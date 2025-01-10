@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static svit.matcher.reflection.FieldMatchers.isAnnotatedWith;
+import static svit.reflection.FieldMatchers.isAnnotatedWith;
 
 /**
  * A class that finds fields in a given class. It supports scanning superclasses

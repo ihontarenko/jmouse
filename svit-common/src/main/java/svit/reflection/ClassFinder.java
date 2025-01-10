@@ -2,13 +2,12 @@ package svit.reflection;
 
 import svit.scanner.ClassScanner;
 import svit.matcher.Matcher;
-import svit.matcher.reflection.ClassMatchers;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
 
-import static svit.matcher.reflection.ClassMatchers.implementsInterface;
-import static svit.matcher.reflection.ClassMatchers.isAbstract;
+import static svit.reflection.ClassMatchers.implementsInterface;
+import static svit.reflection.ClassMatchers.isAbstract;
 
 /**
  * ClassFinder provides utilities for finding, filtering, and sorting classes.

@@ -4,6 +4,8 @@ import svit.matcher.Matcher;
 
 import java.lang.reflect.Member;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.function.Function;
 
 /**
  * An abstract base class for implementing filters that work with reflection members.
@@ -31,6 +33,9 @@ abstract public class AbstractFilter<T extends Member> implements Filter<T> {
     /** The class type to filter members from. */
     protected final Class<?> type;
 
+    /** The comparator used to apply sorting. */
+    protected Comparator<T> comparator = MemberFinder.defaultComparator();
+
     /**
      * Constructs a new {@code AbstractFilter} with the given parameters.
      *
@@ -54,7 +59,7 @@ abstract public class AbstractFilter<T extends Member> implements Filter<T> {
      */
     @Override
     public Collection<T> find() {
-        return finder.find(type, matcher);
+        return finder.find(type, matcher, comparator);
     }
 
     /**
@@ -65,5 +70,17 @@ abstract public class AbstractFilter<T extends Member> implements Filter<T> {
     @Override
     public Matcher<T> matcher() {
         return matcher;
+    }
+
+    @Override
+    public Filter<T> by(Matcher<T> matcher, Function<Matcher<T>, Matcher<T>> logical) {
+        this.matcher = logical.apply(matcher);
+        return this;
+    }
+
+    @Override
+    public Filter<T> sortBy(Comparator<T> comparator) {
+        this.comparator = comparator;
+        return this;
     }
 }

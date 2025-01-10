@@ -1,7 +1,6 @@
 package svit.reflection;
 
 import svit.matcher.Matcher;
-import svit.matcher.reflection.MemberMatcher;
 
 import java.lang.reflect.Member;
 import java.util.Collection;
@@ -45,6 +44,10 @@ import java.util.Optional;
  */
 public interface MemberFinder<T extends Member> {
 
+    static <T extends Member> Comparator<T> defaultComparator() {
+        return Comparator.comparing(Member::getName);
+    }
+
     /**
      * Returns a collection of members from the specified class.
      * This method should be implemented by subclasses to define which members are to be searched
@@ -80,7 +83,7 @@ public interface MemberFinder<T extends Member> {
      * @return a collection of members that match the criteria, sorted by name
      */
     default Collection<T> find(Class<?> clazz, Matcher<? super T> matcher) {
-        return find(clazz, matcher, Comparator.comparing(Member::getName));
+        return find(clazz, matcher, defaultComparator());
     }
 
     /**

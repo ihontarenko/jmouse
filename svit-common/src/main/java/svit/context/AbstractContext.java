@@ -1,6 +1,6 @@
 package svit.context;
 
-import org.springframework.util.ClassUtils;
+import svit.reflection.Reflections;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -121,7 +121,7 @@ public abstract class AbstractContext implements Context {
      */
     @Override
     public void setProperty(Object value) {
-        Class<?> classKey = ClassUtils.getUserClass(requireNonNullElse(value, new Object()).getClass());
+        Class<?> classKey = Reflections.getUserClass(requireNonNullElse(value, new Object()).getClass());
         setProperty(classKey, value);
     }
 

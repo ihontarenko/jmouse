@@ -1,6 +1,6 @@
 package svit.beans;
 
-import df.common.container.ReflectionUtils;
+import svit.reflection.Reflections;
 
 import java.beans.PropertyDescriptor;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ abstract public class AbstractBeanInfo implements BeanObjectInfo {
     protected       Map<String, BeanField>          fields;
 
     public AbstractBeanInfo(Object object) {
-        this.classType = ReflectionUtils.unwrapAnonymousClass(requireNonNull(object).getClass());
+        this.classType = Reflections.getAnonymousClass(requireNonNull(object).getClass());
         this.object = object;
         this.fields = new HashMap<>();
     }

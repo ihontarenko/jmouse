@@ -1,6 +1,6 @@
 package svit.context;
 
-import org.springframework.util.ClassUtils;
+import svit.reflection.Reflections;
 
 import static java.util.Objects.requireNonNull;
 
@@ -21,7 +21,7 @@ public interface VariablesContext {
     void setVariable(Object name, Object value);
 
     default void setVariable(Object variable) {
-        setVariable(ClassUtils.getUserClass(requireNonNull(variable).getClass()), variable);
+        setVariable(Reflections.getUserClass(requireNonNull(variable).getClass()), variable);
     }
 
     default void setVariables(Object... variables) {

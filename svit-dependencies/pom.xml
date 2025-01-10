@@ -10,10 +10,13 @@
     <packaging>pom</packaging>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <svit.version>1.0.0-Beta</svit.version>
+        <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
+        <slf4j.version>2.0.13</slf4j.version>
+        <tomcat-embed.version>10.1.31</tomcat-embed.version>
     </properties>
 
     <dependencyManagement>
@@ -25,6 +28,11 @@
             </dependency>
             <dependency>
                 <groupId>org.svitframework</groupId>
+                <artifactId>svit-expression</artifactId>
+                <version>${svit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.svitframework</groupId>
                 <artifactId>svit-container</artifactId>
                 <version>${svit.version}</version>
             </dependency>
@@ -32,6 +40,39 @@
                 <groupId>org.svitframework</groupId>
                 <artifactId>svit-web</artifactId>
                 <version>${svit.version}</version>
+            </dependency>
+            <!-- Jakarta -->
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta-servlet.version}</version>
+            </dependency>
+            <!-- Slf4j -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <!-- Tomcat -->
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat-embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-jasper</artifactId>
+                <version>${tomcat-embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-el</artifactId>
+                <version>${tomcat-embed.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

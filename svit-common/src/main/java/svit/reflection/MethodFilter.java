@@ -1,11 +1,12 @@
 package svit.reflection;
 
 import svit.matcher.Matcher;
-import svit.matcher.reflection.MethodMatchers;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Objects;
+
+import static svit.reflection.MethodMatchers.*;
 
 /**
  * A filter class to apply various conditions for filtering methods in a class.
@@ -45,9 +46,8 @@ public class MethodFilter extends AbstractFilter<Method> {
     public MethodFilter parameterTypes(Class<?>... parameterTypes) {
         Objects.requireNonNull(parameterTypes);
 
-        matcher = matcher.and(MethodMatchers.hasParameterCount(parameterTypes.length));
-        matcher = matcher.and(
-                MethodMatchers.hasParameterTypes(parameterTypes).or(MethodMatchers.hasSoftParameterTypes(parameterTypes)));
+        matcher = matcher.and(hasParameterCount(parameterTypes.length));
+        matcher = matcher.and(hasParameterTypes(parameterTypes).or(hasSoftParameterTypes(parameterTypes)));
 
         return this;
     }

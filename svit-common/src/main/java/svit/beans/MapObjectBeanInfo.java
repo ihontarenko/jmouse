@@ -1,6 +1,6 @@
 package svit.beans;
 
-import df.common.container.ReflectionUtils;
+import svit.reflection.Reflections;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ public class MapObjectBeanInfo extends AbstractBeanInfo {
 
     public MapObjectBeanInfo(Map<String, Object> map) {
         super(map);
-        ReflectionUtils.readPropertyDescriptors(this.classType, this.descriptors);
+        Reflections.readPropertyDescriptors(this.classType, this.descriptors);
         this.fields = createFields();
     }
 

@@ -1,15 +1,15 @@
 package svit.reflection;
 
-import df.common.container.ClassUtils;
-import svit.matcher.reflection.FieldMatchers;
-import svit.matcher.reflection.MethodMatchers;
-
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 
-import static svit.matcher.reflection.MethodMatchers.hasParameterTypes;
-import static svit.matcher.reflection.MethodMatchers.isAbstract;
+import static svit.reflection.MethodMatchers.hasParameterTypes;
+import static svit.reflection.MethodMatchers.isAbstract;
 
 /**
  * A utility class providing various reflection-based methods for working with classes, fields, methods, and constructors.
@@ -146,7 +146,7 @@ abstract public class Reflections {
         return new ConstructorFinder().findFirst(clazz, hasParameterTypes(types).and(isAbstract().not()))
                 .orElseThrow(() -> new ReflectionException(
                         "CONSTRUCTOR %s(%s) NOT FOUND"
-                                .formatted(ClassUtils.getShortName(clazz), Arrays.toString(types))));
+                                .formatted(getShortName(clazz), Arrays.toString(types))));
     }
 
     /**
@@ -601,6 +601,13 @@ abstract public class Reflections {
         return "%s#%s".formatted(method.getDeclaringClass().getSimpleName(), method.getName());
     }
 
+    /**
+     * Returns the short name of the class for the given object.
+     * If the object is itself a {@link Class}, it delegates to the {@link #getShortName(Class)} method.
+     *
+     * @param clazz the object whose class name is to be shortened
+     * @return the shortened class name
+     */
     public static String getShortName(Object clazz) {
         Class<?> classType = clazz.getClass();
 
@@ -611,6 +618,14 @@ abstract public class Reflections {
         return getShortName(classType);
     }
 
+    /**
+     * Returns the short name of the given class.
+     * The short name is the substring of the class name after the last {@code '.'} character,
+     * unless the class is an array or a primitive type, in which case the full name is returned.
+     *
+     * @param clazz the class whose name is to be shortened
+     * @return the shortened class name
+     */
     public static String getShortName(Class<?> clazz) {
         String className = clazz.getName();
 
@@ -623,6 +638,7 @@ abstract public class Reflections {
 
         return className;
     }
+
 
     /**
      * Extracts parameterized types from the interfaces implemented by the specified class.
@@ -864,6 +880,21 @@ abstract public class Reflections {
      */
     public static Class<?> getUserClass(Object instance) {
         return getUserClass(instance.getClass());
+    }
+
+    public static void readPropertyDescriptors(Class<?> type, Map<String, PropertyDescriptor> propertyDescriptors) {
+        for (PropertyDescriptor propertyDescriptor : getPropertyDescriptors(type)) {
+            propertyDescriptors.put(propertyDescriptor.getName(), propertyDescriptor);
+        }
+    }
+
+    public static List<PropertyDescriptor> getPropertyDescriptors(Class<?> type) {
+        try {
+            BeanInfo beanInfo = Introspector.getBeanInfo(type);
+            return List.of(beanInfo.getPropertyDescriptors());
+        } catch (IntrospectionException e) {
+            throw new ReflectionException(e);
+        }
     }
 
 

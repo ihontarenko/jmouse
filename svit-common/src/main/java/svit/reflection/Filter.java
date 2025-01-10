@@ -4,6 +4,8 @@ import svit.matcher.Matcher;
 
 import java.lang.reflect.Member;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.function.Function;
 
 /**
  * Interface for filtering reflection members in a class.
@@ -36,4 +38,13 @@ public interface Filter<T extends Member> {
      * @return the {@link Matcher} used to filter the members
      */
     Matcher<T> matcher();
+
+    Filter<T> by(Matcher<T> matcher, Function<Matcher<T>, Matcher<T>> logical);
+
+    default Filter<T> by(Matcher<T> matcher) {
+        return by(matcher, Matcher::logicalAnd);
+    }
+
+    Filter<T> sortBy(Comparator<T> comparator);
+
 }
