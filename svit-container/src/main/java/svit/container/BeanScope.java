@@ -4,7 +4,7 @@ package svit.container;
  * Enum representing the lifecycle of a bean in the context.
  * Defines various scopes for managing bean instances.
  */
-public enum Lifecycle {
+public enum BeanScope {
 
     /**
      * A new instance of the bean is created every time it is requested.

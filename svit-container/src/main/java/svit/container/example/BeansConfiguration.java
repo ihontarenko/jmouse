@@ -1,6 +1,6 @@
 package svit.container.example;
 
-import svit.container.Lifecycle;
+import svit.container.BeanScope;
 import svit.container.annotation.Configuration;
 import svit.container.annotation.Provide;
 import svit.container.annotation.Qualifier;
@@ -16,14 +16,14 @@ public class BeansConfiguration {
         return "Chuck Norris";
     }
 
-    @Provide(value = "gal", lifecycle = Lifecycle.PROTOTYPE)
+    @Provide(value = "gal", scope = BeanScope.PROTOTYPE)
     public String galGadot() {
         return "Gal Gadot";
     }
 
     @Provide
-    public String upper(@Qualifier("gal") String name, Float number) {
-        return "[" + Strings.underscored(name).toUpperCase(Locale.ROOT) + number + "]";
+    public String upper(@Qualifier("gal") String name, Double number) {
+        return "[" + Strings.underscored(name).toUpperCase(Locale.ROOT) + " / Random: " + number + "]";
     }
 
 }

@@ -66,7 +66,7 @@ public interface BeanContext
      * @param lifecycle the lifecycle scope for which to retrieve the container
      * @return the {@link BeanInstanceContainer} associated with the given lifecycle
      */
-    BeanInstanceContainer getBeanInstanceContainer(Lifecycle lifecycle);
+    BeanInstanceContainer getBeanInstanceContainer(BeanScope lifecycle);
 
     /**
      * Retrieves the parent context of this bean context.

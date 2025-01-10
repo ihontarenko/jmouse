@@ -3,7 +3,7 @@ package svit.container.definition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import svit.container.BeanContext;
-import svit.container.Lifecycle;
+import svit.container.BeanScope;
 import svit.reflection.Reflections;
 
 import java.lang.reflect.AnnotatedElement;
@@ -36,8 +36,8 @@ public class DefaultBeanDefinitionFactory implements BeanDefinitionFactory {
                     "Failed to create bean definition for '%s' element".formatted(element));
         }
 
-        if (definition.getLifecycle() == null) {
-            definition.setLifecycle(Lifecycle.SINGLETON);
+        if (definition.getBeanScope() == null) {
+            definition.setBeanScope(BeanScope.SINGLETON);
         }
 
         return definition;

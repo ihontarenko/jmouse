@@ -1,7 +1,7 @@
 package svit.container.definition;
 
 import svit.container.BeanCreationType;
-import svit.container.Lifecycle;
+import svit.container.BeanScope;
 import svit.container.instantiation.BeanInstantiationStrategy;
 
 import java.lang.annotation.Annotation;
@@ -20,11 +20,11 @@ public interface BeanDefinition {
     /**
      * Determines if this definition represents a singleton or non-bean lifecycle.
      *
-     * @return {@code true} if the bean is {@link Lifecycle#SINGLETON} or {@link Lifecycle#NON_BEAN},
+     * @return {@code true} if the bean is {@link BeanScope#SINGLETON} or {@link BeanScope#NON_BEAN},
      *         otherwise {@code false}.
      */
     default boolean isSingleton() {
-        return getLifecycle() == Lifecycle.SINGLETON || getLifecycle() == Lifecycle.NON_BEAN;
+        return getBeanScope() == BeanScope.SINGLETON || getBeanScope() == BeanScope.NON_BEAN;
     }
 
     /**
@@ -96,16 +96,16 @@ public interface BeanDefinition {
     /**
      * Retrieves the lifecycle scope of this bean.
      *
-     * @return the {@link Lifecycle} of the bean.
+     * @return the {@link BeanScope} of the bean.
      */
-    Lifecycle getLifecycle();
+    BeanScope getBeanScope();
 
     /**
-     * Sets the lifecycle scope of this bean.
+     * Sets the beanScope scope of this bean.
      *
-     * @param lifecycle the new {@link Lifecycle}.
+     * @param beanScope the new {@link BeanScope}.
      */
-    void setLifecycle(Lifecycle lifecycle);
+    void setBeanScope(BeanScope beanScope);
 
     /**
      * Retrieves all dependencies declared by this bean.

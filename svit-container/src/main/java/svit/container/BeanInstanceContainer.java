@@ -1,5 +1,7 @@
 package svit.container;
 
+import svit.reflection.Reflections;
+
 /**
  * Interface for managing bean instances in a container.
  * Provides methods to retrieve and register beans by name, with support for lazy initialization.
@@ -42,5 +44,18 @@ public interface BeanInstanceContainer {
      * @param bean the bean instance to register.
      */
     void registerBean(String name, Object bean);
+
+    /**
+     * Registers a bean instance with the given name and a specified {@link BeanScope}.
+     *
+     * @param name      the name of the bean.
+     * @param bean      the bean instance to register.
+     * @param beanScope the beanScope scope for the bean.
+     */
+    default void registerBean(String name, Object bean, BeanScope beanScope) {
+        throw new BeanContextException(
+                "The registration of a bean with name '%s' and beanScope '%s' is prohibited in the '%s' implementation."
+                        .formatted(name, beanScope, Reflections.getShortName(getClass())));
+    }
 
 }

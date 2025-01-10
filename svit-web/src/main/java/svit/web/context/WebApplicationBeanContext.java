@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import svit.container.*;
 import svit.container.definition.BeanDefinition;
-import svit.reflection.Reflections;
 import svit.web.context.support.HttpSessionObjectFactory;
 import svit.web.context.support.RequestObjectFactory;
 
@@ -43,7 +42,7 @@ public class WebApplicationBeanContext extends DefaultBeanContext implements Web
             throw new BeanContextException("No registered bean found with the name '%s'.".formatted(name));
         }
 
-        return switch (definition.getLifecycle()) {
+        return switch (definition.getBeanScope()) {
             case SESSION -> sessionContainer.getBean(name, objectFactory);
             case REQUEST -> requestContainer.getBean(name, objectFactory);
             default -> super.getBean(name);

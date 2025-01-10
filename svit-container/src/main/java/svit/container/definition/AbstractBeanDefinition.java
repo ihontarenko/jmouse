@@ -1,6 +1,6 @@
 package svit.container.definition;
 
-import svit.container.Lifecycle;
+import svit.container.BeanScope;
 import svit.container.instantiation.BeanInstantiationStrategy;
 
 import java.lang.annotation.Annotation;
@@ -71,7 +71,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     /**
      * The lifecycle scope for this bean (e.g., SINGLETON, PROTOTYPE).
      */
-    protected Lifecycle lifecycle;
+    protected BeanScope beanScope;
 
     /**
      * The actual bean instance, if created.
@@ -183,18 +183,18 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
      * @return the lifecycle scope
      */
     @Override
-    public Lifecycle getLifecycle() {
-        return lifecycle;
+    public BeanScope getBeanScope() {
+        return beanScope;
     }
 
     /**
      * Sets the lifecycle scope of this bean.
      *
-     * @param lifecycle the new lifecycle scope
+     * @param beanScope the new lifecycle scope
      */
     @Override
-    public void setLifecycle(Lifecycle lifecycle) {
-        this.lifecycle = lifecycle;
+    public void setBeanScope(BeanScope beanScope) {
+        this.beanScope = beanScope;
     }
 
     /**
@@ -290,7 +290,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
      */
     @Override
     public boolean isSingleton() {
-        return getLifecycle() == Lifecycle.SINGLETON || getLifecycle() == Lifecycle.NON_BEAN;
+        return getBeanScope() == BeanScope.SINGLETON || getBeanScope() == BeanScope.NON_BEAN;
     }
 
     /**
@@ -314,7 +314,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     public String toString() {
         final StringBuilder builder = new StringBuilder();
 
-        builder.append("[").append(name).append(':').append(lifecycle).append(':').append(getBeanCreationType()).append(']');
+        builder.append("[").append(name).append(':').append(beanScope).append(':').append(getBeanCreationType()).append(']');
         builder.append(' ');
         builder.append("[").append(type).append("]");
 

@@ -1,7 +1,7 @@
 package svit.container.definition;
 
 import svit.container.BeanCreationType;
-import svit.container.Lifecycle;
+import svit.container.BeanScope;
 import svit.container.ObjectFactory;
 
 /**
@@ -23,7 +23,7 @@ public class ObjectFactoryBeanDefinition extends AbstractBeanDefinition {
         super(name, type);
 
         this.objectFactory = objectFactory;
-        this.lifecycle = Lifecycle.PROTOTYPE;
+        this.beanScope = BeanScope.PROTOTYPE;
     }
 
     /**

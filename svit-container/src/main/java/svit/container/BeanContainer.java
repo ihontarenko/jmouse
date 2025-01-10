@@ -66,13 +66,13 @@ public interface BeanContainer extends BeanInstanceContainer {
     List<Object> getAnnotatedBeans(Class<? extends Annotation> annotation);
 
     /**
-     * Registers a bean instance of the specified type with a default {@link Lifecycle#SINGLETON}.
+     * Registers a bean instance of the specified type with a default {@link BeanScope#SINGLETON}.
      *
      * @param type the type of the bean.
      * @param bean the bean instance to register.
      */
     default void registerBean(Class<?> type, Object bean) {
-        registerBean(type, bean, Lifecycle.SINGLETON);
+        registerBean(type, bean, BeanScope.SINGLETON);
     }
 
     /**
@@ -82,7 +82,7 @@ public interface BeanContainer extends BeanInstanceContainer {
      * @param bean      the bean instance to register.
      * @param lifecycle the lifecycle scope for the bean.
      */
-    void registerBean(Class<?> type, Object bean, Lifecycle lifecycle);
+    void registerBean(Class<?> type, Object bean, BeanScope lifecycle);
 
     /**
      * Creates a bean instance from the given {@link BeanDefinition}, handling

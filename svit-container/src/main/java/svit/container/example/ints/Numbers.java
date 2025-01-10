@@ -1,7 +1,10 @@
 package svit.container.example.ints;
 
+import svit.container.BeanScope;
 import svit.container.annotation.Configuration;
 import svit.container.annotation.Provide;
+
+import java.util.Random;
 
 @Configuration(name = "ints")
 public class Numbers {
@@ -19,6 +22,11 @@ public class Numbers {
     @Provide
     public Integer int777() {
         return 777;
+    }
+
+    @Provide(scope = BeanScope.PROTOTYPE)
+    public Double doubleRandom() {
+        return new Random().nextDouble();
     }
 
 }

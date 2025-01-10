@@ -11,6 +11,10 @@ public class InternalUser implements User {
     @Dependency("defaultUserName")
     private String name;
 
+    public InternalUser() {
+        System.out.println("Constructor called");
+    }
+
     @Override
     public String getName() {
         return beanContext.getBean(User.class, "external_user").getName();

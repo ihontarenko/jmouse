@@ -77,6 +77,11 @@ public class DefaultBeanContext implements BeanContext {
     private final BeanInstanceContainer singletonContainer = new SingletonBeanContainer();
 
     /**
+     * A no-ops bean container
+     */
+    private final BeanInstanceContainer prototypeContainer = new PrototypeBeanContainer();
+
+    /**
      * A list of registered {@link BeanPostProcessor}s for managing bean lifecycle hooks.
      */
     private final List<BeanPostProcessor> processors = new ArrayList<>();
@@ -195,14 +200,13 @@ public class DefaultBeanContext implements BeanContext {
         T                instance      = null;
 
         if (definition != null) {
-            // in default implementation supports only base bean-types
-            instance = switch (definition.getLifecycle()) {
-                case PROTOTYPE -> objectFactory.createObject();
-                case SINGLETON -> singletonContainer.getBean(name, objectFactory);
-                default -> throw new BeanContextException(
-                        "Lifecycle '%s' is not supported for bean '%s'.".formatted(
-                                definition.getLifecycle(), List.of(Lifecycle.PROTOTYPE, Lifecycle.SINGLETON)));
-            };
+            BeanScope beanScope = definition.getBeanScope();
+
+            // get applicable bean instances container and try to find bean
+            BeanInstanceContainer instanceContainer = getBeanInstanceContainer(beanScope);
+
+            // get bean or try to create new one via lambda
+            instance = instanceContainer.getBean(name, objectFactory);
 
             // if bean not found try to search it in parent context
             if (instance == null && parent != null) {
@@ -259,9 +263,9 @@ public class DefaultBeanContext implements BeanContext {
         }
 
         // register bean instance only if it is SINGLETON or NON_BEAN
-        if (definition.isSingleton()) {
-            singletonContainer.registerBean(definition.getBeanName(), instance);
-        }
+        //if (definition.isSingleton()) {
+            registerBean(definition.getBeanName(), instance);
+//        }
 
         return instance;
     }
@@ -278,7 +282,7 @@ public class DefaultBeanContext implements BeanContext {
      */
     @Override
     public List<String> getBeanNames(Class<?> type) {
-        List<String> names = new ArrayList<>();
+        List<String>      names   = new ArrayList<>();
         Matcher<Class<?>> matcher = ClassMatchers.isSupertype(type);
 
         for (Map.Entry<String, BeanDefinition> entry : definitions.entrySet()) {
@@ -347,29 +351,15 @@ public class DefaultBeanContext implements BeanContext {
     }
 
     /**
-     * Registers an existing bean instance with the container.
-     * <p>
-     * This method creates a new {@link BeanDefinition} for the provided instance
-     * and stores it in the context along with the bean itself.
-     * </p>
+     * Registers a bean instance of the specified type and beanScope.
      *
-     * @param type the type of the bean
-     * @param bean the bean instance
-     * @param lifecycle the bean lifecycle (scope)
+     * @param type      the type of the bean.
+     * @param bean      the bean instance to register.
+     * @param beanScope the beanScope scope for the bean.
      */
     @Override
-    public void registerBean(Class<?> type, Object bean, Lifecycle lifecycle) {
-        String name = nameResolver.resolveName(type);
-
-        if (lifecycle == Lifecycle.PROTOTYPE) {
-            LOGGER.warn("The bean prototype has been automatically converted and registered as an ObjectFactory");
-            registerDefinition(new ObjectFactoryBeanDefinition(name, type, () -> bean));
-            LOGGER.info(getDefinition(name).toString());
-        }
-
-//        definition.setBeanInstance(bean);
-//        definition.setLifecycle(lifecycle);
-//        registerDefinition(definition);
+    public void registerBean(Class<?> type, Object bean, BeanScope beanScope) {
+        registerBean(nameResolver.resolveName(type), bean, beanScope);
     }
 
     /**
@@ -384,7 +374,58 @@ public class DefaultBeanContext implements BeanContext {
      */
     @Override
     public void registerBean(String name, Object bean) {
-        getBeanInstanceContainer(Lifecycle.SINGLETON).registerBean(name, bean);
+        registerBean(name, bean, BeanScope.SINGLETON);
+    }
+
+    /**
+     * Registers a bean instance with the given name and a specified {@link BeanScope}.
+     *
+     * @param name      the name of the bean.
+     * @param bean      the bean instance to register.
+     * @param beanScope the lifecycle scope for the bean.
+     */
+    @Override
+    public void registerBean(String name, Object bean, BeanScope beanScope) {
+        BeanDefinition definition = getDefinition(name);
+
+        if (definition == null) {
+
+            definition = new DefaultBeanDefinition(name, bean.getClass());
+
+            if (beanScope == BeanScope.PROTOTYPE || bean instanceof ObjectFactory<?>) {
+                ObjectFactory<Object> objectFactory = () -> bean;
+
+                if (bean instanceof ObjectFactory<?>) {
+                    objectFactory = (ObjectFactory<Object>) bean;
+                    LOGGER.warn("The provided bean '{}' is identified as an ObjectFactory instance", name);
+                }
+
+                definition = new ObjectFactoryBeanDefinition(name, definition.getBeanClass(), objectFactory);
+
+                if (beanScope == BeanScope.PROTOTYPE) {
+                    String warningMessage = "The bean '{}' was automatically converted to an ObjectFactory definition. " +
+                            "Prototype-scoped beans do not maintain a dedicated container and are created as needed, " +
+                            "existing only within their definition objects.";
+
+                    LOGGER.warn(warningMessage, name);
+                }
+            }
+
+            // complement bean information
+            definition.setBeanInstance(bean);
+            definition.setBeanScope(beanScope);
+
+            // register bean definition
+            registerDefinition(definition);
+
+        } else {
+            LOGGER.warn("The bean '{}' already has definition", name);
+        }
+
+        // Register the bean in the container only if it's not an ObjectFactory and not PROTOTYPE scoped
+        getBeanInstanceContainer(beanScope).registerBean(name, bean);
+        LOGGER.info("The bean '{}' with scope '{}' was registered using the '{}' definition.",
+                    name, beanScope, getShortName(definition.getClass()));
     }
 
     /**
@@ -408,26 +449,28 @@ public class DefaultBeanContext implements BeanContext {
     }
 
     /**
-     * Returns a {@link BeanInstanceContainer} based on the specified {@link Lifecycle}.
+     * Returns a {@link BeanInstanceContainer} based on the specified {@link BeanScope}.
      * <p>
      * This implementation supports the following lifecycles:
      * <ul>
-     *     <li>{@link Lifecycle#SINGLETON} and {@link Lifecycle#NON_BEAN} — returns the singleton container.</li>
-     *     <li>{@link Lifecycle#PROTOTYPE} — throws a {@link BeanContextException}, as prototypes do not maintain a dedicated container.</li>
-     *     <li>{@link Lifecycle#REQUEST} and {@link Lifecycle#SESSION} — throws a {@link BeanContextException},
+     *     <li>{@link BeanScope#SINGLETON} and {@link BeanScope#NON_BEAN} — returns the singleton container.</li>
+     *     <li>{@link BeanScope#PROTOTYPE} — throws a {@link BeanContextException}, as prototypes do not maintain a dedicated container.</li>
+     *     <li>{@link BeanScope#REQUEST} and {@link BeanScope#SESSION} — throws a {@link BeanContextException},
      *         indicating that request or session scopes are not available in this context.</li>
      * </ul>
      *
-     * @param lifecycle the lifecycle phase for which to retrieve the container
-     * @return the {@link BeanInstanceContainer} associated with the lifecycle, if supported
-     * @throws BeanContextException if the lifecycle is {@link Lifecycle#PROTOTYPE}, {@link Lifecycle#REQUEST}, or {@link Lifecycle#SESSION}
+     * @param beanScope the beanScope phase for which to retrieve the container
+     * @return the {@link BeanInstanceContainer} associated with the beanScope, if supported
+     * @throws BeanContextException if the beanScope is {@link BeanScope#PROTOTYPE}, {@link BeanScope#REQUEST}, or {@link BeanScope#SESSION}
      */
     @Override
-    public BeanInstanceContainer getBeanInstanceContainer(Lifecycle lifecycle) {
-        return switch (lifecycle) {
+    public BeanInstanceContainer getBeanInstanceContainer(BeanScope beanScope) {
+        return switch (beanScope) {
             case SINGLETON, NON_BEAN -> singletonContainer;
-            case PROTOTYPE -> throw new BeanContextException(
-                    "Prototypes do not have dedicated bean instances container");
+            case PROTOTYPE -> {
+                LOGGER.warn("Prototypes dummy bean instances container");
+                yield prototypeContainer;
+            }
             case REQUEST, SESSION -> throw new BeanContextException(
                     "Request and Session bean instances container is unavailable in this context '%s'"
                             .formatted(getShortName(getClass())));
