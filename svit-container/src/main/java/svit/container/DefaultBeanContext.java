@@ -422,6 +422,9 @@ public class DefaultBeanContext implements BeanContext {
             LOGGER.warn("The bean '{}' already has definition", name);
         }
 
+        // todo: check bean existing
+        // todo: BeanInstanceContainer::containsBean(definition)
+        // todo: BeanInstanceContainer::containsBean(name)
         // Register the bean in the container only if it's not an ObjectFactory and not PROTOTYPE scoped
         getBeanInstanceContainer(beanScope).registerBean(name, bean);
         LOGGER.info("The bean '{}' with scope '{}' was registered using the '{}' definition.",
