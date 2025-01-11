@@ -29,6 +29,17 @@ public class PrototypeBeanContainer implements BeanInstanceContainer {
      */
     @Override
     public void registerBean(String name, Object bean) {
-        // No operation
+
+    }
+
+    /**
+     * Checks whether a bean with the specified name is already registered in this container.
+     *
+     * @param name the name of the bean.
+     * @return always {@code true} for current implementation.
+     */
+    @Override
+    public boolean containsBean(String name) {
+        return true;
     }
 }

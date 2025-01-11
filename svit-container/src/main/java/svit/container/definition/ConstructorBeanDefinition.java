@@ -1,6 +1,6 @@
 package svit.container.definition;
 
-import svit.container.BeanCreationType;
+import svit.container.BeanInstantiationType;
 
 import java.lang.reflect.Constructor;
 
@@ -15,8 +15,8 @@ public class ConstructorBeanDefinition extends AbstractBeanDefinition {
     }
 
     @Override
-    public BeanCreationType getBeanCreationType() {
-        return BeanCreationType.CONSTRUCTOR;
+    public BeanInstantiationType getInstantiationType() {
+        return BeanInstantiationType.CONSTRUCTOR;
     }
 
     public Constructor<?> getConstructor() {

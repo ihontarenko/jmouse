@@ -11,9 +11,7 @@ import svit.reflection.ClassMatchers;
 import svit.reflection.Reflections;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.stream.Collectors.joining;
@@ -27,7 +25,7 @@ import static svit.reflection.Reflections.getShortName;
  * contexts with a parent context and offers additional customization via initializers
  * and post-processors.
  * </p>
- * <h3>Main Features:</h3>
+ * <p>Main Features:</p>
  * <ul>
  *     <li>Register and manage beans by name, type, or annotation.</li>
  *     <li>Resolve dependencies and manage the lifecycle of beans.</li>
@@ -36,20 +34,20 @@ import static svit.reflection.Reflections.getShortName;
  *     <li>Integration with {@link BeanPostProcessor} for custom bean behavior.</li>
  * </ul>
  *
- * <h3>Example Usage:</h3>
+ * <p>Example Usage:</p>
  * <pre>{@code
  * // Create a new DefaultBeanContext
  * DefaultBeanContext context = new DefaultBeanContext();
  *
  * // Register a bean definition
- * BeanDefinition definition = new DefaultBeanDefinition("myService", MyService.class);
+ * BeanDefinition definition = new DefaultBeanDefinition("userService", UserService.class);
  * context.registerDefinition(definition);
  *
  * // Retrieve a bean by its type
- * MyService myService = context.getBean(MyService.class);
+ * MyService userService = context.getBean(UserService.class);
  *
  * // Retrieve a bean by its name
- * MyService myServiceByName = context.getBean("myService");
+ * MyService userServiceByName = context.getBean("userService");
  * }</pre>
  */
 public class DefaultBeanContext implements BeanContext {
@@ -63,8 +61,15 @@ public class DefaultBeanContext implements BeanContext {
 
     /**
      * Holds all registered {@link BeanContextInitializer}s for initializing the context.
+     * This list contains instances of initializers that will be executed during context setup.
      */
     private final List<BeanContextInitializer> initializers = new ArrayList<>();
+
+    /**
+     * Keeps track of {@link BeanContextInitializer} classes that have already been initialized.
+     * Prevents duplicate initialization of the same type.
+     */
+    private final Set<Class<? extends BeanContextInitializer>> initialized = new HashSet<>();
 
     /**
      * A mapping of bean names to their corresponding {@link BeanDefinition}s.
@@ -124,12 +129,38 @@ public class DefaultBeanContext implements BeanContext {
     }
 
     /**
-     * Refreshes the context by invoking all registered {@link BeanContextInitializer}s.
-     * This typically involves reloading bean definitions and initializing beans.
+     * Executes all registered {@link BeanContextInitializer}s to initialize the context.
+     * <p>
+     * If an initializer has already been executed (tracked via the {@code initialized} set),
+     * it will be skipped to prevent duplicate initialization.
      */
     @Override
     public void refresh() {
-        initializers.forEach(initializer -> initializer.initialize(this));
+        for (BeanContextInitializer initializer : initializers) {
+            Class<? extends BeanContextInitializer> initializerClass = initializer.getClass();
+
+            if (initialized.contains(initializerClass)) {
+                LOGGER.info("Initializer '{}' has already been performed", getShortName(initializerClass));
+                continue;
+            }
+
+            initializer.initialize(this);
+            initialized.add(initializerClass);
+        }
+    }
+
+    /**
+     * Clears all tracked initializations, allowing the registered {@link BeanContextInitializer}s
+     * to be executed again.
+     * <p>
+     * This method is useful when the context needs to be reinitialized from scratch.
+     * <p>
+     */
+    @Override
+    public void cleanup() {
+        // Clear the set of initialized classes to allow reinitialization
+        initialized.clear();
+        LOGGER.info("ATTENTION! All initializers will be rerunned");
     }
 
     /**
@@ -244,6 +275,7 @@ public class DefaultBeanContext implements BeanContext {
         detectCyclicDependencies(definition);
         visitor.add(definition);
 
+        // resolved an instantiated raw bean
         T instance = beanFactory.createBean(definition);
 
         // preform post processor BEFORE initializing bean
@@ -262,10 +294,8 @@ public class DefaultBeanContext implements BeanContext {
             processor.postProcessAfterInitialize(instance, this);
         }
 
-        // register bean instance only if it is SINGLETON or NON_BEAN
-        //if (definition.isSingleton()) {
-            registerBean(definition.getBeanName(), instance);
-//        }
+        // IMPORTANT! endpoint of bean instance registration after creation
+        registerBean(definition.getBeanName(), instance, definition.getBeanScope());
 
         return instance;
     }
@@ -379,39 +409,55 @@ public class DefaultBeanContext implements BeanContext {
 
     /**
      * Registers a bean instance with the given name and a specified {@link BeanScope}.
+     * <p>
+     * Registration of the bean in the container occurs only if the bean is not an instance of {@link ObjectFactory}
+     * and does not have the {@link BeanScope#PROTOTYPE} scope.
+     * </p>
+     * <p>
+     * <b>NOTE:</b> The method {@link PrototypeBeanContainer#containsBean} will always return <b>TRUE</b> for the
+     * prototypes container, even though prototype-scoped beans are not stored persistently in the container.
+     * </p>
+     *
+     * <p>Example Usage:</p>
+     * <pre>{@code
+     * // Registering a singleton bean
+     * container.registerBean("myBean", beanInstance, BeanScope.SINGLETON);
+     *
+     * // Registering a prototype-scoped bean (will not have a dedicated container)
+     * container.registerBean("prototypeBean", beanInstance, BeanScope.PROTOTYPE);
+     * }</pre>
      *
      * @param name      the name of the bean.
      * @param bean      the bean instance to register.
      * @param beanScope the lifecycle scope for the bean.
+     * @throws BeanContextException if the bean cannot be registered due to scope restrictions or other errors.
      */
+
     @Override
     public void registerBean(String name, Object bean, BeanScope beanScope) {
         BeanDefinition definition = getDefinition(name);
 
+        // IMPORTANT! If no definition exists, the bean is being registered manually (externally),
+        // not via the automatic BeanContext mechanism
         if (definition == null) {
 
-            definition = new DefaultBeanDefinition(name, bean.getClass());
+            definition = new SimpleBeanDefinition(name, bean.getClass());
 
-            if (beanScope == BeanScope.PROTOTYPE || bean instanceof ObjectFactory<?>) {
-                ObjectFactory<Object> objectFactory = () -> bean;
+            // check and wrap bean into ObjectFactory if necessary
+            if (beanScope == BeanScope.PROTOTYPE) {
+                boolean               isObjectFactory = bean instanceof ObjectFactory<?>;
+                ObjectFactory<Object> factory         = isObjectFactory ? (ObjectFactory<Object>) bean : () -> bean;
 
-                if (bean instanceof ObjectFactory<?>) {
-                    objectFactory = (ObjectFactory<Object>) bean;
-                    LOGGER.warn("The provided bean '{}' is identified as an ObjectFactory instance", name);
+                if (!isObjectFactory) {
+                    LOGGER.warn("The bean '{}' was wrapped into an ObjectFactory because it is prototype scoped.", name);
                 }
 
-                definition = new ObjectFactoryBeanDefinition(name, definition.getBeanClass(), objectFactory);
-
-                if (beanScope == BeanScope.PROTOTYPE) {
-                    String warningMessage = "The bean '{}' was automatically converted to an ObjectFactory definition. " +
-                            "Prototype-scoped beans do not maintain a dedicated container and are created as needed, " +
-                            "existing only within their definition objects.";
-
-                    LOGGER.warn(warningMessage, name);
-                }
+                definition = new ObjectFactoryBeanDefinition(name, definition.getBeanClass(), factory);
             }
 
-            // complement bean information
+            // Add additional information to the BeanDefinition
+            // - Assign the actual bean instance
+            // - Set the scope of the bean (e.g., SINGLETON, PROTOTYPE, etc.)
             definition.setBeanInstance(bean);
             definition.setBeanScope(beanScope);
 
@@ -419,16 +465,32 @@ public class DefaultBeanContext implements BeanContext {
             registerDefinition(definition);
 
         } else {
-            LOGGER.warn("The bean '{}' already has definition", name);
+            LOGGER.warn("The bean '{}' already has a registered definition. No new definition was created.", name);
         }
 
-        // todo: check bean existing
-        // todo: BeanInstanceContainer::containsBean(definition)
-        // todo: BeanInstanceContainer::containsBean(name)
-        // Register the bean in the container only if it's not an ObjectFactory and not PROTOTYPE scoped
-        getBeanInstanceContainer(beanScope).registerBean(name, bean);
-        LOGGER.info("The bean '{}' with scope '{}' was registered using the '{}' definition.",
-                    name, beanScope, getShortName(definition.getClass()));
+        // Ensure the bean is registered in the container
+        // Note: For PROTOTYPE beans, `containsBean(name)` always returns true
+        if (!containsBean(name)) {
+            LOGGER.info("BEAN REGISTRATION: {} with scope {}", name, beanScope);
+            getBeanInstanceContainer(beanScope).registerBean(name, bean);
+        }
+    }
+
+    /**
+     * Checks whether a bean with the specified name is already registered in this container.
+     *
+     * @param name the name of the bean.
+     * @return {@code true} if a bean with the given name exists, otherwise {@code false}.
+     */
+    @Override
+    public boolean containsBean(String name) {
+        BeanDefinition definition = getDefinition(name);
+
+        if (definition == null) {
+            return false;
+        }
+
+        return getBeanInstanceContainer(definition.getBeanScope()).containsBean(name);
     }
 
     /**

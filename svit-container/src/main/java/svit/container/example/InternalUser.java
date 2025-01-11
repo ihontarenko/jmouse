@@ -12,7 +12,7 @@ public class InternalUser implements User {
     private String name;
 
     public InternalUser() {
-        System.out.println("Constructor called");
+        System.out.println("InternalUser: Initialization");
     }
 
     @Override

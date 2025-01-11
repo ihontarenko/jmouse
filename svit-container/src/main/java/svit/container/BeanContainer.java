@@ -103,4 +103,18 @@ public interface BeanContainer extends BeanInstanceContainer {
      * @throws BeanInstantiationException if bean creation fails due to dependencies or initialization errors
      */
     <T> T createBean(BeanDefinition definition);
+
+    /**
+     * Checks if a bean corresponding to the given {@link BeanDefinition} is already registered.
+     * <p>
+     * This method delegates to {@link #containsBean(String)} by extracting the bean name
+     * from the provided definition.
+     *
+     * @param definition the {@link BeanDefinition} whose bean name will be checked
+     * @return {@code true} if a bean with the specified definition name is registered,
+     *         otherwise {@code false}
+     */
+    default boolean containsBean(BeanDefinition definition) {
+        return containsBean(definition.getBeanName());
+    }
 }

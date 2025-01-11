@@ -2,6 +2,7 @@ package svit.container.instantiation;
 
 import svit.container.BeanContext;
 import svit.container.BeanInstantiationException;
+import svit.container.BeanInstantiationType;
 import svit.container.ObjectFactory;
 import svit.container.definition.BeanDefinition;
 import svit.container.definition.ObjectFactoryBeanDefinition;
@@ -34,12 +35,14 @@ public class ObjectFactoryBeanInstantiationStrategy extends AbstractBeanInstanti
 
     /**
      * Determines if this strategy supports the given {@link BeanDefinition}.
+     * <p>
+     * This strategy supports definitions with an instantiation type of {@link BeanInstantiationType#OBJECT_FACTORY}.
      *
-     * @param definition the bean definition to check.
-     * @return {@code true} if the definition is an instance of {@link ObjectFactoryBeanDefinition}, {@code false} otherwise.
+     * @param definition the bean definition to evaluate
+     * @return {@code true} if the definition is supported, otherwise {@code false}
      */
     @Override
     public boolean supports(BeanDefinition definition) {
-        return ObjectFactoryBeanDefinition.class.isAssignableFrom(definition.getClass());
+        return definition.getInstantiationType() == BeanInstantiationType.OBJECT_FACTORY;
     }
 }

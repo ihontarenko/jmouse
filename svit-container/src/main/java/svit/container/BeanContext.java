@@ -83,7 +83,19 @@ public interface BeanContext
     void addInitializer(BeanContextInitializer initializer);
 
     /**
-     * Refreshes the bean context, reinitializing all components and beans.
+     * Executes all registered {@link BeanContextInitializer}s to initialize the context.
+     * <p>
+     * If an initializer has already been executed (tracked via the {@code initialized} set),
+     * it will be skipped to prevent duplicate initialization.
      */
     void refresh();
+
+    /**
+     * Clears all tracked initializations, allowing the registered {@link BeanContextInitializer}s
+     * to be executed again.
+     * <p>
+     * This method is useful when the context needs to be reinitialized from scratch.
+     * <p>
+     */
+    void cleanup();
 }

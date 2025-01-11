@@ -1,6 +1,6 @@
 package svit.container.definition;
 
-import svit.container.BeanCreationType;
+import svit.container.BeanInstantiationType;
 import svit.container.BeanScope;
 import svit.container.instantiation.BeanInstantiationStrategy;
 
@@ -117,9 +117,9 @@ public interface BeanDefinition {
     /**
      * Retrieves the creation type for this bean, indicating how it should be instantiated.
      *
-     * @return a {@link BeanCreationType} value.
+     * @return a {@link BeanInstantiationType} value.
      */
-    BeanCreationType getBeanCreationType();
+    BeanInstantiationType getInstantiationType();
 
     /**
      * Retrieves the actual bean instance if one has been created.

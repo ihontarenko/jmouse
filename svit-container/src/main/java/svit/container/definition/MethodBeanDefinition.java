@@ -1,6 +1,6 @@
 package svit.container.definition;
 
-import svit.container.BeanCreationType;
+import svit.container.BeanInstantiationType;
 import svit.reflection.Reflections;
 
 import java.lang.reflect.Method;
@@ -27,11 +27,11 @@ public class MethodBeanDefinition extends AbstractBeanDefinition {
     /**
      * Retrieves the creation type for this bean definition.
      *
-     * @return {@link BeanCreationType#METHOD}.
+     * @return {@link BeanInstantiationType#FACTORY_METHOD}.
      */
     @Override
-    public BeanCreationType getBeanCreationType() {
-        return BeanCreationType.METHOD;
+    public BeanInstantiationType getInstantiationType() {
+        return BeanInstantiationType.FACTORY_METHOD;
     }
 
     /**

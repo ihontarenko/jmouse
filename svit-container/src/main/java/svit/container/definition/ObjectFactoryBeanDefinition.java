@@ -1,6 +1,6 @@
 package svit.container.definition;
 
-import svit.container.BeanCreationType;
+import svit.container.BeanInstantiationType;
 import svit.container.BeanScope;
 import svit.container.ObjectFactory;
 
@@ -29,11 +29,11 @@ public class ObjectFactoryBeanDefinition extends AbstractBeanDefinition {
     /**
      * Retrieves the creation type for this bean definition.
      *
-     * @return {@link BeanCreationType#OBJECT_FACTORY}.
+     * @return {@link BeanInstantiationType#OBJECT_FACTORY}.
      */
     @Override
-    public BeanCreationType getBeanCreationType() {
-        return BeanCreationType.OBJECT_FACTORY;
+    public BeanInstantiationType getInstantiationType() {
+        return BeanInstantiationType.OBJECT_FACTORY;
     }
 
     /**

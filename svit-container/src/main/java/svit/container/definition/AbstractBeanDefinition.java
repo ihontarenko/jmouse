@@ -314,7 +314,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     public String toString() {
         final StringBuilder builder = new StringBuilder();
 
-        builder.append("[").append(name).append(':').append(beanScope).append(':').append(getBeanCreationType()).append(']');
+        builder.append("[").append(name).append(':').append(beanScope).append(':').append(getInstantiationType()).append(']');
         builder.append(' ');
         builder.append("[").append(type).append("]");
 

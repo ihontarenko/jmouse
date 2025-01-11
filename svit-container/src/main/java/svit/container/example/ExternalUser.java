@@ -13,7 +13,7 @@ public class ExternalUser implements User {
 
     @BeanInitializer
     public void init() {
-        System.out.println("Initialization method");
+        System.out.println("ExternalUser: Initialization");
     }
 
     @Override

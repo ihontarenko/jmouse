@@ -33,4 +33,14 @@ public class SingletonBeanContainer implements BeanInstanceContainer {
         instances.put(name, bean);
     }
 
+    /**
+     * Checks whether a bean with the specified name is already registered in this container.
+     *
+     * @param name the name of the bean.
+     * @return {@code true} if a bean with the given name exists, otherwise {@code false}.
+     */
+    @Override
+    public boolean containsBean(String name) {
+        return instances.containsKey(name);
+    }
 }
