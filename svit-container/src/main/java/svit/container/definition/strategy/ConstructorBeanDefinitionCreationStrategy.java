@@ -1,7 +1,10 @@
-package svit.container.definition;
+package svit.container.definition.strategy;
 
 import svit.container.BeanContext;
 import svit.container.annotation.BeanConstructor;
+import svit.container.definition.BeanDefinition;
+import svit.container.definition.BeanDefinitionException;
+import svit.container.definition.ConstructorBeanDefinition;
 import svit.reflection.Reflections;
 
 import java.lang.reflect.AnnotatedElement;
@@ -28,38 +31,12 @@ import java.util.Set;
  * }
  * }</pre>
  */
-public class ConstructorBeanDefinitionCreationStrategy extends AbstractBeanDefinitionCreationStrategy {
+public class ConstructorBeanDefinitionCreationStrategy extends AbstractBeanDefinitionCreationStrategy<Class<?>> {
 
-    /**
-     * Determines if this strategy supports creating a bean definition from the given element.
-     *
-     * @param element the annotated element to evaluate
-     * @return {@code true} if {@code element} is an instance of {@link Class}, otherwise {@code false}
-     */
+
     @Override
-    public boolean supports(AnnotatedElement element) {
-        return element instanceof Class<?>;
-    }
-
-    /**
-     * Creates a {@link ConstructorBeanDefinition} from the given class.
-     * <p>
-     * The method attempts to find a constructor annotated with {@link BeanConstructor}. If none is found,
-     * it uses the first available constructor. If no constructor is found, a {@link BeanDefinitionException}
-     * is thrown.
-     *
-     * @param element the class to create a definition for
-     * @param context the {@link BeanContext} where this definition will be used
-     * @return the created {@link ConstructorBeanDefinition}
-     * @throws BeanDefinitionException if no valid constructor can be found for the class
-     */
-    @Override
-    public BeanDefinition create(AnnotatedElement element, BeanContext context) {
-        Class<?> klass    = (Class<?>) element;
-        String   beanName = context.getNameResolver().resolveName(klass);
-
-        // Create the definition
-        ConstructorBeanDefinition definition = new ConstructorBeanDefinition(beanName, klass);
+    public BeanDefinition create(String name, Class<?> klass, BeanContext context) {
+        ConstructorBeanDefinition definition = new ConstructorBeanDefinition(name, klass);
 
         Constructor<?> constructor;
 
@@ -92,5 +69,16 @@ public class ConstructorBeanDefinitionCreationStrategy extends AbstractBeanDefin
         updateBeanLifecycle(definition, klass);
 
         return definition;
+    }
+
+    /**
+     * Determines if this strategy supports the provided object.
+     *
+     * @param object the object to check.
+     * @return {@code true} if the strategy supports the object, {@code false} otherwise.
+     */
+    @Override
+    public boolean supports(Object object) {
+        return super.supports(object) && object instanceof Class<?>;
     }
 }

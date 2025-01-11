@@ -17,7 +17,7 @@ public class FrameworkDispatcherServlet extends DispatcherServlet {
         ServletContext servletContext = getServletContext();
 
         response.setStatus(HttpStatus.OK.getCode());
-        response.getWriter().write(getClass().getName());
+        response.getWriter().write("<h1>ZAiS</h1> asdasd as dasd asd asd asd asd asd asd asd asd ");
     }
 
 }

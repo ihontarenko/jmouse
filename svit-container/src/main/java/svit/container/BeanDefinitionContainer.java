@@ -5,8 +5,8 @@ import svit.container.definition.BeanDefinition;
 /**
  * An interface for managing {@link BeanDefinition} objects within a container.
  * <p>
- * For instance, you might define a bean named <em>userService</em> that references a
- * {@code com.example.services.UserService} class:
+ * This interface allows the registration, retrieval, and management of bean definitions.
+ * For example, you can register a bean definition and then retrieve it by its name:
  * <pre>{@code
  * BeanDefinitionContainer container = ...;
  * BeanDefinition userServiceDefinition =
@@ -14,8 +14,10 @@ import svit.container.definition.BeanDefinition;
  *
  * container.registerDefinition(userServiceDefinition);
  *
- * BeanDefinition retrievedDefinition = container.getDefinition("userService");
- * System.out.println("Bean name: " + retrievedDefinition.getBeanName());
+ * if (container.containsDefinition("userService")) {
+ *     BeanDefinition retrievedDefinition = container.getDefinition("userService");
+ *     System.out.println("Bean name: " + retrievedDefinition.getBeanName());
+ * }
  * }</pre>
  */
 public interface BeanDefinitionContainer {
@@ -35,4 +37,13 @@ public interface BeanDefinitionContainer {
      *         or {@code null} if no definition exists for that name
      */
     BeanDefinition getDefinition(String name);
+
+    /**
+     * Checks if a {@link BeanDefinition} with the given name exists in the container.
+     *
+     * @param name the name of the bean definition
+     * @return {@code true} if the container contains a definition with the specified name,
+     *         {@code false} otherwise
+     */
+    boolean containsDefinition(String name);
 }

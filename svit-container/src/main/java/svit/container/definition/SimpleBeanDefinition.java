@@ -25,7 +25,7 @@ public class SimpleBeanDefinition extends AbstractBeanDefinition {
      */
     @Override
     public String toString() {
-        return "DEFAULT_BEAN_DEFINITION: " + super.toString();
+        return "SIMPLE_BEAN_DEFINITION: " + super.toString();
     }
 
     /**

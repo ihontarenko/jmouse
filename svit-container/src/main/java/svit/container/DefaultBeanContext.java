@@ -13,6 +13,7 @@ import svit.reflection.Reflections;
 import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.joining;
 import static svit.reflection.Reflections.getShortName;
@@ -55,15 +56,18 @@ public class DefaultBeanContext implements BeanContext {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBeanContext.class);
 
     /**
-     * Tracks bean definitions currently being processed to detect cyclic dependencies.
+     * A detector for cyclic references in the dependency graph, using {@link DefaultCyclicReferenceDetector}.
+     * This ensures that cyclic dependencies are identified and handled during bean creation.
      */
-    private final List<BeanDefinition> visitor = new ArrayList<>();
+    private final CyclicReferenceDetector<String> referenceDetector = new DefaultCyclicReferenceDetector<>();
 
     /**
      * Holds all registered {@link BeanContextInitializer}s for initializing the context.
      * This list contains instances of initializers that will be executed during context setup.
      */
-    private final List<BeanContextInitializer> initializers = new ArrayList<>();
+    private final List<BeanContextInitializer> initializers = new ArrayList<>(
+            List.of(new RequiredBeanContextInitializer())
+    );
 
     /**
      * Keeps track of {@link BeanContextInitializer} classes that have already been initialized.
@@ -118,7 +122,6 @@ public class DefaultBeanContext implements BeanContext {
      */
     public DefaultBeanContext(BeanContext parent) {
         this.parent = parent;
-        addInitializer(new DefaultBeanContextInitializer());
     }
 
     /**
@@ -136,17 +139,26 @@ public class DefaultBeanContext implements BeanContext {
      */
     @Override
     public void refresh() {
+        LOGGER.warn("=========================================");
+        LOGGER.warn("========== START INITIALIZING! ==========");
+        LOGGER.warn("=========================================");
+
         for (BeanContextInitializer initializer : initializers) {
             Class<? extends BeanContextInitializer> initializerClass = initializer.getClass();
 
             if (initialized.contains(initializerClass)) {
-                LOGGER.info("Initializer '{}' has already been performed", getShortName(initializerClass));
+                LOGGER.warn("Initializer '{}' is already initialized.", getShortName(initializerClass));
                 continue;
             }
 
             initializer.initialize(this);
             initialized.add(initializerClass);
+            LOGGER.info("Initializer '{}' was successfully executed.", getShortName(initializerClass));
         }
+
+        LOGGER.warn("==========================================");
+        LOGGER.warn("========== FINISH INITIALIZING! ==========");
+        LOGGER.warn("==========================================");
     }
 
     /**
@@ -160,7 +172,7 @@ public class DefaultBeanContext implements BeanContext {
     public void cleanup() {
         // Clear the set of initialized classes to allow reinitialization
         initialized.clear();
-        LOGGER.info("ATTENTION! All initializers will be rerunned");
+        LOGGER.warn("WARNING! Initializer states cleared!");
     }
 
     /**
@@ -272,33 +284,57 @@ public class DefaultBeanContext implements BeanContext {
      */
     @Override
     public <T> T createBean(BeanDefinition definition) {
-        detectCyclicDependencies(definition);
-        visitor.add(definition);
 
-        // resolved an instantiated raw bean
-        T instance = beanFactory.createBean(definition);
+        if (definition == null) {
+            throw new BeanContextException("Bean definition required");
+        }
 
-        // preform post processor BEFORE initializing bean
+        Supplier<BeanInstantiationException> exceptionSupplier = ()
+                -> new BeanInstantiationException(
+                        "Cyclic dependency detected for bean: %s".formatted(definition.getBeanName()));
+
+        try {
+            // Detect cyclic references using the general-purpose Identifier interface
+            referenceDetector.detect(definition::getBeanName, exceptionSupplier);
+
+            // resolved an instantiated raw bean
+            T instance = beanFactory.createBean(definition);
+
+            // Initializes a bean instance by applying pre-initialization and post-initialization
+            initializeBean(instance, definition);
+
+            // IMPORTANT! endpoint of bean instance registration after creation
+            registerBean(definition.getBeanName(), instance, definition.getBeanScope());
+
+            return instance;
+        } finally {
+            referenceDetector.remove(definition::getBeanName);
+        }
+    }
+
+    /**
+     * Initializes a bean instance by applying pre-initialization and post-initialization
+     * processing steps and invoking any annotated initializer methods.
+     *
+     * @param instance   the bean instance to initialize.
+     * @param definition the {@link BeanDefinition} associated with the bean.
+     */
+    public void initializeBean(Object instance, BeanDefinition definition) {
+        // Perform pre-initialization steps using registered BeanPostProcessors
         for (BeanPostProcessor processor : processors) {
             processor.postProcessBeforeInitialize(instance, this);
         }
 
-        // invoke initializer method in bean object if present
+        // Invoke the initializer method if present in the bean class
         Reflections.findAllAnnotatedMethods(definition.getBeanClass(), BeanInitializer.class).stream().findFirst()
                 .ifPresent(initializer -> Reflections.invokeMethod(instance, initializer));
 
-        visitor.remove(definition);
-
-        // preform post processor AFTER initializing bean
+        // Perform post-initialization steps using registered BeanPostProcessors
         for (BeanPostProcessor processor : processors) {
             processor.postProcessAfterInitialize(instance, this);
         }
-
-        // IMPORTANT! endpoint of bean instance registration after creation
-        registerBean(definition.getBeanName(), instance, definition.getBeanScope());
-
-        return instance;
     }
+
 
     /**
      * Retrieves the names of all beans that match the specified type.
@@ -432,7 +468,6 @@ public class DefaultBeanContext implements BeanContext {
      * @param beanScope the lifecycle scope for the bean.
      * @throws BeanContextException if the bean cannot be registered due to scope restrictions or other errors.
      */
-
     @Override
     public void registerBean(String name, Object bean, BeanScope beanScope) {
         BeanDefinition definition = getDefinition(name);
@@ -440,20 +475,15 @@ public class DefaultBeanContext implements BeanContext {
         // IMPORTANT! If no definition exists, the bean is being registered manually (externally),
         // not via the automatic BeanContext mechanism
         if (definition == null) {
+            boolean               isObjectFactory = bean instanceof ObjectFactory<?>;
+            ObjectFactory<Object> factory         = isObjectFactory ? (ObjectFactory<Object>) bean : () -> bean;
+            Class<?>              beanClass       = isObjectFactory ? ObjectFactory.class : bean.getClass();
 
-            definition = new SimpleBeanDefinition(name, bean.getClass());
-
-            // check and wrap bean into ObjectFactory if necessary
-            if (beanScope == BeanScope.PROTOTYPE) {
-                boolean               isObjectFactory = bean instanceof ObjectFactory<?>;
-                ObjectFactory<Object> factory         = isObjectFactory ? (ObjectFactory<Object>) bean : () -> bean;
-
-                if (!isObjectFactory) {
-                    LOGGER.warn("The bean '{}' was wrapped into an ObjectFactory because it is prototype scoped.", name);
-                }
-
-                definition = new ObjectFactoryBeanDefinition(name, definition.getBeanClass(), factory);
+            if (!isObjectFactory) {
+                LOGGER.info("The bean '{}' was wrapped into an ObjectFactory<{}>", name, beanClass);
             }
+
+            definition = new ObjectFactoryBeanDefinition(name, beanClass, factory);
 
             // Add additional information to the BeanDefinition
             // - Assign the actual bean instance
@@ -464,16 +494,39 @@ public class DefaultBeanContext implements BeanContext {
             // register bean definition
             registerDefinition(definition);
 
-        } else {
-            LOGGER.warn("The bean '{}' already has a registered definition. No new definition was created.", name);
         }
 
         // Ensure the bean is registered in the container
         // Note: For PROTOTYPE beans, `containsBean(name)` always returns true
         if (!containsBean(name)) {
-            LOGGER.info("BEAN REGISTRATION: {} with scope {}", name, beanScope);
-            getBeanInstanceContainer(beanScope).registerBean(name, bean);
+            BeanInstanceContainer container = getBeanInstanceContainer(beanScope);
+            LOGGER.info("Bean '{}' attached to the '{}' container", name, getShortName(container.getClass()));
+
+            Object object = definition.getBeanInstance();
+
+            if (object == null) {
+                throw new BeanContextException("Unexpected null pointer. Bean instance must be present in definition");
+            }
+
+            container.registerBean(name, object);
         }
+    }
+
+    /**
+     * Registers a bean instance with the given name using an {@link ObjectFactory} and a specified {@link BeanScope}.
+     * <p>
+     * The default implementation throws a {@link BeanContextException} to indicate that
+     * scope-based registration is not supported. Override this method in a subclass
+     * if this functionality is required.
+     *
+     * @param name      the name of the bean.
+     * @param bean      the factory for creating the bean instance.
+     * @param beanScope the scope of the bean.
+     * @throws BeanContextException if this operation is not supported.
+     */
+    @Override
+    public void registerBean(String name, ObjectFactory<Object> bean, BeanScope beanScope) {
+        registerBean(name, (Object) bean, beanScope);
     }
 
     /**
@@ -532,12 +585,9 @@ public class DefaultBeanContext implements BeanContext {
     public BeanInstanceContainer getBeanInstanceContainer(BeanScope beanScope) {
         return switch (beanScope) {
             case SINGLETON, NON_BEAN -> singletonContainer;
-            case PROTOTYPE -> {
-                LOGGER.warn("Prototypes dummy bean instances container");
-                yield prototypeContainer;
-            }
+            case PROTOTYPE -> prototypeContainer;
             case REQUEST, SESSION -> throw new BeanContextException(
-                    "Request and Session bean instances container is unavailable in this context '%s'"
+                    "BeanScope#REQUEST and BeanScope#SESSION bean instances container is unavailable in this context '%s'"
                             .formatted(getShortName(getClass())));
         };
     }
@@ -551,6 +601,18 @@ public class DefaultBeanContext implements BeanContext {
     @Override
     public BeanDefinition getDefinition(String name) {
         return definitions.get(name);
+    }
+
+    /**
+     * Checks if a {@link BeanDefinition} with the given name exists in the container.
+     *
+     * @param name the name of the bean definition
+     * @return {@code true} if the container contains a definition with the specified name,
+     * {@code false} otherwise
+     */
+    @Override
+    public boolean containsDefinition(String name) {
+        return definitions.containsKey(name);
     }
 
     /**
@@ -664,32 +726,6 @@ public class DefaultBeanContext implements BeanContext {
     @Override
     public void setNameResolver(BeanNameResolver nameResolver) {
         this.nameResolver = nameResolver;
-    }
-
-
-    /**
-     * Detects cyclic dependencies during bean creation and throws an exception
-     * if a cyclic dependency is found.
-     *
-     * @param definition the bean definition being processed
-     * @throws BeanInstantiationException if a cyclic dependency is detected
-     */
-    private void detectCyclicDependencies(BeanDefinition definition) {
-        // if definition is already tried to create that is mean that we are in cyclic
-        if (visitor.contains(definition)) {
-
-            // also add current definition for exception message
-            visitor.add(definition);
-            String dependencyPath = visitor.stream().map(BeanDefinition::getBeanName)
-                    .collect(joining("\n\t -> "));
-
-            // clean-un visitor
-            visitor.clear();
-
-            throw new BeanInstantiationException(
-                    "Cyclic dependencies detected during bean creation. dependencies chain: [\n\t -> %s\n]"
-                            .formatted(dependencyPath));
-        }
     }
 
 }

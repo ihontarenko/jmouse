@@ -1,34 +1,47 @@
-package svit.container.definition;
+package svit.container.definition.strategy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import svit.container.BeanContext;
 import svit.container.BeanScope;
 import svit.container.annotation.Provide;
 import svit.container.annotation.Qualifier;
+import svit.container.definition.BeanDefinition;
+import svit.container.definition.BeanDependency;
+import svit.container.definition.SimpleBeanDependency;
+import svit.container.naming.BeanNameResolver;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Parameter;
 import java.util.List;
 
 /**
- * An abstract base class for {@link BeanDefinitionCreationStrategy} implementations.
- * Provides utility methods for processing dependencies and annotations while creating
- * {@link BeanDefinition} instances.
+ * An abstract base class for creating {@link BeanDefinition} objects from annotated elements.
+ * <p>
+ * This class provides utility methods for resolving dependencies, updating bean lifecycle,
+ * and generating bean definitions based on annotations and parameters.
  *
- * <p>Key responsibilities:
- * <ul>
- *   <li><strong>Dependency Creation</strong>:
- *       <ul>
- *         <li>{@link #createDependencies(List, Parameter[])}: Iterates over the parameters, converting each into a {@link BeanDependency}.</li>
- *         <li>{@link #createDependency(Parameter)}: Creates a single {@link BeanDependency} from a parameter, handling {@link Qualifier} if present.</li>
- *       </ul>
- *   </li>
- *   <li><strong>Lifecycle Updates</strong>:
- *       <ul>
- *         <li>{@link #updateBeanLifecycle(BeanDefinition, AnnotatedElement)}: Reads the {@link Provide} annotation to set the bean's {@link BeanScope}.</li>
- *       </ul>
- *   </li>
- * </ul>
+ * @param <T> the type of the annotated element (e.g., {@link java.lang.Class}, {@link java.lang.reflect.Method})
  */
-public abstract class AbstractBeanDefinitionCreationStrategy implements BeanDefinitionCreationStrategy {
+public abstract class AbstractBeanDefinitionCreationStrategy<T extends AnnotatedElement>
+        implements BeanDefinitionCreationStrategy<T> {
+
+    /**
+     * Logger instance for logging details about the creation process.
+     */
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+
+    /**
+     * Creates a {@link BeanDefinition} for the given annotated element using the default naming strategy.
+     *
+     * @param object  the annotated element
+     * @param context the {@link BeanContext} used during definition creation
+     * @return the created {@link BeanDefinition}
+     */
+    @Override
+    public BeanDefinition create(T object, BeanContext context) {
+        return create(context.getNameResolver().resolveName(object), object, context);
+    }
 
     /**
      * Creates bean dependencies for the given array of parameters.
@@ -64,7 +77,7 @@ public abstract class AbstractBeanDefinitionCreationStrategy implements BeanDefi
 
     /**
      * Updates the bean lifecycle by inspecting the {@link Provide} annotation on the provided element.
-     * If present, the annotation's lifecycle value is assigned to the {@code definition}.
+     * If present, the annotation's scope value is assigned to the {@code definition}.
      *
      * @param definition the bean definition to update
      * @param element    the annotated element (class or method) that may hold the {@link Provide} annotation
@@ -73,5 +86,16 @@ public abstract class AbstractBeanDefinitionCreationStrategy implements BeanDefi
         if (element.isAnnotationPresent(Provide.class)) {
             definition.setBeanScope(element.getAnnotation(Provide.class).scope());
         }
+    }
+
+    /**
+     * Determines if this strategy supports the provided object.
+     *
+     * @param object the object to check.
+     * @return {@code true} if the strategy supports the object, {@code false} otherwise.
+     */
+    @Override
+    public boolean supports(Object object) {
+        return object instanceof AnnotatedElement;
     }
 }

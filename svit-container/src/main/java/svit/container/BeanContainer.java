@@ -2,6 +2,7 @@ package svit.container;
 
 import svit.container.definition.BeanDefinition;
 import svit.container.processor.BeanPostProcessor;
+import svit.reflection.Reflections;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
@@ -18,6 +19,15 @@ import java.util.List;
  * }</pre>
  */
 public interface BeanContainer extends BeanInstanceContainer {
+
+    /**
+     * Initializes a bean instance by applying pre-initialization and post-initialization
+     * processing steps and invoking any annotated initializer methods.
+     *
+     * @param instance   the bean instance to initialize.
+     * @param definition the {@link BeanDefinition} associated with the bean.
+     */
+    void initializeBean(Object instance, BeanDefinition definition);
 
     /**
      * Retrieves the names of all beans that match the specified type.
@@ -83,6 +93,56 @@ public interface BeanContainer extends BeanInstanceContainer {
      * @param lifecycle the lifecycle scope for the bean.
      */
     void registerBean(Class<?> type, Object bean, BeanScope lifecycle);
+
+    /**
+     * Registers a bean instance with the given name and a specified {@link BeanScope}.
+     * <p>
+     * The default implementation throws a {@link BeanContextException} to indicate that
+     * scope-based registration is not supported. Override this method in a subclass
+     * if scope-based registration is required.
+     *
+     * @param name      the name of the bean.
+     * @param bean      the bean instance to register.
+     * @param beanScope the scope of the bean.
+     * @throws BeanContextException if this operation is not supported.
+     */
+    default void registerBean(String name, Object bean, BeanScope beanScope) {
+        throw new BeanContextException(
+                "Scope-based bean registration is not supported in %s. Bean '%s' with scope '%s' cannot be registered."
+                        .formatted(Reflections.getShortName(getClass()), name, beanScope));
+    }
+
+    /**
+     * Registers a bean instance with the given name using an {@link ObjectFactory}.
+     * <p>
+     * By default, this method registers the bean with a {@link BeanScope#PROTOTYPE} scope.
+     * Override this method if a different default behavior is required.
+     *
+     * @param name the name of the bean.
+     * @param bean the factory for creating the bean instance.
+     * @throws BeanContextException if this operation is not supported in the implementation.
+     */
+    default void registerBean(String name, ObjectFactory<Object> bean) {
+        registerBean(name, bean, BeanScope.PROTOTYPE);
+    }
+
+    /**
+     * Registers a bean instance with the given name using an {@link ObjectFactory} and a specified {@link BeanScope}.
+     * <p>
+     * The default implementation throws a {@link BeanContextException} to indicate that
+     * scope-based registration is not supported. Override this method in a subclass
+     * if this functionality is required.
+     *
+     * @param name      the name of the bean.
+     * @param bean      the factory for creating the bean instance.
+     * @param beanScope the scope of the bean.
+     * @throws BeanContextException if this operation is not supported.
+     */
+    default void registerBean(String name, ObjectFactory<Object> bean, BeanScope beanScope) {
+        throw new BeanContextException(
+                "Factory-based scope registration is not supported in %s. Bean '%s' with scope '%s' cannot be registered."
+                        .formatted(Reflections.getShortName(getClass()), name, beanScope));
+    }
 
     /**
      * Creates a bean instance from the given {@link BeanDefinition}, handling

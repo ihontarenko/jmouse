@@ -2,6 +2,9 @@ package svit.container;
 
 import org.slf4j.Logger;
 import svit.container.annotation.Provide;
+import svit.container.definition.strategy.ConstructorBeanDefinitionCreationStrategy;
+import svit.container.definition.strategy.MethodBeanDefinitionCreationStrategy;
+import svit.container.definition.strategy.ObjectFactoryBeanDefinitionCreationStrategy;
 import svit.container.instantiation.*;
 import svit.container.naming.AnnotationBeanNameStrategy;
 import svit.container.naming.BeanNameResolver;
@@ -19,7 +22,7 @@ import static svit.reflection.Reflections.getShortName;
  * Default implementation of {@link BeanContextInitializer}.
  * Provides initialization logic for setting up a {@link BeanContext} with default factories, resolvers, and post-processors.
  */
-final class DefaultBeanContextInitializer implements BeanContextInitializer {
+final class RequiredBeanContextInitializer implements BeanContextInitializer {
 
     private static final Logger LOGGER = getLogger(getShortName(BeanContextInitializer.class) + ".DEFAULT_INITIALIZER");
 
@@ -119,12 +122,13 @@ final class DefaultBeanContextInitializer implements BeanContextInitializer {
      * @param context the {@link BeanContext} to configure.
      */
     private void registerDefaultBeanDefinitionFactory(BeanContext context) {
-        BeanDefinitionFactory factory = new DefaultBeanDefinitionFactory();
+        BeanDefinitionFactory factory = new SimpleBeanDefinitionFactory();
 
         LOGGER.info("Initialize new bean definition factory");
 
         factory.addStrategy(new ConstructorBeanDefinitionCreationStrategy());
         factory.addStrategy(new MethodBeanDefinitionCreationStrategy());
+        factory.addStrategy(new ObjectFactoryBeanDefinitionCreationStrategy());
 
         context.setBeanDefinitionFactory(factory);
     }

@@ -1,7 +1,5 @@
 package svit.container;
 
-import svit.reflection.Reflections;
-
 /**
  * Interface for managing bean instances in a container.
  * Provides methods to retrieve and register beans by name, with support for lazy initialization
@@ -25,17 +23,25 @@ public interface BeanInstanceContainer {
     /**
      * Retrieves a bean by its name, creating and registering it using the provided {@link ObjectFactory}
      * if it does not already exist.
+     * <p>
+     * If the factory produces a {@code null} object, a {@link BeanContextException} is thrown.
      *
-     * @param name          the name of the bean.
-     * @param objectFactory the factory to create the bean if it is not already present.
+     * @param name          the name of the bean to retrieve or create.
+     * @param objectFactory the factory to create the bean if it does not already exist.
      * @param <T>           the type of the bean.
      * @return the existing or newly created bean instance.
+     * @throws BeanContextException if the {@link ObjectFactory} produces a {@code null} object.
      */
     default <T> T getBean(String name, ObjectFactory<T> objectFactory) {
         T bean = getBean(name);
 
         if (bean == null) {
             bean = objectFactory.createObject();
+
+            if (bean == null) {
+                throw new BeanContextException("ObjectFactory must produce a non-null object");
+            }
+
             registerBean(name, bean);
         }
 
@@ -58,24 +64,6 @@ public interface BeanInstanceContainer {
      * @param bean the bean instance to register.
      */
     void registerBean(String name, Object bean);
-
-    /**
-     * Registers a bean instance with the given name and a specified {@link BeanScope}.
-     * <p>
-     * The default implementation throws a {@link BeanContextException} to indicate that
-     * scope-based registration is not supported. Override this method in a subclass
-     * if scope-based registration is required.
-     *
-     * @param name      the name of the bean.
-     * @param bean      the bean instance to register.
-     * @param beanScope the scope of the bean.
-     * @throws BeanContextException if this operation is not supported.
-     */
-    default void registerBean(String name, Object bean, BeanScope beanScope) {
-        throw new BeanContextException(
-                "The registration of a bean is prohibited in the '%s' implementation."
-                        .formatted(Reflections.getShortName(getClass())));
-    }
 
     /**
      * Checks whether a bean with the specified name is already registered in this container.

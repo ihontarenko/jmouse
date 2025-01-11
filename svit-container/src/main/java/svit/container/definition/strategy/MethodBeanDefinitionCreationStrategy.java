@@ -1,6 +1,9 @@
-package svit.container.definition;
+package svit.container.definition.strategy;
 
 import svit.container.BeanContext;
+import svit.container.definition.BeanDefinition;
+import svit.container.definition.BeanDefinitionFactory;
+import svit.container.definition.MethodBeanDefinition;
 import svit.container.naming.BeanNameResolver;
 import svit.matcher.Matcher;
 import svit.reflection.ClassMatchers;
@@ -10,55 +13,25 @@ import java.lang.reflect.Method;
 import java.util.Set;
 
 /**
- * A strategy for creating {@link MethodBeanDefinition} instances from annotated {@link Method}s.
+ * A strategy for creating {@link MethodBeanDefinition} instances from {@link Method} elements.
  * <p>
- * This strategy:
- * <ul>
- *     <li>Resolves the bean name from the method using the {@link BeanNameResolver}</li>
- *     <li>Sets the factory method and return type on the resulting {@link MethodBeanDefinition}</li>
- *     <li>Creates dependencies based on the method parameters, if any</li>
- *     <li>Updates the bean's lifecycle based on relevant annotations</li>
- *     <li>Associates the method-level annotations with the bean definition</li>
- *     <li>Links the definition to a parent definition, creating one if necessary</li>
- * </ul>
+ * This strategy processes methods annotated with specific annotations to create bean definitions
+ * and resolve dependencies required for method-based bean instantiation.
  */
-public class MethodBeanDefinitionCreationStrategy extends AbstractBeanDefinitionCreationStrategy {
+public class MethodBeanDefinitionCreationStrategy extends AbstractBeanDefinitionCreationStrategy<Method> {
 
     /**
-     * Checks whether the given element is a {@link Method}.
+     * Creates a {@link BeanDefinition} with a specified name from the provided object.
      *
-     * @param element the annotated element to evaluate
-     * @return {@code true} if {@code element} is an instance of {@link Method}, otherwise {@code false}
+     * @param name    the name of the bean.
+     * @param method  the object from which the bean definition is created.
+     * @param context the {@link BeanContext} used during creation.
+     * @return the created {@link BeanDefinition}.
      */
     @Override
-    public boolean supports(AnnotatedElement element) {
-        return element instanceof Method;
-    }
-
-    /**
-     * Creates a {@link MethodBeanDefinition} from the given {@link Method}.
-     * <p>
-     * Steps:
-     * <ol>
-     *     <li>Resolves the bean name using the {@link BeanContext}'s {@link BeanNameResolver}</li>
-     *     <li>Sets the factory method and return type</li>
-     *     <li>Creates dependencies for each method parameter, if present</li>
-     *     <li>Updates the bean's lifecycle based on annotations</li>
-     *     <li>Attaches the method-level annotations to the definition</li>
-     *     <li>Updates the definition's parent, ensuring the parent is registered if needed</li>
-     * </ol>
-     *
-     * @param element the annotated element, expected to be a {@link Method}
-     * @param context the {@link BeanContext} in which the definition will be managed
-     * @return a new {@link MethodBeanDefinition} representing the method-based bean
-     */
-    @Override
-    public BeanDefinition create(AnnotatedElement element, BeanContext context) {
-        Method method   = (Method) element;
-        String beanName = context.getNameResolver().resolveName(method);
-
+    public BeanDefinition create(String name, Method method, BeanContext context) {
         // Create a new MethodBeanDefinition based on the method's return type
-        MethodBeanDefinition definition = new MethodBeanDefinition(beanName, method.getReturnType());
+        MethodBeanDefinition definition = new MethodBeanDefinition(name, method.getReturnType());
         definition.setFactoryMethod(method);
 
         // If the method has parameters, create dependencies
@@ -70,7 +43,7 @@ public class MethodBeanDefinitionCreationStrategy extends AbstractBeanDefinition
         updateBeanLifecycle(definition, method);
 
         // Attach method-level annotations
-        definition.setAnnotations(Set.of(element.getAnnotations()));
+        definition.setAnnotations(Set.of(method.getAnnotations()));
 
         // Link the definition to its parent (the class that declares the method)
         updateParentDefinition(definition, context);
@@ -106,4 +79,16 @@ public class MethodBeanDefinitionCreationStrategy extends AbstractBeanDefinition
         definition.setParentDefinition(parentDefinition);
         parentDefinition.addChildDefinition(definition);
     }
+
+    /**
+     * Determines if this strategy supports the provided object.
+     *
+     * @param object the object to check.
+     * @return {@code true} if the strategy supports the object, {@code false} otherwise.
+     */
+    @Override
+    public boolean supports(Object object) {
+        return super.supports(object) && object instanceof Method;
+    }
+
 }

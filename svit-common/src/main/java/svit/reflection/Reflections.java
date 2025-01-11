@@ -690,6 +690,36 @@ abstract public class Reflections {
     }
 
     /**
+     * Retrieves the parameterized type of a superclass at the specified index.
+     * <p>
+     * This method extracts the generic type parameters of a class's superclass
+     * and returns the type at the given index. If the index is out of bounds or
+     * the superclass does not have parameterized types, {@code null} is returned.
+     *
+     * @param type  the class whose superclass parameterized type is to be retrieved.
+     * @param index the index of the parameterized type to retrieve.
+     * @return the parameterized type at the specified index, or {@code null} if not available.
+     *
+     * <p>Example Usage:</p>
+     * <pre>{@code
+     * class Base<T> {}
+     * class Derived extends Base<String> {}
+     *
+     * Class<?> parameterizedType = Reflections.getSuperclassParameterizedType(Derived.class, 0);
+     * System.out.println(parameterizedType); // Outputs: class java.lang.String
+     * }</pre>
+     */
+    public static Class<?> getSuperclassParameterizedType(Class<?> type, int index) {
+        List<Class<?>> classes = getSuperclassParameterizedTypes(type);
+
+        if (index < classes.size()) {
+            return classes.get(index);
+        }
+
+        return null;
+    }
+
+    /**
      * Extracts parameterized types from the provided {@link Type} (which may be a {@link ParameterizedType}).
      *
      * @param type the type to analyze

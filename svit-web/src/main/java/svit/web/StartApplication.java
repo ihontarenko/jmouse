@@ -12,7 +12,7 @@ public class StartApplication {
         WebServer<Tomcat> webServer = new TomcatWebServer();
 
         webServer.configure(new TomcatWebServerConfigurer(
-                9090, new FrameworkInitializer(), WebBeanContextLoaderInitializer.class));
+                9911, new FrameworkInitializer(), WebBeanContextLoaderInitializer.class));
 
         webServer.start();
     }
