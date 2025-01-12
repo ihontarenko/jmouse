@@ -66,7 +66,21 @@ public interface BeanContext
      * @param lifecycle the lifecycle scope for which to retrieve the container
      * @return the {@link BeanInstanceContainer} associated with the given lifecycle
      */
-    BeanInstanceContainer getBeanInstanceContainer(BeanScope lifecycle);
+    BeanInstanceContainer getBeanInstanceContainer(BeanScope scope);
+
+    /**
+     * Registers a {@link BeanInstanceContainer} for a specific {@link Scope}.
+     * <p>
+     * This method allows mapping a scope to a container that manages bean instances
+     * within that scope. For example, you can register separate containers for
+     * singleton, prototype, request, or session scopes.
+     * </p>
+     *
+     * @param scope    the {@link Scope} for which the container is being registered.
+     * @param container the {@link BeanInstanceContainer} to be associated with the given scope.
+     * @throws IllegalArgumentException if the provided scope or container is null.
+     */
+    void registerBeanInstanceContainer(Scope scope, BeanInstanceContainer container);
 
     /**
      * Retrieves the parent context of this bean context.

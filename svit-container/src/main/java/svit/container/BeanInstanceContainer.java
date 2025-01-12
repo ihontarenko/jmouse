@@ -74,4 +74,19 @@ public interface BeanInstanceContainer {
     default boolean containsBean(String name) {
         return false;
     }
+
+    /**
+     * Determines if the current implementation supports the given {@link Scope}.
+     * <p>
+     * By default, this method returns {@code false}, indicating that the scope
+     * is not supported. Implementations can override this method to specify
+     * which scopes they support.
+     *
+     * @param scope the {@link Scope} to check for support.
+     * @return {@code true} if the scope is supported, {@code false} otherwise.
+     */
+    default boolean supports(Scope scope) {
+        return false;
+    }
+
 }

@@ -91,6 +91,14 @@ public class DefaultBeanContext implements BeanContext {
     private final BeanInstanceContainer prototypeContainer = new PrototypeBeanContainer();
 
     /**
+     * A mapping of {@link Scope} to their respective {@link BeanInstanceContainer}.
+     * <p>
+     * This map is used to dynamically associate scopes with their corresponding
+     * containers, allowing for flexible management of bean instances based on scope.
+     */
+    private final Map<Scope, BeanInstanceContainer> containers = new ConcurrentHashMap<>();
+
+    /**
      * A list of registered {@link BeanPostProcessor}s for managing bean lifecycle hooks.
      */
     private final List<BeanPostProcessor> processors = new ArrayList<>();
@@ -496,6 +504,7 @@ public class DefaultBeanContext implements BeanContext {
 
         }
 
+        //todo:
         // Ensure the bean is registered in the container
         // Note: For PROTOTYPE beans, `containsBean(name)` always returns true
         if (!containsBean(name)) {
@@ -583,6 +592,7 @@ public class DefaultBeanContext implements BeanContext {
      */
     @Override
     public BeanInstanceContainer getBeanInstanceContainer(BeanScope beanScope) {
+        // todo: migrate to this.containers instead in dedicated field
         return switch (beanScope) {
             case SINGLETON, NON_BEAN -> singletonContainer;
             case PROTOTYPE -> prototypeContainer;
@@ -590,6 +600,23 @@ public class DefaultBeanContext implements BeanContext {
                     "BeanScope#REQUEST and BeanScope#SESSION bean instances container is unavailable in this context '%s'"
                             .formatted(getShortName(getClass())));
         };
+    }
+
+    /**
+     * Registers a {@link BeanInstanceContainer} for a specific {@link Scope}.
+     * <p>
+     * This method allows mapping a scope to a container that manages bean instances
+     * within that scope. For example, you can register separate containers for
+     * singleton, prototype, request, or session scopes.
+     * </p>
+     *
+     * @param scope     the {@link Scope} for which the container is being registered.
+     * @param container the {@link BeanInstanceContainer} to be associated with the given scope.
+     * @throws IllegalArgumentException if the provided scope or container is null.
+     */
+    @Override
+    public void registerBeanInstanceContainer(Scope scope, BeanInstanceContainer container) {
+        containers.put(scope, container);
     }
 
     /**

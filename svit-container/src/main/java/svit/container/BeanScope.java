@@ -4,7 +4,7 @@ package svit.container;
  * Enum representing the lifecycle of a bean in the context.
  * Defines various scopes for managing bean instances.
  */
-public enum BeanScope {
+public enum BeanScope implements Scope {
 
     /**
      * A new instance of the bean is created every time it is requested.
@@ -46,5 +46,17 @@ public enum BeanScope {
      * This is typically used for marker interfaces or classes that
      * are part of the internal container logic.
      */
-    NON_BEAN
+    NON_BEAN;
+
+
+    /**
+     * Returns the unique identifier for this scope, which is the ordinal
+     * value of the enum constant.
+     *
+     * @return the unique identifier for the scope.
+     */
+    @Override
+    public int id() {
+        return ordinal();
+    }
 }
