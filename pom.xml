@@ -31,7 +31,7 @@
         <module>svit-dependencies</module>
         <module>svit-common</module>
         <module>svit-expression</module>
-        <module>svit-container</module>
+        <module>svit-beans</module>
         <module>svit-web</module>
     </modules>
 

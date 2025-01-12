@@ -9,8 +9,8 @@
         <version>1.0.0-Beta</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <name>Svit Framework - DI Container</name>
-    <artifactId>svit-container</artifactId>
+    <name>Svit Framework - Beans</name>
+    <artifactId>svit-beans</artifactId>
     <packaging>jar</packaging>
 
     <properties>

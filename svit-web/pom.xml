@@ -27,7 +27,7 @@
         </dependency>
         <dependency>
             <groupId>org.svitframework</groupId>
-            <artifactId>svit-container</artifactId>
+            <artifactId>svit-beans</artifactId>
         </dependency>
         <!-- Jakarta -->
         <dependency>
