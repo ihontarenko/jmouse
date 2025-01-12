@@ -21,15 +21,6 @@ import java.util.List;
 public interface BeanContainer extends BeanInstanceContainer {
 
     /**
-     * Initializes a bean instance by applying pre-initialization and post-initialization
-     * processing steps and invoking any annotated initializer methods.
-     *
-     * @param instance   the bean instance to initialize.
-     * @param definition the {@link BeanDefinition} associated with the bean.
-     */
-    void initializeBean(Object instance, BeanDefinition definition);
-
-    /**
      * Retrieves the names of all beans that match the specified type.
      *
      * @param type the class type of the beans.
@@ -143,26 +134,6 @@ public interface BeanContainer extends BeanInstanceContainer {
                 "Factory-based scope registration is not supported in %s. Bean '%s' with scope '%s' cannot be registered."
                         .formatted(Reflections.getShortName(getClass()), name, beanScope));
     }
-
-    /**
-     * Creates a bean instance from the given {@link BeanDefinition}, handling
-     * cyclic dependency detection, post-processing, and optional registration.
-     * <p>
-     * This method performs several steps:
-     * <ol>
-     *   <li>Detects and prevents cyclic dependencies by tracking visited definitions.</li>
-     *   <li>Uses the underlying {@link BeanFactory} to create the actual bean instance.</li>
-     *   <li>Runs all registered {@link BeanPostProcessor} instances before and after the bean is initialized.</li>
-     *   <li>Invokes the method annotated with {@code @Initialization}, if present, on the newly created bean.</li>
-     *   <li>If the {@link BeanDefinition} is marked as singleton, the bean is registered in the singleton container.</li>
-     * </ol>
-     *
-     * @param definition the {@link BeanDefinition} describing how the bean should be created
-     * @param <T>        the type of the bean
-     * @return the created bean instance
-     * @throws BeanInstantiationException if bean creation fails due to dependencies or initialization errors
-     */
-    <T> T createBean(BeanDefinition definition);
 
     /**
      * Checks if a bean corresponding to the given {@link BeanDefinition} is already registered.

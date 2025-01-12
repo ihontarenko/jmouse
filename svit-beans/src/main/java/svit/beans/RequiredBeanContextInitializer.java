@@ -33,6 +33,8 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
      */
     @Override
     public void initialize(BeanContext context) {
+        initializeRequiredBeanInstanceContainers(context);
+
         registerDefaultBeanFactory(context);
         registerDefaultBeanDefinitionFactory(context);
         registerDefaultBeanNameResolver(context);
@@ -44,6 +46,20 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
         context.registerBean(BeanContext.class, context);
 
         defaultScanning(context);
+    }
+
+    /**
+     * Initializes the required {@link BeanInstanceContainer}s for basic scopes.
+     * <p>
+     * Clears any previously registered containers and sets up containers for the
+     * {@link BeanScope#SINGLETON} and {@link BeanScope#PROTOTYPE} scopes.
+     * </p>
+     *
+     * @param context the {@link BeanContext} for which the containers are initialized.
+     */
+    private void initializeRequiredBeanInstanceContainers(BeanContext context) {
+        context.registerBeanInstanceContainer(BeanScope.SINGLETON, new SingletonBeanContainer());
+        context.registerBeanInstanceContainer(BeanScope.PROTOTYPE, new PrototypeBeanContainer());
     }
 
     /**
@@ -89,7 +105,9 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
 
         LOGGER.info("Initialize default bean factory");
 
-        factory.setBeanContext(context);
+        if (factory instanceof BeanContextAware contextAware) {
+            contextAware.setBeanContext(context);
+        }
 
         if (factory instanceof BeanInstantiationFactory instantiation) {
             instantiation.addStrategy(new ConstructorBeanInstantiationStrategy());

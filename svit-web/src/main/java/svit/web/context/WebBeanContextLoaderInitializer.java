@@ -4,7 +4,6 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import svit.reflection.Reflections;
 import svit.web.AbstractApplicationInitializer;
 import svit.web.servlet.RequestContextLoaderListener;
 import svit.web.servlet.WebBeanContextLoaderListener;

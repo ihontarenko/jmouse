@@ -6,6 +6,7 @@ import svit.beans.example.User;
 public class Example {
 
     public static void main(String[] args) {
+
         BeanContext context = new DefaultBeanContext();
         context.refresh();
 
@@ -20,6 +21,14 @@ public class Example {
         System.out.println("BEAN VALUE: " + context.getBean( "test1"));
 
         System.out.println("end!");
+    }
+
+    private static BeanContext createRootBeanContext() {
+        BeanContext context = new DefaultBeanContext();
+
+        context.refresh();
+
+        return context;
     }
 
 }

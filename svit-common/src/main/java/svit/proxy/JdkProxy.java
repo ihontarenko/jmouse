@@ -9,14 +9,35 @@ import java.util.List;
 
 import static java.lang.reflect.Proxy.*;
 
+/**
+ * A proxy implementation using the Java Dynamic Proxy API.
+ * <p>
+ * This class acts as an {@link InvocationHandler} for method calls on proxied objects.
+ * It supports method interception through a chain of {@link MethodInterceptor}s and
+ * ensures proper handling of special methods like {@code equals}, {@code hashCode}, and {@code toString}.
+ */
 public class JdkProxy implements InvocationHandler, Proxy {
 
     private final ProxyConfig proxyConfig;
 
+    /**
+     * Constructs a new {@code JdkProxy} with the given {@link ProxyConfig}.
+     *
+     * @param proxyConfig the configuration for the proxy, including the target object and interceptors.
+     */
     public JdkProxy(ProxyConfig proxyConfig) {
         this.proxyConfig = proxyConfig;
     }
 
+    /**
+     * Handles method invocations on the proxy instance.
+     *
+     * @param proxy     the proxy instance.
+     * @param method    the method being invoked.
+     * @param arguments the arguments passed to the method.
+     * @return the result of the method invocation.
+     * @throws Throwable if an error occurs during method execution.
+     */
     @Override
     public Object invoke(Object proxy, Method method, Object[] arguments) throws Throwable {
         Object   returnValue;
@@ -53,21 +74,43 @@ public class JdkProxy implements InvocationHandler, Proxy {
         return returnValue;
     }
 
+    /**
+     * Creates and returns a proxy instance for the target object using the specified {@link ClassLoader}.
+     *
+     * @param classLoader the class loader to define the proxy class.
+     * @return the proxy instance.
+     */
     @Override
     public Object getProxy(ClassLoader classLoader) {
         return newProxyInstance(classLoader, proxyConfig.getInterfaces().toArray(Class[]::new), this);
     }
 
+    /**
+     * Returns the {@link ProxyEngine} associated with this proxy implementation.
+     *
+     * @return {@link ProxyEngine#JDK}.
+     */
     @Override
     public ProxyEngine getProxyEngine() {
         return ProxyEngine.JDK;
     }
 
+    /**
+     * Computes the hash code for this proxy based on the target object and the proxy configuration.
+     *
+     * @return the hash code.
+     */
     @Override
     public int hashCode() {
         return JdkProxy.class.hashCode() * 13 + proxyConfig.getTarget().hashCode();
     }
 
+    /**
+     * Compares this proxy with another object for equality.
+     *
+     * @param that the object to compare.
+     * @return {@code true} if the objects are equal, {@code false} otherwise.
+     */
     @Override
     public boolean equals(Object that) {
         if (that == this) {
@@ -97,6 +140,11 @@ public class JdkProxy implements InvocationHandler, Proxy {
                 && proxy.proxyConfig.getTarget().equals(proxyConfig.getTarget());
     }
 
+    /**
+     * Returns a string representation of this proxy.
+     *
+     * @return a string containing the proxy's hash code and configuration details.
+     */
     @Override
     public String toString() {
         return "JDK PROXY [%s] [%s]".formatted(hashCode(), super.toString());

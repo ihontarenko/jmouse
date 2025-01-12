@@ -38,6 +38,25 @@ public interface BeanDefinition {
     }
 
     /**
+     * Indicates whether the bean represented by this definition is proxied.
+     * <p>
+     * A proxied bean typically wraps the actual bean instance with additional functionality,
+     * such as method interception or lazy initialization.
+     *
+     * @return {@code true} if the bean is proxied, otherwise {@code false}.
+     */
+    default boolean isProxied() {
+        return false;
+    }
+
+    /**
+     * Sets whether the bean represented by this definition is proxied.
+     *
+     * @param proxied {@code true} if the bean should be proxied, {@code false} otherwise.
+     */
+    void setProxied(boolean proxied);
+
+    /**
      * Retrieves the name of the bean.
      *
      * @return the bean name.

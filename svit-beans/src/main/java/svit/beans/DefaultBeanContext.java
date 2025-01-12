@@ -51,7 +51,7 @@ import static svit.reflection.Reflections.getShortName;
  * MyService userServiceByName = context.getBean("userService");
  * }</pre>
  */
-public class DefaultBeanContext implements BeanContext {
+public class DefaultBeanContext implements BeanContext, BeanFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBeanContext.class);
 
@@ -79,16 +79,6 @@ public class DefaultBeanContext implements BeanContext {
      * A mapping of bean names to their corresponding {@link BeanDefinition}s.
      */
     private final Map<String, BeanDefinition> definitions = new ConcurrentHashMap<>();
-
-    /**
-     * A container of instantiated singletons beans
-     */
-    private final BeanInstanceContainer singletonContainer = new SingletonBeanContainer();
-
-    /**
-     * A no-ops bean container
-     */
-    private final BeanInstanceContainer prototypeContainer = new PrototypeBeanContainer();
 
     /**
      * A mapping of {@link Scope} to their respective {@link BeanInstanceContainer}.
@@ -327,6 +317,7 @@ public class DefaultBeanContext implements BeanContext {
      * @param instance   the bean instance to initialize.
      * @param definition the {@link BeanDefinition} associated with the bean.
      */
+    @Override
     public void initializeBean(Object instance, BeanDefinition definition) {
         // Perform pre-initialization steps using registered BeanPostProcessors
         for (BeanPostProcessor processor : processors) {
@@ -336,6 +327,10 @@ public class DefaultBeanContext implements BeanContext {
         // Invoke the initializer method if present in the bean class
         Reflections.findAllAnnotatedMethods(definition.getBeanClass(), BeanInitializer.class).stream().findFirst()
                 .ifPresent(initializer -> Reflections.invokeMethod(instance, initializer));
+
+        if (instance instanceof svit.beans.BeanInitializer beanInitializer) {
+            beanInitializer.initializeBean(instance, definition);
+        }
 
         // Perform post-initialization steps using registered BeanPostProcessors
         for (BeanPostProcessor processor : processors) {
@@ -592,14 +587,14 @@ public class DefaultBeanContext implements BeanContext {
      */
     @Override
     public BeanInstanceContainer getBeanInstanceContainer(BeanScope beanScope) {
-        // todo: migrate to this.containers instead in dedicated field
-        return switch (beanScope) {
-            case SINGLETON, NON_BEAN -> singletonContainer;
-            case PROTOTYPE -> prototypeContainer;
-            case REQUEST, SESSION -> throw new BeanContextException(
-                    "BeanScope#REQUEST and BeanScope#SESSION bean instances container is unavailable in this context '%s'"
-                            .formatted(getShortName(getClass())));
-        };
+        BeanInstanceContainer instanceContainer = containers.get(beanScope);
+
+        if (instanceContainer == null) {
+            throw new BeanContextException("Unsupported bean scope '%s' detected in context '%s'."
+                    .formatted(beanScope, getShortName(getClass())));
+        }
+
+        return instanceContainer;
     }
 
     /**
@@ -617,6 +612,18 @@ public class DefaultBeanContext implements BeanContext {
     @Override
     public void registerBeanInstanceContainer(Scope scope, BeanInstanceContainer container) {
         containers.put(scope, container);
+    }
+
+    /**
+     * Removes all registered {@link BeanInstanceContainer}s.
+     * <p>
+     * This method clears all previously registered containers, effectively resetting
+     * the context's scope-based container management.
+     * </p>
+     */
+    @Override
+    public void removeBeanInstanceContainers() {
+        containers.clear();
     }
 
     /**

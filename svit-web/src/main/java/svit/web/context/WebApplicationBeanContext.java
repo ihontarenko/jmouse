@@ -4,8 +4,10 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import svit.beans.*;
-import svit.beans.definition.BeanDefinition;
+import svit.beans.BeanContext;
+import svit.beans.BeanScope;
+import svit.beans.DefaultBeanContext;
+import svit.beans.ObjectFactory;
 import svit.web.context.support.HttpSessionObjectFactory;
 import svit.web.context.support.RequestObjectFactory;
 
@@ -15,9 +17,7 @@ public class WebApplicationBeanContext extends DefaultBeanContext implements Web
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebApplicationBeanContext.class);
 
-    private final BeanInstanceContainer sessionContainer;
-    private final BeanInstanceContainer requestContainer;
-    private       ServletContext        servletContext;
+    private ServletContext servletContext;
 
     public WebApplicationBeanContext(BeanContext parent) {
         super(parent);
@@ -25,8 +25,9 @@ public class WebApplicationBeanContext extends DefaultBeanContext implements Web
         ObjectFactory<ServletContext>     factory        = this::getServletContext;
         ObjectFactory<HttpServletRequest> requestFactory = new RequestObjectFactory(factory);
 
-        sessionContainer = new HttpSessionBeanContainer(new HttpSessionObjectFactory(requestFactory));
-        requestContainer = new HttpRequestBeanContainer(requestFactory);
+        registerBeanInstanceContainer(BeanScope.REQUEST, new HttpRequestBeanContainer(requestFactory));
+        registerBeanInstanceContainer(BeanScope.SESSION, new HttpSessionBeanContainer(new HttpSessionObjectFactory(requestFactory)));
+        registerBeanInstanceContainer(BeanScope.NON_BEAN, this);
     }
 
     public WebApplicationBeanContext() {
@@ -34,19 +35,8 @@ public class WebApplicationBeanContext extends DefaultBeanContext implements Web
     }
 
     @Override
-    public <T> T getBean(String name) {
-        BeanDefinition   definition    = getDefinition(name);
-        ObjectFactory<T> objectFactory = () -> super.createBean(definition);
-
-        if (definition == null) {
-            throw new BeanContextException("No registered bean found with the name '%s'.".formatted(name));
-        }
-
-        return switch (definition.getBeanScope()) {
-            case SESSION -> sessionContainer.getBean(name, objectFactory);
-            case REQUEST -> requestContainer.getBean(name, objectFactory);
-            default -> super.getBean(name);
-        };
+    public ServletContext getServletContext() {
+        return servletContext;
     }
 
     @Override
@@ -54,11 +44,6 @@ public class WebApplicationBeanContext extends DefaultBeanContext implements Web
         this.servletContext = servletContext;
         LOGGER.info("Register bean '{}'", getShortName(ServletContext.class));
         registerBean(ServletContext.class, servletContext);
-    }
-
-    @Override
-    public ServletContext getServletContext() {
-        return servletContext;
     }
 
 }

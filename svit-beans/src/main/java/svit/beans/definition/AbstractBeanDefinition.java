@@ -1,5 +1,6 @@
 package svit.beans.definition;
 
+import svit.beans.BeanInstantiationType;
 import svit.beans.BeanScope;
 import svit.beans.instantiation.BeanInstantiationStrategy;
 
@@ -57,6 +58,11 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
      * The type (class) of the bean.
      */
     protected Class<?> type;
+
+    /**
+     * Indicates whether the bean is proxied.
+     */
+    protected boolean proxied = false;
 
     /**
      * The parent bean definition, if any.
@@ -135,6 +141,36 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     @Override
     public void setBeanClass(Class<?> type) {
         this.type = type;
+    }
+
+    /**
+     * Indicates whether the bean represented by this definition is proxied.
+     *
+     * @return {@code true} if the bean is proxied, otherwise {@code false}.
+     */
+    @Override
+    public boolean isProxied() {
+        return proxied;
+    }
+
+    /**
+     * Sets whether the bean represented by this definition is proxied.
+     *
+     * @param proxied {@code true} if the bean should be proxied, {@code false} otherwise.
+     */
+    @Override
+    public void setProxied(boolean proxied) {
+        this.proxied = proxied;
+    }
+
+    /**
+     * Retrieves the creation type for this bean, indicating how it should be instantiated.
+     *
+     * @return a {@link BeanInstantiationType} value.
+     */
+    @Override
+    public BeanInstantiationType getInstantiationType() {
+        return null;
     }
 
     /**

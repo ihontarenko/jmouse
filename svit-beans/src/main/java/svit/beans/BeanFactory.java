@@ -17,7 +17,7 @@ import svit.beans.definition.BeanDefinition;
  * @see BeanDefinition
  * @see BeanContext
  */
-public interface BeanFactory extends BeanContextAware {
+public interface BeanFactory {
 
     /**
      * Creates a new instance of a bean based on the provided {@link BeanDefinition}.

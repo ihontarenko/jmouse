@@ -11,9 +11,6 @@ public class InternalUser implements User {
     @Dependency("defaultUserName")
     private String name;
 
-    @Dependency("external_user")
-    private ExternalUser user;
-
     public InternalUser() {
         System.out.println("InternalUser: Initialization");
     }
