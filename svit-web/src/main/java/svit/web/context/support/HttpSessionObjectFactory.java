@@ -2,7 +2,7 @@ package svit.web.context.support;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import svit.container.ObjectFactory;
+import svit.beans.ObjectFactory;
 
 public class HttpSessionObjectFactory implements ObjectFactory<HttpSession> {
 

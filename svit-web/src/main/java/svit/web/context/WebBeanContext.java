@@ -1,7 +1,7 @@
 package svit.web.context;
 
 import jakarta.servlet.ServletContext;
-import svit.container.BeanContext;
+import svit.beans.BeanContext;
 
 /**
  * Represents a web-specific extension of the {@link BeanContext}.

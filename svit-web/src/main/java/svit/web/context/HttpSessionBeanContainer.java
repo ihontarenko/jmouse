@@ -1,8 +1,8 @@
 package svit.web.context;
 
 import jakarta.servlet.http.HttpSession;
-import svit.container.BeanInstanceContainer;
-import svit.container.ObjectFactory;
+import svit.beans.BeanInstanceContainer;
+import svit.beans.ObjectFactory;
 
 public class HttpSessionBeanContainer implements BeanInstanceContainer {
 

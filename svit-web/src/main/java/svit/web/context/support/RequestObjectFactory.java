@@ -2,7 +2,7 @@ package svit.web.context.support;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
-import svit.container.ObjectFactory;
+import svit.beans.ObjectFactory;
 import svit.web.context.WebBeanContext;
 
 /**

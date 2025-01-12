@@ -1,7 +1,7 @@
 package svit.web.context.support;
 
 import jakarta.servlet.ServletContext;
-import svit.container.ObjectFactory;
+import svit.beans.ObjectFactory;
 
 public class ServletContextObjectFactory implements ObjectFactory<ServletContext> {
 

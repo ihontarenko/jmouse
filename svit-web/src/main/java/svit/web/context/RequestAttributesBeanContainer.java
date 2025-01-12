@@ -1,7 +1,7 @@
 package svit.web.context;
 
-import svit.container.BeanInstanceContainer;
-import svit.container.ObjectFactory;
+import svit.beans.BeanInstanceContainer;
+import svit.beans.ObjectFactory;
 import svit.web.context.request.RequestAttributes;
 
 abstract public class RequestAttributesBeanContainer implements BeanInstanceContainer {

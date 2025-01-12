@@ -1,8 +1,8 @@
 package svit.web.context;
 
 import jakarta.servlet.http.HttpServletRequest;
-import svit.container.BeanInstanceContainer;
-import svit.container.ObjectFactory;
+import svit.beans.BeanInstanceContainer;
+import svit.beans.ObjectFactory;
 
 /**
  * A {@link BeanInstanceContainer} implementation that uses {@link HttpServletRequest} to manage bean instances.

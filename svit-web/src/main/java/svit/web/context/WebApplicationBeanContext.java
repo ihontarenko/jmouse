@@ -4,8 +4,8 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import svit.container.*;
-import svit.container.definition.BeanDefinition;
+import svit.beans.*;
+import svit.beans.definition.BeanDefinition;
 import svit.web.context.support.HttpSessionObjectFactory;
 import svit.web.context.support.RequestObjectFactory;
 
