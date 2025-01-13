@@ -6,7 +6,6 @@ import org.jmouse.svit.example.User;
 public class Example {
 
     public static void main(String[] args) {
-
         BeanContext context = new DefaultBeanContext();
         context.addInitializer(new ScannerBeanContextInitializer(User.class));
         context.refresh();
@@ -19,6 +18,9 @@ public class Example {
         context.refresh();
 
         System.out.println("BEAN VALUE: " + context.<User>getBean( "userPrototype").getName());
+
+        context.setBeanContainerRegistry(new DefaultBeanContainerRegistry());
+
         System.out.println("BEAN VALUE: " + context.getBean( "test1"));
 
         System.out.println("end!");

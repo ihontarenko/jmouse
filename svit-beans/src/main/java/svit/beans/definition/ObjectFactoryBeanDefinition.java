@@ -23,7 +23,7 @@ public class ObjectFactoryBeanDefinition extends AbstractBeanDefinition {
         super(name, type);
 
         this.objectFactory = objectFactory;
-        this.beanScope = BeanScope.PROTOTYPE;
+        this.scope = BeanScope.PROTOTYPE;
     }
 
     /**

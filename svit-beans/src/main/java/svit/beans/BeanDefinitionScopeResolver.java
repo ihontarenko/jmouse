@@ -43,6 +43,6 @@ public class BeanDefinitionScopeResolver implements ScopeResolver {
                     "Failed to resolve scope. No bean definition found for: '%s'".formatted(name));
         }
 
-        return beanDefinition.getBeanScope();
+        return beanDefinition.getScope();
     }
 }

@@ -2,6 +2,7 @@ package svit.beans.definition;
 
 import svit.beans.BeanInstantiationType;
 import svit.beans.BeanScope;
+import svit.beans.Scope;
 import svit.beans.instantiation.BeanInstantiationStrategy;
 
 import java.lang.annotation.Annotation;
@@ -77,7 +78,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     /**
      * The lifecycle scope for this bean (e.g., SINGLETON, PROTOTYPE).
      */
-    protected BeanScope beanScope;
+    protected Scope scope;
 
     /**
      * The actual bean instance, if created.
@@ -219,18 +220,18 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
      * @return the lifecycle scope
      */
     @Override
-    public BeanScope getBeanScope() {
-        return beanScope;
+    public Scope getScope() {
+        return scope;
     }
 
     /**
      * Sets the lifecycle scope of this bean.
      *
-     * @param beanScope the new lifecycle scope
+     * @param scope the new lifecycle scope
      */
     @Override
-    public void setBeanScope(BeanScope beanScope) {
-        this.beanScope = beanScope;
+    public void setScope(Scope scope) {
+        this.scope = scope;
     }
 
     /**
@@ -326,7 +327,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
      */
     @Override
     public boolean isSingleton() {
-        return getBeanScope() == BeanScope.SINGLETON || getBeanScope() == BeanScope.NON_BEAN;
+        return getScope() == BeanScope.SINGLETON || getScope() == BeanScope.NON_BEAN;
     }
 
     /**
@@ -350,7 +351,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     public String toString() {
         final StringBuilder builder = new StringBuilder();
 
-        builder.append("[").append(name).append(':').append(beanScope).append(':').append(getInstantiationType()).append(']');
+        builder.append("[").append(name).append(':').append(scope).append(':').append(getInstantiationType()).append(']');
         builder.append(' ');
         builder.append("[").append(type).append("]");
 

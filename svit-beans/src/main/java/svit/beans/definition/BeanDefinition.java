@@ -2,6 +2,7 @@ package svit.beans.definition;
 
 import svit.beans.BeanInstantiationType;
 import svit.beans.BeanScope;
+import svit.beans.Scope;
 import svit.beans.instantiation.BeanInstantiationStrategy;
 
 import java.lang.annotation.Annotation;
@@ -24,7 +25,7 @@ public interface BeanDefinition {
      *         otherwise {@code false}.
      */
     default boolean isSingleton() {
-        return getBeanScope() == BeanScope.SINGLETON || getBeanScope() == BeanScope.NON_BEAN;
+        return getScope() == BeanScope.SINGLETON || getScope() == BeanScope.NON_BEAN;
     }
 
     /**
@@ -115,16 +116,16 @@ public interface BeanDefinition {
     /**
      * Retrieves the lifecycle scope of this bean.
      *
-     * @return the {@link BeanScope} of the bean.
+     * @return the {@link Scope} of the bean.
      */
-    BeanScope getBeanScope();
+    Scope getScope();
 
     /**
-     * Sets the beanScope scope of this bean.
+     * Sets the scope of this bean.
      *
-     * @param beanScope the new {@link BeanScope}.
+     * @param scope the new {@link BeanScope}.
      */
-    void setBeanScope(BeanScope beanScope);
+    void setScope(Scope scope);
 
     /**
      * Retrieves all dependencies declared by this bean.

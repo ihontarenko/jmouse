@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Example usage:</p>
  * <pre>{@code
- * SimpleBeanDefinitionContainer container = new SimpleBeanDefinitionContainer();
+ * BeanDefinitionContainer container = new DefaultBeanDefinitionContainer();
  * BeanDefinition definition = new DefaultBeanDefinition("userService", UserService.class);
  *
  * container.registerDefinition(definition);
@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * System.out.println("Bean name: " + retrievedDefinition.getBeanName());
  * }</pre>
  */
-public class SimpleBeanDefinitionContainer implements BeanDefinitionContainer {
+public class DefaultBeanDefinitionContainer implements BeanDefinitionContainer {
 
     private final Map<String, BeanDefinition> definitions = new ConcurrentHashMap<>();
 

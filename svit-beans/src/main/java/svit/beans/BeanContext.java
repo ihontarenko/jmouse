@@ -45,6 +45,13 @@ public interface BeanContext extends BeanContainer, BeanContainerRegistry,
     BeanDefinitionFactory getBeanDefinitionFactory();
 
     /**
+     * Sets the {@link BeanDefinitionFactory} for this context.
+     *
+     * @param definitionFactory the bean definition factory to set.
+     */
+    void setBeanDefinitionFactory(BeanDefinitionFactory definitionFactory);
+
+    /**
      * Retrieves the current {@link BeanNameResolver}.
      *
      * @return the associated bean name resolver.
@@ -59,18 +66,28 @@ public interface BeanContext extends BeanContainer, BeanContainerRegistry,
     void setBeanFactory(BeanFactory beanFactory);
 
     /**
-     * Sets the {@link BeanDefinitionFactory} for this context.
-     *
-     * @param definitionFactory the bean definition factory to set.
-     */
-    void setBeanDefinitionFactory(BeanDefinitionFactory definitionFactory);
-
-    /**
      * Sets the {@link BeanNameResolver} for this context.
      *
      * @param nameResolver the bean name resolver to set.
      */
     void setNameResolver(BeanNameResolver nameResolver);
+
+    /**
+     * Retrieves the {@link BeanContainerRegistry} associated with this context.
+     *
+     * @return the current {@link BeanContainerRegistry} used by this context.
+     * @throws IllegalStateException if the registry is not set.
+     */
+    BeanContainerRegistry getBeanContainerRegistry();
+
+    /**
+     * Sets the {@link BeanContainerRegistry} for this context.
+     *
+     * @param containerRegistry the {@link BeanContainerRegistry} to set.
+     *                          Must not be {@code null}.
+     * @throws NullPointerException if the provided {@code containerRegistry} is {@code null}.
+     */
+    void setBeanContainerRegistry(BeanContainerRegistry containerRegistry);
 
     /**
      * Sets the parent context for this bean context.

@@ -44,4 +44,15 @@ public class HttpRequestBeanContainer implements BeanContainer {
     public void registerBean(String name, Object bean) {
         objectFactory.createObject().setAttribute(name, bean);
     }
+
+    /**
+     * Checks if a bean with the given name exists in the container.
+     *
+     * @param name the name of the bean.
+     * @return true if the bean exists, false otherwise.
+     */
+    @Override
+    public boolean containsBean(String name) {
+        return getBean(name) != null;
+    }
 }

@@ -115,7 +115,7 @@ public interface BeanContainer {
      * @param scope the scope of the bean.
      * @throws BeanContextException if this method is unsupported in the current implementation.
      */
-    default void registerBean(Class<?> type, Object bean, BeanScope scope) {
+    default void registerBean(Class<?> type, Object bean, Scope scope) {
         throw new BeanContextException(
                 UNSUPPORTED_CALL_EXCEPTION_MESSAGE
                         .formatted("registerBean(Class<?>, Object, BeanScope)", getClass()));
@@ -126,10 +126,10 @@ public interface BeanContainer {
      *
      * @param name the name of the bean.
      * @param objectFactory the ObjectFactory for the bean.
-     * @param beanScope the scope of the bean.
+     * @param scope the scope of the bean.
      */
-    default void registerBean(String name, ObjectFactory<Object> objectFactory, BeanScope beanScope) {
-        registerBean(name, (Object) objectFactory, beanScope);
+    default void registerBean(String name, ObjectFactory<Object> objectFactory, Scope scope) {
+        registerBean(name, (Object) objectFactory, scope);
     }
 
     /**
@@ -137,10 +137,10 @@ public interface BeanContainer {
      *
      * @param name the name of the bean.
      * @param bean the bean instance to register.
-     * @param beanScope the scope of the bean.
+     * @param scope the scope of the bean.
      * @throws BeanContextException if this method is unsupported in the current implementation.
      */
-    default void registerBean(String name, Object bean, BeanScope beanScope) {
+    default void registerBean(String name, Object bean, Scope scope) {
         throw new BeanContextException(
                 UNSUPPORTED_CALL_EXCEPTION_MESSAGE
                         .formatted("registerBean(String, Object, BeanScope)", getClass()));

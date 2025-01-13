@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Beans registered in this container are stored separately for each thread, ensuring thread-safe
  * management of thread-specific beans.
  */
-public class ThreadLocalBeanInstanceContainer implements BeanContainer {
+public class ThreadLocalBeanContainer implements BeanContainer {
 
     /**
      * A thread-local map for storing beans, where each thread maintains its own independent map of beans.

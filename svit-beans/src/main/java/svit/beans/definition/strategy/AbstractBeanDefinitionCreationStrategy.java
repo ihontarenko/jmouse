@@ -82,7 +82,7 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
      */
     protected void updateBeanLifecycle(BeanDefinition definition, AnnotatedElement element) {
         if (element.isAnnotationPresent(Provide.class)) {
-            definition.setBeanScope(element.getAnnotation(Provide.class).scope());
+            definition.setScope(element.getAnnotation(Provide.class).scope());
         }
     }
 

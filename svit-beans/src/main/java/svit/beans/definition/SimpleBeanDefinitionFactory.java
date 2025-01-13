@@ -94,8 +94,8 @@ public class SimpleBeanDefinitionFactory implements BeanDefinitionFactory {
                             .formatted(objectClass, preferredName));
         }
 
-        if (definition.getBeanScope() == null) {
-            definition.setBeanScope(BeanScope.SINGLETON);
+        if (definition.getScope() == null) {
+            definition.setScope(BeanScope.SINGLETON);
         }
 
         return definition;

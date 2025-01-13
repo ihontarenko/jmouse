@@ -55,7 +55,7 @@ public class ObjectFactoryBeanDefinitionCreationStrategy implements BeanDefiniti
     public BeanDefinition create(String name, ObjectFactory<Object> object, BeanContext context) {
         ObjectFactoryBeanDefinition definition = new ObjectFactoryBeanDefinition(name, object.getClass(), object);
 
-        definition.setBeanScope(BeanScope.PROTOTYPE);
+        definition.setScope(BeanScope.PROTOTYPE);
 
         return definition;
     }

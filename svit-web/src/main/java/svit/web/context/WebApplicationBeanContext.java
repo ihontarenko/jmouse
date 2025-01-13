@@ -8,7 +8,8 @@ import svit.beans.BeanContext;
 import svit.beans.BeanScope;
 import svit.beans.DefaultBeanContext;
 import svit.beans.ObjectFactory;
-import svit.web.context.support.HttpSessionObjectFactory;
+import svit.beans.container.ThreadLocalBeanContainer;
+import svit.beans.container.ThreadLocalScope;
 import svit.web.context.support.RequestObjectFactory;
 
 import static svit.reflection.Reflections.getShortName;
@@ -25,8 +26,8 @@ public class WebApplicationBeanContext extends DefaultBeanContext implements Web
         ObjectFactory<ServletContext>     factory        = this::getServletContext;
         ObjectFactory<HttpServletRequest> requestFactory = new RequestObjectFactory(factory);
 
+        registerBeanContainer(ThreadLocalScope.THREAD_LOCAL_SCOPE, new ThreadLocalBeanContainer());
         registerBeanContainer(BeanScope.REQUEST, new HttpRequestBeanContainer(requestFactory));
-        registerBeanContainer(BeanScope.SESSION, new HttpSessionBeanContainer(new HttpSessionObjectFactory(requestFactory)));
         registerBeanContainer(BeanScope.NON_BEAN, this);
     }
 
@@ -43,7 +44,7 @@ public class WebApplicationBeanContext extends DefaultBeanContext implements Web
     public void setServletContext(ServletContext servletContext) {
         this.servletContext = servletContext;
         LOGGER.info("Register bean '{}'", getShortName(ServletContext.class));
-        registerBean(ServletContext.class, servletContext);
+        registerBean(ServletContext.class, servletContext, ThreadLocalScope.THREAD_LOCAL_SCOPE);
     }
 
 }
