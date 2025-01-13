@@ -1,14 +1,14 @@
 package svit.web.context;
 
 import jakarta.servlet.http.HttpServletRequest;
-import svit.beans.BeanInstanceContainer;
+import svit.beans.BeanContainer;
 import svit.beans.ObjectFactory;
 
 /**
- * A {@link BeanInstanceContainer} implementation that uses {@link HttpServletRequest} to manage bean instances.
+ * A {@link BeanContainer} implementation that uses {@link HttpServletRequest} to manage bean instances.
  * Beans are stored as request attributes.
  */
-public class HttpRequestBeanContainer implements BeanInstanceContainer {
+public class HttpRequestBeanContainer implements BeanContainer {
 
     private final ObjectFactory<HttpServletRequest> objectFactory;
 

@@ -1,18 +1,19 @@
 package svit.beans;
 
-import svit.beans.example.ExternalUser;
-import svit.beans.example.User;
+import org.jmouse.svit.example.ExternalUser;
+import org.jmouse.svit.example.User;
 
 public class Example {
 
     public static void main(String[] args) {
 
         BeanContext context = new DefaultBeanContext();
+        context.addInitializer(new ScannerBeanContextInitializer(User.class));
         context.refresh();
 
+        context.registerBean("bean123", () -> 123, BeanScope.PROTOTYPE);
         context.registerBean("userPrototype", ExternalUser::new, BeanScope.PROTOTYPE);
 
-        context.addInitializer(new ConfigurationBeanProviderBeanContextInitializer(Example.class));
         context.addInitializer(ctx -> ctx.registerBean("test1", "bean added in external initializer"));
 
         context.refresh();
@@ -21,18 +22,6 @@ public class Example {
         System.out.println("BEAN VALUE: " + context.getBean( "test1"));
 
         System.out.println("end!");
-
-        // move part of methods from BeanContainer to BeanInstanceContainer
-        // consider to seperate bean container to read/write
-
-    }
-
-    private static BeanContext createRootBeanContext() {
-        BeanContext context = new DefaultBeanContext();
-
-        context.refresh();
-
-        return context;
     }
 
 }

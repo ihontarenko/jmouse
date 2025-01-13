@@ -1,10 +1,10 @@
 package svit.web.context;
 
 import jakarta.servlet.http.HttpSession;
-import svit.beans.BeanInstanceContainer;
+import svit.beans.BeanContainer;
 import svit.beans.ObjectFactory;
 
-public class HttpSessionBeanContainer implements BeanInstanceContainer {
+public class HttpSessionBeanContainer implements BeanContainer {
 
     private final ObjectFactory<HttpSession> objectFactory;
 

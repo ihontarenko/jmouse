@@ -1,5 +1,6 @@
 package svit.beans;
 
+import org.jmouse.svit.example.User;
 import org.slf4j.Logger;
 import svit.beans.annotation.Provide;
 import svit.beans.definition.strategy.ConstructorBeanDefinitionCreationStrategy;
@@ -44,12 +45,10 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
         LOGGER.info("Self referencing: Bean type '{}' -> Bean object '{}'",
                     getShortName(BeanContext.class), getShortName(context.getClass()));
         context.registerBean(BeanContext.class, context);
-
-        defaultScanning(context);
     }
 
     /**
-     * Initializes the required {@link BeanInstanceContainer}s for basic scopes.
+     * Initializes the required {@link BeanContainer}s for basic scopes.
      * <p>
      * Clears any previously registered containers and sets up containers for the
      * {@link BeanScope#SINGLETON} and {@link BeanScope#PROTOTYPE} scopes.
@@ -58,30 +57,8 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
      * @param context the {@link BeanContext} for which the containers are initialized.
      */
     private void initializeRequiredBeanInstanceContainers(BeanContext context) {
-        context.registerBeanInstanceContainer(BeanScope.SINGLETON, new SingletonBeanContainer());
-        context.registerBeanInstanceContainer(BeanScope.PROTOTYPE, new PrototypeBeanContainer());
-    }
-
-    /**
-     * Performs default scanning for classes annotated with {@link Provide} and registers their definitions.
-     *
-     * @param context the {@link BeanContext} in which to register the definitions.
-     */
-    private void defaultScanning(BeanContext context) {
-        BeanDefinitionFactory factory = context.getBeanDefinitionFactory();
-
-        LOGGER.info("Start default scanning");
-
-        for (Class<?> annotatedClass : ClassFinder.findAnnotatedClasses(Provide.class, BeanContext.class)) {
-            if (annotatedClass.isInterface()) {
-                for (Class<?> implementation : ClassFinder.findImplementations(annotatedClass, BeanContext.class)) {
-                    BeanDefinition definition = factory.createDefinition(implementation, context);
-                    context.registerDefinition(definition);
-                }
-            }
-        }
-
-        LOGGER.info("Finish default scanning");
+        context.registerBeanContainer(BeanScope.SINGLETON, new SingletonBeanContainer());
+        context.registerBeanContainer(BeanScope.PROTOTYPE, new PrototypeBeanContainer());
     }
 
     /**

@@ -1,11 +1,10 @@
 package svit.web.context;
 
-import svit.beans.BeanInstanceContainer;
-import svit.beans.ObjectFactory;
+import svit.beans.BeanContainer;
 import svit.web.context.request.RequestAttributes;
 import svit.web.context.request.RequestAttributesHolder;
 
-abstract public class RequestAttributesBeanContainer implements BeanInstanceContainer {
+abstract public class RequestAttributesBeanContainer implements BeanContainer {
 
     @Override
     public <T> T getBean(String name) {

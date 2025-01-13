@@ -4,12 +4,31 @@ import svit.beans.naming.BeanNameResolver;
 import svit.beans.definition.BeanDefinitionFactory;
 import svit.beans.processor.BeanPostProcessorAware;
 
+import java.util.List;
+
 /**
  * Interface representing a bean context in the container framework.
  * Provides methods to manage bean factories, definitions, and initializers.
  */
-public interface BeanContext extends BeanContainer, BeanInstanceContainerRegistry,
+public interface BeanContext extends BeanContainer, BeanContainerRegistry,
         BeanDefinitionContainer, BeanInitializer, BeanPostProcessorAware {
+
+    /**
+     * Retrieves the names of all beans that match the specified type.
+     *
+     * @param type the class type of the beans.
+     * @return a list of bean names that match the given type.
+     */
+    List<String> getBeanNames(Class<?> type);
+
+    /**
+     * Retrieves all beans that match the specified type.
+     *
+     * @param type the class type of the beans.
+     * @param <T>  the type of the beans.
+     * @return a list of beans matching the given type.
+     */
+    <T> List<T> getBeans(Class<T> type);
 
     /**
      * Retrieves the current {@link BeanFactory}.

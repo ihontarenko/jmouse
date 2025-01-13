@@ -6,8 +6,7 @@ import svit.matcher.Matcher;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
-import static svit.reflection.ClassMatchers.implementsInterface;
-import static svit.reflection.ClassMatchers.isAbstract;
+import static svit.reflection.ClassMatchers.*;
 
 /**
  * ClassFinder provides utilities for finding, filtering, and sorting classes.
@@ -102,6 +101,17 @@ public interface ClassFinder {
      */
     static Collection<Class<?>> findImplementations(Class<?> interfaceClass, Class<?>... baseClasses) {
         return findAll(implementsInterface(interfaceClass).and(isAbstract().not()), baseClasses);
+    }
+
+    /**
+     * Finds all implementations of a given interface.
+     *
+     * @param superClass the superclass to look for
+     * @param baseClasses the base classes to scan
+     * @return a collection of implementations
+     */
+    static Collection<Class<?>> findInheritedClasses(Class<?> superClass, Class<?>... baseClasses) {
+        return findAll(isSubtype(superClass).and(isAbstract().not()), baseClasses);
     }
 
     /**

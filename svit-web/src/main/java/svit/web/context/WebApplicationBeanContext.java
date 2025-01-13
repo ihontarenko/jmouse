@@ -25,9 +25,9 @@ public class WebApplicationBeanContext extends DefaultBeanContext implements Web
         ObjectFactory<ServletContext>     factory        = this::getServletContext;
         ObjectFactory<HttpServletRequest> requestFactory = new RequestObjectFactory(factory);
 
-        registerBeanInstanceContainer(BeanScope.REQUEST, new HttpRequestBeanContainer(requestFactory));
-        registerBeanInstanceContainer(BeanScope.SESSION, new HttpSessionBeanContainer(new HttpSessionObjectFactory(requestFactory)));
-        registerBeanInstanceContainer(BeanScope.NON_BEAN, this);
+        registerBeanContainer(BeanScope.REQUEST, new HttpRequestBeanContainer(requestFactory));
+        registerBeanContainer(BeanScope.SESSION, new HttpSessionBeanContainer(new HttpSessionObjectFactory(requestFactory)));
+        registerBeanContainer(BeanScope.NON_BEAN, this);
     }
 
     public WebApplicationBeanContext() {

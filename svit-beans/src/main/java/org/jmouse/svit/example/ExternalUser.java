@@ -1,4 +1,4 @@
-package svit.beans.example;
+package org.jmouse.svit.example;
 
 import svit.beans.annotation.Dependency;
 import svit.beans.annotation.BeanInitializer;

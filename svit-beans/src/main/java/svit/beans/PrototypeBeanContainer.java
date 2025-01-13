@@ -1,11 +1,11 @@
 package svit.beans;
 
 /**
- * A dummy container implementation of {@link BeanInstanceContainer} for prototype-scoped beans.
+ * A dummy container implementation of {@link BeanContainer} for prototype-scoped beans.
  * <p>
  * This container does not store or retrieve any beans. All its methods are effectively no-ops.
  */
-public class PrototypeBeanContainer implements BeanInstanceContainer {
+public class PrototypeBeanContainer implements BeanContainer {
 
     /**
      * Retrieves a bean instance by its name.

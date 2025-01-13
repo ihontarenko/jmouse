@@ -3,7 +3,7 @@ package svit.beans;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SingletonBeanContainer implements BeanInstanceContainer {
+public class SingletonBeanContainer implements BeanContainer {
 
     /**
      * A mapping of bean names to their instantiated bean instances.
@@ -30,6 +30,14 @@ public class SingletonBeanContainer implements BeanInstanceContainer {
      */
     @Override
     public void registerBean(String name, Object bean) {
+        if (bean == null) {
+            throw new BeanContextException("Failed to register bean. Bean must be non NULL");
+        }
+
+        if (containsBean(name)) {
+            throw new BeanContextException("Bean '%s' already present in container".formatted(name));
+        }
+
         instances.put(name, bean);
     }
 

@@ -6,11 +6,9 @@ import svit.beans.annotation.BeanInitializer;
 import svit.beans.definition.*;
 import svit.beans.naming.BeanNameResolver;
 import svit.beans.processor.BeanPostProcessor;
-import svit.matcher.Matcher;
 import svit.reflection.ClassMatchers;
 import svit.reflection.Reflections;
 
-import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -81,12 +79,12 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     private final BeanDefinitionContainer definitionContainer;
 
     /**
-     * A mapping of {@link Scope} to their respective {@link BeanInstanceContainer}.
+     * A mapping of {@link Scope} to their respective {@link BeanContainer}.
      * <p>
      * This map is used to dynamically associate scopes with their corresponding
      * containers, allowing for flexible management of bean instances based on scope.
      */
-    private final Map<Scope, BeanInstanceContainer> containers = new ConcurrentHashMap<>();
+    private final Map<Scope, BeanContainer> containers = new ConcurrentHashMap<>();
 
     /**
      * A list of registered {@link BeanPostProcessor}s for managing bean lifecycle hooks.
@@ -245,7 +243,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
             BeanScope beanScope = definition.getBeanScope();
 
             // get applicable bean instances container and try to find bean
-            BeanInstanceContainer instanceContainer = getBeanInstanceContainer(beanScope);
+            BeanContainer instanceContainer = getBeanContainer(beanScope);
 
             // get bean or try to create new one via lambda
             instance = instanceContainer.getBean(name, objectFactory);
@@ -303,7 +301,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
             initializeBean(instance, definition);
 
             // IMPORTANT! endpoint of bean instance registration after creation
-            registerBean(definition.getBeanName(), instance, definition.getBeanScope());
+            // registerBean(definition.getBeanName(), instance, definition.getBeanScope());
 
             return instance;
         } finally {
@@ -469,24 +467,19 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
 
             // register bean definition
             registerDefinition(definition);
-
         }
 
-        //todo:
-        // Ensure the bean is registered in the container
-        // Note: For PROTOTYPE beans, `containsBean(name)` always returns true
-        if (!containsBean(name)) {
-            BeanInstanceContainer container = getBeanInstanceContainer(beanScope);
-            LOGGER.info("Bean '{}' attached to the '{}' container", name, getShortName(container.getClass()));
+        // todo: think what we should do if bean is object factory
+        BeanContainer container = getBeanContainer(beanScope);
+        LOGGER.info("Bean '{}' attached to the '{}' container", name, getShortName(container.getClass()));
 
-            Object object = definition.getBeanInstance();
+        Object object = definition.getBeanInstance();
 
-            if (object == null) {
-                throw new BeanContextException("Unexpected null pointer. Bean instance must be present in definition");
-            }
-
-            container.registerBean(name, object);
+        if (object == null) {
+            throw new BeanContextException("Unexpected null pointer. Bean instance must be present in definition");
         }
+
+        container.registerBean(name, object);
     }
 
     /**
@@ -497,13 +490,13 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * if this functionality is required.
      *
      * @param name      the name of the bean.
-     * @param bean      the factory for creating the bean instance.
+     * @param objectFactory      the factory for creating the bean instance.
      * @param beanScope the scope of the bean.
      * @throws BeanContextException if this operation is not supported.
      */
     @Override
-    public void registerBean(String name, ObjectFactory<Object> bean, BeanScope beanScope) {
-        registerBean(name, (Object) bean, beanScope);
+    public void registerBean(String name, ObjectFactory<Object> objectFactory, BeanScope beanScope) {
+        registerBean(name, (Object) objectFactory, beanScope);
     }
 
     /**
@@ -520,11 +513,11 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
             return false;
         }
 
-        return getBeanInstanceContainer(definition.getBeanScope()).containsBean(name);
+        return getBeanContainer(definition.getBeanScope()).containsBean(name);
     }
 
     /**
-     * Returns a {@link BeanInstanceContainer} based on the specified {@link BeanScope}.
+     * Returns a {@link BeanContainer} based on the specified {@link BeanScope}.
      * <p>
      * This implementation supports the following lifecycles:
      * <ul>
@@ -535,12 +528,12 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * </ul>
      *
      * @param beanScope the beanScope phase for which to retrieve the container
-     * @return the {@link BeanInstanceContainer} associated with the beanScope, if supported
+     * @return the {@link BeanContainer} associated with the beanScope, if supported
      * @throws BeanContextException if the beanScope is {@link BeanScope#PROTOTYPE}, {@link BeanScope#REQUEST}, or {@link BeanScope#SESSION}
      */
     @Override
-    public BeanInstanceContainer getBeanInstanceContainer(Scope beanScope) {
-        BeanInstanceContainer instanceContainer = containers.get(beanScope);
+    public BeanContainer getBeanContainer(Scope beanScope) {
+        BeanContainer instanceContainer = containers.get(beanScope);
 
         if (instanceContainer == null) {
             throw new BeanContextException("Unsupported bean scope '%s' detected in context '%s'."
@@ -551,7 +544,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Registers a {@link BeanInstanceContainer} for a specific {@link Scope}.
+     * Registers a {@link BeanContainer} for a specific {@link Scope}.
      * <p>
      * This method allows mapping a scope to a container that manages bean instances
      * within that scope. For example, you can register separate containers for
@@ -559,16 +552,16 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * </p>
      *
      * @param scope     the {@link Scope} for which the container is being registered.
-     * @param container the {@link BeanInstanceContainer} to be associated with the given scope.
+     * @param container the {@link BeanContainer} to be associated with the given scope.
      * @throws IllegalArgumentException if the provided scope or container is null.
      */
     @Override
-    public void registerBeanInstanceContainer(Scope scope, BeanInstanceContainer container) {
+    public void registerBeanContainer(Scope scope, BeanContainer container) {
         containers.put(scope, container);
     }
 
     /**
-     * Removes all registered {@link BeanInstanceContainer}s.
+     * Removes all registered {@link BeanContainer}s.
      * <p>
      * This method clears all previously registered containers, effectively resetting
      * the context's scope-based container management.

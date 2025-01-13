@@ -1,18 +1,18 @@
 package svit.beans.container;
 
-import svit.beans.BeanInstanceContainer;
+import svit.beans.BeanContainer;
 import svit.beans.Scope;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * A {@link BeanInstanceContainer} implementation that manages beans in a thread-local scope.
+ * A {@link BeanContainer} implementation that manages beans in a thread-local scope.
  * <p>
  * Beans registered in this container are stored separately for each thread, ensuring thread-safe
  * management of thread-specific beans.
  */
-public class ThreadLocalBeanInstanceContainer implements BeanInstanceContainer {
+public class ThreadLocalBeanInstanceContainer implements BeanContainer {
 
     /**
      * A thread-local map for storing beans, where each thread maintains its own independent map of beans.
