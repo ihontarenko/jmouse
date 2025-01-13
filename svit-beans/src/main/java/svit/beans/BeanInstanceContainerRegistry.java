@@ -10,13 +10,13 @@ package svit.beans;
 public interface BeanInstanceContainerRegistry {
 
     /**
-     * Retrieves the {@link BeanInstanceContainer} associated with the specified {@link BeanScope}.
+     * Retrieves the {@link BeanInstanceContainer} associated with the specified {@link Scope}.
      *
-     * @param scope the {@link BeanScope} for which to retrieve the container.
+     * @param scope the {@link Scope} for which to retrieve the container.
      * @return the {@link BeanInstanceContainer} associated with the provided scope,
      *         or {@code null} if no container is registered for the scope.
      */
-    BeanInstanceContainer getBeanInstanceContainer(BeanScope scope);
+    BeanInstanceContainer getBeanInstanceContainer(Scope scope);
 
     /**
      * Registers a {@link BeanInstanceContainer} for a specific {@link Scope}.

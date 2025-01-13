@@ -59,14 +59,6 @@ public interface BeanContainer extends BeanInstanceContainer {
     <T> List<T> getBeans(Class<T> type);
 
     /**
-     * Retrieves all beans annotated with the specified annotation.
-     *
-     * @param annotation the annotation class to match.
-     * @return a list of beans annotated with the given annotation class.
-     */
-    List<Object> getAnnotatedBeans(Class<? extends Annotation> annotation);
-
-    /**
      * Registers a bean instance of the specified type with a default {@link BeanScope#SINGLETON}.
      *
      * @param type the type of the bean.
@@ -77,13 +69,13 @@ public interface BeanContainer extends BeanInstanceContainer {
     }
 
     /**
-     * Registers a bean instance of the specified type and lifecycle.
+     * Registers a bean instance of the specified type and scope.
      *
      * @param type      the type of the bean.
      * @param bean      the bean instance to register.
-     * @param lifecycle the lifecycle scope for the bean.
+     * @param scope     the scope for the bean.
      */
-    void registerBean(Class<?> type, Object bean, BeanScope lifecycle);
+    void registerBean(Class<?> type, Object bean, BeanScope scope);
 
     /**
      * Registers a bean instance with the given name and a specified {@link BeanScope}.

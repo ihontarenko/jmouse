@@ -8,8 +8,8 @@ import svit.beans.processor.BeanPostProcessorAware;
  * Interface representing a bean context in the container framework.
  * Provides methods to manage bean factories, definitions, and initializers.
  */
-public interface BeanContext
-        extends BeanContainer, BeanInstanceContainerRegistry, BeanDefinitionContainer, BeanInitializer, BeanPostProcessorAware {
+public interface BeanContext extends BeanContainer, BeanInstanceContainerRegistry,
+        BeanDefinitionContainer, BeanInitializer, BeanPostProcessorAware {
 
     /**
      * Retrieves the current {@link BeanFactory}.

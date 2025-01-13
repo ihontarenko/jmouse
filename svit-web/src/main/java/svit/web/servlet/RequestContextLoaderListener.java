@@ -5,6 +5,7 @@ import jakarta.servlet.ServletRequestListener;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import svit.beans.BeanScope;
 import svit.reflection.Reflections;
 import svit.web.context.request.RequestAttributes;
 import svit.web.context.request.RequestAttributesHolder;
@@ -40,7 +41,7 @@ public class RequestContextLoaderListener implements ServletRequestListener {
             LOGGER.info("Update {}[{}] object to '{}' holder", getShortName(servletRequest.getClass().getName()),
                         servletRequest.getRequestURI(), RequestAttributesHolder.class.getName());
             RequestAttributesHolder.setRequestAttributes(
-                    RequestAttributes.of(RequestAttributes.REQUEST, servletRequest)
+                    RequestAttributes.of(BeanScope.REQUEST, servletRequest)
             );
         }
 

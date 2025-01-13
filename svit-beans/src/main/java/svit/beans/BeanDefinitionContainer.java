@@ -1,6 +1,11 @@
 package svit.beans;
 
 import svit.beans.definition.BeanDefinition;
+import svit.matcher.Matcher;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * An interface for managing {@link BeanDefinition} objects within a container.
@@ -25,25 +30,50 @@ public interface BeanDefinitionContainer {
     /**
      * Registers a {@link BeanDefinition} in the container.
      *
-     * @param definition the definition to register
+     * @param definition the definition to register.
      */
     void registerDefinition(BeanDefinition definition);
 
     /**
      * Retrieves a {@link BeanDefinition} by its name.
      *
-     * @param name the name of the bean definition
+     * @param name the name of the bean definition.
      * @return the bean definition corresponding to the given name,
-     *         or {@code null} if no definition exists for that name
+     *         or {@code null} if no definition exists for that name.
      */
     BeanDefinition getDefinition(String name);
 
     /**
      * Checks if a {@link BeanDefinition} with the given name exists in the container.
      *
-     * @param name the name of the bean definition
+     * @param name the name of the bean definition.
      * @return {@code true} if the container contains a definition with the specified name,
-     *         {@code false} otherwise
+     *         {@code false} otherwise.
      */
     boolean containsDefinition(String name);
+
+    /**
+     * Retrieves all registered {@link BeanDefinition}s in the container.
+     *
+     * @return a collection of all registered bean definitions.
+     */
+    Collection<BeanDefinition> getDefinitions();
+
+    /**
+     * Retrieves all {@link BeanDefinition}s in the container that match the specified criteria.
+     *
+     * @param definitionMatcher a matcher to filter bean definitions.
+     * @return a collection of {@link BeanDefinition}s that match the given matcher.
+     */
+    default Collection<BeanDefinition> getDefinitions(Matcher<BeanDefinition> definitionMatcher) {
+        List<BeanDefinition> definitions = new ArrayList<>();
+
+        for (BeanDefinition definition : getDefinitions()) {
+            if (definitionMatcher.matches(definition)) {
+                definitions.add(definition);
+            }
+        }
+
+        return definitions;
+    }
 }

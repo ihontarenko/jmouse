@@ -1,6 +1,7 @@
 package svit.web.context.request;
 
 import jakarta.servlet.http.HttpServletRequest;
+import svit.beans.Scope;
 import svit.web.context.WebContextException;
 
 /**
@@ -49,8 +50,8 @@ public interface RequestAttributes {
      */
     void removeAttribute(String name);
 
-    static RequestAttributes of(int scope, HttpServletRequest request) {
-        return switch (scope) {
+    static RequestAttributes of(Scope scope, HttpServletRequest request) {
+        return switch (scope.id()) {
             case REQUEST -> new ServletHttpRequest(request);
             case SESSION -> new ServletHttpSession(request);
             default -> throw new WebContextException(

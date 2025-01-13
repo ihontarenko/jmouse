@@ -1,24 +1,11 @@
 package svit.beans.container;
 
-import svit.beans.BeanInstanceContainer;
-import svit.beans.Scope;
-import svit.beans.ScopeResolver;
-import svit.beans.SimpleBeanScopeResolver;
+import svit.beans.*;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CompositeBeanInstanceContainer implements BeanInstanceContainer {
-
-    /**
-     * A mapping of {@link Scope} to their respective {@link BeanInstanceContainer}.
-     * <p>
-     * This map is used to dynamically associate scopes with their corresponding
-     * containers, allowing for flexible management of bean instances based on scope.
-     */
-    private final Map<Scope, BeanInstanceContainer> containers = new ConcurrentHashMap<>();
-
-    private final ScopeResolver scopeResolver = new SimpleBeanScopeResolver();
+public class CompositeBeanInstanceContainer implements DelegatingBeanContainer {
 
     /**
      * Retrieves a bean instance by its name.
@@ -28,14 +15,7 @@ public class CompositeBeanInstanceContainer implements BeanInstanceContainer {
      */
     @Override
     public <T> T getBean(String name) {
-        Scope scope = scopeResolver.resolveScope(name);
-        T     bean  = containers.get(scope).getBean(name);
-
-        if (bean == null) {
-
-        }
-
-        return bean;
+        return null;
     }
 
     /**
@@ -46,20 +26,45 @@ public class CompositeBeanInstanceContainer implements BeanInstanceContainer {
      */
     @Override
     public void registerBean(String name, Object bean) {
-        Scope scope = scopeResolver.resolveScope(name);
-        containers.get(scope).registerBean(name, bean);
+
     }
 
     /**
-     * Checks whether a bean with the specified name is already registered in this container.
+     * Retrieves the {@link BeanInstanceContainer} associated with the specified {@link Scope}.
      *
-     * @param name the name of the bean.
-     * @return {@code true} if a bean with the given name exists, otherwise {@code false}.
+     * @param scope the {@link Scope} for which to retrieve the container.
+     * @return the {@link BeanInstanceContainer} associated with the provided scope,
+     * or {@code null} if no container is registered for the scope.
      */
     @Override
-    public boolean containsBean(String name) {
-        Scope scope = scopeResolver.resolveScope(name);
-        return containers.get(scope).containsBean(name);
+    public BeanInstanceContainer getBeanInstanceContainer(Scope scope) {
+        return null;
+    }
+
+    /**
+     * Registers a {@link BeanInstanceContainer} for a specific {@link Scope}.
+     * <p>
+     * Associates the given container with the provided scope, enabling
+     * management of beans within that scope.
+     * </p>
+     *
+     * @param scope     the {@link Scope} for which the container is being registered.
+     * @param container the {@link BeanInstanceContainer} to associate with the scope.
+     */
+    @Override
+    public void registerBeanInstanceContainer(Scope scope, BeanInstanceContainer container) {
+
+    }
+
+    /**
+     * Removes all registered {@link BeanInstanceContainer}s.
+     * <p>
+     * Clears all previously registered containers, effectively resetting the registry.
+     * </p>
+     */
+    @Override
+    public void removeBeanInstanceContainers() {
+
     }
 
     /**
@@ -74,7 +79,17 @@ public class CompositeBeanInstanceContainer implements BeanInstanceContainer {
      */
     @Override
     public boolean supports(Scope scope) {
-        return containers.containsKey(scope);
+        return DelegatingBeanContainer.super.supports(scope);
     }
 
+    /**
+     * Checks whether a bean with the specified name is already registered in this container.
+     *
+     * @param name the name of the bean.
+     * @return {@code true} if a bean with the given name exists, otherwise {@code false}.
+     */
+    @Override
+    public boolean containsBean(String name) {
+        return DelegatingBeanContainer.super.containsBean(name);
+    }
 }

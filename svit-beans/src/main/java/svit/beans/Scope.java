@@ -27,4 +27,5 @@ public interface Scope {
      * @return the name of the scope.
      */
     String name();
+
 }

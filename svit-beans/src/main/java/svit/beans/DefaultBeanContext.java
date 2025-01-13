@@ -78,7 +78,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     /**
      * A mapping of bean names to their corresponding {@link BeanDefinition}s.
      */
-    private final Map<String, BeanDefinition> definitions = new ConcurrentHashMap<>();
+    private final BeanDefinitionContainer definitionContainer;
 
     /**
      * A mapping of {@link Scope} to their respective {@link BeanInstanceContainer}.
@@ -120,6 +120,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     public DefaultBeanContext(BeanContext parent) {
         this.parent = parent;
+        this.definitionContainer = new SimpleBeanDefinitionContainer();
     }
 
     /**
@@ -351,13 +352,10 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public List<String> getBeanNames(Class<?> type) {
-        List<String>      names   = new ArrayList<>();
-        Matcher<Class<?>> matcher = ClassMatchers.isSupertype(type);
+        List<String> names = new ArrayList<>();
 
-        for (Map.Entry<String, BeanDefinition> entry : definitions.entrySet()) {
-            if (matcher.matches(entry.getValue().getBeanClass())) {
-                names.add(entry.getKey());
-            }
+        for (BeanDefinition definition : getDefinitions(BeanDefinitionMatchers.isSupertype(type))) {
+            names.add(definition.getBeanName());
         }
 
         if (parent != null) {
@@ -381,12 +379,10 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     @Override
     public <T> List<T> getBeans(Class<T> type) {
         List<T> beans = new ArrayList<>();
-        Matcher<Class<?>> matcher = ClassMatchers.isSupertype(type);
 
-        for (Map.Entry<String, BeanDefinition> entry : definitions.entrySet()) {
-            if (matcher.matches(entry.getValue().getBeanClass())) {
-                beans.add(getBean(entry.getKey()));
-            }
+
+        for (String beanName : getBeanNames(type)) {
+            beans.add(getBean(beanName));
         }
 
         if (parent != null) {
@@ -397,38 +393,15 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Retrieves all beans annotated with the specified annotation.
-     * <p>
-     * This method iterates through the bean definitions and checks if each bean
-     * is annotated with the specified annotation.
-     * </p>
-     *
-     * @param annotation the annotation to search for
-     * @return a list of beans annotated with the specified annotation
-     */
-    @Override
-    public List<Object> getAnnotatedBeans(Class<? extends Annotation> annotation) {
-        List<Object> beans = new ArrayList<>();
-
-        for (BeanDefinition definition : definitions.values()) {
-            if (definition.isAnnotatedWith(annotation)) {
-                beans.add(getBean(definition.getBeanName()));
-            }
-        }
-
-        return beans;
-    }
-
-    /**
      * Registers a bean instance of the specified type and beanScope.
      *
      * @param type      the type of the bean.
      * @param bean      the bean instance to register.
-     * @param beanScope the beanScope scope for the bean.
+     * @param scope the beanScope scope for the bean.
      */
     @Override
-    public void registerBean(Class<?> type, Object bean, BeanScope beanScope) {
-        registerBean(nameResolver.resolveName(type), bean, beanScope);
+    public void registerBean(Class<?> type, Object bean, BeanScope scope) {
+        registerBean(nameResolver.resolveName(type), bean, scope);
     }
 
     /**
@@ -551,26 +524,6 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Registers a new {@link BeanDefinition} in the container.
-     * <p>
-     * If a bean with the same name already exists, an exception is thrown.
-     * </p>
-     *
-     * @param definition the bean definition to register
-     * @throws DuplicateBeanDefinitionException if a bean with the same name is already registered
-     */
-    @Override
-    public void registerDefinition(BeanDefinition definition) {
-        String beanName = definition.getBeanName();
-
-        if (definitions.containsKey(beanName)) {
-            throw new DuplicateBeanDefinitionException(definition);
-        }
-
-        definitions.put(beanName, definition);
-    }
-
-    /**
      * Returns a {@link BeanInstanceContainer} based on the specified {@link BeanScope}.
      * <p>
      * This implementation supports the following lifecycles:
@@ -586,7 +539,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * @throws BeanContextException if the beanScope is {@link BeanScope#PROTOTYPE}, {@link BeanScope#REQUEST}, or {@link BeanScope#SESSION}
      */
     @Override
-    public BeanInstanceContainer getBeanInstanceContainer(BeanScope beanScope) {
+    public BeanInstanceContainer getBeanInstanceContainer(Scope beanScope) {
         BeanInstanceContainer instanceContainer = containers.get(beanScope);
 
         if (instanceContainer == null) {
@@ -634,7 +587,31 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public BeanDefinition getDefinition(String name) {
-        return definitions.get(name);
+        return definitionContainer.getDefinition(name);
+    }
+
+    /**
+     * Retrieves all registered {@link BeanDefinition}s in the container.
+     *
+     * @return a collection of all registered bean definitions.
+     */
+    @Override
+    public Collection<BeanDefinition> getDefinitions() {
+        return definitionContainer.getDefinitions();
+    }
+
+    /**
+     * Registers a new {@link BeanDefinition} in the container.
+     * <p>
+     * If a bean with the same name already exists, an exception is thrown.
+     * </p>
+     *
+     * @param definition the bean definition to register
+     * @throws DuplicateBeanDefinitionException if a bean with the same name is already registered
+     */
+    @Override
+    public void registerDefinition(BeanDefinition definition) {
+        definitionContainer.registerDefinition(definition);
     }
 
     /**
@@ -646,7 +623,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public boolean containsDefinition(String name) {
-        return definitions.containsKey(name);
+        return definitionContainer.containsDefinition(name);
     }
 
     /**

@@ -13,7 +13,7 @@ public class Example {
         context.registerBean("userPrototype", ExternalUser::new, BeanScope.PROTOTYPE);
 
         context.addInitializer(new ConfigurationBeanProviderBeanContextInitializer(Example.class));
-        context.addInitializer(ctx -> ctx.registerBean("test1", "хуй"));
+        context.addInitializer(ctx -> ctx.registerBean("test1", "bean added in external initializer"));
 
         context.refresh();
 
@@ -21,6 +21,10 @@ public class Example {
         System.out.println("BEAN VALUE: " + context.getBean( "test1"));
 
         System.out.println("end!");
+
+        // move part of methods from BeanContainer to BeanInstanceContainer
+        // consider to seperate bean container to read/write
+
     }
 
     private static BeanContext createRootBeanContext() {
