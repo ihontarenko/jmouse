@@ -9,6 +9,7 @@ import svit.beans.processor.BeanPostProcessor;
 import svit.reflection.ClassMatchers;
 import svit.reflection.Reflections;
 
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -311,7 +312,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
             T instance = beanFactory.createBean(definition);
 
             // Initializes a bean instance by applying pre-initialization and post-initialization
-            initializeBean(instance, definition);
+            instance = (T) initializeBean(instance, definition);
 
             if (definition.isProxied()) {
                 System.out.println(definition);
@@ -325,31 +326,35 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Initializes a bean instance by applying pre-initialization and post-initialization
-     * processing steps and invoking any annotated initializer methods.
+     * Performs initialization logic on a bean instance.
+     * <p>
+     * This method is invoked to prepare the bean instance for use. Implementations may apply additional
+     * configurations, wrap the bean in a proxy, or perform validation based on the provided {@link BeanDefinition}.
+     * </p>
      *
      * @param instance   the bean instance to initialize.
-     * @param definition the {@link BeanDefinition} associated with the bean.
+     * @param definition the {@link BeanDefinition} associated with the bean, providing metadata for initialization.
+     * @return the initialized bean instance, potentially wrapped or modified.
      */
     @Override
-    public void initializeBean(Object instance, BeanDefinition definition) {
+    public <T> T initializeBean(T instance, BeanDefinition definition) {
         // Perform pre-initialization steps using registered BeanPostProcessors
         for (BeanPostProcessor processor : processors) {
-            processor.postProcessBeforeInitialize(instance, this);
+            instance = (T) processor.postProcessBeforeInitialize(instance, definition, this);
         }
 
         // Invoke the initializer method if present in the bean class
-        Reflections.findAllAnnotatedMethods(definition.getBeanClass(), BeanInitializer.class).stream().findFirst()
-                .ifPresent(initializer -> Reflections.invokeMethod(instance, initializer));
-
-        if (instance instanceof svit.beans.BeanInitializer beanInitializer) {
-           //  beanInitializer.initializeBean(instance, definition);
+        for (Method initializer : Reflections.findAllAnnotatedMethods(
+                definition.getBeanClass(), BeanInitializer.class)) {
+            Reflections.invokeMethod(instance, initializer);
         }
 
         // Perform post-initialization steps using registered BeanPostProcessors
         for (BeanPostProcessor processor : processors) {
-            processor.postProcessAfterInitialize(instance, this);
+            instance = (T) processor.postProcessAfterInitialize(instance, definition, this);
         }
+
+        return instance;
     }
 
 
@@ -392,7 +397,6 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     @Override
     public <T> List<T> getBeans(Class<T> type) {
         List<T> beans = new ArrayList<>();
-
 
         for (String beanName : getBeanNames(type)) {
             beans.add(getBean(beanName));
@@ -544,7 +548,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      *
      * @param scope the scope phase for which to retrieve the container
      * @return the {@link BeanContainer} associated with the scope, if supported
-     * @throws BeanContextException if the scope is {@link BeanScope#PROTOTYPE}, {@link BeanScope#REQUEST}, or {@link BeanScope#SESSION}
+     * @throws BeanContextException if the scope is unsupported
      */
     @Override
     public BeanContainer getBeanContainer(Scope scope) {

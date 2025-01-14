@@ -73,4 +73,5 @@ public @interface Provide {
      * @return {@code true} if the bean should be proxied, {@code false} otherwise.
      */
     boolean proxied() default false;
+
 }

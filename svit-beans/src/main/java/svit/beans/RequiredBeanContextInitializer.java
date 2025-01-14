@@ -1,8 +1,6 @@
 package svit.beans;
 
-import org.jmouse.svit.example.User;
 import org.slf4j.Logger;
-import svit.beans.annotation.Provide;
 import svit.beans.definition.strategy.ConstructorBeanDefinitionCreationStrategy;
 import svit.beans.definition.strategy.MethodBeanDefinitionCreationStrategy;
 import svit.beans.definition.strategy.ObjectFactoryBeanDefinitionCreationStrategy;
@@ -14,7 +12,6 @@ import svit.beans.naming.DefaultBeanNameResolver;
 import svit.beans.definition.*;
 import svit.beans.processor.BeanContextAwareBeanPostProcessor;
 import svit.beans.processor.InjectDependencyBeanPostProcessor;
-import svit.reflection.ClassFinder;
 
 import static org.slf4j.LoggerFactory.getLogger;
 import static svit.reflection.Reflections.getShortName;

@@ -1,27 +1,39 @@
 package svit.beans.processor;
 
 import svit.beans.BeanContext;
+import svit.beans.definition.BeanDefinition;
 
 /**
- * A processor interface for performing operations before and after a bean is initialized.
+ * Interface for performing custom operations on beans during their initialization lifecycle.
+ * <p>
+ * Implementations of this interface can define logic to be executed before and after
+ * a bean is initialized in the {@link BeanContext}. This is useful for tasks like
+ * dependency injection, proxy creation, or any additional initialization logic.
+ * </p>
  */
 public interface BeanPostProcessor {
 
     /**
-     * Called before the bean's initialization logic is invoked.
-     * Useful for setting up properties or performing validation.
+     * Performs operations before a bean is initialized.
      *
-     * @param bean    the bean instance to process
-     * @param context the current {@link BeanContext}
+     * @param bean       the bean instance being processed.
+     * @param definition the {@link BeanDefinition} associated with the bean.
+     * @param context    the {@link BeanContext} managing the bean lifecycle.
+     * @return the processed bean instance, which may be the original bean or a wrapped/proxied instance.
      */
-    default void postProcessBeforeInitialize(Object bean, BeanContext context) {}
+    default Object postProcessBeforeInitialize(Object bean, BeanDefinition definition, BeanContext context) {
+        return bean;
+    }
 
     /**
-     * Called after the bean's initialization logic completes.
-     * Useful for final setup or integration tasks.
+     * Performs operations after a bean is initialized.
      *
-     * @param bean    the bean instance to process
-     * @param context the current {@link BeanContext}
+     * @param bean       the bean instance being processed.
+     * @param definition the {@link BeanDefinition} associated with the bean.
+     * @param context    the {@link BeanContext} managing the bean lifecycle.
+     * @return the processed bean instance, which may be the original bean or a wrapped/proxied instance.
      */
-    default void postProcessAfterInitialize(Object bean, BeanContext context) {}
+    default Object postProcessAfterInitialize(Object bean, BeanDefinition definition, BeanContext context) {
+        return bean;
+    }
 }

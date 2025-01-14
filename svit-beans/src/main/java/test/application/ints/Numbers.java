@@ -1,4 +1,4 @@
-package org.jmouse.svit.example.ints;
+package test.application.ints;
 
 import svit.beans.BeanScope;
 import svit.beans.annotation.Configuration;

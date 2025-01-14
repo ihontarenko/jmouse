@@ -1,4 +1,4 @@
-package org.jmouse.svit.example;
+package test.application;
 
 import svit.beans.BeanScope;
 import svit.beans.annotation.Configuration;

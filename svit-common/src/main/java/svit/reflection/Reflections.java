@@ -589,16 +589,22 @@ abstract public class Reflections {
      *
      * @param method the method to retrieve the name for
      * @return a string in the format {@code ClassName#methodName}
-     *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * Method method = MyClass.class.getMethod("doSomething");
-     * String methodName = Reflections.getMethodName(method);
-     * System.out.println(methodName); // MyClass#doSomething
-     * }</pre>
      */
     public static String getMethodName(Method method) {
         return "%s#%s".formatted(method.getDeclaringClass().getSimpleName(), method.getName());
+    }
+
+    /**
+     * Returns a string representing the field name along with its declaring class's simple name.
+     * <p>
+     * This method formats the string as {@code ClassName#fieldName}.
+     * </p>
+     *
+     * @param field the field to retrieve the name for
+     * @return a string in the format {@code ClassName#fieldName}
+     */
+    public static String getFieldName(Field field) {
+        return "%s#%s".formatted(field.getDeclaringClass().getSimpleName(), field.getName());
     }
 
     /**

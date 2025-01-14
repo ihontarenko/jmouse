@@ -3,26 +3,27 @@ package svit.beans;
 import svit.beans.definition.BeanDefinition;
 
 /**
- * Interface for initializing bean instances.
+ * Interface for initializing beans during their lifecycle.
  * <p>
- * The {@code BeanInitializer} is responsible for performing pre-initialization
- * and post-initialization steps, as well as invoking any initializer methods
- * annotated within the bean's class.
+ * A {@code BeanInitializer} is responsible for performing initialization logic on a bean instance,
+ * typically by applying configuration defined in the corresponding {@link BeanDefinition}.
+ * This may include invoking lifecycle methods, applying proxies, or other pre/post-initialization tasks.
  * </p>
- * <p>
- * Typical usage includes setting up dependencies, applying custom logic,
- * or executing lifecycle callbacks during the initialization process.
- * </p>
+ *
+ * @see BeanDefinition
  */
 public interface BeanInitializer {
 
     /**
-     * Initializes a bean instance by applying pre-initialization and post-initialization
-     * processing steps and invoking any annotated initializer methods.
+     * Performs initialization logic on a bean instance.
+     * <p>
+     * This method is invoked to prepare the bean instance for use. Implementations may apply additional
+     * configurations, wrap the bean in a proxy, or perform validation based on the provided {@link BeanDefinition}.
+     * </p>
      *
      * @param instance   the bean instance to initialize.
-     * @param definition the {@link BeanDefinition} associated with the bean.
+     * @param definition the {@link BeanDefinition} associated with the bean, providing metadata for initialization.
+     * @return the initialized bean instance, potentially wrapped or modified.
      */
-    void initializeBean(Object instance, BeanDefinition definition);
-
+    <T> T initializeBean(T instance, BeanDefinition definition);
 }
