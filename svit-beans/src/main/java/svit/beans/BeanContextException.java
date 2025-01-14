@@ -2,13 +2,6 @@ package svit.beans;
 
 /**
  * An exception indicating errors or abnormal conditions encountered within a bean context.
- * <p>
- * Example usage:
- * <pre>{@code
- * if (!beanDefinitionExists) {
- *     throw new BeanContextException("Bean definition not found for: " + beanName);
- * }
- * }</pre>
  */
 public class BeanContextException extends RuntimeException {
 

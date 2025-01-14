@@ -12,10 +12,10 @@ package svit.beans;
  * </p>
  *
  * @see ScopedBeanContainer
- * @see DefaultBeanContainerRegistry
+ * @see ConcurrentHashMapBeanContainerRegistry
  * @see ScopeResolver
  */
-public class DefaultScopedBeanContainer extends DefaultBeanContainerRegistry implements ScopedBeanContainer {
+public class ScopedHashMapBeanContainer extends ConcurrentHashMapBeanContainerRegistry implements ScopedBeanContainer {
 
     /**
      * The resolver responsible for determining the {@link Scope} of a bean based on its name.
@@ -31,7 +31,7 @@ public class DefaultScopedBeanContainer extends DefaultBeanContainerRegistry imp
      *
      * @param scopeResolver the {@link ScopeResolver} for resolving bean scopes.
      */
-    public DefaultScopedBeanContainer(ScopeResolver scopeResolver) {
+    public ScopedHashMapBeanContainer(ScopeResolver scopeResolver) {
         this.scopeResolver = scopeResolver;
     }
 

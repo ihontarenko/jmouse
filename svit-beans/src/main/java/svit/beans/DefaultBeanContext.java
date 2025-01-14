@@ -131,7 +131,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         this.definitionContainer = new DefaultBeanDefinitionContainer();
         this.scopeResolver = new BeanDefinitionScopeResolver(definitionContainer);
         this.containerRegistry = new DelegateBeanContainerRegistry(
-                new DefaultScopedBeanContainer(this.scopeResolver)
+                new ScopedHashMapBeanContainer(this.scopeResolver)
         );
     }
 
@@ -269,7 +269,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         }
 
         if (instance == null) {
-            throw new BeanContextException("No registered bean found with the name '%s'.".formatted(name));
+            throw new BeanNotFoundException("Bean '%s' not found".formatted(name));
         }
 
         return instance;
@@ -337,6 +337,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * @return the initialized bean instance, potentially wrapped or modified.
      */
     @Override
+    @SuppressWarnings({"unchecked"})
     public <T> T initializeBean(T instance, BeanDefinition definition) {
         // Perform pre-initialization steps using registered BeanPostProcessors
         for (BeanPostProcessor processor : processors) {
@@ -463,42 +464,30 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public void registerBean(String name, Object bean, Scope scope) {
-        BeanDefinition definition = getDefinition(name);
+        boolean isLazy = bean instanceof ObjectFactory<?>;
 
         // IMPORTANT! If no definition exists, the bean is being registered manually (externally),
         // not via the automatic BeanContext mechanism
-        if (definition == null) {
-            boolean               isObjectFactory = bean instanceof ObjectFactory<?>;
-            ObjectFactory<Object> factory         = isObjectFactory ? (ObjectFactory<Object>) bean : () -> bean;
-            Class<?>              beanClass       = isObjectFactory ? ObjectFactory.class : bean.getClass();
+        if (!containsDefinition(name)) {
+            Class<?>              beanClass  = isLazy ? ObjectFactory.class : bean.getClass();
+            ObjectFactory<Object> factory    = isLazy ? (ObjectFactory<Object>) bean : () -> bean;
+            BeanDefinition        definition = new ObjectFactoryBeanDefinition(name, beanClass, factory);
 
-            if (!isObjectFactory) {
+            if (!isLazy) {
                 LOGGER.info("The bean '{}' was wrapped into an ObjectFactory<{}>", name, beanClass);
+                definition.setBeanInstance(bean);
             }
 
-            definition = new ObjectFactoryBeanDefinition(name, beanClass, factory);
-
-            // Add additional information to the BeanDefinition
-            // - Assign the actual bean instance
-            // - Set the scope of the bean (e.g., SINGLETON, PROTOTYPE, etc.)
-            definition.setBeanInstance(bean);
             definition.setScope(scope);
-
-            // register bean definition
             registerDefinition(definition);
         }
 
-        // todo: think what we should do if bean is object factory
-        BeanContainer container = getBeanContainer(scope);
-        LOGGER.info("Bean '{}' attached to the '{}' container", name, getShortName(container.getClass()));
-
-        Object object = definition.getBeanInstance();
-
-        if (object == null) {
-            throw new BeanContextException("Unexpected null pointer. Bean instance must be present in definition");
+        // do nothing if passed bean presented as ObjectFactory object
+        if (!isLazy) {
+            BeanContainer  container  = getBeanContainer(scope);
+            LOGGER.info("Bean '{}' attached to the '{}' container", name, getShortName(container.getClass()));
+            getBeanContainer(scope).registerBean(name, bean);
         }
-
-        container.registerBean(name, object);
     }
 
     /**
@@ -554,9 +543,10 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     public BeanContainer getBeanContainer(Scope scope) {
         BeanContainer instanceContainer = containerRegistry.getBeanContainer(scope);
 
+        // some delegated implementation may throw the same exception
+        // but not always
         if (instanceContainer == null) {
-            throw new BeanContextException("Unsupported bean scope '%s' detected in context '%s'."
-                    .formatted(scope, getShortName(getClass())));
+            throw new UnsupportedScopeException(scope, getClass());
         }
 
         return instanceContainer;

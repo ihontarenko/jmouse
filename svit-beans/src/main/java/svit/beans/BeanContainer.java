@@ -1,5 +1,9 @@
 package svit.beans;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import svit.reflection.Reflections;
+
 /**
  * Represents a container for beans. Provides methods to retrieve, register, and manage beans within the container.
  */
@@ -7,6 +11,8 @@ public interface BeanContainer {
 
     // Error message template for unsupported method calls
     String UNSUPPORTED_CALL_EXCEPTION_MESSAGE = "Method '%s' is unsupported in this '%s' implementation.";
+
+    Logger LOGGER = LoggerFactory.getLogger(BeanContainer.class);
 
     /**
      * Retrieves a bean by its name.
@@ -54,6 +60,7 @@ public interface BeanContainer {
                 throw new BeanContextException("ObjectFactory must produce a non-null object");
             }
 
+            LOGGER.info("Register bean with '{}' container", Reflections.getShortName(getClass()));
             registerBean(name, bean);
         }
 

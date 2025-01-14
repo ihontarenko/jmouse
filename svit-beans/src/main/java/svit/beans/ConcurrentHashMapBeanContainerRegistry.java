@@ -17,7 +17,7 @@ import static svit.reflection.Reflections.getShortName;
  * @see Scope
  * @see BeanScope
  */
-public class DefaultBeanContainerRegistry implements BeanContainerRegistry {
+public class ConcurrentHashMapBeanContainerRegistry implements BeanContainerRegistry {
 
     /**
      * A mapping of {@link Scope} to their respective {@link BeanContainer}.
@@ -41,9 +41,7 @@ public class DefaultBeanContainerRegistry implements BeanContainerRegistry {
         BeanContainer instanceContainer = containers.get(scope);
 
         if (instanceContainer == null) {
-            throw new BeanContextException(
-                    "Scope '%s' is unsupported in this '%s' bean container."
-                            .formatted(scope, getShortName(getClass())));
+            throw new UnsupportedScopeException(scope, getClass());
         }
 
         return instanceContainer;
@@ -62,9 +60,6 @@ public class DefaultBeanContainerRegistry implements BeanContainerRegistry {
      */
     @Override
     public void registerBeanContainer(Scope scope, BeanContainer container) {
-        if (scope == null || container == null) {
-            throw new IllegalArgumentException("Scope and container must not be null.");
-        }
         containers.put(scope, container);
     }
 
@@ -88,9 +83,6 @@ public class DefaultBeanContainerRegistry implements BeanContainerRegistry {
      */
     @Override
     public boolean containsBeanContainer(Scope scope) {
-        if (scope == null) {
-            throw new IllegalArgumentException("Scope must not be null.");
-        }
         return containers.containsKey(scope);
     }
 }
