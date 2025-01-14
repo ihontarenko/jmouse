@@ -8,6 +8,7 @@ import svit.beans.naming.BeanNameResolver;
 import svit.beans.processor.BeanPostProcessor;
 import svit.reflection.ClassMatchers;
 import svit.reflection.Reflections;
+import svit.util.Arrays;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -46,12 +47,22 @@ import static svit.reflection.Reflections.getShortName;
  * UserService userService = context.getBean(UserService.class);
  *
  * // Retrieve a bean by its name
- * MyService userServiceByName = context.getBean("userService");
+ * UserService userServiceByName = context.getBean("userService");
  * }</pre>
  */
 public class DefaultBeanContext implements BeanContext, BeanFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBeanContext.class);
+
+    /**
+     * The base classes for scanning and managing beans in the context.
+     * <p>
+     * This field holds an array of classes that serve as entry points for scanning
+     * annotated beans or configurations. By default, this array is empty, indicating
+     * no base classes are defined.
+     * </p>
+     */
+    private Class<?>[] baseClasses = {};
 
     /**
      * A detector for cyclic references in the dependency graph, using {@link DefaultCyclicReferenceDetector}.
@@ -136,10 +147,17 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Constructs a new {@code DefaultBeanContext} with no parent context.
+     * Constructs a new {@code DefaultBeanContext} with the specified base classes.
+     *
+     * @param baseClasses an array of classes to serve as the base for bean scanning and resolution.
+     *                    If {@code null}, no base classes are set.
      */
-    public DefaultBeanContext() {
-        this(null);
+    public DefaultBeanContext(Class<?>... baseClasses) {
+        this((BeanContext) null);
+
+        if (baseClasses != null) {
+            setBaseClasses(baseClasses);
+        }
     }
 
     /**
@@ -312,12 +330,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
             T instance = beanFactory.createBean(definition);
 
             // Initializes a bean instance by applying pre-initialization and post-initialization
-            instance = (T) initializeBean(instance, definition);
-
-            if (definition.isProxied()) {
-                System.out.println(definition);
-                System.out.println("create proxy");
-            }
+            instance = initializeBean(instance, definition);
 
             return instance;
         } finally {
@@ -466,12 +479,12 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     public void registerBean(String name, Object bean, Scope scope) {
         boolean isLazy = bean instanceof ObjectFactory<?>;
 
-        // IMPORTANT! If no definition exists, the bean is being registered manually (externally),
-        // not via the automatic BeanContext mechanism
+        // Create definition if it on present in definition registry
+        // If no definition exists, the bean is being registered manually (externally)
         if (!containsDefinition(name)) {
-            Class<?>              beanClass  = isLazy ? ObjectFactory.class : bean.getClass();
-            ObjectFactory<Object> factory    = isLazy ? (ObjectFactory<Object>) bean : () -> bean;
-            BeanDefinition        definition = new ObjectFactoryBeanDefinition(name, beanClass, factory);
+            Class<?>              beanClass     = isLazy ? ObjectFactory.class : bean.getClass();
+            ObjectFactory<Object> objectFactory = isLazy ? (ObjectFactory<Object>) bean : () -> bean;
+            BeanDefinition        definition    = new ObjectFactoryBeanDefinition(name, beanClass, objectFactory);
 
             if (!isLazy) {
                 LOGGER.info("The bean '{}' was wrapped into an ObjectFactory<{}>", name, beanClass);
@@ -482,10 +495,10 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
             registerDefinition(definition);
         }
 
-        // do nothing if passed bean presented as ObjectFactory object
+        // Do nothing if passed bean presented as ObjectFactory object
         if (!isLazy) {
-            BeanContainer  container  = getBeanContainer(scope);
-            LOGGER.info("Bean '{}' attached to the '{}' container", name, getShortName(container.getClass()));
+            BeanContainer container = getBeanContainer(scope);
+            LOGGER.info("Bean '{}' registered to the '{}' container", name, getShortName(container.getClass()));
             getBeanContainer(scope).registerBean(name, bean);
         }
     }
@@ -522,6 +535,30 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         }
 
         return getBeanContainer(definition.getScope()).containsBean(name);
+    }
+
+    /**
+     * Sets the base classes to be scanned and processed by this context.
+     * <p>
+     * These classes are used to detect annotations, definitions, and additional context information
+     * necessary for bean registration and initialization.
+     * </p>
+     *
+     * @param baseClasses the array of base classes to be set.
+     */
+    @Override
+    public void setBaseClasses(Class<?>... baseClasses) {
+        this.baseClasses = Arrays.concatenate(baseClasses, this.baseClasses);
+    }
+
+    /**
+     * Retrieves the base classes that are currently being used by this context.
+     *
+     * @return an array of base classes that the context is working with.
+     */
+    @Override
+    public Class<?>[] getBaseClasses() {
+        return baseClasses;
     }
 
     /**

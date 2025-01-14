@@ -5,6 +5,7 @@ import svit.beans.definition.BeanDefinition;
 import svit.beans.definition.BeanDefinitionFactory;
 import svit.beans.scanner.ConfigurationAnnotatedClassBeanScanner;
 import svit.beans.scanner.ProvideAnnotatedClassesBeanScanner;
+import svit.util.Arrays;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
@@ -54,11 +55,12 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
     public void initialize(BeanContext context) {
         LOGGER.info("{} scanners ready for run", scanners.size());
 
+        Class<?>[]            rootClasses       = Arrays.concatenate(baseClasses, context.getBaseClasses());
         int                   counter           = 0;
         BeanDefinitionFactory definitionFactory = context.getBeanDefinitionFactory();
 
         for (BeanScanner<AnnotatedElement> scanner : scanners) {
-            for (AnnotatedElement annotatedElement : scanner.scan(baseClasses)) {
+            for (AnnotatedElement annotatedElement : scanner.scan(rootClasses)) {
                 counter++;
                 BeanDefinition beanDefinition = definitionFactory.createDefinition(annotatedElement, context);
                 context.registerDefinition(beanDefinition);

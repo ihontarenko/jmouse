@@ -6,12 +6,37 @@ import svit.beans.processor.BeanPostProcessorAware;
 
 import java.util.List;
 
+
 /**
- * Interface representing a bean context in the container framework.
- * Provides methods to manage bean factories, definitions, and initializers.
+ * Represents the core interface for managing the bean lifecycle, definitions, containers,
+ * and scope resolution within the application context.
+ *
+ * @see BeanContainer
+ * @see BeanContainerRegistry
+ * @see BeanDefinitionContainer
+ * @see BeanInitializer
+ * @see BeanPostProcessorAware
  */
 public interface BeanContext extends BeanContainer, BeanContainerRegistry,
         BeanDefinitionContainer, BeanInitializer, BeanPostProcessorAware {
+
+    /**
+     * Sets the base classes to be scanned and processed by this context.
+     * <p>
+     * These classes are used to detect annotations, definitions, and additional context information
+     * necessary for bean registration and initialization.
+     * </p>
+     *
+     * @param baseClasses the array of base classes to be set.
+     */
+    void setBaseClasses(Class<?>... baseClasses);
+
+    /**
+     * Retrieves the base classes that are currently being used by this context.
+     *
+     * @return an array of base classes that the context is working with.
+     */
+    Class<?>[] getBaseClasses();
 
     /**
      * Retrieves the names of all beans that match the specified type.

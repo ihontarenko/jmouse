@@ -39,7 +39,7 @@ public class MethodBeanDefinitionCreationStrategy extends AbstractBeanDefinition
         }
 
         // Update the definition's lifecycle based on annotations, if any
-        updateBeanLifecycle(definition, method);
+        updateBeanDefinition(definition, method);
 
         // Attach method-level annotations
         definition.setAnnotations(Set.of(method.getAnnotations()));

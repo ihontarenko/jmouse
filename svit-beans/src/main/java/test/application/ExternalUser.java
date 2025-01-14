@@ -1,8 +1,10 @@
 package test.application;
 
+import svit.beans.annotation.BeanName;
 import svit.beans.annotation.Dependency;
 import svit.beans.annotation.BeanInitializer;
 
+@BeanName("admin")
 public class ExternalUser implements User {
 
     @Dependency("gal")

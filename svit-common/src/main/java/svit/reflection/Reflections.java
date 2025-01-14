@@ -7,6 +7,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.function.Function;
 
 import static svit.reflection.MethodMatchers.hasParameterTypes;
 import static svit.reflection.MethodMatchers.isAbstract;
@@ -918,12 +919,26 @@ abstract public class Reflections {
         return getUserClass(instance.getClass());
     }
 
+    /**
+     * Populates a map with property descriptors for a given class, using the property names as keys.
+     *
+     * @param type                the class to introspect.
+     * @param propertyDescriptors the map to populate with property descriptors.
+     * @throws ReflectionException if an error occurs during introspection.
+     */
     public static void readPropertyDescriptors(Class<?> type, Map<String, PropertyDescriptor> propertyDescriptors) {
         for (PropertyDescriptor propertyDescriptor : getPropertyDescriptors(type)) {
             propertyDescriptors.put(propertyDescriptor.getName(), propertyDescriptor);
         }
     }
 
+    /**
+     * Retrieves a list of {@link PropertyDescriptor} objects for the specified class.
+     *
+     * @param type the class to introspect.
+     * @return a list of property descriptors for the given class.
+     * @throws ReflectionException if an error occurs during introspection.
+     */
     public static List<PropertyDescriptor> getPropertyDescriptors(Class<?> type) {
         try {
             BeanInfo beanInfo = Introspector.getBeanInfo(type);
@@ -933,5 +948,25 @@ abstract public class Reflections {
         }
     }
 
+    /**
+     * Retrieves the value of a specified annotation attribute from an annotated element.
+     *
+     * @param element         the annotated element to inspect.
+     * @param annotationClass the class of the annotation to retrieve.
+     * @param extractor       a function to extract the desired attribute value from the annotation.
+     * @param <T>             the type of the annotation.
+     * @return the extracted attribute value, or {@code null} if the annotation is not present.
+     */
+    public static <T extends Annotation> Object getAnnotationValue(
+            AnnotatedElement element, Class<? extends T> annotationClass, Function<T, Object> extractor) {
+        Object value = null;
+
+        if (element.isAnnotationPresent(annotationClass)) {
+            T annotation = element.getAnnotation(annotationClass);
+            value = extractor.apply(annotation);
+        }
+
+        return value;
+    }
 
 }

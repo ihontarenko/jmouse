@@ -7,11 +7,11 @@ import svit.beans.definition.strategy.ObjectFactoryBeanDefinitionCreationStrateg
 import svit.beans.instantiation.*;
 import svit.beans.naming.AnnotationBeanNameStrategy;
 import svit.beans.naming.BeanNameResolver;
-import svit.beans.naming.ClassNameStrategy;
 import svit.beans.naming.DefaultBeanNameResolver;
 import svit.beans.definition.*;
 import svit.beans.processor.BeanContextAwareBeanPostProcessor;
 import svit.beans.processor.InjectDependencyBeanPostProcessor;
+import svit.beans.processor.ProxyBeanPostProcessor;
 
 import static org.slf4j.LoggerFactory.getLogger;
 import static svit.reflection.Reflections.getShortName;
@@ -66,6 +66,7 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
     private void registerDefaultPostProcessors(BeanContext context) {
         LOGGER.info("Initialize post-processors");
         context.addBeanPostProcessor(new InjectDependencyBeanPostProcessor());
+        context.addBeanPostProcessor(new ProxyBeanPostProcessor());
         context.addBeanPostProcessor(new BeanContextAwareBeanPostProcessor());
     }
 
@@ -103,7 +104,7 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
         LOGGER.info("Initialize new bean name resolver");
 
         resolver.addStrategy(new AnnotationBeanNameStrategy());
-        resolver.addStrategy(new ClassNameStrategy());
+        // resolver.addStrategy(new ClassNameStrategy());
 
         context.setNameResolver(resolver);
     }

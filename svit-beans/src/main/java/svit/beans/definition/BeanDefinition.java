@@ -25,7 +25,7 @@ public interface BeanDefinition {
      *         otherwise {@code false}.
      */
     default boolean isSingleton() {
-        return getScope() == BeanScope.SINGLETON || getScope() == BeanScope.NON_BEAN;
+        return getScope() == BeanScope.SINGLETON;
     }
 
     /**
@@ -35,7 +35,7 @@ public interface BeanDefinition {
      *         otherwise {@code false}.
      */
     default boolean isPrototype() {
-        return !isSingleton();
+        return getScope() == BeanScope.PROTOTYPE;
     }
 
     /**

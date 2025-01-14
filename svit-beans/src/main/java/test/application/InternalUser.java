@@ -3,8 +3,10 @@ package test.application;
 import svit.beans.BeanContext;
 import svit.beans.BeanContextAware;
 import svit.beans.annotation.BeanInitializer;
+import svit.beans.annotation.BeanName;
 import svit.beans.annotation.Dependency;
 
+@BeanName("client")
 public class InternalUser implements User, BeanContextAware {
 
     @Dependency

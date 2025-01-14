@@ -74,15 +74,17 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
     }
 
     /**
-     * Updates the bean lifecycle by inspecting the {@link Provide} annotation on the provided element.
+     * Updates the bean definition by inspecting the {@link Provide} annotation on the provided element.
      * If present, the annotation's scope value is assigned to the {@code definition}.
      *
      * @param definition the bean definition to update
      * @param element    the annotated element (class or method) that may hold the {@link Provide} annotation
      */
-    protected void updateBeanLifecycle(BeanDefinition definition, AnnotatedElement element) {
+    protected void updateBeanDefinition(BeanDefinition definition, AnnotatedElement element) {
         if (element.isAnnotationPresent(Provide.class)) {
-            definition.setScope(element.getAnnotation(Provide.class).scope());
+            Provide annotation = element.getAnnotation(Provide.class);
+            definition.setProxied(annotation.proxied());
+            definition.setScope(annotation.scope());
         }
     }
 

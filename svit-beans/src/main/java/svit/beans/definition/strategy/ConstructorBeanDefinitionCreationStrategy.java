@@ -65,7 +65,7 @@ public class ConstructorBeanDefinitionCreationStrategy extends AbstractBeanDefin
         }
 
         // Update the bean lifecycle (e.g., SINGLETON, PROTOTYPE) based on annotations
-        updateBeanLifecycle(definition, klass);
+        updateBeanDefinition(definition, klass);
 
         return definition;
     }
