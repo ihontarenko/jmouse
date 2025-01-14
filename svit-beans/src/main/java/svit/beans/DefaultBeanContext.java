@@ -307,11 +307,16 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
             // Detect cyclic references using the general-purpose Identifier interface
             referenceDetector.detect(definition::getBeanName, exceptionSupplier);
 
-            // resolved an instantiated raw bean
+            // resolve an instantiate raw bean
             T instance = beanFactory.createBean(definition);
 
             // Initializes a bean instance by applying pre-initialization and post-initialization
             initializeBean(instance, definition);
+
+            if (definition.isProxied()) {
+                System.out.println(definition);
+                System.out.println("create proxy");
+            }
 
             return instance;
         } finally {
@@ -338,7 +343,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
                 .ifPresent(initializer -> Reflections.invokeMethod(instance, initializer));
 
         if (instance instanceof svit.beans.BeanInitializer beanInitializer) {
-            beanInitializer.initializeBean(instance, definition);
+           //  beanInitializer.initializeBean(instance, definition);
         }
 
         // Perform post-initialization steps using registered BeanPostProcessors

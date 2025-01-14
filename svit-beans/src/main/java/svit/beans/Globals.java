@@ -1,21 +1,16 @@
 package svit.beans;
 
-public enum Globals implements Scope {
+public class Globals {
 
-    STATE_A, STATE_B;
+    public static final  String              DEFAULT_STATE = "_default";
+    private static final ThreadLocal<String> THREAD_LOCAL  = ThreadLocal.withInitial(() -> DEFAULT_STATE);
 
-    private static final ThreadLocal<Scope> THREAD_LOCAL = ThreadLocal.withInitial(() -> STATE_A);
-
-    public static void set(Scope value) {
+    public static void set(String value) {
         THREAD_LOCAL.set(value);
     }
 
-    private static Scope get() {
+    public static String get() {
         return THREAD_LOCAL.get();
     }
 
-    @Override
-    public int id() {
-        return ordinal() + 13 * 1000;
-    }
 }

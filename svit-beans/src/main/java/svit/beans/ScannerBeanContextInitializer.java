@@ -80,7 +80,7 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
     /**
      * Removes all registered scanners from this initializer.
      */
-    public void removeScanner() {
+    public void clearScanner() {
         this.scanners.clear();
     }
 
