@@ -58,9 +58,9 @@ public interface MethodInvocation {
     /**
      * Retrieves the proxy configuration associated with the invocation.
      *
-     * @return the {@link ProxyConfig} object containing proxy-related metadata.
+     * @return the {@link ProxyContext} object containing proxy-related metadata.
      */
-    ProxyConfig getProxyConfig();
+    ProxyContext getProxyContext();
 
     /**
      * Retrieves the proxy instance on which the method is being invoked.

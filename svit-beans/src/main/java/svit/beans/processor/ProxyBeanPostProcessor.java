@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import svit.beans.BeanContext;
 import svit.beans.definition.BeanDefinition;
 import svit.proxy.AnnotationProxyFactory;
+import svit.proxy.ProxyFactory;
 import svit.reflection.Reflections;
 
 import static svit.reflection.Reflections.getShortName;
@@ -38,13 +39,15 @@ public class ProxyBeanPostProcessor implements BeanPostProcessor {
     @Override
     public Object postProcessBeforeInitialize(Object bean, BeanDefinition definition, BeanContext context) {
         Object proxy = bean;
+        //todo:  fetch proxy factory bean from context
+        ProxyFactory proxyFactory = new AnnotationProxyFactory(context.getBaseClasses());
 
         if (definition.isProxied()) {
             Class<?>[] ifaces = Reflections.getClassInterfaces(definition.getBeanClass());
             if (ifaces.length > 0) {
                 LOGGER.info("Proxied bean '{}' of type '{}'",
                             definition.getBeanName(), getShortName(definition.getBeanClass()));
-                proxy = new AnnotationProxyFactory(bean, context.getBaseClasses()).getProxy();
+                proxy = proxyFactory.createProxy(bean);
             } else {
                 LOGGER.error("Bean '{}' cannot be proxied with JDK Proxy. Ensure the bean implements an interface.",
                              definition.getBeanName());

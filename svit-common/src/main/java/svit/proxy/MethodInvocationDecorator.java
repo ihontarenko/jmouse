@@ -56,8 +56,8 @@ public class MethodInvocationDecorator implements MethodInvocation {
     }
 
     @Override
-    public ProxyConfig getProxyConfig() {
-        return delegate.getProxyConfig();
+    public ProxyContext getProxyContext() {
+        return delegate.getProxyContext();
     }
 
     @Override

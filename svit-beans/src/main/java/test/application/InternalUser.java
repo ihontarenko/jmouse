@@ -22,7 +22,7 @@ public class InternalUser implements User, BeanContextAware {
 
     @Override
     public String getName() {
-        return beanContext.getBean(User.class, "external_user").getName();
+        return beanContext.getBean(User.class, "admin").getName();
     }
 
     /**

@@ -60,7 +60,7 @@ public interface BeanContainer {
                 throw new BeanContextException("ObjectFactory must produce a non-null object");
             }
 
-            LOGGER.info("Register bean with '{}' container", Reflections.getShortName(getClass()));
+            LOGGER.info("Register bean '{}' with '{}' container", name, Reflections.getShortName(getClass()));
             registerBean(name, bean);
         }
 

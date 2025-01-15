@@ -1,5 +1,6 @@
-package svit.proxy;
+package svit.proxy.jdk;
 
+import svit.proxy.*;
 import svit.reflection.Reflections;
 
 import java.lang.reflect.InvocationHandler;
@@ -18,14 +19,14 @@ import static java.lang.reflect.Proxy.*;
  */
 public class JdkProxy implements InvocationHandler, Proxy {
 
-    private final ProxyConfig proxyConfig;
+    private final ProxyContext proxyConfig;
 
     /**
-     * Constructs a new {@code JdkProxy} with the given {@link ProxyConfig}.
+     * Constructs a new {@code JdkProxy} with the given {@link ProxyContext}.
      *
      * @param proxyConfig the configuration for the proxy, including the target object and interceptors.
      */
-    public JdkProxy(ProxyConfig proxyConfig) {
+    public JdkProxy(ProxyContext proxyConfig) {
         this.proxyConfig = proxyConfig;
     }
 
@@ -81,18 +82,8 @@ public class JdkProxy implements InvocationHandler, Proxy {
      * @return the proxy instance.
      */
     @Override
-    public Object getProxy(ClassLoader classLoader) {
-        return newProxyInstance(classLoader, proxyConfig.getInterfaces().toArray(Class[]::new), this);
-    }
-
-    /**
-     * Returns the {@link ProxyEngine} associated with this proxy implementation.
-     *
-     * @return {@link ProxyEngine#JDK}.
-     */
-    @Override
-    public ProxyEngine getProxyEngine() {
-        return ProxyEngine.JDK;
+    public Object getProxy() {
+        return newProxyInstance(proxyConfig.getClassLoader(), proxyConfig.getInterfaces().toArray(Class[]::new), this);
     }
 
     /**
@@ -147,6 +138,6 @@ public class JdkProxy implements InvocationHandler, Proxy {
      */
     @Override
     public String toString() {
-        return "JDK PROXY [%s] [%s]".formatted(hashCode(), super.toString());
+        return "JDK PROXY [%s]".formatted(proxyConfig.getTargetClass());
     }
 }

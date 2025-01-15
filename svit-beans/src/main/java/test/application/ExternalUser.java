@@ -13,7 +13,7 @@ public class ExternalUser implements User {
     @Dependency("int123")
     private Integer count;
 
-    @Dependency("internal_user")
+    @Dependency("client")
     private InternalUser user;
 
     @BeanInitializer

@@ -1,61 +1,47 @@
 package svit.proxy;
 
+import java.util.List;
+
 /**
- * Factory for creating proxy instances with configurable behavior.
- * <p>
- * The {@code ProxyFactory} is responsible for setting up proxy configurations,
- * adding method interceptors, and generating proxy instances using a specified class loader.
+ * A factory interface for creating proxies and corresponding {@link ProxyContext}
+ * instances. Implementations of this interface can generate proxy objects for
+ * various use cases, such as method interception or custom behavior injection.
  */
-public class ProxyFactory implements Proxy {
+public interface ProxyFactory {
 
     /**
-     * The configuration used to create proxies.
-     */
-    protected final ProxyConfig proxyConfig;
-
-    /**
-     * Constructs a {@code ProxyFactory} for the given target object.
+     * Creates a proxy for the specified object.
      *
-     * @param target the target object to be proxied.
+     * @param <T>   the type of the created proxy
+     * @param object the original object to be proxied
+     * @return a proxy instance of the specified object
      */
-    public ProxyFactory(Object target) {
-        this.proxyConfig = new ProxyConfig(target);
-    }
+    <T> T createProxy(Object object);
 
     /**
-     * Adds a {@link MethodInterceptor} to the proxy configuration.
-     * <p>
-     * Interceptors are used to intercept method calls on the proxy and add custom behavior.
+     * Creates a {@link ProxyContext} for the specified object and class loader.
      *
-     * @param interceptor the method interceptor to add.
+     * @param object      the original object to be proxied
+     * @param classLoader the class loader to define the proxy class
+     * @return a new {@link ProxyContext} instance
      */
-    public void addInterceptor(MethodInterceptor interceptor) {
-        this.proxyConfig.addInterceptor(interceptor);
-    }
+    ProxyContext createProxyContext(Object object, ClassLoader classLoader);
 
     /**
-     * Retrieves the proxy instance using the specified {@link ClassLoader}.
+     * Adds a {@link MethodInterceptor} to this factory, which will be invoked
+     * during method calls on the proxy object. Multiple interceptors can be added,
+     * and each will be applied in the order they were registered.
      *
-     * @param classLoader the class loader to use for creating the proxy.
-     * @param <T>         the type of the proxy instance.
-     * @return the proxy instance.
+     * @param interceptor the interceptor to add
      */
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T getProxy(ClassLoader classLoader) {
-        return (T) new JdkProxy(this.proxyConfig).getProxy(classLoader);
-    }
+    void addInterceptor(MethodInterceptor interceptor);
 
     /**
-     * Retrieves the {@link ProxyEngine} associated with this proxy.
-     * <p>
-     * This implementation does not support retrieving the proxy engine and throws an exception.
+     * Retrieves the list of all currently registered {@link MethodInterceptor}s.
+     * Implementations may return an unmodifiable list or a direct reference, so
+     * modifications may or may not affect the actual interceptor list.
      *
-     * @return never returns a value, always throws {@link UnsupportedOperationException}.
-     * @throws UnsupportedOperationException if called.
+     * @return a list of registered interceptors
      */
-    @Override
-    public ProxyEngine getProxyEngine() {
-        throw new UnsupportedOperationException("Proxy engine is unknown and unsupported in this implementation.");
-    }
+    List<MethodInterceptor> getInterceptors();
 }

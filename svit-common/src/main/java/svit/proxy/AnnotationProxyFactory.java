@@ -5,65 +5,44 @@ import svit.reflection.ClassFinder;
 import svit.reflection.Reflections;
 
 /**
- * A proxy factory that automatically scans for method interceptors annotated with
- * {@link ProxyMethodInterceptor} and applies them to the target class.
+ * An extension of {@link DefaultProxyFactory} that automatically discovers and registers
+ * {@link MethodInterceptor}s based on the {@link ProxyMethodInterceptor} annotation.
  * <p>
- * This class extends {@link ProxyFactory} to provide additional functionality for discovering
- * and registering {@link MethodInterceptor}s based on annotations.
- * </p>
+ * This class scans the provided base classes (and potentially their packages) using
+ * {@link ClassFinder#findAnnotatedClasses(Class, Class[])} to locate classes annotated with
+ * {@code @ProxyMethodInterceptor}. Each discovered class is instantiated via reflection and
+ * then added to this factory's interceptor list.
  *
- * <p>Example usage:</p>
- * <pre>{@code
- * AnnotationProxyFactory proxyFactory = new AnnotationProxyFactory(userService, baseClassToScan);
- * UserService proxy = proxyFactory.getProxy();
- * }</pre>
- *
- * @see ProxyFactory
- * @see MethodInterceptor
+ * @see DefaultProxyFactory
+ * @see ProxyMethodInterceptor
  */
-public class AnnotationProxyFactory extends ProxyFactory {
+public class AnnotationProxyFactory extends DefaultProxyFactory {
 
     /**
-     * Constructs an {@link AnnotationProxyFactory} with the specified target object
-     * and scans the provided base classes for interceptors.
+     * Constructs an {@code AnnotationProxyFactory} and immediately scans
+     * the specified base classes for interceptors annotated with
+     * {@link ProxyMethodInterceptor}.
      *
-     * @param target      the target object to proxy.
-     * @param baseClasses the base classes or packages to scan for annotated interceptors.
+     * @param baseClasses one or more base classes (or packages) used to discover annotated interceptors
      */
-    public AnnotationProxyFactory(Object target, Class<?>... baseClasses) {
-        super(target);
+    public AnnotationProxyFactory(Class<?>... baseClasses) {
+        super();
         scanInterceptors(baseClasses);
     }
 
     /**
-     * Constructs an {@link AnnotationProxyFactory} with the specified target object.
-     * Interceptor scanning can be performed later using {@link #scanInterceptors(Class[])}.
+     * Scans the specified base classes (and potentially their packages) for all
+     * classes annotated with {@link ProxyMethodInterceptor}. For each discovered
+     * class, this method instantiates a {@link MethodInterceptor} via reflection
+     * and adds it to the list of interceptors in this factory.
      *
-     * @param target the target object to proxy.
-     */
-    public AnnotationProxyFactory(Object target) {
-        super(target);
-    }
-
-    /**
-     * Scans the specified base classes or packages for classes annotated with
-     * {@link ProxyMethodInterceptor} and registers their instances as {@link MethodInterceptor}s
-     * for the target class.
-     *
-     * @param baseClasses the base classes or packages to scan for annotated interceptors.
+     * @param baseClasses one or more base classes (or packages) used to discover annotated interceptors
      */
     public void scanInterceptors(Class<?>... baseClasses) {
         for (Class<?> annotatedClass : ClassFinder.findAnnotatedClasses(ProxyMethodInterceptor.class, baseClasses)) {
-            ProxyMethodInterceptor annotation = annotatedClass.getAnnotation(ProxyMethodInterceptor.class);
-            Class<?>[]             targets    = annotation.value();
-
-            for (Class<?> targetClass : targets) {
-                if (targetClass.isAssignableFrom(proxyConfig.getTargetClass())) {
-                    MethodInterceptor interceptor = (MethodInterceptor) Reflections.instantiate(
-                            Reflections.findFirstConstructor(annotatedClass));
-                    addInterceptor(interceptor);
-                }
-            }
+            MethodInterceptor interceptor = (MethodInterceptor) Reflections.instantiate(
+                    Reflections.findFirstConstructor(annotatedClass));
+            addInterceptor(interceptor);
         }
     }
 }

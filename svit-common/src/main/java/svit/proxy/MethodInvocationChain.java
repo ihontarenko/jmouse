@@ -19,7 +19,7 @@ public class MethodInvocationChain implements MethodInvocation {
     protected final Method                  method;
     protected final Object[]                arguments;
     protected final Object                  proxy;
-    protected final ProxyConfig             proxyConfig;
+    protected final ProxyContext            proxyContext;
     protected       int                     currentIndex = -1;
 
     /**
@@ -30,12 +30,12 @@ public class MethodInvocationChain implements MethodInvocation {
      * @param method       the method being invoked.
      * @param arguments    the arguments passed to the method.
      * @param interceptors the list of method interceptors.
-     * @param proxyConfig  the proxy configuration.
+     * @param proxyContext  the proxy configuration.
      */
     public MethodInvocationChain(Object proxy, Object target, Method method, Object[] arguments,
-                                 List<MethodInterceptor> interceptors, ProxyConfig proxyConfig) {
+                                 List<MethodInterceptor> interceptors, ProxyContext proxyContext) {
         this.interceptors = interceptors;
-        this.proxyConfig = proxyConfig;
+        this.proxyContext = proxyContext;
         this.proxy = proxy;
         this.target = target;
         this.method = method;
@@ -56,7 +56,11 @@ public class MethodInvocationChain implements MethodInvocation {
         if (interceptors.size() > ++currentIndex) {
             interceptor = interceptors.get(currentIndex);
 
-            return interceptor.invoke(this);
+            interceptor.before(getProxyContext(), getMethod(), getArguments());
+            Object result = interceptor.invoke(this);
+            interceptor.after(getProxyContext(), getMethod(), getArguments(), result);
+
+            return result;
         }
 
         // invoke real method from target object in the end of chain
@@ -106,11 +110,11 @@ public class MethodInvocationChain implements MethodInvocation {
     /**
      * Returns the proxy configuration associated with this invocation.
      *
-     * @return the {@link ProxyConfig}.
+     * @return the {@link ProxyContext}.
      */
     @Override
-    public ProxyConfig getProxyConfig() {
-        return proxyConfig;
+    public ProxyContext getProxyContext() {
+        return proxyContext;
     }
 
     /**
