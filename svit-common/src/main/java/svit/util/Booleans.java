@@ -1,7 +1,7 @@
 package svit.util;
 
 /**
- * Utility class BooleanFunctions for performing common boolean comparisons.
+ * Utility class Booleans for performing common boolean comparisons.
  *
  * <p>This class provides static methods for comparing two numeric values of any type that extends {@link Number}.
  * It supports operations such as greater than, greater than or equal to, less than, less than or equal to,
@@ -10,13 +10,13 @@ package svit.util;
  * <h2>Example Usage:</h2>
  * <pre>{@code
  * public static void main(String[] args) {
- *     System.out.println(BooleanFunctions.gt(5, 3));   // true
- *     System.out.println(BooleanFunctions.lte(2, 2)); // true
- *     System.out.println(BooleanFunctions.eq(4.5, 4)); // false
+ *     System.out.println(Booleans.gt(5, 3));   // true
+ *     System.out.println(Booleans.lte(2, 2)); // true
+ *     System.out.println(Booleans.eq(4.5, 4)); // false
  * }
  * }</pre>
  */
-final public class BooleanFunctions {
+final public class Booleans {
 
     /**
      * Checks if the first number is greater than the second.

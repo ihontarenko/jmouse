@@ -12,9 +12,8 @@ import svit.ast.token.Tokenizer;
 import svit.expression.compiler.EvaluationContextConfigurator;
 import svit.expression.parser.ParserConfigurator;
 import svit.expression.parser.AnyExpressionParser;
-import svit.expression.parser.PathVariableParser;
-import svit.util.BooleanFunctions;
-import svit.util.MathFunctions;
+import svit.util.Booleans;
+import svit.util.Maths;
 import svit.expression.test.ExampleDto;
 import svit.expression.test.TestService;
 
@@ -26,7 +25,7 @@ public class Example {
         ParserContext   parserContext = ParserContext.CONTEXT;
         Tokenizer       tokenizer     = new DefaultTokenizer();
         EvaluationContext evaluationContext = EvaluationContextFactory.defaultEvaluationContext(
-                TestService.class, MathFunctions.class, BooleanFunctions.class);
+                TestService.class, Maths.class, Booleans.class);
 
         evaluationContext.setVariable("user", "Ivan");
         evaluationContext.setVariable("item", new ExampleDto());

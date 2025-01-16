@@ -1,7 +1,7 @@
 package svit.util;
 
 /**
- * Utility class MathFunctions for performing basic mathematical operations.
+ * Utility class Maths for performing basic mathematical operations.
  *
  * <p>This class supports operations on various numeric types by utilizing generics.
  * It operates on objects of type {@link Number}, allowing compatibility with
@@ -10,16 +10,16 @@ package svit.util;
  * <h2>Example Usage:</h2>
  * <pre>{@code
  * public static void main(String[] args) {
- *     System.out.println(MathFunctions.sum(5, 3.2)); // 8.2
- *     System.out.println(MathFunctions.divide(10, 2)); // 5.0
- *     System.out.println(MathFunctions.multiply(4, 2.5)); // 10.0
- *     System.out.println(MathFunctions.subtract(10, 7)); // 3.0
- *     System.out.println(MathFunctions.power(2, 3)); // 8.0
- *     System.out.println(MathFunctions.abs(-5)); // 5.0
+ *     System.out.println(Maths.sum(5, 3.2)); // 8.2
+ *     System.out.println(Maths.divide(10, 2)); // 5.0
+ *     System.out.println(Maths.multiply(4, 2.5)); // 10.0
+ *     System.out.println(Maths.subtract(10, 7)); // 3.0
+ *     System.out.println(Maths.power(2, 3)); // 8.0
+ *     System.out.println(Maths.abs(-5)); // 5.0
  * }
  * }</pre>
  */
-final public class MathFunctions {
+final public class Maths {
 
     /**
      * Adds two numbers and returns the result as {@code double}.

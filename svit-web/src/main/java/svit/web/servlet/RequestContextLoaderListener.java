@@ -44,8 +44,6 @@ public class RequestContextLoaderListener implements ServletRequestListener {
                     RequestAttributes.of(BeanScope.REQUEST, servletRequest)
             );
         }
-
-        // todo: register bean to context
     }
 
     /**

@@ -4,6 +4,7 @@ import svit.beans.annotation.BeanName;
 import svit.beans.annotation.Configuration;
 import svit.beans.annotation.Provide;
 import svit.beans.annotation.Qualifier;
+import svit.reflection.Reflections;
 import svit.util.Strings;
 
 import java.lang.reflect.AnnotatedElement;
@@ -55,7 +56,7 @@ public class AnnotationBeanNameStrategy implements BeanNameStrategy {
                 e -> getAnnotationValue(e, Provide.class, Provide::value),
                 e -> getAnnotationValue(e, Configuration.class, Configuration::name),
                 e -> e instanceof Class<?> ? new ClassNameStrategy().resolve(e) : null,
-                e -> e instanceof Method m ? m.getName() : null
+                e -> e instanceof Method m ? Strings.uncapitalize(Reflections.getMethodName(m)) : null
         );
 
         for (Function<AnnotatedElement, Object> function : functions) {

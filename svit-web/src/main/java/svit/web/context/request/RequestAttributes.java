@@ -4,17 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import svit.beans.Scope;
 import svit.web.context.WebContextException;
 
-/**
- * Interface for managing attributes within a request or session scope.
- * <p>
- * Example usage:
- * <pre>{@code
- * RequestAttributes attributes = ...;
- * attributes.setAttribute("user", new User("Alice"));
- * User user = (User) attributes.getAttribute("user");
- * attributes.removeAttribute("user");
- * }</pre>
- */
+
 public interface RequestAttributes {
 
     /**

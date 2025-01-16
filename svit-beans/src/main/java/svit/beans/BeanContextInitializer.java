@@ -5,6 +5,7 @@ package svit.beans;
  * Implementations of this interface are responsible for configuring and preparing the {@link BeanContext}
  * before it is used.
  */
+@FunctionalInterface
 public interface BeanContextInitializer {
 
     /**

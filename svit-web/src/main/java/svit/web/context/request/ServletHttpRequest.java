@@ -11,23 +11,23 @@ public class ServletHttpRequest implements HttpRequest {
     }
 
     @Override
-    public RequestAttributes getRequestAttributes() {
-        return null;
-    }
-
-    @Override
     public Object getAttribute(String name) {
         return request.getAttribute(name);
     }
 
     @Override
     public void setAttribute(String name, Object value) {
-
+        request.setAttribute(name, value);
     }
 
     @Override
     public void removeAttribute(String name) {
+        request.removeAttribute(name);
+    }
 
+    @Override
+    public HttpServletRequest getRequest() {
+        return request;
     }
 
 }

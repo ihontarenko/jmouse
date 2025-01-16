@@ -38,9 +38,8 @@ public class ProxyBeanPostProcessor implements BeanPostProcessor {
      */
     @Override
     public Object postProcessBeforeInitialize(Object bean, BeanDefinition definition, BeanContext context) {
-        Object proxy = bean;
-        //todo:  fetch proxy factory bean from context
-        ProxyFactory proxyFactory = new AnnotationProxyFactory(context.getBaseClasses());
+        Object       proxy        = bean;
+        ProxyFactory proxyFactory = context.getBean(ProxyFactory.class);
 
         if (definition.isProxied()) {
             Class<?>[] ifaces = Reflections.getClassInterfaces(definition.getBeanClass());

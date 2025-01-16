@@ -52,7 +52,6 @@ public interface BeanContainer {
     default <T> T getBean(String name, ObjectFactory<T> objectFactory) {
         T bean = getBean(name);
 
-        // If the bean is not found, create it using the ObjectFactory
         if (bean == null) {
             bean = objectFactory.createObject();
 
@@ -108,6 +107,28 @@ public interface BeanContainer {
      * Registers a bean with the given class type and singleton scope.
      *
      * @param type the class type of the bean.
+     * @param objectFactory the ObjectFactory for the bean.
+     */
+    default void registerBean(Class<?> type, ObjectFactory<Object> objectFactory) {
+        registerBean(type, objectFactory, BeanScope.SINGLETON);
+    }
+
+    /**
+     * Registers a bean with the given class type, ObjectFactory, and scope.
+     *
+     * @param type the class type of the bean.
+     * @param objectFactory the ObjectFactory for the bean.
+     * @param scope the scope of the bean.
+     * @throws BeanContextException if this method is unsupported in the current implementation.
+     */
+    default void registerBean(Class<?> type, ObjectFactory<Object> objectFactory, Scope scope) {
+        registerBean(type, (Object) objectFactory, scope);
+    }
+
+    /**
+     * Registers a bean with the given class type and singleton scope.
+     *
+     * @param type the class type of the bean.
      * @param bean the bean instance to register.
      */
     default void registerBean(Class<?> type, Object bean) {
@@ -126,6 +147,16 @@ public interface BeanContainer {
         throw new BeanContextException(
                 UNSUPPORTED_CALL_EXCEPTION_MESSAGE
                         .formatted("registerBean(Class<?>, Object, BeanScope)", getClass()));
+    }
+
+    /**
+     * Registers a bean with the given name, ObjectFactory, and scope.
+     *
+     * @param name the name of the bean.
+     * @param objectFactory the ObjectFactory for the bean.
+     */
+    default void registerBean(String name, ObjectFactory<Object> objectFactory) {
+        registerBean(name, (Object) objectFactory, BeanScope.SINGLETON);
     }
 
     /**

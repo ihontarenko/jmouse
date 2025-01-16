@@ -14,7 +14,7 @@ public class ClassNameStrategy implements BeanNameStrategy {
 
     @Override
     public String resolve(AnnotatedElement element) {
-        return Strings.underscored(Reflections.getShortName((Class<?>)element));
+        return Strings.uncapitalize(Reflections.getShortName((Class<?>)element));
     }
 
 }

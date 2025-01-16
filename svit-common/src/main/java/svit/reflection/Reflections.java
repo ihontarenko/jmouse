@@ -957,7 +957,7 @@ abstract public class Reflections {
      * @param <T>             the type of the annotation.
      * @return the extracted attribute value, or {@code null} if the annotation is not present.
      */
-    public static <T extends Annotation> Object getAnnotationValue(
+    public static <T extends Annotation, R> R getAnnotationValue(
             AnnotatedElement element, Class<? extends T> annotationClass, Function<T, Object> extractor) {
         Object value = null;
 
@@ -966,7 +966,7 @@ abstract public class Reflections {
             value = extractor.apply(annotation);
         }
 
-        return value;
+        return (R) value;
     }
 
 }

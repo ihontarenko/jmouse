@@ -1,4 +1,4 @@
-package svit.web.context;
+package svit.web.context.initializer;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;

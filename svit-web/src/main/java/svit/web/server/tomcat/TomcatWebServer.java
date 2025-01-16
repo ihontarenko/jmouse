@@ -6,7 +6,7 @@ import org.apache.catalina.util.ServerInfo;
 import svit.web.server.WebServer;
 import svit.web.server.WebServerException;
 
-public class TomcatWebServer implements WebServer<Tomcat> {
+public class TomcatWebServer implements WebServer {
 
     private final Tomcat tomcat;
 

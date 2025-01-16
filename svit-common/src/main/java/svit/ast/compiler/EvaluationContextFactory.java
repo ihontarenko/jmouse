@@ -1,7 +1,7 @@
 package svit.ast.compiler;
 
-import svit.util.BooleanFunctions;
-import svit.util.MathFunctions;
+import svit.util.Booleans;
+import svit.util.Maths;
 import svit.reflection.Reflections;
 
 import java.util.Arrays;
@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 public class EvaluationContextFactory {
 
     public static final Class<?>[] DEFAULT_FUNCTIONS= new Class[]{
-            MathFunctions.class, BooleanFunctions.class, Math.class
+            Maths.class, Booleans.class, Math.class
     };
 
     public static EvaluationContext newEvaluationContext() {

@@ -74,6 +74,9 @@ public class DefaultProxyFactory implements ProxyFactory {
             Class<?>[] preferredClasses = (Class<?>[]) getAnnotationValue(
                     interceptor.getClass(), ProxyMethodInterceptor.class, ProxyMethodInterceptor::value);
 
+            if (preferredClasses == null) {
+                continue;
+            }
 
             for (Class<?> preferredClass : preferredClasses) {
                 if (classMatcher.matches(preferredClass)) {

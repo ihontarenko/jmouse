@@ -2,23 +2,11 @@ package svit.web.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import svit.reflection.Reflections;
 
 /**
  * A generic interface for managing a web server lifecycle and configuration.
- * <p>
- * Example usage:
- * <pre>{@code
- * WebServer<Tomcat> server = new TomcatWebServer();
- * server.configure(s -> {
- *     s.setPort(8080);
- * });
- * server.start();
- * }</pre>
- *
- * @param <T> the type of the underlying server implementation
  */
-public interface WebServer<T> {
+public interface WebServer {
 
     /**
      * A logger instance for logging server-related events.
@@ -44,7 +32,7 @@ public interface WebServer<T> {
      *
      * @return the underlying server of type {@code T}.
      */
-    T server();
+    Object server();
 
     /**
      * Retrieves the name of internal server implementation
@@ -62,7 +50,7 @@ public interface WebServer<T> {
      * @param configurer a functional interface to configure the underlying server
      * @throws WebServerException if the configurer or the underlying server is {@code null}.
      */
-    default void configure(Configurer<T> configurer) {
+    default void configure(Configurer configurer) {
         if (configurer == null) {
             throw new WebServerException("Configurer object must be non-NULL");
         }

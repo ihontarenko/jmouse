@@ -1,20 +1,16 @@
 package svit.web;
 
-import org.apache.catalina.startup.Tomcat;
-import svit.web.context.WebBeanContextLoaderInitializer;
+import svit.web.context.ApplicationContext;
 import svit.web.server.WebServer;
-import svit.web.server.tomcat.TomcatWebServer;
-import svit.web.server.tomcat.TomcatWebServerConfigurer;
 
 public class StartApplication {
 
     public static void main(String... arguments) {
-        WebServer<Tomcat> webServer = new TomcatWebServer();
+        ApplicationContext context = WebApplicationLauncher.launch(StartApplication.class);
 
-        webServer.configure(new TomcatWebServerConfigurer(
-                9911, new FrameworkInitializer(), WebBeanContextLoaderInitializer.class));
+        WebServer webServer = context.getBean(WebServer.class);
 
-        webServer.start();
+        System.out.println("test");
     }
 
 }

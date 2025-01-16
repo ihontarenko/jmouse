@@ -9,6 +9,7 @@ import svit.beans.processor.BeanPostProcessor;
 import svit.reflection.ClassMatchers;
 import svit.reflection.Reflections;
 import svit.util.Arrays;
+import svit.util.Sorter;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -82,7 +83,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * Keeps track of {@link BeanContextInitializer} classes that have already been initialized.
      * Prevents duplicate initialization of the same type.
      */
-    private final Set<Class<? extends BeanContextInitializer>> initialized = new HashSet<>();
+    private final Set<Integer> initialized = new HashSet<>();
 
     /**
      * A mapping of bean names to their corresponding {@link BeanDefinition}s.
@@ -172,16 +173,19 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         LOGGER.warn("========== START INITIALIZING! ==========");
         LOGGER.warn("=========================================");
 
+        Sorter.sort(initializers);
+
         for (BeanContextInitializer initializer : initializers) {
+            int                                     hashCode         = Objects.hash(initializer);
             Class<? extends BeanContextInitializer> initializerClass = initializer.getClass();
 
-            if (initialized.contains(initializerClass)) {
+            if (initialized.contains(hashCode)) {
                 LOGGER.warn("Initializer '{}' is already initialized.", getShortName(initializerClass));
                 continue;
             }
 
             initializer.initialize(this);
-            initialized.add(initializerClass);
+            initialized.add(hashCode);
             LOGGER.info("Initializer '{}' was successfully executed.", getShortName(initializerClass));
         }
 
@@ -218,7 +222,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         List<String> beanNames = getBeanNames(type);
 
         if (beanNames.isEmpty()) {
-            throw new BeanContextException("No beans found for type: " + type.getName());
+            throw new BeanNotFoundException("No beans associated with '%s' type".formatted(type.getName()));
         }
 
         if (beanNames.size() == 1) {
@@ -477,7 +481,8 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public void registerBean(String name, Object bean, Scope scope) {
-        boolean isLazy = bean instanceof ObjectFactory<?>;
+        boolean       isLazy    = bean instanceof ObjectFactory<?>;
+        BeanContainer container = getBeanContainer(scope);
 
         // Create definition if it on present in definition registry
         // If no definition exists, the bean is being registered manually (externally)
@@ -497,7 +502,6 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
 
         // Do nothing if passed bean presented as ObjectFactory object
         if (!isLazy) {
-            BeanContainer container = getBeanContainer(scope);
             LOGGER.info("Bean '{}' registered to the '{}' container", name, getShortName(container.getClass()));
             getBeanContainer(scope).registerBean(name, bean);
         }

@@ -12,6 +12,8 @@ import svit.beans.definition.*;
 import svit.beans.processor.BeanContextAwareBeanPostProcessor;
 import svit.beans.processor.InjectDependencyBeanPostProcessor;
 import svit.beans.processor.ProxyBeanPostProcessor;
+import svit.proxy.AnnotationProxyFactory;
+import svit.proxy.ProxyFactory;
 
 import static org.slf4j.LoggerFactory.getLogger;
 import static svit.reflection.Reflections.getShortName;
@@ -41,7 +43,8 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
         // Self-referencing registration
         LOGGER.info("Self referencing: Bean type '{}' -> Bean object '{}'",
                     getShortName(BeanContext.class), getShortName(context.getClass()));
-        context.registerBean(BeanContext.class, context);
+        context.registerBean(context.getClass(), context);
+        context.registerBean(ProxyFactory.class, new AnnotationProxyFactory(context.getBaseClasses()));
     }
 
     /**
@@ -104,7 +107,6 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
         LOGGER.info("Initialize new bean name resolver");
 
         resolver.addStrategy(new AnnotationBeanNameStrategy());
-        // resolver.addStrategy(new ClassNameStrategy());
 
         context.setNameResolver(resolver);
     }

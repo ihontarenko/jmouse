@@ -1,7 +1,9 @@
 package svit.web.context.request;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 public interface HttpRequest extends RequestAttributes {
 
-    RequestAttributes getRequestAttributes();
+    HttpServletRequest getRequest();
     
 }

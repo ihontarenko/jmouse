@@ -4,7 +4,7 @@ import svit.beans.BeanContext;
 import svit.beans.BeanContextAware;
 import svit.beans.annotation.Provide;
 
-@Provide(value = "util")
+@Provide(value = "util", proxied = true)
 public class DefaultUtils implements Utils, BeanContextAware {
 
     private BeanContext context;

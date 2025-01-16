@@ -46,6 +46,7 @@ public final class Strings {
 
         char[] chars = value.toCharArray();
         chars[0] = toLowerCase(chars[0]);
+
         return new String(chars);
     }
 
