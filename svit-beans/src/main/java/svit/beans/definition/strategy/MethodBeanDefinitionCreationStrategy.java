@@ -7,6 +7,7 @@ import svit.beans.definition.MethodBeanDefinition;
 import svit.beans.naming.BeanNameResolver;
 import svit.matcher.Matcher;
 import svit.reflection.ClassMatchers;
+import svit.reflection.Reflections;
 
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -32,6 +33,8 @@ public class MethodBeanDefinitionCreationStrategy extends AbstractBeanDefinition
         // Create a new MethodBeanDefinition based on the method's return type
         MethodBeanDefinition definition = new MethodBeanDefinition(name, method.getReturnType());
         definition.setFactoryMethod(method);
+
+        definition.setParametrizedTypes(Reflections.getParameterizedTypes(method.getGenericReturnType()));
 
         // If the method has parameters, create dependencies
         if (method.getParameterCount() != 0) {

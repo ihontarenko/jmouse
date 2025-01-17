@@ -11,7 +11,7 @@ import static svit.reflection.Reflections.getShortName;
 
 public class AbstractApplicationContext extends DefaultBeanContext implements ApplicationContext {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(WebApplicationBeanContext.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractApplicationContext.class);
 
     private ServletContext servletContext;
 
@@ -31,8 +31,8 @@ public class AbstractApplicationContext extends DefaultBeanContext implements Ap
     @Override
     public void setServletContext(ServletContext servletContext) {
         this.servletContext = servletContext;
-        LOGGER.info("Register bean '{}'", getShortName(ServletContext.class));
-        registerBean(ServletContext.class, servletContext, ThreadLocalScope.THREAD_LOCAL_SCOPE);
+        LOGGER.info("Attach servlet context '{}'", getShortName(servletContext.getClass()));
+        registerBean(ServletContext.class, servletContext);
     }
 
 }

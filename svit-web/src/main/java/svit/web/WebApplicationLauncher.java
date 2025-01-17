@@ -6,6 +6,10 @@ import svit.observer.EventManagerFactory;
 import svit.web.context.ApplicationContext;
 import svit.web.context.ApplicationContextEvent;
 import svit.web.context.RootApplicationBeanContext;
+import svit.web.context.initializer.WebBeanContextLoaderInitializer;
+import svit.web.server.WebServer;
+import svit.web.server.WebServerFactory;
+import svit.web.server.tomcat.TomcatWebServerConfigurer;
 
 import static svit.web.context.ApplicationContextEvent.EVENT_AFTER_CONTEXT_REFRESH;
 import static svit.web.context.ApplicationContextEvent.EVENT_BEFORE_CONTEXT_REFRESH;
@@ -29,13 +33,17 @@ public class WebApplicationLauncher {
 
         launcher.refreshContext(applicationContext);
 
+        WebServerFactory factory = applicationContext.getBean(WebServerFactory.class);
+
+        WebServer webServer = factory.getWebServer(new WebBeanContextLoaderInitializer());
+
+        webServer.start();
+
         return applicationContext;
     }
 
     public ApplicationContext createApplicationContext() {
         ApplicationContext context = new RootApplicationBeanContext(baseClasses);
-
-        // context.addInitializer(new ScannerBeanContextInitializer(baseClasses));
 
         refreshContext(context);
 

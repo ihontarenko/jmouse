@@ -60,6 +60,8 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
      */
     protected Class<?> type;
 
+    protected List<Class<?>> parametrizedTypes;
+
     /**
      * Indicates whether the bean is proxied.
      */
@@ -142,6 +144,30 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     @Override
     public void setBeanClass(Class<?> type) {
         this.type = type;
+    }
+
+    /**
+     * Returns a list of parameterized types associated with this bean definition.
+     * Useful when the bean class is a generic type, and its parameters need to be
+     * tracked for reflection or dependency injection purposes.
+     *
+     * @return a list of parameterized types
+     */
+    @Override
+    public List<Class<?>> getParametrizedTypes() {
+        return List.copyOf(parametrizedTypes);
+    }
+
+    /**
+     * Sets the list of parameterized types for this bean definition. This is
+     * particularly helpful when dealing with generic types, allowing you to
+     * specify or update the actual type parameters used by the bean.
+     *
+     * @param types a list of parameterized types
+     */
+    @Override
+    public void setParametrizedTypes(List<Class<?>> types) {
+        this.parametrizedTypes = List.copyOf(types);
     }
 
     /**

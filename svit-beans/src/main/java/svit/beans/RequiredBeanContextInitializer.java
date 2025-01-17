@@ -14,6 +14,7 @@ import svit.beans.processor.InjectDependencyBeanPostProcessor;
 import svit.beans.processor.ProxyBeanPostProcessor;
 import svit.proxy.AnnotationProxyFactory;
 import svit.proxy.ProxyFactory;
+import svit.util.Priority;
 
 import static org.slf4j.LoggerFactory.getLogger;
 import static svit.reflection.Reflections.getShortName;
@@ -22,6 +23,7 @@ import static svit.reflection.Reflections.getShortName;
  * Default implementation of {@link BeanContextInitializer}.
  * Provides initialization logic for setting up a {@link BeanContext} with default factories, resolvers, and post-processors.
  */
+@Priority(Integer.MIN_VALUE)
 final class RequiredBeanContextInitializer implements BeanContextInitializer {
 
     private static final Logger LOGGER = getLogger(getShortName(BeanContextInitializer.class) + ".DEFAULT_INITIALIZER");

@@ -70,7 +70,7 @@ public final class Sorter {
                     order = ordered.getOrder();
                 } else {
                     Integer priority = getAnnotationValue(object.getClass(), Priority.class, Priority::value);
-                    order = requireNonNullElse(priority, Integer.MAX_VALUE);
+                    order = requireNonNullElse(priority, order);
                 }
             }
 

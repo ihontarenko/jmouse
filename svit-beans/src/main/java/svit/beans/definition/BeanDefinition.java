@@ -86,6 +86,24 @@ public interface BeanDefinition {
     void setBeanClass(Class<?> type);
 
     /**
+     * Returns a list of parameterized types associated with this bean definition.
+     * Useful when the bean class is a generic type, and its parameters need to be
+     * tracked for reflection or dependency injection purposes.
+     *
+     * @return a list of parameterized types
+     */
+    List<Class<?>> getParametrizedTypes();
+
+    /**
+     * Sets the list of parameterized types for this bean definition. This is
+     * particularly helpful when dealing with generic types, allowing you to
+     * specify or update the actual type parameters used by the bean.
+     *
+     * @param types a list of parameterized types
+     */
+    void setParametrizedTypes(List<Class<?>> types);
+
+    /**
      * Retrieves the parent definition of this bean, if any.
      *
      * @return the parent {@link BeanDefinition}, or {@code null} if none.

@@ -1,16 +1,16 @@
 package svit.web;
 
+import jakarta.servlet.ServletContext;
 import svit.web.context.ApplicationContext;
-import svit.web.server.WebServer;
 
 public class StartApplication {
 
     public static void main(String... arguments) {
         ApplicationContext context = WebApplicationLauncher.launch(StartApplication.class);
 
-        WebServer webServer = context.getBean(WebServer.class);
+        ServletContext servletContext = context.getBean(ServletContext.class);
 
-        System.out.println("test");
+        System.out.println(servletContext);
     }
 
 }
