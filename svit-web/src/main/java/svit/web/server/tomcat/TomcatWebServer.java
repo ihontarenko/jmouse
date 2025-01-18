@@ -22,12 +22,18 @@ public class TomcatWebServer implements WebServer {
     @Override
     public void start() throws WebServerException {
         try {
+
             LOGGER.info("Web-Server: Starting '{}'...", name());
             tomcat.start();
             LOGGER.info("Web-Server: '{}' started! ", name());
-            LOGGER.info("Port: {}, Catalina Base: {}",
-                        server().getConnector().getPort(), server().getServer().getCatalinaBase().getAbsolutePath());
-            tomcat.getServer().await();
+            LOGGER.info("Port: {}, Catalina Base: {}", server().getConnector().getPort(), server().getServer().getCatalinaBase().getAbsolutePath());
+
+            Thread asyncStart = new Thread(() -> tomcat.getServer().await());
+            asyncStart.setContextClassLoader(getClass().getClassLoader());
+            asyncStart.setDaemon(false);
+            asyncStart.setName(name() + "-async-start");
+            asyncStart.start();
+
         } catch (LifecycleException e) {
             stop();
             throw new WebServerException("Error occurred during '" + name() + "' web-server stopping", e);

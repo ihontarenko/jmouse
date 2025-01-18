@@ -2,13 +2,12 @@ package svit.web.context;
 
 import jakarta.servlet.ServletContext;
 import svit.beans.BeanContext;
-import svit.beans.BeanFactory;
 
 /**
  * Represents a web-specific extension of the {@link BeanContext}.
  * Supports servlet-specific configurations and scoped beans.
  */
-public interface WebBeanContext extends BeanContext, BeanFactory {
+public interface WebBeanContext extends ApplicationBeanContext {
 
     /**
      * Context attribute to bind {@link WebBeanContext} on {@link ServletContext}
@@ -33,4 +32,5 @@ public interface WebBeanContext extends BeanContext, BeanFactory {
      * @return the servlet context
      */
     ServletContext getServletContext();
+
 }

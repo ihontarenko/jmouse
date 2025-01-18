@@ -5,7 +5,7 @@ import svit.beans.BeanScope;
 import svit.beans.container.ThreadLocalBeanContainer;
 import svit.beans.container.ThreadLocalScope;
 
-public class WebApplicationBeanContext extends AbstractApplicationContext {
+public class WebApplicationBeanContext extends AbstractWebApplicationBeanContext {
 
     public WebApplicationBeanContext(BeanContext parent) {
         super(parent);
@@ -17,4 +17,5 @@ public class WebApplicationBeanContext extends AbstractApplicationContext {
     public WebApplicationBeanContext(Class<?>... baseClasses) {
         super(baseClasses);
     }
+
 }

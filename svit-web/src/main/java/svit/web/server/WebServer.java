@@ -2,6 +2,9 @@ package svit.web.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import svit.reflection.ReflectType;
+
+import java.util.List;
 
 /**
  * A generic interface for managing a web server lifecycle and configuration.
@@ -50,7 +53,7 @@ public interface WebServer {
      * @param configurer a functional interface to configure the underlying server
      * @throws WebServerException if the configurer or the underlying server is {@code null}.
      */
-    default void configure(Configurer configurer) {
+    default <T> void configure(Configurer<T> configurer) {
         if (configurer == null) {
             throw new WebServerException("Configurer object must be non-NULL");
         }
@@ -61,7 +64,9 @@ public interface WebServer {
 
         LOGGER.info("Start configuring '{}' web-server", name());
 
-        configurer.configure(server());
+        System.out.println(List.of(ReflectType.forInstance(configurer).getGenerics()));
+
+        configurer.configure((T) server());
     }
 
     /**

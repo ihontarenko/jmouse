@@ -3,13 +3,12 @@ package svit.web;
 import svit.beans.ScannerBeanContextInitializer;
 import svit.observer.EventManager;
 import svit.observer.EventManagerFactory;
-import svit.web.context.ApplicationContext;
+import svit.web.context.ApplicationBeanContext;
 import svit.web.context.ApplicationContextEvent;
-import svit.web.context.RootApplicationBeanContext;
-import svit.web.context.initializer.WebBeanContextLoaderInitializer;
+import svit.web.context.WebApplicationBeanContext;
+import svit.web.context.initializer.WebBeanContextServletInitializer;
 import svit.web.server.WebServer;
 import svit.web.server.WebServerFactory;
-import svit.web.server.tomcat.TomcatWebServerConfigurer;
 
 import static svit.web.context.ApplicationContextEvent.EVENT_AFTER_CONTEXT_REFRESH;
 import static svit.web.context.ApplicationContextEvent.EVENT_BEFORE_CONTEXT_REFRESH;
@@ -24,35 +23,28 @@ public class WebApplicationLauncher {
         this.eventManager = EventManagerFactory.create(baseClasses);
     }
 
-    public static ApplicationContext launch(Class<?>... baseClasses) {
+    public static ApplicationBeanContext launch(Class<?>... baseClasses) {
         WebApplicationLauncher launcher = new WebApplicationLauncher(baseClasses);
 
-        ApplicationContext applicationContext = launcher.createApplicationContext();
-
+        ApplicationBeanContext applicationContext = launcher.createApplicationContext();
         applicationContext.addInitializer(new ScannerBeanContextInitializer(baseClasses));
-
         launcher.refreshContext(applicationContext);
 
         WebServerFactory factory = applicationContext.getBean(WebServerFactory.class);
-
-        WebServer webServer = factory.getWebServer(new WebBeanContextLoaderInitializer());
-
+        WebServer webServer = factory.getWebServer(new WebBeanContextServletInitializer());
         webServer.start();
 
         return applicationContext;
     }
 
-    public ApplicationContext createApplicationContext() {
-        ApplicationContext context = new RootApplicationBeanContext(baseClasses);
-
+    public ApplicationBeanContext createApplicationContext() {
+        ApplicationBeanContext context = new WebApplicationBeanContext(baseClasses);
         refreshContext(context);
-
         context.registerBean(EventManager.class, () -> eventManager);
-
         return context;
     }
 
-    protected void refreshContext(ApplicationContext context) {
+    protected void refreshContext(ApplicationBeanContext context) {
         eventManager.notify(new ApplicationContextEvent(EVENT_BEFORE_CONTEXT_REFRESH, context, this));
         context.refresh();
         eventManager.notify(new ApplicationContextEvent(EVENT_AFTER_CONTEXT_REFRESH, context, this));

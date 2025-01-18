@@ -492,7 +492,8 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
             BeanDefinition        definition    = new ObjectFactoryBeanDefinition(name, beanClass, objectFactory);
 
             if (!isLazy) {
-                LOGGER.info("The bean '{}' was wrapped into an ObjectFactory<{}>", name, beanClass);
+                LOGGER.info("The bean '{}' was wrapped into an ObjectFactory<{}>",
+                        name, getShortName(beanClass));
                 definition.setBeanInstance(bean);
             }
 

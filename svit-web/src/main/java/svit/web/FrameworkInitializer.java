@@ -3,18 +3,14 @@ package svit.web;
 import jakarta.servlet.ServletContainerInitializer;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRegistration;
 import jakarta.servlet.annotation.HandlesTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import svit.matcher.Matcher;
 import svit.reflection.Reflections;
-import svit.web.servlet.DispatcherServlet;
-import svit.web.servlet.FrameworkDispatcherServlet;
 
 import java.lang.reflect.Constructor;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static svit.reflection.ClassMatchers.*;
 import static svit.reflection.Reflections.getShortName;
@@ -31,19 +27,16 @@ public class FrameworkInitializer implements ServletContainerInitializer {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(FrameworkInitializer.class);
 
-    /**
-     * Scans for classes implementing {@link ApplicationInitializer}, instantiates them,
-     * and invokes their {@link ApplicationInitializer#onStartup(ServletContext)} methods.
-     *
-     * @param initializerClasses the set of detected {@link ApplicationInitializer} classes.
-     * @param servletContext     the {@link ServletContext} for the web application.
-     * @throws ServletException if an error occurs during initialization.
-     */
+    private final List<ApplicationInitializer> initializers = new ArrayList<>();
+
+    public FrameworkInitializer(ApplicationInitializer... initializers) {
+        this.initializers.addAll(List.of(initializers));
+    }
+
     @Override
     public void onStartup(Set<Class<?>> initializerClasses, ServletContext servletContext) throws ServletException {
-        Set<ApplicationInitializer> initializers = new HashSet<>();
-        Matcher<Class<?>>           matcher      = isSupertype(ApplicationInitializer.class).and(isInterface().not())
-                .and(isAbstract().not());
+        Matcher<Class<?>> matcher = isSupertype(ApplicationInitializer.class)
+                .and(isInterface().not()).and(isAbstract().not());
 
         if (initializerClasses != null) {
             for (Class<?> initializerClass : initializerClasses) {
@@ -68,6 +61,10 @@ public class FrameworkInitializer implements ServletContainerInitializer {
             }
         }
 
+        executeInitializers(servletContext);
+    }
+
+    protected void executeInitializers(ServletContext servletContext) throws ServletException {
         if (!initializers.isEmpty()) {
             servletContext.log("ApplicationInitializer (%d) was found in classpath".formatted(initializers.size()));
 
@@ -83,15 +80,6 @@ public class FrameworkInitializer implements ServletContainerInitializer {
         } else {
             servletContext.log("No ApplicationInitializers was found in classpath");
         }
-
-        registerDispatcherServlet(servletContext);
-    }
-
-    protected void registerDispatcherServlet(ServletContext servletContext) {
-        DispatcherServlet           dispatcher   = new FrameworkDispatcherServlet();
-        ServletRegistration.Dynamic registration = servletContext.addServlet("FrameworkDispatcherServlet", dispatcher);
-        registration.setLoadOnStartup(1);
-        registration.addMapping("/*");
     }
 
 }

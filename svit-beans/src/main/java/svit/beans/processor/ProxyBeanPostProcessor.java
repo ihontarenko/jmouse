@@ -42,7 +42,7 @@ public class ProxyBeanPostProcessor implements BeanPostProcessor {
         ProxyFactory proxyFactory = context.getBean(ProxyFactory.class);
 
         if (definition.isProxied()) {
-            Class<?>[] ifaces = Reflections.getClassInterfaces(definition.getBeanClass());
+            Class<?>[] ifaces = Reflections.getClassInterfaces(bean.getClass());
             if (ifaces.length > 0) {
                 LOGGER.info("Proxied bean '{}' of type '{}'",
                             definition.getBeanName(), getShortName(definition.getBeanClass()));

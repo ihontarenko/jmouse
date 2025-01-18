@@ -7,10 +7,12 @@ import org.apache.catalina.startup.Tomcat;
 import svit.beans.BeanContext;
 import svit.beans.BeanContextAware;
 import svit.web.ApplicationInitializer;
+import svit.web.FrameworkInitializer;
 import svit.web.context.WebBeanContext;
 import svit.web.server.WebServer;
 import svit.web.server.WebServerFactory;
 
+import java.util.List;
 import java.util.Set;
 
 public class TomcatWebServerFactory implements WebServerFactory, BeanContextAware {
@@ -40,25 +42,15 @@ public class TomcatWebServerFactory implements WebServerFactory, BeanContextAwar
     @Override
     public WebServer getWebServer(ApplicationInitializer... initializers) {
         WebServer                    webServer  = new TomcatWebServer();
-        WebServer.Configurer<Tomcat> configurer = new TomcatWebServerConfigurer(8899, new Starter());
+        // todo: need to add some properties reader or environment mechanism
+        WebServer.Configurer<Tomcat> configurer = new TomcatWebServerConfigurer(8899,
+                new FrameworkInitializer(initializers));
 
         if (webServer.server() instanceof Tomcat tomcat) {
-            configurer.configure(tomcat);
+            webServer.configure(configurer);
         }
 
         return webServer;
-    }
-
-    class Starter implements ServletContainerInitializer {
-
-        @Override
-        public void onStartup(Set<Class<?>> classes, ServletContext ctx) throws ServletException {
-            if (context instanceof WebBeanContext webBeanContext) {
-                webBeanContext.setServletContext(ctx);
-            }
-
-        }
-
     }
 
 }

@@ -8,7 +8,7 @@ import svit.web.server.tomcat.TomcatWebServerFactory;
 @Configuration(name = "webServerFactoryConfiguration")
 public class ServletWebServerFactoryConfiguration {
 
-    @Provide
+    @Provide(proxied = true, value = "webServerFactory")
     public WebServerFactory createWebServerFactory() {
         return new TomcatWebServerFactory();
     }

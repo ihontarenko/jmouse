@@ -3,8 +3,8 @@ package svit.web.context;
 import svit.observer.AbstractEvent;
 
 /**
- * An event class for publishing {@link ApplicationContext} updates or lifecycle changes.
- * This event carries an {@link ApplicationContext} as its payload and provides constants
+ * An event class for publishing {@link ApplicationBeanContext} updates or lifecycle changes.
+ * This event carries an {@link ApplicationBeanContext} as its payload and provides constants
  * indicating different stages in the application's lifecycle. Typical usage involves
  * creating and firing the event at key application milestones, allowing interested
  * observers to respond accordingly.
@@ -15,10 +15,10 @@ import svit.observer.AbstractEvent;
  *   <li>{@link #EVENT_AFTER_CONTEXT_REFRESH}: Fired after the application context is successfully refreshed.</li>
  * </ul>
  *
- * @see ApplicationContext
+ * @see ApplicationBeanContext
  * @see AbstractEvent
  */
-public class ApplicationContextEvent extends AbstractEvent<ApplicationContext> {
+public class ApplicationContextEvent extends AbstractEvent<ApplicationBeanContext> {
 
     /**
      * Constant for the "before context refresh" event name.
@@ -32,13 +32,13 @@ public class ApplicationContextEvent extends AbstractEvent<ApplicationContext> {
 
     /**
      * Constructs a new {@code ApplicationContextEvent} with the specified name,
-     * {@link ApplicationContext} payload, and optional caller reference.
+     * {@link ApplicationBeanContext} payload, and optional caller reference.
      *
      * @param name    the name identifying this event (e.g., one of the provided constants)
-     * @param payload the {@link ApplicationContext} payload relevant to this event
+     * @param payload the {@link ApplicationBeanContext} payload relevant to this event
      * @param caller  an optional reference to the source or origin of this event
      */
-    public ApplicationContextEvent(String name, ApplicationContext payload, Object caller) {
+    public ApplicationContextEvent(String name, ApplicationBeanContext payload, Object caller) {
         super(name, payload, caller);
     }
 }

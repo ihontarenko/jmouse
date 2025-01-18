@@ -16,12 +16,12 @@ import static svit.reflection.Reflections.getShortName;
  * Initializer for configuring the {@link ServletContext} with the {@link WebBeanContextLoaderListener}.
  * Extends {@link AbstractApplicationInitializer} to include additional setup logic.
  */
-public class WebBeanContextLoaderInitializer extends AbstractApplicationInitializer {
+public class WebBeanContextServletInitializer extends AbstractApplicationInitializer {
 
     /**
      * Logger for logging initialization process
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(WebBeanContextLoaderInitializer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebBeanContextServletInitializer.class);
 
     /**
      * Configures the {@link ServletContext} by adding the {@link WebBeanContextLoaderListener}.

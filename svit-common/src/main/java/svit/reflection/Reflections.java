@@ -612,13 +612,13 @@ abstract public class Reflections {
      * Returns the short name of the class for the given object.
      * If the object is itself a {@link Class}, it delegates to the {@link #getShortName(Class)} method.
      *
-     * @param clazz the object whose class name is to be shortened
+     * @param instance the object whose class name is to be shortened
      * @return the shortened class name
      */
-    public static String getShortName(Object clazz) {
-        Class<?> classType = clazz.getClass();
+    public static String getShortName(Object instance) {
+        Class<?> classType = instance.getClass();
 
-        if (clazz instanceof Class<?> type) {
+        if (instance instanceof Class<?> type) {
             classType = type;
         }
 

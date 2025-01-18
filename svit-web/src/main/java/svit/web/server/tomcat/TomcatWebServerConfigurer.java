@@ -1,12 +1,16 @@
 package svit.web.server.tomcat;
 
 import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
+import svit.web.FrameworkInitializer;
 import svit.web.server.WebServer;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.Set;
 
 
@@ -51,11 +55,10 @@ public class TomcatWebServerConfigurer implements WebServer.Configurer<Tomcat> {
     public static final int DEFAULT_PORT = 8080;
 
     private final ServletContainerInitializer containerInitializer;
-    private final Set<Class<?>>               initializers;
-    private       int           port;
-    private       String        document    = DOCUMENT_DEFAULT;
-    private       String        contextRoot = CONTEXT_DEFAULT;
-    private       String        temporary   = TEMPORARY_DEFAULT;
+    private       int                         port;
+    private       String                      document    = DOCUMENT_DEFAULT;
+    private       String                      contextRoot = CONTEXT_DEFAULT;
+    private       String                      temporary   = TEMPORARY_DEFAULT;
 
     /**
      * Constructs a {@code TomcatWebServerConfigurer} with a specified port,
@@ -63,10 +66,8 @@ public class TomcatWebServerConfigurer implements WebServer.Configurer<Tomcat> {
      *
      * @param port                the port on which Tomcat listens
      * @param containerInitializer the {@link ServletContainerInitializer} to configure the servlet container
-     * @param initializers        additional classes passed to the container initializer
      */
-    public TomcatWebServerConfigurer(int port, ServletContainerInitializer containerInitializer, Class<?>... initializers) {
-        this.initializers = Set.of(initializers);
+    public TomcatWebServerConfigurer(int port, ServletContainerInitializer containerInitializer) {
         this.containerInitializer = containerInitializer;
         this.port = port;
     }
@@ -86,11 +87,11 @@ public class TomcatWebServerConfigurer implements WebServer.Configurer<Tomcat> {
     public void configure(Tomcat server) {
         server.setBaseDir(createTemporaryDirectory(getPort()));
 
-        Context context = server.addContext(getContextRoot(), createDocumentBaseDirectory());
+        Context   context   = server.addContext(getContextRoot(), createDocumentBaseDirectory());
         Connector connector = server.getConnector();
 
         connector.setPort(port);
-        context.addServletContainerInitializer(containerInitializer, initializers);
+        context.addServletContainerInitializer(containerInitializer, Collections.emptySet());
     }
 
     /**
