@@ -19,10 +19,6 @@ public class StartApplication {
         conversion.registerConverter(new StringToEnumConverter());
 
         // register basic converters
-        conversion.registerConverter(String.class, Integer.class, Integer::parseInt);
-        conversion.registerConverter(String.class, Double.class, Double::parseDouble);
-        conversion.registerConverter(String.class, Float.class, Float::parseFloat);
-        conversion.registerConverter(String.class, BigDecimal.class, BigDecimal::new);
         conversion.registerConverter(new NumberToStringConverter());
         conversion.registerConverter(new NumberToNumberConverter());
 
