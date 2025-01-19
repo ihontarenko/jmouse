@@ -1,7 +1,5 @@
 package svit.convert;
 
-import svit.convert.converter.ClassTypeConverter;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,12 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DefaultConversion implements Conversion {
 
-    private final Map<ClassPair<?, ?>, GenericConverter<?, ?>> converters      = new ConcurrentHashMap<>();
-    private final GenericConverter<Class<?>, Class<?>>         classNormalizer = new ClassTypeConverter();
-
-    public DefaultConversion() {
-        registerConverter(classNormalizer);
-    }
+    private final Map<ClassPair<?, ?>, GenericConverter<?, ?>> converters = new ConcurrentHashMap<>();
+    private final TypeNormalizer                               normalizer = new TypeNormalizer.EnumTypeNormalizer();
 
     /**
      * Registers a simple {@link Converter} for converting from {@code sourceType} to {@code targetType}.
@@ -82,6 +76,7 @@ public class DefaultConversion implements Conversion {
      * @return a suitable {@link GenericConverter}, or {@code null} if none is registered
      */
     @Override
+    @SuppressWarnings({"unchecked"})
     public <S, T> GenericConverter<S, T> getConverter(ClassPair<S, T> classPair) {
         return (GenericConverter<S, T>) converters.get(classPair);
     }
@@ -105,8 +100,8 @@ public class DefaultConversion implements Conversion {
         R converted = null;
 
         if (source != null) {
-            Class<R>        normalizedType = (Class<R>) classNormalizer.convert(targetType,
-                    (Class<Class<?>>) (Class<?>)Class.class);
+            @SuppressWarnings({"unchecked"})
+            Class<R>        normalizedType = (Class<R>) normalizer.normalize(targetType);
             ClassPair<T, R> classPair      = new ClassPair<>(sourceType, normalizedType);
 
             GenericConverter<T, R> converter = getConverter(classPair);

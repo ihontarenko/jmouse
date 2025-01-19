@@ -15,8 +15,6 @@ public class StartApplication {
     public static void main(String... arguments) {
         DefaultConversion conversion = new DefaultConversion();
 
-        GenericConverter<String, Enum<?>> converter = new StringToEnumConverter();
-
         // register generic converters
         conversion.registerConverter(new StringToEnumConverter());
 
