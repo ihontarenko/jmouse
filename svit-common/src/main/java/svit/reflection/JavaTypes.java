@@ -1,10 +1,24 @@
 package svit.reflection;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A utility class that provides mappings for Java primitive types, their wrapper types,
  * and default values for primitive types.
+ *
+ * <p>This class includes:
+ * <ul>
+ *   <li>A map of default values for primitive types.</li>
+ *   <li>Mappings between primitive types and their corresponding wrapper classes.</li>
+ *   <li>Mappings from wrapper classes back to primitive types.</li>
+ *   <li>Sets of numeric wrapper and primitive types for quick reference.</li>
+ * </ul>
+ *
+ * <p>These utilities are useful when creating instances, initializing variables of
+ * primitive types, or performing type conversions between primitives and wrappers.
  */
 public class JavaTypes {
 
@@ -22,13 +36,6 @@ public class JavaTypes {
      * <li>double: {@code 0D}</li>
      * <li>char: {@code '\0'}</li>
      * </ul>
-     *
-     * @example
-     * <pre>{@code
-     * // Example: Getting default value for an int
-     * Object defaultValue = JavaTypes.PRIMITIVES_DEFAULT_TYPE_VALUES.get(int.class);
-     * System.out.println(defaultValue); // prints 0
-     * }</pre>
      */
     public static final Map<Class<?>, Object> PRIMITIVES_DEFAULT_TYPE_VALUES = Map.of(
             boolean.class, false,
@@ -55,13 +62,6 @@ public class JavaTypes {
      * <li>double.class: {@link Double}</li>
      * <li>char.class: {@link Character}</li>
      * </ul>
-     *
-     * @example
-     * <pre>{@code
-     * // Example: Getting the wrapper class for a primitive type
-     * Class<?> wrapper = JavaTypes.WRAPPERS.get(int.class);
-     * System.out.println(wrapper.getSimpleName()); // prints "Integer"
-     * }</pre>
      */
     public static final Map<Class<?>, Class<?>> WRAPPERS = Map.of(
             boolean.class, Boolean.class,
@@ -88,13 +88,6 @@ public class JavaTypes {
      * <li>{@link Double}: double.class</li>
      * <li>{@link Character}: char.class</li>
      * </ul>
-     *
-     * @example
-     * <pre>{@code
-     * // Example: Getting the primitive type for a wrapper class
-     * Class<?> primitive = JavaTypes.PRIMITIVES.get(Integer.class);
-     * System.out.println(primitive.getSimpleName()); // prints "int"
-     * }</pre>
      */
     public static final Map<Class<?>, Class<?>> PRIMITIVES = Map.of(
             Boolean.class, boolean.class,
@@ -106,4 +99,33 @@ public class JavaTypes {
             Double.class, double.class,
             Character.class, char.class
     );
+
+    /**
+     * A set containing wrapper classes for numeric types.
+     * This set includes common numeric wrappers and also {@link BigDecimal} and {@link BigInteger}.
+     */
+    public static final Set<Class<? extends Number>> NUMBER_WRAPPERS = Set.of(
+            Integer.class,
+            Long.class,
+            Double.class,
+            Float.class,
+            BigDecimal.class,
+            BigInteger.class,
+            Short.class,
+            Byte.class
+    );
+
+    /**
+     * A set containing primitive numeric types.
+     * This set includes common numeric primitives such as int, long, double, float, and short.
+     */
+    public static final Set<Class<? extends Number>> NUMBER_PRIMITIVES = Set.of(
+            int.class,
+            long.class,
+            double.class,
+            float.class,
+            short.class,
+            byte.class
+    );
+
 }

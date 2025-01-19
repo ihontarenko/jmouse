@@ -1,35 +1,35 @@
 package svit.web;
 
-import svit.converter.Converter;
-import svit.converter.ConverterFactory;
-import svit.converter.Conversion;
+import svit.convert.DefaultConversion;
+import svit.convert.GenericConverter;
+import svit.convert.converter.NumberToNumberConverter;
+import svit.convert.converter.NumberToStringConverter;
+import svit.convert.converter.StringToEnumConverter;
+
+import java.math.BigDecimal;
 
 public class StartApplication {
 
+    enum Color{RED, GREEN, BLUE}
+
     public static void main(String... arguments) {
-        ConverterFactory converterFactory = new Conversion();
-        converterFactory.registerConverter(new StringToIntegerConverter());
-        converterFactory.registerConverter(new StringToDoubleConverter());
+        DefaultConversion conversion = new DefaultConversion();
+
+        GenericConverter<String, Enum<?>> converter = new StringToEnumConverter();
+
+        // register generic converters
+        conversion.registerConverter(new StringToEnumConverter());
+
+        // register basic converters
+        conversion.registerConverter(String.class, Integer.class, Integer::parseInt);
+        conversion.registerConverter(String.class, Double.class, Double::parseDouble);
+        conversion.registerConverter(String.class, Float.class, Float::parseFloat);
+        conversion.registerConverter(String.class, BigDecimal.class, BigDecimal::new);
+        conversion.registerConverter(new NumberToStringConverter());
+        conversion.registerConverter(new NumberToNumberConverter());
+
         System.out.println("end");
 //        ApplicationBeanContext context = WebApplicationLauncher.launch(StartApplication.class);
     }
-
-    static class StringToIntegerConverter implements Converter<String, Integer> {
-
-        @Override
-        public Integer convert(String source) {
-            return Integer.parseInt(source);
-        }
-    }
-
-    static class StringToDoubleConverter implements Converter<String, Double> {
-
-        @Override
-        public Double convert(String source) {
-            return Double.parseDouble(source);
-        }
-    }
-
-
 
 }

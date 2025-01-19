@@ -1,4 +1,4 @@
-package svit.converter;
+package svit.convert;
 
 /**
  * A functional interface representing a simple conversion operation from a source

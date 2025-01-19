@@ -1,4 +1,4 @@
-package svit.converter;
+package svit.convert;
 
 import svit.reflection.Reflections;
 
@@ -79,6 +79,6 @@ public class ClassPair<A, B> {
      */
     @Override
     public String toString() {
-        return "%s:%s".formatted(Reflections.getShortName(classA), Reflections.getShortName(classB));
+        return "'%s' → '%s'".formatted(Reflections.getShortName(classA), Reflections.getShortName(classB));
     }
 }
