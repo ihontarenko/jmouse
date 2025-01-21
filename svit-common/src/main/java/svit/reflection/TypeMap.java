@@ -20,7 +20,7 @@ import java.util.Set;
  * <p>These utilities are useful when creating instances, initializing variables of
  * primitive types, or performing type conversions between primitives and wrappers.
  */
-public class JavaTypes {
+public class TypeMap {
 
     /**
      * A map that provides the default values for Java primitive types.

@@ -2,7 +2,7 @@ package svit.web.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import svit.reflection.ReflectType;
+import svit.reflection.JavaType;
 
 import java.util.List;
 
@@ -64,7 +64,10 @@ public interface WebServer {
 
         LOGGER.info("Start configuring '{}' web-server", name());
 
-        System.out.println(List.of(ReflectType.forInstance(configurer).getGenerics()));
+        JavaType javaType   = JavaType.forInstance(configurer);
+        Class<?> serverType = javaType.locate(Configurer.class).getFirst().getRawType();
+
+        LOGGER.info("Type of web-server '{}'", serverType);
 
         configurer.configure((T) server());
     }

@@ -1,7 +1,7 @@
 package svit.convert.converter;
 
 import svit.convert.*;
-import svit.reflection.JavaTypes;
+import svit.reflection.TypeMap;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -87,7 +87,7 @@ public class NumberToNumberConverter implements GenericConverter<Number, Number>
     /**
      * Returns a set of supported type pairs for conversion. Each pair represents a mapping
      * from a numeric source type to a numeric target type. This method generates a matrix
-     * of all possible conversions among the numeric types defined in {@link JavaTypes}.
+     * of all possible conversions among the numeric types defined in {@link TypeMap}.
      *
      * @return a set of {@link ClassPair} objects representing all supported conversions
      *         between numeric primitive types and their wrappers
@@ -97,8 +97,8 @@ public class NumberToNumberConverter implements GenericConverter<Number, Number>
         Set<Class<? extends Number>>                       types     = new HashSet<>();
         Set<ClassPair<? extends Number, ? extends Number>> supported = new HashSet<>();
 
-        types.addAll(JavaTypes.NUMBER_PRIMITIVES);
-        types.addAll(JavaTypes.NUMBER_WRAPPERS);
+        types.addAll(TypeMap.NUMBER_PRIMITIVES);
+        types.addAll(TypeMap.NUMBER_WRAPPERS);
 
         for (Class<? extends Number> sourceType : types) {
             for (Class<? extends Number> targetType : types) {

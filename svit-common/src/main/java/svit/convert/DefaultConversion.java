@@ -3,6 +3,7 @@ package svit.convert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import svit.graph.*;
+import svit.reflection.JavaType;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -118,14 +119,14 @@ public class DefaultConversion implements Conversion {
                     throw new ConverterNotFound(classPair);
                 }
 
+                Object intermediate = source;
+
                 for (ClassPair<?, ?> transition : transitions) {
                     ClassPair<Object, Object> pair = (ClassPair<Object, Object>) transition;
-                    chain.add(value -> (R) getConverter(pair).convert(value, pair.getClassB()));
+                    intermediate = getConverter(pair).convert(intermediate, pair.getClassB());
                 }
 
-                Optional<Converter<Object, R>> composite = chain.stream().reduce(Converter::andThen);
-
-                converted = composite.get().convert(source);
+                converted = (R) intermediate;
             } else {
                 converted = converter.convert(source, targetType);
             }
@@ -155,8 +156,6 @@ public class DefaultConversion implements Conversion {
         List<ClassPair<?, ?>> chain    = new ArrayList<>();
 
         if (!typePath.isEmpty()) {
-            LOGGER.info("Transition path for {} was found.", new ClassPair<>(sourceType, targetType));
-
             for (Edge<Class<?>> edge : Graph.toEdges(typePath)) {
                 ClassPair<?, ?> classPair = new ClassPair<>(edge.nodeA(), edge.nodeB());
                 LOGGER.info("Transition: {}", classPair);

@@ -1,5 +1,6 @@
 package svit.mapping;
 
+import svit.reflection.JavaType;
 import svit.reflection.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,6 +127,9 @@ public interface Mapping {
         @Override
         public void register(Mapper<?, ?> mapper) {
             Class<?> preferredType = resolvePreferredMappersType(mapper.getClass());
+
+//            JavaType javaType      = JavaType.forInstance(mapper);
+//            Class<?> preferredType = javaType.locate(Mapper.class).getFirst().getRawType();
 
             if (preferredType == null) {
                 throw new MappingException(

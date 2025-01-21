@@ -4,8 +4,8 @@ import svit.matcher.Matcher;
 
 import java.util.List;
 
-import static svit.reflection.JavaTypes.PRIMITIVES;
-import static svit.reflection.JavaTypes.WRAPPERS;
+import static svit.reflection.TypeMap.PRIMITIVES;
+import static svit.reflection.TypeMap.WRAPPERS;
 
 /**
  * A utility class that provides matchers for comparing types. These matchers allow for checking

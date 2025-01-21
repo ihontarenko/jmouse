@@ -4,6 +4,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import svit.util.Priority;
 import svit.web.AbstractApplicationInitializer;
 import svit.web.servlet.RequestContextLoaderListener;
 import svit.web.servlet.WebBeanContextLoaderListener;
@@ -16,6 +17,7 @@ import static svit.reflection.Reflections.getShortName;
  * Initializer for configuring the {@link ServletContext} with the {@link WebBeanContextLoaderListener}.
  * Extends {@link AbstractApplicationInitializer} to include additional setup logic.
  */
+@Priority(Integer.MIN_VALUE)
 public class WebBeanContextServletInitializer extends AbstractApplicationInitializer {
 
     /**

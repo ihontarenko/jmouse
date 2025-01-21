@@ -41,4 +41,25 @@ public final class Arrays {
 
         return c;
     }
+
+    /**
+     * Checks if the given array is null or empty.
+     *
+     * @param array the array to check
+     * @return {@code true} if the array is null or has no elements, {@code false} otherwise
+     */
+    public static boolean empty(Object[] array) {
+        return array == null || array.length == 0;
+    }
+
+    /**
+     * Checks if the given array is not null and contains at least one element.
+     *
+     * @param array the array to check
+     * @return {@code true} if the array is not null and contains elements, {@code false} otherwise
+     */
+    public static boolean notEmpty(Object[] array) {
+        return !empty(array);
+    }
+
 }
