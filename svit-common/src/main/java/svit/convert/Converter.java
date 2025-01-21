@@ -1,23 +1,14 @@
 package svit.convert;
 
+import svit.reflection.Reflections;
+
+import java.util.Objects;
+
 /**
  * A functional interface representing a simple conversion operation from a source
  * type {@code S} to a target type {@code T}. This interface is commonly used in
  * contexts where objects of one type need to be transformed into another type,
  * such as data mapping or serialization.
- *
- * <p>Usage example:
- * <pre>{@code
- * // Convert a String to an Integer
- * Converter<String, Integer> stringToInteger = Integer::valueOf;
- * Integer result = stringToInteger.convert("123");
- * // result will be 123
- *
- * // Another example: Convert an Integer to a String
- * Converter<Integer, String> integerToString = Object::toString;
- * String text = integerToString.convert(123);
- * // text will be "123"
- * }</pre>
  *
  * @param <S> the source type
  * @param <T> the target type
@@ -32,4 +23,13 @@ public interface Converter<S, T> {
      * @return the converted object
      */
     T convert(S source);
+
+    default <U> Converter<S, U> andThen(Converter<? super T, ? extends U> after) {
+        return (S value) -> {
+            T initial = Objects.requireNonNull(convert(value), "Converter '%s' must return non NULL result"
+                    .formatted(Reflections.getShortName(getClass())));
+            return Objects.requireNonNull(after, "Next converter in chain can not be NULL").convert(initial);
+        };
+    }
+
 }

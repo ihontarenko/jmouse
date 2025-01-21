@@ -14,7 +14,7 @@ import svit.mapping.MappingConfigurer;
  * @see ConversionConfigurer
  * @see BeanContainer
  */
-public interface ApplicationConfigurer extends MappingConfigurer, ConversionConfigurer {
+public interface ApplicationConfigurer extends ServiceConfigurer {
 
     /**
      * Registers any required singletons with the given {@link BeanContainer}. The default

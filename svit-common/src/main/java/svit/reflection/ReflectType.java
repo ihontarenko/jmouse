@@ -2,236 +2,249 @@ package svit.reflection;
 
 import java.io.Serializable;
 import java.lang.reflect.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.StringJoiner;
 
-/**
- * A utility class that encapsulates reflection-based type information. It can
- * resolve a {@link Type} into its corresponding {@link Class} and provides
- * methods to inspect super types, interfaces, and generic type parameters.
- * <p>
- * The internal mechanics rely on {@link #resolveClass()} to determine the
- * concrete class, if possible. For parameterized types, it can extract
- * generic type arguments via {@link #getGenerics()}. If the type is not
- * parameterized or cannot be resolved (e.g., wildcards, generic arrays), it may
- * throw an exception or return partially populated data.
- * <p>
- * Common use cases include:
- * <ul>
- *   <li>Analyzing parent/child type relationships at runtime</li>
- *   <li>Determining generic parameters for dependency injection frameworks</li>
- *   <li>Inspecting classes for reflective or dynamic proxy logic</li>
- * </ul>
- */
 public class ReflectType {
 
-    /**
-     * A sentinel instance representing a "no type" scenario (e.g., for empty or
-     * unresolvable types).
-     */
-    private static final ReflectType NONE_TYPE = new ReflectType(EmptyType.INSTANCE);
+    private static final Map<ReflectType, ReflectType> CACHE = new HashMap<>();
 
-    /**
-     * A constant for an empty array of {@code ReflectiveType}.
-     */
+    private static final ReflectType NONE_TYPE = new ReflectType(NoneType.INSTANCE);
+
     private static final ReflectType[] EMPTY_TYPE_ARRAY = {};
 
-    /**
-     * The underlying {@link Type} this instance represents. Could be a {@link Class},
-     * {@link ParameterizedType}, or {@link EmptyType}.
-     */
+    private final ReflectType parent;
+
     private final Type type;
 
-    /**
-     * The cached concrete {@link Class} if this {@link Type} can be resolved; otherwise
-     * {@code null} until it is lazily resolved by {@link #resolveClass()}.
-     */
-    private Class<?> klass;
+    private Class<?> rawType;
 
-    /**
-     * A lazily initialized {@link ReflectType} for the super type of {@link #klass}.
-     */
     private volatile ReflectType superType;
 
-    /**
-     * A lazily initialized array of {@link ReflectType} representing the interfaces
-     * implemented by {@link #klass}.
-     */
     private volatile ReflectType[] interfaces;
 
-    /**
-     * A lazily initialized array of {@link ReflectType} representing the generic type
-     * parameters of {@link #type} if it is a {@link ParameterizedType}.
-     */
     private ReflectType[] generics;
 
-    /**
-     * Constructs a {@code ReflectiveType} for the given class. If {@code klass} is {@code null},
-     * it defaults to {@link Object}.
-     *
-     * @param klass the class to represent, or {@code null} to default to {@link Object}
-     */
-    public ReflectType(Class<?> klass) {
-        this.klass = (klass == null) ? Object.class : klass;
-        this.type = this.klass;
-    }
+    private VariableResolver resolver;
 
-    /**
-     * Constructs a {@code ReflectiveType} for the given type. If the type is {@link EmptyType#INSTANCE},
-     * it represents a no-type scenario.
-     *
-     * @param type the type to represent
-     */
-    public ReflectType(Type type) {
+    private int hashCode;
+
+    private ReflectType(Type type, ReflectType parent) {
         this.type = type;
+        this.parent = parent;
+
+        if (parent != null) {
+            this.resolver = new ParentalVariableResolver(parent);
+        }
+
+        this.hashCode = calculateHashCode();
+
         resolveClass();
     }
 
-    /**
-     * Returns the resolved {@link Class} for this type, or resolves it if it has not yet been done.
-     *
-     * @return the corresponding class, or {@code null} if it cannot be resolved
-     */
-    public Class<?> getClassType() {
-        return klass;
+    private ReflectType(Type type) {
+        this(type, null);
     }
 
-    /**
-     * Returns the raw {@link Type} that this {@code ReflectiveType} represents, which may be a
-     * {@link Class}, {@link ParameterizedType}, or {@link EmptyType}.
-     *
-     * @return the underlying type
-     */
+    public static ReflectType forClass(Class<?> klass) {
+        return new ReflectType(klass);
+    }
+
+    public static ReflectType forType(Type type) {
+        return forType(type, null);
+    }
+
+    public static ReflectType forType(Type type, ReflectType parent) {
+        ReflectType newType    = new ReflectType(type, parent);
+        ReflectType cachedType = CACHE.get(newType);
+
+        if (cachedType == null) {
+            CACHE.put(newType, newType);
+            cachedType = newType;
+        }
+
+        return cachedType;
+    }
+
+    public static ReflectType forInstance(Object object) {
+        return (object instanceof Class<?> klass)
+                ? forType(klass)
+                : forType(object.getClass());
+    }
+
+    public static ReflectType forField(Field field) {
+        return forType(field.getGenericType());
+    }
+
+    public static ReflectType forMethodReturnType(Method method) {
+        return forType(method.getGenericReturnType());
+    }
+
+    public Class<?> getRawType() {
+        return rawType;
+    }
+
     public Type getType() {
         return type;
     }
 
-    /**
-     * Resolves and returns the concrete class for this type, if possible. If the type is
-     * {@link EmptyType#INSTANCE}, it returns {@code null}. If the type is already resolved,
-     * no action is taken.
-     *
-     * @return the resolved class, or {@code null} if the type is empty
-     */
     public Class<?> resolveClass() {
-        if (type == EmptyType.INSTANCE) {
+        if (type == NoneType.INSTANCE) {
             return null;
         }
 
-        if (klass == null) {
-            if (type instanceof Class<?>) {
-                this.klass = (Class<?>) type;
-            } else if (type instanceof GenericArrayType arrayType) {
-                // Generic arrays are currently not fully supported
-                throw new UnsupportedOperationException("Generic array types are not supported");
+        if (rawType == null) {
+            if (isRawClass()) {
+                this.rawType = (Class<?>) type;
+            } else if (isArray()) {
+                this.rawType = getComponentType().resolveClass();
             } else {
-                this.klass = resolveType().resolveClass();
+                this.rawType = resolveType().resolveClass();
             }
         }
 
-        return klass;
+        return rawType;
     }
 
-    /**
-     * Resolves the raw type if this is a {@link ParameterizedType}, otherwise returns
-     * {@link #NONE_TYPE}.
-     *
-     * @return a {@link ReflectType} for the raw type if this is parameterized,
-     *         or {@code NONE_TYPE} otherwise
-     */
     public ReflectType resolveType() {
-        ReflectType reflectiveType = NONE_TYPE;
+        return switch (this.type) {
+            case ParameterizedType parameterizedType -> forType(parameterizedType.getRawType());
+            case TypeVariable<?> typeVariable -> {
+                ReflectType variable = resolver.resolve(typeVariable);;
 
-        if (type instanceof ParameterizedType parameterizedType) {
-            reflectiveType = forType(parameterizedType.getRawType());
-        }
+                if (resolver != null) {
+                    variable = resolver.resolve(typeVariable);
+                }
 
-        return reflectiveType;
+                yield variable;
+            }
+            default -> NONE_TYPE;
+        };
     }
 
-    /**
-     * Returns the {@link ReflectType} representing the super type of this class. If the class
-     * has not been resolved yet, it is lazily resolved by calling {@link #resolveClass()}.
-     *
-     * @return the super type, or a {@code ReflectiveType} representing {@code Object} if none exists
-     */
-    public ReflectType getSuperType() {
-        ReflectType localSuperType = this.superType;
+    public ReflectType resolveVariable(TypeVariable<?> variable) {
+        ReflectType type         = null;
+        String      expectedName = variable.getName();
 
-        if (localSuperType == null) {
-            Class<?> klass = resolveClass();
-            if (klass != null) {
-                this.superType = forType(klass.getGenericSuperclass());
+        if (isParametrizedType()) {
+            int counter = 0;
+            for (TypeVariable<? extends Class<?>> typeVariable : getRawType().getTypeParameters()) {
+                String actualName = typeVariable.getName();
+                if (expectedName.equals(actualName)) {
+                    type = getGeneric(counter);
+                    break;
+                }
+                counter++;
             }
+        }
+
+        return Objects.requireNonNullElse(type, NONE_TYPE);
+    }
+
+    public ReflectType getComponentType() {
+        ReflectType type = NONE_TYPE;
+
+        if (this.type instanceof GenericArrayType arrayType) {
+            type = forType(arrayType.getGenericComponentType());
+        } else if (this.type instanceof Class<?> classType) {
+            type = forType(classType.componentType());
+        }
+
+        return type;
+    }
+
+    public boolean isArray() {
+        return (type instanceof Class<?> clazz && clazz.isArray()) || isGenericArrayType();
+    }
+
+    public boolean isParametrizedType() {
+        return this.type instanceof ParameterizedType;
+    }
+
+    public boolean isGenericArrayType() {
+        return this.type instanceof GenericArrayType;
+    }
+
+    public boolean isRawClass() {
+        return this.type instanceof Class<?>;
+    }
+
+    public boolean isTypeVariable() {
+        return this.type instanceof TypeVariable<?>;
+    }
+
+    public ReflectType getSuperType() {
+        ReflectType superType = this.superType;
+
+        if (superType == null) {
+            superType = NONE_TYPE;
+
+            Class<?> klass = resolveClass();
+
+            if (klass != null) {
+                Type genericSuperclass = klass.getGenericSuperclass();
+                if (genericSuperclass != null) {
+                    superType = forType(genericSuperclass, this);
+                }
+            }
+
+            this.superType = superType;
         }
 
         return this.superType;
     }
 
-    /**
-     * Returns an array of {@link ReflectType} representing all the interfaces
-     * implemented by this class. If the class is not resolvable, or there are no
-     * interfaces, an empty array is returned.
-     *
-     * @return an array of interface types, or an empty array if none
-     */
     public ReflectType[] getInterfaces() {
-        Class<?> localClass = getClassType();
+        Class<?> localClass = getRawType();
 
         if (localClass == null) {
             return EMPTY_TYPE_ARRAY;
         }
 
         if (this.interfaces == null) {
-            Type[]        ifaces = localClass.getGenericInterfaces();
-            ReflectType[] result = new ReflectType[ifaces.length];
+            Type[]        interfaces = localClass.getGenericInterfaces();
+            ReflectType[] types      = new ReflectType[interfaces.length];
 
-            for (int i = 0; i < ifaces.length; i++) {
-                result[i] = forType(ifaces[i]);
+            for (int i = 0; i < interfaces.length; i++) {
+                types[i] = forType(interfaces[i], this);
             }
 
-            this.interfaces = result;
+            this.interfaces = types;
         }
 
         return this.interfaces;
     }
 
-    /**
-     * Returns an array of {@link ReflectType} representing the generic type parameters
-     * of this {@link #type} if it is a {@link ParameterizedType}. Otherwise, an empty array
-     * is returned.
-     *
-     * @return an array of generic parameter types, or an empty array if none
-     */
     public ReflectType[] getGenerics() {
-        ReflectType[] localGenerics = this.generics;
+        boolean empty = generics == null || generics.length == 0;
 
-        if (localGenerics == null || localGenerics.length == 0) {
-            if (this.type instanceof ParameterizedType parameterizedType) {
-                Type[]        actualTypes = parameterizedType.getActualTypeArguments();
-                ReflectType[] result      = new ReflectType[actualTypes.length];
+        if (empty) {
+            Type[]        types = isParametrizedType()
+                    ? ((ParameterizedType) type).getActualTypeArguments() : getRawType().getTypeParameters();
+            ReflectType[] array = new ReflectType[types.length];
 
-                for (int i = 0; i < actualTypes.length; i++) {
-                    result[i] = forType(actualTypes[i]);
+            for (int i = 0; i < types.length; i++) {
+                ReflectType type = forType(types[i], parent);
+
+                if (type.isParametrizedType() && type.getGeneric(0).isTypeVariable()) {
+                    System.out.println(">>>");
+                    System.out.println(type);
+//                    type = type.resolveType();
+                    System.out.println(type.hashCode);
+                    System.out.println("<<<");
                 }
 
-                this.generics = result;
-            } else {
-                this.generics = EMPTY_TYPE_ARRAY;
+                array[i] = type;
             }
+
+            this.generics = array;
         }
 
         return this.generics;
     }
 
-    /**
-     * Returns a nested generic type by following the specified sequence of indexes.
-     * For example, calling {@code getGeneric(0, 1)} first gets the 0th generic type,
-     * then from that type, the 1st generic type, and so on. If no matching generic
-     * is found at any step, returns a sentinel {@link #NONE_TYPE}.
-     *
-     * @param sequence an array of indexes specifying which generic to traverse
-     * @return the matching generic type, or {@code NONE_TYPE} if out of bounds
-     */
     public ReflectType getGeneric(int... sequence) {
         ReflectType[] types = getGenerics();
         ReflectType   generic;
@@ -254,20 +267,12 @@ public class ReflectType {
         return generic;
     }
 
-    /**
-     * Attempts to navigate from this {@code ReflectType} to the specified {@code classType}
-     * by searching the current class, its interfaces, and its super types. If it finds
-     * a match, returns the corresponding {@code ReflectType}; otherwise returns {@link #NONE_TYPE}.
-     *
-     * @param classType the target class to navigate toward
-     * @return a {@code ReflectType} representing the path to {@code classType}, or {@code NONE_TYPE} if not found
-     */
     public ReflectType navigate(Class<?> classType) {
         ReflectType targetType = NONE_TYPE;
 
         if (this != NONE_TYPE) {
             // If we haven't resolved the class or if we've found a direct match
-            if (this.klass == null || this.klass == classType) {
+            if (this.rawType == null || this.rawType == classType) {
                 targetType = this;
             } else {
                 // Search interfaces
@@ -287,106 +292,99 @@ public class ReflectType {
         return targetType;
     }
 
-    /**
-     * Creates a new {@code ReflectiveType} for the given {@link Class}.
-     *
-     * @param klass the class to represent
-     * @return a {@code ReflectiveType} wrapping the given class
-     */
-    public static ReflectType forClass(Class<?> klass) {
-        return new ReflectType(klass);
-    }
-
-    /**
-     * Creates a new {@code ReflectiveType} for the given {@link Type}.
-     *
-     * @param type the type to represent
-     * @return a {@code ReflectiveType} wrapping the given type
-     */
-    public static ReflectType forType(Type type) {
-        return new ReflectType(type);
-    }
-
-    /**
-     * Creates a new {@code ReflectiveType} for the class or type of the given object.
-     * If the object is itself a {@code Class}, it uses that; otherwise, it uses the
-     * object's runtime class.
-     *
-     * @param object the object whose type to represent
-     * @return a {@code ReflectiveType} for the object's class or type
-     */
-    public static ReflectType forInstance(Object object) {
-        return (object instanceof Class<?> klass)
-                ? forType(klass)
-                : forType(object.getClass());
-    }
-
-    /**
-     * Creates a new {@code ReflectiveType} representing the generic type of a field.
-     *
-     * @param field the field whose type is to be represented
-     * @return a {@code ReflectiveType} for the field's generic type
-     */
-    public static ReflectType forField(Field field) {
-        return new ReflectType(field.getGenericType());
-    }
-
-    /**
-     * Creates a new {@code ReflectiveType} representing the return type of a method.
-     *
-     * @param method the method whose return type is to be represented
-     * @return a {@code ReflectiveType} for the method's generic return type
-     */
-    public static ReflectType forMethodReturnType(Method method) {
-        return new ReflectType(method.getGenericReturnType());
-    }
-
-    /**
-     * Returns a string representation of the object.
-     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        if (klass != null) {
-            builder.append(klass.getSimpleName());
-
-            ReflectType[] generics = getGenerics();
-
-            if (generics.length > 0) {
-                StringJoiner joiner = new StringJoiner(", ", "<", ">");
-
-                for (ReflectType generic : generics) {
-                    joiner.add(generic.toString());
-                }
-
-                builder.append(joiner);
-            }
+        if (isArray()) {
+            builder.append(getComponentType().toString());
+            builder.append("[]");
         } else {
-            builder.append('?');
+            if (rawType != null) {
+                builder.append(rawType.getSimpleName());
+
+                ReflectType[] generics = getGenerics();
+
+                if (generics.length > 0) {
+                    StringJoiner joiner = new StringJoiner(", ", "<", ">");
+
+                    for (ReflectType generic : generics) {
+                        joiner.add(generic.toString());
+                    }
+
+                    builder.append(joiner);
+                }
+            } else if (isTypeVariable()) {
+                builder.append('!');
+                builder.append(this.type.getTypeName());
+            } else {
+                builder.append('?');
+            }
         }
 
         return builder.toString();
     }
 
-    /**
-     * A singleton class representing a "no type" scenario. This is used internally
-     * when no actual type information is available.
-     */
-    static class EmptyType implements Type, Serializable {
-        /**
-         * The single instance of this empty type.
-         */
-        static final Type INSTANCE = new EmptyType();
+    public int getHashCode() {
+        return hashCode;
+    }
 
-        /**
-         * Ensures that deserialization always returns the single static instance.
-         *
-         * @return the singleton {@link #INSTANCE}
-         */
-        Object readResolve() {
-            return INSTANCE;
+    public void setHashCode(int hashCode) {
+        this.hashCode = hashCode;
+    }
+
+    public int calculateHashCode() {
+        return Objects.hashCode(this.type);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        boolean equals = false;
+
+        if (object != null && getClass() == object.getClass()) {
+            ReflectType that = (ReflectType) object;
+            equals = Objects.equals(type, that.type);
         }
+
+        return equals;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashCode == 0 ? calculateHashCode() : hashCode;
+    }
+
+    interface VariableResolver {
+        ReflectType resolve(Type variable);
+    }
+
+    static class ParentalVariableResolver implements VariableResolver {
+
+        private final ReflectType root;
+
+        ParentalVariableResolver(ReflectType type) {
+            this.root = type;
+        }
+
+        public ReflectType uptoRoot() {
+            ReflectType current = root;
+
+            while (current.parent != null) {
+                current = current.parent;
+            }
+
+            return current;
+        }
+
+        @Override
+        public ReflectType resolve(Type variable) {
+            return root.resolveVariable((TypeVariable<?>) variable);
+        }
+
+    }
+
+    static class NoneType implements Type {
+        static final Type INSTANCE = new NoneType();
     }
 
 }

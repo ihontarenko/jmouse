@@ -1,5 +1,7 @@
 package svit.convert;
 
+import java.util.List;
+
 /**
  * A factory interface for registering and retrieving {@link Converter} or
  * {@link GenericConverter} instances. Implementations of this interface can
@@ -82,5 +84,8 @@ public interface ConverterFactory {
      * @return a compatible generic converter, or {@code null} if none is found
      */
     <S, T> GenericConverter<S, T> getConverter(ClassPair<S, T> classPair);
+
+
+    <S, T> List<ClassPair<?, ?>> searchTransitionChain(Class<S> sourceType, Class<T> targetType);
 
 }

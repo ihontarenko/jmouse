@@ -1,64 +1,69 @@
 package svit.beans;
 
-import java.util.Stack;
+import svit.util.Visitor;
+
 import java.util.function.Supplier;
 
 /**
- * Default implementation of {@link CyclicReferenceDetector} to detect cyclic references in a dependency graph.
- * <p>
- * This implementation uses a {@link ThreadLocal} {@link Stack} to track the current chain of references for each thread,
- * ensuring thread-safe detection of cycles.
+ * Default implementation of the {@link CyclicReferenceDetector} interface for detecting
+ * cyclic dependencies among beans or objects of type {@code T}. It uses a thread-local
+ * {@link Visitor} to keep track of visited identifiers during dependency resolution,
+ * allowing the detection of cycles in the object graph.
  *
- * @param <T> the type of identifier used to detect cyclic references.
+ * @param <T> the type of identifiers being tracked for cyclic references
  */
 public class DefaultCyclicReferenceDetector<T> implements CyclicReferenceDetector<T> {
 
     /**
-     * Thread-local stack to maintain the chain of references for detecting cycles.
+     * Thread-local stack of visited references, implemented using a {@link Visitor.Default}.
+     * This ensures that cyclic reference detection is thread-safe and isolated per thread.
      */
-    private final ThreadLocal<Stack<T>> referenceStack = ThreadLocal.withInitial(Stack::new);
+    private final ThreadLocal<Visitor<T>> referenceStack = ThreadLocal.withInitial(Visitor.Default::new);
 
     /**
-     * Detects a cyclic reference by checking if the provided identifier is already in the current chain.
-     * <p>
-     * If a cyclic reference is detected, the stack is cleared, and a runtime exception is thrown
-     * with details about the detected cycle.
+     * Detects a cyclic reference for the given identifier. If the identifier has been
+     * encountered previously in the current detection chain, a cyclic dependency is detected.
+     * In such a case, this method constructs a dependency chain representation and throws
+     * a {@link RuntimeException} provided by the {@code exceptionSupplier}.
      *
-     * @param identifier        the identifier representing the current reference being processed.
-     * @param exceptionSupplier a supplier that provides a custom exception to throw in case of a cycle.
-     * @throws Throwable the exception provided by the supplier in case of a cycle.
+     * @param identifier       the identifier to check for cyclic references
+     * @param exceptionSupplier a supplier that provides a {@link RuntimeException} to be thrown
+     *                          if a cyclic reference is detected
+     * @throws RuntimeException if a cyclic reference is detected
      */
     @Override
     public void detect(Identifier<T> identifier, Supplier<? extends RuntimeException> exceptionSupplier) {
-        Stack<T> stack = referenceStack.get();
+        Visitor<T> visitor = referenceStack.get();
         T        id    = identifier.getIdentifier();
 
-        if (stack.contains(id)) {
+        if (visitor.familiar(id)) {
             // Construct a dependency chain representation
-            String dependencyChain = stack.stream().map(Object::toString)
+            String dependencyChain = visitor.encounters().stream().map(Object::toString)
                     .reduce("%s -> %s"::formatted).map(chain -> "%s -> %s".formatted(chain, id))
                     .orElse(id.toString());
 
-            // Clear the stack to avoid lingering references
-            stack.clear();
+            // Clear the visitor to avoid lingering references
+            visitor.erase();
 
             // Throw the exception with a cause
             throw (RuntimeException) exceptionSupplier.get().initCause(
                     new IllegalStateException("Cyclic reference detected: %s".formatted(dependencyChain)));
         }
 
-        // Push the current identifier onto the stack
-        stack.push(id);
+        // Push the current identifier onto the visitor
+        visitor.visit(id);
     }
 
     /**
-     * Removes the provided identifier from the current chain, typically called after processing is complete.
+     * Removes the provided identifier from the current tracking chain. This method is typically
+     * called after the processing of a dependency is complete to allow for proper unwinding
+     * of the visited elements stack.
      *
-     * @param identifier the identifier to remove from the current chain.
+     * @param identifier the identifier to remove from the current chain
      */
     @Override
     public void remove(Identifier<T> identifier) {
-        Stack<T> stack = referenceStack.get();
-        stack.remove(identifier.getIdentifier());
+        Visitor<T> visitor = referenceStack.get();
+        visitor.forget(identifier.getIdentifier());
     }
 }
