@@ -10,12 +10,12 @@ public interface RequestAttributes {
     /**
      * Constant representing the request scope.
      */
-    int REQUEST = 0;
+    int REQUEST = 2;
 
     /**
      * Constant representing the session scope.
      */
-    int SESSION = 1;
+    int SESSION = 3;
 
     /**
      * Retrieves an attribute by its name from the current scope (request or session).
@@ -45,7 +45,7 @@ public interface RequestAttributes {
             case REQUEST -> new ServletHttpRequest(request);
             case SESSION -> new ServletHttpSession(request);
             default -> throw new WebContextException(
-                    "Unsupported scope type. Available only RequestAttributes#REQUEST and RequestAttributes@SESSION");
+                    "Unsupported scope ID '%s' type. Available only REQUEST and SESSION".formatted(scope.id()));
         };
     }
 }

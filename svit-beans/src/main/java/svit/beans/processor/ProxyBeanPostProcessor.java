@@ -38,18 +38,18 @@ public class ProxyBeanPostProcessor implements BeanPostProcessor {
      */
     @Override
     public Object postProcessBeforeInitialize(Object bean, BeanDefinition definition, BeanContext context) {
-        Object       proxy        = bean;
-        ProxyFactory proxyFactory = context.getBean(ProxyFactory.class);
+        Object proxy = bean;
 
         if (definition.isProxied()) {
-            Class<?>[] ifaces = Reflections.getClassInterfaces(bean.getClass());
+            ProxyFactory proxyFactory = context.getBean(ProxyFactory.class);
+            Class<?>[]   ifaces       = Reflections.getClassInterfaces(bean.getClass());
             if (ifaces.length > 0) {
                 LOGGER.info("Proxied bean '{}' of type '{}'",
-                            definition.getBeanName(), getShortName(definition.getBeanClass()));
+                        definition.getBeanName(), getShortName(definition.getBeanClass()));
                 proxy = proxyFactory.createProxy(bean);
             } else {
                 LOGGER.error("Bean '{}' cannot be proxied with JDK Proxy. Ensure the bean implements an interface.",
-                             definition.getBeanName());
+                        definition.getBeanName());
             }
         }
 

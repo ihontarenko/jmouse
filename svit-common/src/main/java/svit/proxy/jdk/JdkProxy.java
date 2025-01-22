@@ -19,15 +19,15 @@ import static java.lang.reflect.Proxy.*;
  */
 public class JdkProxy implements InvocationHandler, Proxy {
 
-    private final ProxyContext proxyConfig;
+    private final ProxyContext proxyContext;
 
     /**
      * Constructs a new {@code JdkProxy} with the given {@link ProxyContext}.
      *
-     * @param proxyConfig the configuration for the proxy, including the target object and interceptors.
+     * @param proxyContext the configuration for the proxy, including the target object and interceptors.
      */
-    public JdkProxy(ProxyContext proxyConfig) {
-        this.proxyConfig = proxyConfig;
+    public JdkProxy(ProxyContext proxyContext) {
+        this.proxyContext = proxyContext;
     }
 
     /**
@@ -43,20 +43,20 @@ public class JdkProxy implements InvocationHandler, Proxy {
     public Object invoke(Object proxy, Method method, Object[] arguments) throws Throwable {
         Object   returnValue;
         Class<?> returnClass = method.getReturnType();
-        Object   target      = proxyConfig.getTarget();
+        Object   target      = proxyContext.getTarget();
 
         try {
-            if (Reflections.isEqualsMethod(method) && !proxyConfig.hasEquals()) {
+            if (Reflections.isEqualsMethod(method) && !proxyContext.hasEquals()) {
                 // if target does not have own 'equals' method
                 return this.equals(arguments[0]);
-            } else if (Reflections.isHashCodeMethod(method) && !proxyConfig.hasHashCode()) {
+            } else if (Reflections.isHashCodeMethod(method) && !proxyContext.hasHashCode()) {
                 // if target does not have own 'hashCode' method
                 return this.hashCode();
             }
 
-            List<MethodInterceptor> interceptors = proxyConfig.getInterceptors();
+            List<MethodInterceptor> interceptors = proxyContext.getInterceptors();
             MethodInvocation        invocation   = new MethodInvocationChain(
-                    proxy, target, method, arguments, interceptors, proxyConfig);
+                    proxy, target, method, arguments, interceptors, proxyContext);
 
             returnValue = invocation.proceed();
         } catch (Throwable throwable) {
@@ -83,7 +83,7 @@ public class JdkProxy implements InvocationHandler, Proxy {
      */
     @Override
     public Object getProxy() {
-        return newProxyInstance(proxyConfig.getClassLoader(), proxyConfig.getInterfaces().toArray(Class[]::new), this);
+        return newProxyInstance(proxyContext.getClassLoader(), proxyContext.getInterfaces().toArray(Class[]::new), this);
     }
 
     /**
@@ -93,7 +93,7 @@ public class JdkProxy implements InvocationHandler, Proxy {
      */
     @Override
     public int hashCode() {
-        return JdkProxy.class.hashCode() * 13 + proxyConfig.getTarget().hashCode();
+        return JdkProxy.class.hashCode() * 13 + proxyContext.getTarget().hashCode();
     }
 
     /**
@@ -124,11 +124,11 @@ public class JdkProxy implements InvocationHandler, Proxy {
             return false;
         }
 
-        Class<?>[] interfacesA = proxy.proxyConfig.getInterfaces().toArray(Class[]::new);
-        Class<?>[] interfacesB = proxyConfig.getInterfaces().toArray(Class[]::new);
+        Class<?>[] interfacesA = proxy.proxyContext.getInterfaces().toArray(Class[]::new);
+        Class<?>[] interfacesB = proxyContext.getInterfaces().toArray(Class[]::new);
 
         return Arrays.equals(interfacesA, interfacesB)
-                && proxy.proxyConfig.getTarget().equals(proxyConfig.getTarget());
+                && proxy.proxyContext.getTarget().equals(proxyContext.getTarget());
     }
 
     /**
@@ -138,6 +138,6 @@ public class JdkProxy implements InvocationHandler, Proxy {
      */
     @Override
     public String toString() {
-        return "JDK PROXY [%s]".formatted(proxyConfig.getTargetClass());
+        return "JDK PROXY [%s]".formatted(proxyContext.getTargetClass());
     }
 }
