@@ -2,6 +2,7 @@ package svit.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -20,12 +21,12 @@ import static svit.reflection.Reflections.getShortName;
  */
 public interface Resource extends ReadableResource {
 
-    String PREFIX_CLASSPATH = "classpath";
-    String JAR_FILE         = "jar";
-    String FILE_URL         = "file";
-    String HTTPS_URL        = "https";
-    String HTTP_URL         = "http";
-    String FILE_SYSTEM      = "local";
+    String CLASSPATH_PROTOCOL = "classpath";
+    String JAR_PROTOCOL       = "jar";
+    String FILE_PROTOCOL      = "file";
+    String HTTPS_PROTOCOL     = "https";
+    String HTTP_PROTOCOL      = "http";
+    String LOCAL_PROTOCOL     = "local";
 
     /**
      * Returns the name of the resource.
@@ -98,4 +99,17 @@ public interface Resource extends ReadableResource {
      * Returns a human-readable name for the resource.
      */
     String getResourceName();
+
+    /**
+     * Return input stream bytes as String
+     * */
+    default String asString() {
+        String string = null;
+
+        try(InputStream stream = getInputStream()) {
+            string = new String(stream.readAllBytes());
+        } catch (IOException ignore) { }
+
+        return string;
+    }
 }

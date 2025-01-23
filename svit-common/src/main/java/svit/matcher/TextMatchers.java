@@ -1,10 +1,31 @@
 package svit.matcher;
 
+import svit.matcher.ant.AntMatcher;
+
 /**
  * A utility class that provides matchers for strings. These matchers can check if a string contains
  * a substring, equals another string, starts with a prefix, or ends with a suffix.
  */
 public class TextMatchers {
+
+    /**
+     * Creates a matcher that evaluates strings against an Ant-style pattern.
+     *
+     * @param pattern the Ant-style pattern to match against (e.g., "*.txt", "/path/**")
+     * @return a {@link Matcher} that evaluates whether strings match the specified pattern
+     * <p>
+     * The Ant-style pattern supports wildcards (`*`, `**`) and is useful for flexible string matching, such as file paths.
+     * </p>
+     * Example:
+     * <pre>{@code
+     * Matcher<String> matcher = TextMatchers.ant("*.java");
+     * System.out.println(matcher.matches("Test.java")); // true
+     * System.out.println(matcher.matches("Test.class")); // false
+     * }</pre>
+     */
+    public static Matcher<String> ant(String pattern) {
+        return new AntMatcher(pattern);
+    }
 
     /**
      * Returns a matcher that checks if the given string contains the specified substring.

@@ -13,7 +13,7 @@ public class JarURLResource extends URLResource {
      */
     @Override
     public String getResourceName() {
-        return "JAR:%s".formatted(super.getResourceName());
+        return "JAR_%s".formatted(super.getResourceName());
     }
 
 }

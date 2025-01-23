@@ -1,6 +1,10 @@
 package svit.io;
 
+import svit.matcher.Matcher;
+import svit.matcher.TextMatchers;
+
 import java.io.IOException;
+import java.util.Collection;
 
 public class Example {
 
@@ -8,29 +12,40 @@ public class Example {
 
         ResourceLoader jarLoader = new JarURLResourceLoader();
         ResourceLoader fileSystemLoader = new FileSystemResourceLoader();
-        ResourceLoader urlLoader = new URLResourceLoader();
+        ResourceLoader urlLoader = new NetworkURLResourceLoader();
+        ResourceLoader classpathLoader = new ClasspathResourceLoader();
+
+        Matcher<String> matcher = TextMatchers.ant("/ch/**/*ger.class");
+
+        Collection<Resource> resources = classpathLoader.loadResources("classpath:ch", matcher);
 
         // jar check
-        for (Resource r : jarLoader.loadResources("jar:META-INF/")) {
-            System.out.println(r.getName());
-            System.out.println("-".repeat(64));
-        }
-
-        for (Resource r : fileSystemLoader.loadResources("local:svit-framework/svit-common/src/main/resources/")) {
+        for (Resource r : resources) {
             System.out.println(r.getName());
         }
 
-        System.out.println(
-                new String(
-                        fileSystemLoader.getResource("local:svit-framework/svit-common/src/main/resources/package.txt")
-                                .getInputStream().readAllBytes()
-                )
-        );
+        System.out.println(resources.size());
 
-        System.out.println(
-                urlLoader.getClassLoader().getResource("svit")
-        );
 
+
+//        for (Resource r : fileSystemLoader.loadResources("local:svit-framework/svit-common/src/main/resources/")) {
+//            System.out.println(r.getName());
+//        }
+//
+//        System.out.println(
+//                new String(
+//                        fileSystemLoader.getResource("local:svit-framework/svit-common/src/main/resources/META-INF/package.txt")
+//                                .getInputStream().readAllBytes()
+//                )
+//        );
+//
+//        System.out.println(
+//                urlLoader.getResource("https://uakino.me/robots.txt").asString()
+//        );
+//
+//        Collection<Resource> cpr = new ClasspathResourceLoader().loadResources("classpath:META-INF/");
+//
+//        cpr.forEach(System.out::println);
     }
 
 }

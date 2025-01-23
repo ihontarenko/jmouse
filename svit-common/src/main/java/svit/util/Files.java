@@ -1,6 +1,9 @@
 package svit.util;
 
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.FileSystems;
+import java.nio.file.Paths;
 
 final public class Files {
 
@@ -38,6 +41,14 @@ final public class Files {
         }
 
         return path;
+    }
+
+    public static String getPath(URL url) {
+        try {
+            return Paths.get(url.toURI()).toString();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

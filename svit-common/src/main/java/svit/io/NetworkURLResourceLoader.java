@@ -1,26 +1,27 @@
 package svit.io;
 
+import svit.util.JavaIO;
+
 import java.util.List;
 
 import static svit.io.Resource.*;
 
-public class URLResourceLoader extends AbstractResourceLoader {
+public class NetworkURLResourceLoader extends AbstractResourceLoader {
 
     private final ClassLoader classLoader;
 
-    public URLResourceLoader(ClassLoader classLoader) {
+    public NetworkURLResourceLoader(ClassLoader classLoader) {
         this.classLoader = classLoader;
     }
 
-    public URLResourceLoader() {
+    public NetworkURLResourceLoader() {
         this(Thread.currentThread().getContextClassLoader());
     }
 
     @Override
     public Resource getResource(String location) {
         ensureSupportedProtocol(location);
-
-        return new URLResource(getClassLoader().getResource(location));
+        return new URLResource(JavaIO.toURL(location, getClassLoader()));
     }
 
     @Override
@@ -30,7 +31,7 @@ public class URLResourceLoader extends AbstractResourceLoader {
 
     @Override
     public List<String> supportedProtocols() {
-        return List.of(HTTP_URL, HTTPS_URL, FILE_URL);
+        return List.of(HTTP_PROTOCOL, HTTPS_PROTOCOL);
     }
 
 }

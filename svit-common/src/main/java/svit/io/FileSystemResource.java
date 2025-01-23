@@ -32,7 +32,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
      */
     @Override
     public String getName() {
-        return path.getFileName().toString();
+        return path.toString();
     }
 
     /**
@@ -104,6 +104,6 @@ public class FileSystemResource extends AbstractResource implements WritableReso
      */
     @Override
     public String getResourceName() {
-        return "FS (%s)".formatted(System.getProperty("os.name"));
+        return "FileSystem(%s)".formatted(System.getProperty("os.name"));
     }
 }

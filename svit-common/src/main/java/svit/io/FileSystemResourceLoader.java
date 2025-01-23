@@ -17,17 +17,19 @@ import static svit.util.Files.removeProtocol;
 public class FileSystemResourceLoader extends AbstractResourceLoader {
 
     @Override
-    public Collection<Resource> loadResources(String location, Matcher<Resource> matcher) {
+    public Collection<Resource> loadResources(String location, Matcher<String> matcher) {
+        ensureSupportedProtocol(location);
+        return loadResources(location, Path.of(removeProtocol(location)), matcher);
+    }
+
+    public Collection<Resource> loadResources(String location, Path path, Matcher<String> matcher) {
         Collection<Resource> resources = new ArrayList<>();
 
-        ensureSupportedProtocol(location);
-
-        location = removeProtocol(location);
-
-        try (Stream<Path> stream = Files.walk(Path.of(location))) {
+        try (Stream<Path> stream = Files.walk(path)) {
             stream.filter(Files::isRegularFile)     // Only process regular files
+                    .peek(System.out::println)
                     .map(this::createResource)      // Convert Path to FileSystemResource
-                    .filter(matcher::matches)       // Apply the matcher
+                    //.filter(matcher::matches)       // Apply the matcher
                     .forEach(resources::add);       // Add matching resources to the collection
         } catch (IOException exception) {
             throw new ResourceLoaderException("Failed to load resources from '%s'".formatted(location), exception);
@@ -53,7 +55,7 @@ public class FileSystemResourceLoader extends AbstractResourceLoader {
 
     @Override
     public List<String> supportedProtocols() {
-        return List.of(Resource.FILE_SYSTEM);
+        return List.of(Resource.LOCAL_PROTOCOL);
     }
 
     public Resource createResource(Path path) {

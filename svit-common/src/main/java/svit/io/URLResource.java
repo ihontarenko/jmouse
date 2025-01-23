@@ -72,7 +72,7 @@ public class URLResource extends AbstractResource {
      */
     @Override
     public boolean isFile() {
-        return FILE_URL.equals(getURL().getProtocol());
+        return FILE_PROTOCOL.equals(getURL().getProtocol());
     }
 
     /**
@@ -107,7 +107,7 @@ public class URLResource extends AbstractResource {
      */
     @Override
     public String getResourceName() {
-        return "URL:%s".formatted(getURL().getProtocol());
+        return "URL";
     }
 
 }
