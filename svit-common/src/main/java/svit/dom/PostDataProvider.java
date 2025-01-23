@@ -1,8 +1,8 @@
 package svit.dom;
 
-import svit.context.ErrorDetails;
-import svit.provider.data.DataProvider;
-import svit.provider.error.ErrorProvider;
+import svit.support.context.ErrorDetails;
+import svit.support.provider.data.DataProvider;
+import svit.support.provider.error.ErrorProvider;
 
 import java.util.Map;
 import java.util.Set;

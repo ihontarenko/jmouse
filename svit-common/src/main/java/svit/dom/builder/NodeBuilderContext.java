@@ -1,6 +1,6 @@
 package svit.dom.builder;
 
-import svit.context.AbstractAttributesContext;
+import svit.support.context.AbstractAttributesContext;
 import svit.dom.PostDataProvider;
 
 public class NodeBuilderContext extends AbstractAttributesContext {

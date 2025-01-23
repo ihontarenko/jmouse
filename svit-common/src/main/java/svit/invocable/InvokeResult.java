@@ -1,6 +1,6 @@
 package svit.invocable;
 
-import svit.context.AbstractResultContext;
+import svit.support.context.AbstractResultContext;
 
 import static java.util.Objects.nonNull;
 

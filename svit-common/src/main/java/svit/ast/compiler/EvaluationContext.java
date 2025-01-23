@@ -1,7 +1,7 @@
 package svit.ast.compiler;
 
 import svit.ast.node.Node;
-import svit.context.AbstractVariablesContext;
+import svit.support.context.AbstractVariablesContext;
 
 import java.lang.reflect.Method;
 import java.util.Objects;

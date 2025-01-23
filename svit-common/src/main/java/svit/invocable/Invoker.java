@@ -1,6 +1,6 @@
 package svit.invocable;
 
-import svit.context.ErrorDetails;
+import svit.support.context.ErrorDetails;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

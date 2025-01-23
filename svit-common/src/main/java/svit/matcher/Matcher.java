@@ -25,14 +25,6 @@ public interface Matcher<T> {
      * @param other the other matcher to combine with
      * @return a new matcher that represents the logical AND of the two matchers
      * @see #logicalAnd(Matcher, Matcher)
-     * @example
-     * <pre>{@code
-     * Matcher<String> startsWithA = item -> item.startsWith("A");
-     * Matcher<String> endsWithZ = item -> item.endsWith("Z");
-     * Matcher<String> combinedMatcher = startsWithA.and(endsWithZ);
-     * combinedMatcher.matches("AZ"); // returns true
-     * combinedMatcher.matches("BZ"); // returns false
-     * }</pre>
      */
     default Matcher<T> and(Matcher<? super T> other) {
         return logicalAnd(this, other);
@@ -45,15 +37,6 @@ public interface Matcher<T> {
      * @param other the other matcher to combine with
      * @return a new matcher that represents the logical OR of the two matchers
      * @see #logicalOr(Matcher...)
-     * @example
-     * <pre>{@code
-     * Matcher<String> startsWithA = item -> item.startsWith("A");
-     * Matcher<String> endsWithZ = item -> item.endsWith("Z");
-     * Matcher<String> combinedMatcher = startsWithA.or(endsWithZ);
-     * combinedMatcher.matches("AZ"); // returns true
-     * combinedMatcher.matches("BZ"); // returns true
-     * combinedMatcher.matches("XY"); // returns false
-     * }</pre>
      */
     default Matcher<T> or(Matcher<? super T> other) {
         return logicalOr(this, other);
@@ -66,15 +49,6 @@ public interface Matcher<T> {
      * @param other the other matcher to combine with
      * @return a new matcher that represents the logical XOR of the two matchers
      * @see #logicalXor(Matcher, Matcher)
-     * @example
-     * <pre>{@code
-     * Matcher<String> startsWithA = item -> item.startsWith("A");
-     * Matcher<String> endsWithZ = item -> item.endsWith("Z");
-     * Matcher<String> combinedMatcher = startsWithA.xor(endsWithZ);
-     * combinedMatcher.matches("AZ"); // returns false
-     * combinedMatcher.matches("A");  // returns true
-     * combinedMatcher.matches("Z");  // returns true
-     * }</pre>
      */
     default Matcher<T> xor(Matcher<? super T> other) {
         return logicalXor(this, other);
@@ -84,13 +58,6 @@ public interface Matcher<T> {
      * Negates the result of this matcher using the logical NOT operator.
      *
      * @return a new matcher that represents the negation of this matcher
-     * @example
-     * <pre>{@code
-     * Matcher<String> startsWithA = item -> item.startsWith("A");
-     * Matcher<String> notMatcher = startsWithA.not();
-     * notMatcher.matches("AZ"); // returns false
-     * notMatcher.matches("BZ"); // returns true
-     * }</pre>
      */
     default Matcher<T> not() {
         return not(this);
@@ -103,13 +70,6 @@ public interface Matcher<T> {
      * @param first the first matcher
      * @param second the second matcher
      * @return a new matcher that represents the logical AND of the two matchers
-     * @example
-     * <pre>{@code
-     * Matcher<String> startsWithA = item -> item.startsWith("A");
-     * Matcher<String> endsWithZ = item -> item.endsWith("Z");
-     * Matcher<String> combinedMatcher = Matcher.and(startsWithA, endsWithZ);
-     * combinedMatcher.matches("AZ"); // returns true
-     * }</pre>
      */
     static <T> Matcher<T> logicalAnd(Matcher<? super T> first, Matcher<? super T> second) {
         return new AndMatcher<>(first, second);
@@ -179,14 +139,6 @@ public interface Matcher<T> {
      *
      * @param value the boolean value to return
      * @return a matcher that always returns {@code value}
-     * @example
-     * <pre>{@code
-     * Matcher<Field> matcher = Matcher.constant(false);
-     * for (Class<? extends Annotation> annotation : annotations) {
-     *      matcher = matcher.or(FieldMatchers.isAnnotatedWith(annotation));
-     * }
-     * matcher.matches(someField); // Will return true if the field has any of the annotations
-     * }</pre>
      */
     static <T> Matcher<T> constant(boolean value) {
         return item -> value;

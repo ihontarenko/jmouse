@@ -1,6 +1,6 @@
 package svit.mapping;
 
-import svit.context.AbstractContext;
+import svit.support.context.AbstractContext;
 
 public class MappingContext extends AbstractContext {
 

@@ -12,8 +12,8 @@ import svit.ast.token.Tokenizer;
 import svit.expression.compiler.EvaluationContextConfigurator;
 import svit.expression.parser.AnyExpressionParser;
 import svit.expression.parser.ParserConfigurator;
-import svit.resolver.Resolver;
-import svit.resolver.ResolverContext;
+import svit.support.resolver.Resolver;
+import svit.support.resolver.ResolverContext;
 
 import java.util.List;
 

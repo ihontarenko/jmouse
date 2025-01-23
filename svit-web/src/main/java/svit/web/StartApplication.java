@@ -1,9 +1,11 @@
 package svit.web;
 
+import svit.web.context.WebBeanContext;
+
 public class StartApplication {
 
     public static void main(String... arguments) {
-        WebApplicationLauncher.launch(StartApplication.class);
+        WebBeanContext context = WebApplicationLauncher.launch(StartApplication.class);
     }
 
 }

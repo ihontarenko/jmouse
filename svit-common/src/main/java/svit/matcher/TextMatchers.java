@@ -11,11 +11,6 @@ public class TextMatchers {
      *
      * @param substring the substring to check for
      * @return a matcher that returns true if the string contains the given substring
-     * @example
-     * <pre>{@code
-     * Matcher<String> containsMatcher = TextMatchers.contains("example");
-     * boolean result = containsMatcher.matches("This is an example"); // returns true
-     * }</pre>
      */
     public static Matcher<String> contains(String substring) {
         return new TextContainsMatcher(substring);
@@ -26,11 +21,6 @@ public class TextMatchers {
      *
      * @param substring the string to compare
      * @return a matcher that returns true if the string is exactly the same as the specified string
-     * @example
-     * <pre>{@code
-     * Matcher<String> equalsMatcher = TextMatchers.same("example");
-     * boolean result = equalsMatcher.matches("example"); // returns true
-     * }</pre>
      */
     public static Matcher<String> same(String substring) {
         return new TextEqualsMatcher(substring);
@@ -41,11 +31,6 @@ public class TextMatchers {
      *
      * @param prefix the prefix to check for
      * @return a matcher that returns true if the string starts with the given prefix
-     * @example
-     * <pre>{@code
-     * Matcher<String> startsWithMatcher = TextMatchers.startsWith("ex");
-     * boolean result = startsWithMatcher.matches("example"); // returns true
-     * }</pre>
      */
     public static Matcher<String> startsWith(String prefix) {
         return new TextStartsWithMatcher(prefix);
@@ -56,11 +41,6 @@ public class TextMatchers {
      *
      * @param suffix the suffix to check for
      * @return a matcher that returns true if the string ends with the given suffix
-     * @example
-     * <pre>{@code
-     * Matcher<String> endsWithMatcher = TextMatchers.endsWith("ple");
-     * boolean result = endsWithMatcher.matches("example"); // returns true
-     * }</pre>
      */
     public static Matcher<String> endsWith(String suffix) {
         return new TextEndsWithMatcher(suffix);

@@ -3,6 +3,8 @@ package svit.web.server.tomcat;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.util.ServerInfo;
+import svit.reflection.Reflections;
+import svit.util.Strings;
 import svit.web.server.WebServer;
 import svit.web.server.WebServerException;
 
@@ -28,11 +30,14 @@ public class TomcatWebServer implements WebServer {
             LOGGER.info("Web-Server: '{}' started! ", name());
             LOGGER.info("Port: {}, Catalina Base: {}", server().getConnector().getPort(), server().getServer().getCatalinaBase().getAbsolutePath());
 
-            Thread asyncStart = new Thread(() -> tomcat.getServer().await());
-            asyncStart.setContextClassLoader(getClass().getClassLoader());
-            asyncStart.setDaemon(false);
-            asyncStart.setName(name() + "-async-start");
-            asyncStart.start();
+            Thread async = new Thread(() -> {
+                LOGGER.info("Web-Server: '{}' awaiting! ", name());
+                tomcat.getServer().await();
+            });
+            async.setContextClassLoader(getClass().getClassLoader());
+            async.setDaemon(false);
+            async.setName("%s-AsyncAwait".formatted(name()));
+            async.start();
 
         } catch (LifecycleException e) {
             stop();
@@ -48,7 +53,7 @@ public class TomcatWebServer implements WebServer {
     @Override
     public void stop() throws WebServerException {
         try {
-            LOGGER.info("{} stopping...");
+            LOGGER.info("{} stopping...", name());
             tomcat.stop();
         } catch (LifecycleException e) {
             throw new WebServerException("Error occurred during '" + name() + "' web-server stopping", e);

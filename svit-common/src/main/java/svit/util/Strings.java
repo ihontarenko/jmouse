@@ -1,5 +1,7 @@
 package svit.util;
 
+import java.nio.file.FileSystems;
+
 import static java.lang.Character.*;
 
 /**
@@ -9,9 +11,35 @@ import static java.lang.Character.*;
  */
 public final class Strings {
 
+    public static String DIRECTORY_SEPARATOR = FileSystems.getDefault().getSeparator();
+
     private Strings() {
         // Prevent instantiation
     }
+
+    /**
+     * Extracts the filename from a given path.
+     *
+     * @param name the full path or filename
+     * @return the filename extracted from the path, or the original name if no directory separator is found
+     * <p>
+     * This method checks for the last occurrence of the directory separator in the provided string
+     * and returns the substring following it. If no separator is found, the method returns the input string as is.
+     * </p>
+     * Example:
+     * <pre>{@code
+     * String path = "/home/user/file.txt";
+     * String filename = filename(path); // Returns "file.txt"
+     * }</pre>
+     * @see String#lastIndexOf(int)
+     * @see String#substring(int)
+     */
+    public static String filename(String name) {
+        return (name.lastIndexOf(DIRECTORY_SEPARATOR) != -1)
+                ? name.substring(name.lastIndexOf(DIRECTORY_SEPARATOR) + 1)
+                : name;
+    }
+
 
     /**
      * Checks if a string is not empty (i.e., not null and not blank).

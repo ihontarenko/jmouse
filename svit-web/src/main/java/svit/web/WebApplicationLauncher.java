@@ -1,5 +1,6 @@
 package svit.web;
 
+import org.slf4j.Logger;
 import svit.beans.BeanScope;
 import svit.beans.ScannerBeanContextInitializer;
 import svit.beans.Scope;
@@ -8,10 +9,12 @@ import svit.observer.EventManager;
 import svit.observer.EventManagerFactory;
 import svit.reflection.ClassFinder;
 import svit.reflection.JavaType;
+import svit.util.Arrays;
 import svit.util.Sorter;
 import svit.web.context.ApplicationBeanContext;
 import svit.web.context.ApplicationContextEvent;
 import svit.web.context.WebApplicationBeanContext;
+import svit.web.context.WebBeanContext;
 import svit.web.context.initializer.WebBeanContextServletInitializer;
 import svit.web.server.WebServer;
 import svit.web.server.WebServerFactory;
@@ -32,15 +35,17 @@ public class WebApplicationLauncher {
         this.eventManager = EventManagerFactory.create(baseClasses);
     }
 
-    public static void launch(Class<?>... baseClasses) {
-        WebApplicationLauncher launcher = new WebApplicationLauncher(baseClasses);
+    public static WebBeanContext launch(Class<?>... baseClasses) {
+        WebApplicationLauncher launcher = new WebApplicationLauncher(
+                Arrays.concatenate(baseClasses, new Class[]{Logger.class})
+        );
 
         ScannerBeanContextInitializer scannerBeanContextInitializer = new ScannerBeanContextInitializer(baseClasses);
 
         scannerBeanContextInitializer.addScanner(
                 rootTypes -> new ArrayList<>(ClassFinder.findImplementations(ApplicationInitializer.class, rootTypes)));
 
-        ApplicationBeanContext applicationContext = launcher.createApplicationContext();
+        WebBeanContext applicationContext = launcher.createApplicationContext();
         JavaType.forClass(ScannerBeanContextInitializer.class).toHierarchyString(0);
         applicationContext.addInitializer(scannerBeanContextInitializer);
         launcher.refreshContext(applicationContext);
@@ -66,10 +71,11 @@ public class WebApplicationLauncher {
         WebServer webServer = factory.getWebServer(new WebBeanContextServletInitializer());
         webServer.start();
 
+        return applicationContext;
     }
 
-    public ApplicationBeanContext createApplicationContext() {
-        ApplicationBeanContext context = new WebApplicationBeanContext(baseClasses);
+    public WebBeanContext createApplicationContext() {
+        WebBeanContext context = new WebApplicationBeanContext(baseClasses);
         refreshContext(context);
         context.registerBean(EventManager.class, () -> eventManager);
         return context;
