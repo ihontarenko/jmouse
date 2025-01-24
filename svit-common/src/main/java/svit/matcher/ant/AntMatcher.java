@@ -7,31 +7,18 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * A matcher for strings based on Ant-style patterns.
- * <p>
- * This matcher supports wildcards for flexible string matching:
- * <ul>
- *     <li>{@code ?} - Matches exactly one character.</li>
- *     <li>{@code *} - Matches zero or more characters in a single segment.</li>
- *     <li>{@code **} - Matches zero or more segments in a path.</li>
- * </ul>
- * Example:
- * <pre>{@code
- * new AntMatcher("*.java").matches("Example.java"); // true
- * }</pre>
- */
+
 final public class AntMatcher implements Matcher<String> {
 
-    public static final String ANY_CHARACTER      = "?";
-    public static final String ANY_SINGLE_SEGMENT = "*";
-    public static final String ANY_MULTI_SEGMENT  = "**";
+    public static final String ANY_CHARACTER      = "?"; // Matches exactly one character
+    public static final String ANY_SINGLE_SEGMENT = "*"; // Matches zero or more characters in a single segment
+    public static final String ANY_MULTI_SEGMENT  = "**"; // Matches zero or more segments (including empty)
 
     private final Collection<String> patterns = new ArrayList<>();
     private final String             token;
 
     /**
-     * Constructs an {@link AntMatcher} with the specified pattern and token.
+     * Constructs an AntMatcher with the specified pattern and token.
      *
      * @param pattern the Ant-style pattern to use
      * @param token   the delimiter for splitting segments (e.g., "/")
@@ -44,8 +31,8 @@ final public class AntMatcher implements Matcher<String> {
     }
 
     /**
-     * Constructs an {@link AntMatcher} with the specified pattern.
-     * The default token is {@code "/"}.
+     * Constructs an AntMatcher with the specified pattern.
+     * The default token is "/".
      *
      * @param pattern the Ant-style pattern to use
      * @throws NullPointerException if the pattern is null
@@ -54,66 +41,77 @@ final public class AntMatcher implements Matcher<String> {
         this(pattern, "/");
     }
 
-    /**
-     * Determines if the specified item matches the pattern.
-     *
-     * @param item the string to evaluate
-     * @return {@code true} if the item matches the pattern, {@code false} otherwise
-     * <p>
-     * This method splits the input into segments using the specified token and compares each segment
-     * to the corresponding pattern segment. Supports multi-segment matching with {@code **}.
-     * </p>
-     */
-    @Override
     public boolean matches(String item) {
+        // Step 1: Split the input string into segments using the token
         List<String> segments = new ArrayList<>(List.of(item.split(token)));
+        // Step 2: Create a modifiable copy of the pattern segments
         List<String> patterns = new ArrayList<>(this.patterns);
 
+        // Step 3: If there are more segments in the string than in the pattern, return false
         if (segments.size() < patterns.size()) {
             return false;
         }
 
+        // Step 4: Remove any empty segments from both lists
         segments.removeIf(String::isBlank);
         patterns.removeIf(String::isBlank);
 
+        // Step 5: Start matching from the beginning of both lists
         int i = 0, j = 0;
 
-        while (i < segments.size() && j < patterns.size()) {
-            String segment = segments.get(i);
-            String pattern = patterns.get(j);
+        // Call the recursive method to perform the actual matching
+        return matches(segments, patterns, i, j);
+    }
 
-            if (pattern.equals(ANY_MULTI_SEGMENT)) {
-                // ** matches any sequence of segments
-                if (segments.size() == j + 1 || patterns.size() <= j + 1) {
-                    return true;
-                }
+    /**
+     * Matches segments of a string against a pattern using Ant-style matching.
+     *
+     * @param segments the segments of the string to be matched (e.g., path segments)
+     * @param patterns the segments of the pattern to match against
+     * @param i the current index of the segments list
+     * @param j the current index of the patterns list
+     * @return true if the segments match the pattern, false otherwise
+     */
+    public boolean matches(List<String> segments, List<String> patterns, int i, int j) {
+        // Step 1: If both the pattern and the string have been fully matched, return true.
+        if (i == segments.size() && j == patterns.size()) {
+            return true; // Both lists are fully processed, meaning they match.
+        }
 
-                while (i < segments.size()) {
-                    // find match with next pattern
-                    String np = patterns.get(j + 1);
-                    String cs = segments.get(i);
+        // Step 2: If the pattern is fully processed but the string still has segments, return false.
+        if (j == patterns.size()) {
+            return false; // Pattern is exhausted, but segments remain unmatched.
+        }
 
-                    if (matchSegment(cs, np)) {
-                        break;
-                    }
-
-                    i++;
-                }
-
+        // Step 3: If the segments are fully processed but the pattern still has segments, ensure the remaining pattern contains only `**`.
+        if (i == segments.size()) {
+            // Skip all remaining `**` patterns, as they match any sequence of segments (including empty).
+            while (j < patterns.size() && patterns.get(j).equals(ANY_MULTI_SEGMENT)) {
                 j++;
-            } else if (matchSegment(segment, pattern)) {
-                i++;
-                j++;
-            } else {
-                return false;
             }
+            // If the remaining pattern contains anything other than `**`, it's not a match.
+            return j == patterns.size();
         }
 
-        while (j < patterns.size() && ANY_MULTI_SEGMENT.equals(patterns.get(j))) {
-            j++;
+        // Step 4: Get the current segment from the string and the current pattern to match against.
+        String segment = segments.get(i);
+        String pattern = patterns.get(j);
+
+        // Step 5: If the current pattern is `**`, it can match any sequence of segments.
+        if (pattern.equals(ANY_MULTI_SEGMENT)) {
+            // Try two possible matches:
+            // 1. Skip the current segment in the string but keep the `**` pattern (i + 1, j).
+            // 2. Skip the `**` pattern and try to match the current segment with the next pattern (i, j + 1).
+            return matches(segments, patterns, i + 1, j) || matches(segments, patterns, i, j + 1);
         }
 
-        return patterns.size() == j && segments.size() == i;
+        // Step 6: If the current segment matches the current pattern, continue to the next segment and pattern.
+        if (matches(segment, pattern)) {
+            return matches(segments, patterns, i + 1, j + 1);
+        }
+
+        // Step 7: If none of the above conditions apply, the segments and pattern do not match.
+        return false;
     }
 
     /**
@@ -121,37 +119,54 @@ final public class AntMatcher implements Matcher<String> {
      *
      * @param segment the segment to evaluate
      * @param pattern the pattern to match against
-     * @return {@code true} if the segment matches the pattern, {@code false} otherwise
+     * @return true if the segment matches the pattern, false otherwise
      */
-    public boolean matchSegment(String segment, String pattern) {
-        // * matches any segment
+    public boolean matches(String segment, String pattern) {
+        // Step 1: If the pattern is *, it matches any segment
         if (pattern.equals(ANY_SINGLE_SEGMENT)) {
             return true;
         }
 
+        // Step 2: If the pattern contains *, handle it as a wildcard for multiple characters
         if (pattern.contains(ANY_SINGLE_SEGMENT)) {
-            // Handle wildcard patterns like *.java
-            String regex = pattern.replace(".", "\\.").replace("*", ".+");
-            return segment.matches(regex);
+            // Step 1: Find the position of the first '*' in the pattern
+            int starIndex = pattern.indexOf(ANY_SINGLE_SEGMENT);
+
+            // Step 2: Separate the pattern into a prefix and suffix based on the position of '*'
+            // The prefix is the part of the pattern before '*'
+            String prefix = pattern.substring(0, starIndex);
+            // The suffix is the part of the pattern after '*'
+            String suffix = pattern.substring(starIndex + 1);
+
+            // Ensure that only one '*' character is present in the pattern
+            // If there is more than one '*', this logic might not work correctly
+            if (pattern.indexOf(ANY_SINGLE_SEGMENT, starIndex + 1) != -1) {
+                return false;
+            }
+
+            // Step 3: Check if the segment starts with the prefix and ends with the suffix
+            // This ensures that the part of the segment between the prefix and suffix matches '*'
+            return segment.startsWith(prefix) && segment.endsWith(suffix);
         }
 
+        // Step 3: If the pattern contains ?, handle it as a wildcard for a single character
         if (pattern.contains(ANY_CHARACTER)) {
             // Ensure lengths match
             if (segment.length() != pattern.length()) {
                 return false;
             }
 
-            // Check char-by-char
+            // Check each character in the segment and pattern
             for (int i = 0; i < pattern.length(); i++) {
                 if (pattern.charAt(i) != '?' && pattern.charAt(i) != segment.charAt(i)) {
                     return false;
                 }
             }
 
-            return true;
+            return true; // All characters matched
         }
 
-        // Exact match
+        // Step 4: If no special characters, match the segment exactly
         return segment.equals(pattern);
     }
 

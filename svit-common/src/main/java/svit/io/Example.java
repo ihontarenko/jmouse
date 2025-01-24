@@ -15,7 +15,7 @@ public class Example {
         ResourceLoader urlLoader = new NetworkURLResourceLoader();
         ResourceLoader classpathLoader = new ClasspathResourceLoader();
 
-        Matcher<String> matcher = TextMatchers.ant("/ch/**/*ger.class");
+        Matcher<String> matcher = TextMatchers.ant("/ch/**Disallowed/*ss*/**");
 
         Collection<Resource> resources = classpathLoader.loadResources("classpath:ch", matcher);
 
