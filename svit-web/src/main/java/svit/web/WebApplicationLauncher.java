@@ -1,6 +1,5 @@
 package svit.web;
 
-import org.slf4j.Logger;
 import svit.beans.BeanScope;
 import svit.beans.ScannerBeanContextInitializer;
 import svit.beans.Scope;
@@ -37,10 +36,10 @@ public class WebApplicationLauncher {
 
     public static WebBeanContext launch(Class<?>... baseClasses) {
         WebApplicationLauncher launcher = new WebApplicationLauncher(
-                Arrays.concatenate(baseClasses, new Class[]{Logger.class})
+                Arrays.concatenate(baseClasses, new Class[]{JavaType.class})
         );
 
-        ScannerBeanContextInitializer scannerBeanContextInitializer = new ScannerBeanContextInitializer(baseClasses);
+        ScannerBeanContextInitializer scannerBeanContextInitializer = new ScannerBeanContextInitializer();
 
         scannerBeanContextInitializer.addScanner(
                 rootTypes -> new ArrayList<>(ClassFinder.findImplementations(ApplicationInitializer.class, rootTypes)));

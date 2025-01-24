@@ -291,6 +291,7 @@ public class ClassMatchers {
     }
 
     private record ImplementsInterfaceMatcher(Class<?> interfaceClass) implements Matcher<Class<?>> {
+
         @Override
         public boolean matches(Class<?> clazz) {
             for (Class<?> implementedInterface : Reflections.getClassInterfaces(clazz)) {
@@ -300,13 +301,25 @@ public class ClassMatchers {
             }
             return false;
         }
+
+        @Override
+        public String toString() {
+            return "IMPLEMENT_INTERFACE [ %s ]".formatted(interfaceClass.getName());
+        }
     }
 
     private record ModifierMatcher(int modifier) implements Matcher<Class<?>> {
+
         @Override
         public boolean matches(Class<?> clazz) {
             return (clazz.getModifiers() & modifier) != 0;
         }
+
+        @Override
+        public String toString() {
+            return "TYPE_MODIFIER [ %d ]".formatted(modifier);
+        }
+
     }
 
     private record AnnotatedClassMatcher(Class<? extends Annotation> annotation) implements Matcher<Class<?>> {

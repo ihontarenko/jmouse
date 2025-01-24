@@ -2,10 +2,7 @@ package svit.matcher.ant;
 
 import svit.matcher.Matcher;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 
 final public class AntMatcher implements Matcher<String> {
@@ -41,6 +38,27 @@ final public class AntMatcher implements Matcher<String> {
         this(pattern, "/");
     }
 
+    /**
+     * Matches the given string against the Ant-style pattern.
+     *
+     * <p>
+     * This method splits both the input string and the pattern into segments using the specified token
+     * (default is "/"). It then compares the segments recursively to determine if the input string matches
+     * the pattern.
+     * </p>
+     *
+     * <h3>Steps:</h3>
+     * <ol>
+     *   <li>Splits the input string into segments based on the token.</li>
+     *   <li>Creates a modifiable copy of the pattern segments for processing.</li>
+     *   <li>Checks if the input string has fewer segments than the pattern. If so, returns {@code false}.</li>
+     *   <li>Removes any empty segments from both the input string and the pattern.</li>
+     *   <li>Starts the matching process from the beginning of both lists, using a recursive helper method.</li>
+     * </ol>
+     *
+     * @param item the input string to match against the pattern
+     * @return {@code true} if the input string matches the pattern; {@code false} otherwise
+     */
     public boolean matches(String item) {
         // Step 1: Split the input string into segments using the token
         List<String> segments = new ArrayList<>(List.of(item.split(token)));
@@ -170,4 +188,10 @@ final public class AntMatcher implements Matcher<String> {
         return segment.equals(pattern);
     }
 
+    @Override
+    public String toString() {
+        StringJoiner joiner = new StringJoiner(token, "AntMatcher[ ", " ]");
+        patterns.forEach(joiner::add);
+        return joiner.toString();
+    }
 }

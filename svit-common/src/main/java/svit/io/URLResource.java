@@ -110,4 +110,12 @@ public class URLResource extends AbstractResource {
         return "URL";
     }
 
+    /**
+     * Returns a string representation of the resource.
+     */
+    @Override
+    public String toString() {
+        return "%s : %s".formatted(getResourceName(), getURL());
+    }
+
 }

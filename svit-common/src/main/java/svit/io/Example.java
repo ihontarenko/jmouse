@@ -15,9 +15,9 @@ public class Example {
         ResourceLoader urlLoader = new NetworkURLResourceLoader();
         ResourceLoader classpathLoader = new ClasspathResourceLoader();
 
-        Matcher<String> matcher = TextMatchers.ant("/ch/**Disallowed/*ss*/**");
+        Matcher<String> matcher = TextMatchers.ant("**/svit/**/ref*/**/*.class");
 
-        Collection<Resource> resources = classpathLoader.loadResources("classpath:ch", matcher);
+        Collection<Resource> resources = classpathLoader.loadResources("classpath:svit", matcher);
 
         // jar check
         for (Resource r : resources) {

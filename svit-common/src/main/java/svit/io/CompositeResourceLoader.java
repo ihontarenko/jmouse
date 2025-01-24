@@ -1,5 +1,6 @@
 package svit.io;
 
+import svit.matcher.Matcher;
 import svit.util.Files;
 
 import java.util.ArrayList;
@@ -16,10 +17,18 @@ import static svit.io.Resource.LOCAL_PROTOCOL;
  * supports a protocol, the primary {@link FileSystemResourceLoader} is used as the fallback.
  * </p>
  */
-public class CompositeResourceLoader implements ResourceLoader, ResourceLoaderRegistry {
+public class CompositeResourceLoader implements PatternMatcherResourceLoader, ResourceLoaderRegistry {
 
     private final List<ResourceLoader> loaders = new ArrayList<>();
     private final ResourceLoader       primary = new FileSystemResourceLoader();
+
+    public CompositeResourceLoader() {
+        addResourceLoader(new FileSystemResourceLoader());
+        addResourceLoader(new JrtResourceLoader());
+        addResourceLoader(new JarURLResourceLoader());
+        addResourceLoader(new NetworkURLResourceLoader());
+        addResourceLoader(new ClasspathResourceLoader());
+    }
 
     /**
      * Replaces all existing loaders with the specified loader.
@@ -53,6 +62,24 @@ public class CompositeResourceLoader implements ResourceLoader, ResourceLoaderRe
         return loaders.stream()
                 .filter(loader -> loader.supports(protocol))
                 .findFirst().orElse(primary);
+    }
+
+    /**
+     * Retrieves a loader based on the specified protocol.
+     *
+     * @param location the protocol will extract from (e.g., "file", "http") to match
+     * @return the matching {@link ResourceLoader}, or {@code null} if none found
+     */
+    @Override
+    public ResourceLoader getRequiredResourceLoader(String location) {
+        String protocol = Files.extractProtocol(location, LOCAL_PROTOCOL);
+
+        if (!supports(protocol)) {
+            throw new ResourceLoaderException(
+                    "Unsupported protocol: '%s'. Consider to use: %s.".formatted(protocol, supportedProtocols()));
+        }
+
+        return getResourceLoader(protocol);
     }
 
     /**
@@ -94,11 +121,20 @@ public class CompositeResourceLoader implements ResourceLoader, ResourceLoaderRe
      */
     @Override
     public Resource getResource(String location) {
-        String protocol = Files.extractProtocol(location, LOCAL_PROTOCOL);
+        return getRequiredResourceLoader(location).getResource(location);
+    }
 
-        location = location.substring(protocol.length() + 1);
-
-        return getResourceLoader(protocol).getResource(location);
+    /**
+     * Loads resources from the specified location that match the provided matcher.
+     *
+     * @param location the resource location
+     * @param matcher  the matcher to filter resources
+     * @return a collection of {@link Resource} objects
+     * @throws UnsupportedOperationException if the operation is not supported
+     */
+    @Override
+    public Collection<Resource> loadResources(String location, Matcher<String> matcher) {
+        return getRequiredResourceLoader(location).loadResources(location, matcher);
     }
 
     /**

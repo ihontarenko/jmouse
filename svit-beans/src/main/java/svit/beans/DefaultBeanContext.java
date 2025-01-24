@@ -563,6 +563,10 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public Class<?>[] getBaseClasses() {
+        if (Arrays.empty(baseClasses)) {
+            setBaseClasses(getClass());
+        }
+
         return baseClasses;
     }
 

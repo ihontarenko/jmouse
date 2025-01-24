@@ -7,20 +7,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import static svit.reflection.Reflections.getShortName;
-
 /**
  * Represents a resource that can be accessed and manipulated.
- * <p>
- * This interface provides methods to interact with resources in various forms, such as files, URLs,
- * and input streams. It includes functionality to check for existence, retrieve size, and get
- * metadata like name, URI, and URL.
- * </p>
  *
  * @see ReadableResource
  */
 public interface Resource extends ReadableResource {
 
+    String JRT_PROTOCOL       = "jrt";
     String CLASSPATH_PROTOCOL = "classpath";
     String JAR_PROTOCOL       = "jar";
     String FILE_PROTOCOL      = "file";
@@ -30,15 +24,11 @@ public interface Resource extends ReadableResource {
 
     /**
      * Returns the name of the resource.
-     *
-     * @return the name of the resource
      */
     String getName();
 
     /**
      * Checks if the resource exists.
-     *
-     * @return {@code true} if the resource exists, {@code false} otherwise
      */
     default boolean exists() {
         boolean exists;
@@ -64,8 +54,6 @@ public interface Resource extends ReadableResource {
 
     /**
      * Returns the size of the resource in bytes.
-     *
-     * @return the size of the resource
      */
     long getSize();
 

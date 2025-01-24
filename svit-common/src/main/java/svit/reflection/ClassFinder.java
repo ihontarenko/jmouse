@@ -1,7 +1,8 @@
 package svit.reflection;
 
-import svit.scanner.ClassScanner;
 import svit.matcher.Matcher;
+import svit.reflection.scanner.ClassScanner;
+import svit.reflection.scanner.DefaultClassScanner;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -43,7 +44,7 @@ public interface ClassFinder {
     /**
      * The default class scanner used for locating classes in the classpath.
      */
-    ClassScanner SCANNER = ClassScanner.getDefaultScanner();
+    ClassScanner SCANNER = new DefaultClassScanner();
 
     /**
      * The scanner context containing default configuration for scanning classes.
@@ -185,10 +186,8 @@ public interface ClassFinder {
         if (classes == null) {
             classes = new HashSet<>();
 
-            SCANNER.setMatcher(Matcher.constant(true));
-
             for (Class<?> baseClass : baseClasses) {
-                classes.addAll(SCANNER.scan(baseClass.getPackageName(), baseClass.getClassLoader()));
+                classes.addAll(SCANNER.scan(baseClass.getClassLoader(), baseClass));
             }
 
             CACHE.put(cacheKey, classes);

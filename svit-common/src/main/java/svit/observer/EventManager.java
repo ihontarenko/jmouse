@@ -62,11 +62,6 @@ final public class EventManager {
     public static final Logger LOGGER = LoggerFactory.getLogger(EventManager.class);
 
     /**
-     * A singleton instance of manager with scanned annotated listeners
-     */
-    public static final EventManager INSTANCE = EventManagerFactory.create();
-
-    /**
      * A map that associates event types with lists of subscribed listeners.
      */
     private final Map<String, List<EventListener<?>>> listeners = new HashMap<>();

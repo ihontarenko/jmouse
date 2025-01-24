@@ -1,5 +1,8 @@
 package svit.io;
 
+import svit.matcher.Matcher;
+import svit.util.Files;
+
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReader;
 import java.lang.module.ModuleReference;
@@ -22,11 +25,6 @@ import java.util.*;
 public class JrtResourceLoader implements ResourceLoader {
 
     /**
-     * A set of all Java module references available in the system.
-     */
-    private static final Set<ModuleReference> JAVA_MODULE_NAMES = ModuleFinder.ofSystem().findAll();
-
-    /**
      * Loads resources from the JRT file system that match the specified location.
      *
      * @param location the location or module name to scan for resources; if null, all modules will be scanned
@@ -39,7 +37,7 @@ public class JrtResourceLoader implements ResourceLoader {
      * @see ModuleReader
      */
     @Override
-    public Collection<Resource> loadResources(String location) {
+    public Collection<Resource> loadResources(String location, Matcher<String> matcher) {
         Collection<Resource> resources = new ArrayList<>();
         Set<ResolvedModule>  modules   = ModuleLayer.boot().configuration().modules();
 
@@ -47,7 +45,7 @@ public class JrtResourceLoader implements ResourceLoader {
         for (ResolvedModule module : modules) {
 
             // If no specific location is provided or matches the module name, scan it
-            if (location == null || location.equals(module.name())) {
+            if (location == null || location.endsWith(module.name())) {
                 resources.addAll(scanJavaModule(module));
             }
         }
@@ -57,7 +55,7 @@ public class JrtResourceLoader implements ResourceLoader {
 
     @Override
     public List<String> supportedProtocols() {
-        return List.of();
+        return List.of(Resource.JRT_PROTOCOL);
     }
 
     /**

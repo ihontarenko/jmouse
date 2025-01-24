@@ -45,10 +45,12 @@ public class ClasspathResourceLoader extends AbstractResourceLoader {
 
                 switch (url.getProtocol()) {
                     case Resource.JAR_PROTOCOL:
-                        resources.addAll(new JarURLResourceLoader().loadResources(location, url, matcher));
+                        resources.addAll(new JarURLResourceLoader(getClassLoader())
+                                                 .loadResources(location, url, matcher));
                         break;
                     case Resource.FILE_PROTOCOL:
-                        resources.addAll(new FileSystemResourceLoader().loadResources(location, Paths.get(url.toURI()), matcher));
+                        resources.addAll(new FileSystemResourceLoader()
+                                                 .loadResources(location, Paths.get(url.toURI()), matcher));
                         break;
                     default:
                         throw new ResourceLoaderException("Protocol '%s' not supported.".formatted(url.getProtocol()));

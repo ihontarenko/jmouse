@@ -5,6 +5,8 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
+import java.lang.module.ModuleFinder;
+import java.lang.module.ModuleReference;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.Function;
@@ -32,6 +34,11 @@ abstract public class Reflections {
     );
     public static final String PROXY_CLASS_NAME_SEPARATOR = "$$";
     public static final char   PACKAGE_SEPARATOR          = '.';
+
+    /**
+     * A set of all Java module references available in the system.
+     */
+    public static final Set<ModuleReference> JAVA_MODULE_NAMES = ModuleFinder.ofSystem().findAll();
 
     /**
      * Extracts all static methods declared in the specified class.
@@ -74,7 +81,7 @@ abstract public class Reflections {
     public static Class<?> getClassFor(String className) {
         try {
             return Class.forName(className);
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException | NoClassDefFoundError e) {
             throw new ReflectionException(e);
         }
     }
@@ -967,6 +974,21 @@ abstract public class Reflections {
         }
 
         return (R) value;
+    }
+
+    /**
+     * Checks if the given class belongs to a JRT (Java Runtime) module.
+     *
+     * @param clazz the class to check
+     * @return {@code true} if the class is part of a JRT module, {@code false} otherwise
+     * <p>
+     * This method evaluates the module of the given class and checks if it matches any of the known
+     * Java modules in {@code JAVA_MODULE_NAMES}.
+     */
+    public static boolean isJrtResource(Class<?> clazz) {
+        Module module = clazz.getModule();
+        return JAVA_MODULE_NAMES.stream()
+                .anyMatch(ref -> ref.descriptor().name().equals(module.getName()));
     }
 
 }

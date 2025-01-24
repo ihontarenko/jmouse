@@ -40,4 +40,23 @@ final public class Jars {
         return path;
     }
 
+    /**
+     * Normalizes the path to the JAR file by removing the internal entry path
+     * and retaining only the path to the JAR file itself.
+     *
+     * @param jar the URL pointing to a resource in a JAR file.
+     * @return the normalized path to the JAR file.
+     */
+    public static String getFilePath(URL jar) {
+        String path = jar.toExternalForm();
+
+        // Handle "jar:" protocol and split at "!"
+        int jarSeparatorIndex = path.indexOf(JAR_SEPARATOR);
+        if (jarSeparatorIndex != -1) {
+            path = path.substring(jarSeparatorIndex + 1);
+        }
+
+        return path;
+    }
+
 }

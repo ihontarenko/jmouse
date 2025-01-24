@@ -141,8 +141,39 @@ public interface Matcher<T> {
      * @return a matcher that always returns {@code value}
      */
     static <T> Matcher<T> constant(boolean value) {
-        return item -> value;
+        return new Constant<>(value);
     }
+
+    /**
+     * A {@link Matcher} implementation that always returns a constant boolean value.
+     *
+     * @param <T> the type of items to be matched
+     * @param constant the boolean value to return for all matches
+     */
+    record Constant<T>(boolean constant) implements Matcher<T> {
+
+        /**
+         * Matches the given item by returning the constant boolean value.
+         *
+         * @param item the item to match (ignored in this implementation)
+         * @return the constant boolean value
+         */
+        @Override
+        public boolean matches(T item) {
+            return constant;
+        }
+
+        /**
+         * Returns a string representation of this matcher.
+         *
+         * @return a string in the format "BOOLEAN [ true ]" or "BOOLEAN [ false ]"
+         */
+        @Override
+        public String toString() {
+            return "BOOLEAN [ %s ]".formatted(constant);
+        }
+    }
+
 
     /**
      * A matcher that combines two matchers using the logical AND operator.
@@ -160,7 +191,7 @@ public interface Matcher<T> {
 
         @Override
         public String toString() {
-            return "AND";
+            return "[ %s AND %s ]".formatted(left, right);
         }
     }
 
@@ -180,7 +211,7 @@ public interface Matcher<T> {
 
         @Override
         public String toString() {
-            return "OR";
+            return "[ %s OR %s ]".formatted(left, right);
         }
     }
 
@@ -200,7 +231,7 @@ public interface Matcher<T> {
 
         @Override
         public String toString() {
-            return "XOR";
+            return "[ %s XOR %s ]".formatted(left, right);
         }
     }
 
@@ -218,7 +249,7 @@ public interface Matcher<T> {
 
         @Override
         public String toString() {
-            return "NOT";
+            return "NOT [ %s ]".formatted(matcher);
         }
     }
 

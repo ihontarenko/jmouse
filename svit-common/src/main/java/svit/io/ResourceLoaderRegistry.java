@@ -31,6 +31,14 @@ public interface ResourceLoaderRegistry {
     ResourceLoader getResourceLoader(String protocol);
 
     /**
+     * Retrieves a loader based on the specified protocol.
+     *
+     * @param location the protocol will extract from (e.g., "file", "http") to match
+     * @return the matching {@link ResourceLoader}, or {@code null} if none found
+     */
+    ResourceLoader getRequiredResourceLoader(String location);
+
+    /**
      * Returns all registered loaders.
      *
      * @return a collection of {@link ResourceLoader} instances
