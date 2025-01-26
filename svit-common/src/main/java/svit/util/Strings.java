@@ -1,5 +1,6 @@
 package svit.util;
 
+import java.net.URL;
 import java.nio.file.FileSystems;
 
 import static java.lang.Character.*;
@@ -18,6 +19,86 @@ public final class Strings {
     }
 
     /**
+     * Extracts the suffix of a string based on the specified separator.
+     */
+    public static String suffix(String string, String separator) {
+        return cut(string, separator, true, false, 0);
+    }
+
+    /**
+     * Extracts the suffix of a string based on the specified separator.
+     */
+    public static String suffix(String string, String separator, boolean last) {
+        return cut(string, separator, last, false, 0);
+    }
+
+    /**
+     * Extracts the suffix of a string based on the specified separator and applies a corrector offset.
+     */
+    public static String suffix(String string, String separator, boolean last, int corrector) {
+        return cut(string, separator, last, false, corrector);
+    }
+
+    /**
+     * Extracts the prefix of a string based on the specified separator.
+     */
+    public static String prefix(String string, String separator) {
+        return cut(string, separator, true, true, 0);
+    }
+
+    /**
+     * Extracts the prefix of a string based on the specified separator.
+     */
+    public static String prefix(String string, String separator, boolean last) {
+        return cut(string, separator, last, true, 0);
+    }
+
+    /**
+     * Extracts the prefix of a string based on the specified separator and applies a corrector offset.
+     */
+    public static String prefix(String string, String separator, boolean last, int corrector) {
+        return cut(string, separator, last, true, corrector);
+    }
+
+    /**
+     * Cuts the string based on the specified separator, direction, and offset.
+     */
+    public static String cut(String string, String separator, boolean last, boolean prefix, int corrector) {
+        if (string == null) {
+            return null;
+        }
+
+        int index = separator == null ? -1 : (last ? string.lastIndexOf(separator) : string.indexOf(separator));
+
+        if (index != -1) {
+            string = prefix ? string.substring(0, index + corrector) : string.substring(index + corrector);
+        }
+
+        return string;
+    }
+
+    /**
+     * Extracts a substring between two delimiters.
+     */
+    public static String substring(String string, String start, String end) {
+        if (string == null) {
+            return null;
+        }
+
+        string = suffix(string, start, false, 1);
+        string = prefix(string, end, true, 0);
+
+        return string;
+    }
+
+    /**
+     * Extracts a substring from the specified starting delimiter to the end of the string.
+     */
+    public static String substring(String string, String start) {
+        return substring(string, start, null);
+    }
+
+    /**
      * Extracts the filename from a given path.
      */
     public static String filename(String name) {
@@ -25,7 +106,6 @@ public final class Strings {
                 ? name.substring(name.lastIndexOf(DIRECTORY_SEPARATOR) + 1)
                 : name;
     }
-
 
     /**
      * Checks if a string is not empty (i.e., not null and not blank).
@@ -125,5 +205,19 @@ public final class Strings {
 
         return paddingLength > 0
                 ? String.valueOf(character).repeat(paddingLength) + number : String.valueOf(number);
+    }
+
+    /**
+     * Derives the fully qualified class name from a resource URL relative to the base class.
+     *
+     * @param baseClass the base class used to calculate the relative path
+     * @param url       the URL of the resource
+     * @return the fully qualified class name
+     */
+    public static String extractClassName(Class<?> baseClass, URL url) {
+        String basePath = Files.packageToPath(baseClass, Files.SLASH);
+        String relative = Files.getRelativePath(url, basePath);
+
+        return Files.removeExtension(relative).replace(Files.SLASH.charAt(0), '.');
     }
 }

@@ -14,4 +14,11 @@ public interface Ordered {
      * @return the order value
      */
     int getOrder();
+
+    /**
+     * Sets the order or priority of this object.
+     */
+    default void setOrder(int order) {
+        // no-op
+    }
 }

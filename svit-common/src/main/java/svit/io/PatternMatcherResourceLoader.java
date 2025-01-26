@@ -5,27 +5,44 @@ import org.slf4j.LoggerFactory;
 import svit.matcher.Matcher;
 import svit.matcher.ant.AntMatcher;
 import svit.util.Files;
+import svit.util.Strings;
 
 import java.util.Collection;
 
 import static svit.matcher.TextMatchers.ant;
-import static svit.matcher.TextMatchers.endsWith;
 
+/**
+ * Interface for resource loaders that support pattern matching.
+ * <p>
+ * Provides functionality for finding resources based on Ant-style patterns, such as {@code '✶✶/✶.txt'}.
+ * This interface extends {@link ResourceLoader} and adds pattern-based search capabilities.
+ * </p>
+ * Example usage:
+ * <pre>{@code
+ * PatternMatcherResourceLoader loader = new ClasspathResourceLoader();
+ * Collection<Resource> resources = loader.findResources("classpath:/resources/✶✶/✶.txt");
+ * resources.forEach(resource -> System.out.println(resource.getName()));
+ * }</pre>
+ */
 public interface PatternMatcherResourceLoader extends ResourceLoader {
 
     Logger LOGGER = LoggerFactory.getLogger(PatternMatcherResourceLoader.class);
 
+    /**
+     * Finds resources that match the specified Ant-style pattern.
+     *
+     * @param path the path with an Ant-style pattern (e.g., {@code "classpath:✶✶/✶.txt"})
+     * @return a collection of {@link Resource} objects matching the pattern
+     * @throws ResourceLoaderException if an error occurs during resource loading
+     */
     default Collection<Resource> findResources(String path) {
-        String protocol = Files.extractProtocol(path, Resource.CLASSPATH_PROTOCOL);
-        String location = path.substring(0, path.indexOf(AntMatcher.ANY_SINGLE_SEGMENT) - 1);
-        String pattern  = Files.removeProtocol(path);
+        String          protocol = Files.extractProtocol(path, Resource.CLASSPATH_PROTOCOL);
+        String          location = Strings.prefix(path, AntMatcher.ANY_SINGLE_SEGMENT, false);
+        String          pattern  = Files.removeProtocol(path);
+        Matcher<String> matcher  = ant("**/" + pattern);
 
-        Matcher<String> ant = ant("**/" + pattern);
-
-        ant = ant.and(endsWith("class")).and(endsWith("module-info.class").not());
-
-        LOGGER.info("Protocol: {}, Location: {}, {}", protocol, location, ant);
-        Collection<Resource> resources = loadResources(location, ant);
+        LOGGER.info("Protocol: {}, Location: {}, {}", protocol, location, matcher);
+        Collection<Resource> resources = loadResources(location, matcher);
         LOGGER.info("Found {} resources", resources.size());
 
         return resources;

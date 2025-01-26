@@ -7,27 +7,50 @@ import svit.matcher.Matcher;
 import svit.reflection.ReflectionException;
 import svit.reflection.Reflections;
 import svit.util.Files;
+import svit.util.Strings;
 
-import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Default implementation of {@link ClassScanner}.
+ * <p>
+ * This class provides functionality to scan the classpath for classes that match specific criteria,
+ * leveraging Ant-style patterns for resource matching and supporting both JRT and regular classpath resources.
+ * </p>
+ */
 public class DefaultClassScanner implements ClassScanner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultClassScanner.class);
 
     private final PatternMatcherResourceLoader loader;
 
+    /**
+     * Constructs a {@link DefaultClassScanner} with the specified {@link PatternMatcherResourceLoader}.
+     *
+     * @param loader the resource loader to use for finding resources
+     */
     public DefaultClassScanner(PatternMatcherResourceLoader loader) {
         this.loader = loader;
     }
 
+    /**
+     * Constructs a {@link DefaultClassScanner} with a default {@link CompositeResourceLoader}.
+     */
     public DefaultClassScanner() {
         this(new CompositeResourceLoader());
     }
 
+    /**
+     * Scans the classpath for classes matching the given matcher and base classes.
+     *
+     * @param matcher     the matcher to filter classes
+     * @param classLoader the class loader to use for loading classes
+     * @param baseClasses the base classes or packages to scan
+     * @return a set of classes matching the specified criteria
+     */
     @Override
     public Set<Class<?>> scan(Matcher<Class<?>> matcher, ClassLoader classLoader, Class<?>... baseClasses) {
         Set<Class<?>> classes  = new HashSet<>();
@@ -39,28 +62,22 @@ public class DefaultClassScanner implements ClassScanner {
         );
 
         for (Class<?> baseClass : baseClasses) {
-            String path    = Files.packageToPath(baseClass, Files.SLASH);
-            boolean isJrt = Reflections.isJrtResource(baseClass);
+            String  path    = Files.packageToPath(baseClass, Files.SLASH);
+            String  antPath = pattern.formatted(location.formatted(path));
 
-            if (isJrt) {
-                path = baseClass.getModule().getName();
-            }
-
-            String antPath = pattern.formatted(location.formatted(path));
-
-            // replace protocol to 'jrt:'
-            if (isJrt) {
-                antPath = Resource.JRT_PROTOCOL + ":" + Files.removeProtocol(antPath);
+            // Adjust path for JRT resources
+            if (Reflections.isJrtResource(baseClass)) {
+                antPath = "%s:%s/%s".formatted(Resource.JRT_PROTOCOL, baseClass.getModule().getName(), path);
             }
 
             Collection<Resource> resources = loader.findResources(antPath);
 
             for (Resource resource : resources) {
-                String className = getClassName(baseClass, resource.getURL());
+                String className = Strings.extractClassName(baseClass, resource.getURL());
                 try {
                     classes.add(Reflections.getClassFor(className));
                 } catch (ReflectionException exception) {
-                    LOGGER.error("Unable to get class '{}'. Cause: {}", className, exception.getMessage());
+                    LOGGER.trace("Unable to get class '{}'. Cause: {}", className, exception.getMessage());
                 }
             }
         }
@@ -68,10 +85,6 @@ public class DefaultClassScanner implements ClassScanner {
         return classes.stream().filter(matcher::matches).collect(Collectors.toSet());
     }
 
-    public String getClassName(Class<?> baseClass, URL url) {
-        String basePath = Files.packageToPath(baseClass, Files.SLASH);
-        String relative = Files.getRelativePath(url, basePath);
-        return Files.removeExtension(relative).replace(Files.SLASH.charAt(0), '.');
-    }
+
 
 }

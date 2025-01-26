@@ -2,6 +2,8 @@ package svit.io;
 
 import svit.matcher.Matcher;
 import svit.util.Files;
+import svit.util.JavaIO;
+import svit.util.Strings;
 
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReader;
@@ -22,7 +24,7 @@ import java.util.*;
  * @see Resource
  * @see URLResource
  */
-public class JrtResourceLoader implements ResourceLoader {
+public class JrtResourceLoader extends AbstractResourceLoader {
 
     /**
      * Loads resources from the JRT file system that match the specified location.
@@ -41,11 +43,15 @@ public class JrtResourceLoader implements ResourceLoader {
         Collection<Resource> resources = new ArrayList<>();
         Set<ResolvedModule>  modules   = ModuleLayer.boot().configuration().modules();
 
+        ensureSupportedProtocol(location);
+
+        String javaModule = Strings.prefix(Files.removeProtocol(location), Files.SLASH, false);
+
         // Iterate over all modules in the boot layer
         for (ResolvedModule module : modules) {
 
             // If no specific location is provided or matches the module name, scan it
-            if (location == null || location.endsWith(module.name())) {
+            if (location == null || javaModule.contains(module.name())) {
                 resources.addAll(scanJavaModule(module));
             }
         }
@@ -72,34 +78,11 @@ public class JrtResourceLoader implements ResourceLoader {
             List<String> names = reader.list().toList();
             for (String name : names) {
                 // Attempt to find the resource URI
-                reader.find(name).map(this::toURL).map(URLResource::new).ifPresent(resources::add);
+                reader.find(name).map(JavaIO::toURL).map(JrtURLResource::new).ifPresent(resources::add);
             }
         } catch (Exception ignore) {}
 
         return resources;
-    }
-
-    /**
-     * Converts a {@link URI} to a {@link URL}.
-     *
-     * @param uri the {@link URI} to convert
-     * @return the corresponding {@link URL}
-     * @throws ResourceException if the conversion fails due to a malformed URL
-     * <p>
-     * This method wraps {@link URI#toURL()} and provides a custom exception message
-     * to indicate the failure. It ensures that any issues with malformed URIs are
-     * encapsulated in a {@link ResourceException}.
-     * </p>
-     *
-     * @see URI#toURL()
-     * @see ResourceException
-     */
-    private URL toURL(URI uri) {
-        try {
-            return uri.toURL();
-        } catch (MalformedURLException e) {
-            throw new ResourceException("Failed to convert URI to URL: %s".formatted(uri), e);
-        }
     }
 
 }

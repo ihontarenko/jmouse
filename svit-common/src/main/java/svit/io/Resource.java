@@ -14,6 +14,7 @@ import java.net.URL;
  */
 public interface Resource extends ReadableResource {
 
+    String UNKNOWN_PROTOCOL   = "unknown";
     String JRT_PROTOCOL       = "jrt";
     String CLASSPATH_PROTOCOL = "classpath";
     String JAR_PROTOCOL       = "jar";

@@ -15,16 +15,22 @@ public class Example {
         ResourceLoader urlLoader = new NetworkURLResourceLoader();
         ResourceLoader classpathLoader = new ClasspathResourceLoader();
 
-        Matcher<String> matcher = TextMatchers.ant("**/svit/**/ref*/**/*.class");
+        PatternMatcherResourceLoader loader = new CompositeResourceLoader();
 
-        Collection<Resource> resources = classpathLoader.loadResources("classpath:svit", matcher);
-
-        // jar check
-        for (Resource r : resources) {
-            System.out.println(r.getName());
+        for (Resource resource : loader.findResources("classpath:ch/**/*.class")) {
+            System.out.println(resource);
         }
 
-        System.out.println(resources.size());
+//        Matcher<String> matcher = TextMatchers.ant("**/org/**/*.txt");
+
+//        Collection<Resource> resources = classpathLoader.loadResources("classpath:org", matcher);
+//
+//        // jar check
+//        for (Resource r : resources) {
+//            System.out.println(r.getName());
+//        }
+//
+//        System.out.println(resources.size());
 
 
 

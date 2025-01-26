@@ -1,8 +1,5 @@
 package svit.io;
 
-import svit.reflection.Reflections;
-import svit.util.Files;
-
 import static svit.reflection.Reflections.getShortName;
 import static svit.util.Files.extractProtocol;
 
@@ -27,7 +24,7 @@ abstract public class AbstractResourceLoader implements ResourceLoader {
     }
 
     public void ensureSupportedProtocol(String location) {
-        if (!supports(extractProtocol(location, null))) {
+        if (!supports(extractProtocol(location, Resource.UNKNOWN_PROTOCOL))) {
             throw new ResourceLoaderException(
                     "Protocol '%s' not supported by '%s' loader. Available: %s"
                             .formatted(extractProtocol(location, "undefined"), getShortName(this), supportedProtocols()));

@@ -103,25 +103,18 @@ final public class Files {
         return normalizePath(path).replace(SYSTEM_SLASH, separator);
     }
 
+    /**
+     * Retrieves the relative path of a URL based on a specified base path.
+     */
     public static String getRelativePath(URL url, String basePath) {
-        String path  = url.toExternalForm();
-        int    index = path.lastIndexOf(basePath);
-
-        if (index != -1) {
-            path = path.substring(index);
-        }
-
-        return path;
+        return Strings.suffix(url.toExternalForm(), basePath);
     }
 
+    /**
+     * Removes the file extension from a given path.
+     */
     public static String removeExtension(String path) {
-        int index = path.lastIndexOf('.');
-
-        if (index != -1) {
-            path = path.substring(0, index);
-        }
-
-        return path;
+        return Strings.prefix(path, DOT);
     }
 
 }
