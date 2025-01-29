@@ -4,9 +4,9 @@ import svit.ast.compiler.Compiler;
 import svit.ast.compiler.EvaluationContext;
 import svit.expression.EvaluationException;
 import svit.expression.ast.FunctionNode;
-import svit.invocable.Invocable;
-import svit.invocable.InvokeResult;
-import svit.invocable.StaticMethodInvocable;
+import svit.support.invocable.Invocable;
+import svit.support.invocable.InvokeResult;
+import svit.support.invocable.StaticMethodInvocable;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

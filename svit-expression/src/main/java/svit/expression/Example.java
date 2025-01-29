@@ -12,8 +12,8 @@ import svit.ast.token.Tokenizer;
 import svit.expression.compiler.EvaluationContextConfigurator;
 import svit.expression.parser.ParserConfigurator;
 import svit.expression.parser.AnyExpressionParser;
-import svit.util.Booleans;
-import svit.util.Maths;
+import org.jmouse.util.Booleans;
+import org.jmouse.util.Maths;
 import svit.expression.test.ExampleDto;
 import svit.expression.test.TestService;
 

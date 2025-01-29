@@ -1,6 +1,6 @@
 package svit.support.objects;
 
-import svit.reflection.Reflections;
+import org.jmouse.core.reflection.Reflections;
 
 import java.beans.PropertyDescriptor;
 import java.util.HashMap;

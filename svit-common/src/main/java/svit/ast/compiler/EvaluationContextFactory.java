@@ -1,8 +1,8 @@
 package svit.ast.compiler;
 
-import svit.util.Booleans;
-import svit.util.Maths;
-import svit.reflection.Reflections;
+import org.jmouse.util.Booleans;
+import org.jmouse.util.Maths;
+import org.jmouse.core.reflection.Reflections;
 
 import java.util.Arrays;
 import java.util.stream.Stream;

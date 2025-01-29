@@ -1,6 +1,6 @@
 package svit.support.context;
 
-import svit.reflection.Reflections;
+import org.jmouse.core.reflection.Reflections;
 
 import static java.util.Objects.requireNonNull;
 

@@ -3,7 +3,7 @@ package svit.expression.compiler;
 import svit.ast.compiler.Compiler;
 import svit.ast.compiler.EvaluationContext;
 import svit.expression.ast.ClassNameNode;
-import svit.reflection.Reflections;
+import org.jmouse.core.reflection.Reflections;
 
 public class ClassNameCompiler implements Compiler<ClassNameNode, Class<?>> {
 

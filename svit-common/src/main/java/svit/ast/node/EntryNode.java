@@ -1,7 +1,7 @@
 package svit.ast.node;
 
 import svit.ast.token.Token;
-import svit.util.Strings;
+import org.jmouse.util.Strings;
 
 import java.util.HashMap;
 import java.util.Map;
