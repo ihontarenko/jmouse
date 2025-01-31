@@ -13,6 +13,7 @@ public class Example {
     public static void main(String[] args) {
 
         JavaType javaType = JavaType.forTypeReference(new TypeReference<List<Map<String, Integer>>>() {});
+/*
 
         Map<String, Object> source = new HashMap<>() {{
             put("application", Map.of(
@@ -34,9 +35,61 @@ public class Example {
 
         binder.bind("application.clients.default", Bindable.of(String.class));
         binder.bind("application.users", Bindable.of(JavaType.forParametrizedClass(List.class, Customer.class)));
+*/
+
+        User user = new User("PARENT!!!", 13);
+
+        user.getAccess().add(123);
+
+        Map<String, Object> data = Map.of(
+                "server", Map.of(
+                        "port", 8088,
+                        "name", "Embedded Server",
+                        "customer", Map.of(
+                                "name", "John Smith",
+                                "user", user
+                        )
+                ));
+
+        UserContext userContext = new UserContext(DataSource.of(data));
+
+        userContext.initialize();
+
+        user.getAccess().add(555);
 
         System.out.println("end!");
 
+    }
+
+    static class UserContext {
+
+        private int port;
+        private Binder binder;
+        private Customer customer;
+
+        public UserContext(DataSource source) {
+            binder = new Binder(source);
+        }
+
+        public void initialize() {
+            binder.bind("server", Bindable.ofInstance(this));
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+
+        public Customer getCustomer() {
+            return customer;
+        }
+
+        public void setCustomer(Customer customer) {
+            this.customer = customer;
+        }
     }
 
 

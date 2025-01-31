@@ -1,6 +1,7 @@
 package org.jmouse.context.binding;
 
 import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeDescriptor;
 
 import java.util.function.Supplier;
 
@@ -100,6 +101,18 @@ public final class Bindable<T> {
     }
 
     /**
+     * Retrieves a {@link TypeDescriptor} for the underlying {@link JavaType}.
+     * <p>
+     * This allows for convenient type analysis and classification.
+     * </p>
+     *
+     * @return a {@link TypeDescriptor} representing this bindable's type
+     */
+    public TypeDescriptor getTypeDescriptor() {
+        return TypeDescriptor.forJavaType(type);
+    }
+
+    /**
      * Creates a new {@link Bindable} instance with the specified instance as its value.
      *
      * @param instance the instance to wrap
@@ -108,4 +121,10 @@ public final class Bindable<T> {
     public Bindable<T> withInstance(T instance) {
         return new Bindable<>(this.type, () -> instance);
     }
+
+    @Override
+    public String toString() {
+        return "Bindable(Type: %s; Instance: %s)".formatted(type, value.get());
+    }
+
 }

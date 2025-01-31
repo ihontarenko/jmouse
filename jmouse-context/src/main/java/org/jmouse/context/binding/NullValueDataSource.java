@@ -23,7 +23,7 @@ public class NullValueDataSource extends AbstractDataSource {
      */
     @Override
     public Object getSource() {
-        throw new UnsupportedOperationException("NULL DATA SOURCE");
+        return null;
     }
 
     /**

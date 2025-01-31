@@ -1,5 +1,7 @@
 package org.jmouse.context.binding;
 
+import org.jmouse.core.reflection.JavaType;
+
 abstract public class CollectionBinder extends AbstractBinder {
 
     public CollectionBinder(BindContext context) {
@@ -9,12 +11,17 @@ abstract public class CollectionBinder extends AbstractBinder {
     @Override
     public <T> BindingResult<T> bindValue(NamePath name, Bindable<T> bindable, DataSource source) {
         ObjectBinder rootBinder = context.getRootBinder();
+        DataSource value = source.get(name);
 
-        if (context.isDeepBinding()) {
-            return rootBinder.bind(name, bindable, source);
+        if (value.isSimple()) {
+            System.out.println(value);
+        } else {
+            if (context.isDeepBinding()) {
+                return rootBinder.bind(name, bindable, source);
+            }
         }
 
-        return BindingResult.of((T) source.get(name).getSource());
+        return BindingResult.of((T) value.getSource());
     }
 
     @Override
@@ -24,8 +31,12 @@ abstract public class CollectionBinder extends AbstractBinder {
         if (collection.isCollection()) {
             int index = 0;
             for (Object element : collection.asCollection()) {
-                NamePath   indexed = name.append("[" + index++ + "]");
-                BindingResult<?> result = bindValue(indexed, Bindable.of(bindable.getType().getFirst().getRawType()), source);
+                NamePath indexed = name.append("[" + index++ + "]");
+                JavaType type    = bindable.getType().getFirst();
+
+                System.out.println(">> type: " + type);
+
+                BindingResult<?> result = bindValue(indexed, Bindable.of(type.getRawType()), source);
 
                 if (result.isPresent()) {
                     System.out.println(result.getValue());

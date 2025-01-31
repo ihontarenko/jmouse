@@ -1,5 +1,6 @@
 package org.jmouse.context.binding.test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -7,7 +8,7 @@ public class User {
 
     private     String          name;
     private int                 age;
-    private List<Integer>       access = List.of(999, 888, 777);
+    private List<Integer>       access = new ArrayList<>(List.of(999, 888, 777));
     private Map<String, String> groups = Map.of("default", "User Group");
 
     public User(String name, int age) {

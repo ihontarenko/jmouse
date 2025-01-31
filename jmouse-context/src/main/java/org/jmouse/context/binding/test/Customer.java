@@ -10,12 +10,22 @@ public class Customer {
     private List<Integer>       access = List.of(111, 222, 333);
     private Map<String, String> groups = Map.of("default", "Default Group");
 
+    private User parent;
+
     public Customer(String name, int age) {
         this.name = name;
         this.age = age;
     }
 
     public Customer() {
+    }
+
+    public User getUser() {
+        return parent;
+    }
+
+    public void setUser(User user) {
+        this.parent = user;
     }
 
     public String getName() {

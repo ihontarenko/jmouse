@@ -19,13 +19,17 @@ public class JavaBeanBinder extends AbstractBinder {
         Supplier<T> supplier = bean.getSupplier(bindable);
 
         for (JavaBean.Property property : bean.getProperties()) {
-            JavaType   propertyType = property.getType();
-            String     propertyName = property.getName();
-            DataSource value        = source.get(name.append(propertyName));
+            JavaType propertyType = property.getType();
+            NamePath propertyName = NamePath.of(property.getName());
 
-            if (property.isWritable()) {
-                property.setValue(supplier, value.getRaw());
-            }
+            System.out.println("propertyName: " + propertyName);
+
+            bindValue(propertyName, Bindable.of(propertyType), source.get(name)).ifPresent((Object v) -> {
+                if (property.isWritable()) {
+                    // todo: bindValue
+                    property.setValue(supplier, v);
+                }
+            });
         }
 
         return BindingResult.of(supplier.get());
@@ -33,10 +37,25 @@ public class JavaBeanBinder extends AbstractBinder {
 
     @Override
     public <T> BindingResult<T> bindValue(NamePath name, Bindable<T> bindable, DataSource source) {
-        if (source.isSimple()) {
+        Object       result      = null;
+        ObjectBinder rootBinder = context.getRootBinder();
+        DataSource value = source.get(name);
 
+        if (value.isNull()) {
+            // todo: do something
         }
-        return BindingResult.of(null);
+
+        if (bindable.getTypeDescriptor().isScalar()) {
+            System.out.println("Simple Bindable");
+            result = value.isNull() ? null : value.getRaw();
+            System.out.println(result);
+        } else {
+            if (context.isDeepBinding()) {
+                result = rootBinder.bind(name, bindable, source).getValue();
+            }
+        }
+
+        return BindingResult.of((T)result);
     }
 
     @Override
