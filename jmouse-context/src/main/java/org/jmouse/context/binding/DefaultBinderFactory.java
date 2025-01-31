@@ -1,6 +1,5 @@
 package org.jmouse.context.binding;
 
-import org.jmouse.core.reflection.JavaType;
 import org.jmouse.util.Sorter;
 
 import java.util.ArrayList;
@@ -11,28 +10,17 @@ public class DefaultBinderFactory implements BinderFactory {
 
     private final List<ObjectBinder> binders = new ArrayList<>();
 
-    public DefaultBinderFactory() {
-        registerBinder(new JavaBeanBinder());
-    }
-
     @Override
-    public ObjectBinder getBinder(JavaType type) {
-        ObjectBinder binder = null;
-
+    public ObjectBinder getBinderFor(Bindable<?> bindable) {
         Sorter.sort(this.binders);
 
-        for (ObjectBinder objectBinder : binders) {
-            if (objectBinder.supports(type)) {
-                binder = objectBinder;
-                break;
+        for (ObjectBinder binder : binders) {
+            if (binder.supports(bindable)) {
+                return binder;
             }
         }
 
-        if (binder == null) {
-            throw new BinderException("No binder found for type " + type);
-        }
-
-        return binder;
+        throw new BinderException("No binder found for bindable type '%s'.".formatted(bindable.getType()));
     }
 
     @Override

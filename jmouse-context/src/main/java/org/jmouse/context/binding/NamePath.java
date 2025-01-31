@@ -16,24 +16,62 @@ import java.util.StringJoiner;
  * <li>{@code log[org.jmouse.core].level}</li>
  * </ul>
  * */
-final public class PropertyName {
+final public class NamePath {
 
-    private final Elements elements;
+    public static final char    SEPARATOR = '.';
+    private             Entries entries;
 
-    public PropertyName(String name) {
-        this.elements = new Parser(name, '.').parse();
+    public NamePath(String name) {
+        this(new Parser(name, SEPARATOR).parse());
     }
 
-    public Elements getElements() {
-        return elements;
+    public NamePath(Entries entries) {
+        this.entries = entries;
     }
 
-    public String getElement(int index) {
-        return elements.get(index).toString();
+    public static NamePath of(String name) {
+        return new NamePath(name);
     }
 
-    public static PropertyName of(String name) {
-        return new PropertyName(name);
+    public void suffix(String suffix) {
+        entries = entries.merge(new Parser(suffix, SEPARATOR).parse());
+    }
+
+    public void prefix(String prefix) {
+        entries = new Parser(prefix, SEPARATOR).parse().merge(entries);
+    }
+
+    public NamePath append(NamePath suffix) {
+        return new NamePath(entries.merge(suffix.entries));
+    }
+
+    public NamePath prepend(NamePath prefix) {
+        return new NamePath(prefix.entries.merge(entries));
+    }
+
+    public NamePath append(String entries) {
+        return append(NamePath.of(entries));
+    }
+
+    public NamePath prepend(String entries) {
+        return prepend(NamePath.of(entries));
+    }
+
+    public Entries entries() {
+        return entries;
+    }
+
+    public String get(int index) {
+        return entries.get(index).toString();
+    }
+
+    public String path() {
+        return entries.toString();
+    }
+
+    @Override
+    public String toString() {
+        return entries.toString();
     }
 
     private static class Parser {
@@ -41,9 +79,9 @@ final public class PropertyName {
         private static final int DEFAULT_CAPACITY = 6;
 
         private final CharSequence sequence;
-        private final char  separator;
-        private       int   size;
-        private       int[] starts;
+        private final char         separator;
+        private       int          size;
+        private       int[]        starts;
         private       int[]        ends;
         private       int[]        types;
 
@@ -56,12 +94,12 @@ final public class PropertyName {
             this.types = new int[DEFAULT_CAPACITY];
         }
 
-        public Elements parse() {
+        public Entries parse() {
             int        length    = sequence.length();
             final char separator = this.separator;
             int        opens     = 0;
             int        offset    = 0;
-            int        type      = Type.DEFAULT;
+            int        type      = Type.EMPTY;
 
             for (int position = 0; position < length; position++) {
                 char c = sequence.charAt(position);
@@ -69,7 +107,9 @@ final public class PropertyName {
                 switch (c) {
                     case '[': {
                         if (opens == 0) {
-                            entry(offset, position, type);
+                            if (offset < position) {
+                                entry(offset, position, type);
+                            }
                             offset = position + 1;
                             type = Type.INDEXED;
                         }
@@ -86,7 +126,7 @@ final public class PropertyName {
                         break;
                     }
                     default: {
-                        if ((type & Type.INDEXED) == 0 && sequence.charAt(position) == separator) {
+                        if ((type & Type.INDEXED) == 0 && c == separator) {
                             entry(offset, position, type);
                             offset = position + 1;
                             type = Type.DEFAULT;
@@ -99,23 +139,35 @@ final public class PropertyName {
             }
 
             if (opens != 0) {
-                type = Type.CORRUPTED;
+                type |= Type.CORRUPTED;
             }
 
             entry(offset, length, type);
 
-            return new Elements(this.size, starts, ends, types, sequence);
+            // remove unnecessary `Type.EMPTY`
+            if (size > 1 && types[size - 1] == Type.EMPTY) {
+                size--;
+            }
+
+            return new Entries(this.size, starts, ends, types, sequence);
         }
 
         public int type(char c, int type) {
-            int updated = type;
+            int     updated = type;
+            boolean numeric = c >= '0' && c <= '9';
+            boolean alpha   = c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
+            boolean dashed  = c == '-';
 
-            if (c >= '0' && c <= '9') {
-                updated |= Type.NUMERIC;
-            }
+            if (alpha || numeric || dashed) {
+                updated |= Type.DEFAULT;
 
-            if (c == '-') {
-                updated |= Type.DASHED;
+                if (numeric) {
+                    updated |= Type.NUMERIC;
+                }
+
+                if (dashed) {
+                    updated |= Type.DASHED;
+                }
             }
 
             return updated;
@@ -139,7 +191,7 @@ final public class PropertyName {
 
     }
 
-    public record Elements(int size, int[] starts, int[] ends, int[] types, CharSequence sequence)
+    public record Entries(int size, int[] starts, int[] ends, int[] types, CharSequence sequence)
             implements Iterator<CharSequence>, Iterable<CharSequence> {
 
         private static int position = 0;
@@ -149,26 +201,22 @@ final public class PropertyName {
             return sequence.subSequence(this.starts[index], ends[index]);
         }
 
-        public CharSequence getFirst() {
+        public CharSequence first() {
             return get(0);
         }
 
-        public CharSequence getLast() {
-            return get(getSize() - 1);
+        public CharSequence last() {
+            return get(size() - 1);
         }
 
         public boolean isLast(int index) {
             ensureIndexBounds(index);
-            return index == getSize() - 1;
+            return index == size() - 1;
         }
 
-        public Type getType(int index) {
+        public Type type(int index) {
             ensureIndexBounds(index);
             return new Type(types[index]);
-        }
-
-        public int getSize() {
-            return size;
         }
 
         public int getLength(int index) {
@@ -176,14 +224,40 @@ final public class PropertyName {
             return this.ends[index] - this.starts[index];
         }
 
-        public Elements slice(int offset, int limit) {
+        public Entries merge(Entries other) {
+            int    size      = this.size + other.size;
+            char   c         = other.sequence.charAt(0);
+            String separator = c == '[' ? "" : String.valueOf(SEPARATOR);
+
+            int[] starts = new int[size];
+            int[] ends   = new int[size];
+            int[] types  = new int[size];
+
+            System.arraycopy(this.starts, 0, starts, 0, this.size);
+            System.arraycopy(this.ends, 0, ends, 0, this.size);
+            System.arraycopy(this.types, 0, types, 0, this.size);
+
+            int offset = sequence.length() + separator.length();
+            for (int i = 0; i < other.size; i++) {
+                int index = this.size + i;
+                starts[index] = other.starts[i] + offset;
+                ends[index] = other.ends[i] + offset;
+                types[index] = other.types[i];
+            }
+
+            return new Entries(size, starts, ends, types, sequence + separator + other.sequence);
+        }
+
+        public Entries slice(int offset, int limit) {
             ensureIndexBounds(offset);
             ensureIndexBounds(limit - 1);
 
             int size = limit - offset;
 
             if (size < 0) {
-                throw new IllegalArgumentException("Invalid range: start must be <= end");
+                throw new IllegalArgumentException(
+                        "Invalid range: start(%d) must be less or equals end(%d)"
+                                .formatted(offset, limit));
             }
 
             int[] starts = new int[size];
@@ -194,24 +268,25 @@ final public class PropertyName {
             System.arraycopy(this.ends, offset, ends, 0, size);
             System.arraycopy(this.types, offset, types, 0, size);
 
-            return new Elements(size, starts, ends, types, sequence);
+            return new Entries(size, starts, ends, types, sequence);
         }
 
-        public Elements skip(int count) {
+        public Entries skip(int count) {
             return slice(count, size);
         }
 
-        public Elements limit(int limit) {
+        public Entries limit(int limit) {
             return slice(0, Math.min(limit, size));
         }
 
         public String toOriginal() {
             StringBuilder builder = new StringBuilder();
 
-            position(0);
+            reset();
+
             int counter = 0;
             for (CharSequence value : this) {
-                Type type = getType(counter);
+                Type type = type(counter);
 
                 if (!type.isEmpty()) {
                     if (type.isIndexed()) {
@@ -234,8 +309,8 @@ final public class PropertyName {
 
                 counter++;
             }
-            position(0);
 
+            reset();
 
             return builder.toString();
         }
@@ -246,13 +321,19 @@ final public class PropertyName {
             }
         }
 
-        public void position(int position) {
-            this.position = position;
+        public void reset() {
+            position = 0;
         }
 
         @Override
         public boolean hasNext() {
-            return position < size;
+            boolean hasNext = position < size;
+
+            if (!hasNext) {
+                reset();
+            }
+
+            return hasNext;
         }
 
         @Override

@@ -6,7 +6,7 @@ import java.util.Collection;
 
 public interface BinderFactory {
 
-    ObjectBinder getBinder(JavaType type);
+    ObjectBinder getBinderFor(Bindable<?> bindable);
 
     void registerBinder(ObjectBinder binder);
 

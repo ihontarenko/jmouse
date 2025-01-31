@@ -4,47 +4,108 @@ import org.jmouse.core.reflection.JavaType;
 
 import java.util.function.Supplier;
 
-final public class Bindable<T> {
+/**
+ * Represents a bindable value with an associated {@link JavaType}.
+ * <p>
+ * This class allows deferred retrieval of values via a {@link Supplier}, making it useful
+ * for dynamic type binding and lazy initialization.
+ * </p>
+ *
+ * @param <T> the type of the bindable value
+ */
+public final class Bindable<T> {
 
     private final JavaType    type;
     private final Supplier<T> value;
 
+    /**
+     * Creates a new {@link Bindable} instance with a specified type and value supplier.
+     *
+     * @param type  the {@link JavaType} representing the type of the value
+     * @param value a {@link Supplier} providing the value
+     */
     public Bindable(JavaType type, Supplier<T> value) {
         this.type = type;
         this.value = value;
     }
 
+    /**
+     * Creates a new {@link Bindable} instance with a specified type and a default {@code null} supplier.
+     *
+     * @param type the {@link JavaType} representing the type of the value
+     */
     public Bindable(JavaType type) {
         this(type, () -> null);
     }
 
+    /**
+     * Creates a new {@link Bindable} instance for a given raw class type.
+     *
+     * @param rawType the class type to wrap
+     */
     public Bindable(Class<T> rawType) {
         this(JavaType.forClass(rawType));
     }
 
+    /**
+     * Creates a new {@link Bindable} instance from a {@link JavaType}.
+     *
+     * @param type the {@link JavaType} to wrap
+     * @param <T>  the expected type
+     * @return a new {@link Bindable} instance
+     */
     public static <T> Bindable<T> of(JavaType type) {
         return new Bindable<>(type);
     }
 
+    /**
+     * Creates a new {@link Bindable} instance from a {@link Class}.
+     *
+     * @param type the class type to wrap
+     * @param <T>  the expected type
+     * @return a new {@link Bindable} instance
+     */
     public static <T> Bindable<T> of(Class<?> type) {
         return new Bindable<>(JavaType.forClass(type));
     }
 
+    /**
+     * Creates a {@link Bindable} instance wrapping an existing object.
+     *
+     * @param instance the instance to wrap
+     * @param <T>      the expected type
+     * @return a new {@link Bindable} instance with the provided object as its value
+     */
     @SuppressWarnings({"unchecked"})
     public static <T> Bindable<T> ofInstance(T instance) {
         return (Bindable<T>) of(instance.getClass()).withInstance(instance);
     }
 
+    /**
+     * Retrieves the {@link Supplier} responsible for providing the value.
+     *
+     * @return the value supplier
+     */
     public Supplier<T> getValue() {
         return value;
     }
 
+    /**
+     * Retrieves the {@link JavaType} associated with this bindable value.
+     *
+     * @return the type representation
+     */
     public JavaType getType() {
         return type;
     }
 
+    /**
+     * Creates a new {@link Bindable} instance with the specified instance as its value.
+     *
+     * @param instance the instance to wrap
+     * @return a new {@link Bindable} with the same type but the provided instance as value
+     */
     public Bindable<T> withInstance(T instance) {
         return new Bindable<>(this.type, () -> instance);
     }
-
 }

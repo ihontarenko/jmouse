@@ -1,12 +1,12 @@
 package org.jmouse.context.binding;
 
-import org.jmouse.core.reflection.JavaType;
+public interface ObjectBinder {
 
-public interface ObjectBinder extends PropertyBinder {
+    <T> BindingResult<T> bind(NamePath name, Bindable<T> bindable, DataSource source);
 
-    <T> BindingResult<T> bind(PropertyName name, Bindable<T> bindable, DataSource source);
+    <T> BindingResult<T> bindValue(NamePath name, Bindable<T> bindable, DataSource source);
 
-    default boolean supports(JavaType type) {
+    default <T> boolean supports(Bindable<T> bindable) {
         return false;
     }
 

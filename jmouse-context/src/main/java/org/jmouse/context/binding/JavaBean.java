@@ -24,7 +24,7 @@ import static org.jmouse.core.reflection.Reflections.findFirstConstructor;
 import static org.jmouse.core.reflection.Reflections.instantiate;
 import static org.jmouse.util.Strings.uncapitalize;
 
-final public class Bean<T> {
+final public class JavaBean<T> {
 
     public static final String GETTER_GET_PREFIX = "get";
     public static final String GETTER_IS_PREFIX  = "is";
@@ -33,12 +33,12 @@ final public class Bean<T> {
     private final Map<String, Property> properties = new LinkedHashMap<>();
     private final JavaType              type;
 
-    public Bean(JavaType type) {
+    public JavaBean(JavaType type) {
         this.type = type;
         addProperties();
     }
 
-    public Bean(Class<?> type) {
+    public JavaBean(Class<?> type) {
         this(JavaType.forClass(type));
     }
 
@@ -71,7 +71,7 @@ final public class Bean<T> {
     public void addMethod(Method method, String prefix, Matcher<Executable> matcher, BiConsumer<Property, Method> adder) {
         if (matcher.matches(method)) {
             adder.accept(properties.computeIfAbsent(
-                    uncapitalize(method.getName().substring(prefix.length())), this::newBeanProperty), method);
+                    uncapitalize(method.getName().substring(prefix.length())), this::createProperty), method);
         }
     }
 
@@ -108,12 +108,17 @@ final public class Bean<T> {
         });
     }
 
-    public Property newBeanProperty(String name) {
+    public Property createProperty(String name) {
         return new Property(name, type);
     }
 
-    public static <T> Bean<T> of(Class<T> type) {
-        return new Bean<>(type);
+    public static <T> JavaBean<T> of(Class<T> type) {
+        return new JavaBean<>(type);
+    }
+
+    @Override
+    public String toString() {
+        return "Bean: %s; Properties: %d".formatted(type, properties.size());
     }
 
     public static class Property {

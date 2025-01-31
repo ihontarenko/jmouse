@@ -97,6 +97,16 @@ public class JavaType {
     }
 
     /**
+     * Creates a {@link JavaType} instance from a {@link TypeReference}.
+     *
+     * @param type the {@link TypeReference} representing the desired type
+     * @return a {@link JavaType} instance corresponding to the given type reference
+     */
+    public static JavaType forTypeReference(TypeReference<?> type) {
+        return forType(type.getType());
+    }
+
+    /**
      * Returns a {@link JavaType} instance for the given {@link Class}.
      *
      * @param klass the class to wrap
