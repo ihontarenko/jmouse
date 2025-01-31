@@ -13,7 +13,7 @@ public class Example {
     public static void main(String[] args) {
 
         JavaType javaType = JavaType.forTypeReference(new TypeReference<List<Map<String, Integer>>>() {});
-/*
+
 
         Map<String, Object> source = new HashMap<>() {{
             put("application", Map.of(
@@ -33,9 +33,11 @@ public class Example {
 
         Binder binder = new Binder(dataSource);
 
-        binder.bind("application.clients.default", Bindable.of(String.class));
-        binder.bind("application.users", Bindable.of(JavaType.forParametrizedClass(List.class, Customer.class)));
-*/
+//        binder.bind("application.names", Bindable.of(List.class));
+//        binder.bind("application.names", Bindable.of(String[].class));
+//        binder.bind("application.clients.default", Bindable.of(String.class));
+//        binder.bind("application.names", Bindable.of(JavaType.forParametrizedClass(List.class, String.class)));
+
 
         User user = new User("PARENT!!!", 13);
 

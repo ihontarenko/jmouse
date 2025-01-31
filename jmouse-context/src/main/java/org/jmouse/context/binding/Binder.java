@@ -12,9 +12,10 @@ public class Binder implements ObjectBinder, BindContext {
         this.factory = factory;
 
         // register default binders
-        factory.registerBinder(new MapCollectionBinder(this));
-        factory.registerBinder(new SetCollectionBinder(this));
-        factory.registerBinder(new ListCollectionBinder(this));
+        factory.registerBinder(new MapBinder(this));
+        factory.registerBinder(new ArrayBinder(this));
+        factory.registerBinder(new SetBinder(this));
+        factory.registerBinder(new ListBinder(this));
         factory.registerBinder(new JavaBeanBinder(this));
     }
 

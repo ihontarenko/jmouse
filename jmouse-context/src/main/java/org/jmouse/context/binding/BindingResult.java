@@ -15,6 +15,10 @@ final public class BindingResult<T> {
         return new BindingResult<>(value);
     }
 
+    public static <T> BindingResult<T> empty() {
+        return of(null);
+    }
+
     public T getValue(Supplier<? extends Error> exceptionSupplier) {
         if (!isPresent()) {
             throw exceptionSupplier.get();

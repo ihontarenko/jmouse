@@ -118,8 +118,18 @@ public final class Bindable<T> {
      * @param instance the instance to wrap
      * @return a new {@link Bindable} with the same type but the provided instance as value
      */
-    public Bindable<T> withInstance(T instance) {
-        return new Bindable<>(this.type, () -> instance);
+    public Bindable<T>  withInstance(T instance) {
+        return withInstance(() -> instance);
+    }
+
+    /**
+     * Creates a new {@link Bindable} instance with the specified instance as its value.
+     *
+     * @param supplier the supplier with instance
+     * @return a new {@link Bindable} with the same type but the provided instance as value
+     */
+    public Bindable<T>  withInstance(Supplier<T> supplier) {
+        return new Bindable<>(this.type, supplier);
     }
 
     @Override

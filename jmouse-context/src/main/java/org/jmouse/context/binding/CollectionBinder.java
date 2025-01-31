@@ -1,6 +1,10 @@
 package org.jmouse.context.binding;
 
 import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeDescriptor;
+
+import java.util.Collection;
+import java.util.function.Supplier;
 
 abstract public class CollectionBinder extends AbstractBinder {
 
@@ -9,47 +13,29 @@ abstract public class CollectionBinder extends AbstractBinder {
     }
 
     @Override
-    public <T> BindingResult<T> bindValue(NamePath name, Bindable<T> bindable, DataSource source) {
-        ObjectBinder rootBinder = context.getRootBinder();
-        DataSource value = source.get(name);
-
-        if (value.isSimple()) {
-            System.out.println(value);
-        } else {
-            if (context.isDeepBinding()) {
-                return rootBinder.bind(name, bindable, source);
-            }
-        }
-
-        return BindingResult.of((T) value.getSource());
-    }
-
-    @Override
     public <T> BindingResult<T> bind(NamePath name, Bindable<T> bindable, DataSource source) {
-        DataSource collection = source.get(name);
+        DataSource     collection     = source.get(name);
+        TypeDescriptor typeDescriptor = bindable.getTypeDescriptor();
 
-        if (collection.isCollection()) {
+        if (typeDescriptor.isCollection()) {
             int index = 0;
+            Collection<Object> elements = getCollection().get();
+
             for (Object element : collection.asCollection()) {
-                NamePath indexed = name.append("[" + index++ + "]");
-                JavaType type    = bindable.getType().getFirst();
+                NamePath elementName = name.append("[" + index++ + "]");
+                JavaType elementType = bindable.getType().getFirst();
 
-                System.out.println(">> type: " + type);
+                BindingResult<Object> result = bindValue(elementName, Bindable.of(elementType.getRawType()), source);
 
-                BindingResult<?> result = bindValue(indexed, Bindable.of(type.getRawType()), source);
-
-                if (result.isPresent()) {
-                    System.out.println(result.getValue());
-                }
-
+                result.ifPresent(elements::add);
             }
+
+            return BindingResult.of((T) elements);
         }
 
-
-        return BindingResult.of(null);
-//        return context.getRootBinder().bind(name, bindable, source);
+        return BindingResult.empty();
     }
 
-
+    abstract protected <T> Supplier<? extends Collection<T>> getCollection();
 
 }
