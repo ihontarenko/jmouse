@@ -107,6 +107,36 @@ public class Example {
         return resolver;
     }
 
+    static class AppConfig {
+        private String host;
+        private int port;
+        private String name;
+
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
     static class UserContext {
 
         private       int           port;
@@ -114,14 +144,18 @@ public class Example {
         private       List<Service> services;
         private String        javaHome;
 
+        private AppConfig config;
+
         public UserContext(DataSource source) {
             binder = new Binder(source);
         }
 
         public void initialize() {
             binder.bind("app.context", Bindable.ofInstance(this));
-            binder.bind(null, Bindable.ofInstance(this));
-            binder.bind("JAVA_HOME", Bindable.of(String.class)).ifPresent(this::setJavaHome);
+            binder.bind("default", Bindable.ofInstance(this));
+            Binder.with("123").bind(null, Bindable.of(double.class)).ifPresent(System.out::println);
+//            binder.bind(null, Bindable.ofInstance(this));
+//            binder.bind("JAVA_HOME", Bindable.of(String.class)).ifPresent(this::setJavaHome);
         }
 
         public String getJavaHome() {
@@ -146,6 +180,14 @@ public class Example {
 
         public void setServices(List<Service> services) {
             this.services = services;
+        }
+
+        public AppConfig getConfig() {
+            return config;
+        }
+
+        public void setConfig(AppConfig config) {
+            this.config = config;
         }
     }
 

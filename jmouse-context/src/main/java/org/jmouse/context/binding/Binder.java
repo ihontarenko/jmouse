@@ -8,14 +8,12 @@ import java.util.function.Supplier;
 
 public class Binder implements ObjectBinder, BindContext {
 
+    private static final Supplier<? extends RuntimeException> exceptionSupplier = () -> new RuntimeException("Recursive binding detected");
     private final BindingStrategy                 strategy;
     private final DataSource                      source;
     private final BinderFactory                   factory;
     private final Conversion                      conversion;
     private final CyclicReferenceDetector<String> detector;
-
-    private static final Supplier<? extends RuntimeException> exceptionSupplier = ()
-            -> new RuntimeException("Recursive binding detected");
 
     public Binder(DataSource source, BinderFactory factory, BindingStrategy strategy) {
         this.strategy = strategy;
@@ -30,6 +28,10 @@ public class Binder implements ObjectBinder, BindContext {
         factory.registerBinder(new SetBinder(this));
         factory.registerBinder(new ListBinder(this));
         factory.registerBinder(new JavaBeanBinder(this));
+    }
+
+    public static Binder with(Object source) {
+        return new Binder(DataSource.of(source));
     }
 
     public Binder(DataSource source) {
@@ -53,8 +55,7 @@ public class Binder implements ObjectBinder, BindContext {
 
     @Override
     public <T> BindingResult<T> bindValue(NamePath name, Bindable<T> bindable, DataSource source) {
-        throw new UnsupportedOperationException(
-                "Root binder is not supported this method. This methods can be called only in type-binder specific.");
+        throw new UnsupportedOperationException("Root binder is not supported this method. This methods can be called only in type-binder specific.");
     }
 
     @Override
