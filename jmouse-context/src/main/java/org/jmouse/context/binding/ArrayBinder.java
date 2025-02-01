@@ -44,7 +44,7 @@ public class ArrayBinder extends CollectionBinder {
     }
 
     @Override
-    protected <T> Supplier<? extends Collection<T>> getCollection() {
+    protected <T> Supplier<? extends Collection<T>> getCollectionSupplier() {
         return ArrayList::new;
     }
 }

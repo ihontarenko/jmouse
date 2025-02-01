@@ -1,15 +1,28 @@
 package org.jmouse.context.binding;
 
+import org.jmouse.core.convert.Conversion;
+import svit.beans.CyclicReferenceDetector;
+import svit.beans.DefaultCyclicReferenceDetector;
+
+import java.util.function.Supplier;
+
 public class Binder implements ObjectBinder, BindContext {
 
-    private final BindingStrategy strategy;
-    private final DataSource      source;
-    private final BinderFactory   factory;
+    private final BindingStrategy                 strategy;
+    private final DataSource                      source;
+    private final BinderFactory                   factory;
+    private final Conversion                      conversion;
+    private final CyclicReferenceDetector<String> detector;
+
+    private static final Supplier<? extends RuntimeException> exceptionSupplier = ()
+            -> new RuntimeException("Recursive binding detected");
 
     public Binder(DataSource source, BinderFactory factory, BindingStrategy strategy) {
         this.strategy = strategy;
         this.source = source;
         this.factory = factory;
+        this.detector = new DefaultCyclicReferenceDetector<>();
+        this.conversion = new BinderConversion();
 
         // register default binders
         factory.registerBinder(new MapBinder(this));
@@ -30,7 +43,12 @@ public class Binder implements ObjectBinder, BindContext {
     @Override
     public <T> BindingResult<T> bind(NamePath path, Bindable<T> bindable, DataSource source) {
         ObjectBinder binder = factory.getBinderFor(bindable);
-        return binder.bind(path, bindable, source);
+
+        detector.detect(path::path, exceptionSupplier);
+        BindingResult<T> result = binder.bind(path, bindable, source);
+        detector.remove(path::path);
+
+        return result;
     }
 
     @Override
@@ -57,5 +75,10 @@ public class Binder implements ObjectBinder, BindContext {
     @Override
     public boolean isShallowBinding() {
         return BindingStrategy.SHALLOW.equals(strategy);
+    }
+
+    @Override
+    public Conversion getConversion() {
+        return conversion;
     }
 }

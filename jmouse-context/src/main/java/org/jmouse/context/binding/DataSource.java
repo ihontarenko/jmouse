@@ -51,20 +51,18 @@ public interface DataSource {
     default DataSource get(NamePath name) {
         DataSource       nested   = this;
         int              counter  = 0;
-        NamePath.Entries elements = name.entries();
+        NamePath.Entries entries = name.entries();
 
-        for (CharSequence element : elements) {
-            NamePath.Type type = elements.type(counter);
+        for (CharSequence element : entries) {
+            NamePath.Type type = entries.type(counter);
 
-            if (type.isEmpty()) {
-                continue;
-            }
-
-            if (type.isIndexed() && type.isNumeric()) {
-                int index = Integer.parseInt(element.toString());
-                nested = nested.get(index);
-            } else {
-                nested = nested.get(element.toString());
+            if (!type.isEmpty()) {
+                if (type.isIndexed() && type.isNumeric()) {
+                    int index = Integer.parseInt(element.toString());
+                    nested = nested.get(index);
+                } else {
+                    nested = nested.get(element.toString());
+                }
             }
 
             counter++;

@@ -18,6 +18,7 @@ import java.util.StringJoiner;
  * */
 final public class NamePath {
 
+    public static final Entries EMPTY     = new Entries(0, new int[0], new int[0], new int[0], "");
     public static final char    SEPARATOR = '.';
     private             Entries entries;
 
@@ -29,8 +30,12 @@ final public class NamePath {
         this.entries = entries;
     }
 
+    public static NamePath empty() {
+        return new NamePath(EMPTY);
+    }
+
     public static NamePath of(String name) {
-        return new NamePath(name);
+        return name == null ? empty() : new NamePath(name);
     }
 
     public void suffix(String suffix) {
@@ -226,7 +231,7 @@ final public class NamePath {
 
         public Entries merge(Entries other) {
             int    size      = this.size + other.size;
-            char   c         = other.sequence.charAt(0);
+            char   c         = other.sequence.isEmpty() ? Character.MIN_VALUE : other.sequence.charAt(0);
             String separator = c == '[' ? "" : String.valueOf(SEPARATOR);
 
             int[] starts = new int[size];
@@ -237,12 +242,16 @@ final public class NamePath {
             System.arraycopy(this.ends, 0, ends, 0, this.size);
             System.arraycopy(this.types, 0, types, 0, this.size);
 
-            int offset = sequence.length() + separator.length();
+            int offset = this.size > 0 ? sequence.length() + separator.length() : 0;
             for (int i = 0; i < other.size; i++) {
                 int index = this.size + i;
                 starts[index] = other.starts[i] + offset;
                 ends[index] = other.ends[i] + offset;
                 types[index] = other.types[i];
+            }
+
+            if (sequence.isEmpty() || other.sequence.isEmpty()) {
+                separator = "";
             }
 
             return new Entries(size, starts, ends, types, sequence + separator + other.sequence);
@@ -280,7 +289,7 @@ final public class NamePath {
         }
 
         public String toOriginal() {
-            StringBuilder builder = new StringBuilder();
+            /*StringBuilder builder = new StringBuilder();
 
             reset();
 
@@ -312,7 +321,8 @@ final public class NamePath {
 
             reset();
 
-            return builder.toString();
+            return builder.toString();*/
+            return sequence.toString();
         }
 
         private void ensureIndexBounds(int index) {

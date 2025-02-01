@@ -116,6 +116,10 @@ final public class JavaBean<T> {
         return new JavaBean<>(type);
     }
 
+    public static <T> JavaBean<T> of(JavaType type) {
+        return new JavaBean<>(type);
+    }
+
     @Override
     public String toString() {
         return "Bean: %s; Properties: %d".formatted(type, properties.size());

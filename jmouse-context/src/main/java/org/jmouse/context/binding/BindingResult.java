@@ -35,6 +35,10 @@ final public class BindingResult<T> {
         return value;
     }
 
+    public boolean isEmpty() {
+        return value == null;
+    }
+
     public boolean isPresent() {
         return value != null;
     }
@@ -45,6 +49,8 @@ final public class BindingResult<T> {
         }
     }
 
-
-
+    @Override
+    public String toString() {
+        return "Bound: [value=%s]".formatted(value);
+    }
 }

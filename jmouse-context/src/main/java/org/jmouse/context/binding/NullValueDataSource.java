@@ -8,12 +8,12 @@ public class NullValueDataSource extends AbstractDataSource {
 
     @Override
     public DataSource get(String name) {
-        throw new UnsupportedOperationException("NULL DATA SOURCE");
+        return DataSource.of(null);
     }
 
     @Override
     public DataSource get(int index) {
-        throw new UnsupportedOperationException("NULL DATA SOURCE");
+        return DataSource.of(null);
     }
 
     /**
@@ -33,7 +33,7 @@ public class NullValueDataSource extends AbstractDataSource {
      */
     @Override
     public Object getRaw() {
-        throw new UnsupportedOperationException("NULL DATA SOURCE");
+        return getSource();
     }
 
     /**

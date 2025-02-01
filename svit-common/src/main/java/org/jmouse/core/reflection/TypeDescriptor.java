@@ -57,6 +57,14 @@ public class TypeDescriptor {
         return new TypeDescriptor(type);
     }
 
+    public Class<?> getRawType() {
+        return rawType;
+    }
+
+    public JavaType getType() {
+        return type;
+    }
+
     /**
      * Checks if the current type is assignable from the given class.
      *
@@ -192,5 +200,14 @@ public class TypeDescriptor {
      */
     public boolean isScalar() {
         return isString() || isNumber() || isBoolean() || isByte() || isCharacter() || isPrimitive();
+    }
+
+    /**
+     * Checks if the type is a Object type.
+     *
+     * @return {@code true} if the type is a Object type
+     */
+    public boolean isObject() {
+        return rawType.isAssignableFrom(Object.class);
     }
 }

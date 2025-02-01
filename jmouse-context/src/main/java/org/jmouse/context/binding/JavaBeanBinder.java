@@ -1,6 +1,7 @@
 package org.jmouse.context.binding;
 
 import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeDescriptor;
 import org.jmouse.util.Priority;
 
 import java.util.function.Supplier;
@@ -16,16 +17,21 @@ public class JavaBeanBinder extends AbstractBinder {
 
     @Override
     public <T> BindingResult<T> bind(NamePath name, Bindable<T> bindable, DataSource source) {
-        Class<T>    type     = (Class<T>) bindable.getType().getRawType();
-        JavaBean<T> bean     = JavaBean.of(type);
-        Supplier<T> supplier = bean.getSupplier(bindable);
+        TypeDescriptor typeDescriptor = bindable.getTypeDescriptor();
+        JavaType       type           = bindable.getType();
+        JavaBean<T>    bean           = JavaBean.of(type);
+        Supplier<T>    supplier       = bean.getSupplier(bindable);
+
+        if (typeDescriptor.isObject() || typeDescriptor.isScalar()) {
+            return bindValue(name, bindable, source);
+        }
 
         for (JavaBean.Property property : bean.getProperties()) {
             JavaType         propertyType = property.getType();
             Supplier<Object> value        = property.getValue(supplier);
             NamePath         propertyName = NamePath.of(property.getName());
 
-            bindValue(propertyName, of(propertyType).withInstance(value), source.get(name)).ifPresent(result -> {
+            bindValue(name.append(propertyName), of(propertyType).withInstance(value), source).ifPresent(result -> {
                 if (property.isWritable()) {
                     property.setValue(supplier, result);
                 }
@@ -36,7 +42,7 @@ public class JavaBeanBinder extends AbstractBinder {
     }
 
     @Override
-    public  <T> boolean supports(Bindable<T> bindable) {
+    public <T> boolean supports(Bindable<T> bindable) {
         // fallback binder always true
         return true;
     }

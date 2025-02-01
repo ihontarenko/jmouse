@@ -35,7 +35,7 @@ public class JavaTypeDataSource extends AbstractDataSource {
      */
     @Override
     public DataSource get(String name) {
-        Object value = source;
+        Object value = null;
 
         if (isMap()) {
             value = asMap().get(name);
@@ -55,10 +55,13 @@ public class JavaTypeDataSource extends AbstractDataSource {
      */
     @Override
     public DataSource get(int index) {
-        Object value = source;
+        Object value = null;
 
         if (isList()) {
-            value = asList().get(index);
+            List<Object> list = asList(Object.class);
+            if (list.size() > index) {
+                value = asList().get(index);
+            }
         }
 
         return DataSource.of(value);

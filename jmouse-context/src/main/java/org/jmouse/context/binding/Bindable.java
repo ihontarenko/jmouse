@@ -66,7 +66,7 @@ public final class Bindable<T> {
      * @param <T>  the expected type
      * @return a new {@link Bindable} instance
      */
-    public static <T> Bindable<T> of(Class<?> type) {
+    public static <T> Bindable<T> of(Class<T> type) {
         return new Bindable<>(JavaType.forClass(type));
     }
 
@@ -79,7 +79,7 @@ public final class Bindable<T> {
      */
     @SuppressWarnings({"unchecked"})
     public static <T> Bindable<T> ofInstance(T instance) {
-        return (Bindable<T>) of(instance.getClass()).withInstance(instance);
+        return Bindable.of((Class<T>) instance.getClass()).withInstance(instance);
     }
 
     /**
@@ -118,7 +118,7 @@ public final class Bindable<T> {
      * @param instance the instance to wrap
      * @return a new {@link Bindable} with the same type but the provided instance as value
      */
-    public Bindable<T>  withInstance(T instance) {
+    public Bindable<T> withInstance(T instance) {
         return withInstance(() -> instance);
     }
 
