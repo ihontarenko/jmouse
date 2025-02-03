@@ -3,6 +3,8 @@ package org.jmouse.context.binding;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.TypeDescriptor;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -49,6 +51,14 @@ public final class Bindable<T> {
         this(JavaType.forClass(rawType));
     }
 
+    public static <K, V> Bindable<Map<K, V>> ofMap(Class<K> keyType, Class<V> valueType) {
+        return of(JavaType.forParametrizedClass(Map.class, keyType, valueType));
+    }
+
+    public static <V> Bindable<List<V>> ofList(Class<V> rawType) {
+        return of(JavaType.forParametrizedClass(List.class, rawType));
+    }
+
     /**
      * Creates a new {@link Bindable} instance from a {@link JavaType}.
      *
@@ -68,7 +78,7 @@ public final class Bindable<T> {
      * @return a new {@link Bindable} instance
      */
     public static <T> Bindable<T> of(Class<T> type) {
-        return new Bindable<>(JavaType.forClass(type));
+        return of(JavaType.forClass(type));
     }
 
     /**

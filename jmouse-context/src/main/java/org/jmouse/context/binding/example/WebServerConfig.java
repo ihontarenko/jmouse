@@ -53,4 +53,15 @@ public class WebServerConfig {
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
+
+    @Override
+    public String toString() {
+        return "WebServerConfig{" +
+                "name='" + name + '\'' +
+                ", port=" + port +
+                ", host='" + host + '\'' +
+                ", alias=" + alias +
+                ", properties=" + properties +
+                '}';
+    }
 }

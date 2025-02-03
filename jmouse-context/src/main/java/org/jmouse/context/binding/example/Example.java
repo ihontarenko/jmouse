@@ -1,7 +1,9 @@
 package org.jmouse.context.binding.example;
 
+import org.jmouse.context.ValueFlow;
 import org.jmouse.context.binding.*;
 import org.jmouse.core.env.*;
+import org.jmouse.core.reflection.JavaType;
 
 import java.util.*;
 
@@ -9,25 +11,26 @@ public class Example {
 
     public static void main(String[] args) {
 
-//        PropertyResolver    resolver = createPropertyResolver();
-//        Map<String, Object> flatMap  = new HashMap<>();
-//
-//        for (PropertySource<?> source : resolver.getRegistry().getPropertySources()) {
-//            for (String name : source.getPropertyNames()) {
-//                flatMap.put(name, source.getProperty(name));
-//            }
-//        }
-//
-//        Map<String, Object> nested = PropertiesTransformer.transform(flatMap);
+        PropertyResolver    resolver = createPropertyResolver();
+        Map<String, Object> flatMap  = new HashMap<>();
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("default", Map.of("data", new RandomProvider()));
+        for (PropertySource<?> source : resolver.getRegistry().getPropertySources()) {
+            for (String name : source.getPropertyNames()) {
+                flatMap.put(name, source.getProperty(name));
+            }
+        }
 
+        Map<String, Object> data = PropertiesTransformer.transform(flatMap);
         Binder binder = new Binder(DataSource.of(data));
 
-        AppConfig appConfig = binder.bind("default", Bindable.of(AppConfig.class)).getValue();
+        var type = Bindable.ofMap(String.class, WebServerConfig.class);
 
-        System.out.println(appConfig.getDefaultWebServerConfig().getPort());
+        ValueFlow.get()
+                .create(binder.bind("default.configs", type)::getValue)
+                .when(Objects::nonNull)
+                .as(stringWebServerConfigMap -> stringWebServerConfigMap.get("tomcat"))
+                .toConsume(System.out::println);
+        System.out.println(false);
     }
 
     private static PropertyResolver createPropertyResolver() {

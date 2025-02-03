@@ -245,9 +245,11 @@ final public class NamePath {
             boolean dashed  = c == '-';
 
             if (alpha || numeric || dashed) {
-                updated |= Type.DEFAULT;
+                if (alpha) {
+                    updated |= Type.DEFAULT;
+                }
 
-                if (numeric) {
+                if (numeric && (type & Type.DEFAULT) == 0) {
                     updated |= Type.NUMERIC;
                 }
 
