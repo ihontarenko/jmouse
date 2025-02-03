@@ -2,10 +2,9 @@ package org.jmouse.context.binding;
 
 import org.jmouse.core.reflection.JavaType;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.util.Objects.requireNonNullElseGet;
 import static org.jmouse.core.reflection.JavaType.forInstance;
@@ -47,6 +46,14 @@ public interface DataSource {
      *
      * @param name the structured name path
      * @return the nested {@link DataSource}
+     * @throws NumberFormatException if an indexed path contains a non-numeric value
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * DataSource source = ...;
+     * NamePath path = NamePath.of("user.address.street");
+     * DataSource street = source.get(path);
+     * }</pre>
      */
     default DataSource get(NamePath name) {
         DataSource       nested   = this;
@@ -69,6 +76,33 @@ public interface DataSource {
         }
 
         return nested;
+    }
+
+    /**
+     * Retrieves a collection of keys representing the entries in this {@link DataSource}.
+     *
+     * @return a collection of keys as strings
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * DataSource source = ...;
+     * Collection<String> keys = source.keys();
+     * }</pre>
+     */
+    default List<String> keys() {
+        List<String> keys = new ArrayList<>();
+
+        if (isMap()) {
+            keys = asMap().keySet().stream().map(Object::toString).toList();
+        } else if (isList()) {
+            keys = IntStream.range(0, asList().size()).mapToObj("[%d]"::formatted).toList();
+        }
+
+        return keys;
+    }
+
+    default List<NamePath> names() {
+        return keys().stream().map(NamePath::new).toList();
     }
 
     /**

@@ -8,7 +8,7 @@ import java.util.List;
  * maintain a registry of source-target type pairs, providing flexible and
  * extensible type conversion capabilities.
  *
- * <p>Usage example:
+ * <p><strong>Usage example:</strong></p>
  * <pre>{@code
  * // 1. Create a ConverterFactory implementation
  * ConverterFactory factory = new DefaultConverterFactory();
@@ -59,6 +59,35 @@ public interface ConverterFactory {
     void registerConverter(GenericConverter<?, ?> genericConverter);
 
     /**
+     * Checks if a converter is registered for the given source and target types.
+     *
+     * @param sourceType the class representing the source type
+     * @param targetType the class representing the target type
+     * @return {@code true} if a converter exists, {@code false} otherwise
+     */
+    default boolean hasConverter(Class<?> sourceType, Class<?> targetType) {
+        return hasConverter(new ClassPair<>(sourceType, targetType));
+    }
+
+    /**
+     * Checks if a converter exists for the specified {@link ClassPair}.
+     *
+     * @param classPair a {@link ClassPair} representing the source and target types
+     * @return {@code true} if a converter exists, {@code false} otherwise
+     */
+    default boolean hasConverter(ClassPair<?, ?> classPair) {
+        return getConverter(classPair) != null;
+    }
+
+    /**
+     * Removes a registered converter for the specified source and target types.
+     *
+     * @param classPair a {@link ClassPair} representing the source and target types
+     * @return {@code true} if a converter was removed, {@code false} if no such converter was found
+     */
+    boolean removeConverter(ClassPair<?, ?> classPair);
+
+    /**
      * Retrieves a {@link GenericConverter} instance capable of handling the specified
      * source and target types, if available. This default method constructs a
      * {@link ClassPair} internally and delegates to {@link #getConverter(ClassPair)}.
@@ -85,7 +114,31 @@ public interface ConverterFactory {
      */
     <S, T> GenericConverter<S, T> getConverter(ClassPair<S, T> classPair);
 
-
+    /**
+     * Searches for a transition chain that allows conversion from {@code sourceType} to {@code targetType}
+     * using intermediate conversion steps. If a direct conversion is not available, this method
+     * attempts to construct a path of conversions that ultimately leads to the desired type.
+     *
+     * <p>This is useful when multiple converters exist that can form a chain of type transformations.</p>
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * // Suppose we have registered converters for:
+     * // String -> Integer
+     * // Integer -> Double
+     * // Double -> BigDecimal
+     *
+     * List<ClassPair<?, ?>> transitions = factory.searchTransitionChain(String.class, BigDecimal.class);
+     * // Resulting chain: [String -> Integer, Integer -> Double, Double -> BigDecimal]
+     * }</pre>
+     *
+     * @param <S>       the source type
+     * @param <T>       the target type
+     * @param sourceType the class representing the source type
+     * @param targetType the class representing the target type
+     * @return a list of {@link ClassPair} instances representing the conversion path,
+     *         or an empty list if no transition is found
+     */
     <S, T> List<ClassPair<?, ?>> searchTransitionChain(Class<S> sourceType, Class<T> targetType);
 
 }

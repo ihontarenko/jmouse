@@ -20,14 +20,14 @@ import static java.util.stream.Collectors.joining;
  * @see GenericConverter
  * @see ConverterNotFound
  */
-public class DefaultConversion implements Conversion {
+public class StandardConversion implements Conversion {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultConversion.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StandardConversion.class);
 
     private final Map<ClassPair<?, ?>, GenericConverter<?, ?>> converters = new ConcurrentHashMap<>();
-    private final TypeNormalizer       normalizer = new TypeNormalizer.EnumTypeNormalizer();
-    private final Graph<Class<?>>      graph      = new MapListGraph<>();
-    private final PathFinder<Class<?>> pathFinder = new BFSPathFinder<>();
+    private final TypeNormalizer                               normalizer = new TypeNormalizer.EnumTypeNormalizer();
+    private final Graph<Class<?>>                              graph      = new MapListGraph<>();
+    private final PathFinder<Class<?>>                         pathFinder = new BFSPathFinder<>();
 
     /**
      * Registers a simple {@link Converter} for converting from {@code sourceType} to {@code targetType}.
@@ -57,6 +57,34 @@ public class DefaultConversion implements Conversion {
             graph.addEdge(supportedType.getClassA(), supportedType.getClassB());
             converters.putIfAbsent(supportedType, genericConverter);
         }
+    }
+
+    /**
+     * Checks if a converter exists for the specified {@link ClassPair}.
+     *
+     * @param classPair a {@link ClassPair} representing the source and target types
+     * @return {@code true} if a converter exists, {@code false} otherwise
+     */
+    @Override
+    public boolean hasConverter(ClassPair<?, ?> classPair) {
+        return converters.containsKey(classPair);
+    }
+
+    /**
+     * Removes a registered converter for the specified source and target types.
+     *
+     * @param classPair a {@link ClassPair} representing the source and target types
+     * @return {@code true} if a converter was removed, {@code false} if no such converter was found
+     */
+    @Override
+    public boolean removeConverter(ClassPair<?, ?> classPair) {
+        boolean removed = false;
+
+        if (hasConverter(classPair)) {
+            removed = converters.remove(classPair) != null;
+        }
+
+        return removed;
     }
 
     /**

@@ -6,7 +6,7 @@ package org.jmouse.core.convert;
  * {@link #configureConversion(Conversion)} to register new type converters,
  * set default options, or otherwise influence the conversion process.
  *
- * @see DefaultConversion
+ * @see StandardConversion
  */
 public interface ConversionConfigurer {
 

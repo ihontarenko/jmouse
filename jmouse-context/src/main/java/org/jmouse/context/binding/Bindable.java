@@ -3,6 +3,7 @@ package org.jmouse.context.binding;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.TypeDescriptor;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -79,6 +80,7 @@ public final class Bindable<T> {
      */
     @SuppressWarnings({"unchecked"})
     public static <T> Bindable<T> ofInstance(T instance) {
+        Objects.requireNonNull(instance, "Instance must not be NULL");
         return Bindable.of((Class<T>) instance.getClass()).withInstance(instance);
     }
 

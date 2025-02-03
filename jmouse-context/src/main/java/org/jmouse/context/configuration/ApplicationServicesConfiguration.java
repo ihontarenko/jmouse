@@ -4,7 +4,7 @@ import org.jmouse.core.convert.converter.*;
 import svit.beans.annotation.Configuration;
 import svit.beans.annotation.Provide;
 import org.jmouse.core.convert.Conversion;
-import org.jmouse.core.convert.DefaultConversion;
+import org.jmouse.core.convert.StandardConversion;
 import org.jmouse.core.convert.converter.enums.IntegerToEnumConverter;
 import org.jmouse.core.convert.converter.enums.StringToEnumConverter;
 import org.jmouse.core.mapping.Mapping;
@@ -21,7 +21,7 @@ public class ApplicationServicesConfiguration {
 
     @Provide(proxied = true)
     public Conversion conversionService() {
-        Conversion conversion = new DefaultConversion();
+        Conversion conversion = new StandardConversion();
 
         conversion.registerConverter(new StringToEnumConverter());
         conversion.registerConverter(new IntegerToEnumConverter());

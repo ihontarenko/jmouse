@@ -19,6 +19,8 @@ import static org.jmouse.context.binding.Bindable.of;
  */
 abstract public class CollectionBinder extends AbstractBinder {
 
+    private static final String INDEX_ZERO = "[0]";
+
     /**
      * Constructs a new {@code CollectionBinder} with the given context.
      *
@@ -37,41 +39,37 @@ abstract public class CollectionBinder extends AbstractBinder {
      * </p>
      *
      * @param <T> the type of the object to bind
-     * @param name the path name for binding
+     * @param root the path name for binding
      * @param bindable the bindable object representing the collection
      * @param source the data source
      * @return the binding result containing the collection, or an empty result if no binding is possible
      */
     @Override
-    public <T> BindingResult<T> bind(NamePath name, Bindable<T> bindable, DataSource source) {
+    public <T> BindingResult<T> bind(NamePath root, Bindable<T> bindable, DataSource source) {
         TypeDescriptor typeDescriptor = bindable.getTypeDescriptor();
 
         // Check if the bindable is a collection
         if (typeDescriptor.isCollection()) {
-            @SuppressWarnings({"unchecked"})
-            Collection<Object> elements = (Collection<Object>) getCollection(bindable);
-            int                index    = 0;
+            @SuppressWarnings({"unchecked"}) Collection<Object> elements = (Collection<Object>) getCollection(bindable);
+            int index   = 0;
+            int maxSize = 16; // todo: move this value to context
 
-            while (true) {
-                // Append the index to the path for element binding
-                NamePath elementName = name.append("[" + index++ + "]");
-                JavaType elementType = bindable.getType().getFirst();
+            JavaType elementType = bindable.getType().getFirst();
+            NamePath zeroName    = root.append(INDEX_ZERO);
 
-                if (source.get(elementName).isNull() && source.get(name).isSimple()) {
-                    System.out.println("no collection present but we can convert scalar to collection");
-                    elementName = name;
+            if (source.get(zeroName).isNull() && source.get(root).isSimple()) {
+                bindCollectionElement(root, of(elementType), source, elements);
+            } else {
+                while (maxSize > index) {
+                    // Append the index to the path for element binding
+                    NamePath elementName = root.append("[" + index++ + "]");
+
+                    BindingResult<?> result = bindCollectionElement(elementName, of(elementType), source, elements);
+
+                    if (result.isEmpty()) {
+                        break;
+                    }
                 }
-
-                // Bind the individual element and add it to the collection
-                BindingResult<Object> result = bindValue(elementName, of(elementType), source);
-
-                // Break if no element is bound (empty result)
-                if (result.isEmpty()) {
-                    break;
-                }
-
-                // Add the successfully bound element to the collection
-                result.ifPresent(elements::add);
             }
 
             return BindingResult.of((T) elements);
@@ -79,6 +77,16 @@ abstract public class CollectionBinder extends AbstractBinder {
 
         // Return an empty result if not a collection
         return BindingResult.empty();
+    }
+
+    private BindingResult<?> bindCollectionElement(NamePath name, Bindable<?> bindable, DataSource source, Collection<Object> elements) {
+        // Bind the individual element and add it to the collection
+        BindingResult<?> result = bindValue(name, bindable, source);
+
+        // Add the successfully bound element to the collection
+        result.ifPresent(elements::add);
+
+        return result;
     }
 
     /**

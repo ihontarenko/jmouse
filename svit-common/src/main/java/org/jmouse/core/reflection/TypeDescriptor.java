@@ -1,9 +1,6 @@
 package org.jmouse.core.reflection;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Represents type metadata and provides utility methods for type analysis.
@@ -23,8 +20,8 @@ public class TypeDescriptor {
      * @param rawType the raw class type
      */
     public TypeDescriptor(Class<?> rawType) {
-        this.rawType = rawType;
-        this.type = JavaType.forType(rawType);
+        this.rawType = Objects.requireNonNullElse(rawType, Object.class);
+        this.type = JavaType.forType(this.rawType);
     }
 
     /**
@@ -34,7 +31,7 @@ public class TypeDescriptor {
      */
     public TypeDescriptor(JavaType type) {
         this.type = type;
-        this.rawType = type.getRawType();
+        this.rawType = Objects.requireNonNullElse(type.getRawType(), Object.class);
     }
 
     /**

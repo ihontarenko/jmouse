@@ -1,7 +1,5 @@
 package org.jmouse.core.convert;
 
-import org.jmouse.core.reflection.JavaType;
-
 import java.util.Set;
 
 /**
@@ -87,7 +85,7 @@ public interface GenericConverter<S, T> {
      * @param converter  the conversion logic implemented as a {@link Converter}
      * @return a {@link GenericConverter} instance capable of converting between the specified types
      */
-    static <S, T> GenericConverter<S, T> of(Class<S> sourceType, Class<T> targetType, Converter<S, T> converter) {
+    static <S, T> GenericConverter<S, T> of(Class<S> sourceType, Class<? extends T> targetType, Converter<S, ? extends T> converter) {
         return new GenericConverter<>() {
             @Override
             public T convert(S source, Class<S> sourceType, Class<T> targetType) {
