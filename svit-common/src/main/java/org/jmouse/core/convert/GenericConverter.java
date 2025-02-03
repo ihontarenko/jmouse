@@ -1,5 +1,7 @@
 package org.jmouse.core.convert;
 
+import org.jmouse.core.reflection.JavaType;
+
 import java.util.Set;
 
 /**

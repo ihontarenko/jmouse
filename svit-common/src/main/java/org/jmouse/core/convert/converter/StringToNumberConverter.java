@@ -24,6 +24,9 @@ public class StringToNumberConverter implements GenericConverter<String, Number>
         converters.put(BigDecimal.class, BigDecimal::new);
         converters.put(Short.class, Short::valueOf);
         converters.put(Byte.class, Byte::valueOf);
+
+        converters.put(int.class, Integer::parseInt);
+        converters.put(double.class, Double::parseDouble);
     }
 
     @Override
@@ -46,7 +49,10 @@ public class StringToNumberConverter implements GenericConverter<String, Number>
                 new ClassPair<>(String.class, Double.class),
                 new ClassPair<>(String.class, Float.class),
                 new ClassPair<>(String.class, BigInteger.class),
-                new ClassPair<>(String.class, BigDecimal.class)
+                new ClassPair<>(String.class, BigDecimal.class),
+                // primitives
+                new ClassPair<>(String.class, int.class),
+                new ClassPair<>(String.class, double.class)
         );
     }
 }

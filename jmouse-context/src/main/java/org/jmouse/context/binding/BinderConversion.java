@@ -1,15 +1,22 @@
 package org.jmouse.context.binding;
 
 import org.jmouse.core.convert.DefaultConversion;
-import org.jmouse.core.convert.converter.NumberToNumberConverter;
-import org.jmouse.core.convert.converter.StringToNumberConverter;
+import org.jmouse.core.convert.GenericConverter;
+import org.jmouse.core.convert.converter.*;
 
 public class BinderConversion extends DefaultConversion {
 
     public BinderConversion() {
-        registerConverter(new NumberToNumberConverter());
         registerConverter(new StringToNumberConverter());
-        registerConverter(new NumberToNumberConverter());
+        registerConverter(new NumberToStringConverter());
+
+        for (GenericConverter<?, ?> converter : CollectionConverters.getConverters()) {
+            registerConverter(converter);
+        }
+
+        for (GenericConverter<?, ?> converter : DateAndTimeConverters.getConverters()) {
+            registerConverter(converter);
+        }
     }
 
 }

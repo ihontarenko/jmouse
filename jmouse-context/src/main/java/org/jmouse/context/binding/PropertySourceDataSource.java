@@ -2,7 +2,7 @@ package org.jmouse.context.binding;
 
 import org.jmouse.core.env.PropertyResolver;
 
-public class PropertySourceDataSource extends AbstractDataSource {
+public class PropertySourceDataSource extends JavaTypeDataSource {
 
     /**
      * Constructs an {@link AbstractDataSource} with the given source object.
@@ -10,7 +10,7 @@ public class PropertySourceDataSource extends AbstractDataSource {
      * @param source the source object to wrap
      */
     public PropertySourceDataSource(PropertyResolver source) {
-        super(source);
+        super(null);
     }
 
     /**

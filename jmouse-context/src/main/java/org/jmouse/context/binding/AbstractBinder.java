@@ -1,6 +1,6 @@
 package org.jmouse.context.binding;
 
-import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.reflection.TypeDescriptor;
 
 abstract public class AbstractBinder implements ObjectBinder {
@@ -16,7 +16,6 @@ abstract public class AbstractBinder implements ObjectBinder {
         TypeDescriptor typeDescriptor = bindable.getTypeDescriptor();
         DataSource     value          = source.get(name);
         ObjectBinder   binder         = context.getRootBinder();
-        JavaType       type           = bindable.getType();
 
         if (value.isNull()) {
             return BindingResult.empty();
@@ -27,8 +26,8 @@ abstract public class AbstractBinder implements ObjectBinder {
         if (typeDescriptor.isScalar() || typeDescriptor.isObject()){
             Object result = value.getRaw();
 
-            if (!value.isNull() && valueDescriptor.isScalar() && !valueDescriptor.is(typeDescriptor.getRawType())) {
-                result = context.getConversion().convert(result, type.getRawType());
+            if (valueDescriptor.isScalar()) {
+                result = convert(result, typeDescriptor);
             }
 
             return BindingResult.of((T) result);
@@ -38,4 +37,15 @@ abstract public class AbstractBinder implements ObjectBinder {
 
         return BindingResult.empty();
     }
+
+    protected Object convert(Object value, TypeDescriptor typeDescriptor) {
+        Conversion conversion = context.getConversion();
+
+        if (conversion != null) {
+            value = conversion.convert(value, typeDescriptor.getRawType());
+        }
+
+        return value;
+    }
+
 }

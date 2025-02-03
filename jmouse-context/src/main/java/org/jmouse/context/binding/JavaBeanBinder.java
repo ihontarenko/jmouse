@@ -31,11 +31,16 @@ public class JavaBeanBinder extends AbstractBinder {
             Supplier<Object> value        = property.getValue(supplier);
             NamePath         propertyName = NamePath.of(property.getName());
 
-            bindValue(name.append(propertyName), of(propertyType).withInstance(value), source).ifPresent(result -> {
-                if (property.isWritable()) {
-                    property.setValue(supplier, result);
-                }
-            });
+            BindingResult<Object> result = bindValue(
+                    name.append(propertyName), of(propertyType).withInstance(value), source);
+
+            if (result.isEmpty()) {
+                continue;
+            }
+
+            if (property.isWritable()) {
+                property.setValue(supplier, result.getValue());
+            }
         }
 
         return BindingResult.of(supplier.get());

@@ -3,16 +3,21 @@ package org.jmouse.context.binding.test;
 import org.jmouse.context.binding.*;
 import org.jmouse.core.env.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Example {
 
     public static final List<User> CLIENTS = new ArrayList<>();
 
     public static void main(String[] args) {
+
+//        BinderConversion conversion = new BinderConversion();
+//
+//        List strings = conversion.convert("Hello", List.class);
+//
+//        System.out.println(strings);
+
+
 //
 //        JavaType javaType = JavaType.forTypeReference(new TypeReference<List<Map<String, Integer>>>() {});
 //
@@ -81,7 +86,7 @@ public class Example {
         Binder b = new Binder(DataSource.of(nested));
         DataSource source1 = DataSource.of(nested);
 
-        new Binder(DataSource.of("123")).bind(null, Bindable.of(Integer.class));
+        new Binder(DataSource.of("123")).bind(null, Bindable.of(int.class));
 
         UserContext userContext = new UserContext(source1);
         userContext.initialize();
@@ -151,9 +156,12 @@ public class Example {
         }
 
         public void initialize() {
+            Binder.with("123").bind(null, Bindable.of(String[].class)).ifPresent(System.out::println);
             binder.bind("app.context", Bindable.ofInstance(this));
             binder.bind("default", Bindable.ofInstance(this));
+            binder.bind(null, Bindable.ofInstance(this));
             Binder.with("123").bind(null, Bindable.of(double.class)).ifPresent(System.out::println);
+            System.out.println("hello");
 //            binder.bind(null, Bindable.ofInstance(this));
 //            binder.bind("JAVA_HOME", Bindable.of(String.class)).ifPresent(this::setJavaHome);
         }

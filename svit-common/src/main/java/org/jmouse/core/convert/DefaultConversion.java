@@ -1,6 +1,7 @@
 package org.jmouse.core.convert;
 
 import org.jmouse.core.graph.*;
+import org.jmouse.core.reflection.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,9 +76,12 @@ public class DefaultConversion implements Conversion {
 
     /**
      * Converts the given {@code source} object from type {@code T} to type {@code R} using a registered converter.
-     * It first looks up a converter based on the source and target types. If a converter is found,
-     * it uses the converter to perform the conversion. If no converter is found, a {@link ConverterNotFound}
-     * exception is thrown.
+     * <p>
+     * The method first looks up a converter based on the source and target types. If a converter is found,
+     * it performs the conversion. If no direct converter is available, the method attempts to find a suitable converter
+     * through inherited types or by searching for a transition chain using a graph of type converters. If no converter
+     * is found, a {@link ConverterNotFound} exception is thrown.
+     * </p>
      *
      * @param <T>        the type of the source object
      * @param <R>        the type of the desired result
@@ -97,12 +101,25 @@ public class DefaultConversion implements Conversion {
             Class<R>        normalizedType = (Class<R>) normalizer.normalize(targetType);
             ClassPair<T, R> classPair      = new ClassPair<>(sourceType, normalizedType);
 
-            // find direct converter
+            if (classPair.isTheSame()) {
+                return (R) source;
+            }
+
+            // Try to find a direct converter
             GenericConverter<T, R> converter = getConverter(classPair);
 
             if (converter == null) {
-                // search transition converters chain
-                // using graph of type converter type and BFS search
+                // Attempt to find a converter using inherited types
+                ClassPair<T, R> candidate = searchPossibleCandidate(sourceType, targetType);
+
+                if (candidate != null) {
+                    classPair = candidate;
+                    converter = getConverter(classPair);
+                }
+            }
+
+            if (converter == null) {
+                // Search for a transition chain using a graph of converters and BFS search
                 List<ClassPair<?, ?>> transitions = searchTransitionChain(sourceType, targetType);
 
                 if (transitions.isEmpty()) {
@@ -127,6 +144,39 @@ public class DefaultConversion implements Conversion {
         }
 
         return converted;
+    }
+
+    /**
+     * Searches for a potential converter candidate by checking interfaces and superclasses of the source and target types.
+     * <p>
+     * The method iterates over the interfaces and classes of the source and target types to find a {@link ClassPair}
+     * that matches a registered converter.
+     * </p>
+     *
+     * @param <S>         the source type
+     * @param <T>         the target type
+     * @param sourceType  the class representing the source type
+     * @param targetType  the class representing the target type
+     * @return a {@link ClassPair} containing the source and target types if a suitable converter is found,
+     *         {@code null} if no converter is found
+     */
+    public <S, T> ClassPair<S, T> searchPossibleCandidate(Class<S> sourceType, Class<T> targetType) {
+        List<Class<?>> sourceCandidates = new ArrayList<>(List.of(Reflections.getClassInterfaces(sourceType)));
+        List<Class<?>> targetCandidates = new ArrayList<>(List.of(Reflections.getClassInterfaces(targetType)));
+
+        sourceCandidates.add(sourceType);
+        targetCandidates.add(targetType);
+
+        for (Class<?> sourceCandidate : sourceCandidates) {
+            for (Class<?> targetCandidate : targetCandidates) {
+                ClassPair<?, ?> pair = new ClassPair<>(sourceCandidate, targetCandidate);
+                if (converters.containsKey(pair)) {
+                    return (ClassPair<S, T>) pair;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

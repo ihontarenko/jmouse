@@ -1,6 +1,6 @@
 package org.jmouse.core.convert;
 
-import org.jmouse.core.reflection.Reflections;
+import org.jmouse.core.reflection.JavaType;
 
 import java.util.Objects;
 
@@ -48,6 +48,19 @@ public class ClassPair<A, B> {
     }
 
     /**
+     * Checks if the two classes in the pair are the same.
+     * <p>
+     * This method compares {@link Class} objects {@code classA} and {@code classB} to determine if they represent
+     * the same type.
+     * </p>
+     *
+     * @return {@code true} if the two classes in the pair are the same, {@code false} otherwise
+     */
+    public boolean isTheSame() {
+        return Objects.equals(classA, classB);
+    }
+
+    /**
      * Determines equality by comparing the underlying {@link Class} objects
      * for both {@code classA} and {@code classB}.
      *
@@ -79,6 +92,6 @@ public class ClassPair<A, B> {
      */
     @Override
     public String toString() {
-        return "'%s' → '%s'".formatted(Reflections.getShortName(classA), Reflections.getShortName(classB));
+        return "'%s' → '%s'".formatted(JavaType.forClass(classA), JavaType.forClass(classB));
     }
 }

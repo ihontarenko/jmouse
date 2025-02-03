@@ -75,6 +75,10 @@ public class TypeDescriptor {
         return clazz.isAssignableFrom(rawType);
     }
 
+    public boolean is(TypeDescriptor typeDescriptor) {
+        return is(typeDescriptor.getRawType());
+    }
+
     /**
      * Checks if the type represents an array.
      *
