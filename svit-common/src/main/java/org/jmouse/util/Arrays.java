@@ -110,7 +110,7 @@ public final class Arrays {
      * box(String.class); // String.class (unchanged)
      * }</pre>
      */
-    public static Class<?> box(Class<?> primitiveType) {
+    public static Class<?> boxType(Class<?> primitiveType) {
         Class<?> boxedType = primitiveType;
 
         if (primitiveType.isPrimitive()) {
@@ -119,6 +119,26 @@ public final class Arrays {
         }
 
         return boxedType;
+    }
+
+    /**
+     * Converts a primitive value to its corresponding boxed (wrapper).
+     * <p>
+     * If the given class is a primitive type, this method returns the equivalent boxed value.
+     * </p>
+     *
+     * @param value the primitive value (or not) type to be boxed
+     * @return the corresponding boxed value, or the original value if it is not a primitive
+     */
+    public static Object boxValue(Object value) {
+        Class<?> valueType = value.getClass();
+
+        if (valueType.isPrimitive()) {
+            Object array = Array.newInstance(valueType, 1);
+            value = Array.get(array, 0).getClass();
+        }
+
+        return value;
     }
 
 }

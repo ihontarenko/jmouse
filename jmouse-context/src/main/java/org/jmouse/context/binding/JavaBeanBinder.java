@@ -1,5 +1,7 @@
 package org.jmouse.context.binding;
 
+import org.jmouse.context.binding.bean.Bean;
+import org.jmouse.context.binding.bean.JavaBean;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.TypeDescriptor;
 import org.jmouse.util.Priority;
@@ -45,18 +47,18 @@ public class JavaBeanBinder extends AbstractBinder {
      */
     @Override
     public <T> BindingResult<T> bind(NamePath name, Bindable<T> bindable, DataSource source) {
-        TypeDescriptor typeDescriptor = bindable.getTypeDescriptor();
-        JavaType       type           = bindable.getType();
-        JavaBean<T>    bean           = JavaBean.of(type);
-        Supplier<T>    supplier       = bean.getSupplier(bindable);
+        TypeDescriptor  typeDescriptor = bindable.getTypeDescriptor();
+        JavaType        type    = bindable.getType();
+        JavaBean<T>     bean    = JavaBean.of(type);
+        Bean.Factory<T> factory = bean.getFactory(bindable);
 
         if (typeDescriptor.isObject() || typeDescriptor.isScalar()) {
             return bindValue(name, bindable, source);
         }
 
-        for (JavaBean.Property property : bean.getProperties()) {
+        for (Bean.Property<T> property : bean.getProperties()) {
             JavaType         propertyType = property.getType();
-            Supplier<Object> value        = property.getValue(supplier);
+            Supplier<?> value        = property.getValue(factory);
             NamePath         propertyName = NamePath.of(getPreferredName(property));
 
             if (property.isWritable()) {
@@ -67,11 +69,11 @@ public class JavaBeanBinder extends AbstractBinder {
                     continue;
                 }
 
-                property.setValue(supplier, result.getValue());
+                property.setValue(factory, result.getValue());
             }
         }
 
-        return BindingResult.of(supplier.get());
+        return BindingResult.of(factory.create());
     }
 
     /**
@@ -85,11 +87,11 @@ public class JavaBeanBinder extends AbstractBinder {
      * @param property the JavaBean property
      * @return the preferred property name
      */
-    protected String getPreferredName(JavaBean.Property property) {
+    protected String getPreferredName(Bean.Property<?> property) {
         String name = property.getName();
 
         if (property.isWritable()) {
-            Method setter = property.getSetter();
+            Method setter = property.getRawSetter();
             if (setter != null && setter.isAnnotationPresent(PropertyPath.class)) {
                 String preferredPath = setter.getAnnotation(PropertyPath.class).value();
                 if (preferredPath != null && !preferredPath.isEmpty()) {
@@ -114,6 +116,6 @@ public class JavaBeanBinder extends AbstractBinder {
      */
     @Override
     public <T> boolean supports(Bindable<T> bindable) {
-        return true;
+        return !TypeDescriptor.forJavaType(bindable.getType()).isRecord();
     }
 }

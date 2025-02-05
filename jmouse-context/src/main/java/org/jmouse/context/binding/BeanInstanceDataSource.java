@@ -1,5 +1,8 @@
 package org.jmouse.context.binding;
 
+import org.jmouse.context.binding.bean.Bean;
+import org.jmouse.context.binding.bean.JavaBean;
+
 import java.util.function.Supplier;
 
 import static org.jmouse.core.reflection.Reflections.getShortName;
@@ -36,15 +39,15 @@ public class BeanInstanceDataSource extends AbstractDataSource {
      */
     @Override
     public DataSource get(String name) {
-        JavaBean.Property property = bean.getProperty(name);
+        Bean.Property<Object> property = bean.getProperty(name);
 
         if (property == null) {
             throw new IllegalArgumentException(
-                    "Bean instance does not have property: '%s'.".formatted(name));
+                    "Bean factory does not have property: '%s'.".formatted(name));
         }
 
-        Supplier<Object> instance = this.getSupplier();
-        Supplier<Object> value    = property.getValue(instance);
+        Bean.Factory<Object> factory = this.getSupplier();
+        Supplier<Object>     value    = property.getValue(factory);
 
         return DataSource.of(value.get());
     }
@@ -68,8 +71,8 @@ public class BeanInstanceDataSource extends AbstractDataSource {
      *
      * @return a {@link Supplier} providing values from the bean instance
      */
-    private Supplier<Object> getSupplier() {
-        return bean.getSupplier(Bindable.ofInstance(source));
+    private Bean.Factory<Object> getSupplier() {
+        return bean.getFactory(Bindable.ofInstance(source));
     }
 
     /**

@@ -92,7 +92,7 @@ final public class JavaBean<T> {
     @SuppressWarnings("unchecked")
     public Supplier<T> getSupplier(Bindable<T> bean) {
         return new CachedSupplier<>(() -> {
-            T instance = null;
+            T           instance = null;
             Supplier<T> supplier = bean.getValue();
 
             if (supplier != null) {
@@ -139,8 +139,7 @@ final public class JavaBean<T> {
         }
 
         public Property(String name, Class<?> owner) {
-            this.name = name;
-            this.owner = JavaType.forClass(owner);
+            this(name, JavaType.forClass(owner));
         }
 
         public String getName() {

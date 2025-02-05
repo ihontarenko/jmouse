@@ -211,4 +211,14 @@ public class TypeDescriptor {
     public boolean isObject() {
         return rawType.isAssignableFrom(Object.class);
     }
+
+    /**
+     * Checks if the type is a Record type.
+     *
+     * @return {@code true} if the type is a Record type
+     */
+    public boolean isRecord() {
+        return is(Record.class);
+    }
+
 }

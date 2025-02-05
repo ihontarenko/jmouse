@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import static org.jmouse.core.reflection.MethodMatchers.hasParameterTypes;
 import static org.jmouse.core.reflection.MethodMatchers.isAbstract;
+import static org.jmouse.util.Strings.uncapitalize;
 
 /**
  * A utility class providing various reflection-based methods for working with classes, fields, methods, and constructors.
@@ -23,29 +24,22 @@ import static org.jmouse.core.reflection.MethodMatchers.isAbstract;
  */
 abstract public class Reflections {
 
-    private static final Map<Class<?>, Object> PRIMITIVES_DEFAULT_TYPE_VALUES = Map.of(
-            boolean.class, false,
-            byte.class, (byte) 0,
-            short.class, (short) 0,
-            int.class, 0,
-            long.class, 0L,
-            float.class, 0F,
-            double.class, 0D,
-            char.class, '\0'
-    );
-    public static final String PROXY_CLASS_NAME_SEPARATOR = "$$";
-    public static final char   PACKAGE_SEPARATOR          = '.';
-
+    public static final  String                PROXY_CLASS_NAME_SEPARATOR     = "$$";
+    public static final  char                  PACKAGE_SEPARATOR              = '.';
     /**
      * A set of all Java module references
      */
     public static final Set<ModuleReference> JAVA_MODULES = ModuleFinder.ofSystem().findAll();
-
     /**
      * A set of all Java module names.
      */
     public static final Set<String> JAVA_MODULE_NAMES = JAVA_MODULES.stream().map(r -> r.descriptor().name())
             .collect(Collectors.toSet());
+    private static final Map<Class<?>, Object> PRIMITIVES_DEFAULT_TYPE_VALUES = Map.of(boolean.class, false, byte.class,
+                                                                                       (byte) 0, short.class, (short) 0,
+                                                                                       int.class, 0, long.class, 0L,
+                                                                                       float.class, 0F, double.class,
+                                                                                       0D, char.class, '\0');
 
     /**
      * Extracts all static methods declared in the specified class.
@@ -79,11 +73,11 @@ abstract public class Reflections {
      * @return the corresponding Class object
      * @throws ReflectionException if the class cannot be found
      *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * Class<?> stringClass = Reflections.getClassFor("java.lang.String");
-     * System.out.println(stringClass.getName()); // java.lang.String
-     * }</pre>
+     *                             <p><b>Example usage:</b></p>
+     *                             <pre>{@code
+     *                             Class<?> stringClass = Reflections.getClassFor("java.lang.String");
+     *                             System.out.println(stringClass.getName()); // java.lang.String
+     *                             }</pre>
      */
     public static Class<?> getClassFor(String className) {
         try {
@@ -105,11 +99,11 @@ abstract public class Reflections {
      * @return a new instance of the object
      * @throws ReflectionException if instantiation fails
      *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * Constructor<MyClass> constructor = MyClass.class.getConstructor(String.class);
-     * MyClass instance = Reflections.instantiate(constructor, "example argument");
-     * }</pre>
+     *                             <p><b>Example usage:</b></p>
+     *                             <pre>{@code
+     *                             Constructor<MyClass> constructor = MyClass.class.getConstructor(String.class);
+     *                             MyClass instance = Reflections.instantiate(constructor, "example argument");
+     *                             }</pre>
      */
     public static <T> T instantiate(Constructor<T> constructor, Object... arguments) {
         final int parametersCount = constructor.getParameterCount();
@@ -127,8 +121,8 @@ abstract public class Reflections {
                 for (int i = 0; i < constructorArguments.length; i++) {
                     if (arguments[i] == null) {
                         Class<?> parameterType = parameterTypes[i];
-                        constructorArguments[i] = parameterType.isPrimitive()
-                                ? PRIMITIVES_DEFAULT_TYPE_VALUES.get(parameterType) : null;
+                        constructorArguments[i] = parameterType.isPrimitive() ? PRIMITIVES_DEFAULT_TYPE_VALUES.get(
+                                parameterType) : null;
                     } else {
                         constructorArguments[i] = arguments[i];
                     }
@@ -151,17 +145,16 @@ abstract public class Reflections {
      * @return the first matching constructor
      * @throws ReflectionException if no matching constructor is found
      *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * Constructor<?> constructor = Reflections.findFirstConstructor(MyClass.class, String.class, int.class);
-     * Object instance = Reflections.instantiate(constructor, "example", 42);
-     * }</pre>
+     *                             <p><b>Example usage:</b></p>
+     *                             <pre>{@code
+     *                             Constructor<?> constructor = Reflections.findFirstConstructor(MyClass.class, String.class, int.class);
+     *                             Object instance = Reflections.instantiate(constructor, "example", 42);
+     *                             }</pre>
      */
     public static Constructor<?> findFirstConstructor(Class<?> clazz, Class<?>... types) {
-        return new ConstructorFinder().findFirst(clazz, hasParameterTypes(types).and(isAbstract().not()))
-                .orElseThrow(() -> new ReflectionException(
-                        "CONSTRUCTOR %s(%s) NOT FOUND"
-                                .formatted(getShortName(clazz), Arrays.toString(types))));
+        return new ConstructorFinder().findFirst(clazz, hasParameterTypes(types).and(isAbstract().not())).orElseThrow(
+                () -> new ReflectionException(
+                        "CONSTRUCTOR %s(%s) NOT FOUND".formatted(getShortName(clazz), Arrays.toString(types))));
     }
 
     /**
@@ -172,15 +165,15 @@ abstract public class Reflections {
      * @return the first annotated constructor
      * @throws ReflectionException if no annotated constructor is found
      *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * @CustomAnnotation
-     * public MyClass(String param) {
-     *     // ...
-     * }
+     *                             <p><b>Example usage:</b></p>
+     *                             <pre>{@code
+     *                             @CustomAnnotation
+     *                             public MyClass(String param) {
+     *                                 // ...
+     *                             }
      *
-     * Constructor<?> constructor = Reflections.findFirstAnnotatedConstructor(MyClass.class, CustomAnnotation.class);
-     * }</pre>
+     *                             Constructor<?> constructor = Reflections.findFirstAnnotatedConstructor(MyClass.class, CustomAnnotation.class);
+     *                             }</pre>
      */
     public static Constructor<?> findFirstAnnotatedConstructor(Class<?> clazz, Class<? extends Annotation> annotation) {
         return new ConstructorFinder().findFirst(clazz, MethodMatchers.isAnnotatedWith(annotation))
@@ -270,17 +263,15 @@ abstract public class Reflections {
      * @param fieldName the name of the field
      * @param value     the value to set
      *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * MyClass myObj = new MyClass();
-     * Reflections.setFieldValue(myObj, "name", "John Doe");
-     * }</pre>
-     *
+     *                  <p><b>Example usage:</b></p>
+     *                  <pre>{@code
+     *                  MyClass myObj = new MyClass();
+     *                  Reflections.setFieldValue(myObj, "name", "John Doe");
+     *                  }</pre>
      * @see #getFieldValue(Object, String)
      */
     public static void setFieldValue(Object object, String fieldName, Object value) {
-        getField(object.getClass(), fieldName)
-                .ifPresent(field -> setFieldValue(object, field, value));
+        getField(object.getClass(), fieldName).ifPresent(field -> setFieldValue(object, field, value));
     }
 
     /**
@@ -290,11 +281,11 @@ abstract public class Reflections {
      * @param field  the field to set
      * @param value  the value to set
      *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * Field nameField = MyClass.class.getDeclaredField("name");
-     * Reflections.setFieldValue(myObj, nameField, "Jane Doe");
-     * }</pre>
+     *               <p><b>Example usage:</b></p>
+     *               <pre>{@code
+     *               Field nameField = MyClass.class.getDeclaredField("name");
+     *               Reflections.setFieldValue(myObj, nameField, "Jane Doe");
+     *               }</pre>
      */
     public static void setFieldValue(Object object, Field field, Object value) {
         try {
@@ -317,13 +308,10 @@ abstract public class Reflections {
      * Object value = Reflections.getFieldValue(myObj, "name");
      * System.out.println("Field value: " + value);
      * }</pre>
-     *
      * @see #setFieldValue(Object, String, Object)
      */
     public static Object getFieldValue(Object object, String fieldName) {
-        return getField(object.getClass(), fieldName)
-                .map(field -> getFieldValue(object, field))
-                .orElse(null);
+        return getField(object.getClass(), fieldName).map(field -> getFieldValue(object, field)).orElse(null);
     }
 
     /**
@@ -358,12 +346,12 @@ abstract public class Reflections {
      * @return the result of the method invocation, or {@code null} if the method has a void return type
      * @throws ReflectionException if an exception occurs during invocation
      *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * Method method = MyClass.class.getMethod("greet", String.class);
-     * Object result = Reflections.invokeMethod(myObj, method, "Hello");
-     * System.out.println("Method returned: " + result);
-     * }</pre>
+     *                             <p><b>Example usage:</b></p>
+     *                             <pre>{@code
+     *                             Method method = MyClass.class.getMethod("greet", String.class);
+     *                             Object result = Reflections.invokeMethod(myObj, method, "Hello");
+     *                             System.out.println("Method returned: " + result);
+     *                             }</pre>
      */
     public static Object invokeMethod(Object object, Method method, Object... arguments) {
         try {
@@ -395,9 +383,7 @@ abstract public class Reflections {
      * }</pre>
      */
     public static Object getMethodValue(Object object, String methodName) {
-        return getGetter(object.getClass(), methodName)
-                .map(method -> invokeMethod(object, method))
-                .orElse(null);
+        return getGetter(object.getClass(), methodName).map(method -> invokeMethod(object, method)).orElse(null);
     }
 
     /**
@@ -415,8 +401,8 @@ abstract public class Reflections {
      * }</pre>
      */
     public static Optional<Method> getMethod(Class<?> targetClass, String methodName, Class<?>... types) {
-        return new MethodFinder().findFirst(targetClass, MethodMatchers.nameEquals(methodName).and(
-                hasParameterTypes(types)));
+        return new MethodFinder().findFirst(targetClass,
+                                            MethodMatchers.nameEquals(methodName).and(hasParameterTypes(types)));
     }
 
     /**
@@ -434,8 +420,7 @@ abstract public class Reflections {
      * }</pre>
      */
     public static Optional<Method> getSetter(Class<?> targetClass, String methodName) {
-        return getMethod(targetClass,
-                         "set" + methodName.substring(0, 1).toUpperCase() + methodName.substring(1));
+        return getMethod(targetClass, "set" + methodName.substring(0, 1).toUpperCase() + methodName.substring(1));
     }
 
     /**
@@ -456,8 +441,7 @@ abstract public class Reflections {
      * }</pre>
      */
     public static Optional<Method> getGetter(Class<?> targetClass, String methodName) {
-        return getMethod(targetClass,
-                         "get" + methodName.substring(0, 1).toUpperCase() + methodName.substring(1));
+        return getMethod(targetClass, "get" + methodName.substring(0, 1).toUpperCase() + methodName.substring(1));
     }
 
     /**
@@ -599,6 +583,24 @@ abstract public class Reflections {
         return classes;
     }
 
+    public static Class<?>[] getParameters(Executable executable) {
+        return executable.getParameterTypes();
+    }
+
+    public static Class<?>[] getRecordComponentsTypes(Class<?> record) {
+        Class<?>[] classes = null;
+
+        if (record.isRecord()) {
+            RecordComponent[] components = record.getRecordComponents();
+            classes = new Class<?>[components.length];
+            for (int i = 0; i < components.length; i++) {
+                classes[i] = components[i].getType();
+            }
+        }
+
+        return classes;
+    }
+
     /**
      * Returns a string representing the method name along with its declaring class's simple name.
      *
@@ -607,6 +609,10 @@ abstract public class Reflections {
      */
     public static String getMethodName(Method method) {
         return "%s#%s".formatted(method.getDeclaringClass().getSimpleName(), method.getName());
+    }
+
+    public static String getPropertyName(Method method, String prefix) {
+        return uncapitalize(method.getName().substring(prefix.length()));
     }
 
     /**
@@ -669,23 +675,23 @@ abstract public class Reflections {
      *
      * @param type the class to analyze
      * @return a map where keys are the raw types of implemented interfaces and values are lists of parameterized types
-     *         used in those interfaces
+     * used in those interfaces
      * @throws NullPointerException if {@code type} is null
      *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * class MyClass implements Comparable<MyClass> {}
-     * Map<Class<?>, List<Class<?>>> result = Reflections.getInterfacesParameterizedTypes(MyClass.class);
-     * System.out.println(result); // Output: {interface java.lang.Comparable=[class MyClass]}
-     * }</pre>
+     *                              <p><b>Example usage:</b></p>
+     *                              <pre>{@code
+     *                              class MyClass implements Comparable<MyClass> {}
+     *                              Map<Class<?>, List<Class<?>>> result = Reflections.getInterfacesParameterizedTypes(MyClass.class);
+     *                              System.out.println(result); // Output: {interface java.lang.Comparable=[class MyClass]}
+     *                              }</pre>
      */
     public static Map<Class<?>, List<Class<?>>> getInterfacesParameterizedTypes(Class<?> type) {
         Map<Class<?>, List<Class<?>>> parameterizedTypes = new HashMap<>();
 
         for (Type genericInterface : type.getGenericInterfaces()) {
             if (genericInterface instanceof ParameterizedType parameterizedType) {
-                parameterizedTypes.computeIfAbsent(
-                        (Class<?>) parameterizedType.getRawType(), key -> Reflections.getParameterizedTypes(parameterizedType));
+                parameterizedTypes.computeIfAbsent((Class<?>) parameterizedType.getRawType(),
+                                                   key -> Reflections.getParameterizedTypes(parameterizedType));
             }
         }
 
@@ -699,12 +705,12 @@ abstract public class Reflections {
      * @return a list of classes representing the parameterized types of the superclass
      * @throws NullPointerException if {@code type} is null
      *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * class MyClass extends HashMap<String, Integer> {}
-     * List<Class<?>> result = Reflections.getSuperclassParameterizedTypes(MyClass.class);
-     * System.out.println(result); // Output: [class java.lang.String, class java.lang.Integer]
-     * }</pre>
+     *                              <p><b>Example usage:</b></p>
+     *                              <pre>{@code
+     *                              class MyClass extends HashMap<String, Integer> {}
+     *                              List<Class<?>> result = Reflections.getSuperclassParameterizedTypes(MyClass.class);
+     *                              System.out.println(result); // Output: [class java.lang.String, class java.lang.Integer]
+     *                              }</pre>
      */
     public static List<Class<?>> getSuperclassParameterizedTypes(Class<?> type) {
         return getParameterizedTypes(type.getGenericSuperclass());
@@ -747,12 +753,12 @@ abstract public class Reflections {
      * @return a list of classes representing the parameterized types
      * @throws NullPointerException if {@code type} is null
      *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * Type genericSuperclass = MyClass.class.getGenericSuperclass();
-     * List<Class<?>> parameterized = Reflections.getParameterizedTypes(genericSuperclass);
-     * System.out.println(parameterized);
-     * }</pre>
+     *                              <p><b>Example usage:</b></p>
+     *                              <pre>{@code
+     *                              Type genericSuperclass = MyClass.class.getGenericSuperclass();
+     *                              List<Class<?>> parameterized = Reflections.getParameterizedTypes(genericSuperclass);
+     *                              System.out.println(parameterized);
+     *                              }</pre>
      */
     public static List<Class<?>> getParameterizedTypes(Type type) {
         List<Class<?>> parameterizedTypes = new ArrayList<>();
@@ -769,17 +775,17 @@ abstract public class Reflections {
     /**
      * Retrieves a list of parameterized types for a specific interface implemented by the given class.
      *
-     * @param type the class to analyze
+     * @param type  the class to analyze
      * @param iface the interface whose parameterized types are to be retrieved
      * @return a list of parameterized types if present; otherwise, an empty {@code List}
      * @throws NullPointerException if {@code type} or {@code iface} is null
      *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * class MyClass implements Comparable<MyClass> {}
-     * List<Class<?>> result = Reflections.getInterfacesParameterizedTypes(MyClass.class, Comparable.class);
-     * System.out.println(result); // Output: [class MyClass]
-     * }</pre>
+     *                              <p><b>Example usage:</b></p>
+     *                              <pre>{@code
+     *                              class MyClass implements Comparable<MyClass> {}
+     *                              List<Class<?>> result = Reflections.getInterfacesParameterizedTypes(MyClass.class, Comparable.class);
+     *                              System.out.println(result); // Output: [class MyClass]
+     *                              }</pre>
      */
     public static List<Class<?>> getInterfacesParameterizedTypes(Class<?> type, Class<?> iface) {
         return getInterfacesParameterizedTypes(type).getOrDefault(iface, Collections.emptyList());
@@ -794,12 +800,12 @@ abstract public class Reflections {
      * @return the parameterized type if present; otherwise {@code null}
      * @throws NullPointerException if {@code type} or {@code iface} is null
      *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * class MyClass implements Comparable<MyClass> {}
-     * Class<?> paramType = Reflections.getInterfacesParameterizedType(MyClass.class, Comparable.class, 0);
-     * System.out.println(paramType); // Output: class MyClass
-     * }</pre>
+     *                              <p><b>Example usage:</b></p>
+     *                              <pre>{@code
+     *                              class MyClass implements Comparable<MyClass> {}
+     *                              Class<?> paramType = Reflections.getInterfacesParameterizedType(MyClass.class, Comparable.class, 0);
+     *                              System.out.println(paramType); // Output: class MyClass
+     *                              }</pre>
      */
     public static Class<?> getInterfacesParameterizedType(Class<?> type, Class<?> iface, int index) {
         List<Class<?>> classes = getInterfacesParameterizedTypes(type, iface);
@@ -820,12 +826,12 @@ abstract public class Reflections {
      * @throws NullPointerException if {@code type} is null
      * @throws ClassCastException   if the type cannot be converted to a class
      *
-     * <p><b>Example usage:</b></p>
-     * <pre>{@code
-     * ParameterizedType paramType = (ParameterizedType) SomeClass.class.getGenericSuperclass();
-     * Class<?> clazz = Reflections.toClass(paramType.getActualTypeArguments()[0]);
-     * System.out.println(clazz);
-     * }</pre>
+     *                              <p><b>Example usage:</b></p>
+     *                              <pre>{@code
+     *                              ParameterizedType paramType = (ParameterizedType) SomeClass.class.getGenericSuperclass();
+     *                              Class<?> clazz = Reflections.toClass(paramType.getActualTypeArguments()[0]);
+     *                              System.out.println(clazz);
+     *                              }</pre>
      */
     public static Class<?> toClass(Type type) {
         Class<?> clazz;
@@ -971,8 +977,7 @@ abstract public class Reflections {
      * @param <T>             the type of the annotation.
      * @return the extracted attribute value, or {@code null} if the annotation is not present.
      */
-    public static <T extends Annotation, R> R getAnnotationValue(
-            AnnotatedElement element, Class<? extends T> annotationClass, Function<T, Object> extractor) {
+    public static <T extends Annotation, R> R getAnnotationValue(AnnotatedElement element, Class<? extends T> annotationClass, Function<T, Object> extractor) {
         Object value = null;
 
         if (element.isAnnotationPresent(annotationClass)) {

@@ -23,6 +23,10 @@ public class Example {
         Map<String, Object> data = PropertiesTransformer.transform(flatMap);
         Binder binder = new Binder(DataSource.of(data));
 
+        BindingResult<WebServer> result = binder.bind("default.configs.t10", Bindable.of(WebServer.class));
+
+        System.out.println(result);
+
         var type = Bindable.ofMap(String.class, WebServerConfig.class);
 
         ValueFlow.get()

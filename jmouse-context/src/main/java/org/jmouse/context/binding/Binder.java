@@ -45,6 +45,7 @@ public class Binder implements ObjectBinder, BindContext {
         factory.registerBinder(new ArrayBinder(this));
         factory.registerBinder(new SetBinder(this));
         factory.registerBinder(new ListBinder(this));
+        factory.registerBinder(new ValueObjectBinder(this));
         factory.registerBinder(new JavaBeanBinder(this));
     }
 
