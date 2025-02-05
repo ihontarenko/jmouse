@@ -43,28 +43,34 @@ public class JavaBeanBinder extends AbstractBinder {
      * @param bindable the bindable instance representing the JavaBean
      * @param source   the data source from which values are retrieved
      * @param <T>      the type of the JavaBean
-     * @return a {@link BindingResult} containing the bound JavaBean instance
+     * @return a {@link BindResult} containing the bound JavaBean instance
      */
     @Override
-    public <T> BindingResult<T> bind(NamePath name, Bindable<T> bindable, DataSource source) {
+    public <T> BindResult<T> bind(NamePath name, Bindable<T> bindable, DataSource source) {
         TypeDescriptor  typeDescriptor = bindable.getTypeDescriptor();
         JavaType        type    = bindable.getType();
         JavaBean<T>     bean    = JavaBean.of(type);
+
+        // Obtain a factory that can create new instances of the class
         Bean.Factory<T> factory = bean.getFactory(bindable);
 
+        // If the type is either a simple object or a scalar value, bind it directly
         if (typeDescriptor.isObject() || typeDescriptor.isScalar()) {
             return bindValue(name, bindable, source);
         }
 
+        // Iterate through all the properties of the JavaBean to map values
         for (Bean.Property<T> property : bean.getProperties()) {
-            JavaType         propertyType = property.getType();
+            JavaType    propertyType = property.getType();
             Supplier<?> value        = property.getValue(factory);
-            NamePath         propertyName = NamePath.of(getPreferredName(property));
+            NamePath    propertyName = NamePath.of(getPreferredName(property));
 
+            // Check if the property is writable then perform value binding for the property
             if (property.isWritable()) {
-                BindingResult<Object> result = bindValue(
+                BindResult<Object> result = bindValue(
                         name.append(propertyName), of(propertyType).withInstance(value), source);
 
+                // If no value was found in the data source, skip this property
                 if (result.isEmpty()) {
                     continue;
                 }
@@ -73,7 +79,7 @@ public class JavaBeanBinder extends AbstractBinder {
             }
         }
 
-        return BindingResult.of(factory.create());
+        return BindResult.of(factory.create());
     }
 
     /**
@@ -105,10 +111,6 @@ public class JavaBeanBinder extends AbstractBinder {
 
     /**
      * Determines whether this binder supports the given {@link Bindable}.
-     * <p>
-     * This implementation always returns {@code true}, as it acts as a fallback binder
-     * that handles JavaBeans by default.
-     * </p>
      *
      * @param bindable the bindable instance to check
      * @param <T>      the type of the bindable
@@ -116,6 +118,6 @@ public class JavaBeanBinder extends AbstractBinder {
      */
     @Override
     public <T> boolean supports(Bindable<T> bindable) {
-        return !TypeDescriptor.forJavaType(bindable.getType()).isRecord();
+        return !bindable.getTypeDescriptor().isRecord() && !bindable.getTypeDescriptor().isScalar();
     }
 }

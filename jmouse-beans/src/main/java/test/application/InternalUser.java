@@ -20,9 +20,17 @@ public class InternalUser implements User, BeanContextAware {
         System.out.println("init()...");
     }
 
+    public String getExternalName() {
+        return beanContext.getBean(User.class, "admin").getName();
+    }
+
     @Override
     public String getName() {
-        return beanContext.getBean(User.class, "admin").getName();
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**

@@ -3,7 +3,6 @@ package org.jmouse.context.binding;
 import org.jmouse.core.reflection.JavaType;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.Objects.requireNonNullElseGet;
@@ -347,7 +346,7 @@ public interface DataSource {
         boolean    unknown  = !instance.isArray() && !instance.isCollection() && !instance.isMap() && !instance.isSimple();
 
         if (unknown && !instance.isNull()) {
-            instance = new BeanInstanceDataSource(source);
+            instance = new JavaBeanInstanceDataSource(source);
         } else if (instance.isSimple() || instance.isCollection() || instance.isMap() || instance.isArray()) {
             instance = new JavaTypeDataSource(instance.getSource());
         }

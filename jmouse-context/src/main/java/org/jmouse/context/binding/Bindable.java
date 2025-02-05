@@ -6,6 +6,7 @@ import org.jmouse.core.reflection.TypeDescriptor;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -57,6 +58,10 @@ public final class Bindable<T> {
 
     public static <V> Bindable<List<V>> ofList(Class<V> rawType) {
         return of(JavaType.forParametrizedClass(List.class, rawType));
+    }
+
+    public static <V> Bindable<Set<V>> ofSet(Class<V> rawType) {
+        return of(JavaType.forParametrizedClass(Set.class, rawType));
     }
 
     /**

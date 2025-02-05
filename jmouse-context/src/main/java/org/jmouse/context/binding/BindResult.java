@@ -1,10 +1,11 @@
 package org.jmouse.context.binding;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * The {@code BindingResult} class represents the result of a binding operation.
+ * The {@code BindResult} class represents the result of a binding operation.
  * <p>
  * Similar to {@link java.util.Optional}, but specifically focused on storing a value
  * that may result from a binding process. Provides methods to retrieve the value
@@ -13,32 +14,32 @@ import java.util.function.Supplier;
  *
  * @param <T> the type of the stored value
  */
-public final class BindingResult<T> {
+public final class BindResult<T> {
 
     private final T value;
 
-    private BindingResult(T value) {
+    private BindResult(T value) {
         this.value = value;
     }
 
     /**
-     * Creates a {@code BindingResult} instance with the given value.
+     * Creates a {@code BindResult} instance with the given value.
      *
      * @param value the value to be stored
      * @param <T>   the type of the value
-     * @return a new {@code BindingResult} instance
+     * @return a new {@code BindResult} instance
      */
-    public static <T> BindingResult<T> of(T value) {
-        return new BindingResult<>(value);
+    public static <T> BindResult<T> of(T value) {
+        return new BindResult<>(value);
     }
 
     /**
-     * Creates an empty {@code BindingResult}.
+     * Creates an empty {@code BindResult}.
      *
      * @param <T> the type of the value
      * @return an empty binding result
      */
-    public static <T> BindingResult<T> empty() {
+    public static <T> BindResult<T> empty() {
         return of(null);
     }
 
@@ -49,7 +50,7 @@ public final class BindingResult<T> {
      * @return the stored value
      * @throws Error if the value is absent
      */
-    public T getValue(Supplier<? extends Error> exceptionSupplier) {
+    public T getValue(Supplier<? extends RuntimeException> exceptionSupplier) {
         if (!isPresent()) {
             throw exceptionSupplier.get();
         }
@@ -100,8 +101,28 @@ public final class BindingResult<T> {
      */
     public void ifPresent(Consumer<T> consumer) {
         if (isPresent()) {
-            consumer.accept(value);
+            Objects.requireNonNullElseGet(consumer, () -> v -> {}).accept(value);
         }
+    }
+
+    /**
+     * Returns the contained value if present; otherwise, returns the provided default value.
+     *
+     * @param defaultValue the default value to return if no value is present
+     * @return the contained value if present, otherwise {@code defaultValue}
+     */
+    public T orElse(T defaultValue) {
+        return isPresent() ? value : defaultValue;
+    }
+
+    /**
+     * Returns the contained value if present; otherwise, returns the result of the provided supplier.
+     *
+     * @param supplier the supplier to provide a fallback value
+     * @return the contained value if present, otherwise the supplied value
+     */
+    public T orElse(Supplier<? extends T> supplier) {
+        return isPresent() ? value : Objects.requireNonNullElse(supplier, () -> null).get();
     }
 
     @Override

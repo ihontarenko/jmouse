@@ -3,6 +3,8 @@ package org.jmouse.context.binding;
 import org.jmouse.context.binding.bean.Bean;
 import org.jmouse.context.binding.bean.JavaBean;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static org.jmouse.core.reflection.Reflections.getShortName;
@@ -14,18 +16,18 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * It does not support indexed access since beans are typically key-value structures.
  * </p>
  */
-public class BeanInstanceDataSource extends AbstractDataSource {
+public class JavaBeanInstanceDataSource extends AbstractDataSource {
 
     private final JavaBean<Object> bean;
 
     /**
-     * Creates a {@link BeanInstanceDataSource} for the given bean instance.
+     * Creates a {@link JavaBeanInstanceDataSource} for the given bean instance.
      *
      * @param source the bean instance to wrap
      * @throws IllegalArgumentException if the source is {@code null}
      */
     @SuppressWarnings({"unchecked"})
-    public BeanInstanceDataSource(Object source) {
+    public JavaBeanInstanceDataSource(Object source) {
         super(source);
         this.bean = (JavaBean<Object>) JavaBean.of(source.getClass());
     }
@@ -64,6 +66,20 @@ public class BeanInstanceDataSource extends AbstractDataSource {
         throw new UnsupportedDataSourceException(
                 "Bean instance '%s' does not support indexed accessing"
                         .formatted(bean));
+    }
+
+    /**
+     * Retrieves a collection of keys representing the entries in this {@link DataSource}.
+     *
+     * @return a collection of keys as strings
+     */
+    @Override
+    public List<String> keys() {
+        List<String> keys = new ArrayList<>();
+
+        bean.getProperties().forEach(property -> keys.add(property.getName()));
+
+        return keys;
     }
 
     /**

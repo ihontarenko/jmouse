@@ -105,9 +105,9 @@ abstract public class Bean<T> {
          */
         @SuppressWarnings({"unchecked"})
         static <T, V> Getter<T, V> ofMethod(Method getter) {
-            getter.setAccessible(true);
             return (T instance) -> {
                 try {
+                    getter.setAccessible(true);
                     return (V) getter.invoke(instance);
                 } catch (Exception exception) {
                     throw new GetterCallException(
@@ -160,13 +160,13 @@ abstract public class Bean<T> {
          * @throws SetterCallException if the method invocation fails
          */
         static <T, V> Setter<T, V> ofMethod(Method setter) {
-            setter.setAccessible(true);
             return (T instance, V value) -> {
                 try {
+                    setter.setAccessible(true);
                     setter.invoke(instance, value);
                 } catch (Exception exception) {
                     throw new SetterCallException(
-                            "Failed to call setter '%s'" .formatted(getMethodName(setter)), exception);
+                            "Failed to call setter '%s'".formatted(getMethodName(setter)), exception);
                 }
             };
         }
@@ -262,12 +262,12 @@ abstract public class Bean<T> {
      */
     public abstract static class Property<T> {
 
-        protected final String name;
-        protected final JavaType owner;
-        protected Setter<T, Object> setter;
-        protected Getter<T, Object> getter;
-        private Method rawGetter;
-        private Method rawSetter;
+        protected final String            name;
+        protected final JavaType          owner;
+        protected       Method            rawGetter;
+        protected       Method            rawSetter;
+        protected       Getter<T, Object> getter;
+        protected       Setter<T, Object> setter;
 
         /**
          * Constructs a property with the specified name and owner type.

@@ -38,13 +38,13 @@ public class ArrayBinder extends CollectionBinder {
      * @param root the name path to be used for the binding
      * @param bindable the bindable object that holds the type and value to be bound
      * @param source the data source from which to fetch values
-     * @return a {@link BindingResult} containing the bound array, or an empty result if no valid binding was found
+     * @return a {@link BindResult} containing the bound array, or an empty result if no valid binding was found
      */
     @Override
-    public <T> BindingResult<T> bind(NamePath root, Bindable<T> bindable, DataSource source) {
-        JavaType         elementType = bindable.getType().getComponentType();
-        JavaType         type        = JavaType.forParametrizedClass(List.class, elementType.getRawType());
-        BindingResult<T> result      = super.bind(root, Bindable.of(type), source);
+    public <T> BindResult<T> bind(NamePath root, Bindable<T> bindable, DataSource source) {
+        JavaType      elementType = bindable.getType().getComponentType();
+        JavaType      type        = JavaType.forParametrizedClass(List.class, elementType.getRawType());
+        BindResult<T> result      = super.bind(root, Bindable.of(type), source);
 
         // resulted array object
         T elements = null;
@@ -61,7 +61,7 @@ public class ArrayBinder extends CollectionBinder {
             }
         }
 
-        return BindingResult.of(elements);
+        return BindResult.of(elements);
     }
 
     /**

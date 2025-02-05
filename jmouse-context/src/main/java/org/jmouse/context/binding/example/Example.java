@@ -3,7 +3,6 @@ package org.jmouse.context.binding.example;
 import org.jmouse.context.ValueFlow;
 import org.jmouse.context.binding.*;
 import org.jmouse.core.env.*;
-import org.jmouse.core.reflection.JavaType;
 
 import java.util.*;
 
@@ -20,21 +19,78 @@ public class Example {
             }
         }
 
-        Map<String, Object> data = PropertiesTransformer.transform(flatMap);
-        Binder binder = new Binder(DataSource.of(data));
+        Map<String, Object> data   = PropertiesTransformer.transform(flatMap);
+        Binder              binder = Binder.with(data);
 
-        BindingResult<WebServer> result = binder.bind("default.configs.t10", Bindable.of(WebServer.class));
+        Bind.with(binder).toMap(null, String.class);
+        Bind.with(binder).to("JAVA_HOME", Object.class);
+        Bind.with(binder).to("JAVA_HOME", String.class);
+        Bind.with(binder).toInt("app.context.port").ifPresent(value -> {
+            System.out.println(value.byteValue());
+        });
 
-        System.out.println(result);
+        UserKeeper userKeeper = new UserKeeper(new User("John Wik"), new User("John Doe"));
 
-        var type = Bindable.ofMap(String.class, WebServerConfig.class);
+        Bind.with(userKeeper).toMap();
 
-        ValueFlow.get()
-                .create(binder.bind("default.configs", type)::getValue)
-                .when(Objects::nonNull)
-                .as(stringWebServerConfigMap -> stringWebServerConfigMap.get("tomcat"))
-                .toConsume(System.out::println);
-        System.out.println(false);
+        Bind.with(binder).toMap("services", Object.class);
+
+        System.out.println("Binding " + binder);
+    }
+
+    public static class UserKeeper {
+
+        private User        admin;
+        private User        client;
+
+        public UserKeeper(User admin, User client) {
+            this.admin = admin;
+            this.client = client;
+        }
+
+        public User getAdmin() {
+            return admin;
+        }
+
+        public void setAdmin(User admin) {
+            this.admin = admin;
+        }
+
+        public User getClient() {
+            return client;
+        }
+
+        public void setClient(User client) {
+            this.client = client;
+        }
+    }
+
+    public static class User {
+        private String name;
+        private Double port;
+
+        public User() {
+        }
+
+        public User(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Double getPort() {
+            return port;
+        }
+
+        public void setPort(Double port) {
+            this.port = port;
+        }
     }
 
     private static PropertyResolver createPropertyResolver() {

@@ -45,7 +45,7 @@ abstract public class CollectionBinder extends AbstractBinder {
      * @return the binding result containing the collection, or an empty result if no binding is possible
      */
     @Override
-    public <T> BindingResult<T> bind(NamePath root, Bindable<T> bindable, DataSource source) {
+    public <T> BindResult<T> bind(NamePath root, Bindable<T> bindable, DataSource source) {
         TypeDescriptor typeDescriptor = bindable.getTypeDescriptor();
 
         // Check if the bindable is a collection
@@ -64,7 +64,7 @@ abstract public class CollectionBinder extends AbstractBinder {
                     // Append the index to the path for element binding
                     NamePath elementName = root.append("[" + index++ + "]");
 
-                    BindingResult<?> result = bindCollectionElement(elementName, of(elementType), source, elements);
+                    BindResult<?> result = bindCollectionElement(elementName, of(elementType), source, elements);
 
                     if (result.isEmpty()) {
                         break;
@@ -72,16 +72,16 @@ abstract public class CollectionBinder extends AbstractBinder {
                 }
             }
 
-            return BindingResult.of((T) elements);
+            return BindResult.of((T) elements);
         }
 
         // Return an empty result if not a collection
-        return BindingResult.empty();
+        return BindResult.empty();
     }
 
-    private BindingResult<?> bindCollectionElement(NamePath name, Bindable<?> bindable, DataSource source, Collection<Object> elements) {
+    private BindResult<?> bindCollectionElement(NamePath name, Bindable<?> bindable, DataSource source, Collection<Object> elements) {
         // Bind the individual element and add it to the collection
-        BindingResult<?> result = bindValue(name, bindable, source);
+        BindResult<?> result = bindValue(name, bindable, source);
 
         // Add the successfully bound element to the collection
         result.ifPresent(elements::add);

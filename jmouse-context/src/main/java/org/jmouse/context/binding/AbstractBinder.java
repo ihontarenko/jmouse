@@ -38,15 +38,16 @@ abstract public class AbstractBinder implements ObjectBinder {
      * @param bindable the bindable instance representing the target type
      * @param source   the data source containing the value
      * @param <T>      the type of the target object
-     * @return a {@link BindingResult} containing the bound value, or empty if binding failed
+     * @return a {@link BindResult} containing the bound value, or empty if binding failed
      */
+    @SuppressWarnings({"unchecked"})
     @Override
-    public <T> BindingResult<T> bindValue(NamePath name, Bindable<T> bindable, DataSource source) {
+    public <T> BindResult<T> bindValue(NamePath name, Bindable<T> bindable, DataSource source) {
         DataSource value = source.get(name);
 
         // If the value is null, return an empty binding result
         if (value.isNull()) {
-            return BindingResult.empty();
+            return BindResult.empty();
         }
 
         bindable = (Bindable<T>) refreshBindable(bindable, value);
@@ -61,16 +62,16 @@ abstract public class AbstractBinder implements ObjectBinder {
 
             // If the value is scalar, convert it to the target type
             if (valueDescriptor.isScalar()) {
-                result = convert(result, descriptor);
+                return (BindResult<T>) BindResult.of(convert(result, descriptor));
             }
 
-            return BindingResult.of((T) result);
+            return BindResult.empty();
         } else if (context.isDeepBinding()) {
             // If deep binding is enabled, delegate to root binder
             return binder.bind(name, bindable, source);
         }
 
-        return BindingResult.empty();
+        return BindResult.empty();
     }
 
     /**

@@ -39,10 +39,10 @@ public class MapBinder extends AbstractBinder {
      * @param bindable the bindable instance representing the target map
      * @param source   the data source containing the values
      * @param <T>      the type of the target object (map in this case)
-     * @return a {@link BindingResult} containing the bound map, or empty if binding failed
+     * @return a {@link BindResult} containing the bound map, or empty if binding failed
      */
     @Override
-    public <T> BindingResult<T> bind(NamePath name, Bindable<T> bindable, DataSource source) {
+    public <T> BindResult<T> bind(NamePath name, Bindable<T> bindable, DataSource source) {
         TypeDescriptor typeDescriptor = bindable.getTypeDescriptor();
         List<NamePath> keys           = source.get(name).names();
 
@@ -55,23 +55,29 @@ public class MapBinder extends AbstractBinder {
             for (NamePath key : keys) {
                 String           keyName       = key.path();
                 Bindable<Object> entryBindable = getBindableEntry(bindable, map, keyName);
+                NamePath.Entries entries       = key.entries();
 
                 // If the key consists of multiple elements, we explicitly convert it into an indexed format.
                 // This ensures that the entire key is treated as a single entity enclosed in brackets,
                 // preventing it from being split into separate path segments.
-                if (key.entries().size() != 1) {
+                if (entries.size() != 1) {
                     key = NamePath.of("[" + key.path() + "]");
                 }
 
+                if (entries.type(0).isNumeric()) {
+                    keyName = entries.first().toString();
+                }
+
                 // Bind the value for each map entry and put it into the map
+                String entryKey = keyName;
                 bindValue(name.append(key), entryBindable, source).ifPresent(
-                        entry -> map.put(keyName, entry));
+                        entry -> map.put(entryKey, entry));
             }
 
-            return (BindingResult<T>) BindingResult.of(map);
+            return (BindResult<T>) BindResult.of(map);
         }
 
-        return BindingResult.empty();
+        return BindResult.empty();
     }
 
     /**
