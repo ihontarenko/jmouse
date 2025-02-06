@@ -1,6 +1,6 @@
 package org.jmouse.web;
 
-import svit.beans.BeanContext;
+import org.jmouse.beans.BeanContext;
 
 public interface Launcher<C extends BeanContext> {
 

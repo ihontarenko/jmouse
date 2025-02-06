@@ -1,6 +1,6 @@
 package test.application;
 
-import svit.beans.annotation.Provide;
+import org.jmouse.beans.annotation.Provide;
 
 @Provide(proxied = true, value = "root")
 public class TestRoot implements GetValue{

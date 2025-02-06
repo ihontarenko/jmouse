@@ -1,7 +1,7 @@
 package org.jmouse.web.request;
 
 import jakarta.servlet.http.HttpServletRequest;
-import svit.beans.Scope;
+import org.jmouse.beans.Scope;
 import org.jmouse.web.context.WebContextException;
 
 

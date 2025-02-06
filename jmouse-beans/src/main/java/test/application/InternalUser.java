@@ -1,10 +1,10 @@
 package test.application;
 
-import svit.beans.BeanContext;
-import svit.beans.BeanContextAware;
-import svit.beans.annotation.BeanInitializer;
-import svit.beans.annotation.BeanName;
-import svit.beans.annotation.Dependency;
+import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.BeanContextAware;
+import org.jmouse.beans.annotation.BeanInitializer;
+import org.jmouse.beans.annotation.BeanName;
+import org.jmouse.beans.annotation.Dependency;
 
 @BeanName("client")
 public class InternalUser implements User, BeanContextAware {

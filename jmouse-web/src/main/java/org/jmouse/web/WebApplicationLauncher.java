@@ -1,6 +1,6 @@
 package org.jmouse.web;
 
-import svit.beans.ScannerBeanContextInitializer;
+import org.jmouse.beans.ScannerBeanContextInitializer;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.observer.EventManager;
 import org.jmouse.core.observer.EventManagerFactory;

@@ -2,8 +2,8 @@ package org.jmouse.web.configuration;
 
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.env.MapPropertySource;
-import svit.beans.BeanContainer;
-import svit.beans.annotation.Configuration;
+import org.jmouse.beans.BeanContainer;
+import org.jmouse.beans.annotation.Configuration;
 import org.jmouse.context.ApplicationConfigurer;
 
 import java.util.Map;

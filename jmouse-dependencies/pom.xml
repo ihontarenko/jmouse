@@ -25,7 +25,7 @@
         <dependencies>
             <dependency>
                 <groupId>org.jmouse</groupId>
-                <artifactId>jmouse-common</artifactId>
+                <artifactId>jmouse-core</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>
             <dependency>

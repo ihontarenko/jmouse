@@ -1,8 +1,8 @@
 package org.jmouse.context.processor;
 
-import svit.beans.BeanContext;
-import svit.beans.definition.BeanDefinition;
-import svit.beans.processor.BeanPostProcessor;
+import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.definition.BeanDefinition;
+import org.jmouse.beans.processor.BeanPostProcessor;
 
 public class ResourceInjectionBeanPostProcessor implements BeanPostProcessor {
 

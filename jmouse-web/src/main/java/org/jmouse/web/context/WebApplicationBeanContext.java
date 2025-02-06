@@ -1,8 +1,8 @@
 package org.jmouse.web.context;
 
-import svit.beans.BeanContext;
-import svit.beans.container.ThreadLocalBeanContainer;
-import svit.beans.container.ThreadLocalScope;
+import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.container.ThreadLocalBeanContainer;
+import org.jmouse.beans.container.ThreadLocalScope;
 
 public class WebApplicationBeanContext extends AbstractWebApplicationBeanContext {
 

@@ -1,6 +1,6 @@
 package org.jmouse.context;
 
-import svit.beans.BeanContext;
+import org.jmouse.beans.BeanContext;
 
 public interface ApplicationContextFactory<T extends BeanContext> {
 

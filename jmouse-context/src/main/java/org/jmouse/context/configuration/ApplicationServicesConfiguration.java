@@ -1,8 +1,8 @@
 package org.jmouse.context.configuration;
 
 import org.jmouse.core.convert.converter.*;
-import svit.beans.annotation.Configuration;
-import svit.beans.annotation.Provide;
+import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.beans.annotation.Provide;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.convert.StandardConversion;
 import org.jmouse.core.convert.converter.enums.IntegerToEnumConverter;

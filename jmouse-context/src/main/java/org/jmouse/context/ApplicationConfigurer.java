@@ -1,6 +1,6 @@
 package org.jmouse.context;
 
-import svit.beans.BeanContainer;
+import org.jmouse.beans.BeanContainer;
 import org.jmouse.core.convert.ConversionConfigurer;
 import org.jmouse.core.mapping.MappingConfigurer;
 

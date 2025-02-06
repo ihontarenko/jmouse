@@ -1,8 +1,8 @@
 package org.jmouse.context.bind;
 
 import org.jmouse.core.convert.Conversion;
-import svit.beans.CyclicReferenceDetector;
-import svit.beans.DefaultCyclicReferenceDetector;
+import org.jmouse.beans.CyclicReferenceDetector;
+import org.jmouse.beans.DefaultCyclicReferenceDetector;
 
 import java.util.function.Supplier;
 

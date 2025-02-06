@@ -1,7 +1,7 @@
 package org.jmouse.web.configuration;
 
-import svit.beans.annotation.Configuration;
-import svit.beans.annotation.Provide;
+import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.beans.annotation.Provide;
 import org.jmouse.web.server.WebServerFactory;
 import org.jmouse.web.server.tomcat.TomcatWebServerFactory;
 

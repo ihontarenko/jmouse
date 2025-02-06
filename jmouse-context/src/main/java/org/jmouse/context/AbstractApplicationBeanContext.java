@@ -1,8 +1,8 @@
 package org.jmouse.context;
 
-import svit.beans.BeanContext;
-import svit.beans.BeanNotFoundException;
-import svit.beans.DefaultBeanContext;
+import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.BeanNotFoundException;
+import org.jmouse.beans.DefaultBeanContext;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.env.PropertySourceRegistry;
 import org.jmouse.core.io.ResourceLoader;

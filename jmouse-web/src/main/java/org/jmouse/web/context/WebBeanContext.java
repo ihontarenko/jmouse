@@ -2,7 +2,7 @@ package org.jmouse.web.context;
 
 import jakarta.servlet.ServletContext;
 import org.jmouse.context.ApplicationBeanContext;
-import svit.beans.BeanContext;
+import org.jmouse.beans.BeanContext;
 
 /**
  * Represents a web-specific extension of the {@link BeanContext}.

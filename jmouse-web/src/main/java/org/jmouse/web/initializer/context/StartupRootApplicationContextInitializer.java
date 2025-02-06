@@ -1,9 +1,9 @@
 package org.jmouse.web.initializer.context;
 
-import svit.beans.BeanContainer;
-import svit.beans.BeanContext;
-import svit.beans.BeanContextInitializer;
-import svit.beans.BeanScope;
+import org.jmouse.beans.BeanContainer;
+import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.BeanContextInitializer;
+import org.jmouse.beans.BeanScope;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.io.CompositeResourceLoader;

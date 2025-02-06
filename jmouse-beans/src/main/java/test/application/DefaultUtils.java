@@ -1,8 +1,8 @@
 package test.application;
 
-import svit.beans.BeanContext;
-import svit.beans.BeanContextAware;
-import svit.beans.annotation.Provide;
+import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.BeanContextAware;
+import org.jmouse.beans.annotation.Provide;
 
 @Provide(value = "util", proxied = true)
 public class DefaultUtils implements Utils, BeanContextAware {

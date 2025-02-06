@@ -4,7 +4,7 @@ import jakarta.servlet.ServletContext;
 import org.jmouse.context.AbstractApplicationBeanContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import svit.beans.BeanContext;
+import org.jmouse.beans.BeanContext;
 
 import static org.jmouse.core.reflection.Reflections.getShortName;
 

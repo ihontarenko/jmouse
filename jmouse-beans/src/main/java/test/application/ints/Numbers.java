@@ -1,8 +1,8 @@
 package test.application.ints;
 
-import svit.beans.BeanScope;
-import svit.beans.annotation.Configuration;
-import svit.beans.annotation.Provide;
+import org.jmouse.beans.BeanScope;
+import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.beans.annotation.Provide;
 
 import java.util.Random;
 
