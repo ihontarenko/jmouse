@@ -1,2 +1,2 @@
-# jmouse-framework
-Svit Framework
+# JMouse - Framework
+
