@@ -13,10 +13,7 @@ import java.util.Objects;
  * @param <A> the type of the first class
  * @param <B> the type of the second class
  */
-public class ClassPair<A, B> {
-
-    private final Class<A> classA;
-    private final Class<B> classB;
+public record ClassPair<A, B>(Class<A> classA, Class<B> classB) {
 
     /**
      * Constructs a new {@code ClassPair} with the specified classes.
@@ -24,9 +21,11 @@ public class ClassPair<A, B> {
      * @param classA the first class in the pair
      * @param classB the second class in the pair
      */
-    public ClassPair(Class<A> classA, Class<B> classB) {
-        this.classA = classA;
-        this.classB = classB;
+    public ClassPair {
+    }
+
+    public static <A, B> ClassPair<A, B> of(Class<A> classA, Class<B> classB) {
+        return new ClassPair<>(classA, classB);
     }
 
     /**
@@ -34,7 +33,8 @@ public class ClassPair<A, B> {
      *
      * @return a {@link Class} object representing type {@code B}
      */
-    public Class<B> getClassB() {
+    @Override
+    public Class<B> classB() {
         return classB;
     }
 
@@ -43,7 +43,8 @@ public class ClassPair<A, B> {
      *
      * @return a {@link Class} object representing type {@code A}
      */
-    public Class<A> getClassA() {
+    @Override
+    public Class<A> classA() {
         return classA;
     }
 
@@ -75,16 +76,6 @@ public class ClassPair<A, B> {
                     && Objects.equals(classB, classPair.classB);
         }
         return false;
-    }
-
-    /**
-     * Computes the hash code based on the underlying class references.
-     *
-     * @return the computed hash code
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(classA, classB);
     }
 
     /**

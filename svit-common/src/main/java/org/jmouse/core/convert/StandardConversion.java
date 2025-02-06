@@ -54,7 +54,7 @@ public class StandardConversion implements Conversion {
     @Override
     public void registerConverter(GenericConverter<?, ?> genericConverter) {
         for (ClassPair<?, ?> supportedType : genericConverter.getSupportedTypes()) {
-            graph.addEdge(supportedType.getClassA(), supportedType.getClassB());
+            graph.addEdge(supportedType.classA(), supportedType.classB());
             converters.putIfAbsent(supportedType, genericConverter);
         }
     }
@@ -160,7 +160,7 @@ public class StandardConversion implements Conversion {
 
                 for (ClassPair<?, ?> transition : transitions) {
                     ClassPair<Object, Object> pair = (ClassPair<Object, Object>) transition;
-                    intermediate = getConverter(pair).convert(intermediate, pair.getClassB());
+                    intermediate = getConverter(pair).convert(intermediate, pair.classB());
                 }
 
                 converted = (R) intermediate;

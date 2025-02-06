@@ -8,9 +8,9 @@ import java.util.Set;
 
 public class StandardEnvironment implements Environment {
 
-    private final PropertyResolver    resolver;
-    private final PlaceholderResolver placeholder;
-    private final Set<String>         profiles = new HashSet<>();
+    private final PropertyResolver resolver;
+//    private final PlaceholderResolver placeholder;//
+    private final Set<String>      profiles = new HashSet<>();
 
     public StandardEnvironment() {
         this(new StandardPropertyResolver(new DefaultPropertySourceRegistry()));
@@ -18,7 +18,7 @@ public class StandardEnvironment implements Environment {
 
     public StandardEnvironment(PropertyResolver resolver) {
         this.resolver = resolver;
-        this.placeholder = new SimplePlaceholderResolver(this);
+     //    this.placeholder = new SimplePlaceholderResolver(this);
     }
 
     @Override
@@ -48,15 +48,15 @@ public class StandardEnvironment implements Environment {
         return Set.of(getActiveProfiles()).contains(profile);
     }
 
-    @Override
-    public String resolvePlaceholders(String text) {
-        return placeholder.resolvePlaceholders(text);
-    }
-
-    @Override
-    public String resolveRequiredPlaceholders(String text) {
-        return placeholder.resolveRequiredPlaceholders(text);
-    }
+//    @Override
+//    public String resolvePlaceholder(String text) {
+//        return placeholder.resolvePlaceholder(text);
+//    }
+//
+//    @Override
+//    public String resolveRequiredPlaceholders(String text) {
+//        return placeholder.resolveRequiredPlaceholders(text);
+//    }
 
     @Override
     public void setRegistry(PropertySourceRegistry registry) {

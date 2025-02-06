@@ -3,7 +3,7 @@ package org.jmouse.core.env;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SimplePlaceholderResolver implements PlaceholderResolver {
+public class SimplePlaceholderResolver {
 
     private static final Pattern          PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{(.+?)}");
     private final        PropertyResolver resolver;
@@ -15,8 +15,7 @@ public class SimplePlaceholderResolver implements PlaceholderResolver {
     /**
      * Resolves placeholders in the given text.
      */
-    @Override
-    public String resolvePlaceholders(String text) {
+    public String resolvePlaceholder(String text) {
         Matcher matcher = PLACEHOLDER_PATTERN.matcher(text);
         StringBuilder builder = new StringBuilder();
 
@@ -34,9 +33,8 @@ public class SimplePlaceholderResolver implements PlaceholderResolver {
     /**
      * Resolves placeholders, throwing an exception if any remain unresolved.
      */
-    @Override
     public String resolveRequiredPlaceholders(String text) {
-        String resolved = resolvePlaceholders(text);
+        String resolved = resolvePlaceholder(text);
 
         if (resolved.contains("${")) {
             throw new UnresolvedPropertyPlaceholderException("Unresolved placeholder '%s' is left".formatted(resolved));

@@ -3,7 +3,7 @@ package org.jmouse.core.env;
 /**
  * Central interface for accessing properties and resolving placeholders.
  */
-public interface Environment extends PropertyResolver, PlaceholderResolver {
+public interface Environment extends PropertyResolver {
 
     /**
      * Returns the active profiles for the current environment.

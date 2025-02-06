@@ -10,7 +10,7 @@ public class Example {
         MapPropertySource source3 = new ClasspathPropertySource("package-info", "classpath:package-info.properties");
 
         PropertySourceRegistry registry = new DefaultPropertySourceRegistry();
-        PropertyResolver resolver = new StandardPropertyResolver(registry);
+        PropertyResolver       resolver = new StandardPropertyResolver(registry);
 
         Environment env = new StandardEnvironment(resolver);
 
