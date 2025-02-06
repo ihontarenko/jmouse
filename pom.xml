@@ -3,9 +3,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <name>Svit Framework - Project</name>
-    <groupId>org.svitframework</groupId>
-    <artifactId>svit-parent</artifactId>
+    <name>JMouse - Project</name>
+    <groupId>org.jmouse</groupId>
+    <artifactId>jmouse-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0-Beta</version>
 
@@ -18,8 +18,8 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.svitframework</groupId>
-                <artifactId>svit-dependencies</artifactId>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-dependencies</artifactId>
                 <version>1.0.0-Beta</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -28,12 +28,12 @@
     </dependencyManagement>
 
     <modules>
-        <module>svit-dependencies</module>
-        <module>svit-common</module>
-        <module>svit-expression</module>
+        <module>jmouse-dependencies</module>
+        <module>jmouse-core</module>
+        <module>jmouse-expression</module>
         <module>jmouse-beans</module>
         <module>jmouse-context</module>
-        <module>svit-web</module>
+        <module>jmouse-web</module>
     </modules>
 
 </project>

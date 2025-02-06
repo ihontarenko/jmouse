@@ -4,13 +4,12 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.svitframework</groupId>
-        <artifactId>svit-parent</artifactId>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parent</artifactId>
         <version>1.0.0-Beta</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <name>JMouse - Context</name>
-    <groupId>org.jmouse</groupId>
     <artifactId>jmouse-context</artifactId>
     <packaging>jar</packaging>
 
@@ -22,11 +21,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.svitframework</groupId>
-            <artifactId>svit-common</artifactId>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.svitframework</groupId>
+            <groupId>org.jmouse</groupId>
             <artifactId>jmouse-beans</artifactId>
         </dependency>
         <dependency>

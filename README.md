@@ -1,2 +1,2 @@
-# svit-framework
+# jmouse-framework
 Svit Framework
