@@ -65,7 +65,13 @@ abstract public class AbstractBinder implements ObjectBinder {
 
             // If the value is scalar, convert it to the target type
             if (valueDescriptor.isScalar()) {
-                return (BindResult<T>) BindResult.of(convert(result, descriptor));
+                Object converted = convert(result, descriptor);
+
+                if (converted != null) {
+                    converted = callback.onBinding(name, bindable, context, converted);
+                }
+
+                return (BindResult<T>) BindResult.of(converted);
             }
 
             return BindResult.empty();

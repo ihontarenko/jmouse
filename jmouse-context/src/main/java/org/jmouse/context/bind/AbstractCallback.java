@@ -9,7 +9,7 @@ public class AbstractCallback implements BindCallback {
     }
 
     protected AbstractCallback() {
-        this(NULL);
+        this(NOOP);
     }
 
 }

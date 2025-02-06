@@ -1,6 +1,7 @@
 package org.jmouse.context.bind.example;
 
 import org.jmouse.context.bind.*;
+import org.jmouse.core.StandardPlaceholderReplacer;
 import org.jmouse.core.env.PropertyResolver;
 import org.jmouse.core.env.*;
 import org.jmouse.util.Strings;
@@ -21,13 +22,13 @@ public class Example {
         }
 
         Map<String, Object> data   = PropertiesTransformer.transform(flatMap);
-        Binder              binder = Binder.with(data, new BindingExceptionCallback());
+        Binder              binder = Binder.with(data, new DefaultBindingCallback(new StandardPlaceholderReplacer()));
 
         Bind.with(binder).toMap(null, String.class);
         Bind.with(binder).to("JAVA_HOME", Object.class);
         Bind.with(binder).to("JAVA_HOME", String.class);
         Bind.with(binder).toInt("app.context.port").ifPresent(value -> {
-            System.out.println(value.byteValue());
+            System.out.println(value * 2);
         });
 
         Bind.with(binder).toMap("services", Object.class);
@@ -37,8 +38,6 @@ public class Example {
         System.out.println(
                 Strings.underscored("aaBbCc")
         );
-
-        System.out.println("Binding " + binder);
     }
 
 
@@ -77,7 +76,8 @@ public class Example {
         MapPropertySource source2 = new MapPropertySource("rawMaps", Map.of(
                 "app.name", "Svit",
                 "app.full-name", "JMouse - Svit Framework",
-                "app.description", "Based on Java 21"
+                    "app.java.version", "21",
+                "app.description", "Application: '${app.name}' Java ${app.java.version} ${app.userName:Default}"
         ));
         MapPropertySource source3 = new ClasspathPropertySource("default", "classpath:services.properties");
 

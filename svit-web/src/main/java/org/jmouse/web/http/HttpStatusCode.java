@@ -61,7 +61,7 @@ public sealed interface HttpStatusCode permits HttpStatus {
      */
     int getCode();
 
-    public enum HttpStatusType {
+    enum HttpStatusType {
         INFORMATIONAL,
         SUCCESS,
         REDIRECTION,

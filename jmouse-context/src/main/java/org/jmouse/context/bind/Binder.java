@@ -35,7 +35,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @param strategy the binding strategy (deep or shallow)
      */
     public Binder(DataSource source, BinderFactory factory, BindingStrategy strategy) {
-        this.defaultCallback = BindCallback.NULL;
+        this.defaultCallback = BindCallback.NOOP;
         this.strategy = strategy;
         this.source = source;
         this.factory = factory;
@@ -141,8 +141,7 @@ public class Binder implements ObjectBinder, BindContext {
     @SuppressWarnings({"unchecked"})
     private <T> T performException(NamePath path, Bindable<T> bindable, Exception exception) {
         try {
-            Object result = defaultCallback.onFailure(path, bindable, this, exception);
-            return (T) result;
+            return (T) defaultCallback.onFailure(path, bindable, this, exception);
         } catch (Throwable cause) {
             throw new BindException(path, bindable, cause);
         }

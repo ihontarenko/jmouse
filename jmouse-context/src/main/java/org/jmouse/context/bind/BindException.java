@@ -15,7 +15,7 @@ public class BindException extends RuntimeException {
     }
 
     public static String getExceptionMessage(NamePath path, Bindable<?> bindable) {
-        return "Binding '%s' type to the '%s' property is failed".formatted(bindable, path);
+        return "Binding '%s' type to the '%s' property is failed".formatted(bindable.getType(), path);
     }
 
 }
