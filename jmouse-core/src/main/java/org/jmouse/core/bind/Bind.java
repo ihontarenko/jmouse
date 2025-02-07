@@ -58,26 +58,51 @@ public final class Bind {
     }
 
     /**
-     * Binds the value at the given path to the specified bindable type.
+     * Binds a value from the specified path to a given bindable type.
      *
      * @param path the property path
-     * @param bindable the bindable type
+     * @param bindable the target bindable type
      * @param <T> the expected result type
-     * @return the binding result
+     * @return the binding result containing the bound value
      */
     public <T> BindResult<T> to(String path, Bindable<T> bindable) {
         return binder.bind(path, bindable);
     }
 
     /**
-     * Binds a value to the specified bindable type.
+     * Binds a value from the specified path to the given target instance.
      *
-     * @param bindable the bindable type
+     * @param path the property path
+     * @param target the target instance to bind
      * @param <T> the expected result type
-     * @return the binding result
+     * @return the binding result containing the bound value
+     */
+    @SuppressWarnings({"unchecked"})
+    public <T> BindResult<T> to(String path, Object target) {
+        return (BindResult<T>) binder.bind(path, Bindable.ofInstance(target));
+    }
+
+    /**
+     * Binds a value to a specified bindable type.
+     *
+     * @param bindable the target bindable type
+     * @param <T> the expected result type
+     * @return the binding result containing the bound value
      */
     public <T> BindResult<T> to(Bindable<T> bindable) {
         return binder.bind(bindable);
+    }
+
+    /**
+     * Binds a value directly to the given target instance.
+     *
+     * @param target the target instance to bind
+     * @param <T> the expected result type
+     * @return the binding result containing the bound value
+     */
+    @SuppressWarnings({"unchecked"})
+    public <T> BindResult<T> to(Object target) {
+        return (BindResult<T>) binder.bind(Bindable.ofInstance(target));
     }
 
     /**
