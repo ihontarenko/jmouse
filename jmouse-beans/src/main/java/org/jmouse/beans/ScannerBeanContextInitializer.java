@@ -6,7 +6,7 @@ import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDefinitionFactory;
 import org.jmouse.beans.scanner.ConfigurationAnnotatedClassBeanScanner;
 import org.jmouse.beans.scanner.ProvideAnnotatedClassesBeanScanner;
-import org.jmouse.util.Arrays;
+import org.jmouse.util.helper.Arrays;
 import org.jmouse.util.Priority;
 
 import java.lang.reflect.AnnotatedElement;

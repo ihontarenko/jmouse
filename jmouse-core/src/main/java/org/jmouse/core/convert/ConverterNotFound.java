@@ -15,7 +15,7 @@ public class ConverterNotFound extends RuntimeException {
      * @param classPair the {@link ClassPair} representing the source and target types
      *                  for which no converter is available
      */
-    public ConverterNotFound(ClassPair<?, ?> classPair) {
+    public ConverterNotFound(ClassPair classPair) {
         super("Unable to convert %s — no registered converter found.".formatted(classPair));
     }
 

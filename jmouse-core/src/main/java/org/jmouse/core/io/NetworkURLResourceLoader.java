@@ -1,6 +1,6 @@
 package org.jmouse.core.io;
 
-import org.jmouse.util.JavaIO;
+import org.jmouse.util.helper.JavaIO;
 
 import java.util.List;
 

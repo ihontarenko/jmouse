@@ -7,8 +7,8 @@ import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.convert.StandardConversion;
 import org.jmouse.core.convert.converter.enums.IntegerToEnumConverter;
 import org.jmouse.core.convert.converter.enums.StringToEnumConverter;
-import org.jmouse.core.mapping.Mapping;
-import org.jmouse.core.mapping.MappingFactory;
+import org.jmouse.common.mapping.Mapping;
+import org.jmouse.common.mapping.MappingFactory;
 import org.jmouse.context.ApplicationBeanContext;
 
 @Configuration

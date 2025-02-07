@@ -11,10 +11,13 @@ import java.util.Properties;
  */
 public class StandardPlaceholderReplacer implements PlaceholderReplacer {
 
-    private final String          prefix;
-    private final String          suffix;
-    private final String          separator;
-    private final Visitor<String> visitor;
+    private final String                          prefix;
+    private final String                          suffix;
+    private final String                          separator;
+    private final CyclicReferenceDetector<String> detector;
+
+    private final static IllegalStateException ILLEGAL_STATE_EXCEPTION
+            = new IllegalStateException("Circular placeholder reference");;
 
     /**
      * Creates a {@code StandardPlaceholderReplacer} with custom delimiters.
@@ -27,7 +30,7 @@ public class StandardPlaceholderReplacer implements PlaceholderReplacer {
         this.prefix = prefix;
         this.suffix = suffix;
         this.separator = separator;
-        this.visitor = new Visitor.Default<>();
+        this.detector = new DefaultCyclicReferenceDetector<>();
     }
 
     /**
@@ -89,11 +92,7 @@ public class StandardPlaceholderReplacer implements PlaceholderReplacer {
                 String resolved    = resolver.resolvePlaceholder(placeholder);
 
                 // Detect circular references
-                if (visitor.familiar(placeholder)) {
-                    throw new IllegalStateException("Circular placeholder reference '" + placeholder + "'");
-                }
-
-                visitor.visit(placeholder);
+                detector.detect(() -> placeholder, () -> ILLEGAL_STATE_EXCEPTION);
 
                 // Handle default value syntax: ${key:default}
                 if (resolved == null && placeholder.contains(separator)) {
@@ -116,7 +115,7 @@ public class StandardPlaceholderReplacer implements PlaceholderReplacer {
                     start = builder.indexOf(prefix, end + suffix.length());
                 }
 
-                visitor.forget(placeholder);
+                detector.remove(() -> placeholder);
             } else {
                 start = -1;
             }
@@ -125,15 +124,14 @@ public class StandardPlaceholderReplacer implements PlaceholderReplacer {
         return builder.toString();
     }
 
-    public String getPrefix() {
-        return prefix;
-    }
-
-    public String getSuffix() {
+    @Override
+    public String suffix() {
         return suffix;
     }
 
-    public String getSeparator() {
-        return separator;
+    @Override
+    public String prefix() {
+        return prefix;
     }
+
 }

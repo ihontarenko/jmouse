@@ -27,6 +27,14 @@
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-context</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-expression</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-web</artifactId>
+        </dependency>
 
         <!-- SLF4J -->
         <dependency>

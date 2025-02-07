@@ -9,10 +9,6 @@ public class RegexPlaceholderReplacer implements PlaceholderReplacer {
 
     /**
      * Replaces placeholders in the given string using a {@link PlaceholderResolver}.
-     *
-     * @param value    the input string containing placeholders
-     * @param resolver the resolver used to retrieve placeholder values
-     * @return the string with resolved placeholders
      */
     @Override
     public String replace(String value, PlaceholderResolver resolver) {
@@ -28,5 +24,15 @@ public class RegexPlaceholderReplacer implements PlaceholderReplacer {
         matcher.appendTail(builder);
 
         return builder.toString();
+    }
+
+    @Override
+    public String suffix() {
+        return PLACEHOLDER_SUFFIX;
+    }
+
+    @Override
+    public String prefix() {
+        return PLACEHOLDER_PREFIX;
     }
 }

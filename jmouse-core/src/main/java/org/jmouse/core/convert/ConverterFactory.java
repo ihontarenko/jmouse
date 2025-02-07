@@ -66,7 +66,7 @@ public interface ConverterFactory {
      * @return {@code true} if a converter exists, {@code false} otherwise
      */
     default boolean hasConverter(Class<?> sourceType, Class<?> targetType) {
-        return hasConverter(new ClassPair<>(sourceType, targetType));
+        return hasConverter(new ClassPair(sourceType, targetType));
     }
 
     /**
@@ -75,7 +75,7 @@ public interface ConverterFactory {
      * @param classPair a {@link ClassPair} representing the source and target types
      * @return {@code true} if a converter exists, {@code false} otherwise
      */
-    default boolean hasConverter(ClassPair<?, ?> classPair) {
+    default boolean hasConverter(ClassPair classPair) {
         return getConverter(classPair) != null;
     }
 
@@ -85,7 +85,7 @@ public interface ConverterFactory {
      * @param classPair a {@link ClassPair} representing the source and target types
      * @return {@code true} if a converter was removed, {@code false} if no such converter was found
      */
-    boolean removeConverter(ClassPair<?, ?> classPair);
+    boolean removeConverter(ClassPair classPair);
 
     /**
      * Retrieves a {@link GenericConverter} instance capable of handling the specified
@@ -99,7 +99,7 @@ public interface ConverterFactory {
      * @return a compatible generic converter, or {@code null} if none is found
      */
     default <S, T> GenericConverter<S, T> getConverter(Class<S> sourceType, Class<T> targetType) {
-        return getConverter(new ClassPair<>(sourceType, targetType));
+        return getConverter(new ClassPair(sourceType, targetType));
     }
 
     /**
@@ -112,7 +112,7 @@ public interface ConverterFactory {
      * @param classPair a {@link ClassPair} representing the source and target types
      * @return a compatible generic converter, or {@code null} if none is found
      */
-    <S, T> GenericConverter<S, T> getConverter(ClassPair<S, T> classPair);
+    <S, T> GenericConverter<S, T> getConverter(ClassPair classPair);
 
     /**
      * Searches for a transition chain that allows conversion from {@code sourceType} to {@code targetType}
@@ -139,6 +139,6 @@ public interface ConverterFactory {
      * @return a list of {@link ClassPair} instances representing the conversion path,
      *         or an empty list if no transition is found
      */
-    <S, T> List<ClassPair<?, ?>> searchTransitionChain(Class<S> sourceType, Class<T> targetType);
+    <S, T> List<ClassPair> searchTransitionChain(Class<S> sourceType, Class<T> targetType);
 
 }

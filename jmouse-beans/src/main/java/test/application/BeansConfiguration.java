@@ -4,7 +4,7 @@ import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.annotation.Configuration;
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.beans.annotation.Qualifier;
-import org.jmouse.util.Strings;
+import org.jmouse.util.helper.Strings;
 
 import java.util.List;
 import java.util.Locale;

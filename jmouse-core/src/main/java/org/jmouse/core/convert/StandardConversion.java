@@ -5,10 +5,10 @@ import org.jmouse.core.reflection.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static java.util.stream.Collectors.joining;
 
 /**
  * The default implementation of the {@link Conversion} interface. It manages a registry
@@ -24,10 +24,10 @@ public class StandardConversion implements Conversion {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StandardConversion.class);
 
-    private final Map<ClassPair<?, ?>, GenericConverter<?, ?>> converters = new ConcurrentHashMap<>();
-    private final TypeNormalizer                               normalizer = new TypeNormalizer.EnumTypeNormalizer();
-    private final Graph<Class<?>>                              graph      = new MapListGraph<>();
-    private final PathFinder<Class<?>>                         pathFinder = new BFSPathFinder<>();
+    private final Map<ClassPair, GenericConverter<?, ?>> converters = new ConcurrentHashMap<>();
+    private final TypeNormalizer                         normalizer = new TypeNormalizer.EnumTypeNormalizer();
+    private final Graph<Class<?>>                        graph      = new MapListGraph<>();
+    private final PathFinder<Class<?>>                   pathFinder = new BFSPathFinder<>();
 
     /**
      * Registers a simple {@link Converter} for converting from {@code sourceType} to {@code targetType}.
@@ -53,7 +53,7 @@ public class StandardConversion implements Conversion {
      */
     @Override
     public void registerConverter(GenericConverter<?, ?> genericConverter) {
-        for (ClassPair<?, ?> supportedType : genericConverter.getSupportedTypes()) {
+        for (ClassPair supportedType : genericConverter.getSupportedTypes()) {
             graph.addEdge(supportedType.classA(), supportedType.classB());
             converters.putIfAbsent(supportedType, genericConverter);
         }
@@ -66,8 +66,11 @@ public class StandardConversion implements Conversion {
      * @return {@code true} if a converter exists, {@code false} otherwise
      */
     @Override
-    public boolean hasConverter(ClassPair<?, ?> classPair) {
-        return converters.containsKey(classPair);
+    public boolean hasConverter(ClassPair classPair) {
+        if (!converters.containsKey(classPair)) {
+            return searchPossibleCandidate(classPair.classA(), classPair.classB()) != null;
+        }
+        return true;
     }
 
     /**
@@ -77,7 +80,7 @@ public class StandardConversion implements Conversion {
      * @return {@code true} if a converter was removed, {@code false} if no such converter was found
      */
     @Override
-    public boolean removeConverter(ClassPair<?, ?> classPair) {
+    public boolean removeConverter(ClassPair classPair) {
         boolean removed = false;
 
         if (hasConverter(classPair)) {
@@ -98,7 +101,7 @@ public class StandardConversion implements Conversion {
      */
     @Override
     @SuppressWarnings({"unchecked"})
-    public <S, T> GenericConverter<S, T> getConverter(ClassPair<S, T> classPair) {
+    public <S, T> GenericConverter<S, T> getConverter(ClassPair classPair) {
         return (GenericConverter<S, T>) converters.get(classPair);
     }
 
@@ -125,9 +128,8 @@ public class StandardConversion implements Conversion {
         R converted = null;
 
         if (source != null) {
-            @SuppressWarnings({"unchecked"})
-            Class<R>        normalizedType = (Class<R>) normalizer.normalize(targetType);
-            ClassPair<T, R> classPair      = new ClassPair<>(sourceType, normalizedType);
+            @SuppressWarnings({"unchecked"}) Class<R> normalizedType = (Class<R>) normalizer.normalize(targetType);
+            ClassPair classPair = new ClassPair(sourceType, normalizedType);
 
             if (classPair.isTheSame()) {
                 return (R) source;
@@ -138,7 +140,7 @@ public class StandardConversion implements Conversion {
 
             if (converter == null) {
                 // Attempt to find a converter using inherited types
-                ClassPair<T, R> candidate = searchPossibleCandidate(sourceType, targetType);
+                ClassPair candidate = searchPossibleCandidate(sourceType, targetType);
 
                 if (candidate != null) {
                     classPair = candidate;
@@ -148,7 +150,7 @@ public class StandardConversion implements Conversion {
 
             if (converter == null) {
                 // Search for a transition chain using a graph of converters and BFS search
-                List<ClassPair<?, ?>> transitions = searchTransitionChain(sourceType, targetType);
+                List<ClassPair> transitions = searchTransitionChain(sourceType, targetType);
 
                 if (transitions.isEmpty()) {
                     throw new ConverterNotFound(classPair);
@@ -158,9 +160,8 @@ public class StandardConversion implements Conversion {
 
                 Object intermediate = source;
 
-                for (ClassPair<?, ?> transition : transitions) {
-                    ClassPair<Object, Object> pair = (ClassPair<Object, Object>) transition;
-                    intermediate = getConverter(pair).convert(intermediate, pair.classB());
+                for (ClassPair transition : transitions) {
+                    intermediate = getConverter(transition).convert(intermediate, (Class<Object>) transition.classB());
                 }
 
                 converted = (R) intermediate;
@@ -181,14 +182,14 @@ public class StandardConversion implements Conversion {
      * that matches a registered converter.
      * </p>
      *
-     * @param <S>         the source type
-     * @param <T>         the target type
-     * @param sourceType  the class representing the source type
-     * @param targetType  the class representing the target type
+     * @param <S>        the source type
+     * @param <T>        the target type
+     * @param sourceType the class representing the source type
+     * @param targetType the class representing the target type
      * @return a {@link ClassPair} containing the source and target types if a suitable converter is found,
-     *         {@code null} if no converter is found
+     * {@code null} if no converter is found
      */
-    public <S, T> ClassPair<S, T> searchPossibleCandidate(Class<S> sourceType, Class<T> targetType) {
+    public <S, T> ClassPair searchPossibleCandidate(Class<S> sourceType, Class<T> targetType) {
         List<Class<?>> sourceCandidates = new ArrayList<>(List.of(Reflections.getClassInterfaces(sourceType)));
         List<Class<?>> targetCandidates = new ArrayList<>(List.of(Reflections.getClassInterfaces(targetType)));
 
@@ -197,9 +198,9 @@ public class StandardConversion implements Conversion {
 
         for (Class<?> sourceCandidate : sourceCandidates) {
             for (Class<?> targetCandidate : targetCandidates) {
-                ClassPair<?, ?> pair = new ClassPair<>(sourceCandidate, targetCandidate);
+                ClassPair pair = new ClassPair(sourceCandidate, targetCandidate);
                 if (converters.containsKey(pair)) {
-                    return (ClassPair<S, T>) pair;
+                    return pair;
                 }
             }
         }
@@ -214,21 +215,21 @@ public class StandardConversion implements Conversion {
      * the source and target. For each consecutive pair of types in the found path, it retrieves
      * a corresponding {@link GenericConverter} and adds it to the conversion chain.
      *
-     * @param <S> the initial source type
-     * @param <T> the final target type
+     * @param <S>        the initial source type
+     * @param <T>        the final target type
      * @param sourceType the class representing the starting type of the conversion
      * @param targetType the class representing the desired final type of the conversion
      * @return a list of {@link GenericConverter} instances representing the conversion path
-     *         from {@code sourceType} to {@code targetType}, or an empty list if no such path exists
+     * from {@code sourceType} to {@code targetType}, or an empty list if no such path exists
      */
     @Override
-    public <S, T> List<ClassPair<?, ?>> searchTransitionChain(Class<S> sourceType, Class<T> targetType) {
-        List<Class<?>>        typePath = pathFinder.findPath(graph, sourceType, targetType);
-        List<ClassPair<?, ?>> chain    = new ArrayList<>();
+    public <S, T> List<ClassPair> searchTransitionChain(Class<S> sourceType, Class<T> targetType) {
+        List<Class<?>>  typePath = pathFinder.findPath(graph, sourceType, targetType);
+        List<ClassPair> chain    = new ArrayList<>();
 
         if (!typePath.isEmpty()) {
             for (Edge<Class<?>> edge : Graph.toEdges(typePath)) {
-                chain.add(new ClassPair<>(edge.nodeA(), edge.nodeB()));
+                chain.add(new ClassPair(edge.nodeA(), edge.nodeB()));
             }
         }
 

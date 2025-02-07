@@ -4,8 +4,10 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanNotFoundException;
 import org.jmouse.beans.DefaultBeanContext;
 import org.jmouse.core.env.Environment;
-import org.jmouse.core.env.PropertySourceRegistry;
+import org.jmouse.core.env.PropertySource;
 import org.jmouse.core.io.ResourceLoader;
+
+import java.util.Collection;
 
 public class AbstractApplicationBeanContext extends DefaultBeanContext implements ApplicationBeanContext {
 
@@ -34,16 +36,6 @@ public class AbstractApplicationBeanContext extends DefaultBeanContext implement
     }
 
     @Override
-    public void setRegistry(PropertySourceRegistry registry) {
-        throw new UnsupportedOperationException("Direct call from context is not supported");
-    }
-
-    @Override
-    public PropertySourceRegistry getRegistry() {
-        throw new UnsupportedOperationException("Direct call from context is not supported");
-    }
-
-    @Override
     public Object getRawProperty(String name) {
         return getEnvironment().getProperty(name);
     }
@@ -53,4 +45,28 @@ public class AbstractApplicationBeanContext extends DefaultBeanContext implement
         return getEnvironment().getProperty(name, targetType);
     }
 
+    @Override
+    public PropertySource<?> getPropertySource(String name) {
+        return getEnvironment().getPropertySource(name);
+    }
+
+    @Override
+    public void addPropertySource(PropertySource<?> propertySource) {
+        getEnvironment().addPropertySource(propertySource);
+    }
+
+    @Override
+    public boolean hasPropertySource(String name) {
+        return getEnvironment().hasPropertySource(name);
+    }
+
+    @Override
+    public boolean removePropertySource(String name) {
+        return getEnvironment().removePropertySource(name);
+    }
+
+    @Override
+    public Collection<? extends PropertySource<?>> getPropertySources() {
+        return getEnvironment().getPropertySources();
+    }
 }

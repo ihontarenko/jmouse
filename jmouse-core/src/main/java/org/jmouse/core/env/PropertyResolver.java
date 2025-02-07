@@ -1,27 +1,8 @@
 package org.jmouse.core.env;
 
-/**
- * Defines methods for resolving properties from a {@link PropertySourceRegistry}.
- * <p>
- * This interface provides methods to retrieve property values in various types, check for property existence,
- * and handle default values or required properties.
- * </p>
- */
+import java.util.*;
+
 public interface PropertyResolver {
-
-    /**
-     * Sets the {@link PropertySourceRegistry} to be used for resolving properties.
-     *
-     * @param registry the property source registry
-     */
-    void setRegistry(PropertySourceRegistry registry);
-
-    /**
-     * Returns the current {@link PropertySourceRegistry} used by this resolver.
-     *
-     * @return the property source registry
-     */
-    PropertySourceRegistry getRegistry();
 
     /**
      * Retrieves the raw property value without any type conversion.
@@ -96,8 +77,8 @@ public interface PropertyResolver {
      * @return the converted property value
      * @throws PropertyNotFoundException if the property is not found
      */
-    default <T> T getRequiredProperty(String name, Class<T> targetType) {
-        T value = getProperty(name, targetType);
+    default <T> T getRequiredProperty(String name, Class<? super T> targetType) {
+        T value = getProperty(name, (Class<T>) targetType);
 
         if (value == null) {
             throw new PropertyNotFoundException("Required property '%s' not found".formatted(name));
@@ -115,4 +96,82 @@ public interface PropertyResolver {
     default boolean containsProperty(String name) {
         return getRawProperty(name) != null;
     }
+
+    /**
+     * Retrieves a collection of all property names from all registered {@link PropertySource} instances.
+     * <p>
+     * This method aggregates property names from every available {@link PropertySource} into a single collection.
+     * </p>
+     *
+     * @return a {@link Collection} containing all property names across registered sources
+     */
+    default Collection<String> getPropertyNames() {
+        List<String> names = new ArrayList<>();
+
+        for (PropertySource<?> source : getPropertySources()) {
+            names.addAll(List.of(source.getPropertyNames()));
+        }
+
+        return names;
+    }
+
+    /**
+     * Retrieves a flattened view of all properties from all registered {@link PropertySource} instances.
+     * <p>
+     * This method consolidates properties from all sources into a single {@link Map}, where each key represents
+     * a property name and its corresponding value.
+     * </p>
+     *
+     * @return a {@link Map} containing all properties across all registered sources
+     */
+    default Map<String, Object> getFlattenedProperties() {
+        Map<String, Object> flattened = new HashMap<>();
+
+        for (String propertyName : getPropertyNames()) {
+            flattened.put(propertyName, getRawProperty(propertyName));
+        }
+
+        return flattened;
+    }
+
+    /**
+     * Retrieves a {@link PropertySource} by its name.
+     *
+     * @param name the name of the property source
+     * @return the corresponding {@link PropertySource}, or {@code null} if not found
+     */
+    PropertySource<?> getPropertySource(String name);
+
+    /**
+     * Adds a new {@link PropertySource} to the collection.
+     *
+     * @param propertySource the property source to add
+     */
+    void addPropertySource(PropertySource<?> propertySource);
+
+    /**
+     * Checks whether a property source with the given name exists.
+     *
+     * @param name the name of the property source
+     * @return {@code true} if the property source exists, {@code false} otherwise
+     */
+    boolean hasPropertySource(String name);
+
+    /**
+     * Removes a {@link PropertySource} by its name.
+     *
+     * @param name the name of the property source to remove
+     * @return {@code true} if the property source was removed, {@code false} if no such source existed
+     */
+    boolean removePropertySource(String name);
+
+    /**
+     * Returns all registered {@link PropertySource} instances.
+     *
+     * @return a collection of registered property sources
+     */
+    Collection<? extends PropertySource<?>> getPropertySources();
+
+
+
 }

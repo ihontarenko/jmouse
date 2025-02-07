@@ -1,50 +1,24 @@
 package org.jmouse.core.env;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Abstract base class for {@link PropertyResolver} implementations.
  * <p>
- * This class provides a common implementation for managing a {@link PropertySourceRegistry}
- * and resolving raw property values from registered property sources.
+ * Provides a registry of {@link PropertySource} instances and implements common property resolution logic.
  * </p>
  */
 abstract public class AbstractPropertyResolver implements PropertyResolver {
 
-    private PropertySourceRegistry registry;
+    private final Map<String, PropertySource<?>> sources = new LinkedHashMap<>();
 
     /**
-     * Constructs an {@link AbstractPropertyResolver} with the specified {@link PropertySourceRegistry}.
-     *
-     * @param registry the property source registry to use for resolving properties
-     */
-    public AbstractPropertyResolver(PropertySourceRegistry registry) {
-        this.registry = registry;
-    }
-
-    /**
-     * Sets the {@link PropertySourceRegistry} to be used for resolving properties.
-     *
-     * @param registry the property source registry
-     */
-    @Override
-    public void setRegistry(PropertySourceRegistry registry) {
-        this.registry = registry;
-    }
-
-    /**
-     * Returns the current {@link PropertySourceRegistry} used by this resolver.
-     *
-     * @return the property source registry
-     */
-    @Override
-    public PropertySourceRegistry getRegistry() {
-        return registry;
-    }
-
-    /**
-     * Resolves the raw property value for the specified property name.
+     * Retrieves the raw property value for the specified property name.
      * <p>
-     * Iterates through all registered {@link PropertySource}s in the registry to find the first source
-     * that contains the property.
+     * Iterates through all registered {@link PropertySource}s to locate the first one containing the property.
      * </p>
      *
      * @param name the name of the property to resolve
@@ -52,15 +26,64 @@ abstract public class AbstractPropertyResolver implements PropertyResolver {
      */
     @Override
     public Object getRawProperty(String name) {
-        Object value = null;
-
-        for (PropertySource<?> source : registry.getPropertySources()) {
+        for (PropertySource<?> source : getPropertySources()) {
             if (source.containsProperty(name)) {
-                value = source.getProperty(name);
-                break;
+                return source.getProperty(name);
             }
         }
+        return null;
+    }
 
-        return value;
+    /**
+     * Retrieves a {@link PropertySource} by its name.
+     *
+     * @param name the name of the property source
+     * @return the corresponding {@link PropertySource}, or {@code null} if not found
+     */
+    @Override
+    public PropertySource<?> getPropertySource(String name) {
+        return sources.get(name);
+    }
+
+    /**
+     * Registers a new {@link PropertySource}.
+     *
+     * @param propertySource the property source to add
+     */
+    @Override
+    public void addPropertySource(PropertySource<?> propertySource) {
+        sources.put(propertySource.getName(), propertySource);
+    }
+
+    /**
+     * Checks whether a {@link PropertySource} with the given name exists.
+     *
+     * @param name the name of the property source
+     * @return {@code true} if the property source exists, {@code false} otherwise
+     */
+    @Override
+    public boolean hasPropertySource(String name) {
+        return sources.containsKey(name);
+    }
+
+    /**
+     * Removes a {@link PropertySource} by its name.
+     *
+     * @param name the name of the property source to remove
+     * @return {@code true} if the property source was removed, {@code false} if it did not exist
+     */
+    @Override
+    public boolean removePropertySource(String name) {
+        return sources.remove(name) != null;
+    }
+
+    /**
+     * Retrieves all registered {@link PropertySource} instances.
+     *
+     * @return a collection of registered property sources
+     */
+    @Override
+    public Collection<? extends PropertySource<?>> getPropertySources() {
+        return sources.values();
     }
 }

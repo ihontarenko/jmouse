@@ -73,7 +73,7 @@ public interface GenericConverter<S, T> {
      *
      * @return a set of {@code ClassPair} objects representing the supported conversions
      */
-    Set<ClassPair<? extends S, ? extends T>> getSupportedTypes();
+    Set<ClassPair> getSupportedTypes();
 
     /**
      * Creates a {@link GenericConverter} for the specified source and target types, using the provided converter logic.
@@ -85,16 +85,17 @@ public interface GenericConverter<S, T> {
      * @param converter  the conversion logic implemented as a {@link Converter}
      * @return a {@link GenericConverter} instance capable of converting between the specified types
      */
-    static <S, T> GenericConverter<S, T> of(Class<S> sourceType, Class<? extends T> targetType, Converter<S, ? extends T> converter) {
+    static <S, T> GenericConverter<S, T> of(Class<S> sourceType, Class<T> targetType, Converter<? super S, ? super T> converter) {
         return new GenericConverter<>() {
+            @SuppressWarnings({"unchecked"})
             @Override
             public T convert(S source, Class<S> sourceType, Class<T> targetType) {
-                return converter.convert(source);
+                return (T) converter.convert(source);
             }
 
             @Override
-            public Set<ClassPair<? extends S, ? extends T>> getSupportedTypes() {
-                return Set.of(new ClassPair<>(sourceType, targetType));
+            public Set<ClassPair> getSupportedTypes() {
+                return Set.of(new ClassPair(sourceType, targetType));
             }
         };
     }

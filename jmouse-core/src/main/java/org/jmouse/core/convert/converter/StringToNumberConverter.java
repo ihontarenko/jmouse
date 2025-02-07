@@ -34,25 +34,25 @@ public class StringToNumberConverter implements GenericConverter<String, Number>
         Converter<String, Number> converter = converters.get(targetType);
 
         if (converter == null) {
-            throw new ConverterNotFound(new ClassPair<>(sourceType, targetType));
+            throw new ConverterNotFound(new ClassPair(sourceType, targetType));
         }
 
         return converter.convert(source);
     }
 
     @Override
-    public Set<ClassPair<? extends String, ? extends Number>> getSupportedTypes() {
+    public Set<ClassPair> getSupportedTypes() {
         return Set.of(
-                new ClassPair<>(String.class, Short.class),
-                new ClassPair<>(String.class, Integer.class),
-                new ClassPair<>(String.class, Long.class),
-                new ClassPair<>(String.class, Double.class),
-                new ClassPair<>(String.class, Float.class),
-                new ClassPair<>(String.class, BigInteger.class),
-                new ClassPair<>(String.class, BigDecimal.class),
+                new ClassPair(String.class, Short.class),
+                new ClassPair(String.class, Integer.class),
+                new ClassPair(String.class, Long.class),
+                new ClassPair(String.class, Double.class),
+                new ClassPair(String.class, Float.class),
+                new ClassPair(String.class, BigInteger.class),
+                new ClassPair(String.class, BigDecimal.class),
                 // primitives
-                new ClassPair<>(String.class, int.class),
-                new ClassPair<>(String.class, double.class)
+                new ClassPair(String.class, int.class),
+                new ClassPair(String.class, double.class)
         );
     }
 }

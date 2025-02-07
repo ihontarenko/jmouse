@@ -1,4 +1,4 @@
-package org.jmouse.core.mapping;
+package org.jmouse.common.mapping;
 
 /**
  * A simple hook for configuring or extending a {@link Mapping} instance with

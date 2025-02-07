@@ -1,9 +1,7 @@
 package org.jmouse.core.env;
 
-import org.jmouse.core.convert.Converter;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.jmouse.core.convert.ClassPair;
+import org.jmouse.core.convert.Conversion;
 
 /**
  * A standard implementation of {@link PropertyResolver} that supports property retrieval and conversion.
@@ -14,17 +12,10 @@ import java.util.Map;
  */
 public class StandardPropertyResolver extends AbstractPropertyResolver {
 
-    private final Map<Class<?>, Converter<String, Object>> converters = new HashMap<>();
+    private final Conversion conversion;
 
-    /**
-     * Constructs a {@link StandardPropertyResolver} with the specified {@link PropertySourceRegistry}.
-     *
-     * @param registry the property source registry to use for resolving properties
-     */
-    public StandardPropertyResolver(PropertySourceRegistry registry) {
-        super(registry);
-
-        converters.put(Integer.class, Integer::parseInt);
+    public StandardPropertyResolver() {
+        conversion = new PropertyValueConversion();
     }
 
     /**
@@ -41,9 +32,11 @@ public class StandardPropertyResolver extends AbstractPropertyResolver {
     public <T> T getProperty(String name, Class<T> targetType) {
         Object value = getRawProperty(name);
 
-        if (converters.containsKey(targetType)) {
-            value = converters.get(targetType).convert((String) value);
-            System.out.println("converted value: " + value);
+        if (value != null) {
+            ClassPair pair = ClassPair.of(value.getClass(), targetType);
+            if (conversion.hasConverter(pair)) {
+                value = conversion.convert(value, targetType);
+            }
         }
 
         return (T) value;

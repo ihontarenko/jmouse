@@ -1,4 +1,4 @@
-package org.jmouse.util;
+package org.jmouse.util.helper;
 
 import java.net.URL;
 import java.nio.file.FileSystems;
@@ -33,10 +33,10 @@ public final class Strings {
     }
 
     /**
-     * Extracts the suffix of a string based on the specified separator and applies a corrector offset.
+     * Extracts the suffix of a string based on the specified separator and applies a offset.
      */
-    public static String suffix(String string, String separator, boolean last, int corrector) {
-        return cut(string, separator, last, false, corrector);
+    public static String suffix(String string, String separator, boolean last, int offset) {
+        return cut(string, separator, last, false, offset);
     }
 
     /**
@@ -54,16 +54,16 @@ public final class Strings {
     }
 
     /**
-     * Extracts the prefix of a string based on the specified separator and applies a corrector offset.
+     * Extracts the prefix of a string based on the specified separator and applies a offset offset.
      */
-    public static String prefix(String string, String separator, boolean last, int corrector) {
-        return cut(string, separator, last, true, corrector);
+    public static String prefix(String string, String separator, boolean last, int offset) {
+        return cut(string, separator, last, true, offset);
     }
 
     /**
      * Cuts the string based on the specified separator, direction, and offset.
      */
-    public static String cut(String string, String separator, boolean last, boolean prefix, int corrector) {
+    public static String cut(String string, String separator, boolean last, boolean prefix, int offset) {
         if (string == null) {
             return null;
         }
@@ -71,7 +71,7 @@ public final class Strings {
         int index = separator == null ? -1 : (last ? string.lastIndexOf(separator) : string.indexOf(separator));
 
         if (index != -1) {
-            string = prefix ? string.substring(0, index + corrector) : string.substring(index + corrector);
+            string = prefix ? string.substring(0, index + offset) : string.substring(index + offset);
         }
 
         return string;

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 import static org.jmouse.core.reflection.MethodMatchers.hasParameterTypes;
 import static org.jmouse.core.reflection.MethodMatchers.isAbstract;
-import static org.jmouse.util.Strings.uncapitalize;
+import static org.jmouse.util.helper.Strings.uncapitalize;
 
 /**
  * A utility class providing various reflection-based methods for working with classes, fields, methods, and constructors.

@@ -12,8 +12,8 @@ import org.jmouse.common.ast.token.Tokenizer;
 import org.jmouse.expression.compiler.EvaluationContextConfigurator;
 import org.jmouse.expression.parser.ParserConfigurator;
 import org.jmouse.expression.parser.AnyExpressionParser;
-import org.jmouse.util.Booleans;
-import org.jmouse.util.Maths;
+import org.jmouse.util.helper.Booleans;
+import org.jmouse.util.helper.Maths;
 import org.jmouse.expression.test.ExampleDto;
 import org.jmouse.expression.test.TestService;
 

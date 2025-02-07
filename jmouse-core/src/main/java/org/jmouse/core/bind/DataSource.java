@@ -1,5 +1,6 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.env.PropertyResolver;
 import org.jmouse.core.reflection.JavaType;
 
 import java.util.*;
@@ -345,7 +346,9 @@ public interface DataSource {
         DataSource instance = new DummyDataSource(source);
         boolean    unknown  = !instance.isArray() && !instance.isCollection() && !instance.isMap() && !instance.isSimple();
 
-        if (unknown && !instance.isNull()) {
+        if (instance.is(PropertyResolver.class)) {
+            instance = new PropertyResolverDataSource((PropertyResolver) source);
+        } else if (unknown && !instance.isNull()) {
             instance = new JavaBeanInstanceDataSource(source);
         } else if (instance.isSimple() || instance.isCollection() || instance.isMap() || instance.isArray()) {
             instance = new StandardDataSource(instance.getSource());

@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.util.Arrays;
+import org.jmouse.util.helper.Arrays;
 
 import java.util.HashMap;
 import java.util.Iterator;

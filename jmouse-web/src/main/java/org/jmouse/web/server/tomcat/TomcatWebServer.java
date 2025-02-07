@@ -26,7 +26,8 @@ public class TomcatWebServer implements WebServer {
             LOGGER.info("Web-Server: Starting '{}'...", name());
             tomcat.start();
             LOGGER.info("Web-Server: '{}' started! ", name());
-            LOGGER.info("Port: {}, Catalina Base: {}", server().getConnector().getPort(), server().getServer().getCatalinaBase().getAbsolutePath());
+            LOGGER.info("Port: {}, Catalina Base: {}", server().getConnector().getPort(),
+                        server().getServer().getCatalinaBase().getAbsolutePath());
 
             Thread async = new Thread(() -> {
                 LOGGER.info("Web-Server: '{}' awaiting! ", name());

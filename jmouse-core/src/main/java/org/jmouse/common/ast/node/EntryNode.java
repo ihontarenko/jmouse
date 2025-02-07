@@ -1,7 +1,7 @@
 package org.jmouse.common.ast.node;
 
 import org.jmouse.common.ast.token.Token;
-import org.jmouse.util.Strings;
+import org.jmouse.util.helper.Strings;
 
 import java.util.HashMap;
 import java.util.Map;

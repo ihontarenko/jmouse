@@ -81,7 +81,7 @@ public class NumberToNumberConverter implements GenericConverter<Number, Number>
         Converter<Number, Number> converter = converters.get(targetType);
 
         if (converter == null) {
-            throw new ConverterNotFound(new ClassPair<>(sourceType, targetType));
+            throw new ConverterNotFound(new ClassPair(sourceType, targetType));
         }
 
         return converter.convert(source);
@@ -96,13 +96,13 @@ public class NumberToNumberConverter implements GenericConverter<Number, Number>
      *         between numeric primitive types and their wrappers
      */
     @Override
-    public Set<ClassPair<? extends Number, ? extends Number>> getSupportedTypes() {
-        Set<Class<? extends Number>>                       types     = converters.keySet();
-        Set<ClassPair<? extends Number, ? extends Number>> supported = new HashSet<>();
+    public Set<ClassPair> getSupportedTypes() {
+        Set<Class<? extends Number>> types     = converters.keySet();
+        Set<ClassPair>               supported = new HashSet<>();
 
         for (Class<? extends Number> sourceType : types) {
             for (Class<? extends Number> targetType : types) {
-                supported.add(new ClassPair<>(sourceType, targetType));
+                supported.add(new ClassPair(sourceType, targetType));
             }
         }
 

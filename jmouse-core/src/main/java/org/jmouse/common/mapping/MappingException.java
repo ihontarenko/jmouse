@@ -1,4 +1,4 @@
-package org.jmouse.core.mapping;
+package org.jmouse.common.mapping;
 
 public class MappingException extends RuntimeException {
 

@@ -2,7 +2,7 @@ package org.jmouse.core.bind;
 
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.Reflections;
-import org.jmouse.util.Arrays;
+import org.jmouse.util.helper.Arrays;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.RecordComponent;

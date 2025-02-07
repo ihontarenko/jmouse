@@ -1,6 +1,6 @@
-package org.jmouse.core.mapping.mapper;
+package org.jmouse.common.mapping.mapper;
 
-import org.jmouse.core.mapping.Mapper;
+import org.jmouse.common.mapping.Mapper;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Field;

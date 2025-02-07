@@ -1,4 +1,4 @@
-package org.jmouse.core.mapping;
+package org.jmouse.common.mapping;
 
 import org.jmouse.core.reflection.ClassFinder;
 import org.jmouse.core.reflection.ReflectionException;

@@ -1,6 +1,7 @@
 package org.jmouse.web;
 
 import org.jmouse.context.ApplicationBeanContext;
+import org.jmouse.core.bind.Bind;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.web.context.WebBeanContext;
 
@@ -10,6 +11,9 @@ public class StartApplication {
 
     public static void main(String... arguments) {
         WebBeanContext context = new WebApplicationLauncher(StartApplication.class, ApplicationBeanContext.class).launch();
+
+        System.out.println("--- Java Web Application ---");
+        Bind.with(context.getEnvironment()).toString("JAVA_HOME").ifPresent(System.out::println);
 
         Conversion conversion = context.getBean(Conversion.class);
 

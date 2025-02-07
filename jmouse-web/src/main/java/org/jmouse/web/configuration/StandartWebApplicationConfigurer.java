@@ -14,7 +14,7 @@ public class StandartWebApplicationConfigurer implements ApplicationConfigurer {
     @Override
     public void configureEnvironment(Environment environment) {
         System.out.println("configureEnvironment!!!!!!!!!!!!!!!!!!!!");
-        environment.getRegistry().addPropertySource(new MapPropertySource("runtime", Map.of("jmouse.name", "jMouse - SvitFramework")));
+        environment.addPropertySource(new MapPropertySource("runtime", Map.of("jmouse.name", "jMouse - SvitFramework")));
     }
 
     /**

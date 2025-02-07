@@ -48,15 +48,15 @@ public class NumberToStringConverter implements GenericConverter<Number, String>
      * @return a set of supported source-target type pairs
      */
     @Override
-    public Set<ClassPair<? extends Number, ? extends String>> getSupportedTypes() {
+    public Set<ClassPair> getSupportedTypes() {
         return Set.of(
-                new ClassPair<>(Short.class, String.class),
-                new ClassPair<>(Integer.class, String.class),
-                new ClassPair<>(Long.class, String.class),
-                new ClassPair<>(Double.class, String.class),
-                new ClassPair<>(Float.class, String.class),
-                new ClassPair<>(BigInteger.class, String.class),
-                new ClassPair<>(BigDecimal.class, String.class)
+                new ClassPair(Short.class, String.class),
+                new ClassPair(Integer.class, String.class),
+                new ClassPair(Long.class, String.class),
+                new ClassPair(Double.class, String.class),
+                new ClassPair(Float.class, String.class),
+                new ClassPair(BigInteger.class, String.class),
+                new ClassPair(BigDecimal.class, String.class)
         );
     }
 

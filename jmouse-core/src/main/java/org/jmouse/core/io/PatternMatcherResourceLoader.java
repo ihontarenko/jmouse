@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.matcher.ant.AntMatcher;
-import org.jmouse.util.Files;
-import org.jmouse.util.Strings;
+import org.jmouse.util.helper.Files;
+import org.jmouse.util.helper.Strings;
 
 import java.util.Collection;
 

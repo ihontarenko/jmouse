@@ -1,4 +1,4 @@
-package org.jmouse.util;
+package org.jmouse.util.helper;
 
 import java.net.URL;
 

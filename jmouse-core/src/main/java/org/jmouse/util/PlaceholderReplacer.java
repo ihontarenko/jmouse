@@ -27,4 +27,8 @@ public interface PlaceholderReplacer {
      * @return the string with resolved placeholders
      */
     String replace(String value, PlaceholderResolver resolver);
+
+    String suffix();
+
+    String prefix();
 }

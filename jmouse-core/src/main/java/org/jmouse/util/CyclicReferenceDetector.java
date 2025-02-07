@@ -20,7 +20,6 @@ public interface CyclicReferenceDetector<T> {
      *
      * @param identifier        the identifier representing the current element being processed.
      * @param exceptionSupplier a supplier that provides a custom exception to throw if a cycle is detected.
-     * @throws Throwable the exception provided by the supplier if a cycle is detected.
      */
     void detect(Identifier<T> identifier, Supplier<? extends RuntimeException> exceptionSupplier);
 

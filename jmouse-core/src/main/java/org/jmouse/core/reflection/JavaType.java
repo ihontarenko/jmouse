@@ -1,6 +1,6 @@
 package org.jmouse.core.reflection;
 
-import org.jmouse.util.Arrays;
+import org.jmouse.util.helper.Arrays;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -221,8 +221,8 @@ public class JavaType {
      *
      * @return the raw {@link Class}, or null if the type cannot be resolved
      */
-    public Class<?> getRawType() {
-        return rawType;
+    public <T> Class<T> getRawType() {
+        return (Class<T>) rawType;
     }
 
     /**
@@ -966,7 +966,7 @@ public class JavaType {
     static class SyntheticType implements ParameterizedType {
 
         private final Class<?> rawType;
-        private final Type[] typeArguments;
+        private final Type[]   typeArguments;
 
         SyntheticType(Class<?> rawType, Type[] typeArguments) {
             this.rawType = rawType;

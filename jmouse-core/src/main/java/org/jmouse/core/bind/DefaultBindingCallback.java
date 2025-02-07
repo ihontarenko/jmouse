@@ -12,16 +12,16 @@ public class DefaultBindingCallback implements BindCallback {
         this.replacer = replacer;
     }
 
+    public DefaultBindingCallback() {
+        this.replacer = new StandardPlaceholderReplacer();
+    }
+
     @Override
     public Object onBinding(NamePath name, Bindable<?> bindable, BindContext context, Object value) {
         Object handled = value;
 
         if (handled instanceof String stringValue && bindable.getTypeDescriptor().isString()) {
-            String prefix = PlaceholderReplacer.PLACEHOLDER_PREFIX;
-            if (replacer instanceof StandardPlaceholderReplacer standardReplacer) {
-                prefix = standardReplacer.getPrefix();
-            }
-
+            String prefix = replacer.prefix();
             if (stringValue.contains(prefix)) {
                 PlaceholderResolver resolver = (placeholder) -> {
                     DataSource dataSource = context.getDataSource();

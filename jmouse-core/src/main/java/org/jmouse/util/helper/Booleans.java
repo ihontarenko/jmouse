@@ -1,4 +1,4 @@
-package org.jmouse.util;
+package org.jmouse.util.helper;
 
 /**
  * Utility class Booleans for performing common boolean comparisons.

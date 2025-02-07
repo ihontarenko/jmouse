@@ -60,10 +60,8 @@ public class StringToEnumConverter implements GenericConverter<String, Enum<?>> 
      * @return a set containing a single {@code ClassPair} for {@code String -> Enum<?>}
      */
     @Override
-    public Set<ClassPair<? extends String, ? extends Enum<?>>> getSupportedTypes() {
-        @SuppressWarnings("unchecked")
-        Class<Enum<?>> enumClass = (Class<Enum<?>>) (Class<?>) Enum.class;
-        return Set.of(new ClassPair<>(String.class, enumClass));
+    public Set<ClassPair> getSupportedTypes() {
+        return Set.of(new ClassPair(String.class, Enum.class));
     }
 
 }

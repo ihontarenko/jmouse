@@ -9,11 +9,8 @@ import java.util.Objects;
  * used to represent some kind of mapping or conversion from {@code classA} to
  * {@code classB}. The {@code ClassPair} is parameterized to ensure type safety
  * in scenarios like converters or adapters.
- *
- * @param <A> the type of the first class
- * @param <B> the type of the second class
  */
-public record ClassPair<A, B>(Class<A> classA, Class<B> classB) {
+public record ClassPair(Class<?> classA, Class<?> classB) {
 
     /**
      * Constructs a new {@code ClassPair} with the specified classes.
@@ -24,8 +21,8 @@ public record ClassPair<A, B>(Class<A> classA, Class<B> classB) {
     public ClassPair {
     }
 
-    public static <A, B> ClassPair<A, B> of(Class<A> classA, Class<B> classB) {
-        return new ClassPair<>(classA, classB);
+    public static ClassPair of(Class<?> classA, Class<?> classB) {
+        return new ClassPair(classA, classB);
     }
 
     /**
@@ -34,7 +31,7 @@ public record ClassPair<A, B>(Class<A> classA, Class<B> classB) {
      * @return a {@link Class} object representing type {@code B}
      */
     @Override
-    public Class<B> classB() {
+    public Class<?> classB() {
         return classB;
     }
 
@@ -44,7 +41,7 @@ public record ClassPair<A, B>(Class<A> classA, Class<B> classB) {
      * @return a {@link Class} object representing type {@code A}
      */
     @Override
-    public Class<A> classA() {
+    public Class<?> classA() {
         return classA;
     }
 
@@ -71,7 +68,7 @@ public record ClassPair<A, B>(Class<A> classA, Class<B> classB) {
     @Override
     public boolean equals(Object object) {
         if (object != null && getClass() == object.getClass()) {
-            ClassPair<?, ?> classPair = (ClassPair<?, ?>) object;
+            ClassPair classPair = (ClassPair) object;
             return Objects.equals(classA, classPair.classA)
                     && Objects.equals(classB, classPair.classB);
         }

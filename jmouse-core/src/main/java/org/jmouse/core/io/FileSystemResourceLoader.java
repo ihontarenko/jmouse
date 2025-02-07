@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.jmouse.util.Files.*;
+import static org.jmouse.util.helper.Files.*;
 
 /**
  * A {@link ResourceLoader} implementation for loading resources from the file system.

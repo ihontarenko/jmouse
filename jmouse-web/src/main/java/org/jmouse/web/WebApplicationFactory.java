@@ -1,25 +1,20 @@
 package org.jmouse.web;
 
+import org.jmouse.context.AbstractApplicationFactory;
 import org.jmouse.core.env.*;
-import org.jmouse.context.ApplicationFactory;
 import org.jmouse.web.context.WebApplicationBeanContext;
 import org.jmouse.web.context.WebBeanContext;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class WebApplicationFactory implements ApplicationFactory<WebBeanContext> {
-
-    public static final String SYSTEM_PROPERTIES     = "system-properties";
-    public static final String SYSTEM_ENV_PROPERTIES = "system-env";
+public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanContext> {
 
     @Override
     public Environment createDefaultEnvironment() {
-        Environment            environment = new StandardEnvironment();
-        PropertySourceRegistry registry    = environment.getRegistry();
+        Environment environment = super.createDefaultEnvironment();
 
-        registry.addPropertySource(new SystemEnvironmentPropertySource(SYSTEM_ENV_PROPERTIES));
-        registry.addPropertySource(new SystemPropertiesPropertySource(SYSTEM_PROPERTIES));
+        loadApplicationProperties("classpath:webserver.properties", environment);
 
         return environment;
     }

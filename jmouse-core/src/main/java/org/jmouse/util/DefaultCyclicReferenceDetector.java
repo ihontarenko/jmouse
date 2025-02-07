@@ -32,7 +32,7 @@ public class DefaultCyclicReferenceDetector<T> implements CyclicReferenceDetecto
     @Override
     public void detect(Identifier<T> identifier, Supplier<? extends RuntimeException> exceptionSupplier) {
         Visitor<T> visitor = referenceStack.get();
-        T        id    = identifier.getIdentifier();
+        T          id      = identifier.getIdentifier();
 
         if (visitor.familiar(id)) {
             // Construct a dependency chain representation

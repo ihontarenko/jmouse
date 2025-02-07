@@ -5,7 +5,7 @@ import org.jmouse.beans.annotation.Configuration;
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.core.reflection.Reflections;
-import org.jmouse.util.Strings;
+import org.jmouse.util.helper.Strings;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;

@@ -8,7 +8,7 @@ import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.io.CompositeResourceLoader;
 import org.jmouse.core.io.ResourceLoader;
-import org.jmouse.core.mapping.Mapping;
+import org.jmouse.common.mapping.Mapping;
 import org.jmouse.util.Priority;
 import org.jmouse.util.Sorter;
 import org.jmouse.context.ApplicationConfigurer;

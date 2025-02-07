@@ -14,7 +14,7 @@ import org.jmouse.beans.naming.BeanNameResolver;
 import org.jmouse.beans.processor.BeanPostProcessor;
 import org.jmouse.core.reflection.ClassMatchers;
 import org.jmouse.core.reflection.Reflections;
-import org.jmouse.util.Arrays;
+import org.jmouse.util.helper.Arrays;
 import org.jmouse.util.Sorter;
 
 import java.lang.reflect.Method;

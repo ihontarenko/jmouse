@@ -52,17 +52,41 @@ public final class Bindable<T> {
         this(JavaType.forClass(rawType));
     }
 
+    /**
+     * Creates a {@link Bindable} instance representing a {@link Map} with the specified key and value types.
+     *
+     * @param keyType   the class type of the map keys
+     * @param valueType the class type of the map values
+     * @param <K>       the type of the keys in the map
+     * @param <V>       the type of the values in the map
+     * @return a {@link Bindable} representing a map with the given key-value types
+     */
     public static <K, V> Bindable<Map<K, V>> ofMap(Class<K> keyType, Class<V> valueType) {
         return of(JavaType.forParametrizedClass(Map.class, keyType, valueType));
     }
 
+    /**
+     * Creates a {@link Bindable} instance representing a {@link List} with the specified element type.
+     *
+     * @param rawType the class type of the list elements
+     * @param <V>     the type of the elements in the list
+     * @return a {@link Bindable} representing a list of the given element type
+     */
     public static <V> Bindable<List<V>> ofList(Class<V> rawType) {
         return of(JavaType.forParametrizedClass(List.class, rawType));
     }
 
+    /**
+     * Creates a {@link Bindable} instance representing a {@link Set} with the specified element type.
+     *
+     * @param rawType the class type of the set elements
+     * @param <V>     the type of the elements in the set
+     * @return a {@link Bindable} representing a set of the given element type
+     */
     public static <V> Bindable<Set<V>> ofSet(Class<V> rawType) {
         return of(JavaType.forParametrizedClass(Set.class, rawType));
     }
+
 
     /**
      * Creates a new {@link Bindable} instance from a {@link JavaType}.

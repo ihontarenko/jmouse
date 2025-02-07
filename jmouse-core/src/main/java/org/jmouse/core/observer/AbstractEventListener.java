@@ -1,6 +1,6 @@
 package org.jmouse.core.observer;
 
-import org.jmouse.util.Strings;
+import org.jmouse.util.helper.Strings;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.reflection.TypeMatchers;
 
