@@ -1,2 +1,2 @@
-# JMouse - Framework
+# jMouse - Framework
 

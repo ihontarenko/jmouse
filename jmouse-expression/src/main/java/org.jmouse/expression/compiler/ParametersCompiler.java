@@ -1,9 +1,9 @@
-package svit.expression.compiler;
+package org.jmouse.expression.compiler;
 
 import org.jmouse.common.ast.compiler.Compiler;
 import org.jmouse.common.ast.compiler.EvaluationContext;
-import svit.expression.ast.ParameterNode;
-import svit.expression.ast.ParametersNode;
+import org.jmouse.expression.ast.ParameterNode;
+import org.jmouse.expression.ast.ParametersNode;
 
 import java.util.HashMap;
 import java.util.Map;

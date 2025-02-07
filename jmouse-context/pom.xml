@@ -9,7 +9,7 @@
         <version>1.0.0-Beta</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <name>JMouse - Context</name>
+    <name>jMouse - Context</name>
     <artifactId>jmouse-context</artifactId>
     <packaging>jar</packaging>
 

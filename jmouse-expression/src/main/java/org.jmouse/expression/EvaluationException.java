@@ -1,4 +1,4 @@
-package svit.expression;
+package org.jmouse.expression;
 
 public class EvaluationException extends RuntimeException {
 

@@ -1,13 +1,13 @@
-package svit.expression.parser;
+package org.jmouse.expression.parser;
 
 import org.jmouse.common.ast.lexer.Lexer;
 import org.jmouse.common.ast.node.Node;
 import org.jmouse.common.ast.parser.Parser;
 import org.jmouse.common.ast.parser.ParserContext;
-import svit.expression.ExtendedToken;
+import org.jmouse.expression.ExtendedToken;
 
 import static org.jmouse.common.ast.token.DefaultToken.T_OPEN_CURLY_BRACE;
-import static svit.expression.Checkers.*;
+import static org.jmouse.expression.Checkers.*;
 
 public class AnyExpressionParser implements Parser {
 

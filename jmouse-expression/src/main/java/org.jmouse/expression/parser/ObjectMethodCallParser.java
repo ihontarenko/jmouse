@@ -1,12 +1,12 @@
-package svit.expression.parser;
+package org.jmouse.expression.parser;
 
 import org.jmouse.common.ast.lexer.Lexer;
 import org.jmouse.common.ast.node.Node;
 import org.jmouse.common.ast.parser.Parser;
 import org.jmouse.common.ast.parser.ParserContext;
 import org.jmouse.common.ast.token.DefaultToken;
-import svit.expression.ExtendedToken;
-import svit.expression.ast.ObjectMethodNode;
+import org.jmouse.expression.ExtendedToken;
+import org.jmouse.expression.ast.ObjectMethodNode;
 
 public class ObjectMethodCallParser implements Parser {
 

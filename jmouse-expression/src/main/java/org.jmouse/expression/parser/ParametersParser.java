@@ -1,11 +1,11 @@
-package svit.expression.parser;
+package org.jmouse.expression.parser;
 
-import svit.expression.ast.ParameterNode;
+import org.jmouse.expression.ast.ParameterNode;
 import org.jmouse.common.ast.lexer.Lexer;
 import org.jmouse.common.ast.node.Node;
 import org.jmouse.common.ast.parser.Parser;
 import org.jmouse.common.ast.parser.ParserContext;
-import svit.expression.ast.ParametersNode;
+import org.jmouse.expression.ast.ParametersNode;
 
 import static org.jmouse.common.ast.token.DefaultToken.*;
 

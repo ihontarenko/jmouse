@@ -1,4 +1,4 @@
-package svit.expression;
+package org.jmouse.expression;
 
 import org.jmouse.common.ast.compiler.EvaluationContext;
 import org.jmouse.common.ast.compiler.EvaluationContextFactory;
@@ -9,9 +9,9 @@ import org.jmouse.common.ast.parser.Parser;
 import org.jmouse.common.ast.parser.ParserContext;
 import org.jmouse.common.ast.token.Token;
 import org.jmouse.common.ast.token.Tokenizer;
-import svit.expression.compiler.EvaluationContextConfigurator;
-import svit.expression.parser.AnyExpressionParser;
-import svit.expression.parser.ParserConfigurator;
+import org.jmouse.expression.compiler.EvaluationContextConfigurator;
+import org.jmouse.expression.parser.AnyExpressionParser;
+import org.jmouse.expression.parser.ParserConfigurator;
 import org.jmouse.common.support.resolver.Resolver;
 import org.jmouse.common.support.resolver.ResolverContext;
 

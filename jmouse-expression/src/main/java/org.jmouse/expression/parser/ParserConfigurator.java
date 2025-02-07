@@ -1,4 +1,4 @@
-package svit.expression.parser;
+package org.jmouse.expression.parser;
 
 import org.jmouse.common.ast.configurer.Configurator;
 import org.jmouse.common.ast.parser.ParserContext;

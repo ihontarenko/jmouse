@@ -1,4 +1,4 @@
-package svit.expression.compiler;
+package org.jmouse.expression.compiler;
 
 import org.jmouse.common.ast.compiler.Compiler;
 import org.jmouse.common.ast.compiler.EvaluationContext;

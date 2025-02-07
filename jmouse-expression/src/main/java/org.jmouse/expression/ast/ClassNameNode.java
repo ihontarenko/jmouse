@@ -1,4 +1,4 @@
-package svit.expression.ast;
+package org.jmouse.expression.ast;
 
 import org.jmouse.common.ast.token.Token;
 

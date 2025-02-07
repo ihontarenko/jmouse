@@ -1,4 +1,4 @@
-package svit.expression.parser;
+package org.jmouse.expression.parser;
 
 import org.jmouse.common.ast.lexer.Lexer;
 import org.jmouse.common.ast.node.Node;

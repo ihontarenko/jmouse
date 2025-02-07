@@ -74,7 +74,7 @@ public class ClasspathResourceLoader extends AbstractResourceLoader {
      */
     @Override
     public Resource getResource(String location) {
-        URL url = JavaIO.toURL(location, getClassLoader());
+        URL url = JavaIO.getURLResource(Files.removeProtocol(location), getClassLoader());
 
         if (url == null) {
             throw new ResourceLoaderException("Failed to find resource '%s'".formatted(location));

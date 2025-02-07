@@ -1,6 +1,5 @@
 package org.jmouse.util;
 
-import org.jmouse.core.io.JarResourceException;
 import org.jmouse.core.io.ResourceException;
 
 import java.net.MalformedURLException;
@@ -13,7 +12,8 @@ import java.net.URL;
  */
 final public class JavaIO {
 
-    private JavaIO() {}
+    private JavaIO() {
+    }
 
     /**
      * Converts a location string to a {@link URL}, resolving it using the provided {@link ClassLoader}.
@@ -21,15 +21,32 @@ final public class JavaIO {
      * @param location the resource location, which can include a protocol (e.g., "jar:", "file:")
      * @param loader   the {@link ClassLoader} used for resolving resources
      * @return a {@link URL} representing the resolved location
-     * @throws JarResourceException if the location cannot be converted to a URL
+     * @throws ResourceException if the location cannot be converted to a URL
      */
     public static URL toURL(String location, ClassLoader loader) {
         try {
             String clean = Files.removeProtocol(location);
-            return Jars.isJarURL(clean) || clean.startsWith("/") ? new URI(location).toURL()
-                    : loader.getResource(clean);
+            return Jars.isJarURL(clean) || clean.startsWith("/") ? new URI(location).toURL() : loader.getResource(
+                    clean);
         } catch (Exception e) {
-            throw new JarResourceException("Failed to create URL from '%s' location".formatted(location), e);
+            throw new ResourceException("Failed to create URL from '%s' location".formatted(location), e);
+        }
+    }
+
+    public static URL getURLResource(String location, ClassLoader loader) {
+        try {
+            String protocol = Files.extractProtocol(location, null);
+            URL    url;
+
+            if (protocol != null) {
+                url = new URI(location).toURL();
+            } else {
+                url = loader.getResource(Files.removeProtocol(location));
+            }
+
+            return url;
+        } catch (Exception e) {
+            throw new ResourceException("Failed to get URL for '%s' location".formatted(location), e);
         }
     }
 

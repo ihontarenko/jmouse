@@ -9,7 +9,7 @@
         <version>1.0.0-Beta</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <name>JMouse - Beans</name>
+    <name>jMouse - Beans</name>
     <artifactId>jmouse-beans</artifactId>
     <packaging>jar</packaging>
 

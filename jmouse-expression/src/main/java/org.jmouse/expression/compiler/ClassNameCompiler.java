@@ -1,8 +1,8 @@
-package svit.expression.compiler;
+package org.jmouse.expression.compiler;
 
 import org.jmouse.common.ast.compiler.Compiler;
 import org.jmouse.common.ast.compiler.EvaluationContext;
-import svit.expression.ast.ClassNameNode;
+import org.jmouse.expression.ast.ClassNameNode;
 import org.jmouse.core.reflection.Reflections;
 
 public class ClassNameCompiler implements Compiler<ClassNameNode, Class<?>> {

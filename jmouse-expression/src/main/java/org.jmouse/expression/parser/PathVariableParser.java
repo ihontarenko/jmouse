@@ -1,13 +1,13 @@
-package svit.expression.parser;
+package org.jmouse.expression.parser;
 
 import org.jmouse.common.ast.lexer.Lexer;
 import org.jmouse.common.ast.node.Node;
 import org.jmouse.common.ast.parser.Parser;
 import org.jmouse.common.ast.parser.ParserContext;
-import svit.expression.ast.PathVariableNode;
-import svit.expression.ast.ValuesNode;
+import org.jmouse.expression.ast.PathVariableNode;
+import org.jmouse.expression.ast.ValuesNode;
 
-import static svit.expression.ExtendedToken.T_PATH_VARIABLE;
+import static org.jmouse.expression.ExtendedToken.T_PATH_VARIABLE;
 
 public class PathVariableParser implements Parser {
 

@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <name>JMouse - Project</name>
+    <name>jMouse - Project</name>
     <groupId>org.jmouse</groupId>
     <artifactId>jmouse-parent</artifactId>
     <packaging>pom</packaging>
@@ -34,6 +34,7 @@
         <module>jmouse-beans</module>
         <module>jmouse-context</module>
         <module>jmouse-web</module>
+        <module>testing-ground</module>
     </modules>
 
 </project>

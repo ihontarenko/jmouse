@@ -1,10 +1,10 @@
-package svit.expression.compiler;
+package org.jmouse.expression.compiler;
 
 import org.jmouse.common.ast.compiler.Compiler;
 import org.jmouse.common.ast.compiler.EvaluationContext;
 import org.jmouse.common.ast.node.Node;
-import svit.expression.ast.StringDefinitionNode;
-import svit.expression.ast.VariableNode;
+import org.jmouse.expression.ast.StringDefinitionNode;
+import org.jmouse.expression.ast.VariableNode;
 
 import java.util.AbstractMap;
 import java.util.Map;

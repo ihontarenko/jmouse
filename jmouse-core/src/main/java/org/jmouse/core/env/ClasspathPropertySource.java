@@ -3,32 +3,32 @@ package org.jmouse.core.env;
 import org.jmouse.core.io.ClasspathResourceLoader;
 import org.jmouse.core.io.Resource;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Properties;
+/**
+ * A {@link ResourcePropertySource} that loads properties from a classpath resource.
+ * <p>
+ * This implementation resolves a resource located on the classpath and makes its properties
+ * available as a property source.
+ * </p>
+ */
+public class ClasspathPropertySource extends ResourcePropertySource {
 
-public class ClasspathPropertySource extends JavaPropertiesPropertySource {
-
-    private final ClasspathResourceLoader loader;
-    private final String                  location;
-
+    /**
+     * Creates a new {@code ClasspathPropertySource} with the given name and classpath location.
+     *
+     * @param name     the name of the property source
+     * @param location the classpath location of the properties file
+     */
     public ClasspathPropertySource(String name, String location) {
-        super(name, null);
-        this.location = location;
-        this.loader = new ClasspathResourceLoader();
-        loadProperties();
+        super(name, loadResource(location));
     }
 
-    private void loadProperties() {
-        Resource   resource   = loader.getResource(location);
-        Properties properties = new Properties();
-
-        try {
-            properties.load(resource.getReader());
-        } catch (IOException ignore) {
-        }
-
-        this.source = (Map) properties;
+    /**
+     * Loads a resource from the classpath.
+     *
+     * @param location the classpath location of the resource
+     * @return the resolved {@link Resource}
+     */
+    private static Resource loadResource(String location) {
+        return new ClasspathResourceLoader().getResource(location);
     }
-
 }

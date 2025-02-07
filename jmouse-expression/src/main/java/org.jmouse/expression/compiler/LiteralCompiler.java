@@ -1,8 +1,8 @@
-package svit.expression.compiler;
+package org.jmouse.expression.compiler;
 
 import org.jmouse.common.ast.compiler.Compiler;
 import org.jmouse.common.ast.compiler.EvaluationContext;
-import svit.expression.ast.LiteralNode;
+import org.jmouse.expression.ast.LiteralNode;
 
 import static java.lang.Boolean.parseBoolean;
 import static java.lang.Double.parseDouble;

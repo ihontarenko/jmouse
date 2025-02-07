@@ -1,8 +1,8 @@
-package svit.expression.compiler;
+package org.jmouse.expression.compiler;
 
 import org.jmouse.common.ast.compiler.Compiler;
 import org.jmouse.common.ast.compiler.EvaluationContext;
-import svit.expression.ast.PathVariableNode;
+import org.jmouse.expression.ast.PathVariableNode;
 
 public class PathVariableCompiler implements Compiler<PathVariableNode, String> {
 

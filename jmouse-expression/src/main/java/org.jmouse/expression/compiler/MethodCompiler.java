@@ -1,10 +1,10 @@
-package svit.expression.compiler;
+package org.jmouse.expression.compiler;
 
 import org.jmouse.common.ast.compiler.Compiler;
 import org.jmouse.common.ast.compiler.EvaluationContext;
 import org.jmouse.common.ast.node.Node;
-import svit.expression.EvaluationException;
-import svit.expression.ast.ObjectMethodNode;
+import org.jmouse.expression.EvaluationException;
+import org.jmouse.expression.ast.ObjectMethodNode;
 import org.jmouse.common.support.invocable.Invocable;
 import org.jmouse.common.support.invocable.InvokeResult;
 import org.jmouse.common.support.invocable.ObjectMethodInvocable;

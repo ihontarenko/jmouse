@@ -1,13 +1,13 @@
-package svit.expression.parser;
+package org.jmouse.expression.parser;
 
-import svit.expression.ast.AnnotationNode;
+import org.jmouse.expression.ast.AnnotationNode;
 import org.jmouse.common.ast.lexer.Lexer;
 import org.jmouse.common.ast.node.Node;
 import org.jmouse.common.ast.parser.Parser;
 import org.jmouse.common.ast.parser.ParserContext;
 
 import static org.jmouse.common.ast.token.DefaultToken.*;
-import static svit.expression.ExtendedToken.T_ANNOTATION;
+import static org.jmouse.expression.ExtendedToken.T_ANNOTATION;
 
 public class AnnotationParser implements Parser {
 

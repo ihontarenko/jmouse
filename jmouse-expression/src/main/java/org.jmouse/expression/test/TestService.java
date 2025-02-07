@@ -1,4 +1,4 @@
-package svit.expression.test;
+package org.jmouse.expression.test;
 
 import java.util.Random;
 

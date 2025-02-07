@@ -9,7 +9,7 @@
         <version>1.0.0-Beta</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <name>JMouse - Web (Servlet)</name>
+    <name>jMouse - Web (Servlet)</name>
     <artifactId>jmouse-web</artifactId>
     <packaging>jar</packaging>
 
@@ -20,7 +20,7 @@
     </properties>
 
     <dependencies>
-        <!-- Svit -->
+        <!-- jMouse -->
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-core</artifactId>
