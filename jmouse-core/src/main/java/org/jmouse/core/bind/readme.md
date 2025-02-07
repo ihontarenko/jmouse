@@ -2,56 +2,55 @@
 
 ### **Lightweight and Flexible Data Binding for Java**
 
-jMouse Data Binder is a powerful tool for mapping structured data (`Map`, `Properties`, `Environment`, `JSON`, `YAML`) to Java objects, including **Beans, Collections, Maps, Arrays, and Records**.
+jMouse Data Binder is a powerful tool for mapping structured data (`Map`, `Properties`, `Environment`, etc.) to Java objects, including **Beans, Collections, Maps, Arrays, and Records**.
 
 ## **Quick Start ⚡**
 
-### **🔹 Bind a Simple Object**
+### **1️⃣ Bind a Simple Object**
 ```java
 Map<String, Object> source = Map.of(
-    "server.port", 8080,
+    "server.port", "8090",
     "server.name", "jMouseServer"
 );
 
-Binder binder = Binder.of(source);
+Binder binder = Binder.withDataSource(source);
 ServerConfig config = binder.bind("server", Bindable.of(ServerConfig.class)).getValue();
 
-System.out.println(config.getPort()); // 8080
+System.out.println(config.getPort()); // Integer 8090
 ```
 
-### **🔹 Bind a List of Objects**
+### **2️⃣ Binding to Objects**
+#### You can bind configurations directly into Java objects:
 ```java
-List<User> users = Binder.of(source)
-    .bind("users", Bindable.ofList(User.class))
-    .getValue();
-
-System.out.println(users.get(0).getName()); // John
+public record Package(String name, String version) {}
+// Bind a source to record
+Package pkg = Bind.with(binder).to("package", Package.class).getValue();
 ```
 
-### **🔹 Bind a Record**
+### **3️⃣ Binding Maps & Collections**
 ```java
-record AppConfig(String name, int port) {}
+// Bind a list  
+List<String> services = Bind.with(binder).toList("services", String.class).get();
 
-AppConfig config = Binder.of(source)
-    .bind("app", Bindable.of(AppConfig.class))
-    .getValue();
-
-System.out.println(config.name()); // jMouse
+// Bind a map of objects  
+Map<String, Object> configs = Bind.with(binder).toMap("default.configs", Object.class).getValue();
 ```
 
-### **🔹 Use Callbacks for Custom Logic 🎯**
+### **4️⃣ Binding an Existing Object**
+#### Bind values directly to an existing object:
+
 ```java
-Binder binder = Binder.of(source)
-    .withCallback((name, value) -> System.out.println("Bound: " + name + " -> " + value));
+AppContext context = new AppContext();
+// Bind source values to existing object
+Bind.with(binder).to("app.context", context);
+// or
+Bind.with(binder).to("app.context", this);
 ```
 
-## **Features ✅**
-✔ **Simple & Intuitive API**  
-✔ **Supports Complex Structures**  
-✔ **Deep Binding & Type Conversion**  
-✔ **Callback System for Custom Logic**
+### ⚡ Advanced Usage 
+#### Property Placeholders
+The binder supports placeholder resolution:
 
-jMouse Data Binder is designed for **jMouse Framework**, but it works **standalone** as well.
-
-🔗 **License:** Apache 2.0
-
+```java
+"app.description": "Application: '${app.name}' running on Java ${app.java.version}"
+```
