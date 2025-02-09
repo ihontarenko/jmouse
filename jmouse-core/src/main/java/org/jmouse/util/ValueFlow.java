@@ -1,8 +1,5 @@
 package org.jmouse.util;
 
-import org.jmouse.core.bind.NullSafeSupplier;
-import org.jmouse.core.bind.SingletonSupplier;
-
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;

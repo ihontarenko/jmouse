@@ -218,8 +218,8 @@ public interface BeanDescriptor<T> extends ElementDescriptor<T>, ClassTypeInspec
     class Builder<T> extends ElementDescriptor.Builder<Builder<T>, T, BeanDescriptor<T>> {
 
         private Map<String, PropertyDescriptor<T>> properties = new LinkedHashMap<>();
-        private T bean;
-        private ClassDescriptor descriptor;
+        private T                                  bean;
+        private ClassDescriptor                    descriptor;
 
         /**
          * Constructs a new {@code BeanDescriptor.Builder} with the specified bean name.

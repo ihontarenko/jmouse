@@ -1,5 +1,6 @@
 package org.jmouse.descriptive;
 
+import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.core.bind.JavaBean;
 import org.jmouse.core.metadata.BeanDescriptor;
 import org.jmouse.core.metadata.ClassDescriptor;
@@ -24,7 +25,10 @@ public class Example {
         ExternalUser externalUser = new ExternalUser();
 
         BeanDescriptor<ExternalUser> descriptor = MetaDescriptor.forBean(ExternalUser.class);
-        BeanDescriptor<WebServer> recordBean = MetaDescriptor.forValueObject(WebServer.class);
+        BeanDescriptor<UserHolder> recordBean = MetaDescriptor.forValueObject(UserHolder.class);
+
+        recordBean.getBeanClass().getField("user").getAnnotation(Qualifier.class)
+
 
         System.out.println(recordBean);
     }
