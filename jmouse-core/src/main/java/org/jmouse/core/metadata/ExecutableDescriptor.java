@@ -1,4 +1,4 @@
-package org.jmouse.core.descriptive;
+package org.jmouse.core.metadata;
 
 import java.lang.reflect.Executable;
 import java.util.Collection;

@@ -1,4 +1,4 @@
-package org.jmouse.core.descriptive;
+package org.jmouse.core.metadata;
 
 /**
  * A base interface for describing various elements within the Descriptive API.

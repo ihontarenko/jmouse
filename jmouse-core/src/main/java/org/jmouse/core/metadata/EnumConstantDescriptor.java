@@ -1,4 +1,4 @@
-package org.jmouse.core.descriptive;
+package org.jmouse.core.metadata;
 
 public interface EnumConstantDescriptor extends ElementDescriptor {
 

@@ -1,7 +1,6 @@
-package org.jmouse.core.descriptive;
+package org.jmouse.core.metadata;
 
 import org.jmouse.common.support.invocable.FieldDescriptor;
-import org.jmouse.core.reflection.Reflections;
 
 import java.util.*;
 
