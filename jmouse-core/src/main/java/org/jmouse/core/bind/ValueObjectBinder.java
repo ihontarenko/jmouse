@@ -2,6 +2,7 @@ package org.jmouse.core.bind;
 
 import org.jmouse.core.reflection.TypeDescriptor;
 import org.jmouse.util.Priority;
+import org.jmouse.util.Setter;
 
 import java.util.function.Supplier;
 
@@ -84,7 +85,7 @@ public class ValueObjectBinder extends AbstractBinder {
         // Iterate over record properties and bind values from the data source
         for (Bean.Property<?> property : vo.getProperties()) {
             String      propertyName = property.getName();
-            var         setter       = Bean.Setter.ofMap(propertyName);
+            var         setter       = Setter.ofMap(propertyName);
             Bindable<?> component    = Bindable.of(property.getType());
 
             @SuppressWarnings("unchecked")

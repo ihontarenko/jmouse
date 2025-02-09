@@ -52,7 +52,7 @@ public final class MetaDescriptor {
      * @param depth     the recursion depth limit for nested metadata resolution
      * @return a {@link ParameterDescriptor} instance
      */
-    private static ParameterDescriptor forParameter(Parameter parameter, int depth) {
+    public static ParameterDescriptor forParameter(Parameter parameter, int depth) {
         ParameterDescriptor.Builder builder = new ParameterDescriptor.Builder(parameter.getName());
 
         for (Annotation annotation : parameter.getAnnotations()) {
@@ -82,7 +82,7 @@ public final class MetaDescriptor {
      * @param depth  the recursion depth limit for nested metadata resolution
      * @return a {@link MethodDescriptor} instance
      */
-    private static MethodDescriptor forMethod(Method method, int depth) {
+    public static MethodDescriptor forMethod(Method method, int depth) {
         MethodDescriptor.Builder builder = new MethodDescriptor.Builder(method.getName());
 
         forExecutable(builder, method, depth);
@@ -107,7 +107,7 @@ public final class MetaDescriptor {
      * @param depth the recursion depth limit for nested metadata resolution
      * @return a {@link FieldDescriptor} instance
      */
-    private static FieldDescriptor forField(Field field, int depth) {
+    public static FieldDescriptor forField(Field field, int depth) {
         FieldDescriptor.Builder builder = new FieldDescriptor.Builder(field.getName());
 
         builder.internal(field).type(forClass(field.getType(), depth - 1));
@@ -136,7 +136,7 @@ public final class MetaDescriptor {
      * @param depth       the recursion depth limit for nested metadata resolution
      * @return a {@link ConstructorDescriptor} instance
      */
-    private static ConstructorDescriptor forConstructor(Constructor<?> constructor, int depth) {
+    public static ConstructorDescriptor forConstructor(Constructor<?> constructor, int depth) {
         ConstructorDescriptor.Builder builder = new ConstructorDescriptor.Builder(constructor.getName());
 
         forExecutable(builder, constructor, depth);
@@ -148,7 +148,7 @@ public final class MetaDescriptor {
      * Creates a descriptor for a constructor or method with a specified depth for nested elements.
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private static void forExecutable(ExecutableDescriptor.Builder builder, Executable executable, int depth) {
+    public static void forExecutable(ExecutableDescriptor.Builder builder, Executable executable, int depth) {
         builder.internal(executable);
 
         for (Parameter parameter : executable.getParameters()) {
@@ -189,7 +189,7 @@ public final class MetaDescriptor {
      * @param depth the recursion depth limit for nested metadata resolution
      * @return a {@link ClassDescriptor} instance
      */
-    private static ClassDescriptor forClass(Class<?> type, int depth) {
+    public static ClassDescriptor forClass(Class<?> type, int depth) {
         if (CACHE.containsKey(type)) {
             return CACHE.get(type);
         }
@@ -243,7 +243,7 @@ public final class MetaDescriptor {
      * @param depth      the recursion depth limit for nested metadata resolution
      * @return an {@link AnnotationDescriptor} instance
      */
-    private static AnnotationDescriptor forAnnotation(Annotation annotation, int depth) {
+    public static AnnotationDescriptor forAnnotation(Annotation annotation, int depth) {
         Class<? extends Annotation>  type    = annotation.annotationType();
         AnnotationDescriptor.Builder builder = new AnnotationDescriptor.Builder(getShortName(type));
 
@@ -264,37 +264,54 @@ public final class MetaDescriptor {
     }
 
     /**
-     * Creates a descriptor for a given bean instance.
+     * Creates a descriptor for a JavaBean.
      * <p>
-     * This method analyzes the bean's class, its properties, and associated getter/setter methods
-     * to generate a {@link BeanDescriptor}. The properties are identified based on JavaBean conventions.
+     * This method analyzes the given class and generates a {@link BeanDescriptor},
+     * detecting properties based on JavaBean getter/setter conventions.
      * </p>
      *
-     * @param bean the bean instance to describe
+     * @param type the class to describe
      * @param <T>  the type of the bean
-     * @return a {@link BeanDescriptor} instance representing the given bean
+     * @return a {@link BeanDescriptor} instance representing the bean
      */
-    public static <T> BeanDescriptor<T> forBean(T bean) {
-        return forBean(bean, DEFAULT_DEPTH);
+    public static <T> BeanDescriptor<T> forBean(Class<T> type) {
+        return forBean(type, null);
     }
 
     /**
-     * Creates a descriptor for a given bean instance with a specified depth for nested elements.
+     * Creates a descriptor for a JavaBean with an optional instance.
      * <p>
-     * This method extracts metadata about the bean, including its properties, getter and setter methods,
-     * and its class descriptor. It constructs a {@link BeanDescriptor} that includes all relevant metadata.
+     * If an instance is provided, it is stored inside the descriptor for further inspection.
+     * The descriptor is constructed based on JavaBean conventions for property detection.
      * </p>
      *
-     * @param bean  the bean instance to describe
+     * @param type the class to describe
+     * @param bean an optional instance of the bean
+     * @param <T>  the type of the bean
+     * @return a {@link BeanDescriptor} instance representing the bean
+     */
+    public static <T> BeanDescriptor<T> forBean(Class<T> type, T bean) {
+        return forBean(type, bean, DEFAULT_DEPTH);
+    }
+
+    /**
+     * Creates a descriptor for a JavaBean with an optional instance and specified depth.
+     * <p>
+     * The method scans for getter and setter methods to construct property descriptors.
+     * The recursion depth determines how deeply nested types should be resolved.
+     * </p>
+     *
+     * @param type  the class to describe
+     * @param bean  an optional instance of the bean
      * @param depth the recursion depth limit for nested metadata resolution
      * @param <T>   the type of the bean
-     * @return a {@link BeanDescriptor} instance representing the given bean
+     * @return a {@link BeanDescriptor} instance representing the bean
      */
-    public static <T> BeanDescriptor<T> forBean(T bean, int depth) {
-        BeanDescriptor.Builder<T>                builder    = new BeanDescriptor.Builder<>(getShortName(bean.getClass()));
-        ClassDescriptor                          descriptor = forClass(bean.getClass(), depth);
-        Matcher<Executable>                      anyMatcher = getter().or(setter());
+    public static <T> BeanDescriptor<T> forBean(Class<T> type, T bean, int depth) {
         Map<String, Builder<T>>                  builders   = new HashMap<>();
+        BeanDescriptor.Builder<T>                builder    = new BeanDescriptor.Builder<>(getShortName(type));
+        ClassDescriptor                          descriptor = forClass(type, depth);
+        Matcher<Executable>                      anyMatcher = getter().or(setter());
         BiConsumer<Builder<T>, MethodDescriptor> getter     = Builder::getter;
         BiConsumer<Builder<T>, MethodDescriptor> setter     = Builder::setter;
 
@@ -303,7 +320,7 @@ public final class MetaDescriptor {
             if (anyMatcher.matches(rawMethod)) {
 
                 BiConsumer<Builder<T>, MethodDescriptor> adder = (a, b) -> {};
-                String                                   name  = null;
+                String name = null;
 
                 if (getter().matches(rawMethod) && prefixIs().matches(rawMethod)) {
                     name = getPropertyName(rawMethod, GETTER_IS_PREFIX);
@@ -321,11 +338,76 @@ public final class MetaDescriptor {
         }
 
         builder.descriptor(descriptor);
-        builder.bean(bean);
-        builder.internal(bean);
+
+        if (bean != null) {
+            builder.bean(bean).internal(bean);
+        }
 
         for (Builder<T> property : builders.values()) {
             builder.property(property.build());
+        }
+
+        return builder.build();
+    }
+
+    /**
+     * Creates a descriptor for a record (value object).
+     * <p>
+     * This method detects record components and generates a {@link BeanDescriptor},
+     * treating them as immutable properties.
+     * </p>
+     *
+     * @param type the record class to describe
+     * @param <T>  the type of the record
+     * @return a {@link BeanDescriptor} instance representing the record
+     */
+    public static <T extends Record> BeanDescriptor<T> forValueObject(Class<T> type) {
+        return forValueObject(type, null);
+    }
+
+    /**
+     * Creates a descriptor for a record (value object) with an optional instance.
+     * <p>
+     * This method extracts metadata from record components and generates a descriptor
+     * treating them as immutable properties.
+     * </p>
+     *
+     * @param type the record class to describe
+     * @param bean an optional instance of the record
+     * @param <T>  the type of the record
+     * @return a {@link BeanDescriptor} instance representing the record
+     */
+    public static <T extends Record> BeanDescriptor<T> forValueObject(Class<T> type, T bean) {
+        return forValueObject(type, bean, DEFAULT_DEPTH);
+    }
+
+    /**
+     * Creates a descriptor for a record (value object) with an optional instance and specified depth.
+     * <p>
+     * Unlike standard JavaBeans, records do not have setters; their components are immutable.
+     * This method detects record components and maps them to property descriptors.
+     * </p>
+     *
+     * @param type  the record class to describe
+     * @param bean  an optional instance of the record
+     * @param depth the recursion depth limit for nested metadata resolution
+     * @param <T>   the type of the record
+     * @return a {@link BeanDescriptor} instance representing the record
+     */
+    public static <T extends Record> BeanDescriptor<T> forValueObject(Class<T> type, T bean, int depth) {
+        BeanDescriptor.Builder<T> builder = new BeanDescriptor.Builder<>(getShortName(type));
+        ClassDescriptor descriptor = forClass(type, depth);
+
+        builder.descriptor(descriptor);
+
+        if (bean != null) {
+            builder.bean(bean).internal(bean);
+        }
+
+        for (RecordComponent component : type.getRecordComponents()) {
+            PropertyDescriptor.Builder<T> propertyBuilder = new PropertyDescriptor.Builder<>(component.getName());
+            propertyBuilder.getter(forMethod(component.getAccessor(), depth - 1));
+            builder.property(propertyBuilder.build());
         }
 
         return builder.build();

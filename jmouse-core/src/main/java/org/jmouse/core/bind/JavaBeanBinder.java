@@ -1,7 +1,9 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.metadata.MetaDescriptor;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.TypeDescriptor;
+import org.jmouse.util.Factory;
 import org.jmouse.util.Priority;
 
 import java.lang.reflect.Method;
@@ -50,8 +52,10 @@ public class JavaBeanBinder extends AbstractBinder {
         JavaType       type           = bindable.getType();
         JavaBean<T>    bean           = JavaBean.of(type);
 
+        MetaDescriptor.forBean(type.getRawType());
+
         // Obtain a factory that can create new instances of the class
-        Bean.Factory<T> factory = bean.getFactory(bindable);
+        Factory<T> factory = bean.getFactory(bindable);
 
         // If the type is either a simple object or a scalar value, bind it directly
         if (typeDescriptor.isObject() || typeDescriptor.isScalar()) {

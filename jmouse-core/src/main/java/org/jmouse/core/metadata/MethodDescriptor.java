@@ -1,6 +1,9 @@
 package org.jmouse.core.metadata;
 
+import org.jmouse.core.reflection.MethodMatchers;
 import org.jmouse.core.reflection.Reflections;
+import org.jmouse.util.Getter;
+import org.jmouse.util.Setter;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -31,6 +34,64 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
      * @return the {@link ClassDescriptor} representing the return type of this method
      */
     ClassDescriptor getReturnType();
+
+    /**
+     * Determines if this method is a JavaBean-style setter.
+     * <p>
+     * A setter method follows the convention of having a name prefixed with
+     * {@code "set"} and accepting a single parameter.
+     * </p>
+     *
+     * @return {@code true} if this method is a setter, otherwise {@code false}
+     */
+    default boolean isSetter() {
+        return MethodMatchers.setter().matches(getInternal());
+    }
+
+    /**
+     * Determines if this method is a JavaBean-style getter.
+     * <p>
+     * A getter method follows the convention of having a name prefixed with
+     * {@code "get"} or {@code "is"} and returning a value.
+     * </p>
+     *
+     * @return {@code true} if this method is a getter, otherwise {@code false}
+     */
+    default boolean isGetter() {
+        return MethodMatchers.getter().matches(getInternal());
+    }
+
+    /**
+     * Returns a {@link Setter} function based on this method if it is a setter.
+     * <p>
+     * This method constructs a {@link Setter} instance that allows setting values
+     * on an object via this method if it follows the setter convention.
+     * </p>
+     *
+     * @param <T> the type of the object containing the method
+     * @param <V> the type of the value being set
+     * @return a {@link Setter} instance for this method
+     * @throws IllegalArgumentException if the method is not a setter
+     */
+    default <T, V> Setter<T, V> getSetter() {
+        return Setter.ofMethod(getInternal());
+    }
+
+    /**
+     * Returns a {@link Getter} function based on this method if it is a getter.
+     * <p>
+     * This method constructs a {@link Getter} instance that allows retrieving values
+     * from an object via this method if it follows the getter convention.
+     * </p>
+     *
+     * @param <T> the type of the object containing the method
+     * @param <V> the return type of the method
+     * @return a {@link Getter} instance for this method
+     * @throws IllegalArgumentException if the method is not a getter
+     */
+    default <T, V> Getter<T, V> getGetter() {
+        return Getter.ofMethod(getInternal());
+    }
 
     /**
      * Default implementation of {@link MethodDescriptor}.

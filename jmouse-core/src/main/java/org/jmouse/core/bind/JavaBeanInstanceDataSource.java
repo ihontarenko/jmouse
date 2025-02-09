@@ -1,5 +1,7 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.util.Factory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -45,8 +47,8 @@ public class JavaBeanInstanceDataSource extends AbstractDataSource {
                     "Bean factory does not have property: '%s'.".formatted(name));
         }
 
-        Bean.Factory<Object> factory = this.getSupplier();
-        Supplier<Object>     value    = property.getValue(factory);
+        Factory<Object>  factory = this.getSupplier();
+        Supplier<Object> value   = property.getValue(factory);
 
         return DataSource.of(value.get());
     }
@@ -84,7 +86,7 @@ public class JavaBeanInstanceDataSource extends AbstractDataSource {
      *
      * @return a {@link Supplier} providing values from the bean instance
      */
-    private Bean.Factory<Object> getSupplier() {
+    private Factory<Object> getSupplier() {
         return bean.getFactory(Bindable.ofInstance(source));
     }
 

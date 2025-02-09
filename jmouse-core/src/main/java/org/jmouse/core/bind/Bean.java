@@ -1,14 +1,15 @@
 package org.jmouse.core.bind;
 
 import org.jmouse.core.reflection.JavaType;
+import org.jmouse.util.Factory;
+import org.jmouse.util.Getter;
+import org.jmouse.util.Setter;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-
-import static org.jmouse.core.reflection.Reflections.getMethodName;
 
 /**
  * Represents a generic bean model that encapsulates metadata and properties of a Java type.
@@ -69,187 +70,6 @@ abstract public class Bean<T> {
         return properties.containsKey(name);
     }
 
-    /**
-     * A functional interface representing a getter method for retrieving a value from an instance.
-     * <p>
-     * This interface abstracts over different ways of accessing properties, such as via method calls
-     * or retrieving values from a map.
-     * </p>
-     *
-     * @param <T> the type of the instance from which the value is retrieved
-     * @param <R> the type of the value being retrieved
-     */
-    @FunctionalInterface
-    public interface Getter<T, R> {
-
-        /**
-         * Creates a getter for a map, retrieving a value by a given key.
-         *
-         * @param key the key whose associated value is to be returned
-         * @param <K> the type of keys in the map
-         * @param <V> the type of values in the map
-         * @return a getter that retrieves values from a map by key
-         */
-        static <K, V> Getter<Map<K, V>, V> ofMap(K key) {
-            return (instance) -> instance.get(key);
-        }
-
-        /**
-         * Creates a getter that invokes a given method on an instance.
-         *
-         * @param getter the method to be invoked as a getter
-         * @param <T>    the type of the instance
-         * @param <V>    the type of the value being retrieved
-         * @return a getter that calls the specified method
-         * @throws GetterCallException if the method invocation fails
-         */
-        @SuppressWarnings({"unchecked"})
-        static <T, V> Getter<T, V> ofMethod(Method getter) {
-            return (T instance) -> {
-                try {
-                    getter.setAccessible(true);
-                    return (V) getter.invoke(instance);
-                } catch (Exception exception) {
-                    throw new GetterCallException(
-                            "Failed to call getter '%s'".formatted(getMethodName(getter)), exception);
-                }
-            };
-        }
-
-        /**
-         * Retrieves a value from the given instance.
-         *
-         * @param instance the instance from which to retrieve the value
-         * @return the retrieved value
-         */
-        R get(T instance);
-    }
-
-    /**
-     * A functional interface representing a setter method for assigning a value to an instance.
-     * <p>
-     * This interface abstracts over different ways of setting properties, such as via method calls
-     * or assigning values in a map.
-     * </p>
-     *
-     * @param <T> the type of the instance on which the value is set
-     * @param <V> the type of the value being set
-     */
-    @FunctionalInterface
-    public interface Setter<T, V> {
-
-        /**
-         * Creates a setter for a map, assigning a value to a specified key.
-         *
-         * @param key the key to which the value should be assigned
-         * @param <K> the type of keys in the map
-         * @param <V> the type of values in the map
-         * @return a setter that assigns values in a map by key
-         */
-        static <K, V> Setter<Map<K, V>, V> ofMap(K key) {
-            return (instance, value) -> instance.put(key, value);
-        }
-
-        /**
-         * Creates a setter that invokes a given method on an instance.
-         *
-         * @param setter the method to be invoked as a setter
-         * @param <T>    the type of the instance
-         * @param <V>    the type of the value being set
-         * @return a setter that calls the specified method
-         * @throws SetterCallException if the method invocation fails
-         */
-        static <T, V> Setter<T, V> ofMethod(Method setter) {
-            return (T instance, V value) -> {
-                try {
-                    setter.setAccessible(true);
-                    setter.invoke(instance, value);
-                } catch (Exception exception) {
-                    throw new SetterCallException(
-                            "Failed to call setter '%s'".formatted(getMethodName(setter)), exception);
-                }
-            };
-        }
-
-        /**
-         * Assigns a value to the given instance.
-         *
-         * @param instance the instance on which to set the value
-         * @param value    the value to be assigned
-         */
-        void set(T instance, V value);
-
-    }
-
-    /**
-     * A functional interface representing a factory for creating instances of type {@code T}.
-     * <p>
-     * This interface allows encapsulating object creation logic, making it useful in contexts
-     * where dependency injection, lazy initialization, or configurable instantiation is required.
-     * </p>
-     *
-     * @param <T> the type of object this factory creates
-     */
-    @FunctionalInterface
-    public interface Factory<T> {
-
-        /**
-         * Creates a factory from a given supplier.
-         *
-         * @param supplier the supplier providing instances of {@code T}
-         * @param <T>      the type of the created object
-         * @return a factory that delegates to the supplier
-         */
-        static <T> Factory<T> of(Supplier<T> supplier) {
-            return supplier::get;
-        }
-
-        /**
-         * Creates and returns a new instance of {@code T}.
-         *
-         * @return a new instance of {@code T}
-         */
-        T create();
-    }
-
-    /**
-     * Exception thrown when a setter method invocation fails.
-     * <p>
-     * This exception wraps the original cause of the failure, providing additional context.
-     * </p>
-     */
-    public static class SetterCallException extends RuntimeException {
-
-        /**
-         * Constructs a new {@code SetterCallException} with the specified message and cause.
-         *
-         * @param message the detail message
-         * @param cause   the underlying cause of the exception
-         */
-        public SetterCallException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
-
-    /**
-     * Exception thrown when a getter method invocation fails.
-     * <p>
-     * This exception wraps the original cause of the failure, providing additional context.
-     * </p>
-     */
-    public static class GetterCallException extends RuntimeException {
-
-        /**
-         * Constructs a new {@code GetterCallException} with the specified message and cause.
-         *
-         * @param message the detail message
-         * @param cause   the underlying cause of the exception
-         */
-        public GetterCallException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
-
 
     /**
      * Represents a property within a bean or record, encapsulating getter and setter methods.
@@ -265,9 +85,9 @@ abstract public class Bean<T> {
         protected final String            name;
         protected final JavaType          owner;
         protected       Method            rawGetter;
-        protected       Method            rawSetter;
-        protected       Getter<T, Object> getter;
-        protected       Setter<T, Object> setter;
+        protected Method            rawSetter;
+        protected Getter<T, Object> getter;
+        protected Setter<T, Object> setter;
 
         /**
          * Constructs a property with the specified name and owner type.
