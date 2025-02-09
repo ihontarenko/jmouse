@@ -15,7 +15,7 @@ public interface AnnotationDescriptor extends Descriptor<Annotation> {
         private final Map<String, Object> attributes = new HashMap<>();
         private final ClassDescriptor     annotationType;
 
-        protected Implementation(String name, Annotation internal, Map<String, Object> attributes, ClassDescriptor annotationType) {
+        Implementation(String name, Annotation internal, Map<String, Object> attributes, ClassDescriptor annotationType) {
             super(name, internal);
             this.attributes.putAll(attributes);
             this.annotationType = annotationType;
@@ -38,7 +38,7 @@ public interface AnnotationDescriptor extends Descriptor<Annotation> {
         private Map<String, Object> attributes = new HashMap<>();
         private ClassDescriptor     annotationType;
 
-        protected Builder(String name) {
+        public Builder(String name) {
             super(name);
         }
 

@@ -23,6 +23,10 @@ import java.util.List;
 @SuppressWarnings({"unused"})
 public class MethodMatchers {
 
+    public static final String GETTER_GET_PREFIX = "get";
+    public static final String GETTER_IS_PREFIX  = "is";
+    public static final String SETTER_PREFIX     = "set";
+
     /**
      * Creates a matcher that checks if a method or constructor has the specified modifier.
      *
@@ -232,6 +236,66 @@ public class MethodMatchers {
      */
     public static Matcher<Executable> nameStarts(String prefix) {
         return withName(TextMatchers.startsWith(prefix));
+    }
+
+    /**
+     * Creates a matcher that checks if an {@link Executable} follows the JavaBean "is" getter naming convention.
+     * <p>
+     * Matches methods that start with {@code "is"}, which is typically used for boolean getters.
+     * </p>
+     *
+     * @return a {@link Matcher} for methods starting with {@code "is"}
+     */
+    public static Matcher<Executable> prefixIs() {
+        return nameStarts(GETTER_IS_PREFIX);
+    }
+
+    /**
+     * Creates a matcher that checks if an {@link Executable} follows the JavaBean "get" getter naming convention.
+     * <p>
+     * Matches methods that start with {@code "get"}, which is typically used for standard getters.
+     * </p>
+     *
+     * @return a {@link Matcher} for methods starting with {@code "get"}
+     */
+    public static Matcher<Executable> prefixGet() {
+        return nameStarts(GETTER_GET_PREFIX);
+    }
+
+    /**
+     * Creates a matcher that checks if an {@link Executable} follows the JavaBean "set" setter naming convention.
+     * <p>
+     * Matches methods that start with {@code "set"}, which is typically used for standard setters.
+     * </p>
+     *
+     * @return a {@link Matcher} for methods starting with {@code "set"}
+     */
+    public static Matcher<Executable> prefixSet() {
+        return nameStarts(SETTER_PREFIX);
+    }
+
+    /**
+     * Creates a matcher that checks if an {@link Executable} is a getter method.
+     * <p>
+     * Matches methods that start with either {@code "get"} or {@code "is"}, following JavaBean conventions.
+     * </p>
+     *
+     * @return a {@link Matcher} for getter methods
+     */
+    public static Matcher<Executable> getter() {
+        return hasParameterCount(0).and(prefixIs().or(prefixGet()));
+    }
+
+    /**
+     * Creates a matcher that checks if an {@link Executable} is a setter method.
+     * <p>
+     * Matches methods that start with {@code "set"}, following JavaBean conventions.
+     * </p>
+     *
+     * @return a {@link Matcher} for setter methods
+     */
+    public static Matcher<Executable> setter() {
+        return prefixSet().and(hasParameterCount(1));
     }
 
     /**

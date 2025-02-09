@@ -602,13 +602,13 @@ abstract public class Reflections {
     }
 
     /**
-     * Returns a string representing the method name along with its declaring class's simple name.
+     * Returns a string representing the executable name along with its declaring class's simple name.
      *
-     * @param method the method to retrieve the name for
+     * @param executable the executable to retrieve the name for
      * @return a string in the format {@code ClassName#methodName}
      */
-    public static String getMethodName(Method method) {
-        return "%s#%s".formatted(method.getDeclaringClass().getSimpleName(), method.getName());
+    public static String getMethodName(Executable executable) {
+        return "%s#%s".formatted(executable.getDeclaringClass().getSimpleName(), executable.getName());
     }
 
     public static String getPropertyName(Method method, String prefix) {
