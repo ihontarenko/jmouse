@@ -41,6 +41,8 @@ public class ConfigurationAnnotatedClassBeanScanner implements BeanScanner<Annot
 
         // Find classes annotated with @Configuration
         for (Class<?> klass : ClassFinder.findAnnotatedClasses(Configuration.class, baseClasses)) {
+            // Add factory @Configuration annotated class
+            elements.add(klass);
             // Find methods annotated with @Provide in each @Configuration class
             elements.addAll(new MethodFinder().filter(klass).annotated(Provide.class).find());
         }

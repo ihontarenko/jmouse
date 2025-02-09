@@ -1,0 +1,24 @@
+package org.jmouse.validator.manual;
+
+import org.jmouse.util.helper.Strings;
+
+import static org.jmouse.util.helper.Strings.underscored;
+
+abstract public class AbstractValidator implements Validator {
+
+    protected String message;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return "%s [message='%s']".formatted(Strings.underscored(this.getClass().getSimpleName(), true), message);
+    }
+
+}

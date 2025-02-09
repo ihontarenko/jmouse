@@ -1,10 +1,8 @@
 package org.jmouse.web;
 
 import org.jmouse.beans.ScannerBeanContextInitializer;
-import org.jmouse.core.bind.Bind;
+import org.jmouse.core.bind.*;
 import org.jmouse.core.env.Environment;
-import org.jmouse.core.observer.EventManager;
-import org.jmouse.core.observer.EventManagerFactory;
 import org.jmouse.core.reflection.ClassFinder;
 import org.jmouse.context.ApplicationConfigurer;
 import org.jmouse.context.ApplicationFactory;
@@ -15,20 +13,20 @@ import org.jmouse.web.initializer.context.StartupRootApplicationContextInitializ
 import org.jmouse.web.server.WebServer;
 import org.jmouse.web.server.WebServerConfig;
 import org.jmouse.web.server.WebServerFactory;
+import org.jmouse.web.server.WebServers;
 
 import java.util.ArrayList;
 import java.util.Map;
 
 public class WebApplicationLauncher {
 
-    private final EventManager                       eventManager;
     private final Class<?>[]                         baseClasses;
     private final ApplicationFactory<WebBeanContext> applicationFactory = new WebApplicationFactory();
-    private  Map<String, WebServerConfig> webserver;
+    private  Map<WebServers, WebServerConfig> webserver;
+    private Binder binder;
 
     public WebApplicationLauncher(Class<?>... baseClasses) {
         this.baseClasses = baseClasses;
-        this.eventManager = EventManagerFactory.create(baseClasses);
     }
 
     public WebBeanContext launch() {
@@ -41,17 +39,20 @@ public class WebApplicationLauncher {
         scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
                 ClassFinder.findImplementations(ApplicationConfigurer.class, rootTypes)));
 
-        WebBeanContext rootWebBeanContext = applicationFactory.createContext("WEB-ROOT", baseClasses);
+        WebBeanContext rootWebBeanContext = applicationFactory.createContext(WebBeanContext.DEFAULT_ROOT_WEB_CONTEXT_NAME, baseClasses);
         rootWebBeanContext.addInitializer(scannerBeanContextInitializer);
         rootWebBeanContext.addInitializer(new StartupRootApplicationContextInitializer(environment));
         rootWebBeanContext.refresh();
 
-        WebBeanContext webBeanContext = applicationFactory.createContext(
-                "WEB-APPLICATION", rootWebBeanContext, baseClasses);
+        binder = Binder.withDataSource(environment);
 
-        Bind.with(rootWebBeanContext.getEnvironment()).to(this);
+        WebBeanContext webBeanContext = applicationFactory.createContext(WebBeanContext.DEFAULT_WEB_CONTEXT_NAME, rootWebBeanContext, baseClasses);
 
-        System.out.println("Web Server Port: " + getWebserver().get("tomcat").port());;
+        Bind.with(binder).to("jmouse.web", this);
+
+        Bind.with(binder).to("jmouse.web.server.default", WebServers.class).ifPresent(webServers -> {
+            System.out.println("Default WebServers Configuration: " + getWebserver().get(webServers));
+        });
 
         // web server part
         rootWebBeanContext.getBeans(ServletWebApplicationInitializer.class);
@@ -62,11 +63,13 @@ public class WebApplicationLauncher {
         return rootWebBeanContext;
     }
 
-    public Map<String, WebServerConfig> getWebserver() {
+    public Map<WebServers, WebServerConfig> getWebserver() {
         return webserver;
     }
 
-    public void setWebserver(Map<String, WebServerConfig> webserver) {
+    @PropertyPath("server")
+    public void setWebserver(Map<WebServers, WebServerConfig> webserver) {
         this.webserver = webserver;
     }
+
 }

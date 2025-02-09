@@ -160,7 +160,7 @@ public final class Bindable<T> {
      * @return a new {@link Bindable} with the same type but the provided instance as value
      */
     public Bindable<T> withInstance(T instance) {
-        return withInstance(() -> instance);
+        return withSuppliedInstance(() -> instance);
     }
 
     /**
@@ -169,13 +169,13 @@ public final class Bindable<T> {
      * @param supplier the supplier with instance
      * @return a new {@link Bindable} with the same type but the provided instance as value
      */
-    public Bindable<T>  withInstance(Supplier<T> supplier) {
+    public Bindable<T> withSuppliedInstance(Supplier<T> supplier) {
         return new Bindable<>(this.type, supplier);
     }
 
     @Override
     public String toString() {
-        return "Bindable(Type: %s; Instance: %s)".formatted(type, value.get());
+        return "Bindable(Type: %s)".formatted(type);
     }
 
 }

@@ -3,6 +3,7 @@ package org.jmouse.context;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanNotFoundException;
 import org.jmouse.beans.DefaultBeanContext;
+import org.jmouse.context.processor.ResourceInjectionBeanPostProcessor;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.env.PropertySource;
 import org.jmouse.core.io.ResourceLoader;
@@ -17,6 +18,8 @@ public class AbstractApplicationBeanContext extends DefaultBeanContext implement
 
     public AbstractApplicationBeanContext(Class<?>... baseClasses) {
         super(baseClasses);
+
+        addBeanPostProcessor(new ResourceInjectionBeanPostProcessor());
     }
 
     @Override

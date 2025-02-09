@@ -38,10 +38,11 @@ public class ScalarValueBinder extends AbstractBinder {
      */
     @Override
     public <T> BindResult<T> bind(NamePath name, Bindable<T> bindable, DataSource source, BindCallback callback) {
-        TypeDescriptor descriptor = bindable.getTypeDescriptor();
+        TypeDescriptor descriptor  = bindable.getTypeDescriptor();
+        boolean        isCompliant = descriptor.isScalar() || descriptor.isEnum() || descriptor.isClass();
 
-        if (!descriptor.isScalar()) {
-            throw new IllegalArgumentException("Scalar binder only handles scalar types. But got " + descriptor);
+        if (!isCompliant) {
+            throw new IllegalArgumentException("Scalar binder only handles scalar, class, enum types. But got " + descriptor);
         }
 
         return bindValue(name, bindable, source, callback);
@@ -59,6 +60,8 @@ public class ScalarValueBinder extends AbstractBinder {
      */
     @Override
     public <T> boolean supports(Bindable<T> bindable) {
-        return bindable.getTypeDescriptor().isScalar();
+        TypeDescriptor descriptor = bindable.getTypeDescriptor();
+
+        return descriptor.isScalar() || descriptor.isEnum() || descriptor.isClass();
     }
 }

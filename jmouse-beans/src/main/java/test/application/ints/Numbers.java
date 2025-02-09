@@ -9,7 +9,7 @@ import java.util.Random;
 @Configuration(name = "ints")
 public class Numbers {
 
-    @Provide
+    @Provide("int123")
     public Integer int123() {
         return 123;
     }

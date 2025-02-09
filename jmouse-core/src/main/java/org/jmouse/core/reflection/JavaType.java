@@ -30,7 +30,7 @@ public class JavaType {
     /**
      * A constant representing a "no type" scenario.
      */
-    private static final JavaType NONE_TYPE = new JavaType(NoneType.INSTANCE);
+    public static final JavaType NONE_TYPE = new JavaType(NoneType.INSTANCE);
 
     /**
      * A constant representing an empty array of {@link JavaType}.

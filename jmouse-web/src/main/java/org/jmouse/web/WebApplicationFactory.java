@@ -14,7 +14,7 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
     public Environment createDefaultEnvironment() {
         Environment environment = super.createDefaultEnvironment();
 
-        loadApplicationProperties("classpath:webserver.properties", environment);
+//        loadApplicationProperties("classpath:webserver.properties", environment);
 
         return environment;
     }

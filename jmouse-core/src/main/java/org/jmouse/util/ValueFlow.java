@@ -1,4 +1,4 @@
-package org.jmouse.context;
+package org.jmouse.util;
 
 import org.jmouse.core.bind.NullSafeSupplier;
 import org.jmouse.core.bind.SingletonSupplier;

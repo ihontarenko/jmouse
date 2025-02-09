@@ -35,7 +35,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @param strategy the binding strategy (deep or shallow)
      */
     public Binder(DataSource source, BinderFactory factory, BindingStrategy strategy) {
-        this.defaultCallback = BindCallback.NOOP;
+        this.defaultCallback = new DefaultBindingCallback();
         this.strategy = strategy;
         this.source = source;
         this.factory = factory;
@@ -138,12 +138,34 @@ public class Binder implements ObjectBinder, BindContext {
         }
     }
 
+    /**
+     * Handles exceptions that occur during the binding process.
+     * <p>
+     * This method invokes the {@code onFailure} callback and, if it results in another exception,
+     * wraps it into a {@link BindException}. If the callback returns a value, it is cast and returned.
+     * </p>
+     *
+     * @param path     the property path where the exception occurred
+     * @param bindable the bindable target type
+     * @param exception the original exception that occurred
+     * @param <T>      the expected result type
+     * @return the fallback value returned by the callback, if any
+     * @throws BindException if the callback throws an exception that is not already a {@link BindException}
+     */
     @SuppressWarnings({"unchecked"})
     private <T> T performException(NamePath path, Bindable<T> bindable, Exception exception) {
         try {
             return (T) defaultCallback.onFailure(path, bindable, this, exception);
-        } catch (Throwable cause) {
-            throw new BindException(path, bindable, cause);
+        } catch (Exception cause) {
+            BindException bindException;
+
+            if (cause instanceof BindException) {
+                bindException = (BindException) cause;
+            } else {
+                bindException = new BindException(path, bindable, cause);
+            }
+
+            throw bindException;
         }
     }
 
@@ -154,7 +176,8 @@ public class Binder implements ObjectBinder, BindContext {
      */
     @Override
     public <T> BindResult<T> bindValue(NamePath name, Bindable<T> bindable, DataSource source, BindCallback callback) {
-        throw new UnsupportedOperationException("Root binder is not supported this method. This methods can be called only in type-binder specific.");
+        throw new UnsupportedOperationException(
+                "Root binder is not supported this method. This methods can be called only in type-binder specific.");
     }
 
     /**

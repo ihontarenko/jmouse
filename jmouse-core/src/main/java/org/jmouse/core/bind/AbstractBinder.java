@@ -60,7 +60,7 @@ abstract public class AbstractBinder implements ObjectBinder {
         ObjectBinder   rootBinder      = context.getRootBinder();
 
         // Scalar or object binding logic
-        if (descriptor.isScalar() || descriptor.isObject() || descriptor.is(Class.class)) {
+        if (descriptor.isScalar() || descriptor.isObject() || descriptor.isClass() || descriptor.isEnum()) {
             Object result = value.getRaw();
 
             // If the value is scalar, convert it to the target type

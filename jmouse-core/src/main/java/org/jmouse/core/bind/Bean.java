@@ -352,11 +352,13 @@ abstract public class Bean<T> {
          * @return the JavaType representing the property's type
          */
         public JavaType getType() {
-            JavaType type = JavaType.forMethodReturnType(rawGetter);
+            JavaType type = JavaType.NONE_TYPE;
 
-            // Prefer the setter type if available
+            // Prefer the setter type if available and getter as fallback type
             if (rawSetter != null) {
                 type = JavaType.forMethodParameter(rawSetter, 0);
+            } else if (rawGetter != null) {
+                type = JavaType.forMethodReturnType(rawGetter);
             }
 
             return type;
@@ -424,7 +426,7 @@ abstract public class Bean<T> {
 
         @Override
         public String toString() {
-            return "(%s) [%s] : %s".formatted(owner, name, getType());
+            return "%s#%s : %s".formatted(owner, name, getType());
         }
     }
 

@@ -55,9 +55,7 @@ public class IntegerToEnumConverter implements GenericConverter<Integer, Enum<?>
      */
     @Override
     public Set<ClassPair> getSupportedTypes() {
-        @SuppressWarnings("unchecked")
-        Class<Enum<?>> enumClass = (Class<Enum<?>>) (Class<?>) Enum.class;
-        return Set.of(new ClassPair(Integer.class, enumClass));
+        return Set.of(new ClassPair(Integer.class, Enum.class));
     }
 
 }

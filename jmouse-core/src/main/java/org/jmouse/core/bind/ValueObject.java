@@ -113,7 +113,7 @@ final public class ValueObject<T extends Record> extends Bean<T> {
 
             if (values.size() != properties.size()) {
                 throw new IllegalArgumentException(
-                        "ValueObject(%s) should be fully fulfilled with '%d' properties but only '%d' present"
+                        "Property mismatch: %s requires all %d properties to be set, but found only %d"
                                 .formatted(type, properties.size(), values.size()));
             }
 

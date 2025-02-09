@@ -27,13 +27,14 @@ public interface BindCallback {
     /**
      * Invoked after a value has been successfully bound.
      */
-    default void onBound(NamePath name, Bindable<?> bindable, BindContext context, Object value) {
+    default void onBound(NamePath name, Bindable<?> bindable, BindContext context, BindResult<Object> value) {
     }
 
     /**
      * Handles binding failures.
      */
-    default Object onFailure(NamePath name, Bindable<?> bindable, BindContext context, Exception error) throws Exception {
-        throw error;
+    default Object onFailure(NamePath name, Bindable<?> bindable, BindContext context, Exception exception)
+            throws Exception {
+        throw exception;
     }
 }

@@ -1,5 +1,6 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.reflection.TypeDescriptor;
 import org.jmouse.util.Priority;
 
 import java.util.function.Supplier;
@@ -37,42 +38,67 @@ public class ValueObjectBinder extends AbstractBinder {
     }
 
     /**
-     * Binds a record class by extracting its properties, resolving values from the {@link DataSource},
-     * and instantiating a new immutable record instance.
+     * Binds a Java record by extracting its properties, resolving values from the {@link DataSource},
+     * and creating a new immutable record instance.
      *
-     * @param name     the hierarchical name of the object being bound
-     * @param bindable the bindable target describing the type to bind
+     * @param name     the hierarchical name path of the object being bound
+     * @param bindable the target bindable describing the type to bind
+     * @param source   the data source providing values for binding
+     * @param callback a binding callback for customization
+     * @param <T>      the type of the bound object
+     * @return a {@link BindResult} containing the bound record instance, or an empty result if binding was unsuccessful
+     */
+    @Override
+    @SuppressWarnings({"unchecked"})
+    public <T> BindResult<T> bind(NamePath name, Bindable<T> bindable, DataSource source, BindCallback callback) {
+        TypeDescriptor sourceDescriptor = TypeDescriptor.forClass(source.get(name).getType());
+        TypeDescriptor targetDescriptor = bindable.getTypeDescriptor();
+
+        // Ensure the target is a record and the source is a compatible type (map or JavaBean)
+        if (targetDescriptor.isRecord() && (sourceDescriptor.isMap() || sourceDescriptor.isBean())) {
+            return bindValueObject(name, bindable, source, callback);
+        }
+
+        return BindResult.empty();
+    }
+
+    /**
+     * Performs the binding of a Java record by mapping its components from the data source.
+     *
+     * @param name     the name path of the object being bound
+     * @param bindable the bindable target describing the record type
      * @param source   the source of values for binding
      * @param callback the binding callback for customization
      * @param <T>      the type of the bound object
      * @return a {@link BindResult} containing the bound record instance if successful
      */
-    @Override
-    @SuppressWarnings({"unchecked"})
-    public <T> BindResult<T> bind(NamePath name, Bindable<T> bindable, DataSource source, BindCallback callback) {
+    protected <T> BindResult<T> bindValueObject(NamePath name, Bindable<T> bindable, DataSource source, BindCallback callback) {
         Class<?> rawType = bindable.getType().getRawType();
 
-        if (bindable.getTypeDescriptor().isRecord()) {
-            // Create a ValueObject representation of the record
-            ValueObject<?>     vo      = ValueObject.of((Class<? extends Record>) rawType);
-            ValueObject.Values values  = vo.getRecordValues();
-            Supplier<?>        factory = vo.getInstance(values);
+        // Create a ValueObject representation of the record
+        @SuppressWarnings("unchecked")
+        ValueObject<?>     vo      = ValueObject.of((Class<? extends Record>) rawType);
+        ValueObject.Values values  = vo.getRecordValues();
+        Supplier<?>        factory = vo.getInstance(values);
 
-            // Bind each record property from the data source
-            for (Bean.Property<?> property : vo.getProperties()) {
-                String      propertyName = property.getName();
-                var         setter       = Bean.Setter.ofMap(propertyName);
-                Bindable<?> component    = Bindable.of(property.getType());
+        // Iterate over record properties and bind values from the data source
+        for (Bean.Property<?> property : vo.getProperties()) {
+            String      propertyName = property.getName();
+            var         setter       = Bean.Setter.ofMap(propertyName);
+            Bindable<?> component    = Bindable.of(property.getType());
 
-                bindValue(name.append(propertyName), component, source, callback)
-                        .ifPresent(bound -> setter.set(values, bound));
-            }
+            @SuppressWarnings("unchecked")
+            BindResult<T> result = (BindResult<T>) bindValue(name.append(propertyName), component, source, callback);
 
-            // Create and return the record instance
-            return BindResult.of((T) factory.get());
+            // Set the bound value if available
+            result.ifPresent(bound -> setter.set(values, bound));
         }
 
-        return BindResult.empty();
+        // Invoke the callback after binding
+        callback.onBound(name, bindable, context, null);
+
+        // Instantiate and return the record
+        return BindResult.of((T) factory.get());
     }
 
     /**

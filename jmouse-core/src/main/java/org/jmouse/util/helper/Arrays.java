@@ -2,6 +2,8 @@ package org.jmouse.util.helper;
 
 import java.lang.reflect.Array;
 
+import static java.util.Arrays.sort;
+
 /**
  * Utility class for array operations.
  */
@@ -39,6 +41,95 @@ public final class Arrays {
         System.arraycopy(b, 0, c, sizeA, sizeB);
 
         return c;
+    }
+
+    /**
+     * Removes duplicate elements from the given array using sorting.
+     * This method is optimized for arrays of {@link Comparable} elements.
+     * <p>
+     * The input array is modified during processing, and the resulting unique elements
+     * are returned in a new array.
+     * <p>
+     * <b>Time Complexity:</b> O(n log n) due to sorting, followed by a single pass O(n)
+     * to filter out duplicates, making the overall complexity O(n log n).
+     *
+     * @param <T> the type of elements in the array, must implement {@link Comparable}
+     * @param array the input array to process
+     * @return a new array containing only unique elements from the input array, preserving order
+     */
+    public static <T extends Comparable<T>> T[] unique(T[] array) {
+        if (array == null || array.length <= 1) {
+            return array;
+        }
+
+        // Sort the array to bring duplicates together
+        sort(array);
+
+        int unique = 0;
+        for (int i = 1; i < array.length; i++) {
+            if (!array[i].equals(array[i - 1])) {
+                array[unique++] = array[i - 1];
+            }
+        }
+
+        // Ensure the last unique element is included
+        array[unique++] = array[array.length - 1];
+
+        @SuppressWarnings({"unchecked"})
+        T[] result = (T[]) Array.newInstance(array.getClass().getComponentType(), unique);
+
+        System.arraycopy(array, 0, result, 0, unique);
+
+        return result;
+    }
+
+    /**
+     * Removes duplicate elements from the given array using a nested loop comparison.
+     * This method is suitable for arrays of arbitrary object types that do not implement {@link Comparable}.
+     * <p>
+     * This method has a higher time complexity due to its use of a nested loop
+     * for duplicate detection, making it less efficient for large datasets.
+     * <p>
+     * <b>Time Complexity:</b> Worst-case complexity is O(n²), but in practice,
+     * the actual complexity depends on the number of unique elements, `u`.
+     * The inner loop runs at most `u` times, making the expected complexity O(n * u),
+     * where `u` is the number of unique elements (u ≤ n).
+     *
+     * @param <T> the type of elements in the array
+     * @param array the input array to process
+     * @return a new array containing only unique elements from the input array, preserving order
+     */
+    public static <T> T[] unique(T[] array) {
+        if (array == null || array.length <= 1) {
+            return array;
+        }
+
+        int unique = 0;
+
+        @SuppressWarnings("unchecked")
+        T[] temporary = (T[]) Array.newInstance(array.getClass().getComponentType(), array.length);
+
+        for (T t : array) {
+            boolean duplicate = false;
+
+            for (int j = 0; j < unique; j++) {
+                if (temporary[j].equals(t)) {
+                    duplicate = true;
+                    break;
+                }
+            }
+
+            if (!duplicate) {
+                temporary[unique++] = t;
+            }
+        }
+
+        @SuppressWarnings({"unchecked"})
+        T[] result = (T[]) Array.newInstance(array.getClass().getComponentType(), unique);
+
+        System.arraycopy(temporary, 0, result, 0, unique);
+
+        return result;
     }
 
     /**

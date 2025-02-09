@@ -1,5 +1,7 @@
 package org.jmouse.web.configuration;
 
+import org.jmouse.beans.annotation.SuppressException;
+import org.jmouse.beans.definition.DuplicateBeanDefinitionException;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.env.MapPropertySource;
 import org.jmouse.beans.BeanContainer;
@@ -9,6 +11,7 @@ import org.jmouse.context.ApplicationConfigurer;
 import java.util.Map;
 
 @Configuration
+@SuppressException(DuplicateBeanDefinitionException.class)
 public class StandartWebApplicationConfigurer implements ApplicationConfigurer {
 
     @Override
@@ -30,3 +33,4 @@ public class StandartWebApplicationConfigurer implements ApplicationConfigurer {
         container.registerBean("appName", "web-application");
     }
 }
+

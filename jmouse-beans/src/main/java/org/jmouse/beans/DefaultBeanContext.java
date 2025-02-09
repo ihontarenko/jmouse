@@ -60,7 +60,8 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  */
 public class DefaultBeanContext implements BeanContext, BeanFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBeanContext.class);
+    public static final  String DEFAULT_CONTEXT_NAME = "DEFAULT-BEANS-CONTEXT";
+    private static final Logger LOGGER               = LoggerFactory.getLogger(DefaultBeanContext.class);
 
     /**
      * The base classes for scanning and managing beans in the context.
@@ -146,31 +147,48 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     private String contextId;
 
     /**
-     * Constructs a new {@code DefaultBeanContext} with the specified parent context.
+     * Constructs a new {@code DefaultBeanContext} with the specified parent context and base classes.
+     * <p>
+     * If a parent context is provided, this context may inherit beans from the parent. Additionally,
+     * the provided base classes are used as entry points for scanning and resolving beans.
      *
-     * @param parent the parent bean context, or {@code null} if none exists
+     * @param parent     the parent bean context, or {@code null} if this is a root context
+     * @param baseClasses an array of classes to serve as the base for bean scanning and resolution.
+     *                    If {@code null}, no base classes are set.
      */
-    public DefaultBeanContext(BeanContext parent) {
+    public DefaultBeanContext(BeanContext parent, Class<?>... baseClasses) {
         this.parent = parent;
         this.definitionContainer = new DefaultBeanDefinitionContainer();
         this.scopeResolver = new BeanDefinitionScopeResolver(definitionContainer);
         this.containerRegistry = new DelegateBeanContainerRegistry(
                 new ScopedHashMapBeanContainer(this.scopeResolver)
         );
+
+        setBaseClasses(baseClasses);
+        setContextId(DEFAULT_CONTEXT_NAME);
+    }
+
+    /**
+     * Constructs a new {@code DefaultBeanContext} with the specified parent context.
+     * <p>
+     * This constructor automatically retrieves the base classes from the parent context.
+     *
+     * @param parent the parent bean context, must not be {@code null}
+     */
+    public DefaultBeanContext(BeanContext parent) {
+        this(parent, parent.getBaseClasses());
     }
 
     /**
      * Constructs a new {@code DefaultBeanContext} with the specified base classes.
+     * <p>
+     * This constructor is typically used when no parent context is required.
      *
      * @param baseClasses an array of classes to serve as the base for bean scanning and resolution.
      *                    If {@code null}, no base classes are set.
      */
     public DefaultBeanContext(Class<?>... baseClasses) {
-        this((BeanContext) null);
-
-        if (baseClasses != null) {
-            setBaseClasses(baseClasses);
-        }
+        this(null, baseClasses);
     }
 
     /**
@@ -565,7 +583,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public void setBaseClasses(Class<?>... baseClasses) {
-        this.baseClasses = Arrays.concatenate(baseClasses, this.baseClasses);
+        this.baseClasses = Arrays.unique(Arrays.concatenate(baseClasses, this.baseClasses));
     }
 
     /**

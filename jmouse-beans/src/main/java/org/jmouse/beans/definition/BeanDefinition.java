@@ -196,6 +196,15 @@ public interface BeanDefinition {
     Collection<Annotation> getAnnotations();
 
     /**
+     * Retrieves a specific annotation of the given type from this bean definition.
+     *
+     * @param <A> the type of the annotation to retrieve
+     * @param annotationType the class object of the annotation type
+     * @return the annotation instance if present, otherwise {@code null}
+     */
+    <A extends Annotation> A getAnnotation(Class<A> annotationType);
+
+    /**
      * Sets the annotations present on this bean definition.
      *
      * @param annotations a collection of annotations to set.

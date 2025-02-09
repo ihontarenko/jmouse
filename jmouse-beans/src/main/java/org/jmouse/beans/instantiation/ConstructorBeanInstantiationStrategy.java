@@ -42,8 +42,8 @@ public class ConstructorBeanInstantiationStrategy extends AbstractBeanInstantiat
     @Override
     public Object create(BeanDefinition definition, BeanContext context) {
         ConstructorBeanDefinition beanDefinition = (ConstructorBeanDefinition) definition;
-        List<BeanDependency> dependencies = beanDefinition.getBeanDependencies();
-        Object[] arguments = new Object[0];
+        Object[]                  arguments      = new Object[0];
+        List<BeanDependency>      dependencies   = beanDefinition.getBeanDependencies();
 
         if (!dependencies.isEmpty()) {
             try {

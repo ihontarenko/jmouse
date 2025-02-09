@@ -10,6 +10,7 @@ import org.jmouse.beans.definition.ConstructorBeanDefinition;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.RecordComponent;
 import java.util.Set;
 
 /**
@@ -40,6 +41,19 @@ public class ConstructorBeanDefinitionCreationStrategy extends AbstractBeanDefin
         ConstructorBeanDefinition definition = new ConstructorBeanDefinition(name, klass);
 
         Constructor<?> constructor;
+        Class<?>[]     parameterTypes = new Class[0];
+
+        if (klass.isRecord()) {
+            RecordComponent[] components  = klass.getRecordComponents();
+            Class<?>[]        recordTypes = new Class<?>[components.length];
+            int               index       = 0;
+
+            for (RecordComponent component : components) {
+                recordTypes[index++] = component.getType();
+            }
+
+            parameterTypes = recordTypes;
+        }
 
         try {
             // Attempt to find an annotated constructor
@@ -47,7 +61,7 @@ public class ConstructorBeanDefinitionCreationStrategy extends AbstractBeanDefin
         } catch (Exception annotatedConstructorException) {
             try {
                 // Fallback to first available constructor
-                constructor = Reflections.findFirstConstructor(klass);
+                constructor = Reflections.findFirstConstructor(klass, parameterTypes);
             } catch (Exception defaultConstructorException) {
                 BeanDefinitionException exception = new BeanDefinitionException(
                         "No constructor was found. Please create a default constructor for (" + klass + ") at least."

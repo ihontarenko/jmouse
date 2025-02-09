@@ -6,7 +6,7 @@ import org.jmouse.web.server.WebServerFactory;
 import org.jmouse.web.server.tomcat.TomcatWebServerFactory;
 
 @Configuration(name = "webServerFactoryConfiguration")
-public class ServletWebServerFactoryConfiguration {
+public class WebServerFactoryConfiguration {
 
     @Provide(proxied = true, value = "webServerFactory")
     public WebServerFactory createWebServerFactory() {

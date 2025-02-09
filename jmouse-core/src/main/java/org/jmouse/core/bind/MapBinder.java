@@ -1,5 +1,6 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.TypeDescriptor;
 
 import java.util.LinkedHashMap;
@@ -50,12 +51,16 @@ public class MapBinder extends AbstractBinder {
         // Check if the target is a map and if the keys are present in the source
         if (typeDescriptor.isMap() && !keys.isEmpty()) {
             // Get the map from the bindable instance
-            @SuppressWarnings({"unchecked"}) Map<String, Object> map = (Map<String, Object>) getMap(bindable);
+            @SuppressWarnings({"unchecked"})
+            Map<Object, Object> map             = (Map<Object, Object>) getMap(bindable);
+            JavaType            mapType         = bindable.getType();
+            TypeDescriptor      valueDescriptor = TypeDescriptor.forJavaType(mapType.getLast());
+            TypeDescriptor      keyDescriptor   = TypeDescriptor.forJavaType(mapType.getFirst());
 
             // Iterate through each key and bind the corresponding value
             for (NamePath key : keys) {
                 String           keyName       = key.path();
-                Bindable<Object> entryBindable = getBindableEntry(bindable, map, keyName);
+                Bindable<Object> valueBindable = getBindableEntry(valueDescriptor, map, keyName);
                 NamePath.Entries entries       = key.entries();
 
                 // If the key consists of multiple elements, we explicitly convert it into an indexed format.
@@ -65,13 +70,16 @@ public class MapBinder extends AbstractBinder {
                     key = NamePath.of("[" + key.path() + "]");
                 }
 
+                // unwrap braces [0] -> 0
                 if (entries.type(0).isNumeric()) {
                     keyName = entries.first().toString();
                 }
 
+                // convert key from String to actual type of Map<K, ?> key
+                Object entryKey = convert(keyName, keyDescriptor);
+
                 // Bind the value for each map entry and put it into the map
-                String entryKey = keyName;
-                bindValue(name.append(key), entryBindable, source, callback)
+                bindValue(name.append(key), valueBindable, source, callback)
                         .ifPresent(entry -> map.put(entryKey, entry));
             }
 
@@ -93,8 +101,8 @@ public class MapBinder extends AbstractBinder {
      * @param name     the map key to bind
      * @return a {@link Bindable} instance for the map entry
      */
-    protected Bindable<Object> getBindableEntry(Bindable<?> bindable, Map<String, Object> map, String name) {
-        Bindable<Object> entry = Bindable.of(bindable.getType().getLast());
+    protected Bindable<Object> getBindableEntry(TypeDescriptor descriptor, Map<Object, Object> map, String name) {
+        Bindable<Object> entry = Bindable.of(descriptor.getType());
 
         // If the map already contains the key, use the existing value
         if (map.containsKey(name)) {
@@ -103,6 +111,7 @@ public class MapBinder extends AbstractBinder {
 
         return entry;
     }
+
 
     /**
      * Retrieves the map from the bindable instance.
@@ -115,14 +124,14 @@ public class MapBinder extends AbstractBinder {
      * @return the map to bind values to
      */
     @SuppressWarnings({"unchecked"})
-    protected Map<String, ?> getMap(Bindable<?> bindable) {
+    protected Map<Object, ?> getMap(Bindable<?> bindable) {
         TypeDescriptor typeDescriptor = bindable.getTypeDescriptor();
         Supplier<?>    supplier       = bindable.getValue();
 
         // Check if the bindable type is a map and retrieve it if available
         if (typeDescriptor.isMap() && supplier != null) {
             if (supplier.get() instanceof Map<?, ?>) {
-                return (Map<String, ?>) supplier.get();
+                return (Map<Object, ?>) supplier.get();
             }
         }
 
@@ -135,7 +144,7 @@ public class MapBinder extends AbstractBinder {
      * @param bindable the bindable instance
      * @return a supplier that provides a new {@link LinkedHashMap}
      */
-    protected Supplier<Map<String, ?>> getMapSupplier(Bindable<?> bindable) {
+    protected Supplier<Map<Object, ?>> getMapSupplier(Bindable<?> bindable) {
         return LinkedHashMap::new;
     }
 

@@ -11,5 +11,5 @@ package org.jmouse.web.server;
  * @param port the port on which the server will listen
  * @param name the name of the web server instance
  */
-public record WebServerConfig(String host, int port, String name) {
+public record WebServerConfig(int port, WebServers name) {
 }

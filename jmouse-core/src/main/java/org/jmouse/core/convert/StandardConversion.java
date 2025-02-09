@@ -177,6 +177,7 @@ public class StandardConversion implements Conversion {
 
     /**
      * Searches for a potential converter candidate by checking interfaces and superclasses of the source and target types.
+     * But not optimized operation with O(n^2) complexity
      * <p>
      * The method iterates over the interfaces and classes of the source and target types to find a {@link ClassPair}
      * that matches a registered converter.

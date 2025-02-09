@@ -46,9 +46,9 @@ public class JavaBeanBinder extends AbstractBinder {
      */
     @Override
     public <T> BindResult<T> bind(NamePath name, Bindable<T> bindable, DataSource source, BindCallback callback) {
-        TypeDescriptor  typeDescriptor = bindable.getTypeDescriptor();
-        JavaType        type    = bindable.getType();
-        JavaBean<T>     bean    = JavaBean.of(type);
+        TypeDescriptor typeDescriptor = bindable.getTypeDescriptor();
+        JavaType       type           = bindable.getType();
+        JavaBean<T>    bean           = JavaBean.of(type);
 
         // Obtain a factory that can create new instances of the class
         Bean.Factory<T> factory = bean.getFactory(bindable);
@@ -60,14 +60,17 @@ public class JavaBeanBinder extends AbstractBinder {
 
         // Iterate through all the properties of the JavaBean to map values
         for (Bean.Property<T> property : bean.getProperties()) {
-            JavaType    propertyType = property.getType();
-            Supplier<?> value        = property.getValue(factory);
-            NamePath    propertyName = NamePath.of(getPreferredName(property));
+            JavaType         propertyType = property.getType();
+            Supplier<Object> value        = property.getValue(factory);
+            NamePath         propertyName = NamePath.of(getPreferredName(property));
 
             // Check if the property is writable then perform value binding for the property
             if (property.isWritable()) {
-                BindResult<Object> result = bindValue(
-                        name.append(propertyName), of(propertyType).withInstance(value), source, callback);
+                NamePath           propertyPath     = name.append(propertyName);
+                Bindable<Object>   bindableProperty = of(propertyType).withSuppliedInstance(value);
+                BindResult<Object> result           = bindValue(propertyPath, bindableProperty, source, callback);
+
+                checkRequirements(result, propertyName, property);
 
                 // If no value was found in the data source, skip this property
                 if (result.isEmpty()) {
@@ -75,10 +78,28 @@ public class JavaBeanBinder extends AbstractBinder {
                 }
 
                 property.setValue(factory, result.getValue());
+
+                callback.onBound(propertyPath, bindableProperty, context, result);
             }
         }
 
         return BindResult.of(factory.create());
+    }
+
+    /**
+     * Check if property is required
+     * <p>
+     * If the property has a setter method annotated with {@link PropertyRequired},
+     * and no value present will be thrown {@link IllegalStateException}
+     * </p>
+     */
+    protected void checkRequirements(BindResult<?> result, NamePath propertyName, Bean.Property<?> property) {
+        if (result.isEmpty()) {
+            if (property.getRawSetter().isAnnotationPresent(PropertyRequired.class)) {
+                throw new IllegalStateException("No value for required property '%s' in path '%s'"
+                        .formatted(property, propertyName));
+            }
+        }
     }
 
     /**
@@ -117,6 +138,6 @@ public class JavaBeanBinder extends AbstractBinder {
      */
     @Override
     public <T> boolean supports(Bindable<T> bindable) {
-        return !bindable.getTypeDescriptor().isRecord() && !bindable.getTypeDescriptor().isScalar();
+        return bindable.getTypeDescriptor().isBean();
     }
 }

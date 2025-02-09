@@ -31,6 +31,7 @@
         <module>jmouse-dependencies</module>
         <module>jmouse-core</module>
         <module>jmouse-expression</module>
+        <module>jmouse-validation</module>
         <module>jmouse-beans</module>
         <module>jmouse-context</module>
         <module>jmouse-web</module>
