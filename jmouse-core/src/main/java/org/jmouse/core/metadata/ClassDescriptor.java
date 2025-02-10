@@ -100,7 +100,8 @@ public interface ClassDescriptor extends ElementDescriptor<Class<?>>, ClassTypeI
          */
         Implementation(
                 String name, Class<?> internal,
-                Set<AnnotationDescriptor> annotations, Class<?> classType,
+                Set<AnnotationDescriptor> annotations,
+                Class<?> classType,
                 Collection<ConstructorDescriptor> constructors,
                 Map<String, FieldDescriptor> fields,
                 Map<String, MethodDescriptor> methods
@@ -271,7 +272,9 @@ public interface ClassDescriptor extends ElementDescriptor<Class<?>>, ClassTypeI
          */
         @Override
         public ClassDescriptor build() {
-            return new Implementation(name, internal,
+            return new Implementation(
+                    name,
+                    internal,
                     Collections.unmodifiableSet(annotations),
                     internal,
                     Collections.unmodifiableSet(constructors),

@@ -30,7 +30,7 @@ Package pkg = Bind.with(binder).to("package", Package.class).getValue();
 ### **3️⃣ Binding Maps & Collections**
 ```java
 // Bind a list  
-List<String> services = Bind.with(binder).toList("services", String.class).get();
+List<String> services = Bind.with(binder).toList("services", String.class).getValue();
 
 // Bind a map of objects  
 Map<String, Object> configs = Bind.with(binder).toMap("default.configs", Object.class).getValue();
