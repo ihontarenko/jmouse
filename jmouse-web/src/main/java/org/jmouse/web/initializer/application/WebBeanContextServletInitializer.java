@@ -4,7 +4,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jmouse.testing_ground.beans.annotation.BeanConstructor;
+import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.util.Priority;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.servlet.RequestContextListener;

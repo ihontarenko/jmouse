@@ -1,8 +1,8 @@
 package org.jmouse.context;
 
-import org.jmouse.testing_ground.beans.BeanContext;
-import org.jmouse.testing_ground.beans.BeanNotFoundException;
-import org.jmouse.testing_ground.beans.DefaultBeanContext;
+import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.BeanNotFoundException;
+import org.jmouse.beans.DefaultBeanContext;
 import org.jmouse.context.processor.ResourceInjectionBeanPostProcessor;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.env.PropertySource;

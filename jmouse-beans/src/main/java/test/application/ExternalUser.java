@@ -1,9 +1,9 @@
 package test.application;
 
-import org.jmouse.testing_ground.beans.BeanContext;
-import org.jmouse.testing_ground.beans.annotation.BeanName;
-import org.jmouse.testing_ground.beans.annotation.Dependency;
-import org.jmouse.testing_ground.beans.annotation.BeanInitializer;
+import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.annotation.BeanName;
+import org.jmouse.beans.annotation.Dependency;
+import org.jmouse.beans.annotation.BeanInitializer;
 
 @BeanName("admin")
 public class ExternalUser implements User {

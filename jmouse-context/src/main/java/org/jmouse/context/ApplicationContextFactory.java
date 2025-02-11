@@ -1,6 +1,6 @@
 package org.jmouse.context;
 
-import org.jmouse.testing_ground.beans.BeanContext;
+import org.jmouse.beans.BeanContext;
 
 /**
  * A factory interface for creating application contexts.

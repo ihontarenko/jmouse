@@ -2,8 +2,8 @@ package org.jmouse.web.initializer.context;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jmouse.testing_ground.beans.BeanContext;
-import org.jmouse.testing_ground.beans.BeanContextInitializer;
+import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.BeanContextInitializer;
 import org.jmouse.util.Priority;
 
 @Priority(1)

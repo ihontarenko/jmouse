@@ -1,6 +1,6 @@
 package org.jmouse.context;
 
-import org.jmouse.testing_ground.beans.BeanContainer;
+import org.jmouse.beans.BeanContainer;
 import org.jmouse.core.convert.ConversionConfigurer;
 import org.jmouse.common.mapping.MappingConfigurer;
 

@@ -1,7 +1,7 @@
 package org.jmouse.web.configuration;
 
-import org.jmouse.testing_ground.beans.annotation.Configuration;
-import org.jmouse.testing_ground.beans.annotation.Provide;
+import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.beans.annotation.Provide;
 import org.jmouse.web.server.WebServerFactory;
 import org.jmouse.web.server.tomcat.TomcatWebServerFactory;
 

@@ -1,8 +1,8 @@
 package org.jmouse.context.configuration;
 
 import org.jmouse.core.convert.converter.*;
-import org.jmouse.testing_ground.beans.annotation.Configuration;
-import org.jmouse.testing_ground.beans.annotation.Provide;
+import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.beans.annotation.Provide;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.convert.StandardConversion;
 import org.jmouse.core.convert.converter.enums.IntegerToEnumConverter;

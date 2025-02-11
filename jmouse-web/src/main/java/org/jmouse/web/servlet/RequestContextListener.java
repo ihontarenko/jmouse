@@ -5,7 +5,7 @@ import jakarta.servlet.ServletRequestListener;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jmouse.testing_ground.beans.BeanScope;
+import org.jmouse.beans.BeanScope;
 import org.jmouse.web.request.RequestAttributes;
 import org.jmouse.web.request.RequestAttributesHolder;
 

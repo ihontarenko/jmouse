@@ -1,8 +1,8 @@
 package test.application.ints;
 
-import org.jmouse.testing_ground.beans.BeanScope;
-import org.jmouse.testing_ground.beans.annotation.Configuration;
-import org.jmouse.testing_ground.beans.annotation.Provide;
+import org.jmouse.beans.BeanScope;
+import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.beans.annotation.Provide;
 
 import java.util.Random;
 

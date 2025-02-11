@@ -1,8 +1,8 @@
 package org.jmouse.context.processor;
 
-import org.jmouse.testing_ground.beans.BeanContext;
-import org.jmouse.testing_ground.beans.definition.BeanDefinition;
-import org.jmouse.testing_ground.beans.processor.BeanPostProcessor;
+import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.definition.BeanDefinition;
+import org.jmouse.beans.processor.BeanPostProcessor;
 import org.jmouse.context.Resource;
 import org.jmouse.core.reflection.FieldFinder;
 

@@ -1,7 +1,7 @@
 package org.jmouse.context;
 
-import org.jmouse.testing_ground.beans.BeanContext;
-import org.jmouse.testing_ground.beans.BeanFactory;
+import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.BeanFactory;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.env.PropertyResolver;
 import org.jmouse.core.io.ResourceLoader;
