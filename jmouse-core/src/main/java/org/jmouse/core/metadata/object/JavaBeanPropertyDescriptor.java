@@ -26,7 +26,7 @@ public interface JavaBeanPropertyDescriptor<T> extends PropertyDescriptor<T> {
                 Setter<T, Object> setter,
                 MethodDescriptor getterMethod,
                 MethodDescriptor setterMethod,
-                JavaBeanDescriptor<T> owner
+                ObjectDescriptor<T> owner
         ) {
             super(name, internal, annotations, getter, setter, owner);
 

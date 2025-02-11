@@ -198,15 +198,15 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
      * A builder class for constructing {@link PropertyDescriptor} instances.
      *
      * @param <B> the type of the builder itself
-     * @param <T> the type of the object containing the property
+     * @param <I> the type of the object containing the property
      * @param <D> the type of {@link PropertyDescriptor} being built
      */
-    abstract class Builder<B extends Builder<B, T, D>, T, D extends PropertyDescriptor<T>>
-            extends ElementDescriptor.Builder<B, T, D> {
+    abstract class Builder<B extends Builder<B, I, D>, I, D extends PropertyDescriptor<I>>
+            extends ElementDescriptor.Builder<B, I, D> {
 
-        protected Getter<T, Object>     getter;
-        protected Setter<T, Object>     setter;
-        protected JavaBeanDescriptor<T> owner;
+        protected Getter<I, Object>   getter;
+        protected Setter<I, Object>   setter;
+        protected ObjectDescriptor<I> owner;
 
         /**
          * Constructs a new {@code PropertyDescriptor.Builder}.
@@ -223,7 +223,7 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
          * @param getter the getter function
          * @return this builder instance
          */
-        public B getter(Getter<T, Object> getter) {
+        public B getter(Getter<I, Object> getter) {
             this.getter = getter;
             return self();
         }
@@ -234,7 +234,7 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
          * @param setter the setter function
          * @return this builder instance
          */
-        public B setter(Setter<T, Object> setter) {
+        public B setter(Setter<I, Object> setter) {
             this.setter = setter;
             return self();
         }
@@ -245,7 +245,7 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
          * @param owner the {@link JavaBeanDescriptor} representing the owner
          * @return this builder instance
          */
-        public B owner(JavaBeanDescriptor<T> owner) {
+        public B owner(JavaBeanDescriptor<I> owner) {
             this.owner = owner;
             return self();
         }
