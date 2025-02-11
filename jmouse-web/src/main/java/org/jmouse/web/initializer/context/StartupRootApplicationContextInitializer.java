@@ -1,9 +1,9 @@
 package org.jmouse.web.initializer.context;
 
-import org.jmouse.beans.BeanContainer;
-import org.jmouse.beans.BeanContext;
-import org.jmouse.beans.BeanContextInitializer;
-import org.jmouse.beans.BeanScope;
+import org.jmouse.testing_ground.beans.BeanContainer;
+import org.jmouse.testing_ground.beans.BeanContext;
+import org.jmouse.testing_ground.beans.BeanContextInitializer;
+import org.jmouse.testing_ground.beans.BeanScope;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.io.CompositeResourceLoader;

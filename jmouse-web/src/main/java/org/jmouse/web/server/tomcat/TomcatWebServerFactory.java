@@ -1,8 +1,8 @@
 package org.jmouse.web.server.tomcat;
 
 import org.apache.catalina.startup.Tomcat;
-import org.jmouse.beans.BeanContext;
-import org.jmouse.beans.BeanContextAware;
+import org.jmouse.testing_ground.beans.BeanContext;
+import org.jmouse.testing_ground.beans.BeanContextAware;
 import org.jmouse.web.initializer.ServletWebApplicationInitializer;
 import org.jmouse.web.servlet.initializer.FrameworkInitializer;
 import org.jmouse.web.server.WebServer;

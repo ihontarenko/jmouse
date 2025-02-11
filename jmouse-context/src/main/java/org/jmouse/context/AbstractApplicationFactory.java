@@ -1,6 +1,5 @@
 package org.jmouse.context;
 
-import org.jmouse.beans.BeanContext;
 import org.jmouse.core.env.*;
 import org.jmouse.core.io.CompositeResourceLoader;
 import org.jmouse.core.io.PatternMatcherResourceLoader;

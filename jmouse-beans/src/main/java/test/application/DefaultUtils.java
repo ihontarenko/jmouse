@@ -1,8 +1,8 @@
 package test.application;
 
-import org.jmouse.beans.BeanContext;
-import org.jmouse.beans.BeanContextAware;
-import org.jmouse.beans.annotation.Provide;
+import org.jmouse.testing_ground.beans.BeanContext;
+import org.jmouse.testing_ground.beans.BeanContextAware;
+import org.jmouse.testing_ground.beans.annotation.Provide;
 
 @Provide(value = "util", proxied = true)
 public class DefaultUtils implements Utils, BeanContextAware {

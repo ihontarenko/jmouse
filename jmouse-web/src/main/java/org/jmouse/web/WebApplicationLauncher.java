@@ -1,6 +1,6 @@
 package org.jmouse.web;
 
-import org.jmouse.beans.ScannerBeanContextInitializer;
+import org.jmouse.testing_ground.beans.ScannerBeanContextInitializer;
 import org.jmouse.core.bind.*;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.reflection.ClassFinder;

@@ -1,11 +1,11 @@
 package org.jmouse.web.configuration;
 
-import org.jmouse.beans.annotation.SuppressException;
-import org.jmouse.beans.definition.DuplicateBeanDefinitionException;
+import org.jmouse.testing_ground.beans.annotation.SuppressException;
+import org.jmouse.testing_ground.beans.definition.DuplicateBeanDefinitionException;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.env.MapPropertySource;
-import org.jmouse.beans.BeanContainer;
-import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.testing_ground.beans.BeanContainer;
+import org.jmouse.testing_ground.beans.annotation.Configuration;
 import org.jmouse.context.ApplicationConfigurer;
 
 import java.util.Map;

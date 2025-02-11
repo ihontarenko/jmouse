@@ -41,7 +41,7 @@ public abstract class AbstractMessageSourceBundle extends AbstractMessageSource 
      */
     protected final List<MessageBundleLoader> loaders = new ArrayList<>();
 
-    private Charset defaultEncoding;
+    private Charset     defaultEncoding;
     private ClassLoader classLoader;
 
     /**

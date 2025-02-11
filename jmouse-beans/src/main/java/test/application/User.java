@@ -1,6 +1,6 @@
 package test.application;
 
-import org.jmouse.beans.annotation.Provide;
+import org.jmouse.testing_ground.beans.annotation.Provide;
 
 @Provide(proxied = true)
 public interface User {

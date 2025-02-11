@@ -56,14 +56,7 @@ public abstract class AbstractMessageSource implements MessageSource {
      */
     @Override
     public String getMessage(String key, Locale locale, Object... arguments) {
-        MessageFormat messageFormat = resolveMessage(key, locale);
-        String message = null;
-
-        if (messageFormat != null) {
-            synchronized (messageFormat) { // Ensure thread safety when formatting messages
-                message = messageFormat.format(resolveArguments(arguments, locale));
-            }
-        }
+        String message = resolveMessage(key, locale, arguments);
 
         // Apply fallback strategy if the message is not found
         if (message == null && isFallbackWithCode()) {
@@ -75,6 +68,10 @@ public abstract class AbstractMessageSource implements MessageSource {
 
     /**
      * Retrieves a localized message for the given key using the default locale.
+     * <p>
+     * This method is a shortcut for calling {@link #getMessage(String, Locale, Object...)}
+     * with the system's default locale.
+     * </p>
      *
      * @param key       the message key
      * @param arguments optional arguments for message formatting
@@ -83,6 +80,73 @@ public abstract class AbstractMessageSource implements MessageSource {
     @Override
     public String getMessage(String key, Object... arguments) {
         return getMessage(key, getDefaultLocale(), arguments);
+    }
+
+    /**
+     * Retrieves a localized message using a {@link LocalizableMessage} instance.
+     * <p>
+     * This method provides a convenient way to resolve messages with a structured
+     * message representation that includes the key, arguments, and a default fallback message.
+     * </p>
+     *
+     * @param localizable the localizable message containing the key, arguments, and fallback message
+     * @param locale    the locale to retrieve the message for
+     * @return the localized message, formatted if necessary, or the default message if the key is not found
+     */
+    @Override
+    public String getMessage(LocalizableMessage localizable, Locale locale) {
+        Object[] arguments = resolveArguments(localizable.getArguments(), locale);
+        String   message   = resolveMessage(localizable.getMessageKey(), locale, arguments);
+
+        if (message == null) {
+            message = localizable.getDefaultMessage();
+            if (message == null && isFallbackWithCode()) {
+                message = getFallbackPattern().formatted(message);
+            }
+        }
+
+        return message;
+    }
+
+    /**
+     * Retrieves a localized message using a {@link LocalizableMessage} instance.
+     * <p>
+     * This method provides a convenient way to resolve messages with a structured
+     * message representation that includes the key, arguments, and a default fallback message.
+     * </p>
+     *
+     * @param localizable the localizable message containing the key, arguments, and fallback message
+     * @return the localized message, formatted if necessary, or the default message if the key is not found
+     */
+    @Override
+    public String getMessage(LocalizableMessage localizable) {
+        return getMessage(localizable, getDefaultLocale());
+    }
+
+    /**
+     * Resolves the localized message for the given key and locale, applying argument formatting.
+     * <p>
+     * This method retrieves the message format for the given key and locale, and formats
+     * the message using the provided arguments. The method ensures thread safety while formatting.
+     * </p>
+     *
+     * @param key       the message key
+     * @param locale    the target locale
+     * @param arguments optional arguments for message formatting
+     * @return the formatted message, or {@code null} if no message is found
+     */
+    protected String resolveMessage(String key, Locale locale, Object... arguments) {
+        MessageFormat messageFormat = resolveMessage(key, locale);
+        String message = null;
+
+        if (messageFormat != null) {
+            // Ensure thread safety when formatting messages
+            synchronized (messageFormat) {
+                message = messageFormat.format(resolveArguments(arguments, locale));
+            }
+        }
+
+        return message;
     }
 
     /**

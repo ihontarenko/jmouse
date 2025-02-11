@@ -11,6 +11,7 @@ import java.util.Locale;
  * </p>
  *
  * @see MessageSourceBundle
+ * @see LocalizableMessage
  */
 public interface MessageSource {
 
@@ -40,4 +41,29 @@ public interface MessageSource {
      * @return the localized message, formatted if arguments are provided
      */
     String getMessage(String key, Object... arguments);
+
+    /**
+     * Retrieves a localized message using a {@link LocalizableMessage} instance.
+     * <p>
+     * This method provides a convenient way to resolve messages with a structured
+     * message representation that includes the key, arguments, and a default fallback message.
+     * </p>
+     *
+     * @param localizable the localizable message containing the key, arguments, and fallback message
+     * @param locale    the locale to retrieve the message for
+     * @return the localized message, formatted if necessary, or the default message if the key is not found
+     */
+    String getMessage(LocalizableMessage localizable, Locale locale);
+
+    /**
+     * Retrieves a localized message using a {@link LocalizableMessage} instance.
+     * <p>
+     * This method provides a convenient way to resolve messages with a structured
+     * message representation that includes the key, arguments, and a default fallback message.
+     * </p>
+     *
+     * @param localizable the localizable message containing the key, arguments, and fallback message
+     * @return the localized message, formatted if necessary, or the default message if the key is not found
+     */
+    String getMessage(LocalizableMessage localizable);
 }

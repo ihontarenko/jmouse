@@ -1,6 +1,6 @@
 package org.jmouse.web;
 
-import org.jmouse.beans.BeanContext;
+import org.jmouse.testing_ground.beans.BeanContext;
 
 /**
  * Defines a contract for launching an application with a configurable {@link BeanContext}.

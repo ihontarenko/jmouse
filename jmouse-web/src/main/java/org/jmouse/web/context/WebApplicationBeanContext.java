@@ -1,8 +1,8 @@
 package org.jmouse.web.context;
 
-import org.jmouse.beans.BeanContext;
-import org.jmouse.beans.container.ThreadLocalBeanContainer;
-import org.jmouse.beans.container.ThreadLocalScope;
+import org.jmouse.testing_ground.beans.BeanContext;
+import org.jmouse.testing_ground.beans.container.ThreadLocalBeanContainer;
+import org.jmouse.testing_ground.beans.container.ThreadLocalScope;
 
 public class WebApplicationBeanContext extends AbstractWebApplicationBeanContext {
 
