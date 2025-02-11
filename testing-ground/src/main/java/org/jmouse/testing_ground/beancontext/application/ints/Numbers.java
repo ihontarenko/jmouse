@@ -1,4 +1,4 @@
-package test.application.ints;
+package org.jmouse.testing_ground.beancontext.application.ints;
 
 import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.annotation.Configuration;

@@ -137,7 +137,7 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
         /**
          * Sets the exception types of the executable using a varargs array.
          *
-         * @param exceptionTypes an array of {@link ClassDescriptor} instances
+         * @param exceptionType an array of {@link ClassDescriptor} instances
          * @return this builder instance for method chaining
          */
         public B exceptionType(ClassDescriptor exceptionType) {

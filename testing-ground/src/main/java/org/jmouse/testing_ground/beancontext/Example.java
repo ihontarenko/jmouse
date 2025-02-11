@@ -1,9 +1,12 @@
-package org.jmouse.beans;
+package org.jmouse.testing_ground.beancontext;
 
+import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.DefaultBeanContext;
+import org.jmouse.beans.ScannerBeanContextInitializer;
 import org.jmouse.context.ApplicationConfigurer;
 import org.jmouse.web.Launcher;
-import test.application.User;
-import test.application.UserHolder;
+import org.jmouse.testing_ground.beancontext.application.User;
+import org.jmouse.testing_ground.beancontext.application.UserHolder;
 
 public class Example {
 

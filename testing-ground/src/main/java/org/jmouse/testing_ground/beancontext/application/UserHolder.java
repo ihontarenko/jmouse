@@ -1,4 +1,4 @@
-package test.application;
+package org.jmouse.testing_ground.beancontext.application;
 
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.beans.annotation.Qualifier;

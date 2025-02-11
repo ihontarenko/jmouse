@@ -9,12 +9,12 @@ abstract public class BasicErrors implements Errors {
     }
 
     @Override
-    public void reject(String errorCode, String defaultMessage, String[] arguments) {
+    public void reject(String errorCode, String defaultMessage, String... arguments) {
 
     }
 
     @Override
-    public void rejectValue(String field, String errorCode, String defaultMessage, String[] arguments) {
+    public void rejectValue(String field, String errorCode, String defaultMessage, String... arguments) {
 
     }
 

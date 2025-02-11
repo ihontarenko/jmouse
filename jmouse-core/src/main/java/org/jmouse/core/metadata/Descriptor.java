@@ -1,5 +1,8 @@
 package org.jmouse.core.metadata;
 
+import org.jmouse.core.metadata.object.JavaBeanDescriptor;
+import org.jmouse.core.metadata.object.JavaBeanPropertyDescriptor;
+
 /**
  * A base interface for describing various elements within the Descriptive API.
  * <p>
@@ -12,10 +15,10 @@ package org.jmouse.core.metadata;
  * @param <T> the type of the internal representation of the described element
  * @see ElementDescriptor
  * @see ClassDescriptor
- * @see BeanDescriptor
+ * @see JavaBeanDescriptor
  * @see MethodDescriptor
  * @see FieldDescriptor
- * @see PropertyDescriptor
+ * @see JavaBeanPropertyDescriptor
  * @see ConstructorDescriptor
  * @see ParameterDescriptor
  * @see AnnotationDescriptor

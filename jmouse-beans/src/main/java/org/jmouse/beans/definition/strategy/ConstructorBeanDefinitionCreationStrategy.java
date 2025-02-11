@@ -7,7 +7,7 @@ import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDefinitionException;
 import org.jmouse.beans.definition.ConstructorBeanDefinition;
-import org.jmouse.core.metadata.BeanDescriptor;
+import org.jmouse.core.metadata.object.JavaBeanDescriptor;
 import org.jmouse.core.metadata.MetaDescriptor;
 import org.jmouse.core.reflection.Reflections;
 
@@ -41,7 +41,7 @@ public class ConstructorBeanDefinitionCreationStrategy extends AbstractBeanDefin
     @Override
     public BeanDefinition create(String name, Class<?> klass, BeanContext context) {
         ConstructorBeanDefinition definition = new ConstructorBeanDefinition(name, klass);
-        BeanDescriptor<?>         descriptor = MetaDescriptor.forBean(klass);
+        JavaBeanDescriptor<?>     descriptor = MetaDescriptor.forBean(klass);
 
         Constructor<?> constructor;
         Class<?>[]     parameterTypes = new Class[0];

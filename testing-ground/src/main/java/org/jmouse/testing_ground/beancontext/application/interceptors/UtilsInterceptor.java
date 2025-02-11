@@ -1,9 +1,9 @@
-package test.application.interceptors;
+package org.jmouse.testing_ground.beancontext.application.interceptors;
 
 import org.jmouse.core.proxy.MethodInterceptor;
 import org.jmouse.core.proxy.MethodInvocation;
 import org.jmouse.core.proxy.annotation.ProxyMethodInterceptor;
-import test.application.Utils;
+import org.jmouse.testing_ground.beancontext.application.Utils;
 
 @ProxyMethodInterceptor({Utils.class})
 public class UtilsInterceptor implements MethodInterceptor {

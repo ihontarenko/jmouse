@@ -1,7 +1,11 @@
 package org.jmouse.core.metadata;
 
 import org.jmouse.core.matcher.Matcher;
-import org.jmouse.core.metadata.PropertyDescriptor.Builder;
+import org.jmouse.core.metadata.object.JavaBeanDescriptor;
+import org.jmouse.core.metadata.object.JavaBeanPropertyDescriptor;
+import org.jmouse.core.metadata.object.JavaBeanPropertyDescriptor.Builder;
+import org.jmouse.util.Getter;
+import org.jmouse.util.Setter;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -266,15 +270,15 @@ public final class MetaDescriptor {
     /**
      * Creates a descriptor for a JavaBean.
      * <p>
-     * This method analyzes the given class and generates a {@link BeanDescriptor},
+     * This method analyzes the given class and generates a {@link JavaBeanDescriptor},
      * detecting properties based on JavaBean getter/setter conventions.
      * </p>
      *
      * @param type the class to describe
      * @param <T>  the type of the bean
-     * @return a {@link BeanDescriptor} instance representing the bean
+     * @return a {@link JavaBeanDescriptor} instance representing the bean
      */
-    public static <T> BeanDescriptor<T> forBean(Class<T> type) {
+    public static <T> JavaBeanDescriptor<T> forBean(Class<T> type) {
         return forBean(type, null);
     }
 
@@ -288,9 +292,9 @@ public final class MetaDescriptor {
      * @param type the class to describe
      * @param bean an optional instance of the bean
      * @param <T>  the type of the bean
-     * @return a {@link BeanDescriptor} instance representing the bean
+     * @return a {@link JavaBeanDescriptor} instance representing the bean
      */
-    public static <T> BeanDescriptor<T> forBean(Class<T> type, T bean) {
+    public static <T> JavaBeanDescriptor<T> forBean(Class<T> type, T bean) {
         return forBean(type, bean, DEFAULT_DEPTH);
     }
 
@@ -305,22 +309,22 @@ public final class MetaDescriptor {
      * @param bean  an optional instance of the bean
      * @param depth the recursion depth limit for nested metadata resolution
      * @param <T>   the type of the bean
-     * @return a {@link BeanDescriptor} instance representing the bean
+     * @return a {@link JavaBeanDescriptor} instance representing the bean
      */
-    public static <T> BeanDescriptor<T> forBean(Class<T> type, T bean, int depth) {
+    public static <T> JavaBeanDescriptor<T> forBean(Class<T> type, T bean, int depth) {
         // Map to store property builders
         Map<String, Builder<T>> builders = new HashMap<>();
 
         // Initialize the BeanDescriptor builder with the short name of the class
-        BeanDescriptor.Builder<T> builder = new BeanDescriptor.Builder<>(getShortName(type));
+        JavaBeanDescriptor.Builder<T> builder = new JavaBeanDescriptor.Builder<>(getShortName(type));
 
         // Generate the class descriptor for the given type
         ClassDescriptor typeDescriptor = forClass(type, depth);
 
         // Define matchers for getter and setter methods
-        Matcher<Executable> anyMatcher = getter().or(setter());
-        BiConsumer<Builder<T>, MethodDescriptor> getter = Builder::getter;
-        BiConsumer<Builder<T>, MethodDescriptor> setter = Builder::setter;
+        Matcher<Executable>                       anyMatcher   = getter().or(setter());
+        BiConsumer<Builder<T>, MethodDescriptor>  getterMethod = Builder::getterMethod;
+        BiConsumer<Builder<T>, MethodDescriptor>  setterMethod = Builder::setterMethod;
 
         // Iterate over all methods in the class descriptor
         for (MethodDescriptor method : typeDescriptor.getMethods()) {
@@ -334,15 +338,15 @@ public final class MetaDescriptor {
                 // Determine if the method is a getter ("is" or "get" prefix)
                 if (getter().matches(rawMethod) && prefixIs().matches(rawMethod)) {
                     name = getPropertyName(rawMethod, GETTER_IS_PREFIX);
-                    adder = getter;
+                    adder = getterMethod;
                 } else if (getter().matches(rawMethod)) {
                     name = getPropertyName(rawMethod, GETTER_GET_PREFIX);
-                    adder = getter;
+                    adder = getterMethod;
                 }
                 // Determine if the method is a setter ("set" prefix)
                 else if (setter().matches(rawMethod)) {
                     name = getPropertyName(rawMethod, SETTER_PREFIX);
-                    adder = setter;
+                    adder = setterMethod;
                 }
 
                 // Associate the method with a property descriptor
@@ -351,6 +355,12 @@ public final class MetaDescriptor {
                 // Copy annotations from method to property descriptor
                 if (builders.containsKey(name)) {
                     method.getAnnotations().forEach(builders.get(name)::annotation);
+
+                    if (setter().matches(rawMethod)) {
+                        builders.get(name).setter(Setter.ofMethod(rawMethod));
+                    } else if (getter().matches(rawMethod)) {
+                        builders.get(name).getter(Getter.ofMethod(rawMethod));
+                    }
                 }
 
                 // Copy annotations from corresponding field (if exists)
@@ -369,7 +379,7 @@ public final class MetaDescriptor {
         }
 
         // Build the final BeanDescriptor instance
-        BeanDescriptor<T> beanDescriptor = builder.build();
+        JavaBeanDescriptor<T> beanDescriptor = builder.build();
 
         // Assign properties to the final descriptor
         for (Builder<T> property : builders.values()) {
@@ -382,15 +392,15 @@ public final class MetaDescriptor {
     /**
      * Creates a descriptor for a record (value object).
      * <p>
-     * This method detects record components and generates a {@link BeanDescriptor},
+     * This method detects record components and generates a {@link JavaBeanDescriptor},
      * treating them as immutable properties.
      * </p>
      *
      * @param type the record class to describe
      * @param <T>  the type of the record
-     * @return a {@link BeanDescriptor} instance representing the record
+     * @return a {@link JavaBeanDescriptor} instance representing the record
      */
-    public static <T extends Record> BeanDescriptor<T> forValueObject(Class<T> type) {
+    public static <T extends Record> JavaBeanDescriptor<T> forValueObject(Class<T> type) {
         return forValueObject(type, null);
     }
 
@@ -404,9 +414,9 @@ public final class MetaDescriptor {
      * @param type the record class to describe
      * @param bean an optional instance of the record
      * @param <T>  the type of the record
-     * @return a {@link BeanDescriptor} instance representing the record
+     * @return a {@link JavaBeanDescriptor} instance representing the record
      */
-    public static <T extends Record> BeanDescriptor<T> forValueObject(Class<T> type, T bean) {
+    public static <T extends Record> JavaBeanDescriptor<T> forValueObject(Class<T> type, T bean) {
         return forValueObject(type, bean, DEFAULT_DEPTH);
     }
 
@@ -421,11 +431,11 @@ public final class MetaDescriptor {
      * @param bean  an optional instance of the record
      * @param depth the recursion depth limit for nested metadata resolution
      * @param <T>   the type of the record
-     * @return a {@link BeanDescriptor} instance representing the record
+     * @return a {@link JavaBeanDescriptor} instance representing the record
      */
-    public static <T extends Record> BeanDescriptor<T> forValueObject(Class<T> type, T bean, int depth) {
+    public static <T extends Record> JavaBeanDescriptor<T> forValueObject(Class<T> type, T bean, int depth) {
         // Initialize the builder for the BeanDescriptor using the class short name
-        BeanDescriptor.Builder<T> builder = new BeanDescriptor.Builder<>(getShortName(type));
+        JavaBeanDescriptor.Builder<T> builder = new JavaBeanDescriptor.Builder<>(getShortName(type));
 
         // Generate a ClassDescriptor for the given record type
         ClassDescriptor descriptor = forClass(type, depth);
@@ -439,15 +449,16 @@ public final class MetaDescriptor {
         }
 
         // Build the BeanDescriptor for the record
-        BeanDescriptor<T> beanDescriptor = builder.build();
+        JavaBeanDescriptor<T> beanDescriptor = builder.build();
 
         // Iterate over all record components (fields implicitly declared in the record)
         for (RecordComponent component : type.getRecordComponents()) {
             // Initialize a property descriptor builder for each record component
-            PropertyDescriptor.Builder<T> propertyBuilder = new PropertyDescriptor.Builder<>(component.getName());
+            JavaBeanPropertyDescriptor.Builder<T> propertyBuilder = new JavaBeanPropertyDescriptor.Builder<>(component.getName());
 
             // Link the getter method of the record component
-            propertyBuilder.owner(beanDescriptor).getter(forMethod(component.getAccessor(), depth - 1));
+            propertyBuilder.owner(beanDescriptor).getterMethod(forMethod(component.getAccessor(), depth - 1));
+            propertyBuilder.getter(Getter.ofMethod(component.getAccessor()));
 
             // Add the property to the bean descriptor
             builder.property(propertyBuilder.build());

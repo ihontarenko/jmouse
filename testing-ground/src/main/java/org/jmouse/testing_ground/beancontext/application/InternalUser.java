@@ -1,4 +1,4 @@
-package test.application;
+package org.jmouse.testing_ground.beancontext.application;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanContextAware;
@@ -13,7 +13,7 @@ public class InternalUser implements User, BeanContextAware {
     private BeanContext beanContext;
 
     @Dependency("defaultUserName")
-    private String name;
+    private String name = "defaultUserName";
 
     @BeanInitializer
     public void init() {

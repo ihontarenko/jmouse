@@ -1,14 +1,15 @@
 package org.jmouse.testing_ground.descriptive;
 
 import org.jmouse.core.bind.JavaBean;
-import org.jmouse.core.metadata.BeanDescriptor;
+import org.jmouse.core.metadata.object.JavaBeanDescriptor;
 import org.jmouse.core.metadata.ClassDescriptor;
 import org.jmouse.core.metadata.MetaDescriptor;
+import org.jmouse.core.metadata.object.ObjectDescriptor;
 import org.jmouse.testing_ground.example.WebServer;
 import org.jmouse.web.server.WebServers;
-import test.application.ExternalUser;
-import test.application.InternalUser;
-import test.application.UserHolder;
+import org.jmouse.testing_ground.beancontext.application.ExternalUser;
+import org.jmouse.testing_ground.beancontext.application.InternalUser;
+import org.jmouse.testing_ground.beancontext.application.UserHolder;
 
 public class Example {
 
@@ -23,8 +24,12 @@ public class Example {
 
         ExternalUser externalUser = new ExternalUser();
 
-        BeanDescriptor<ExternalUser> descriptor = MetaDescriptor.forBean(ExternalUser.class, externalUser);
-        BeanDescriptor<UserHolder> recordBean = MetaDescriptor.forValueObject(UserHolder.class);
+        externalUser.setUser(new InternalUser());
+
+        ObjectDescriptor<ExternalUser> descriptor = MetaDescriptor.forBean(ExternalUser.class, externalUser);
+        ObjectDescriptor<UserHolder> recordBean = MetaDescriptor.forValueObject(UserHolder.class);
+
+        descriptor.getProperty("user").getGetter();
 
         System.out.println(recordBean);
     }
