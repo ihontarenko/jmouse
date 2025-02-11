@@ -1,8 +1,8 @@
-package org.jmouse.validator.manual.constraint;
+package org.jmouse.validator.old.constraint;
 
-import org.jmouse.validator.manual.AbstractValidator;
-import org.jmouse.validator.manual.Errors;
-import org.jmouse.validator.manual.ValidationContext;
+import org.jmouse.validator.old.AbstractValidator;
+import org.jmouse.validator.old.Errors;
+import org.jmouse.validator.old.ValidationContext;
 
 public class NumberRangeValidator extends AbstractValidator {
 

@@ -1,4 +1,4 @@
-package org.jmouse.validator.manual;
+package org.jmouse.validator.old;
 
 import org.jmouse.common.support.objects.BeanObjectInfo;
 import org.jmouse.common.support.objects.FieldAccessor;

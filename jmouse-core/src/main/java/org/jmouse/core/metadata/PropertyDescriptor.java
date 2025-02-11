@@ -32,13 +32,6 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
     BeanDescriptor<T> getOwner();
 
     /**
-     * Sets the owner of this property.
-     *
-     * @param owner the {@link BeanDescriptor} that owns this property
-     */
-    void setOwner(BeanDescriptor<T> owner);
-
-    /**
      * Returns the method descriptor representing the getter of this property.
      *
      * @return the {@link MethodDescriptor} for the getter, or {@code null} if not present
@@ -131,16 +124,6 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
         @Override
         public BeanDescriptor<T> getOwner() {
             return owner;
-        }
-
-        /**
-         * Sets the owner of this property.
-         *
-         * @param owner the {@link BeanDescriptor} that owns this property
-         */
-        @Override
-        public void setOwner(BeanDescriptor<T> owner) {
-            this.owner = owner;
         }
 
         /**

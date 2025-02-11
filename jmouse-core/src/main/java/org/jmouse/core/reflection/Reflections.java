@@ -974,18 +974,20 @@ abstract public class Reflections {
      * @param element         the annotated element to inspect.
      * @param annotationClass the class of the annotation to retrieve.
      * @param extractor       a function to extract the desired attribute value from the annotation.
-     * @param <T>             the type of the annotation.
+     * @param <A>             the type of the annotation.
+     * @param <R>             the type of annotation method return type.
      * @return the extracted attribute value, or {@code null} if the annotation is not present.
      */
-    public static <T extends Annotation, R> R getAnnotationValue(AnnotatedElement element, Class<? extends T> annotationClass, Function<T, Object> extractor) {
-        Object value = null;
+    public static <A extends Annotation, R> R getAnnotationValue(
+            AnnotatedElement element, Class<? extends A> annotationClass, Function<A, R> extractor) {
+        R value = null;
 
         if (element.isAnnotationPresent(annotationClass)) {
-            T annotation = element.getAnnotation(annotationClass);
+            A annotation = element.getAnnotation(annotationClass);
             value = extractor.apply(annotation);
         }
 
-        return (R) value;
+        return value;
     }
 
     /**

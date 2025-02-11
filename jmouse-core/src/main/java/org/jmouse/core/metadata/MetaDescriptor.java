@@ -308,46 +308,75 @@ public final class MetaDescriptor {
      * @return a {@link BeanDescriptor} instance representing the bean
      */
     public static <T> BeanDescriptor<T> forBean(Class<T> type, T bean, int depth) {
-        Map<String, Builder<T>>                  builders   = new HashMap<>();
-        BeanDescriptor.Builder<T>                builder    = new BeanDescriptor.Builder<>(getShortName(type));
-        ClassDescriptor                          descriptor = forClass(type, depth);
-        Matcher<Executable>                      anyMatcher = getter().or(setter());
-        BiConsumer<Builder<T>, MethodDescriptor> getter     = Builder::getter;
-        BiConsumer<Builder<T>, MethodDescriptor> setter     = Builder::setter;
+        // Map to store property builders
+        Map<String, Builder<T>> builders = new HashMap<>();
 
-        for (MethodDescriptor method : descriptor.getMethods()) {
+        // Initialize the BeanDescriptor builder with the short name of the class
+        BeanDescriptor.Builder<T> builder = new BeanDescriptor.Builder<>(getShortName(type));
+
+        // Generate the class descriptor for the given type
+        ClassDescriptor typeDescriptor = forClass(type, depth);
+
+        // Define matchers for getter and setter methods
+        Matcher<Executable> anyMatcher = getter().or(setter());
+        BiConsumer<Builder<T>, MethodDescriptor> getter = Builder::getter;
+        BiConsumer<Builder<T>, MethodDescriptor> setter = Builder::setter;
+
+        // Iterate over all methods in the class descriptor
+        for (MethodDescriptor method : typeDescriptor.getMethods()) {
             Method rawMethod = method.getInternal();
-            if (anyMatcher.matches(rawMethod)) {
 
+            // Check if the method matches getter or setter patterns
+            if (anyMatcher.matches(rawMethod)) {
                 BiConsumer<Builder<T>, MethodDescriptor> adder = (a, b) -> {};
                 String name = null;
 
+                // Determine if the method is a getter ("is" or "get" prefix)
                 if (getter().matches(rawMethod) && prefixIs().matches(rawMethod)) {
                     name = getPropertyName(rawMethod, GETTER_IS_PREFIX);
                     adder = getter;
                 } else if (getter().matches(rawMethod)) {
                     name = getPropertyName(rawMethod, GETTER_GET_PREFIX);
                     adder = getter;
-                } else if (setter().matches(rawMethod)) {
+                }
+                // Determine if the method is a setter ("set" prefix)
+                else if (setter().matches(rawMethod)) {
                     name = getPropertyName(rawMethod, SETTER_PREFIX);
                     adder = setter;
                 }
 
+                // Associate the method with a property descriptor
                 adder.accept(builders.computeIfAbsent(name, Builder::new), forMethod(rawMethod, depth - 1));
+
+                // Copy annotations from method to property descriptor
+                if (builders.containsKey(name)) {
+                    method.getAnnotations().forEach(builders.get(name)::annotation);
+                }
+
+                // Copy annotations from corresponding field (if exists)
+                if (typeDescriptor.hasField(name)) {
+                    typeDescriptor.getField(name).getAnnotations().forEach(builders.get(name)::annotation);
+                }
             }
         }
 
-        builder.descriptor(descriptor);
+        // Assign the class descriptor to the bean descriptor
+        builder.descriptor(typeDescriptor);
 
+        // If a bean instance is provided, attach it to the descriptor
         if (bean != null) {
             builder.bean(bean).internal(bean);
         }
 
+        // Build the final BeanDescriptor instance
+        BeanDescriptor<T> beanDescriptor = builder.build();
+
+        // Assign properties to the final descriptor
         for (Builder<T> property : builders.values()) {
-            builder.property(property.build());
+            builder.property(property.owner(beanDescriptor).build());
         }
 
-        return builder.build();
+        return beanDescriptor;
     }
 
     /**
@@ -395,22 +424,50 @@ public final class MetaDescriptor {
      * @return a {@link BeanDescriptor} instance representing the record
      */
     public static <T extends Record> BeanDescriptor<T> forValueObject(Class<T> type, T bean, int depth) {
+        // Initialize the builder for the BeanDescriptor using the class short name
         BeanDescriptor.Builder<T> builder = new BeanDescriptor.Builder<>(getShortName(type));
+
+        // Generate a ClassDescriptor for the given record type
         ClassDescriptor descriptor = forClass(type, depth);
 
+        // Assign the class descriptor to the builder
         builder.descriptor(descriptor);
 
+        // If an instance of the record is provided, attach it to the descriptor
         if (bean != null) {
             builder.bean(bean).internal(bean);
         }
 
+        // Build the BeanDescriptor for the record
+        BeanDescriptor<T> beanDescriptor = builder.build();
+
+        // Iterate over all record components (fields implicitly declared in the record)
         for (RecordComponent component : type.getRecordComponents()) {
+            // Initialize a property descriptor builder for each record component
             PropertyDescriptor.Builder<T> propertyBuilder = new PropertyDescriptor.Builder<>(component.getName());
-            propertyBuilder.getter(forMethod(component.getAccessor(), depth - 1));
+
+            // Link the getter method of the record component
+            propertyBuilder.owner(beanDescriptor).getter(forMethod(component.getAccessor(), depth - 1));
+
+            // Add the property to the bean descriptor
             builder.property(propertyBuilder.build());
+
+            // If the field exists in the descriptor, copy its annotations to the property
+            if (descriptor.hasField(component.getName())) {
+                FieldDescriptor field = descriptor.getField(component.getName());
+                field.getAnnotations().forEach(propertyBuilder::annotation);
+            }
+
+            // If a method with the same name exists, copy its annotations to the property
+            if (descriptor.hasMethod(component.getName())) {
+                MethodDescriptor method = descriptor.getMethod(component.getName());
+                method.getAnnotations().forEach(propertyBuilder::annotation);
+            }
         }
 
-        return builder.build();
+        // Return the BeanDescriptor for the record
+        return beanDescriptor;
     }
+
 
 }

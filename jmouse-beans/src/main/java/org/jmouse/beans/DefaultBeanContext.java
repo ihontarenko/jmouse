@@ -176,7 +176,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * @param parent the parent bean context, must not be {@code null}
      */
     public DefaultBeanContext(BeanContext parent) {
-        this(parent, parent.getBaseClasses());
+        this(parent, parent == null ? new Class[0] : parent.getBaseClasses());
     }
 
     /**

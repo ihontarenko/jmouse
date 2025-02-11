@@ -1,10 +1,10 @@
-package org.jmouse.validator.manual;
+package org.jmouse.validator.old;
 
 import org.jmouse.common.mapping.mapper.ObjectFieldMapper;
 import org.jmouse.core.proxy.AnnotationProxyFactory;
-import org.jmouse.validator.manual.constraint.NonEmptyValidator;
-import org.jmouse.validator.manual.constraint.NotNullValidator;
-import org.jmouse.validator.manual.constraint.NumberRangeValidator;
+import org.jmouse.validator.old.constraint.NonEmptyValidator;
+import org.jmouse.validator.old.constraint.NotNullValidator;
+import org.jmouse.validator.old.constraint.NumberRangeValidator;
 import org.jmouse.core.proxy.ProxyFactory;
 import org.jmouse.core.reflection.Reflections;
 

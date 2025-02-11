@@ -1,4 +1,4 @@
-package org.jmouse.validator.manual;
+package org.jmouse.validator.old;
 
 public record ErrorMessage(String pointer, String message, String code) {
 

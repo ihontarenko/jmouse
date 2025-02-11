@@ -23,9 +23,8 @@ public class Example {
 
         ExternalUser externalUser = new ExternalUser();
 
-        BeanDescriptor<ExternalUser> descriptor = MetaDescriptor.forBean(ExternalUser.class);
+        BeanDescriptor<ExternalUser> descriptor = MetaDescriptor.forBean(ExternalUser.class, externalUser);
         BeanDescriptor<UserHolder> recordBean = MetaDescriptor.forValueObject(UserHolder.class);
-
 
         System.out.println(recordBean);
     }

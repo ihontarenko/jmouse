@@ -1,5 +1,6 @@
 package org.jmouse.beans.definition.strategy;
 
+import org.jmouse.core.reflection.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jmouse.beans.BeanContext;
@@ -82,9 +83,8 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
      */
     protected void updateBeanDefinition(BeanDefinition definition, AnnotatedElement element) {
         if (element.isAnnotationPresent(Provide.class)) {
-            Provide annotation = element.getAnnotation(Provide.class);
-            definition.setProxied(annotation.proxied());
-            definition.setScope(annotation.scope());
+            definition.setProxied(Reflections.getAnnotationValue(element, Provide.class, Provide::proxied));
+            definition.setScope(Reflections.getAnnotationValue(element, Provide.class, Provide::scope));
         }
     }
 

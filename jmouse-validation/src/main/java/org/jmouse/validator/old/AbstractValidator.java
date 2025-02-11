@@ -1,4 +1,4 @@
-package org.jmouse.validator.manual;
+package org.jmouse.validator.old;
 
 import org.jmouse.util.helper.Strings;
 

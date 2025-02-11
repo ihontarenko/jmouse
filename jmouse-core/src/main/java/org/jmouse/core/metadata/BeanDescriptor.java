@@ -106,11 +106,6 @@ public interface BeanDescriptor<T> extends ElementDescriptor<T>, ClassTypeInspec
             super(name, internal, annotations);
             this.type = type;
             this.properties = properties;
-
-            // Assigns ownership to each property descriptor
-            for (PropertyDescriptor<T> property : properties.values()) {
-                property.setOwner(this);
-            }
         }
 
         /**
