@@ -1,4 +1,4 @@
-package org.jmouse.core.metadata;
+package org.jmouse.core.bind.descriptor;
 
 import java.util.*;
 
@@ -10,7 +10,7 @@ public interface ClassTypeInspector {
     /**
      * Returns the class type being inspected.
      *
-     * @return the {@link Class} object representing the inspected type
+     * @return the {@link Class} bean representing the inspected type
      */
     Class<?> getClassType();
 

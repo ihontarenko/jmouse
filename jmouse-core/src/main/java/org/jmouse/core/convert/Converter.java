@@ -17,10 +17,10 @@ import java.util.Objects;
 public interface Converter<S, T> {
 
     /**
-     * Converts the specified source object of type {@code S} to an object of type {@code T}.
+     * Converts the specified source bean of type {@code S} to an bean of type {@code T}.
      *
-     * @param source the source object to convert
-     * @return the converted object
+     * @param source the source bean to convert
+     * @return the converted bean
      */
     T convert(S source);
 

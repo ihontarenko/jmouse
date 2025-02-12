@@ -9,7 +9,7 @@ import java.nio.file.Path;
 /**
  * A resource implementation for accessing and manipulating files in the file system.
  * <p>
- * This class provides methods to read from and write to files, as well as retrieve file metadata
+ * This class provides methods to read from and write to files, as well as retrieve file descriptor
  * such as name, size, and URL representation.
  * </p>
  *

@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * Annotation to mark a class or method as a bean provider for dependency injection.
  * <p>
  * This annotation can be applied to classes or methods to indicate that the annotated
- * element should be managed by the bean container. It provides metadata about the
+ * element should be managed by the bean container. It provides descriptor about the
  * bean's name, lifecycle scope, and whether the bean should be proxied.
  * </p>
  *

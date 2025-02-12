@@ -10,7 +10,7 @@ import java.util.List;
  * Represents a chain of method interceptors for a proxy method invocation.
  * <p>
  * The {@code MethodInvocationChain} executes registered {@link MethodInterceptor}s sequentially,
- * with the final step invoking the actual method on the target object.
+ * with the final step invoking the actual method on the target bean.
  */
 public class MethodInvocationChain implements MethodInvocation {
 
@@ -26,7 +26,7 @@ public class MethodInvocationChain implements MethodInvocation {
      * Constructs a new {@code MethodInvocationChain}.
      *
      * @param proxy        the proxy instance.
-     * @param target       the target object.
+     * @param target       the target bean.
      * @param method       the method being invoked.
      * @param arguments    the arguments passed to the method.
      * @param interceptors the list of method interceptors.
@@ -43,7 +43,7 @@ public class MethodInvocationChain implements MethodInvocation {
     }
 
     /**
-     * Proceeds to the next interceptor in the chain or invokes the actual method on the target object.
+     * Proceeds to the next interceptor in the chain or invokes the actual method on the target bean.
      *
      * @return the result of the method invocation.
      * @throws Throwable if an error occurs during method execution.
@@ -63,7 +63,7 @@ public class MethodInvocationChain implements MethodInvocation {
             return result;
         }
 
-        // invoke real method from target object in the end of chain
+        // invoke real method from target bean in the end of chain
         return Reflections.invokeMethod(target, method, arguments);
     }
 
@@ -88,9 +88,9 @@ public class MethodInvocationChain implements MethodInvocation {
     }
 
     /**
-     * Returns the target object on which the method is invoked.
+     * Returns the target bean on which the method is invoked.
      *
-     * @return the target object.
+     * @return the target bean.
      */
     @Override
     public Object getTarget() {

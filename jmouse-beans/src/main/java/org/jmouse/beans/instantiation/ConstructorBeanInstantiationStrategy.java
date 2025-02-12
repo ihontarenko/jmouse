@@ -36,7 +36,7 @@ public class ConstructorBeanInstantiationStrategy extends AbstractBeanInstantiat
      *
      * @param definition the bean definition describing how the bean should be created
      * @param context    the {@link BeanContext} for resolving dependencies
-     * @return the instantiated bean object
+     * @return the instantiated bean bean
      * @throws BeanInstantiationException if dependency resolution or instantiation fails
      */
     @Override

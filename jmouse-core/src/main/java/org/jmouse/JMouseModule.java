@@ -3,7 +3,7 @@ package org.jmouse;
 /**
  * Represents a module in the JMouse framework.
  * <p>
- * This class stores metadata about a module, including its name, version,
+ * This class stores descriptor about a module, including its name, version,
  * and a reference to the root class that serves as its entry point.
  * </p>
  */

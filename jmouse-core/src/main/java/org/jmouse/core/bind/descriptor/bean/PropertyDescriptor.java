@@ -1,22 +1,22 @@
-package org.jmouse.core.metadata.object;
+package org.jmouse.core.bind.descriptor.bean;
 
-import org.jmouse.core.metadata.AnnotationDescriptor;
-import org.jmouse.core.metadata.ClassDescriptor;
-import org.jmouse.core.metadata.ClassTypeInspector;
-import org.jmouse.core.metadata.ElementDescriptor;
+import org.jmouse.core.bind.descriptor.AnnotationDescriptor;
+import org.jmouse.core.bind.descriptor.TypeDescriptor;
+import org.jmouse.core.bind.descriptor.ClassTypeInspector;
+import org.jmouse.core.bind.descriptor.ElementDescriptor;
 import org.jmouse.util.Getter;
 import org.jmouse.util.Setter;
 
 import java.util.Set;
 
 /**
- * Represents a property descriptor that provides metadata about an object's property.
+ * Represents a property descriptor that provides descriptor about an bean's property.
  * <p>
  * This interface extends {@link ElementDescriptor} and {@link ClassTypeInspector},
- * allowing access to property-specific metadata such as its type, owner, getter, and setter methods.
+ * allowing access to property-specific descriptor such as its type, owner, getter, and setter methods.
  * </p>
  *
- * @param <T> the type of the object containing the property
+ * @param <T> the type of the bean containing the property
  */
 public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeInspector {
 
@@ -33,14 +33,14 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
     /**
      * Returns the class descriptor representing the type of this property.
      *
-     * @return the {@link ClassDescriptor} representing the property's type
+     * @return the {@link TypeDescriptor} representing the property's type
      */
-    ClassDescriptor getType();
+    TypeDescriptor getType();
 
     /**
      * Returns the owner of this property.
      * <p>
-     * The owner is the object descriptor that contains this property.
+     * The owner is the bean descriptor that contains this property.
      * </p>
      *
      * @return the {@link ObjectDescriptor} representing the owner of this property
@@ -84,11 +84,11 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
     /**
      * A default implementation of {@link PropertyDescriptor}.
      * <p>
-     * This implementation provides a way to retrieve metadata about a property,
+     * This implementation provides a way to retrieve descriptor about a property,
      * including its getter, setter, and owner.
      * </p>
      *
-     * @param <T> the type of the object containing the property
+     * @param <T> the type of the bean containing the property
      */
     abstract class Implementation<T> extends ElementDescriptor.Implementation<T> implements PropertyDescriptor<T> {
 
@@ -139,7 +139,7 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
         /**
          * Returns the owner of this property.
          * <p>
-         * The owner is the object descriptor that contains this property.
+         * The owner is the bean descriptor that contains this property.
          * </p>
          *
          * @return the {@link ObjectDescriptor} representing the owner of this property
@@ -176,7 +176,7 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
         /**
          * Returns the class type of this property.
          *
-         * @return the {@link Class} object representing the property type, or {@code null} if not available
+         * @return the {@link Class} bean representing the property type, or {@code null} if not available
          */
         @Override
         public Class<?> getClassType() {
@@ -190,7 +190,7 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
          */
         @Override
         public String toString() {
-            return "%s#%s : %s".formatted(getOwner(), getName(), getType());
+            return "%s.%s : %s".formatted(getOwner(), getName(), getType());
         }
     }
 
@@ -198,7 +198,7 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
      * A builder class for constructing {@link PropertyDescriptor} instances.
      *
      * @param <B> the type of the builder itself
-     * @param <I> the type of the object containing the property
+     * @param <I> the type of the bean containing the property
      * @param <D> the type of {@link PropertyDescriptor} being built
      */
     abstract class Builder<B extends Builder<B, I, D>, I, D extends PropertyDescriptor<I>>
@@ -242,10 +242,10 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
         /**
          * Sets the owner of this property.
          *
-         * @param owner the {@link JavaBeanDescriptor} representing the owner
+         * @param owner the {@link ObjectDescriptor} representing the owner
          * @return this builder instance
          */
-        public B owner(JavaBeanDescriptor<I> owner) {
+        public B owner(ObjectDescriptor<I> owner) {
             this.owner = owner;
             return self();
         }

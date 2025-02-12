@@ -85,7 +85,7 @@ public final class Arrays {
 
     /**
      * Removes duplicate elements from the given array using a nested loop comparison.
-     * This method is suitable for arrays of arbitrary object types that do not implement {@link Comparable}.
+     * This method is suitable for arrays of arbitrary bean types that do not implement {@link Comparable}.
      * <p>
      * This method has a higher time complexity due to its use of a nested loop
      * for duplicate detection, making it less efficient for large datasets.
@@ -135,12 +135,12 @@ public final class Arrays {
     /**
      * Expands an array to a new size, appending default values as needed.
      * <p>
-     * This method works with both primitive and object arrays. If the new size is less than or equal to the
+     * This method works with both primitive and bean arrays. If the new size is less than or equal to the
      * original array size, the original array is returned unchanged. If the array is expanded, the additional
      * elements will be initialized to their default values (e.g., 0 for integers, null for objects).
      * </p>
      *
-     * @param <T>      the type of the array (can be a primitive or object array)
+     * @param <T>      the type of the array (can be a primitive or bean array)
      * @param oldArray the original array to expand
      * @param newSize  the desired size of the new array
      * @return the expanded array with default values, or the original array if no expansion is required

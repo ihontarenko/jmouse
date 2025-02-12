@@ -1,8 +1,7 @@
 package org.jmouse.testing_ground.validation;
 
-import org.jmouse.core.metadata.object.JavaBeanDescriptor;
-import org.jmouse.core.metadata.MetaDescriptor;
-import org.jmouse.core.metadata.object.PropertyAccessor;
+import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
+import org.jmouse.core.bind.descriptor.bean.PropertyAccessor;
 import org.jmouse.util.Getter;
 import org.jmouse.validator.Validator;
 
@@ -18,7 +17,7 @@ public class Main {
                 errors.reject("user.null", "User must be non NULL");
             }
 
-            JavaBeanDescriptor<User> descriptor = MetaDescriptor.forBean(User.class, user);
+            JavaBeanDescriptor<User> descriptor = JavaBeanDescriptor.forBean(User.class, user);
             PropertyAccessor<User>   accessor   = descriptor.getProperty("name").getPropertyAccessor();
 
             System.out.println(accessor.obtainValue(user)); // John

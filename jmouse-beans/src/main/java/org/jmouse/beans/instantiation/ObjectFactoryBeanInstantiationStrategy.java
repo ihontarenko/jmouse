@@ -19,7 +19,7 @@ public class ObjectFactoryBeanInstantiationStrategy extends AbstractBeanInstanti
      * @param definition the bean definition containing the {@link ObjectFactory}.
      * @param context    the {@link BeanContext} in which the bean is being created.
      * @return the created bean instance.
-     * @throws BeanInstantiationException if the {@link ObjectFactory} is null or fails to produce an object.
+     * @throws BeanInstantiationException if the {@link ObjectFactory} is null or fails to produce an bean.
      */
     @Override
     public Object create(BeanDefinition definition, BeanContext context) {
@@ -27,7 +27,7 @@ public class ObjectFactoryBeanInstantiationStrategy extends AbstractBeanInstanti
 
         if (objectFactory == null) {
             throw new BeanInstantiationException(
-                    "Bean instantiation failed because object-factory is required to produce a non-null object.");
+                    "Bean instantiation failed because bean-factory is required to produce a non-null bean.");
         }
 
         return objectFactory.createObject();

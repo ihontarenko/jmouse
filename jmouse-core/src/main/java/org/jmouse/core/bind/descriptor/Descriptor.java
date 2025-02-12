@@ -1,20 +1,20 @@
-package org.jmouse.core.metadata;
+package org.jmouse.core.bind.descriptor;
 
-import org.jmouse.core.metadata.object.JavaBeanDescriptor;
-import org.jmouse.core.metadata.object.JavaBeanPropertyDescriptor;
+import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
+import org.jmouse.core.bind.descriptor.bean.JavaBeanPropertyDescriptor;
 
 /**
  * A base interface for describing various elements within the Descriptive API.
  * <p>
  * This interface provides a common structure for descriptors that represent different
  * elements, such as types, methods, fields, properties, constructors, and annotations.
- * Implementations of this interface allow accessing metadata and internal representations
+ * Implementations of this interface allow accessing descriptor and internal representations
  * of the described elements.
  * </p>
  *
  * @param <T> the type of the internal representation of the described element
  * @see ElementDescriptor
- * @see ClassDescriptor
+ * @see TypeDescriptor
  * @see JavaBeanDescriptor
  * @see MethodDescriptor
  * @see FieldDescriptor
@@ -37,7 +37,7 @@ public interface Descriptor<T> {
     /**
      * Returns the internal representation of this descriptor.
      * <p>
-     * The returned object depends on the implementation. It could be a {@link Class},
+     * The returned bean depends on the implementation. It could be a {@link Class},
      * a {@link java.lang.reflect.Method}, a {@link java.lang.reflect.Field}, or any other
      * representation of the described element.
      *
@@ -69,7 +69,7 @@ public interface Descriptor<T> {
         /**
          * Sets the internal representation of the descriptor being built.
          *
-         * @param internal the internal object to assign
+         * @param internal the internal bean to assign
          * @return this builder instance for method chaining
          */
         B internal(I internal);
@@ -153,7 +153,7 @@ public interface Descriptor<T> {
             implements Descriptor.Builder<B, I, D> {
 
         protected String name;
-        protected I internal;
+        protected I      internal;
 
         /**
          * Constructs a new {@code DescriptorBuilder} with the given name.
@@ -179,7 +179,7 @@ public interface Descriptor<T> {
         /**
          * Sets the internal representation of the descriptor being built.
          *
-         * @param internal the internal object to assign
+         * @param internal the internal bean to assign
          * @return this builder instance for method chaining
          */
         @Override

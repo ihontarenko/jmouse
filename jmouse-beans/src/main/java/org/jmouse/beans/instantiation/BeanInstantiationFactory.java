@@ -22,9 +22,9 @@ public interface BeanInstantiationFactory {
      * Creates an instance of a bean based on the provided {@link BeanDefinition} and {@link BeanContext},
      * using one of the registered instantiation strategies.
      *
-     * @param definition the bean definition containing metadata for creating the bean
+     * @param definition the bean definition containing descriptor for creating the bean
      * @param context    the context in which the bean is to be created
-     * @return the instantiated bean object, or {@code null} if no registered strategy supports the definition
+     * @return the instantiated bean bean, or {@code null} if no registered strategy supports the definition
      */
     Object createInstance(BeanDefinition definition, BeanContext context);
 }

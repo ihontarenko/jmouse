@@ -7,8 +7,7 @@ import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDefinitionException;
 import org.jmouse.beans.definition.ConstructorBeanDefinition;
-import org.jmouse.core.metadata.object.JavaBeanDescriptor;
-import org.jmouse.core.metadata.MetaDescriptor;
+import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Constructor;
@@ -41,11 +40,10 @@ public class ConstructorBeanDefinitionCreationStrategy extends AbstractBeanDefin
     @Override
     public BeanDefinition create(String name, Class<?> klass, BeanContext context) {
         ConstructorBeanDefinition definition = new ConstructorBeanDefinition(name, klass);
-        JavaBeanDescriptor<?>     descriptor = MetaDescriptor.forBean(klass);
+        JavaBeanDescriptor<?>     descriptor = JavaBeanDescriptor.forBean(klass);
 
         Constructor<?> constructor;
         Class<?>[]     parameterTypes = new Class[0];
-
 
         if (descriptor.isRecord()) {
             RecordComponent[] components  = klass.getRecordComponents();
@@ -91,10 +89,10 @@ public class ConstructorBeanDefinitionCreationStrategy extends AbstractBeanDefin
     }
 
     /**
-     * Determines if this strategy supports the provided object.
+     * Determines if this strategy supports the provided bean.
      *
-     * @param object the object to check.
-     * @return {@code true} if the strategy supports the object, {@code false} otherwise.
+     * @param object the bean to check.
+     * @return {@code true} if the strategy supports the bean, {@code false} otherwise.
      */
     @Override
     public boolean supports(Object object) {

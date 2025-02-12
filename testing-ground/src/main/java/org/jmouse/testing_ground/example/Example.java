@@ -24,7 +24,7 @@ public class Example {
 
         BindResult<Map<String, JMouseModule>> result = Bind.with(binder).toMap("package", JMouseModule.class);
 
-        Bind.with(binder).to(WebServer.class);
+        Bind.with(binder).to("default.webserver", WebServer.class);
 
         System.out.println(result.getValue());
 

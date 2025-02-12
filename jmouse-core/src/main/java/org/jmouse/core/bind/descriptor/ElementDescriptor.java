@@ -1,4 +1,4 @@
-package org.jmouse.core.metadata;
+package org.jmouse.core.bind.descriptor;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -7,7 +7,7 @@ import java.util.*;
  * Represents a descriptor for an element that may have annotations.
  * <p>
  * This interface extends {@link Descriptor} and provides a method to retrieve
- * annotation metadata associated with the described element.
+ * annotation descriptor associated with the described element.
  * </p>
  *
  * @param <T> the type of the internal representation of the described element
@@ -18,7 +18,7 @@ public interface ElementDescriptor<T> extends Descriptor<T> {
     /**
      * Returns a collection of annotation descriptors associated with this element.
      * <p>
-     * This method provides access to metadata about annotations present on the element.
+     * This method provides access to descriptor about annotations present on the element.
      * </p>
      *
      * @return a collection of {@link AnnotationDescriptor} instances
@@ -46,7 +46,7 @@ public interface ElementDescriptor<T> extends Descriptor<T> {
     }
 
     /**
-     * A base implementation of {@link ElementDescriptor} providing support for annotation metadata.
+     * A base implementation of {@link ElementDescriptor} providing support for annotation descriptor.
      * <p>
      * This class extends {@link Descriptor.Implementation} and includes a collection of annotation descriptors.
      * </p>
@@ -83,7 +83,7 @@ public interface ElementDescriptor<T> extends Descriptor<T> {
     /**
      * A builder for constructing instances of {@link ElementDescriptor}.
      * <p>
-     * This abstract builder provides methods for setting annotation metadata before
+     * This abstract builder provides methods for setting annotation descriptor before
      * finalizing the descriptor instance.
      * </p>
      *

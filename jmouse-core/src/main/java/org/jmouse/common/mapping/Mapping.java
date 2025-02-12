@@ -10,7 +10,7 @@ import static org.jmouse.core.reflection.Reflections.getInterfacesParameterizedT
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**
- * Interface for handling mapping operations between different object types.
+ * Interface for handling mapping operations between different bean types.
  * Provides methods to map objects, retrieve mappers, and register new mappers.
  */
 public interface Mapping {
@@ -18,27 +18,27 @@ public interface Mapping {
     Logger  LOGGER   = LoggerFactory.getLogger(Mapping.class);
 
     /**
-     * Maps an object to a target type.
+     * Maps an bean to a target type.
      *
-     * @param source the source object to map
+     * @param source the source bean to map
      * @param <R> the target type
-     * @return the mapped object of type R
+     * @return the mapped bean of type R
      */
     <R> R map(Object source);
 
     /**
-     * Retrieves a mapper for the specified source object.
+     * Retrieves a mapper for the specified source bean.
      *
-     * @param preferredType the source object
+     * @param preferredType the source bean
      * @return the appropriate Mapper instance
      * @throws MappingException if no suitable mapper is found
      */
     Set<Mapper<Object, Object>> mappers(Class<?> preferredType);
 
     /**
-     * Retrieves a mapper for the specified source object.
+     * Retrieves a mapper for the specified source bean.
      *
-     * @param object the source object
+     * @param object the source bean
      * @param <S> the source type
      * @param <R> the target type
      * @return the appropriate Mapper instance
@@ -47,7 +47,7 @@ public interface Mapping {
     <S, R> Mapper<S, R> mapper(S object);
 
     /**
-     * Registers a new mapper to handle specific object mappings.
+     * Registers a new mapper to handle specific bean mappings.
      *
      * @param mapper the Mapper to register
      */
@@ -62,9 +62,9 @@ public interface Mapping {
         private final Map<Class<?>, Set<Mapper<Object, Object>>> mappers = new HashMap<>();
 
         /**
-         * Retrieves a mapper for the specified source object.
+         * Retrieves a mapper for the specified source bean.
          *
-         * @param source the source object
+         * @param source the source bean
          * @return the appropriate Mapper instance
          * @throws MappingException if no suitable mapper is found
          */
@@ -87,9 +87,9 @@ public interface Mapping {
         }
 
         /**
-         * Retrieves a mapper for the specified source object.
+         * Retrieves a mapper for the specified source bean.
          *
-         * @param preferredType the source object
+         * @param preferredType the source bean
          * @return the appropriate Mapper instance
          * @throws MappingException if no suitable mapper is found
          */
@@ -106,11 +106,11 @@ public interface Mapping {
         }
 
         /**
-         * Maps an object to a target type by using the appropriate mapper.
+         * Maps an bean to a target type by using the appropriate mapper.
          *
-         * @param source the source object to map
+         * @param source the source bean to map
          * @param <R> the target type
-         * @return the mapped object of type R
+         * @return the mapped bean of type R
          */
         @Override
         public <R> R map(Object source) {
@@ -160,9 +160,9 @@ public interface Mapping {
         }
 
         /**
-         * Resolves the expected type of the source object for mapper lookup.
+         * Resolves the expected type of the source bean for mapper lookup.
          *
-         * @param source the source object
+         * @param source the source bean
          * @return the resolved type
          */
         private Class<?> resolveExpectedType(Object source) {

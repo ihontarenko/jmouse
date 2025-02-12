@@ -14,27 +14,27 @@ import org.jmouse.beans.definition.BeanDefinition;
 public interface BeanDefinitionCreationStrategy<T> {
 
     /**
-     * Determines if this strategy supports the provided object.
+     * Determines if this strategy supports the provided bean.
      *
-     * @param object the object to check.
-     * @return {@code true} if the strategy supports the object, {@code false} otherwise.
+     * @param object the bean to check.
+     * @return {@code true} if the strategy supports the bean, {@code false} otherwise.
      */
     boolean supports(Object object);
 
     /**
-     * Creates a {@link BeanDefinition} from the provided object.
+     * Creates a {@link BeanDefinition} from the provided bean.
      *
-     * @param object the object from which the bean definition is created.
+     * @param object the bean from which the bean definition is created.
      * @param context the {@link BeanContext} used during creation.
      * @return the created {@link BeanDefinition}.
      */
     BeanDefinition create(T object, BeanContext context);
 
     /**
-     * Creates a {@link BeanDefinition} with a specified name from the provided object.
+     * Creates a {@link BeanDefinition} with a specified name from the provided bean.
      *
      * @param name    the name of the bean.
-     * @param object the object from which the bean definition is created.
+     * @param object the bean from which the bean definition is created.
      * @param context the {@link BeanContext} used during creation.
      * @return the created {@link BeanDefinition}.
      */

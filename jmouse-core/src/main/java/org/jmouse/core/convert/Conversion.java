@@ -11,29 +11,29 @@ package org.jmouse.core.convert;
 public interface Conversion extends ConverterFactory {
 
     /**
-     * Converts the specified {@code source} object from one type ({@code sourceType})
+     * Converts the specified {@code source} bean from one type ({@code sourceType})
      * to another ({@code targetType}), using a registered converter if available.
      *
-     * @param <T>        the type of the source object
+     * @param <T>        the type of the source bean
      * @param <R>        the type of the desired result
-     * @param source     the object to be converted (may be {@code null})
+     * @param source     the bean to be converted (may be {@code null})
      * @param sourceType the class representing the source type
      * @param targetType the class representing the target type
-     * @return the converted object, or {@code null} if no matching converter was found
+     * @return the converted bean, or {@code null} if no matching converter was found
      *         or if {@code source} was {@code null}
      */
     <T, R> R convert(T source, Class<T> sourceType, Class<R> targetType);
 
     /**
      * A convenience method that infers the source type from the runtime class of the
-     * provided {@code source} object. If {@code source} is {@code null}, this method
+     * provided {@code source} bean. If {@code source} is {@code null}, this method
      * immediately returns {@code null}.
      *
-     * @param <T>        the type of the source object
+     * @param <T>        the type of the source bean
      * @param <R>        the type of the desired result
-     * @param source     the object to be converted (may be {@code null})
+     * @param source     the bean to be converted (may be {@code null})
      * @param targetType the class representing the target type
-     * @return the converted object, or {@code null} if no matching converter was found
+     * @return the converted bean, or {@code null} if no matching converter was found
      *         or if {@code source} was {@code null}
      */
     @SuppressWarnings("unchecked")

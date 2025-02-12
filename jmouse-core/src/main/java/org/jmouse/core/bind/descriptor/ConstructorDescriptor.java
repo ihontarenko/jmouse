@@ -1,12 +1,14 @@
-package org.jmouse.core.metadata;
+package org.jmouse.core.bind.descriptor;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Parameter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
 /**
- * Represents a descriptor for a {@link Constructor}, providing metadata such as annotations,
+ * Represents a descriptor for a {@link Constructor}, providing descriptor such as annotations,
  * parameters, and declared exception types.
  * <p>
  * This interface extends {@link ExecutableDescriptor} to specialize it for constructors.
@@ -15,14 +17,14 @@ import java.util.Set;
  * @see ExecutableDescriptor
  * @see ParameterDescriptor
  * @see AnnotationDescriptor
- * @see ClassDescriptor
+ * @see TypeDescriptor
  */
 public interface ConstructorDescriptor extends ExecutableDescriptor<Constructor<?>> {
 
     /**
      * Default implementation of {@link ConstructorDescriptor}.
      * <p>
-     * This class provides a concrete implementation for storing metadata related to constructors,
+     * This class provides a concrete implementation for storing descriptor related to constructors,
      * including their annotations, parameters, and declared exception types.
      * </p>
      */
@@ -41,7 +43,7 @@ public interface ConstructorDescriptor extends ExecutableDescriptor<Constructor<
                 String name, Constructor<?> internal,
                 Set<AnnotationDescriptor> annotations,
                 Collection<ParameterDescriptor> parameters,
-                Collection<ClassDescriptor> exceptionTypes
+                Collection<TypeDescriptor> exceptionTypes
         ) {
             super(name, internal, annotations, parameters, exceptionTypes);
         }
@@ -51,7 +53,7 @@ public interface ConstructorDescriptor extends ExecutableDescriptor<Constructor<
     /**
      * A builder for constructing instances of {@link ConstructorDescriptor}.
      * <p>
-     * This builder provides a fluent API for setting constructor metadata before
+     * This builder provides a fluent API for setting constructor descriptor before
      * creating an immutable {@link ConstructorDescriptor} instance.
      * </p>
      */
@@ -84,5 +86,41 @@ public interface ConstructorDescriptor extends ExecutableDescriptor<Constructor<
                     Collections.unmodifiableSet(exceptionTypes)
             );
         }
+    }
+
+    /**
+     * Creates a descriptor for a constructor.
+     *
+     * @param constructor the constructor to describe
+     * @return a {@link ConstructorDescriptor} instance representing the constructor
+     */
+    static ConstructorDescriptor forContructor(Constructor<?> constructor) {
+        return forContructor(constructor, TypeDescriptor.DEFAULT_DEPTH);
+    }
+
+    /**
+     * Creates a descriptor for a constructor with a specified depth for nested elements.
+     *
+     * @param constructor the constructor to describe
+     * @param depth       the recursion depth limit for nested descriptor resolution
+     * @return a {@link ConstructorDescriptor} instance
+     */
+    @SuppressWarnings("all")
+    static ConstructorDescriptor forContructor(Constructor<?> constructor, int depth) {
+        ConstructorDescriptor.Builder builder = new ConstructorDescriptor.Builder(constructor.getName());
+
+        for (Parameter parameter : constructor.getParameters()) {
+            builder.parameter(ParameterDescriptor.forParameter(parameter, depth - 1));
+        }
+
+        for (Class<?> exceptionType : constructor.getExceptionTypes()) {
+            builder.exceptionType(TypeDescriptor.forClass(exceptionType, depth - 1));
+        }
+
+        for (Annotation annotation : constructor.getAnnotations()) {
+            builder.annotation(AnnotationDescriptor.forAnnotation(annotation, depth - 1));
+        }
+
+        return builder.internal(constructor).build();
     }
 }

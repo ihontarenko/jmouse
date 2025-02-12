@@ -16,11 +16,11 @@ import org.jmouse.beans.definition.ObjectFactoryBeanDefinition;
 public class ObjectFactoryBeanDefinitionCreationStrategy implements BeanDefinitionCreationStrategy<ObjectFactory<Object>> {
 
     /**
-     * Determines if this strategy supports the provided object.
+     * Determines if this strategy supports the provided bean.
      * <p>
      * Currently, this strategy does not support implicit bean definition creation from arbitrary objects.
      *
-     * @param object the object to check.
+     * @param object the bean to check.
      * @return {@code false}, as only named factories are supported.
      */
     @Override
@@ -31,7 +31,7 @@ public class ObjectFactoryBeanDefinitionCreationStrategy implements BeanDefiniti
     /**
      * Unsupported operation for creating a bean definition without an explicit name.
      *
-     * @param object  the factory object.
+     * @param object  the factory bean.
      * @param context the bean context.
      * @return nothing, as this operation always throws an exception.
      * @throws BeanContextException indicating that this operation is unsupported.
@@ -47,7 +47,7 @@ public class ObjectFactoryBeanDefinitionCreationStrategy implements BeanDefiniti
      * The bean scope for definitions created by this strategy is set to {@link BeanScope#PROTOTYPE}.
      *
      * @param name    the name of the bean.
-     * @param object  the factory object providing the bean instance.
+     * @param object  the factory bean providing the bean instance.
      * @param context the bean context.
      * @return the created {@link BeanDefinition}.
      */

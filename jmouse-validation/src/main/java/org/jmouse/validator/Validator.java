@@ -4,7 +4,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 /**
- * Defines a contract for object validation.
+ * Defines a contract for bean validation.
  * <p>
  * Implementations of this interface provide a way to validate objects
  * and collect validation errors. A {@link Validator} can support
@@ -25,7 +25,7 @@ public interface Validator {
      *
      * @param type      the class type that this validator supports
      * @param validator a function that validates instances of the specified type
-     * @param <T>       the type of the object being validated
+     * @param <T>       the type of the bean being validated
      * @return a new instance of {@link Validator} specialized for the given type
      */
     static <T> Validator forInstance(Class<T> type, BiConsumer<T, Errors> validator) {
@@ -33,14 +33,14 @@ public interface Validator {
     }
 
     /**
-     * Validates the given object and returns a new {@link Errors} instance
+     * Validates the given bean and returns a new {@link Errors} instance
      * containing any validation errors.
      * <p>
-     * This method provides a convenient way to validate an object and
+     * This method provides a convenient way to validate an bean and
      * collect errors without manually creating an {@link Errors} instance.
      * </p>
      *
-     * @param value the object to validate
+     * @param value the bean to validate
      * @return an {@link Errors} instance containing validation errors, if any
      */
     default Errors validate(Object value) {
@@ -50,14 +50,14 @@ public interface Validator {
     }
 
     /**
-     * Validates the given object and collects validation errors.
+     * Validates the given bean and collects validation errors.
      * <p>
-     * If the object does not meet the validation criteria, errors
+     * If the bean does not meet the validation criteria, errors
      * should be added to the provided {@link Errors} instance.
      * </p>
      *
-     * @param object the object to validate
-     * @param errors the errors object to collect validation issues
+     * @param object the bean to validate
+     * @param errors the errors bean to collect validation issues
      */
     void validate(Object object, Errors errors);
 
@@ -76,7 +76,7 @@ public interface Validator {
      * are validated, using a predicate to check if a given class is supported.
      * </p>
      *
-     * @param <T> the type of object being validated
+     * @param <T> the type of bean being validated
      */
     class Typed<T> implements Validator {
 
@@ -98,11 +98,11 @@ public interface Validator {
         }
 
         /**
-         * Validates the given object by casting it to the expected type
+         * Validates the given bean by casting it to the expected type
          * and applying the provided validation function.
          *
-         * @param object the object to validate
-         * @param errors the errors object to collect validation issues
+         * @param object the bean to validate
+         * @param errors the errors bean to collect validation issues
          */
         @Override
         public void validate(Object object, Errors errors) {

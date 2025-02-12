@@ -60,9 +60,9 @@ public class DelegateBeanContainer implements BeanContainer, Delegate<BeanContai
     }
 
     /**
-     * Sets the delegate object.
+     * Sets the delegate bean.
      *
-     * @param delegate the delegate object to set.
+     * @param delegate the delegate bean to set.
      */
     @Override
     public void setDelegate(BeanContainer delegate) {
@@ -70,9 +70,9 @@ public class DelegateBeanContainer implements BeanContainer, Delegate<BeanContai
     }
 
     /**
-     * Retrieves the current delegate object.
+     * Retrieves the current delegate bean.
      *
-     * @return the delegate object, or {@code null} if no delegate is set.
+     * @return the delegate bean, or {@code null} if no delegate is set.
      */
     @Override
     public BeanContainer getDelegate() {

@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.metadata.MetaDescriptor;
+import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.TypeDescriptor;
 import org.jmouse.util.Factory;
@@ -52,7 +52,7 @@ public class JavaBeanBinder extends AbstractBinder {
         JavaType       type           = bindable.getType();
         JavaBean<T>    bean           = JavaBean.of(type);
 
-        MetaDescriptor.forBean(type.getRawType());
+        JavaBeanDescriptor.forBean(type.getRawType());
 
         // Obtain a factory that can create new instances of the class
         Factory<T> factory = bean.getFactory(bindable);

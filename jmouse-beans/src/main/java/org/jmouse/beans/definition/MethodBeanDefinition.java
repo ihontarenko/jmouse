@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 
 /**
  * A {@link BeanDefinition} implementation for beans created using a factory method.
- * Stores metadata about the factory method and its associated object.
+ * Stores descriptor about the factory method and its associated bean.
  */
 public class MethodBeanDefinition extends AbstractBeanDefinition {
 
@@ -53,25 +53,25 @@ public class MethodBeanDefinition extends AbstractBeanDefinition {
     }
 
     /**
-     * Retrieves the object containing the factory method.
+     * Retrieves the bean containing the factory method.
      *
-     * @return the factory object.
+     * @return the factory bean.
      */
     public Object getFactoryObject() {
         return object;
     }
 
     /**
-     * Sets the object containing the factory method.
+     * Sets the bean containing the factory method.
      *
-     * @param object the factory object to set.
+     * @param object the factory bean to set.
      */
     public void setFactoryObject(Object object) {
         this.object = object;
     }
 
     /**
-     * Returns a string representation of this bean definition, including the factory method and object.
+     * Returns a string representation of this bean definition, including the factory method and bean.
      *
      * @return a string representation of the bean definition.
      */

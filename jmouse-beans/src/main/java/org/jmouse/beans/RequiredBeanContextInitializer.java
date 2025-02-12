@@ -47,7 +47,7 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
         registerDefaultPostProcessors(context);
 
         // Self-referencing registration
-        LOGGER.info("Self referencing: Bean type '{}' -> Bean object '{}'",
+        LOGGER.info("Self referencing: Bean type '{}' -> Bean bean '{}'",
                     getShortName(BeanContext.class), getShortName(context.getClass()));
         context.registerBean(context.getClass(), context);
         context.registerBean(ProxyFactory.class, new AnnotationProxyFactory(context.getBaseClasses()));

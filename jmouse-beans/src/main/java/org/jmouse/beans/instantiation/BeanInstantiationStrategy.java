@@ -12,7 +12,7 @@ public interface BeanInstantiationStrategy {
     /**
      * Creates a new instance of a bean based on the provided {@link BeanDefinition} and {@link BeanContext}.
      *
-     * @param definition the bean definition containing metadata about the bean.
+     * @param definition the bean definition containing descriptor about the bean.
      * @param context    the context in which the bean is being created.
      * @return the newly created bean instance.
      */

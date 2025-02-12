@@ -22,7 +22,7 @@ public interface BeanInitializer {
      * </p>
      *
      * @param instance   the bean instance to initialize.
-     * @param definition the {@link BeanDefinition} associated with the bean, providing metadata for initialization.
+     * @param definition the {@link BeanDefinition} associated with the bean, providing descriptor for initialization.
      * @return the initialized bean instance, potentially wrapped or modified.
      */
     <T> T initializeBean(T instance, BeanDefinition definition);

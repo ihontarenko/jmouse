@@ -42,16 +42,16 @@ public class SimpleBeanDefinitionFactory implements BeanDefinitionFactory {
     }
 
     /**
-     * Creates a {@link BeanDefinition} for the given object using the registered strategies.
+     * Creates a {@link BeanDefinition} for the given bean using the registered strategies.
      * <p>
      * If a preferred name is provided, it is passed to the strategy for naming the bean definition.
-     * The factory iterates over its strategies to find a suitable one that supports the given object.
+     * The factory iterates over its strategies to find a suitable one that supports the given bean.
      * If no suitable strategy is found, a {@link BeanDefinitionException} is thrown.
      * <p>
      * If the created bean definition does not specify a scope, it defaults to {@link BeanScope#SINGLETON}.
      *
      * @param preferredName the preferred name for the bean, or {@code null} to use the default naming strategy.
-     * @param object        the object for which to create the bean definition.
+     * @param object        the bean for which to create the bean definition.
      * @param context       the {@link BeanContext} used during creation.
      * @return the created {@link BeanDefinition}.
      * @throws BeanDefinitionException if no suitable strategy is found.
@@ -61,7 +61,7 @@ public class SimpleBeanDefinitionFactory implements BeanDefinitionFactory {
         BeanDefinition definition = null;
 
         if (object == null) {
-            LOGGER.error("Bean definition creation skipped: input object is NULL.");
+            LOGGER.error("Bean definition creation skipped: input bean is NULL.");
             return definition;
         }
 
@@ -91,7 +91,7 @@ public class SimpleBeanDefinitionFactory implements BeanDefinitionFactory {
 
         if (definition == null) {
             throw new BeanDefinitionException(
-                    "No strategy found to create a bean definition for the object type '%s' and preferred name '%s'."
+                    "No strategy found to create a bean definition for the bean type '%s' and preferred name '%s'."
                             .formatted(objectClass, preferredName));
         }
 

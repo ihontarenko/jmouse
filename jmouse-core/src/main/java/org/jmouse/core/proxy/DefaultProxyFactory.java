@@ -39,12 +39,12 @@ public class DefaultProxyFactory implements ProxyFactory {
     }
 
     /**
-     * Creates a proxy for the specified object using the default JDK proxy mechanism.
+     * Creates a proxy for the specified bean using the default JDK proxy mechanism.
      * The proxy is configured with the interceptors that match the target class.
      *
      * @param <T>    the type of the created proxy
-     * @param object the original object to be proxied
-     * @return a JDK-based proxy instance of the specified object
+     * @param object the original bean to be proxied
+     * @return a JDK-based proxy instance of the specified bean
      * @see #createProxyContext(Object, ClassLoader)
      */
     @Override
@@ -55,13 +55,13 @@ public class DefaultProxyFactory implements ProxyFactory {
     }
 
     /**
-     * Creates a {@link ProxyContext} for the specified object and class loader. This method
+     * Creates a {@link ProxyContext} for the specified bean and class loader. This method
      * determines which {@link MethodInterceptor}s should be applied by checking the
      * {@link ProxyMethodInterceptor#value() value} of each interceptor's annotation against
      * the target class. Only interceptors whose preferred class is a supertype of the target
      * class are added to the proxy context.
      *
-     * @param object      the original object to be proxied
+     * @param object      the original bean to be proxied
      * @param classLoader the class loader to define the proxy class
      * @return a new {@link ProxyContext} instance populated with matching interceptors
      */

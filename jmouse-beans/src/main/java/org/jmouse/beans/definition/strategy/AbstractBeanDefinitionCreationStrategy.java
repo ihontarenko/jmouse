@@ -89,10 +89,10 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
     }
 
     /**
-     * Determines if this strategy supports the provided object.
+     * Determines if this strategy supports the provided bean.
      *
-     * @param object the object to check.
-     * @return {@code true} if the strategy supports the object, {@code false} otherwise.
+     * @param object the bean to check.
+     * @return {@code true} if the strategy supports the bean, {@code false} otherwise.
      */
     @Override
     public boolean supports(Object object) {

@@ -15,7 +15,7 @@ import java.util.List;
  * A strategy for instantiating beans using factory methods.
  * <p>
  * This strategy resolves dependencies for the factory method's parameters,
- * retrieves or creates the factory object, and invokes the method to create the bean.
+ * retrieves or creates the factory bean, and invokes the method to create the bean.
  * <p>
  * Example usage:
  * <pre>{@code
@@ -34,12 +34,12 @@ public class MethodBeanInstantiationStrategy extends AbstractBeanInstantiationSt
      * Creates a bean instance using a factory method specified in the {@link MethodBeanDefinition}.
      * <p>
      * This method resolves dependencies required for the factory method, retrieves or creates
-     * the factory object, and invokes the method to create the bean.
+     * the factory bean, and invokes the method to create the bean.
      *
      * @param definition the bean definition describing how the bean should be created
      * @param context    the {@link BeanContext} for resolving dependencies and factory objects
-     * @return the instantiated bean object
-     * @throws BeanInstantiationException if dependency resolution, factory object retrieval,
+     * @return the instantiated bean bean
+     * @throws BeanInstantiationException if dependency resolution, factory bean retrieval,
      *                                    or method invocation fails
      */
     @Override
@@ -65,14 +65,14 @@ public class MethodBeanInstantiationStrategy extends AbstractBeanInstantiationSt
     }
 
     /**
-     * Resolves or retrieves the factory object for the given {@link MethodBeanDefinition}.
+     * Resolves or retrieves the factory bean for the given {@link MethodBeanDefinition}.
      * <p>
-     * If the factory object is not explicitly set, it is retrieved from the parent bean definition
+     * If the factory bean is not explicitly set, it is retrieved from the parent bean definition
      * in the {@link BeanContext}.
      *
      * @param definition the method-based bean definition
-     * @param context    the {@link BeanContext} to resolve the factory object
-     * @return the factory object to invoke the method on
+     * @param context    the {@link BeanContext} to resolve the factory bean
+     * @return the factory bean to invoke the method on
      */
     private Object resolveFactoryBean(MethodBeanDefinition definition, BeanContext context) {
         Object factoryBean = definition.getFactoryObject();
@@ -82,7 +82,7 @@ public class MethodBeanInstantiationStrategy extends AbstractBeanInstantiationSt
 
             factoryBean = context.getBean(parent.getBeanName());
 
-            // Set the resolved factory object for all child definitions of the parent
+            // Set the resolved factory bean for all child definitions of the parent
             for (BeanDefinition childDefinition : parent.getChildrenDefinitions()) {
                 if (childDefinition instanceof MethodBeanDefinition methodBeanDefinition) {
                     methodBeanDefinition.setFactoryObject(factoryBean);

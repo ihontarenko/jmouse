@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Describes a bean's metadata and lifecycle within the container,
+ * Describes a bean's descriptor and lifecycle within the container,
  * including its name, class, creation strategy, dependencies, and annotations.
  * <p>
  * A {@code BeanDefinition} can also have parent-child relationships,
@@ -199,7 +199,7 @@ public interface BeanDefinition {
      * Retrieves a specific annotation of the given type from this bean definition.
      *
      * @param <A> the type of the annotation to retrieve
-     * @param annotationType the class object of the annotation type
+     * @param annotationType the class bean of the annotation type
      * @return the annotation instance if present, otherwise {@code null}
      */
     <A extends Annotation> A getAnnotation(Class<A> annotationType);

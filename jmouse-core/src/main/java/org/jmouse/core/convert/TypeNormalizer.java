@@ -13,7 +13,7 @@ public interface TypeNormalizer {
      * to a common base type or representation.
      *
      * @param type the class to normalize
-     * @return the normalized {@link Class} object; may be the same as the input type
+     * @return the normalized {@link Class} bean; may be the same as the input type
      *         or a more general type
      */
     Class<?> normalize(Class<?> type);

@@ -51,7 +51,7 @@ abstract public class AbstractPropertySource<T> implements PropertySource<T>, Or
     }
 
     /**
-     * Returns the order or priority of this object.
+     * Returns the order or priority of this bean.
      * <p>
      * Lower values typically represent higher priority.
      * </p>
@@ -64,7 +64,7 @@ abstract public class AbstractPropertySource<T> implements PropertySource<T>, Or
     }
 
     /**
-     * Sets the order or priority of this object.
+     * Sets the order or priority of this bean.
      *
      * @param order the order value to set
      */
@@ -74,10 +74,10 @@ abstract public class AbstractPropertySource<T> implements PropertySource<T>, Or
     }
 
     /**
-     * Checks if this property source is equal to another object based on the name.
+     * Checks if this property source is equal to another bean based on the name.
      *
-     * @param object the object to compare
-     * @return {@code true} if the object is an {@link AbstractPropertySource} with the same name, {@code false} otherwise
+     * @param object the bean to compare
+     * @return {@code true} if the bean is an {@link AbstractPropertySource} with the same name, {@code false} otherwise
      */
     @Override
     public boolean equals(Object object) {

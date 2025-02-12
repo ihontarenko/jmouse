@@ -6,7 +6,7 @@ import java.util.function.Supplier;
  * Default implementation of the {@link CyclicReferenceDetector} interface for detecting
  * cyclic dependencies among beans or objects of type {@code T}. It uses a thread-local
  * {@link Visitor} to keep track of visited identifiers during dependency resolution,
- * allowing the detection of cycles in the object graph.
+ * allowing the detection of cycles in the bean graph.
  *
  * @param <T> the type of identifiers being tracked for cyclic references
  */

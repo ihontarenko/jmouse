@@ -6,7 +6,7 @@ import org.jmouse.beans.ObjectFactory;
 
 /**
  * A {@link BeanDefinition} implementation for beans created using an {@link ObjectFactory}.
- * Stores the factory and metadata about the bean.
+ * Stores the factory and descriptor about the bean.
  */
 public class ObjectFactoryBeanDefinition extends AbstractBeanDefinition {
 
@@ -39,7 +39,7 @@ public class ObjectFactoryBeanDefinition extends AbstractBeanDefinition {
     /**
      * Retrieves the {@link ObjectFactory} associated with this bean definition.
      *
-     * @return the object factory.
+     * @return the bean factory.
      */
     public ObjectFactory<Object> getObjectFactory() {
         return objectFactory;

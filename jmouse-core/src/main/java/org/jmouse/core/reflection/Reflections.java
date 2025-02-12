@@ -35,11 +35,16 @@ abstract public class Reflections {
      */
     public static final Set<String> JAVA_MODULE_NAMES = JAVA_MODULES.stream().map(r -> r.descriptor().name())
             .collect(Collectors.toSet());
-    private static final Map<Class<?>, Object> PRIMITIVES_DEFAULT_TYPE_VALUES = Map.of(boolean.class, false, byte.class,
-                                                                                       (byte) 0, short.class, (short) 0,
-                                                                                       int.class, 0, long.class, 0L,
-                                                                                       float.class, 0F, double.class,
-                                                                                       0D, char.class, '\0');
+    private static final Map<Class<?>, Object> PRIMITIVES_DEFAULT_TYPE_VALUES = Map.of(
+                    boolean.class, false,
+                    byte.class, (byte) 0,
+                    short.class, (short) 0,
+                    int.class, 0,
+                    long.class, 0L,
+                    float.class, 0F,
+                    double.class, 0D,
+                    char.class, '\0'
+    );
 
     /**
      * Extracts all static methods declared in the specified class.
@@ -70,7 +75,7 @@ abstract public class Reflections {
      * Creates a Class instance for the given class name, suppressing the {@link ClassNotFoundException}.
      *
      * @param className the fully qualified name of the desired class
-     * @return the corresponding Class object
+     * @return the corresponding Class bean
      * @throws ReflectionException if the class cannot be found
      *
      *                             <p><b>Example usage:</b></p>
@@ -88,15 +93,15 @@ abstract public class Reflections {
     }
 
     /**
-     * Instantiates an object using the given constructor and arguments.
+     * Instantiates an bean using the given constructor and arguments.
      *
      * <p>This method will attempt to match null arguments to default primitive values if
      * the constructor parameter is a primitive type.</p>
      *
-     * @param <T>         the type of object to instantiate
+     * @param <T>         the type of bean to instantiate
      * @param constructor the constructor to use for instantiation
      * @param arguments   the arguments to pass to the constructor
-     * @return a new instance of the object
+     * @return a new instance of the bean
      * @throws ReflectionException if instantiation fails
      *
      *                             <p><b>Example usage:</b></p>
@@ -257,9 +262,9 @@ abstract public class Reflections {
     }
 
     /**
-     * Sets the value of a field in an object by its field name.
+     * Sets the value of a field in an bean by its field name.
      *
-     * @param object    the object whose field is to be set
+     * @param object    the bean whose field is to be set
      * @param fieldName the name of the field
      * @param value     the value to set
      *
@@ -275,9 +280,9 @@ abstract public class Reflections {
     }
 
     /**
-     * Sets the value of a field in an object.
+     * Sets the value of a field in an bean.
      *
-     * @param object the object whose field is to be set
+     * @param object the bean whose field is to be set
      * @param field  the field to set
      * @param value  the value to set
      *
@@ -296,9 +301,9 @@ abstract public class Reflections {
     }
 
     /**
-     * Gets the value of a field from an object by its field name.
+     * Gets the value of a field from an bean by its field name.
      *
-     * @param object    the object whose field value is to be retrieved
+     * @param object    the bean whose field value is to be retrieved
      * @param fieldName the name of the field
      * @return the value of the field, or null if the field does not exist or cannot be accessed
      *
@@ -315,9 +320,9 @@ abstract public class Reflections {
     }
 
     /**
-     * Gets the value of a field from an object.
+     * Gets the value of a field from an bean.
      *
-     * @param object the object whose field value is to be retrieved
+     * @param object the bean whose field value is to be retrieved
      * @param field  the field to retrieve the value from
      * @return the value of the field, or null if it cannot be accessed
      *
@@ -338,9 +343,9 @@ abstract public class Reflections {
     }
 
     /**
-     * Invokes a method on the specified object with the given arguments.
+     * Invokes a method on the specified bean with the given arguments.
      *
-     * @param object    the object on which to invoke the method
+     * @param object    the bean on which to invoke the method
      * @param method    the method to invoke
      * @param arguments the arguments to pass to the method
      * @return the result of the method invocation, or {@code null} if the method has a void return type
@@ -369,9 +374,9 @@ abstract public class Reflections {
     }
 
     /**
-     * Invokes a getter method (no-argument method starting with "get") on the specified object.
+     * Invokes a getter method (no-argument method starting with "get") on the specified bean.
      *
-     * @param object     the object on which to invoke the getter
+     * @param object     the bean on which to invoke the getter
      * @param methodName the name of the field (the actual method will be "get" + capitalized field name)
      * @return the result of the getter method, or {@code null} if the method does not exist or fails to invoke
      *
@@ -565,7 +570,7 @@ abstract public class Reflections {
      * Converts an array of objects to their corresponding array of classes.
      *
      * @param arguments an array of objects
-     * @return an array of classes representing each object's type
+     * @return an array of classes representing each bean's type
      *
      * <p><b>Example usage:</b></p>
      * <pre>{@code
@@ -625,14 +630,14 @@ abstract public class Reflections {
      * @return a string in the format {@code ClassName#fieldName}
      */
     public static String getFieldName(Field field) {
-        return "%s#%s".formatted(field.getDeclaringClass().getSimpleName(), field.getName());
+        return "%s.%s".formatted(field.getDeclaringClass().getSimpleName(), field.getName());
     }
 
     /**
-     * Returns the short name of the class for the given object.
-     * If the object is itself a {@link Class}, it delegates to the {@link #getShortName(Class)} method.
+     * Returns the short name of the class for the given bean.
+     * If the bean is itself a {@link Class}, it delegates to the {@link #getShortName(Class)} method.
      *
-     * @param instance the object whose class name is to be shortened
+     * @param instance the bean whose class name is to be shortened
      * @return the shortened class name
      */
     public static String getShortName(Object instance) {
@@ -926,7 +931,7 @@ abstract public class Reflections {
      * <p>If the class name contains {@link #PROXY_CLASS_NAME_SEPARATOR}, this method attempts
      * to retrieve its superclass, which should be the actual class.</p>
      *
-     * @param instance the object which class will be unwrapped
+     * @param instance the bean which class will be unwrapped
      * @return the unwrapped class, or the original class if it's not a proxy
      *
      * <p><b>Example usage:</b></p>

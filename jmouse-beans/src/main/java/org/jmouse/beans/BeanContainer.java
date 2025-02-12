@@ -47,7 +47,7 @@ public interface BeanContainer {
      * @param objectFactory the ObjectFactory used to create the bean if it doesn't exist.
      * @param <T> the type of the bean.
      * @return the bean instance.
-     * @throws BeanContextException if the ObjectFactory produces a null object.
+     * @throws BeanContextException if the ObjectFactory produces a null bean.
      */
     default <T> T getBean(String name, ObjectFactory<T> objectFactory) {
         T bean = getBean(name);
@@ -56,7 +56,7 @@ public interface BeanContainer {
             bean = objectFactory.createObject();
 
             if (bean == null) {
-                throw new BeanContextException("ObjectFactory must produce a non-null object");
+                throw new BeanContextException("ObjectFactory must produce a non-null bean");
             }
 
             LOGGER.info("Register bean '{}' with '{}' container", name, Reflections.getShortName(getClass()));

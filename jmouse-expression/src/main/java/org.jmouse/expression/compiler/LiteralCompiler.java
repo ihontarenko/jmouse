@@ -11,17 +11,17 @@ import static java.lang.Integer.parseInt;
 import static org.jmouse.common.ast.token.DefaultToken.*;
 
 /**
- * The {@code LiteralCompiler} class compiles {@link LiteralNode} objects into their respective Java object representations.
+ * The {@code LiteralCompiler} class compiles {@link LiteralNode} objects into their respective Java bean representations.
  * This includes conversions for numeric, boolean, and null literals.
  */
 public class LiteralCompiler implements Compiler<LiteralNode, Object> {
 
     /**
-     * Compiles a {@link LiteralNode} into its Java object representation.
+     * Compiles a {@link LiteralNode} into its Java bean representation.
      *
      * @param node the literal node to compile
      * @param evaluationContext  the evaluation context (not used in this implementation)
-     * @return the compiled Java object representation of the literal node
+     * @return the compiled Java bean representation of the literal node
      */
     @Override
     public Object compile(LiteralNode node, EvaluationContext evaluationContext) {

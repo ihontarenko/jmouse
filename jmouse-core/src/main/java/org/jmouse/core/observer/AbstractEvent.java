@@ -19,7 +19,7 @@ public abstract class AbstractEvent<T> implements Event<T> {
 
     /**
      * The payload containing data relevant to this event.
-     * Could be any object type depending on the event's purpose.
+     * Could be any bean type depending on the event's purpose.
      */
     protected final T payload;
 
@@ -66,7 +66,7 @@ public abstract class AbstractEvent<T> implements Event<T> {
 
     /**
      * The payload of this event, containing data relevant to observers. Could be any
-     * object type, such as domain models, messages, or other event-specific structures.
+     * bean type, such as domain models, messages, or other event-specific structures.
      *
      * @return the payload of this event
      */
@@ -76,7 +76,7 @@ public abstract class AbstractEvent<T> implements Event<T> {
     }
 
     /**
-     * Returns the {@code Class} object representing the type of the payload.
+     * Returns the {@code Class} bean representing the type of the payload.
      * Useful for determining how to process or cast the payload.
      * <p>
      * By default, this method uses {@link Objects#requireNonNull(Object)}
@@ -92,7 +92,7 @@ public abstract class AbstractEvent<T> implements Event<T> {
 
     /**
      * An optional reference to the source or origin of this event. This could be
-     * the publisher itself or another object providing context for the event.
+     * the publisher itself or another bean providing context for the event.
      *
      * @return the caller or source of this event, or {@code null} if not provided
      */

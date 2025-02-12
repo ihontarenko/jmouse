@@ -23,10 +23,10 @@ public interface BeanFactory {
      * Creates a new instance of a bean based on the provided {@link BeanDefinition}.
      * <p>
      * The factory uses the information in the {@code BeanDefinition} to determine
-     * how to construct the object, resolve its dependencies, and initialize it.
+     * how to construct the bean, resolve its dependencies, and initialize it.
      * </p>
      *
-     * @param definition the bean definition containing metadata about the bean
+     * @param definition the bean definition containing descriptor about the bean
      * @param <T>        the type of the bean
      * @return the newly created bean instance
      * @throws BeanInstantiationException if the bean cannot be created due to errors

@@ -3,7 +3,7 @@ package org.jmouse.core.reflection;
 import java.util.*;
 
 /**
- * Represents type metadata and provides utility methods for type analysis.
+ * Represents type descriptor and provides utility methods for type analysis.
  * <p>
  * This class wraps a {@link Class} and a corresponding {@link JavaType} to facilitate
  * various type-checking operations commonly used in reflection-based processing.
@@ -198,7 +198,7 @@ public class TypeDescriptor {
      * <p>
      * A type is considered a JavaBean if it is neither a primitive nor a collection-like structure,
      * nor a scalar type such as {@link String} or {@link Number}. This method is useful when determining
-     * whether an object follows the JavaBean pattern.
+     * whether an bean follows the JavaBean pattern.
      * </p>
      *
      * @return {@code true} if the type is a JavaBean, otherwise {@code false}

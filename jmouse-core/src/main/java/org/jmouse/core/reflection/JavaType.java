@@ -164,9 +164,9 @@ public class JavaType {
     }
 
     /**
-     * Creates a {@link JavaType} for an instance of an object.
+     * Creates a {@link JavaType} for an instance of an bean.
      *
-     * @param object the object instance
+     * @param object the bean instance
      * @return a {@link JavaType} instance
      */
     public static JavaType forInstance(Object object) {

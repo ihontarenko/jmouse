@@ -53,7 +53,7 @@ public class FileSystemResourceLoader extends AbstractResourceLoader {
         try (Stream<Path> stream = Files.walk(path)) {
             stream.filter(Files::isRegularFile)     // Only process regular files
                     .filter(filter::matches)        // Apply the matcher
-                    .map(this::createResource)      // Convert Path to Resource object
+                    .map(this::createResource)      // Convert Path to Resource bean
                     .forEach(resources::add);       // Add matching resources to the collection
         } catch (IOException exception) {
             throw new ResourceLoaderException("Failed to load resources from '%s'".formatted(location), exception);

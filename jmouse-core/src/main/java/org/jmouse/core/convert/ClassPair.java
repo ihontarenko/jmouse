@@ -28,7 +28,7 @@ public record ClassPair(Class<?> classA, Class<?> classB) {
     /**
      * Returns the second class in the pair.
      *
-     * @return a {@link Class} object representing type {@code B}
+     * @return a {@link Class} bean representing type {@code B}
      */
     @Override
     public Class<?> classB() {
@@ -38,7 +38,7 @@ public record ClassPair(Class<?> classA, Class<?> classB) {
     /**
      * Returns the first class in the pair.
      *
-     * @return a {@link Class} object representing type {@code A}
+     * @return a {@link Class} bean representing type {@code A}
      */
     @Override
     public Class<?> classA() {
@@ -62,7 +62,7 @@ public record ClassPair(Class<?> classA, Class<?> classB) {
      * Determines equality by comparing the underlying {@link Class} objects
      * for both {@code classA} and {@code classB}.
      *
-     * @param object the other object to compare
+     * @param object the other bean to compare
      * @return {@code true} if both pairs hold the same classes, otherwise {@code false}
      */
     @Override
@@ -76,7 +76,7 @@ public record ClassPair(Class<?> classA, Class<?> classB) {
     }
 
     /**
-     * Returns a string representation of the object.
+     * Returns a string representation of the bean.
      */
     @Override
     public String toString() {

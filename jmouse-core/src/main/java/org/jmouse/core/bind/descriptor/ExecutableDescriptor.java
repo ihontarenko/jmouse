@@ -1,10 +1,7 @@
-package org.jmouse.core.metadata;
+package org.jmouse.core.bind.descriptor;
 
 import java.lang.reflect.Executable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Represents a descriptor for executable elements such as methods and constructors.
@@ -17,7 +14,7 @@ import java.util.Set;
  * @see MethodDescriptor
  * @see ConstructorDescriptor
  * @see ParameterDescriptor
- * @see ClassDescriptor
+ * @see TypeDescriptor
  */
 public interface ExecutableDescriptor<E extends Executable> extends ElementDescriptor<E> {
 
@@ -31,20 +28,40 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
      */
     Collection<ParameterDescriptor> getParameters();
 
+    default ParameterDescriptor getParameter(int index) {
+        ParameterDescriptor descriptor = null;
+
+        if (index >= 0 && index < getParameters().size()) {
+            descriptor = List.copyOf(getParameters()).get(index);
+        }
+
+        return descriptor;
+    }
+
     /**
      * Returns a collection of exception types that this executable can throw.
      * <p>
      * The returned collection contains descriptors of the declared exceptions.
      * </p>
      *
-     * @return a collection of {@link ClassDescriptor} instances representing exception types
+     * @return a collection of {@link TypeDescriptor} instances representing exception types
      */
-    Collection<ClassDescriptor> getExceptionTypes();
+    Collection<TypeDescriptor> getExceptionTypes();
+
+    default TypeDescriptor getExceptionType(int index) {
+        TypeDescriptor exceptionType = null;
+
+        if (index >= 0 && index < getExceptionTypes().size()) {
+            exceptionType = List.copyOf(getExceptionTypes()).get(index);
+        }
+
+        return exceptionType;
+    }
 
     /**
      * A default implementation of {@link ExecutableDescriptor}.
      * <p>
-     * This class provides a concrete implementation for storing metadata related to executable elements,
+     * This class provides a concrete implementation for storing descriptor related to executable elements,
      * including their annotations, parameters, and declared exception types.
      * </p>
      *
@@ -54,7 +71,7 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
             extends ElementDescriptor.Implementation<E> implements ExecutableDescriptor<E> {
 
         protected final Collection<ParameterDescriptor> parameters;
-        protected final Collection<ClassDescriptor>     exceptionTypes;
+        protected final Collection<TypeDescriptor>      exceptionTypes;
 
         /**
          * Constructs a new {@code ExecutableDescriptor.Implementation} instance.
@@ -69,7 +86,7 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
                 String name, E internal,
                 Set<AnnotationDescriptor> annotations,
                 Collection<ParameterDescriptor> parameters,
-                Collection<ClassDescriptor> exceptionTypes
+                Collection<TypeDescriptor> exceptionTypes
         ) {
             super(name, internal, annotations);
             this.parameters = parameters;
@@ -89,10 +106,10 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
         /**
          * Returns a collection of exception types that this executable can throw.
          *
-         * @return a collection of {@link ClassDescriptor} instances representing exception types
+         * @return a collection of {@link TypeDescriptor} instances representing exception types
          */
         @Override
-        public Collection<ClassDescriptor> getExceptionTypes() {
+        public Collection<TypeDescriptor> getExceptionTypes() {
             return exceptionTypes;
         }
     }
@@ -112,7 +129,7 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
             extends ElementDescriptor.Builder<B, E, D> {
 
         protected Set<ParameterDescriptor> parameters     = new HashSet<>();
-        protected Set<ClassDescriptor>     exceptionTypes = new HashSet<>();
+        protected Set<TypeDescriptor>      exceptionTypes = new HashSet<>();
 
         /**
          * Constructs a new {@code ExecutableDescriptor.Builder} with the specified executable name.
@@ -137,10 +154,10 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
         /**
          * Sets the exception types of the executable using a varargs array.
          *
-         * @param exceptionType an array of {@link ClassDescriptor} instances
+         * @param exceptionType an array of {@link TypeDescriptor} instances
          * @return this builder instance for method chaining
          */
-        public B exceptionType(ClassDescriptor exceptionType) {
+        public B exceptionType(TypeDescriptor exceptionType) {
             this.exceptionTypes.add(exceptionType);
             return self();
         }

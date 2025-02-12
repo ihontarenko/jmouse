@@ -1,9 +1,9 @@
-package org.jmouse.core.metadata.object;
+package org.jmouse.core.bind.descriptor.bean;
 
-import org.jmouse.core.metadata.AnnotationDescriptor;
-import org.jmouse.core.metadata.ClassDescriptor;
-import org.jmouse.core.metadata.ClassTypeInspector;
-import org.jmouse.core.metadata.ElementDescriptor;
+import org.jmouse.core.bind.descriptor.AnnotationDescriptor;
+import org.jmouse.core.bind.descriptor.TypeDescriptor;
+import org.jmouse.core.bind.descriptor.ClassTypeInspector;
+import org.jmouse.core.bind.descriptor.ElementDescriptor;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -11,18 +11,18 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Represents metadata for an object, including its properties and annotations.
+ * Represents descriptor for an bean, including its properties and annotations.
  * <p>
  * This interface extends {@link ElementDescriptor} and {@link ClassTypeInspector},
- * allowing introspection of an object's structure, including its properties and type.
+ * allowing introspection of an bean's structure, including its properties and type.
  * </p>
  *
- * @param <T> the type of the object being described
+ * @param <T> the type of the bean being described
  */
 public interface ObjectDescriptor<T> extends ElementDescriptor<T>, ClassTypeInspector {
 
     /**
-     * Returns a collection of all properties associated with this object.
+     * Returns a collection of all properties associated with this bean.
      * <p>
      * Each property in the collection is represented by a {@link PropertyDescriptor}.
      * </p>
@@ -43,7 +43,18 @@ public interface ObjectDescriptor<T> extends ElementDescriptor<T>, ClassTypeInsp
     PropertyDescriptor<T> getProperty(String name);
 
     /**
-     * Checks whether the object contains a property with the given name.
+     * Retrieves a property accessor by its name.
+     * <p>
+     * If no property with the given name exists, this method returns {@code null}.
+     * </p>
+     *
+     * @param name the name of the property
+     * @return the property accessor, or {@code null} if not found
+     */
+    PropertyAccessor<T> getPropertyAccessor(String name);
+
+    /**
+     * Checks whether the bean contains a property with the given name.
      *
      * @param name the name of the property
      * @return {@code true} if the property exists, otherwise {@code false}
@@ -53,40 +64,41 @@ public interface ObjectDescriptor<T> extends ElementDescriptor<T>, ClassTypeInsp
     /**
      * A default implementation of {@link ObjectDescriptor}.
      * <p>
-     * This implementation provides access to an object's properties and metadata,
+     * This implementation provides access to an bean's properties and descriptor,
      * including its annotations and type information.
      * </p>
      *
-     * @param <T> the type of the object being described
+     * @param <T> the type of the bean being described
      */
     abstract class Implementation<T> extends ElementDescriptor.Implementation<T> implements ObjectDescriptor<T> {
 
-        protected final ClassDescriptor                              type;
+        protected final TypeDescriptor                               type;
         protected final Map<String, ? extends PropertyDescriptor<T>> properties;
 
         /**
          * Constructs a new {@code ObjectDescriptor.Implementation}.
          *
-         * @param name        the name of the object
-         * @param internal    the internal representation of the object
-         * @param annotations the annotations associated with this object
-         * @param type        the class descriptor representing the object's type
-         * @param properties  the properties associated with this object
+         * @param name        the name of the bean
+         * @param internal    the internal representation of the bean
+         * @param annotations the annotations associated with this bean
+         * @param type        the class descriptor representing the bean's type
+         * @param properties  the properties associated with this bean
          */
         Implementation(
                 String name,
                 T internal,
                 Set<AnnotationDescriptor> annotations,
-                ClassDescriptor type,
+                TypeDescriptor type,
                 Map<String, ? extends PropertyDescriptor<T>> properties
         ) {
             super(name, internal, annotations);
+
             this.type = type;
             this.properties = properties;
         }
 
         /**
-         * Returns a collection of all properties associated with this object.
+         * Returns a collection of all properties associated with this bean.
          * <p>
          * Each property in the collection is represented by a {@link PropertyDescriptor}.
          * </p>
@@ -113,7 +125,27 @@ public interface ObjectDescriptor<T> extends ElementDescriptor<T>, ClassTypeInsp
         }
 
         /**
-         * Checks whether the object contains a property with the given name.
+         * Retrieves a property accessor by its name.
+         * <p>
+         * If no property with the given name exists, this method returns {@code null}.
+         * </p>
+         *
+         * @param name the name of the property
+         * @return the property accessor, or {@code null} if not found
+         */
+        @Override
+        public PropertyAccessor<T> getPropertyAccessor(String name) {
+            PropertyAccessor<T> accessor = null;
+
+            if (hasProperty(name)) {
+                accessor = getProperty(name).getPropertyAccessor();
+            }
+
+            return accessor;
+        }
+
+        /**
+         * Checks whether the bean contains a property with the given name.
          *
          * @param name the name of the property
          * @return {@code true} if the property exists, otherwise {@code false}
@@ -124,9 +156,9 @@ public interface ObjectDescriptor<T> extends ElementDescriptor<T>, ClassTypeInsp
         }
 
         /**
-         * Returns a string representation of this object descriptor.
+         * Returns a string representation of this bean descriptor.
          *
-         * @return a string representing the class type of this object
+         * @return a string representing the class type of this bean
          */
         @Override
         public String toString() {
@@ -137,27 +169,27 @@ public interface ObjectDescriptor<T> extends ElementDescriptor<T>, ClassTypeInsp
     /**
      * A builder class for constructing {@link ObjectDescriptor} instances.
      *
-     * @param <T> the type of the object being described
+     * @param <T> the type of the bean being described
      */
     abstract class Builder<T> extends ElementDescriptor.Builder<ObjectDescriptor.Builder<T>, T, ObjectDescriptor<T>> {
 
         protected Map<String, PropertyDescriptor<T>> properties = new LinkedHashMap<>();
         protected T                                  bean;
-        protected ClassDescriptor                    descriptor;
+        protected TypeDescriptor                     descriptor;
 
         /**
          * Constructs a new {@code ObjectDescriptor.Builder}.
          *
-         * @param name the name of the object being built
+         * @param name the name of the bean being built
          */
         public Builder(String name) {
             super(name);
         }
 
         /**
-         * Sets the object instance associated with this descriptor.
+         * Sets the bean instance associated with this descriptor.
          *
-         * @param bean the object instance
+         * @param bean the bean instance
          * @return this builder instance
          */
         public ObjectDescriptor.Builder<T> bean(T bean) {
@@ -166,18 +198,18 @@ public interface ObjectDescriptor<T> extends ElementDescriptor<T>, ClassTypeInsp
         }
 
         /**
-         * Sets the class descriptor representing the object's type.
+         * Sets the class descriptor representing the bean's type.
          *
-         * @param descriptor the {@link ClassDescriptor} representing the object's type
+         * @param descriptor the {@link TypeDescriptor} representing the bean's type
          * @return this builder instance
          */
-        public ObjectDescriptor.Builder<T> descriptor(ClassDescriptor descriptor) {
+        public ObjectDescriptor.Builder<T> descriptor(TypeDescriptor descriptor) {
             this.descriptor = descriptor;
             return self();
         }
 
         /**
-         * Sets the properties associated with this object descriptor.
+         * Sets the properties associated with this bean descriptor.
          *
          * @param properties a map of property names to {@link PropertyDescriptor} instances
          * @return this builder instance
@@ -188,7 +220,7 @@ public interface ObjectDescriptor<T> extends ElementDescriptor<T>, ClassTypeInsp
         }
 
         /**
-         * Adds a single property descriptor to this object descriptor.
+         * Adds a single property descriptor to this bean descriptor.
          *
          * @param property the {@link PropertyDescriptor} to add
          * @return this builder instance

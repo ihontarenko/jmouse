@@ -1,17 +1,21 @@
-package org.jmouse.core.metadata;
+package org.jmouse.core.bind.descriptor;
 
 import org.jmouse.core.reflection.MethodMatchers;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.util.Getter;
 import org.jmouse.util.Setter;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
+import static org.jmouse.core.bind.descriptor.TypeDescriptor.forClass;
+
 /**
- * Represents a descriptor for a {@link Method}, providing metadata such as return type,
+ * Represents a descriptor for a {@link Method}, providing descriptor such as return type,
  * annotations, parameters, and declared exceptions.
  * <p>
  * This interface extends {@link ExecutableDescriptor} to specialize it for method descriptions.
@@ -20,7 +24,7 @@ import java.util.Set;
  * @see ExecutableDescriptor
  * @see ParameterDescriptor
  * @see AnnotationDescriptor
- * @see ClassDescriptor
+ * @see TypeDescriptor
  */
 public interface MethodDescriptor extends ExecutableDescriptor<Method> {
 
@@ -31,9 +35,9 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
      * of the method.
      * </p>
      *
-     * @return the {@link ClassDescriptor} representing the return type of this method
+     * @return the {@link TypeDescriptor} representing the return type of this method
      */
-    ClassDescriptor getReturnType();
+    TypeDescriptor getReturnType();
 
     /**
      * Determines if this method is a JavaBean-style setter.
@@ -65,10 +69,10 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
      * Returns a {@link Setter} function based on this method if it is a setter.
      * <p>
      * This method constructs a {@link Setter} instance that allows setting values
-     * on an object via this method if it follows the setter convention.
+     * on an bean via this method if it follows the setter convention.
      * </p>
      *
-     * @param <T> the type of the object containing the method
+     * @param <T> the type of the bean containing the method
      * @param <V> the type of the value being set
      * @return a {@link Setter} instance for this method
      * @throws IllegalArgumentException if the method is not a setter
@@ -81,10 +85,10 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
      * Returns a {@link Getter} function based on this method if it is a getter.
      * <p>
      * This method constructs a {@link Getter} instance that allows retrieving values
-     * from an object via this method if it follows the getter convention.
+     * from an bean via this method if it follows the getter convention.
      * </p>
      *
-     * @param <T> the type of the object containing the method
+     * @param <T> the type of the bean containing the method
      * @param <V> the return type of the method
      * @return a {@link Getter} instance for this method
      * @throws IllegalArgumentException if the method is not a getter
@@ -96,13 +100,13 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
     /**
      * Default implementation of {@link MethodDescriptor}.
      * <p>
-     * This class provides a concrete implementation for storing metadata related to methods,
+     * This class provides a concrete implementation for storing descriptor related to methods,
      * including their annotations, parameters, return type, and declared exception types.
      * </p>
      */
     class Implementation extends ExecutableDescriptor.Implementation<Method> implements MethodDescriptor {
 
-        protected final ClassDescriptor returnType;
+        protected final TypeDescriptor returnType;
 
         /**
          * Constructs a new {@code MethodDescriptor.Implementation} instance.
@@ -118,8 +122,8 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
                 String name, Method internal,
                 Set<AnnotationDescriptor> annotations,
                 Collection<ParameterDescriptor> parameters,
-                Collection<ClassDescriptor> exceptionTypes,
-                ClassDescriptor returnType
+                Collection<TypeDescriptor> exceptionTypes,
+                TypeDescriptor returnType
         ) {
             super(name, internal, annotations, parameters, exceptionTypes);
             this.returnType = returnType;
@@ -128,10 +132,10 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
         /**
          * Returns the return type descriptor of this method.
          *
-         * @return the {@link ClassDescriptor} representing the return type of this method
+         * @return the {@link TypeDescriptor} representing the return type of this method
          */
         @Override
-        public ClassDescriptor getReturnType() {
+        public TypeDescriptor getReturnType() {
             return returnType;
         }
 
@@ -152,13 +156,13 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
     /**
      * A builder for constructing instances of {@link MethodDescriptor}.
      * <p>
-     * This builder provides a fluent API for setting method metadata before
+     * This builder provides a fluent API for setting method descriptor before
      * creating an immutable {@link MethodDescriptor} instance.
      * </p>
      */
     class Builder extends ExecutableDescriptor.Builder<Builder, Method, MethodDescriptor> {
 
-        private ClassDescriptor returnType;
+        private TypeDescriptor returnType;
 
         /**
          * Constructs a new {@code MethodDescriptor.Builder} with the specified method name.
@@ -172,10 +176,10 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
         /**
          * Sets the return type of the method being built.
          *
-         * @param returnType the {@link ClassDescriptor} representing the return type
+         * @param returnType the {@link TypeDescriptor} representing the return type
          * @return this builder instance for method chaining
          */
-        public Builder returnType(ClassDescriptor returnType) {
+        public Builder returnType(TypeDescriptor returnType) {
             this.returnType = returnType;
             return self();
         }
@@ -199,5 +203,41 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
                     returnType
             );
         }
+    }
+
+    /**
+     * Creates a descriptor for a method.
+     *
+     * @param method the method to describe
+     * @return a {@link MethodDescriptor} instance representing the method
+     */
+    static MethodDescriptor forMethod(Method method) {
+        return forMethod(method, TypeDescriptor.DEFAULT_DEPTH);
+    }
+
+    /**
+     * Creates a descriptor for a method with a specified depth for nested elements.
+     *
+     * @param method the method to describe
+     * @param depth  the recursion depth limit for nested descriptor resolution
+     * @return a {@link MethodDescriptor} instance
+     */
+    @SuppressWarnings("all")
+    static MethodDescriptor forMethod(Method method, int depth) {
+        MethodDescriptor.Builder builder = new MethodDescriptor.Builder(method.getName());
+
+        for (Parameter parameter : method.getParameters()) {
+            builder.parameter(ParameterDescriptor.forParameter(parameter, depth - 1));
+        }
+
+        for (Class<?> exceptionType : method.getExceptionTypes()) {
+            builder.exceptionType(forClass(exceptionType, depth - 1));
+        }
+
+        for (Annotation annotation : method.getAnnotations()) {
+            builder.annotation(AnnotationDescriptor.forAnnotation(annotation, depth - 1));
+        }
+
+        return builder.internal(method).returnType(forClass(method.getReturnType(), depth - 1)).build();
     }
 }

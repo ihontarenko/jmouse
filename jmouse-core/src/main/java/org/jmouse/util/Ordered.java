@@ -8,7 +8,7 @@ package org.jmouse.util;
 public interface Ordered {
 
     /**
-     * Returns the order or priority of this object.
+     * Returns the order or priority of this bean.
      * Lower values typically represent higher priority.
      *
      * @return the order value
@@ -16,7 +16,7 @@ public interface Ordered {
     int getOrder();
 
     /**
-     * Sets the order or priority of this object.
+     * Sets the order or priority of this bean.
      */
     default void setOrder(int order) {
         // no-op

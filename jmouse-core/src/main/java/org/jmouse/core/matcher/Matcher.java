@@ -5,7 +5,7 @@ import java.util.Arrays;
  * A generic interface for matching items of type {@code T} against certain conditions.
  * This interface supports chaining of matchers using logical operators such as AND, OR, XOR, and NOT.
  *
- * @param <T> the type of the object being matched
+ * @param <T> the type of the bean being matched
  */
 @SuppressWarnings({"unused"})
 public interface Matcher<T> {
@@ -13,7 +13,7 @@ public interface Matcher<T> {
     /**
      * Evaluates whether the given {@code item} matches the criteria defined by this matcher.
      *
-     * @param item the object to be evaluated
+     * @param item the bean to be evaluated
      * @return {@code true} if the item matches the criteria, {@code false} otherwise
      */
     boolean matches(T item);
@@ -179,7 +179,7 @@ public interface Matcher<T> {
      * A matcher that combines two matchers using the logical AND operator.
      * Both matchers must return true for the final result to be true.
      *
-     * @param <T> the type of the object being matched
+     * @param <T> the type of the bean being matched
      */
     record AndMatcher<T>(Matcher<? super T> left, Matcher<? super T> right)
             implements Matcher<T> {
@@ -199,7 +199,7 @@ public interface Matcher<T> {
      * A matcher that combines two matchers using the logical OR operator.
      * At least one matcher must return true for the final result to be true.
      *
-     * @param <T> the type of the object being matched
+     * @param <T> the type of the bean being matched
      */
     record OrMatcher<T>(Matcher<? super T> left, Matcher<? super T> right)
             implements Matcher<T> {
@@ -219,7 +219,7 @@ public interface Matcher<T> {
      * A matcher that combines two matchers using the logical XOR operator.
      * The final result is true if one matcher returns true and the other returns false.
      *
-     * @param <T> the type of the object being matched
+     * @param <T> the type of the bean being matched
      */
     record XorMatcher<T>(Matcher<? super T> left, Matcher<? super T> right)
             implements Matcher<T> {
@@ -238,7 +238,7 @@ public interface Matcher<T> {
     /**
      * A matcher that negates the result of another matcher using the logical NOT operator.
      *
-     * @param <T> the type of the object being matched
+     * @param <T> the type of the bean being matched
      */
     record NotMatcher<T>(Matcher<? super T> matcher) implements Matcher<T> {
 

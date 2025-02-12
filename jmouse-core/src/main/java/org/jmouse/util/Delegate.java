@@ -1,10 +1,10 @@
 package org.jmouse.util;
 
 /**
- * Generic interface for managing a delegate object.
+ * Generic interface for managing a delegate bean.
  * <p>
  * This interface provides methods to set and retrieve a delegate of a specified type.
- * It is useful in scenarios where an object acts as a proxy or wrapper for another object.
+ * It is useful in scenarios where an bean acts as a proxy or wrapper for another bean.
  * </p>
  *
  * @param <T> the type of the delegate.
@@ -12,16 +12,16 @@ package org.jmouse.util;
 public interface Delegate<T> {
 
     /**
-     * Sets the delegate object.
+     * Sets the delegate bean.
      *
-     * @param delegate the delegate object to set.
+     * @param delegate the delegate bean to set.
      */
     void setDelegate(T delegate);
 
     /**
-     * Retrieves the current delegate object.
+     * Retrieves the current delegate bean.
      *
-     * @return the delegate object, or {@code null} if no delegate is set.
+     * @return the delegate bean, or {@code null} if no delegate is set.
      */
     T getDelegate();
 }

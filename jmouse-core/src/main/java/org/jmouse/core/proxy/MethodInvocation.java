@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 /**
  * Represents a method invocation on a proxy instance, allowing for method interception and custom behavior.
  * <p>
- * The {@link MethodInvocation} interface provides access to the method being called, its arguments, the target object,
+ * The {@link MethodInvocation} interface provides access to the method being called, its arguments, the target bean,
  * and other contextual information. It also supports proceeding with the original method invocation or altering its behavior.
  * </p>
  *
@@ -30,7 +30,7 @@ public interface MethodInvocation {
     /**
      * Retrieves the method being invoked.
      *
-     * @return the {@link Method} object representing the invoked method.
+     * @return the {@link Method} bean representing the invoked method.
      */
     Method getMethod();
 
@@ -42,9 +42,9 @@ public interface MethodInvocation {
     Object[] getArguments();
 
     /**
-     * Retrieves the target object on which the method is being invoked.
+     * Retrieves the target bean on which the method is being invoked.
      *
-     * @return the target object.
+     * @return the target bean.
      */
     Object getTarget();
 
@@ -58,7 +58,7 @@ public interface MethodInvocation {
     /**
      * Retrieves the proxy configuration associated with the invocation.
      *
-     * @return the {@link ProxyContext} object containing proxy-related metadata.
+     * @return the {@link ProxyContext} bean containing proxy-related descriptor.
      */
     ProxyContext getProxyContext();
 

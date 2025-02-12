@@ -10,7 +10,7 @@ import java.util.*;
 
 /**
  * An abstract base class for {@link BeanDefinition} implementations.
- * Manages common bean metadata such as dependencies, lifecycle, annotations, and more.
+ * Manages common bean descriptor such as dependencies, lifecycle, annotations, and more.
  * <p>
  * This class serves as a foundation for concrete bean definitions in a container,
  * providing storage and access for core properties:
@@ -293,7 +293,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Retrieves the instantiation strategy for this bean (e.g., constructor, method, object factory).
+     * Retrieves the instantiation strategy for this bean (e.g., constructor, method, bean factory).
      *
      * @return the bean instantiation strategy
      */
@@ -326,7 +326,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
      * Retrieves a specific annotation of the given type from this bean definition.
      *
      * @param <A> the type of the annotation to retrieve
-     * @param annotationType the class object of the annotation type
+     * @param annotationType the class bean of the annotation type
      * @return the annotation instance if present, otherwise {@code null}
      */
     @Override

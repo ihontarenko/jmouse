@@ -380,7 +380,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * </p>
      *
      * @param instance   the bean instance to initialize.
-     * @param definition the {@link BeanDefinition} associated with the bean, providing metadata for initialization.
+     * @param definition the {@link BeanDefinition} associated with the bean, providing descriptor for initialization.
      * @return the initialized bean instance, potentially wrapped or modified.
      */
     @Override
@@ -531,7 +531,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
             registerDefinition(definition);
         }
 
-        // Do nothing if passed bean presented as ObjectFactory object
+        // Do nothing if passed bean presented as ObjectFactory bean
         if (!isLazy) {
             LOGGER.info("Bean '{}' registered to the '{}' container", name, getShortName(container.getClass()));
             getBeanContainer(scope).registerBean(name, bean);

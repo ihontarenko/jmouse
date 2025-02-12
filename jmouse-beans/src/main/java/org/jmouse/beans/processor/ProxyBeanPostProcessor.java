@@ -31,7 +31,7 @@ public class ProxyBeanPostProcessor implements BeanPostProcessor {
      * </p>
      *
      * @param bean       the original bean instance
-     * @param definition the bean's definition metadata
+     * @param definition the bean's definition descriptor
      * @param context    the current {@link BeanContext}
      * @return the bean instance (proxy or original)
      */
