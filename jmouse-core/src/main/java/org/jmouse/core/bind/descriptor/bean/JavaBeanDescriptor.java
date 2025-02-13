@@ -64,7 +64,7 @@ public interface JavaBeanDescriptor<T> extends ObjectDescriptor<T> {
     class Implementation<T> extends ObjectDescriptor.Implementation<T> implements JavaBeanDescriptor<T> {
 
         /**
-         * Constructs a new {@code BeanDescriptor.Implementation} instance.
+         * Constructs a new {@code BeanDescriptor.PropertyDescriptorAccessor} instance.
          *
          * @param name        the name of the bean
          * @param internal    the bean instance

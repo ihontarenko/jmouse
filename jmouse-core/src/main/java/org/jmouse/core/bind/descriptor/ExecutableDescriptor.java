@@ -75,7 +75,7 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
         protected final Collection<TypeDescriptor>      exceptionTypes;
 
         /**
-         * Constructs a new {@code ExecutableDescriptor.Implementation} instance.
+         * Constructs a new {@code ExecutableDescriptor.PropertyDescriptorAccessor} instance.
          *
          * @param name          the name of the executable (e.g., method or constructor name)
          * @param internal      the underlying {@link Executable} instance

@@ -31,7 +31,7 @@ public interface ConstructorDescriptor extends ExecutableDescriptor<Constructor<
     class Implementation extends ExecutableDescriptor.Implementation<Constructor<?>> implements ConstructorDescriptor {
 
         /**
-         * Constructs a new {@code ConstructorDescriptor.Implementation} instance.
+         * Constructs a new {@code ConstructorDescriptor.PropertyDescriptorAccessor} instance.
          *
          * @param name          the name of the constructor (typically the class name)
          * @param internal      the underlying {@link Constructor} instance

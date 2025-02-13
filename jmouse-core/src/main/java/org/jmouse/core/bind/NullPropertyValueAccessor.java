@@ -1,8 +1,8 @@
 package org.jmouse.core.bind;
 
-public class NullValueDataSource extends AbstractDataSource {
+public class NullPropertyValueAccessor extends AbstractPropertyValueAccessor {
 
-    public NullValueDataSource() {
+    public NullPropertyValueAccessor() {
         super(null);
     }
 

@@ -32,35 +32,36 @@ public class MapBinder extends AbstractBinder {
      * Binds the values from the {@link PropertyValueAccessor} to the target {@link Map}.
      * <p>
      * This method checks if the target type is a {@link Map}. If so, it retrieves the
-     * list of keys from the data source, then binds each entry by invoking {@link #bindValue}.
+     * list of keys from the data accessor, then binds each entry by invoking {@link #bindValue}.
      * The bound entries are placed into the map.
      * </p>
      *
      * @param name     the structured name path of the binding target
      * @param bindable the bindable instance representing the target map
-     * @param source   the data source containing the values
+     * @param accessor   the data accessor containing the values
      * @param callback the binding callback for customization
      * @param <T>      the type of the target object (map in this case)
      * @return a {@link BindResult} containing the bound map, or empty if binding failed
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValueAccessor source, BindCallback callback) {
+    public <T> BindResult<T> bind(
+            PropertyPath name, Bindable<T> bindable, PropertyValueAccessor accessor, BindCallback callback) {
         TypeInformation   typeDescriptor = bindable.getTypeInformation();
-        Set<PropertyPath> keys           = source.navigate(name).nameSet();
+        Set<PropertyPath> keys           = accessor.navigate(name).nameSet();
 
-        // Check if the target is a map and if the keys are present in the source
+        // Check if the target is a map and if the keys are present in the accessor
         if (typeDescriptor.isMap() && !keys.isEmpty()) {
             // Get the map from the bindable instance
             @SuppressWarnings({"unchecked"})
-            Map<Object, Object> map             = (Map<Object, Object>) getMap(bindable);
-            JavaType        mapType         = bindable.getType();
-            TypeInformation valueDescriptor = TypeInformation.forJavaType(mapType.getLast());
-            TypeInformation keyDescriptor   = TypeInformation.forJavaType(mapType.getFirst());
+            Map<Object, Object> map     = (Map<Object, Object>) getMap(bindable);
+            JavaType            mapType = bindable.getType();
+            TypeInformation     vi      = TypeInformation.forJavaType(mapType.getLast());
+            TypeInformation     ki      = TypeInformation.forJavaType(mapType.getFirst());
 
             // Iterate through each key and bind the corresponding value
             for (PropertyPath key : keys) {
                 String               keyName       = key.path();
-                Bindable<Object>     valueBindable = getBindableEntry(valueDescriptor, map, keyName);
+                Bindable<Object>     valueBindable = getBindableEntry(vi, map, keyName);
                 PropertyPath.Entries entries       = key.entries();
 
                 // If the key consists of multiple elements, we explicitly convert it into an indexed format.
@@ -76,10 +77,10 @@ public class MapBinder extends AbstractBinder {
                 }
 
                 // convert key from String to actual type of Map<K, ?> key
-                Object entryKey = convert(keyName, keyDescriptor);
+                Object entryKey = convert(keyName, ki);
 
                 // Bind the value for each map entry and put it into the map
-                bindValue(name.append(key), valueBindable, source, callback)
+                bindValue(name.append(key), valueBindable, accessor, callback)
                         .ifPresent(entry -> map.put(entryKey, entry));
             }
 

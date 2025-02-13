@@ -58,7 +58,7 @@ public interface ElementDescriptor<T> extends Descriptor<T> {
         protected final Set<AnnotationDescriptor> annotations;
 
         /**
-         * Constructs a new {@code ElementDescriptor.Implementation} with the given parameters.
+         * Constructs a new {@code ElementDescriptor.PropertyDescriptorAccessor} with the given parameters.
          *
          * @param name        the name of the element
          * @param internal    the internal representation of the element

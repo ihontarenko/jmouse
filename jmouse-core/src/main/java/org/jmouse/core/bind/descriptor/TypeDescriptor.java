@@ -132,7 +132,7 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
         private final JavaType                          javaType;
 
         /**
-         * Constructs a new {@code ClassDescriptor.Implementation} instance.
+         * Constructs a new {@code ClassDescriptor.PropertyDescriptorAccessor} instance.
          *
          * @param name         the name of the class
          * @param internal     the underlying {@link Class} instance

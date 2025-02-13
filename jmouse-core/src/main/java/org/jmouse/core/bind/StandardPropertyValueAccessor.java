@@ -13,14 +13,14 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * or a key (for maps).
  * </p>
  */
-public class StandardDataSource extends AbstractDataSource {
+public class StandardPropertyValueAccessor extends AbstractPropertyValueAccessor {
 
     /**
-     * Creates a new {@link StandardDataSource} with the given source object.
+     * Creates a new {@link StandardPropertyValueAccessor} with the given source object.
      *
      * @param source the underlying data source (expected to be a {@link List} or {@link Map})
      */
-    public StandardDataSource(Object source) {
+    public StandardPropertyValueAccessor(Object source) {
         super(source);
     }
 

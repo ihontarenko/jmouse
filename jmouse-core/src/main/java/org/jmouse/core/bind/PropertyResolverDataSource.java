@@ -12,14 +12,14 @@ import java.util.Map;
  */
 public class PropertyResolverDataSource implements PropertyValueAccessor {
 
-    private final StandardDataSource delegate;
+    private final StandardPropertyValueAccessor delegate;
 
     /**
      * Creates a new {@link PropertyResolverDataSource} by extracting properties
      * from the given {@link PropertyResolver} and converting them into a structured
      * hierarchical format.
      * <p>
-     * <strong>Implementation Details:</strong>
+     * <strong>PropertyDescriptorAccessor Details:</strong>
      * <ul>
      *   <li>A temporary property source is created to store all flattened properties.</li>
      *   <li>This temporary property source is added to the resolver under a unique key.</li>
@@ -40,7 +40,7 @@ public class PropertyResolverDataSource implements PropertyValueAccessor {
         Map<String, Object> hierarchical = resolver.getRequiredProperty(temporaryKeyName, Map.class);
         resolver.removePropertySource(temporaryPropertySourceName);
 
-        this.delegate = new StandardDataSource(hierarchical);
+        this.delegate = new StandardPropertyValueAccessor(hierarchical);
     }
 
     /**

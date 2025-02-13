@@ -1,13 +1,13 @@
 package org.jmouse.core.bind;
 
-public class DummyDataSource extends AbstractDataSource {
+public class DummyPropertyValueAccessor extends AbstractPropertyValueAccessor {
 
     /**
-     * Constructs an {@link AbstractDataSource} with the given source object.
+     * Constructs an {@link AbstractPropertyValueAccessor} with the given source object.
      *
      * @param source the source object to wrap
      */
-    public DummyDataSource(Object source) {
+    public DummyPropertyValueAccessor(Object source) {
         super(source);
     }
 

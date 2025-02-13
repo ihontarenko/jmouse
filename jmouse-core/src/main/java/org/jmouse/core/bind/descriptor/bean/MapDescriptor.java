@@ -83,7 +83,7 @@ public interface MapDescriptor<K, V> extends ObjectDescriptor<Map<K, V>> {
     class Implementation<K, V> extends ObjectDescriptor.Implementation<Map<K, V>> implements MapDescriptor<K, V> {
 
         /**
-         * Constructs a new {@code BeanDescriptor.Implementation} instance.
+         * Constructs a new {@code BeanDescriptor.PropertyDescriptorAccessor} instance.
          *
          * @param name        the name of the bean
          * @param internal    the bean instance

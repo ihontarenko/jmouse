@@ -1,5 +1,6 @@
 package org.jmouse.core.bind.descriptor.bean;
 
+import org.jmouse.core.bind.PropertyAccessor;
 import org.jmouse.core.bind.descriptor.AnnotationDescriptor;
 import org.jmouse.core.bind.descriptor.TypeDescriptor;
 import org.jmouse.core.reflection.ClassTypeInspector;
@@ -98,7 +99,7 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
         private final PropertyAccessor<T> accessor;
 
         /**
-         * Constructs a new {@code PropertyDescriptor.Implementation}.
+         * Constructs a new {@code PropertyDescriptor.PropertyDescriptorAccessor}.
          *
          * @param name        the name of the property
          * @param internal    the internal representation of the property
@@ -120,7 +121,7 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
             this.getter = getter;
             this.setter = setter;
             this.owner = owner;
-            this.accessor = PropertyAccessor.ofPropertyDescriptor(this);
+            this.accessor = new PropertyDescriptorAccessor<>(this);
         }
 
         /**

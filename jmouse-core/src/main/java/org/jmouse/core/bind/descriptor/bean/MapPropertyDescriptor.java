@@ -50,7 +50,7 @@ public interface MapPropertyDescriptor<K, V> extends PropertyDescriptor<Map<K, V
         private final TypeDescriptor valueType;
 
         /**
-         * Constructs a new {@code MapPropertyDescriptor.Implementation}.
+         * Constructs a new {@code MapPropertyDescriptor.PropertyDescriptorAccessor}.
          *
          * @param name        the name of the property
          * @param internal    the internal map reference

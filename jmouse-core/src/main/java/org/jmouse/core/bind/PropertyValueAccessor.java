@@ -28,19 +28,18 @@ public interface PropertyValueAccessor extends ClassTypeInspector {
      * @throws UnsupportedDataSourceException if the type is unsupported
      */
     static PropertyValueAccessor wrap(Object source) {
-        PropertyValueAccessor instance = new DummyDataSource(source);
-        boolean               unknown  = !instance.isArray() && !instance.isCollection() && !instance.isMap() && !instance.isSimple();
+        PropertyValueAccessor instance = new DummyPropertyValueAccessor(source);
 
         if (instance.isInstanceOf(PropertyResolver.class)) {
             instance = new PropertyResolverDataSource((PropertyResolver) source);
-        } else if (unknown && !instance.isNull()) {
-            instance = new JavaBeanInstanceDataSource(source);
-        } else if (instance.isSimple() || instance.isCollection() || instance.isMap() || instance.isArray()) {
-            instance = new StandardDataSource(instance.unwrap());
+        } else if (instance.isBean()) {
+            instance = new JavaBeanPropertyValueAccessor(source);
+        } else if (instance.isScalar() || instance.isCollection() || instance.isMap() || instance.isArray()) {
+            instance = new StandardPropertyValueAccessor(instance.unwrap());
         }
 
         if (instance.isNull()) {
-            instance = new NullValueDataSource();
+            instance = new NullPropertyValueAccessor();
         }
 
         return instance;
@@ -83,6 +82,17 @@ public interface PropertyValueAccessor extends ClassTypeInspector {
      * @return the nested {@link PropertyValueAccessor}
      */
     PropertyValueAccessor get(int index);
+
+    /**
+     * Retrieves a nested {@link PropertyValueAccessor} using a {@link PropertyPath}.
+     *
+     * @param path the structured name path
+     * @return the nested {@link PropertyValueAccessor}
+     * @throws NumberFormatException if an indexed path contains a non-numeric value
+     */
+    default PropertyValueAccessor navigate(String path) {
+        return navigate(PropertyPath.of(path));
+    }
 
     /**
      * Retrieves a nested {@link PropertyValueAccessor} using a {@link PropertyPath}.

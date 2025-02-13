@@ -44,7 +44,7 @@ public class WebApplicationLauncher {
         rootWebBeanContext.addInitializer(new StartupRootApplicationContextInitializer(environment));
         rootWebBeanContext.refresh();
 
-        binder = Binder.withDataSource(environment);
+        binder = Binder.withValueAccessor(environment);
 
         WebBeanContext webBeanContext = applicationFactory.createContext(WebBeanContext.DEFAULT_WEB_CONTEXT_NAME, rootWebBeanContext, baseClasses);
 

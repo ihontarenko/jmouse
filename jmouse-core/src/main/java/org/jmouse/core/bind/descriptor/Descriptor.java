@@ -107,7 +107,7 @@ public interface Descriptor<T> {
         protected final T internal;
 
         /**
-         * Constructs a new {@code Descriptor.Implementation} with the given parameters.
+         * Constructs a new {@code Descriptor.PropertyDescriptorAccessor} with the given parameters.
          *
          * @param name     the name of the element
          * @param internal the internal representation of the element

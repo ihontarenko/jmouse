@@ -16,21 +16,21 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * It does not support indexed access since beans are typically key-value structures.
  * </p>
  */
-public class JavaBeanInstanceDataSource extends AbstractDataSource {
+public class JavaBeanPropertyValueAccessor extends AbstractPropertyValueAccessor {
 
     private final JavaBean<Object>           bean;
     private final JavaBeanDescriptor<Object> descriptor;
 
     /**
-     * Creates a {@link JavaBeanInstanceDataSource} for the given bean instance.
+     * Creates a {@link JavaBeanPropertyValueAccessor} for the given bean instance.
      *
      * @param source the bean instance to wrap
      * @throws IllegalArgumentException if the source is {@code null}
      */
     @SuppressWarnings({"unchecked"})
-    public JavaBeanInstanceDataSource(Object source) {
+    public JavaBeanPropertyValueAccessor(Object source) {
         super(source);
-        this.descriptor = JavaBeanDescriptor.forBean(Object.class, source.getClass());
+        this.descriptor = JavaBeanDescriptor.forBean((Class<Object>) source.getClass(), Object.class);
         this.bean = (JavaBean<Object>) JavaBean.of(source.getClass());
     }
 

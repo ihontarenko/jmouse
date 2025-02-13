@@ -31,22 +31,23 @@ abstract public class AbstractBinder implements ObjectBinder {
     /**
      * Attempts to bind a scalar or object value from the {@link PropertyValueAccessor}.
      * <p>
-     * If the requested name is present in the source, this method attempts to
+     * If the requested name is present in the accessor, this method attempts to
      * retrieve and convert the value based on the target {@link TypeInformation}.
      * If deep binding is enabled, it delegates to the root binder for nested binding.
      * </p>
      *
      * @param name     the structured name path of the binding target
      * @param bindable the bindable instance representing the target type
-     * @param source   the data source containing the value
+     * @param accessor the data accessor containing the value
      * @param callback the binding callback for customization
      * @param <T>      the type of the target object
      * @return a {@link BindResult} containing the bound value, or empty if binding failed
      */
     @SuppressWarnings({"unchecked"})
     @Override
-    public <T> BindResult<T> bindValue(PropertyPath name, Bindable<T> bindable, PropertyValueAccessor source, BindCallback callback) {
-        PropertyValueAccessor value = source.navigate(name);
+    public <T> BindResult<T> bindValue(
+            PropertyPath name, Bindable<T> bindable, PropertyValueAccessor accessor, BindCallback callback) {
+        PropertyValueAccessor value = accessor.navigate(name);
 
         // If the value is null, return an empty binding result
         if (value.isNull()) {
@@ -77,7 +78,7 @@ abstract public class AbstractBinder implements ObjectBinder {
             return BindResult.empty();
         } else if (context.isDeepBinding()) {
             // If deep binding is enabled, delegate to root rootBinder
-            return rootBinder.bind(name, bindable, source, callback);
+            return rootBinder.bind(name, bindable, accessor, callback);
         }
 
         return BindResult.empty();

@@ -185,7 +185,7 @@ public interface ClassTypeInspector {
      * @return {@code true} if the class type represents a bean, otherwise {@code false}
      */
     default boolean isBean() {
-        return !isObject() && !isEnum() && !isArray() && !isCollection() && !isMap() && !isScalar();
+        return !isObject() && !isEnum() && !isArray() && !isCollection() && !isMap() && !isScalar() && !isUnknown();
     }
 
     /**

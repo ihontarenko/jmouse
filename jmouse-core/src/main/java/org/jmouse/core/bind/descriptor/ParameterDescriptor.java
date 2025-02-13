@@ -42,7 +42,7 @@ public interface ParameterDescriptor extends ElementDescriptor<Parameter>, Class
         private final TypeDescriptor type;
 
         /**
-         * Constructs a new {@code ParameterDescriptor.Implementation} instance.
+         * Constructs a new {@code ParameterDescriptor.PropertyDescriptorAccessor} instance.
          *
          * @param name        the name of the parameter
          * @param internal    the underlying {@link Parameter} instance

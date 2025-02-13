@@ -1,10 +1,11 @@
 package org.jmouse.testing_ground.binder.dto;
 
+import java.util.List;
+
 public class User {
 
     private String name;
-    private Address address;
-    private int random;
+    private List<Address>   address;
 
     public String getName() {
         return name;
@@ -14,19 +15,11 @@ public class User {
         this.name = name;
     }
 
-    public Address getAddress() {
+    public List<Address> getAddress() {
         return address;
     }
 
-    public void setAddress(Address address) {
+    public void setAddress(List<Address> address) {
         this.address = address;
-    }
-
-    public int getRandom() {
-        return random;
-    }
-
-    public void setRandom(int random) {
-        this.random = random;
     }
 }

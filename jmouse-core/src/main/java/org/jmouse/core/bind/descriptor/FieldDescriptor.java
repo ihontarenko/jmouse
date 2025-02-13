@@ -45,7 +45,7 @@ public interface FieldDescriptor extends ElementDescriptor<Field>, ClassTypeInsp
         private final TypeDescriptor type;
 
         /**
-         * Constructs a new {@code FieldDescriptor.Implementation} instance.
+         * Constructs a new {@code FieldDescriptor.PropertyDescriptorAccessor} instance.
          *
          * @param name        the name of the field
          * @param internal    the underlying {@link Field} instance

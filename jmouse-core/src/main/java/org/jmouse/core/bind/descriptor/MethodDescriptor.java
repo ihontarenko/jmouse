@@ -109,7 +109,7 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
         protected final TypeDescriptor returnType;
 
         /**
-         * Constructs a new {@code MethodDescriptor.Implementation} instance.
+         * Constructs a new {@code MethodDescriptor.PropertyDescriptorAccessor} instance.
          *
          * @param name          the name of the method
          * @param internal      the underlying {@link Method} instance
