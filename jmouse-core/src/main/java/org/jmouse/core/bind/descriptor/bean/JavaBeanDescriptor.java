@@ -2,6 +2,7 @@ package org.jmouse.core.bind.descriptor.bean;
 
 import org.jmouse.core.bind.descriptor.*;
 import org.jmouse.core.matcher.Matcher;
+import org.jmouse.core.reflection.JavaType;
 import org.jmouse.util.Getter;
 import org.jmouse.util.Setter;
 
@@ -12,7 +13,6 @@ import java.util.*;
 import java.util.function.BiConsumer;
 
 import static org.jmouse.core.bind.descriptor.MethodDescriptor.forMethod;
-import static org.jmouse.core.bind.descriptor.TypeDescriptor.forClass;
 import static org.jmouse.core.reflection.MethodMatchers.*;
 import static org.jmouse.core.reflection.MethodMatchers.getter;
 import static org.jmouse.core.reflection.Reflections.getPropertyName;
@@ -237,7 +237,7 @@ public interface JavaBeanDescriptor<T> extends ObjectDescriptor<T> {
         JavaBeanDescriptor.Builder<T> builder = new JavaBeanDescriptor.Builder<>(getShortName(type));
 
         // Generate the class descriptor for the given type
-        TypeDescriptor typeDescriptor = forClass(type, depth);
+        TypeDescriptor typeDescriptor = TypeDescriptor.forType(JavaType.forType(type), depth);
 
         // Define matchers for getter and setter methods
         Matcher<Executable> anyMatcher = getter().or(setter());
@@ -361,7 +361,7 @@ public interface JavaBeanDescriptor<T> extends ObjectDescriptor<T> {
         JavaBeanDescriptor.Builder<T> builder = new JavaBeanDescriptor.Builder<>(getShortName(type));
 
         // Generate a ClassDescriptor for the given record type
-        TypeDescriptor descriptor = forClass(type, depth);
+        TypeDescriptor descriptor = TypeDescriptor.forType(JavaType.forClass(type), depth);
 
         // Assign the class descriptor to the builder
         builder.descriptor(descriptor);

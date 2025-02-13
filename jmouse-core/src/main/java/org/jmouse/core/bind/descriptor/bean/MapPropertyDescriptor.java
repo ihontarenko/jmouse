@@ -106,6 +106,17 @@ public interface MapPropertyDescriptor<K, V> extends PropertyDescriptor<Map<K, V
         }
 
         /**
+         * Determines whether this property is writable.
+         *
+         * @return {@code true} if the property has a setter method, otherwise {@code false}
+         */
+        @Override
+        public boolean isWritable() {
+            // todo: check that the map is immutable or not
+            return super.isWritable();
+        }
+
+        /**
          * Returns a string representation of this map property descriptor.
          *
          * @return a formatted string including the key and value types
@@ -166,13 +177,10 @@ public interface MapPropertyDescriptor<K, V> extends PropertyDescriptor<Map<K, V
         @Override
         public MapPropertyDescriptor<K, V> build() {
             return new Implementation<>(
-                    name,
-                    internal,
-                    getter,
-                    setter,
+                    name, internal,
+                    getter, setter,
                     owner,
-                    keyType,
-                    valueType
+                    keyType, valueType
             );
         }
     }

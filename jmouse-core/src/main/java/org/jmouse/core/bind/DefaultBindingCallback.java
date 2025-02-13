@@ -1,37 +1,52 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
 import org.jmouse.util.PlaceholderReplacer;
 import org.jmouse.util.PlaceholderResolver;
 import org.jmouse.util.StandardPlaceholderReplacer;
 
 /**
- * Default implementation of {@link AbstractCallback} that provides placeholder resolution
- * and additional handling for bound values.
+ * Default implementation of a binding callback used in property binding operations.
  * <p>
- * This callback:
- * <ul>
- *   <li>Supports placeholder replacement in {@link String} values.</li>
- *   <li>Delegates additional processing to the parent callback.</li>
- * </ul>
+ * This class extends {@link AbstractCallback} and provides a default implementation
+ * for handling placeholder replacement within binding operations.
+ * </p>
+ *
+ * @author JMouse - Team
+ * @author Mr. Jerry Mouse
+ * @author Ivan Hontarenko
  */
 public class DefaultBindingCallback extends AbstractCallback {
 
     private final PlaceholderReplacer replacer;
 
     /**
-     * Creates a new instance with a custom {@link PlaceholderReplacer}.
+     * Constructs a {@code DefaultBindingCallback} with a specified parent callback and placeholder replacer.
      *
-     * @param replacer the placeholder replacer to use
+     * @param parent   the parent {@link BindCallback} to delegate to
+     * @param replacer the {@link PlaceholderReplacer} used for handling placeholders
      */
-    public DefaultBindingCallback(PlaceholderReplacer replacer) {
+    public DefaultBindingCallback(BindCallback parent, PlaceholderReplacer replacer) {
         this.replacer = replacer;
+        this.parent = parent;
     }
 
     /**
-     * Creates a new instance using the {@link StandardPlaceholderReplacer}.
+     * Constructs a {@code DefaultBindingCallback} with a specified parent callback
+     * and a default {@link StandardPlaceholderReplacer}.
+     *
+     * @param parent the parent {@link BindCallback} to delegate to
+     */
+    public DefaultBindingCallback(BindCallback parent) {
+        this(parent, new StandardPlaceholderReplacer());
+    }
+
+    /**
+     * Constructs a {@code DefaultBindingCallback} with a default parent callback (NOOP)
+     * and a default {@link StandardPlaceholderReplacer}.
      */
     public DefaultBindingCallback() {
-        this.replacer = new StandardPlaceholderReplacer();
+        this(NOOP, new StandardPlaceholderReplacer());
     }
 
     /**
@@ -48,6 +63,21 @@ public class DefaultBindingCallback extends AbstractCallback {
     @Override
     public void onBound(PropertyPath name, Bindable<?> bindable, BindContext context, BindResult<Object> value) {
         parent.onBound(name, bindable, context, value);
+    }
+
+    /**
+     * Invoked when a binding operation results in no value being bound.
+     * <p>
+     * This method allows custom handling when no value is assigned to a bindable.
+     * </p>
+     *
+     * @param name     the property path
+     * @param bindable the target bindable
+     * @param context  the binding context
+     */
+    @Override
+    public void onUnbound(PropertyPath name, Bindable<?> bindable, BindContext context) {
+        super.onUnbound(name, bindable, context);
     }
 
     /**
@@ -71,9 +101,9 @@ public class DefaultBindingCallback extends AbstractCallback {
             String prefix = replacer.prefix();
             if (stringValue.contains(prefix)) {
                 PlaceholderResolver resolver = (placeholder) -> {
-                    PropertyValuesAccessor dataSource = context.getDataSource();
-                    PropertyPath           path       = PropertyPath.of(placeholder);
-                    PropertyValuesAccessor other      = dataSource.navigate(path);
+                    PropertyValuesAccessor accessor = context.getDataSource();
+                    PropertyPath           path     = PropertyPath.forPath(placeholder);
+                    PropertyValuesAccessor other    = accessor.navigate(path);
                     return other.isNull() ? null : other.asText();
                 };
                 handled = replacer.replace(stringValue, resolver);

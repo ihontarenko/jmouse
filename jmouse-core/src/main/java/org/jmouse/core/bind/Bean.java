@@ -176,7 +176,7 @@ abstract public class Bean<T> {
 
             // Prefer the setter type if available and getter as fallback type
             if (rawSetter != null) {
-                type = JavaType.forMethodParameter(rawSetter, 0);
+                type = JavaType.forParameter(rawSetter, 0);
             } else if (rawGetter != null) {
                 type = JavaType.forMethodReturnType(rawGetter);
             }

@@ -1,5 +1,7 @@
 package org.jmouse.core.bind.descriptor;
 
+import org.jmouse.core.reflection.JavaType;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
@@ -109,12 +111,16 @@ public interface ConstructorDescriptor extends ExecutableDescriptor<Constructor<
     static ConstructorDescriptor forContructor(Constructor<?> constructor, int depth) {
         ConstructorDescriptor.Builder builder = new ConstructorDescriptor.Builder(constructor.getName());
 
-        for (Parameter parameter : constructor.getParameters()) {
-            builder.parameter(ParameterDescriptor.forParameter(parameter, depth - 1));
+        int         parametersCount = constructor.getParameterCount();
+        Parameter[] parameters      = constructor.getParameters();
+        for (int i = 0; i < parametersCount; i++) {
+            JavaType parameterType = JavaType.forParameter(constructor, i);
+            builder.parameter(ParameterDescriptor.forParameter(parameters[i], parameterType, depth - 1));
         }
 
-        for (Class<?> exceptionType : constructor.getExceptionTypes()) {
-            builder.exceptionType(TypeDescriptor.forClass(exceptionType, depth - 1));
+        int exceptionTypes = constructor.getExceptionTypes().length;
+        for (int i = 0; i < exceptionTypes; i++) {
+            builder.exceptionType(TypeDescriptor.forType(JavaType.forExceptionType(constructor, i), depth - 1));
         }
 
         for (Annotation annotation : constructor.getAnnotations()) {

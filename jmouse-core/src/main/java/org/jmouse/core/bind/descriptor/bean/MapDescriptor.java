@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import static org.jmouse.core.bind.descriptor.TypeDescriptor.forClass;
+import static org.jmouse.core.bind.descriptor.TypeDescriptor.forType;
 
 /**
  * Represents a descriptor for a {@link Map}, providing descriptor about its structure and entries.
@@ -40,7 +40,7 @@ public interface MapDescriptor<K, V> extends ObjectDescriptor<Map<K, V>> {
         Builder<K, V> root = new Builder<>(null);
 
         root.internal(map);
-        root.descriptor(forClass(map.getClass()));
+        root.descriptor(TypeDescriptor.forClass(map.getClass()));
 
         MapDescriptor<K, V> descriptor = root.build();
 
@@ -59,8 +59,8 @@ public interface MapDescriptor<K, V> extends ObjectDescriptor<Map<K, V>> {
             builder.setter((Setter<Map<K, V>, Object>) setter);
 
             // Define key and value types using TypeDescriptor
-            builder.valueType(forClass(value.getClass()));
-            builder.keyType(forClass(key.getClass()));
+            builder.valueType(TypeDescriptor.forClass(value.getClass()));
+            builder.keyType(TypeDescriptor.forClass(key.getClass()));
 
             builder.owner(descriptor);
 

@@ -22,12 +22,22 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
      * Returns a collection of parameter descriptors associated with this executable.
      * <p>
      * This collection represents the parameters declared in the method or constructor.
+     * Each parameter is described using a {@link ParameterDescriptor}.
      * </p>
      *
-     * @return a collection of {@link ParameterDescriptor} instances
+     * @return a collection of {@link ParameterDescriptor} instances representing the parameters
      */
     Collection<ParameterDescriptor> getParameters();
 
+    /**
+     * Retrieves the parameter descriptor at the specified index.
+     * <p>
+     * If the index is out of range, this method returns {@code null}.
+     * </p>
+     *
+     * @param index the index of the parameter (zero-based)
+     * @return the {@link ParameterDescriptor} at the given index, or {@code null} if out of bounds
+     */
     default ParameterDescriptor getParameter(int index) {
         ParameterDescriptor descriptor = null;
 
@@ -48,7 +58,15 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
      */
     Collection<TypeDescriptor> getExceptionTypes();
 
-
+    /**
+     * Retrieves the exception type descriptor at the specified index.
+     * <p>
+     * If the index is out of range, this method returns {@code null}.
+     * </p>
+     *
+     * @param index the index of the exception type (zero-based)
+     * @return the {@link TypeDescriptor} at the given index, or {@code null} if out of bounds
+     */
     default TypeDescriptor getExceptionType(int index) {
         TypeDescriptor exceptionType = null;
 
@@ -58,6 +76,7 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
 
         return exceptionType;
     }
+
 
     /**
      * A default implementation of {@link ExecutableDescriptor}.

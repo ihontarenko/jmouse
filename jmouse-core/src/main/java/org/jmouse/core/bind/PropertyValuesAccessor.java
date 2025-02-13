@@ -111,7 +111,7 @@ public interface PropertyValuesAccessor extends ClassTypeInspector {
      * @throws NumberFormatException if an indexed path contains a non-numeric value
      */
     default PropertyValuesAccessor navigate(String path) {
-        return navigate(PropertyPath.of(path));
+        return navigate(PropertyPath.forPath(path));
     }
 
     /**
@@ -189,7 +189,7 @@ public interface PropertyValuesAccessor extends ClassTypeInspector {
      * @see #keySet()
      */
     default Set<PropertyPath> nameSet() {
-        return keySet().stream().map(PropertyPath::of).collect(toUnmodifiableSet());
+        return keySet().stream().map(PropertyPath::forPath).collect(toUnmodifiableSet());
     }
 
     /**

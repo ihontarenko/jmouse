@@ -69,7 +69,7 @@ final public class PropertyPath {
      * @param name the property path to parse
      * @return a PropertyPath instance, or an empty instance if the input is null
      */
-    public static PropertyPath of(String name) {
+    public static PropertyPath forPath(String name) {
         return name == null ? empty() : new PropertyPath(name);
     }
 
@@ -118,7 +118,7 @@ final public class PropertyPath {
      * @return a new PropertyPath with the appended entries
      */
     public PropertyPath append(String entries) {
-        return append(PropertyPath.of(entries));
+        return append(PropertyPath.forPath(entries));
     }
 
     /**
@@ -128,7 +128,7 @@ final public class PropertyPath {
      * @return a new PropertyPath with the prepended entries
      */
     public PropertyPath prepend(String entries) {
-        return prepend(PropertyPath.of(entries));
+        return prepend(PropertyPath.forPath(entries));
     }
 
     /**

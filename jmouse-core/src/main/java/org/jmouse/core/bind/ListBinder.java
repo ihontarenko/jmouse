@@ -1,11 +1,11 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.util.Priority;
+
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
-
-import static org.jmouse.core.reflection.ClassMatchers.isSupertype;
 
 /**
  * {@code ListBinder} is a specific implementation of {@link CollectionBinder} that handles binding for {@link List} types.
@@ -16,7 +16,10 @@ import static org.jmouse.core.reflection.ClassMatchers.isSupertype;
  * checking whether the bindable type is a list and providing a supplier to create new lists.
  * </p>
  */
+@Priority(ListBinder.PRIORITY)
 public class ListBinder extends CollectionBinder {
+
+    public static final int PRIORITY = MapBinder.PRIORITY + 10;
 
     /**
      * Constructs a new {@code ListBinder} with the given binding context.
@@ -37,7 +40,7 @@ public class ListBinder extends CollectionBinder {
      */
     @Override
     public <T> boolean supports(Bindable<T> bindable) {
-        return isSupertype(List.class).matches(bindable.getType().getRawType());
+        return bindable.getType().isList();
     }
 
     /**

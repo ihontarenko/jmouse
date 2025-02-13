@@ -1,6 +1,10 @@
 package org.jmouse.testing_ground.binder.dto;
 
+import org.jmouse.core.bind.BindRequired;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class User {
@@ -8,6 +12,7 @@ public class User {
     private String name;
     private List<Address>   address;
     private Set<Book>       books;
+    private String status;
 
     public String getName() {
         return name;
@@ -32,4 +37,18 @@ public class User {
     public void setBooks(Set<Book> books) {
         this.books = books;
     }
+
+    public String getStatus() {
+        return status;
+    }
+
+    // @BindRequired("Обовязкове занчення блять!!!")
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setBatchData(List<Map<String, HashMap<String, List<User>>>> batchData) {
+
+    }
+
 }

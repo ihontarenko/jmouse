@@ -1,6 +1,7 @@
 package org.jmouse.core.bind;
 
 import org.jmouse.core.reflection.JavaType;
+import org.jmouse.util.Priority;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -18,7 +19,10 @@ import java.util.function.Supplier;
  * converting it back into an array.
  * </p>
  */
+@Priority(ArrayBinder.PRIORITY)
 public class ArrayBinder extends CollectionBinder {
+
+    public static final int PRIORITY = SetBinder.PRIORITY + 10;
 
     /**
      * Constructs a new {@code ArrayBinder} with the given binding context.
@@ -37,15 +41,15 @@ public class ArrayBinder extends CollectionBinder {
      * @param <T> the type of the bindable object
      * @param root the name path to be used for the binding
      * @param bindable the bindable object that holds the type and value to be bound
-     * @param source the data source from which to fetch values
+     * @param accessor the data source from which to fetch values
      * @param callback the binding callback for customization
      * @return a {@link BindResult} containing the bound array, or an empty result if no valid binding was found
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath root, Bindable<T> bindable, PropertyValuesAccessor source, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath root, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback) {
         JavaType      elementType = bindable.getType().getComponentType();
         JavaType      type        = JavaType.forParametrizedClass(List.class, elementType.getRawType());
-        BindResult<T> result      = super.bind(root, Bindable.of(type), source, callback);
+        BindResult<T> result      = super.bind(root, Bindable.of(type), accessor, callback);
 
         // resulted array object
         T elements = null;
@@ -60,6 +64,8 @@ public class ArrayBinder extends CollectionBinder {
 
                 elements = (T) array;
             }
+        } else {
+            callback.onUnbound(root, Bindable.of(type), context);
         }
 
         return BindResult.of(elements);
@@ -75,7 +81,7 @@ public class ArrayBinder extends CollectionBinder {
      */
     @Override
     public <T> boolean supports(Bindable<T> bindable) {
-        return bindable.getTypeInformation().isArray();
+        return bindable.getType().isArray();
     }
 
     /**

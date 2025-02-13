@@ -34,7 +34,7 @@ public class HierarchicalMapConverter implements GenericConverter<Map<String, Ob
     @SuppressWarnings({"unchecked"})
     public Map<String, Object> convert(Map<String, Object> source, Class<Map<String, Object>> sourceType, Class<Map<String, Object>> targetType) {
         Map<String, Object> hierarchical = new HashMap<>();
-        Set<PropertyPath>   keys         = source.keySet().stream().map(PropertyPath::of).collect(toSet());
+        Set<PropertyPath>   keys         = source.keySet().stream().map(PropertyPath::forPath).collect(toSet());
 
         for (PropertyPath path : keys) {
             PropertyPath.Entries entries    = path.entries();

@@ -26,8 +26,10 @@ import java.util.function.Supplier;
  * Person person = result.orElse(null); // Person [name=John]
  * }</pre>
  */
-@Priority(Integer.MIN_VALUE / 2)
+@Priority(ValueObjectBinder.PRIORITY)
 public class ValueObjectBinder extends AbstractBinder {
+
+    public static final int PRIORITY = -500;
 
     /**
      * Constructs a binder for handling Java records.
@@ -44,20 +46,20 @@ public class ValueObjectBinder extends AbstractBinder {
      *
      * @param name     the hierarchical name path of the object being bound
      * @param bindable the target bindable describing the type to bind
-     * @param source   the data source providing values for binding
+     * @param accessor   the data source providing values for binding
      * @param callback a binding callback for customization
      * @param <T>      the type of the bound object
      * @return a {@link BindResult} containing the bound record instance, or an empty result if binding was unsuccessful
      */
     @Override
     @SuppressWarnings({"unchecked"})
-    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor source, BindCallback callback) {
-        TypeInformation sourceDescriptor = TypeInformation.forClass(source.navigate(name).getDataType());
+    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback) {
+        TypeInformation sourceDescriptor = TypeInformation.forClass(accessor.navigate(name).getDataType());
         TypeInformation targetDescriptor = bindable.getTypeInformation();
 
         // Ensure the target is a record and the source is a compatible type (map or JavaBean)
         if (targetDescriptor.isRecord() && (sourceDescriptor.isMap() || sourceDescriptor.isBean())) {
-            return bindValueObject(name, bindable, source, callback);
+            return bindValueObject(name, bindable, accessor, callback);
         }
 
         return BindResult.empty();
@@ -112,7 +114,7 @@ public class ValueObjectBinder extends AbstractBinder {
      */
     @Override
     public <T> boolean supports(Bindable<T> bindable) {
-        return bindable.getTypeInformation().isRecord();
+        return bindable.getType().isRecord();
     }
 
 }

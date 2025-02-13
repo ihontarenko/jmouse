@@ -2,6 +2,7 @@ package org.jmouse.core.bind;
 
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.TypeInformation;
+import org.jmouse.util.Priority;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,7 +18,10 @@ import static org.jmouse.core.reflection.ClassMatchers.isSupertype;
  * to the target map in the bindable instance.
  * </p>
  */
+@Priority(MapBinder.PRIORITY)
 public class MapBinder extends AbstractBinder {
+
+    public static final int PRIORITY = -1000;
 
     /**
      * Constructs a {@link MapBinder} with the given binding context.
@@ -68,7 +72,7 @@ public class MapBinder extends AbstractBinder {
                 // This ensures that the entire key is treated as a single entity enclosed in brackets,
                 // preventing it from being split into separate path segments.
                 if (entries.size() != 1) {
-                    key = PropertyPath.of("[" + key.path() + "]");
+                    key = PropertyPath.forPath("[" + key.path() + "]");
                 }
 
                 // unwrap braces [0] -> 0

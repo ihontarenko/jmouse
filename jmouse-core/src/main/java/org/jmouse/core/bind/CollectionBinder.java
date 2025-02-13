@@ -41,12 +41,12 @@ abstract public class CollectionBinder extends AbstractBinder {
      * @param <T> the type of the object to bind
      * @param root the path name for binding
      * @param bindable the bindable object representing the collection
-     * @param source the data source
+     * @param accessor the data source
      * @param callback the binding callback for customization
      * @return the binding result containing the collection, or an empty result if no binding is possible
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath root, Bindable<T> bindable, PropertyValuesAccessor source, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath root, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback) {
         TypeInformation typeDescriptor = bindable.getTypeInformation();
 
         // Check if the bindable is a collection
@@ -58,15 +58,15 @@ abstract public class CollectionBinder extends AbstractBinder {
             JavaType     elementType = bindable.getType().getFirst();
             PropertyPath zeroName    = root.append(INDEX_ZERO);
 
-            if (source.navigate(zeroName).isNull() && source.navigate(root).isSimple()) {
-                bindCollectionElement(root, of(elementType), source, elements, callback);
+            if (accessor.navigate(zeroName).isNull() && accessor.navigate(root).isSimple()) {
+                bindCollectionElement(root, of(elementType), accessor, elements, callback);
             } else {
                 while (maxSize > index) {
                     // Append the index to the path for element binding
                     PropertyPath elementName = root.append("[" + index++ + "]");
 
                     BindResult<?> result = bindCollectionElement(
-                            elementName, of(elementType), source, elements, callback);
+                            elementName, of(elementType), accessor, elements, callback);
 
                     if (result.isEmpty()) {
                         break;

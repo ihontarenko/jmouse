@@ -1,11 +1,11 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.util.Priority;
+
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Supplier;
-
-import static org.jmouse.core.reflection.ClassMatchers.isSupertype;
 
 /**
  * {@code SetBinder} is a specific implementation of {@link CollectionBinder} that handles binding for {@link Set} types.
@@ -16,7 +16,10 @@ import static org.jmouse.core.reflection.ClassMatchers.isSupertype;
  * checking whether the bindable type is a {@link Set} and providing a supplier to create a collection.
  * </p>
  */
+@Priority(SetBinder.PRIORITY)
 public class SetBinder extends CollectionBinder {
+
+    public static final int PRIORITY = ListBinder.PRIORITY + 10;
 
     /**
      * Constructs a new {@code SetBinder} with the given binding context.
@@ -37,7 +40,7 @@ public class SetBinder extends CollectionBinder {
      */
     @Override
     public <T> boolean supports(Bindable<T> bindable) {
-        return isSupertype(Set.class).matches(bindable.getType().getRawType());
+        return bindable.getType().isSet();
     }
 
     /**

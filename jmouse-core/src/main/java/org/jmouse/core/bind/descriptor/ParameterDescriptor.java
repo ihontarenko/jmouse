@@ -1,6 +1,7 @@
 package org.jmouse.core.bind.descriptor;
 
 import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.JavaType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
@@ -136,22 +137,51 @@ public interface ParameterDescriptor extends ElementDescriptor<Parameter>, Class
     }
 
     /**
-     * Creates a descriptor for a method parameter with a specified depth for nested elements.
+     * Creates a descriptor for a method parameter with a specified depth for nested descriptor resolution.
+     * <p>
+     * This method generates a {@link ParameterDescriptor} for the given {@link Parameter},
+     * resolving annotations and determining the type descriptor recursively up to the specified depth.
+     * </p>
      *
      * @param parameter the parameter to describe
      * @param depth     the recursion depth limit for nested descriptor resolution
-     * @return a {@link ParameterDescriptor} instance
+     * @return a {@link ParameterDescriptor} instance representing the parameter
      */
     static ParameterDescriptor forParameter(Parameter parameter, int depth) {
+        return forParameter(parameter, null, depth);
+    }
+
+    /**
+     * Creates a descriptor for a method parameter, allowing explicit type specification and depth control.
+     * <p>
+     * This method generates a {@link ParameterDescriptor} for the given {@link Parameter},
+     * resolving its annotations and type descriptor. If a custom {@link JavaType} is provided,
+     * it is used instead of deriving the type from the parameter itself.
+     * </p>
+     *
+     * @param parameter     the parameter to describe
+     * @param parameterType an explicit {@link JavaType} for the parameter, or {@code null} to infer from reflection
+     * @param depth         the recursion depth limit for nested descriptor resolution
+     * @return a {@link ParameterDescriptor} instance representing the parameter
+     */
+    static ParameterDescriptor forParameter(Parameter parameter, JavaType parameterType, int depth) {
         ParameterDescriptor.Builder builder = new ParameterDescriptor.Builder(parameter.getName());
 
+        // Determine the parameter type, either provided explicitly or derived from reflection
+        if (parameterType == null) {
+            parameterType = JavaType.forParameter(parameter);
+        }
+
+        // Process and attach parameter annotations
         for (Annotation annotation : parameter.getAnnotations()) {
             builder.annotation(AnnotationDescriptor.forAnnotation(annotation, depth - 1));
         }
 
-        builder.type(TypeDescriptor.forClass(parameter.getType(), depth - 1));
+        // Set the parameter type and internal representation
+        builder.type(TypeDescriptor.forType(parameterType, depth - 1));
         builder.internal(parameter);
 
         return builder.build();
     }
+
 }

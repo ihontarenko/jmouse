@@ -1,6 +1,7 @@
 package org.jmouse.core.bind.descriptor;
 
 import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.annotation.Annotation;
@@ -152,7 +153,7 @@ public interface FieldDescriptor extends ElementDescriptor<Field>, ClassTypeInsp
     static FieldDescriptor forField(Field field, int depth) {
         FieldDescriptor.Builder builder = new FieldDescriptor.Builder(field.getName());
 
-        builder.internal(field).type(TypeDescriptor.forClass(field.getType(), depth - 1));
+        builder.internal(field).type(TypeDescriptor.forType(JavaType.forField(field), depth - 1));
 
         for (Annotation annotation : field.getAnnotations()) {
             builder.annotation(AnnotationDescriptor.forAnnotation(annotation, depth - 1));

@@ -1,5 +1,6 @@
 package org.jmouse.core.bind.descriptor;
 
+import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.MethodMatchers;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.util.Getter;
@@ -12,7 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
-import static org.jmouse.core.bind.descriptor.TypeDescriptor.forClass;
+import static org.jmouse.core.bind.descriptor.TypeDescriptor.forType;
 
 /**
  * Represents a descriptor for a {@link Method}, providing descriptor such as return type,
@@ -226,18 +227,22 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
     static MethodDescriptor forMethod(Method method, int depth) {
         MethodDescriptor.Builder builder = new MethodDescriptor.Builder(method.getName());
 
-        for (Parameter parameter : method.getParameters()) {
-            builder.parameter(ParameterDescriptor.forParameter(parameter, depth - 1));
+        int         parametersCount = method.getParameterCount();
+        Parameter[] parameters      = method.getParameters();
+        for (int i = 0; i < parametersCount; i++) {
+            JavaType parameterType = JavaType.forParameter(method, i);
+            builder.parameter(ParameterDescriptor.forParameter(parameters[i], parameterType, depth - 1));
         }
 
-        for (Class<?> exceptionType : method.getExceptionTypes()) {
-            builder.exceptionType(forClass(exceptionType, depth - 1));
+        int exceptionTypes = method.getExceptionTypes().length;
+        for (int i = 0; i < exceptionTypes; i++) {
+            builder.exceptionType(TypeDescriptor.forType(JavaType.forExceptionType(method, i), depth - 1));
         }
 
         for (Annotation annotation : method.getAnnotations()) {
             builder.annotation(AnnotationDescriptor.forAnnotation(annotation, depth - 1));
         }
 
-        return builder.internal(method).returnType(forClass(method.getReturnType(), depth - 1)).build();
+        return builder.internal(method).returnType(TypeDescriptor.forType(JavaType.forMethodReturnType(method), depth - 1)).build();
     }
 }

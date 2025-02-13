@@ -47,7 +47,8 @@ abstract public class AbstractBinder implements ObjectBinder {
     @Override
     public <T> BindResult<T> bindValue(
             PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback) {
-        PropertyValuesAccessor value = accessor.navigate(name);
+        PropertyPath           path  = callback.onKeyCreated(name, context);
+        PropertyValuesAccessor value = accessor.navigate(path);
 
         // If the value is null, return an empty binding result
         if (value.isNull()) {
@@ -69,7 +70,7 @@ abstract public class AbstractBinder implements ObjectBinder {
                 Object converted = convert(result, descriptor);
 
                 if (converted != null) {
-                    converted = callback.onBinding(name, bindable, context, converted);
+                    converted = callback.onBinding(path, bindable, context, converted);
                 }
 
                 return (BindResult<T>) BindResult.of(converted);
@@ -78,8 +79,10 @@ abstract public class AbstractBinder implements ObjectBinder {
             return BindResult.empty();
         } else if (context.isDeepBinding()) {
             // If deep binding is enabled, delegate to root rootBinder
-            return rootBinder.bind(name, bindable, accessor, callback);
+            return rootBinder.bind(path, bindable, accessor, callback);
         }
+
+        callback.onUnbound(path, bindable, context);
 
         return BindResult.empty();
     }

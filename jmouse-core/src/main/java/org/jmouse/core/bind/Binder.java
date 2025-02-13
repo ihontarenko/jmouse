@@ -107,7 +107,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @return the result of the binding
      */
     public <T> BindResult<T> bind(String path, Bindable<T> bindable) {
-        return bind(PropertyPath.of(path), bindable, source, null);
+        return bind(PropertyPath.forPath(path), bindable, source, null);
     }
 
     /**
@@ -116,12 +116,12 @@ public class Binder implements ObjectBinder, BindContext {
      * @param <T> the type of the object to bind
      * @param path the path at which to bind the object
      * @param bindable the object to bind
-     * @param source the data source
+     * @param accessor the data source
      * @param callback the binding callback for customization
      * @return the result of the binding
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath path, Bindable<T> bindable, PropertyValuesAccessor source, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath path, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback) {
         try {
             ObjectBinder binder     = factory.getBinderFor(bindable);
             BindCallback customizer = callback == null ? this.defaultCallback : callback;
@@ -129,9 +129,9 @@ public class Binder implements ObjectBinder, BindContext {
             // Detect recursive binding before proceeding
             detector.detect(path::path, exceptionSupplier);
 
-            return binder.bind(path, bindable, source, customizer);
+            return binder.bind(path, bindable, accessor, customizer);
         } catch (Exception exception) {
-            return BindResult.of(performException(path, bindable, exception));
+            return BindResult.of(doException(path, bindable, exception));
         } finally {
             // Remove the path after binding to prevent future recursion detection for the same path
             detector.remove(path::path);
@@ -153,7 +153,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @throws BindException if the callback throws an exception that is not already a {@link BindException}
      */
     @SuppressWarnings({"unchecked"})
-    private <T> T performException(PropertyPath path, Bindable<T> bindable, Exception exception) {
+    private <T> T doException(PropertyPath path, Bindable<T> bindable, Exception exception) {
         try {
             return (T) defaultCallback.onFailure(path, bindable, this, exception);
         } catch (Exception cause) {
@@ -175,7 +175,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @throws UnsupportedOperationException if called on the root binder
      */
     @Override
-    public <T> BindResult<T> bindValue(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor source, BindCallback callback) {
+    public <T> BindResult<T> bindValue(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback) {
         throw new UnsupportedOperationException(
                 "Root binder is not supported this method. This methods can be called only in type-binder specific.");
     }

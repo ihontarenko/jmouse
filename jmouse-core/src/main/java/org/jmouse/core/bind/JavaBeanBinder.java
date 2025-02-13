@@ -3,13 +3,16 @@ package org.jmouse.core.bind;
 import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
 import org.jmouse.core.bind.descriptor.bean.ObjectDescriptor;
 import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.Reflections;
 import org.jmouse.util.Factory;
 import org.jmouse.util.Priority;
+import org.jmouse.util.helper.Strings;
 
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
 import static org.jmouse.core.bind.Bindable.of;
+import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
 
 /**
  * A binder implementation that supports binding JavaBeans.
@@ -18,8 +21,10 @@ import static org.jmouse.core.bind.Bindable.of;
  * from the provided {@link PropertyValuesAccessor}.
  * </p>
  */
-@Priority(Integer.MAX_VALUE)
+@Priority(JavaBeanBinder.PRIORITY)
 public class JavaBeanBinder extends AbstractBinder {
+
+    public static final int PRIORITY = 1000;
 
     /**
      * Creates a {@link JavaBeanBinder} with the given binding context.
@@ -41,13 +46,13 @@ public class JavaBeanBinder extends AbstractBinder {
      *
      * @param name     the structured name path of the binding target
      * @param bindable the bindable instance representing the JavaBean
-     * @param source   the data source from which values are retrieved
+     * @param accessor   the data source from which values are retrieved
      * @param callback the binding callback for customization
      * @param <T>      the type of the JavaBean
      * @return a {@link BindResult} containing the bound JavaBean instance
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor source, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback) {
         JavaType    type = bindable.getType();
         JavaBean<T> bean = JavaBean.of(type);
 
@@ -58,12 +63,12 @@ public class JavaBeanBinder extends AbstractBinder {
 
         // If the type is either a simple object or a scalar value, bind it directly
         if (type.isObject() || type.isScalar()) {
-            return bindValue(name, bindable, source, callback);
+            return bindValue(name, bindable, accessor, callback);
         }
 
         // Iterate through all the properties of the JavaBean to map values
         for (Bean.Property<T> property : bean.getProperties()) {
-            PropertyPath     propertyName = PropertyPath.of(getPreferredName(property));
+            PropertyPath     propertyName = PropertyPath.forPath(getPreferredName(property));
             JavaType         propertyType = property.getType();
             Supplier<Object> value        = property.getValue(factory);
 
@@ -71,12 +76,13 @@ public class JavaBeanBinder extends AbstractBinder {
             if (property.isWritable()) {
                 PropertyPath       propertyPath     = name.append(propertyName);
                 Bindable<Object>   bindableProperty = of(propertyType).withSuppliedInstance(value);
-                BindResult<Object> result           = bindValue(propertyPath, bindableProperty, source, callback);
+                BindResult<Object> result           = bindValue(propertyPath, bindableProperty, accessor, callback);
 
                 checkRequirements(result, propertyName, property);
 
                 // If no value was found in the data source, skip this property
                 if (result.isEmpty()) {
+                    callback.onUnbound(propertyPath, bindableProperty, context);
                     continue;
                 }
 
@@ -99,8 +105,14 @@ public class JavaBeanBinder extends AbstractBinder {
     protected void checkRequirements(BindResult<?> result, PropertyPath propertyName, Bean.Property<?> property) {
         if (result.isEmpty()) {
             if (property.getRawSetter().isAnnotationPresent(BindRequired.class)) {
-                throw new IllegalStateException("No value for required property '%s' in path '%s'"
-                        .formatted(property, propertyName));
+                String message = getAnnotationValue(property.getRawSetter(), BindRequired.class, BindRequired::value);
+
+                if (Strings.isEmpty(message)) {
+                    message = "Property '%s' required to be bound but value do not present on path: '%s'"
+                            .formatted(property, propertyName);
+                }
+
+                throw new IllegalStateException(message);
             }
         }
     }
@@ -141,6 +153,6 @@ public class JavaBeanBinder extends AbstractBinder {
      */
     @Override
     public <T> boolean supports(Bindable<T> bindable) {
-        return bindable.getTypeInformation().isBean();
+        return bindable.getType().isBean();
     }
 }

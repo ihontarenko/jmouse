@@ -198,22 +198,59 @@ public class JavaType implements ClassTypeInspector {
     }
 
     /**
-     * Creates a {@link JavaType} for a specific parameter of a given {@link Method}.
+     * Creates a {@link JavaType} for a specific exception type declared by a {@link Method}.
+     * <p>
+     * This executable retrieves the exception type at the specified index in the executable's
+     * declared exceptions and constructs a {@link JavaType} representation of it.
+     * If the specified index is out of bounds, an {@link IllegalArgumentException} is thrown.
+     * </p>
      *
-     * @param method the method whose parameter type is to be resolved
-     * @param index  the index of the parameter (zero-based)
-     * @return a {@link JavaType} instance representing the parameter type at the given index
-     * @throws IllegalArgumentException if the method does not have a parameter at the specified index
+     * @param executable the executable whose exception type is to be resolved
+     * @param index  the index of the exception type in the declared exceptions
+     * @return a {@link JavaType} instance representing the exception type
+     * @throws IllegalArgumentException if the specified index is out of bounds
      */
-    public static JavaType forMethodParameter(Method method, int index) {
-        Type[] parameters = method.getGenericParameterTypes();
+    public static JavaType forExceptionType(Executable executable, int index) {
+        Type[] parameters = executable.getGenericExceptionTypes();
 
         if (parameters.length > index) {
             return forType(parameters[index]);
         }
 
         throw new IllegalArgumentException(
-                "Method '%s' has no parameter '%d' index".formatted(Reflections.getMethodName(method), index));
+                "Executable '%s' has no exception type with '%d' index".formatted(Reflections.getMethodName(executable), index));
+    }
+
+    /**
+     * Creates a {@link JavaType} for a specific parameter of a given {@link Method}.
+     *
+     * @param executable the executable whose parameter type is to be resolved
+     * @param index  the index of the parameter (zero-based)
+     * @return a {@link JavaType} instance representing the parameter type at the given index
+     * @throws IllegalArgumentException if the executable does not have a parameter at the specified index
+     */
+    public static JavaType forParameter(Executable executable, int index) {
+        Type[] parameters = executable.getGenericParameterTypes();
+
+        if (parameters.length > index) {
+            return forType(parameters[index]);
+        }
+
+        throw new IllegalArgumentException(
+                "Executable '%s' has no parameter '%d' index".formatted(Reflections.getMethodName(executable), index));
+    }
+
+    /**
+     * Creates a {@link JavaType} for the given method or constructor parameter.
+     * <p>
+     * This method resolves the generic parameter type using {@link Parameter#getParameterizedType()}.
+     * </p>
+     *
+     * @param parameter the parameter whose type is to be resolved
+     * @return a {@link JavaType} instance representing the parameter's type
+     */
+    public static JavaType forParameter(Parameter parameter) {
+        return forType(parameter.getParameterizedType());
     }
 
     /**
@@ -973,16 +1010,47 @@ public class JavaType implements ClassTypeInspector {
         static final Type INSTANCE = new NoneType();
     }
 
+    /**
+     * Represents a synthetic {@link ParameterizedType} that can be used to define parameterized types dynamically.
+     * <p>
+     * This implementation allows the creation of parameterized types without requiring explicit generic declarations
+     * in the source code. It is particularly useful for runtime type resolution in reflection-based frameworks.
+     * </p>
+     *
+     * Example usage:
+     * <pre>{@code
+     * ParameterizedType syntheticType = new SyntheticType(List.class, new Type[]{String.class});
+     * System.out.println(syntheticType.getTypeName()); // Outputs: "Synthetic:List<String>"
+     * }</pre>
+     *
+     * @author JMouse - Team
+     * @author Mr. Jerry Mouse
+     * @author Ivan Hontarenko
+     */
     static class SyntheticType implements ParameterizedType {
 
         private final Class<?> rawType;
-        private final Type[]   typeArguments;
+        private final Type[] typeArguments;
 
+        /**
+         * Constructs a synthetic parameterized type with the specified raw type and type arguments.
+         *
+         * @param rawType       the raw type of the parameterized type
+         * @param typeArguments the actual type arguments
+         */
         SyntheticType(Class<?> rawType, Type[] typeArguments) {
             this.rawType = rawType;
             this.typeArguments = typeArguments;
         }
 
+        /**
+         * Returns the type name representation of this synthetic parameterized type.
+         * <p>
+         * The format follows: {@code Synthetic:RawType<TypeArg1, TypeArg2, ...>}
+         * </p>
+         *
+         * @return the type name of this parameterized type
+         */
         @Override
         public String getTypeName() {
             StringBuilder builder = new StringBuilder();
@@ -1003,21 +1071,36 @@ public class JavaType implements ClassTypeInspector {
             return builder.toString();
         }
 
+        /**
+         * Returns the actual type arguments of this parameterized type.
+         *
+         * @return an array of {@link Type} representing the actual type arguments
+         */
         @Override
         public Type[] getActualTypeArguments() {
             return typeArguments;
         }
 
+        /**
+         * Returns the raw type of this parameterized type.
+         *
+         * @return the {@link Type} representing the raw type
+         */
         @Override
         public Type getRawType() {
             return rawType;
         }
 
+        /**
+         * Returns the owner type of this parameterized type, which is always {@code null}
+         * since synthetic types do not have an owner.
+         *
+         * @return {@code null} as synthetic types do not have an owner
+         */
         @Override
         public Type getOwnerType() {
             return null;
         }
-
     }
 
 }

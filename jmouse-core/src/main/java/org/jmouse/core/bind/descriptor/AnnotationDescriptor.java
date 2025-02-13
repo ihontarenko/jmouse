@@ -1,5 +1,7 @@
 package org.jmouse.core.bind.descriptor;
 
+import org.jmouse.core.reflection.JavaType;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -92,7 +94,7 @@ public interface AnnotationDescriptor extends Descriptor<Annotation> {
         Class<? extends Annotation>  type    = annotation.annotationType();
         AnnotationDescriptor.Builder builder = new AnnotationDescriptor.Builder(getShortName(type));
 
-        builder.internal(annotation).annotationType(TypeDescriptor.forClass(type, depth - 1));
+        builder.internal(annotation).annotationType(TypeDescriptor.forType(JavaType.forType(type), depth - 1));
 
         try {
             Map<String, Object> attributes = new HashMap<>();

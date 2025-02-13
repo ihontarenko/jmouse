@@ -1,5 +1,6 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.util.Priority;
 
@@ -9,8 +10,10 @@ import org.jmouse.util.Priority;
  * This binder ensures that only scalar types are processed. It throws an exception if a non-scalar type is passed.
  * </p>
  */
-@Priority(Integer.MAX_VALUE / 10)
+@Priority(ScalarValueBinder.PRIORITY)
 public class ScalarValueBinder extends AbstractBinder {
+
+    public static final int PRIORITY = 100;
 
     /**
      * Constructs a new {@code ScalarValueBinder} with the given binding context.
@@ -30,14 +33,14 @@ public class ScalarValueBinder extends AbstractBinder {
      *
      * @param name     the name path representing the target property
      * @param bindable the bindable type to map the value to
-     * @param source   the data source containing the value
+     * @param accessor   the data source containing the value
      * @param callback the binding callback for customization
      * @param <T>      the target type
      * @return a {@link BindResult} containing the bound scalar value
      * @throws IllegalArgumentException if a non-scalar type is provided
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor source, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback) {
         TypeInformation descriptor  = bindable.getTypeInformation();
         boolean         isCompliant = descriptor.isScalar() || descriptor.isEnum() || descriptor.isClass();
 
@@ -45,7 +48,7 @@ public class ScalarValueBinder extends AbstractBinder {
             throw new IllegalArgumentException("Scalar binder only handles scalar, class, enum types. But got " + descriptor);
         }
 
-        return bindValue(name, bindable, source, callback);
+        return bindValue(name, bindable, accessor, callback);
     }
 
     /**
@@ -60,8 +63,7 @@ public class ScalarValueBinder extends AbstractBinder {
      */
     @Override
     public <T> boolean supports(Bindable<T> bindable) {
-        TypeInformation descriptor = bindable.getTypeInformation();
-
-        return descriptor.isScalar() || descriptor.isEnum() || descriptor.isClass();
+        JavaType type = bindable.getType();
+        return type.isScalar() || type.isEnum() || type.isClass();
     }
 }

@@ -24,7 +24,7 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
 public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeInspector {
 
     int                           DEFAULT_DEPTH = 2;
-    Map<Class<?>, TypeDescriptor> CACHE         = new HashMap<>();
+    Map<JavaType, TypeDescriptor> CACHE         = new HashMap<>();
 
     /**
      * Returns the {@link JavaType} representation of this type.
@@ -137,15 +137,16 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
          * @param name         the name of the class
          * @param internal     the underlying {@link Class} instance
          * @param annotations  a set of annotation descriptors associated with this class
-         * @param classType    the actual class type
+         * @param type         the actual class type
          * @param constructors a collection of constructor descriptors
          * @param fields       a map of field names to field descriptors
          * @param methods      a map of method names to method descriptors
          */
         Implementation(
-                String name, Class<?> internal,
+                String name,
+                Class<?> internal,
                 Set<AnnotationDescriptor> annotations,
-                Class<?> classType,
+                JavaType type,
                 Collection<ConstructorDescriptor> constructors,
                 Map<String, FieldDescriptor> fields,
                 Map<String, MethodDescriptor> methods
@@ -154,7 +155,7 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
             this.constructors = constructors;
             this.fields = fields;
             this.methods = methods;
-            this.javaType = JavaType.forType(classType);
+            this.javaType = type;
         }
 
         /**
@@ -280,6 +281,7 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
         private final Set<ConstructorDescriptor>    constructors = new HashSet<>();
         private final Map<String, FieldDescriptor>  fields       = new HashMap<>();
         private final Map<String, MethodDescriptor> methods      = new HashMap<>();
+        private       JavaType                      type;
 
         /**
          * Constructs a new {@code ClassDescriptor.Builder} with the specified class name.
@@ -314,6 +316,10 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
 
         /**
          * Adds a method descriptor to this class.
+         * <p>
+         * This method registers a {@link MethodDescriptor} representing a method in the class.
+         * The method is stored in a map using its name as the key.
+         * </p>
          *
          * @param method the method descriptor to add
          * @return this builder instance for method chaining
@@ -322,6 +328,21 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
             methods.put(method.getName(), method);
             return self();
         }
+
+        /**
+         * Sets the {@link JavaType} of this class.
+         * <p>
+         * This method defines the Java type that the class descriptor represents.
+         * </p>
+         *
+         * @param type the Java type of the class
+         * @return this builder instance for method chaining
+         */
+        public Builder type(JavaType type) {
+            this.type = type;
+            return self();
+        }
+
 
         /**
          * Builds a new {@link TypeDescriptor} instance using the configured values.
@@ -334,7 +355,7 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
                     name,
                     internal,
                     Collections.unmodifiableSet(annotations),
-                    internal,
+                    type,
                     Collections.unmodifiableSet(constructors),
                     Collections.unmodifiableMap(fields),
                     Collections.unmodifiableMap(methods)
@@ -342,17 +363,12 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
         }
     }
 
-    /**
-     * Creates a descriptor for a class.
-     * <p>
-     * If the class descriptor has already been created, it is retrieved from an internal cache.
-     * </p>
-     *
-     * @param type the class to describe
-     * @return a {@link TypeDescriptor} instance representing the class
-     */
+    static TypeDescriptor forType(JavaType type) {
+        return forType(type, DEFAULT_DEPTH);
+    }
+
     static TypeDescriptor forClass(Class<?> type) {
-        return forClass(type, DEFAULT_DEPTH);
+        return forType(JavaType.forType(type), DEFAULT_DEPTH);
     }
 
     /**
@@ -367,35 +383,37 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
      * @param depth the recursion depth limit for nested descriptor resolution
      * @return a {@link TypeDescriptor} instance
      */
-    static TypeDescriptor forClass(Class<?> type, int depth) {
-        if (CACHE.containsKey(type)) {
-            return CACHE.get(type);
+    static TypeDescriptor forType(JavaType type, int depth) {
+        TypeDescriptor descriptor = CACHE.get(type);
+
+        if (descriptor == null) {
+            Class<?>               rawType = type.getRawType();
+            TypeDescriptor.Builder builder = new TypeDescriptor.Builder(getShortName(type));
+
+            builder.internal(rawType).type(type);
+
+            if (depth > 0) {
+                for (Annotation annotation : rawType.getAnnotations()) {
+                    builder.annotation(AnnotationDescriptor.forAnnotation(annotation, depth - 1));
+                }
+
+                for (Method method : rawType.getDeclaredMethods()) {
+                    builder.method(MethodDescriptor.forMethod(method, depth - 1));
+                }
+
+                for (Constructor<?> ctor : rawType.getDeclaredConstructors()) {
+                    builder.constructor(ConstructorDescriptor.forContructor(ctor, depth - 1));
+                }
+
+                for (Field field : rawType.getDeclaredFields()) {
+                    builder.field(FieldDescriptor.forField(field, depth - 1));
+                }
+            }
+
+            descriptor = builder.build();
+
+            CACHE.put(type, descriptor);
         }
-
-        TypeDescriptor.Builder builder = new TypeDescriptor.Builder(getShortName(type));
-        builder.internal(type);
-
-        if (depth > 0) {
-            for (Annotation annotation : type.getAnnotations()) {
-                builder.annotation(AnnotationDescriptor.forAnnotation(annotation, depth - 1));
-            }
-
-            for (Method method : type.getDeclaredMethods()) {
-                builder.method(MethodDescriptor.forMethod(method, depth - 1));
-            }
-
-            for (Constructor<?> ctor : type.getDeclaredConstructors()) {
-                builder.constructor(ConstructorDescriptor.forContructor(ctor, depth - 1));
-            }
-
-            for (Field field : type.getDeclaredFields()) {
-                builder.field(FieldDescriptor.forField(field, depth - 1));
-            }
-        }
-
-        TypeDescriptor descriptor = builder.build();
-
-        CACHE.put(type, descriptor);
 
         return descriptor;
     }
