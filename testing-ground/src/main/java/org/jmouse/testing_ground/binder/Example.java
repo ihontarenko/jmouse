@@ -1,104 +1,41 @@
 package org.jmouse.testing_ground.binder;
 
-
-import org.jmouse.JMouseModule;
-import org.jmouse.core.bind.*;
-import org.jmouse.core.io.CompositeResourceLoader;
-import org.jmouse.core.io.PatternMatcherResourceLoader;
-import org.jmouse.core.io.Resource;
-import org.jmouse.core.env.PropertyResolver;
-import org.jmouse.core.env.*;
-import org.jmouse.testing_ground.binder.dto.Address;
+import org.jmouse.core.bind.Bind;
+import org.jmouse.core.bind.Binder;
+import org.jmouse.core.bind.DefaultBindingCallback;
 import org.jmouse.testing_ground.binder.dto.User;
-import org.jmouse.util.helper.Strings;
 
-import java.nio.file.FileSystems;
-import java.util.*;
-
-import static org.jmouse.util.helper.Files.removeExtension;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Example {
 
     public static void main(String[] args) {
-        long time = System.currentTimeMillis();
 
-        PropertyResolver resolver = createPropertyResolver();
+        List<Map<String, Object>> addresses = new ArrayList<>();
+        addresses.add(Map.of("street", "Street 123 ${address[0].city}", "city", "New-York"));
 
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
-        System.out.println("Resolved property resolver: " + resolver);
-        PropertyValueAccessor dataSource = PropertyValueAccessor.wrap(resolver);
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
-        Map<String, Object> map = Map.of(
-                "name", "Stephen King",
-                "address", List.of(
-                        Map.of(
-                                "street", "Elm Street 666",
-                                "city", "Castle Rock"
-                        ),
-                        Map.of(
-                                "street", "Elm Street 777",
-                                "city", "New York"
-                        )
-                )
-        );
-
-        PropertyValueAccessor mapAccessor = PropertyValueAccessor.wrap(map);
-
-        Binder mapBinder = Binder.withValueAccessor(map);
-
-        User user = Bind.with(mapBinder).to(User.class).getValue();
-        Address address = Bind.with(mapBinder).to("address[0]", Address.class).getValue();
-
-        User copyUser = Bind.with(user).to(User.class).getValue();
-
-        PropertyValueAccessor accessor = PropertyValueAccessor.wrap(user);
-
-        Binder binder = Binder.with(resolver, new DefaultBindingCallback());
-
-        BindResult<Map<String, JMouseModule>> result = Bind.with(binder).toMap("package", JMouseModule.class);
-
-        Bind.with(binder).to("default.webserver", WebServer.class);
-        System.out.println(System.currentTimeMillis() - time);
-        time = System.currentTimeMillis();
-        System.out.println(result.getValue());
-
-        Bind.with(binder).toMap("services", Object.class);
-    }
-
-    private static PropertyResolver createPropertyResolver() {
-
-        PatternMatcherResourceLoader resourceLoader = new CompositeResourceLoader();
-
-        MapPropertySource mapSource = new MapPropertySource("rawMaps", Map.of(
-                "app.name", "jMouse Core v${package.core.version}",
-                "app.full-name", "jMouse Framework",
-                "app.java.version", "21",
-                "app.description", "Application: '${app.name}' Java ${app.java.version} ${app.userName:Default}"
+        List<Map<String, Object>> books = new ArrayList<>();
+        books.add(Map.of(
+                "title", "Book 1",
+                "author", "${name}",
+                "placeCreation", "Written on ${address[0].city:Unknown} city with love: ${name}"
         ));
 
-        PropertyResolver resolver = new StandardPropertyResolver();
+        Map<String, Object> data = new HashMap<>();
 
-        resolver.addPropertySource(mapSource);
+        data.put("name", "James Bond");
+        data.put("books", books);
+        data.put("address", addresses);
 
-        int counter = 0;
-        for (Resource resource : resourceLoader.findResources("classpath:package.properties")) {
-            String name      = Strings.suffix(resource.getName(), FileSystems.getDefault().getSeparator(), true, 1);
-            String formatted = "%s[%d]".formatted(removeExtension(name), counter++);
-            resolver.addPropertySource(new ResourcePropertySource(formatted, resource));
-        }
+        Binder binder = Binder.with(data, new DefaultBindingCallback());
+        User user = Bind.with(binder).get(null, User.class);
 
-        counter = 0;
-        for (Resource resource : resourceLoader.findResources("classpath:webserver.properties")) {
-            String name      = Strings.suffix(resource.getName(), FileSystems.getDefault().getSeparator(), true, 1);
-            String formatted = "%s[%d]".formatted(removeExtension(name), counter++);
-            resolver.addPropertySource(new ResourcePropertySource(formatted, resource));
-        }
+        System.out.println(user);
 
-        return resolver;
     }
-
 
 
 }

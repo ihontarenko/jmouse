@@ -46,7 +46,7 @@ abstract public class CollectionBinder extends AbstractBinder {
      * @return the binding result containing the collection, or an empty result if no binding is possible
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath root, Bindable<T> bindable, PropertyValueAccessor source, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath root, Bindable<T> bindable, PropertyValuesAccessor source, BindCallback callback) {
         TypeInformation typeDescriptor = bindable.getTypeInformation();
 
         // Check if the bindable is a collection
@@ -82,7 +82,7 @@ abstract public class CollectionBinder extends AbstractBinder {
     }
 
     private BindResult<?> bindCollectionElement(
-            PropertyPath name, Bindable<?> bindable, PropertyValueAccessor source, Collection<Object> elements, BindCallback callback) {
+            PropertyPath name, Bindable<?> bindable, PropertyValuesAccessor source, Collection<Object> elements, BindCallback callback) {
         // Bind the individual element and add it to the collection
         BindResult<?> result = bindValue(name, bindable, source, callback);
 

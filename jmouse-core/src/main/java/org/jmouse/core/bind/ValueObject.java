@@ -2,6 +2,7 @@ package org.jmouse.core.bind;
 
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.Reflections;
+import org.jmouse.util.CachedSupplier;
 import org.jmouse.util.Factory;
 import org.jmouse.util.helper.Arrays;
 

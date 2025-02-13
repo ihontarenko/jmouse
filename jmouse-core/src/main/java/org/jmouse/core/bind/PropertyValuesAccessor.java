@@ -1,5 +1,8 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
+import org.jmouse.core.bind.descriptor.bean.MapDescriptor;
+import org.jmouse.core.bind.descriptor.bean.ObjectDescriptor;
 import org.jmouse.core.env.PropertyResolver;
 import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.core.reflection.JavaType;
@@ -18,28 +21,45 @@ import static org.jmouse.core.reflection.JavaType.forInstance;
  * It allows working with objects, lists, maps, arrays, and primitive types in a unified way.
  * </p>
  */
-public interface PropertyValueAccessor extends ClassTypeInspector {
+public interface PropertyValuesAccessor extends ClassTypeInspector {
+
+    @SuppressWarnings("unchecked")
+    static <T> ObjectDescriptor<T> descriptor(Object source) {
+        JavaType            javaType = forInstance(requireNonNullElseGet(source, Object::new));
+        ObjectDescriptor<?> descriptor;
+
+        if (javaType.isMap()) {
+            Map<Object, Object> map = (Map<Object, Object>) source;
+            descriptor = MapDescriptor.forMap(map);
+        } else if (javaType.isRecord()){
+            descriptor = JavaBeanDescriptor.forValueObject(javaType.getRawType());
+        } else {
+            descriptor = JavaBeanDescriptor.forBean(javaType.getRawType());
+        }
+
+        return (ObjectDescriptor<T>) descriptor;
+    }
 
     /**
-     * Creates a {@link PropertyValueAccessor} instance from the given source object.
+     * Creates a {@link PropertyValuesAccessor} instance from the given source object.
      *
      * @param source the source object
-     * @return a {@link PropertyValueAccessor} instance wrapping the source
+     * @return a {@link PropertyValuesAccessor} instance wrapping the source
      * @throws UnsupportedDataSourceException if the type is unsupported
      */
-    static PropertyValueAccessor wrap(Object source) {
-        PropertyValueAccessor instance = new DummyPropertyValueAccessor(source);
+    static PropertyValuesAccessor wrap(Object source) {
+        PropertyValuesAccessor instance = new DummyPropertyValuesAccessor(source);
 
         if (instance.isInstanceOf(PropertyResolver.class)) {
             instance = new PropertyResolverDataSource((PropertyResolver) source);
         } else if (instance.isBean()) {
-            instance = new JavaBeanPropertyValueAccessor(source);
+            instance = new JavaBeanPropertyValuesAccessor(source);
         } else if (instance.isScalar() || instance.isCollection() || instance.isMap() || instance.isArray()) {
-            instance = new StandardPropertyValueAccessor(instance.unwrap());
+            instance = new StandardPropertyValuesAccessor(instance.unwrap());
         }
 
         if (instance.isNull()) {
-            instance = new NullPropertyValueAccessor();
+            instance = new NullPropertyValuesAccessor();
         }
 
         return instance;
@@ -68,43 +88,43 @@ public interface PropertyValueAccessor extends ClassTypeInspector {
     Object unwrap();
 
     /**
-     * Retrieves a nested {@link PropertyValueAccessor} by name.
+     * Retrieves a nested {@link PropertyValuesAccessor} by name.
      *
      * @param name the name of the nested data source
-     * @return the nested {@link PropertyValueAccessor}
+     * @return the nested {@link PropertyValuesAccessor}
      */
-    PropertyValueAccessor get(String name);
+    PropertyValuesAccessor get(String name);
 
     /**
-     * Retrieves a nested {@link PropertyValueAccessor} by index.
+     * Retrieves a nested {@link PropertyValuesAccessor} by index.
      *
      * @param index the index of the nested data source
-     * @return the nested {@link PropertyValueAccessor}
+     * @return the nested {@link PropertyValuesAccessor}
      */
-    PropertyValueAccessor get(int index);
+    PropertyValuesAccessor get(int index);
 
     /**
-     * Retrieves a nested {@link PropertyValueAccessor} using a {@link PropertyPath}.
+     * Retrieves a nested {@link PropertyValuesAccessor} using a {@link PropertyPath}.
      *
      * @param path the structured name path
-     * @return the nested {@link PropertyValueAccessor}
+     * @return the nested {@link PropertyValuesAccessor}
      * @throws NumberFormatException if an indexed path contains a non-numeric value
      */
-    default PropertyValueAccessor navigate(String path) {
+    default PropertyValuesAccessor navigate(String path) {
         return navigate(PropertyPath.of(path));
     }
 
     /**
-     * Retrieves a nested {@link PropertyValueAccessor} using a {@link PropertyPath}.
+     * Retrieves a nested {@link PropertyValuesAccessor} using a {@link PropertyPath}.
      *
      * @param name the structured name path
-     * @return the nested {@link PropertyValueAccessor}
+     * @return the nested {@link PropertyValuesAccessor}
      * @throws NumberFormatException if an indexed path contains a non-numeric value
      */
-    default PropertyValueAccessor navigate(PropertyPath name) {
-        PropertyValueAccessor nested  = this;
-        int                   counter = 0;
-        PropertyPath.Entries  entries = name.entries();
+    default PropertyValuesAccessor navigate(PropertyPath name) {
+        PropertyValuesAccessor nested  = this;
+        int                    counter = 0;
+        PropertyPath.Entries   entries = name.entries();
 
         for (CharSequence element : entries) {
             PropertyPath.Type type = entries.type(counter);
@@ -125,7 +145,7 @@ public interface PropertyValueAccessor extends ClassTypeInspector {
     }
 
     /**
-     * Retrieves a list of keys representing the entries in this {@link PropertyValueAccessor}.
+     * Retrieves a list of keys representing the entries in this {@link PropertyValuesAccessor}.
      * <p>
      * If the data source is a map, the method returns its key set as strings.
      * If the data source is a list, the method generates index-based keys
@@ -153,7 +173,7 @@ public interface PropertyValueAccessor extends ClassTypeInspector {
     }
 
     /**
-     * Retrieves a list of {@link PropertyPath} representations for the keys in this {@link PropertyValueAccessor}.
+     * Retrieves a list of {@link PropertyPath} representations for the keys in this {@link PropertyValuesAccessor}.
      * <p>
      * This method converts the keys obtained from {@link #keySet()} into {@link PropertyPath} objects,
      * allowing structured representation of hierarchical data.

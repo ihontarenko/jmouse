@@ -20,9 +20,9 @@ import java.util.function.Supplier;
  */
 public class SingletonSupplier<T> implements Supplier<T> {
 
-    private final Supplier<T> supplier;
-    private final Supplier<T> fallback;
-    private volatile T instance;
+    private final    Supplier<T> supplier;
+    private final    Supplier<T> fallback;
+    private volatile T           instance;
 
     private final ReentrantLock lock = new ReentrantLock();
 

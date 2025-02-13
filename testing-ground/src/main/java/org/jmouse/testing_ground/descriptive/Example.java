@@ -1,13 +1,12 @@
 package org.jmouse.testing_ground.descriptive;
 
-import org.jmouse.core.bind.PropertyValueAccessor;
+import org.jmouse.core.bind.PropertyValuesAccessor;
 import org.jmouse.core.bind.JavaBean;
 import org.jmouse.core.bind.descriptor.TypeDescriptor;
 import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
 import org.jmouse.core.bind.descriptor.bean.MapDescriptor;
 import org.jmouse.core.bind.descriptor.bean.ObjectDescriptor;
 import org.jmouse.testing_ground.beancontext.application.WideConstructorDto;
-import org.jmouse.testing_ground.binder.WebServer;
 import org.jmouse.web.server.WebServers;
 import org.jmouse.testing_ground.beancontext.application.ExternalUser;
 import org.jmouse.testing_ground.beancontext.application.InternalUser;
@@ -30,7 +29,6 @@ public class Example {
         TypeDescriptor descriptorA = TypeDescriptor.forClass(InternalUser.class);
         TypeDescriptor descriptorB = TypeDescriptor.forClass(ExternalUser.class);
         TypeDescriptor descriptorC = TypeDescriptor.forClass(WebServers.class);
-        TypeDescriptor descriptorD = TypeDescriptor.forClass(WebServer.class);
         TypeDescriptor descriptorE = TypeDescriptor.forClass(UserHolder.class);
 
         ExternalUser externalUser = new ExternalUser();
@@ -49,9 +47,11 @@ public class Example {
 
         recordBean.getProperty("user").getGetter();
 
-        WideConstructorDto    dto    = new WideConstructorDto(123, "James");
-        PropertyValueAccessor source = PropertyValueAccessor.wrap(dto);
+        WideConstructorDto     dto    = new WideConstructorDto(123, "James");
+        PropertyValuesAccessor source = PropertyValuesAccessor.wrap(dto);
         source.get("id").asObject(); // 123
+
+
 
         JavaBeanDescriptor<WideConstructorDto> dd = JavaBeanDescriptor.forBean(WideConstructorDto.class);
 

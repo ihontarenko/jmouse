@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 /**
  * Binder for Java records, enabling their instantiation and property binding from a data source.
  * <p>
- * This binder extracts record components, binds them using the provided {@link PropertyValueAccessor},
+ * This binder extracts record components, binds them using the provided {@link PropertyValuesAccessor},
  * and creates a new immutable record instance via a {@link ValueObject}.
  * </p>
  *
@@ -39,7 +39,7 @@ public class ValueObjectBinder extends AbstractBinder {
     }
 
     /**
-     * Binds a Java record by extracting its properties, resolving values from the {@link PropertyValueAccessor},
+     * Binds a Java record by extracting its properties, resolving values from the {@link PropertyValuesAccessor},
      * and creating a new immutable record instance.
      *
      * @param name     the hierarchical name path of the object being bound
@@ -51,7 +51,7 @@ public class ValueObjectBinder extends AbstractBinder {
      */
     @Override
     @SuppressWarnings({"unchecked"})
-    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValueAccessor source, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor source, BindCallback callback) {
         TypeInformation sourceDescriptor = TypeInformation.forClass(source.navigate(name).getDataType());
         TypeInformation targetDescriptor = bindable.getTypeInformation();
 
@@ -73,7 +73,7 @@ public class ValueObjectBinder extends AbstractBinder {
      * @param <T>      the type of the bound object
      * @return a {@link BindResult} containing the bound record instance if successful
      */
-    protected <T> BindResult<T> bindValueObject(PropertyPath name, Bindable<T> bindable, PropertyValueAccessor source, BindCallback callback) {
+    protected <T> BindResult<T> bindValueObject(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor source, BindCallback callback) {
         Class<?> rawType = bindable.getType().getRawType();
 
         // Create a ValueObject representation of the record

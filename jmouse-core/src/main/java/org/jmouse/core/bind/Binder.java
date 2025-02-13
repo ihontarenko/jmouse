@@ -19,8 +19,8 @@ public class Binder implements ObjectBinder, BindContext {
     private static final Supplier<? extends RuntimeException> exceptionSupplier = ()
             -> new BindException("Recursive binding detected");
 
-    private final PropertyValueAccessor source;
-    private final BinderFactory         factory;
+    private final PropertyValuesAccessor source;
+    private final BinderFactory          factory;
     private final Conversion                      conversion;
     private final CyclicReferenceDetector<String> detector;
     private       BindCallback                    defaultCallback;
@@ -34,7 +34,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @param factory the factory for creating binders
      * @param strategy the binding strategy (deep or shallow)
      */
-    public Binder(PropertyValueAccessor source, BinderFactory factory, BindingStrategy strategy) {
+    public Binder(PropertyValuesAccessor source, BinderFactory factory, BindingStrategy strategy) {
         this.defaultCallback = new DefaultBindingCallback();
         this.strategy = strategy;
         this.source = source;
@@ -61,7 +61,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @return a new {@code Binder} instance
      */
     public static Binder with(Object source, BindCallback callback) {
-        Binder binder = new Binder(PropertyValueAccessor.wrap(source));
+        Binder binder = new Binder(PropertyValuesAccessor.wrap(source));
 
         binder.setDefaultCallback(callback);
 
@@ -75,7 +75,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @return a new {@code Binder} instance
      */
     public static Binder withValueAccessor(Object source) {
-        return new Binder(PropertyValueAccessor.wrap(source));
+        return new Binder(PropertyValuesAccessor.wrap(source));
     }
 
     /**
@@ -83,7 +83,7 @@ public class Binder implements ObjectBinder, BindContext {
      *
      * @param source the data source for binding
      */
-    public Binder(PropertyValueAccessor source) {
+    public Binder(PropertyValuesAccessor source) {
         this(source, new DefaultBinderFactory(), BindingStrategy.DEEP);
     }
 
@@ -121,7 +121,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @return the result of the binding
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath path, Bindable<T> bindable, PropertyValueAccessor source, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath path, Bindable<T> bindable, PropertyValuesAccessor source, BindCallback callback) {
         try {
             ObjectBinder binder     = factory.getBinderFor(bindable);
             BindCallback customizer = callback == null ? this.defaultCallback : callback;
@@ -145,10 +145,10 @@ public class Binder implements ObjectBinder, BindContext {
      * wraps it into a {@link BindException}. If the callback returns a value, it is cast and returned.
      * </p>
      *
-     * @param path     the property path where the exception occurred
-     * @param bindable the bindable target type
+     * @param path      the property path where the exception occurred
+     * @param bindable  the bindable target type
      * @param exception the original exception that occurred
-     * @param <T>      the expected result type
+     * @param <T>       the expected result type
      * @return the fallback value returned by the callback, if any
      * @throws BindException if the callback throws an exception that is not already a {@link BindException}
      */
@@ -175,7 +175,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @throws UnsupportedOperationException if called on the root binder
      */
     @Override
-    public <T> BindResult<T> bindValue(PropertyPath name, Bindable<T> bindable, PropertyValueAccessor source, BindCallback callback) {
+    public <T> BindResult<T> bindValue(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor source, BindCallback callback) {
         throw new UnsupportedOperationException(
                 "Root binder is not supported this method. This methods can be called only in type-binder specific.");
     }
@@ -186,7 +186,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @return the data source
      */
     @Override
-    public PropertyValueAccessor getDataSource() {
+    public PropertyValuesAccessor getDataSource() {
         return source;
     }
 

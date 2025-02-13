@@ -29,7 +29,7 @@ abstract public class AbstractBinder implements ObjectBinder {
     }
 
     /**
-     * Attempts to bind a scalar or object value from the {@link PropertyValueAccessor}.
+     * Attempts to bind a scalar or object value from the {@link PropertyValuesAccessor}.
      * <p>
      * If the requested name is present in the accessor, this method attempts to
      * retrieve and convert the value based on the target {@link TypeInformation}.
@@ -46,8 +46,8 @@ abstract public class AbstractBinder implements ObjectBinder {
     @SuppressWarnings({"unchecked"})
     @Override
     public <T> BindResult<T> bindValue(
-            PropertyPath name, Bindable<T> bindable, PropertyValueAccessor accessor, BindCallback callback) {
-        PropertyValueAccessor value = accessor.navigate(name);
+            PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback) {
+        PropertyValuesAccessor value = accessor.navigate(name);
 
         // If the value is null, return an empty binding result
         if (value.isNull()) {
@@ -95,7 +95,7 @@ abstract public class AbstractBinder implements ObjectBinder {
      * @param value    the value to bind
      * @return the refreshed bindable instance
      */
-    protected Bindable<?> refreshBindable(Bindable<?> bindable, PropertyValueAccessor value) {
+    protected Bindable<?> refreshBindable(Bindable<?> bindable, PropertyValuesAccessor value) {
         TypeInformation valueDescriptor = TypeInformation.forClass(value.getDataType());
         TypeInformation descriptor      = bindable.getTypeInformation();
 

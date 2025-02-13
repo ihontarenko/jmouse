@@ -15,7 +15,7 @@ import static org.jmouse.core.bind.Bindable.of;
  * A binder implementation that supports binding JavaBeans.
  * <p>
  * This binder inspects the properties of a JavaBean and attempts to populate them
- * from the provided {@link PropertyValueAccessor}.
+ * from the provided {@link PropertyValuesAccessor}.
  * </p>
  */
 @Priority(Integer.MAX_VALUE)
@@ -31,10 +31,10 @@ public class JavaBeanBinder extends AbstractBinder {
     }
 
     /**
-     * Binds the given {@link Bindable} JavaBean to values from the {@link PropertyValueAccessor}.
+     * Binds the given {@link Bindable} JavaBean to values from the {@link PropertyValuesAccessor}.
      * <p>
      * This method checks if the target type is an object or scalar, and delegates to
-     * {@link #bindValue(PropertyPath, Bindable, PropertyValueAccessor, BindCallback)} if necessary. Otherwise, it
+     * {@link #bindValue(PropertyPath, Bindable, PropertyValuesAccessor, BindCallback)} if necessary. Otherwise, it
      * iterates over the JavaBean's properties and attempts to bind each writable
      * property.
      * </p>
@@ -47,7 +47,7 @@ public class JavaBeanBinder extends AbstractBinder {
      * @return a {@link BindResult} containing the bound JavaBean instance
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValueAccessor source, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor source, BindCallback callback) {
         JavaType    type = bindable.getType();
         JavaBean<T> bean = JavaBean.of(type);
 
@@ -63,14 +63,14 @@ public class JavaBeanBinder extends AbstractBinder {
 
         // Iterate through all the properties of the JavaBean to map values
         for (Bean.Property<T> property : bean.getProperties()) {
+            PropertyPath     propertyName = PropertyPath.of(getPreferredName(property));
             JavaType         propertyType = property.getType();
             Supplier<Object> value        = property.getValue(factory);
-            PropertyPath     propertyName = PropertyPath.of(getPreferredName(property));
 
             // Check if the property is writable then perform value binding for the property
             if (property.isWritable()) {
-                PropertyPath     propertyPath     = name.append(propertyName);
-                Bindable<Object> bindableProperty = of(propertyType).withSuppliedInstance(value);
+                PropertyPath       propertyPath     = name.append(propertyName);
+                Bindable<Object>   bindableProperty = of(propertyType).withSuppliedInstance(value);
                 BindResult<Object> result           = bindValue(propertyPath, bindableProperty, source, callback);
 
                 checkRequirements(result, propertyName, property);
@@ -92,13 +92,13 @@ public class JavaBeanBinder extends AbstractBinder {
     /**
      * Check if property is required
      * <p>
-     * If the property has a setter method annotated with {@link PropertyRequired},
+     * If the property has a setter method annotated with {@link BindRequired},
      * and no value present will be thrown {@link IllegalStateException}
      * </p>
      */
     protected void checkRequirements(BindResult<?> result, PropertyPath propertyName, Bean.Property<?> property) {
         if (result.isEmpty()) {
-            if (property.getRawSetter().isAnnotationPresent(PropertyRequired.class)) {
+            if (property.getRawSetter().isAnnotationPresent(BindRequired.class)) {
                 throw new IllegalStateException("No value for required property '%s' in path '%s'"
                         .formatted(property, propertyName));
             }
@@ -108,7 +108,7 @@ public class JavaBeanBinder extends AbstractBinder {
     /**
      * Determines the preferred property name for binding.
      * <p>
-     * If the property has a setter method annotated with {@link PropertyName},
+     * If the property has a setter method annotated with {@link BindName},
      * the preferred name is taken from the annotation. Otherwise, the default
      * property name is used.
      * </p>
@@ -121,8 +121,8 @@ public class JavaBeanBinder extends AbstractBinder {
 
         if (property.isWritable()) {
             Method setter = property.getRawSetter();
-            if (setter != null && setter.isAnnotationPresent(PropertyName.class)) {
-                String preferredPath = setter.getAnnotation(PropertyName.class).value();
+            if (setter != null && setter.isAnnotationPresent(BindName.class)) {
+                String preferredPath = setter.getAnnotation(BindName.class).value();
                 if (preferredPath != null && !preferredPath.isEmpty()) {
                     name = preferredPath;
                 }

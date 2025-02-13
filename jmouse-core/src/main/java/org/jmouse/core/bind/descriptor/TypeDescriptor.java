@@ -23,7 +23,7 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  */
 public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeInspector {
 
-    int                           DEFAULT_DEPTH = 4;
+    int                           DEFAULT_DEPTH = 2;
     Map<Class<?>, TypeDescriptor> CACHE         = new HashMap<>();
 
     /**

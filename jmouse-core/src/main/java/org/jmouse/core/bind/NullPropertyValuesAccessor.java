@@ -1,19 +1,19 @@
 package org.jmouse.core.bind;
 
-public class NullPropertyValueAccessor extends AbstractPropertyValueAccessor {
+public class NullPropertyValuesAccessor extends AbstractPropertyValuesAccessor {
 
-    public NullPropertyValueAccessor() {
+    public NullPropertyValuesAccessor() {
         super(null);
     }
 
     @Override
-    public PropertyValueAccessor get(String name) {
-        return PropertyValueAccessor.wrap(null);
+    public PropertyValuesAccessor get(String name) {
+        return PropertyValuesAccessor.wrap(null);
     }
 
     @Override
-    public PropertyValueAccessor get(int index) {
-        return PropertyValueAccessor.wrap(null);
+    public PropertyValuesAccessor get(int index) {
+        return PropertyValuesAccessor.wrap(null);
     }
 
     /**

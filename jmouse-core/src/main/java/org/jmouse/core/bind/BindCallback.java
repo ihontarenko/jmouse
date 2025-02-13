@@ -13,7 +13,7 @@ public interface BindCallback {
     /**
      * Resolves the key name before binding.
      */
-    default PropertyPath onResolveKey(PropertyPath name, BindContext context) {
+    default PropertyPath onKeyCreated(PropertyPath name, BindContext context) {
         return name;
     }
 

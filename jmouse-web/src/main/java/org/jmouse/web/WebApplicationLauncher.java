@@ -67,7 +67,7 @@ public class WebApplicationLauncher {
         return webserver;
     }
 
-    @PropertyName("server")
+    @BindName("server")
     public void setWebserver(Map<WebServers, WebServerConfig> webserver) {
         this.webserver = webserver;
     }

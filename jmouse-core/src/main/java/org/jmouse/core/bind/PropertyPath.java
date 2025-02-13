@@ -1,5 +1,6 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.util.Exceptions;
 import org.jmouse.util.helper.Arrays;
 
 import java.util.HashMap;
@@ -504,7 +505,7 @@ final public class PropertyPath {
 
         private void ensureIndexBounds(int index) {
             if (index < 0 || index >= size()) {
-                throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+                Exceptions.throwIfOutOfRange(index, 0, size, "Index: %d, Size: %d".formatted(index, size));
             }
         }
 

@@ -71,9 +71,9 @@ public class DefaultBindingCallback extends AbstractCallback {
             String prefix = replacer.prefix();
             if (stringValue.contains(prefix)) {
                 PlaceholderResolver resolver = (placeholder) -> {
-                    PropertyValueAccessor dataSource = context.getDataSource();
-                    PropertyPath          path       = PropertyPath.of(placeholder);
-                    PropertyValueAccessor other      = dataSource.navigate(path);
+                    PropertyValuesAccessor dataSource = context.getDataSource();
+                    PropertyPath           path       = PropertyPath.of(placeholder);
+                    PropertyValuesAccessor other      = dataSource.navigate(path);
                     return other.isNull() ? null : other.asText();
                 };
                 handled = replacer.replace(stringValue, resolver);

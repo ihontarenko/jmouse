@@ -185,7 +185,7 @@ public interface ClassTypeInspector {
      * @return {@code true} if the class type represents a bean, otherwise {@code false}
      */
     default boolean isBean() {
-        return !isObject() && !isEnum() && !isArray() && !isCollection() && !isMap() && !isScalar() && !isUnknown();
+        return !isRecord() && !isObject() && !isEnum() && !isArray() && !isCollection() && !isMap() && !isScalar() && !isUnknown();
     }
 
     /**
@@ -195,6 +195,15 @@ public interface ClassTypeInspector {
      */
     default boolean isRecord() {
         return is(Record.class);
+    }
+
+    /**
+     * Alias for {@link #isRecord()}
+     *
+     * @return {@code true} if the class type is a record, otherwise {@code false}
+     */
+    default boolean isValueObject() {
+        return isRecord();
     }
 
     /**

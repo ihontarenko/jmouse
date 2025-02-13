@@ -13,7 +13,7 @@ import static org.jmouse.core.reflection.ClassMatchers.isSupertype;
 /**
  * A binder for {@link Map} types, extending the {@link AbstractBinder} class.
  * <p>
- * This binder handles the process of binding {@link Map} entries from the {@link PropertyValueAccessor}
+ * This binder handles the process of binding {@link Map} entries from the {@link PropertyValuesAccessor}
  * to the target map in the bindable instance.
  * </p>
  */
@@ -29,7 +29,7 @@ public class MapBinder extends AbstractBinder {
     }
 
     /**
-     * Binds the values from the {@link PropertyValueAccessor} to the target {@link Map}.
+     * Binds the values from the {@link PropertyValuesAccessor} to the target {@link Map}.
      * <p>
      * This method checks if the target type is a {@link Map}. If so, it retrieves the
      * list of keys from the data accessor, then binds each entry by invoking {@link #bindValue}.
@@ -38,14 +38,14 @@ public class MapBinder extends AbstractBinder {
      *
      * @param name     the structured name path of the binding target
      * @param bindable the bindable instance representing the target map
-     * @param accessor   the data accessor containing the values
+     * @param accessor the data accessor containing the values
      * @param callback the binding callback for customization
      * @param <T>      the type of the target object (map in this case)
      * @return a {@link BindResult} containing the bound map, or empty if binding failed
      */
     @Override
     public <T> BindResult<T> bind(
-            PropertyPath name, Bindable<T> bindable, PropertyValueAccessor accessor, BindCallback callback) {
+            PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback) {
         TypeInformation   typeDescriptor = bindable.getTypeInformation();
         Set<PropertyPath> keys           = accessor.navigate(name).nameSet();
 

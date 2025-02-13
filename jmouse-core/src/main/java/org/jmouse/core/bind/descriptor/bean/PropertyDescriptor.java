@@ -191,7 +191,15 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
          */
         @Override
         public String toString() {
-            return "%s.%s : %s".formatted(getOwner(), getName(), getType());
+            StringBuilder builder = new StringBuilder();
+
+            builder.append('[');
+            builder.append(isWritable() ? "W" : "-");
+            builder.append(isReadable() ? "R" : "-");
+            builder.append(']');
+            builder.append(" %s.%s : %s".formatted(getOwner(), getName(), getType()));
+
+            return builder.toString();
         }
     }
 

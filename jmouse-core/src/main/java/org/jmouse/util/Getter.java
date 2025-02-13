@@ -53,6 +53,32 @@ public interface Getter<T, R> {
     }
 
     /**
+     * Composes this {@code Getter} with another {@code Getter}, creating a chain of property access.
+     * <p>
+     * This method allows chaining of getters, enabling retrieval of nested properties.
+     * The first getter extracts a value from an instance of type {@code T}, and the second getter
+     * further extracts a value from the result of the first getter.
+     * </p>
+     *
+     * <p>Example usage:</p>
+     * <pre>{@code
+     * Getter<Person, Address> getAddress = Person::getAddress;
+     * Getter<Address, String> getStreet = Address::getStreet;
+     *
+     * Getter<Person, String> getPersonStreet = getAddress.andThen(getStreet);
+     *
+     * String street = getPersonStreet.get(person); // Retrieves person.getAddress().getStreet()
+     * }</pre>
+     *
+     * @param <U>    the final return type of the composed getter
+     * @param after  the next getter to apply after this getter
+     * @return a new {@code Getter} that applies both getters sequentially
+     */
+    default <U> Getter<T, U> andThen(Getter<? super R, ? extends U> after) {
+        return instance -> after.get(get(instance));
+    }
+
+    /**
      * Retrieves a value from the given instance.
      *
      * @param instance the instance from which to retrieve the value

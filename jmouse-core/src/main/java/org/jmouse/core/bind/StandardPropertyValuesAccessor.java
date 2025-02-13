@@ -7,54 +7,54 @@ import static org.jmouse.core.reflection.JavaType.forInstance;
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**
- * A {@link PropertyValueAccessor} implementation that provides indexed access to collections and maps.
+ * A {@link PropertyValuesAccessor} implementation that provides indexed access to collections and maps.
  * <p>
  * This class allows retrieving values from lists and maps using either an index (for lists)
  * or a key (for maps).
  * </p>
  */
-public class StandardPropertyValueAccessor extends AbstractPropertyValueAccessor {
+public class StandardPropertyValuesAccessor extends AbstractPropertyValuesAccessor {
 
     /**
-     * Creates a new {@link StandardPropertyValueAccessor} with the given source object.
+     * Creates a new {@link StandardPropertyValuesAccessor} with the given source object.
      *
      * @param source the underlying data source (expected to be a {@link List} or {@link Map})
      */
-    public StandardPropertyValueAccessor(Object source) {
+    public StandardPropertyValuesAccessor(Object source) {
         super(source);
     }
 
     /**
-     * Retrieves a nested {@link PropertyValueAccessor} by name.
+     * Retrieves a nested {@link PropertyValuesAccessor} by name.
      * <p>
      * If the source is a {@link Map}, this method returns the value associated with the given key.
      * </p>
      *
      * @param name the name (key) to retrieve from the map
-     * @return the corresponding {@link PropertyValueAccessor}, or an empty data source if not found
+     * @return the corresponding {@link PropertyValuesAccessor}, or an empty data source if not found
      */
     @Override
-    public PropertyValueAccessor get(String name) {
+    public PropertyValuesAccessor get(String name) {
         Object value = null;
 
         if (isMap()) {
             value = asMap().get(name);
         }
 
-        return PropertyValueAccessor.wrap(value);
+        return PropertyValuesAccessor.wrap(value);
     }
 
     /**
-     * Retrieves a nested {@link PropertyValueAccessor} by index.
+     * Retrieves a nested {@link PropertyValuesAccessor} by index.
      * <p>
      * If the source is a {@link List}, this method returns the value at the specified index.
      * </p>
      *
      * @param index the index to retrieve from the list
-     * @return the corresponding {@link PropertyValueAccessor}, or an empty data source if out of bounds
+     * @return the corresponding {@link PropertyValuesAccessor}, or an empty data source if out of bounds
      */
     @Override
-    public PropertyValueAccessor get(int index) {
+    public PropertyValuesAccessor get(int index) {
         Object value = null;
 
         if (isList()) {
@@ -64,7 +64,7 @@ public class StandardPropertyValueAccessor extends AbstractPropertyValueAccessor
             }
         }
 
-        return PropertyValueAccessor.wrap(value);
+        return PropertyValuesAccessor.wrap(value);
     }
 
     /**

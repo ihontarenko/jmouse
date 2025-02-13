@@ -4,6 +4,7 @@ import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.MethodFinder;
 import org.jmouse.core.reflection.Reflections;
+import org.jmouse.util.CachedSupplier;
 import org.jmouse.util.Factory;
 
 import java.lang.reflect.Constructor;
@@ -118,16 +119,16 @@ public final class JavaBean<T> extends Bean<T> {
     }
 
     /**
-     * Creates a factory for constructing instances of this bean.
+     * Creates a factory for constructing instances of this bindable.
      *
-     * @param bean the bindable bean
-     * @return a factory that creates instances of the bean
+     * @param bindable the bindable
+     * @return a factory that creates instances of the bindable
      */
     @SuppressWarnings("unchecked")
-    public Factory<T> getFactory(Bindable<T> bean) {
+    public Factory<T> getFactory(Bindable<T> bindable) {
         return Factory.of(new CachedSupplier<>(() -> {
             T           instance = null;
-            Supplier<T> supplier = bean.getValue();
+            Supplier<T> supplier = bindable.getValue();
 
             if (supplier != null) {
                 instance = supplier.get();

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A utility class for binding data from a {@link PropertyValueAccessor} to Java objects.
+ * A utility class for binding data from a {@link PropertyValuesAccessor} to Java objects.
  * Provides convenient factory methods and type-safe bindings for common types.
  */
 public final class Bind {
@@ -34,16 +34,16 @@ public final class Bind {
      * @return a new {@code Bind} instance
      */
     public static Bind with(Object data) {
-        return with(PropertyValueAccessor.wrap(data));
+        return with(PropertyValuesAccessor.wrap(data));
     }
 
     /**
-     * Creates a {@code Bind} instance with the specified {@link PropertyValueAccessor}.
+     * Creates a {@code Bind} instance with the specified {@link PropertyValuesAccessor}.
      *
      * @param dataSource the data source
      * @return a new {@code Bind} instance
      */
-    public static Bind with(PropertyValueAccessor dataSource) {
+    public static Bind with(PropertyValuesAccessor dataSource) {
         return with(new Binder(dataSource));
     }
 
@@ -162,6 +162,25 @@ public final class Bind {
     }
 
     /**
+     * Binds a value at the given path as a {@code String}.
+     *
+     * @param path the property path
+     * @return the binding result unwrapped as {@code String}
+     */
+    public String getString(String path) {
+        return get(path, String.class);
+    }
+
+    /**
+     * Binds a value at the root path as a {@code String}.
+     *
+     * @return the binding result unwrapped as {@code String}
+     */
+    public String getString() {
+        return get(null, String.class);
+    }
+
+    /**
      * Binds a value at the given path as an {@code Integer}.
      *
      * @param path the property path
@@ -183,6 +202,10 @@ public final class Bind {
         return to(path, Bindable.ofMap(String.class, valueType));
     }
 
+    public <V> Map<String, V> getMap(String path, Class<V> valueType) {
+        return toMap(path, valueType).getValue();
+    }
+
     /**
      * Binds a map of {@code String} keys to values of the specified type.
      *
@@ -192,6 +215,10 @@ public final class Bind {
      */
     public <V> BindResult<Map<String, V>> toMap(Class<V> valueType) {
         return to(Bindable.ofMap(String.class, valueType));
+    }
+
+    public <V> Map<String, V> getMap(Class<V> valueType) {
+        return toMap(valueType).getValue();
     }
 
     /**
@@ -204,6 +231,10 @@ public final class Bind {
         return to(path, Bindable.ofMap(String.class, Object.class));
     }
 
+    public Map<String, Object> getMap(String path) {
+        return toMap(path).getValue();
+    }
+
     /**
      * Binds a {@code Map<String, String>}.
      *
@@ -211,6 +242,10 @@ public final class Bind {
      */
     public BindResult<Map<String, String>> toMap() {
         return to(STRING_MAP);
+    }
+
+    public Map<String, String> getMap() {
+        return toMap().getValue();
     }
 
     /**
@@ -264,4 +299,14 @@ public final class Bind {
     public BindResult<Set<String>> toSet() {
         return to(STRING_SET);
     }
+
+    /**
+     * Binds a value to a specified bindable type and return.
+     *
+     * @return the bound object
+     */
+    public <T> T get(String path, Class<T> type) {
+        return to(path, type).getValue();
+    }
+
 }

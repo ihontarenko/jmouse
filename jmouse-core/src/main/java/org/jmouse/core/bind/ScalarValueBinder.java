@@ -22,7 +22,7 @@ public class ScalarValueBinder extends AbstractBinder {
     }
 
     /**
-     * Binds a scalar value from the {@link PropertyValueAccessor} to the given {@link Bindable} type.
+     * Binds a scalar value from the {@link PropertyValuesAccessor} to the given {@link Bindable} type.
      * <p>
      * This method ensures that only scalar types are handled. If a non-scalar type is provided,
      * an {@link IllegalArgumentException} is thrown.
@@ -37,7 +37,7 @@ public class ScalarValueBinder extends AbstractBinder {
      * @throws IllegalArgumentException if a non-scalar type is provided
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValueAccessor source, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor source, BindCallback callback) {
         TypeInformation descriptor  = bindable.getTypeInformation();
         boolean         isCompliant = descriptor.isScalar() || descriptor.isEnum() || descriptor.isClass();
 

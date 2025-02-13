@@ -71,10 +71,12 @@ public class HierarchicalMapConverter implements GenericConverter<Map<String, Ob
                     } else {
                         try {
                             map = (Map<String, Object>) map.computeIfAbsent(key, mapFactory());
-                        } catch (ClassCastException e) {
-                            // for duplicate properties such as
-                            // java.property.name.key=1
-                            // java.property.name=2
+                        } catch (ClassCastException ignored) {
+                            // case when incorrect properties defined
+                            // - when
+                            // java.property.int_value=2
+                            // - and then
+                            // java.property.int_value.value=1
                         }
                     }
                 }

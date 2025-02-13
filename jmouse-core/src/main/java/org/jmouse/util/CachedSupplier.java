@@ -1,4 +1,4 @@
-package org.jmouse.core.bind;
+package org.jmouse.util;
 
 import java.util.function.Supplier;
 
@@ -21,7 +21,7 @@ import java.util.function.Supplier;
 public class CachedSupplier<T> implements Supplier<T> {
 
     private final Supplier<T> factory;
-    private T value;
+    private       T           value;
 
     /**
      * Creates a {@link CachedSupplier} with the given factory supplier.
