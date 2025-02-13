@@ -22,7 +22,7 @@ import java.util.Map;
  *         .down()
  *             .div().withAttributes(Map.of("class", "container"))
  *                 .down()
- *                     .paragraph().withText("Welcome to the example page.")
+ *                     .paragraph().withText("Welcome to the binder page.")
  *                 .up()
  *             .up()
  *         .up();

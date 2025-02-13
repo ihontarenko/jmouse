@@ -85,9 +85,9 @@ abstract public class Bean<T> {
         protected final String            name;
         protected final JavaType          owner;
         protected       Method            rawGetter;
-        protected Method            rawSetter;
-        protected Getter<T, Object> getter;
-        protected Setter<T, Object> setter;
+        protected       Method            rawSetter;
+        protected       Getter<T, Object> getter;
+        protected       Setter<T, Object> setter;
 
         /**
          * Constructs a property with the specified name and owner type.

@@ -16,6 +16,8 @@ import java.util.Set;
  */
 public interface MessageBundle {
 
+    MessageBundle NULL_OBJECT = new Empty();
+
     /**
      * Retrieves an bean associated with the given key from the message bundle.
      * <p>
@@ -73,4 +75,33 @@ public interface MessageBundle {
      * @return the {@link Locale} of this message bundle
      */
     Locale getLocale();
+
+    class Empty implements MessageBundle {
+
+        @Override
+        public Object getObject(String key) {
+            return null;
+        }
+
+        @Override
+        public String getString(String key) {
+            return null;
+        }
+
+        @Override
+        public String getBundleId() {
+            return "[:EMPTY:]";
+        }
+
+        @Override
+        public Set<String> getKeys() {
+            return Set.of();
+        }
+
+        @Override
+        public Locale getLocale() {
+            return Locale.getDefault();
+        }
+
+    }
 }

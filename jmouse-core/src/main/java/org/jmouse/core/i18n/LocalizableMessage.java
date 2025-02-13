@@ -1,5 +1,7 @@
 package org.jmouse.core.i18n;
 
+import org.jmouse.util.helper.Arrays;
+
 import java.text.MessageFormat;
 
 /**
@@ -14,13 +16,40 @@ import java.text.MessageFormat;
  */
 public interface LocalizableMessage {
 
-    static LocalizableMessage of(String key, String defaultMessage, Object... arguments) {
-        return new LocalizableMessage.Default(key, defaultMessage, arguments);
+    /**
+     * Creates a new {@code LocalizableMessage} instance with a specified message key,
+     * default message, and optional arguments.
+     *
+     * @param code           the message key for localization
+     * @param defaultMessage the fallback message if the localized message is not found
+     * @param arguments      optional arguments for message formatting
+     * @return a new {@link LocalizableMessage} instance
+     */
+    static LocalizableMessage of(String code, String defaultMessage, Object... arguments) {
+        return new LocalizableMessage.Default(new String[]{code}, defaultMessage, arguments);
     }
 
-    static LocalizableMessage of(String key, Object... arguments) {
-        return of(key, null, arguments);
+    /**
+     * Creates a new {@code LocalizableMessage} instance with a specified message code
+     * and optional arguments, using {@code null} as the default message.
+     *
+     * @param code       the message code for localization
+     * @param arguments optional arguments for message formatting
+     * @return a new {@link LocalizableMessage} instance
+     */
+    static LocalizableMessage of(String code, Object... arguments) {
+        return of(code, null, arguments);
     }
+
+    /**
+     * Returns the message codes used for localization.
+     * <p>
+     * The key is typically used to retrieve the localized message from a message source.
+     * </p>
+     *
+     * @return the message key
+     */
+    String[] getCodes();
 
     /**
      * Returns the message key used for localization.
@@ -30,7 +59,9 @@ public interface LocalizableMessage {
      *
      * @return the message key
      */
-    String getMessageKey();
+    default String getCode() {
+        return Arrays.get(getCodes(), 0, null);
+    }
 
     /**
      * Returns the arguments used for formatting the localized message.
@@ -64,24 +95,24 @@ public interface LocalizableMessage {
     class Default implements LocalizableMessage {
 
         private final String   defaultMessage;
-        private final String   key;
+        private final String[] codes;
         private final Object[] arguments;
 
         /**
          * Constructs a new {@code Default} instance of {@link LocalizableMessage}.
          *
-         * @param key            the message key used for localization
+         * @param codes          the message key used for localization
          * @param defaultMessage the fallback message if localization is unavailable
          * @param arguments      optional arguments for message formatting
          */
-        public Default(String key, String defaultMessage, Object... arguments) {
-            this.key = key;
-            this.arguments = arguments;
+        public Default(String[] codes, String defaultMessage, Object... arguments) {
+            this.codes = codes;
             this.defaultMessage = defaultMessage;
+            this.arguments = arguments;
         }
 
         /**
-         * Returns the message key used for localization.
+         * Returns the message codes used for localization.
          * <p>
          * The key is typically used to retrieve the localized message from a message source.
          * </p>
@@ -89,8 +120,8 @@ public interface LocalizableMessage {
          * @return the message key
          */
         @Override
-        public String getMessageKey() {
-            return key;
+        public String[] getCodes() {
+            return codes;
         }
 
         /**

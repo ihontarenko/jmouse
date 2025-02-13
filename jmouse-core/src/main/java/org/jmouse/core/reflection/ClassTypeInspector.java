@@ -1,4 +1,4 @@
-package org.jmouse.core.bind.descriptor;
+package org.jmouse.core.reflection;
 
 import java.util.*;
 
@@ -22,6 +22,10 @@ public interface ClassTypeInspector {
      */
     default boolean is(Class<?> clazz) {
         return clazz.isAssignableFrom(getClassType());
+    }
+
+    default boolean is(ClassTypeInspector inspector) {
+        return is(inspector.getClassType());
     }
 
     /**
@@ -191,6 +195,19 @@ public interface ClassTypeInspector {
      */
     default boolean isRecord() {
         return is(Record.class);
+    }
+
+    /**
+     * Checks if the inspected type is unknown.
+     * <p>
+     * This method is useful for cases where the class type is either undefined
+     * ({@code null}) or explicitly marked as {@code Unknown.class}.
+     * </p>
+     *
+     * @return {@code true} if the class type is unknown, otherwise {@code false}
+     */
+    default boolean isUnknown() {
+        return getClassType() == null || is(Unknown.class);
     }
 
 }

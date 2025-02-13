@@ -14,6 +14,8 @@ public class MessageExample {
 
         String name = messageSource.getMessage("project.name", Locale.of("uk_UA"));
 
+
+         // My Zais
         messageSource.setFallbackWithCode(true);
         messageSource.setFallbackPattern("[? %s ?]");
 
@@ -27,6 +29,10 @@ public class MessageExample {
         System.out.println(
                 messageSource.getMessage(localizableMessage)
         );
+
+        System.out.println(messageSource.getMessage("{0}! Im your father!", "Luke"));
+
+        System.out.println(messageSource.getMessage("zais.name"));
 
         System.out.println(messageSource.getMessageFor(MessageExample.class, "hello"));
     }

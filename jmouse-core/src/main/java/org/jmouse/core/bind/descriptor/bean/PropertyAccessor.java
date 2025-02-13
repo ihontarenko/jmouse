@@ -4,7 +4,7 @@ package org.jmouse.core.bind.descriptor.bean;
  * Defines a contract for accessing and modifying property values of an bean.
  * <p>
  * Implementations of this interface provide methods for injecting and retrieving
- * values from an bean's properties using {@link PropertyDescriptor}.
+ * values from a bean's properties using {@link PropertyDescriptor}.
  * </p>
  *
  * @param <T> the type of the bean whose property is being accessed
@@ -109,6 +109,11 @@ public interface PropertyAccessor<T> {
             }
 
             return value;
+        }
+
+        @Override
+        public String toString() {
+            return "Accessor to: %s".formatted(descriptor);
         }
     }
 }

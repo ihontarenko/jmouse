@@ -12,24 +12,24 @@ public class DummyDataSource extends AbstractDataSource {
     }
 
     /**
-     * Retrieves a nested {@link DataSource} by name.
+     * Retrieves a nested {@link PropertyValueAccessor} by name.
      *
      * @param name the name of the nested data source
-     * @return the nested {@link DataSource}
+     * @return the nested {@link PropertyValueAccessor}
      */
     @Override
-    public DataSource get(String name) {
+    public PropertyValueAccessor get(String name) {
         throw new UnsupportedOperationException("DUMMY DATA SOURCE");
     }
 
     /**
-     * Retrieves a nested {@link DataSource} by index.
+     * Retrieves a nested {@link PropertyValueAccessor} by index.
      *
      * @param index the index of the nested data source
-     * @return the nested {@link DataSource}
+     * @return the nested {@link PropertyValueAccessor}
      */
     @Override
-    public DataSource get(int index) {
+    public PropertyValueAccessor get(int index) {
         throw new UnsupportedOperationException("DUMMY DATA SOURCE");
     }
 

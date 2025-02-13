@@ -1,15 +1,16 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
 import org.jmouse.util.Factory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**
- * A {@link DataSource} implementation for accessing properties of a bean instance.
+ * A {@link PropertyValueAccessor} implementation for accessing properties of a bean instance.
  * <p>
  * This class allows retrieving properties dynamically from a wrapped bean instance.
  * It does not support indexed access since beans are typically key-value structures.
@@ -17,7 +18,8 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  */
 public class JavaBeanInstanceDataSource extends AbstractDataSource {
 
-    private final JavaBean<Object> bean;
+    private final JavaBean<Object>           bean;
+    private final JavaBeanDescriptor<Object> descriptor;
 
     /**
      * Creates a {@link JavaBeanInstanceDataSource} for the given bean instance.
@@ -28,18 +30,19 @@ public class JavaBeanInstanceDataSource extends AbstractDataSource {
     @SuppressWarnings({"unchecked"})
     public JavaBeanInstanceDataSource(Object source) {
         super(source);
+        this.descriptor = JavaBeanDescriptor.forBean(Object.class, source.getClass());
         this.bean = (JavaBean<Object>) JavaBean.of(source.getClass());
     }
 
     /**
-     * Retrieves a property from the bean instance as a {@link DataSource}.
+     * Retrieves a property from the bean instance as a {@link PropertyValueAccessor}.
      *
      * @param name the name of the property to retrieve
-     * @return a {@link DataSource} wrapping the property value
+     * @return a {@link PropertyValueAccessor} wrapping the property value
      * @throws IllegalArgumentException if the property does not exist
      */
     @Override
-    public DataSource get(String name) {
+    public PropertyValueAccessor get(String name) {
         Bean.Property<Object> property = bean.getProperty(name);
 
         if (property == null) {
@@ -50,7 +53,7 @@ public class JavaBeanInstanceDataSource extends AbstractDataSource {
         Factory<Object>  factory = this.getSupplier();
         Supplier<Object> value   = property.getValue(factory);
 
-        return DataSource.of(value.get());
+        return PropertyValueAccessor.wrap(value.get());
     }
 
     /**
@@ -61,20 +64,20 @@ public class JavaBeanInstanceDataSource extends AbstractDataSource {
      * @throws UnsupportedDataSourceException always, since indexed access is not supported
      */
     @Override
-    public DataSource get(int index) {
+    public PropertyValueAccessor get(int index) {
         throw new UnsupportedDataSourceException(
                 "Bean instance '%s' does not support indexed accessing"
                         .formatted(bean));
     }
 
     /**
-     * Retrieves a collection of keys representing the entries in this {@link DataSource}.
+     * Retrieves a collection of keys representing the entries in this {@link PropertyValueAccessor}.
      *
      * @return a collection of keys as strings
      */
     @Override
-    public List<String> keys() {
-        List<String> keys = new ArrayList<>();
+    public Set<String> keySet() {
+        Set<String> keys = new HashSet<>();
 
         bean.getProperties().forEach(property -> keys.add(property.getName()));
 

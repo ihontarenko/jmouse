@@ -15,11 +15,11 @@ import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
  * mechanism ({@link JdkProxy}) to create proxies and applies only those {@link MethodInterceptor}s
  * whose associated annotation {@link ProxyMethodInterceptor} matches the target class.
  *
- * <p>Usage example:
+ * <p>Usage binder:
  * <pre>{@code
  * // Create a new factory with some interceptors
  * ProxyFactory factory = new DefaultProxyFactory(new LoggingInterceptor(), new SecurityInterceptor());
- * // Create a proxy instance (for example, MyService is your original class)
+ * // Create a proxy instance (for binder, MyService is your original class)
  * InternalService proxyService = factory.createProxy(serviceInstance);
  * }</pre>
  */

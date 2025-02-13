@@ -13,27 +13,27 @@ public interface BindCallback {
     /**
      * Resolves the key name before binding.
      */
-    default NamePath onResolveKey(NamePath name, BindContext context) {
+    default PropertyPath onResolveKey(PropertyPath name, BindContext context) {
         return name;
     }
 
     /**
      * Invoked before binding a value to a bindable.
      */
-    default Object onBinding(NamePath name, Bindable<?> bindable, BindContext context, Object value) {
+    default Object onBinding(PropertyPath name, Bindable<?> bindable, BindContext context, Object value) {
         return value;
     }
 
     /**
      * Invoked after a value has been successfully bound.
      */
-    default void onBound(NamePath name, Bindable<?> bindable, BindContext context, BindResult<Object> value) {
+    default void onBound(PropertyPath name, Bindable<?> bindable, BindContext context, BindResult<Object> value) {
     }
 
     /**
      * Handles binding failures.
      */
-    default Object onFailure(NamePath name, Bindable<?> bindable, BindContext context, Exception exception)
+    default Object onFailure(PropertyPath name, Bindable<?> bindable, BindContext context, Exception exception)
             throws Exception {
         throw exception;
     }

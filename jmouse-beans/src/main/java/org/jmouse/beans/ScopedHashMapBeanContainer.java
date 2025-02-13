@@ -8,7 +8,7 @@ package org.jmouse.beans;
  * </p>
  * <p>
  * Typical usage involves defining a {@link ScopeResolver} to manage the lifecycle of beans dynamically based on
- * their scope. For example, singletons, prototypes, or tenant-specific beans can be managed seamlessly.
+ * their scope. For binder, singletons, prototypes, or tenant-specific beans can be managed seamlessly.
  * </p>
  *
  * @see ScopedBeanContainer

@@ -7,7 +7,7 @@ import static org.jmouse.core.reflection.JavaType.forInstance;
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**
- * A {@link DataSource} implementation that provides indexed access to collections and maps.
+ * A {@link PropertyValueAccessor} implementation that provides indexed access to collections and maps.
  * <p>
  * This class allows retrieving values from lists and maps using either an index (for lists)
  * or a key (for maps).
@@ -25,36 +25,36 @@ public class StandardDataSource extends AbstractDataSource {
     }
 
     /**
-     * Retrieves a nested {@link DataSource} by name.
+     * Retrieves a nested {@link PropertyValueAccessor} by name.
      * <p>
      * If the source is a {@link Map}, this method returns the value associated with the given key.
      * </p>
      *
      * @param name the name (key) to retrieve from the map
-     * @return the corresponding {@link DataSource}, or an empty data source if not found
+     * @return the corresponding {@link PropertyValueAccessor}, or an empty data source if not found
      */
     @Override
-    public DataSource get(String name) {
+    public PropertyValueAccessor get(String name) {
         Object value = null;
 
         if (isMap()) {
             value = asMap().get(name);
         }
 
-        return DataSource.of(value);
+        return PropertyValueAccessor.wrap(value);
     }
 
     /**
-     * Retrieves a nested {@link DataSource} by index.
+     * Retrieves a nested {@link PropertyValueAccessor} by index.
      * <p>
      * If the source is a {@link List}, this method returns the value at the specified index.
      * </p>
      *
      * @param index the index to retrieve from the list
-     * @return the corresponding {@link DataSource}, or an empty data source if out of bounds
+     * @return the corresponding {@link PropertyValueAccessor}, or an empty data source if out of bounds
      */
     @Override
-    public DataSource get(int index) {
+    public PropertyValueAccessor get(int index) {
         Object value = null;
 
         if (isList()) {
@@ -64,7 +64,7 @@ public class StandardDataSource extends AbstractDataSource {
             }
         }
 
-        return DataSource.of(value);
+        return PropertyValueAccessor.wrap(value);
     }
 
     /**
@@ -74,6 +74,6 @@ public class StandardDataSource extends AbstractDataSource {
      */
     @Override
     public String toString() {
-        return "%s: %s".formatted(getShortName(this), forInstance(getSource()));
+        return "%s: %s".formatted(getShortName(this), forInstance(unwrap()));
     }
 }

@@ -1,6 +1,6 @@
-package org.jmouse.testing_ground.example;
+package org.jmouse.testing_ground.binder;
 
-import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.bind.PropertyName;
 
 public class Data {
 
@@ -10,7 +10,7 @@ public class Data {
         return number;
     }
 
-    @PropertyPath("random")
+    @PropertyName("random")
     public void setNumber(int number) {
         this.number = number;
     }

@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.reflection.TypeDescriptor;
+import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.util.Priority;
 
 /**
@@ -22,7 +22,7 @@ public class ScalarValueBinder extends AbstractBinder {
     }
 
     /**
-     * Binds a scalar value from the {@link DataSource} to the given {@link Bindable} type.
+     * Binds a scalar value from the {@link PropertyValueAccessor} to the given {@link Bindable} type.
      * <p>
      * This method ensures that only scalar types are handled. If a non-scalar type is provided,
      * an {@link IllegalArgumentException} is thrown.
@@ -37,9 +37,9 @@ public class ScalarValueBinder extends AbstractBinder {
      * @throws IllegalArgumentException if a non-scalar type is provided
      */
     @Override
-    public <T> BindResult<T> bind(NamePath name, Bindable<T> bindable, DataSource source, BindCallback callback) {
-        TypeDescriptor descriptor  = bindable.getTypeDescriptor();
-        boolean        isCompliant = descriptor.isScalar() || descriptor.isEnum() || descriptor.isClass();
+    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValueAccessor source, BindCallback callback) {
+        TypeInformation descriptor  = bindable.getTypeInformation();
+        boolean         isCompliant = descriptor.isScalar() || descriptor.isEnum() || descriptor.isClass();
 
         if (!isCompliant) {
             throw new IllegalArgumentException("Scalar binder only handles scalar, class, enum types. But got " + descriptor);
@@ -60,7 +60,7 @@ public class ScalarValueBinder extends AbstractBinder {
      */
     @Override
     public <T> boolean supports(Bindable<T> bindable) {
-        TypeDescriptor descriptor = bindable.getTypeDescriptor();
+        TypeInformation descriptor = bindable.getTypeInformation();
 
         return descriptor.isScalar() || descriptor.isEnum() || descriptor.isClass();
     }

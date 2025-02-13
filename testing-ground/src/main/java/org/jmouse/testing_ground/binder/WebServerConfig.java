@@ -1,6 +1,6 @@
-package org.jmouse.testing_ground.example;
+package org.jmouse.testing_ground.binder;
 
-import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.bind.PropertyName;
 
 import java.util.List;
 import java.util.Map;
@@ -49,7 +49,7 @@ public class WebServerConfig {
         return properties;
     }
 
-    @PropertyPath("props")
+    @PropertyName("props")
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }

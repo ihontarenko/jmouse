@@ -54,7 +54,7 @@ public interface Graph<T> {
      * Utility method to convert a list of nodes into a list of consecutive edges connecting those nodes.
      *
      * <p>This method takes a list of nodes and constructs edges between each pair of consecutive
-     * nodes in the list. For example, given a list [A, B, C, D], it will produce edges:
+     * nodes in the list. For binder, given a list [A, B, C, D], it will produce edges:
      * (A, B), (B, C), (C, D).</p>
      *
      * @param <T> the type of the nodes in the list and edges

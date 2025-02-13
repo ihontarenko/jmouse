@@ -27,7 +27,7 @@ public class AnyExpressionParser implements Parser {
             // parameters (key1=expression, ...)
             valueNode = context.getParser(ParametersParser.class).parse(lexer, context);
         } else if (lexer.isNext(ExtendedToken.T_CLASS_NAME)) {
-            // resolve java-class name 'className=com.example.validator.NotNullValidator'
+            // resolve java-class name 'className=com.binder.validator.NotNullValidator'
             shift(lexer, ExtendedToken.T_CLASS_NAME);
             valueNode = context.getParser(ClassNameParser.class).parse(lexer, context);
         } else if (lexer.isNext(ExtendedToken.T_PATH_VARIABLE)) {

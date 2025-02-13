@@ -1,6 +1,6 @@
 package org.jmouse.core.env.converter;
 
-import org.jmouse.core.bind.NamePath;
+import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.core.convert.ClassPair;
 import org.jmouse.core.convert.GenericConverter;
 
@@ -34,17 +34,17 @@ public class HierarchicalMapConverter implements GenericConverter<Map<String, Ob
     @SuppressWarnings({"unchecked"})
     public Map<String, Object> convert(Map<String, Object> source, Class<Map<String, Object>> sourceType, Class<Map<String, Object>> targetType) {
         Map<String, Object> hierarchical = new HashMap<>();
-        Set<NamePath>       keys         = source.keySet().stream().map(NamePath::new).collect(toSet());
+        Set<PropertyPath>   keys         = source.keySet().stream().map(PropertyPath::of).collect(toSet());
 
-        for (NamePath path : keys) {
-            NamePath.Entries    entries    = path.entries();
-            Object              value      = source.get(path.path());
-            Map<String, Object> map        = hierarchical;
-            List<Object>        collection = Collections.EMPTY_LIST;
+        for (PropertyPath path : keys) {
+            PropertyPath.Entries entries    = path.entries();
+            Object               value      = source.get(path.path());
+            Map<String, Object>  map        = hierarchical;
+            List<Object>         collection = Collections.EMPTY_LIST;
 
             for (int index = 0; index < entries.size(); index++) {
-                String        key  = entries.get(index).toString();
-                NamePath.Type type = entries.type(index);
+                String            key  = entries.get(index).toString();
+                PropertyPath.Type type = entries.type(index);
 
                 // Skip empty keys
                 if (type.isEmpty()) {
@@ -65,7 +65,7 @@ public class HierarchicalMapConverter implements GenericConverter<Map<String, Ob
                 if (type.isNumeric() && index > 0) {
                     map = (Map<String, Object>) collection.get(ensureCollection(collection, key));
                 } else {
-                    NamePath.Type nextType = entries.type(index + 1);
+                    PropertyPath.Type nextType = entries.type(index + 1);
                     if (nextType.isNumeric()) {
                         collection = (List<Object>) map.computeIfAbsent(key, listFactory());
                     } else {

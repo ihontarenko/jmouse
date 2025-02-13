@@ -7,10 +7,10 @@ import org.jmouse.core.env.PropertySource;
 import java.util.Map;
 
 /**
- * A {@link DataSource} implementation that wraps a {@link PropertyResolver},
+ * A {@link PropertyValueAccessor} implementation that wraps a {@link PropertyResolver},
  * converting its properties into a hierarchical structure.
  */
-public class PropertyResolverDataSource implements DataSource {
+public class PropertyResolverDataSource implements PropertyValueAccessor {
 
     private final StandardDataSource delegate;
 
@@ -49,29 +49,29 @@ public class PropertyResolverDataSource implements DataSource {
      * @return the extracted hierarchical data
      */
     @Override
-    public Object getSource() {
-        return delegate.getSource();
+    public Object unwrap() {
+        return delegate.unwrap();
     }
 
     /**
-     * Retrieves a nested {@link DataSource} by name.
+     * Retrieves a nested {@link PropertyValueAccessor} by name.
      *
      * @param name the property key
-     * @return the corresponding {@link DataSource}, or an empty source if not found
+     * @return the corresponding {@link PropertyValueAccessor}, or an empty source if not found
      */
     @Override
-    public DataSource get(String name) {
+    public PropertyValueAccessor get(String name) {
         return delegate.get(name);
     }
 
     /**
-     * Retrieves a nested {@link DataSource} by index.
+     * Retrieves a nested {@link PropertyValueAccessor} by index.
      *
      * @param index the index within a collection-based property
-     * @return the corresponding {@link DataSource}, or an empty source if not found
+     * @return the corresponding {@link PropertyValueAccessor}, or an empty source if not found
      */
     @Override
-    public DataSource get(int index) {
+    public PropertyValueAccessor get(int index) {
         return delegate.get(index);
     }
 }

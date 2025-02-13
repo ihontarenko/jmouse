@@ -1,5 +1,6 @@
 package org.jmouse.core.bind.descriptor;
 
+import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.core.reflection.JavaType;
 
 import java.lang.annotation.Annotation;
@@ -77,6 +78,21 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
      * @return a collection of {@link ConstructorDescriptor} instances
      */
     Collection<ConstructorDescriptor> getConstructors();
+
+    /**
+     * Returns a constructor descriptor associated with this class.
+     *
+     * @return a {@link ConstructorDescriptor} instance
+     */
+    default ConstructorDescriptor getConstructor(int index) {
+        ConstructorDescriptor descriptor = null;
+
+        if (index >= 0 && index < getConstructors().size()) {
+            descriptor = List.copyOf(getConstructors()).get(index);
+        }
+
+        return descriptor;
+    }
 
     /**
      * Returns a collection of field descriptors associated with this class.

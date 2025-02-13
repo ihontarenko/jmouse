@@ -157,6 +157,7 @@ public abstract class AbstractMessageSourceBundle extends AbstractMessageSource 
      * @param locale the target locale
      * @return the resolved {@link MessageFormat}, or {@code null} if not found
      */
+    @Override
     protected MessageFormat resolveFormat(MessageBundle bundle, String key, Locale locale) {
         String        cacheKey      = resolveFormatKey(bundle, key, locale);
         MessageFormat messageFormat = formats.get(cacheKey);
@@ -167,6 +168,26 @@ public abstract class AbstractMessageSourceBundle extends AbstractMessageSource 
                 messageFormat = createMessageFormat(message, locale);
                 formats.put(cacheKey, messageFormat);
             }
+        }
+
+        return messageFormat;
+    }
+
+    /**
+     * Resolves a formatted message for the given resolved message template and locale.
+     *
+     * @param template the message template
+     * @param locale   the target locale
+     * @return the resolved {@link MessageFormat}, or {@code null} if not found
+     */
+    @Override
+    protected MessageFormat resolveFormat(String template, Locale locale) {
+        String        cacheKey      = resolveFormatKey(MessageBundle.NULL_OBJECT, template, locale);
+        MessageFormat messageFormat = formats.get(cacheKey);
+
+        if (messageFormat == null) {
+            messageFormat = createMessageFormat(template, locale);
+            formats.put(cacheKey, messageFormat);
         }
 
         return messageFormat;

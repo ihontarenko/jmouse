@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.reflection.TypeDescriptor;
+import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.util.Priority;
 import org.jmouse.util.Setter;
 
@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 /**
  * Binder for Java records, enabling their instantiation and property binding from a data source.
  * <p>
- * This binder extracts record components, binds them using the provided {@link DataSource},
+ * This binder extracts record components, binds them using the provided {@link PropertyValueAccessor},
  * and creates a new immutable record instance via a {@link ValueObject}.
  * </p>
  *
@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  * BindContext context = new BindContext();
  * ValueObjectBinder binder = new ValueObjectBinder(context);
  *
- * NamePath namePath = NamePath.of("person");
+ * PropertyPath namePath = PropertyPath.of("person");
  * Bindable<Person> bindable = Bindable.of(Person.class);
  * DataSource source = DataSource.of(Map.of("name", "John"));
  *
@@ -39,7 +39,7 @@ public class ValueObjectBinder extends AbstractBinder {
     }
 
     /**
-     * Binds a Java record by extracting its properties, resolving values from the {@link DataSource},
+     * Binds a Java record by extracting its properties, resolving values from the {@link PropertyValueAccessor},
      * and creating a new immutable record instance.
      *
      * @param name     the hierarchical name path of the object being bound
@@ -51,9 +51,9 @@ public class ValueObjectBinder extends AbstractBinder {
      */
     @Override
     @SuppressWarnings({"unchecked"})
-    public <T> BindResult<T> bind(NamePath name, Bindable<T> bindable, DataSource source, BindCallback callback) {
-        TypeDescriptor sourceDescriptor = TypeDescriptor.forClass(source.get(name).getType());
-        TypeDescriptor targetDescriptor = bindable.getTypeDescriptor();
+    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValueAccessor source, BindCallback callback) {
+        TypeInformation sourceDescriptor = TypeInformation.forClass(source.navigate(name).getDataType());
+        TypeInformation targetDescriptor = bindable.getTypeInformation();
 
         // Ensure the target is a record and the source is a compatible type (map or JavaBean)
         if (targetDescriptor.isRecord() && (sourceDescriptor.isMap() || sourceDescriptor.isBean())) {
@@ -73,7 +73,7 @@ public class ValueObjectBinder extends AbstractBinder {
      * @param <T>      the type of the bound object
      * @return a {@link BindResult} containing the bound record instance if successful
      */
-    protected <T> BindResult<T> bindValueObject(NamePath name, Bindable<T> bindable, DataSource source, BindCallback callback) {
+    protected <T> BindResult<T> bindValueObject(PropertyPath name, Bindable<T> bindable, PropertyValueAccessor source, BindCallback callback) {
         Class<?> rawType = bindable.getType().getRawType();
 
         // Create a ValueObject representation of the record
@@ -112,7 +112,7 @@ public class ValueObjectBinder extends AbstractBinder {
      */
     @Override
     public <T> boolean supports(Bindable<T> bindable) {
-        return bindable.getTypeDescriptor().isRecord();
+        return bindable.getTypeInformation().isRecord();
     }
 
 }

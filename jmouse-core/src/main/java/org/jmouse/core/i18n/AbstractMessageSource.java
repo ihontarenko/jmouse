@@ -1,5 +1,7 @@
 package org.jmouse.core.i18n;
 
+import org.jmouse.util.helper.Arrays;
+
 import java.text.MessageFormat;
 import java.util.Locale;
 
@@ -95,11 +97,26 @@ public abstract class AbstractMessageSource implements MessageSource {
      */
     @Override
     public String getMessage(LocalizableMessage localizable, Locale locale) {
+        String[] codes     = localizable.getCodes();
+        String   message   = null;
         Object[] arguments = resolveArguments(localizable.getArguments(), locale);
-        String   message   = resolveMessage(localizable.getMessageKey(), locale, arguments);
+
+        if (Arrays.notEmpty(codes)) {
+            for (String code : codes) {
+                message = resolveMessage(code, locale, arguments);
+                if (message != null) {
+                    break;
+                }
+            }
+        }
 
         if (message == null) {
             message = localizable.getDefaultMessage();
+
+            if (message != null) {
+                message = resolveFormat(message, locale).format(arguments);
+            }
+
             if (message == null && isFallbackWithCode()) {
                 message = getFallbackPattern().formatted(message);
             }
@@ -137,7 +154,7 @@ public abstract class AbstractMessageSource implements MessageSource {
      */
     protected String resolveMessage(String key, Locale locale, Object... arguments) {
         MessageFormat messageFormat = resolveMessage(key, locale);
-        String message = null;
+        String        message       = null;
 
         if (messageFormat != null) {
             // Ensure thread safety when formatting messages
@@ -174,6 +191,25 @@ public abstract class AbstractMessageSource implements MessageSource {
      * @return the resolved {@link MessageFormat}, or {@code null} if not found
      */
     protected abstract MessageFormat resolveMessage(String key, Locale locale);
+
+    /**
+     * Resolves a formatted message for the given resolved message template and locale.
+     *
+     * @param template  the message template
+     * @param locale    the target locale
+     * @return the resolved {@link MessageFormat}, or {@code null} if not found
+     */
+    protected abstract MessageFormat resolveFormat(String template, Locale locale);
+
+    /**
+     * Resolves a formatted message for the given key and locale.
+     *
+     * @param bundle the message bundle
+     * @param key    the message key
+     * @param locale the target locale
+     * @return the resolved {@link MessageFormat}, or {@code null} if not found
+     */
+    protected abstract MessageFormat resolveFormat(MessageBundle bundle, String key, Locale locale);
 
     /**
      * Checks whether the message source should return the message key as a fallback.

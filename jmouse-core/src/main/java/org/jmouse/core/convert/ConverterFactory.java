@@ -8,7 +8,7 @@ import java.util.List;
  * maintain a registry of source-target type pairs, providing flexible and
  * extensible type conversion capabilities.
  *
- * <p><strong>Usage example:</strong></p>
+ * <p><strong>Usage binder:</strong></p>
  * <pre>{@code
  * // 1. Create a ConverterFactory implementation
  * ConverterFactory factory = new DefaultConverterFactory();

@@ -23,14 +23,14 @@ public class BindException extends RuntimeException {
      * Constructs a {@link BindException} for a failed binding operation,
      * indicating the property path and the expected type.
      */
-    public BindException(NamePath path, Bindable<?> bindable, Throwable cause) {
+    public BindException(PropertyPath path, Bindable<?> bindable, Throwable cause) {
         super(getExceptionMessage(path, bindable), cause);
     }
 
     /**
      * Generates a detailed exception message for a binding failure.
      */
-    public static String getExceptionMessage(NamePath path, Bindable<?> bindable) {
+    public static String getExceptionMessage(PropertyPath path, Bindable<?> bindable) {
         return "Binding failure: '%s' could not be assigned from '%s'.".formatted(bindable.getType(), path);
     }
 }

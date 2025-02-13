@@ -20,7 +20,7 @@ import java.util.function.*;
  * </ul>
  * <p>
  */
-public class JavaType {
+public class JavaType implements ClassTypeInspector {
 
     /**
      * A cache for storing resolved {@link JavaType} instances to avoid redundant resolution.
@@ -375,6 +375,16 @@ public class JavaType {
      */
     public boolean isUnresolved() {
         return !isResolved();
+    }
+
+    /**
+     * Returns the class type being inspected.
+     *
+     * @return the {@link Class} bean representing the inspected type
+     */
+    @Override
+    public Class<?> getClassType() {
+        return isResolved() ? getRawType() : Unknown.TYPE;
     }
 
     /**

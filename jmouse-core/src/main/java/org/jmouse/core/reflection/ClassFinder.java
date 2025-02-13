@@ -29,7 +29,7 @@ import static org.jmouse.core.reflection.ClassMatchers.*;
  * result.forEach(System.out::println);
  * }</pre>
  *
- * <p>This example demonstrates how to find classes annotated with a specific annotation
+ * <p>This binder demonstrates how to find classes annotated with a specific annotation
  * and sort them using predefined and custom comparators.</p>
  */
 public interface ClassFinder {

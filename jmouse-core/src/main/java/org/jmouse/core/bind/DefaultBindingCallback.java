@@ -1,6 +1,5 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.reflection.TypeDescriptor;
 import org.jmouse.util.PlaceholderReplacer;
 import org.jmouse.util.PlaceholderResolver;
 import org.jmouse.util.StandardPlaceholderReplacer;
@@ -47,7 +46,7 @@ public class DefaultBindingCallback extends AbstractCallback {
      * @param value    the bound value result
      */
     @Override
-    public void onBound(NamePath name, Bindable<?> bindable, BindContext context, BindResult<Object> value) {
+    public void onBound(PropertyPath name, Bindable<?> bindable, BindContext context, BindResult<Object> value) {
         parent.onBound(name, bindable, context, value);
     }
 
@@ -65,17 +64,17 @@ public class DefaultBindingCallback extends AbstractCallback {
      * @return the transformed or resolved value
      */
     @Override
-    public Object onBinding(NamePath name, Bindable<?> bindable, BindContext context, Object value) {
+    public Object onBinding(PropertyPath name, Bindable<?> bindable, BindContext context, Object value) {
         Object handled = value;
 
-        if (handled instanceof String stringValue && bindable.getTypeDescriptor().isString()) {
+        if (handled instanceof String stringValue && bindable.getTypeInformation().isString()) {
             String prefix = replacer.prefix();
             if (stringValue.contains(prefix)) {
                 PlaceholderResolver resolver = (placeholder) -> {
-                    DataSource dataSource = context.getDataSource();
-                    NamePath   path       = NamePath.of(placeholder);
-                    DataSource other      = dataSource.get(path);
-                    return other.isNull() ? null : other.asString();
+                    PropertyValueAccessor dataSource = context.getDataSource();
+                    PropertyPath          path       = PropertyPath.of(placeholder);
+                    PropertyValueAccessor other      = dataSource.navigate(path);
+                    return other.isNull() ? null : other.asText();
                 };
                 handled = replacer.replace(stringValue, resolver);
             }

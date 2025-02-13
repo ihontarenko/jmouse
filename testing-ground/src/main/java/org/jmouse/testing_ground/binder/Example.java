@@ -1,4 +1,4 @@
-package org.jmouse.testing_ground.example;
+package org.jmouse.testing_ground.binder;
 
 
 import org.jmouse.JMouseModule;
@@ -19,6 +19,8 @@ public class Example {
 
     public static void main(String[] args) {
         PropertyResolver resolver = createPropertyResolver();
+
+        PropertyValueAccessor dataSource = PropertyValueAccessor.wrap(resolver);
 
         Binder binder = Binder.with(resolver, new DefaultBindingCallback());
 

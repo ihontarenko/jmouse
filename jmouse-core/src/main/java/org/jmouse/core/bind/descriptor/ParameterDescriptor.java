@@ -1,5 +1,7 @@
 package org.jmouse.core.bind.descriptor;
 
+import org.jmouse.core.reflection.ClassTypeInspector;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.util.Collections;

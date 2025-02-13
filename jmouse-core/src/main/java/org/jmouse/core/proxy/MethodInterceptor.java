@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
  *       receiving the result of the method call (or a thrown exception, if applicable).</li>
  * </ul>
  *
- * <p>Usage example:
+ * <p>Usage binder:
  * <pre>{@code
  * public class LoggingInterceptor implements MethodInterceptor {
  *

@@ -4,4 +4,6 @@ public interface GetValue {
 
     String getValue();
 
+    Object getObject();
+
 }

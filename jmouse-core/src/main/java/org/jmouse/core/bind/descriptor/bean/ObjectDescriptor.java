@@ -2,7 +2,7 @@ package org.jmouse.core.bind.descriptor.bean;
 
 import org.jmouse.core.bind.descriptor.AnnotationDescriptor;
 import org.jmouse.core.bind.descriptor.TypeDescriptor;
-import org.jmouse.core.bind.descriptor.ClassTypeInspector;
+import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.core.bind.descriptor.ElementDescriptor;
 
 import java.util.Collection;

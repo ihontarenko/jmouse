@@ -9,7 +9,7 @@ import java.util.function.Function;
 /**
  * Transforms a flat key-value {@link Map} into a nested structure based on hierarchical keys.
  * <p>
- * Keys are parsed using {@link NamePath}, allowing for structured representation with maps and lists.
+ * Keys are parsed using {@link PropertyPath}, allowing for structured representation with maps and lists.
  * <p>
  * Example input:
  * <pre>
@@ -49,14 +49,14 @@ public class PropertiesTransformer {
         Map<String, Object> nested = new HashMap<>();
 
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            NamePath.Entries    entries    = NamePath.of(entry.getKey()).entries();
-            Object              value      = entry.getValue();
+            PropertyPath.Entries entries = PropertyPath.of(entry.getKey()).entries();
+            Object               value   = entry.getValue();
             Map<String, Object> current    = nested;
             List<Object>        collection = null;
 
             for (int i = 0; i < entries.size(); i++) {
-                NamePath.Type type = entries.type(i);
-                String        key  = entries.get(i).toString();
+                PropertyPath.Type type = entries.type(i);
+                String            key  = entries.get(i).toString();
 
                 if (type.isEmpty()) {
                     continue;

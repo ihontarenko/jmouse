@@ -7,13 +7,13 @@ public class NullValueDataSource extends AbstractDataSource {
     }
 
     @Override
-    public DataSource get(String name) {
-        return DataSource.of(null);
+    public PropertyValueAccessor get(String name) {
+        return PropertyValueAccessor.wrap(null);
     }
 
     @Override
-    public DataSource get(int index) {
-        return DataSource.of(null);
+    public PropertyValueAccessor get(int index) {
+        return PropertyValueAccessor.wrap(null);
     }
 
     /**
@@ -22,7 +22,7 @@ public class NullValueDataSource extends AbstractDataSource {
      * @return the original source object
      */
     @Override
-    public Object getSource() {
+    public Object unwrap() {
         return null;
     }
 
@@ -32,8 +32,8 @@ public class NullValueDataSource extends AbstractDataSource {
      * @return the raw object
      */
     @Override
-    public Object getRaw() {
-        return getSource();
+    public Object asObject() {
+        return unwrap();
     }
 
     /**
@@ -42,7 +42,7 @@ public class NullValueDataSource extends AbstractDataSource {
      * @return the {@link Class} representing the data source type
      */
     @Override
-    public Class<?> getType() {
+    public Class<?> getDataType() {
         return void.class;
     }
 }

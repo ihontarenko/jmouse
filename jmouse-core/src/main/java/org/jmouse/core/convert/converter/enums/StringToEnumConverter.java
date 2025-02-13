@@ -10,7 +10,7 @@ import java.util.Set;
  * into a corresponding {@link Enum} constant by matching names (case-insensitive).
  * If no matching constant is found, this converter returns {@code null}.
  *
- * <p>Usage example:
+ * <p>Usage binder:
  * <pre>{@code
  * // Suppose you have an enum:
  * enum Color { RED, GREEN, BLUE }

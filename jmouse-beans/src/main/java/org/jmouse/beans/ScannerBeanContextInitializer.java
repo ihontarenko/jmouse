@@ -22,7 +22,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * This class is responsible for initializing a {@link BeanContext} by scanning
  * specified base classes for annotated elements using registered {@link BeanScanner}s.
  *
- * <p>Usage example:</p>
+ * <p>Usage binder:</p>
  * <pre>{@code
  * BeanContext context = new BeanContext();
  * ScannerBeanContextInitializer initializer = new ScannerBeanContextInitializer(new Class<?>[]{ RootClass.class });

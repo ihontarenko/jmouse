@@ -11,11 +11,11 @@ import java.util.List;
  * An interface for managing {@link BeanDefinition} objects within a container.
  * <p>
  * This interface allows the registration, retrieval, and management of bean definitions.
- * For example, you can register a bean definition and then retrieve it by its name:
+ * For binder, you can register a bean definition and then retrieve it by its name:
  * <pre>{@code
  * BeanDefinitionContainer container = ...;
  * BeanDefinition userServiceDefinition =
- *     new DefaultBeanDefinition("userService", com.example.services.UserService.class);
+ *     new DefaultBeanDefinition("userService", com.binder.services.UserService.class);
  *
  * container.registerDefinition(userServiceDefinition);
  *

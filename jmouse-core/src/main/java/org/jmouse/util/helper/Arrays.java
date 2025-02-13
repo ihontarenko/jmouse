@@ -185,6 +185,28 @@ public final class Arrays {
     }
 
     /**
+     * Retrieves an element from the specified array at the given index.
+     * <p>
+     * If the index is out of bounds or the array is null/empty, the provided default value is returned.
+     * </p>
+     *
+     * @param array        the array from which to retrieve the element
+     * @param index        the index of the element to retrieve
+     * @param defaultValue the value to return if the index is out of bounds or the array is null/empty
+     * @param <T>          the type of the array elements
+     * @return the element at the specified index, or {@code defaultValue} if unavailable
+     */
+    public static <T> T get(T[] array, int index, T defaultValue) {
+        T value = defaultValue;
+
+        if (notEmpty(array) && index >= 0 && index < array.length) {
+            value = array[index];
+        }
+
+        return value;
+    }
+
+    /**
      * Converts a primitive type to its corresponding boxed (wrapper) type.
      * <p>
      * If the given class is a primitive type, this method returns the equivalent wrapper type.

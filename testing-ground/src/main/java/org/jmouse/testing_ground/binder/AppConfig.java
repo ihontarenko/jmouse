@@ -1,6 +1,6 @@
-package org.jmouse.testing_ground.example;
+package org.jmouse.testing_ground.binder;
 
-import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.bind.PropertyName;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public class AppConfig {
         return webServerConfig;
     }
 
-    @PropertyPath("configs")
+    @PropertyName("configs")
     public void setWebServerConfig(List<WebServerConfig> webServerConfig) {
         this.webServerConfig = webServerConfig;
     }
@@ -24,7 +24,7 @@ public class AppConfig {
         return defaultWebServerConfig;
     }
 
-    @PropertyPath("webserver")
+    @PropertyName("webserver")
     public void setDefaultWebServerConfig(WebServerConfig defaultWebServerConfig) {
         this.defaultWebServerConfig = defaultWebServerConfig;
     }

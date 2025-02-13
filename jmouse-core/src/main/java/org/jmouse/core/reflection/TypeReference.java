@@ -9,7 +9,7 @@ import java.lang.reflect.Type;
  * for scenarios where Java's type erasure would otherwise remove generic type
  * details, such as deserialization frameworks or reflection-based utilities.
  *
- * <p>Usage example:
+ * <p>Usage binder:
  * <pre>{@code
  * // Create an anonymous subclass of TypeReference with a specific generic type
  * TypeReference<List<String>> typeRef = new TypeReference<>() {};

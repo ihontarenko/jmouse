@@ -1,7 +1,7 @@
 package org.jmouse.core.bind;
 
 import org.jmouse.core.convert.Conversion;
-import org.jmouse.core.reflection.TypeDescriptor;
+import org.jmouse.core.reflection.TypeInformation;
 
 /**
  * Base implementation of the {@link ObjectBinder} interface.
@@ -29,10 +29,10 @@ abstract public class AbstractBinder implements ObjectBinder {
     }
 
     /**
-     * Attempts to bind a scalar or object value from the {@link DataSource}.
+     * Attempts to bind a scalar or object value from the {@link PropertyValueAccessor}.
      * <p>
      * If the requested name is present in the source, this method attempts to
-     * retrieve and convert the value based on the target {@link TypeDescriptor}.
+     * retrieve and convert the value based on the target {@link TypeInformation}.
      * If deep binding is enabled, it delegates to the root binder for nested binding.
      * </p>
      *
@@ -45,8 +45,8 @@ abstract public class AbstractBinder implements ObjectBinder {
      */
     @SuppressWarnings({"unchecked"})
     @Override
-    public <T> BindResult<T> bindValue(NamePath name, Bindable<T> bindable, DataSource source, BindCallback callback) {
-        DataSource value = source.get(name);
+    public <T> BindResult<T> bindValue(PropertyPath name, Bindable<T> bindable, PropertyValueAccessor source, BindCallback callback) {
+        PropertyValueAccessor value = source.navigate(name);
 
         // If the value is null, return an empty binding result
         if (value.isNull()) {
@@ -55,13 +55,13 @@ abstract public class AbstractBinder implements ObjectBinder {
 
         bindable = (Bindable<T>) refreshBindable(bindable, value);
 
-        TypeDescriptor descriptor      = bindable.getTypeDescriptor();
-        TypeDescriptor valueDescriptor = TypeDescriptor.forClass(value.getType());
-        ObjectBinder   rootBinder      = context.getRootBinder();
+        TypeInformation descriptor      = bindable.getTypeInformation();
+        TypeInformation valueDescriptor = TypeInformation.forClass(value.getDataType());
+        ObjectBinder    rootBinder      = context.getRootBinder();
 
         // Scalar or object binding logic
         if (descriptor.isScalar() || descriptor.isObject() || descriptor.isClass() || descriptor.isEnum()) {
-            Object result = value.getRaw();
+            Object result = value.asObject();
 
             // If the value is scalar, convert it to the target type
             if (valueDescriptor.isScalar()) {
@@ -94,13 +94,13 @@ abstract public class AbstractBinder implements ObjectBinder {
      * @param value    the value to bind
      * @return the refreshed bindable instance
      */
-    protected Bindable<?> refreshBindable(Bindable<?> bindable, DataSource value) {
-        TypeDescriptor valueDescriptor = TypeDescriptor.forClass(value.getType());
-        TypeDescriptor descriptor      = bindable.getTypeDescriptor();
+    protected Bindable<?> refreshBindable(Bindable<?> bindable, PropertyValueAccessor value) {
+        TypeInformation valueDescriptor = TypeInformation.forClass(value.getDataType());
+        TypeInformation descriptor      = bindable.getTypeInformation();
 
         // Override bindable type if necessary based on value descriptor
         if (descriptor.isObject() && !valueDescriptor.isScalar()) {
-            bindable = Bindable.of(value.getType());
+            bindable = Bindable.of(value.getDataType());
         }
 
         return bindable;
@@ -110,14 +110,14 @@ abstract public class AbstractBinder implements ObjectBinder {
      * Converts a value to the target type using the configured {@link Conversion}.
      * <p>
      * This method ensures that scalar values are converted to match the expected
-     * {@link TypeDescriptor}. If no conversion is needed, the original value is returned.
+     * {@link TypeInformation}. If no conversion is needed, the original value is returned.
      * </p>
      *
      * @param value          the raw value to convert
      * @param typeDescriptor the target type descriptor
      * @return the converted value, or the original value if no conversion was needed
      */
-    protected Object convert(Object value, TypeDescriptor typeDescriptor) {
+    protected Object convert(Object value, TypeInformation typeDescriptor) {
         Conversion conversion = context.getConversion();
         Class<?>   targetType = typeDescriptor.getRawType();
 

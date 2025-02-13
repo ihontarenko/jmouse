@@ -10,12 +10,12 @@ import org.jmouse.core.convert.Conversion;
 public interface BindContext {
 
     /**
-     * Returns the {@link DataSource} associated with this binding context.
+     * Returns the {@link PropertyValueAccessor} associated with this binding context.
      * The data source provides the raw input for binding operations.
      *
      * @return the data source
      */
-    DataSource getDataSource();
+    PropertyValueAccessor getDataSource();
 
     /**
      * Returns the root {@link ObjectBinder} that manages the binding process.

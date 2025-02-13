@@ -1,4 +1,4 @@
-package org.jmouse.testing_ground.example;
+package org.jmouse.testing_ground.binder;
 
 import java.util.Random;
 

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * A utility class for binding data from a {@link DataSource} to Java objects.
+ * A utility class for binding data from a {@link PropertyValueAccessor} to Java objects.
  * Provides convenient factory methods and type-safe bindings for common types.
  */
 public final class Bind {
@@ -34,16 +34,16 @@ public final class Bind {
      * @return a new {@code Bind} instance
      */
     public static Bind with(Object data) {
-        return with(DataSource.of(data));
+        return with(PropertyValueAccessor.wrap(data));
     }
 
     /**
-     * Creates a {@code Bind} instance with the specified {@link DataSource}.
+     * Creates a {@code Bind} instance with the specified {@link PropertyValueAccessor}.
      *
      * @param dataSource the data source
      * @return a new {@code Bind} instance
      */
-    public static Bind with(DataSource dataSource) {
+    public static Bind with(PropertyValueAccessor dataSource) {
         return with(new Binder(dataSource));
     }
 

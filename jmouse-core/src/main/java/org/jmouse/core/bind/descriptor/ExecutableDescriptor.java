@@ -48,6 +48,7 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
      */
     Collection<TypeDescriptor> getExceptionTypes();
 
+
     default TypeDescriptor getExceptionType(int index) {
         TypeDescriptor exceptionType = null;
 

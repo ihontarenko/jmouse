@@ -632,7 +632,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * Registers a {@link BeanContainer} for a specific {@link Scope}.
      * <p>
      * This method allows mapping a scope to a container that manages bean instances
-     * within that scope. For example, you can register separate containers for
+     * within that scope. For binder, you can register separate containers for
      * singleton, prototype, request, or session scopes.
      * </p>
      *

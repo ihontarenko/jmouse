@@ -1,7 +1,7 @@
 package org.jmouse.core.bind;
 
 import org.jmouse.core.reflection.JavaType;
-import org.jmouse.core.reflection.TypeDescriptor;
+import org.jmouse.core.reflection.TypeInformation;
 
 import java.util.List;
 import java.util.Map;
@@ -142,15 +142,15 @@ public final class Bindable<T> {
     }
 
     /**
-     * Retrieves a {@link TypeDescriptor} for the underlying {@link JavaType}.
+     * Retrieves a {@link TypeInformation} for the underlying {@link JavaType}.
      * <p>
      * This allows for convenient type analysis and classification.
      * </p>
      *
-     * @return a {@link TypeDescriptor} representing this bindable's type
+     * @return a {@link TypeInformation} representing this bindable's type
      */
-    public TypeDescriptor getTypeDescriptor() {
-        return TypeDescriptor.forJavaType(type);
+    public TypeInformation getTypeInformation() {
+        return TypeInformation.forJavaType(type);
     }
 
     /**

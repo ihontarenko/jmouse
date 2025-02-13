@@ -107,7 +107,7 @@ abstract public class Reflections {
      *                             <p><b>Example usage:</b></p>
      *                             <pre>{@code
      *                             Constructor<MyClass> constructor = MyClass.class.getConstructor(String.class);
-     *                             MyClass instance = Reflections.instantiate(constructor, "example argument");
+     *                             MyClass instance = Reflections.instantiate(constructor, "binder argument");
      *                             }</pre>
      */
     public static <T> T instantiate(Constructor<T> constructor, Object... arguments) {
@@ -153,7 +153,7 @@ abstract public class Reflections {
      *                             <p><b>Example usage:</b></p>
      *                             <pre>{@code
      *                             Constructor<?> constructor = Reflections.findFirstConstructor(MyClass.class, String.class, int.class);
-     *                             Object instance = Reflections.instantiate(constructor, "example", 42);
+     *                             Object instance = Reflections.instantiate(constructor, "binder", 42);
      *                             }</pre>
      */
     public static Constructor<?> findFirstConstructor(Class<?> clazz, Class<?>... types) {

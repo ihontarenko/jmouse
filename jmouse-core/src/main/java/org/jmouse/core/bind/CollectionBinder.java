@@ -1,7 +1,7 @@
 package org.jmouse.core.bind;
 
 import org.jmouse.core.reflection.JavaType;
-import org.jmouse.core.reflection.TypeDescriptor;
+import org.jmouse.core.reflection.TypeInformation;
 
 import java.util.Collection;
 import java.util.function.Supplier;
@@ -46,8 +46,8 @@ abstract public class CollectionBinder extends AbstractBinder {
      * @return the binding result containing the collection, or an empty result if no binding is possible
      */
     @Override
-    public <T> BindResult<T> bind(NamePath root, Bindable<T> bindable, DataSource source, BindCallback callback) {
-        TypeDescriptor typeDescriptor = bindable.getTypeDescriptor();
+    public <T> BindResult<T> bind(PropertyPath root, Bindable<T> bindable, PropertyValueAccessor source, BindCallback callback) {
+        TypeInformation typeDescriptor = bindable.getTypeInformation();
 
         // Check if the bindable is a collection
         if (typeDescriptor.isCollection()) {
@@ -55,15 +55,15 @@ abstract public class CollectionBinder extends AbstractBinder {
             int index   = 0;
             int maxSize = 16; // todo: move this value to context
 
-            JavaType elementType = bindable.getType().getFirst();
-            NamePath zeroName    = root.append(INDEX_ZERO);
+            JavaType     elementType = bindable.getType().getFirst();
+            PropertyPath zeroName    = root.append(INDEX_ZERO);
 
-            if (source.get(zeroName).isNull() && source.get(root).isSimple()) {
+            if (source.navigate(zeroName).isNull() && source.navigate(root).isSimple()) {
                 bindCollectionElement(root, of(elementType), source, elements, callback);
             } else {
                 while (maxSize > index) {
                     // Append the index to the path for element binding
-                    NamePath elementName = root.append("[" + index++ + "]");
+                    PropertyPath elementName = root.append("[" + index++ + "]");
 
                     BindResult<?> result = bindCollectionElement(
                             elementName, of(elementType), source, elements, callback);
@@ -82,7 +82,7 @@ abstract public class CollectionBinder extends AbstractBinder {
     }
 
     private BindResult<?> bindCollectionElement(
-            NamePath name, Bindable<?> bindable, DataSource source, Collection<Object> elements, BindCallback callback) {
+            PropertyPath name, Bindable<?> bindable, PropertyValueAccessor source, Collection<Object> elements, BindCallback callback) {
         // Bind the individual element and add it to the collection
         BindResult<?> result = bindValue(name, bindable, source, callback);
 
@@ -101,8 +101,8 @@ abstract public class CollectionBinder extends AbstractBinder {
      * @return the collection associated with the bindable object, or a default collection if none is found
      */
     protected Collection<?> getCollection(Bindable<?> bindable) {
-        TypeDescriptor typeDescriptor = bindable.getTypeDescriptor();
-        Supplier<?>    supplier       = bindable.getValue();
+        TypeInformation typeDescriptor = bindable.getTypeInformation();
+        Supplier<?>     supplier       = bindable.getValue();
 
         // Check if the bindable represents a collection and return the value if available
         if (typeDescriptor.isCollection() && supplier != null) {

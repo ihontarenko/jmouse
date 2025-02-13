@@ -7,7 +7,7 @@ import java.util.Set;
  * {@code T}. Implementations of this interface typically define a set of supported
  * source-target type pairs and provide logic for performing the actual conversion.
  *
- * <p>Usage example:
+ * <p>Usage binder:
  * <pre>{@code
  * public class StringToIntegerConverter implements GenericConverter<String, Integer> {
  *
