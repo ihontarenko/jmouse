@@ -89,12 +89,26 @@ public class DefaultBeanFactory implements BeanFactory, BeanInstantiationFactory
     public Object createInstance(BeanDefinition definition, BeanContext context) {
         Object instance = null;
 
-        for (BeanInstantiationStrategy strategy : strategies) {
-            if (strategy.supports(definition)) {
-                definition.setBeanCreationStrategy(strategy);
-                instance = strategy.create(definition, context);
+        BeanInstantiationStrategy instantiationStrategy = definition.getBeanCreationStrategy();
+
+        if (instantiationStrategy == null) {
+            for (BeanInstantiationStrategy strategy : strategies) {
+                if (strategy.supports(definition)) {
+                    instantiationStrategy = strategy;
+                    break;
+                }
+            }
+        }
+
+        if (instantiationStrategy != null) {
+            // Link applicable strategy to bean definition
+            definition.setBeanCreationStrategy(instantiationStrategy);
+            // Instantiate bean via applicable strategy
+            instance = instantiationStrategy.create(definition, context);
+
+            if (instance != null) {
                 LOGGER.info("Bean instance (scope='{}', name='{}') created via: '{}' strategy",
-                            definition.getScope(), definition.getBeanName(), getShortName(strategy.getClass()));
+                            definition.getScope(), definition.getBeanName(), getShortName(instantiationStrategy.getClass()));
             }
         }
 

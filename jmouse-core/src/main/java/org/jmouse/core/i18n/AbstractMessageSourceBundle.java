@@ -206,7 +206,7 @@ public abstract class AbstractMessageSourceBundle extends AbstractMessageSource 
         try {
             message = bundle.getString(key);
         } catch (MissingResourceException exception) {
-            LOGGER.info("Resource '{}' in bundle '{}' not found.", key, bundle.getBundleId());
+            LOGGER.debug("Resource '{}' in bundle '{}' not found.", key, bundle.getBundleId());
         }
 
         return message;

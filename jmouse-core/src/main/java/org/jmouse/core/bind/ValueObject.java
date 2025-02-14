@@ -4,6 +4,7 @@ import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.util.CachedSupplier;
 import org.jmouse.util.Factory;
+import org.jmouse.util.SingletonSupplier;
 import org.jmouse.util.helper.Arrays;
 
 import java.lang.reflect.Constructor;
@@ -13,8 +14,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.jmouse.core.reflection.JavaType.forClass;
-import static org.jmouse.core.reflection.Reflections.findFirstConstructor;
-import static org.jmouse.core.reflection.Reflections.getRecordComponentsTypes;
+import static org.jmouse.core.reflection.Reflections.*;
 
 /**
  * Represents a wrapper for Java records, allowing for structured value retrieval and instantiation.
@@ -89,6 +89,40 @@ final public class ValueObject<T extends Record> extends Bean<T> {
      */
     public Values getRecordValues() {
         return new Values(this);
+    }
+
+    public BeanConstructor<T, Values> constructor() {
+        return values -> SingletonSupplier.of(() -> {
+            Object[] arguments = new Object[properties.size()];
+            int      index     = 0;
+
+            if (constructor == null) {
+                throw new IllegalStateException(
+                        "No applicable constructor was found for this record type: %s".formatted(type));
+            }
+
+            if (values.size() != properties.size()) {
+                throw new IllegalArgumentException(
+                        "Property mismatch: %s requires all %d properties to be set, but found only %d"
+                                .formatted(type, properties.size(), values.size()));
+            }
+
+            for (Bean.Property<?> property : getProperties()) {
+                Object   value        = values.get(property);
+                JavaType propertyType = property.getType();
+                Class<?> classType    = Arrays.boxType(propertyType.getRawType());
+
+                try {
+                    arguments[index++] = classType.cast(value);
+                } catch (ClassCastException e) {
+                    throw new IllegalArgumentException(
+                            "Property '%s' of type '%s' cannot be cast to '%s'. Value should be converted or passed before"
+                                    .formatted(property.getName(), propertyType, value.getClass()));
+                }
+            }
+
+            return Reflections.instantiate(constructor, arguments);
+        });
     }
 
     /**

@@ -1,6 +1,7 @@
 package org.jmouse.testing_ground.beancontext;
 
 import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.DefaultBeanContext;
 import org.jmouse.beans.ScannerBeanContextInitializer;
 import org.jmouse.context.ApplicationConfigurer;
@@ -25,7 +26,9 @@ public class Example {
         System.out.println(adminUser);
 
 //        context.registerBean("adminUser", () -> adminUser);
-        context.registerBean("adminUser", adminUser);
+        context.registerBean("adminUser", adminUser, BeanScope.PROTOTYPE);
+
+        context.getDefinition("adminUser").setProxied(true);
 
         System.out.println(context.getBean(AdminUser.class));
 

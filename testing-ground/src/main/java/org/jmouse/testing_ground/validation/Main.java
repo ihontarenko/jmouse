@@ -16,13 +16,6 @@ public class Main {
 
     public static void main(String... arguments) throws Throwable {
 
-        Getter<String, Integer> intGetter = Integer::parseInt;
-        Getter<Integer, BigDecimal> numberGetter = v -> new BigDecimal(v.toString());
-
-        Getter<String, BigDecimal> result = intGetter.andThen(numberGetter);
-
-        System.out.println(result.get("123").getClass());
-
         Validator validator = Validator.forInstance(User.class, (user, errors) -> {
             errors.reject("object.non_null", "User must be non NULL");
             errors.rejectValue("name", "field.name.empty", "User name {0} must be non NULL", user.getName());

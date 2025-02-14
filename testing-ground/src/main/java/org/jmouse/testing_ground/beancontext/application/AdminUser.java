@@ -2,7 +2,7 @@ package org.jmouse.testing_ground.beancontext.application;
 
 import org.jmouse.beans.annotation.Dependency;
 
-public class AdminUser {
+public class AdminUser implements User {
 
     @Dependency("gal")
     private String name;
@@ -21,4 +21,9 @@ public class AdminUser {
                 "name='" + name + '\'' +
                 '}';
     }
+
+    interface User {
+        String getName();
+    }
+
 }

@@ -32,21 +32,76 @@ public interface JavaBeanDescriptor<T> extends ObjectDescriptor<T> {
      *
      * @return a collection of {@link MethodDescriptor} instances
      */
-    Collection<MethodDescriptor> getMethods();
+    default Collection<MethodDescriptor> getMethods() {
+        return getBeanClass().getMethods();
+    }
+
+    /**
+     * Retrieves a method descriptor by name.
+     *
+     * @param name the name of the method
+     * @return the corresponding {@link MethodDescriptor}, or {@code null} if not found
+     */
+    default MethodDescriptor getMethod(String name) {
+        return getBeanClass().getMethod(name);
+    }
+
+    /**
+     * Checks if this class contains a method with the given name.
+     *
+     * @param name the name of the method
+     * @return {@code true} if the method exists, otherwise {@code false}
+     */
+    default boolean hasMethod(String name) {
+        return getBeanClass().hasMethod(name);
+    }
 
     /**
      * Returns a collection of constructor descriptors associated with this bean.
      *
      * @return a collection of {@link ConstructorDescriptor} instances
      */
-    Collection<ConstructorDescriptor> getConstructors();
+    default Collection<ConstructorDescriptor> getConstructors() {
+        return getBeanClass().getConstructors();
+    }
+
+    /**
+     * Returns a constructor descriptor associated with this class.
+     *
+     * @return a {@link ConstructorDescriptor} instance
+     */
+    default ConstructorDescriptor getConstructor(int index) {
+        return getBeanClass().getConstructor(index);
+    }
 
     /**
      * Returns a collection of field descriptors associated with this bean.
      *
      * @return a collection of {@link FieldDescriptor} instances
      */
-    Collection<FieldDescriptor> getFields();
+    default Collection<FieldDescriptor> getFields() {
+        return getBeanClass().getFields();
+    }
+
+    /**
+     * Retrieves a field descriptor by name.
+     *
+     * @param name the name of the field
+     * @return the corresponding {@link FieldDescriptor}, or {@code null} if not found
+     */
+    default FieldDescriptor getField(String name) {
+        return getBeanClass().getField(name);
+    }
+
+    /**
+     * Checks if this class contains a field with the given name.
+     *
+     * @param name the name of the field
+     * @return {@code true} if the field exists, otherwise {@code false}
+     */
+    default boolean hasField(String name) {
+        return getBeanClass().hasField(name);
+    }
 
     /**
      * Default implementation of {@link JavaBeanDescriptor}.

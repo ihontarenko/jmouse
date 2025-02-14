@@ -34,6 +34,17 @@ public final class Exceptions {
     }
 
     /**
+     * Throws an {@link IllegalArgumentException} if the given condition is true.
+     *
+     * @param condition the condition to check
+     * @param message   the error message if the condition is true
+     * @throws IllegalArgumentException if {@code condition} is true
+     */
+    public static void thrownIfTrue(boolean condition, String message) {
+        thrownIfFalse(!condition, message);
+    }
+
+    /**
      * Throws an {@link IllegalArgumentException} if the given object is null.
      *
      * @param object  the object to check

@@ -6,6 +6,7 @@ import org.jmouse.core.reflection.MethodFinder;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.util.CachedSupplier;
 import org.jmouse.util.Factory;
+import org.jmouse.util.SingletonSupplier;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -116,6 +117,24 @@ public final class JavaBean<T> extends Bean<T> {
             Bean.Property<T> property = properties.computeIfAbsent(name, this::createProperty);
             adder.accept((Property<T>) property, method);
         }
+    }
+
+    public BeanConstructor<T, Bindable<T>> constructor() {
+        return context -> SingletonSupplier.of(() -> {
+            T           instance = null;
+            Supplier<T> supplier = context.getValue();
+
+            if (supplier != null) {
+                instance = supplier.get();
+            }
+
+            if (instance == null) {
+                Constructor<T> constructor = (Constructor<T>) findFirstConstructor(type.getRawType());
+                instance = instantiate(constructor);
+            }
+
+            return instance;
+        });
     }
 
     /**

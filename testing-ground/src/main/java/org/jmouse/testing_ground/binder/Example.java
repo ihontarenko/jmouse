@@ -3,12 +3,14 @@ package org.jmouse.testing_ground.binder;
 import org.jmouse.core.bind.Bind;
 import org.jmouse.core.bind.Binder;
 import org.jmouse.core.bind.DefaultBindingCallback;
+import org.jmouse.core.bind.ImmutableBean;
 import org.jmouse.core.bind.descriptor.TypeDescriptor;
 import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
 import org.jmouse.core.bind.descriptor.bean.PropertyDescriptor;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.testing_ground.binder.dto.User;
 import org.jmouse.testing_ground.binder.dto.UserService;
+import org.jmouse.web.server.WebServerConfig;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +20,10 @@ import java.util.Map;
 public class Example {
 
     public static void main(String[] args) {
+
+        // public Factory<T> getFactory(Bindable<T> bindable) {
+        // public Supplier<T> getInstance(Values values) {
+        ImmutableBean<WebServerConfig> immutableBean = ImmutableBean.forClass(WebServerConfig.class);
 
         JavaType type = JavaType.forType(UserService.class);
 
