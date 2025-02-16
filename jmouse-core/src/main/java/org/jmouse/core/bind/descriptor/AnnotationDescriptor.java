@@ -15,16 +15,25 @@ public interface AnnotationDescriptor extends Descriptor<Annotation> {
 
     Map<String, Object> getAttributes();
 
-    class Implementation extends Descriptor.Implementation<Annotation> implements AnnotationDescriptor {
+    static AnnotationDescriptor.Builder of(Annotation annotation) {
+        return new AnnotationDescriptor.Builder(annotation);
+    }
+
+    class Implementation extends AbstractDescriptor<Annotation> implements AnnotationDescriptor {
 
         private final Map<String, Object> attributes = new HashMap<>();
         private final TypeDescriptor      annotationType;
 
-        Implementation(String name, Annotation internal, Map<String, Object> attributes, TypeDescriptor annotationType) {
-            super(name, internal);
-            this.attributes.putAll(attributes);
-            this.annotationType = annotationType;
+        protected Implementation(Mutable<?, Annotation, Descriptor<Annotation>> mutable, String name, Annotation internal) {
+            super(mutable, name, internal);
         }
+
+//        Implementation(String name, Annotation internal, Map<String, Object> attributes, TypeDescriptor annotationType) {
+//            this.attributes.putAll(attributes);
+//            this.annotationType = annotationType;
+//        }
+
+
 
         @Override
         public TypeDescriptor getAnnotationType() {
@@ -36,15 +45,19 @@ public interface AnnotationDescriptor extends Descriptor<Annotation> {
             return attributes;
         }
 
+        @Override
+        public AnnotationDescriptor introspect() {
+            return this;
+        }
     }
 
-    final class Builder extends Descriptor.DescriptorBuilder<Builder, Annotation, AnnotationDescriptor> {
+    final class Builder extends AbstractMutableDescriptor<Builder, Annotation, AnnotationDescriptor> {
 
         private Map<String, Object> attributes = new HashMap<>();
         private TypeDescriptor      annotationType;
 
-        public Builder(String name) {
-            super(name);
+        public Builder(Annotation describable) {
+            super(describable);
         }
 
         public Builder attribute(String name, Object value) {
@@ -62,9 +75,13 @@ public interface AnnotationDescriptor extends Descriptor<Annotation> {
             return self();
         }
 
+        public Builder annotationType() {
+            return annotationType(TypeDescriptor.forType(JavaType.forType(target.annotationType())));
+        }
+
         @Override
-        public AnnotationDescriptor build() {
-            return new Implementation(name, internal, attributes, annotationType);
+        public AnnotationDescriptor toImmutable() {
+            return new Implementation(name, target, attributes, annotationType);
         }
 
     }
@@ -92,9 +109,9 @@ public interface AnnotationDescriptor extends Descriptor<Annotation> {
      */
     static AnnotationDescriptor forAnnotation(Annotation annotation, int depth) {
         Class<? extends Annotation>  type    = annotation.annotationType();
-        AnnotationDescriptor.Builder builder = new AnnotationDescriptor.Builder(getShortName(type));
+        AnnotationDescriptor.Builder builder = new AnnotationDescriptor.Builder(annotation);
 
-        builder.internal(annotation).annotationType(TypeDescriptor.forType(JavaType.forType(type), depth - 1));
+        builder.target(annotation).annotationType(TypeDescriptor.forType(JavaType.forType(type), depth - 1));
 
         try {
             Map<String, Object> attributes = new HashMap<>();
@@ -107,7 +124,7 @@ public interface AnnotationDescriptor extends Descriptor<Annotation> {
         } catch (Exception ignored) {
         }
 
-        return builder.build();
+        return builder.toImmutable();
     }
 
 }

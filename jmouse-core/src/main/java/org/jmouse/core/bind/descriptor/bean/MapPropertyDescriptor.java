@@ -175,9 +175,9 @@ public interface MapPropertyDescriptor<K, V> extends PropertyDescriptor<Map<K, V
          * @return a new instance of {@link MapPropertyDescriptor}
          */
         @Override
-        public MapPropertyDescriptor<K, V> build() {
+        public MapPropertyDescriptor<K, V> toImmutable() {
             return new Implementation<>(
-                    name, internal,
+                    name, target,
                     getter, setter,
                     owner,
                     keyType, valueType

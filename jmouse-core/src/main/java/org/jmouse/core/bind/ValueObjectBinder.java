@@ -1,5 +1,6 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
 import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.util.Priority;
 import org.jmouse.util.Setter;
@@ -52,7 +53,6 @@ public class ValueObjectBinder extends AbstractBinder {
      * @return a {@link BindResult} containing the bound record instance, or an empty result if binding was unsuccessful
      */
     @Override
-    @SuppressWarnings({"unchecked"})
     public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback) {
         TypeInformation sourceDescriptor = TypeInformation.forClass(accessor.navigate(name).getDataType());
         TypeInformation targetDescriptor = bindable.getTypeInformation();
@@ -76,13 +76,14 @@ public class ValueObjectBinder extends AbstractBinder {
      * @return a {@link BindResult} containing the bound record instance if successful
      */
     protected <T> BindResult<T> bindValueObject(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor source, BindCallback callback) {
-        Class<?> rawType = bindable.getType().getRawType();
+        Class<Record> rawType = bindable.getType().getRawType();
 
         // Create a ValueObject representation of the record
-        @SuppressWarnings("unchecked")
         ValueObject<?>     vo      = ValueObject.of((Class<? extends Record>) rawType);
         ValueObject.Values values  = vo.getRecordValues();
         Supplier<?>        factory = vo.getInstance(values);
+
+        JavaBeanDescriptor.forRecord(rawType);
 
         // Iterate over record properties and bind values from the data source
         for (Bean.Property<?> property : vo.getProperties()) {

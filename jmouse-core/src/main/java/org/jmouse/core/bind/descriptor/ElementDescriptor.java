@@ -1,6 +1,7 @@
 package org.jmouse.core.bind.descriptor;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.util.*;
 
 /**
@@ -13,7 +14,7 @@ import java.util.*;
  * @param <T> the type of the internal representation of the described element
  * @see AnnotationDescriptor
  */
-public interface ElementDescriptor<T> extends Descriptor<T> {
+public interface ElementDescriptor<T extends AnnotatedElement> extends Descriptor<T> {
 
     /**
      * Returns a collection of annotation descriptors associated with this element.
@@ -36,10 +37,10 @@ public interface ElementDescriptor<T> extends Descriptor<T> {
      * @return the corresponding {@link AnnotationDescriptor}, or {@code null} if the annotation is not present
      */
     default AnnotationDescriptor getAnnotation(Class<? extends Annotation> annotation) {
-        for (AnnotationDescriptor annotationDescriptor : getAnnotations()) {
-            Annotation internal = annotationDescriptor.getInternal();
+        for (AnnotationDescriptor descriptor : getAnnotations()) {
+            Annotation internal = descriptor.unwrap();
             if (internal.annotationType().equals(annotation)) {
-                return annotationDescriptor;
+                return descriptor;
             }
         }
         return null;
@@ -48,22 +49,16 @@ public interface ElementDescriptor<T> extends Descriptor<T> {
     /**
      * A base implementation of {@link ElementDescriptor} providing support for annotation descriptor.
      * <p>
-     * This class extends {@link Descriptor.Implementation} and includes a collection of annotation descriptors.
+     * This class extends {@link AbstractDescriptor} and includes a collection of annotation descriptors.
      * </p>
      *
      * @param <T> the type of the internal representation of the described element
      */
-    abstract class Implementation<T> extends Descriptor.Implementation<T> implements ElementDescriptor<T> {
+    abstract class Implementation<T extends AnnotatedElement> extends AbstractDescriptor<T>
+            implements ElementDescriptor<T> {
 
         protected final Set<AnnotationDescriptor> annotations;
 
-        /**
-         * Constructs a new {@code ElementDescriptor.PropertyDescriptorAccessor} with the given parameters.
-         *
-         * @param name        the name of the element
-         * @param internal    the internal representation of the element
-         * @param annotations a set of annotation descriptors associated with this element
-         */
         public Implementation(String name, T internal, Set<AnnotationDescriptor> annotations) {
             super(name, internal);
             this.annotations = annotations;
@@ -87,22 +82,22 @@ public interface ElementDescriptor<T> extends Descriptor<T> {
      * finalizing the descriptor instance.
      * </p>
      *
-     * @param <B> the type of the builder itself, used for fluent API methods
+     * @param <M> the type of the builder itself, used for fluent API methods
      * @param <I> the type of the internal representation of the element
      * @param <D> the type of the descriptor being built
      */
-    abstract class Builder<B extends Descriptor.Builder<B, I, D>, I, D extends ElementDescriptor<I>>
-            extends DescriptorBuilder<B, I, D> {
+    abstract class Mutable<M extends Descriptor.Mutable<M, I, D>, I extends AnnotatedElement, D extends ElementDescriptor<I>>
+            extends AbstractMutableDescriptor<M, I, D> {
 
         protected Set<AnnotationDescriptor> annotations = new HashSet<>();
 
         /**
          * Constructs a new {@code ElementDescriptor.Builder} with the given name.
          *
-         * @param name the name of the element being built
+         * @param element the name of the element being built
          */
-        public Builder(String name) {
-            super(name);
+        public Mutable(I element) {
+            super(element);
         }
 
         /**
@@ -111,9 +106,27 @@ public interface ElementDescriptor<T> extends Descriptor<T> {
          * @param annotation the annotation descriptor to add
          * @return this builder instance for method chaining
          */
-        public B annotation(AnnotationDescriptor annotation) {
+        public M annotation(AnnotationDescriptor annotation) {
             this.annotations.add(annotation);
             return self();
         }
+
+        @Override
+        public M introspect() {
+            return annotations();
+        }
+
+        public M annotations() {
+            this.annotations.clear();
+
+            for (Annotation annotation : target.getAnnotations()) {
+                annotation(AnnotationDescriptor.of(annotation)
+                        .annotationType()
+                        .toImmutable());
+            }
+
+            return self();
+        }
+
     }
 }

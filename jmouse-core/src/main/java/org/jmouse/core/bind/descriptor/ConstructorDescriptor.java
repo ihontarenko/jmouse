@@ -5,8 +5,8 @@ import org.jmouse.core.reflection.JavaType;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -44,8 +44,8 @@ public interface ConstructorDescriptor extends ExecutableDescriptor<Constructor<
         Implementation(
                 String name, Constructor<?> internal,
                 Set<AnnotationDescriptor> annotations,
-                Collection<ParameterDescriptor> parameters,
-                Collection<TypeDescriptor> exceptionTypes
+                List<ParameterDescriptor> parameters,
+                List<TypeDescriptor> exceptionTypes
         ) {
             super(name, internal, annotations, parameters, exceptionTypes);
         }
@@ -59,7 +59,7 @@ public interface ConstructorDescriptor extends ExecutableDescriptor<Constructor<
      * creating an immutable {@link ConstructorDescriptor} instance.
      * </p>
      */
-    class Builder extends ExecutableDescriptor.Builder<Builder, Constructor<?>, ConstructorDescriptor> {
+    class Builder extends Mutable<Builder, Constructor<?>, ConstructorDescriptor> {
 
         /**
          * Constructs a new {@code ConstructorDescriptor.Builder} with the specified constructor name.
@@ -79,13 +79,13 @@ public interface ConstructorDescriptor extends ExecutableDescriptor<Constructor<
          * @return a new immutable instance of {@link ConstructorDescriptor}
          */
         @Override
-        public ConstructorDescriptor build() {
+        public ConstructorDescriptor toImmutable() {
             return new Implementation(
                     name,
-                    internal,
+                    target,
                     Collections.unmodifiableSet(annotations),
-                    Collections.unmodifiableSet(parameters),
-                    Collections.unmodifiableSet(exceptionTypes)
+                    Collections.unmodifiableList(parameters),
+                    Collections.unmodifiableList(exceptionTypes)
             );
         }
     }
@@ -127,6 +127,6 @@ public interface ConstructorDescriptor extends ExecutableDescriptor<Constructor<
             builder.annotation(AnnotationDescriptor.forAnnotation(annotation, depth - 1));
         }
 
-        return builder.internal(constructor).build();
+        return builder.target(constructor).toImmutable();
     }
 }

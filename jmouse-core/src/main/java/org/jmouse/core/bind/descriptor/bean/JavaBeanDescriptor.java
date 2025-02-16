@@ -229,10 +229,10 @@ public interface JavaBeanDescriptor<T> extends ObjectDescriptor<T> {
          * @return a new instance of {@link JavaBeanDescriptor}
          */
         @Override
-        public JavaBeanDescriptor<T> build() {
+        public JavaBeanDescriptor<T> toImmutable() {
             return new Implementation<>(
                     name,
-                    internal,
+                    target,
                     Collections.unmodifiableSet(annotations),
                     descriptor,
                     Collections.unmodifiableMap(properties)
@@ -303,7 +303,7 @@ public interface JavaBeanDescriptor<T> extends ObjectDescriptor<T> {
 
         // Iterate over all methods in the class descriptor
         for (MethodDescriptor method : typeDescriptor.getMethods()) {
-            Method rawMethod = method.getInternal();
+            Method rawMethod = method.unwrap();
 
             // Check if the method matches getter or setter patterns
             if (anyMatcher.matches(rawMethod)) {
@@ -353,15 +353,15 @@ public interface JavaBeanDescriptor<T> extends ObjectDescriptor<T> {
 
         // If a bean instance is provided, attach it to the descriptor
         if (bean != null) {
-            builder.bean(bean).internal(bean);
+            builder.bean(bean).target(bean);
         }
 
         // Build the final BeanDescriptor instance
-        JavaBeanDescriptor<T> beanDescriptor = builder.build();
+        JavaBeanDescriptor<T> beanDescriptor = builder.toImmutable();
 
         // Assign properties to the final descriptor
         for (JavaBeanPropertyDescriptor.Builder<T> property : builders.values()) {
-            builder.property(property.owner(beanDescriptor).build());
+            builder.property(property.owner(beanDescriptor).toImmutable());
         }
 
         return beanDescriptor;
@@ -378,8 +378,8 @@ public interface JavaBeanDescriptor<T> extends ObjectDescriptor<T> {
      * @param <T>  the type of the record
      * @return a {@link JavaBeanDescriptor} instance representing the record
      */
-    static <T extends Record> JavaBeanDescriptor<T> forValueObject(Class<T> type) {
-        return forValueObject(type, null);
+    static <T extends Record> JavaBeanDescriptor<T> forRecord(Class<? super T> type) {
+        return forRecord(type, null);
     }
 
     /**
@@ -394,8 +394,8 @@ public interface JavaBeanDescriptor<T> extends ObjectDescriptor<T> {
      * @param <T>  the type of the record
      * @return a {@link JavaBeanDescriptor} instance representing the record
      */
-    static <T extends Record> JavaBeanDescriptor<T> forValueObject(Class<T> type, T bean) {
-        return forValueObject(type, bean, TypeDescriptor.DEFAULT_DEPTH);
+    static <T extends Record> JavaBeanDescriptor<T> forRecord(Class<? super T> type, T bean) {
+        return forRecord(type, bean, TypeDescriptor.DEFAULT_DEPTH);
     }
 
     /**
@@ -411,7 +411,7 @@ public interface JavaBeanDescriptor<T> extends ObjectDescriptor<T> {
      * @param <T>   the type of the record
      * @return a {@link JavaBeanDescriptor} instance representing the record
      */
-    static <T extends Record> JavaBeanDescriptor<T> forValueObject(Class<T> type, T bean, int depth) {
+    static <T extends Record> JavaBeanDescriptor<T> forRecord(Class<? super T> type, T bean, int depth) {
         // Initialize the builder for the BeanDescriptor using the class short name
         JavaBeanDescriptor.Builder<T> builder = new JavaBeanDescriptor.Builder<>(getShortName(type));
 
@@ -423,11 +423,11 @@ public interface JavaBeanDescriptor<T> extends ObjectDescriptor<T> {
 
         // If an instance of the record is provided, attach it to the descriptor
         if (bean != null) {
-            builder.bean(bean).internal(bean);
+            builder.bean(bean).target(bean);
         }
 
         // Build the BeanDescriptor for the record
-        JavaBeanDescriptor<T> beanDescriptor = builder.build();
+        JavaBeanDescriptor<T> beanDescriptor = builder.toImmutable();
 
         // Iterate over all record components (fields implicitly declared in the record)
         for (RecordComponent component : type.getRecordComponents()) {
@@ -439,7 +439,7 @@ public interface JavaBeanDescriptor<T> extends ObjectDescriptor<T> {
             propertyBuilder.getter(Getter.ofMethod(component.getAccessor()));
 
             // Add the property to the bean descriptor
-            builder.property(propertyBuilder.build());
+            builder.property(propertyBuilder.toImmutable());
 
             // If the field exists in the descriptor, copy its annotations to the property
             if (descriptor.hasField(component.getName())) {

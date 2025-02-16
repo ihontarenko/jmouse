@@ -26,6 +26,10 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
     int                           DEFAULT_DEPTH = 2;
     Map<JavaType, TypeDescriptor> CACHE         = new HashMap<>();
 
+    static Mutable builder(JavaType javaType) {
+        return new Mutable(javaType);
+    }
+
     /**
      * Returns the {@link JavaType} representation of this type.
      * <p>
@@ -126,10 +130,10 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
      */
     class Implementation extends ElementDescriptor.Implementation<Class<?>> implements TypeDescriptor {
 
-        private final Collection<ConstructorDescriptor> constructors;
-        private final Map<String, FieldDescriptor>      fields;
-        private final Map<String, MethodDescriptor>     methods;
-        private final JavaType                          javaType;
+        private final List<ConstructorDescriptor>   constructors;
+        private final Map<String, FieldDescriptor>  fields;
+        private final Map<String, MethodDescriptor> methods;
+        private final JavaType                      javaType;
 
         /**
          * Constructs a new {@code ClassDescriptor.PropertyDescriptorAccessor} instance.
@@ -147,7 +151,7 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
                 Class<?> internal,
                 Set<AnnotationDescriptor> annotations,
                 JavaType type,
-                Collection<ConstructorDescriptor> constructors,
+                List<ConstructorDescriptor> constructors,
                 Map<String, FieldDescriptor> fields,
                 Map<String, MethodDescriptor> methods
         ) {
@@ -158,6 +162,11 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
             this.javaType = type;
         }
 
+        @Override
+        public TypeDescriptor introspect() {
+            return null;
+        }
+
         /**
          * Returns the class type being described.
          *
@@ -165,7 +174,7 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
          */
         @Override
         public Class<?> getClassType() {
-            return internal;
+            return target;
         }
 
         /**
@@ -276,20 +285,20 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
      * creating an immutable {@link TypeDescriptor} instance.
      * </p>
      */
-    class Builder extends ElementDescriptor.Builder<Builder, Class<?>, TypeDescriptor> {
+    class Mutable extends ElementDescriptor.Mutable<Mutable, Class<?>, TypeDescriptor> {
 
-        private final Set<ConstructorDescriptor>    constructors = new HashSet<>();
-        private final Map<String, FieldDescriptor>  fields       = new HashMap<>();
-        private final Map<String, MethodDescriptor> methods      = new HashMap<>();
-        private       JavaType                      type;
+        private final Map<String, FieldDescriptor>   fields       = new HashMap<>();
+        private final List<ConstructorDescriptor>    constructors = new ArrayList<>();
+        private final Map<String, MethodDescriptor>  methods      = new HashMap<>();
+        private       JavaType                       type;
 
         /**
          * Constructs a new {@code ClassDescriptor.Builder} with the specified class name.
          *
-         * @param name the name of the class
+         * @param classType the name of the class
          */
-        public Builder(String name) {
-            super(name);
+        public Mutable(JavaType javaType) {
+            super(javaType.getClassType());
         }
 
         /**
@@ -298,7 +307,7 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
          * @param constructor the constructor descriptor to add
          * @return this builder instance for method chaining
          */
-        public Builder constructor(ConstructorDescriptor constructor) {
+        public Mutable constructor(ConstructorDescriptor constructor) {
             constructors.add(constructor);
             return self();
         }
@@ -309,7 +318,7 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
          * @param field the field descriptor to add
          * @return this builder instance for method chaining
          */
-        public Builder field(FieldDescriptor field) {
+        public Mutable field(FieldDescriptor field) {
             fields.put(field.getName(), field);
             return self();
         }
@@ -324,7 +333,7 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
          * @param method the method descriptor to add
          * @return this builder instance for method chaining
          */
-        public Builder method(MethodDescriptor method) {
+        public Mutable method(MethodDescriptor method) {
             methods.put(method.getName(), method);
             return self();
         }
@@ -338,11 +347,10 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
          * @param type the Java type of the class
          * @return this builder instance for method chaining
          */
-        public Builder type(JavaType type) {
+        public Mutable type(JavaType type) {
             this.type = type;
             return self();
         }
-
 
         /**
          * Builds a new {@link TypeDescriptor} instance using the configured values.
@@ -350,13 +358,13 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
          * @return a new immutable instance of {@link TypeDescriptor}
          */
         @Override
-        public TypeDescriptor build() {
+        public TypeDescriptor toImmutable() {
             return new Implementation(
                     name,
-                    internal,
+                    target,
                     Collections.unmodifiableSet(annotations),
                     type,
-                    Collections.unmodifiableSet(constructors),
+                    Collections.unmodifiableList(constructors),
                     Collections.unmodifiableMap(fields),
                     Collections.unmodifiableMap(methods)
             );
@@ -387,10 +395,10 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
         TypeDescriptor descriptor = CACHE.get(type);
 
         if (descriptor == null) {
-            Class<?>               rawType = type.getRawType();
-            TypeDescriptor.Builder builder = new TypeDescriptor.Builder(getShortName(type));
+            Class<?> rawType = type.getRawType();
+            Mutable  builder = new Mutable(type.getClassType());
 
-            builder.internal(rawType).type(type);
+            builder.target(rawType).type(type);
 
             if (depth > 0) {
                 for (Annotation annotation : rawType.getAnnotations()) {
@@ -410,7 +418,7 @@ public interface TypeDescriptor extends ElementDescriptor<Class<?>>, ClassTypeIn
                 }
             }
 
-            descriptor = builder.build();
+            descriptor = builder.toImmutable();
 
             CACHE.put(type, descriptor);
         }

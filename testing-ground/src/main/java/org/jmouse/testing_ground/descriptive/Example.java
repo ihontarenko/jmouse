@@ -43,7 +43,7 @@ public class Example {
         externalUser.setUser(new InternalUser());
 
         ObjectDescriptor<ExternalUser> descriptor = JavaBeanDescriptor.forBean(ExternalUser.class, externalUser);
-        ObjectDescriptor<UserHolder> recordBean = JavaBeanDescriptor.forValueObject(UserHolder.class);
+        ObjectDescriptor<UserHolder> recordBean = JavaBeanDescriptor.forRecord(UserHolder.class);
 
         recordBean.getProperty("user").getGetter();
 

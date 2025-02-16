@@ -211,7 +211,7 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
      * @param <D> the type of {@link PropertyDescriptor} being built
      */
     abstract class Builder<B extends Builder<B, I, D>, I, D extends PropertyDescriptor<I>>
-            extends ElementDescriptor.Builder<B, I, D> {
+            extends Mutable<B, I, D> {
 
         protected Getter<I, Object>   getter;
         protected Setter<I, Object>   setter;

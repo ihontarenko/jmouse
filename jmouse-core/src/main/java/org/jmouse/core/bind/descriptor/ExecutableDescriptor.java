@@ -1,6 +1,9 @@
 package org.jmouse.core.bind.descriptor;
 
+import org.jmouse.util.Exceptions;
+
 import java.lang.reflect.Executable;
+import java.lang.reflect.Parameter;
 import java.util.*;
 
 /**
@@ -18,6 +21,8 @@ import java.util.*;
  */
 public interface ExecutableDescriptor<E extends Executable> extends ElementDescriptor<E> {
 
+    String DEFAULT_PARAMETER_NAME_PREFIX = "arg";
+
     /**
      * Returns a collection of parameter descriptors associated with this executable.
      * <p>
@@ -27,7 +32,7 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
      *
      * @return a collection of {@link ParameterDescriptor} instances representing the parameters
      */
-    Collection<ParameterDescriptor> getParameters();
+    List<ParameterDescriptor> getParameters();
 
     /**
      * Retrieves the parameter descriptor at the specified index.
@@ -49,6 +54,31 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
     }
 
     /**
+     * Retrieves the parameter descriptor by name.
+     *
+     * @param name the name of the parameter
+     * @return the {@link ParameterDescriptor} at the given index, or {@code null} if out of bounds
+     */
+    default ParameterDescriptor getParameter(String name) {
+        ParameterDescriptor descriptor = null;
+
+        for (ParameterDescriptor parameter : getParameters()) {
+            if (parameter.getName().equals(name)) {
+                descriptor = parameter;
+                break;
+            }
+        }
+
+        if (descriptor == null) {
+            Exceptions.thrownIfFalse(name.startsWith(DEFAULT_PARAMETER_NAME_PREFIX),
+                    "Use annotation @BindParam and specify name " +
+                            "or enable argument names adding -parameters argument to Java compiler");
+        }
+
+        return descriptor;
+    }
+
+    /**
      * Returns a collection of exception types that this executable can throw.
      * <p>
      * The returned collection contains descriptors of the declared exceptions.
@@ -56,7 +86,7 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
      *
      * @return a collection of {@link TypeDescriptor} instances representing exception types
      */
-    Collection<TypeDescriptor> getExceptionTypes();
+    List<TypeDescriptor> getExceptionTypes();
 
     /**
      * Retrieves the exception type descriptor at the specified index.
@@ -71,7 +101,7 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
         TypeDescriptor exceptionType = null;
 
         if (index >= 0 && index < getExceptionTypes().size()) {
-            exceptionType = List.copyOf(getExceptionTypes()).get(index);
+            exceptionType = getExceptionTypes().get(index);
         }
 
         return exceptionType;
@@ -90,8 +120,8 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
     abstract class Implementation<E extends Executable>
             extends ElementDescriptor.Implementation<E> implements ExecutableDescriptor<E> {
 
-        protected final Collection<ParameterDescriptor> parameters;
-        protected final Collection<TypeDescriptor>      exceptionTypes;
+        protected final List<ParameterDescriptor> parameters;
+        protected final List<TypeDescriptor>      exceptionTypes;
 
         /**
          * Constructs a new {@code ExecutableDescriptor.PropertyDescriptorAccessor} instance.
@@ -105,8 +135,8 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
         public Implementation(
                 String name, E internal,
                 Set<AnnotationDescriptor> annotations,
-                Collection<ParameterDescriptor> parameters,
-                Collection<TypeDescriptor> exceptionTypes
+                List<ParameterDescriptor> parameters,
+                List<TypeDescriptor> exceptionTypes
         ) {
             super(name, internal, annotations);
             this.parameters = parameters;
@@ -119,7 +149,7 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
          * @return a collection of {@link ParameterDescriptor} instances
          */
         @Override
-        public Collection<ParameterDescriptor> getParameters() {
+        public List<ParameterDescriptor> getParameters() {
             return parameters;
         }
 
@@ -129,7 +159,7 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
          * @return a collection of {@link TypeDescriptor} instances representing exception types
          */
         @Override
-        public Collection<TypeDescriptor> getExceptionTypes() {
+        public List<TypeDescriptor> getExceptionTypes() {
             return exceptionTypes;
         }
     }
@@ -141,23 +171,40 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
      * before finalizing the descriptor instance.
      * </p>
      *
-     * @param <B> the type of the builder itself, used for fluent API methods
+     * @param <M> the type of the builder itself, used for fluent API methods
      * @param <E> the type of {@link Executable} being described
      * @param <D> the type of {@link ExecutableDescriptor} being built
      */
-    abstract class Builder<B extends Builder<B, E, D>, E extends Executable, D extends ExecutableDescriptor<E>>
-            extends ElementDescriptor.Builder<B, E, D> {
+    abstract class Mutable<M extends Mutable<M, E, D>, E extends Executable, D extends ExecutableDescriptor<E>>
+            extends ElementDescriptor.Mutable<M, E, D> {
 
-        protected Set<ParameterDescriptor> parameters     = new HashSet<>();
-        protected Set<TypeDescriptor>      exceptionTypes = new HashSet<>();
+        protected List<ParameterDescriptor> parameters     = new ArrayList<>();
+        protected List<TypeDescriptor>      exceptionTypes = new ArrayList<>();
 
         /**
-         * Constructs a new {@code ExecutableDescriptor.Builder} with the specified executable name.
+         * Constructs a new {@code ElementDescriptor.Builder} with the given name.
          *
-         * @param name the name of the executable (e.g., method or constructor name)
+         * @param element the name of the element being built
          */
-        public Builder(String name) {
-            super(name);
+        public Mutable(E element) {
+            super(element);
+        }
+
+        @Override
+        public M introspect() {
+            return super.introspect()
+                    .parameters();
+        }
+
+        public M parameters() {
+            int         parametersCount = target.getParameterCount();
+            Parameter[] parameters      = target.getParameters();
+
+            for (int i = 0; i < parametersCount; i++) {
+                parameter(ParameterDescriptor.of(parameters[i]).name().type().toImmutable());
+            }
+
+            return self();
         }
 
         /**
@@ -166,7 +213,7 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
          * @param parameter a {@link ParameterDescriptor} instance
          * @return this builder instance for method chaining
          */
-        public B parameter(ParameterDescriptor parameter) {
+        public M parameter(ParameterDescriptor parameter) {
             this.parameters.add(parameter);
             return self();
         }
@@ -177,7 +224,7 @@ public interface ExecutableDescriptor<E extends Executable> extends ElementDescr
          * @param exceptionType an array of {@link TypeDescriptor} instances
          * @return this builder instance for method chaining
          */
-        public B exceptionType(TypeDescriptor exceptionType) {
+        public M exceptionType(TypeDescriptor exceptionType) {
             this.exceptionTypes.add(exceptionType);
             return self();
         }

@@ -174,10 +174,10 @@ public interface JavaBeanPropertyDescriptor<T> extends PropertyDescriptor<T> {
          * @return a new instance of {@code JavaBeanPropertyDescriptor}
          */
         @Override
-        public JavaBeanPropertyDescriptor<T> build() {
+        public JavaBeanPropertyDescriptor<T> toImmutable() {
             return new Implementation<>(
                     name,
-                    internal,
+                    target,
                     Collections.unmodifiableSet(annotations),
                     getter,
                     setter,

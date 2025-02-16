@@ -1,7 +1,9 @@
 package org.jmouse.core.bind.descriptor;
 
+import org.jmouse.core.bind.BindParam;
 import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.Reflections;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
@@ -20,6 +22,10 @@ import java.util.Set;
  * @see AnnotationDescriptor
  */
 public interface ParameterDescriptor extends ElementDescriptor<Parameter>, ClassTypeInspector {
+
+    static Mutable of(Parameter parameter) {
+        return new Mutable(parameter);
+    }
 
     /**
      * Returns the type descriptor of this parameter.
@@ -79,6 +85,13 @@ public interface ParameterDescriptor extends ElementDescriptor<Parameter>, Class
         public String toString() {
             return "[%s] %s".formatted(getName(), type.toString());
         }
+
+
+        @Override
+        public ParameterDescriptor.Mutable toMutable() {
+            return null;
+        }
+
     }
 
     /**
@@ -88,17 +101,33 @@ public interface ParameterDescriptor extends ElementDescriptor<Parameter>, Class
      * creating an immutable {@link ParameterDescriptor} instance.
      * </p>
      */
-    class Builder extends ElementDescriptor.Builder<Builder, Parameter, ParameterDescriptor> {
+    class Mutable extends ElementDescriptor.Mutable<Mutable, Parameter, ParameterDescriptor> {
 
         private TypeDescriptor type;
 
         /**
-         * Constructs a new {@code ParameterDescriptor.Builder} with the specified parameter name.
+         * Constructs a new {@code ElementDescriptor.Builder} with the given name.
          *
-         * @param name the name of the parameter
+         * @param element the name of the element being built
          */
-        public Builder(String name) {
-            super(name);
+        public Mutable(Parameter element) {
+            super(element);
+        }
+
+        @Override
+        public Mutable name() {
+            String parameterName = target.getName();
+
+            if (target.isAnnotationPresent(BindParam.class)) {
+                parameterName = Reflections.getAnnotationValue(target, BindParam.class, BindParam::value);
+            }
+
+            return name(parameterName);
+        }
+
+        @Override
+        public Mutable introspect() {
+            return super.introspect().name().annotations();
         }
 
         /**
@@ -107,9 +136,15 @@ public interface ParameterDescriptor extends ElementDescriptor<Parameter>, Class
          * @param type the {@link TypeDescriptor} representing the parameter type
          * @return this builder instance for method chaining
          */
-        Builder type(TypeDescriptor type) {
+        public Mutable type(TypeDescriptor type) {
             this.type = type;
             return self();
+        }
+
+        public Mutable type() {
+            return type(TypeDescriptor.builder()
+                    .type(JavaType.forParameter(target))
+                    .toImmutable());
         }
 
         /**
@@ -121,8 +156,13 @@ public interface ParameterDescriptor extends ElementDescriptor<Parameter>, Class
          * @return a new immutable instance of {@link ParameterDescriptor}
          */
         @Override
-        public ParameterDescriptor build() {
-            return new Implementation(name, internal, Collections.unmodifiableSet(annotations), type);
+        public ParameterDescriptor toImmutable() {
+            return new Implementation(
+                    name,
+                    target,
+                    Collections.unmodifiableSet(annotations),
+                    type
+            );
         }
     }
 
@@ -165,7 +205,6 @@ public interface ParameterDescriptor extends ElementDescriptor<Parameter>, Class
      * @return a {@link ParameterDescriptor} instance representing the parameter
      */
     static ParameterDescriptor forParameter(Parameter parameter, JavaType parameterType, int depth) {
-        ParameterDescriptor.Builder builder = new ParameterDescriptor.Builder(parameter.getName());
 
         // Determine the parameter type, either provided explicitly or derived from reflection
         if (parameterType == null) {
@@ -179,9 +218,9 @@ public interface ParameterDescriptor extends ElementDescriptor<Parameter>, Class
 
         // Set the parameter type and internal representation
         builder.type(TypeDescriptor.forType(parameterType, depth - 1));
-        builder.internal(parameter);
+        builder.target(parameter);
 
-        return builder.build();
+        return builder.toImmutable();
     }
 
 }

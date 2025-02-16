@@ -9,8 +9,8 @@ import org.jmouse.util.Setter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static org.jmouse.core.bind.descriptor.TypeDescriptor.forType;
@@ -50,7 +50,7 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
      * @return {@code true} if this method is a setter, otherwise {@code false}
      */
     default boolean isSetter() {
-        return MethodMatchers.setter().matches(getInternal());
+        return MethodMatchers.setter().matches(unwrap());
     }
 
     /**
@@ -63,7 +63,7 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
      * @return {@code true} if this method is a getter, otherwise {@code false}
      */
     default boolean isGetter() {
-        return MethodMatchers.getter().matches(getInternal());
+        return MethodMatchers.getter().matches(unwrap());
     }
 
     /**
@@ -79,7 +79,7 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
      * @throws IllegalArgumentException if the method is not a setter
      */
     default <T, V> Setter<T, V> getSetter() {
-        return Setter.ofMethod(getInternal());
+        return Setter.ofMethod(unwrap());
     }
 
     /**
@@ -95,7 +95,7 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
      * @throws IllegalArgumentException if the method is not a getter
      */
     default <T, V> Getter<T, V> getGetter() {
-        return Getter.ofMethod(getInternal());
+        return Getter.ofMethod(unwrap());
     }
 
     /**
@@ -122,8 +122,8 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
         Implementation(
                 String name, Method internal,
                 Set<AnnotationDescriptor> annotations,
-                Collection<ParameterDescriptor> parameters,
-                Collection<TypeDescriptor> exceptionTypes,
+                List<ParameterDescriptor> parameters,
+                List<TypeDescriptor> exceptionTypes,
                 TypeDescriptor returnType
         ) {
             super(name, internal, annotations, parameters, exceptionTypes);
@@ -150,7 +150,7 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
          */
         @Override
         public String toString() {
-            return "%s : %s".formatted(Reflections.getMethodName(internal), returnType);
+            return "%s : %s".formatted(Reflections.getMethodName(target), returnType);
         }
     }
 
@@ -161,7 +161,7 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
      * creating an immutable {@link MethodDescriptor} instance.
      * </p>
      */
-    class Builder extends ExecutableDescriptor.Builder<Builder, Method, MethodDescriptor> {
+    class Builder extends Mutable<Builder, Method, MethodDescriptor> {
 
         private TypeDescriptor returnType;
 
@@ -194,13 +194,13 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
          * @return a new immutable instance of {@link MethodDescriptor}
          */
         @Override
-        public MethodDescriptor build() {
+        public MethodDescriptor toImmutable() {
             return new Implementation(
                     name,
-                    internal,
+                    target,
                     Collections.unmodifiableSet(annotations),
-                    Collections.unmodifiableSet(parameters),
-                    Collections.unmodifiableSet(exceptionTypes),
+                    Collections.unmodifiableList(parameters),
+                    Collections.unmodifiableList(exceptionTypes),
                     returnType
             );
         }
@@ -243,6 +243,6 @@ public interface MethodDescriptor extends ExecutableDescriptor<Method> {
             builder.annotation(AnnotationDescriptor.forAnnotation(annotation, depth - 1));
         }
 
-        return builder.internal(method).returnType(TypeDescriptor.forType(JavaType.forMethodReturnType(method), depth - 1)).build();
+        return builder.target(method).returnType(TypeDescriptor.forType(JavaType.forMethodReturnType(method), depth - 1)).toImmutable();
     }
 }

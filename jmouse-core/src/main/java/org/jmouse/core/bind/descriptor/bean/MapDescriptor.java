@@ -39,10 +39,10 @@ public interface MapDescriptor<K, V> extends ObjectDescriptor<Map<K, V>> {
     static <K, V> MapDescriptor<K, V> forMap(final Map<K, V> map) {
         Builder<K, V> root = new Builder<>(null);
 
-        root.internal(map);
+        root.target(map);
         root.descriptor(TypeDescriptor.forClass(map.getClass()));
 
-        MapDescriptor<K, V> descriptor = root.build();
+        MapDescriptor<K, V> descriptor = root.toImmutable();
 
         for (Map.Entry<K, V> entry : map.entrySet()) {
             V value = entry.getValue();
@@ -64,7 +64,7 @@ public interface MapDescriptor<K, V> extends ObjectDescriptor<Map<K, V>> {
 
             builder.owner(descriptor);
 
-            root.property(builder.build());
+            root.property(builder.toImmutable());
         }
 
         return descriptor;
@@ -155,10 +155,10 @@ public interface MapDescriptor<K, V> extends ObjectDescriptor<Map<K, V>> {
          * @return a new instance of {@link MapDescriptor}
          */
         @Override
-        public MapDescriptor<K, V> build() {
+        public MapDescriptor<K, V> toImmutable() {
             return new Implementation<>(
                     name,
-                    internal,
+                    target,
                     Collections.unmodifiableSet(annotations),
                     descriptor,
                     Collections.unmodifiableMap(properties)

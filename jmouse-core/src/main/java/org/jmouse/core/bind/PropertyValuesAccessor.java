@@ -32,7 +32,7 @@ public interface PropertyValuesAccessor extends ClassTypeInspector {
             Map<Object, Object> map = (Map<Object, Object>) source;
             descriptor = MapDescriptor.forMap(map);
         } else if (javaType.isRecord()){
-            descriptor = JavaBeanDescriptor.forValueObject(javaType.getRawType());
+            descriptor = JavaBeanDescriptor.forRecord(javaType.getRawType());
         } else {
             descriptor = JavaBeanDescriptor.forBean(javaType.getRawType());
         }

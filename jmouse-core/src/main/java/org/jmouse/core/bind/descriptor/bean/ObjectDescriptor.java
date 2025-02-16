@@ -172,7 +172,7 @@ public interface ObjectDescriptor<T> extends ElementDescriptor<T>, ClassTypeInsp
      *
      * @param <T> the type of the bean being described
      */
-    abstract class Builder<T> extends ElementDescriptor.Builder<ObjectDescriptor.Builder<T>, T, ObjectDescriptor<T>> {
+    abstract class Builder<T> extends Mutable<Builder<T>, T, ObjectDescriptor<T>> {
 
         protected Map<String, PropertyDescriptor<T>> properties = new LinkedHashMap<>();
         protected T                                  bean;
@@ -195,7 +195,7 @@ public interface ObjectDescriptor<T> extends ElementDescriptor<T>, ClassTypeInsp
          */
         public ObjectDescriptor.Builder<T> bean(T bean) {
             this.bean = bean;
-            return internal(bean).self();
+            return target(bean).self();
         }
 
         /**

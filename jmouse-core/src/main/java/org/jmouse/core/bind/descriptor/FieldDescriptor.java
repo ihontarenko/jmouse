@@ -23,6 +23,10 @@ import java.util.Set;
  */
 public interface FieldDescriptor extends ElementDescriptor<Field>, ClassTypeInspector {
 
+    static Mutable composer(Field field) {
+        return new Mutable(field);
+    }
+
     /**
      * Returns the type descriptor of this field.
      * <p>
@@ -45,18 +49,22 @@ public interface FieldDescriptor extends ElementDescriptor<Field>, ClassTypeInsp
 
         private final TypeDescriptor type;
 
-        /**
-         * Constructs a new {@code FieldDescriptor.PropertyDescriptorAccessor} instance.
-         *
-         * @param name        the name of the field
-         * @param internal    the underlying {@link Field} instance
-         * @param annotations a set of annotation descriptors associated with this field
-         * @param type        the descriptor representing the type of this field
-         */
-        Implementation(String name, Field internal, Set<AnnotationDescriptor> annotations, TypeDescriptor type) {
-            super(name, internal, annotations);
+        public Implementation(
+                Descriptor.Mutable<?, Field, Descriptor<Field>> mutable,
+                String name,
+                Field internal,
+                Set<AnnotationDescriptor> annotations,
+                TypeDescriptor type
+        ) {
+            super(mutable, name, internal, annotations);
             this.type = type;
         }
+
+//
+//        Implementation(String name, Field internal, Set<AnnotationDescriptor> annotations, TypeDescriptor type) {
+//            super(name, internal, annotations);
+//            this.type = type;
+//        }
 
         /**
          * Returns the class type being inspected.
@@ -84,7 +92,12 @@ public interface FieldDescriptor extends ElementDescriptor<Field>, ClassTypeInsp
 
         @Override
         public String toString() {
-            return Reflections.getFieldName(internal);
+            return Reflections.getFieldName(target);
+        }
+
+        @Override
+        public Descriptor<Field> introspect() {
+            return null;
         }
     }
 
@@ -95,17 +108,17 @@ public interface FieldDescriptor extends ElementDescriptor<Field>, ClassTypeInsp
      * creating an immutable {@link FieldDescriptor} instance.
      * </p>
      */
-    class Builder extends ElementDescriptor.Builder<Builder, Field, FieldDescriptor> {
+    class Mutable extends ElementDescriptor.Mutable<Mutable, Field, FieldDescriptor> {
 
         private TypeDescriptor type;
 
         /**
-         * Constructs a new {@code FieldDescriptor.Builder} with the specified field name.
+         * Constructs a new {@code ElementDescriptor.Builder} with the given name.
          *
-         * @param name the name of the field
+         * @param element the name of the element being built
          */
-        public Builder(String name) {
-            super(name);
+        public Mutable(Field element) {
+            super(element);
         }
 
         /**
@@ -114,9 +127,13 @@ public interface FieldDescriptor extends ElementDescriptor<Field>, ClassTypeInsp
          * @param type the {@link TypeDescriptor} representing the field type
          * @return this builder instance for method chaining
          */
-        public Builder type(TypeDescriptor type) {
+        public Mutable type(TypeDescriptor type) {
             this.type = type;
             return self();
+        }
+
+        public Mutable type() {
+            return type(TypeDescriptor.builder(target.getType()).toImmutable());
         }
 
         /**
@@ -128,8 +145,13 @@ public interface FieldDescriptor extends ElementDescriptor<Field>, ClassTypeInsp
          * @return a new immutable instance of {@link FieldDescriptor}
          */
         @Override
-        public FieldDescriptor build() {
-            return new Implementation(name, internal, Collections.unmodifiableSet(annotations), type);
+        public FieldDescriptor toImmutable() {
+            return new Implementation(
+                    this,
+                    name,
+                    target,
+                    Collections.unmodifiableSet(annotations)
+            );
         }
     }
 
@@ -151,14 +173,14 @@ public interface FieldDescriptor extends ElementDescriptor<Field>, ClassTypeInsp
      * @return a {@link FieldDescriptor} instance
      */
     static FieldDescriptor forField(Field field, int depth) {
-        FieldDescriptor.Builder builder = new FieldDescriptor.Builder(field.getName());
+        Mutable builder = new Mutable(field.getName());
 
-        builder.internal(field).type(TypeDescriptor.forType(JavaType.forField(field), depth - 1));
+        builder.target(field).type(TypeDescriptor.forType(JavaType.forField(field), depth - 1));
 
         for (Annotation annotation : field.getAnnotations()) {
             builder.annotation(AnnotationDescriptor.forAnnotation(annotation, depth - 1));
         }
 
-        return builder.build();
+        return builder.toImmutable();
     }
 }
