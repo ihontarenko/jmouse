@@ -1,4 +1,4 @@
-package org.jmouse.core.bind.descriptor;
+package org.jmouse.core.bind.introspection.bean;
 
 public class JavaBeanDescriptor<T> extends ObjectDescriptor<Class<T>, JavaBeanDescriptor<T>, JavaBeanIntrospector<T>> {
 

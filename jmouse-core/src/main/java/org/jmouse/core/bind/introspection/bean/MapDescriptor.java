@@ -1,4 +1,4 @@
-package org.jmouse.core.bind.descriptor;
+package org.jmouse.core.bind.introspection.bean;
 
 import java.util.Map;
 

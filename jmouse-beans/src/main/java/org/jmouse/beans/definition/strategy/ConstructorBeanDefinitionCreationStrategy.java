@@ -7,7 +7,7 @@ import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDefinitionException;
 import org.jmouse.beans.definition.ConstructorBeanDefinition;
-import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
+import org.jmouse.core.bind.bean.bean.JavaBeanDescriptor;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Constructor;

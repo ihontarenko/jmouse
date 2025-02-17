@@ -1,4 +1,4 @@
-package org.jmouse.core.bind.descriptor;
+package org.jmouse.core.bind.introspection.bean;
 
 import org.jmouse.core.bind.PropertyAccessor;
 import org.jmouse.core.bind.introspection.AbstractDescriptor;

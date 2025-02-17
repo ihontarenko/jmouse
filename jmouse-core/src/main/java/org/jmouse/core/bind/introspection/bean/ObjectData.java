@@ -1,8 +1,7 @@
-package org.jmouse.core.bind.descriptor;
+package org.jmouse.core.bind.introspection.bean;
 
 import org.jmouse.core.bind.introspection.ClassTypeDescriptor;
 import org.jmouse.core.bind.introspection.internal.AbstractDataContainer;
-import org.jmouse.core.reflection.JavaType;
 
 public class ObjectData<T> extends AbstractDataContainer<T> {
 

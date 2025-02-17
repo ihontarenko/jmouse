@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
+import org.jmouse.core.bind.bean.bean.JavaBeanDescriptor;
 import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.util.Priority;
 import org.jmouse.util.Setter;

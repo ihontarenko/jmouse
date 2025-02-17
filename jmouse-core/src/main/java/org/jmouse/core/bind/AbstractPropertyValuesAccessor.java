@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.descriptor.bean.ObjectDescriptor;
+import org.jmouse.core.bind.bean.bean.ObjectDescriptor;
 
 /**
  * An abstract base implementation of {@link PropertyValuesAccessor}.

@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
+import org.jmouse.core.bind.bean.bean.JavaBeanDescriptor;
 import org.jmouse.util.PlaceholderReplacer;
 import org.jmouse.util.PlaceholderResolver;
 import org.jmouse.util.StandardPlaceholderReplacer;

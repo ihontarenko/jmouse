@@ -1,8 +1,8 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
-import org.jmouse.core.bind.descriptor.bean.MapDescriptor;
-import org.jmouse.core.bind.descriptor.bean.ObjectDescriptor;
+import org.jmouse.core.bind.bean.bean.JavaBeanDescriptor;
+import org.jmouse.core.bind.bean.bean.MapDescriptor;
+import org.jmouse.core.bind.bean.bean.ObjectDescriptor;
 import org.jmouse.core.env.PropertyResolver;
 import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.core.reflection.JavaType;

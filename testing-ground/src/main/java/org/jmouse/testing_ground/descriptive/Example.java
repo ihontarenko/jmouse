@@ -2,10 +2,10 @@ package org.jmouse.testing_ground.descriptive;
 
 import org.jmouse.core.bind.PropertyValuesAccessor;
 import org.jmouse.core.bind.JavaBean;
-import org.jmouse.core.bind.descriptor.TypeDescriptor;
-import org.jmouse.core.bind.descriptor.bean.JavaBeanDescriptor;
-import org.jmouse.core.bind.descriptor.bean.MapDescriptor;
-import org.jmouse.core.bind.descriptor.bean.ObjectDescriptor;
+import org.jmouse.core.bind.bean.TypeDescriptor;
+import org.jmouse.core.bind.bean.bean.JavaBeanDescriptor;
+import org.jmouse.core.bind.bean.bean.MapDescriptor;
+import org.jmouse.core.bind.bean.bean.ObjectDescriptor;
 import org.jmouse.testing_ground.beancontext.application.WideConstructorDto;
 import org.jmouse.web.server.WebServers;
 import org.jmouse.testing_ground.beancontext.application.ExternalUser;

@@ -1,4 +1,4 @@
-package org.jmouse.core.bind.descriptor;
+package org.jmouse.core.bind.introspection.bean;
 
 import org.jmouse.core.bind.introspection.ClassTypeDescriptor;
 import org.jmouse.core.bind.introspection.ClassTypeIntrospector;
@@ -27,7 +27,10 @@ public class JavaBeanIntrospector<T> extends ObjectIntrospector<JavaBeanIntrospe
 
     @Override
     public JavaBeanIntrospector<T> introspect() {
-        JavaBeanIntrospector<T> introspector = super.introspect().type();
+        return name().type().properties();
+    }
+
+    public JavaBeanIntrospector<T> properties() {
         ClassTypeDescriptor     descriptor   = container.getType();
 
         for (Map.Entry<String, MethodDescriptor> entry : descriptor.getMethods().entrySet()) {
@@ -36,11 +39,11 @@ public class JavaBeanIntrospector<T> extends ObjectIntrospector<JavaBeanIntrospe
             //
         }
 
-        return introspector;
+        return self();
     }
 
-    public JavaBeanIntrospector<T> property(MethodDescriptor md) {
-
+    public JavaBeanIntrospector<T> property(MethodDescriptor descriptor) {
+        return self();
     }
 
     @Override
