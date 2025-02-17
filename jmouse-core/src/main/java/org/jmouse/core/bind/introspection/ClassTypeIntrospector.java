@@ -13,7 +13,7 @@ public class ClassTypeIntrospector extends AnnotatedElementIntrospector<ClassTyp
         super(type);
     }
 
-    protected ClassTypeIntrospector(JavaType type) {
+    public ClassTypeIntrospector(JavaType type) {
         this(type.getRawType());
         type(type);
     }
