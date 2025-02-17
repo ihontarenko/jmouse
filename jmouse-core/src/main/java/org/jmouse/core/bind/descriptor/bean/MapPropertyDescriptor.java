@@ -139,7 +139,7 @@ public interface MapPropertyDescriptor<K, V> extends PropertyDescriptor<Map<K, V
         private TypeDescriptor valueType;
 
         /**
-         * Constructs a new {@code MapPropertyDescriptor.Builder}.
+         * Constructs a new {@code MapPropertyDescriptor.Mutable}.
          *
          * @param name the name of the map entry being built
          */

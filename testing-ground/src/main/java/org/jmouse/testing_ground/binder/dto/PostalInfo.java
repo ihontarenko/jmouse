@@ -1,4 +1,3 @@
-package org.jmouse.testing_ground.binder.dto;
+public static void main(String[] args) {
 
-public record PostalInfo(int zip, String street, String city, String state, String country) {
 }

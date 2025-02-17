@@ -137,7 +137,7 @@ public interface MapDescriptor<K, V> extends ObjectDescriptor<Map<K, V>> {
     class Builder<K, V> extends ObjectDescriptor.Builder<Map<K, V>> {
 
         /**
-         * Constructs a new {@code MapDescriptor.Builder}.
+         * Constructs a new {@code MapDescriptor.Mutable}.
          *
          * @param name the name of the descriptor being built
          */

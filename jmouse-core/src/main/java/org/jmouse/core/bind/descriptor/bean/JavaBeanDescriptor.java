@@ -211,7 +211,7 @@ public interface JavaBeanDescriptor<T> extends ObjectDescriptor<T> {
     class Builder<T> extends ObjectDescriptor.Builder<T> {
 
         /**
-         * Constructs a new {@code JavaBeanDescriptor.Builder}.
+         * Constructs a new {@code JavaBeanDescriptor.Mutable}.
          *
          * @param name the name of the JavaBean being built
          */

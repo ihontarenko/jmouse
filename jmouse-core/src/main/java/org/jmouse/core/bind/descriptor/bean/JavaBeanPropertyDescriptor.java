@@ -127,7 +127,7 @@ public interface JavaBeanPropertyDescriptor<T> extends PropertyDescriptor<T> {
         private MethodDescriptor setterMethod;
 
         /**
-         * Constructs a new {@code JavaBeanPropertyDescriptor.Builder}.
+         * Constructs a new {@code JavaBeanPropertyDescriptor.Mutable}.
          *
          * @param name the name of the property being built
          */

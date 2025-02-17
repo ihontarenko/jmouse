@@ -1,6 +1,7 @@
 package org.jmouse.core.bind.descriptor.bean;
 
 import org.jmouse.core.bind.PropertyAccessor;
+import org.jmouse.core.bind.PropertyDescriptorAccessor;
 import org.jmouse.core.bind.descriptor.AnnotationDescriptor;
 import org.jmouse.core.bind.descriptor.TypeDescriptor;
 import org.jmouse.core.reflection.ClassTypeInspector;
@@ -218,7 +219,7 @@ public interface PropertyDescriptor<T> extends ElementDescriptor<T>, ClassTypeIn
         protected ObjectDescriptor<I> owner;
 
         /**
-         * Constructs a new {@code PropertyDescriptor.Builder}.
+         * Constructs a new {@code PropertyDescriptor.Mutable}.
          *
          * @param name the name of the property being built
          */

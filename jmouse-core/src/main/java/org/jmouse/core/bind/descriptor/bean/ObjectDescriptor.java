@@ -179,7 +179,7 @@ public interface ObjectDescriptor<T> extends ElementDescriptor<T>, ClassTypeInsp
         protected TypeDescriptor                     descriptor;
 
         /**
-         * Constructs a new {@code ObjectDescriptor.Builder}.
+         * Constructs a new {@code ObjectDescriptor.Mutable}.
          *
          * @param name the name of the bean being built
          */

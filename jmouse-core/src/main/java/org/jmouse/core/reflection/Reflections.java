@@ -634,6 +634,16 @@ abstract public class Reflections {
     }
 
     /**
+     * Returns a string representing the method's parameter name.
+     *
+     * @param parameter the parameter to retrieve the name for
+     * @return a string in the format {@code ClassName#methodName@arg0}
+     */
+    public static String getParameterName(Parameter parameter) {
+        return "%s@%s".formatted(getMethodName(parameter.getDeclaringExecutable()), parameter.getName());
+    }
+
+    /**
      * Returns the short name of the class for the given bean.
      * If the bean is itself a {@link Class}, it delegates to the {@link #getShortName(Class)} method.
      *
