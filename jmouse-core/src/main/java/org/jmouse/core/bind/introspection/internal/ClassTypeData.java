@@ -50,7 +50,7 @@ public class ClassTypeData extends AnnotatedElementData<Class<?>> {
     }
 
     public void addMethod(MethodDescriptor method) {
-        methods.put(method.getName(), method);
+        methods.put(method.unwrap().getName(), method);
     }
 
     public void clearConstructors() {

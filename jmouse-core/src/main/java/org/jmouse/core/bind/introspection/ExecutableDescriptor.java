@@ -14,7 +14,14 @@ abstract public class ExecutableDescriptor<E extends Executable, C extends Execu
     }
 
     public Collection<ParameterDescriptor> getParameters() {
-        return Collections.unmodifiableCollection(container.getParameters());
+        Collection<ParameterDescriptor> parameters = container.getParameters();
+
+        if (parameters.isEmpty()) {
+            toIntrospector().parameters();
+            parameters = container.getParameters();
+        }
+
+        return Collections.unmodifiableCollection(parameters);
     }
 
     public ParameterDescriptor getParameter(String name) {

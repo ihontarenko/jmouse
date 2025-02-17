@@ -4,6 +4,7 @@ import org.jmouse.core.bind.introspection.internal.ClassTypeData;
 import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.core.reflection.JavaType;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -35,12 +36,20 @@ public class ClassTypeDescriptor extends AnnotatedElementDescriptor<Class<?>, Cl
         return Collections.unmodifiableMap(container.getMethods());
     }
 
+    public MethodDescriptor getMethod(String name) {
+        return getMethods().get(name);
+    }
+
     public boolean hasMethod(String methodName) {
         return getMethods().containsKey(methodName);
     }
 
     public Map<String, FieldDescriptor> getFields() {
         return Collections.unmodifiableMap(container.getFields());
+    }
+
+    public FieldDescriptor getField(String name) {
+        return getFields().get(name);
     }
 
     public boolean hasField(String name) {
@@ -52,5 +61,9 @@ public class ClassTypeDescriptor extends AnnotatedElementDescriptor<Class<?>, Cl
         return introspector;
     }
 
+    @Override
+    public String toString() {
+        return "Class-Type: " + getName();
+    }
 
 }

@@ -18,7 +18,7 @@ public class AnnotationIntrospector extends AbstractIntrospector<AnnotationData,
 
     @Override
     public AnnotationIntrospector introspect() {
-        return name().annotationType();
+        return name().attributes().annotationType();
     }
 
     public AnnotationIntrospector annotationType() {

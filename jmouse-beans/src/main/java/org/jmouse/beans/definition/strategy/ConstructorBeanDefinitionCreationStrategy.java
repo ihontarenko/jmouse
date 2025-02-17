@@ -7,7 +7,7 @@ import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDefinitionException;
 import org.jmouse.beans.definition.ConstructorBeanDefinition;
-import org.jmouse.core.bind.bean.bean.JavaBeanDescriptor;
+import org.jmouse.core.bind.introspection.bean.JavaBeanDescriptor;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Constructor;
@@ -40,12 +40,12 @@ public class ConstructorBeanDefinitionCreationStrategy extends AbstractBeanDefin
     @Override
     public BeanDefinition create(String name, Class<?> klass, BeanContext context) {
         ConstructorBeanDefinition definition = new ConstructorBeanDefinition(name, klass);
-        JavaBeanDescriptor<?>     descriptor = JavaBeanDescriptor.forBean(klass);
+//        JavaBeanDescriptor<?>     descriptor = JavaBeanDescriptor.forBean(klass);
 
         Constructor<?> constructor;
         Class<?>[]     parameterTypes = new Class[0];
 
-        if (descriptor.isRecord()) {
+        if (klass.isRecord()) {
             RecordComponent[] components  = klass.getRecordComponents();
             Class<?>[]        recordTypes = new Class<?>[components.length];
             int               index       = 0;

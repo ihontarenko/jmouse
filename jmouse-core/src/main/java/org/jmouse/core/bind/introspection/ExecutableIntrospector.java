@@ -14,7 +14,7 @@ abstract public class ExecutableIntrospector<C extends ExecutableData<E>, I exte
 
     @Override
     public I name() {
-        return name(Reflections.getMethodName(container.getTarget()));
+        return name(container.getTarget().getName());
     }
 
     public I parameter(ParameterDescriptor descriptor) {

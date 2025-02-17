@@ -20,11 +20,12 @@ abstract public class AbstractIntrospector<C extends DataContainer<T>, I extends
         return self();
     }
 
-    protected D getDescriptor(Supplier<D> factory) {
+    protected D getCachedDescriptor(Supplier<D> factory) {
         D descriptor = this.descriptor;
 
         if (descriptor == null) {
             descriptor = factory.get();
+            this.descriptor = descriptor;
         }
 
         return descriptor;

@@ -17,7 +17,7 @@ public class ConstructorIntrospector extends ExecutableIntrospector<ConstructorD
 
     @Override
     public ConstructorDescriptor toDescriptor() {
-        return getDescriptor(() -> new ConstructorDescriptor(this, container));
+        return getCachedDescriptor(() -> new ConstructorDescriptor(this, container));
     }
 
     @Override

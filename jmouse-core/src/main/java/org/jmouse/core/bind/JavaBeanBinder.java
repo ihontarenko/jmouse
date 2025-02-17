@@ -1,7 +1,5 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.bean.bean.JavaBeanDescriptor;
-import org.jmouse.core.bind.bean.bean.ObjectDescriptor;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.util.Factory;
 import org.jmouse.util.Priority;
@@ -54,8 +52,6 @@ public class JavaBeanBinder extends AbstractBinder {
     public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback) {
         JavaType    type = bindable.getType();
         JavaBean<T> bean = JavaBean.of(type);
-
-        ObjectDescriptor<T> descriptor = JavaBeanDescriptor.forBean(type.getRawType());
 
         // Obtain a factory that can create new instances of the class
         Factory<T> factory = bean.getFactory(bindable);

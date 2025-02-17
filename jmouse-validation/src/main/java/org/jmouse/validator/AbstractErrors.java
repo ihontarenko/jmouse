@@ -1,6 +1,7 @@
 package org.jmouse.validator;
 
-import org.jmouse.core.bind.bean.bean.JavaBeanDescriptor;
+import org.jmouse.core.bind.introspection.bean.JavaBeanDescriptor;
+import org.jmouse.core.bind.introspection.bean.JavaBeanIntrospector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +42,8 @@ abstract public class AbstractErrors implements Errors {
     @SuppressWarnings("unchecked")
     public AbstractErrors(Object target) {
         this.target = target;
-        this.descriptor = (JavaBeanDescriptor<Object>) JavaBeanDescriptor.forBean(target.getClass());
-        this.objectName = descriptor.getBeanClass().getName();
+        this.descriptor = (JavaBeanDescriptor<Object>) new JavaBeanIntrospector<>(target.getClass()).introspect().toDescriptor();
+        this.objectName = descriptor.getName();
     }
 
     /**
@@ -75,14 +76,14 @@ abstract public class AbstractErrors implements Errors {
      */
     @Override
     public void rejectValue(String field, String errorCode, String defaultMessage, Object... arguments) {
-        Object fieldValue;
+        Object fieldValue = null;
 
-        if (descriptor.hasProperty(field)) {
+/*        if (descriptor.hasProperty(field)) {
             fieldValue = getFieldValue(field);
         } else {
             throw new IllegalArgumentException(
                     "Validated object '%s' does not contain field: '%s'".formatted(objectName, field));
-        }
+        }*/
 
         String[] errorCodes = getErrorCodes(errorCode);
         fieldErrors.add(new FieldError(objectName, field, fieldValue, errorCodes, defaultMessage, arguments));
@@ -102,9 +103,9 @@ abstract public class AbstractErrors implements Errors {
     public Object getFieldValue(String field) {
         Object value = null;
 
-        if (descriptor.hasProperty(field)) {
-            value = descriptor.getPropertyAccessor(field).obtainValue(target);
-        }
+//        if (descriptor.hasProperty(field)) {
+//            value = descriptor.getPropertyAccessor(field).obtainValue(target);
+//        }
 
         return value;
     }
@@ -123,9 +124,9 @@ abstract public class AbstractErrors implements Errors {
     public Class<?> getFieldType(String field) {
         Class<?> type = null;
 
-        if (descriptor.hasProperty(field)) {
-            type = descriptor.getProperty(field).getClassType();
-        }
+//        if (descriptor.hasProperty(field)) {
+//            type = descriptor.getProperty(field).getClassType();
+//        }
 
         return type;
     }

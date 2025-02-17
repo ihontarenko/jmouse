@@ -1,8 +1,5 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.bean.bean.JavaBeanDescriptor;
-import org.jmouse.core.bind.bean.bean.MapDescriptor;
-import org.jmouse.core.bind.bean.bean.ObjectDescriptor;
 import org.jmouse.core.env.PropertyResolver;
 import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.core.reflection.JavaType;
@@ -22,23 +19,6 @@ import static org.jmouse.core.reflection.JavaType.forInstance;
  * </p>
  */
 public interface PropertyValuesAccessor extends ClassTypeInspector {
-
-    @SuppressWarnings("unchecked")
-    static <T> ObjectDescriptor<T> descriptor(Object source) {
-        JavaType            javaType = forInstance(requireNonNullElseGet(source, Object::new));
-        ObjectDescriptor<?> descriptor;
-
-        if (javaType.isMap()) {
-            Map<Object, Object> map = (Map<Object, Object>) source;
-            descriptor = MapDescriptor.forMap(map);
-        } else if (javaType.isRecord()){
-            descriptor = JavaBeanDescriptor.forRecord(javaType.getRawType());
-        } else {
-            descriptor = JavaBeanDescriptor.forBean(javaType.getRawType());
-        }
-
-        return (ObjectDescriptor<T>) descriptor;
-    }
 
     /**
      * Creates a {@link PropertyValuesAccessor} instance from the given source object.

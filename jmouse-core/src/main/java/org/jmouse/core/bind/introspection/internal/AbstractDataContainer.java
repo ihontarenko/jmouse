@@ -29,4 +29,8 @@ public class AbstractDataContainer<T> implements DataContainer<T> {
         this.target = target;
     }
 
+    @Override
+    public String toString() {
+        return "DataContainer: '%s'[%s]".formatted(name, target);
+    }
 }

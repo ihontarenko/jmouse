@@ -15,7 +15,7 @@ public class MapIntrospector<K, V> extends ObjectIntrospector<MapIntrospector<?,
 
     @Override
     public MapDescriptor<K, V> toDescriptor() {
-        return getDescriptor(() -> new MapDescriptor<>(this, container));
+        return getCachedDescriptor(() -> new MapDescriptor<>(this, container));
     }
 
 }

@@ -10,11 +10,11 @@ import java.lang.reflect.Method;
 public class ClassTypeIntrospector extends AnnotatedElementIntrospector<ClassTypeData, ClassTypeIntrospector, Class<?>, ClassTypeDescriptor> {
 
     protected ClassTypeIntrospector(Class<?> type) {
-        super(type);
+        this(JavaType.forClass(type));
     }
 
     public ClassTypeIntrospector(JavaType type) {
-        this(type.getRawType());
+        super(type.getRawType());
         type(type);
     }
 
@@ -70,7 +70,7 @@ public class ClassTypeIntrospector extends AnnotatedElementIntrospector<ClassTyp
     public ClassTypeIntrospector methods() {
         ClassTypeDescriptor parent = toDescriptor();
 
-        for (Method method : container.getTarget().getMethods()) {
+        for (Method method : container.getTarget().getDeclaredMethods()) {
             method(new MethodIntrospector(method).introspect().toDescriptor());
         }
 
@@ -84,7 +84,7 @@ public class ClassTypeIntrospector extends AnnotatedElementIntrospector<ClassTyp
 
     @Override
     public ClassTypeDescriptor toDescriptor() {
-        return new ClassTypeDescriptor(this, container);
+        return getCachedDescriptor(() -> new ClassTypeDescriptor(this, container));
     }
 
     @Override

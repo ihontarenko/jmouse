@@ -1,6 +1,5 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.bean.bean.JavaBeanDescriptor;
 import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.util.Priority;
 import org.jmouse.util.Setter;
@@ -82,8 +81,6 @@ public class ValueObjectBinder extends AbstractBinder {
         ValueObject<?>     vo      = ValueObject.of((Class<? extends Record>) rawType);
         ValueObject.Values values  = vo.getRecordValues();
         Supplier<?>        factory = vo.getInstance(values);
-
-        JavaBeanDescriptor.forRecord(rawType);
 
         // Iterate over record properties and bind values from the data source
         for (Bean.Property<?> property : vo.getProperties()) {

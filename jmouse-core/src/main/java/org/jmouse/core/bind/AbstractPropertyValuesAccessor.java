@@ -1,7 +1,5 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.bean.bean.ObjectDescriptor;
-
 /**
  * An abstract base implementation of {@link PropertyValuesAccessor}.
  * <p>
@@ -19,18 +17,12 @@ public abstract class AbstractPropertyValuesAccessor implements PropertyValuesAc
     protected final Object                   source;
 
     /**
-     * The descriptor of underlying data type.
-     */
-    protected final ObjectDescriptor<Object> descriptor;
-
-    /**
      * Constructs an {@link AbstractPropertyValuesAccessor} with the given source object.
      *
      * @param source the source object to wrap
      */
     public AbstractPropertyValuesAccessor(Object source) {
         this.source = source;
-        this.descriptor = PropertyValuesAccessor.descriptor(source);
     }
 
     /**

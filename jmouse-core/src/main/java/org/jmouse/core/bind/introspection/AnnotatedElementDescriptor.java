@@ -21,7 +21,10 @@ abstract public class AnnotatedElementDescriptor<E extends AnnotatedElement, C e
         AnnotationDescriptor descriptor = null;
 
         for (AnnotationDescriptor annotation : getAnnotations()) {
-//            if (annotation.getType().)
+            if (annotation.getType().is(annotationType)) {
+                descriptor = annotation;
+                break;
+            }
         }
 
         return descriptor;
