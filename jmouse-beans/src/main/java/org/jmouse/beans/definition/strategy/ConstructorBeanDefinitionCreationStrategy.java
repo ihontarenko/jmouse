@@ -7,7 +7,6 @@ import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDefinitionException;
 import org.jmouse.beans.definition.ConstructorBeanDefinition;
-import org.jmouse.core.bind.introspection.bean.JavaBeanDescriptor;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Constructor;
@@ -19,11 +18,11 @@ import java.util.Set;
  * <p>
  * This strategy:
  * <ul>
- *   <li>Resolves the bean name from the class using the {@link BeanNameResolver}.</li>
+ *   <li>Resolves the structured name from the class using the {@link BeanNameResolver}.</li>
  *   <li>Searches for a constructor annotated with {@link BeanConstructor} if present; otherwise,
  *       it falls back to the first available constructor.</li>
  *   <li>Creates dependencies from the constructor parameters.</li>
- *   <li>Updates the bean lifecycle based on annotations like {@link Provide}.</li>
+ *   <li>Updates the structured lifecycle based on annotations like {@link Provide}.</li>
  * </ul>
  *
  * <p>Example usage:
@@ -82,17 +81,17 @@ public class ConstructorBeanDefinitionCreationStrategy extends AbstractBeanDefin
             createDependencies(definition.getBeanDependencies(), constructor.getParameters());
         }
 
-        // Update the bean lifecycle (e.g., SINGLETON, PROTOTYPE) based on annotations
+        // Update the structured lifecycle (e.g., SINGLETON, PROTOTYPE) based on annotations
         updateBeanDefinition(definition, klass);
 
         return definition;
     }
 
     /**
-     * Determines if this strategy supports the provided bean.
+     * Determines if this strategy supports the provided structured.
      *
-     * @param object the bean to check.
-     * @return {@code true} if the strategy supports the bean, {@code false} otherwise.
+     * @param object the structured to check.
+     * @return {@code true} if the strategy supports the structured, {@code false} otherwise.
      */
     @Override
     public boolean supports(Object object) {

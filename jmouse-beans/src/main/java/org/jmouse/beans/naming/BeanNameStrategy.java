@@ -4,11 +4,11 @@ package org.jmouse.beans.naming;
 import java.lang.reflect.AnnotatedElement;
 
 /**
- * Strategy interface for resolving bean names based on annotated elements.
+ * Strategy interface for resolving structured names based on annotated elements.
  * <p>
  * Implementations of this interface provide mechanisms to determine
  * whether a given annotated element is supported and to resolve its
- * corresponding bean name.
+ * corresponding structured name.
  * </p>
  */
 public interface BeanNameStrategy {
@@ -22,13 +22,13 @@ public interface BeanNameStrategy {
     boolean supports(AnnotatedElement element);
 
     /**
-     * Resolves the bean name for the given annotated element.
+     * Resolves the structured name for the given annotated element.
      * <p>
      * This method is called for elements that are supported by this strategy.
      * </p>
      *
      * @param element the annotated element to resolve.
-     * @return the resolved bean name.
+     * @return the resolved structured name.
      * @throws IllegalArgumentException if the element is not supported or cannot be resolved.
      */
     String resolve(AnnotatedElement element);

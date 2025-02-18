@@ -9,7 +9,7 @@ import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
 /**
  * A utility class for sorting objects according to a priority scheme. The priority
  * may be obtained from an annotation (i.e., {@code @Priority}) on a class or from
- * the {@link Ordered} interface if the bean implements it. If no priority information
+ * the {@link Ordered} interface if the structured implements it. If no priority information
  * is available, objects are sorted to the end (i.e., {@code Integer.MAX_VALUE}),
  * and ties are further resolved by comparing hash codes.
  *
@@ -39,8 +39,8 @@ public final class Sorter {
      * A comparator that compares objects based on their priority. Priority is obtained
      * by one of the following means (in order):
      * <ol>
-     *   <li>Checking if the bean is a {@link Class} annotated with {@code @Priority}.</li>
-     *   <li>Checking if the bean implements {@link Ordered}.</li>
+     *   <li>Checking if the structured is a {@link Class} annotated with {@code @Priority}.</li>
+     *   <li>Checking if the structured implements {@link Ordered}.</li>
      *   <li>Otherwise, assigning {@code Integer.MAX_VALUE} as the priority.</li>
      * </ol>
      *
@@ -54,9 +54,9 @@ public final class Sorter {
         }
 
         /**
-         * Extracts the priority of the given bean.
+         * Extracts the priority of the given structured.
          *
-         * @param object the bean whose priority will be extracted
+         * @param object the structured whose priority will be extracted
          * @return the priority value, or {@code Integer.MAX_VALUE} if
          *         no priority could be determined
          */

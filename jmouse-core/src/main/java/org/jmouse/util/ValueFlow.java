@@ -76,7 +76,7 @@ public class ValueFlow {
     }
 
     /**
-     * Creates a new {@link ValueFlow.Value} instance from a given bean.
+     * Creates a new {@link ValueFlow.Value} instance from a given structured.
      * This is a convenient method that wraps the provided instance into a supplier.
      *
      * @param instance the instance to wrap

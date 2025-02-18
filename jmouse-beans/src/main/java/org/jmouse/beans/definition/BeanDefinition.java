@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Describes a bean's descriptor and lifecycle within the container,
+ * Describes a structured's descriptor and lifecycle within the container,
  * including its name, class, creation strategy, dependencies, and annotations.
  * <p>
  * A {@code BeanDefinition} can also have parent-child relationships,
@@ -19,9 +19,9 @@ import java.util.List;
 public interface BeanDefinition {
 
     /**
-     * Determines if this definition represents a singleton or non-bean lifecycle.
+     * Determines if this definition represents a singleton or non-structured lifecycle.
      *
-     * @return {@code true} if the bean is {@link BeanScope#SINGLETON} or {@link BeanScope#NON_BEAN},
+     * @return {@code true} if the structured is {@link BeanScope#SINGLETON} or {@link BeanScope#NON_BEAN},
      *         otherwise {@code false}.
      */
     default boolean isSingleton() {
@@ -31,7 +31,7 @@ public interface BeanDefinition {
     /**
      * Determines if this definition represents a prototype lifecycle.
      *
-     * @return {@code true} if the bean is not a singleton (prototype or other scopes),
+     * @return {@code true} if the structured is not a singleton (prototype or other scopes),
      *         otherwise {@code false}.
      */
     default boolean isPrototype() {
@@ -39,55 +39,55 @@ public interface BeanDefinition {
     }
 
     /**
-     * Indicates whether the bean represented by this definition is proxied.
+     * Indicates whether the structured represented by this definition is proxied.
      * <p>
-     * A proxied bean typically wraps the actual bean instance with additional functionality,
+     * A proxied structured typically wraps the actual structured instance with additional functionality,
      * such as method interception or lazy initialization.
      *
-     * @return {@code true} if the bean is proxied, otherwise {@code false}.
+     * @return {@code true} if the structured is proxied, otherwise {@code false}.
      */
     default boolean isProxied() {
         return false;
     }
 
     /**
-     * Sets whether the bean represented by this definition is proxied.
+     * Sets whether the structured represented by this definition is proxied.
      *
-     * @param proxied {@code true} if the bean should be proxied, {@code false} otherwise.
+     * @param proxied {@code true} if the structured should be proxied, {@code false} otherwise.
      */
     void setProxied(boolean proxied);
 
     /**
-     * Retrieves the name of the bean.
+     * Retrieves the name of the structured.
      *
-     * @return the bean name.
+     * @return the structured name.
      */
     String getBeanName();
 
     /**
-     * Sets the name of the bean.
+     * Sets the name of the structured.
      *
-     * @param name the new bean name.
+     * @param name the new structured name.
      */
     void setBeanName(String name);
 
     /**
-     * Retrieves the class type of the bean.
+     * Retrieves the class type of the structured.
      *
-     * @return the bean class.
+     * @return the structured class.
      */
     Class<?> getBeanClass();
 
     /**
-     * Sets the class type of the bean.
+     * Sets the class type of the structured.
      *
-     * @param type the new bean class.
+     * @param type the new structured class.
      */
     void setBeanClass(Class<?> type);
 
     /**
-     * Returns a list of parameterized types associated with this bean definition.
-     * Useful when the bean class is a generic type, and its parameters need to be
+     * Returns a list of parameterized types associated with this structured definition.
+     * Useful when the structured class is a generic type, and its parameters need to be
      * tracked for reflection or dependency injection purposes.
      *
      * @return a list of parameterized types
@@ -95,124 +95,124 @@ public interface BeanDefinition {
     List<Class<?>> getParametrizedTypes();
 
     /**
-     * Sets the list of parameterized types for this bean definition. This is
+     * Sets the list of parameterized types for this structured definition. This is
      * particularly helpful when dealing with generic types, allowing you to
-     * specify or update the actual type parameters used by the bean.
+     * specify or update the actual type parameters used by the structured.
      *
      * @param types a list of parameterized types
      */
     void setParametrizedTypes(List<Class<?>> types);
 
     /**
-     * Retrieves the parent definition of this bean, if any.
+     * Retrieves the parent definition of this structured, if any.
      *
      * @return the parent {@link BeanDefinition}, or {@code null} if none.
      */
     BeanDefinition getParentDefinition();
 
     /**
-     * Sets the parent definition of this bean.
+     * Sets the parent definition of this structured.
      *
      * @param parent the parent {@link BeanDefinition}.
      */
     void setParentDefinition(BeanDefinition parent);
 
     /**
-     * Retrieves the list of children definitions associated with this bean.
+     * Retrieves the list of children definitions associated with this structured.
      *
      * @return a list of child {@link BeanDefinition} instances.
      */
     List<BeanDefinition> getChildrenDefinitions();
 
     /**
-     * Adds a child definition to this bean.
+     * Adds a child definition to this structured.
      *
      * @param child the child {@link BeanDefinition} to add.
      */
     void addChildDefinition(BeanDefinition child);
 
     /**
-     * Retrieves the lifecycle scope of this bean.
+     * Retrieves the lifecycle scope of this structured.
      *
-     * @return the {@link Scope} of the bean.
+     * @return the {@link Scope} of the structured.
      */
     Scope getScope();
 
     /**
-     * Sets the scope of this bean.
+     * Sets the scope of this structured.
      *
      * @param scope the new {@link BeanScope}.
      */
     void setScope(Scope scope);
 
     /**
-     * Retrieves all dependencies declared by this bean.
+     * Retrieves all dependencies declared by this structured.
      *
      * @return a list of {@link BeanDependency} objects.
      */
     List<BeanDependency> getBeanDependencies();
 
     /**
-     * Retrieves the creation type for this bean, indicating how it should be instantiated.
+     * Retrieves the creation type for this structured, indicating how it should be instantiated.
      *
      * @return a {@link BeanInstantiationType} value.
      */
     BeanInstantiationType getInstantiationType();
 
     /**
-     * Retrieves the actual bean instance if one has been created.
+     * Retrieves the actual structured instance if one has been created.
      *
-     * @param <T> the type of the bean.
-     * @return the bean instance, or {@code null} if not created yet.
+     * @param <T> the type of the structured.
+     * @return the structured instance, or {@code null} if not created yet.
      */
     <T> T getBeanInstance();
 
     /**
-     * Sets the actual bean instance.
+     * Sets the actual structured instance.
      *
-     * @param instance the new bean instance.
+     * @param instance the new structured instance.
      */
     void setBeanInstance(Object instance);
 
     /**
-     * Retrieves the strategy used to instantiate this bean.
+     * Retrieves the strategy used to instantiate this structured.
      *
      * @return the {@link BeanInstantiationStrategy}.
      */
     BeanInstantiationStrategy getBeanCreationStrategy();
 
     /**
-     * Sets the strategy used to instantiate this bean.
+     * Sets the strategy used to instantiate this structured.
      *
      * @param strategy the {@link BeanInstantiationStrategy} to set.
      */
     void setBeanCreationStrategy(BeanInstantiationStrategy strategy);
 
     /**
-     * Retrieves the annotations present on this bean definition.
+     * Retrieves the annotations present on this structured definition.
      *
      * @return a collection of annotations.
      */
     Collection<Annotation> getAnnotations();
 
     /**
-     * Retrieves a specific annotation of the given type from this bean definition.
+     * Retrieves a specific annotation of the given type from this structured definition.
      *
      * @param <A> the type of the annotation to retrieve
-     * @param annotationType the class bean of the annotation type
+     * @param annotationType the class structured of the annotation type
      * @return the annotation instance if present, otherwise {@code null}
      */
     <A extends Annotation> A getAnnotation(Class<A> annotationType);
 
     /**
-     * Sets the annotations present on this bean definition.
+     * Sets the annotations present on this structured definition.
      *
      * @param annotations a collection of annotations to set.
      */
     void setAnnotations(Collection<Annotation> annotations);
 
     /**
-     * Checks if this bean definition is annotated with the specified class.
+     * Checks if this structured definition is annotated with the specified class.
      *
      * @param annotatedClass the annotation type to check.
      * @return {@code true} if annotated, otherwise {@code false}.

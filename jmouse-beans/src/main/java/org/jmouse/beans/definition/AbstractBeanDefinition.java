@@ -10,9 +10,9 @@ import java.util.*;
 
 /**
  * An abstract base class for {@link BeanDefinition} implementations.
- * Manages common bean descriptor such as dependencies, lifecycle, annotations, and more.
+ * Manages common structured descriptor such as dependencies, lifecycle, annotations, and more.
  * <p>
- * This class serves as a foundation for concrete bean definitions in a container,
+ * This class serves as a foundation for concrete structured definitions in a container,
  * providing storage and access for core properties:
  * <ul>
  *     <li>Bean name</li>
@@ -41,62 +41,62 @@ import java.util.*;
 public abstract class AbstractBeanDefinition implements BeanDefinition {
 
     /**
-     * A list of dependencies that this bean requires.
+     * A list of dependencies that this structured requires.
      */
     protected final List<BeanDependency> dependencies;
 
     /**
-     * A map of annotations (by their types) present on this bean definition.
+     * A map of annotations (by their types) present on this structured definition.
      */
     protected final Map<Class<? extends Annotation>, Annotation> annotations;
 
     /**
-     * The unique name of the bean.
+     * The unique name of the structured.
      */
     protected String name;
 
     /**
-     * The type (class) of the bean.
+     * The type (class) of the structured.
      */
     protected Class<?> type;
 
     protected List<Class<?>> parametrizedTypes;
 
     /**
-     * Indicates whether the bean is proxied.
+     * Indicates whether the structured is proxied.
      */
     protected boolean proxied = false;
 
     /**
-     * The parent bean definition, if any.
+     * The parent structured definition, if any.
      */
     protected BeanDefinition parent;
 
     /**
-     * Child bean definitions that extend or complement this bean's definition.
+     * Child structured definitions that extend or complement this structured's definition.
      */
     protected List<BeanDefinition> children;
 
     /**
-     * The lifecycle scope for this bean (e.g., SINGLETON, PROTOTYPE).
+     * The lifecycle scope for this structured (e.g., SINGLETON, PROTOTYPE).
      */
     protected Scope scope;
 
     /**
-     * The actual bean instance, if created.
+     * The actual structured instance, if created.
      */
     protected Object instance;
 
     /**
-     * The strategy for instantiating the bean.
+     * The strategy for instantiating the structured.
      */
     protected BeanInstantiationStrategy strategy;
 
     /**
      * Constructs a new {@code AbstractBeanDefinition} with the specified name and type.
      *
-     * @param name the unique name of the bean
-     * @param type the bean's class
+     * @param name the unique name of the structured
+     * @param type the structured's class
      */
     public AbstractBeanDefinition(String name, Class<?> type) {
         this.name = name;
@@ -107,9 +107,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Retrieves the name of this bean.
+     * Retrieves the name of this structured.
      *
-     * @return the name of the bean
+     * @return the name of the structured
      */
     @Override
     public String getBeanName() {
@@ -117,9 +117,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Sets the name of this bean.
+     * Sets the name of this structured.
      *
-     * @param name the new bean name
+     * @param name the new structured name
      */
     @Override
     public void setBeanName(String name) {
@@ -127,9 +127,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Retrieves the class of this bean.
+     * Retrieves the class of this structured.
      *
-     * @return the bean's class
+     * @return the structured's class
      */
     @Override
     public Class<?> getBeanClass() {
@@ -137,9 +137,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Sets the class of this bean.
+     * Sets the class of this structured.
      *
-     * @param type the new class of the bean
+     * @param type the new class of the structured
      */
     @Override
     public void setBeanClass(Class<?> type) {
@@ -147,8 +147,8 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Returns a list of parameterized types associated with this bean definition.
-     * Useful when the bean class is a generic type, and its parameters need to be
+     * Returns a list of parameterized types associated with this structured definition.
+     * Useful when the structured class is a generic type, and its parameters need to be
      * tracked for reflection or dependency injection purposes.
      *
      * @return a list of parameterized types
@@ -159,9 +159,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Sets the list of parameterized types for this bean definition. This is
+     * Sets the list of parameterized types for this structured definition. This is
      * particularly helpful when dealing with generic types, allowing you to
-     * specify or update the actual type parameters used by the bean.
+     * specify or update the actual type parameters used by the structured.
      *
      * @param types a list of parameterized types
      */
@@ -171,9 +171,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Indicates whether the bean represented by this definition is proxied.
+     * Indicates whether the structured represented by this definition is proxied.
      *
-     * @return {@code true} if the bean is proxied, otherwise {@code false}.
+     * @return {@code true} if the structured is proxied, otherwise {@code false}.
      */
     @Override
     public boolean isProxied() {
@@ -181,9 +181,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Sets whether the bean represented by this definition is proxied.
+     * Sets whether the structured represented by this definition is proxied.
      *
-     * @param proxied {@code true} if the bean should be proxied, {@code false} otherwise.
+     * @param proxied {@code true} if the structured should be proxied, {@code false} otherwise.
      */
     @Override
     public void setProxied(boolean proxied) {
@@ -191,7 +191,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Retrieves the creation type for this bean, indicating how it should be instantiated.
+     * Retrieves the creation type for this structured, indicating how it should be instantiated.
      *
      * @return a {@link BeanInstantiationType} value.
      */
@@ -201,9 +201,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Retrieves the parent definition of this bean, if any.
+     * Retrieves the parent definition of this structured, if any.
      *
-     * @return the parent bean definition, or {@code null} if none
+     * @return the parent structured definition, or {@code null} if none
      */
     @Override
     public BeanDefinition getParentDefinition() {
@@ -211,9 +211,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Sets the parent definition for this bean.
+     * Sets the parent definition for this structured.
      *
-     * @param parent the new parent bean definition
+     * @param parent the new parent structured definition
      */
     @Override
     public void setParentDefinition(BeanDefinition parent) {
@@ -221,7 +221,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Retrieves the child definitions of this bean.
+     * Retrieves the child definitions of this structured.
      *
      * @return a list of child definitions
      */
@@ -231,7 +231,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Adds a child definition to this bean.
+     * Adds a child definition to this structured.
      *
      * @param child the child definition to add
      */
@@ -241,7 +241,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Retrieves the lifecycle scope of this bean (e.g., SINGLETON, PROTOTYPE).
+     * Retrieves the lifecycle scope of this structured (e.g., SINGLETON, PROTOTYPE).
      *
      * @return the lifecycle scope
      */
@@ -251,7 +251,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Sets the lifecycle scope of this bean.
+     * Sets the lifecycle scope of this structured.
      *
      * @param scope the new lifecycle scope
      */
@@ -261,9 +261,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Retrieves the dependencies required by this bean.
+     * Retrieves the dependencies required by this structured.
      *
-     * @return a list of bean dependencies
+     * @return a list of structured dependencies
      */
     @Override
     public List<BeanDependency> getBeanDependencies() {
@@ -271,10 +271,10 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Retrieves the actual instance of this bean, if it has been created.
+     * Retrieves the actual instance of this structured, if it has been created.
      *
-     * @param <T> the expected type of the bean
-     * @return the bean instance, or {@code null} if not created
+     * @param <T> the expected type of the structured
+     * @return the structured instance, or {@code null} if not created
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -283,9 +283,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Sets the actual instance of this bean.
+     * Sets the actual instance of this structured.
      *
-     * @param instance the new bean instance
+     * @param instance the new structured instance
      */
     @Override
     public void setBeanInstance(Object instance) {
@@ -293,9 +293,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Retrieves the instantiation strategy for this bean (e.g., constructor, method, bean factory).
+     * Retrieves the instantiation strategy for this structured (e.g., constructor, method, structured factory).
      *
-     * @return the bean instantiation strategy
+     * @return the structured instantiation strategy
      */
     @Override
     public BeanInstantiationStrategy getBeanCreationStrategy() {
@@ -303,9 +303,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Sets the instantiation strategy for this bean.
+     * Sets the instantiation strategy for this structured.
      *
-     * @param strategy the new bean instantiation strategy
+     * @param strategy the new structured instantiation strategy
      */
     @Override
     public void setBeanCreationStrategy(BeanInstantiationStrategy strategy) {
@@ -313,7 +313,7 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Retrieves the collection of annotations present on this bean definition.
+     * Retrieves the collection of annotations present on this structured definition.
      *
      * @return a collection of annotations
      */
@@ -323,10 +323,10 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Retrieves a specific annotation of the given type from this bean definition.
+     * Retrieves a specific annotation of the given type from this structured definition.
      *
      * @param <A> the type of the annotation to retrieve
-     * @param annotationType the class bean of the annotation type
+     * @param annotationType the class structured of the annotation type
      * @return the annotation instance if present, otherwise {@code null}
      */
     @Override
@@ -335,9 +335,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Sets the annotations present on this bean definition.
+     * Sets the annotations present on this structured definition.
      *
-     * @param annotations a collection of annotations to associate with this bean
+     * @param annotations a collection of annotations to associate with this structured
      */
     @Override
     public void setAnnotations(Collection<Annotation> annotations) {
@@ -348,10 +348,10 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Determines if this bean definition is annotated with the specified class.
+     * Determines if this structured definition is annotated with the specified class.
      *
      * @param annotatedClass the annotation class to check
-     * @return {@code true} if this bean is annotated with {@code annotatedClass}, otherwise {@code false}
+     * @return {@code true} if this structured is annotated with {@code annotatedClass}, otherwise {@code false}
      */
     @Override
     public boolean isAnnotatedWith(Class<?> annotatedClass) {
@@ -359,9 +359,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Determines if this bean is a singleton or non-bean lifecycle.
+     * Determines if this structured is a singleton or non-structured lifecycle.
      *
-     * @return {@code true} if the bean's lifecycle is SINGLETON or NON_BEAN, otherwise {@code false}
+     * @return {@code true} if the structured's lifecycle is SINGLETON or NON_BEAN, otherwise {@code false}
      */
     @Override
     public boolean isSingleton() {
@@ -369,9 +369,9 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Determines if this bean is a prototype (not a singleton).
+     * Determines if this structured is a prototype (not a singleton).
      *
-     * @return {@code true} if the bean is prototype-scoped, otherwise {@code false}
+     * @return {@code true} if the structured is prototype-scoped, otherwise {@code false}
      */
     @Override
     public boolean isPrototype() {
@@ -379,11 +379,11 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Returns a string representation of this bean definition, including
-     * basic information such as name, lifecycle scope, bean class, instance,
+     * Returns a string representation of this structured definition, including
+     * basic information such as name, lifecycle scope, structured class, instance,
      * dependencies, parent, creation type, and instantiation strategy.
      *
-     * @return a string describing the bean definition
+     * @return a string describing the structured definition
      */
     @Override
     public String toString() {

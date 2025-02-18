@@ -53,7 +53,7 @@ public interface WebServer {
      */
     default <T> void configure(Configurer<T> configurer) {
         if (configurer == null) {
-            throw new WebServerException("Configurer bean must be non-NULL");
+            throw new WebServerException("Configurer structured must be non-NULL");
         }
 
         if (server() == null) {

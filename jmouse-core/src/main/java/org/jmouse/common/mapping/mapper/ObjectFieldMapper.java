@@ -9,10 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A mapper that converts an bean to a {@link Map} of its field names and values.
+ * A mapper that converts an structured to a {@link Map} of its field names and values.
  * <p>
  * This class uses reflection to retrieve private fields and map their values. It also supports reverse mapping
- * from a {@link Map} to an bean.
+ * from a {@link Map} to an structured.
  * </p>
  * @see Mapper
  * @see Reflections
@@ -20,12 +20,12 @@ import java.util.Map;
 public class ObjectFieldMapper implements Mapper<Object, Map<String, Object>> {
 
     /**
-     * Converts an bean to a {@link Map} of its field names and values.
+     * Converts an structured to a {@link Map} of its field names and values.
      *
-     * @param source the source bean to map
+     * @param source the source structured to map
      * @return a {@link Map} containing the field names and their corresponding values
      * <p>
-     * This method retrieves all private fields from the source bean's class and populates a {@link Map} with their values.
+     * This method retrieves all private fields from the source structured's class and populates a {@link Map} with their values.
      * </p>
      */
     @Override
@@ -36,7 +36,7 @@ public class ObjectFieldMapper implements Mapper<Object, Map<String, Object>> {
     }
 
     /**
-     * Throws {@link UnsupportedOperationException}, as reverse mapping to a new bean is not supported.
+     * Throws {@link UnsupportedOperationException}, as reverse mapping to a new structured is not supported.
      *
      * @param source the source {@link Map} to reverse map
      * @return nothing, as this method always throws an exception
@@ -48,12 +48,12 @@ public class ObjectFieldMapper implements Mapper<Object, Map<String, Object>> {
     }
 
     /**
-     * Maps the fields of the given bean to the provided {@link Map}.
+     * Maps the fields of the given structured to the provided {@link Map}.
      *
-     * @param source      the source bean to map
+     * @param source      the source structured to map
      * @param destination the destination {@link Map} to populate
      * <p>
-     * This method retrieves private fields of the source bean and populates the destination {@link Map}
+     * This method retrieves private fields of the source structured and populates the destination {@link Map}
      * with their names and values.
      * </p>
      * @see Reflections#getClassFields(Class, int)
@@ -67,12 +67,12 @@ public class ObjectFieldMapper implements Mapper<Object, Map<String, Object>> {
     }
 
     /**
-     * Populates the fields of an bean from the given {@link Map}.
+     * Populates the fields of an structured from the given {@link Map}.
      *
      * @param source      the source {@link Map} containing field names and values
-     * @param destination the destination bean to populate
+     * @param destination the destination structured to populate
      * <p>
-     * This method sets the fields of the destination bean with the corresponding values from the source {@link Map}.
+     * This method sets the fields of the destination structured with the corresponding values from the source {@link Map}.
      * </p>
      * @see Reflections#setFieldValue(Object, String, Object)
      */

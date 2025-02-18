@@ -52,7 +52,7 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
 
     /**
      * Initializes the provided {@link BeanContext} by scanning the base classes
-     * and registering bean definitions for the annotated elements.
+     * and registering structured definitions for the annotated elements.
      *
      * @param context the {@link BeanContext} to initialize.
      */

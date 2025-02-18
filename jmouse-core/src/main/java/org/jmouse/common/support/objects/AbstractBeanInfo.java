@@ -51,6 +51,6 @@ abstract public class AbstractBeanInfo implements BeanObjectInfo {
     @Override
     public BeanField getBeanField(String name) {
         return ofNullable(fields.get(name)).orElseThrow(() -> new BeanFieldNotFoundException(
-                "No fields are defined for the bean info of the class: " + getClassType()));
+                "No fields are defined for the structured info of the class: " + getClassType()));
     }
 }

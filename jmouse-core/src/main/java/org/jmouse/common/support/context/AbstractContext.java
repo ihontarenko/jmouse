@@ -36,7 +36,7 @@ public abstract class AbstractContext implements Context {
     /**
      * Constructor with a specified {@link BeanProvider}.
      *
-     * @param beanProvider the bean provider to associate with this context.
+     * @param beanProvider the structured provider to associate with this context.
      */
     public AbstractContext(BeanProvider beanProvider) {
         this.beanProvider = beanProvider;
@@ -45,7 +45,7 @@ public abstract class AbstractContext implements Context {
     /**
      * Sets the {@link BeanProvider} for this context.
      *
-     * @param beanProvider the bean provider to set.
+     * @param beanProvider the structured provider to set.
      */
     @Override
     public void setBeanProvider(BeanProvider beanProvider) {
@@ -55,7 +55,7 @@ public abstract class AbstractContext implements Context {
     /**
      * Retrieves the current {@link BeanProvider}.
      *
-     * @return the associated bean provider.
+     * @return the associated structured provider.
      */
     @Override
     public BeanProvider getBeanProvider() {
@@ -63,11 +63,11 @@ public abstract class AbstractContext implements Context {
     }
 
     /**
-     * Retrieves a bean by its class type.
+     * Retrieves a structured by its class type.
      *
-     * @param beanClass the class of the bean to retrieve.
-     * @param <T>       the type of the bean.
-     * @return the bean instance.
+     * @param beanClass the class of the structured to retrieve.
+     * @param <T>       the type of the structured.
+     * @return the structured instance.
      * @throws MissingBeanProviderException if the {@link BeanProvider} is not set.
      */
     @Override
@@ -78,12 +78,12 @@ public abstract class AbstractContext implements Context {
     }
 
     /**
-     * Retrieves a bean by its name and class type.
+     * Retrieves a structured by its name and class type.
      *
-     * @param beanName  the name of the bean to retrieve.
-     * @param beanClass the class of the bean to retrieve.
-     * @param <T>       the type of the bean.
-     * @return the bean instance.
+     * @param beanName  the name of the structured to retrieve.
+     * @param beanClass the class of the structured to retrieve.
+     * @param <T>       the type of the structured.
+     * @return the structured instance.
      * @throws MissingBeanProviderException if the {@link BeanProvider} is not set.
      */
     @Override

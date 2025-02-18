@@ -24,7 +24,7 @@ public class JdkProxy implements InvocationHandler, Proxy {
     /**
      * Constructs a new {@code JdkProxy} with the given {@link ProxyContext}.
      *
-     * @param proxyContext the configuration for the proxy, including the target bean and interceptors.
+     * @param proxyContext the configuration for the proxy, including the target structured and interceptors.
      */
     public JdkProxy(ProxyContext proxyContext) {
         this.proxyContext = proxyContext;
@@ -76,7 +76,7 @@ public class JdkProxy implements InvocationHandler, Proxy {
     }
 
     /**
-     * Creates and returns a proxy instance for the target bean using the specified {@link ClassLoader}.
+     * Creates and returns a proxy instance for the target structured using the specified {@link ClassLoader}.
      *
      * @param classLoader the class loader to define the proxy class.
      * @return the proxy instance.
@@ -87,7 +87,7 @@ public class JdkProxy implements InvocationHandler, Proxy {
     }
 
     /**
-     * Computes the hash code for this proxy based on the target bean and the proxy configuration.
+     * Computes the hash code for this proxy based on the target structured and the proxy configuration.
      *
      * @return the hash code.
      */
@@ -97,9 +97,9 @@ public class JdkProxy implements InvocationHandler, Proxy {
     }
 
     /**
-     * Compares this proxy with another bean for equality.
+     * Compares this proxy with another structured for equality.
      *
-     * @param that the bean to compare.
+     * @param that the structured to compare.
      * @return {@code true} if the objects are equal, {@code false} otherwise.
      */
     @Override

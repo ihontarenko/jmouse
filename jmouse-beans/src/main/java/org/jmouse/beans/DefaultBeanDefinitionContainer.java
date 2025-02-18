@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * A simple implementation of the {@link BeanDefinitionContainer} interface.
  * <p>
  * This container manages {@link BeanDefinition} objects and provides thread-safe
- * methods for registering, retrieving, and managing bean definitions.
+ * methods for registering, retrieving, and managing structured definitions.
  *
  * <p>Example usage:</p>
  * <pre>{@code
@@ -53,8 +53,8 @@ public class DefaultBeanDefinitionContainer implements BeanDefinitionContainer {
     /**
      * Retrieves a {@link BeanDefinition} by its name.
      *
-     * @param name the name of the bean definition
-     * @return the bean definition corresponding to the given name,
+     * @param name the name of the structured definition
+     * @return the structured definition corresponding to the given name,
      * or {@code null} if no definition exists for that name
      */
     @Override
@@ -65,7 +65,7 @@ public class DefaultBeanDefinitionContainer implements BeanDefinitionContainer {
     /**
      * Checks if a {@link BeanDefinition} with the given name exists in the container.
      *
-     * @param name the name of the bean definition
+     * @param name the name of the structured definition
      * @return {@code true} if the container contains a definition with the specified name,
      * {@code false} otherwise
      */
@@ -77,7 +77,7 @@ public class DefaultBeanDefinitionContainer implements BeanDefinitionContainer {
     /**
      * Retrieves all registered {@link BeanDefinition}s in the container.
      *
-     * @return a collection of all registered bean definitions.
+     * @return a collection of all registered structured definitions.
      */
     @Override
     public Collection<BeanDefinition> getDefinitions() {

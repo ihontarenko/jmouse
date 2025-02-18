@@ -15,7 +15,7 @@ import java.util.function.Function;
 import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
 
 /**
- * A strategy for resolving bean names based on annotations present on a {@link Class}
+ * A strategy for resolving structured names based on annotations present on a {@link Class}
  * or {@link Method}. This strategy prioritizes annotation values in the following order:
  * <ol>
  *     <li>{@link Qualifier#value()}</li>
@@ -43,10 +43,10 @@ public class AnnotationBeanNameStrategy implements BeanNameStrategy {
     }
 
     /**
-     * Resolves the name of a bean based on annotations or fallback rules.
+     * Resolves the name of a structured based on annotations or fallback rules.
 
      * @param element the element from which to resolve the name.
-     * @return the resolved bean name, or {@code null} if no suitable name is found.
+     * @return the resolved structured name, or {@code null} if no suitable name is found.
      */
     @Override
     public String resolve(AnnotatedElement element) {

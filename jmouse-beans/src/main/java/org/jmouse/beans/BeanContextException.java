@@ -1,7 +1,7 @@
 package org.jmouse.beans;
 
 /**
- * An exception indicating errors or abnormal conditions encountered within a bean context.
+ * An exception indicating errors or abnormal conditions encountered within a structured context.
  */
 public class BeanContextException extends RuntimeException {
 

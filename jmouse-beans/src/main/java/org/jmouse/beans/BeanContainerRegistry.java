@@ -3,7 +3,7 @@ package org.jmouse.beans;
 /**
  * Interface for managing the registry of {@link BeanContainer}s across different {@link Scope}s.
  * <p>
- * This interface provides methods to register, retrieve, and manage bean containers based on their scopes.
+ * This interface provides methods to register, retrieve, and manage structured containers based on their scopes.
  * It is a central component for managing beans in a multi-scope environment.
  * </p>
  *
@@ -31,8 +31,8 @@ public interface BeanContainerRegistry {
     /**
      * Retrieves the {@link BeanContainer} associated with the specified {@link Scope}.
      *
-     * @param scope the scope of the desired bean container.
-     * @return the corresponding bean container, or {@code null} if none is registered for the given scope.
+     * @param scope the scope of the desired structured container.
+     * @return the corresponding structured container, or {@code null} if none is registered for the given scope.
      * @throws IllegalArgumentException if the scope is {@code null}.
      */
     BeanContainer getBeanContainer(Scope scope);
@@ -40,8 +40,8 @@ public interface BeanContainerRegistry {
     /**
      * Registers a {@link BeanContainer} for the specified {@link Scope}.
      *
-     * @param scope     the scope of the bean container to register.
-     * @param container the bean container to associate with the given scope.
+     * @param scope     the scope of the structured container to register.
+     * @param container the structured container to associate with the given scope.
      * @throws IllegalArgumentException if the scope or container is {@code null}.
      */
     void registerBeanContainer(Scope scope, BeanContainer container);
@@ -56,7 +56,7 @@ public interface BeanContainerRegistry {
     /**
      * Checks if a {@link BeanContainer} is registered for the specified {@link Scope}.
      *
-     * @param scope the scope to check for a registered bean container.
+     * @param scope the scope to check for a registered structured container.
      * @return {@code true} if a container is registered for the given scope, {@code false} otherwise.
      * @throws IllegalArgumentException if the scope is {@code null}.
      */

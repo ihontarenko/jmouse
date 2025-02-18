@@ -12,37 +12,37 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 /**
- * Represents a generic bean model that encapsulates metadata and properties of a Java type.
+ * Represents a generic structured model that encapsulates metadata and properties of a Java type.
  * <p>
  * This class provides methods for managing properties dynamically, enabling reflection-based
  * property access and manipulation.
  * </p>
  *
- * @param <T> the type of the bean instance
+ * @param <T> the type of the structured instance
  */
 abstract public class Bean<T> {
 
     /**
-     * The Java type represented by this bean.
+     * The Java type represented by this structured.
      */
     protected final JavaType type;
 
     /**
-     * A map storing the properties of this bean, keyed by property names.
+     * A map storing the properties of this structured, keyed by property names.
      */
     protected final Map<String, Property<T>> properties = new LinkedHashMap<>();
 
     /**
-     * Constructs a bean for the specified type.
+     * Constructs a structured for the specified type.
      *
-     * @param type the Java type this bean represents
+     * @param type the Java type this structured represents
      */
     protected Bean(JavaType type) {
         this.type = type;
     }
 
     /**
-     * Retrieves all properties defined in this bean.
+     * Retrieves all properties defined in this structured.
      *
      * @return a collection of properties
      */
@@ -61,7 +61,7 @@ abstract public class Bean<T> {
     }
 
     /**
-     * Checks whether this bean contains a property with the given name.
+     * Checks whether this structured contains a property with the given name.
      *
      * @param name the property name to check
      * @return {@code true} if the property exists, otherwise {@code false}
@@ -72,13 +72,13 @@ abstract public class Bean<T> {
 
 
     /**
-     * Represents a property within a bean or record, encapsulating getter and setter methods.
+     * Represents a property within a structured or record, encapsulating getter and setter methods.
      * <p>
      * This abstract class provides a mechanism for retrieving and modifying property values dynamically
      * using reflection. It supports both read and write operations if applicable.
      * </p>
      *
-     * @param <T> the type of the bean or record containing this property
+     * @param <T> the type of the structured or record containing this property
      */
     public abstract static class Property<T> {
 

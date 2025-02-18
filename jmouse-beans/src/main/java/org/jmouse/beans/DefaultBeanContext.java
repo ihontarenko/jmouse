@@ -28,7 +28,7 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
 /**
  * Default implementation of the {@link BeanContext} interface.
  * <p>
- * This class provides a concrete implementation for managing bean definitions,
+ * This class provides a concrete implementation for managing structured definitions,
  * lifecycle management, and dependency resolution. It supports hierarchical
  * contexts with a parent context and offers additional customization via initializers
  * and post-processors.
@@ -38,8 +38,8 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  *     <li>Register and manage beans by name, type, or annotation.</li>
  *     <li>Resolve dependencies and manage the lifecycle of beans.</li>
  *     <li>Support for hierarchical contexts through a parent context.</li>
- *     <li>Prevention of cyclic dependencies during bean creation.</li>
- *     <li>Integration with {@link BeanPostProcessor} for custom bean behavior.</li>
+ *     <li>Prevention of cyclic dependencies during structured creation.</li>
+ *     <li>Integration with {@link BeanPostProcessor} for custom structured behavior.</li>
  * </ul>
  *
  * <p>Example Usage:</p>
@@ -47,14 +47,14 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * // Create a new DefaultBeanContext
  * DefaultBeanContext context = new DefaultBeanContext();
  *
- * // Register a bean definition
+ * // Register a structured definition
  * BeanDefinition definition = new DefaultBeanDefinition("userService", UserService.class);
  * context.registerDefinition(definition);
  *
- * // Retrieve a bean by its type
+ * // Retrieve a structured by its type
  * UserService userService = context.getBean(UserService.class);
  *
- * // Retrieve a bean by its name
+ * // Retrieve a structured by its name
  * UserService userServiceByName = context.getBean("userService");
  * }</pre>
  */
@@ -75,7 +75,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
 
     /**
      * A detector for cyclic references in the dependency graph, using {@link DefaultCyclicReferenceDetector}.
-     * This ensures that cyclic dependencies are identified and handled during bean creation.
+     * This ensures that cyclic dependencies are identified and handled during structured creation.
      */
     private final CyclicReferenceDetector<String> referenceDetector = new DefaultCyclicReferenceDetector<>();
 
@@ -94,14 +94,14 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     private final Set<Integer> initialized = new HashSet<>();
 
     /**
-     * A mapping of bean names to their corresponding {@link BeanDefinition}s.
+     * A mapping of structured names to their corresponding {@link BeanDefinition}s.
      */
     private final BeanDefinitionContainer definitionContainer;
 
     /**
-     * Resolves the {@link Scope} of a bean by its name.
+     * Resolves the {@link Scope} of a structured by its name.
      * <p>
-     * The {@link ScopeResolver} determines the lifecycle or context in which a bean
+     * The {@link ScopeResolver} determines the lifecycle or context in which a structured
      * is created and managed (e.g., singleton, prototype, request, session).
      * </p>
      */
@@ -110,14 +110,14 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     /**
      * The registry responsible for managing {@link BeanContainer}s for various scopes.
      * <p>
-     * This registry facilitates retrieval, registration, and removal of bean containers
+     * This registry facilitates retrieval, registration, and removal of structured containers
      * based on their {@link Scope}, enabling flexible and scoped management of beans.
      * </p>
      */
     private final BeanContainerRegistry containerRegistry;
 
     /**
-     * A list of registered {@link BeanPostProcessor}s for managing bean lifecycle hooks.
+     * A list of registered {@link BeanPostProcessor}s for managing structured lifecycle hooks.
      */
     private final List<BeanPostProcessor> processors = new ArrayList<>();
 
@@ -132,12 +132,12 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     private BeanDefinitionFactory beanDefinitionFactory;
 
     /**
-     * Factory responsible for creating bean instances.
+     * Factory responsible for creating structured instances.
      */
     private BeanFactory beanFactory;
 
     /**
-     * Resolver used for determining bean names.
+     * Resolver used for determining structured names.
      */
     private BeanNameResolver nameResolver;
 
@@ -152,8 +152,8 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * If a parent context is provided, this context may inherit beans from the parent. Additionally,
      * the provided base classes are used as entry points for scanning and resolving beans.
      *
-     * @param parent     the parent bean context, or {@code null} if this is a root context
-     * @param baseClasses an array of classes to serve as the base for bean scanning and resolution.
+     * @param parent     the parent structured context, or {@code null} if this is a root context
+     * @param baseClasses an array of classes to serve as the base for structured scanning and resolution.
      *                    If {@code null}, no base classes are set.
      */
     public DefaultBeanContext(BeanContext parent, Class<?>... baseClasses) {
@@ -173,7 +173,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * <p>
      * This constructor automatically retrieves the base classes from the parent context.
      *
-     * @param parent the parent bean context, must not be {@code null}
+     * @param parent the parent structured context, must not be {@code null}
      */
     public DefaultBeanContext(BeanContext parent) {
         this(parent, parent == null ? new Class[0] : parent.getBaseClasses());
@@ -184,7 +184,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * <p>
      * This constructor is typically used when no parent context is required.
      *
-     * @param baseClasses an array of classes to serve as the base for bean scanning and resolution.
+     * @param baseClasses an array of classes to serve as the base for structured scanning and resolution.
      *                    If {@code null}, no base classes are set.
      */
     public DefaultBeanContext(Class<?>... baseClasses) {
@@ -239,12 +239,12 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Retrieves a bean by its type. Throws an exception if no beans or multiple beans
+     * Retrieves a structured by its type. Throws an exception if no beans or multiple beans
      * of the specified type exist.
      *
-     * @param type the type of the bean
+     * @param type the type of the structured
      * @param <T>  the type parameter
-     * @return the bean instance
+     * @return the structured instance
      * @throws BeanContextException if no beans or multiple beans of the specified type exist
      */
     @Override
@@ -260,19 +260,19 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         }
 
         throw new BeanContextException(
-                "Multiple beans found for type: '%s'. Please specify the bean name. Available beans: %s"
+                "Multiple beans found for type: '%s'. Please specify the structured name. Available beans: %s"
                         .formatted(type.getName(), beanNames));
     }
 
     /**
-     * Retrieves a bean by its type and name. If the name is {@code null} or blank,
+     * Retrieves a structured by its type and name. If the name is {@code null} or blank,
      * it falls back to {@link #getBean(Class)}.
      *
-     * @param type the type of the bean
-     * @param name the name of the bean, or {@code null} to retrieve by type only
+     * @param type the type of the structured
+     * @param name the name of the structured, or {@code null} to retrieve by type only
      * @param <T>  the type parameter
-     * @return the bean instance
-     * @throws BeanContextException if the bean's type does not match the requested type
+     * @return the structured instance
+     * @throws BeanContextException if the structured's type does not match the requested type
      */
     @Override
     public <T> T getBean(Class<T> type, String name) {
@@ -291,13 +291,13 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Retrieves a bean by its name. If the bean is not yet instantiated, it is created
+     * Retrieves a structured by its name. If the structured is not yet instantiated, it is created
      * and initialized using its associated {@link BeanDefinition}.
      *
-     * @param name the name of the bean
+     * @param name the name of the structured
      * @param <T>  the type parameter
-     * @return the bean instance
-     * @throws BeanContextException if no bean definition exists for the given name
+     * @return the structured instance
+     * @throws BeanContextException if no structured definition exists for the given name
      */
     @Override
     public <T> T getBean(String name) {
@@ -308,14 +308,14 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         if (definition != null) {
             Scope beanScope = scopeResolver.resolveScope(name);
 
-            // get applicable bean instances container and try to find bean
+            // get applicable structured instances container and try to find structured
             BeanContainer instanceContainer = getBeanContainer(beanScope);
 
-            // get bean or try to create new one via lambda
+            // get structured or try to create new one via lambda
             instance = instanceContainer.getBean(name, objectFactory);
         }
 
-        // if bean not found try to search it in parent context
+        // if structured not found try to search it in parent context
         if (instance == null && parent != null) {
             instance = parent.getBean(name);
         }
@@ -328,22 +328,22 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Creates a bean instance from the given {@link BeanDefinition}, handling
+     * Creates a structured instance from the given {@link BeanDefinition}, handling
      * cyclic dependency detection, post-processing, and optional registration.
      * <p>
      * This method performs several steps:
      * <ol>
      *   <li>Detects and prevents cyclic dependencies by tracking visited definitions.</li>
-     *   <li>Uses the underlying {@link BeanFactory} to create the actual bean instance.</li>
-     *   <li>Runs all registered {@link BeanPostProcessor} instances before and after the bean is initialized.</li>
-     *   <li>Invokes the method annotated with {@code @Initialization}, if present, on the newly created bean.</li>
-     *   <li>If the {@link BeanDefinition} is marked as singleton, the bean is registered in the singleton container.</li>
+     *   <li>Uses the underlying {@link BeanFactory} to create the actual structured instance.</li>
+     *   <li>Runs all registered {@link BeanPostProcessor} instances before and after the structured is initialized.</li>
+     *   <li>Invokes the method annotated with {@code @Initialization}, if present, on the newly created structured.</li>
+     *   <li>If the {@link BeanDefinition} is marked as singleton, the structured is registered in the singleton container.</li>
      * </ol>
      *
-     * @param definition the {@link BeanDefinition} describing how the bean should be created
-     * @param <T>        the type of the bean
-     * @return the created bean instance
-     * @throws BeanInstantiationException if bean creation fails due to dependencies or initialization errors
+     * @param definition the {@link BeanDefinition} describing how the structured should be created
+     * @param <T>        the type of the structured
+     * @return the created structured instance
+     * @throws BeanInstantiationException if structured creation fails due to dependencies or initialization errors
      */
     @Override
     public <T> T createBean(BeanDefinition definition) {
@@ -354,16 +354,16 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
 
         Supplier<BeanInstantiationException> exceptionSupplier = ()
                 -> new BeanInstantiationException(
-                        "Cyclic dependency detected for bean: %s".formatted(definition.getBeanName()));
+                        "Cyclic dependency detected for structured: %s".formatted(definition.getBeanName()));
 
         try {
             // Detect cyclic references using the general-purpose Identifier interface
             referenceDetector.detect(definition::getBeanName, exceptionSupplier);
 
-            // resolve an instantiate raw bean
+            // resolve an instantiate raw structured
             T instance = beanFactory.createBean(definition);
 
-            // Initializes a bean instance by applying pre-initialization and post-initialization
+            // Initializes a structured instance by applying pre-initialization and post-initialization
             instance = initializeBean(instance, definition);
 
             return instance;
@@ -373,15 +373,15 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Performs initialization logic on a bean instance.
+     * Performs initialization logic on a structured instance.
      * <p>
-     * This method is invoked to prepare the bean instance for use. Implementations may apply additional
-     * configurations, wrap the bean in a proxy, or perform validation based on the provided {@link BeanDefinition}.
+     * This method is invoked to prepare the structured instance for use. Implementations may apply additional
+     * configurations, wrap the structured in a proxy, or perform validation based on the provided {@link BeanDefinition}.
      * </p>
      *
-     * @param instance   the bean instance to initialize.
-     * @param definition the {@link BeanDefinition} associated with the bean, providing descriptor for initialization.
-     * @return the initialized bean instance, potentially wrapped or modified.
+     * @param instance   the structured instance to initialize.
+     * @param definition the {@link BeanDefinition} associated with the structured, providing descriptor for initialization.
+     * @return the initialized structured instance, potentially wrapped or modified.
      */
     @Override
     @SuppressWarnings({"unchecked"})
@@ -391,7 +391,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
             instance = (T) processor.postProcessBeforeInitialize(instance, definition, this);
         }
 
-        // Invoke the initializer method if present in the bean class
+        // Invoke the initializer method if present in the structured class
         for (Method initializer : Reflections.findAllAnnotatedMethods(
                 definition.getBeanClass(), BeanInitializer.class)) {
             Reflections.invokeMethod(instance, initializer);
@@ -410,11 +410,11 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * Retrieves the names of all beans that match the specified type.
      * <p>
      * This method searches the current context and, if applicable, the parent context.
-     * It uses a matcher to determine if the type of each bean matches the requested type.
+     * It uses a matcher to determine if the type of each structured matches the requested type.
      * </p>
      *
      * @param type the type of beans to search for
-     * @return a list of bean names that match the specified type
+     * @return a list of structured names that match the specified type
      */
     @Override
     public List<String> getBeanNames(Class<?> type) {
@@ -434,13 +434,13 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     /**
      * Retrieves all beans that match the specified type.
      * <p>
-     * This method iterates through the bean definitions in the current context
+     * This method iterates through the structured definitions in the current context
      * and retrieves matching beans. It includes beans from the parent context if applicable.
      * </p>
      *
      * @param type the type of beans to retrieve
      * @param <T>  the type parameter of the beans
-     * @return a list of bean instances that match the specified type
+     * @return a list of structured instances that match the specified type
      */
     @Override
     public <T> List<T> getBeans(Class<T> type) {
@@ -458,11 +458,11 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Registers a bean instance of the specified type and beanScope.
+     * Registers a structured instance of the specified type and beanScope.
      *
-     * @param type      the type of the bean.
-     * @param bean      the bean instance to register.
-     * @param scope the beanScope scope for the bean.
+     * @param type      the type of the structured.
+     * @param bean      the structured instance to register.
+     * @param scope the beanScope scope for the structured.
      */
     @Override
     public void registerBean(Class<?> type, Object bean, Scope scope) {
@@ -470,14 +470,14 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Registers an existing bean instance with the container.
+     * Registers an existing structured instance with the container.
      * <p>
      * This method creates a new {@link BeanDefinition} for the provided instance
-     * and stores it in the context along with the bean itself.
+     * and stores it in the context along with the structured itself.
      * </p>
      *
-     * @param name the name of the bean
-     * @param bean the bean instance
+     * @param name the name of the structured
+     * @param bean the structured instance
      */
     @Override
     public void registerBean(String name, Object bean) {
@@ -485,9 +485,9 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Registers a bean instance with the given name and a specified {@link BeanScope}.
+     * Registers a structured instance with the given name and a specified {@link BeanScope}.
      * <p>
-     * Registration of the bean in the container occurs only if the bean is not an instance of {@link ObjectFactory}
+     * Registration of the structured in the container occurs only if the structured is not an instance of {@link ObjectFactory}
      * and does not have the {@link BeanScope#PROTOTYPE} scope.
      * </p>
      * <p>
@@ -497,17 +497,17 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      *
      * <p>Example Usage:</p>
      * <pre>{@code
-     * // Registering a singleton bean
+     * // Registering a singleton structured
      * container.registerBean("myBean", beanInstance, BeanScope.SINGLETON);
      *
-     * // Registering a prototype-scoped bean (will not have a dedicated container)
+     * // Registering a prototype-scoped structured (will not have a dedicated container)
      * container.registerBean("prototypeBean", beanInstance, BeanScope.PROTOTYPE);
      * }</pre>
      *
-     * @param name      the name of the bean.
-     * @param bean      the bean instance to register.
-     * @param scope     the lifecycle scope for the bean.
-     * @throws BeanContextException if the bean cannot be registered due to scope restrictions or other errors.
+     * @param name      the name of the structured.
+     * @param bean      the structured instance to register.
+     * @param scope     the lifecycle scope for the structured.
+     * @throws BeanContextException if the structured cannot be registered due to scope restrictions or other errors.
      */
     @Override
     public void registerBean(String name, Object bean, Scope scope) {
@@ -515,14 +515,14 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         BeanContainer container = getBeanContainer(scope);
 
         // Create definition if it on present in definition registry
-        // If no definition exists, the bean is being registered manually (externally)
+        // If no definition exists, the structured is being registered manually (externally)
         if (!containsDefinition(name)) {
             Class<?>              beanClass     = isLazy ? ObjectFactory.class : bean.getClass();
             ObjectFactory<Object> objectFactory = isLazy ? (ObjectFactory<Object>) bean : () -> bean;
             BeanDefinition        definition    = new ObjectFactoryBeanDefinition(name, beanClass, objectFactory);
 
             if (!isLazy) {
-                LOGGER.info("The bean '{}' was wrapped into an ObjectFactory<{}>",
+                LOGGER.info("The structured '{}' was wrapped into an ObjectFactory<{}>",
                         name, getShortName(beanClass));
                 definition.setBeanInstance(bean);
             }
@@ -531,7 +531,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
             registerDefinition(definition);
         }
 
-        // Do nothing if passed bean presented as ObjectFactory bean
+        // Do nothing if passed structured presented as ObjectFactory structured
         if (!isLazy) {
             LOGGER.info("Bean '{}' registered to the '{}' container", name, getShortName(container.getClass()));
             getBeanContainer(scope).registerBean(name, bean);
@@ -539,15 +539,15 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Registers a bean instance with the given name using an {@link ObjectFactory} and a specified {@link BeanScope}.
+     * Registers a structured instance with the given name using an {@link ObjectFactory} and a specified {@link BeanScope}.
      * <p>
      * The default implementation throws a {@link BeanContextException} to indicate that
      * scope-based registration is not supported. Override this method in a subclass
      * if this functionality is required.
      *
-     * @param name      the name of the bean.
-     * @param objectFactory      the factory for creating the bean instance.
-     * @param scope the scope of the bean.
+     * @param name      the name of the structured.
+     * @param objectFactory      the factory for creating the structured instance.
+     * @param scope the scope of the structured.
      * @throws BeanContextException if this operation is not supported.
      */
     @Override
@@ -556,10 +556,10 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Checks whether a bean with the specified name is already registered in this container.
+     * Checks whether a structured with the specified name is already registered in this container.
      *
-     * @param name the name of the bean.
-     * @return {@code true} if a bean with the given name exists, otherwise {@code false}.
+     * @param name the name of the structured.
+     * @return {@code true} if a structured with the given name exists, otherwise {@code false}.
      */
     @Override
     public boolean containsBean(String name) {
@@ -576,7 +576,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * Sets the base classes to be scanned and processed by this context.
      * <p>
      * These classes are used to detect annotations, definitions, and additional context information
-     * necessary for bean registration and initialization.
+     * necessary for structured registration and initialization.
      * </p>
      *
      * @param baseClasses the array of base classes to be set.
@@ -631,7 +631,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     /**
      * Registers a {@link BeanContainer} for a specific {@link Scope}.
      * <p>
-     * This method allows mapping a scope to a container that manages bean instances
+     * This method allows mapping a scope to a container that manages structured instances
      * within that scope. For binder, you can register separate containers for
      * singleton, prototype, request, or session scopes.
      * </p>
@@ -660,7 +660,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     /**
      * Checks if a {@link BeanContainer} is registered for the specified {@link Scope}.
      *
-     * @param scope the scope to check for a registered bean container.
+     * @param scope the scope to check for a registered structured container.
      * @return {@code true} if a container is registered for the given scope, {@code false} otherwise.
      * @throws IllegalArgumentException if the scope is {@code null}.
      */
@@ -672,8 +672,8 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     /**
      * Retrieves a {@link BeanDefinition} by its name.
      *
-     * @param name the name of the bean
-     * @return the bean definition, or {@code null} if no definition is found
+     * @param name the name of the structured
+     * @return the structured definition, or {@code null} if no definition is found
      */
     @Override
     public BeanDefinition getDefinition(String name) {
@@ -683,7 +683,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     /**
      * Retrieves all registered {@link BeanDefinition}s in the container.
      *
-     * @return a collection of all registered bean definitions.
+     * @return a collection of all registered structured definitions.
      */
     @Override
     public Collection<BeanDefinition> getDefinitions() {
@@ -693,11 +693,11 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     /**
      * Registers a new {@link BeanDefinition} in the container.
      * <p>
-     * If a bean with the same name already exists, an exception is thrown.
+     * If a structured with the same name already exists, an exception is thrown.
      * </p>
      *
-     * @param definition the bean definition to register
-     * @throws DuplicateBeanDefinitionException if a bean with the same name is already registered
+     * @param definition the structured definition to register
+     * @throws DuplicateBeanDefinitionException if a structured with the same name is already registered
      */
     @Override
     public void registerDefinition(BeanDefinition definition) {
@@ -707,7 +707,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     /**
      * Checks if a {@link BeanDefinition} with the given name exists in the container.
      *
-     * @param name the name of the bean definition
+     * @param name the name of the structured definition
      * @return {@code true} if the container contains a definition with the specified name,
      * {@code false} otherwise
      */
@@ -775,7 +775,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     /**
      * Retrieves the current {@link BeanFactory}.
      *
-     * @return the bean factory
+     * @return the structured factory
      */
     @Override
     public BeanFactory getBeanFactory() {
@@ -785,7 +785,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     /**
      * Retrieves the current {@link BeanDefinitionFactory}.
      *
-     * @return the bean definition factory
+     * @return the structured definition factory
      */
     @Override
     public BeanDefinitionFactory getBeanDefinitionFactory() {
@@ -795,7 +795,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     /**
      * Retrieves the current {@link BeanNameResolver}.
      *
-     * @return the bean name resolver
+     * @return the structured name resolver
      */
     @Override
     public BeanNameResolver getNameResolver() {
@@ -805,7 +805,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     /**
      * Sets the current {@link BeanFactory}.
      *
-     * @param beanFactory the bean factory to set
+     * @param beanFactory the structured factory to set
      */
     @Override
     public void setBeanFactory(BeanFactory beanFactory) {
@@ -815,7 +815,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     /**
      * Sets the current {@link BeanDefinitionFactory}.
      *
-     * @param definitionFactory the bean definition factory to set
+     * @param definitionFactory the structured definition factory to set
      */
     @Override
     public void setBeanDefinitionFactory(BeanDefinitionFactory definitionFactory) {
@@ -825,7 +825,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     /**
      * Sets the current {@link BeanNameResolver}.
      *
-     * @param nameResolver the bean name resolver to set
+     * @param nameResolver the structured name resolver to set
      */
     @Override
     public void setNameResolver(BeanNameResolver nameResolver) {

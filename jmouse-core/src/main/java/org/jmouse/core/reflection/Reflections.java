@@ -75,7 +75,7 @@ abstract public class Reflections {
      * Creates a Class instance for the given class name, suppressing the {@link ClassNotFoundException}.
      *
      * @param className the fully qualified name of the desired class
-     * @return the corresponding Class bean
+     * @return the corresponding Class structured
      * @throws ReflectionException if the class cannot be found
      *
      *                             <p><b>Example usage:</b></p>
@@ -93,15 +93,15 @@ abstract public class Reflections {
     }
 
     /**
-     * Instantiates an bean using the given constructor and arguments.
+     * Instantiates an structured using the given constructor and arguments.
      *
      * <p>This method will attempt to match null arguments to default primitive values if
      * the constructor parameter is a primitive type.</p>
      *
-     * @param <T>         the type of bean to instantiate
+     * @param <T>         the type of structured to instantiate
      * @param constructor the constructor to use for instantiation
      * @param arguments   the arguments to pass to the constructor
-     * @return a new instance of the bean
+     * @return a new instance of the structured
      * @throws ReflectionException if instantiation fails
      *
      *                             <p><b>Example usage:</b></p>
@@ -262,9 +262,9 @@ abstract public class Reflections {
     }
 
     /**
-     * Sets the value of a field in an bean by its field name.
+     * Sets the value of a field in an structured by its field name.
      *
-     * @param object    the bean whose field is to be set
+     * @param object    the structured whose field is to be set
      * @param fieldName the name of the field
      * @param value     the value to set
      *
@@ -280,9 +280,9 @@ abstract public class Reflections {
     }
 
     /**
-     * Sets the value of a field in an bean.
+     * Sets the value of a field in an structured.
      *
-     * @param object the bean whose field is to be set
+     * @param object the structured whose field is to be set
      * @param field  the field to set
      * @param value  the value to set
      *
@@ -301,9 +301,9 @@ abstract public class Reflections {
     }
 
     /**
-     * Gets the value of a field from an bean by its field name.
+     * Gets the value of a field from an structured by its field name.
      *
-     * @param object    the bean whose field value is to be retrieved
+     * @param object    the structured whose field value is to be retrieved
      * @param fieldName the name of the field
      * @return the value of the field, or null if the field does not exist or cannot be accessed
      *
@@ -320,9 +320,9 @@ abstract public class Reflections {
     }
 
     /**
-     * Gets the value of a field from an bean.
+     * Gets the value of a field from an structured.
      *
-     * @param object the bean whose field value is to be retrieved
+     * @param object the structured whose field value is to be retrieved
      * @param field  the field to retrieve the value from
      * @return the value of the field, or null if it cannot be accessed
      *
@@ -343,9 +343,9 @@ abstract public class Reflections {
     }
 
     /**
-     * Invokes a method on the specified bean with the given arguments.
+     * Invokes a method on the specified structured with the given arguments.
      *
-     * @param object    the bean on which to invoke the method
+     * @param object    the structured on which to invoke the method
      * @param method    the method to invoke
      * @param arguments the arguments to pass to the method
      * @return the result of the method invocation, or {@code null} if the method has a void return type
@@ -374,9 +374,9 @@ abstract public class Reflections {
     }
 
     /**
-     * Invokes a getter method (no-argument method starting with "get") on the specified bean.
+     * Invokes a getter method (no-argument method starting with "get") on the specified structured.
      *
-     * @param object     the bean on which to invoke the getter
+     * @param object     the structured on which to invoke the getter
      * @param methodName the name of the field (the actual method will be "get" + capitalized field name)
      * @return the result of the getter method, or {@code null} if the method does not exist or fails to invoke
      *
@@ -570,7 +570,7 @@ abstract public class Reflections {
      * Converts an array of objects to their corresponding array of classes.
      *
      * @param arguments an array of objects
-     * @return an array of classes representing each bean's type
+     * @return an array of classes representing each structured's type
      *
      * <p><b>Example usage:</b></p>
      * <pre>{@code
@@ -644,10 +644,10 @@ abstract public class Reflections {
     }
 
     /**
-     * Returns the short name of the class for the given bean.
-     * If the bean is itself a {@link Class}, it delegates to the {@link #getShortName(Class)} method.
+     * Returns the short name of the class for the given structured.
+     * If the structured is itself a {@link Class}, it delegates to the {@link #getShortName(Class)} method.
      *
-     * @param instance the bean whose class name is to be shortened
+     * @param instance the structured whose class name is to be shortened
      * @return the shortened class name
      */
     public static String getShortName(Object instance) {
@@ -941,7 +941,7 @@ abstract public class Reflections {
      * <p>If the class name contains {@link #PROXY_CLASS_NAME_SEPARATOR}, this method attempts
      * to retrieve its superclass, which should be the actual class.</p>
      *
-     * @param instance the bean which class will be unwrapped
+     * @param instance the structured which class will be unwrapped
      * @return the unwrapped class, or the original class if it's not a proxy
      *
      * <p><b>Example usage:</b></p>

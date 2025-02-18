@@ -1,7 +1,7 @@
 package org.jmouse.beans;
 
 /**
- * An exception indicating error that bean can be found in any contained or bean is unknown at all
+ * An exception indicating error that structured can be found in any contained or structured is unknown at all
  */
 public class BeanNotFoundException extends RuntimeException {
 

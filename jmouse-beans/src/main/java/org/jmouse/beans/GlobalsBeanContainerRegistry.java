@@ -8,14 +8,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@link BeanContainerRegistry} instances.
  * <p>
  * The {@code GlobalsBeanContainerRegistry} allows for managing beans across multiple registries that are associated
- * with specific scopes, enabling tenant-specific or contextualized bean management.
+ * with specific scopes, enabling tenant-specific or contextualized structured management.
  * </p>
  *
  * <p>Key Features:</p>
  * <ul>
  *     <li>Dynamically resolves a {@link BeanContainerRegistry} for a given {@link Scope}.</li>
  *     <li>Supports lazy initialization of registries using a provided {@link ObjectFactory}.</li>
- *     <li>Delegates bean registration, retrieval, and removal operations to the resolved registry.</li>
+ *     <li>Delegates structured registration, retrieval, and removal operations to the resolved registry.</li>
  * </ul>
  *
  * <p>Example Usage:</p>

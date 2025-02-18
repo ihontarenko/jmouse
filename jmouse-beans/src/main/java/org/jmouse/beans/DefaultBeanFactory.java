@@ -18,7 +18,7 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * <p>Key responsibilities:
  * <ul>
  *     <li>Maintaining a list of {@link BeanInstantiationStrategy} to create beans.</li>
- *     <li>Delegating bean instantiation to the appropriate strategy.</li>
+ *     <li>Delegating structured instantiation to the appropriate strategy.</li>
  *     <li>Integrating with a {@link BeanContext} for dependency resolution.</li>
  * </ul>
  *
@@ -28,7 +28,7 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * factory.addStrategy(new SimpleBeanInstantiationStrategy());
  * // ...
  * BeanDefinition definition = ...;
- * Object bean = factory.createBean(definition);
+ * Object structured = factory.createBean(definition);
  * }</pre>
  */
 public class DefaultBeanFactory implements BeanFactory, BeanInstantiationFactory, BeanContextAware {
@@ -39,7 +39,7 @@ public class DefaultBeanFactory implements BeanFactory, BeanInstantiationFactory
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBeanFactory.class);
 
     /**
-     * The list of {@link BeanInstantiationStrategy} instances used to create bean objects.
+     * The list of {@link BeanInstantiationStrategy} instances used to create structured objects.
      */
     private final List<BeanInstantiationStrategy> strategies = new ArrayList<>();
 
@@ -49,16 +49,16 @@ public class DefaultBeanFactory implements BeanFactory, BeanInstantiationFactory
     private BeanContext context;
 
     /**
-     * Creates a new bean instance based on the given {@link BeanDefinition}.
+     * Creates a new structured instance based on the given {@link BeanDefinition}.
      * <p>
      * This method delegates to {@link #createInstance(BeanDefinition, BeanContext)}.
      * If the instance is {@code null}, a {@link BeanInstantiationException} is thrown.
-     * The created instance is then assigned to the bean definition.
+     * The created instance is then assigned to the structured definition.
      *
-     * @param definition the bean definition describing how the bean should be created
-     * @param <T>        the expected type of the bean
-     * @return the newly created bean instance
-     * @throws BeanInstantiationException if bean instantiation fails or yields a {@code null} instance
+     * @param definition the structured definition describing how the structured should be created
+     * @param <T>        the expected type of the structured
+     * @return the newly created structured instance
+     * @throws BeanInstantiationException if structured instantiation fails or yields a {@code null} instance
      */
     @Override
     public <T> T createBean(BeanDefinition definition) {
@@ -66,24 +66,24 @@ public class DefaultBeanFactory implements BeanFactory, BeanInstantiationFactory
 
         if (instance == null) {
             throw new BeanInstantiationException(
-                    "Failed to instantiate bean '%s' using definition of type '%s'."
+                    "Failed to instantiate structured '%s' using definition of type '%s'."
                             .formatted(definition.getBeanName(), getShortName(definition.getClass())));
         }
 
-        // assign bean instance for it definition
+        // assign structured instance for it definition
         definition.setBeanInstance(instance);
 
         return instance;
     }
 
     /**
-     * Creates a bean instance by iterating over registered {@link BeanInstantiationStrategy} objects.
-     * When a strategy supports the given definition, it is used to create the bean.
+     * Creates a structured instance by iterating over registered {@link BeanInstantiationStrategy} objects.
+     * When a strategy supports the given definition, it is used to create the structured.
      * The first matching strategy sets the creation strategy in the definition and logs the creation.
      *
-     * @param definition the bean definition to instantiate
+     * @param definition the structured definition to instantiate
      * @param context    the current {@link BeanContext}
-     * @return the created bean instance, or {@code null} if no strategy supports the definition
+     * @return the created structured instance, or {@code null} if no strategy supports the definition
      */
     @Override
     public Object createInstance(BeanDefinition definition, BeanContext context) {
@@ -101,9 +101,9 @@ public class DefaultBeanFactory implements BeanFactory, BeanInstantiationFactory
         }
 
         if (instantiationStrategy != null) {
-            // Link applicable strategy to bean definition
+            // Link applicable strategy to structured definition
             definition.setBeanCreationStrategy(instantiationStrategy);
-            // Instantiate bean via applicable strategy
+            // Instantiate structured via applicable strategy
             instance = instantiationStrategy.create(definition, context);
 
             if (instance != null) {
@@ -129,7 +129,7 @@ public class DefaultBeanFactory implements BeanFactory, BeanInstantiationFactory
     /**
      * Retrieves the current {@link BeanContext}.
      *
-     * @return the associated bean context
+     * @return the associated structured context
      */
     @Override
     public BeanContext getBeanContext() {
@@ -139,7 +139,7 @@ public class DefaultBeanFactory implements BeanFactory, BeanInstantiationFactory
     /**
      * Sets the current {@link BeanContext} for this factory.
      *
-     * @param context the bean context to associate
+     * @param context the structured context to associate
      */
     @Override
     public void setBeanContext(BeanContext context) {

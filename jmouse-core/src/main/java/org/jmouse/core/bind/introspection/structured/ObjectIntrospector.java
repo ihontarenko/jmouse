@@ -1,4 +1,4 @@
-package org.jmouse.core.bind.introspection.bean;
+package org.jmouse.core.bind.introspection.structured;
 
 import org.jmouse.core.bind.introspection.AbstractDescriptor;
 import org.jmouse.core.bind.introspection.AbstractIntrospector;

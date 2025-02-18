@@ -30,10 +30,10 @@ public class JdkMessageBundle implements MessageBundle {
     }
 
     /**
-     * Retrieves an bean associated with the given key.
+     * Retrieves an structured associated with the given key.
      *
      * @param key the message key
-     * @return the corresponding bean, or throws {@link MissingResourceException} if not found
+     * @return the corresponding structured, or throws {@link MissingResourceException} if not found
      */
     @Override
     public Object getObject(String key) {

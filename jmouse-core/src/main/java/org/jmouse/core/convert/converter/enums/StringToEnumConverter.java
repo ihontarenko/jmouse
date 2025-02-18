@@ -33,7 +33,7 @@ public class StringToEnumConverter implements GenericConverter<String, Enum<?>> 
      * match is found, {@code null} is returned.
      *
      * @param source     the {@code String} value to convert
-     * @param sourceType the specific runtime type of the source bean (String)
+     * @param sourceType the specific runtime type of the source structured (String)
      * @param targetType the enum class type to which the string should be converted
      * @return the matching enum constant, or {@code null} if none matches
      */

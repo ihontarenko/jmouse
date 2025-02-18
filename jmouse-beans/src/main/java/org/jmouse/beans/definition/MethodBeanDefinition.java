@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 
 /**
  * A {@link BeanDefinition} implementation for beans created using a factory method.
- * Stores descriptor about the factory method and its associated bean.
+ * Stores descriptor about the factory method and its associated structured.
  */
 public class MethodBeanDefinition extends AbstractBeanDefinition {
 
@@ -17,15 +17,15 @@ public class MethodBeanDefinition extends AbstractBeanDefinition {
     /**
      * Constructs a {@link MethodBeanDefinition}.
      *
-     * @param name the name of the bean.
-     * @param type the type of the bean.
+     * @param name the name of the structured.
+     * @param type the type of the structured.
      */
     public MethodBeanDefinition(String name, Class<?> type) {
         super(name, type);
     }
 
     /**
-     * Retrieves the creation type for this bean definition.
+     * Retrieves the creation type for this structured definition.
      *
      * @return {@link BeanInstantiationType#FACTORY_METHOD}.
      */
@@ -35,7 +35,7 @@ public class MethodBeanDefinition extends AbstractBeanDefinition {
     }
 
     /**
-     * Retrieves the factory method used to create the bean.
+     * Retrieves the factory method used to create the structured.
      *
      * @return the factory method.
      */
@@ -44,7 +44,7 @@ public class MethodBeanDefinition extends AbstractBeanDefinition {
     }
 
     /**
-     * Sets the factory method used to create the bean.
+     * Sets the factory method used to create the structured.
      *
      * @param method the factory method to set.
      */
@@ -53,27 +53,27 @@ public class MethodBeanDefinition extends AbstractBeanDefinition {
     }
 
     /**
-     * Retrieves the bean containing the factory method.
+     * Retrieves the structured containing the factory method.
      *
-     * @return the factory bean.
+     * @return the factory structured.
      */
     public Object getFactoryObject() {
         return object;
     }
 
     /**
-     * Sets the bean containing the factory method.
+     * Sets the structured containing the factory method.
      *
-     * @param object the factory bean to set.
+     * @param object the factory structured to set.
      */
     public void setFactoryObject(Object object) {
         this.object = object;
     }
 
     /**
-     * Returns a string representation of this bean definition, including the factory method and bean.
+     * Returns a string representation of this structured definition, including the factory method and structured.
      *
-     * @return a string representation of the bean definition.
+     * @return a string representation of the structured definition.
      */
     @Override
     public String toString() {

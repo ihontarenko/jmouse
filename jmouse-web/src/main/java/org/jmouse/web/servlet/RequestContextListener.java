@@ -37,7 +37,7 @@ public class RequestContextListener implements ServletRequestListener {
     @Override
     public void requestInitialized(ServletRequestEvent event) {
         if (event.getServletRequest() instanceof HttpServletRequest servletRequest) {
-            LOGGER.info("Update {}[{}] bean to '{}' holder", getShortName(servletRequest.getClass().getName()),
+            LOGGER.info("Update {}[{}] structured to '{}' holder", getShortName(servletRequest.getClass().getName()),
                         servletRequest.getRequestURI(), RequestAttributesHolder.class.getName());
             RequestAttributesHolder.setRequestAttributes(
                     RequestAttributes.of(BeanScope.REQUEST, servletRequest)

@@ -106,7 +106,7 @@ public class StandardConversion implements Conversion {
     }
 
     /**
-     * Converts the given {@code source} bean from type {@code T} to type {@code R} using a registered converter.
+     * Converts the given {@code source} structured from type {@code T} to type {@code R} using a registered converter.
      * <p>
      * The method first looks up a converter based on the source and target types. If a converter is found,
      * it performs the conversion. If no direct converter is available, the method attempts to find a suitable converter
@@ -114,12 +114,12 @@ public class StandardConversion implements Conversion {
      * is found, a {@link ConverterNotFound} exception is thrown.
      * </p>
      *
-     * @param <T>        the type of the source bean
+     * @param <T>        the type of the source structured
      * @param <R>        the type of the desired result
-     * @param source     the bean to convert
+     * @param source     the structured to convert
      * @param sourceType the class representing the source type
      * @param targetType the class representing the target type
-     * @return the converted bean of type {@code R}, or {@code null} if the source is {@code null}
+     * @return the converted structured of type {@code R}, or {@code null} if the source is {@code null}
      * @throws ConverterNotFound if no converter is registered for the given source and target types
      */
     @Override

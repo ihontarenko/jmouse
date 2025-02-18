@@ -34,25 +34,25 @@ import java.util.Set;
 public interface GenericConverter<S, T> {
 
     /**
-     * Converts the given source bean of type {@code S} into an bean of type {@code T},
+     * Converts the given source structured of type {@code S} into an structured of type {@code T},
      * using the provided {@code sourceType} and {@code targetType} for more specific conversion
      * logic if needed.
      *
-     * @param source     the bean to convert (may be {@code null})
-     * @param sourceType the specific runtime type of the source bean
+     * @param source     the structured to convert (may be {@code null})
+     * @param sourceType the specific runtime type of the source structured
      * @param targetType the desired target type
-     * @return the converted bean, or {@code null} if the source is {@code null} or cannot be converted
+     * @return the converted structured, or {@code null} if the source is {@code null} or cannot be converted
      */
     T convert(S source, Class<S> sourceType, Class<T> targetType);
 
     /**
      * A convenience method that infers the {@code sourceType} from the runtime class of
-     * the given source bean. If {@code source} is {@code null}, this method returns
+     * the given source structured. If {@code source} is {@code null}, this method returns
      * {@code null}.
      *
-     * @param source     the bean to convert (may be {@code null})
+     * @param source     the structured to convert (may be {@code null})
      * @param targetType the desired target type
-     * @return the converted bean, or {@code null} if the source is {@code null} or cannot be converted
+     * @return the converted structured, or {@code null} if the source is {@code null} or cannot be converted
      */
     default T convert(S source, Class<T> targetType) {
         T converted = null;

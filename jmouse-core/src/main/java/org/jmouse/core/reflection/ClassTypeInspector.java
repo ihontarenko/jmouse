@@ -10,7 +10,7 @@ public interface ClassTypeInspector {
     /**
      * Returns the class type being inspected.
      *
-     * @return the {@link Class} bean representing the inspected type
+     * @return the {@link Class} structured representing the inspected type
      */
     Class<?> getClassType();
 
@@ -176,13 +176,13 @@ public interface ClassTypeInspector {
     }
 
     /**
-     * Checks if the inspected type is a bean.
+     * Checks if the inspected type is a structured.
      * <p>
-     * A bean is defined as a non-scalar, non-primitive, non-collection, non-map,
+     * A structured is defined as a non-scalar, non-primitive, non-collection, non-map,
      * and non-enum type that is not exactly {@code Object.class}.
      * </p>
      *
-     * @return {@code true} if the class type represents a bean, otherwise {@code false}
+     * @return {@code true} if the class type represents a structured, otherwise {@code false}
      */
     default boolean isBean() {
         return !isRecord() && !isObject() && !isEnum() && !isArray() && !isCollection() && !isMap() && !isScalar() && !isUnknown();

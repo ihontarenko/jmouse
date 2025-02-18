@@ -10,18 +10,18 @@ import java.util.List;
 public interface ProxyFactory {
 
     /**
-     * Creates a proxy for the specified bean.
+     * Creates a proxy for the specified structured.
      *
      * @param <T>   the type of the created proxy
-     * @param object the original bean to be proxied
-     * @return a proxy instance of the specified bean
+     * @param object the original structured to be proxied
+     * @return a proxy instance of the specified structured
      */
     <T> T createProxy(Object object);
 
     /**
-     * Creates a {@link ProxyContext} for the specified bean and class loader.
+     * Creates a {@link ProxyContext} for the specified structured and class loader.
      *
-     * @param object      the original bean to be proxied
+     * @param object      the original structured to be proxied
      * @param classLoader the class loader to define the proxy class
      * @return a new {@link ProxyContext} instance
      */
@@ -29,7 +29,7 @@ public interface ProxyFactory {
 
     /**
      * Adds a {@link MethodInterceptor} to this factory, which will be invoked
-     * during method calls on the proxy bean. Multiple interceptors can be added,
+     * during method calls on the proxy structured. Multiple interceptors can be added,
      * and each will be applied in the order they were registered.
      *
      * @param interceptor the interceptor to add

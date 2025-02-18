@@ -17,7 +17,7 @@ public class EvaluationContext extends AbstractVariablesContext {
      * Retrieves a function by its name from the evaluation context.
      *
      * @param name the name of the function.
-     * @return the {@link Method} bean representing the function.
+     * @return the {@link Method} structured representing the function.
      * @throws EvaluationContextException if the function is not found in the context.
      *
      * <p>Example usage:</p>
@@ -41,7 +41,7 @@ public class EvaluationContext extends AbstractVariablesContext {
      * Adds or updates a function in the evaluation context.
      *
      * @param name   the name of the function.
-     * @param method the {@link Method} bean representing the function.
+     * @param method the {@link Method} structured representing the function.
      *
      * <p>Example usage:</p>
      * <pre>{@code
@@ -55,7 +55,7 @@ public class EvaluationContext extends AbstractVariablesContext {
     /**
      * Adds or updates a function in the evaluation context using the function's name.
      *
-     * @param method the {@link Method} bean representing the function.
+     * @param method the {@link Method} structured representing the function.
      *
      * <p>Example usage:</p>
      * <pre>{@code
@@ -70,7 +70,7 @@ public class EvaluationContext extends AbstractVariablesContext {
      * Retrieves a variable by its name, ensuring it exists in the context.
      *
      * @param name the name of the variable.
-     * @return the variable bean.
+     * @return the variable structured.
      * @throws EvaluationContextException if the variable is not found in the context.
      *
      * <p>Example usage:</p>
@@ -94,7 +94,7 @@ public class EvaluationContext extends AbstractVariablesContext {
      * Adds a compiler for a specific node type to the evaluation context.
      *
      * @param nodeType the class representing the node type.
-     * @param compiler the {@link Compiler} bean for the node type.
+     * @param compiler the {@link Compiler} structured for the node type.
      *
      * <p>Example usage:</p>
      * <pre>{@code
@@ -109,7 +109,7 @@ public class EvaluationContext extends AbstractVariablesContext {
      * Adds a compiler to the evaluation context. The compiler's node type is inferred
      * from its {@code nodeType()} method.
      *
-     * @param compiler the {@link Compiler} bean to add.
+     * @param compiler the {@link Compiler} structured to add.
      * @throws NullPointerException if the compiler's {@code nodeType()} method returns {@code null}.
      *
      * <p>Example usage:</p>
@@ -129,7 +129,7 @@ public class EvaluationContext extends AbstractVariablesContext {
      *
      * @param nodeType the class representing the node type.
      * @param <N>      the type of the node.
-     * @return the {@link Compiler} bean for the node type.
+     * @return the {@link Compiler} structured for the node type.
      * @throws EvaluationContextException if no compiler is found for the specified node type.
      *
      * <p>Example usage:</p>
@@ -150,11 +150,11 @@ public class EvaluationContext extends AbstractVariablesContext {
     }
 
     /**
-     * Retrieves a compiler for a specific node bean from the evaluation context.
+     * Retrieves a compiler for a specific node structured from the evaluation context.
      *
-     * @param nodeObject the node bean whose compiler is to be retrieved.
+     * @param nodeObject the node structured whose compiler is to be retrieved.
      * @param <N>        the type of the node.
-     * @return the {@link Compiler} bean for the node type.
+     * @return the {@link Compiler} structured for the node type.
      *
      * <p>Example usage:</p>
      * <pre>{@code

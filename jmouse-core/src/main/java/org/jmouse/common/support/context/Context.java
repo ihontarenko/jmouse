@@ -25,7 +25,7 @@ public interface Context extends BeanProvider, BeanProviderAware {
     Map<Object, Object> getProperties();
 
     /**
-     * Copies all properties and the bean provider from another context.
+     * Copies all properties and the structured provider from another context.
      *
      * @param context the source context to copy from.
      */
@@ -35,7 +35,7 @@ public interface Context extends BeanProvider, BeanProviderAware {
     }
 
     /**
-     * Copies all properties and the bean provider to another context.
+     * Copies all properties and the structured provider to another context.
      *
      * @param context the target context to copy to.
      */

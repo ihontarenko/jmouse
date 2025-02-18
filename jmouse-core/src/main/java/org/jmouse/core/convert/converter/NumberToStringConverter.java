@@ -32,7 +32,7 @@ public class NumberToStringConverter implements GenericConverter<Number, String>
      * Converts the given numeric value to a {@code String} by calling {@code String.valueOf(source)}.
      *
      * @param source     the numeric value to convert
-     * @param sourceType the specific runtime type of the source bean
+     * @param sourceType the specific runtime type of the source structured
      * @param targetType the desired target type, which is always {@link String} in this case
      * @return the string representation of {@code source}
      */

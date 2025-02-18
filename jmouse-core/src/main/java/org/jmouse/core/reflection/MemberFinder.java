@@ -182,7 +182,7 @@ public interface MemberFinder<T extends Member> {
      * The filter allows chaining of matching and sorting operations to retrieve members on demand.
      *
      * @param clazz the class whose members are to be filtered
-     * @return a {@link Filter} bean for the specified class
+     * @return a {@link Filter} structured for the specified class
      */
     Filter<T> filter(Class<?> clazz);
 }

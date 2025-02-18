@@ -9,9 +9,9 @@ import java.util.function.Supplier;
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**
- * A {@link PropertyValuesAccessor} implementation for accessing properties of a bean instance.
+ * A {@link PropertyValuesAccessor} implementation for accessing properties of a structured instance.
  * <p>
- * This class allows retrieving properties dynamically from a wrapped bean instance.
+ * This class allows retrieving properties dynamically from a wrapped structured instance.
  * It does not support indexed access since beans are typically key-value structures.
  * </p>
  */
@@ -20,9 +20,9 @@ public class JavaBeanPropertyValuesAccessor extends AbstractPropertyValuesAccess
     private final JavaBean<Object> bean;
 
     /**
-     * Creates a {@link JavaBeanPropertyValuesAccessor} for the given bean instance.
+     * Creates a {@link JavaBeanPropertyValuesAccessor} for the given structured instance.
      *
-     * @param source the bean instance to wrap
+     * @param source the structured instance to wrap
      * @throws IllegalArgumentException if the source is {@code null}
      */
     @SuppressWarnings({"unchecked"})
@@ -32,7 +32,7 @@ public class JavaBeanPropertyValuesAccessor extends AbstractPropertyValuesAccess
     }
 
     /**
-     * Retrieves a property from the bean instance as a {@link PropertyValuesAccessor}.
+     * Retrieves a property from the structured instance as a {@link PropertyValuesAccessor}.
      *
      * @param name the name of the property to retrieve
      * @return a {@link PropertyValuesAccessor} wrapping the property value
@@ -54,7 +54,7 @@ public class JavaBeanPropertyValuesAccessor extends AbstractPropertyValuesAccess
     }
 
     /**
-     * Throws an exception since bean instances do not support indexed access.
+     * Throws an exception since structured instances do not support indexed access.
      *
      * @param index the index to retrieve
      * @return never returns a value
@@ -82,9 +82,9 @@ public class JavaBeanPropertyValuesAccessor extends AbstractPropertyValuesAccess
     }
 
     /**
-     * Retrieves a supplier for the bean instance.
+     * Retrieves a supplier for the structured instance.
      *
-     * @return a {@link Supplier} providing values from the bean instance
+     * @return a {@link Supplier} providing values from the structured instance
      */
     private Factory<Object> getSupplier() {
         return bean.getFactory(Bindable.ofInstance(source));

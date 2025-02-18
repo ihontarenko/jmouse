@@ -42,7 +42,7 @@ public class AnyExpressionParser implements Parser {
             // by default #localVariable
             Class<? extends Parser> variableParser = VariableParser.class;
 
-            // if #bean.methodCall() or // if #staticMethodCall()
+            // if #structured.methodCall() or // if #staticMethodCall()
             if (lexer.check(OBJECT_METHOD)) {
                 variableParser = ObjectMethodCallParser.class;
             } else if (lexer.check(STATIC_METHOD)) {

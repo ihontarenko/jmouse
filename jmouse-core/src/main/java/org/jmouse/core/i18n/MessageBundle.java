@@ -19,14 +19,14 @@ public interface MessageBundle {
     MessageBundle NULL_OBJECT = new Empty();
 
     /**
-     * Retrieves an bean associated with the given key from the message bundle.
+     * Retrieves an structured associated with the given key from the message bundle.
      * <p>
-     * This method returns a generic bean, allowing flexibility in message storage.
+     * This method returns a generic structured, allowing flexibility in message storage.
      * If the key does not exist, implementations should handle it gracefully.
      * </p>
      *
      * @param key the message key (e.g., "error.not.found", "button.submit")
-     * @return the associated bean, or {@code null} if not found
+     * @return the associated structured, or {@code null} if not found
      */
     Object getObject(String key);
 

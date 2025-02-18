@@ -10,8 +10,8 @@ import java.util.List;
 /**
  * An interface for managing {@link BeanDefinition} objects within a container.
  * <p>
- * This interface allows the registration, retrieval, and management of bean definitions.
- * For binder, you can register a bean definition and then retrieve it by its name:
+ * This interface allows the registration, retrieval, and management of structured definitions.
+ * For binder, you can register a structured definition and then retrieve it by its name:
  * <pre>{@code
  * BeanDefinitionContainer container = ...;
  * BeanDefinition userServiceDefinition =
@@ -37,8 +37,8 @@ public interface BeanDefinitionContainer {
     /**
      * Retrieves a {@link BeanDefinition} by its name.
      *
-     * @param name the name of the bean definition.
-     * @return the bean definition corresponding to the given name,
+     * @param name the name of the structured definition.
+     * @return the structured definition corresponding to the given name,
      *         or {@code null} if no definition exists for that name.
      */
     BeanDefinition getDefinition(String name);
@@ -46,7 +46,7 @@ public interface BeanDefinitionContainer {
     /**
      * Checks if a {@link BeanDefinition} with the given name exists in the container.
      *
-     * @param name the name of the bean definition.
+     * @param name the name of the structured definition.
      * @return {@code true} if the container contains a definition with the specified name,
      *         {@code false} otherwise.
      */
@@ -55,14 +55,14 @@ public interface BeanDefinitionContainer {
     /**
      * Retrieves all registered {@link BeanDefinition}s in the container.
      *
-     * @return a collection of all registered bean definitions.
+     * @return a collection of all registered structured definitions.
      */
     Collection<BeanDefinition> getDefinitions();
 
     /**
      * Retrieves all {@link BeanDefinition}s in the container that match the specified criteria.
      *
-     * @param definitionMatcher a matcher to filter bean definitions.
+     * @param definitionMatcher a matcher to filter structured definitions.
      * @return a collection of {@link BeanDefinition}s that match the given matcher.
      */
     default Collection<BeanDefinition> getDefinitions(Matcher<BeanDefinition> definitionMatcher) {

@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * A strategy for instantiating beans using constructors.
  * <p>
- * This strategy resolves dependencies for the constructor parameters of a bean
+ * This strategy resolves dependencies for the constructor parameters of a structured
  * and uses reflection to invoke the appropriate constructor.
  * <p>
  * Example usage:
@@ -29,14 +29,14 @@ import java.util.List;
 public class ConstructorBeanInstantiationStrategy extends AbstractBeanInstantiationStrategy {
 
     /**
-     * Creates a bean instance using a constructor specified in the {@link ConstructorBeanDefinition}.
+     * Creates a structured instance using a constructor specified in the {@link ConstructorBeanDefinition}.
      * <p>
      * This method resolves dependencies required for the constructor, if any, and
      * then uses reflection to invoke the constructor.
      *
-     * @param definition the bean definition describing how the bean should be created
+     * @param definition the structured definition describing how the structured should be created
      * @param context    the {@link BeanContext} for resolving dependencies
-     * @return the instantiated bean bean
+     * @return the instantiated structured structured
      * @throws BeanInstantiationException if dependency resolution or instantiation fails
      */
     @Override
@@ -50,7 +50,7 @@ public class ConstructorBeanInstantiationStrategy extends AbstractBeanInstantiat
                 arguments = resolveDependencies(dependencies, context);
             } catch (RuntimeException exception) {
                 throw new BeanInstantiationException(
-                        "Failed to create bean via constructor strategy for bean type: " + definition.getBeanClass(),
+                        "Failed to create structured via constructor strategy for structured type: " + definition.getBeanClass(),
                         exception);
             }
         }
@@ -63,7 +63,7 @@ public class ConstructorBeanInstantiationStrategy extends AbstractBeanInstantiat
      * <p>
      * This strategy supports definitions with an instantiation type of {@link BeanInstantiationType#CONSTRUCTOR}.
      *
-     * @param definition the bean definition to evaluate
+     * @param definition the structured definition to evaluate
      * @return {@code true} if the definition is supported, otherwise {@code false}
      */
     @Override

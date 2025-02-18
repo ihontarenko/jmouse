@@ -28,7 +28,7 @@ public class ResourcePropertySource extends JavaPropertiesPropertySource {
      * Loads properties from the given resource.
      *
      * @param resource the resource to read properties from
-     * @return a {@link Properties} bean populated with the resource's properties
+     * @return a {@link Properties} structured populated with the resource's properties
      */
     private static Properties loadJavaProperties(Resource resource) {
         Properties properties = new Properties();

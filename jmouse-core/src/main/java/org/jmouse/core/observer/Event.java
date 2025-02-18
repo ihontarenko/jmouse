@@ -27,14 +27,14 @@ public interface Event<T> {
 
     /**
      * The payload of this event, containing data relevant to observers. Could be any
-     * bean type, such as domain models, messages, or other event-specific structures.
+     * structured type, such as domain models, messages, or other event-specific structures.
      *
      * @return the payload of this event
      */
     T payload();
 
     /**
-     * Returns the {@code Class} bean representing the type of the payload.
+     * Returns the {@code Class} structured representing the type of the payload.
      * Useful for determining how to process or cast the payload.
      *
      * @return the class of the payload
@@ -43,7 +43,7 @@ public interface Event<T> {
 
     /**
      * An optional reference to the source or origin of this event. This could be
-     * the publisher itself or another bean providing context for the event.
+     * the publisher itself or another structured providing context for the event.
      *
      * @return the caller or source of this event, or {@code null} if not provided
      */

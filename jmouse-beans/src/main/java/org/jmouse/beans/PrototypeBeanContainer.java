@@ -8,10 +8,10 @@ package org.jmouse.beans;
 public class PrototypeBeanContainer implements BeanContainer {
 
     /**
-     * Retrieves a bean instance by its name.
+     * Retrieves a structured instance by its name.
      *
-     * @param name the name of the bean to retrieve.
-     * @param <T>  the type of the bean.
+     * @param name the name of the structured to retrieve.
+     * @param <T>  the type of the structured.
      * @return always {@code null}, as this container does not store beans.
      */
     @Override
@@ -20,12 +20,12 @@ public class PrototypeBeanContainer implements BeanContainer {
     }
 
     /**
-     * Registers a bean instance with the given name.
+     * Registers a structured instance with the given name.
      * <p>
      * In this implementation, the method does nothing.
      *
-     * @param name the name of the bean.
-     * @param bean the bean instance to register.
+     * @param name the name of the structured.
+     * @param bean the structured instance to register.
      */
     @Override
     public void registerBean(String name, Object bean) {
@@ -33,9 +33,9 @@ public class PrototypeBeanContainer implements BeanContainer {
     }
 
     /**
-     * Checks whether a bean with the specified name is already registered in this container.
+     * Checks whether a structured with the specified name is already registered in this container.
      *
-     * @param name the name of the bean.
+     * @param name the name of the structured.
      * @return always {@code true} for current implementation.
      */
     @Override

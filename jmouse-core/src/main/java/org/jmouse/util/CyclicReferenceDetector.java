@@ -3,7 +3,7 @@ package org.jmouse.util;
 import java.util.function.Supplier;
 
 /**
- * Interface for detecting cyclic dependencies in bean creation or dependency graphs.
+ * Interface for detecting cyclic dependencies in structured creation or dependency graphs.
  * <p>
  * This interface provides methods to detect cycles and remove processed identifiers
  * to ensure that no cyclic references exist during runtime.

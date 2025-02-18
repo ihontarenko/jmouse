@@ -43,7 +43,7 @@ public class ValidatorConstraintFactory {
 
         if (validator == null) {
             throw new UnregisteredValidatorException(
-                    "Validator bean with the enum key '%s' is not found in the ValidatorConstraintFactory. Please ensure it is registered."
+                    "Validator structured with the enum key '%s' is not found in the ValidatorConstraintFactory. Please ensure it is registered."
                             .formatted(key));
         }
 

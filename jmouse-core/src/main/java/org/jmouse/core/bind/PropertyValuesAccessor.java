@@ -332,7 +332,7 @@ public interface PropertyValuesAccessor extends ClassTypeInspector {
     /**
      * Returns the class type being inspected.
      *
-     * @return the {@link Class} bean representing the inspected type
+     * @return the {@link Class} structured representing the inspected type
      */
     @Override
     default Class<?> getClassType() {

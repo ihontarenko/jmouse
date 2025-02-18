@@ -20,7 +20,7 @@ public interface MessageSourceTypeAware extends MessageSource {
      * This method derives the message key using the instance's class name.
      * </p>
      *
-     * @param instance  the bean whose class name is used for message retrieval
+     * @param instance  the structured whose class name is used for message retrieval
      * @param key       the message key
      * @param locale    the target locale
      * @param arguments optional arguments for message formatting
@@ -36,7 +36,7 @@ public interface MessageSourceTypeAware extends MessageSource {
      * This method derives the message key using the instance's class name.
      * </p>
      *
-     * @param instance  the bean whose class name is used for message retrieval
+     * @param instance  the structured whose class name is used for message retrieval
      * @param key       the message key
      * @param arguments optional arguments for message formatting
      * @return the localized message, formatted if necessary

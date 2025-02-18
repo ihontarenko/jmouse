@@ -20,11 +20,11 @@ public class ThreadLocalBeanContainer implements BeanContainer {
     private final ThreadLocal<Map<String, Object>> threadLocalBeans = ThreadLocal.withInitial(ConcurrentHashMap::new);
 
     /**
-     * Retrieves a bean instance by its name from the thread-local context.
+     * Retrieves a structured instance by its name from the thread-local context.
      *
-     * @param name the name of the bean to retrieve.
-     * @param <T>  the type of the bean.
-     * @return the bean instance if present, or {@code null} if no bean is found with the given name.
+     * @param name the name of the structured to retrieve.
+     * @param <T>  the type of the structured.
+     * @return the structured instance if present, or {@code null} if no structured is found with the given name.
      */
     @Override
     public <T> T getBean(String name) {
@@ -32,10 +32,10 @@ public class ThreadLocalBeanContainer implements BeanContainer {
     }
 
     /**
-     * Registers a bean instance with the given name in the thread-local context.
+     * Registers a structured instance with the given name in the thread-local context.
      *
-     * @param name the name of the bean.
-     * @param bean the bean instance to register.
+     * @param name the name of the structured.
+     * @param bean the structured instance to register.
      */
     @Override
     public void registerBean(String name, Object bean) {
@@ -43,10 +43,10 @@ public class ThreadLocalBeanContainer implements BeanContainer {
     }
 
     /**
-     * Checks if a bean with the specified name exists in the thread-local context.
+     * Checks if a structured with the specified name exists in the thread-local context.
      *
-     * @param name the name of the bean.
-     * @return {@code true} if a bean with the given name exists, {@code false} otherwise.
+     * @param name the name of the structured.
+     * @return {@code true} if a structured with the given name exists, {@code false} otherwise.
      */
     @Override
     public boolean containsBean(String name) {

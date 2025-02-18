@@ -25,16 +25,16 @@ public class BeanContextAwareBeanPostProcessor implements BeanPostProcessor {
      * Injects the {@link BeanContext} into beans implementing {@link BeanContextAware}
      * after their initialization.
      *
-     * @param object     the bean instance being processed.
-     * @param definition the {@link BeanDefinition} associated with the bean.
-     * @param context    the {@link BeanContext} managing the bean lifecycle.
-     * @return the processed bean instance.
+     * @param object     the structured instance being processed.
+     * @param definition the {@link BeanDefinition} associated with the structured.
+     * @param context    the {@link BeanContext} managing the structured lifecycle.
+     * @return the processed structured instance.
      */
     @Override
     public Object postProcessAfterInitialize(Object object, BeanDefinition definition, BeanContext context) {
-        // Check if the bean implements BeanContextAware
+        // Check if the structured implements BeanContextAware
         if (object instanceof BeanContextAware contextAware) {
-            LOGGER.info("Injecting context '{}' into bean '{}'",
+            LOGGER.info("Injecting context '{}' into structured '{}'",
                         Reflections.getShortName(context.getClass()), Reflections.getShortName(object.getClass()));
             contextAware.setBeanContext(context);
         }

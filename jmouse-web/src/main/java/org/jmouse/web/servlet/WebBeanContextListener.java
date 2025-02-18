@@ -10,7 +10,7 @@ import org.jmouse.web.context.WebBeanContext;
 
 /**
  * Listener for loading and managing the {@link WebBeanContext} within a {@link ServletContext}.
- * It initializes the web application bean context during the servlet context initialization phase
+ * It initializes the web application structured context during the servlet context initialization phase
  * and cleans it up during the destruction phase.
  */
 public class WebBeanContextListener implements ServletContextListener {
@@ -46,7 +46,7 @@ public class WebBeanContextListener implements ServletContextListener {
      */
     @Override
     public void contextDestroyed(ServletContextEvent event) {
-        LOGGER.info("detaching '{}' bean context", WebBeanContext.ROOT_WEB_BEAN_CONTEXT_ATTRIBUTE);
+        LOGGER.info("detaching '{}' structured context", WebBeanContext.ROOT_WEB_BEAN_CONTEXT_ATTRIBUTE);
         ServletContext servletContext = event.getServletContext();
         servletContext.removeAttribute(WebBeanContext.ROOT_WEB_BEAN_CONTEXT_ATTRIBUTE);
     }

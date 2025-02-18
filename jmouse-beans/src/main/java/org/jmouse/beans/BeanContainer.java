@@ -15,39 +15,39 @@ public interface BeanContainer {
     Logger LOGGER = LoggerFactory.getLogger(BeanContainer.class);
 
     /**
-     * Retrieves a bean by its name.
+     * Retrieves a structured by its name.
      *
-     * @param name the name of the bean to retrieve.
-     * @param <T> the type of the bean.
-     * @return the bean instance.
+     * @param name the name of the structured to retrieve.
+     * @param <T> the type of the structured.
+     * @return the structured instance.
      */
     <T> T getBean(String name);
 
     /**
-     * Registers a bean with the given name.
+     * Registers a structured with the given name.
      *
-     * @param name the name of the bean to register.
-     * @param bean the bean instance to register.
+     * @param name the name of the structured to register.
+     * @param bean the structured instance to register.
      */
     void registerBean(String name, Object bean);
 
     /**
-     * Checks if a bean with the given name exists in the container.
+     * Checks if a structured with the given name exists in the container.
      *
-     * @param name the name of the bean.
-     * @return true if the bean exists, false otherwise.
+     * @param name the name of the structured.
+     * @return true if the structured exists, false otherwise.
      */
     boolean containsBean(String name);
 
     /**
-     * Retrieves a bean by name, or creates it using the provided ObjectFactory if it doesn't exist.
-     * Registers the created bean in the container.
+     * Retrieves a structured by name, or creates it using the provided ObjectFactory if it doesn't exist.
+     * Registers the created structured in the container.
      *
-     * @param name the name of the bean.
-     * @param objectFactory the ObjectFactory used to create the bean if it doesn't exist.
-     * @param <T> the type of the bean.
-     * @return the bean instance.
-     * @throws BeanContextException if the ObjectFactory produces a null bean.
+     * @param name the name of the structured.
+     * @param objectFactory the ObjectFactory used to create the structured if it doesn't exist.
+     * @param <T> the type of the structured.
+     * @return the structured instance.
+     * @throws BeanContextException if the ObjectFactory produces a null structured.
      */
     default <T> T getBean(String name, ObjectFactory<T> objectFactory) {
         T bean = getBean(name);
@@ -56,10 +56,10 @@ public interface BeanContainer {
             bean = objectFactory.createObject();
 
             if (bean == null) {
-                throw new BeanContextException("ObjectFactory must produce a non-null bean");
+                throw new BeanContextException("ObjectFactory must produce a non-null structured");
             }
 
-            LOGGER.info("Register bean '{}' with '{}' container", name, Reflections.getShortName(getClass()));
+            LOGGER.info("Register structured '{}' with '{}' container", name, Reflections.getShortName(getClass()));
             registerBean(name, bean);
         }
 
@@ -77,11 +77,11 @@ public interface BeanContainer {
     }
 
     /**
-     * Retrieves a bean by its class type.
+     * Retrieves a structured by its class type.
      *
-     * @param type the class type of the bean.
-     * @param <T> the type of the bean.
-     * @return the bean instance.
+     * @param type the class type of the structured.
+     * @param <T> the type of the structured.
+     * @return the structured instance.
      * @throws BeanContextException if this method is unsupported in the current implementation.
      */
     default <T> T getBean(Class<T> type) {
@@ -90,12 +90,12 @@ public interface BeanContainer {
     }
 
     /**
-     * Retrieves a bean by its class type and name.
+     * Retrieves a structured by its class type and name.
      *
-     * @param type the class type of the bean.
-     * @param name the name of the bean.
-     * @param <T> the type of the bean.
-     * @return the bean instance.
+     * @param type the class type of the structured.
+     * @param name the name of the structured.
+     * @param <T> the type of the structured.
+     * @return the structured instance.
      * @throws BeanContextException if this method is unsupported in the current implementation.
      */
     default <T> T getBean(Class<T> type, String name) {
@@ -104,21 +104,21 @@ public interface BeanContainer {
     }
 
     /**
-     * Registers a bean with the given class type and singleton scope.
+     * Registers a structured with the given class type and singleton scope.
      *
-     * @param type the class type of the bean.
-     * @param objectFactory the ObjectFactory for the bean.
+     * @param type the class type of the structured.
+     * @param objectFactory the ObjectFactory for the structured.
      */
     default void registerBean(Class<?> type, ObjectFactory<Object> objectFactory) {
         registerBean(type, objectFactory, BeanScope.SINGLETON);
     }
 
     /**
-     * Registers a bean with the given class type, ObjectFactory, and scope.
+     * Registers a structured with the given class type, ObjectFactory, and scope.
      *
-     * @param type the class type of the bean.
-     * @param objectFactory the ObjectFactory for the bean.
-     * @param scope the scope of the bean.
+     * @param type the class type of the structured.
+     * @param objectFactory the ObjectFactory for the structured.
+     * @param scope the scope of the structured.
      * @throws BeanContextException if this method is unsupported in the current implementation.
      */
     default void registerBean(Class<?> type, ObjectFactory<Object> objectFactory, Scope scope) {
@@ -126,21 +126,21 @@ public interface BeanContainer {
     }
 
     /**
-     * Registers a bean with the given class type and singleton scope.
+     * Registers a structured with the given class type and singleton scope.
      *
-     * @param type the class type of the bean.
-     * @param bean the bean instance to register.
+     * @param type the class type of the structured.
+     * @param bean the structured instance to register.
      */
     default void registerBean(Class<?> type, Object bean) {
         registerBean(type, bean, BeanScope.SINGLETON);
     }
 
     /**
-     * Registers a bean with the given class type, instance, and scope.
+     * Registers a structured with the given class type, instance, and scope.
      *
-     * @param type the class type of the bean.
-     * @param bean the bean instance to register.
-     * @param scope the scope of the bean.
+     * @param type the class type of the structured.
+     * @param bean the structured instance to register.
+     * @param scope the scope of the structured.
      * @throws BeanContextException if this method is unsupported in the current implementation.
      */
     default void registerBean(Class<?> type, Object bean, Scope scope) {
@@ -150,32 +150,32 @@ public interface BeanContainer {
     }
 
     /**
-     * Registers a bean with the given name, ObjectFactory, and scope.
+     * Registers a structured with the given name, ObjectFactory, and scope.
      *
-     * @param name the name of the bean.
-     * @param objectFactory the ObjectFactory for the bean.
+     * @param name the name of the structured.
+     * @param objectFactory the ObjectFactory for the structured.
      */
     default void registerBean(String name, ObjectFactory<Object> objectFactory) {
         registerBean(name, (Object) objectFactory, BeanScope.SINGLETON);
     }
 
     /**
-     * Registers a bean with the given name, ObjectFactory, and scope.
+     * Registers a structured with the given name, ObjectFactory, and scope.
      *
-     * @param name the name of the bean.
-     * @param objectFactory the ObjectFactory for the bean.
-     * @param scope the scope of the bean.
+     * @param name the name of the structured.
+     * @param objectFactory the ObjectFactory for the structured.
+     * @param scope the scope of the structured.
      */
     default void registerBean(String name, ObjectFactory<Object> objectFactory, Scope scope) {
         registerBean(name, (Object) objectFactory, scope);
     }
 
     /**
-     * Registers a bean with the given name, instance, and scope.
+     * Registers a structured with the given name, instance, and scope.
      *
-     * @param name the name of the bean.
-     * @param bean the bean instance to register.
-     * @param scope the scope of the bean.
+     * @param name the name of the structured.
+     * @param bean the structured instance to register.
+     * @param scope the scope of the structured.
      * @throws BeanContextException if this method is unsupported in the current implementation.
      */
     default void registerBean(String name, Object bean, Scope scope) {

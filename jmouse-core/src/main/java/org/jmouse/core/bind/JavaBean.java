@@ -38,7 +38,7 @@ public final class JavaBean<T> extends Bean<T> {
     /**
      * Constructs a JavaBean representation for the given type.
      *
-     * @param type the Java type of the bean
+     * @param type the Java type of the structured
      */
     public JavaBean(JavaType type) {
         super(type);
@@ -48,7 +48,7 @@ public final class JavaBean<T> extends Bean<T> {
     /**
      * Constructs a JavaBean representation for the given class.
      *
-     * @param type the class of the bean
+     * @param type the class of the structured
      */
     public JavaBean(Class<?> type) {
         this(JavaType.forClass(type));
@@ -57,8 +57,8 @@ public final class JavaBean<T> extends Bean<T> {
     /**
      * Creates a JavaBean instance for a given class.
      *
-     * @param <T>  the type of the bean
-     * @param type the class of the bean
+     * @param <T>  the type of the structured
+     * @param type the class of the structured
      * @return a JavaBean instance
      */
     public static <T> JavaBean<T> of(Class<T> type) {
@@ -68,8 +68,8 @@ public final class JavaBean<T> extends Bean<T> {
     /**
      * Creates a JavaBean instance for a given Java type.
      *
-     * @param <T>  the type of the bean
-     * @param type the JavaType of the bean
+     * @param <T>  the type of the structured
+     * @param type the JavaType of the structured
      * @return a JavaBean instance
      */
     public static <T> JavaBean<T> of(JavaType type) {
@@ -77,7 +77,7 @@ public final class JavaBean<T> extends Bean<T> {
     }
 
     /**
-     * Scans and adds properties to the bean based on getter and setter method conventions.
+     * Scans and adds properties to the structured based on getter and setter method conventions.
      */
     private void addProperties() {
         Matcher<Executable> anyMatcher = nameStarts(GETTER_GET_PREFIX).or(nameStarts(GETTER_IS_PREFIX))
@@ -95,7 +95,7 @@ public final class JavaBean<T> extends Bean<T> {
     }
 
     /**
-     * Retrieves all methods declared in the bean class.
+     * Retrieves all methods declared in the structured class.
      *
      * @return a collection of methods
      */
@@ -104,7 +104,7 @@ public final class JavaBean<T> extends Bean<T> {
     }
 
     /**
-     * Adds a property to the bean if the method matches the specified criteria.
+     * Adds a property to the structured if the method matches the specified criteria.
      *
      * @param method  the method to analyze
      * @param prefix  the expected prefix (e.g., "get", "set")
@@ -180,7 +180,7 @@ public final class JavaBean<T> extends Bean<T> {
     /**
      * Represents a property of a JavaBean.
      *
-     * @param <T> the type of the bean containing the property
+     * @param <T> the type of the structured containing the property
      */
     public static class Property<T> extends Bean.Property<T> {
 
@@ -188,7 +188,7 @@ public final class JavaBean<T> extends Bean<T> {
          * Constructs a JavaBean property.
          *
          * @param name  the name of the property
-         * @param owner the JavaType of the bean containing the property
+         * @param owner the JavaType of the structured containing the property
          */
         public Property(String name, JavaType owner) {
             super(name, owner);
@@ -198,7 +198,7 @@ public final class JavaBean<T> extends Bean<T> {
          * Constructs a JavaBean property using a class reference.
          *
          * @param name  the name of the property
-         * @param owner the class of the bean containing the property
+         * @param owner the class of the structured containing the property
          */
         public Property(String name, Class<?> owner) {
             this(name, JavaType.forClass(owner));

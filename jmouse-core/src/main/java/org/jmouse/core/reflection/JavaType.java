@@ -164,9 +164,9 @@ public class JavaType implements ClassTypeInspector {
     }
 
     /**
-     * Creates a {@link JavaType} for an instance of an bean.
+     * Creates a {@link JavaType} for an instance of an structured.
      *
-     * @param object the bean instance
+     * @param object the structured instance
      * @return a {@link JavaType} instance
      */
     public static JavaType forInstance(Object object) {
@@ -417,7 +417,7 @@ public class JavaType implements ClassTypeInspector {
     /**
      * Returns the class type being inspected.
      *
-     * @return the {@link Class} bean representing the inspected type
+     * @return the {@link Class} structured representing the inspected type
      */
     @Override
     public Class<?> getClassType() {
