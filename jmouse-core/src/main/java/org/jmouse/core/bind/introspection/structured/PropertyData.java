@@ -1,5 +1,6 @@
 package org.jmouse.core.bind.introspection.structured;
 
+import org.jmouse.core.bind.introspection.ClassTypeDescriptor;
 import org.jmouse.core.bind.introspection.MethodDescriptor;
 import org.jmouse.core.bind.introspection.internal.AbstractDataContainer;
 import org.jmouse.util.Getter;
@@ -12,6 +13,7 @@ public class PropertyData<T> extends AbstractDataContainer<T> implements Propert
     private MethodDescriptor    getterMethod;
     private MethodDescriptor    setterMethod;
     private ObjectDescriptor<T> owner;
+    private ClassTypeDescriptor type;
 
     public PropertyData(T target) {
         super(target);
@@ -23,8 +25,8 @@ public class PropertyData<T> extends AbstractDataContainer<T> implements Propert
     }
 
     @Override
-    public void setGetter(Getter<T, Object> getter) {
-        this.getter = getter;
+    public void setGetter(Getter<T, ?> getter) {
+        this.getter = (Getter<T, Object>) getter;
     }
 
     @Override
@@ -33,8 +35,8 @@ public class PropertyData<T> extends AbstractDataContainer<T> implements Propert
     }
 
     @Override
-    public void setSetter(Setter<T, Object> setter) {
-        this.setter = setter;
+    public void setSetter(Setter<T, ?> setter) {
+        this.setter = (Setter<T, Object>) setter;
     }
 
     @Override
@@ -55,6 +57,16 @@ public class PropertyData<T> extends AbstractDataContainer<T> implements Propert
     @Override
     public void setSetterMethod(MethodDescriptor setterMethod) {
         this.setterMethod = setterMethod;
+    }
+
+    @Override
+    public ClassTypeDescriptor getType() {
+        return type;
+    }
+
+    @Override
+    public void setType(ClassTypeDescriptor type) {
+        this.type = type;
     }
 
     @Override

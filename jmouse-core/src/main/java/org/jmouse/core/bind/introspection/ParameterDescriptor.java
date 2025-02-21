@@ -10,9 +10,17 @@ public class ParameterDescriptor extends AnnotatedElementDescriptor<Parameter, P
         super(introspector, container);
     }
 
+    public ClassTypeDescriptor getType() {
+        return container.getType();
+    }
+
     @Override
     public ParameterIntrospector toIntrospector() {
         return introspector;
     }
 
+    @Override
+    public String toString() {
+        return "[%s]: %s".formatted(getName(), getType().getJavaType());
+    }
 }

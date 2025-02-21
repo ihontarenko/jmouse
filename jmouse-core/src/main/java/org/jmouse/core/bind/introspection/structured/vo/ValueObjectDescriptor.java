@@ -1,4 +1,4 @@
-package org.jmouse.core.bind.introspection.structured.java_bean;
+package org.jmouse.core.bind.introspection.structured.vo;
 
 import org.jmouse.core.bind.introspection.AbstractDescriptor;
 import org.jmouse.core.bind.introspection.ClassTypeDescriptor;
@@ -9,13 +9,19 @@ import org.jmouse.core.reflection.ClassTypeInspector;
 
 import java.util.Map;
 
-public class JavaBeanDescriptor<T>
-        extends AbstractDescriptor<T, ObjectData<T>, JavaBeanIntrospector<T>> implements ClassTypeInspector, ObjectDescriptor<T> {
+public class ValueObjectDescriptor<T> extends AbstractDescriptor<T, ObjectData<T>, ValueObjectIntrospector<T>>
+        implements ClassTypeInspector, ObjectDescriptor<T> {
 
-    protected JavaBeanDescriptor(JavaBeanIntrospector<T> introspector, ObjectData<T> container) {
+    protected ValueObjectDescriptor(ValueObjectIntrospector<T> introspector, ObjectData<T> container) {
         super(introspector, container);
     }
 
+    @Override
+    public ValueObjectIntrospector<T> toIntrospector() {
+        return introspector;
+    }
+
+    @Override
     public ClassTypeDescriptor getType() {
         return container.getType();
     }
@@ -31,18 +37,7 @@ public class JavaBeanDescriptor<T>
     }
 
     @Override
-    public JavaBeanIntrospector<T> toIntrospector() {
-        return introspector;
-    }
-
-    @Override
-    public String toString() {
-        return "Java-Bean Descriptor: " + container.getType();
-    }
-
-    @Override
     public Class<?> getClassType() {
-        return container.getType().getClassType();
+        return getType().getClassType();
     }
-
 }

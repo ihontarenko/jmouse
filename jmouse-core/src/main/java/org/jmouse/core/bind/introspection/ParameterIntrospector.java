@@ -2,11 +2,11 @@ package org.jmouse.core.bind.introspection;
 
 import org.jmouse.core.bind.introspection.internal.ParameterData;
 import org.jmouse.core.reflection.JavaType;
-import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Parameter;
 
-public class ParameterIntrospector extends AnnotatedElementIntrospector<ParameterData, ParameterIntrospector, Parameter, ParameterDescriptor> {
+public class ParameterIntrospector
+        extends AnnotatedElementIntrospector<ParameterData, ParameterIntrospector, Parameter, ParameterDescriptor> {
 
     protected ParameterIntrospector(Parameter target) {
         super(target);
@@ -14,7 +14,7 @@ public class ParameterIntrospector extends AnnotatedElementIntrospector<Paramete
 
     @Override
     public ParameterIntrospector name() {
-        return name(Reflections.getParameterName(container.getTarget()));
+        return name(container.getTarget().getName());
     }
 
     public ParameterIntrospector type() {
@@ -37,6 +37,5 @@ public class ParameterIntrospector extends AnnotatedElementIntrospector<Paramete
     public ParameterData getContainerFor(Parameter target) {
         return new ParameterData(target);
     }
-
 
 }

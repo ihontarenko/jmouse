@@ -1,6 +1,7 @@
-package org.jmouse.core.bind.introspection.structured.java_bean;
+package org.jmouse.core.bind.introspection.structured.jb;
 
 import org.jmouse.core.bind.introspection.AbstractIntrospector;
+import org.jmouse.core.bind.introspection.ClassTypeDescriptor;
 import org.jmouse.core.bind.introspection.MethodDescriptor;
 import org.jmouse.core.bind.introspection.structured.PropertyData;
 import org.jmouse.util.Getter;
@@ -13,8 +14,13 @@ public class JavaBeanPropertyIntrospector<T>
         super(target);
     }
 
-    JavaBeanPropertyIntrospector<T> owner(JavaBeanDescriptor<T> descriptor) {
+    public JavaBeanPropertyIntrospector<T> owner(JavaBeanDescriptor<T> descriptor) {
         container.setOwner(descriptor);
+        return self();
+    }
+
+    public JavaBeanPropertyIntrospector<T> type(ClassTypeDescriptor type) {
+        container.setType(type);
         return self();
     }
 
