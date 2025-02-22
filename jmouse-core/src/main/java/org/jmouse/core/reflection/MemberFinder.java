@@ -2,6 +2,8 @@ package org.jmouse.core.reflection;
 
 import org.jmouse.core.matcher.Matcher;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,6 +45,8 @@ import java.util.Optional;
  * @param <T> the type of {@link Member} being searched (e.g., {@link java.lang.reflect.Constructor}, {@link java.lang.reflect.Method}, {@link java.lang.reflect.Field})
  */
 public interface MemberFinder<T extends Member> {
+
+    Comparator<Executable> PARAMETERS_COUNT_CMP = Comparator.comparingInt(Executable::getParameterCount);
 
     static <T extends Member> Comparator<T> defaultComparator() {
         return Comparator.comparing(Member::getName);
@@ -98,7 +102,7 @@ public interface MemberFinder<T extends Member> {
      * @param comparator the comparator to sort the matched members
      * @return a collection of members that match the criteria, sorted as specified
      */
-    default Collection<T> find(Class<?> clazz, Matcher<? super T> matcher, Comparator<T> comparator) {
+    default Collection<T> find(Class<?> clazz, Matcher<? super T> matcher, Comparator<? super T> comparator) {
         return find(clazz, matcher, Collections.singletonList(comparator));
     }
 
@@ -115,7 +119,7 @@ public interface MemberFinder<T extends Member> {
      * @param comparators a collection of comparators to sort the matched members; if empty, no sorting is applied
      * @return a collection of members that match the criteria, sorted as specified
      */
-    default Collection<T> find(Class<?> clazz, Matcher<? super T> matcher, Collection<Comparator<T>> comparators) {
+    default Collection<T> find(Class<?> clazz, Matcher<? super T> matcher, Collection<Comparator<? super T>> comparators) {
         Matcher<Member> strictMatcher = MemberMatcher.isDeclaredClass(clazz).and((Matcher<? super Member>) matcher);
         Collection<T>   members       = getMembers(clazz);
 
@@ -127,6 +131,7 @@ public interface MemberFinder<T extends Member> {
         }
 
         Comparator<T> comparator = comparators.stream()
+                .map(cmp -> (Comparator<T>)cmp)
                 .reduce(Comparator::thenComparing)
                 .orElse((a, b) -> 0);
 
@@ -142,7 +147,7 @@ public interface MemberFinder<T extends Member> {
      * @param comparators a collection of comparators for sorting the members
      * @return an {@link Optional} containing the first matching member, or empty if no match is found
      */
-    default Optional<T> findFirst(Class<?> clazz, Matcher<? super T> matcher, Collection<Comparator<T>> comparators) {
+    default Optional<T> findFirst(Class<?> clazz, Matcher<? super T> matcher, Collection<Comparator<? super T>> comparators) {
         return find(clazz, matcher, comparators).stream().findFirst();
     }
 
@@ -158,7 +163,7 @@ public interface MemberFinder<T extends Member> {
      * @param comparator the comparator to sort the members
      * @return an {@link Optional} containing the first matching member, or empty if no match is found
      */
-    default Optional<T> findFirst(Class<?> clazz, Matcher<? super T> matcher, Comparator<T> comparator) {
+    default Optional<T> findFirst(Class<?> clazz, Matcher<? super T> matcher, Comparator<? super T> comparator) {
         return findFirst(clazz, matcher, Collections.singletonList(comparator));
     }
 

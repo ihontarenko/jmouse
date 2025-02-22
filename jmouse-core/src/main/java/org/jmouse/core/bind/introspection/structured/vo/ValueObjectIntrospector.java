@@ -1,14 +1,14 @@
 package org.jmouse.core.bind.introspection.structured.vo;
 
 import org.jmouse.core.bind.introspection.*;
-import org.jmouse.core.bind.introspection.structured.ObjectData;
 import org.jmouse.core.reflection.JavaType;
 
-import java.io.BufferedOutputStream;
-import java.io.PrintStream;
-import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
-public class ValueObjectIntrospector<T> extends AbstractIntrospector<ObjectData<T>, ValueObjectIntrospector<T>, T, ValueObjectDescriptor<T>> {
+public class ValueObjectIntrospector<T>
+        extends AbstractIntrospector<ValueObjectData<T>, ValueObjectIntrospector<T>, T, ValueObjectDescriptor<T>> {
 
     public ValueObjectIntrospector(Class<T> target) {
         super(null);
@@ -21,15 +21,33 @@ public class ValueObjectIntrospector<T> extends AbstractIntrospector<ObjectData<
         return self();
     }
 
-    public ValueObjectIntrospector<T> properties() {
-        ClassTypeDescriptor   classTypeDescriptor   = container.getType();
-        ConstructorDescriptor constructorDescriptor = classTypeDescriptor.getConstructors().getFirst();
+    public ValueObjectIntrospector<T> constructor() {
+        ClassTypeDescriptor         descriptor   = container.getType();
+        List<ConstructorDescriptor> constructors = new ArrayList<>(descriptor.getConstructors());
+        constructors.sort(Comparator.comparingInt(ctor -> ctor.getParameters().size()));
 
-        System.out.println(constructorDescriptor);
-        for (ParameterDescriptor parameter : constructorDescriptor.getParameters()) {
-            System.out.println(parameter);
+        container.setConstructor(constructors.getFirst());
+
+        return self();
+    }
+
+    public ValueObjectIntrospector<T> properties() {
+        constructor();
+
+        ConstructorDescriptor    constructor = container.getConstructor();
+        ValueObjectDescriptor<T> parent      = toDescriptor();
+
+        for (ParameterDescriptor parameter : constructor.getParameters()) {
+            ValueObjectPropertyIntrospector<T> introspector = new ValueObjectPropertyIntrospector<>(container.getTarget());
+            introspector.owner(parent).name(parameter.getName());
+            property(introspector.toDescriptor());
         }
 
+        return self();
+    }
+
+    public ValueObjectIntrospector<T> property(ValueObjectPropertyDescriptor<T> property) {
+        container.addProperty(property);
         return self();
     }
 
@@ -49,7 +67,7 @@ public class ValueObjectIntrospector<T> extends AbstractIntrospector<ObjectData<
     }
 
     @Override
-    public ObjectData<T> getContainerFor(T target) {
-        return new ObjectData<>(target);
+    public ValueObjectData<T> getContainerFor(T target) {
+        return new ValueObjectData<>(target);
     }
 }

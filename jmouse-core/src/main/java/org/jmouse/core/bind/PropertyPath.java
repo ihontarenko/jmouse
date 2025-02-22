@@ -1,6 +1,7 @@
 package org.jmouse.core.bind;
 
 import org.jmouse.util.Exceptions;
+import org.jmouse.util.Streamable;
 import org.jmouse.util.helper.Arrays;
 
 import java.util.HashMap;
@@ -342,7 +343,7 @@ final public class PropertyPath {
      * @param sequence  the original sequence being parsed
      */
     public record Entries(int size, int[] starts, int[] ends, int[] types, CharSequence sequence)
-            implements Iterator<CharSequence>, Iterable<CharSequence> {
+            implements Iterator<CharSequence>, Streamable<CharSequence> {
 
         private static int position = 0;
 

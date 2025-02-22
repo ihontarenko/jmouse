@@ -63,7 +63,7 @@ public class ClassTypeDescriptor extends AnnotatedElementDescriptor<Class<?>, Cl
 
     @Override
     public String toString() {
-        return "Class-Type: " + getName();
+        return getJavaType().toString();
     }
 
 }

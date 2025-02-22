@@ -2,10 +2,15 @@ package org.jmouse.core.reflection;
 
 import org.jmouse.core.matcher.Matcher;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.jmouse.core.matcher.Matcher.constant;
+import static org.jmouse.core.reflection.MethodMatchers.isAnnotatedWith;
 
 /**
  * A class that finds constructors in a given class. It supports scanning superclasses
@@ -40,7 +45,19 @@ public class ConstructorFinder implements MemberFinder<Constructor<?>> {
      */
     @Override
     public ConstructorFilter filter(Class<?> clazz) {
-        return new ConstructorFilter(this, Matcher.constant(true), clazz);
+        return new ConstructorFilter(this, constant(true), clazz);
+    }
+
+    public static Collection<Constructor<?>> findConstructor(Class<?> clazz) {
+        return new ConstructorFinder().find(clazz, constant(true));
+    }
+
+    public static Constructor<?> findFirstConstructor(Class<?> clazz) {
+        return new ConstructorFinder().findFirst(clazz, constant(true), PARAMETERS_COUNT_CMP).orElse(null);
+    }
+
+    public static Constructor<?> findFirstAnnotatedConstructor(Class<?> clazz, Class<? extends Annotation> annotation) {
+        return new ConstructorFinder().findFirst(clazz, isAnnotatedWith(annotation), PARAMETERS_COUNT_CMP).orElse(null);
     }
 
 }

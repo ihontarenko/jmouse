@@ -16,7 +16,7 @@ public class User {
     private String name;
     private List<Address>   address;
     private Set<Book>       books;
-    private String status;
+    private UserStatus status;
 
     public String getName() {
         return name;
@@ -43,12 +43,12 @@ public class User {
         this.books = books;
     }
 
-    public String getStatus() {
+    public UserStatus getStatus() {
         return status;
     }
 
     // @BindRequired("Обовязкове занчення блять!!!")
-    public void setStatus(String status) {
+    public void setStatus(UserStatus status) {
         this.status = status;
     }
 

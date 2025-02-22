@@ -12,6 +12,10 @@ public class ClientUser {
         this.age = age;
     }
 
+    public ClientUser(String name, String lastName) {
+        this(name, lastName, 0);
+    }
+
     public String getName() {
         return name;
     }

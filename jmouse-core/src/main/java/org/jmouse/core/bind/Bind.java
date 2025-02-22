@@ -309,4 +309,13 @@ public final class Bind {
         return to(path, type).getValue();
     }
 
+    /**
+     * Binds a value to a specified bindable type and return.
+     *
+     * @return the bound object
+     */
+    public <T> T get(Class<T> type) {
+        return get(null, type);
+    }
+
 }

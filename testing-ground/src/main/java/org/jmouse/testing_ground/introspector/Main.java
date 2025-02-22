@@ -1,5 +1,6 @@
 package org.jmouse.testing_ground.introspector;
 
+import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.core.bind.introspection.ClassTypeDescriptor;
 import org.jmouse.core.bind.introspection.ClassTypeIntrospector;
 import org.jmouse.core.bind.introspection.structured.jb.JavaBeanDescriptor;
@@ -22,6 +23,10 @@ public class Main {
         ClassTypeDescriptor descriptor = introspector.toDescriptor();
 
         Map<Object, Object> data = new HashMap<>();
+
+        PropertyPath propertyPath = PropertyPath.forPath("app.name[0].version");
+
+        propertyPath.entries();
 
         data.put("firstName", "John");
         data.put(123, 123L);

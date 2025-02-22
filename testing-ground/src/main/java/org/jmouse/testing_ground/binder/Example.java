@@ -14,8 +14,6 @@ public class Example {
 
     public static void main(String[] args) {
 
-
-
         List<Map<String, Object>> addresses = new ArrayList<>();
         addresses.add(Map.of("street", "Street 123 ${address[0].city}", "city", "New-York"));
 
@@ -29,11 +27,12 @@ public class Example {
         Map<String, Object> data = new HashMap<>();
 
         data.put("name", "James Bond");
+        data.put("status", Map.of("status", "Blocked!"));
         data.put("books", books);
         data.put("address", addresses);
 
         Binder binder = Binder.with(data, new DefaultBindingCallback());
-        User   user   = Bind.with(binder).get(null, User.class);
+        User   user   = Bind.with(binder).get(User.class);
 
         System.out.println(user);
     }

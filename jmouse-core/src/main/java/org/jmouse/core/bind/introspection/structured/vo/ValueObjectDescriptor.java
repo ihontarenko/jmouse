@@ -2,17 +2,16 @@ package org.jmouse.core.bind.introspection.structured.vo;
 
 import org.jmouse.core.bind.introspection.AbstractDescriptor;
 import org.jmouse.core.bind.introspection.ClassTypeDescriptor;
-import org.jmouse.core.bind.introspection.structured.ObjectData;
 import org.jmouse.core.bind.introspection.structured.ObjectDescriptor;
 import org.jmouse.core.bind.introspection.structured.PropertyDescriptor;
 import org.jmouse.core.reflection.ClassTypeInspector;
 
 import java.util.Map;
 
-public class ValueObjectDescriptor<T> extends AbstractDescriptor<T, ObjectData<T>, ValueObjectIntrospector<T>>
+public class ValueObjectDescriptor<T> extends AbstractDescriptor<T, ValueObjectData<T>, ValueObjectIntrospector<T>>
         implements ClassTypeInspector, ObjectDescriptor<T> {
 
-    protected ValueObjectDescriptor(ValueObjectIntrospector<T> introspector, ObjectData<T> container) {
+    protected ValueObjectDescriptor(ValueObjectIntrospector<T> introspector, ValueObjectData<T> container) {
         super(introspector, container);
     }
 
@@ -39,5 +38,10 @@ public class ValueObjectDescriptor<T> extends AbstractDescriptor<T, ObjectData<T
     @Override
     public Class<?> getClassType() {
         return getType().getClassType();
+    }
+
+    @Override
+    public String toString() {
+        return "[VO]: " + container.getType().getJavaType();
     }
 }
