@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pines Templates - Index</title>
+</head>
+<body>
+
+    <h1>Main Page - {{ title }}</h1>
+
+    <ul>
+    {% for item in items %}
+        <li>{{ item }}</li>
+    {% endFor %}
+    </ul>
+
+    {% call(1, 2, 3) | default('123') %}
+
+    <ul>
+        <li>Loader</li>
+        <li>CharSequence</li>
+        <li>Lexer</li>
+    </ul>
+
+    <footer>
+        Pines - 2025 {# "Years" #}
+    </footer>
+
+</body>
+</html>

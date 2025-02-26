@@ -24,9 +24,9 @@ import java.lang.reflect.Parameter;
  */
 abstract public class ExecutableIntrospector<
         C extends ExecutableData<E>,
-        I extends ExecutableIntrospector<?, ?, ?, ?>,
+        I extends ExecutableIntrospector<C, I, E, D>,
         E extends Executable,
-        D extends ExecutableDescriptor<?, ?, ?>>
+        D extends ExecutableDescriptor<E, C, I>>
         extends AnnotatedElementIntrospector<C, I, E, D> {
 
     /**

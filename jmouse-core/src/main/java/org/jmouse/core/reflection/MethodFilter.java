@@ -17,7 +17,7 @@ import static org.jmouse.core.reflection.MethodMatchers.*;
  *
  * <p>Example usage:
  * <pre>
- *     MethodFilter filter = new MethodFilter(finder, matcher, SomeClass.class);
+ *     MethodFilter filter = new MethodFilter(support, matcher, SomeClass.class);
  *     filter.methodName("toString")
  *           .returnType(String.class)
  *           .parameterTypes();

@@ -36,6 +36,7 @@
         <module>jmouse-context</module>
         <module>jmouse-web</module>
         <module>testing-ground</module>
+        <module>jmouse-templates</module>
     </modules>
 
 </project>

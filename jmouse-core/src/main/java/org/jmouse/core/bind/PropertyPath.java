@@ -11,7 +11,7 @@ import java.util.StringJoiner;
 
 /**
  * Represents a structured path name that can be used to navigate and manipulate
- * hierarchical properties. This class provides parsing, merging, and transformation
+ * hierarchical properties. This class provides lexer, merging, and transformation
  * capabilities for structured property paths.
  *
  * <p>Example usage:</p>
@@ -38,7 +38,7 @@ final public class PropertyPath {
     private Entries entries;
 
     /**
-     * Constructs a PropertyPath by parsing the given string.
+     * Constructs a PropertyPath by lexer the given string.
      *
      * @param name the property path to parse
      */

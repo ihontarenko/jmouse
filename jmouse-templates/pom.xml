@@ -9,42 +9,21 @@
         <version>1.0.0-Beta</version>
     </parent>
 
-    <artifactId>testing-ground</artifactId>
+    <name>jMouse - Pines Templates</name>
+    <artifactId>jmouse-templates</artifactId>
+    <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>21</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
 
     <dependencies>
-        <!-- jMouse -->
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-context</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-expression</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-templates</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-validation</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-web</artifactId>
-        </dependency>
-
-        <!-- SLF4J -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -55,15 +34,15 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>21</source>
-                    <target>21</target>
-                    <compilerArgs>--enable-preview</compilerArgs>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
         </plugins>

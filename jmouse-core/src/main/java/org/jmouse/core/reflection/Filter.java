@@ -16,7 +16,7 @@ import java.util.function.Function;
  *
  * <p>Example usage:
  * <pre>
- *     Filter<Method> filter = new MethodFilter(finder, matcher, SomeClass.class);
+ *     Filter<Method> filter = new MethodFilter(support, matcher, SomeClass.class);
  *     List<Method> methods = filter.find();
  *     Matcher<Method> currentMatcher = filter.matcher();
  * </pre>

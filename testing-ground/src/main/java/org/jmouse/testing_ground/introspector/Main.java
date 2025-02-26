@@ -1,5 +1,6 @@
 package org.jmouse.testing_ground.introspector;
 
+import org.apache.catalina.core.JniLifecycleListener;
 import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.core.bind.introspection.ClassTypeDescriptor;
 import org.jmouse.core.bind.introspection.ClassTypeIntrospector;
@@ -46,8 +47,6 @@ public class Main {
         ValueObjectDescriptor<UserAdmin> valueObjectDescriptorRecord = new ValueObjectIntrospector<>(UserAdmin.class).introspect().toDescriptor();
 
         System.out.println(descriptor);
-
-
     }
 
 }

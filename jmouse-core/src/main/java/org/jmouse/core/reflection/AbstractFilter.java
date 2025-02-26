@@ -16,7 +16,7 @@ import java.util.function.Function;
  *
  * <p>Example usage:
  * <pre>{@code
- *     AbstractFilter<Method> methodFilter = new MethodFilter(finder, matcher, SomeClass.class);
+ *     AbstractFilter<Method> methodFilter = new MethodFilter(support, matcher, SomeClass.class);
  *     List<Method> methods = methodFilter.find();
  * }</pre>
  *
@@ -24,7 +24,7 @@ import java.util.function.Function;
  */
 abstract public class AbstractFilter<T extends Member> implements Filter<T> {
 
-    /** The finder used to locate members. */
+    /** The support used to locate members. */
     protected final MemberFinder<T> finder;
 
     /** The matcher used to apply filtering criteria. */
