@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.jmouse.template.lexer.RawToken.Type.*;
+
 /**
  * Splits raw text into tokens, distinguishing between plain text and templating expressions.
  *
@@ -60,14 +62,14 @@ public class RawSplitter implements Splitter<List<RawToken>, StringSource> {
         int          lastIndex = 0;
 
         while (matcher.find()) {
-            int startIndex = matcher.start();
+            int startIndex  = matcher.start();
+            int startOffset = offset + startIndex;
 
             // Cut out source-content between expressions
             if (startIndex > lastIndex) {
-                String head = segment.subSequence(lastIndex, startIndex).toString();
-                tokens.add(new RawToken(head, source.getLineNumber(offset + startIndex), offset + lastIndex,
-                                        RawToken.Type.RAW_TEXT));
-                LOGGER.info("Before open-close: '{}'", head);
+                String rawContent = segment.subSequence(lastIndex, startIndex).toString();
+                tokens.add(new RawToken(rawContent, source.getLineNumber(startOffset), startOffset, RAW_TEXT));
+                LOGGER.info("Before open-close: '{}'", rawContent);
             }
 
             if (matcher.group(INNER_GROUP) != null) {
@@ -77,8 +79,7 @@ public class RawSplitter implements Splitter<List<RawToken>, StringSource> {
 
                 // Add the opening delimiter.
                 LOGGER.info("Open: {}", open);
-                tokens.add(new RawToken(open, source.getLineNumber(offset + startIndex), offset + startIndex,
-                                        RawToken.Type.OPEN_TAG));
+                tokens.add(new RawToken(open, source.getLineNumber(startOffset), startOffset, OPEN_TAG));
 
                 // Tokenize the expression content using ExpressionSplitter.
                 LOGGER.info("Inner Expression: '{}'", expression);
@@ -88,9 +89,9 @@ public class RawSplitter implements Splitter<List<RawToken>, StringSource> {
 
                 // Add the closing delimiter.
                 LOGGER.info("Close: {}", close);
-                int closeIndex = matcher.end() - close.length();
-                tokens.add(new RawToken(close, source.getLineNumber(offset + closeIndex), offset + closeIndex,
-                                        RawToken.Type.CLOSE_TAG));
+                int closeIndex  = matcher.end() - close.length();
+                int closeOffset = offset + closeIndex;
+                tokens.add(new RawToken(close, source.getLineNumber(closeOffset), closeOffset, CLOSE_TAG));
             }
 
             lastIndex = matcher.end();
@@ -98,9 +99,9 @@ public class RawSplitter implements Splitter<List<RawToken>, StringSource> {
 
         // Add remaining HTML source.
         if (lastIndex < segment.length()) {
-            String tail = segment.subSequence(lastIndex, segment.length()).toString();
-            tokens.add(new RawToken(tail, source.getLineNumber(offset + lastIndex), offset + lastIndex,
-                                    RawToken.Type.RAW_TEXT));
+            String tail       = segment.subSequence(lastIndex, segment.length()).toString();
+            int    lastOffset = offset + lastIndex;
+            tokens.add(new RawToken(tail, source.getLineNumber(lastOffset), lastOffset, RAW_TEXT));
             LOGGER.info("Tail: '{}'", tail);
         }
 

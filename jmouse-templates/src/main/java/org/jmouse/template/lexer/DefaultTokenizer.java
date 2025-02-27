@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Integer.MIN_VALUE;
+import static org.jmouse.template.lexer.RawToken.Type.UNKNOWN;
+
 /**
  * Default implementation of {@link Tokenizer} that processes text and produces a list of type entries.
  *
@@ -55,8 +59,8 @@ public class DefaultTokenizer implements Tokenizer<Token, StringSource> {
         TokenizableString tokenizable = text.getTokenizable();
 
         // Special tokens marking the start and end of a line
-        RawToken sol = new RawToken("BEFORE-OF-LINE", -1, Integer.MIN_VALUE, RawToken.Type.UNKNOWN);
-        RawToken eol = new RawToken("END-OF-LINE", -1, Integer.MAX_VALUE, RawToken.Type.UNKNOWN);
+        RawToken sol = new RawToken("BEFORE-OF-LINE", -1, MIN_VALUE, UNKNOWN);
+        RawToken eol = new RawToken("END-OF-LINE", -1, MAX_VALUE, UNKNOWN);
 
         tokens.add(entry(BasicToken.T_SOL, sol, counter));
 
@@ -64,7 +68,7 @@ public class DefaultTokenizer implements Tokenizer<Token, StringSource> {
 
         for (RawToken rawToken : rawTokens) {
             RawToken.Type type       = rawToken.type();
-            String        tokenValue = rawToken.token().trim();
+            String        tokenValue = rawToken.value().trim();
 
             // Determine type entry based on the type
             Token token = switch (type) {
@@ -76,7 +80,7 @@ public class DefaultTokenizer implements Tokenizer<Token, StringSource> {
 
                     if (optional.isPresent()) {
                         tokenType = optional.get();
-                    } else if (type == RawToken.Type.UNKNOWN) {
+                    } else if (type == UNKNOWN) {
                         tokenType = BasicToken.T_UNKNOWN;
                     }
 
@@ -87,7 +91,7 @@ public class DefaultTokenizer implements Tokenizer<Token, StringSource> {
                     // Detect integer and floating-point numbers
                     Token.Type tokenType = BasicToken.T_INT;
 
-                    if (rawToken.token().matches(Syntax.FRACTIONAL_NUMBER)) {
+                    if (rawToken.value().matches(Syntax.FRACTIONAL_NUMBER)) {
                         tokenType = BasicToken.T_FLOAT;
                     }
 
@@ -110,14 +114,14 @@ public class DefaultTokenizer implements Tokenizer<Token, StringSource> {
     }
 
     /**
-     * Creates a type entry from the given type type and raw type.
+     * Creates a type entry from the given type and raw type.
      *
-     * @param type    the type type
+     * @param type    the type
      * @param token   the raw type data
      * @param ordinal the ordinal offset of the type
      * @return a new type entry
      */
     private Token entry(Token.Type type, RawToken token, int ordinal) {
-        return new Token(token.token(), type, ordinal, token.offset(), token.line());
+        return new Token(token.value(), type, ordinal, token.offset(), token.line());
     }
 }
