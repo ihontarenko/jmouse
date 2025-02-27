@@ -16,11 +16,6 @@ import java.util.regex.Pattern;
  *
  * <p>Utilizes regex-based tokenization to extract meaningful components from an expression.</p>
  *
- * <pre>{@code
- * ExpressionSplitter splitter = new ExpressionSplitter();
- * List<RawToken> tokens = splitter.split("variable + 42", 0, "variable + 42".length());
- * }</pre>
- *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
@@ -30,17 +25,15 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, StringSource
 
     private static final Pattern EXPRESSION_PATTERN = Pattern.compile(
             "\\s*(?:(?<IDENTIFIER>[a-zA-Z_][a-zA-Z0-9_]*)" +
-            "|(?<NUMBER>\\d+)" +
-            "|(?<STRING>'[^']*'|\"[^\"]*\")" +
-            "|(?<OPERATOR>[|:,()])" +
-            "|(?<OTHER>\\S))"
+            "|(?<NUMBER>\\d+)|(?<STRING>'[^']*'|\"[^\"]*\")" +
+            "|(?<OPERATOR>[|:,()])|(?<OTHER>\\S))"
     );
 
-    public static final  String                     IDENTIFIER          = "IDENTIFIER";
-    public static final  String                     NUMBER              = "NUMBER";
-    public static final  String                     STRING              = "STRING";
-    public static final  String                     OPERATOR            = "OPERATOR";
-    public static final  String                     OTHER               = "OTHER";
+    public static final String IDENTIFIER = "IDENTIFIER";
+    public static final String NUMBER     = "NUMBER";
+    public static final String STRING     = "STRING";
+    public static final String OPERATOR   = "OPERATOR";
+    public static final String OTHER      = "OTHER";
 
     // Define group names and their corresponding type types.
     private static final String[]                   GROUP_NAMES         = {IDENTIFIER, NUMBER, STRING, OPERATOR, OTHER};

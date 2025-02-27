@@ -17,11 +17,6 @@ import static org.jmouse.template.lexer.RawToken.Type.*;
  * <p>Uses a regex-based approach to identify expressions enclosed within template delimiters,
  * such as <code>{{expression}}</code> or <code>{% statement %}</code>, and processes them accordingly.</p>
  *
- * <pre>{@code
- * RawSplitter splitter = new RawSplitter();
- * List<RawToken> tokens = splitter.split("Hello {{name}}!", 0, "Hello {{name}}!".length());
- * }</pre>
- *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
@@ -65,7 +60,7 @@ public class RawSplitter implements Splitter<List<RawToken>, StringSource> {
             int startIndex  = matcher.start();
             int startOffset = offset + startIndex;
 
-            // Cut out source-content between expressions
+            // Extract plain text between expressions.
             if (startIndex > lastIndex) {
                 String rawContent = segment.subSequence(lastIndex, startIndex).toString();
                 tokens.add(new RawToken(rawContent, source.getLineNumber(startOffset), startOffset, RAW_TEXT));

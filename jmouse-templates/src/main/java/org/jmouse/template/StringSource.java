@@ -9,7 +9,7 @@ import java.util.Arrays;
 import static org.jmouse.util.helper.Arrays.expand;
 
 /**
- * Represents a template source that reads data from a {@link Reader} and provides
+ * Represents a source for a template that reads data from a {@link Reader} and provides
  * efficient operations for text manipulation.
  *
  * <p>This class maintains a buffer to store template content, supporting operations
@@ -23,23 +23,28 @@ public class StringSource implements CharSequence {
     private static final int DEFAULT_CAPACITY = 1024;
 
     private final String            name;          // Template name
-    private final TokenizableString tokenizable;
+    private final TokenizableString tokenizable;   // Tokenized representation of the template
     private       int               length = 0;    // Number of characters stored in buffer
     private       char[]            buffer;        // Character buffer for storing template data
 
     /**
      * Constructs a {@code StringSource} with the given template name and content reader.
      *
-     * @param name the name of the template
-     * @param reader   the reader providing the template content
+     * @param name   the name of the template
+     * @param reader the reader providing the template content
      */
     public StringSource(String name, Reader reader) {
         this.tokenizable = new Tokenized(this);
         this.name = name;
         this.buffer = new char[DEFAULT_CAPACITY];
-        copyReaderIntoCharArray(reader);
+        readerIntoCharArray(reader);
     }
 
+    /**
+     * Returns the tokenized representation of the template.
+     *
+     * @return the tokenized content
+     */
     public TokenizableString getTokenizable() {
         return tokenizable;
     }
@@ -58,8 +63,8 @@ public class StringSource implements CharSequence {
     /**
      * Extracts a substring from the buffer between specified positions.
      *
-     * @param start the starting offset (relative to offset)
-     * @param end   the ending offset (relative to offset)
+     * @param start the starting offset
+     * @param end   the ending offset
      * @return the extracted substring
      */
     public String substring(int start, int end) {
@@ -71,7 +76,7 @@ public class StringSource implements CharSequence {
      *
      * @param reader the reader providing template content
      */
-    private void copyReaderIntoCharArray(Reader reader) {
+    private void readerIntoCharArray(Reader reader) {
         char[] buffer = new char[DEFAULT_CAPACITY * 4];
         int    length;
 
@@ -106,10 +111,10 @@ public class StringSource implements CharSequence {
     }
 
     /**
-     * Determines the length of a newline sequence at the specified offset.
-     * Supports different newline formats: '\n', '\r', and '\r\n'.
+     * Calculates the number of lines up to a given offset.
      *
-     * @param offset the offset to check for a newline
+     * @param offset the offset to check for newlines
+     * @return the total number of lines up to the given offset
      */
     public int getLineNumber(int offset) {
         int lines = 1;
@@ -177,5 +182,4 @@ public class StringSource implements CharSequence {
     public String toString() {
         return new String(buffer, 0, length);
     }
-
 }

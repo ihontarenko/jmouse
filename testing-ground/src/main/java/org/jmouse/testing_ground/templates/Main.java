@@ -7,6 +7,7 @@ import org.jmouse.template.loader.ClasspathLoader;
 import org.jmouse.template.loader.TemplateLoader;
 
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.List;
 
 public class Main {
@@ -18,7 +19,8 @@ public class Main {
         loader.setSuffix(".html");
 
         Reader reader = loader.load("index");
-        StringSource source = new StringSource("index", reader);
+//        StringSource source = new StringSource("index", reader);
+        StringSource source = new StringSource("index", new StringReader("Hello {{ username }}!"));
         DefaultTokenizer tokenizer = new DefaultTokenizer();
 
         List<Token> tokens = tokenizer.tokenize(source);
