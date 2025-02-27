@@ -1,7 +1,7 @@
 package org.jmouse.template;
 
-import org.jmouse.template.lexer.Token;
-import org.jmouse.template.lexer.Tokenizable;
+import org.jmouse.template.lexer.Token.Type;
+import org.jmouse.template.lexer.TokenizableString;
 import org.jmouse.util.Exceptions;
 import org.jmouse.util.helper.Arrays;
 
@@ -14,67 +14,67 @@ import java.util.Iterator;
  * the original character sequence.</p>
  *
  * <pre>{@code
- * TokenizedString tokenizedString = new TokenizedString("Hello, world!");
- * tokenizedString.entry(0, 5, Token.HELLO);
+ * Tokenized tokenizedString = new Tokenized("Hello, world!");
+ * tokenizedString.entry(0, 5, TokenType.HELLO);
  * System.out.println(tokenizedString.get(0));
  * }</pre>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class TokenizedString implements Tokenizable {
+public class Tokenized implements TokenizableString {
 
     private static final int DEFAULT_ARRAY_SIZE = 32;
 
     private final CharSequence sequence;
     private       int          size = 0;
-    private       Token[]      tokens;
+    private       Type[]       types;
     private       int[]        offsets;
     private       int[]        lengths;
 
     /**
-     * Constructs a new {@code TokenizedString} instance for the given character sequence.
+     * Constructs a new {@code Tokenized} instance for the given character sequence.
      *
      * @param sequence the input character sequence to tokenize
      */
-    public TokenizedString(CharSequence sequence) {
+    public Tokenized(CharSequence sequence) {
         this.sequence = sequence;
-        this.tokens = new Token[DEFAULT_ARRAY_SIZE];
+        this.types = new Type[DEFAULT_ARRAY_SIZE];
         this.offsets = new int[DEFAULT_ARRAY_SIZE];
         this.lengths = new int[DEFAULT_ARRAY_SIZE];
     }
 
     /**
-     * Adds a token entry with its offset and length.
+     * Adds a type entry with its offset and length.
      *
-     * @param offset the starting offset of the token in the sequence
-     * @param length the length of the token
-     * @param token  the token type
+     * @param offset the starting offset of the type in the sequence
+     * @param length the length of the type
+     * @param token  the type type
      */
     @Override
-    public void entry(int offset, int length, Token token) {
+    public void entry(int offset, int length, Type token) {
         ensureCapacity();
 
         this.offsets[this.size] = offset;
         this.lengths[this.size] = length;
-        this.tokens[this.size] = token;
+        this.types[this.size] = token;
 
         this.size++;
     }
 
     /**
-     * Retrieves the token entry at the specified index.
+     * Retrieves the type entry at the specified index.
      *
-     * @param index the index of the token
+     * @param index the index of the type
      * @return the corresponding {@link Entry}
      */
     @Override
     public Entry get(int index) {
         ensureIndex(index);
 
-        int   offset = this.offsets[index];
-        Token token  = this.tokens[index];
-        int   length = this.lengths[index];
+        int  offset = this.offsets[index];
+        Type token  = this.types[index];
+        int  length = this.lengths[index];
 
         String segment = subSequence(offset, offset + length).toString();
 
@@ -82,9 +82,9 @@ public class TokenizedString implements Tokenizable {
     }
 
     /**
-     * Returns the number of stored token entries.
+     * Returns the number of stored type entries.
      *
-     * @return the number of token entries
+     * @return the number of type entries
      */
     @Override
     public int size() {
@@ -142,13 +142,13 @@ public class TokenizedString implements Tokenizable {
     private void ensureCapacity() {
         if (this.offsets.length <= this.size) {
             this.offsets = Arrays.expand(this.offsets, this.offsets.length << 1);
-            this.tokens = Arrays.expand(this.tokens, this.tokens.length << 1);
+            this.types = Arrays.expand(this.types, this.types.length << 1);
             this.lengths = Arrays.expand(this.lengths, this.lengths.length << 1);
         }
     }
 
     /**
-     * Returns an iterator over the token entries.
+     * Returns an iterator over the type entries.
      *
      * @return an iterator for {@link Entry} elements
      */

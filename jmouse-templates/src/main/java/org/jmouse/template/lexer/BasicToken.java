@@ -1,6 +1,6 @@
 package org.jmouse.template.lexer;
 
-public enum StandardToken implements Token {
+public enum BasicToken implements Token.Type {
 
     T_UNKNOWN(1),
     T_EOL(-1),
@@ -51,28 +51,37 @@ public enum StandardToken implements Token {
     private final int      type;
     private final String[] values;
 
-    StandardToken(final int type) {
+    BasicToken(final int type) {
         this(type, new String[0]);
     }
 
-    StandardToken(final int type, final String... values) {
+    BasicToken(final int type, final String... values) {
         this.type = type;
         this.values = values;
     }
 
     @Override
-    public int type() {
+    public int getTypeId() {
         return type;
     }
 
     @Override
-    public String[] examples() {
+    public <E extends Enum<E>> E getEnumType() {
+        return (E) this;
+    }
+
+    @Override
+    public <E extends Enum<E>> Class<E> getBundleType() {
+        return (Class<E>) getEnumType().getClass();
+    }
+
+    @Override
+    public String[] getTokenTemplates() {
         return values;
     }
 
     @Override
-    public StandardToken[] tokens() {
+    public Token.Type[] getTokens() {
         return values();
     }
-
 }

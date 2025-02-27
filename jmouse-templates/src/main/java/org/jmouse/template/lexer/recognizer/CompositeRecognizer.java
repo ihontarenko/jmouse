@@ -8,20 +8,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-public class CompositeRecognizer implements Recognizer<Token, String> {
+public class CompositeRecognizer implements Recognizer<Token.Type, String> {
 
-    private final List<Recognizer<Token, String>> recognizers = new ArrayList<>();
+    private final List<Recognizer<Token.Type, String>> recognizers = new ArrayList<>();
 
-    public void addRecognizer(Recognizer<Token, String> recognizer) {
+    public void addRecognizer(Recognizer<Token.Type, String> recognizer) {
         recognizers.add(recognizer);
     }
 
     @Override
-    public Optional<Token> recognize(String subject) {
+    public Optional<Token.Type> recognize(String subject) {
         Sorter.sort(this.recognizers);
 
-        Optional<Token>                     token    = Optional.empty();
-        Iterator<Recognizer<Token, String>> iterator = recognizers.iterator();
+        Optional<Token.Type>                     token    = Optional.empty();
+        Iterator<Recognizer<Token.Type, String>> iterator = recognizers.iterator();
 
         while (iterator.hasNext() && token.isEmpty()) {
             token = iterator.next().recognize(subject);

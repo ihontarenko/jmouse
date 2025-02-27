@@ -1,5 +1,6 @@
 package org.jmouse.template.lexer;
 
+import org.jmouse.template.StringSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +24,7 @@ import java.util.regex.Pattern;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class ExpressionSplitter implements Splitter<List<RawToken>> {
+public class ExpressionSplitter implements Splitter<List<RawToken>, StringSource> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ExpressionSplitter.class);
 
@@ -41,7 +42,7 @@ public class ExpressionSplitter implements Splitter<List<RawToken>> {
     public static final  String                     OPERATOR            = "OPERATOR";
     public static final  String                     OTHER               = "OTHER";
 
-    // Define group names and their corresponding token types.
+    // Define group names and their corresponding type types.
     private static final String[]                   GROUP_NAMES         = {IDENTIFIER, NUMBER, STRING, OPERATOR, OTHER};
     private static final Map<String, RawToken.Type> GROUP_TO_TOKEN_TYPE = new HashMap<>();
 
@@ -54,7 +55,7 @@ public class ExpressionSplitter implements Splitter<List<RawToken>> {
     }
 
     /**
-     * Splits the provided text into a list of {@link RawToken}, identifying different token types.
+     * Splits the provided text into a list of {@link RawToken}, identifying different type types.
      *
      * @param text   the input character sequence
      * @param offset the starting offset for tokenization
@@ -62,17 +63,18 @@ public class ExpressionSplitter implements Splitter<List<RawToken>> {
      * @return a list of {@link RawToken} extracted from the input text
      */
     @Override
-    public List<RawToken> split(CharSequence text, int offset, int length) {
+    public List<RawToken> split(StringSource text, int offset, int length) {
         List<RawToken> tokens = new ArrayList<>();
 
         // Create a sub-sequence of the text for processing.
-        CharSequence subText = text.subSequence(0, length);
-        Matcher matcher = EXPRESSION_PATTERN.matcher(subText);
-        int index = 0;
+        CharSequence segment = text.subSequence(offset, length);
+        Matcher      matcher = EXPRESSION_PATTERN.matcher(segment);
+        int          index   = 0;
 
         while (matcher.find(index)) {
-            String tokenValue = null;
-            RawToken.Type tokenType = GROUP_TO_TOKEN_TYPE.get(OTHER);
+            String        tokenValue  = null;
+            RawToken.Type tokenType   = GROUP_TO_TOKEN_TYPE.get(OTHER);
+            int           startOffset = offset + matcher.start();
 
             // Loop through the predefined group names to see which one matched.
             for (String groupName : GROUP_NAMES) {
@@ -85,7 +87,7 @@ public class ExpressionSplitter implements Splitter<List<RawToken>> {
             }
 
             if (tokenValue != null) {
-                tokens.add(new RawToken(tokenValue, offset + matcher.start(), tokenType));
+                tokens.add(new RawToken(tokenValue, text.getLineNumber(startOffset), startOffset, tokenType));
             }
 
             index = matcher.end();

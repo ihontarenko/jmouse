@@ -1,14 +1,15 @@
 package org.jmouse.testing_ground.templates;
 
-import org.jmouse.template.TemplateSource;
-import org.jmouse.template.TokenizedString;
-import org.jmouse.template.lexer.*;
+import org.jmouse.template.StringSource;
+import org.jmouse.template.lexer.DefaultTokenizer;
+import org.jmouse.template.lexer.RawSplitter;
+import org.jmouse.template.lexer.RawToken;
+import org.jmouse.template.lexer.Token;
 import org.jmouse.template.loader.ClasspathLoader;
 import org.jmouse.template.loader.TemplateLoader;
 
 import java.io.Reader;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Main {
 
@@ -18,19 +19,26 @@ public class Main {
         loader.setPrefix("templates/");
         loader.setSuffix(".html");
 
-        Reader         reader = loader.load("index");
-        TemplateSource source = new TemplateSource("index", reader);
+        Reader reader = loader.load("index");
 
-        source.shift(123);
+        StringSource source = new StringSource("index", reader);
 
-        //////////////////
-        Tokenizer<Token.Entry, Tokenizable> tokenizer = new DefaultTokenizer();
+        RawSplitter splitter = new RawSplitter();
 
-        List<Token.Entry> tokens = tokenizer.tokenize(source.text());
+        List<RawToken> rawTokens = splitter.split(source, 221, source.length());
 
-        Lexer lexer = new TemplateLexer(tokens);
+        for (RawToken rawToken : rawTokens) {
+            System.out.println(rawToken);
+        }
 
-        System.out.println(tokens.size());
+//        System.out.println(source.getLineNumber(123));
+//
+//        DefaultTokenizer tokenizer = new DefaultTokenizer();
+//
+//        List<Token> tokens = tokenizer.tokenize(source);
+//
+//        System.out.println(tokens.size());
+
     }
 
 }

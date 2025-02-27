@@ -8,24 +8,24 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 
 /**
- * Recognizes tokens based on an enumeration type implementing {@link Token}.
+ * Recognizes tokens based on an enumeration type implementing {@link Token.Type}.
  *
- * <p>This recognizer searches for a matching token in the provided enum type based on a given string.</p>
+ * <p>This recognizer searches for a matching type in the provided enum type based on a given string.</p>
  *
- * @param <T> the enum type implementing {@link Token}
+ * @param <T> the enum type implementing {@link Token.Type}
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class EnumTokenRecognizer<T extends Enum<T> & Token> extends EnumFinder<T> implements Recognizer<Token, String> {
+public class EnumTokenRecognizer<T extends Enum<T> & Token.Type> extends EnumFinder<T> implements Recognizer<Token.Type, String> {
 
     private final int order;
     private final T[] tokens;
 
     /**
-     * Constructs a new enum-based token recognizer.
+     * Constructs a new enum-based type recognizer.
      *
-     * @param enumType the enumeration class containing token definitions
+     * @param enumType the enumeration class containing type definitions
      * @param order    the recognition order priority
      */
     public EnumTokenRecognizer(Class<T> enumType, int order) {
@@ -44,13 +44,13 @@ public class EnumTokenRecognizer<T extends Enum<T> & Token> extends EnumFinder<T
     }
 
     /**
-     * Attempts to recognize a token from the given string.
+     * Attempts to recognize a type from the given string.
      *
-     * @param piece the string to recognize as a token
-     * @return an {@link Optional} containing the recognized token, or empty if not found
+     * @param piece the string to recognize as a type
+     * @return an {@link Optional} containing the recognized type, or empty if not found
      */
     @Override
-    public Optional<Token> recognize(String piece) {
+    public Optional<Token.Type> recognize(String piece) {
         return ofNullable(find(piece, tokens).orElse(null));
     }
 }

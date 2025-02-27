@@ -1,5 +1,6 @@
 package org.jmouse.template.lexer;
 
+import org.jmouse.template.StringSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,85 +23,84 @@ import java.util.regex.Pattern;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class RawSplitter implements Splitter<List<RawToken>> {
+public class RawSplitter implements Splitter<List<RawToken>, StringSource> {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(RawSplitter.class);
+    private final static Logger LOGGER      = LoggerFactory.getLogger(RawSplitter.class);
+    public static final  String INNER_GROUP = "INNER";
+    public static final  String CLOSE_GROUP = "CLOSE";
+    public static final  String OPEN_GROUP  = "OPEN";
 
     private static final Pattern EXPRESSION_PATTERN = Pattern.compile(
             "(?<OPEN>\\{(?<type>\\{|[%!#\\$\\*@])\\s*)" +  // Open: matches either "{{" or "{X" where X ∈ {%, !, #, $, *, @}
             "(?<INNER>.*?)\\s*" +                          // Inner: non-greedy match for the expression content
             "(?<CLOSE>(?:\\}\\}|\\k<type>\\}))"            // Close: matches "}}" if type was "{" or "X}" if type is X
     );
-    public static final String INNER_GROUP = "INNER";
-    public static final String CLOSE_GROUP = "CLOSE";
-    public static final String OPEN_GROUP  = "OPEN";
 
-    private final Splitter<List<RawToken>> splitter;
+    private final Splitter<List<RawToken>, StringSource> splitter;
 
     public RawSplitter() {
         this.splitter = new ExpressionSplitter();
     }
 
     /**
-     * Splits the given text into raw tokens, distinguishing between plain text and template expressions.
+     * Splits the given source into raw tokens, distinguishing between plain source and template expressions.
      *
-     * @param text   the input character sequence
+     * @param source the input character sequence
      * @param offset the starting offset for tokenization
      * @param length the number of characters to process
      * @return a list of {@link RawToken} representing the parsed components
      */
     @Override
-    public List<RawToken> split(CharSequence text, int offset, int length) {
+    public List<RawToken> split(StringSource source, int offset, int length) {
         List<RawToken> tokens = new ArrayList<>();
 
         // Create a subregion for tokenization.
-        CharSequence subText   = text.subSequence(offset, offset + length);
-        Matcher      matcher   = EXPRESSION_PATTERN.matcher(subText);
+        CharSequence segment   = source.substring(offset, length);
+        Matcher      matcher   = EXPRESSION_PATTERN.matcher(segment);
         int          lastIndex = 0;
 
         while (matcher.find()) {
-            int matchStart = matcher.start();
+            int startIndex = matcher.start();
 
-            // Add HTML text (non-expression) as a single raw token.
-            if (matchStart > lastIndex) {
-                String htmlText = subText.subSequence(lastIndex, matchStart).toString();
-                tokens.add(new RawToken(htmlText, offset + lastIndex, RawToken.Type.RAW_TEXT));
-                LOGGER.info("Raw token: '{}'", htmlText);
+            // Cut out source-content between expressions
+            if (startIndex > lastIndex) {
+                String head = segment.subSequence(lastIndex, startIndex).toString();
+                tokens.add(new RawToken(head, source.getLineNumber(offset + startIndex), offset + lastIndex,
+                                        RawToken.Type.RAW_TEXT));
+                LOGGER.info("Before open-close: '{}'", head);
             }
 
-            // Process expression block if present.
             if (matcher.group(INNER_GROUP) != null) {
-                String open  = matcher.group(OPEN_GROUP);
-                String inner = matcher.group(INNER_GROUP);
-                String close = matcher.group(CLOSE_GROUP);
+                String open       = matcher.group(OPEN_GROUP);
+                String expression = matcher.group(INNER_GROUP);
+                String close      = matcher.group(CLOSE_GROUP);
 
                 // Add the opening delimiter.
-                tokens.add(new RawToken(open, offset + matcher.start(), RawToken.Type.OPEN_TAG));
-                LOGGER.info("Open tag: {}", open);
+                LOGGER.info("Open: {}", open);
+                tokens.add(new RawToken(open, source.getLineNumber(offset + startIndex), offset + startIndex,
+                                        RawToken.Type.OPEN_TAG));
 
-                // Tokenize the inner content using ExpressionSplitter.
-                int innerOffset = offset + matcher.start() + open.length();
-                LOGGER.info("Inner expression: '{}'", inner);
-                tokens.addAll(splitter.split(inner, innerOffset, inner.length()));
+                // Tokenize the expression content using ExpressionSplitter.
+                LOGGER.info("Inner Expression: '{}'", expression);
+                int innerIndex  = startIndex + open.length();
+                int innerOffset = offset + innerIndex;
+                tokens.addAll(splitter.split(source, innerOffset, innerOffset + expression.length()));
 
                 // Add the closing delimiter.
-                int closeTagPosition = offset + matcher.end() - close.length();
-                tokens.add(new RawToken(close, closeTagPosition, RawToken.Type.CLOSE_TAG));
-                LOGGER.info("Close tag: {}", close);
-            } else {
-                // Fallback: add the match as a token.
-                String token = matcher.group();
-                tokens.add(new RawToken(token, offset + matcher.start(), RawToken.Type.UNKNOWN));
-                LOGGER.info("Fallback: {}", token);
+                LOGGER.info("Close: {}", close);
+                int closeIndex = matcher.end() - close.length();
+                tokens.add(new RawToken(close, source.getLineNumber(offset + closeIndex), offset + closeIndex,
+                                        RawToken.Type.CLOSE_TAG));
             }
 
             lastIndex = matcher.end();
         }
 
-        // Add remaining HTML text.
-        if (lastIndex < subText.length()) {
-            String tail = subText.subSequence(lastIndex, subText.length()).toString();
-            tokens.add(new RawToken(tail, offset + lastIndex, RawToken.Type.RAW_TEXT));
+        // Add remaining HTML source.
+        if (lastIndex < segment.length()) {
+            String tail = segment.subSequence(lastIndex, segment.length()).toString();
+            tokens.add(new RawToken(tail, source.getLineNumber(offset + lastIndex), offset + lastIndex,
+                                    RawToken.Type.RAW_TEXT));
             LOGGER.info("Tail: '{}'", tail);
         }
 

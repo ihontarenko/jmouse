@@ -1,211 +1,61 @@
 package org.jmouse.template.lexer;
 
-import java.util.Objects;
-
 /**
- * Represents a token in a lexer system, providing methods to retrieve token types,
- * examples, and sub-tokens.
+ * Represents a lexical type in a template lexer, storing its value, type, position, and line number.
  *
- * <p>The {@link Token.Entry} sub-interface defines a structured representation of a token,
- * including its value, offset, and ordinal placement.</p>
+ * <p>This record encapsulates type metadata for efficient processing in a lexer or parser.</p>
+ *
+ * @param value      the textual representation of the type
+ * @param type       the type of type
+ * @param ordinal    the position of the type in the sequence
+ * @param offset     the character offset in the source text
+ * @param lineNumber the line number where the type appears
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public interface Token {
+public record Token(String value, Token.Type type, int ordinal, int offset, int lineNumber) {
 
     /**
-     * Returns the token type identifier.
-     *
-     * @return the token type
+     * Defines the contract for type types used in the lexer.
      */
-    int type();
-
-    /**
-     * Returns example usages of this token.
-     *
-     * @return an array of example strings
-     */
-    String[] examples();
-
-    /**
-     * Returns an array of related tokens.
-     *
-     * @return an array of sub-tokens
-     */
-    Token[] tokens();
-
-    /**
-     * Represents a structured token entry with value, offset, and ordinal information.
-     */
-    interface Entry {
+    public interface Type {
 
         /**
-         * Creates a new entry with the given token, value, offset, and ordinal.
+         * Returns a unique identifier for the type type.
          *
-         * @param token    the token
-         * @param value    the token's string representation
-         * @param position the offset of the token in the text
-         * @param ordinal  the ordinal index
-         * @return a new token entry
+         * @return the type identifier
          */
-        static Entry of(final Token token, final String value, final int position, final int ordinal) {
-            return new Default(token, value, position, ordinal);
-        }
+        int getTypeId();
 
         /**
-         * Creates a new entry with the given token, value, and offset.
+         * Retrieves the enum representation of this type type.
          *
-         * @param token    the token
-         * @param value    the token's string representation
-         * @param position the offset of the token in the text
-         * @return a new token entry
+         * @param <E> the enum type
+         * @return the corresponding enum value
          */
-        static Entry of(final Token token, final String value, final int position) {
-            return new Default(token, value, position, -1);
-        }
+        <E extends Enum<E>> E getEnumType();
 
         /**
-         * Creates a new entry with the given token and value.
+         * Retrieves the enum class associated with this type type.
          *
-         * @param token the token
-         * @param value the token's string representation
-         * @return a new token entry
+         * @param <E> the enum type
+         * @return the corresponding enum class
          */
-        static Entry of(final Token token, final String value) {
-            return new Default(token, value, -1, -1);
-        }
+        <E extends Enum<E>> Class<E> getBundleType();
 
         /**
-         * Creates a new copy of an existing entry.
+         * Returns an array of example type templates.
          *
-         * @param entry the entry to copy
-         * @return a new token entry
+         * @return an array of type templates
          */
-        static Entry of(final Entry entry) {
-            return new Default(entry.token(), entry.value(), entry.position(), entry.ordinal());
-        }
+        String[] getTokenTemplates();
 
         /**
-         * Returns the token associated with this entry.
+         * Returns an array of related type types.
          *
-         * @return the token
+         * @return an array of type types
          */
-        Token token();
-
-        /**
-         * Returns the offset of the token in the text.
-         *
-         * @return the token offset
-         */
-        int position();
-
-        /**
-         * Returns the ordinal index of the token.
-         *
-         * @return the token ordinal
-         */
-        int ordinal();
-
-        /**
-         * Returns the value of the token.
-         *
-         * @return the token value
-         */
-        String value();
-
-        /**
-         * Checks if this entry represents the specified token.
-         *
-         * @param token the token to compare
-         * @return {@code true} if it matches, otherwise {@code false}
-         */
-        boolean is(Token token);
-
-        /**
-         * Checks if this entry is equal to another entry.
-         *
-         * @param entry the entry to compare
-         * @return {@code true} if they match, otherwise {@code false}
-         */
-        boolean is(Entry entry);
-    }
-
-    /**
-     * Default implementation of the {@link Token.Entry} interface.
-     */
-    record Default(Token token, String value, int position, int ordinal) implements Entry {
-
-        /**
-         * Checks if this entry represents the specified token.
-         *
-         * @param token the token to compare
-         * @return {@code true} if it matches, otherwise {@code false}
-         */
-        @Override
-        public boolean is(Token token) {
-            return this.token.equals(token);
-        }
-
-        /**
-         * Checks if this entry is equal to another entry.
-         *
-         * @param entry the entry to compare
-         * @return {@code true} if they match, otherwise {@code false}
-         */
-        @Override
-        public boolean is(Entry entry) {
-            return equals(entry);
-        }
-
-        /**
-         * Returns a formatted string representation of the entry.
-         *
-         * @return a formatted string
-         */
-        @Override
-        public String toString() {
-            return String.format("%04d-%04d %s(%s)", position, ordinal, token, value);
-        }
-
-        /**
-         * Computes a hash code based on token and value.
-         *
-         * @return the hash code
-         */
-        @Override
-        public int hashCode() {
-            return Objects.hash(token, value);
-        }
-
-        /**
-         * Checks if this entry is equal to another object.
-         *
-         * @param that the object to compare
-         * @return {@code true} if equal, otherwise {@code false}
-         */
-        @Override
-        public boolean equals(final Object that) {
-            if (this == that) {
-                return true;
-            }
-
-            if (that == null || this.getClass() != that.getClass()) {
-                return false;
-            }
-
-            boolean[] equals = new boolean[]{
-                    Objects.equals(((Entry) that).value(), this.value),
-                    Objects.equals(((Entry) that).token(), this.token)
-            };
-
-            boolean isEqual = true;
-
-            for (boolean equal : equals) {
-                isEqual = isEqual && equal;
-            }
-
-            return isEqual;
-        }
+        Type[] getTokens();
     }
 }

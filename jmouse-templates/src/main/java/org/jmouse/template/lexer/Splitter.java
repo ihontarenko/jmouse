@@ -10,7 +10,7 @@ package org.jmouse.template.lexer;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public interface Splitter<R> {
+public interface Splitter<R, S extends CharSequence> {
 
     /**
      * Splits the given text into a structured format.
@@ -20,5 +20,5 @@ public interface Splitter<R> {
      * @param length the number of characters to process
      * @return the processed result of type {@code R}
      */
-    R split(CharSequence text, int offset, int length);
+    R split(S text, int offset, int length);
 }

@@ -1,11 +1,10 @@
 package org.jmouse.template.lexer;
 
-import java.util.List;
+public class TemplateLexer implements Lexer {
 
-public class TemplateLexer extends AbstractLexer {
-
-    public TemplateLexer(List<Token.Entry> entries) {
-        super(entries);
+    @Override
+    public TokenCursor tokenize(CharSequence text) {
+        return null;
     }
 
 }

@@ -2,117 +2,117 @@ package org.jmouse.template.lexer;
 
 /**
  * Enumeration of template tokens used in the template engine.
- * Each token has a unique type identifier and example string(s) associated with it.
+ * Each type has a unique type identifier and example string(s) associated with it.
  */
-public enum TemplateToken implements Token {
+public enum TemplateToken implements Token.Type {
 
     // Print tokens
     /**
-     * Opening print token: e.g., "{{"
+     * Opening print type: e.g., "{{"
      */
     T_OPEN_PRINT(10001, "{{"),
 
     /**
-     * Closing print token: e.g., "}}"
+     * Closing print type: e.g., "}}"
      */
     T_CLOSE_PRINT(10002, "}}"),
 
     // Call tokens (used for control structures)
     /**
-     * Opening call token: e.g., "{%"
+     * Opening call type: e.g., "{%"
      */
     T_OPEN_CALL(10003, "{%"),
 
     /**
-     * Closing call token: e.g., "%}"
+     * Closing call type: e.g., "%}"
      */
     T_CLOSE_CALL(10004, "%}"),
 
     // Comment tokens
     /**
-     * Opening comment token: e.g., "{#"
+     * Opening comment type: e.g., "{#"
      */
     T_OPEN_COMMENT(10005, "{#"),
 
     /**
-     * Closing comment token: e.g., "#}"
+     * Closing comment type: e.g., "#}"
      */
     T_CLOSE_COMMENT(10006, "#}"),
 
     // Keywords and control structures (grouped by 20000+)
     /**
-     * 'for' keyword token.
+     * 'for' keyword type.
      */
     T_FOR(20001, "for"),
 
     /**
-     * 'endfor' keyword token.
+     * 'endfor' keyword type.
      */
     T_END_FOR(20002, "endfor"),
 
     /**
-     * 'if' keyword token.
+     * 'if' keyword type.
      */
     T_IF(20003, "if"),
 
     /**
-     * 'endif' keyword token (also supports "fi" as an alternative).
+     * 'endif' keyword type (also supports "fi" as an alternative).
      */
     T_END_IF(20004, "endif", "fi"),
 
     /**
-     * 'else' keyword token.
+     * 'else' keyword type.
      */
     T_ELSE(20005, "else"),
 
     /**
-     * 'in' keyword token.
+     * 'in' keyword type.
      */
     T_IN(20006, "in"),
 
     /**
-     * 'with' keyword token.
+     * 'with' keyword type.
      */
     T_WITH(20007, "with"),
 
     /**
-     * 'extends' keyword token.
+     * 'extends' keyword type.
      */
     T_EXTENDS(20008, "extends"),
 
     /**
-     * 'block' keyword token.
+     * 'block' keyword type.
      */
     T_BLOCK(20009, "block"),
 
     /**
-     * 'macro' keyword token.
+     * 'macro' keyword type.
      */
     T_MACRO(20010, "macro"),
 
     // Additional tokens
     /**
-     * 'include' keyword token.
+     * 'include' keyword type.
      */
     T_INCLUDE(20011, "include"),
 
     /**
-     * 'call' keyword token.
+     * 'call' keyword type.
      */
     T_CALL(20012, "call"),
 
     /**
-     * 'set' keyword token.
+     * 'set' keyword type.
      */
     T_SET(20013, "set"),
 
     /**
-     * 'endset' keyword token.
+     * 'endset' keyword type.
      */
     T_END_SET(20014, "endset"),
 
     /**
-     * 'import' keyword token.
+     * 'import' keyword type.
      */
     T_IMPORT(20015, "import"),
 
@@ -121,47 +121,42 @@ public enum TemplateToken implements Token {
      */
     T_RAW_TEXT(30001);
 
-    private final int type;
-    private final String[] examples;
+    private final int      type;
+    private final String[] values;
 
     /**
-     * Constructs a template token with the specified type and example usages.
+     * Constructs a template type with the specified type and example usages.
      *
-     * @param type     the unique type identifier for this token
-     * @param examples example strings representing the token
+     * @param type     the unique type identifier for this type
+     * @param values example strings representing the type
      */
-    TemplateToken(final int type, final String... examples) {
+    TemplateToken(final int type, final String... values) {
         this.type = type;
-        this.examples = examples;
+        this.values = values;
     }
 
-    /**
-     * Returns the token type identifier.
-     *
-     * @return the token type identifier
-     */
     @Override
-    public int type() {
+    public int getTypeId() {
         return type;
     }
 
-    /**
-     * Returns example usages of this token.
-     *
-     * @return an array of example strings
-     */
     @Override
-    public String[] examples() {
-        return examples;
+    public <E extends Enum<E>> E getEnumType() {
+        return (E) this;
     }
 
-    /**
-     * Returns all tokens as an array.
-     *
-     * @return an array of all TemplateToken values
-     */
     @Override
-    public Token[] tokens() {
+    public <E extends Enum<E>> Class<E> getBundleType() {
+        return (Class<E>) getEnumType().getClass();
+    }
+
+    @Override
+    public String[] getTokenTemplates() {
+        return values;
+    }
+
+    @Override
+    public Token.Type[] getTokens() {
         return values();
     }
 
