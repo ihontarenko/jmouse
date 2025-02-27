@@ -14,7 +14,7 @@ public class SyntaxErrorException extends Error {
     }
 
     public SyntaxErrorException(Parser parser, Token.Entry entry, String expected) {
-        this("[%s] expected token %s, but encountered %s at position %d".formatted(
+        this("[%s] expected token %s, but encountered %s at offset %d".formatted(
                 parser.getClass().getSimpleName(), expected, entry.token(), entry.position()));
     }
 

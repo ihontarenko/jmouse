@@ -31,16 +31,16 @@ public interface Lexer extends ListIterator<Entry>, Iterable<Entry> {
     int length();
 
     /**
-     * Returns the current cursor position.
+     * Returns the current cursor offset.
      *
-     * @return the cursor position
+     * @return the cursor offset
      */
     int cursor();
 
     /**
-     * Sets the cursor to the specified position.
+     * Sets the cursor to the specified offset.
      *
-     * @param cursor the new cursor position
+     * @param cursor the new cursor offset
      */
     void cursor(int cursor);
 
@@ -96,9 +96,9 @@ public interface Lexer extends ListIterator<Entry>, Iterable<Entry> {
     void backward(Token token);
 
     /**
-     * Creates a new lexer instance with an increased position.
+     * Creates a new lexer instance with an increased offset.
      *
-     * @param increase the position offset for the new lexer
+     * @param increase the offset offset for the new lexer
      * @return a new lexer instance
      */
     Lexer lexer(int increase);
@@ -107,7 +107,7 @@ public interface Lexer extends ListIterator<Entry>, Iterable<Entry> {
      * Checks if the current sequence of tokens matches the given tokens.
      *
      * @param limit  the number of tokens to check
-     * @param offset the offset position from the cursor
+     * @param offset the offset offset from the cursor
      * @param tokens the expected token sequence
      * @return {@code true} if the sequence matches, otherwise {@code false}
      */
@@ -211,7 +211,7 @@ public interface Lexer extends ListIterator<Entry>, Iterable<Entry> {
     }
 
     /**
-     * Returns a new lexer instance at the current position.
+     * Returns a new lexer instance at the current offset.
      *
      * @return a new lexer instance
      */
@@ -222,7 +222,7 @@ public interface Lexer extends ListIterator<Entry>, Iterable<Entry> {
     /**
      * Retrieves the token entry at a given offset.
      *
-     * @param offset the offset from the current position
+     * @param offset the offset from the current offset
      * @return the entry at the given offset
      */
     default Entry lookAhead(int offset) {

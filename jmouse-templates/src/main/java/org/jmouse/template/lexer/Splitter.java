@@ -5,11 +5,6 @@ package org.jmouse.template.lexer;
  *
  * <p>Implementations of this interface process a given text segment and return a structured result.</p>
  *
- * <pre>{@code
- * Splitter<List<RawToken>> splitter = new ExpressionSplitter();
- * List<RawToken> tokens = splitter.split("variable + 42", 0, "variable + 42".length());
- * }</pre>
- *
  * @param <R> the type of result produced by the splitter
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
@@ -21,7 +16,7 @@ public interface Splitter<R> {
      * Splits the given text into a structured format.
      *
      * @param text   the input character sequence
-     * @param offset the starting position for processing
+     * @param offset the starting offset for processing
      * @param length the number of characters to process
      * @return the processed result of type {@code R}
      */

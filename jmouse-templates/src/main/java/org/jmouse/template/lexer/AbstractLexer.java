@@ -9,12 +9,6 @@ import java.util.function.Predicate;
  *
  * <p>This lexer supports bidirectional traversal and lookup operations over a list of tokens.</p>
  *
- * <pre>{@code
- * List<Token.Entry> tokens = List.of(new Token.Entry(T_IDENTIFIER, "var"));
- * Lexer lexer = new LexerImplementation(tokens);
- * Token.Entry entry = lexer.lookOver(T_OPEN_PAREN, T_CLOSE_PAREN);
- * }</pre>
- *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
@@ -109,9 +103,9 @@ public abstract class AbstractLexer extends ImmutableListIterator<Token.Entry> i
     }
 
     /**
-     * Returns the current cursor position.
+     * Returns the current cursor offset.
      *
-     * @return the cursor position
+     * @return the cursor offset
      */
     @Override
     public int cursor() {
@@ -119,9 +113,9 @@ public abstract class AbstractLexer extends ImmutableListIterator<Token.Entry> i
     }
 
     /**
-     * Sets the cursor to the specified position.
+     * Sets the cursor to the specified offset.
      *
-     * @param cursor the new cursor position
+     * @param cursor the new cursor offset
      */
     @Override
     public void cursor(int cursor) {
@@ -132,7 +126,7 @@ public abstract class AbstractLexer extends ImmutableListIterator<Token.Entry> i
      * Checks if the next sequence of tokens matches the given tokens.
      *
      * @param limit  the number of tokens to check
-     * @param offset the position offset
+     * @param offset the offset offset
      * @param tokens the expected token sequence
      * @return {@code true} if the sequence matches, otherwise {@code false}
      */
@@ -196,13 +190,14 @@ public abstract class AbstractLexer extends ImmutableListIterator<Token.Entry> i
     /**
      * Creates a new lexer instance at the given offset.
      *
-     * @param offset the position offset
+     * @param offset the offset offset
      * @return a new lexer instance
      */
     @Override
     public Lexer lexer(int offset) {
-        int cursor = AbstractLexer.this.cursor;
-        Lexer lexer = new AbstractLexer(AbstractLexer.this.entries) {};
+        int   cursor = AbstractLexer.this.cursor;
+        Lexer lexer  = new AbstractLexer(AbstractLexer.this.entries) {
+        };
 
         lexer.cursor(cursor + offset);
 

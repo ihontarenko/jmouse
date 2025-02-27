@@ -7,7 +7,7 @@ import java.util.Objects;
  * examples, and sub-tokens.
  *
  * <p>The {@link Token.Entry} sub-interface defines a structured representation of a token,
- * including its value, position, and ordinal placement.</p>
+ * including its value, offset, and ordinal placement.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -36,16 +36,16 @@ public interface Token {
     Token[] tokens();
 
     /**
-     * Represents a structured token entry with value, position, and ordinal information.
+     * Represents a structured token entry with value, offset, and ordinal information.
      */
     interface Entry {
 
         /**
-         * Creates a new entry with the given token, value, position, and ordinal.
+         * Creates a new entry with the given token, value, offset, and ordinal.
          *
          * @param token    the token
          * @param value    the token's string representation
-         * @param position the position of the token in the text
+         * @param position the offset of the token in the text
          * @param ordinal  the ordinal index
          * @return a new token entry
          */
@@ -54,11 +54,11 @@ public interface Token {
         }
 
         /**
-         * Creates a new entry with the given token, value, and position.
+         * Creates a new entry with the given token, value, and offset.
          *
          * @param token    the token
          * @param value    the token's string representation
-         * @param position the position of the token in the text
+         * @param position the offset of the token in the text
          * @return a new token entry
          */
         static Entry of(final Token token, final String value, final int position) {
@@ -94,9 +94,9 @@ public interface Token {
         Token token();
 
         /**
-         * Returns the position of the token in the text.
+         * Returns the offset of the token in the text.
          *
-         * @return the token position
+         * @return the token offset
          */
         int position();
 

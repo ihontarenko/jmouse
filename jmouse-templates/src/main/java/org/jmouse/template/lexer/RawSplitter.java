@@ -45,7 +45,7 @@ public class RawSplitter implements Splitter<List<RawToken>> {
      * Splits the given text into raw tokens, distinguishing between plain text and template expressions.
      *
      * @param text   the input character sequence
-     * @param offset the starting position for tokenization
+     * @param offset the starting offset for tokenization
      * @param length the number of characters to process
      * @return a list of {@link RawToken} representing the parsed components
      */

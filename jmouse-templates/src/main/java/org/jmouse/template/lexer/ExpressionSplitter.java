@@ -57,7 +57,7 @@ public class ExpressionSplitter implements Splitter<List<RawToken>> {
      * Splits the provided text into a list of {@link RawToken}, identifying different token types.
      *
      * @param text   the input character sequence
-     * @param offset the starting position for tokenization
+     * @param offset the starting offset for tokenization
      * @param length the number of characters to process
      * @return a list of {@link RawToken} extracted from the input text
      */

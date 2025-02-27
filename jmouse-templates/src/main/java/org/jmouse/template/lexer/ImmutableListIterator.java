@@ -144,7 +144,7 @@ public abstract class ImmutableListIterator<T> implements ListIterator<T>, Itera
     /**
      * Returns a string representation of the iterator state.
      *
-     * @return a formatted string showing the length and cursor position
+     * @return a formatted string showing the length and cursor offset
      */
     @Override
     public String toString() {
