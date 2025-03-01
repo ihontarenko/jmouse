@@ -12,7 +12,7 @@ public class TemplateLexer implements Lexer {
             DefaultTokenizer tokenizer = new DefaultTokenizer();
             List<Token>      tokens    = tokenizer.tokenize(source);
 
-
+            tokenCursor = new DefaultTokenCursor(source, tokens);
         }
 
         return tokenCursor;

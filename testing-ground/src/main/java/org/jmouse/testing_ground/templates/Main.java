@@ -1,14 +1,14 @@
 package org.jmouse.testing_ground.templates;
 
 import org.jmouse.template.TokenizableString;
-import org.jmouse.template.lexer.DefaultTokenizer;
-import org.jmouse.template.lexer.Token;
-import org.jmouse.template.lexer.TokenizableSource;
+import org.jmouse.template.lexer.*;
 import org.jmouse.template.loader.ClasspathLoader;
 import org.jmouse.template.loader.TemplateLoader;
+import org.jmouse.template.node.Node;
+import org.jmouse.template.parser.ArithmeticParser;
+import org.jmouse.template.parser.ParserContext;
 
 import java.io.Reader;
-import java.io.StringReader;
 import java.util.List;
 
 public class Main {
@@ -21,16 +21,20 @@ public class Main {
 
         Reader            reader    = loader.load("index");
 //        TokenizableSource source    = new TokenizableString("index", reader);
-        TokenizableSource source    = new TokenizableString("index", "Hello {% for ab in   xyz  def %}!");
-        DefaultTokenizer  tokenizer = new DefaultTokenizer();
+//        TokenizableSource source    = new TokenizableString("index", "Hello {% for ab in   xyz  def %}! {{ users is not contains '123' }}");
+        TokenizableSource source    = new TokenizableString("test-string", "Calculation: {{ 1 + 2 * 3 + 4 + 5 * 5 * 4 + 2 }} {# x++ --z v+=123 v-=111 #}");
 
-        List<Token> tokens = tokenizer.tokenize(source);
+        Lexer lexer = new TemplateLexer();
 
-        for (TokenizableSource.Entry entry : source) {
-            System.out.println(entry + ": " + entry.segment());
-        }
+        TokenCursor cursor = lexer.tokenize(source);
 
-        System.out.println(tokens.size());
+        ParserContext parserContext = ParserContext.newContext();
+
+        parserContext.addParser(new ArithmeticParser());
+
+        Node root = parserContext.getParser(ArithmeticParser.class).parse(cursor, parserContext);
+
+        System.out.println(root);
 
     }
 

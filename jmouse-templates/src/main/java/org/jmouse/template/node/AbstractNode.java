@@ -3,61 +3,61 @@ package org.jmouse.template.node;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * An abstract implementation of the {@link Node} interface, providing
+ * basic parent-child relationships for hierarchical structures.
+ *
+ * @author Ivan Hontarenko (Mr. Jerry Mouse)
+ * @author ihontarenko@gmail.com
+ */
 abstract public class AbstractNode implements Node {
 
-    protected final List<Node> children = new ArrayList<>();
-    protected       Node       parent;
+    protected final List<Node> children = new ArrayList<>(); // List of child nodes
+    protected Node parent; // Parent node reference
 
+    /**
+     * Constructs an {@code AbstractNode} with no parent.
+     */
     public AbstractNode() {
         this(null);
     }
 
+    /**
+     * Constructs an {@code AbstractNode} with the specified parent node.
+     *
+     * @param parent the parent node, or {@code null} if this is a root node
+     */
     public AbstractNode(Node parent) {
         this.parent = parent;
     }
 
-    @Override
-    public boolean hasChildren() {
-        return !children.isEmpty();
-    }
-
-    @Override
-    public boolean hasParent() {
-        return this.parent != null;
-    }
-
+    /**
+     * Returns the parent node of this node.
+     *
+     * @return the parent node or {@code null} if this is a root node
+     */
     @Override
     public Node parent() {
         return this.parent;
     }
 
+    /**
+     * Sets the parent node of this node.
+     *
+     * @param node the parent node to set
+     */
     @Override
     public void parent(Node node) {
         this.parent = node;
     }
 
+    /**
+     * Returns the list of child nodes.
+     *
+     * @return a list of child nodes
+     */
     @Override
-    public Node[] children() {
-        Node[] nodes = new Node[this.children.size()];
-        return this.children.toArray(nodes);
+    public List<Node> children() {
+        return this.children;
     }
-
-    @Override
-    public Node first() {
-        return hasChildren() ? children.getFirst() : null;
-    }
-
-    @Override
-    public Node last() {
-        return hasChildren() ? children.getLast() : null;
-    }
-
-    @Override
-    public void add(Node node) {
-        if (this != node) {
-            node.parent(this);
-            this.children.add(node);
-        }
-    }
-
 }

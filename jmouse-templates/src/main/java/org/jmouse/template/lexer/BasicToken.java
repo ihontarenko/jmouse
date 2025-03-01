@@ -2,7 +2,7 @@ package org.jmouse.template.lexer;
 
 /**
  * BasicToken defines token types for the template language.
- * 
+ *
  * <p>Tokens are grouped by category using numeric ranges:
  * <br>
  * Group 1000: Comparison operators<br>
@@ -26,14 +26,16 @@ public enum BasicToken implements Token.Type {
     T_SOL(-1),
 
     // Comparison operators (Group 1000)
-    T_EQ(1010, "=", "==", "EQ"),
-    T_NE(1020, "!=", "<>", "NOT", "NE", "NEQ"),
-    T_GT(1030, ">", "GT"),
-    T_GE(1040, ">=", "GTE", "GE"),
-    T_LT(1050, "<", "LT"),
-    T_LE(1060, "<=", "LTE", "LE"),
+    T_EQ(1010, "=", "==", "eq", "equals"),
+    T_NE(1020, "!=", "<>", "not", "ne", "neq"),
+    T_GT(1030, ">", "gt"),
+    T_GE(1040, ">=", "gte", "ge"),
+    T_LT(1050, "<", "lt"),
+    T_LE(1060, "<=", "lte", "le"),
     T_AND(1070, "&&", "and"),
     T_OR(1080, "||", "or"),
+    T_IS(1090, "is"),
+    T_CONTAINS(1100, "contains"),
 
     // Assignment operators (Group 6000)
     T_COLON_ASSIGN(6110, ":="),
@@ -41,6 +43,8 @@ public enum BasicToken implements Token.Type {
     T_MINUS_ASSIGN(6130, "-="),
     T_MULTIPLY_ASSIGN(6140, "*="),
     T_DIVIDE_ASSIGN(6150, "/="),
+    T_INCREMENT(6160, "++"),
+    T_DECREMENT(6170, "--"),
 
     // Arithmetic operators and punctuation (Group 2000)
     T_PLUS(2030, "+"),
@@ -56,7 +60,7 @@ public enum BasicToken implements Token.Type {
     T_COMMA(2070, ","),
     T_NEGATE(2080, "!"),
     T_QUESTION(2090, "?"),
-    T_BACKSLASH(2100, "\\"),  // Звичайна зворотна коса риска
+    T_BACKSLASH(2100, "\\"),
     T_VERTICAL_SLASH(2110, "|"),
     T_AMPERSAND(2120, "&"),
     T_COLON(2130, ":"),
@@ -127,4 +131,6 @@ public enum BasicToken implements Token.Type {
     public Token.Type[] getTokens() {
         return values();
     }
+
+
 }

@@ -1,6 +1,6 @@
 package org.jmouse.template.lexer;
 
-import java.util.List;
+import org.jmouse.util.Streamable;
 
 /**
  * TokenCursor provides an advanced API for navigating a stream of tokens.
@@ -8,61 +8,53 @@ import java.util.List;
  * and managing savepoints for backtracking.
  *
  * <p>This interface is intended to be used by parsers to inspect and consume tokens
- * with support for backtracking and lookahead. It is built on top of an underlying type list.</p>
+ * with support for backtracking and lookahead. It is built on top of an underlying token list.</p>
  */
-public interface TokenCursor {
+public interface TokenCursor extends Streamable<Token> {
 
     /**
-     * Returns true if there is at least one more type in the stream.
+     * Returns true if there is at least one more token in the stream.
      *
      * @return true if tokens remain, false otherwise
      */
     boolean hasNext();
 
     /**
-     * Returns true if there is at least one type before the current position.
+     * Returns true if there is at least one token before the current position.
      *
      * @return true if there are previous tokens, false otherwise
      */
     boolean hasPrevious();
 
     /**
-     * Consumes and returns the next type in the stream.
+     * Consumes and returns the next token in the stream.
      *
-     * @return the next type
+     * @return the next Token object (including its value, position, and type)
      */
-    Token.Type next();
+    Token next();
 
     /**
-     * Consumes and returns the previous type in the stream.
+     * Consumes and returns the previous token in the stream.
      *
-     * @return the previous type
+     * @return the previous Token object (including its value, position, and type)
      */
-    Token.Type previous();
+    Token previous();
 
     /**
-     * Returns the next type without consuming it.
+     * Returns the next token without consuming it.
      *
-     * @return the next type
+     * @return the next Token object
      */
-    Token.Type peek();
+    Token peek();
 
     /**
-     * Returns the type at the specified offset from the current position without consuming any tokens.
-     * For example, lookAt(0) is equivalent to peek(), lookAt(1) returns the type immediately after peek(), etc.
+     * Returns the token at the specified offset from the current position without consuming any tokens.
+     * For example, lookAt(0) is equivalent to peek(), lookAt(1) returns the token immediately after peek(), etc.
      *
      * @param offset the offset from the current position (0-based)
-     * @return the type at the given offset
+     * @return the Token object at the given offset
      */
-    Token.Type lookAt(int offset);
-
-    /**
-     * Returns a list of tokens starting from the current position, up to the specified count.
-     *
-     * @param count the number of tokens to retrieve
-     * @return a list of tokens from the current position
-     */
-    List<Token.Type> lookOver(int count);
+    Token lookAt(int offset);
 
     /**
      * Advances the cursor by the specified number of tokens (consumes them).
@@ -80,19 +72,70 @@ public interface TokenCursor {
     void retract(int count);
 
     /**
-     * Consumes the next type and verifies that it matches the expected type.
-     * If the type does not match, a SyntaxErrorException is thrown.
+     * Consumes the next token and verifies that its type matches the expected type.
+     * If the token's type does not match, a SyntaxErrorException is thrown.
      *
-     * @param expected the expected type
-     * @return the consumed type
-     * @throws SyntaxErrorException if the next type does not match the expected type
+     * @param expected the expected Token.Type
+     * @return the consumed Token object
+     * @throws SyntaxErrorException if the next token's type does not match the expected type
      */
-    Token.Type expect(Token.Type expected) throws SyntaxErrorException;
+    Token expect(Token.Type expected) throws SyntaxErrorException;
+
+    /**
+     * Checks whether the current token matches the specified expected type.
+     *
+     * @param expected the expected Token.Type for the current token
+     * @return true if the current token matches, false otherwise
+     */
+    default boolean isCurrent(Token.Type expected) {
+        return checkAt(0, expected);
+    }
+
+    /**
+     * Checks whether the previous token matches the specified expected type.
+     *
+     * @param expected the expected Token.Type for the previous token
+     * @return true if the previous token matches, false otherwise
+     */
+    default boolean isPrevious(Token.Type expected) {
+        return checkAt(-1, expected);
+    }
+
+    /**
+     * Checks whether the next token matches the specified expected type.
+     *
+     * @param expected the expected Token.Type for the next token
+     * @return true if the next token matches, false otherwise
+     */
+    default boolean isNext(Token.Type expected) {
+        return checkAt(1, expected);
+    }
+
+    /**
+     * Checks whether the token at the specified lookahead offset matches the expected type.
+     *
+     * @param offset   the offset from the current position (0 means current token)
+     * @param expected the expected Token.Type for the token at the given offset
+     * @return true if the token at the offset matches, false otherwise
+     */
+    default boolean checkAt(int offset, Token.Type expected) {
+        return lookAt(offset).type() == expected;
+    }
+
+    /**
+     * Returns the current token without consuming it.
+     * Alias for peek().
+     *
+     * @return the current Token object
+     */
+    default Token current() {
+        return peek();
+    }
 
     /**
      * Saves the current cursor position as a Savepoint, which can be used later to restore the cursor.
      *
-     * @return a Savepoint representing the current position in the type stream
+     * @return a Savepoint representing the current position in the token stream
      */
     default Savepoint savepoint() {
         return this::position;
@@ -106,33 +149,40 @@ public interface TokenCursor {
     void restore(Savepoint sp);
 
     /**
-     * Returns the current position (index) of the cursor within the type stream.
+     * Returns the current position (index) of the cursor within the token stream.
      *
-     * @return the current type index
+     * @return the current token index
      */
     int position();
 
     /**
-     * Resets the cursor to the beginning of the type stream.
+     * Resets the cursor to the beginning of the token stream.
      */
     void reset();
 
     /**
-     * Returns the total number of tokens in the type stream.
+     * Returns the total number of tokens in the token stream.
      *
-     * @return the total type count
+     * @return the total token count
      */
-    int totalTokens();
+    int total();
 
     /**
-     * Represents a marker for a position in the type stream, used for backtracking.
+     * Returns the number of tokens remaining from the current cursor position.
+     *
+     * @return the count of remaining tokens
+     */
+    int remaining();
+
+    /**
+     * Represents a marker for a position in the token stream, used for backtracking.
      */
     @FunctionalInterface
     interface Savepoint {
         /**
-         * Returns the index in the type stream where this savepoint was created.
+         * Returns the index in the token stream where this savepoint was created.
          *
-         * @return the type index
+         * @return the token index
          */
         int getPosition();
     }

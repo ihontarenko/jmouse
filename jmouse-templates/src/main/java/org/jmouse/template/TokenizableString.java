@@ -29,10 +29,10 @@ public class TokenizableString implements TokenizableSource {
     private final String name;          // Template name
     private       int    length = 0;    // Number of characters stored in buffer
     private       char[] buffer;        // Character buffer for storing template data
-    private       int    size   = 0;
-    private       Type[] types;
-    private       int[]  offsets;
-    private       int[]  lengths;
+    private       int    size   = 0;    // Number of stored tokens
+    private       Type[] types;         // Array storing token types
+    private       int[]  offsets;       // Array storing token positions
+    private       int[]  lengths;       // Array storing token lengths
 
     public TokenizableString(String name, String text) {
         this(name, new StringReader(text));
