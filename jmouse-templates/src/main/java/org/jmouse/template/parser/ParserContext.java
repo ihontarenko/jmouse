@@ -9,14 +9,14 @@ public interface ParserContext {
 
     Parser getParser(Class<? extends Parser> type);
 
-    void registerParser(Parser parser);
+    void addParser(Parser parser);
 
     class SimpleContext implements ParserContext {
 
         private final Map<Class<? extends Parser>, Parser> parsers = new HashMap<>();
 
         @Override
-        public void registerParser(Parser parser) {
+        public void addParser(Parser parser) {
             parsers.put(parser.getClass(), parser);
         }
 

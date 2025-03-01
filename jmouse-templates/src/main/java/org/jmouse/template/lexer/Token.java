@@ -16,6 +16,11 @@ package org.jmouse.template.lexer;
  */
 public record Token(String value, Token.Type type, int ordinal, int offset, int lineNumber) {
 
+    @Override
+    public String toString() {
+        return "%04d:%04d:%04d [%s]".formatted(ordinal, offset, lineNumber, type);
+    }
+
     /**
      * Defines the contract for type types used in the lexer.
      */

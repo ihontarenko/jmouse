@@ -38,6 +38,15 @@ public enum TemplateToken implements Token.Type {
      * Closing comment type: e.g., "#}"
      */
     T_CLOSE_COMMENT(10006, "#}"),
+    /**
+     * Opening comment type: e.g., "{!"
+     */
+    T_OPEN_JAVA_CODE(10007, "{!"),
+
+    /**
+     * Closing comment type: e.g., "!}"
+     */
+    T_CLOSE_JAVA_CODE(10008, "!}"),
 
     // Keywords and control structures (grouped by 20000+)
     /**

@@ -1,6 +1,5 @@
 package org.jmouse.template.lexer;
 
-import org.jmouse.template.StringSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,31 +15,24 @@ import java.util.regex.Pattern;
  *
  * <p>Utilizes regex-based tokenization to extract meaningful components from an expression.</p>
  *
- * <pre>{@code
- * ExpressionSplitter splitter = new ExpressionSplitter();
- * List<RawToken> tokens = splitter.split("variable + 42", 0, "variable + 42".length());
- * }</pre>
- *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class ExpressionSplitter implements Splitter<List<RawToken>, StringSource> {
+public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableSource> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ExpressionSplitter.class);
 
     private static final Pattern EXPRESSION_PATTERN = Pattern.compile(
             "\\s*(?:(?<IDENTIFIER>[a-zA-Z_][a-zA-Z0-9_]*)" +
-            "|(?<NUMBER>\\d+)" +
-            "|(?<STRING>'[^']*'|\"[^\"]*\")" +
-            "|(?<OPERATOR>[|:,()])" +
-            "|(?<OTHER>\\S))"
+            "|(?<NUMBER>\\d+)|(?<STRING>'[^']*'|\"[^\"]*\")" +
+            "|(?<OPERATOR>[|:,()]|&{2}|\\|{2}|[><!=]+=?)|(?<OTHER>\\S))"
     );
 
-    public static final  String                     IDENTIFIER          = "IDENTIFIER";
-    public static final  String                     NUMBER              = "NUMBER";
-    public static final  String                     STRING              = "STRING";
-    public static final  String                     OPERATOR            = "OPERATOR";
-    public static final  String                     OTHER               = "OTHER";
+    public static final String IDENTIFIER = "IDENTIFIER";
+    public static final String NUMBER     = "NUMBER";
+    public static final String STRING     = "STRING";
+    public static final String OPERATOR   = "OPERATOR";
+    public static final String OTHER      = "OTHER";
 
     // Define group names and their corresponding type types.
     private static final String[]                   GROUP_NAMES         = {IDENTIFIER, NUMBER, STRING, OPERATOR, OTHER};
@@ -63,7 +55,7 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, StringSource
      * @return a list of {@link RawToken} extracted from the input text
      */
     @Override
-    public List<RawToken> split(StringSource text, int offset, int length) {
+    public List<RawToken> split(TokenizableSource text, int offset, int length) {
         List<RawToken> tokens = new ArrayList<>();
 
         // Create a sub-sequence of the text for processing.
@@ -80,6 +72,8 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, StringSource
             for (String groupName : GROUP_NAMES) {
                 tokenValue = matcher.group(groupName);
                 if (tokenValue != null) {
+                    // Get the start position of the capturing group.
+                    startOffset = offset + matcher.start(groupName);
                     tokenType = GROUP_TO_TOKEN_TYPE.get(groupName);
                     LOGGER.info("Found group '{}' in expression '{}'", tokenType, tokenValue);
                     break;

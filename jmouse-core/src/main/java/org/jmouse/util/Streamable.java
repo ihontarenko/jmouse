@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -84,6 +85,10 @@ public interface Streamable<T> extends Iterable<T>, Supplier<Stream<T>> {
      */
     default Streamable<T> filter(Predicate<? super T> predicate) {
         return of(() -> stream().filter(predicate));
+    }
+
+    default T reduce(T identity, BinaryOperator<T> accumulator) {
+        return stream().reduce(identity, accumulator);
     }
 
     /**
