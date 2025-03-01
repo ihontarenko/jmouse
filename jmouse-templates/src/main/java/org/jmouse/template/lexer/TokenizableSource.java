@@ -10,10 +10,22 @@ import org.jmouse.util.Streamable;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public interface Tokenizable extends CharSequence, Streamable<Tokenizable.Entry> {
+public interface TokenizableSource extends CharSequence, Streamable<TokenizableSource.Entry> {
 
-    @Override
+    /**
+     * Calculates the number of lines up to a given offset.
+     *
+     * @param offset the offset to check for newlines
+     * @return the total number of lines up to the given offset
+     */
     int getLineNumber(int offset);
+
+    /**
+     * Returns the name of the template.
+     *
+     * @return the template name
+     */
+    String getName();
 
     /**
      * Adds a type entry with its offset and length.

@@ -15,7 +15,7 @@
     {% endFor %}
     </ul>
 
-    <b>{$ if users gt 1 $}</b>
+    <b>{$ if users gt 1 && num <= 123 $}</b>
 
     {% call(1, 2, 3) | default('123') %}
 

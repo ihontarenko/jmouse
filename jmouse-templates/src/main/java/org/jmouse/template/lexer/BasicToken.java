@@ -12,6 +12,8 @@ public enum BasicToken implements Token.Type {
     T_GE(1040, ">=", "GTE", "GE"),
     T_LT(1050, "<", "LT"),
     T_LE(1060, "<=", "LTE", "LE"),
+    T_AND(1070, "&&", "and"),
+    T_OR(1080, "||", "or"),
     T_AT(2000, "@"),
     T_HASH(2010, "#"),
     T_MINUS(2020, "-"),

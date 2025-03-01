@@ -21,7 +21,7 @@ import static org.jmouse.util.helper.Arrays.expand;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class Tokenized implements TokenizableSource {
+public class TokenizableString implements TokenizableSource {
 
     private static final int DEFAULT_ARRAY_SIZE = 32;
     private static final int DEFAULT_CAPACITY   = 1024;
@@ -34,11 +34,11 @@ public class Tokenized implements TokenizableSource {
     private       int[]  offsets;
     private       int[]  lengths;
 
-    public Tokenized(String name, String text) {
+    public TokenizableString(String name, String text) {
         this(name, new StringReader(text));
     }
 
-    public Tokenized(String name, Reader reader) {
+    public TokenizableString(String name, Reader reader) {
         this.name = name;
         this.types = new Type[DEFAULT_ARRAY_SIZE];
         this.offsets = new int[DEFAULT_ARRAY_SIZE];

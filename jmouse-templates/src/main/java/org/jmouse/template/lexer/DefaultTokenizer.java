@@ -1,6 +1,5 @@
 package org.jmouse.template.lexer;
 
-import org.jmouse.template.StringSource;
 import org.jmouse.template.lexer.recognizer.CompositeRecognizer;
 import org.jmouse.template.lexer.recognizer.EnumTokenRecognizer;
 import org.slf4j.Logger;
@@ -28,7 +27,7 @@ import static org.jmouse.template.lexer.RawToken.Type.UNKNOWN;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class DefaultTokenizer implements Tokenizer<Token, StringSource> {
+public class DefaultTokenizer implements Tokenizer<Token, TokenizableSource> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTokenizer.class);
 
@@ -46,17 +45,16 @@ public class DefaultTokenizer implements Tokenizer<Token, StringSource> {
     }
 
     /**
-     * Tokenizes the given text into a list of {@link Token}.
+     * Tokenizes the given source into a list of {@link Token}.
      *
-     * @param text the input character sequence to tokenize
+     * @param source the input character sequence to tokenize
      * @return a list of tokenized entries
      */
     @Override
-    public List<Token> tokenize(StringSource text) {
+    public List<Token> tokenize(TokenizableSource source) {
         List<Token>       tokens      = new ArrayList<>();
-        List<RawToken>    rawTokens   = splitter.split(text, 0, text.length());
+        List<RawToken>    rawTokens   = splitter.split(source, 0, source.length());
         int               counter     = 0;
-        TokenizableString tokenizable = text.getTokenizable();
 
         // Special tokens marking the start and end of a line
         RawToken sol = new RawToken("BEFORE-OF-LINE", -1, MIN_VALUE, UNKNOWN);
@@ -99,7 +97,7 @@ public class DefaultTokenizer implements Tokenizer<Token, StringSource> {
                 }
             };
 
-            tokenizable.entry(rawToken.offset(), rawToken.length(), token.type());
+            source.entry(rawToken.offset(), rawToken.length(), token.type());
 
             tokens.add(token);
 
@@ -108,7 +106,7 @@ public class DefaultTokenizer implements Tokenizer<Token, StringSource> {
 
         tokens.add(entry(BasicToken.T_EOL, eol, counter));
 
-        LOGGER.info("Tokenized '{}' tokens", tokens.size());
+        LOGGER.info("TokenizableString '{}' tokens", tokens.size());
 
         return tokens;
     }

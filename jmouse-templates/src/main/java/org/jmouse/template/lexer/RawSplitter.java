@@ -1,6 +1,5 @@
 package org.jmouse.template.lexer;
 
-import org.jmouse.template.StringSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +19,7 @@ import static org.jmouse.template.lexer.RawToken.Type.*;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class RawSplitter implements Splitter<List<RawToken>, StringSource> {
+public class RawSplitter implements Splitter<List<RawToken>, TokenizableSource> {
 
     private final static Logger LOGGER      = LoggerFactory.getLogger(RawSplitter.class);
     public static final  String INNER_GROUP = "INNER";
@@ -33,7 +32,7 @@ public class RawSplitter implements Splitter<List<RawToken>, StringSource> {
             "(?<CLOSE>(?:\\}\\}|\\k<type>\\}))"            // Close: matches "}}" if type was "{" or "X}" if type is X
     );
 
-    private final Splitter<List<RawToken>, StringSource> splitter;
+    private final Splitter<List<RawToken>, TokenizableSource> splitter;
 
     public RawSplitter() {
         this.splitter = new ExpressionSplitter();
@@ -48,11 +47,11 @@ public class RawSplitter implements Splitter<List<RawToken>, StringSource> {
      * @return a list of {@link RawToken} representing the parsed components
      */
     @Override
-    public List<RawToken> split(StringSource source, int offset, int length) {
+    public List<RawToken> split(TokenizableSource source, int offset, int length) {
         List<RawToken> tokens = new ArrayList<>();
 
         // Create a subregion for tokenization.
-        CharSequence segment   = source.substring(offset, length);
+        CharSequence segment   = source.subSequence(offset, length);
         Matcher      matcher   = EXPRESSION_PATTERN.matcher(segment);
         int          lastIndex = 0;
 
@@ -63,7 +62,7 @@ public class RawSplitter implements Splitter<List<RawToken>, StringSource> {
             // Extract plain text between expressions.
             if (startIndex > lastIndex) {
                 String rawContent = segment.subSequence(lastIndex, startIndex).toString();
-                tokens.add(new RawToken(rawContent, source.getLineNumber(startOffset), startOffset, RAW_TEXT));
+                tokens.add(new RawToken(rawContent, source.getLineNumber(offset + lastIndex), offset + lastIndex, RAW_TEXT));
                 LOGGER.info("Before open-close: '{}'", rawContent);
             }
 

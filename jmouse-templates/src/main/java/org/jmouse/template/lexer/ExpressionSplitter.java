@@ -1,6 +1,5 @@
 package org.jmouse.template.lexer;
 
-import org.jmouse.template.StringSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,14 +18,14 @@ import java.util.regex.Pattern;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class ExpressionSplitter implements Splitter<List<RawToken>, StringSource> {
+public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableSource> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ExpressionSplitter.class);
 
     private static final Pattern EXPRESSION_PATTERN = Pattern.compile(
             "\\s*(?:(?<IDENTIFIER>[a-zA-Z_][a-zA-Z0-9_]*)" +
             "|(?<NUMBER>\\d+)|(?<STRING>'[^']*'|\"[^\"]*\")" +
-            "|(?<OPERATOR>[|:,()])|(?<OTHER>\\S))"
+            "|(?<OPERATOR>[|:,()]|&{2}|\\|{2}|[><!=]+=?)|(?<OTHER>\\S))"
     );
 
     public static final String IDENTIFIER = "IDENTIFIER";
@@ -56,7 +55,7 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, StringSource
      * @return a list of {@link RawToken} extracted from the input text
      */
     @Override
-    public List<RawToken> split(StringSource text, int offset, int length) {
+    public List<RawToken> split(TokenizableSource text, int offset, int length) {
         List<RawToken> tokens = new ArrayList<>();
 
         // Create a sub-sequence of the text for processing.
@@ -73,6 +72,8 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, StringSource
             for (String groupName : GROUP_NAMES) {
                 tokenValue = matcher.group(groupName);
                 if (tokenValue != null) {
+                    // Get the start position of the capturing group.
+                    startOffset = offset + matcher.start(groupName);
                     tokenType = GROUP_TO_TOKEN_TYPE.get(groupName);
                     LOGGER.info("Found group '{}' in expression '{}'", tokenType, tokenValue);
                     break;
