@@ -10,14 +10,17 @@ import org.jmouse.util.Streamable;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public interface TokenizableString extends CharSequence, Streamable<TokenizableString.Entry> {
+public interface Tokenizable extends CharSequence, Streamable<Tokenizable.Entry> {
+
+    @Override
+    int getLineNumber(int offset);
 
     /**
      * Adds a type entry with its offset and length.
      *
      * @param offset the starting offset of the type in the sequence
      * @param length the length of the type
-     * @param token  the type type
+     * @param token  the token type
      */
     void entry(int offset, int length, Token.Type token);
 
