@@ -1,10 +1,11 @@
 package org.jmouse.template.node;
 
 import org.jmouse.template.lexer.Token;
-import org.jmouse.util.helper.Strings;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.jmouse.util.helper.Strings.underscored;
 
 public class EntryNode extends AbstractNode {
 
@@ -25,8 +26,8 @@ public class EntryNode extends AbstractNode {
 
     @Override
     public String toString() {
-        return String.format("%s ENTRY: [%s] PROPERTIES: %s", Strings.underscored(getClass().getSimpleName(), true),
-                             token, properties);
+        return "%s ENTRY: [%s] PROPERTIES: %s"
+                .formatted(underscored(getClass().getSimpleName(), true), token, properties);
     }
 
 }
