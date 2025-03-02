@@ -57,7 +57,7 @@ public class DefaultTokenCursor implements TokenCursor {
      */
     @Override
     public Token next() {
-        return hasNext() ? tokens.get(++cursor) : null;
+        return hasNext() ? tokens.get(cursor++) : null;
     }
 
     /**
@@ -67,7 +67,7 @@ public class DefaultTokenCursor implements TokenCursor {
      */
     @Override
     public Token previous() {
-        return hasPrevious() ? tokens.get(--cursor) : null;
+        return hasPrevious() ? tokens.get(cursor--) : null;
     }
 
     /**
@@ -122,9 +122,9 @@ public class DefaultTokenCursor implements TokenCursor {
      * @throws SyntaxErrorException if the next token does not match the expected type
      */
     @Override
-    public Token expect(Token.Type expected) throws SyntaxErrorException {
+    public Token expect(Token.Type... expected) throws SyntaxErrorException {
         if (!isNext(expected)) {
-            throw new SyntaxErrorException(source, expected, lookAt(1));
+            throw new SyntaxErrorException(source, lookAt(1), expected);
         }
         return next();
     }
@@ -182,4 +182,8 @@ public class DefaultTokenCursor implements TokenCursor {
         return tokens.iterator();
     }
 
+    @Override
+    public String toString() {
+        return "Cursor[%s:%d] = (%s)".formatted(current().type(), cursor, current().value());
+    }
 }

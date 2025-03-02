@@ -22,7 +22,9 @@ public class Main {
         Reader            reader    = loader.load("index");
 //        TokenizableSource source    = new TokenizableString("index", reader);
 //        TokenizableSource source    = new TokenizableString("index", "Hello {% for ab in   xyz  def %}! {{ users is not contains '123' }}");
-        TokenizableSource source    = new TokenizableString("test-string", "Calculation: {{ 1 + 2 * 3 + 4 + 5 * 5 * 4 + 2 }} {# x++ --z v+=123 v-=111 #}");
+//        TokenizableSource source    = new TokenizableString("test-string", "Calculation: {{ 1 + 2 * 3 + 4 + 5 * 5 * 4 + 2 }}");
+        TokenizableSource source    = new TokenizableString("test-string", "Calculation: {{ --1 + 2++ * 3^2 ( 2 + 6) }}");
+//        TokenizableSource source    = new TokenizableString("test-string", "Calculation: {{ 1 + 2++}} {# x++ --z v+=123 v-=111 #}");
 
         Lexer lexer = new TemplateLexer();
 
@@ -31,6 +33,10 @@ public class Main {
         ParserContext parserContext = ParserContext.newContext();
 
         parserContext.addParser(new ArithmeticParser());
+
+        cursor.next();
+        cursor.next();
+        cursor.next();
 
         Node root = parserContext.getParser(ArithmeticParser.class).parse(cursor, parserContext);
 

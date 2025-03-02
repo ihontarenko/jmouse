@@ -2,6 +2,8 @@ package org.jmouse.template.lexer;
 
 import org.jmouse.util.Streamable;
 
+import java.util.List;
+
 /**
  * TokenCursor provides an advanced API for navigating a stream of tokens.
  * It offers methods for lookahead, shifting, retracting, expectation checking,
@@ -79,7 +81,7 @@ public interface TokenCursor extends Streamable<Token> {
      * @return the consumed Token object
      * @throws SyntaxErrorException if the next token's type does not match the expected type
      */
-    Token expect(Token.Type expected) throws SyntaxErrorException;
+    Token expect(Token.Type... expected) throws SyntaxErrorException;
 
     /**
      * Checks whether the current token matches the specified expected type.
@@ -87,7 +89,7 @@ public interface TokenCursor extends Streamable<Token> {
      * @param expected the expected Token.Type for the current token
      * @return true if the current token matches, false otherwise
      */
-    default boolean isCurrent(Token.Type expected) {
+    default boolean isCurrent(Token.Type... expected) {
         return checkAt(0, expected);
     }
 
@@ -97,7 +99,7 @@ public interface TokenCursor extends Streamable<Token> {
      * @param expected the expected Token.Type for the previous token
      * @return true if the previous token matches, false otherwise
      */
-    default boolean isPrevious(Token.Type expected) {
+    default boolean isPrevious(Token.Type... expected) {
         return checkAt(-1, expected);
     }
 
@@ -107,7 +109,7 @@ public interface TokenCursor extends Streamable<Token> {
      * @param expected the expected Token.Type for the next token
      * @return true if the next token matches, false otherwise
      */
-    default boolean isNext(Token.Type expected) {
+    default boolean isNext(Token.Type... expected) {
         return checkAt(1, expected);
     }
 
@@ -118,8 +120,8 @@ public interface TokenCursor extends Streamable<Token> {
      * @param expected the expected Token.Type for the token at the given offset
      * @return true if the token at the offset matches, false otherwise
      */
-    default boolean checkAt(int offset, Token.Type expected) {
-        return lookAt(offset).type() == expected;
+    default boolean checkAt(int offset, Token.Type... expected) {
+        return List.of(expected).contains(lookAt(offset).type());
     }
 
     /**

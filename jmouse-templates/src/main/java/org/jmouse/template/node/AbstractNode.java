@@ -3,6 +3,8 @@ package org.jmouse.template.node;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.jmouse.util.helper.Strings.underscored;
+
 /**
  * An abstract implementation of the {@link Node} interface, providing
  * basic parent-child relationships for hierarchical structures.
@@ -13,7 +15,7 @@ import java.util.List;
 abstract public class AbstractNode implements Node {
 
     protected final List<Node> children = new ArrayList<>(); // List of child nodes
-    protected Node parent; // Parent node reference
+    protected       Node       parent; // Parent node reference
 
     /**
      * Constructs an {@code AbstractNode} with no parent.
@@ -59,5 +61,10 @@ abstract public class AbstractNode implements Node {
     @Override
     public List<Node> children() {
         return this.children;
+    }
+
+    @Override
+    public String toString() {
+        return "%s".formatted(underscored(getClass().getSimpleName(), true));
     }
 }

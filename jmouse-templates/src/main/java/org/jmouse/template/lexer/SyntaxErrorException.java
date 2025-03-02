@@ -1,5 +1,7 @@
 package org.jmouse.template.lexer;
 
+import java.util.Arrays;
+
 /**
  * Thrown when a syntax error occurs during the parsing process.
  */
@@ -22,8 +24,8 @@ public class SyntaxErrorException extends Error {
      * @param expected the expected token type
      * @param actual   the token that was actually encountered
      */
-    public SyntaxErrorException(TokenizableSource source, Token.Type expected, Token actual) {
-        this(buildMessage(source, expected, actual));
+    public SyntaxErrorException(TokenizableSource source, Token actual, Token.Type... expected) {
+        this(buildMessage(source, actual, expected));
     }
 
     /**
@@ -35,10 +37,9 @@ public class SyntaxErrorException extends Error {
      * @param actual   the actual token encountered
      * @return a formatted error message
      */
-    private static String buildMessage(TokenizableSource source, Token.Type expected, Token actual) {
-        return String.format(
-                "Syntax error: expected token '%s', but encountered token '%s' at offset %s (line %s).",
-                expected, actual.type(), actual.offset(), source.getLineNumber(actual.offset())
-        );
+    private static String buildMessage(TokenizableSource source, Token actual, Token.Type... expected) {
+        return "Syntax error: expected token '%s', but encountered token '%s' at offset %d (line %d, source '%s')."
+                .formatted(Arrays.toString(expected), actual.type(), actual.offset(),
+                        source.getLineNumber(actual.offset()), source.getName());
     }
 }
