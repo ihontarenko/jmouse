@@ -1,6 +1,7 @@
-package org.jmouse.template.node;
+package org.jmouse.template.node.arithmetic;
 
 import org.jmouse.template.lexer.Token;
+import org.jmouse.template.node.Expression;
 
 /**
  * Represents a prefix unary operation in the Abstract Syntax Tree (AST).

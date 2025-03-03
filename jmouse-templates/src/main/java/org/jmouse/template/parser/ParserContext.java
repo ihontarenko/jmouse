@@ -4,15 +4,31 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Represents a context for managing parsers in a templating system.
+ * Represents a context for managing parsers and options in a templating system.
  *
  * <p>The context maintains a registry of parsers that can be accessed by their class type.
- * This allows different parser implementations to be managed dynamically.</p>
+ * It also allows configuration options to be set dynamically, enabling flexible parsing behavior.</p>
+ *
+ * <pre>{@code
+ * ParserContext context = ParserContext.newContext();
+ * context.addParser(new ArithmeticParser());
+ * Parser parser = context.getParser(ArithmeticParser.class);
+ * context.setOptions(new ParserOptions());
+ * }</pre>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
 public interface ParserContext {
+
+    /**
+     * Creates a new instance of {@link ParserContext}.
+     *
+     * @return a new parser context instance
+     */
+    static ParserContext newContext() {
+        return new SimpleContext();
+    }
 
     /**
      * Retrieves a registered parser by its class type.
@@ -31,20 +47,59 @@ public interface ParserContext {
     void addParser(Parser parser);
 
     /**
-     * Creates a new instance of {@link ParserContext}.
+     * Retrieves the current parser options.
      *
-     * @return a new parser context instance
+     * @return the current {@link ParserOptions} instance or {@code null} if not set
      */
-    static ParserContext newContext() {
-        return new SimpleContext();
-    }
+    ParserOptions getOptions();
 
     /**
-     * A simple implementation of {@link ParserContext} that maintains a registry of parsers.
+     * Sets the parser options for this context.
+     *
+     * @param options the {@link ParserOptions} instance to apply
+     */
+    void setOptions(ParserOptions options);
+
+    /**
+     * Clears the parser options from this context.
+     */
+    void clearOptions();
+
+    /**
+     * A simple implementation of {@link ParserContext} that maintains a registry of parsers and options.
      */
     class SimpleContext implements ParserContext {
 
         private final Map<Class<? extends Parser>, Parser> parsers = new HashMap<>();
+        private       ParserOptions                        options;
+
+        /**
+         * Retrieves the currently set parser options.
+         *
+         * @return the current parser options, or {@code null} if not set
+         */
+        @Override
+        public ParserOptions getOptions() {
+            return options;
+        }
+
+        /**
+         * Sets the parser options for this context.
+         *
+         * @param options the parser options to apply
+         */
+        @Override
+        public void setOptions(ParserOptions options) {
+            this.options = options;
+        }
+
+        /**
+         * Clears the currently stored parser options.
+         */
+        @Override
+        public void clearOptions() {
+            this.options = null;
+        }
 
         /**
          * Registers a parser in the context.

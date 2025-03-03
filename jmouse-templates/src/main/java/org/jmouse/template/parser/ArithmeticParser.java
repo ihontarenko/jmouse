@@ -4,6 +4,9 @@ import org.jmouse.template.lexer.BasicToken;
 import org.jmouse.template.lexer.Token;
 import org.jmouse.template.lexer.TokenCursor;
 import org.jmouse.template.node.*;
+import org.jmouse.template.node.arithmetic.BinaryOperation;
+import org.jmouse.template.node.arithmetic.PostfixUnaryOperation;
+import org.jmouse.template.node.arithmetic.PrefixUnaryOperation;
 
 import static org.jmouse.template.lexer.BasicToken.*;
 

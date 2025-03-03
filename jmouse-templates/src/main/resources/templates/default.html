@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title | upper | trim }}</title>
+</head>
+<body>
+<!-- Умовний блок -->
+{% if user.isAdmin %}
+<header>
+    <h1>Welcome, Administrator {{ user.name | escape }}</h1>
+</header>
+{% else %}
+<header>
+    <h1>Welcome, {{ user.name | capitalize }}</h1>
+</header>
+{% endif %}
+
+<section>
+    <!-- Виклик функції для форматування дати -->
+    <p>Today is: {{ currentDate | format("EEEE, dd MMMM yyyy") }}</p>
+
+    <!-- Форматування валюти -->
+    <p>Your balance is: {{ balance | currency("USD") }}</p>
+
+    <!-- Цикл для переліку елементів -->
+    <ul>
+        {% for item in items %}
+        <li>{{ item.name | escape }}: {{ item.price | currency("USD") }}</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Арифметичний вираз -->
+    <p>Arithmetic test: {{ 2 + 4 * 3 / 6 + 1/3 }}</p>
+
+    <!-- Вираз з префіксним і постфіксним інкрементом/декрементом -->
+    <p>Increment test: {{ --counter + counter++ }}</p>
+
+    <!-- Імпліцитна множина (3 множиться на (2+6)) -->
+    <p>Implicit multiplication test: {{ 3 (2 + 6) }}</p>
+
+    <!-- Виклик функції -->
+    <p>Function call: {{ format("Hello, %s!", user.name) }}</p>
+
+    <!-- Теренарний оператор -->
+    <p>Status: {{ user.age >= 18 ? "Adult" : "Minor" }}</p>
+
+    <!-- Макрос для рендерингу користувача -->
+    {% macro renderUser(user) %}
+    <div class="user">
+        <p>Name: {{ user.name | escape }}</p>
+        <p>Email: {{ user.email | lower }}</p>
+    </div>
+    {% endmacro %}
+
+    <!-- Виклик макросу -->
+    <div class="user-info">
+        {{ renderUser(user) }}
+    </div>
+</section>
+
+<footer>
+    <p>© {{ currentYear }}</p>
+</footer>
+</body>
+</html>

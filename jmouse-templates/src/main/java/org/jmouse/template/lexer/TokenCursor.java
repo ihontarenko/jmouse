@@ -114,6 +114,22 @@ public interface TokenCursor extends Streamable<Token> {
     }
 
     /**
+     * Checks whether the tokens starting at the current position match the specified sequence of token types.
+     *
+     * @param expected an array of expected token types, in the desired order
+     * @return {@code true} if the tokens from the current position match the expected sequence, {@code false} otherwise
+     */
+    default boolean matchesSequence(Token.Type... expected) {
+        boolean matches = true;
+
+        for (int i = 0; i < expected.length; i++) {
+            matches &= checkAt(i, expected);
+        }
+
+        return matches;
+    }
+
+    /**
      * Checks whether the token at the specified lookahead offset matches the expected type.
      *
      * @param offset   the offset from the current position (0 means current token)

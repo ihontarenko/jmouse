@@ -9,7 +9,7 @@
         <version>1.0.0-Beta</version>
     </parent>
 
-    <name>jMouse - Pines Templates</name>
+    <name>jMouse - Templates (Leafs)</name>
     <artifactId>jmouse-templates</artifactId>
     <packaging>jar</packaging>
 
