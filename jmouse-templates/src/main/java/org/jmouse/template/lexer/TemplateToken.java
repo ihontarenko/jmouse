@@ -21,12 +21,12 @@ public enum TemplateToken implements Token.Type {
     /**
      * Opening call type: e.g., "{%"
      */
-    T_OPEN_CALL(10003, "{%"),
+    T_OPEN_EXPRESSION(10003, "{%"),
 
     /**
      * Closing call type: e.g., "%}"
      */
-    T_CLOSE_CALL(10004, "%}"),
+    T_CLOSE_EXPRESSION(10004, "%}"),
 
     // Comment tokens
     /**

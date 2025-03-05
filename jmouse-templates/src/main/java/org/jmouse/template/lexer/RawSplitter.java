@@ -76,7 +76,7 @@ public class RawSplitter implements Splitter<List<RawToken>, TokenizableSource> 
                 tokens.add(new RawToken(open, source.getLineNumber(startOffset), startOffset, OPEN_TAG));
 
                 // Tokenize the expression content using ExpressionSplitter.
-                LOGGER.info("Inner Expression: '{}'", expression);
+                LOGGER.info("Inner ExpressionNode: '{}'", expression);
                 int innerIndex  = startIndex + open.length();
                 int innerOffset = offset + innerIndex;
                 tokens.addAll(splitter.split(source, innerOffset, innerOffset + expression.length()));

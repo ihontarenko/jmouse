@@ -1,20 +1,20 @@
-package org.jmouse.template.node.arithmetic;
+package org.jmouse.template.node.expression.arithmetic;
 
 import org.jmouse.template.lexer.Token;
-import org.jmouse.template.node.AbstractExpression;
-import org.jmouse.template.node.Expression;
+import org.jmouse.template.node.AbstractExpressionNode;
+import org.jmouse.template.node.ExpressionNode;
 
 /**
  * Represents a unary operation expression node in the Abstract Syntax Tree (AST).
  *
  * <p>This node is used to represent unary operations such as increment, decrement,
- * unary plus, or unary minus. It extends {@link AbstractExpression} and holds a single operand
+ * unary plus, or unary minus. It extends {@link AbstractExpressionNode} and holds a single operand
  * along with an operator represented by a {@link Token.Type}.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-abstract public class UnaryOperation extends AbstractExpression {
+abstract public class UnaryOperation extends AbstractExpressionNode {
 
     /**
      * The operator for the unary operation.
@@ -27,7 +27,7 @@ abstract public class UnaryOperation extends AbstractExpression {
     /**
      * The operand on which the unary operation is applied.
      */
-    private final Expression operand;
+    private final ExpressionNode operand;
 
     /**
      * Constructs a {@code UnaryOperation} node with the specified operand and operator.
@@ -35,7 +35,7 @@ abstract public class UnaryOperation extends AbstractExpression {
      * @param operand  the operand expression on which the unary operation is applied
      * @param operator the token type representing the unary operator (e.g., increment, decrement, plus, minus)
      */
-    public UnaryOperation(Expression operand, Token.Type operator) {
+    public UnaryOperation(ExpressionNode operand, Token.Type operator) {
         this.operator = operator;
         this.operand = operand;
     }
@@ -54,7 +54,7 @@ abstract public class UnaryOperation extends AbstractExpression {
      *
      * @return the operand expression
      */
-    public Expression getOperand() {
+    public ExpressionNode getOperand() {
         return operand;
     }
 }

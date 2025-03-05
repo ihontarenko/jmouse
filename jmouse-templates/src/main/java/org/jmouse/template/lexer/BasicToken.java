@@ -84,13 +84,6 @@ public enum BasicToken implements Token.Type {
     T_FALSE(9000, "FALSE"),
     T_TRUE(9001, "TRUE"),
     T_NULL(9999, "NULL"),
-    T_IF(9010, "if"),
-    T_ELSE(9011, "else"),
-    T_ENDIF(9012, "endif"),
-    T_FOR(9020, "for"),
-    T_ENDFOR(9021, "endfor"),
-    T_WHILE(9030, "while"),
-    T_ENDWHILE(9031, "endwhile"),
 
     // Identifier (Group 7000)
     T_IDENTIFIER(7000);

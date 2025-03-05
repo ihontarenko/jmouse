@@ -1,10 +1,12 @@
 package org.jmouse.template.loader;
 
+import org.jmouse.util.Charset;
+
 abstract public class AbstractLoader<T> implements TemplateLoader<T> {
 
-    private String prefix;
-    private String suffix;
-    private String charset;
+    private String  prefix;
+    private String  suffix;
+    private Charset charset;
 
     @Override
     public void setPrefix(String prefix) {
@@ -17,7 +19,7 @@ abstract public class AbstractLoader<T> implements TemplateLoader<T> {
     }
 
     @Override
-    public void setCharset(String charset) {
+    public void setCharset(Charset charset) {
         this.charset = charset;
     }
 
@@ -32,7 +34,7 @@ abstract public class AbstractLoader<T> implements TemplateLoader<T> {
     }
 
     @Override
-    public String getCharset() {
+    public Charset getCharset() {
         return this.charset;
     }
 }

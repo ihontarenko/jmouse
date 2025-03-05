@@ -88,8 +88,9 @@ public class DefaultTokenizer implements Tokenizer<Token, TokenizableSource> {
                 case NUMBER -> {
                     // Detect integer and floating-point numbers
                     Token.Type tokenType = BasicToken.T_INT;
+                    String     value     = rawToken.value();
 
-                    if (rawToken.value().matches(Syntax.FRACTIONAL_NUMBER)) {
+                    if (value.contains(".") || value.toLowerCase().contains("e")) {
                         tokenType = BasicToken.T_FLOAT;
                     }
 

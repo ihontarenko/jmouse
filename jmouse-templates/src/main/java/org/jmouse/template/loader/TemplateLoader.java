@@ -1,5 +1,7 @@
 package org.jmouse.template.loader;
 
+import org.jmouse.util.Charset;
+
 import java.io.Reader;
 
 public interface TemplateLoader<T> {
@@ -14,7 +16,7 @@ public interface TemplateLoader<T> {
 
     }
 
-    default void setCharset(String charset) {
+    default void setCharset(Charset charset) {
 
     }
 
@@ -26,7 +28,7 @@ public interface TemplateLoader<T> {
         return null;
     }
 
-    default String getCharset() {
+    default Charset getCharset() {
         return null;
     }
 

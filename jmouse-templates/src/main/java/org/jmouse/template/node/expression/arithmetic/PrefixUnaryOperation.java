@@ -1,7 +1,7 @@
-package org.jmouse.template.node.arithmetic;
+package org.jmouse.template.node.expression.arithmetic;
 
 import org.jmouse.template.lexer.Token;
-import org.jmouse.template.node.Expression;
+import org.jmouse.template.node.ExpressionNode;
 
 /**
  * Represents a prefix unary operation in the Abstract Syntax Tree (AST).
@@ -20,7 +20,7 @@ public class PrefixUnaryOperation extends UnaryOperation {
      * @param operand  the operand expression (e.g., a variable)
      * @param operator the prefix operator (e.g., {@code ++}, {@code --})
      */
-    public PrefixUnaryOperation(Expression operand, Token.Type operator) {
+    public PrefixUnaryOperation(ExpressionNode operand, Token.Type operator) {
         super(operand, operator);
     }
 }

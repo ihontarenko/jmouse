@@ -1,8 +1,8 @@
-package org.jmouse.template.node.arithmetic;
+package org.jmouse.template.node.expression.arithmetic;
 
 import org.jmouse.template.lexer.Token;
-import org.jmouse.template.node.AbstractExpression;
-import org.jmouse.template.node.Expression;
+import org.jmouse.template.node.AbstractExpressionNode;
+import org.jmouse.template.node.ExpressionNode;
 
 /**
  * Represents a binary operation node in the Abstract Syntax Tree (AST).
@@ -13,12 +13,12 @@ import org.jmouse.template.node.Expression;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class BinaryOperation extends AbstractExpression {
+public class BinaryOperation extends AbstractExpressionNode {
 
     /**
      * The left-hand side expression of the binary operation.
      */
-    private final Expression left;
+    private final ExpressionNode left;
 
     /**
      * The operator used in the binary operation.
@@ -28,7 +28,7 @@ public class BinaryOperation extends AbstractExpression {
     /**
      * The right-hand side expression of the binary operation.
      */
-    private final Expression right;
+    private final ExpressionNode right;
 
     /**
      * Constructs a {@code BinaryOperation} with the specified left-hand side expression,
@@ -38,7 +38,7 @@ public class BinaryOperation extends AbstractExpression {
      * @param operator the operator used in the binary operation
      * @param right    the right-hand side expression of the binary operation
      */
-    public BinaryOperation(Expression left, Token.Type operator, Expression right) {
+    public BinaryOperation(ExpressionNode left, Token.Type operator, ExpressionNode right) {
         this.left = left;
         this.operator = operator;
         this.right = right;
@@ -49,7 +49,7 @@ public class BinaryOperation extends AbstractExpression {
      *
      * @return the left-hand side expression
      */
-    public Expression getLeft() {
+    public ExpressionNode getLeft() {
         return left;
     }
 
@@ -58,7 +58,7 @@ public class BinaryOperation extends AbstractExpression {
      *
      * @return the right-hand side expression
      */
-    public Expression getRight() {
+    public ExpressionNode getRight() {
         return right;
     }
 

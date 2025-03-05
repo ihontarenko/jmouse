@@ -6,15 +6,10 @@ package org.jmouse.template.node;
  * <p>This node is used to store plain text that does not require further processing,
  * such as static HTML or text content in a template.</p>
  *
- * <pre>{@code
- * RawTextNode textNode = new RawTextNode("Hello, World!");
- * System.out.println(textNode.getString()); // Output: Hello, World!
- * }</pre>
- *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class RawTextNode extends AbstractNode {
+public class RawTextNode extends AbstractRenderableNode {
 
     /**
      * The raw text content of this node.

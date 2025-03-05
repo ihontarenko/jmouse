@@ -10,12 +10,6 @@ import static org.jmouse.util.helper.Strings.underscored;
  * <p>This class is designed to create hierarchical structures based on tokenized input.
  * It extends {@link AbstractNode}, providing a simple way to wrap tokens into nodes.</p>
  *
- * <pre>{@code
- * Token token = new Token("example", Type.T_IDENTIFIER, 1, 5, 2);
- * BasicNode node = BasicNode.forToken(token);
- * System.out.println(node.token()); // Outputs the associated token
- * }</pre>
- *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */

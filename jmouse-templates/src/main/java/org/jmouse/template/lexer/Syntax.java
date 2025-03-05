@@ -6,7 +6,7 @@ public class Syntax {
     public static final String NUMBER            = "[.]?\\d+[.]?\\d*";
     public static final String UNSIGNED_INTEGER  = "\\d+";
     public static final String SIGNED_INTEGER    = "[+-]?\\d+";
-    public static final String FRACTIONAL_NUMBER = "\\d*\\.\\d*|[+-]?\\d+(\\.\\d+)?([Ee][+-]?\\d+)?";
+    public static final String FRACTIONAL_NUMBER = "\\d+\\.\\d*|[+-]?\\d+(\\.\\d+)?([Ee][+-]?\\d+)?";
     public static final String IDENTIFIER        = "\\w+";
     public static final String LETTERS           = "[a-zA-Z]+";
     public static final String SEMICOLON_COMMENT = ";[^\n]+|\\([\\w\\s]+\\)";

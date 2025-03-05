@@ -38,7 +38,7 @@ public class SyntaxErrorException extends Error {
      * @return a formatted error message
      */
     private static String buildMessage(TokenizableSource source, Token actual, Token.Type... expected) {
-        return "Syntax error: expected token '%s', but encountered token '%s' at offset %d (line %d, source '%s')."
+        return "Syntax error: expected token '%s', but encountered token '%s' at offset %d (at line: %d, source '%s')."
                 .formatted(Arrays.toString(expected), actual.type(), actual.offset(),
                         source.getLineNumber(actual.offset()), source.getName());
     }
