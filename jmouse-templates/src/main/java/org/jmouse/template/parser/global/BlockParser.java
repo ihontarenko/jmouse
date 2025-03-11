@@ -15,7 +15,7 @@ public class BlockParser implements Parser {
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
         if (context.getOptions() != null) {
-            Parser           parser  = context.getParser(RootParser.NAME);
+            Parser           parser  = context.getParser(RootParser.class);
             Predicate<Token> stopper = context.getOptions().stopCondition();
             Token            token   = cursor.peek();
             while (cursor.hasNext() && !stopper.test(token)) {
@@ -23,11 +23,6 @@ public class BlockParser implements Parser {
                 parent.add(parser.parse(cursor, context));
             }
         }
-    }
-
-    @Override
-    public String getName() {
-        return NAME;
     }
 
 }

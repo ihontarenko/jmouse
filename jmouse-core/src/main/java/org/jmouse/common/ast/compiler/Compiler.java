@@ -15,15 +15,15 @@ public interface Compiler<N extends Node, R> {
      * Compiles the given AST node into a result.
      *
      * @param node the node to be compiled
-     * @param evaluationContext  the evaluation context providing contextual information for the compilation
+     * @param evaluationContext  the context context providing contextual information for the compilation
      * @return the result of the compilation
      */
     R compile(N node, EvaluationContext evaluationContext);
 
     /**
-     * Specifies the type of AST node this compiler can handle.
+     * Specifies the type of AST node this evaluation can handle.
      *
-     * @return the class type of the node this compiler is designed to process
+     * @return the class type of the node this evaluation is designed to process
      */
     Class<? extends N> nodeType();
 

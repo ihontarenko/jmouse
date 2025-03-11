@@ -19,7 +19,7 @@ public class StringDefinitionCompiler implements Compiler<StringDefinitionNode, 
      * Compiles a {@link StringDefinitionNode} into a {@link Map.Entry} mapping the variable name to its evaluated value.
      *
      * @param node               the string definition node to compile
-     * @param evaluationContext  the evaluation context for evaluating the node
+     * @param evaluationContext  the context context for evaluating the node
      * @return a {@link Map.Entry} with the variable name as the key and the evaluated value as the value
      */
     @Override
@@ -32,7 +32,7 @@ public class StringDefinitionCompiler implements Compiler<StringDefinitionNode, 
     }
 
     /**
-     * Specifies the type of node this compiler can handle.
+     * Specifies the type of node this evaluation can handle.
      *
      * @return the {@link StringDefinitionNode} class
      */

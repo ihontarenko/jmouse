@@ -1,5 +1,6 @@
-package org.jmouse.template.node.expression.arithmetic;
+package org.jmouse.template.node.expression;
 
+import org.jmouse.template.extension.Operator;
 import org.jmouse.template.lexer.Token;
 import org.jmouse.template.node.AbstractExpressionNode;
 import org.jmouse.template.node.ExpressionNode;
@@ -23,7 +24,7 @@ public class BinaryOperation extends AbstractExpressionNode {
     /**
      * The operator used in the binary operation.
      */
-    private final Token.Type operator;
+    private final Operator operator;
 
     /**
      * The right-hand side expression of the binary operation.
@@ -38,7 +39,7 @@ public class BinaryOperation extends AbstractExpressionNode {
      * @param operator the operator used in the binary operation
      * @param right    the right-hand side expression of the binary operation
      */
-    public BinaryOperation(ExpressionNode left, Token.Type operator, ExpressionNode right) {
+    public BinaryOperation(ExpressionNode left, Operator operator, ExpressionNode right) {
         this.left = left;
         this.operator = operator;
         this.right = right;
@@ -67,7 +68,7 @@ public class BinaryOperation extends AbstractExpressionNode {
      *
      * @return the operator
      */
-    public Token.Type getOperator() {
+    public Operator getOperator() {
         return operator;
     }
 }

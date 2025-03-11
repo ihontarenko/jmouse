@@ -130,6 +130,21 @@ public class DefaultTokenCursor implements TokenCursor {
     }
 
     /**
+     * Expects a specific token type at the current position and advances if found.
+     *
+     * @param expected the expected token type
+     * @return the current token if it matches the expected type
+     * @throws SyntaxErrorException if the current token does not match the expected type
+     */
+    @Override
+    public Token ensure(Token.Type... expected) throws SyntaxErrorException {
+        if (!isCurrent(expected)) {
+            throw new SyntaxErrorException(source, lookAt(0), expected);
+        }
+        return peek();
+    }
+
+    /**
      * Restores the cursor position from a given savepoint.
      *
      * @param sp the savepoint to restore from

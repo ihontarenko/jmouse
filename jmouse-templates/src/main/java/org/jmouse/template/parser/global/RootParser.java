@@ -7,7 +7,6 @@ import org.jmouse.template.node.RawTextNode;
 import org.jmouse.template.parser.ParseException;
 import org.jmouse.template.parser.Parser;
 import org.jmouse.template.parser.ParserContext;
-import org.jmouse.template.parser.arithmetic.ArithmeticParser;
 
 import static org.jmouse.template.lexer.BasicToken.*;
 import static org.jmouse.template.lexer.TemplateToken.*;
@@ -50,18 +49,13 @@ public class RootParser implements Parser {
     public void parseExpression(TokenCursor cursor, Node parent, ParserContext context) {
 
         if (cursor.matchesSequence(T_IDENTIFIER, T_OPEN_PAREN)) {
-            context.getParser(FunctionParser.NAME).parse(cursor, context);
+            context.getParser(FunctionParser.class).parse(cursor, context);
         } else if (cursor.matchesSequence(T_IDENTIFIER, T_DOT)) {
             // property access
         } else if (cursor.isNext(T_PLUS, T_MINUS, T_MULTIPLY, T_DIVIDE, T_CARET)) {
-            context.getParser(ArithmeticParser.NAME).parse(cursor, parent, context);
+            context.getParser(OperatorParser.class).parse(cursor, parent, context);
         }
 
-    }
-
-    @Override
-    public String getName() {
-        return NAME;
     }
 
 }

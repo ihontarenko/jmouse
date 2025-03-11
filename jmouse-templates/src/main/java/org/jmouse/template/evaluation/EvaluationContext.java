@@ -1,4 +1,4 @@
-package org.jmouse.template.compiler;
+package org.jmouse.template.evaluation;
 
 import org.jmouse.common.support.context.AbstractVariablesContext;
 import org.jmouse.template.node.Node;
@@ -7,14 +7,14 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
- * Represents the evaluation context for AST (Abstract Syntax Tree) compilation.
+ * Represents the context context for AST (Abstract Syntax Tree) compilation.
  * This context provides utilities to manage functions, variables, and compilers
  * specific to node types in the AST.
  */
 public class EvaluationContext extends AbstractVariablesContext {
 
     /**
-     * Retrieves a function by its name from the evaluation context.
+     * Retrieves a function by its name from the context context.
      *
      * @param name the name of the function.
      * @return the {@link Method} structured representing the function.
@@ -38,7 +38,7 @@ public class EvaluationContext extends AbstractVariablesContext {
     }
 
     /**
-     * Adds or updates a function in the evaluation context.
+     * Adds or updates a function in the context context.
      *
      * @param name   the name of the function.
      * @param method the {@link Method} structured representing the function.
@@ -53,7 +53,7 @@ public class EvaluationContext extends AbstractVariablesContext {
     }
 
     /**
-     * Adds or updates a function in the evaluation context using the function's name.
+     * Adds or updates a function in the context context using the function's name.
      *
      * @param method the {@link Method} structured representing the function.
      *
@@ -91,7 +91,7 @@ public class EvaluationContext extends AbstractVariablesContext {
     }
 
     /**
-     * Adds a compiler for a specific node type to the evaluation context.
+     * Adds a evaluation for a specific node type to the context context.
      *
      * @param nodeType the class representing the node type.
      * @param compiler the {@link Compiler} structured for the node type.
@@ -106,16 +106,16 @@ public class EvaluationContext extends AbstractVariablesContext {
     }
 
     /**
-     * Adds a compiler to the evaluation context. The compiler's node type is inferred
+     * Adds a evaluation to the context context. The evaluation's node type is inferred
      * from its {@code nodeType()} method.
      *
      * @param compiler the {@link Compiler} structured to add.
-     * @throws NullPointerException if the compiler's {@code nodeType()} method returns {@code null}.
+     * @throws NullPointerException if the evaluation's {@code nodeType()} method returns {@code null}.
      *
      * <p>Example usage:</p>
      * <pre>{@code
-     * Compiler<MyNode> compiler = new MyNodeCompiler();
-     * context.addCompiler(compiler);
+     * Compiler<MyNode> evaluation = new MyNodeCompiler();
+     * context.addCompiler(evaluation);
      * }</pre>
      */
     public void addCompiler(Compiler<?, ?> compiler) {
@@ -125,16 +125,16 @@ public class EvaluationContext extends AbstractVariablesContext {
     }
 
     /**
-     * Retrieves a compiler for a specific node type from the evaluation context.
+     * Retrieves a evaluation for a specific node type from the context context.
      *
      * @param nodeType the class representing the node type.
      * @param <N>      the type of the node.
      * @return the {@link Compiler} structured for the node type.
-     * @throws EvaluationContextException if no compiler is found for the specified node type.
+     * @throws EvaluationContextException if no evaluation is found for the specified node type.
      *
      * <p>Example usage:</p>
      * <pre>{@code
-     * Compiler<MyNode> compiler = context.getCompiler(MyNode.class);
+     * Compiler<MyNode> evaluation = context.getCompiler(MyNode.class);
      * }</pre>
      */
     public <N extends Node> Compiler<N, ?> getCompiler(Class<? extends N> nodeType) {
@@ -142,7 +142,7 @@ public class EvaluationContext extends AbstractVariablesContext {
 
         if (compiler == null) {
             throw new EvaluationContextException(
-                    "Evaluation context does not contain the required compiler for '%s' node."
+                    "Evaluation context does not contain the required evaluation for '%s' node."
                             .formatted(nodeType.getName()));
         }
 
@@ -150,16 +150,16 @@ public class EvaluationContext extends AbstractVariablesContext {
     }
 
     /**
-     * Retrieves a compiler for a specific node structured from the evaluation context.
+     * Retrieves a evaluation for a specific node structured from the context context.
      *
-     * @param nodeObject the node structured whose compiler is to be retrieved.
+     * @param nodeObject the node structured whose evaluation is to be retrieved.
      * @param <N>        the type of the node.
      * @return the {@link Compiler} structured for the node type.
      *
      * <p>Example usage:</p>
      * <pre>{@code
      * MyNode node = new MyNode();
-     * Compiler<MyNode> compiler = context.getCompiler(node);
+     * Compiler<MyNode> evaluation = context.getCompiler(node);
      * }</pre>
      */
     @SuppressWarnings("unchecked")

@@ -1,4 +1,4 @@
-package org.jmouse.template.node.expression.arithmetic;
+package org.jmouse.template.node.expression;
 
 import org.jmouse.template.lexer.Token;
 import org.jmouse.template.node.ExpressionNode;

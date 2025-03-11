@@ -25,7 +25,7 @@ public class DefaultBinderFactory implements BinderFactory {
     /**
      * Retrieves the most suitable {@link ObjectBinder} for the given {@link Bindable} type.
      * <p>
-     * The registered binders are sorted before evaluation to ensure priority-based selection.
+     * The registered binders are sorted before context to ensure priority-based selection.
      * If no matching binder is found, a {@link BindException} is thrown.
      * </p>
      *

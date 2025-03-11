@@ -84,6 +84,15 @@ public interface TokenCursor extends Streamable<Token> {
     Token expect(Token.Type... expected) throws SyntaxErrorException;
 
     /**
+     * Expects a specific token type at the current position and advances if found.
+     *
+     * @param expected the expected token type
+     * @return the current token if it matches the expected type
+     * @throws SyntaxErrorException if the current token does not match the expected type
+     */
+    Token ensure(Token.Type... expected) throws SyntaxErrorException;
+
+    /**
      * Checks whether the current token matches the specified expected type.
      *
      * @param expected the expected Token.Type for the current token

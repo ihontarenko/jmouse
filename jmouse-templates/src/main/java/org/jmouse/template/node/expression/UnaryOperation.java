@@ -1,5 +1,6 @@
-package org.jmouse.template.node.expression.arithmetic;
+package org.jmouse.template.node.expression;
 
+import org.jmouse.template.extension.Operator;
 import org.jmouse.template.lexer.Token;
 import org.jmouse.template.node.AbstractExpressionNode;
 import org.jmouse.template.node.ExpressionNode;
@@ -9,7 +10,7 @@ import org.jmouse.template.node.ExpressionNode;
  *
  * <p>This node is used to represent unary operations such as increment, decrement,
  * unary plus, or unary minus. It extends {@link AbstractExpressionNode} and holds a single operand
- * along with an operator represented by a {@link Token.Type}.</p>
+ * along with an operator represented by a {@link Operator}.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -20,9 +21,9 @@ abstract public class UnaryOperation extends AbstractExpressionNode {
      * The operator for the unary operation.
      *
      * <p>This field can represent operations such as increment, decrement, unary plus, or unary minus,
-     * and is represented using a {@link Token.Type} value.</p>
+     * and is represented using a {@link Operator} value.</p>
      */
-    private final Token.Type operator;
+    private final Operator operator;
 
     /**
      * The operand on which the unary operation is applied.
@@ -35,7 +36,7 @@ abstract public class UnaryOperation extends AbstractExpressionNode {
      * @param operand  the operand expression on which the unary operation is applied
      * @param operator the token type representing the unary operator (e.g., increment, decrement, plus, minus)
      */
-    public UnaryOperation(ExpressionNode operand, Token.Type operator) {
+    public UnaryOperation(ExpressionNode operand, Operator operator) {
         this.operator = operator;
         this.operand = operand;
     }
@@ -43,9 +44,9 @@ abstract public class UnaryOperation extends AbstractExpressionNode {
     /**
      * Returns the operator for this unary operation.
      *
-     * @return the {@link Token.Type} representing the operator
+     * @return the {@link Operator} representing the operator
      */
-    public Token.Type getOperator() {
+    public Operator getOperator() {
         return operator;
     }
 

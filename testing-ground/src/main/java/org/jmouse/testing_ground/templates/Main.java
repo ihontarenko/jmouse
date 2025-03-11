@@ -7,7 +7,7 @@ import org.jmouse.template.loader.TemplateLoader;
 import org.jmouse.template.node.BasicNode;
 import org.jmouse.template.node.Node;
 import org.jmouse.template.parser.*;
-import org.jmouse.template.parser.arithmetic.ArithmeticParser;
+import org.jmouse.template.parser.global.OperatorParser;
 import org.jmouse.template.parser.global.RootParser;
 
 import java.io.Reader;
@@ -19,6 +19,10 @@ public class Main {
 
         loader.setPrefix("templates/");
         loader.setSuffix(".html");
+
+        Boolean a = null;
+
+        System.out.println(a);
 
         Reader            reader    = loader.load("simple");
 //        TokenizableSource source    = new TokenizableString("default.html", reader);
@@ -35,12 +39,14 @@ public class Main {
 
         ParserContext parserContext = new DefaultParserContext();
 
-        parserContext.addParser(new ArithmeticParser());
+
+
+        parserContext.addParser(new OperatorParser());
         parserContext.addParser(new RootParser());
 
         cursor.next();
         Node root = BasicNode.forToken(new Token("Container", BasicToken.T_UNKNOWN, 0, 0, 0));
-        parserContext.getParser("root").parse(cursor, root, parserContext);
+        parserContext.getParser(RootParser.class).parse(cursor, root, parserContext);
 
         System.out.println(root);
 

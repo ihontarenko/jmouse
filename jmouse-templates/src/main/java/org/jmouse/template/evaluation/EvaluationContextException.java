@@ -1,4 +1,4 @@
-package org.jmouse.template.compiler;
+package org.jmouse.template.evaluation;
 
 public class EvaluationContextException extends RuntimeException {
 

@@ -9,8 +9,6 @@ import org.jmouse.template.parser.ParserContext;
 
 public class FunctionParser implements Parser {
 
-    public static final String NAME = "function";
-
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
         Node function = new FunctionNode(cursor.peek().value());
@@ -26,8 +24,4 @@ public class FunctionParser implements Parser {
         parent.add(function);
     }
 
-    @Override
-    public String getName() {
-        return NAME;
-    }
 }

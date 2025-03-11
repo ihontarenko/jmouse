@@ -1,5 +1,8 @@
 package org.jmouse.template.parser;
 
+import org.jmouse.template.extension.Operator;
+import org.jmouse.template.lexer.Token;
+
 /**
  * Represents a context for managing parsers and options in a templating system.
  *
@@ -15,9 +18,13 @@ public interface ParserContext {
 
     void addExpressionParser(ExpressionParser parser);
 
-    Parser getParser(String name);
+    Parser getParser(Class<? extends Parser> type);
 
     void addParser(Parser parser);
+
+    Operator getOperator(Token.Type type);
+
+    void addOperator(Operator operator);
 
     ParserOptions getOptions();
 

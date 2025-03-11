@@ -20,7 +20,7 @@ public class LiteralCompiler implements Compiler<LiteralNode, Object> {
      * Compiles a {@link LiteralNode} into its Java structured representation.
      *
      * @param node the literal node to compile
-     * @param evaluationContext  the evaluation context (not used in this implementation)
+     * @param evaluationContext  the context context (not used in this implementation)
      * @return the compiled Java structured representation of the literal node
      */
     @Override
@@ -52,7 +52,7 @@ public class LiteralCompiler implements Compiler<LiteralNode, Object> {
     }
 
     /**
-     * Specifies the type of node this compiler can handle.
+     * Specifies the type of node this evaluation can handle.
      *
      * @return the {@link LiteralNode} class
      */

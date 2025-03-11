@@ -1,11 +1,10 @@
 package org.jmouse.template.parser;
 
-import org.jmouse.template.NameKeeper;
 import org.jmouse.template.lexer.TokenCursor;
 import org.jmouse.template.node.BasicNode;
 import org.jmouse.template.node.Node;
 
-public interface Parser extends NameKeeper {
+public interface Parser {
 
     void parse(TokenCursor cursor, Node parent, ParserContext context);
 
