@@ -13,7 +13,7 @@ public interface Operator {
 
     /**
      * ⚖️ Returns the precedence level of this operator.
-     * Higher values indicate higher precedence in expression evaluation.
+     * Higher values indicate higher precedence in tag evaluation.
      *
      * @return 🔢 the precedence level of the operator
      */

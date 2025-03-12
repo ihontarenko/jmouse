@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 /**
  * Splits expressions into individual tokens such as identifiers, numbers, strings, and operators.
  *
- * <p>Utilizes regex-based tokenization to extract meaningful components from an expression.</p>
+ * <p>Utilizes regex-based tokenization to extract meaningful components from an tag.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -76,7 +76,7 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
                     // Get the start position of the capturing group.
                     startOffset = offset + matcher.start(groupName);
                     tokenType = GROUP_TO_TOKEN_TYPE.get(groupName);
-                    LOGGER.info("Found group '{}' in expression '{}'", tokenType, tokenValue);
+                    LOGGER.info("Found group '{}' in tag '{}'", tokenType, tokenValue);
                     break;
                 }
             }

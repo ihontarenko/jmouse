@@ -15,16 +15,16 @@ public class AnyExpressionParser implements Parser {
     public void parse(Lexer lexer, Node parent, ParserContext context) {
         Node valueNode;
 
-        // resolve next expression after equal
+        // resolve next tag after equal
         if (lexer.isNext(T_OPEN_CURLY_BRACE)) {
-            // resolve array expression '{"string", "literal", etc.}'
+            // resolve array tag '{"string", "literal", etc.}'
             valueNode = context.getParser(ArrayParser.class).parse(lexer, context);
         } else if (lexer.isNext(ExtendedToken.T_ANNOTATION)) {
             // resolve nested annotation 'nextAnnotation=@AnnotationName(...)'
             shift(lexer, ExtendedToken.T_ANNOTATION);
             valueNode = context.getParser(AnnotationParser.class).parse(lexer, context);
         } else if (PARAMETERS.test(lexer)) {
-            // parameters (key1=expression, ...)
+            // parameters (key1=tag, ...)
             valueNode = context.getParser(ParametersParser.class).parse(lexer, context);
         } else if (lexer.isNext(ExtendedToken.T_CLASS_NAME)) {
             // resolve java-class name 'className=com.binder.validator.NotNullValidator'

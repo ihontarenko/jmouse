@@ -3,16 +3,18 @@ package org.jmouse.template;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public interface Cache<K extends Cache.CacheKey, V> {
+public interface Cache<K extends Cache.Key, V> {
 
-    CacheValue<V> get(K key);
+    Value<V> get(K key);
 
-    default CacheValue<V> get(K key, Supplier<CacheValue<V>> supplier) {
-        CacheValue<V> value = get(key);
+    default Value<V> get(K key, Supplier<Value<V>> supplier) {
+        Value<V> value = get(key);
 
         if (value == null) {
             value = supplier.get();
-            put(key, value.getValue());
+            if (value.isPresent()) {
+                put(key, value.getValue());
+            }
         }
 
         return value;
@@ -24,29 +26,35 @@ public interface Cache<K extends Cache.CacheKey, V> {
         return get(key) != null;
     }
 
-    interface CacheKey {
+    interface Key {
 
-        static CacheKey forObject(Object object) {
-            return new ObjectCacheKey(object);
+        static Key forObject(Object object) {
+            return new ObjectKey(object);
         }
 
     }
 
-    interface CacheValue<V> {
+    interface Value<V> {
+
         V getValue();
+
+        default boolean isPresent() {
+            return getValue() != null;
+        }
+
     }
 
-    class ObjectCacheKey implements CacheKey {
+    class ObjectKey implements Key {
 
         private final Object object;
 
-        public ObjectCacheKey(Object object) {
+        public ObjectKey(Object object) {
             this.object = object;
         }
 
         @Override
         public boolean equals(Object object) {
-            if (!(object instanceof ObjectCacheKey that)) {
+            if (!(object instanceof Cache.ObjectKey that)) {
                 return false;
             }
 

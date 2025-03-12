@@ -1,5 +1,6 @@
 package org.jmouse.template.node.expression;
 
+import org.jmouse.template.extension.Operator;
 import org.jmouse.template.lexer.Token;
 import org.jmouse.template.node.ExpressionNode;
 
@@ -17,10 +18,10 @@ public class PrefixUnaryOperation extends UnaryOperation {
     /**
      * Constructs a {@code PrefixUnaryOperation} with the specified operand and operator.
      *
-     * @param operand  the operand expression (e.g., a variable)
+     * @param operand  the operand tag (e.g., a variable)
      * @param operator the prefix operator (e.g., {@code ++}, {@code --})
      */
-    public PrefixUnaryOperation(ExpressionNode operand, Token.Type operator) {
+    public PrefixUnaryOperation(ExpressionNode operand, Operator operator) {
         super(operand, operator);
     }
 }

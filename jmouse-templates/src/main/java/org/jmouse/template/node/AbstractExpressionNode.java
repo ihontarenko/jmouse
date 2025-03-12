@@ -1,7 +1,7 @@
 package org.jmouse.template.node;
 
 /**
- * AbstractExpressionNode is the base class for expression nodes in the AST.
+ * AbstractExpressionNode is the base class for tag nodes in the AST.
  *
  * @author Ivan Hontarenko
  * @version 1.0

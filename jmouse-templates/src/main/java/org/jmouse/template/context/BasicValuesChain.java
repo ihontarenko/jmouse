@@ -13,6 +13,17 @@ import java.util.Deque;
  * <p>
  * 🚀 This class ensures <b>proper scope isolation</b> while allowing
  * for lookups to propagate through the scope hierarchy.
+ * <p>
+ * Example usage:
+ * <pre>{@code
+ *     BasicValuesChain chain = new BasicValuesChain();
+ *     chain.setValue("x", 42);
+ *     chain.push(); // New scope
+ *     chain.setValue("x", 100);
+ *     chain.getValue("x"); // Returns 100
+ *     chain.pop(); // Removes the top scope
+ *     chain.getValue("x"); // Returns 42
+ * }
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com

@@ -7,8 +7,10 @@ import org.jmouse.template.loader.TemplateLoader;
 import org.jmouse.template.node.BasicNode;
 import org.jmouse.template.node.Node;
 import org.jmouse.template.parser.*;
+import org.jmouse.template.parser.global.FunctionParser;
 import org.jmouse.template.parser.global.OperatorParser;
 import org.jmouse.template.parser.global.RootParser;
+import org.jmouse.template.parser.tag.ForParser;
 
 import java.io.Reader;
 
@@ -25,17 +27,18 @@ public class Main {
         System.out.println(a);
 
         Reader            reader    = loader.load("simple");
-//        TokenizableSource source    = new TokenizableString("default.html", reader);
-//        TokenizableSource source    = new TokenizableString("simple.html", reader);
-//        TokenizableSource source    = new TokenizableString("index", "Hello {% for ab in   xyz  def %}! {{ users is not contains '123' }}");
-//        TokenizableSource source    = new TokenizableString("test-string", "Calculation: {{ 1 + 2 * 3 + 4 + 5 * 5 * 4 + 2 }}");
-//        TokenizableSource source    = new TokenizableString("test-string", "Calculation: {{ --1 + 2++ * 3^2 (2 + 6) }}");
-//        TokenizableSource source    = new TokenizableString("test-string", "Calculation: {{ 1 + 2++}} {# x++ --z v+=123 v-=111 #}");
-        TokenizableSource source    = new TokenizableString("test-string", "Calculation: {{ min() + 1 / user.id (low(), high(1, 2^3)) }}");
+//        TokenizableSource string    = new TokenizableString("default.html", reader);
+//        TokenizableSource string    = new TokenizableString("simple.html", reader);
+//        TokenizableSource string    = new TokenizableString("index", "Hello {% for ab in   xyz  def %}! {{ users is not contains '123' }}");
+//        TokenizableSource string    = new TokenizableString("test-string", "Calculation: {{ 1 + 2 * 3 + 4 + 5 * 5 * 4 + 2 }}");
+//        TokenizableSource string    = new TokenizableString("test-string", "Calculation: {{ --1 + 2++ * 3^2 (2 + 6) }}");
+//        TokenizableSource string    = new TokenizableString("test-string", "Calculation: {{ 1 + 2++}} {# x++ --z v+=123 v-=111 #}");
+//        TokenizableSource string    = new TokenizableString("test-string", "Calculation: {{ min() + 1 / user.id (low(), high(1, 2^3)) }}");
+        TokenizableSource string    = new TokenizableString("string-test", "<h1>{% min(1, 2 + 3 * 2 ^ 2 * 2) | toBigInt %}</h1>");
 
         Lexer lexer = new TemplateLexer();
 
-        TokenCursor cursor = lexer.tokenize(source);
+        TokenCursor cursor = lexer.tokenize(string);
 
         ParserContext parserContext = new DefaultParserContext();
 
@@ -43,6 +46,10 @@ public class Main {
 
         parserContext.addParser(new OperatorParser());
         parserContext.addParser(new RootParser());
+        parserContext.addParser(new FunctionParser());
+        parserContext.addParser(new ExpressionParser());
+
+        parserContext.addTagParser(new ForParser());
 
         cursor.next();
         Node root = BasicNode.forToken(new Token("Container", BasicToken.T_UNKNOWN, 0, 0, 0));

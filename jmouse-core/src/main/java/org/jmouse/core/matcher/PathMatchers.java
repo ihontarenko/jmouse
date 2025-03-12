@@ -106,10 +106,10 @@ public class PathMatchers {
     }
 
     /**
-     * Returns a matcher that checks if the file name matches the given regular expression.
+     * Returns a matcher that checks if the file name matches the given regular tag.
      *
-     * @param regex the regular expression to match the file name against
-     * @return a matcher that returns true if the file name matches the given regular expression
+     * @param regex the regular tag to match the file name against
+     * @return a matcher that returns true if the file name matches the given regular tag
      */
     public static Matcher<Path> matchesPattern(String regex) {
         return new PathMatchesPatternMatcher(regex);

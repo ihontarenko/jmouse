@@ -1,13 +1,13 @@
 package org.jmouse.template.extension;
 
-import org.jmouse.template.parser.ExpressionParser;
+import org.jmouse.template.parser.TagParser;
 import org.jmouse.template.parser.Parser;
 
 import java.util.List;
 
 public interface ExtensionProvider {
 
-    List<ExpressionParser> getExpressionParsers();
+    List<TagParser> getTagParsers();
 
     List<Parser> getParsers();
 

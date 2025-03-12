@@ -9,23 +9,23 @@ public class DefaultParserContext implements ParserContext {
 
     private final ExtensionContainer<Token.Type, Operator>            operators;
     private final ExtensionContainer<Class<? extends Parser>, Parser> parsers;
-    private final ExtensionContainer<String, ExpressionParser>        expressionParsers;
+    private final ExtensionContainer<String, TagParser>               tags;
     private       ParserOptions                                       options;
 
     public DefaultParserContext() {
-        this.expressionParsers = new ExpressionParserContainer();
         this.parsers = new ParserContainer();
+        this.tags = new TagParserContainer();
         this.operators = new OperatorContainer();
     }
 
     @Override
-    public ExpressionParser getExpressionParser(String name) {
-        return expressionParsers.get(name);
+    public TagParser getTagParser(String name) {
+        return tags.get(name);
     }
 
     @Override
-    public void addExpressionParser(ExpressionParser parser) {
-        expressionParsers.register(parser);
+    public void addTagParser(TagParser parser) {
+        tags.register(parser);
     }
 
     @Override

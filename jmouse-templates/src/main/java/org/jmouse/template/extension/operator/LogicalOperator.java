@@ -34,7 +34,7 @@ public enum LogicalOperator implements Operator {
     OR(BasicToken.T_OR, "OR", 4),
 
     /**
-     * 🔄 Logical NOT (`!`), inverts the boolean value of an expression.
+     * 🔄 Logical NOT (`!`), inverts the boolean value of an tag.
      * Precedence: 6 (higher than AND, OR)
      */
     NOT(BasicToken.T_NEGATE, "NOT", 6),

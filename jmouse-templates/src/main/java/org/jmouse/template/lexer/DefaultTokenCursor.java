@@ -133,7 +133,7 @@ public class DefaultTokenCursor implements TokenCursor {
      * Expects a specific token type at the current position and advances if found.
      *
      * @param expected the expected token type
-     * @return the current token if it matches the expected type
+     * @return the next token if it matches the expected type
      * @throws SyntaxErrorException if the current token does not match the expected type
      */
     @Override

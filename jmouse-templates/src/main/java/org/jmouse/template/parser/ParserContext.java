@@ -14,9 +14,9 @@ import org.jmouse.template.lexer.Token;
  */
 public interface ParserContext {
 
-    ExpressionParser getExpressionParser(String name);
+    TagParser getTagParser(String name);
 
-    void addExpressionParser(ExpressionParser parser);
+    void addTagParser(TagParser parser);
 
     Parser getParser(Class<? extends Parser> type);
 

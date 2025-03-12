@@ -34,7 +34,7 @@ public class Example {
         new ParserConfigurator().configure(parserContext);
         new EvaluationContextConfigurator().configure(evaluationContext);
 
-        String el1 = "(values={#validation/non_null, (applier=#lte(#item.getQty(), 100), qty=#item.getQty(), name=#item.getName()), #user.startsWith('Iv'), #lt(1, 2), #multiply(7, #divide(22, 7)), #divide(22, 7), svit.expression.Example, 1, #user, (key1=123, key2='Hello!', key3={1, 2.3, 3.123123123123, #math.sum(456, 9881), java.util.List}, key4=#user)})";
+        String el1 = "(values={#validation/non_null, (applier=#lte(#item.getQty(), 100), qty=#item.getQty(), name=#item.getName()), #user.startsWith('Iv'), #lt(1, 2), #multiply(7, #divide(22, 7)), #divide(22, 7), svit.tag.Example, 1, #user, (key1=123, key2='Hello!', key3={1, 2.3, 3.123123123123, #math.sum(456, 9881), java.util.List}, key4=#user)})";
         String el2 = "#validation/non_null";
         String el3 = "/user/:id/:name/action:do";
 

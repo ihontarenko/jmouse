@@ -17,7 +17,7 @@ import org.jmouse.template.node.ExpressionNode;
 public class BinaryOperation extends AbstractExpressionNode {
 
     /**
-     * The left-hand side expression of the binary operation.
+     * The left-hand side tag of the binary operation.
      */
     private final ExpressionNode left;
 
@@ -27,17 +27,17 @@ public class BinaryOperation extends AbstractExpressionNode {
     private final Operator operator;
 
     /**
-     * The right-hand side expression of the binary operation.
+     * The right-hand side tag of the binary operation.
      */
     private final ExpressionNode right;
 
     /**
-     * Constructs a {@code BinaryOperation} with the specified left-hand side expression,
-     * operator, and right-hand side expression.
+     * Constructs a {@code BinaryOperation} with the specified left-hand side tag,
+     * operator, and right-hand side tag.
      *
-     * @param left     the left-hand side expression of the binary operation
+     * @param left     the left-hand side tag of the binary operation
      * @param operator the operator used in the binary operation
-     * @param right    the right-hand side expression of the binary operation
+     * @param right    the right-hand side tag of the binary operation
      */
     public BinaryOperation(ExpressionNode left, Operator operator, ExpressionNode right) {
         this.left = left;
@@ -46,18 +46,18 @@ public class BinaryOperation extends AbstractExpressionNode {
     }
 
     /**
-     * Returns the left-hand side expression of the binary operation.
+     * Returns the left-hand side tag of the binary operation.
      *
-     * @return the left-hand side expression
+     * @return the left-hand side tag
      */
     public ExpressionNode getLeft() {
         return left;
     }
 
     /**
-     * Returns the right-hand side expression of the binary operation.
+     * Returns the right-hand side tag of the binary operation.
      *
-     * @return the right-hand side expression
+     * @return the right-hand side tag
      */
     public ExpressionNode getRight() {
         return right;

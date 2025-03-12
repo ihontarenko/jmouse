@@ -6,7 +6,7 @@ import org.jmouse.template.node.AbstractExpressionNode;
 import org.jmouse.template.node.ExpressionNode;
 
 /**
- * Represents a unary operation expression node in the Abstract Syntax Tree (AST).
+ * Represents a unary operation tag node in the Abstract Syntax Tree (AST).
  *
  * <p>This node is used to represent unary operations such as increment, decrement,
  * unary plus, or unary minus. It extends {@link AbstractExpressionNode} and holds a single operand
@@ -33,7 +33,7 @@ abstract public class UnaryOperation extends AbstractExpressionNode {
     /**
      * Constructs a {@code UnaryOperation} node with the specified operand and operator.
      *
-     * @param operand  the operand expression on which the unary operation is applied
+     * @param operand  the operand tag on which the unary operation is applied
      * @param operator the token type representing the unary operator (e.g., increment, decrement, plus, minus)
      */
     public UnaryOperation(ExpressionNode operand, Operator operator) {
@@ -51,9 +51,9 @@ abstract public class UnaryOperation extends AbstractExpressionNode {
     }
 
     /**
-     * Returns the operand expression of this unary operation.
+     * Returns the operand tag of this unary operation.
      *
-     * @return the operand expression
+     * @return the operand tag
      */
     public ExpressionNode getOperand() {
         return operand;

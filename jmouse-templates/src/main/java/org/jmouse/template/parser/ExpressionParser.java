@@ -1,12 +1,26 @@
 package org.jmouse.template.parser;
 
 import org.jmouse.template.lexer.TokenCursor;
-import org.jmouse.template.node.RenderableNode;
+import org.jmouse.template.node.Node;
+import org.jmouse.template.parser.global.FunctionParser;
+import org.jmouse.template.parser.global.OperatorParser;
 
-public interface ExpressionParser {
+import static org.jmouse.template.lexer.BasicToken.*;
+import static org.jmouse.template.lexer.BasicToken.T_CARET;
 
-    RenderableNode parse(TokenCursor cursor, ParserContext context);
+public class ExpressionParser implements Parser {
 
-    String getName();
+    @Override
+    public void parse(TokenCursor cursor, Node parent, ParserContext context) {
+        if (cursor.matchesSequence(T_IDENTIFIER, T_OPEN_PAREN)) {
+            context.getParser(FunctionParser.class).parse(cursor, context);
+        } else if (cursor.matchesSequence(T_IDENTIFIER, T_DOT)) {
+            // property access
+        } else if (cursor.isNext(T_PLUS, T_MINUS, T_MULTIPLY, T_DIVIDE, T_CARET)) {
+            context.getParser(OperatorParser.class).parse(cursor, parent, context);
+        } else {
+
+        }
+    }
 
 }

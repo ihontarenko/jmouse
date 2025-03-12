@@ -14,7 +14,7 @@ import static org.jmouse.template.lexer.RawToken.Type.*;
  * Splits raw text into tokens, distinguishing between plain text and templating expressions.
  *
  * <p>Uses a regex-based approach to identify expressions enclosed within template delimiters,
- * such as <code>{{expression}}</code> or <code>{% statement %}</code>, and processes them accordingly.</p>
+ * such as <code>{{tag}}</code> or <code>{% statement %}</code>, and processes them accordingly.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -28,7 +28,7 @@ public class RawSplitter implements Splitter<List<RawToken>, TokenizableSource> 
 
     private static final Pattern EXPRESSION_PATTERN = Pattern.compile(
             "(?<OPEN>\\{(?<type>\\{|[%!#\\$\\*@])\\s*)" +  // Open: matches either "{{" or "{X" where X ∈ {%, !, #, $, *, @}
-            "(?<INNER>.*?)\\s*" +                          // Inner: non-greedy match for the expression content
+            "(?<INNER>.*?)\\s*" +                          // Inner: non-greedy match for the tag content
             "(?<CLOSE>(?:\\}\\}|\\k<type>\\}))"            // Close: matches "}}" if type was "{" or "X}" if type is X
     );
 
@@ -75,7 +75,7 @@ public class RawSplitter implements Splitter<List<RawToken>, TokenizableSource> 
                 LOGGER.info("Open: {}", open);
                 tokens.add(new RawToken(open, source.getLineNumber(startOffset), startOffset, OPEN_TAG));
 
-                // Tokenize the expression content using ExpressionSplitter.
+                // Tokenize the tag content using ExpressionSplitter.
                 LOGGER.info("Inner ExpressionNode: '{}'", expression);
                 int innerIndex  = startIndex + open.length();
                 int innerOffset = offset + innerIndex;
