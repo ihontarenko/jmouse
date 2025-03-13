@@ -8,10 +8,7 @@ import org.jmouse.template.loader.TemplateLoader;
 import org.jmouse.template.node.BasicNode;
 import org.jmouse.template.node.Node;
 import org.jmouse.template.parser.*;
-import org.jmouse.template.parser.global.FunctionParser;
-import org.jmouse.template.parser.global.OperatorParser;
-import org.jmouse.template.parser.global.RootParser;
-import org.jmouse.template.parser.tag.ForParser;
+import org.jmouse.template.parser.core.RootParser;
 
 import java.io.Reader;
 
@@ -31,7 +28,9 @@ public class Main {
 //        TokenizableSource string    = new TokenizableString("test-string", "Calculation: {{ --1 + 2++ * 3^2 (2 + 6) }}");
 //        TokenizableSource string    = new TokenizableString("test-string", "Calculation: {{ 1 + 2++}} {# x++ --z v+=123 v-=111 #}");
 //        TokenizableSource string    = new TokenizableString("test-string", "Calculation: {{ min() + 1 / user.id (low(), high(1, 2^3)) }}");
-        TokenizableSource string    = new TokenizableString("string-test", "<h1>{% min(min() | toBigInt | abs, 1++, 2 + 3 * 2 ^ 2 * 2) + 2 %}</h1>");
+//        TokenizableSource string    = new TokenizableString("string-test", "<h1>{% min(1.1, false, null, min() | toBigInt | abs, 1++, 2 + 3 / min() * 2 ^ 2 * 2) + 2 %}</h1>");
+//        TokenizableSource string    = new TokenizableString("string-test", "<h1>{{ 2 <= 3 || (1 > 0 && 2 < 3) >= 3 && 4 < min() or 5 % 2 != 0 }}</h1>");
+        TokenizableSource string    = new TokenizableString("string-test", "<h1>{{ 2 + (2 + 2) * 2 / 3 (22 / 7) }}</h1>");
 
         Lexer lexer = new TemplateLexer();
 

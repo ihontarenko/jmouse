@@ -11,8 +11,8 @@ import org.jmouse.template.lexer.Token;
  * Example:
  * <pre>
  *     int x = 5;
- *     ++x; // INCREMENT (x = 6)
- *     --x; // DECREMENT (x = 5)
+ *     ++x; // INCREMENT
+ *     x--; // DECREMENT
  * </pre>
  *
  * Operators with **higher precedence** are evaluated first.

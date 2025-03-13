@@ -1,4 +1,4 @@
-package org.jmouse.template.parser.global;
+package org.jmouse.template.parser.core;
 
 import org.jmouse.template.lexer.Token;
 import org.jmouse.template.lexer.TokenCursor;

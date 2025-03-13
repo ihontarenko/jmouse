@@ -7,15 +7,16 @@ import org.jmouse.template.extension.function.MinFunction;
 import org.jmouse.template.extension.operator.BinaryOperator;
 import org.jmouse.template.extension.operator.LogicalOperator;
 import org.jmouse.template.extension.operator.UnaryOperator;
-import org.jmouse.template.parser.ExpressionParser;
+import org.jmouse.template.parser.core.ExpressionParser;
 import org.jmouse.template.parser.Parser;
 import org.jmouse.template.parser.TagParser;
-import org.jmouse.template.parser.global.FunctionParser;
-import org.jmouse.template.parser.global.LiteralParser;
-import org.jmouse.template.parser.global.OperatorParser;
-import org.jmouse.template.parser.global.RootParser;
+import org.jmouse.template.parser.core.FunctionParser;
+import org.jmouse.template.parser.core.LiteralParser;
+import org.jmouse.template.parser.core.OperatorParser;
+import org.jmouse.template.parser.core.RootParser;
 import org.jmouse.template.parser.tag.ForParser;
 import org.jmouse.template.parser.tag.IfParser;
+import org.jmouse.template.parser.tag.LoremParser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +47,8 @@ public class CoreExtension implements Extension {
     public List<TagParser> getTagParsers() {
         return List.of(
                 new ForParser(),
-                new IfParser()
+                new IfParser(),
+                new LoremParser()
         );
     }
 

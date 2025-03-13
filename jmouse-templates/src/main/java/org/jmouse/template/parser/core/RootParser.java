@@ -1,11 +1,12 @@
-package org.jmouse.template.parser.global;
+package org.jmouse.template.parser.core;
 
 import org.jmouse.template.lexer.Token;
 import org.jmouse.template.lexer.TokenCursor;
 import org.jmouse.template.node.*;
-import org.jmouse.template.parser.ExpressionParser;
-import org.jmouse.template.parser.Parser;
-import org.jmouse.template.parser.ParserContext;
+import org.jmouse.template.node.renderable.BodyNode;
+import org.jmouse.template.node.renderable.PrintNode;
+import org.jmouse.template.node.renderable.RawTextNode;
+import org.jmouse.template.parser.*;
 
 import static org.jmouse.template.lexer.BasicToken.*;
 import static org.jmouse.template.lexer.TemplateToken.*;
@@ -40,13 +41,16 @@ public class RootParser implements Parser {
                 cursor.next();
             } else if (cursor.isCurrent(T_OPEN_PRINT)) {
                 // 🏗️ Handling print expression: {{ expression }}
-                cursor.expect(T_OPEN_PRINT);
+                cursor.ensure(T_OPEN_PRINT);
+
+                // consume open tag
+                cursor.next();
 
                 // ✅ Parse statements inside {{ statement }} block
                 Node node = parser.parse(cursor, context);
 
                 // ✅ Expect closing braces "}}"
-                cursor.expect(T_CLOSE_PRINT);
+                cursor.ensure(T_CLOSE_PRINT);
 
                 // ✅ Wrap expression inside PrintNode
                 if (node instanceof ExpressionNode expression) {
@@ -55,15 +59,21 @@ public class RootParser implements Parser {
             } else if (cursor.isCurrent(T_OPEN_EXPRESSION)) {
                 // 🏗️ Handling execution expression: "{%"
                 cursor.next();
+                Token currentToken = cursor.peek();
 
                 // create body node (container)
                 BodyNode body = new BodyNode();
 
-                // ✅ Parse statements inside {% statement %} block
-                parser.parse(cursor, body, context);
+                TagParser tagParser = context.getTagParser(currentToken.value());
+
+                if (tagParser == null) {
+                    throw new ParseException("No tag parser found: '%s'".formatted(currentToken.value()));
+                }
+
+                body.add(tagParser.parse(cursor, context));
 
                 // ✅ Expect closing expression tag: "%}"
-                cursor.expect(T_CLOSE_EXPRESSION);
+                cursor.ensure(T_CLOSE_EXPRESSION);
 
                 // ✅ Add parsed body to parent
                 parent.add(body);

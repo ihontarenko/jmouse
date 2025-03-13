@@ -1,14 +1,11 @@
-package org.jmouse.template.parser.global;
+package org.jmouse.template.parser.core;
 
 import org.jmouse.template.lexer.TokenCursor;
 import org.jmouse.template.node.Node;
 import org.jmouse.template.parser.Parser;
 import org.jmouse.template.parser.ParserContext;
 
-/**
- * PropertyAccessParser parses property access expressions.
- */
-public class PropertyAccessParser implements Parser {
+public class VariableParser implements Parser {
 
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {

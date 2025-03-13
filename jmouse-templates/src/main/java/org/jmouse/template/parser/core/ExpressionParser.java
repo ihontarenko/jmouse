@@ -1,14 +1,14 @@
-package org.jmouse.template.parser;
+package org.jmouse.template.parser.core;
 
 import org.jmouse.template.lexer.Token;
 import org.jmouse.template.lexer.TokenCursor;
 import org.jmouse.template.node.ExpressionNode;
 import org.jmouse.template.node.Node;
 import org.jmouse.template.node.expression.FilterExpression;
-import org.jmouse.template.node.expression.PostfixUnaryOperation;
-import org.jmouse.template.node.expression.PrefixUnaryOperation;
-import org.jmouse.template.parser.global.FunctionParser;
-import org.jmouse.template.parser.global.LiteralParser;
+import org.jmouse.template.node.expression.unary.PostfixUnaryOperation;
+import org.jmouse.template.node.expression.unary.PrefixUnaryOperation;
+import org.jmouse.template.parser.Parser;
+import org.jmouse.template.parser.ParserContext;
 
 import static org.jmouse.template.lexer.BasicToken.*;
 
@@ -31,7 +31,7 @@ public class ExpressionParser implements Parser {
             left = new PrefixUnaryOperation((ExpressionNode) parse(cursor, context), context.getOperator(token.type()));
         }
 
-        if (cursor.matchesSequence(T_DECREMENT, T_INCREMENT)) {
+        if (cursor.isCurrent(T_DECREMENT, T_INCREMENT)) {
             left = new PostfixUnaryOperation((ExpressionNode) left, context.getOperator(cursor.peek().type()));
             cursor.next();
         }

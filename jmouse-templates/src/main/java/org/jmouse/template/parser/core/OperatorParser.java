@@ -1,13 +1,15 @@
-package org.jmouse.template.parser.global;
+package org.jmouse.template.parser.core;
 
 import org.jmouse.template.extension.Operator;
+import org.jmouse.template.lexer.Token;
 import org.jmouse.template.lexer.TokenCursor;
 import org.jmouse.template.node.ExpressionNode;
 import org.jmouse.template.node.Node;
 import org.jmouse.template.node.expression.BinaryOperation;
-import org.jmouse.template.parser.ExpressionParser;
 import org.jmouse.template.parser.Parser;
 import org.jmouse.template.parser.ParserContext;
+
+import static org.jmouse.template.lexer.BasicToken.T_OPEN_PAREN;
 
 /**
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
@@ -36,9 +38,14 @@ public class OperatorParser implements Parser {
     private ExpressionNode parseExpression(TokenCursor cursor, ParserContext context, int precedence) {
         ExpressionParser parser = (ExpressionParser) context.getParser(ExpressionParser.class);
         ExpressionNode   left   = (ExpressionNode) parser.parse(cursor, context);
+        Token            token  = cursor.peek();
 
         while (cursor.hasNext()) {
-            Operator operator = context.getOperator(cursor.peek().type());
+            Operator operator = context.getOperator(token.type());
+
+            if (operator == null && cursor.isCurrent(T_OPEN_PAREN)) {
+                System.out.println(cursor);
+            }
 
             if (operator == null || precedence > operator.getPrecedence()) {
                 break;

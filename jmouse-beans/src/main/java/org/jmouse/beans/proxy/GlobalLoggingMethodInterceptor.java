@@ -12,7 +12,7 @@ import org.jmouse.core.reflection.Reflections;
 import java.lang.reflect.Method;
 
 /**
- * A global logging interceptor that logs method calls before and after their invocation,
+ * A core logging interceptor that logs method calls before and after their invocation,
  * as well as during the invocation process. This interceptor is annotated with
  * {@link ProxyMethodInterceptor @ProxyMethodInterceptor} to indicate that it can be
  * automatically discovered and applied by a compatible proxy factory.
