@@ -1,10 +1,12 @@
 package org.jmouse.template;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * 🏗️ Abstract implementation of {@link ExtensionContainer}, providing a basic storage mechanism
+ * 🏗️ Abstract implementation of {@link ObjectContainer}, providing a basic storage mechanism
  * for managing extensions using a key-value structure.
  *
  * @param <K> 🔑 the type of the key used to identify extensions
@@ -13,7 +15,7 @@ import java.util.Map;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public abstract class AbstractExtensionContainer<K, E> implements ExtensionContainer<K, E> {
+public abstract class AbstractObjectContainer<K, E> implements ObjectContainer<K, E> {
 
     /**
      * 🗂️ Stores registered extensions mapped by their corresponding keys.
@@ -23,7 +25,7 @@ public abstract class AbstractExtensionContainer<K, E> implements ExtensionConta
     /**
      * 🏗️ Constructs an empty extension container.
      */
-    protected AbstractExtensionContainer() {
+    protected AbstractObjectContainer() {
         this.extensions = new HashMap<>();
     }
 
@@ -34,7 +36,7 @@ public abstract class AbstractExtensionContainer<K, E> implements ExtensionConta
      */
     @Override
     public void register(E extension) {
-        extensions.put(key(extension), extension);
+        extensions.put(keyFor(extension), extension);
     }
 
     /**
@@ -45,7 +47,7 @@ public abstract class AbstractExtensionContainer<K, E> implements ExtensionConta
     @Override
     public void remove(E extension) {
         if (contains(extension)) {
-            extensions.remove(key(extension));
+            extensions.remove(keyFor(extension));
         }
     }
 
@@ -58,5 +60,25 @@ public abstract class AbstractExtensionContainer<K, E> implements ExtensionConta
     @Override
     public E get(K name) {
         return extensions.get(name);
+    }
+
+    /**
+     * 📜 Returns a list of all stored objects in the container.
+     *
+     * @return 📦 a list of registered objects
+     */
+    @Override
+    public List<E> values() {
+        return List.copyOf(extensions.values());
+    }
+
+    /**
+     * 🔑 Returns a set of all keys currently registered in the container.
+     *
+     * @return 🗂️ a set of all keys
+     */
+    @Override
+    public Set<K> keys() {
+        return extensions.keySet();
     }
 }

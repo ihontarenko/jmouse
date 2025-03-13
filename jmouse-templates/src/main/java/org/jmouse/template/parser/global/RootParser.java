@@ -28,7 +28,7 @@ public class RootParser implements Parser {
 
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
-        ExpressionParser parser = (ExpressionParser) context.getParser(ExpressionParser.class);
+        Parser parser = context.getParser(OperatorParser.class);
 
         while (cursor.hasNext()) {
 

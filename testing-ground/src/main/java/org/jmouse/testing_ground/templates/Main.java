@@ -1,5 +1,6 @@
 package org.jmouse.testing_ground.templates;
 
+import org.jmouse.template.CoreExtension;
 import org.jmouse.template.TokenizableString;
 import org.jmouse.template.lexer.*;
 import org.jmouse.template.loader.ClasspathLoader;
@@ -22,10 +23,6 @@ public class Main {
         loader.setPrefix("templates/");
         loader.setSuffix(".html");
 
-        Boolean a = null;
-
-        System.out.println(a);
-
         Reader            reader    = loader.load("simple");
 //        TokenizableSource string    = new TokenizableString("default.html", reader);
 //        TokenizableSource string    = new TokenizableString("simple.html", reader);
@@ -34,7 +31,7 @@ public class Main {
 //        TokenizableSource string    = new TokenizableString("test-string", "Calculation: {{ --1 + 2++ * 3^2 (2 + 6) }}");
 //        TokenizableSource string    = new TokenizableString("test-string", "Calculation: {{ 1 + 2++}} {# x++ --z v+=123 v-=111 #}");
 //        TokenizableSource string    = new TokenizableString("test-string", "Calculation: {{ min() + 1 / user.id (low(), high(1, 2^3)) }}");
-        TokenizableSource string    = new TokenizableString("string-test", "<h1>{% min(1, 2 + 3 * 2 ^ 2 * 2) | toBigInt %}</h1>");
+        TokenizableSource string    = new TokenizableString("string-test", "<h1>{% min(rand(), 1, 2 + 3 * 2 ^ 2 * 2) + 2 | toBigInt %}</h1>");
 
         Lexer lexer = new TemplateLexer();
 
@@ -42,14 +39,7 @@ public class Main {
 
         ParserContext parserContext = new DefaultParserContext();
 
-
-
-        parserContext.addParser(new OperatorParser());
-        parserContext.addParser(new RootParser());
-        parserContext.addParser(new FunctionParser());
-        parserContext.addParser(new ExpressionParser());
-
-        parserContext.addTagParser(new ForParser());
+        parserContext.importExtension(new CoreExtension());
 
         cursor.next();
         Node root = BasicNode.forToken(new Token("Container", BasicToken.T_UNKNOWN, 0, 0, 0));

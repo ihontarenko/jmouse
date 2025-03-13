@@ -1,51 +1,76 @@
 package org.jmouse.template.parser;
 
-import org.jmouse.template.ExtensionContainer;
 import org.jmouse.template.OperatorContainer;
-import org.jmouse.template.extension.Operator;
+import org.jmouse.template.extension.*;
 import org.jmouse.template.lexer.Token;
 
 public class DefaultParserContext implements ParserContext {
 
-    private final ExtensionContainer<Token.Type, Operator>            operators;
-    private final ExtensionContainer<Class<? extends Parser>, Parser> parsers;
-    private final ExtensionContainer<String, TagParser>               tags;
-    private       ParserOptions                                       options;
+    private final ExtensionContainer extensions;
+    private       ParserOptions      options;
 
     public DefaultParserContext() {
-        this.parsers = new ParserContainer();
-        this.tags = new TagParserContainer();
-        this.operators = new OperatorContainer();
+        this.extensions = new StandardExtensionContainer();
     }
 
     @Override
     public TagParser getTagParser(String name) {
-        return tags.get(name);
+        return extensions.getTagParser(name);
     }
 
     @Override
     public void addTagParser(TagParser parser) {
-        tags.register(parser);
+        extensions.addTagParser(parser);
     }
 
     @Override
     public Parser getParser(Class<? extends Parser> type) {
-        return parsers.get(type);
+        return extensions.getParser(type);
     }
 
     @Override
     public void addParser(Parser parser) {
-        parsers.register(parser);
+        extensions.addParser(parser);
     }
 
     @Override
     public Operator getOperator(Token.Type type) {
-        return operators.get(type);
+        return extensions.getOperator(type);
     }
 
     @Override
     public void addOperator(Operator operator) {
-        this.operators.register(operator);
+        extensions.addOperator(operator);
+    }
+
+    @Override
+    public Function getFunction(String name) {
+        return extensions.getFunction(name);
+    }
+
+    @Override
+    public void addFunction(Function function) {
+        extensions.addFunction(function);
+    }
+
+    @Override
+    public Test getTest(String name) {
+        return extensions.getTest(name);
+    }
+
+    @Override
+    public void addTest(Test test) {
+        extensions.addTest(test);
+    }
+
+    @Override
+    public Filter getFilter(String name) {
+        return extensions.getFilter(name);
+    }
+
+    @Override
+    public void addFilter(Filter filter) {
+        extensions.addFilter(filter);
     }
 
     @Override

@@ -71,4 +71,9 @@ public class BinaryOperation extends AbstractExpressionNode {
     public Operator getOperator() {
         return operator;
     }
+
+    @Override
+    public String toString() {
+        return "( %s %s %s )".formatted(left.toString(), operator.getName(), right.toString());
+    }
 }

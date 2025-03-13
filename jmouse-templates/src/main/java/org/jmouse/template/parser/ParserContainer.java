@@ -1,11 +1,11 @@
 package org.jmouse.template.parser;
 
-import org.jmouse.template.AbstractExtensionContainer;
+import org.jmouse.template.AbstractObjectContainer;
 
-public class ParserContainer extends AbstractExtensionContainer<Class<? extends Parser>, Parser> {
+public class ParserContainer extends AbstractObjectContainer<Class<? extends Parser>, Parser> {
 
     @Override
-    public Class<? extends Parser> key(Parser extension) {
+    public Class<? extends Parser> keyFor(Parser extension) {
         return extension.getClass();
     }
 

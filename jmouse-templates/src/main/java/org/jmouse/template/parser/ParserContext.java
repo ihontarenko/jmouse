@@ -1,5 +1,6 @@
 package org.jmouse.template.parser;
 
+import org.jmouse.template.extension.ExtensionContainer;
 import org.jmouse.template.extension.Operator;
 import org.jmouse.template.lexer.Token;
 
@@ -12,19 +13,7 @@ import org.jmouse.template.lexer.Token;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public interface ParserContext {
-
-    TagParser getTagParser(String name);
-
-    void addTagParser(TagParser parser);
-
-    Parser getParser(Class<? extends Parser> type);
-
-    void addParser(Parser parser);
-
-    Operator getOperator(Token.Type type);
-
-    void addOperator(Operator operator);
+public interface ParserContext extends ExtensionContainer {
 
     ParserOptions getOptions();
 

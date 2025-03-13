@@ -1,16 +1,16 @@
 package org.jmouse.template.parser;
 
-import org.jmouse.template.AbstractExtensionContainer;
+import org.jmouse.template.AbstractObjectContainer;
 
 /**
  * 🏗️ A container for managing {@link TagParser} instances.
- * This implementation extends {@link AbstractExtensionContainer} and uses
+ * This implementation extends {@link AbstractObjectContainer} and uses
  * the parser's name as its unique key.
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class TagParserContainer extends AbstractExtensionContainer<String, TagParser> {
+public class TagParserContainer extends AbstractObjectContainer<String, TagParser> {
 
     /**
      * 🔑 Retrieves the unique key for a given {@link TagParser}.
@@ -19,7 +19,7 @@ public class TagParserContainer extends AbstractExtensionContainer<String, TagPa
      * @return 🏷️ the name of the parser, used as its key
      */
     @Override
-    public String key(TagParser extension) {
+    public String keyFor(TagParser extension) {
         return extension.getName();
     }
 }

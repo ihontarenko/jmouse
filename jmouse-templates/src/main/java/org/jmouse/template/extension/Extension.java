@@ -1,47 +1,75 @@
 package org.jmouse.template.extension;
 
-import org.jmouse.template.lexer.Token;
-import org.jmouse.template.parser.TagParser;
 import org.jmouse.template.parser.Parser;
+import org.jmouse.template.parser.TagParser;
 
+import java.util.Collections;
 import java.util.List;
 
+/**
+ * 🔌 Represents an extension that provides additional functionality to the template engine.
+ * Extensions can include custom tag parsers, expression parsers, operators, functions, tests, and filters.
+ * <p>
+ * By default, all methods return empty lists, meaning the extension does not provide any additional features
+ * unless explicitly overridden.
+ * </p>
+ *
+ * @author Ivan Hontarenko (Mr. Jerry Mouse)
+ * @author ihontarenko@gmail.com
+ */
 public interface Extension {
 
-    TagParser getTagParser(String name);
+    /**
+     * 📌 Returns a list of custom tag parsers provided by this extension.
+     *
+     * @return a list of {@link TagParser} instances, or an empty list if none are provided.
+     */
+    default List<TagParser> getTagParsers() {
+        return Collections.emptyList();
+    }
 
-    void addTagParser(TagParser parser);
+    /**
+     * 📌 Returns a list of expression parsers provided by this extension.
+     *
+     * @return a list of {@link Parser} instances, or an empty list if none are provided.
+     */
+    default List<Parser> getParsers() {
+        return Collections.emptyList();
+    }
 
-    Parser getParser(Class<? extends Parser> type);
+    /**
+     * ➕ Returns a list of custom operators added by this extension.
+     *
+     * @return a list of {@link Operator} instances, or an empty list if none are provided.
+     */
+    default List<Operator> getOperators() {
+        return Collections.emptyList();
+    }
 
-    void addParser(Parser parser);
+    /**
+     * 🔤 Returns a list of custom functions added by this extension.
+     *
+     * @return a list of {@link Function} instances, or an empty list if none are provided.
+     */
+    default List<Function> getFunctions() {
+        return Collections.emptyList();
+    }
 
-    Operator getOperator(Token.Type type);
+    /**
+     * ✅ Returns a list of custom tests (boolean expressions) added by this extension.
+     *
+     * @return a list of {@link Test} instances, or an empty list if none are provided.
+     */
+    default List<Test> getTests() {
+        return Collections.emptyList();
+    }
 
-    void addOperator(Operator operator);
-
-    Function getFunction(String name);
-
-    void addFunction(Function function);
-
-    Test getTest(String name);
-
-    void addTest(Test test);
-
-    Filter getFilter(String name);
-
-    void addFilter(Filter filter);
-
-    List<TagParser> getExpressionParsers();
-
-    List<Parser> getParsers();
-
-    List<Operator> getOperators();
-
-    List<Function> getFunctions();
-
-    List<Test> getTests();
-
-    List<Filter> getFilters();
-
+    /**
+     * 🎨 Returns a list of custom filters added by this extension.
+     *
+     * @return a list of {@link Filter} instances, or an empty list if none are provided.
+     */
+    default List<Filter> getFilters() {
+        return Collections.emptyList();
+    }
 }

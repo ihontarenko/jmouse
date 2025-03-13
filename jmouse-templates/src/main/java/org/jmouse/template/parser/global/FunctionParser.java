@@ -38,15 +38,21 @@ public class FunctionParser implements Parser {
             Node   arguments = new ValuesNode();
 
             do {
+                cursor.next();
                 arguments.add(parser.parse(cursor, context));
-            } while (cursor.nextIf(BasicToken.T_COMMA));
+            } while (cursor.isCurrent(BasicToken.T_COMMA) && cursor.hasNext());
 
             function.setArguments(arguments);
+
+            cursor.ensure(BasicToken.T_CLOSE_PAREN);
+        } else {
+            cursor.expect(BasicToken.T_CLOSE_PAREN);
         }
 
-        cursor.expect(BasicToken.T_CLOSE_PAREN);
-
         parent.add(function);
+
+        // consume close parentheses
+        cursor.next();
     }
 
 }

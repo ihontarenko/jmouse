@@ -24,4 +24,8 @@ public class FunctionNode extends AbstractExpressionNode {
         this.arguments = arguments;
     }
 
+    @Override
+    public String toString() {
+        return "%s(%s)".formatted(name, arguments == null ? "" : "ARGUMENTS[%d]".formatted(arguments.children().size()));
+    }
 }
