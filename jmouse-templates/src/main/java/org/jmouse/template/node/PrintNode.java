@@ -1,6 +1,6 @@
 package org.jmouse.template.node;
 
-public class PrintNode extends AbstractExpressionNode {
+public class PrintNode extends AbstractRenderableNode {
 
     private final ExpressionNode expression;
 

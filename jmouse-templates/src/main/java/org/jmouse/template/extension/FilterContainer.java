@@ -2,7 +2,7 @@ package org.jmouse.template.extension;
 
 import org.jmouse.template.AbstractObjectContainer;
 
-public class FunctionContainer extends AbstractObjectContainer<String, Function> {
+public class FilterContainer extends AbstractObjectContainer<String, Filter> {
 
     /**
      * 🏷️ Retrieves the key associated with a given object.
@@ -11,7 +11,7 @@ public class FunctionContainer extends AbstractObjectContainer<String, Function>
      * @return 🔑 the key associated with the object
      */
     @Override
-    public String keyFor(Function extension) {
+    public String keyFor(Filter extension) {
         return extension.getName();
     }
 

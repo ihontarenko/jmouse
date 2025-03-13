@@ -1,7 +1,9 @@
 package org.jmouse.template;
 
 import org.jmouse.template.extension.Extension;
+import org.jmouse.template.extension.Function;
 import org.jmouse.template.extension.Operator;
+import org.jmouse.template.extension.function.MinFunction;
 import org.jmouse.template.extension.operator.BinaryOperator;
 import org.jmouse.template.extension.operator.LogicalOperator;
 import org.jmouse.template.extension.operator.UnaryOperator;
@@ -20,6 +22,14 @@ import java.util.Arrays;
 import java.util.List;
 
 public class CoreExtension implements Extension {
+
+
+    @Override
+    public List<Function> getFunctions() {
+        return List.of(
+                new MinFunction()
+        );
+    }
 
     @Override
     public List<Parser> getParsers() {

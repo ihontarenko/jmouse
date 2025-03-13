@@ -1,11 +1,13 @@
 package org.jmouse.template.extension;
 
+import org.jmouse.template.ObjectContainer;
 import org.jmouse.template.lexer.Token;
 import org.jmouse.template.parser.Parser;
+import org.jmouse.template.parser.ParserContainer;
 import org.jmouse.template.parser.TagParser;
+import org.jmouse.template.parser.TagParserContainer;
 
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 🏗️ Standard implementation of {@link ExtensionContainer}.
@@ -19,23 +21,23 @@ import java.util.Map;
  */
 public class StandardExtensionContainer implements ExtensionContainer {
 
-    private final Map<String, TagParser>               tags;
-    private final Map<Class<? extends Parser>, Parser> parsers;
-    private final Map<String, Test>                    tests;
-    private final Map<String, Function>                functions;
-    private final Map<String, Filter>                  filters;
-    private final Map<Token.Type, Operator>            operators;
+    private final ObjectContainer<Class<? extends Parser>, Parser> parsers;
+    private final ObjectContainer<String, TagParser>               tags;
+    private final ObjectContainer<Token.Type, Operator>            operators;
+    private final ObjectContainer<String, Test>                    tests;
+    private final ObjectContainer<String, Function>                functions;
+    private final ObjectContainer<String, Filter>                  filters;
 
     /**
      * 🛠️ Constructs an empty {@code StandardExtensionContainer}.
      */
     public StandardExtensionContainer() {
-        tags = new HashMap<>();
-        parsers = new HashMap<>();
-        tests = new HashMap<>();
-        functions = new HashMap<>();
-        filters = new HashMap<>();
-        operators = new HashMap<>();
+        tags = new TagParserContainer();
+        parsers = new ParserContainer();
+        tests = new TestContainer();
+        functions = new FunctionContainer();
+        filters = new FilterContainer();
+        operators = new OperatorContainer();
     }
 
     /**
@@ -56,7 +58,7 @@ public class StandardExtensionContainer implements ExtensionContainer {
      */
     @Override
     public void addTagParser(TagParser parser) {
-        tags.put(parser.getName(), parser);
+        tags.register(parser);
     }
 
     /**
@@ -77,7 +79,7 @@ public class StandardExtensionContainer implements ExtensionContainer {
      */
     @Override
     public void addParser(Parser parser) {
-        parsers.put(parser.getClass(), parser);
+        parsers.register(parser);
     }
 
     /**
@@ -98,7 +100,7 @@ public class StandardExtensionContainer implements ExtensionContainer {
      */
     @Override
     public void addOperator(Operator operator) {
-        operators.put(operator.getType(), operator);
+        operators.register(operator);
     }
 
     /**
@@ -119,7 +121,7 @@ public class StandardExtensionContainer implements ExtensionContainer {
      */
     @Override
     public void addFunction(Function function) {
-        functions.put(function.getName(), function);
+        functions.register(function);
     }
 
     /**
@@ -140,7 +142,7 @@ public class StandardExtensionContainer implements ExtensionContainer {
      */
     @Override
     public void addTest(Test test) {
-        tests.put(test.getName(), test);
+        tests.register(test);
     }
 
     /**
@@ -161,7 +163,7 @@ public class StandardExtensionContainer implements ExtensionContainer {
      */
     @Override
     public void addFilter(Filter filter) {
-        filters.put(filter.getName(), filter);
+        filters.register(filter);
     }
 
 }

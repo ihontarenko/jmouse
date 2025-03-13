@@ -31,7 +31,7 @@ public class Main {
 //        TokenizableSource string    = new TokenizableString("test-string", "Calculation: {{ --1 + 2++ * 3^2 (2 + 6) }}");
 //        TokenizableSource string    = new TokenizableString("test-string", "Calculation: {{ 1 + 2++}} {# x++ --z v+=123 v-=111 #}");
 //        TokenizableSource string    = new TokenizableString("test-string", "Calculation: {{ min() + 1 / user.id (low(), high(1, 2^3)) }}");
-        TokenizableSource string    = new TokenizableString("string-test", "<h1>{% min(rand(), 1, 2 + 3 * 2 ^ 2 * 2) + 2 | toBigInt %}</h1>");
+        TokenizableSource string    = new TokenizableString("string-test", "<h1>{% min(min() | toBigInt | abs, 1++, 2 + 3 * 2 ^ 2 * 2) + 2 %}</h1>");
 
         Lexer lexer = new TemplateLexer();
 

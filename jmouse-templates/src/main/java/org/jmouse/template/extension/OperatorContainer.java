@@ -1,6 +1,6 @@
-package org.jmouse.template;
+package org.jmouse.template.extension;
 
-import org.jmouse.template.extension.Operator;
+import org.jmouse.template.AbstractObjectContainer;
 import org.jmouse.template.lexer.Token;
 
 /**

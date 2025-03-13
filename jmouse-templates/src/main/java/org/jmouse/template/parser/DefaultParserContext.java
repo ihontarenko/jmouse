@@ -1,6 +1,5 @@
 package org.jmouse.template.parser;
 
-import org.jmouse.template.OperatorContainer;
 import org.jmouse.template.extension.*;
 import org.jmouse.template.lexer.Token;
 

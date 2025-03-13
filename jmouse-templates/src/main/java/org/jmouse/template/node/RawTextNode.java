@@ -14,7 +14,7 @@ public class RawTextNode extends AbstractRenderableNode {
     /**
      * The raw text content of this node.
      */
-    private final String string;
+    private final char[] data;
 
     /**
      * Constructs a {@code RawTextNode} with the specified text content.
@@ -22,7 +22,7 @@ public class RawTextNode extends AbstractRenderableNode {
      * @param string the raw text content
      */
     public RawTextNode(String string) {
-        this.string = string;
+        this.data = string.toCharArray();
     }
 
     /**
@@ -31,6 +31,6 @@ public class RawTextNode extends AbstractRenderableNode {
      * @return the raw text content
      */
     public String getString() {
-        return string;
+        return new String(data);
     }
 }
