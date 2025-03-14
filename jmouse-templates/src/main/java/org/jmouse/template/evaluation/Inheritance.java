@@ -1,4 +1,6 @@
-package org.jmouse.template;
+package org.jmouse.template.evaluation;
+
+import org.jmouse.template.Template;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +8,7 @@ import java.util.List;
 public class Inheritance implements TemplateInheritance {
 
     private final List<Template> hierarchy = new ArrayList<>();
-    private int depth = 0;
+    private int                  depth     = 0;
 
     @Override
     public void inherit(Template template) {

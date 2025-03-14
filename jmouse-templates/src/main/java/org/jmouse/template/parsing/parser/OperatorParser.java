@@ -80,7 +80,7 @@ public class OperatorParser implements Parser {
      * <ul>
      *     <li>A nested expression within parentheses</li>
      *     <li>A function call or a variable</li>
-     *     <li>An implicit multiplication (e.g., {@code 2(3+4)})</li>
+     *     <li>An implicit multiplication (e.g., {@code 2(3 + 4)})</li>
      * </ul>
      *
      * @param cursor  the token cursor
@@ -93,15 +93,15 @@ public class OperatorParser implements Parser {
 
         // Handle nested expressions inside parentheses
         if (cursor.isCurrent(T_OPEN_PAREN) && !cursor.isPrevious(T_IDENTIFIER)) {
-            cursor.expect(T_OPEN_PAREN);
+            cursor.ensure(T_OPEN_PAREN);
             left = parseExpression(cursor, context, 0);
-            cursor.expect(T_CLOSE_PAREN);
+            cursor.ensure(T_CLOSE_PAREN);
         } else {
             // Parse any standard expression (number, variable, function, etc.)
             left = (ExpressionNode) parser.parse(cursor, context);
         }
 
-        // Handle implicit multiplication: e.g., `2(3+4)` -> `2 * (3+4)`
+        // Handle implicit multiplication: e.g., `2 (3 + 4)` -> `2 * (3 + 4)`
         if (cursor.isCurrent(T_OPEN_PAREN)) {
             Operator multiply = context.getOperator(T_MULTIPLY);
             left = new BinaryOperation(left, multiply, parsePrimaryExpression(cursor, context));

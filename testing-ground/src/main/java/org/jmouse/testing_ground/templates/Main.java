@@ -1,6 +1,6 @@
 package org.jmouse.testing_ground.templates;
 
-import org.jmouse.template.CoreExtension;
+import org.jmouse.template.extension.CoreExtension;
 import org.jmouse.template.TokenizableString;
 import org.jmouse.template.lexer.*;
 import org.jmouse.template.loader.ClasspathLoader;
@@ -34,8 +34,8 @@ public class Main {
 //        TokenizableSource string    = new TokenizableString("string-test", "<h1>{{ 2 + (2 + 2) * 2 / 3 (22 / 7) }}</h1>");
 //        TokenizableSource string    = new TokenizableString("string-test", "<h1>{{ 1 (2 + 3) * 4 }}</h1>");
 
-        TokenizableSource string    = new TokenizableString("string-test", "<h1>{{ min(min(), 123) }}</h1>");
-//        TokenizableSource string    = new TokenizableString("string-test", "<h1>{% if x is even || a > 1 or data.users[0].name is odd %}</h1>");
+//        TokenizableSource string    = new TokenizableString("string-test", "<h1>{{ min(max() + 2 / 3 (1+1) ) }}</h1>");
+        TokenizableSource string    = new TokenizableString("string-test", "<h1>{% if x is even || a > 1 or data.users[0].name is odd %}</h1>");
 //        TokenizableSource string    = new TokenizableString("string-test", "<h1>{{ data.users[0].name }}</h1>");
 
         Lexer lexer = new TemplateLexer();

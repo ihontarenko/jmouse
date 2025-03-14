@@ -18,14 +18,14 @@ public class ArgumentsParser implements Parser {
         Node   arguments = new ArgumentsNode();
         Parser parser    = context.getParser(OperatorParser.class);
 
-        cursor.ensure(T_OPEN_PAREN);
+//        cursor.ensure(T_OPEN_PAREN);
 
         do {
-            cursor.next();
-            arguments.add(parser.parse(cursor, context));
-        } while (cursor.isCurrent(BasicToken.T_COMMA) && cursor.hasNext());
+            Node argument = parser.parse(cursor, context);
+            arguments.add(argument);
+        } while (cursor.isCurrent(BasicToken.T_COMMA) && cursor.next() != null);
 
-        cursor.ensure(T_CLOSE_PAREN);
+//        cursor.ensure(T_CLOSE_PAREN);
 
         parent.add(arguments);
     }

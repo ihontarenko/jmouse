@@ -2,8 +2,9 @@ package org.jmouse.template.parsing.tag;
 
 import org.jmouse.template.lexer.TemplateToken;
 import org.jmouse.template.lexer.TokenCursor;
-import org.jmouse.template.node.Node;
+import org.jmouse.template.node.ExpressionNode;
 import org.jmouse.template.node.RenderableNode;
+import org.jmouse.template.node.renderable.IfNode;
 import org.jmouse.template.parsing.Parser;
 import org.jmouse.template.parsing.TagParser;
 import org.jmouse.template.parsing.ParserContext;
@@ -18,11 +19,11 @@ public class IfParser implements TagParser {
 
         Parser parser = context.getParser(OperatorParser.class);
 
-        Node node = parser.parse(cursor, context);
+        ExpressionNode node = (ExpressionNode) parser.parse(cursor, context);
 
         System.out.println(cursor.current());
 
-        return null;
+        return new IfNode();
     }
 
     @Override

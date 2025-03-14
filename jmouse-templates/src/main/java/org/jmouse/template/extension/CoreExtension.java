@@ -1,8 +1,6 @@
-package org.jmouse.template;
+package org.jmouse.template.extension;
 
-import org.jmouse.template.extension.Extension;
-import org.jmouse.template.extension.Function;
-import org.jmouse.template.extension.Operator;
+import org.jmouse.template.extension.function.MaxFunction;
 import org.jmouse.template.extension.function.MinFunction;
 import org.jmouse.template.extension.operator.BinaryOperator;
 import org.jmouse.template.extension.operator.LogicalOperator;
@@ -25,7 +23,8 @@ public class CoreExtension implements Extension {
     @Override
     public List<Function> getFunctions() {
         return List.of(
-                new MinFunction()
+                new MinFunction(),
+                new MaxFunction()
         );
     }
 

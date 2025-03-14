@@ -9,7 +9,7 @@ public record RawToken(String value, int line, int offset, Type type) {
 
     @Override
     public String toString() {
-        return "%s:[('%s') %d:%d]".formatted(type, type == Type.RAW_TEXT ? "[LARGE]" : value, offset, line);
+        return "%s:[%d:%d]: %s".formatted(type, offset, line, type == Type.RAW_TEXT ? "[LARGE]" : value);
     }
 
     /**
