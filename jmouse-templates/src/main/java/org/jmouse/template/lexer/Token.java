@@ -3,7 +3,7 @@ package org.jmouse.template.lexer;
 /**
  * Represents a lexical type in a template lexer, storing its value, type, position, and line number.
  *
- * <p>This record encapsulates type metadata for efficient processing in a lexer or parser.</p>
+ * <p>This record encapsulates type metadata for efficient processing in a lexer or parsing.</p>
  *
  * @param value      the textual representation of the type
  * @param type       the type of type

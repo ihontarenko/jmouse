@@ -24,7 +24,7 @@ import java.util.StringJoiner;
  * <ul>
  *     <li>{@code application.main.name}</li>
  *     <li>{@code server.hosts[0].name}</li>
- *     <li>{@code log[org.jmouse.core].level}</li>
+ *     <li>{@code log[org.jmouse.parser].level}</li>
  * </ul>
  */
 final public class PropertyPath {
@@ -171,8 +171,8 @@ final public class PropertyPath {
      *
      * <p>Example usage:</p>
      * <pre>{@code
-     * Parser parser = new Parser("a.b[0].c-d", '.');
-     * Entries entries = parser.parse();
+     * Parser parsing = new Parser("a.b[0].c-d", '.');
+     * Entries entries = parsing.parse();
      * System.out.println(entries); // Parsed representation of "a.b[0].c-d"
      * }</pre>
      */
@@ -189,7 +189,7 @@ final public class PropertyPath {
         private       int[]        types;
 
         /**
-         * Constructs a new parser instance for a given sequence and separator.
+         * Constructs a new parsing instance for a given sequence and separator.
          *
          * @param sequence  the character sequence to parse
          * @param separator the character used as a separator in the sequence

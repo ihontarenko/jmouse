@@ -2,12 +2,10 @@ package org.jmouse.template.extension;
 
 import org.jmouse.template.ObjectContainer;
 import org.jmouse.template.lexer.Token;
-import org.jmouse.template.parser.Parser;
-import org.jmouse.template.parser.ParserContainer;
-import org.jmouse.template.parser.TagParser;
-import org.jmouse.template.parser.TagParserContainer;
-
-import java.util.HashMap;
+import org.jmouse.template.parsing.Parser;
+import org.jmouse.template.parsing.ParserContainer;
+import org.jmouse.template.parsing.TagParser;
+import org.jmouse.template.parsing.TagParserContainer;
 
 /**
  * 🏗️ Standard implementation of {@link ExtensionContainer}.
@@ -41,9 +39,9 @@ public class StandardExtensionContainer implements ExtensionContainer {
     }
 
     /**
-     * 🔖 Retrieves a registered tag parser by its name.
+     * 🔖 Retrieves a registered tag parsing by its name.
      *
-     * @param name the name of the tag parser
+     * @param name the name of the tag parsing
      * @return the {@link TagParser} instance, or {@code null} if not found
      */
     @Override
@@ -52,7 +50,7 @@ public class StandardExtensionContainer implements ExtensionContainer {
     }
 
     /**
-     * ➕ Adds a new tag parser to the container.
+     * ➕ Adds a new tag parsing to the container.
      *
      * @param parser the {@link TagParser} instance to register
      */
@@ -62,9 +60,9 @@ public class StandardExtensionContainer implements ExtensionContainer {
     }
 
     /**
-     * 🔍 Retrieves a registered parser by its class type.
+     * 🔍 Retrieves a registered parsing by its class type.
      *
-     * @param type the class type of the parser
+     * @param type the class type of the parsing
      * @return the {@link Parser} instance, or {@code null} if not found
      */
     @Override
@@ -73,7 +71,7 @@ public class StandardExtensionContainer implements ExtensionContainer {
     }
 
     /**
-     * ➕ Adds a new parser to the container.
+     * ➕ Adds a new parsing to the container.
      *
      * @param parser the {@link Parser} instance to register
      */

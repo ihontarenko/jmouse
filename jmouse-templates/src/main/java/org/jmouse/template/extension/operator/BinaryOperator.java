@@ -47,6 +47,11 @@ public enum BinaryOperator implements Operator {
     DIVIDE(BasicToken.T_DIVIDE, "DIVIDE", 20),
 
     /**
+     * 🔢 Modulus operator (`%`), returns the remainder of a division.
+     * Precedence: 20 (same as multiplication and division)
+     */
+    MODULUS(BasicToken.T_PERCENT, "MODULUS", 20),
+    /**
      * 🔼 Exponential operator (`^`), used for power calculations.
      * Precedence: 30 (highest among binary operators)
      */

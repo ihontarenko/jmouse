@@ -1,4 +1,4 @@
-package org.jmouse.template.parser;
+package org.jmouse.template.parsing;
 
 import org.jmouse.template.extension.*;
 import org.jmouse.template.lexer.Token;
@@ -70,6 +70,11 @@ public class DefaultParserContext implements ParserContext {
     @Override
     public void addFilter(Filter filter) {
         extensions.addFilter(filter);
+    }
+
+    @Override
+    public ExtensionContainer getExtensionContainer() {
+        return extensions;
     }
 
     @Override

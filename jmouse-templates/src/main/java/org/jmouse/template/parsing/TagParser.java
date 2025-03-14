@@ -1,4 +1,4 @@
-package org.jmouse.template.parser;
+package org.jmouse.template.parsing;
 
 import org.jmouse.template.lexer.TokenCursor;
 import org.jmouse.template.node.RenderableNode;

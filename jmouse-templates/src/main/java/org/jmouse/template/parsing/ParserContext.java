@@ -1,8 +1,6 @@
-package org.jmouse.template.parser;
+package org.jmouse.template.parsing;
 
 import org.jmouse.template.extension.ExtensionContainer;
-import org.jmouse.template.extension.Operator;
-import org.jmouse.template.lexer.Token;
 
 /**
  * Represents a context for managing parsers and options in a templating system.
@@ -14,6 +12,8 @@ import org.jmouse.template.lexer.Token;
  * @author ihontarenko@gmail.com
  */
 public interface ParserContext extends ExtensionContainer {
+
+    ExtensionContainer getExtensionContainer();
 
     ParserOptions getOptions();
 

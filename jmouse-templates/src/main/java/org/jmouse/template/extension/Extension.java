@@ -1,7 +1,7 @@
 package org.jmouse.template.extension;
 
-import org.jmouse.template.parser.Parser;
-import org.jmouse.template.parser.TagParser;
+import org.jmouse.template.parsing.Parser;
+import org.jmouse.template.parsing.TagParser;
 
 import java.util.Collections;
 import java.util.List;

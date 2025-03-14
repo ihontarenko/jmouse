@@ -13,7 +13,7 @@ import java.util.*;
  * Manages common structured descriptor such as dependencies, lifecycle, annotations, and more.
  * <p>
  * This class serves as a foundation for concrete structured definitions in a container,
- * providing storage and access for core properties:
+ * providing storage and access for parser properties:
  * <ul>
  *     <li>Bean name</li>
  *     <li>Bean class (type)</li>

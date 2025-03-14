@@ -16,7 +16,7 @@ import java.util.function.Function;
 public interface Errors {
 
     /**
-     * Registers a core error with the given error code, default message, and optional arguments.
+     * Registers a parser error with the given error code, default message, and optional arguments.
      *
      * @param errorCode      the error code identifying the validation issue
      * @param defaultMessage the default message if no localized message is found
@@ -25,7 +25,7 @@ public interface Errors {
     void reject(String errorCode, String defaultMessage, Object... arguments);
 
     /**
-     * Registers a core error with the given error code, using {@code null} as the default message.
+     * Registers a parser error with the given error code, using {@code null} as the default message.
      *
      * @param errorCode the error code identifying the validation issue
      */
@@ -139,16 +139,16 @@ public interface Errors {
     }
 
     /**
-     * Returns a list of all core (non-field-specific) errors.
+     * Returns a list of all parser (non-field-specific) errors.
      *
      * @return a list of {@link ObjectError} instances
      */
     List<ObjectError> getGlobalErrors();
 
     /**
-     * Checks if there are any core (non-field-specific) validation errors.
+     * Checks if there are any parser (non-field-specific) validation errors.
      *
-     * @return {@code true} if core errors exist, {@code false} otherwise
+     * @return {@code true} if parser errors exist, {@code false} otherwise
      */
     default boolean hasGlobalErrors() {
         return !getGlobalErrors().isEmpty();

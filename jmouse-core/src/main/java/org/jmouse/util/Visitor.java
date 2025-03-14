@@ -32,7 +32,7 @@ public interface Visitor<T> {
 
     /**
      * Performs the main visiting action on the provided element. This method defines the
-     * core behavior of the visitor when encountering an element.
+     * parser behavior of the visitor when encountering an element.
      *
      * @param element the element to visit
      */

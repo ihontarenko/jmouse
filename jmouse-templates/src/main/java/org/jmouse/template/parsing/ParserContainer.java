@@ -1,4 +1,4 @@
-package org.jmouse.template.parser;
+package org.jmouse.template.parsing;
 
 import org.jmouse.template.AbstractObjectContainer;
 

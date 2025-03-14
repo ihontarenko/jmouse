@@ -47,7 +47,7 @@ abstract public class AbstractErrors implements Errors {
     }
 
     /**
-     * Registers a core error with the given error code, default message, and optional arguments.
+     * Registers a parser error with the given error code, default message, and optional arguments.
      * <p>
      * The error is associated with the entire object rather than a specific field.
      * </p>
@@ -161,7 +161,7 @@ abstract public class AbstractErrors implements Errors {
     }
 
     /**
-     * Returns a list of all core (non-field-specific) validation errors.
+     * Returns a list of all parser (non-field-specific) validation errors.
      *
      * @return a list of {@link ObjectError} instances
      */

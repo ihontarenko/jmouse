@@ -1,12 +1,12 @@
-package org.jmouse.template.parser.core;
+package org.jmouse.template.parsing.parser;
 
 import org.jmouse.template.lexer.BasicToken;
 import org.jmouse.template.lexer.Token;
 import org.jmouse.template.lexer.TokenCursor;
 import org.jmouse.template.node.Node;
 import org.jmouse.template.node.expression.literal.*;
-import org.jmouse.template.parser.Parser;
-import org.jmouse.template.parser.ParserContext;
+import org.jmouse.template.parsing.Parser;
+import org.jmouse.template.parsing.ParserContext;
 
 import static org.jmouse.template.lexer.BasicToken.*;
 
@@ -37,8 +37,6 @@ public class LiteralParser implements Parser {
                 parent.add(new BooleanLiteralNode(type == T_TRUE));
                 break;
         }
-
-        cursor.next();
     }
 
 }

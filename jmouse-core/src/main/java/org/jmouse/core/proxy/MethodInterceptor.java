@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
  * <p>Typical usage involves three steps:
  * <ul>
  *   <li>{@link #before(ProxyContext, Method, Object[])} – called before the actual method invocation.</li>
- *   <li>{@link #invoke(MethodInvocation)} – contains the core interception logic and eventually calls
+ *   <li>{@link #invoke(MethodInvocation)} – contains the parser interception logic and eventually calls
  *       {@link MethodInvocation#proceed()} to invoke the target method.</li>
  *   <li>{@link #after(ProxyContext, Method, Object[], Object)} – called after the method invocation,
  *       receiving the result of the method call (or a thrown exception, if applicable).</li>
@@ -54,7 +54,7 @@ public interface MethodInterceptor {
     }
 
     /**
-     * The core method that performs the actual interception logic. Implementations
+     * The parser method that performs the actual interception logic. Implementations
      * generally call {@link MethodInvocation#proceed()} to invoke the target method.
      *
      * @param invocation the {@link MethodInvocation} encapsulating the target method and its parameters

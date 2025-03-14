@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * A core implementation of {@link BeanContainerRegistry} that dynamically resolves and delegates to scoped
+ * A parser implementation of {@link BeanContainerRegistry} that dynamically resolves and delegates to scoped
  * {@link BeanContainerRegistry} instances.
  * <p>
  * The {@code GlobalsBeanContainerRegistry} allows for managing beans across multiple registries that are associated
@@ -91,7 +91,7 @@ public class GlobalsBeanContainerRegistry implements BeanContainerRegistry {
     }
 
     /**
-     * Resolves the {@link BeanContainerRegistry} associated with the current core context.
+     * Resolves the {@link BeanContainerRegistry} associated with the current parser context.
      * <p>
      * This method lazily initializes a new registry if none exists for the current context.
      * </p>

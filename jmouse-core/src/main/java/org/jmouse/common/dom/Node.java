@@ -6,7 +6,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 @SuppressWarnings({"unused"})
-public interface Node /*extends df.base.common.libs.parser.node.Node*/ {
+public interface Node /*extends df.base.common.libs.parsing.node.Node*/ {
 
     int getDepth();
 

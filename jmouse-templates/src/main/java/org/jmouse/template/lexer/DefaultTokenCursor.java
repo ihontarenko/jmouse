@@ -141,7 +141,10 @@ public class DefaultTokenCursor implements TokenCursor {
         if (!isCurrent(expected)) {
             throw new SyntaxErrorException(source, lookAt(0), expected);
         }
-        return peek();
+
+        next();
+
+        return lookAt(-1);
     }
 
     /**

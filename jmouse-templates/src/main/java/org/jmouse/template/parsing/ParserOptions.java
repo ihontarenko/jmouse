@@ -1,11 +1,11 @@
-package org.jmouse.template.parser;
+package org.jmouse.template.parsing;
 
 import org.jmouse.template.lexer.Token;
 
 import java.util.function.Predicate;
 
 /**
- * Represents configurable options for the parser.
+ * Represents configurable options for the parsing.
  *
  * <p>This interface provides mechanisms to define conditions that influence
  * the parsing process, such as specifying a stopping condition.</p>
@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 public interface ParserOptions {
 
     /**
-     * Defines a stop condition that determines when the parser should halt.
+     * Defines a stop condition that determines when the parsing should halt.
      *
      * @return a {@link Predicate} that evaluates whether parsing should stop at a given token
      */
@@ -31,7 +31,7 @@ public interface ParserOptions {
     /**
      * Creates a {@code ParserOptions} instance with a custom stop condition.
      *
-     * @param stopCondition the stopping condition for the parser
+     * @param stopCondition the stopping condition for the parsing
      * @return a new instance of {@code ParserOptions} with the specified condition
      */
     static ParserOptions withStopCondition(Predicate<Token> stopCondition) {

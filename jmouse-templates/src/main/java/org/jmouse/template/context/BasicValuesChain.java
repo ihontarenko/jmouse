@@ -34,7 +34,7 @@ public class BasicValuesChain implements ScopedChain {
     private final Deque<ScopeValues> chain = new ArrayDeque<>();
 
     /**
-     * 🆕 Creates a new `BasicValuesChain` with an initial core scope.
+     * 🆕 Creates a new `BasicValuesChain` with an initial parser scope.
      */
     public BasicValuesChain() {
         chain.push(new BasicScopeValues());

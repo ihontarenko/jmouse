@@ -21,7 +21,7 @@ public class ParametersParser implements Parser {
             ensureNext(lexer, T_IDENTIFIER);
 
             ParameterNode parameter = new ParameterNode();
-            // parser identifier and shift to equal symbol 'identifier='
+            // parsing identifier and shift to equal symbol 'identifier='
             Node identifier = context.getParser(IdentifierParser.class).parse(lexer, context);
             parameter.setKey(identifier);
             shift(lexer, T_EQ);

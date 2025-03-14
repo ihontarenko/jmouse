@@ -8,7 +8,7 @@ import java.util.List;
 
 
 /**
- * Represents the core interface for managing the structured lifecycle, definitions, containers,
+ * Represents the parser interface for managing the structured lifecycle, definitions, containers,
  * and scope resolution within the application context.
  *
  * @see BeanContainer

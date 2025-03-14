@@ -1,14 +1,15 @@
-package org.jmouse.template.parser.core;
+package org.jmouse.template.parsing.parser;
 
 import org.jmouse.template.extension.Function;
 import org.jmouse.template.lexer.BasicToken;
 import org.jmouse.template.lexer.TokenCursor;
 import org.jmouse.template.node.Node;
-import org.jmouse.template.node.expression.ValuesNode;
+import org.jmouse.template.node.expression.ArgumentsNode;
 import org.jmouse.template.node.expression.FunctionNode;
-import org.jmouse.template.parser.ParseException;
-import org.jmouse.template.parser.Parser;
-import org.jmouse.template.parser.ParserContext;
+import org.jmouse.template.parsing.ParseException;
+import org.jmouse.template.parsing.Parser;
+import org.jmouse.template.parsing.ParserContext;
+import org.jmouse.template.parsing.parser.sub.ArgumentsParser;
 
 /**
  * Parses function calls and their arguments.
@@ -27,11 +28,8 @@ public class FunctionParser implements Parser {
 
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
-        // 📌 Extract function name and ensure it's a valid identifier
+        // Extract function name and ensure it's a valid identifier
         FunctionNode function = new FunctionNode(cursor.peek().value());
-
-        cursor.ensure(BasicToken.T_IDENTIFIER); // Ensure that the current token is a function name
-        cursor.expect(BasicToken.T_OPEN_PAREN); // Expect '('
 
         Function executor = context.getFunction(function.getName());
 
@@ -39,25 +37,17 @@ public class FunctionParser implements Parser {
             throw new ParseException("Unknown function: " + function.getName());
         }
 
-        // 📝 Parse function arguments
+        // Ensure that the current token is a function name
+        cursor.ensure(BasicToken.T_IDENTIFIER);
+
+        // Parse function arguments
         if (!cursor.isNext(BasicToken.T_CLOSE_PAREN)) {
-            Parser parser    = context.getParser(OperatorParser.class);
-            Node   arguments = new ValuesNode();
-
-            do {
-                cursor.next();
-                arguments.add(parser.parse(cursor, context));
-            } while (cursor.isCurrent(BasicToken.T_COMMA) && cursor.hasNext());
-
-            function.setArguments(arguments);
-
-            cursor.ensure(BasicToken.T_CLOSE_PAREN);
+            Parser parser    = context.getParser(ArgumentsParser.class);
+            function.setArguments(parser.parse(cursor, context));
         } else {
-            cursor.expect(BasicToken.T_CLOSE_PAREN);
+            cursor.ensure(BasicToken.T_OPEN_PAREN);
+            cursor.ensure(BasicToken.T_CLOSE_PAREN);
         }
-
-        // consume close parentheses
-        cursor.next();
 
         parent.add(function);
     }
