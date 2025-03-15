@@ -28,6 +28,10 @@ public interface ParserOptions {
         return token -> false;
     }
 
+    default Class<? extends Parser> nextParser() {
+        return null;
+    }
+
     /**
      * Creates a {@code ParserOptions} instance with a custom stop condition.
      *
@@ -35,13 +39,17 @@ public interface ParserOptions {
      * @return a new instance of {@code ParserOptions} with the specified condition
      */
     static ParserOptions withStopCondition(Predicate<Token> stopCondition) {
-        return new Default(stopCondition);
+        return new Default(stopCondition, null);
+    }
+
+    static ParserOptions withNextParser(Class<? extends Parser> nextParser) {
+        return new Default(null, nextParser);
     }
 
     /**
      * Default implementation of {@link ParserOptions}.
      */
-    record Default(Predicate<Token> stopCondition) implements ParserOptions {
+    record Default(Predicate<Token> stopCondition, Class<? extends Parser> nextParser) implements ParserOptions {
 
     }
 }

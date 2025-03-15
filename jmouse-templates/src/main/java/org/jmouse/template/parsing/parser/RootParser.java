@@ -55,7 +55,7 @@ public class RootParser implements Parser {
                 }
             } else if (cursor.isCurrent(T_OPEN_EXPRESSION)) {
                 // 🏗️ Handling execution expression: "{%"
-                cursor.next();
+                cursor.ensure(T_OPEN_EXPRESSION);
                 Token currentToken = cursor.peek();
 
                 // create body node (container)

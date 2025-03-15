@@ -1,6 +1,7 @@
 package org.jmouse.template.parsing.parser;
 
 import org.jmouse.template.extension.Operator;
+import org.jmouse.template.extension.operator.LogicalOperator;
 import org.jmouse.template.lexer.Token;
 import org.jmouse.template.lexer.TokenCursor;
 import org.jmouse.template.node.ExpressionNode;
@@ -66,8 +67,14 @@ public class OperatorParser implements Parser {
 
             cursor.next(); // Consume operator
 
-            // Parse the right-hand side with adjusted precedence
-            ExpressionNode right = parseExpression(cursor, context, operator.getPrecedence() + 1);
+            ExpressionNode right;
+
+            if (operator == LogicalOperator.IS) {
+                right = (ExpressionNode) context.getParser(TestParser.class).parse(cursor, context);
+            } else {
+                // Parse the right-hand side with adjusted precedence
+                right = parseExpression(cursor, context, operator.getPrecedence() + 1);
+            }
 
             left = new BinaryOperation(left, operator, right);
         }

@@ -1,7 +1,6 @@
 package org.jmouse.core.bind;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.jmouse.core.reflection.JavaType.forInstance;
 import static org.jmouse.core.reflection.Reflections.getShortName;
@@ -58,9 +57,21 @@ public class StandardPropertyValuesAccessor extends AbstractPropertyValuesAccess
         Object value = null;
 
         if (isList()) {
-            List<Object> list = asList(Object.class);
-            if (list.size() > index) {
+            List<Object> values = asList(Object.class);
+            if (values.size() > index) {
                 value = asList().get(index);
+            }
+        } else if (isSet()) {
+            Set<Object>      values   = asSet(Object.class);
+            Iterator<Object> iterator = values.iterator();
+            int              count    = 0;
+            if (values.size() > index) {
+                while (iterator.hasNext()) {
+                    value = iterator.next();
+                    if (count++ == index) {
+                        break;
+                    }
+                }
             }
         }
 

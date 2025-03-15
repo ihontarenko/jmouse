@@ -6,8 +6,8 @@ import org.jmouse.template.node.ExpressionNode;
 import org.jmouse.template.node.RenderableNode;
 import org.jmouse.template.node.renderable.IfNode;
 import org.jmouse.template.parsing.Parser;
-import org.jmouse.template.parsing.TagParser;
 import org.jmouse.template.parsing.ParserContext;
+import org.jmouse.template.parsing.TagParser;
 import org.jmouse.template.parsing.parser.OperatorParser;
 
 public class IfParser implements TagParser {
@@ -17,9 +17,10 @@ public class IfParser implements TagParser {
         // consume 'if'
         cursor.ensure(TemplateToken.T_IF);
 
-        Parser parser = context.getParser(OperatorParser.class);
+        Parser         parser = context.getParser(OperatorParser.class);
+        ExpressionNode node   = (ExpressionNode) parser.parse(cursor, context);
 
-        ExpressionNode node = (ExpressionNode) parser.parse(cursor, context);
+        cursor.ensure(TemplateToken.T_CLOSE_EXPRESSION);
 
         System.out.println(cursor.current());
 

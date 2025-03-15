@@ -3,6 +3,7 @@ package org.jmouse.testing_ground.binder;
 import org.jmouse.core.bind.Bind;
 import org.jmouse.core.bind.Binder;
 import org.jmouse.core.bind.DefaultBindingCallback;
+import org.jmouse.core.bind.PropertyValuesAccessor;
 import org.jmouse.testing_ground.binder.dto.User;
 
 import java.util.ArrayList;
@@ -27,13 +28,15 @@ public class Example {
         Map<String, Object> data = new HashMap<>();
 
         data.put("name", "James Bond");
-        data.put("status", Map.of("status", "Blocked!"));
+        data.put("status", Map.of("status", "Blocked"));
         data.put("books", books);
         data.put("address", addresses);
 
         Binder binder = Binder.with(data, new DefaultBindingCallback());
         User   user   = Bind.with(binder).get(User.class);
 
+        PropertyValuesAccessor accessor = PropertyValuesAccessor.wrap(user);
+        accessor.navigate("books[0].placeCreation").asText();
         System.out.println(user);
     }
 

@@ -9,6 +9,7 @@ import org.jmouse.template.parsing.parser.*;
 import org.jmouse.template.parsing.Parser;
 import org.jmouse.template.parsing.TagParser;
 import org.jmouse.template.parsing.parser.sub.ArgumentsParser;
+import org.jmouse.template.parsing.parser.sub.ParenthesesParser;
 import org.jmouse.template.parsing.tag.ForParser;
 import org.jmouse.template.parsing.tag.IfParser;
 import org.jmouse.template.parsing.tag.LoremParser;
@@ -35,8 +36,11 @@ public class CoreExtension implements Extension {
                 new OperatorParser(),
                 new ExpressionParser(),
                 new FunctionParser(),
+                new TestParser(),
+                new FilterParser(),
                 new PropertyParser(),
                 new LiteralParser(),
+                new ParenthesesParser(),
                 new ArgumentsParser()
         );
     }

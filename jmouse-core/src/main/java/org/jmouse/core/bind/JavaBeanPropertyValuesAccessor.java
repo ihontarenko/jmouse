@@ -43,6 +43,7 @@ public class JavaBeanPropertyValuesAccessor extends AbstractPropertyValuesAccess
         Bean.Property<Object> property = bean.getProperty(name);
 
         if (property == null) {
+            // todo: consider to create virtual-property resolver
             throw new IllegalArgumentException(
                     "Bean factory does not have property: '%s'.".formatted(name));
         }

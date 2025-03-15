@@ -73,7 +73,14 @@ public enum LogicalOperator implements Operator {
      * ❌ Not equal to (`!=`), returns {@code true} if operands are not equal.
      * Precedence: 8 (same as EQUAL)
      */
-    NOT_EQUAL(BasicToken.T_NE, "NOT_EQUAL", 8);
+    NOT_EQUAL(BasicToken.T_NE, "NOT_EQUAL", 8),
+
+    /**
+     * 🧪 Logical "IS" operator (`IS`), used to apply tests to values.
+     * Example: `x IS even`, `name IS not empty`
+     * Precedence: 9 (higher than equality and relational operators)
+     */
+    IS(BasicToken.T_IS, "IS", 9);
 
     /** 🎭 The token type representing the operator. */
     private final Token.Type type;

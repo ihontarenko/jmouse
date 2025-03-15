@@ -291,6 +291,37 @@ public interface PropertyValuesAccessor extends ClassTypeInspector {
     }
 
     /**
+     * Converts the data source to a {@link Set}.
+     *
+     * @return a set representation of the data source
+     */
+    default Set<?> asSet() {
+        return asSet(Object.class);
+    }
+
+    /**
+     * Converts the data source to a typed {@link Set}.
+     *
+     * @param <T>  the element type
+     * @param type the expected element type
+     * @return a typed set representation of the data source
+     * @throws IllegalArgumentException if type mismatch occurs
+     */
+    @SuppressWarnings({"unchecked"})
+    default <T> Set<T> asSet(Class<T> type) {
+        Set<T>   value   = asType(Set.class);
+        Class<?> generic = forInstance(value).toSet().getFirst().getRawType();
+
+        if (generic == null && !value.isEmpty()) {
+            generic = forInstance(value.iterator().next()).getRawType();
+        }
+
+        verifyTypeCompatibility("#asSet(Type)", type, generic);
+
+        return value;
+    }
+
+    /**
      * Converts the data source to a {@link Map}.
      *
      * @return a map representation of the data source

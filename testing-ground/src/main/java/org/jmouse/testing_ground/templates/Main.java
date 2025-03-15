@@ -35,7 +35,7 @@ public class Main {
 //        TokenizableSource string    = new TokenizableString("string-test", "<h1>{{ 1 (2 + 3) * 4 }}</h1>");
 
 //        TokenizableSource string    = new TokenizableString("string-test", "<h1>{{ min(max() + 2 / 3 (1+1) ) }}</h1>");
-        TokenizableSource string    = new TokenizableString("string-test", "<h1>{% if x is even || a > 1 or data.users[0].name is odd %}</h1>");
+        TokenizableSource string    = new TokenizableString("string-test", "<h1>{% if x is even and y is not inset(1, 2, 3) || a > 1 and a < 10 and x is even or data.users[0].name is odd %}</h1>");
 //        TokenizableSource string    = new TokenizableString("string-test", "<h1>{{ data.users[0].name }}</h1>");
 
         Lexer lexer = new TemplateLexer();

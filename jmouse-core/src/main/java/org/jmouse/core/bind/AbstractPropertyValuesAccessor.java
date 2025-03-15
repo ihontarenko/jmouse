@@ -14,7 +14,7 @@ public abstract class AbstractPropertyValuesAccessor implements PropertyValuesAc
     /**
      * The underlying data source object.
      */
-    protected final Object                   source;
+    protected final Object source;
 
     /**
      * Constructs an {@link AbstractPropertyValuesAccessor} with the given source object.
