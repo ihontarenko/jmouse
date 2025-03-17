@@ -1,8 +1,8 @@
 package org.jmouse.template.node.renderable;
 
-import org.jmouse.template.node.AbstractRenderableNode;
-import org.jmouse.template.node.ExpressionNode;
-import org.jmouse.template.node.RenderableNode;
+import org.jmouse.el.node.AbstractRenderableNode;
+import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.RenderableNode;
 
 public class IfCondition extends AbstractRenderableNode {
 

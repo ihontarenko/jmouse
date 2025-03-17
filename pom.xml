@@ -37,6 +37,7 @@
         <module>jmouse-web</module>
         <module>testing-ground</module>
         <module>jmouse-templates</module>
+        <module>jmouse-el</module>
     </modules>
 
 </project>

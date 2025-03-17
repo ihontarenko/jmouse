@@ -1,14 +1,14 @@
 package org.jmouse.template.parsing.tag;
 
-import org.jmouse.template.lexer.TemplateToken;
-import org.jmouse.template.lexer.TokenCursor;
-import org.jmouse.template.node.ExpressionNode;
-import org.jmouse.template.node.RenderableNode;
+import org.jmouse.template.TemplateToken;
+import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.RenderableNode;
 import org.jmouse.template.node.renderable.IfNode;
-import org.jmouse.template.parsing.Parser;
-import org.jmouse.template.parsing.ParserContext;
-import org.jmouse.template.parsing.TagParser;
-import org.jmouse.template.parsing.parser.OperatorParser;
+import org.jmouse.el.parsing.Parser;
+import org.jmouse.el.parsing.ParserContext;
+import org.jmouse.el.parsing.TagParser;
+import org.jmouse.el.parsing.OperatorParser;
 
 public class IfParser implements TagParser {
 

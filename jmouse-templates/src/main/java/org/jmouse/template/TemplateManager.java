@@ -1,6 +1,6 @@
 package org.jmouse.template;
 
-import org.jmouse.template.extension.ExtensionContainer;
+import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.template.loader.TemplateLoader;
 
 public interface TemplateManager {

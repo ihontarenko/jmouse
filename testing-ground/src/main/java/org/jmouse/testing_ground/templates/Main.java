@@ -1,14 +1,16 @@
 package org.jmouse.testing_ground.templates;
 
-import org.jmouse.template.extension.CoreExtension;
-import org.jmouse.template.TokenizableString;
-import org.jmouse.template.lexer.*;
+import org.jmouse.template.CoreExtension;
+import org.jmouse.el.lexer.*;
+import org.jmouse.el.parsing.DefaultParserContext;
+import org.jmouse.el.parsing.ParserContext;
+import org.jmouse.el.TokenizableString;
+import org.jmouse.template.lexer.TemplateLexer;
 import org.jmouse.template.loader.ClasspathLoader;
 import org.jmouse.template.loader.TemplateLoader;
-import org.jmouse.template.node.BasicNode;
-import org.jmouse.template.node.Node;
-import org.jmouse.template.parsing.*;
-import org.jmouse.template.parsing.parser.RootParser;
+import org.jmouse.el.node.BasicNode;
+import org.jmouse.el.node.Node;
+import org.jmouse.template.parsing.RootParser;
 
 import java.io.Reader;
 

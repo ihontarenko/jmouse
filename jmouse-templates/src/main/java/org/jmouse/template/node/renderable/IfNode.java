@@ -1,6 +1,6 @@
 package org.jmouse.template.node.renderable;
 
-import org.jmouse.template.node.AbstractRenderableNode;
+import org.jmouse.el.node.AbstractRenderableNode;
 
 import java.util.ArrayList;
 import java.util.List;

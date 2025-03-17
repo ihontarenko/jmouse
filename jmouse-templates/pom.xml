@@ -25,6 +25,10 @@
             <artifactId>jmouse-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-el</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
