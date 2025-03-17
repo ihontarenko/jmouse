@@ -20,7 +20,6 @@ import java.util.List;
 
 public class CoreExtension implements Extension {
 
-
     @Override
     public List<Function> getFunctions() {
         return List.of(
