@@ -1,11 +1,11 @@
-package org.jmouse.el.parsing;
+package org.jmouse.el.parser;
 
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
-import org.jmouse.el.node.expression.FilterExpression;
+import org.jmouse.el.node.expression.FilterNode;
 import org.jmouse.el.node.expression.unary.PostfixUnaryOperation;
 import org.jmouse.el.node.expression.unary.PrefixUnaryOperation;
 
@@ -40,13 +40,15 @@ public class ExpressionParser implements Parser {
         // parse right expression if present
         while (cursor.matchesSequence(T_VERTICAL_SLASH, T_IDENTIFIER)) {
             cursor.expect(T_IDENTIFIER);
-            String name = cursor.peek().value();
-            left = new FilterExpression(context.getFilter(name), left);
-            cursor.next();
+            Node right = context.getParser(FilterParser.class).parse(cursor, context);
+            if (right instanceof FilterNode filter) {
+                filter.setLeft(left);
+                left = filter;
+            }
         }
 
         if (left == null) {
-            throw new ParseException("Unrecognized expression at " + cursor.position());
+            throw new ParseException("Unexpected token " + cursor.peek() + " at " + cursor.position());
         }
 
         parent.add(left);

@@ -171,8 +171,8 @@ final public class PropertyPath {
      *
      * <p>Example usage:</p>
      * <pre>{@code
-     * Parser parsing = new Parser("a.b[0].c-d", '.');
-     * Entries entries = parsing.parse();
+     * Parser parser = new Parser("a.b[0].c-d", '.');
+     * Entries entries = parser.parse();
      * System.out.println(entries); // Parsed representation of "a.b[0].c-d"
      * }</pre>
      */
@@ -189,7 +189,7 @@ final public class PropertyPath {
         private       int[]        types;
 
         /**
-         * Constructs a new parsing instance for a given sequence and separator.
+         * Constructs a new parser instance for a given sequence and separator.
          *
          * @param sequence  the character sequence to parse
          * @param separator the character used as a separator in the sequence

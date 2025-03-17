@@ -21,4 +21,14 @@ public interface Splitter<R, S extends CharSequence> {
      * @return the processed result of type {@code R}
      */
     R split(S text, int offset, int length);
+
+    /**
+     * Splits the given text into a structured format.
+     *
+     * @param text   the input character sequence
+     * @return the processed result of type {@code R}
+     */
+    default R split(S text) {
+        return split(text, 0, text.length());
+    }
 }

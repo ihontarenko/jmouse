@@ -1,7 +1,7 @@
 package org.jmouse.el.extension;
 
-import org.jmouse.el.parsing.Parser;
-import org.jmouse.el.parsing.TagParser;
+import org.jmouse.el.parser.Parser;
+import org.jmouse.el.parser.TagParser;
 
 import java.util.Collections;
 import java.util.List;

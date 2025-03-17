@@ -11,19 +11,19 @@ import java.util.List;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class DefaultTokenCursor implements TokenCursor {
+public class Cursor implements TokenCursor {
 
     private final TokenizableSource source; // Source of tokens
     private final List<Token>       tokens; // List of tokens
     private       int               cursor; // Current position in the token list
 
     /**
-     * Constructs a {@code DefaultTokenCursor} with a source and a list of tokens.
+     * Constructs a {@code Cursor} with a source and a list of tokens.
      *
      * @param source the tokenizable source
      * @param tokens the list of tokens to iterate over
      */
-    public DefaultTokenCursor(TokenizableSource source, List<Token> tokens) {
+    public Cursor(TokenizableSource source, List<Token> tokens) {
         this.source = source;
         this.tokens = tokens;
     }

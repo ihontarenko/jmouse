@@ -5,7 +5,7 @@ import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
-import org.jmouse.el.parsing.*;
+import org.jmouse.el.parser.*;
 import org.jmouse.template.node.renderable.BodyNode;
 import org.jmouse.template.node.renderable.PrintNode;
 import org.jmouse.template.node.renderable.RawTextNode;
@@ -13,8 +13,8 @@ import org.jmouse.template.node.renderable.RawTextNode;
 import static org.jmouse.template.TemplateToken.*;
 
 /**
- * 🏗️ The root parsing responsible for processing the entire template.
- * This parsing delegates expressions to {@link ExpressionParser}.
+ * 🏗️ The root parser responsible for processing the entire template.
+ * This parser delegates expressions to {@link ExpressionParser}.
  *
  * <p>
  * Parses:
@@ -65,7 +65,7 @@ public class RootParser implements Parser {
                 TagParser tagParser = context.getTagParser(currentToken.value());
 
                 if (tagParser == null) {
-                    throw new ParseException("No tag parsing found: '%s'".formatted(currentToken.value()));
+                    throw new ParseException("No tag parser found: '%s'".formatted(currentToken.value()));
                 }
 
                 body.add(tagParser.parse(cursor, context));

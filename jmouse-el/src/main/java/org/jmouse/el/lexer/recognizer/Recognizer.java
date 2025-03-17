@@ -7,17 +7,6 @@ import java.util.Optional;
 /**
  * Represents a generic recognizer that attempts to identify a result from a given subject.
  *
- * <p>Implementations of this interface provide recognition logic that either returns a result
- * wrapped in an {@link Optional} or an empty result if recognition fails.</p>
- *
- * <pre>{@code
- * Recognizer<String, String> recognizer = subject -> subject.startsWith("Hello")
- *         ? Optional.of("Greeting recognized") : Optional.empty();
- *
- * Optional<String> result = recognizer.recognize("Hello, world!");
- * result.ifPresent(System.out::println);
- * }</pre>
- *
  * @param <R> the type of the recognition result
  * @param <T> the type of the subject being recognized
  *

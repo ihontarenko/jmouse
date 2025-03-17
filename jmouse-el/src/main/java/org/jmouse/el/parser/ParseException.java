@@ -1,4 +1,4 @@
-package org.jmouse.el.parsing;
+package org.jmouse.el.parser;
 
 public class ParseException extends RuntimeException {
 

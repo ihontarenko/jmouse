@@ -1,4 +1,4 @@
-package org.jmouse.el.parsing;
+package org.jmouse.el.parser;
 
 import org.jmouse.el.extension.Operator;
 import org.jmouse.el.extension.operator.LogicalOperator;
@@ -11,7 +11,7 @@ import org.jmouse.el.node.expression.BinaryOperation;
 import static org.jmouse.el.lexer.BasicToken.*;
 
 /**
- * 🔢 OperatorParser is responsible for parsing mathematical and logical expressions.
+ * 🔢 OperatorParser is responsible for parser mathematical and logical expressions.
  * <p>
  * Supports:
  * <ul>
@@ -21,7 +21,7 @@ import static org.jmouse.el.lexer.BasicToken.*;
  * <p>
  * Handles:
  * <ul>
- *     <li>Precedence-based parsing</li>
+ *     <li>Precedence-based parser</li>
  *     <li>Implicit multiplication (e.g., {@code 2(3 + 4) → 2 * (3 + 4)})</li>
  *     <li>Nested expressions with parentheses</li>
  * </ul>
@@ -36,7 +36,7 @@ public class OperatorParser implements Parser {
      *
      * @param cursor  the token cursor
      * @param parent  the parent node to attach the parsed tag
-     * @param context the parsing context
+     * @param context the parser context
      */
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
@@ -47,7 +47,7 @@ public class OperatorParser implements Parser {
      * Parses an arithmetic or logical expression, considering operator precedence.
      *
      * @param cursor     the token cursor
-     * @param context    the parsing context
+     * @param context    the parser context
      * @param precedence the current operator precedence level
      * @return an expression node representing the parsed expression
      */
@@ -89,7 +89,7 @@ public class OperatorParser implements Parser {
      * </ul>
      *
      * @param cursor  the token cursor
-     * @param context the parsing context
+     * @param context the parser context
      * @return the parsed primary expression node
      */
     private ExpressionNode parsePrimaryExpression(TokenCursor cursor, ParserContext context) {

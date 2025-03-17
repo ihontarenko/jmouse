@@ -5,10 +5,10 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.RenderableNode;
 import org.jmouse.template.node.renderable.IfNode;
-import org.jmouse.el.parsing.Parser;
-import org.jmouse.el.parsing.ParserContext;
-import org.jmouse.el.parsing.TagParser;
-import org.jmouse.el.parsing.OperatorParser;
+import org.jmouse.el.parser.Parser;
+import org.jmouse.el.parser.ParserContext;
+import org.jmouse.el.parser.TagParser;
+import org.jmouse.el.parser.OperatorParser;
 
 public class IfParser implements TagParser {
 

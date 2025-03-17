@@ -10,13 +10,8 @@ import java.util.List;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public interface Tokenizer<T, S extends CharSequence> {
+public interface Tokenizer<S extends CharSequence, T> {
 
-    /**
-     * Tokenizes the given text into a list of {@link Token.Type} instances.
-     *
-     * @param text the input character sequence to tokenize
-     * @return a list of extracted tokens
-     */
     List<T> tokenize(S text);
+
 }

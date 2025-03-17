@@ -1,8 +1,8 @@
 package org.jmouse.el.extension;
 
 import org.jmouse.el.lexer.Token;
-import org.jmouse.el.parsing.TagParser;
-import org.jmouse.el.parsing.Parser;
+import org.jmouse.el.parser.TagParser;
+import org.jmouse.el.parser.Parser;
 
 /**
  * 🛠️ Manages various extensions used in the template engine, including functions, tests, filters, operators, and parsers.
@@ -17,30 +17,30 @@ import org.jmouse.el.parsing.Parser;
 public interface ExtensionContainer {
 
     /**
-     * 🔖 Retrieves a registered tag parsing by its name.
+     * 🔖 Retrieves a registered tag parser by its name.
      *
-     * @param name the name of the tag parsing
+     * @param name the name of the tag parser
      * @return the {@link TagParser} instance, or {@code null} if not found
      */
     TagParser getTagParser(String name);
 
     /**
-     * ➕ Adds a new tag parsing to the container.
+     * ➕ Adds a new tag parser to the container.
      *
      * @param parser the {@link TagParser} instance to register
      */
     void addTagParser(TagParser parser);
 
     /**
-     * 🔍 Retrieves a registered expression parsing by its class type.
+     * 🔍 Retrieves a registered expression parser by its class type.
      *
-     * @param type the class type of the parsing
+     * @param type the class type of the parser
      * @return the {@link Parser} instance, or {@code null} if not found
      */
     Parser getParser(Class<? extends Parser> type);
 
     /**
-     * ➕ Adds a new expression parsing to the container.
+     * ➕ Adds a new expression parser to the container.
      *
      * @param parser the {@link Parser} instance to register
      */

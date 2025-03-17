@@ -4,8 +4,8 @@ import org.jmouse.template.TemplateToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.RenderableNode;
-import org.jmouse.el.parsing.TagParser;
-import org.jmouse.el.parsing.ParserContext;
+import org.jmouse.el.parser.TagParser;
+import org.jmouse.el.parser.ParserContext;
 
 public class ForParser implements TagParser {
 

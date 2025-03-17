@@ -1,5 +1,6 @@
 package org.jmouse.el.lexer.recognizer;
 
+import org.jmouse.el.lexer.RawToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.support.EnumFinder;
 
@@ -17,7 +18,7 @@ import static java.util.Optional.ofNullable;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class EnumTokenRecognizer<T extends Enum<T> & Token.Type> extends EnumFinder<T> implements Recognizer<Token.Type, String> {
+public class EnumTokenRecognizer<T extends Enum<T> & Token.Type> extends EnumFinder<T> implements Recognizer<Token.Type, RawToken> {
 
     private final int order;
     private final T[] tokens;
@@ -45,12 +46,9 @@ public class EnumTokenRecognizer<T extends Enum<T> & Token.Type> extends EnumFin
 
     /**
      * Attempts to recognize a type from the given string.
-     *
-     * @param piece the string to recognize as a type
-     * @return an {@link Optional} containing the recognized type, or empty if not found
      */
     @Override
-    public Optional<Token.Type> recognize(String piece) {
-        return ofNullable(find(piece, tokens).orElse(null));
+    public Optional<Token.Type> recognize(RawToken rawToken) {
+        return ofNullable(find(rawToken.value().trim(), tokens).orElse(null));
     }
 }

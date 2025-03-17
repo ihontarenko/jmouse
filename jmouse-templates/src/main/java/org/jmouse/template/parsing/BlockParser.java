@@ -3,9 +3,9 @@ package org.jmouse.template.parsing;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
-import org.jmouse.el.parsing.Parser;
-import org.jmouse.el.parsing.ParserContext;
-import org.jmouse.el.parsing.ParserOptions;
+import org.jmouse.el.parser.Parser;
+import org.jmouse.el.parser.ParserContext;
+import org.jmouse.el.parser.ParserOptions;
 
 import java.util.function.Predicate;
 

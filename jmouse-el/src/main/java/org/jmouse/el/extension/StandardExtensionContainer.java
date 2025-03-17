@@ -2,10 +2,10 @@ package org.jmouse.el.extension;
 
 import org.jmouse.el.ObjectContainer;
 import org.jmouse.el.lexer.Token;
-import org.jmouse.el.parsing.Parser;
-import org.jmouse.el.parsing.ParserContainer;
-import org.jmouse.el.parsing.TagParser;
-import org.jmouse.el.parsing.TagParserContainer;
+import org.jmouse.el.parser.Parser;
+import org.jmouse.el.parser.ParserContainer;
+import org.jmouse.el.parser.TagParser;
+import org.jmouse.el.parser.TagParserContainer;
 
 /**
  * 🏗️ Standard implementation of {@link ExtensionContainer}.
@@ -39,9 +39,9 @@ public class StandardExtensionContainer implements ExtensionContainer {
     }
 
     /**
-     * 🔖 Retrieves a registered tag parsing by its name.
+     * 🔖 Retrieves a registered tag parser by its name.
      *
-     * @param name the name of the tag parsing
+     * @param name the name of the tag parser
      * @return the {@link TagParser} instance, or {@code null} if not found
      */
     @Override
@@ -50,7 +50,7 @@ public class StandardExtensionContainer implements ExtensionContainer {
     }
 
     /**
-     * ➕ Adds a new tag parsing to the container.
+     * ➕ Adds a new tag parser to the container.
      *
      * @param parser the {@link TagParser} instance to register
      */
@@ -60,9 +60,9 @@ public class StandardExtensionContainer implements ExtensionContainer {
     }
 
     /**
-     * 🔍 Retrieves a registered parsing by its class type.
+     * 🔍 Retrieves a registered parser by its class type.
      *
-     * @param type the class type of the parsing
+     * @param type the class type of the parser
      * @return the {@link Parser} instance, or {@code null} if not found
      */
     @Override
@@ -71,7 +71,7 @@ public class StandardExtensionContainer implements ExtensionContainer {
     }
 
     /**
-     * ➕ Adds a new parsing to the container.
+     * ➕ Adds a new parser to the container.
      *
      * @param parser the {@link Parser} instance to register
      */

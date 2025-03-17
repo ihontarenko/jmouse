@@ -3,7 +3,7 @@ package org.jmouse.el.lexer;
 import java.util.Arrays;
 
 /**
- * Thrown when a syntax error occurs during the parsing process.
+ * Thrown when a syntax error occurs during the parser process.
  */
 public class SyntaxErrorException extends Error {
 

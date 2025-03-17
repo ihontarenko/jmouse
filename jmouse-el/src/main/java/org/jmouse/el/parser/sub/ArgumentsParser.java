@@ -1,12 +1,12 @@
-package org.jmouse.el.parsing.sub;
+package org.jmouse.el.parser.sub;
 
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.ArgumentsNode;
-import org.jmouse.el.parsing.Parser;
-import org.jmouse.el.parsing.ParserContext;
-import org.jmouse.el.parsing.OperatorParser;
+import org.jmouse.el.parser.Parser;
+import org.jmouse.el.parser.ParserContext;
+import org.jmouse.el.parser.OperatorParser;
 
 public class ArgumentsParser implements Parser {
 
