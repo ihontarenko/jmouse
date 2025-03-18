@@ -4,9 +4,7 @@ import org.jmouse.core.bind.introspection.AbstractIntrospector;
 import org.jmouse.core.bind.introspection.ClassTypeDescriptor;
 import org.jmouse.core.bind.introspection.MethodDescriptor;
 import org.jmouse.core.bind.introspection.structured.PropertyData;
-import org.jmouse.core.bind.introspection.structured.jb.JavaBeanPropertyIntrospector;
 import org.jmouse.util.Getter;
-import org.jmouse.util.Setter;
 
 public class ValueObjectPropertyIntrospector<T> extends
         AbstractIntrospector<PropertyData<T>, ValueObjectPropertyIntrospector<T>, T, ValueObjectPropertyDescriptor<T>> {

@@ -65,6 +65,7 @@ public interface PropertyAccessor<T> {
             Object value = null;
 
             if (property.isReadable()) {
+                System.out.println("Reading property: " + property);
                 value = property.getGetter().get(instance);
             }
 

@@ -48,7 +48,7 @@ public class ValueObjectPropertyDescriptor<T>
      */
     @Override
     public void setType(ClassTypeDescriptor type) {
-        throw UNSUPPORTED_OPERATION_EXCEPTION;
+        container.setType(type);
     }
 
     /**
@@ -99,5 +99,15 @@ public class ValueObjectPropertyDescriptor<T>
     @Override
     public void setSetter(Setter<T, ?> setter) {
         throw UNSUPPORTED_OPERATION_EXCEPTION;
+    }
+
+    /**
+     * Returns a string representation of this JavaBean property descriptor.
+     *
+     * @return a formatted string representing the property name and type
+     */
+    @Override
+    public String toString() {
+        return "[%s]: %s".formatted(getName(), getType().getJavaType());
     }
 }

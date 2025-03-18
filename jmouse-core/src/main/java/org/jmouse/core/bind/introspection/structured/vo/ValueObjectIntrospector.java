@@ -48,6 +48,8 @@ public class ValueObjectIntrospector<T>
                     container.getTarget());
             introspector.owner(parent).name(parameter.getName());
 
+            introspector.type(parameter.getType());
+
             if (components.containsKey(parameter.getName())) {
                 RecordComponent  component = components.get(parameter.getName());
                 MethodDescriptor method    = new MethodIntrospector(component.getAccessor()).introspect()

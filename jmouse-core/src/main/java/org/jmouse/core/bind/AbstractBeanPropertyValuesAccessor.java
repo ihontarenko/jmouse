@@ -1,0 +1,93 @@
+package org.jmouse.core.bind;
+
+import org.jmouse.core.bind.introspection.structured.ObjectDescriptor;
+import org.jmouse.core.bind.introspection.structured.PropertyDescriptor;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.jmouse.core.reflection.Reflections.getShortName;
+
+/**
+ * A {@link PropertyValuesAccessor} implementation for accessing properties of a structured instance.
+ * <p>
+ * This class allows retrieving properties dynamically from a wrapped structured instance.
+ * It does not support indexed access since beans are typically key-value structures.
+ * </p>
+ */
+abstract public class AbstractBeanPropertyValuesAccessor extends AbstractPropertyValuesAccessor {
+
+    private final ObjectDescriptor<Object> descriptor;
+
+    /**
+     * Creates a {@link AbstractBeanPropertyValuesAccessor} for the given structured instance.
+     *
+     * @param source the structured instance to wrap
+     * @throws IllegalArgumentException if the source is {@code null}
+     */
+    public AbstractBeanPropertyValuesAccessor(Object source) {
+        super(source);
+        this.descriptor = getDescriptor(source.getClass());
+    }
+
+    /**
+     * Retrieves a property from the structured instance as a {@link PropertyValuesAccessor}.
+     *
+     * @param name the name of the property to retrieve
+     * @return a {@link PropertyValuesAccessor} wrapping the property value
+     * @throws IllegalArgumentException if the property does not exist
+     */
+    @Override
+    public PropertyValuesAccessor get(String name) {
+        PropertyDescriptor<Object> property = descriptor.getProperty(name);
+
+        if (!descriptor.hasProperty(name)) {
+            // todo: consider to create virtual-property resolver
+            throw new IllegalArgumentException(
+                    "Accessor '%s' does not have property: '%s'.".formatted(descriptor, name));
+        }
+
+        return PropertyValuesAccessor.wrap(property.getPropertyAccessor().obtainValue(source));
+    }
+
+    /**
+     * Throws an exception since structured instances do not support indexed access.
+     *
+     * @param index the index to retrieve
+     * @return never returns a value
+     * @throws UnsupportedDataSourceException always, since indexed access is not supported
+     */
+    @Override
+    public PropertyValuesAccessor get(int index) {
+        throw new UnsupportedDataSourceException(
+                "Accessor '%s' does not support indexed accessing"
+                        .formatted(descriptor));
+    }
+
+    /**
+     * Retrieves a collection of keys representing the entries in this {@link PropertyValuesAccessor}.
+     *
+     * @return a collection of keys as strings
+     */
+    @Override
+    public Set<String> keySet() {
+        Set<String> keys = new HashSet<>();
+
+        descriptor.getProperties().forEach((name, property) -> keys.add(name));
+
+        return keys;
+    }
+
+    /**
+     * Returns a string representation of this data source.
+     *
+     * @return a formatted string with the class name and the type of the stored source
+     */
+    @Override
+    public String toString() {
+        return "%s: %s".formatted(getShortName(this), descriptor);
+    }
+
+    abstract protected ObjectDescriptor<Object> getDescriptor(Class<?> type);
+
+}

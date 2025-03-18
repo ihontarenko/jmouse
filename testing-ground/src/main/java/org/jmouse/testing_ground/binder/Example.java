@@ -46,7 +46,7 @@ public class Example {
         PropertyValuesAccessor wrapped = PropertyValuesAccessor.wrap(data);
         PropertyValuesAccessor vo = PropertyValuesAccessor.wrap(new BookImmutable("Title", "Stephen King", "Maine"));
 
-        vo.get("title");
+//        vo.get("title2");
 
         Binder binder = Binder.with(data, new DefaultBindingCallback());
         User   user   = Bind.with(binder).get(User.class);
