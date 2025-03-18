@@ -1,4 +1,4 @@
-package org.jmouse.el.context;
+package org.jmouse.el.evaluation;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -47,6 +47,9 @@ public class BasicValuesChain implements ScopedChain {
      */
     @Override
     public ScopeValues pop() {
+        if (chain.size() == 1) {
+            throw new EvaluationException("Unable to remove root scope values");
+        }
         return chain.pop();
     }
 

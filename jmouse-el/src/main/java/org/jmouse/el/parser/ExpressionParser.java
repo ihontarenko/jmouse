@@ -38,7 +38,7 @@ public class ExpressionParser implements Parser {
         }
 
         // parse right expression if present
-        while (cursor.matchesSequence(T_VERTICAL_SLASH, T_IDENTIFIER)) {
+        while (cursor.hasNext() && cursor.matchesSequence(T_VERTICAL_SLASH, T_IDENTIFIER)) {
             cursor.expect(T_IDENTIFIER);
             Node right = context.getParser(FilterParser.class).parse(cursor, context);
             if (right instanceof FilterNode filter) {

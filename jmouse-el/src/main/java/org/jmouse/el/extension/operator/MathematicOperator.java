@@ -1,6 +1,8 @@
 package org.jmouse.el.extension.operator;
 
+import org.jmouse.el.extension.Calculator;
 import org.jmouse.el.extension.Operator;
+import org.jmouse.el.extension.calculator.MathematicCalculator;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 
@@ -20,60 +22,57 @@ import org.jmouse.el.lexer.Token;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public enum BinaryOperator implements Operator {
+public enum MathematicOperator implements Operator {
 
     /**
      * ➕ Addition operator (`+`), used for summation.
      * Precedence: 10
      */
-    PLUS(BasicToken.T_PLUS, "PLUS", 10),
+    PLUS(MathematicCalculator.PLUS, BasicToken.T_PLUS, "PLUS", 10),
 
     /**
      * ➖ Subtraction operator (`-`), used for difference calculations.
      * Precedence: 10
      */
-    SUBTRACT(BasicToken.T_MINUS, "SUBTRACT", 10),
+    SUBTRACT(MathematicCalculator.SUBTRACT, BasicToken.T_MINUS, "SUBTRACT", 10),
 
     /**
      * ✖️ Multiplication operator (`*`), used for product calculations.
      * Precedence: 20
      */
-    MULTIPLY(BasicToken.T_MULTIPLY, "MULTIPLY", 20),
+    MULTIPLY(MathematicCalculator.MULTIPLY, BasicToken.T_MULTIPLY, "MULTIPLY", 20),
 
     /**
      * ➗ Division operator (`/`), used for quotient calculations.
      * Precedence: 20
      */
-    DIVIDE(BasicToken.T_DIVIDE, "DIVIDE", 20),
+    DIVIDE(MathematicCalculator.DIVIDE, BasicToken.T_DIVIDE, "DIVIDE", 20),
 
     /**
      * 🔢 Modulus operator (`%`), returns the remainder of a division.
      * Precedence: 20 (same as multiplication and division)
      */
-    MODULUS(BasicToken.T_PERCENT, "MODULUS", 20),
+    MODULUS(MathematicCalculator.MODULUS, BasicToken.T_PERCENT, "MODULUS", 20),
     /**
      * 🔼 Exponential operator (`^`), used for power calculations.
      * Precedence: 30 (highest among binary operators)
      */
-    EXPONENTIAL(BasicToken.T_CARET, "EXPONENTIAL", 30);
+    EXPONENTIAL(MathematicCalculator.EXPONENTIAL, BasicToken.T_CARET, "EXPONENTIAL", 30);
 
-    /** 🎭 The token type representing the operator. */
-    private final Token.Type type;
-
-    /** 🏷️ The human-readable name of the operator. */
-    private final String name;
-
-    /** ⚖️ The precedence level determining the order of operations. */
-    private final int precedence;
+    private final Calculator<Number> calculator;
+    private final Token.Type         type;
+    private final String             name;
+    private final int                precedence;
 
     /**
-     * 🎭 Constructs a new {@link BinaryOperator}.
+     * 🎭 Constructs a new {@link MathematicOperator}.
      *
-     * @param type 🔠 the token type of the operator
-     * @param name 🏷️ the name of the operator
+     * @param type       🔠 the token type of the operator
+     * @param name       🏷️ the name of the operator
      * @param precedence ⚖️ the precedence level of the operator
      */
-    BinaryOperator(Token.Type type, String name, int precedence) {
+    MathematicOperator(Calculator<Number> calculator, Token.Type type, String name, int precedence) {
+        this.calculator = calculator;
         this.type = type;
         this.name = name;
         this.precedence = precedence;
@@ -108,4 +107,15 @@ public enum BinaryOperator implements Operator {
     public Token.Type getType() {
         return type;
     }
+
+    /**
+     * Returns the associated calculator for this operator.
+     *
+     * @return The calculator instance.
+     */
+    @Override
+    public Calculator<?> getCalculator() {
+        return calculator;
+    }
+
 }

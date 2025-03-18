@@ -1,5 +1,6 @@
 package org.jmouse.el.node.expression;
 
+import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Operator;
 import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.ExpressionNode;
@@ -69,6 +70,11 @@ public class BinaryOperation extends AbstractExpressionNode {
      */
     public Operator getOperator() {
         return operator;
+    }
+
+    @Override
+    public Object evaluate(EvaluationContext context) {
+        return super.evaluate(context);
     }
 
     @Override

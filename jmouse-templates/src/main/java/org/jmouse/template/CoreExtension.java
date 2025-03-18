@@ -5,8 +5,8 @@ import org.jmouse.el.extension.Function;
 import org.jmouse.el.extension.Operator;
 import org.jmouse.el.extension.function.MaxFunction;
 import org.jmouse.el.extension.function.MinFunction;
-import org.jmouse.el.extension.operator.BinaryOperator;
-import org.jmouse.el.extension.operator.LogicalOperator;
+import org.jmouse.el.extension.operator.MathematicOperator;
+import org.jmouse.el.extension.operator.BooleanLogicalOperator;
 import org.jmouse.el.extension.operator.UnaryOperator;
 import org.jmouse.el.parser.*;
 import org.jmouse.el.parser.Parser;
@@ -62,8 +62,8 @@ public class CoreExtension implements Extension {
         List<Operator> operators = new ArrayList<>();
 
         operators.addAll(Arrays.asList(UnaryOperator.values()));
-        operators.addAll(Arrays.asList(LogicalOperator.values()));
-        operators.addAll(Arrays.asList(BinaryOperator.values()));
+        operators.addAll(Arrays.asList(BooleanLogicalOperator.values()));
+        operators.addAll(Arrays.asList(MathematicOperator.values()));
 
         return operators;
     }

@@ -1,7 +1,7 @@
 package org.jmouse.el.parser;
 
 import org.jmouse.el.extension.Operator;
-import org.jmouse.el.extension.operator.LogicalOperator;
+import org.jmouse.el.extension.operator.TestOperator;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
@@ -36,7 +36,7 @@ public class OperatorParser implements Parser {
      *
      * @param cursor  the token cursor
      * @param parent  the parent node to attach the parsed tag
-     * @param context the parser context
+     * @param context the parser evaluation
      */
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
@@ -47,7 +47,7 @@ public class OperatorParser implements Parser {
      * Parses an arithmetic or logical expression, considering operator precedence.
      *
      * @param cursor     the token cursor
-     * @param context    the parser context
+     * @param context    the parser evaluation
      * @param precedence the current operator precedence level
      * @return an expression node representing the parsed expression
      */
@@ -67,10 +67,9 @@ public class OperatorParser implements Parser {
 
             ExpressionNode right;
 
-            if (operator == LogicalOperator.IS) {
+            if (operator == TestOperator.IS) {
                 right = (ExpressionNode) context.getParser(TestParser.class).parse(cursor, context);
             } else {
-                // Parse the right-hand side with adjusted precedence
                 right = parseExpression(cursor, context, operator.getPrecedence() + 1);
             }
 
@@ -89,7 +88,7 @@ public class OperatorParser implements Parser {
      * </ul>
      *
      * @param cursor  the token cursor
-     * @param context the parser context
+     * @param context the parser evaluation
      * @return the parsed primary expression node
      */
     private ExpressionNode parsePrimaryExpression(TokenCursor cursor, ParserContext context) {

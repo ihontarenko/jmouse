@@ -86,7 +86,7 @@ public class Cursor implements TokenCursor {
      */
     @Override
     public Token lookAt(int offset) {
-        int position = cursor + offset;
+        int position = Math.min(cursor + offset, tokens.size() - 1);
         return position < tokens.size() ? tokens.get(position) : null;
     }
 

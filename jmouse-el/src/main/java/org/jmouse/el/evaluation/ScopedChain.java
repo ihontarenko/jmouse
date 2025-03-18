@@ -1,11 +1,11 @@
-package org.jmouse.el.context;
+package org.jmouse.el.evaluation;
 
 /**
  * 🔗 Represents a scoped chain of variable contexts.
- * This interface allows managing **nested variable scopes**, enabling
+ * This interface allows managing <b>nested variable scopes</b>, enabling
  * hierarchical lookups and modifications of values.
  * <p>
- * The **most local scope** is searched first when retrieving values, then
+ * The <b>most local scope</b> is searched first when retrieving values, then
  * the search continues upwards through the chain.
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
@@ -65,7 +65,7 @@ public interface ScopedChain {
     }
 
     /**
-     * ✏️ Sets the value of a variable in the **current (top-most) scope**.
+     * ✏️ Sets the value of a variable in the <b>current (top-most) scope</b>.
      *
      * @param name 🏷️ the variable name
      * @param value 🔢 the new value to set
@@ -75,7 +75,7 @@ public interface ScopedChain {
     }
 
     /**
-     * ✅ Checks if a variable exists in the **current (top-most) scope**.
+     * ✅ Checks if a variable exists in the <b>current (top-most) scope</b>.
      *
      * @param name 🏷️ the variable name
      * @return 🔍 {@code true} if the variable exists, otherwise {@code false}

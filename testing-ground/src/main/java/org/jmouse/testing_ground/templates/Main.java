@@ -1,9 +1,13 @@
 package org.jmouse.testing_ground.templates;
 
 import org.jmouse.el.StringSource;
+import org.jmouse.el.evaluation.DefaultEvaluationContext;
+import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.evaluation.ScopedChain;
 import org.jmouse.el.lexer.recognizer.CompositeRecognizer;
 import org.jmouse.el.lexer.recognizer.EnumTokenRecognizer;
 import org.jmouse.el.lexer.recognizer.Recognizer;
+import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.parser.OperatorParser;
 import org.jmouse.template.CoreExtension;
 import org.jmouse.el.lexer.*;
@@ -17,6 +21,8 @@ import org.jmouse.template.loader.TemplateLoader;
 import org.jmouse.el.node.Node;
 
 import java.io.Reader;
+import java.util.List;
+import java.util.Map;
 
 public class Main {
 
@@ -54,7 +60,8 @@ public class Main {
 
         TokenCursor cursor = lexer.tokenize(string);
 
-        TokenizableSource elString = new StringSource("el-string", "1 | toInt(-1) | toBigInt is not int(1++) || x is even or data.users[0].name | trim is odd");
+//        TokenizableSource elString = new StringSource("el-string", "1 | toInt(-1) | toBigInt is not int(1++) || x is even or data.users[0].name | trim is odd");
+        TokenizableSource elString = new StringSource("el-string", "123 + user[0].level");
         Recognizer<Token.Type, RawToken> elr = new EnumTokenRecognizer<>(BasicToken.class, 20);
         Lexer elLexer = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), elr));
 
@@ -67,6 +74,19 @@ public class Main {
         cursor.next();
         elCursor.next();
         Node compiled = parserContext.getParser(OperatorParser.class).parse(elCursor, parserContext);
+
+        EvaluationContext evaluationContext = new DefaultEvaluationContext();
+
+        ScopedChain scopedChain = evaluationContext.getScopedChain();
+
+        scopedChain.setValue("user", List.of(Map.of("name", "Root!", "level", 333)));
+        scopedChain.push();
+        scopedChain.setValue("user", List.of(Map.of("name", "Local!", "level", 999)));
+
+        if (compiled instanceof ExpressionNode expressionNode) {
+            Object value = expressionNode.evaluate(evaluationContext);
+            System.out.println(STR."value: \{value}");
+        }
 
         System.out.println(compiled);
     }
