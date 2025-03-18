@@ -26,7 +26,7 @@ import static java.util.stream.Collectors.joining;
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**
- * Default implementation of the {@link BeanContext} interface.
+ * DirectAccess implementation of the {@link BeanContext} interface.
  * <p>
  * This class provides a concrete implementation for managing structured definitions,
  * lifecycle management, and dependency resolution. It supports hierarchical

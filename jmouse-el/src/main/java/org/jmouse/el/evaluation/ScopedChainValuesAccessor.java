@@ -2,6 +2,7 @@ package org.jmouse.el.evaluation;
 
 import org.jmouse.core.bind.AbstractPropertyValuesAccessor;
 import org.jmouse.core.bind.PropertyValuesAccessor;
+import org.jmouse.core.bind.UnsupportedDataSourceException;
 
 public class ScopedChainValuesAccessor extends AbstractPropertyValuesAccessor {
 
@@ -40,7 +41,27 @@ public class ScopedChainValuesAccessor extends AbstractPropertyValuesAccessor {
      */
     @Override
     public PropertyValuesAccessor get(int index) {
-        return null;
+        throw new UnsupportedDataSourceException(
+                "Accessor '%s' does not support indexed accessing"
+                        .formatted(getClass().getName()));
+    }
+
+    /**
+     * Sets a property value by name.
+     *
+     * @param name  the property name
+     * @param value the value to set
+     */
+    @Override
+    public void set(String name, Object value) {
+        asType(ScopedChain.class).setValue(name, value);
+    }
+
+    @Override
+    public void set(int index, Object value) {
+        throw new UnsupportedDataSourceException(
+                "Accessor '%s' does not support indexed accessing"
+                        .formatted(getClass().getName()));
     }
 
 }

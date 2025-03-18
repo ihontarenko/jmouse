@@ -24,7 +24,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**
- * Default implementation of {@link BeanContextInitializer}.
+ * DirectAccess implementation of {@link BeanContextInitializer}.
  * Provides initialization logic for setting up a {@link BeanContext} with default factories, resolvers, and post-processors.
  */
 @Priority(Integer.MIN_VALUE)

@@ -51,7 +51,7 @@ public class WebApplicationLauncher {
         Bind.with(binder).to("jmouse.web", this);
 
         Bind.with(binder).to("jmouse.web.server.default", WebServers.class).ifPresent(webServers -> {
-            System.out.println("Default WebServers Configuration: " + getWebserver().get(webServers));
+            System.out.println("DirectAccess WebServers Configuration: " + getWebserver().get(webServers));
         });
 
         // web server part

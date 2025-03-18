@@ -10,13 +10,13 @@ package org.jmouse.util;
  */
 public interface PlaceholderReplacer {
 
-    /** Default prefix for placeholders: <code>${</code> */
+    /** DirectAccess prefix for placeholders: <code>${</code> */
     String PLACEHOLDER_PREFIX = "${";
 
-    /** Default suffix for placeholders: <code>}</code> */
+    /** DirectAccess suffix for placeholders: <code>}</code> */
     String PLACEHOLDER_SUFFIX = "}";
 
-    /** Default separator for default values inside placeholders: <code>:</code> */
+    /** DirectAccess separator for default values inside placeholders: <code>:</code> */
     String PLACEHOLDER_SEPARATOR = ":";
 
     /**

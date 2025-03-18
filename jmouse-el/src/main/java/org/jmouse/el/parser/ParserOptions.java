@@ -47,7 +47,7 @@ public interface ParserOptions {
     }
 
     /**
-     * Default implementation of {@link ParserOptions}.
+     * DirectAccess implementation of {@link ParserOptions}.
      */
     record Default(Predicate<Token> stopCondition, Class<? extends Parser> nextParser) implements ParserOptions {
 

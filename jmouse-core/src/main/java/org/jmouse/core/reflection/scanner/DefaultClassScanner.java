@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Default implementation of {@link ClassScanner}.
+ * DirectAccess implementation of {@link ClassScanner}.
  * <p>
  * This class provides functionality to scan the classpath for classes that match specific criteria,
  * leveraging Ant-style patterns for resource matching and supporting both JRT and regular classpath resources.

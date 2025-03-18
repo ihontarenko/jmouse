@@ -11,12 +11,12 @@ import org.jmouse.beans.BeanContext;
 public interface WebBeanContext extends ApplicationBeanContext {
 
     /**
-     * Default name for root web context
+     * DirectAccess name for root web context
      */
     String DEFAULT_ROOT_WEB_CONTEXT_NAME = "WEB-ROOT";
 
     /**
-     * Default name for child (application) web context
+     * DirectAccess name for child (application) web context
      */
     String DEFAULT_WEB_CONTEXT_NAME      = "WEB-APPLICATION";
 

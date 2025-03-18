@@ -17,6 +17,32 @@ public class NullPropertyValuesAccessor extends AbstractPropertyValuesAccessor {
     }
 
     /**
+     * Sets a property value by name.
+     *
+     * @param name  the property name
+     * @param value the value to set
+     */
+    @Override
+    public void set(String name, Object value) {
+
+    }
+
+    /**
+     * Sets a property value by index.
+     *
+     * <p>The default implementation throws an {@link UnsupportedDataSourceException},
+     * indicating that indexed access is not supported unless overridden by an implementation.</p>
+     *
+     * @param index the property index
+     * @param value the value to set
+     * @throws UnsupportedDataSourceException if indexed access is not supported
+     */
+    @Override
+    public void set(int index, Object value) {
+
+    }
+
+    /**
      * Retrieves the underlying source object.
      *
      * @return the original source object

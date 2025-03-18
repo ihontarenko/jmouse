@@ -37,7 +37,7 @@ public interface PropertyValuesAccessor extends ClassTypeInspector {
         } else if (instance.isValueObject()) {
             instance = new ValueObjectPropertyValuesAccessor(source);
         } else if (instance.isScalar() || instance.isCollection() || instance.isMap() || instance.isArray()) {
-            instance = new StandardPropertyValuesAccessor(instance.unwrap());
+            instance = new StandardTypesPropertyValuesAccessor(instance.unwrap());
         }
 
         if (instance.isNull()) {
@@ -86,6 +86,26 @@ public interface PropertyValuesAccessor extends ClassTypeInspector {
     PropertyValuesAccessor get(int index);
 
     /**
+     * Sets a property value by name.
+     *
+     * @param name  the property name
+     * @param value the value to set
+     */
+    void set(String name, Object value);
+
+    /**
+     * Sets a property value by index.
+     *
+     * <p>The default implementation throws an {@link UnsupportedDataSourceException},
+     * indicating that indexed access is not supported unless overridden by an implementation.</p>
+     *
+     * @param index the property index
+     * @param value the value to set
+     * @throws UnsupportedDataSourceException if indexed access is not supported
+     */
+    void set(int index, Object value);
+
+    /**
      * Retrieves a nested {@link PropertyValuesAccessor} using a {@link PropertyPath}.
      *
      * @param path the structured name path
@@ -97,11 +117,17 @@ public interface PropertyValuesAccessor extends ClassTypeInspector {
     }
 
     /**
-     * Retrieves a nested {@link PropertyValuesAccessor} using a {@link PropertyPath}.
+     * Retrieves a nested {@link PropertyValuesAccessor} using the specified {@link PropertyPath}.
+     * <p>
+     * The method navigates through the nested structure represented by the given path.
+     * Each segment of the path is processed in order. If a segment is indexed (i.e. it represents
+     * an array element) and numeric, the method parses the segment as an integer index; otherwise,
+     * it treats the segment as a property name.
+     * </p>
      *
-     * @param name the structured name path
-     * @return the nested {@link PropertyValuesAccessor}
-     * @throws NumberFormatException if an indexed path contains a non-numeric value
+     * @param name the structured property path used to navigate the nested properties
+     * @return the nested {@link PropertyValuesAccessor} corresponding to the given path
+     * @throws NumberFormatException if an indexed path segment contains a non-numeric value
      */
     default PropertyValuesAccessor navigate(PropertyPath name) {
         PropertyValuesAccessor nested  = this;
@@ -124,6 +150,42 @@ public interface PropertyValuesAccessor extends ClassTypeInspector {
         }
 
         return nested;
+    }
+
+    /**
+     * Injects the given value into the property specified by the given property name.
+     * <p>
+     * This is a convenience method that converts the provided string into a {@link PropertyPath}
+     * and then delegates to {@link #inject(PropertyPath, Object)}.
+     * </p>
+     *
+     * @param name  the structured property name as a string
+     * @param value the value to inject into the property
+     */
+    default void inject(String name, Object value) {
+        inject(PropertyPath.forPath(name), value);
+    }
+
+    /**
+     * Injects the given value into the property specified by the {@link PropertyPath}.
+     * <p>
+     * If the property path consists of multiple segments, the method navigates to the nested
+     * accessor corresponding to all but the last segment (using {@link PropertyPath#sup(int)}),
+     * and then sets the value using the last segment (obtained via {@link PropertyPath#tail()}).
+     * If the property path contains only a single segment, the value is set directly.
+     * </p>
+     *
+     * @param name  the structured property path identifying the property to inject the value into
+     * @param value the value to set on the identified property
+     */
+    default void inject(PropertyPath name, Object value) {
+        if (name.entries().size() > 1) {
+            PropertyPath tail = name.tail();
+            PropertyPath path = name.sup(1);
+            navigate(path).set(tail.path(), value);
+        } else {
+            set(name.path(), value);
+        }
     }
 
     /**

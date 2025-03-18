@@ -39,7 +39,7 @@ public class StandardEnvironment implements Environment {
     /**
      * Retrieves the default profiles for the environment.
      * <p>
-     * Default profiles are used when no active profiles are explicitly set.
+     * DirectAccess profiles are used when no active profiles are explicitly set.
      * </p>
      *
      * @return an array of default profile names

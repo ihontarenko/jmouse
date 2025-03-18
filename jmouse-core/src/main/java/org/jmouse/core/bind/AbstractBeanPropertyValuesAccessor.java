@@ -31,6 +31,41 @@ abstract public class AbstractBeanPropertyValuesAccessor extends AbstractPropert
     }
 
     /**
+     * Sets a property value by name.
+     *
+     * @param name  the property name
+     * @param value the value to set
+     */
+    @Override
+    public void set(String name, Object value) {
+        PropertyDescriptor<Object> property = descriptor.getProperty(name);
+
+        if (!descriptor.hasProperty(name)) {
+            throw new IllegalArgumentException(
+                    "Accessor '%s' does not have property: '%s'.".formatted(descriptor, name));
+        }
+
+        property.getAccessor().writeValue(unwrap(), value);
+    }
+
+    /**
+     * Sets a property value by index.
+     *
+     * <p>The default implementation throws an {@link UnsupportedDataSourceException},
+     * indicating that indexed access is not supported unless overridden by an implementation.</p>
+     *
+     * @param index the property index
+     * @param value the value to set
+     * @throws UnsupportedDataSourceException if indexed access is not supported
+     */
+    @Override
+    public void set(int index, Object value) {
+        throw new UnsupportedDataSourceException(
+                "Accessor '%s' does not support indexed accessing"
+                        .formatted(descriptor));
+    }
+
+    /**
      * Retrieves a property from the structured instance as a {@link PropertyValuesAccessor}.
      *
      * @param name the name of the property to retrieve
@@ -47,7 +82,7 @@ abstract public class AbstractBeanPropertyValuesAccessor extends AbstractPropert
                     "Accessor '%s' does not have property: '%s'.".formatted(descriptor, name));
         }
 
-        return PropertyValuesAccessor.wrap(property.getPropertyAccessor().obtainValue(source));
+        return PropertyValuesAccessor.wrap(property.getAccessor().readValue(source));
     }
 
     /**

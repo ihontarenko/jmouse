@@ -3,7 +3,7 @@ package org.jmouse.util;
 import java.util.function.Supplier;
 
 /**
- * Default implementation of the {@link CyclicReferenceDetector} interface for detecting
+ * DirectAccess implementation of the {@link CyclicReferenceDetector} interface for detecting
  * cyclic dependencies among beans or objects of type {@code T}. It uses a thread-local
  * {@link Visitor} to keep track of visited identifiers during dependency resolution,
  * allowing the detection of cycles in the structured graph.

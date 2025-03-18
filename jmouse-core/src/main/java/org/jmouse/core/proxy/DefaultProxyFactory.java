@@ -11,7 +11,7 @@ import java.util.List;
 import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
 
 /**
- * Default implementation of the {@link ProxyFactory} interface. Uses the JDK dynamic proxy
+ * DirectAccess implementation of the {@link ProxyFactory} interface. Uses the JDK dynamic proxy
  * mechanism ({@link JdkProxy}) to create proxies and applies only those {@link MethodInterceptor}s
  * whose associated annotation {@link ProxyMethodInterceptor} matches the target class.
  *

@@ -27,7 +27,7 @@ public abstract class AbstractContext implements Context {
     private boolean stopped = false;
 
     /**
-     * Default constructor. Initializes the context without a {@link BeanProvider}.
+     * DirectAccess constructor. Initializes the context without a {@link BeanProvider}.
      */
     public AbstractContext() {
         this(null);

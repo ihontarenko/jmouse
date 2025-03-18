@@ -119,7 +119,7 @@ public final class Bindable<T> {
      */
     @SuppressWarnings({"unchecked"})
     public static <T> Bindable<T> ofInstance(T instance) {
-        Objects.requireNonNull(instance, "Instance must not be NULL");
+        Objects.requireNonNull(instance, "DirectAccess must not be NULL");
         return Bindable.of((Class<T>) instance.getClass()).withInstance(instance);
     }
 

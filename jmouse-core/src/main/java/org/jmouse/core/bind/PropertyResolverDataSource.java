@@ -12,14 +12,14 @@ import java.util.Map;
  */
 public class PropertyResolverDataSource implements PropertyValuesAccessor {
 
-    private final StandardPropertyValuesAccessor delegate;
+    private final StandardTypesPropertyValuesAccessor delegate;
 
     /**
      * Creates a new {@link PropertyResolverDataSource} by extracting properties
      * from the given {@link PropertyResolver} and converting them into a structured
      * hierarchical format.
      * <p>
-     * <strong>Default Details:</strong>
+     * <strong>DirectAccess Details:</strong>
      * <ul>
      *   <li>A temporary property source is created to store all flattened properties.</li>
      *   <li>This temporary property source is added to the resolver under a unique key.</li>
@@ -40,7 +40,7 @@ public class PropertyResolverDataSource implements PropertyValuesAccessor {
         Map<String, Object> hierarchical = resolver.getRequiredProperty(temporaryKeyName, Map.class);
         resolver.removePropertySource(temporaryPropertySourceName);
 
-        this.delegate = new StandardPropertyValuesAccessor(hierarchical);
+        this.delegate = new StandardTypesPropertyValuesAccessor(hierarchical);
     }
 
     /**
@@ -73,5 +73,31 @@ public class PropertyResolverDataSource implements PropertyValuesAccessor {
     @Override
     public PropertyValuesAccessor get(int index) {
         return delegate.get(index);
+    }
+
+    /**
+     * Sets a property value by name.
+     *
+     * @param name  the property name
+     * @param value the value to set
+     */
+    @Override
+    public void set(String name, Object value) {
+        delegate.set(name, value);
+    }
+
+    /**
+     * Sets a property value by index.
+     *
+     * <p>The default implementation throws an {@link UnsupportedDataSourceException},
+     * indicating that indexed access is not supported unless overridden by an implementation.</p>
+     *
+     * @param index the property index
+     * @param value the value to set
+     * @throws UnsupportedDataSourceException if indexed access is not supported
+     */
+    @Override
+    public void set(int index, Object value) {
+        delegate.set(index, value);
     }
 }

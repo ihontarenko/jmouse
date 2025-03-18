@@ -1,9 +1,6 @@
 package org.jmouse.testing_ground.binder;
 
-import org.jmouse.core.bind.Bind;
-import org.jmouse.core.bind.Binder;
-import org.jmouse.core.bind.DefaultBindingCallback;
-import org.jmouse.core.bind.PropertyValuesAccessor;
+import org.jmouse.core.bind.*;
 import org.jmouse.core.bind.introspection.structured.ObjectDescriptor;
 import org.jmouse.core.bind.introspection.structured.jb.JavaBeanIntrospector;
 import org.jmouse.testing_ground.binder.dto.*;
@@ -28,11 +25,14 @@ public class Example {
                 "author", "${name}",
                 "placeCreation", "Written on ${address[0].city:Unknown} city with love: ${name}"
         ));
-        books.add(new Book(){{
-            setTitle("Book 2");
-            setAuthor("John Doe");
-            setPlaceCreation("New York");
-        }});
+
+        Book book = new Book();
+
+        book.setTitle("Book 2");
+        book.setAuthor("John Doe");
+        book.setPlaceCreation("New York");
+
+        books.add(book);
 
         books.add(new BookImmutable("Title", "Stephen King", "Maine"));
 
@@ -46,12 +46,19 @@ public class Example {
         PropertyValuesAccessor wrapped = PropertyValuesAccessor.wrap(data);
         PropertyValuesAccessor vo = PropertyValuesAccessor.wrap(new BookImmutable("Title", "Stephen King", "Maine"));
 
+        wrapped.set("olo", "asd");
+
+        wrapped.inject("books[1].title", "Book Injected");
+        wrapped.inject("global", "Global Injected");
+
 //        vo.get("title2");
 
         Binder binder = Binder.with(data, new DefaultBindingCallback());
         User   user   = Bind.with(binder).get(User.class);
 
         PropertyValuesAccessor accessor = PropertyValuesAccessor.wrap(user);
+
+        accessor.set("name", "John Doe");
 
         ObjectDescriptor<User> descriptor = new JavaBeanIntrospector<>(User.class).introspect().toDescriptor();
 

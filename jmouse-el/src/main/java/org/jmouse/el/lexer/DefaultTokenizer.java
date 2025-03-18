@@ -13,7 +13,7 @@ import static java.lang.Integer.MIN_VALUE;
 import static org.jmouse.el.lexer.RawToken.Type.UNKNOWN;
 
 /**
- * Default implementation of {@link Tokenizer} that processes text and produces a list of type entries.
+ * DirectAccess implementation of {@link Tokenizer} that processes text and produces a list of type entries.
  *
  * <p>This tokenizer utilizes a raw text splitter and a composite recognizer to classify tokens based on
  * predefined type sets.</p>

@@ -134,7 +134,7 @@ public class MapBinder extends AbstractBinder {
             if (mapObject instanceof Map<?, ?>) {
 
                 if (mapObject.getClass().getName().contains("Immutable")) {
-                    throw new BindException("Unable to bind immutable map");
+                    throw new BindException("Bindable map is present but it is immutable");
                 }
 
                 return (Map<Object, ?>) supplier.get();

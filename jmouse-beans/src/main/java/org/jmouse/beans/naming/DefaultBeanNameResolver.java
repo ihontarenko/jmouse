@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Default implementation of {@link BeanNameResolver}.
+ * DirectAccess implementation of {@link BeanNameResolver}.
  * <p>
  * This class manages a list of {@link BeanNameStrategy} instances and uses them to resolve
  * structured names based on annotated elements. Strategies are evaluated in the order they are

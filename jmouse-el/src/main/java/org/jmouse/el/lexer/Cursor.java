@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Default implementation of {@link TokenCursor} that provides navigation through a list of tokens.
+ * DirectAccess implementation of {@link TokenCursor} that provides navigation through a list of tokens.
  *
  * <p>Allows forward and backward traversal, token peeking, shifting, and syntax validation.</p>
  *

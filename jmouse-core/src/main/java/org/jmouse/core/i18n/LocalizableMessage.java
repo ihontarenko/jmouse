@@ -86,7 +86,7 @@ public interface LocalizableMessage {
     String getDefaultMessage();
 
     /**
-     * Default implementation of {@link LocalizableMessage}.
+     * DirectAccess implementation of {@link LocalizableMessage}.
      * <p>
      * This class provides a basic implementation that stores the message key,
      * optional arguments, and a default message for fallback scenarios.
@@ -99,7 +99,7 @@ public interface LocalizableMessage {
         private final Object[] arguments;
 
         /**
-         * Constructs a new {@code Default} instance of {@link LocalizableMessage}.
+         * Constructs a new {@code DirectAccess} instance of {@link LocalizableMessage}.
          *
          * @param codes          the message key used for localization
          * @param defaultMessage the fallback message if localization is unavailable

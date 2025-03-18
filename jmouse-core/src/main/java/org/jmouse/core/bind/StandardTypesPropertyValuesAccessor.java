@@ -12,14 +12,14 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * or a key (for maps).
  * </p>
  */
-public class StandardPropertyValuesAccessor extends AbstractPropertyValuesAccessor {
+public class StandardTypesPropertyValuesAccessor extends AbstractPropertyValuesAccessor {
 
     /**
-     * Creates a new {@link StandardPropertyValuesAccessor} with the given source object.
+     * Creates a new {@link StandardTypesPropertyValuesAccessor} with the given source object.
      *
      * @param source the underlying data source (expected to be a {@link List} or {@link Map})
      */
-    public StandardPropertyValuesAccessor(Object source) {
+    public StandardTypesPropertyValuesAccessor(Object source) {
         super(source);
     }
 
@@ -76,6 +76,43 @@ public class StandardPropertyValuesAccessor extends AbstractPropertyValuesAccess
         }
 
         return PropertyValuesAccessor.wrap(value);
+    }
+
+    /**
+     * Sets a property value by name.
+     *
+     * @param name  the property name
+     * @param value the value to set
+     */
+    @Override
+    public void set(String name, Object value) {
+        if (isMap()) {
+            asMap(Object.class, Object.class).put(name, value);
+        }
+    }
+
+    /**
+     * Sets a property value by index.
+     *
+     * <p>The default implementation throws an {@link UnsupportedDataSourceException},
+     * indicating that indexed access is not supported unless overridden by an implementation.</p>
+     *
+     * @param index the property index
+     * @param value the value to set
+     * @throws UnsupportedDataSourceException if indexed access is not supported
+     */
+    @Override
+    public void set(int index, Object value) {
+        if (isList()) {
+            List<Object> values = asList(Object.class);
+            if (index == -1) {
+                values.add(value);
+            } else {
+                values.set(index, value);
+            }
+        } else if (isSet()) {
+            asSet(Object.class).add(value);
+        }
     }
 
     /**

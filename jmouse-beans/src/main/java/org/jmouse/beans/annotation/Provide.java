@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  * <pre>{@code
  * @Provide(value = "userService", scope = BeanScope.SINGLETON, proxied = true)
  * public class UserService {
- *     // Default of the service
+ *     // DirectAccess of the service
  * }
  *
  * @Provide(scope = BeanScope.PROTOTYPE)

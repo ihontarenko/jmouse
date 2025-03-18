@@ -5,7 +5,7 @@ import org.jmouse.util.PlaceholderResolver;
 import org.jmouse.util.StandardPlaceholderReplacer;
 
 /**
- * Default implementation of a binding callback used in property binding operations.
+ * DirectAccess implementation of a binding callback used in property binding operations.
  * <p>
  * This class extends {@link AbstractCallback} and provides a default implementation
  * for handling placeholder replacement within binding operations.

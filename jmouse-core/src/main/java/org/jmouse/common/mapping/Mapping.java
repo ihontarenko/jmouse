@@ -54,7 +54,7 @@ public interface Mapping {
     void register(Mapper<?, ?> mapper);
 
     /**
-     * Default implementation of the Mapping interface.
+     * DirectAccess implementation of the Mapping interface.
      * Maintains a registry of mappers and handles mapping operations.
      */
     class DefaultMapping implements Mapping {

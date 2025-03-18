@@ -78,6 +78,8 @@ public class Main {
 
         Bind.with(source).to(destination);
 
+        PropertyPath path = PropertyPath.forPath("users[0].name");
+
         TokenCursor elCursor = elLexer.tokenize(elString);
 
         ParserContext parserContext = new DefaultParserContext();

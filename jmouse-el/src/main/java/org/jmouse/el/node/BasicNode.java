@@ -18,7 +18,7 @@ public class BasicNode extends AbstractNode {
     protected final Token token; // Associated token for this node
 
     /**
-     * Default constructor for internal use only.
+     * DirectAccess constructor for internal use only.
      */
     private BasicNode() {
         this(null);

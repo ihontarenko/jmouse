@@ -133,24 +133,62 @@ final public class PropertyPath {
     }
 
     /**
-     * Creates a new PropertyPath by skipped a property path entries.
+     * Creates a new PropertyPath by skipping a specified number of entries from the beginning.
+     * <p>
+     * This method removes the first {@code offset} segments of the current PropertyPath and returns a new
+     * PropertyPath representing the remainder. For example, if the current path is "a.b.c.d" and the offset is 2,
+     * the resulting path will be "c.d".
+     * </p>
      *
-     * @param offset count the number of entries to skip
-     * @return a new PropertyPath with the cut entries
+     * @param offset the number of entries to skip from the beginning
+     * @return a new PropertyPath representing the path after the skipped entries
+     * @throws IndexOutOfBoundsException if {@code offset} is negative or exceeds the number of available entries
      */
     public PropertyPath sub(int offset) {
         return new PropertyPath(entries.skip(offset));
     }
 
     /**
-     * Creates a new PropertyPath by skipped a property path entries.
+     * Creates a new PropertyPath by skipping a given number of entries from the end.
+     * <p>
+     * The resulting PropertyPath contains the initial segments of the current path,
+     * with the last {@code offset} entries removed.
+     * </p>
      *
-     * @param offset count the number of entries to skip
-     * @return a new PropertyPath with the cut entries
+     * @param offset the number of entries to skip from the end
+     * @return a new PropertyPath with the last {@code offset} entries removed
+     * @throws IndexOutOfBoundsException if {@code offset} is negative or greater than the number of entries
      */
     public PropertyPath sup(int offset) {
         return new PropertyPath(entries.limit(entries.size - offset));
     }
+
+    /**
+     * Returns a PropertyPath representing the tail of the current path.
+     * <p>
+     * The tail is defined as the last entry (segment) of the PropertyPath.
+     * </p>
+     *
+     * @return a new PropertyPath consisting solely of the last path segment
+     * @throws IndexOutOfBoundsException if the current path has no entries
+     */
+    public PropertyPath tail() {
+        return new PropertyPath(String.valueOf(entries.last()));
+    }
+
+    /**
+     * Returns a PropertyPath representing the head of the current path.
+     * <p>
+     * The head is defined as the first entry (segment) of the PropertyPath.
+     * </p>
+     *
+     * @return a new PropertyPath consisting solely of the first path segment
+     * @throws IndexOutOfBoundsException if the current path has no entries
+     */
+    public PropertyPath head() {
+        return new PropertyPath(String.valueOf(entries.first()));
+    }
+
 
     /**
      * Retrieves the entries of this PropertyPath.
@@ -198,7 +236,7 @@ final public class PropertyPath {
      */
     private static class Parser {
 
-        /** Default initial capacity for storing parsed entries. */
+        /** DirectAccess initial capacity for storing parsed entries. */
         private static final int DEFAULT_CAPACITY = 6;
 
         private final CharSequence sequence;
@@ -521,10 +559,19 @@ final public class PropertyPath {
          * @return the original parsed sequence
          */
         public String toOriginal() {
-            if (sequence != null && !sequence.isEmpty()) {
-                return sequence.subSequence(starts[0], Math.min(ends[size - 1] + 1, sequence.length())).toString();
-            }
+            if (sequence != null && !sequence.isEmpty() && size > 0) {
+                int startIndex = starts[0];
+                if ((types[0] & Type.INDEXED) != 0 && startIndex > 0 && sequence.charAt(startIndex - 1) == '[') {
+                    startIndex--;
+                }
 
+                int endIndex = ends[size - 1];
+                if ((types[size - 1] & Type.INDEXED) != 0 && endIndex < sequence.length() && sequence.charAt(endIndex) == ']') {
+                    endIndex++;
+                }
+
+                return sequence.subSequence(startIndex, endIndex).toString();
+            }
             return "";
         }
 

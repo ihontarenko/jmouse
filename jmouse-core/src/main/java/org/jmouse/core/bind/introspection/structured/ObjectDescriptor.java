@@ -29,7 +29,7 @@ public interface ObjectDescriptor<T> {
      * @return a {@link PropertyAccessor} instance, or {@code null} if not provided
      */
     default PropertyAccessor<T> getPropertyAccessor(String propertyName) {
-        return PropertyAccessor.ofProperty(getProperty(propertyName));
+        return PropertyAccessor.forDirect(getProperty(propertyName));
     }
 
     /**

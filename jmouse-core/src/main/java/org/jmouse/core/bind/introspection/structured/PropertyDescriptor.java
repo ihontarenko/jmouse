@@ -6,6 +6,8 @@ import org.jmouse.core.bind.introspection.MethodDescriptor;
 import org.jmouse.util.Getter;
 import org.jmouse.util.Setter;
 
+import java.util.function.Supplier;
+
 /**
  * Represents a property descriptor that provides metadata and access mechanisms
  * for a property within an {@link ObjectDescriptor}.
@@ -107,8 +109,17 @@ public interface PropertyDescriptor<T> {
      *
      * @return a {@link PropertyAccessor} instance, or {@code null} if not provided
      */
-    default PropertyAccessor<T> getPropertyAccessor() {
-        return PropertyAccessor.ofProperty(this);
+    default PropertyAccessor<T> getAccessor() {
+        return PropertyAccessor.forDirect(this);
+    }
+
+    /**
+     * Retrieves the {@link PropertyAccessor} associated with this object.
+     *
+     * @return a {@link PropertyAccessor} instance, or {@code null} if not provided
+     */
+    default PropertyAccessor<Supplier<T>> getLazyAccessor() {
+        return PropertyAccessor.forLazy(this);
     }
 
     /**
