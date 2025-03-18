@@ -1,5 +1,7 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.bind.introspection.structured.PropertyDescriptor;
+
 /**
  * Defines an interface for accessing and modifying properties of an object.
  * <p>
@@ -9,7 +11,6 @@ package org.jmouse.core.bind;
  * </p>
  *
  * @param <T> the type of the object whose property is being accessed
- *
  * @author Mr. Jerry Mouse
  * @author Ivan Hontarenko
  */
@@ -39,5 +40,36 @@ public interface PropertyAccessor<T> {
      * @return the value of the property, or {@code null} if it cannot be accessed
      */
     Object obtainValue(T object);
+
+    static <T> PropertyAccessor<T> ofProperty(PropertyDescriptor<T> descriptor) {
+        return new Default<>(descriptor);
+    }
+
+    class Default<T> implements PropertyAccessor<T> {
+
+        private final PropertyDescriptor<T> property;
+
+        public Default(PropertyDescriptor<T> property) {
+            this.property = property;
+        }
+
+        @Override
+        public void injectValue(T instance, Object value) {
+            if (property.isWritable()) {
+                property.getSetter().set(instance, value);
+            }
+        }
+
+        @Override
+        public Object obtainValue(T instance) {
+            Object value = null;
+
+            if (property.isReadable()) {
+                value = property.getGetter().get(instance);
+            }
+
+            return value;
+        }
+    }
 
 }

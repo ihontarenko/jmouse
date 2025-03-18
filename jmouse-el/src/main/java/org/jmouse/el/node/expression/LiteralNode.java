@@ -1,5 +1,6 @@
 package org.jmouse.el.node.expression;
 
+import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.AbstractExpressionNode;
 
 abstract public class LiteralNode<T> extends AbstractExpressionNode {
@@ -19,4 +20,8 @@ abstract public class LiteralNode<T> extends AbstractExpressionNode {
         return value == null ? "NULL" : value.toString();
     }
 
+    @Override
+    public Object evaluate(EvaluationContext context) {
+        return value;
+    }
 }

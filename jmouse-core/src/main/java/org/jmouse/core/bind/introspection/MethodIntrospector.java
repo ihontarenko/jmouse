@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 
 public class MethodIntrospector extends ExecutableIntrospector<MethodData, MethodIntrospector, Method, MethodDescriptor> {
 
-    protected MethodIntrospector(Method target) {
+    public MethodIntrospector(Method target) {
         super(target);
     }
 

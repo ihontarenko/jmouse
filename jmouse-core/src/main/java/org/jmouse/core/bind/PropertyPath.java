@@ -133,6 +133,26 @@ final public class PropertyPath {
     }
 
     /**
+     * Creates a new PropertyPath by skipped a property path entries.
+     *
+     * @param offset count the number of entries to skip
+     * @return a new PropertyPath with the cut entries
+     */
+    public PropertyPath sub(int offset) {
+        return new PropertyPath(entries.skip(offset));
+    }
+
+    /**
+     * Creates a new PropertyPath by skipped a property path entries.
+     *
+     * @param offset count the number of entries to skip
+     * @return a new PropertyPath with the cut entries
+     */
+    public PropertyPath sup(int offset) {
+        return new PropertyPath(entries.limit(entries.size - offset));
+    }
+
+    /**
      * Retrieves the entries of this PropertyPath.
      *
      * @return the path entries
@@ -275,11 +295,11 @@ final public class PropertyPath {
          * @return an updated bitmask including the new character type
          */
         public int type(char c, int type) {
-            int     updated = type;
-            boolean numeric = c >= '0' && c <= '9';
-            boolean alpha   = c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
-            boolean dashed  = c == '-';
-            boolean underscored  = c == '_';
+            int     updated     = type;
+            boolean numeric     = c >= '0' && c <= '9';
+            boolean alpha       = c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z';
+            boolean dashed      = c == '-';
+            boolean underscored = c == '_';
 
             if (alpha || numeric || dashed || underscored) {
                 if (alpha) {
@@ -501,7 +521,11 @@ final public class PropertyPath {
          * @return the original parsed sequence
          */
         public String toOriginal() {
-            return sequence.toString();
+            if (sequence != null && !sequence.isEmpty()) {
+                return sequence.subSequence(starts[0], Math.min(ends[size - 1] + 1, sequence.length())).toString();
+            }
+
+            return "";
         }
 
         private void ensureIndexBounds(int index) {

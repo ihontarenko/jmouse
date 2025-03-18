@@ -1,6 +1,9 @@
 package org.jmouse.el.evaluation;
 
+import org.jmouse.core.bind.Bind;
+import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.core.bind.PropertyValuesAccessor;
+import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.extension.ExtensionContainer;
 
 public interface EvaluationContext {
@@ -8,6 +11,8 @@ public interface EvaluationContext {
     ScopedChain getScopedChain();
 
     ExtensionContainer getExtensions();
+
+    Conversion getConversion();
 
     default Object getValue(String name) {
         Object      value = null;
@@ -22,6 +27,19 @@ public interface EvaluationContext {
         }
 
         return value;
+    }
+
+    default void setValue(String name, Object value) {
+        if (name.contains(".") || name.contains("[")) {
+            PropertyValuesAccessor accessor = getValueAccessor().navigate(PropertyPath.forPath(name).sup(1));
+            // todo: try use binder
+
+            Bind.with(getValueAccessor()).to(name, getValueAccessor().unwrap());
+
+            System.out.println(accessor);
+        } else {
+            getScopedChain().setValue(name, value);
+        }
     }
 
     default PropertyValuesAccessor getValueAccessor() {

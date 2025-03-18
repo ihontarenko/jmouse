@@ -70,4 +70,9 @@ public enum ComparisonOperator implements Operator {
         return type;
     }
 
+    @Override
+    public Calculator<?> getCalculator() {
+        return calculator;
+    }
+
 }

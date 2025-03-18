@@ -2,7 +2,11 @@ package org.jmouse.core.bind.introspection.structured.vo;
 
 import org.jmouse.core.bind.introspection.AbstractIntrospector;
 import org.jmouse.core.bind.introspection.ClassTypeDescriptor;
+import org.jmouse.core.bind.introspection.MethodDescriptor;
 import org.jmouse.core.bind.introspection.structured.PropertyData;
+import org.jmouse.core.bind.introspection.structured.jb.JavaBeanPropertyIntrospector;
+import org.jmouse.util.Getter;
+import org.jmouse.util.Setter;
 
 public class ValueObjectPropertyIntrospector<T> extends
         AbstractIntrospector<PropertyData<T>, ValueObjectPropertyIntrospector<T>, T, ValueObjectPropertyDescriptor<T>> {
@@ -31,6 +35,16 @@ public class ValueObjectPropertyIntrospector<T> extends
         return self();
     }
 
+    public ValueObjectPropertyIntrospector<T> getter(Getter<T, Object> getter) {
+        container.setGetter(getter);
+        return self();
+    }
+
+    public ValueObjectPropertyIntrospector<T> getterMethod(MethodDescriptor descriptor) {
+        container.setGetterMethod(descriptor);
+        return getter(Getter.ofMethod(descriptor.unwrap()));
+    }
+
     /**
      * Performs the introspection process to analyze the data container.
      *
@@ -38,7 +52,7 @@ public class ValueObjectPropertyIntrospector<T> extends
      */
     @Override
     public ValueObjectPropertyIntrospector<T> introspect() {
-        return null;
+        return self();
     }
 
     /**

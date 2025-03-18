@@ -19,7 +19,7 @@ public class PropertyResolverDataSource implements PropertyValuesAccessor {
      * from the given {@link PropertyResolver} and converting them into a structured
      * hierarchical format.
      * <p>
-     * <strong>PropertyDescriptorAccessor Details:</strong>
+     * <strong>Default Details:</strong>
      * <ul>
      *   <li>A temporary property source is created to store all flattened properties.</li>
      *   <li>This temporary property source is added to the resolver under a unique key.</li>

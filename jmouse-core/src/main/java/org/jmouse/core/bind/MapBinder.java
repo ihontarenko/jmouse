@@ -130,7 +130,13 @@ public class MapBinder extends AbstractBinder {
 
         // Check if the bindable type is a map and retrieve it if available
         if (typeDescriptor.isMap() && supplier != null) {
-            if (supplier.get() instanceof Map<?, ?>) {
+            Object mapObject = supplier.get();
+            if (mapObject instanceof Map<?, ?>) {
+
+                if (mapObject.getClass().getName().contains("Immutable")) {
+                    throw new BindException("Unable to bind immutable map");
+                }
+
                 return (Map<Object, ?>) supplier.get();
             }
         }

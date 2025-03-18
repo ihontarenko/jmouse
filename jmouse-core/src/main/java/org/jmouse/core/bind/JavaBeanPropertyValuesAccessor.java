@@ -1,5 +1,8 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.bind.introspection.structured.PropertyDescriptor;
+import org.jmouse.core.bind.introspection.structured.jb.JavaBeanDescriptor;
+import org.jmouse.core.bind.introspection.structured.jb.JavaBeanIntrospector;
 import org.jmouse.util.Factory;
 
 import java.util.HashSet;
@@ -18,6 +21,7 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
 public class JavaBeanPropertyValuesAccessor extends AbstractPropertyValuesAccessor {
 
     private final JavaBean<Object> bean;
+    private final JavaBeanDescriptor<Object> descriptor;
 
     /**
      * Creates a {@link JavaBeanPropertyValuesAccessor} for the given structured instance.
@@ -28,6 +32,8 @@ public class JavaBeanPropertyValuesAccessor extends AbstractPropertyValuesAccess
     @SuppressWarnings({"unchecked"})
     public JavaBeanPropertyValuesAccessor(Object source) {
         super(source);
+        Class<Object> beanType = (Class<Object>) source.getClass();
+        this.descriptor = new JavaBeanIntrospector<>(beanType).introspect().toDescriptor();
         this.bean = (JavaBean<Object>) JavaBean.of(source.getClass());
     }
 
@@ -40,18 +46,15 @@ public class JavaBeanPropertyValuesAccessor extends AbstractPropertyValuesAccess
      */
     @Override
     public PropertyValuesAccessor get(String name) {
-        Bean.Property<Object> property = bean.getProperty(name);
+        PropertyDescriptor<Object> propertyDescriptor = descriptor.getProperty(name);
 
-        if (property == null) {
+        if (!descriptor.hasProperty(name)) {
             // todo: consider to create virtual-property resolver
             throw new IllegalArgumentException(
                     "Bean factory does not have property: '%s'.".formatted(name));
         }
 
-        Factory<Object>  factory = this.getSupplier();
-        Supplier<Object> value   = property.getValue(factory);
-
-        return PropertyValuesAccessor.wrap(value.get());
+        return PropertyValuesAccessor.wrap(propertyDescriptor.getPropertyAccessor().obtainValue(source));
     }
 
     /**
@@ -65,7 +68,7 @@ public class JavaBeanPropertyValuesAccessor extends AbstractPropertyValuesAccess
     public PropertyValuesAccessor get(int index) {
         throw new UnsupportedDataSourceException(
                 "Bean instance '%s' does not support indexed accessing"
-                        .formatted(bean));
+                        .formatted(descriptor));
     }
 
     /**
@@ -80,15 +83,6 @@ public class JavaBeanPropertyValuesAccessor extends AbstractPropertyValuesAccess
         bean.getProperties().forEach(property -> keys.add(property.getName()));
 
         return keys;
-    }
-
-    /**
-     * Retrieves a supplier for the structured instance.
-     *
-     * @return a {@link Supplier} providing values from the structured instance
-     */
-    private Factory<Object> getSupplier() {
-        return bean.getFactory(Bindable.ofInstance(source));
     }
 
     /**

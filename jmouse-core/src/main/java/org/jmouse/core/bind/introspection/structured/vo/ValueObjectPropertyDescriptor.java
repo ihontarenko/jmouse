@@ -68,7 +68,7 @@ public class ValueObjectPropertyDescriptor<T>
      */
     @Override
     public Getter<T, Object> getGetter() {
-        return null;
+        return container.getGetter();
     }
 
     /**
@@ -78,7 +78,7 @@ public class ValueObjectPropertyDescriptor<T>
      */
     @Override
     public void setGetter(Getter<T, ?> getter) {
-        throw UNSUPPORTED_OPERATION_EXCEPTION;
+        container.setGetter(getter);
     }
 
     /**

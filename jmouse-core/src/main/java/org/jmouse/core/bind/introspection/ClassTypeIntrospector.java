@@ -2,10 +2,12 @@ package org.jmouse.core.bind.introspection;
 
 import org.jmouse.core.bind.introspection.internal.ClassTypeData;
 import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.MethodFinder;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Collection;
 
 /**
  * Introspects Java class types, including constructors, fields, and methods,
@@ -103,9 +105,12 @@ public class ClassTypeIntrospector extends AnnotatedElementIntrospector<ClassTyp
      * Introspects and registers all declared methods.
      */
     public ClassTypeIntrospector methods() {
-        for (Method method : container.getTarget().getDeclaredMethods()) {
+        Collection<Method> methods = new MethodFinder().getMembers(container.getType().getRawType(), true);
+
+        for (Method method : methods) {
             method(new MethodIntrospector(method).introspect().toDescriptor());
         }
+
         return self();
     }
 

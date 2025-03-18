@@ -1,5 +1,7 @@
 package org.jmouse.testing_ground.templates;
 
+import org.jmouse.core.bind.Bind;
+import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.el.StringSource;
 import org.jmouse.el.evaluation.DefaultEvaluationContext;
 import org.jmouse.el.evaluation.EvaluationContext;
@@ -21,6 +23,7 @@ import org.jmouse.template.loader.TemplateLoader;
 import org.jmouse.el.node.Node;
 
 import java.io.Reader;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,9 +64,19 @@ public class Main {
         TokenCursor cursor = lexer.tokenize(string);
 
 //        TokenizableSource elString = new StringSource("el-string", "1 | toInt(-1) | toBigInt is not int(1++) || x is even or data.users[0].name | trim is odd");
-        TokenizableSource elString = new StringSource("el-string", "123 + user[0].level");
+//        TokenizableSource elString = new StringSource("el-string", "123 + user[0].level / 22");
+//        TokenizableSource elString = new StringSource("el-string", "22 / 7");
+//        TokenizableSource elString = new StringSource("el-string", "22 / 7 > 4");
+        TokenizableSource elString = new StringSource("el-string", "user[0].level");
         Recognizer<Token.Type, RawToken> elr = new EnumTokenRecognizer<>(BasicToken.class, 20);
         Lexer elLexer = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), elr));
+
+        Map<String, Object> source = Map.of("name", "John");
+        Map<String, Object> destination = new HashMap<>();
+
+        destination.put("level", 10);
+
+        Bind.with(source).to(destination);
 
         TokenCursor elCursor = elLexer.tokenize(elString);
 
@@ -76,6 +89,8 @@ public class Main {
         Node compiled = parserContext.getParser(OperatorParser.class).parse(elCursor, parserContext);
 
         EvaluationContext evaluationContext = new DefaultEvaluationContext();
+
+        evaluationContext.getExtensions().importExtension(new CoreExtension());
 
         ScopedChain scopedChain = evaluationContext.getScopedChain();
 

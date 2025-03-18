@@ -2,10 +2,10 @@ package org.jmouse.core.bind.introspection.structured.vo;
 
 import org.jmouse.core.bind.introspection.*;
 import org.jmouse.core.reflection.JavaType;
+import org.jmouse.util.Streamable;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.lang.reflect.RecordComponent;
+import java.util.*;
 
 public class ValueObjectIntrospector<T>
         extends AbstractIntrospector<ValueObjectData<T>, ValueObjectIntrospector<T>, T, ValueObjectDescriptor<T>> {
@@ -24,8 +24,8 @@ public class ValueObjectIntrospector<T>
     public ValueObjectIntrospector<T> constructor() {
         ClassTypeDescriptor         descriptor   = container.getType();
         List<ConstructorDescriptor> constructors = new ArrayList<>(descriptor.getConstructors());
-        constructors.sort(Comparator.comparingInt(ctor -> ctor.getParameters().size()));
 
+        constructors.sort(Comparator.comparingInt(ctor -> ctor.getParameters().size()));
         container.setConstructor(constructors.getFirst());
 
         return self();
@@ -34,12 +34,27 @@ public class ValueObjectIntrospector<T>
     public ValueObjectIntrospector<T> properties() {
         constructor();
 
-        ConstructorDescriptor    constructor = container.getConstructor();
-        ValueObjectDescriptor<T> parent      = toDescriptor();
+        Map<String, RecordComponent> components  = Collections.emptyMap();
+        ConstructorDescriptor        constructor = container.getConstructor();
+        ValueObjectDescriptor<T>     parent      = toDescriptor();
+        Class<?>                     classType   = parent.getClassType();
+
+        if (parent.isValueObject()) {
+            components = Streamable.of(classType.getRecordComponents()).toMap(RecordComponent::getName);
+        }
 
         for (ParameterDescriptor parameter : constructor.getParameters()) {
-            ValueObjectPropertyIntrospector<T> introspector = new ValueObjectPropertyIntrospector<>(container.getTarget());
+            ValueObjectPropertyIntrospector<T> introspector = new ValueObjectPropertyIntrospector<>(
+                    container.getTarget());
             introspector.owner(parent).name(parameter.getName());
+
+            if (components.containsKey(parameter.getName())) {
+                RecordComponent  component = components.get(parameter.getName());
+                MethodDescriptor method    = new MethodIntrospector(component.getAccessor()).introspect()
+                        .toDescriptor();
+                introspector.getterMethod(method);
+            }
+
             property(introspector.toDescriptor());
         }
 

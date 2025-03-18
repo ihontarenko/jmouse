@@ -34,6 +34,8 @@ public interface PropertyValuesAccessor extends ClassTypeInspector {
             instance = new PropertyResolverDataSource((PropertyResolver) source);
         } else if (instance.isBean()) {
             instance = new JavaBeanPropertyValuesAccessor(source);
+        } else if (instance.isValueObject()) {
+            instance = new ValueObjectPropertyValuesAccessor(source);
         } else if (instance.isScalar() || instance.isCollection() || instance.isMap() || instance.isArray()) {
             instance = new StandardPropertyValuesAccessor(instance.unwrap());
         }

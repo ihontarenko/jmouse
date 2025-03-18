@@ -1,7 +1,9 @@
 package org.jmouse.el.node.expression;
 
+import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Operator;
+import org.jmouse.el.extension.operator.ComparisonOperator;
 import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.ExpressionNode;
 
@@ -74,7 +76,16 @@ public class BinaryOperation extends AbstractExpressionNode {
 
     @Override
     public Object evaluate(EvaluationContext context) {
-        return super.evaluate(context);
+        Object left  = getLeft().evaluate(context);
+        Object right = getRight().evaluate(context);
+
+        if (operator instanceof ComparisonOperator) {
+            Conversion conversion = context.getConversion();
+            // aligning data types to a single one for comparisons
+            right = conversion.convert(right, left.getClass());
+        }
+
+        return operator.getCalculator().calculate(left, right);
     }
 
     @Override

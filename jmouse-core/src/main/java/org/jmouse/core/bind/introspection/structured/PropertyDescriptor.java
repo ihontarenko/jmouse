@@ -1,5 +1,6 @@
 package org.jmouse.core.bind.introspection.structured;
 
+import org.jmouse.core.bind.PropertyAccessor;
 import org.jmouse.core.bind.introspection.ClassTypeDescriptor;
 import org.jmouse.core.bind.introspection.MethodDescriptor;
 import org.jmouse.util.Getter;
@@ -99,6 +100,15 @@ public interface PropertyDescriptor<T> {
      */
     default boolean isWritable() {
         return getSetter() != null;
+    }
+
+    /**
+     * Retrieves the {@link PropertyAccessor} associated with this object.
+     *
+     * @return a {@link PropertyAccessor} instance, or {@code null} if not provided
+     */
+    default PropertyAccessor<T> getPropertyAccessor() {
+        return PropertyAccessor.ofProperty(this);
     }
 
     /**
