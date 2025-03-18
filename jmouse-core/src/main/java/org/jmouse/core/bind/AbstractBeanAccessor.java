@@ -15,17 +15,17 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * It does not support indexed access since beans are typically key-value structures.
  * </p>
  */
-abstract public class AbstractBeanObjectAccessor extends AbstractObjectAccessor {
+abstract public class AbstractBeanAccessor extends AbstractAccessor {
 
     private final ObjectDescriptor<Object> descriptor;
 
     /**
-     * Creates a {@link AbstractBeanObjectAccessor} for the given structured instance.
+     * Creates a {@link AbstractBeanAccessor} for the given structured instance.
      *
      * @param source the structured instance to wrap
      * @throws IllegalArgumentException if the source is {@code null}
      */
-    public AbstractBeanObjectAccessor(Object source) {
+    public AbstractBeanAccessor(Object source) {
         super(source);
         this.descriptor = getDescriptor(source.getClass());
     }

@@ -1,9 +1,9 @@
 package org.jmouse.core.bind;
 
-public class DummyObjectAccessor extends AbstractObjectAccessor {
+public class DummyObjectAccessor extends AbstractAccessor {
 
     /**
-     * Constructs an {@link AbstractObjectAccessor} with the given source object.
+     * Constructs an {@link AbstractAccessor} with the given source object.
      *
      * @param source the source object to wrap
      */

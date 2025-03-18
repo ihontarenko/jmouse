@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-public interface PropertyValuesAccessorProvider {
+public interface ObjectAccessorProvider {
 
     boolean supports(Object source);
 

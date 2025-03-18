@@ -1,13 +1,13 @@
 package org.jmouse.el.evaluation;
 
-import org.jmouse.core.bind.AbstractObjectAccessor;
+import org.jmouse.core.bind.AbstractAccessor;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.UnsupportedDataSourceException;
 
-public class ScopedChainValuesAccessor extends AbstractObjectAccessor {
+public class ScopedChainValuesAccessor extends AbstractAccessor {
 
     /**
-     * Constructs an {@link AbstractObjectAccessor} with the given source object.
+     * Constructs an {@link AbstractAccessor} with the given source object.
      *
      * @param chain the source object to wrap
      */

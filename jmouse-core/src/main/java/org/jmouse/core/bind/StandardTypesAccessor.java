@@ -12,14 +12,14 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * or a key (for maps).
  * </p>
  */
-public class StandardTypesObjectAccessor extends AbstractObjectAccessor {
+public class StandardTypesAccessor extends AbstractAccessor {
 
     /**
-     * Creates a new {@link StandardTypesObjectAccessor} with the given source object.
+     * Creates a new {@link StandardTypesAccessor} with the given source object.
      *
      * @param source the underlying data source (expected to be a {@link List} or {@link Map})
      */
-    public StandardTypesObjectAccessor(Object source) {
+    public StandardTypesAccessor(Object source) {
         super(source);
     }
 
@@ -87,7 +87,7 @@ public class StandardTypesObjectAccessor extends AbstractObjectAccessor {
     @Override
     public void set(String name, Object value) {
         if (isMap()) {
-            asMap(Object.class, Object.class).put(name, value);
+            asMap(String.class, Object.class).put(name, value);
         }
     }
 

@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-public class NullObjectAccessor extends AbstractObjectAccessor {
+public class NullObjectAccessor extends AbstractAccessor {
 
     public NullObjectAccessor() {
         super(null);

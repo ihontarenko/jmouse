@@ -28,23 +28,24 @@ public interface ObjectAccessor extends ClassTypeInspector {
      * @throws UnsupportedDataSourceException if the type is unsupported
      */
     static ObjectAccessor wrap(Object source) {
-        ObjectAccessor instance = new DummyObjectAccessor(source);
-
-        if (instance.isInstanceOf(PropertyResolver.class)) {
-            instance = new PropertyResolverDataSource((PropertyResolver) source);
-        } else if (instance.isBean()) {
-            instance = new JavaBeanObjectAccessor(source);
-        } else if (instance.isValueObject()) {
-            instance = new ValueObjectObjectAccessor(source);
-        } else if (instance.isScalar() || instance.isCollection() || instance.isMap() || instance.isArray()) {
-            instance = new StandardTypesObjectAccessor(instance.unwrap());
-        }
-
-        if (instance.isNull()) {
-            instance = new NullObjectAccessor();
-        }
-
-        return instance;
+        return null;
+//        ObjectAccessor instance = new DummyObjectAccessor(source);
+//
+//        if (instance.isInstanceOf(PropertyResolver.class)) {
+//            instance = new PropertyResolverAccessor((PropertyResolver) source);
+//        } else if (instance.isBean()) {
+//            instance = new JavaBeanAccessor(source);
+//        } else if (instance.isValueObject()) {
+//            instance = new ValueObjectAccessor(source);
+//        } else if (instance.isScalar() || instance.isCollection() || instance.isMap() || instance.isArray()) {
+//            instance = new StandardTypesAccessor(instance.unwrap());
+//        }
+//
+//        if (instance.isNull()) {
+//            instance = new NullObjectAccessor();
+//        }
+//
+//        return instance;
     }
 
     /**
@@ -243,17 +244,6 @@ public interface ObjectAccessor extends ClassTypeInspector {
      */
     default boolean isNull() {
         return unwrap() == null;
-    }
-
-    /**
-     * Checks if the data source is assignable to the specified type.
-     *
-     * @param <T>  the expected type
-     * @param type the class to check
-     * @return {@code true} if assignable, otherwise {@code false}
-     */
-    default <T> boolean isInstanceOf(Class<T> type) {
-        return type.isAssignableFrom(getDataType());
     }
 
     /**

@@ -43,7 +43,11 @@ public class Example {
         data.put("books", books);
         data.put("address", addresses);
 
-        ObjectAccessor wrapped = ObjectAccessor.wrap(data);
+        ObjectAccessorFactory factory = new StandardAccessorFactory();
+
+
+
+        ObjectAccessor wrapped = factory.wrap(data);
         ObjectAccessor vo      = ObjectAccessor.wrap(new BookImmutable("Title", "Stephen King", "Maine"));
 
         wrapped.set("olo", "asd");
@@ -53,8 +57,7 @@ public class Example {
 
 //        vo.get("title2");
 
-        Binder binder = Binder.with(data, new DefaultBindingCallback());
-        User   user   = Bind.with(binder).get(User.class);
+        User   user   = Bind.with(data).get(User.class);
 
         ObjectAccessor accessor = ObjectAccessor.wrap(user);
 
@@ -62,7 +65,6 @@ public class Example {
 
         ObjectDescriptor<User> descriptor = new JavaBeanIntrospector<>(User.class).introspect().toDescriptor();
 
-        Getter<User, Object> getter = descriptor.getProperty("status").getGetter();
         Setter<User, Object> setter = descriptor.getProperty("status").getSetter();
 
         setter.set(user, new UserStatus(Status.REGISTERED));

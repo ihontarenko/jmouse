@@ -9,16 +9,16 @@ import java.util.List;
  * whether they support a given source and create an accessor accordingly.
  * </p>
  */
-public class DefaultPropertyValuesAccessorFactory implements PropertyValuesAccessorFactory {
+public class BasicAccessorFactory implements ObjectAccessorFactory {
 
-    private final List<PropertyValuesAccessorProvider> providers;
+    protected final List<ObjectAccessorProvider> providers;
 
     /**
      * Constructs a factory with the given list of providers.
      *
-     * @param providers a list of PropertyValuesAccessorProvider instances
+     * @param providers a list of ObjectAccessorProvider instances
      */
-    public DefaultPropertyValuesAccessorFactory(List<PropertyValuesAccessorProvider> providers) {
+    public BasicAccessorFactory(List<ObjectAccessorProvider> providers) {
         this.providers = List.copyOf(providers);
     }
 
@@ -30,16 +30,23 @@ public class DefaultPropertyValuesAccessorFactory implements PropertyValuesAcces
      *
      * @param source the source object to wrap
      * @return a ObjectAccessor for the given source
-     * @throws UnsupportedDataSourceException if no provider can handle the source type
      */
     @Override
     public ObjectAccessor wrap(Object source) {
         ObjectAccessor instance = new NullObjectAccessor();
 
-        for (PropertyValuesAccessorProvider provider : providers) {
-            if (provider.supports(source)) {
-                instance = provider.create(source);
-                break;
+        if (source != null) {
+            instance = new DummyObjectAccessor(source);
+
+            for (ObjectAccessorProvider provider : providers) {
+                if (provider.supports(source)) {
+                    instance = provider.create(source);
+                    break;
+                }
+            }
+
+            if (instance instanceof ObjectAccessorFactory.Aware aware) {
+                aware.setFactory(this);
             }
         }
 

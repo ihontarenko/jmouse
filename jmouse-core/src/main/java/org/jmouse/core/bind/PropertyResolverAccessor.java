@@ -10,12 +10,12 @@ import java.util.Map;
  * A {@link ObjectAccessor} implementation that wraps a {@link PropertyResolver},
  * converting its properties into a hierarchical structure.
  */
-public class PropertyResolverDataSource implements ObjectAccessor {
+public class PropertyResolverAccessor implements ObjectAccessor {
 
-    private final StandardTypesObjectAccessor delegate;
+    private final StandardTypesAccessor delegate;
 
     /**
-     * Creates a new {@link PropertyResolverDataSource} by extracting properties
+     * Creates a new {@link PropertyResolverAccessor} by extracting properties
      * from the given {@link PropertyResolver} and converting them into a structured
      * hierarchical format.
      * <p>
@@ -30,7 +30,7 @@ public class PropertyResolverDataSource implements ObjectAccessor {
      *
      * @param resolver the {@link PropertyResolver} to extract properties from
      */
-    public PropertyResolverDataSource(PropertyResolver resolver) {
+    public PropertyResolverAccessor(PropertyResolver resolver) {
         String              temporaryPropertySourceName = "temporary-property-source";
         String              temporaryKeyName            = "temporary-key";
         Map<String, Object> properties                  = Map.of(temporaryKeyName, resolver.getFlattenedProperties());
@@ -40,7 +40,7 @@ public class PropertyResolverDataSource implements ObjectAccessor {
         Map<String, Object> hierarchical = resolver.getRequiredProperty(temporaryKeyName, Map.class);
         resolver.removePropertySource(temporaryPropertySourceName);
 
-        this.delegate = new StandardTypesObjectAccessor(hierarchical);
+        this.delegate = new StandardTypesAccessor(hierarchical);
     }
 
     /**

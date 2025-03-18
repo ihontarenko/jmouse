@@ -9,7 +9,7 @@ package org.jmouse.core.bind;
  *
  * @see ObjectAccessor
  */
-public abstract class AbstractObjectAccessor implements ObjectAccessor {
+public abstract class AbstractAccessor implements ObjectAccessor {
 
     /**
      * The underlying data source object.
@@ -17,11 +17,11 @@ public abstract class AbstractObjectAccessor implements ObjectAccessor {
     protected final Object source;
 
     /**
-     * Constructs an {@link AbstractObjectAccessor} with the given source object.
+     * Constructs an {@link AbstractAccessor} with the given source object.
      *
      * @param source the source object to wrap
      */
-    public AbstractObjectAccessor(Object source) {
+    public AbstractAccessor(Object source) {
         this.source = source;
     }
 
