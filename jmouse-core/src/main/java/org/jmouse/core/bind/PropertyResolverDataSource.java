@@ -7,12 +7,12 @@ import org.jmouse.core.env.PropertySource;
 import java.util.Map;
 
 /**
- * A {@link PropertyValuesAccessor} implementation that wraps a {@link PropertyResolver},
+ * A {@link ObjectAccessor} implementation that wraps a {@link PropertyResolver},
  * converting its properties into a hierarchical structure.
  */
-public class PropertyResolverDataSource implements PropertyValuesAccessor {
+public class PropertyResolverDataSource implements ObjectAccessor {
 
-    private final StandardTypesPropertyValuesAccessor delegate;
+    private final StandardTypesObjectAccessor delegate;
 
     /**
      * Creates a new {@link PropertyResolverDataSource} by extracting properties
@@ -40,7 +40,7 @@ public class PropertyResolverDataSource implements PropertyValuesAccessor {
         Map<String, Object> hierarchical = resolver.getRequiredProperty(temporaryKeyName, Map.class);
         resolver.removePropertySource(temporaryPropertySourceName);
 
-        this.delegate = new StandardTypesPropertyValuesAccessor(hierarchical);
+        this.delegate = new StandardTypesObjectAccessor(hierarchical);
     }
 
     /**
@@ -54,24 +54,24 @@ public class PropertyResolverDataSource implements PropertyValuesAccessor {
     }
 
     /**
-     * Retrieves a nested {@link PropertyValuesAccessor} by name.
+     * Retrieves a nested {@link ObjectAccessor} by name.
      *
      * @param name the property key
-     * @return the corresponding {@link PropertyValuesAccessor}, or an empty source if not found
+     * @return the corresponding {@link ObjectAccessor}, or an empty source if not found
      */
     @Override
-    public PropertyValuesAccessor get(String name) {
+    public ObjectAccessor get(String name) {
         return delegate.get(name);
     }
 
     /**
-     * Retrieves a nested {@link PropertyValuesAccessor} by index.
+     * Retrieves a nested {@link ObjectAccessor} by index.
      *
      * @param index the index within a collection-based property
-     * @return the corresponding {@link PropertyValuesAccessor}, or an empty source if not found
+     * @return the corresponding {@link ObjectAccessor}, or an empty source if not found
      */
     @Override
-    public PropertyValuesAccessor get(int index) {
+    public ObjectAccessor get(int index) {
         return delegate.get(index);
     }
 

@@ -18,30 +18,30 @@ import static org.jmouse.core.reflection.JavaType.forInstance;
  * It allows working with objects, lists, maps, arrays, and primitive types in a unified way.
  * </p>
  */
-public interface PropertyValuesAccessor extends ClassTypeInspector {
+public interface ObjectAccessor extends ClassTypeInspector {
 
     /**
-     * Creates a {@link PropertyValuesAccessor} instance from the given source object.
+     * Creates a {@link ObjectAccessor} instance from the given source object.
      *
      * @param source the source object
-     * @return a {@link PropertyValuesAccessor} instance wrapping the source
+     * @return a {@link ObjectAccessor} instance wrapping the source
      * @throws UnsupportedDataSourceException if the type is unsupported
      */
-    static PropertyValuesAccessor wrap(Object source) {
-        PropertyValuesAccessor instance = new DummyPropertyValuesAccessor(source);
+    static ObjectAccessor wrap(Object source) {
+        ObjectAccessor instance = new DummyObjectAccessor(source);
 
         if (instance.isInstanceOf(PropertyResolver.class)) {
             instance = new PropertyResolverDataSource((PropertyResolver) source);
         } else if (instance.isBean()) {
-            instance = new JavaBeanPropertyValuesAccessor(source);
+            instance = new JavaBeanObjectAccessor(source);
         } else if (instance.isValueObject()) {
-            instance = new ValueObjectPropertyValuesAccessor(source);
+            instance = new ValueObjectObjectAccessor(source);
         } else if (instance.isScalar() || instance.isCollection() || instance.isMap() || instance.isArray()) {
-            instance = new StandardTypesPropertyValuesAccessor(instance.unwrap());
+            instance = new StandardTypesObjectAccessor(instance.unwrap());
         }
 
         if (instance.isNull()) {
-            instance = new NullPropertyValuesAccessor();
+            instance = new NullObjectAccessor();
         }
 
         return instance;
@@ -70,20 +70,20 @@ public interface PropertyValuesAccessor extends ClassTypeInspector {
     Object unwrap();
 
     /**
-     * Retrieves a nested {@link PropertyValuesAccessor} by name.
+     * Retrieves a nested {@link ObjectAccessor} by name.
      *
      * @param name the name of the nested data source
-     * @return the nested {@link PropertyValuesAccessor}
+     * @return the nested {@link ObjectAccessor}
      */
-    PropertyValuesAccessor get(String name);
+    ObjectAccessor get(String name);
 
     /**
-     * Retrieves a nested {@link PropertyValuesAccessor} by index.
+     * Retrieves a nested {@link ObjectAccessor} by index.
      *
      * @param index the index of the nested data source
-     * @return the nested {@link PropertyValuesAccessor}
+     * @return the nested {@link ObjectAccessor}
      */
-    PropertyValuesAccessor get(int index);
+    ObjectAccessor get(int index);
 
     /**
      * Sets a property value by name.
@@ -106,18 +106,18 @@ public interface PropertyValuesAccessor extends ClassTypeInspector {
     void set(int index, Object value);
 
     /**
-     * Retrieves a nested {@link PropertyValuesAccessor} using a {@link PropertyPath}.
+     * Retrieves a nested {@link ObjectAccessor} using a {@link PropertyPath}.
      *
      * @param path the structured name path
-     * @return the nested {@link PropertyValuesAccessor}
+     * @return the nested {@link ObjectAccessor}
      * @throws NumberFormatException if an indexed path contains a non-numeric value
      */
-    default PropertyValuesAccessor navigate(String path) {
+    default ObjectAccessor navigate(String path) {
         return navigate(PropertyPath.forPath(path));
     }
 
     /**
-     * Retrieves a nested {@link PropertyValuesAccessor} using the specified {@link PropertyPath}.
+     * Retrieves a nested {@link ObjectAccessor} using the specified {@link PropertyPath}.
      * <p>
      * The method navigates through the nested structure represented by the given path.
      * Each segment of the path is processed in order. If a segment is indexed (i.e. it represents
@@ -126,13 +126,13 @@ public interface PropertyValuesAccessor extends ClassTypeInspector {
      * </p>
      *
      * @param name the structured property path used to navigate the nested properties
-     * @return the nested {@link PropertyValuesAccessor} corresponding to the given path
+     * @return the nested {@link ObjectAccessor} corresponding to the given path
      * @throws NumberFormatException if an indexed path segment contains a non-numeric value
      */
-    default PropertyValuesAccessor navigate(PropertyPath name) {
-        PropertyValuesAccessor nested  = this;
-        int                    counter = 0;
-        PropertyPath.Entries   entries = name.entries();
+    default ObjectAccessor navigate(PropertyPath name) {
+        ObjectAccessor       nested  = this;
+        int                  counter = 0;
+        PropertyPath.Entries entries = name.entries();
 
         for (CharSequence element : entries) {
             PropertyPath.Type type = entries.type(counter);
@@ -189,7 +189,7 @@ public interface PropertyValuesAccessor extends ClassTypeInspector {
     }
 
     /**
-     * Retrieves a list of keys representing the entries in this {@link PropertyValuesAccessor}.
+     * Retrieves a list of keys representing the entries in this {@link ObjectAccessor}.
      * <p>
      * If the data source is a map, the method returns its key set as strings.
      * If the data source is a list, the method generates index-based keys
@@ -217,7 +217,7 @@ public interface PropertyValuesAccessor extends ClassTypeInspector {
     }
 
     /**
-     * Retrieves a list of {@link PropertyPath} representations for the keys in this {@link PropertyValuesAccessor}.
+     * Retrieves a list of {@link PropertyPath} representations for the keys in this {@link ObjectAccessor}.
      * <p>
      * This method converts the keys obtained from {@link #keySet()} into {@link PropertyPath} objects,
      * allowing structured representation of hierarchical data.

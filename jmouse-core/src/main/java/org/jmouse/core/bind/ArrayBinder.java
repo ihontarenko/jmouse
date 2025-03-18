@@ -46,7 +46,7 @@ public class ArrayBinder extends CollectionBinder {
      * @return a {@link BindResult} containing the bound array, or an empty result if no valid binding was found
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath root, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath root, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback) {
         JavaType      elementType = bindable.getType().getComponentType();
         JavaType      type        = JavaType.forParametrizedClass(List.class, elementType.getRawType());
         BindResult<T> result      = super.bind(root, Bindable.of(type), accessor, callback);

@@ -1,35 +1,35 @@
 package org.jmouse.core.bind;
 
-public class DummyPropertyValuesAccessor extends AbstractPropertyValuesAccessor {
+public class DummyObjectAccessor extends AbstractObjectAccessor {
 
     /**
-     * Constructs an {@link AbstractPropertyValuesAccessor} with the given source object.
+     * Constructs an {@link AbstractObjectAccessor} with the given source object.
      *
      * @param source the source object to wrap
      */
-    public DummyPropertyValuesAccessor(Object source) {
+    public DummyObjectAccessor(Object source) {
         super(source);
     }
 
     /**
-     * Retrieves a nested {@link PropertyValuesAccessor} by name.
+     * Retrieves a nested {@link ObjectAccessor} by name.
      *
      * @param name the name of the nested data source
-     * @return the nested {@link PropertyValuesAccessor}
+     * @return the nested {@link ObjectAccessor}
      */
     @Override
-    public PropertyValuesAccessor get(String name) {
+    public ObjectAccessor get(String name) {
         throw new UnsupportedOperationException("DUMMY DATA SOURCE");
     }
 
     /**
-     * Retrieves a nested {@link PropertyValuesAccessor} by index.
+     * Retrieves a nested {@link ObjectAccessor} by index.
      *
      * @param index the index of the nested data source
-     * @return the nested {@link PropertyValuesAccessor}
+     * @return the nested {@link ObjectAccessor}
      */
     @Override
-    public PropertyValuesAccessor get(int index) {
+    public ObjectAccessor get(int index) {
         throw new UnsupportedOperationException("DUMMY DATA SOURCE");
     }
 

@@ -14,7 +14,7 @@ import static org.jmouse.core.reflection.ClassMatchers.isSupertype;
 /**
  * A binder for {@link Map} types, extending the {@link AbstractBinder} class.
  * <p>
- * This binder handles the process of binding {@link Map} entries from the {@link PropertyValuesAccessor}
+ * This binder handles the process of binding {@link Map} entries from the {@link ObjectAccessor}
  * to the target map in the bindable instance.
  * </p>
  */
@@ -33,7 +33,7 @@ public class MapBinder extends AbstractBinder {
     }
 
     /**
-     * Binds the values from the {@link PropertyValuesAccessor} to the target {@link Map}.
+     * Binds the values from the {@link ObjectAccessor} to the target {@link Map}.
      * <p>
      * This method checks if the target type is a {@link Map}. If so, it retrieves the
      * list of keys from the data accessor, then binds each entry by invoking {@link #bindValue}.
@@ -49,7 +49,7 @@ public class MapBinder extends AbstractBinder {
      */
     @Override
     public <T> BindResult<T> bind(
-            PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback) {
+            PropertyPath name, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback) {
         TypeInformation   typeDescriptor = bindable.getTypeInformation();
         Set<PropertyPath> keys           = accessor.navigate(name).nameSet();
 

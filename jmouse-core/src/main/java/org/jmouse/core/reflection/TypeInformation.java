@@ -55,6 +55,13 @@ public class TypeInformation implements ClassTypeInspector {
     }
 
     /**
+     * Creates a {@link TypeInformation} for a given instance object.
+     */
+    public static TypeInformation forInstance(Object instance) {
+        return new TypeInformation(JavaType.forInstance(instance));
+    }
+
+    /**
      * Returns the raw class type.
      *
      * @return the underlying class type

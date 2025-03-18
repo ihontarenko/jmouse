@@ -43,8 +43,8 @@ public class Example {
         data.put("books", books);
         data.put("address", addresses);
 
-        PropertyValuesAccessor wrapped = PropertyValuesAccessor.wrap(data);
-        PropertyValuesAccessor vo = PropertyValuesAccessor.wrap(new BookImmutable("Title", "Stephen King", "Maine"));
+        ObjectAccessor wrapped = ObjectAccessor.wrap(data);
+        ObjectAccessor vo      = ObjectAccessor.wrap(new BookImmutable("Title", "Stephen King", "Maine"));
 
         wrapped.set("olo", "asd");
 
@@ -56,7 +56,7 @@ public class Example {
         Binder binder = Binder.with(data, new DefaultBindingCallback());
         User   user   = Bind.with(binder).get(User.class);
 
-        PropertyValuesAccessor accessor = PropertyValuesAccessor.wrap(user);
+        ObjectAccessor accessor = ObjectAccessor.wrap(user);
 
         accessor.set("name", "John Doe");
 

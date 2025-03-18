@@ -1,14 +1,14 @@
 package org.jmouse.core.bind;
 
 /**
- * Defines the contract for binding objects from a {@link PropertyValuesAccessor}.
+ * Defines the contract for binding objects from a {@link ObjectAccessor}.
  * Implementations of this interface are responsible for mapping data
  * from a source to a target bindable type, optionally applying a {@link BindCallback}.
  */
 public interface ObjectBinder {
 
     /**
-     * Binds a value from the given {@link PropertyValuesAccessor} to a target {@link Bindable} type.
+     * Binds a value from the given {@link ObjectAccessor} to a target {@link Bindable} type.
      *
      * @param name     the property path in the data accessor
      * @param bindable the target bindable type
@@ -17,10 +17,10 @@ public interface ObjectBinder {
      * @param <T>      the expected type of the bound value
      * @return a {@link BindResult} containing the bound value, or an empty result if not found
      */
-    <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback);
+    <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback);
 
     /**
-     * Binds a single value from the given {@link PropertyValuesAccessor} to a target {@link Bindable} type.
+     * Binds a single value from the given {@link ObjectAccessor} to a target {@link Bindable} type.
      * This method is used for simple scalar values rather than complex object binding.
      *
      * @param name     the property path in the data accessor
@@ -30,7 +30,7 @@ public interface ObjectBinder {
      * @param <T>      the expected type of the bound value
      * @return a {@link BindResult} containing the bound value, or an empty result if not found
      */
-    <T> BindResult<T> bindValue(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback);
+    <T> BindResult<T> bindValue(PropertyPath name, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback);
 
     /**
      * Determines whether this binder supports binding the given {@link Bindable} type.

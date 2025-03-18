@@ -1,15 +1,15 @@
 package org.jmouse.core.bind;
 
 /**
- * An abstract base implementation of {@link PropertyValuesAccessor}.
+ * An abstract base implementation of {@link ObjectAccessor}.
  * <p>
  * This class provides a foundation for concrete data source implementations by storing
  * the underlying source object.
  * </p>
  *
- * @see PropertyValuesAccessor
+ * @see ObjectAccessor
  */
-public abstract class AbstractPropertyValuesAccessor implements PropertyValuesAccessor {
+public abstract class AbstractObjectAccessor implements ObjectAccessor {
 
     /**
      * The underlying data source object.
@@ -17,11 +17,11 @@ public abstract class AbstractPropertyValuesAccessor implements PropertyValuesAc
     protected final Object source;
 
     /**
-     * Constructs an {@link AbstractPropertyValuesAccessor} with the given source object.
+     * Constructs an {@link AbstractObjectAccessor} with the given source object.
      *
      * @param source the source object to wrap
      */
-    public AbstractPropertyValuesAccessor(Object source) {
+    public AbstractObjectAccessor(Object source) {
         this.source = source;
     }
 

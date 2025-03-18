@@ -9,23 +9,23 @@ import java.util.Set;
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**
- * A {@link PropertyValuesAccessor} implementation for accessing properties of a structured instance.
+ * A {@link ObjectAccessor} implementation for accessing properties of a structured instance.
  * <p>
  * This class allows retrieving properties dynamically from a wrapped structured instance.
  * It does not support indexed access since beans are typically key-value structures.
  * </p>
  */
-abstract public class AbstractBeanPropertyValuesAccessor extends AbstractPropertyValuesAccessor {
+abstract public class AbstractBeanObjectAccessor extends AbstractObjectAccessor {
 
     private final ObjectDescriptor<Object> descriptor;
 
     /**
-     * Creates a {@link AbstractBeanPropertyValuesAccessor} for the given structured instance.
+     * Creates a {@link AbstractBeanObjectAccessor} for the given structured instance.
      *
      * @param source the structured instance to wrap
      * @throws IllegalArgumentException if the source is {@code null}
      */
-    public AbstractBeanPropertyValuesAccessor(Object source) {
+    public AbstractBeanObjectAccessor(Object source) {
         super(source);
         this.descriptor = getDescriptor(source.getClass());
     }
@@ -66,14 +66,14 @@ abstract public class AbstractBeanPropertyValuesAccessor extends AbstractPropert
     }
 
     /**
-     * Retrieves a property from the structured instance as a {@link PropertyValuesAccessor}.
+     * Retrieves a property from the structured instance as a {@link ObjectAccessor}.
      *
      * @param name the name of the property to retrieve
-     * @return a {@link PropertyValuesAccessor} wrapping the property value
+     * @return a {@link ObjectAccessor} wrapping the property value
      * @throws IllegalArgumentException if the property does not exist
      */
     @Override
-    public PropertyValuesAccessor get(String name) {
+    public ObjectAccessor get(String name) {
         PropertyDescriptor<Object> property = descriptor.getProperty(name);
 
         if (!descriptor.hasProperty(name)) {
@@ -82,7 +82,7 @@ abstract public class AbstractBeanPropertyValuesAccessor extends AbstractPropert
                     "Accessor '%s' does not have property: '%s'.".formatted(descriptor, name));
         }
 
-        return PropertyValuesAccessor.wrap(property.getAccessor().readValue(source));
+        return ObjectAccessor.wrap(property.getAccessor().readValue(source));
     }
 
     /**
@@ -93,14 +93,14 @@ abstract public class AbstractBeanPropertyValuesAccessor extends AbstractPropert
      * @throws UnsupportedDataSourceException always, since indexed access is not supported
      */
     @Override
-    public PropertyValuesAccessor get(int index) {
+    public ObjectAccessor get(int index) {
         throw new UnsupportedDataSourceException(
                 "Accessor '%s' does not support indexed accessing"
                         .formatted(descriptor));
     }
 
     /**
-     * Retrieves a collection of keys representing the entries in this {@link PropertyValuesAccessor}.
+     * Retrieves a collection of keys representing the entries in this {@link ObjectAccessor}.
      *
      * @return a collection of keys as strings
      */

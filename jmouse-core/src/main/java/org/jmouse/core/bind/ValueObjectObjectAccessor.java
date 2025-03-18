@@ -3,9 +3,9 @@ package org.jmouse.core.bind;
 import org.jmouse.core.bind.introspection.structured.ObjectDescriptor;
 import org.jmouse.core.bind.introspection.structured.vo.ValueObjectIntrospector;
 
-public class ValueObjectPropertyValuesAccessor extends AbstractBeanPropertyValuesAccessor {
+public class ValueObjectObjectAccessor extends AbstractBeanObjectAccessor {
 
-    public ValueObjectPropertyValuesAccessor(Object source) {
+    public ValueObjectObjectAccessor(Object source) {
         super(source);
     }
 

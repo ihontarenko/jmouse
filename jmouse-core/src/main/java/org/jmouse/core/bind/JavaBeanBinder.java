@@ -15,7 +15,7 @@ import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
  * A binder implementation that supports binding JavaBeans.
  * <p>
  * This binder inspects the properties of a JavaBean and attempts to populate them
- * from the provided {@link PropertyValuesAccessor}.
+ * from the provided {@link ObjectAccessor}.
  * </p>
  */
 @Priority(JavaBeanBinder.PRIORITY)
@@ -33,10 +33,10 @@ public class JavaBeanBinder extends AbstractBinder {
     }
 
     /**
-     * Binds the given {@link Bindable} JavaBean to values from the {@link PropertyValuesAccessor}.
+     * Binds the given {@link Bindable} JavaBean to values from the {@link ObjectAccessor}.
      * <p>
      * This method checks if the target type is an object or scalar, and delegates to
-     * {@link #bindValue(PropertyPath, Bindable, PropertyValuesAccessor, BindCallback)} if necessary. Otherwise, it
+     * {@link #bindValue(PropertyPath, Bindable, ObjectAccessor, BindCallback)} if necessary. Otherwise, it
      * iterates over the JavaBean's properties and attempts to bind each writable
      * property.
      * </p>
@@ -49,7 +49,7 @@ public class JavaBeanBinder extends AbstractBinder {
      * @return a {@link BindResult} containing the bound JavaBean instance
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, PropertyValuesAccessor accessor, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback) {
         JavaType    type = bindable.getType();
         JavaBean<T> bean = JavaBean.of(type);
 

@@ -1,13 +1,13 @@
 package org.jmouse.el.evaluation;
 
-import org.jmouse.core.bind.AbstractPropertyValuesAccessor;
-import org.jmouse.core.bind.PropertyValuesAccessor;
+import org.jmouse.core.bind.AbstractObjectAccessor;
+import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.UnsupportedDataSourceException;
 
-public class ScopedChainValuesAccessor extends AbstractPropertyValuesAccessor {
+public class ScopedChainValuesAccessor extends AbstractObjectAccessor {
 
     /**
-     * Constructs an {@link AbstractPropertyValuesAccessor} with the given source object.
+     * Constructs an {@link AbstractObjectAccessor} with the given source object.
      *
      * @param chain the source object to wrap
      */
@@ -16,13 +16,13 @@ public class ScopedChainValuesAccessor extends AbstractPropertyValuesAccessor {
     }
 
     /**
-     * Retrieves a nested {@link PropertyValuesAccessor} by name.
+     * Retrieves a nested {@link ObjectAccessor} by name.
      *
      * @param name the name of the nested data source
-     * @return the nested {@link PropertyValuesAccessor}
+     * @return the nested {@link ObjectAccessor}
      */
     @Override
-    public PropertyValuesAccessor get(String name) {
+    public ObjectAccessor get(String name) {
         ScopedChain chain = asType(ScopedChain.class);
         Object      value = null;
 
@@ -30,17 +30,17 @@ public class ScopedChainValuesAccessor extends AbstractPropertyValuesAccessor {
             value = chain.getValue(name);
         }
 
-        return PropertyValuesAccessor.wrap(value);
+        return ObjectAccessor.wrap(value);
     }
 
     /**
-     * Retrieves a nested {@link PropertyValuesAccessor} by index.
+     * Retrieves a nested {@link ObjectAccessor} by index.
      *
      * @param index the index of the nested data source
-     * @return the nested {@link PropertyValuesAccessor}
+     * @return the nested {@link ObjectAccessor}
      */
     @Override
-    public PropertyValuesAccessor get(int index) {
+    public ObjectAccessor get(int index) {
         throw new UnsupportedDataSourceException(
                 "Accessor '%s' does not support indexed accessing"
                         .formatted(getClass().getName()));
