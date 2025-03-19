@@ -1,15 +1,14 @@
 package org.jmouse.testing_ground.introspector;
 
-import org.apache.catalina.core.JniLifecycleListener;
 import org.jmouse.core.bind.PropertyPath;
-import org.jmouse.core.bind.introspection.ClassTypeDescriptor;
-import org.jmouse.core.bind.introspection.ClassTypeIntrospector;
-import org.jmouse.core.bind.introspection.structured.jb.JavaBeanDescriptor;
-import org.jmouse.core.bind.introspection.structured.jb.JavaBeanIntrospector;
-import org.jmouse.core.bind.introspection.structured.map.MapDescriptor;
-import org.jmouse.core.bind.introspection.structured.map.MapIntrospector;
-import org.jmouse.core.bind.introspection.structured.vo.ValueObjectDescriptor;
-import org.jmouse.core.bind.introspection.structured.vo.ValueObjectIntrospector;
+import org.jmouse.core.bind.descriptor.ClassTypeDescriptor;
+import org.jmouse.core.bind.descriptor.ClassTypeIntrospector;
+import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanDescriptor;
+import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
+import org.jmouse.core.bind.descriptor.structured.map.MapDescriptor;
+import org.jmouse.core.bind.descriptor.structured.map.MapIntrospector;
+import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectDescriptor;
+import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectIntrospector;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.testing_ground.binder.dto.User;
 

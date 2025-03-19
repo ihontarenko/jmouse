@@ -401,7 +401,7 @@ final public class PropertyPath {
      * @param sequence  the original sequence being parsed
      */
     public record Entries(int size, int[] starts, int[] ends, int[] types, CharSequence sequence)
-            implements Iterator<CharSequence>, Streamable<CharSequence> {
+            implements Streamable<CharSequence> {
 
         private static int position = 0;
 
@@ -589,39 +589,27 @@ final public class PropertyPath {
         }
 
         /**
-         * Checks if more elements are available in the iterator.
-         *
-         * @return true if there are more elements, false otherwise
-         */
-        @Override
-        public boolean hasNext() {
-            boolean hasNext = position < size;
-
-            if (!hasNext) {
-                reset();
-            }
-
-            return hasNext;
-        }
-
-        /**
-         * Retrieves the next path segment in the iteration.
-         *
-         * @return the next segment
-         */
-        @Override
-        public CharSequence next() {
-            return get(position++);
-        }
-
-        /**
          * Returns an iterator over the path segments.
          *
          * @return an iterator over path segments
          */
         @Override
         public Iterator<CharSequence> iterator() {
-            return this;
+            return new Iterator<>() {
+
+                int iteration = 0;
+
+                @Override
+                public boolean hasNext() {
+                    return iteration < size;
+                }
+
+                @Override
+                public CharSequence next() {
+                    return get(iteration++);
+                }
+
+            };
         }
 
         @Override

@@ -5,7 +5,12 @@ import org.jmouse.core.bind.PropertyPath;
 public class PathCheck {
 
     public static void main(String[] args) {
-        PropertyPath path = PropertyPath.forPath("abc.xxx[0][1].name.last");
+        PropertyPath path = PropertyPath.forPath("books");
+
+        for (CharSequence entry : path.entries()) {
+            System.out.println( entry);
+        }
+        System.out.println("----");
         System.out.println(path.sub(1));
         System.out.println(path.sup(1));
 

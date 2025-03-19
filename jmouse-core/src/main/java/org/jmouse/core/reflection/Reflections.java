@@ -959,7 +959,7 @@ abstract public class Reflections {
      *
      * @param type                the class to introspect.
      * @param propertyDescriptors the map to populate with property descriptors.
-     * @throws ReflectionException if an error occurs during introspection.
+     * @throws ReflectionException if an error occurs during descriptor.
      */
     public static void readPropertyDescriptors(Class<?> type, Map<String, PropertyDescriptor> propertyDescriptors) {
         for (PropertyDescriptor propertyDescriptor : getPropertyDescriptors(type)) {
@@ -972,7 +972,7 @@ abstract public class Reflections {
      *
      * @param type the class to introspect.
      * @return a list of property descriptors for the given class.
-     * @throws ReflectionException if an error occurs during introspection.
+     * @throws ReflectionException if an error occurs during descriptor.
      */
     public static List<PropertyDescriptor> getPropertyDescriptors(Class<?> type) {
         try {

@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.introspection.structured.PropertyDescriptor;
+import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 
 /**
  * Direct implementation of a PropertyAccessor.

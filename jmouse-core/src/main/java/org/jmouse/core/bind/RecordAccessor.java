@@ -1,7 +1,7 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.introspection.structured.ObjectDescriptor;
-import org.jmouse.core.bind.introspection.structured.vo.ValueObjectIntrospector;
+import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
+import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectIntrospector;
 
 /**
  * An implementation of an ObjectAccessor specifically for value objects.

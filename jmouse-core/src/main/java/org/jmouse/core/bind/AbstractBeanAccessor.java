@@ -1,7 +1,7 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.introspection.structured.ObjectDescriptor;
-import org.jmouse.core.bind.introspection.structured.PropertyDescriptor;
+import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
+import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 
 import java.util.HashSet;
 import java.util.Set;

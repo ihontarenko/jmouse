@@ -29,6 +29,7 @@ public class StandardAccessorWrapper extends BasicAccessorWrapper {
     public StandardAccessorWrapper() {
         this(List.of(
                 new StandardTypesAccessorProvider(),
+                new PropertyValueResolverAccessorProvider(),
                 new JavaBeanAccessorProvider(),
                 new RecordAccessorProvider(),
                 new PropertyResolverAccessorProvider()

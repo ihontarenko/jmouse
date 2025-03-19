@@ -4,6 +4,7 @@ public class Book {
 
     private String title;
     private String author;
+    private int    pages;
     private String placeCreation;
 
     public String getTitle() {
@@ -28,5 +29,13 @@ public class Book {
 
     public void setPlaceCreation(String placeCreation) {
         this.placeCreation = placeCreation;
+    }
+
+    public int getPages() {
+        return pages;
+    }
+
+    public void setPages(int pages) {
+        this.pages = pages;
     }
 }

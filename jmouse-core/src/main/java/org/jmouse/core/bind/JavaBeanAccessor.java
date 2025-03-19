@@ -1,7 +1,7 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.introspection.structured.ObjectDescriptor;
-import org.jmouse.core.bind.introspection.structured.jb.JavaBeanIntrospector;
+import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
+import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
 
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
