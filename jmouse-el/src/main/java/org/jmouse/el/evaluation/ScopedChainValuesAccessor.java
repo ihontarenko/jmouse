@@ -30,7 +30,7 @@ public class ScopedChainValuesAccessor extends AbstractAccessor {
             value = chain.getValue(name);
         }
 
-        return ObjectAccessor.wrap(value);
+        return wrap(value);
     }
 
     /**

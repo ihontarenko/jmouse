@@ -88,7 +88,7 @@ public class ValueObjectPropertyDescriptor<T>
      */
     @Override
     public Setter<T, Object> getSetter() {
-        return null;
+        throw UNSUPPORTED_OPERATION_EXCEPTION;
     }
 
     /**

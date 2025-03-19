@@ -42,12 +42,12 @@ public class Example {
         data.put("books", books);
         data.put("address", addresses);
 
-        ObjectAccessorWrapper factory = new StandardAccessorWrapper();
+        ObjectAccessorWrapper wrapper = new StandardAccessorWrapper();
 
 
 
-        ObjectAccessor wrapped = factory.wrap(data);
-        ObjectAccessor vo      = ObjectAccessor.wrap(new BookImmutable("Title", "Stephen King", "Maine"));
+        ObjectAccessor wrapped = wrapper.wrap(data);
+        ObjectAccessor vo      = wrapper.wrap(new BookImmutable("Title", "Stephen King", "Maine"));
 
         wrapped.set("olo", "asd");
 
@@ -58,9 +58,20 @@ public class Example {
 
         User   user   = Bind.with(data).get(User.class);
 
-        ObjectAccessor accessor = ObjectAccessor.wrap(user);
+        ObjectAccessor accessor = wrapper.wrap(user);
 
         accessor.set("name", "John Doe");
+
+        VirtualPropertyResolver resolver = VirtualPropertyResolver.defaultResolver();
+        resolver.register(new UserMainAddressVirtualProperty());
+
+        PropertyValueResolver valueResolver = new DefaultPropertyValueResolver(accessor, resolver);
+
+        System.out.println(
+                valueResolver.getProperty("name")
+        );
+
+        Object value = valueResolver.getProperty("mainAddress");
 
         ObjectDescriptor<User> descriptor = new JavaBeanIntrospector<>(User.class).introspect().toDescriptor();
 

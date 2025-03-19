@@ -81,7 +81,7 @@ abstract public class AbstractBeanAccessor extends AbstractAccessor {
                     "Accessor '%s' does not have property: '%s'.".formatted(descriptor, name));
         }
 
-        return ObjectAccessor.wrap(property.getAccessor().readValue(source));
+        return wrap(property.getAccessor().readValue(source));
     }
 
     /**

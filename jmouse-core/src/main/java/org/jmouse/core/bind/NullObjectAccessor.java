@@ -2,18 +2,20 @@ package org.jmouse.core.bind;
 
 public class NullObjectAccessor extends AbstractAccessor {
 
+    public static final NullObjectAccessor INSTANCE = new NullObjectAccessor();
+
     public NullObjectAccessor() {
         super(null);
     }
 
     @Override
     public ObjectAccessor get(String name) {
-        return ObjectAccessor.wrap(null);
+        return INSTANCE;
     }
 
     @Override
     public ObjectAccessor get(int index) {
-        return ObjectAccessor.wrap(null);
+        return INSTANCE;
     }
 
     /**

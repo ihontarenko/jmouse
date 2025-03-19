@@ -19,16 +19,7 @@ import static org.jmouse.core.reflection.JavaType.forInstance;
  */
 public interface ObjectAccessor extends ClassTypeInspector {
 
-    /**
-     * Creates a {@link ObjectAccessor} instance from the given source object.
-     *
-     * @param source the source object
-     * @return a {@link ObjectAccessor} instance wrapping the source
-     * @throws UnsupportedDataSourceException if the type is unsupported
-     */
-    static ObjectAccessor wrap(Object source) {
-        return null;
-    }
+    ObjectAccessorWrapper STANDARD_WRAPPER = new StandardAccessorWrapper();
 
     /**
      * Ensures that the expected and actual types are compatible.
@@ -46,11 +37,29 @@ public interface ObjectAccessor extends ClassTypeInspector {
     }
 
     /**
+     * Creates a {@link ObjectAccessor} instance from the given source object.
+     *
+     * @param source the source object
+     * @return a {@link ObjectAccessor} instance wrapping the source
+     */
+    static ObjectAccessor wrapObject(Object source) {
+        return STANDARD_WRAPPER.wrap(source);
+    }
+
+    /**
      * Retrieves the underlying source object.
      *
      * @return the original source object
      */
     Object unwrap();
+
+    /**
+     * Creates a {@link ObjectAccessor} instance from the given source object.
+     *
+     * @param source the source object
+     * @return a {@link ObjectAccessor} instance wrapping the source
+     */
+    ObjectAccessor wrap(Object source);
 
     /**
      * Retrieves a nested {@link ObjectAccessor} by name.

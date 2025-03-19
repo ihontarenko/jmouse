@@ -16,11 +16,13 @@ import java.util.function.Supplier;
  */
 public class Binder implements ObjectBinder, BindContext {
 
-    private static final Supplier<? extends RuntimeException> exceptionSupplier = ()
+    private static final ObjectAccessorWrapper DEFAULT_WRAPPER = new StandardAccessorWrapper();
+    private static final Supplier<? extends RuntimeException> EXCEPTION_SUPPLIER = ()
             -> new BindException("Recursive binding detected");
 
-    private final ObjectAccessor source;
-    private final BinderFactory  factory;
+    private final ObjectAccessor                  source;
+    private final BinderFactory                   factory;
+    private final ObjectAccessorWrapper           wrapper;
     private final Conversion                      conversion;
     private final CyclicReferenceDetector<String> detector;
     private       BindCallback                    defaultCallback;
@@ -41,6 +43,7 @@ public class Binder implements ObjectBinder, BindContext {
         this.factory = factory;
         this.detector = new DefaultCyclicReferenceDetector<>();
         this.conversion = new BinderConversion();
+        this.wrapper = new StandardAccessorWrapper();
 
         // register default binders
         factory.registerBinder(new ScalarValueBinder(this));
@@ -61,7 +64,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @return a new {@code Binder} instance
      */
     public static Binder with(Object source, BindCallback callback) {
-        Binder binder = new Binder(ObjectAccessor.wrap(source));
+        Binder binder = new Binder(DEFAULT_WRAPPER.wrap(source));
 
         binder.setDefaultCallback(callback);
 
@@ -75,7 +78,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @return a new {@code Binder} instance
      */
     public static Binder withValueAccessor(Object source) {
-        return new Binder(ObjectAccessor.wrap(source));
+        return new Binder(DEFAULT_WRAPPER.wrap(source));
     }
 
     /**
@@ -127,7 +130,7 @@ public class Binder implements ObjectBinder, BindContext {
             BindCallback customizer = callback == null ? this.defaultCallback : callback;
 
             // Detect recursive binding before proceeding
-            detector.detect(path::path, exceptionSupplier);
+            detector.detect(path::path, EXCEPTION_SUPPLIER);
 
             return binder.bind(path, bindable, accessor, customizer);
         } catch (Exception exception) {

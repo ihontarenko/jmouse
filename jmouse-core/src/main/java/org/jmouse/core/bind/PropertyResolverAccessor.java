@@ -54,6 +54,17 @@ public class PropertyResolverAccessor implements ObjectAccessor {
     }
 
     /**
+     * Creates a {@link ObjectAccessor} instance from the given source object.
+     *
+     * @param source the source object
+     * @return a {@link ObjectAccessor} instance wrapping the source
+     */
+    @Override
+    public ObjectAccessor wrap(Object source) {
+        return delegate.wrap(source);
+    }
+
+    /**
      * Retrieves a nested {@link ObjectAccessor} by name.
      *
      * @param name the property key

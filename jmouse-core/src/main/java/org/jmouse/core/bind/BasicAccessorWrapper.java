@@ -46,7 +46,7 @@ public class BasicAccessorWrapper implements ObjectAccessorWrapper {
             }
 
             if (instance instanceof ObjectAccessorWrapper.Aware aware) {
-                aware.setFactory(this);
+                aware.setWrapper(this);
             }
         }
 

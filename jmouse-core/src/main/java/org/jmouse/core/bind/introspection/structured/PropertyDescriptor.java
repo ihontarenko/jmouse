@@ -1,5 +1,7 @@
 package org.jmouse.core.bind.introspection.structured;
 
+import org.jmouse.core.bind.DirectPropertyAccess;
+import org.jmouse.core.bind.LazyPropertyAccess;
 import org.jmouse.core.bind.PropertyAccessor;
 import org.jmouse.core.bind.introspection.ClassTypeDescriptor;
 import org.jmouse.core.bind.introspection.MethodDescriptor;
@@ -110,7 +112,7 @@ public interface PropertyDescriptor<T> {
      * @return a {@link PropertyAccessor} instance, or {@code null} if not provided
      */
     default PropertyAccessor<T> getAccessor() {
-        return PropertyAccessor.forDirect(this);
+        return DirectPropertyAccess.forPropertyDescriptor(this);
     }
 
     /**
@@ -119,7 +121,7 @@ public interface PropertyDescriptor<T> {
      * @return a {@link PropertyAccessor} instance, or {@code null} if not provided
      */
     default PropertyAccessor<Supplier<T>> getLazyAccessor() {
-        return PropertyAccessor.forLazy(this);
+        return LazyPropertyAccess.forPropertyDescriptor(this);
     }
 
     /**

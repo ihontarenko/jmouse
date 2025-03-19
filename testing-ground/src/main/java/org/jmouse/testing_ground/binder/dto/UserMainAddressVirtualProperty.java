@@ -1,16 +1,28 @@
-package org.jmouse.core.bind;
+package org.jmouse.testing_ground.binder.dto;
 
-/**
- * Defines an interface for accessing and modifying an object's property.
- * <p>
- * Implementations of this interface provide mechanisms to inject and obtain values
- * dynamically from an object's properties. This is useful for frameworks that require
- * reflective or programmatic property manipulation.
- * </p>
- *
- * @param <T> the type of the object whose property is being accessed
- */
-public interface PropertyAccessor<T> {
+import org.jmouse.core.bind.VirtualProperty;
+
+public class UserMainAddressVirtualProperty implements VirtualProperty<User> {
+
+    /**
+     * Returns the instance type for which this virtual property is applicable.
+     *
+     * @return the {@link Class} representing the type T
+     */
+    @Override
+    public Class<User> getInstanceType() {
+        return User.class;
+    }
+
+    /**
+     * Returns the name of this property.
+     *
+     * @return the property name
+     */
+    @Override
+    public String getName() {
+        return "mainAddress";
+    }
 
     /**
      * Injects a value into the specified property of the given object.
@@ -22,7 +34,10 @@ public interface PropertyAccessor<T> {
      * @param value  the value to inject into the property
      * @throws IllegalArgumentException if the property is not writable
      */
-    void writeValue(T object, Object value);
+    @Override
+    public void writeValue(User object, Object value) {
+
+    }
 
     /**
      * Retrieves the current value of the specified property from the given object.
@@ -34,24 +49,20 @@ public interface PropertyAccessor<T> {
      * @param object the target object from which to retrieve the property value
      * @return the value of the property, or {@code null} if it cannot be accessed
      */
-    Object readValue(T object);
+    @Override
+    public Object readValue(User object) {
+        Address address = object.getAddress().getFirst();
+        return STR."\{address.getStreet()}, \{address.getCity()}";
+    }
 
     /**
      * Checks if the property is readable (i.e., has a getter).
      *
      * @return {@code true} if the property has a getter, {@code false} otherwise
      */
-    default boolean isReadable() {
-        return false;
-    }
-
-    /**
-     * Checks if the property is writable (i.e., has a setter).
-     *
-     * @return {@code true} if the property has a setter, {@code false} otherwise
-     */
-    default boolean isWritable() {
-        return false;
+    @Override
+    public boolean isReadable() {
+        return true;
     }
 
 }

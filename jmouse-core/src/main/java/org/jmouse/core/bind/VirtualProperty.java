@@ -9,7 +9,7 @@ package org.jmouse.core.bind;
  *
  * @param <T> the type of the object for which this virtual property applies
  */
-public interface VirtualProperty<T> {
+public interface VirtualProperty<T> extends PropertyAccessor<T> {
 
     /**
      * Returns the instance type for which this virtual property is applicable.
@@ -19,11 +19,10 @@ public interface VirtualProperty<T> {
     Class<T> getInstanceType();
 
     /**
-     * Computes and returns the value of this virtual property for the given object.
+     * Returns the name of this property.
      *
-     * @param object the object from which to derive the property value
-     * @param name   the name of the virtual property
-     * @return the computed value of the virtual property, or {@code null} if the property cannot be resolved
+     * @return the property name
      */
-    Object getValue(T object, String name);
+    String getName();
+
 }

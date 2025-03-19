@@ -20,16 +20,16 @@ public interface ObjectAccessorWrapper {
         /**
          * Sets the ObjectAccessorWrapper.
          *
-         * @param factory the factory to set
+         * @param wrapper the factory to set
          */
-        void setFactory(ObjectAccessorWrapper factory);
+        void setWrapper(ObjectAccessorWrapper wrapper);
 
         /**
          * Returns the ObjectAccessorWrapper.
          *
          * @return the ObjectAccessorWrapper
          */
-        ObjectAccessorWrapper getFactory();
+        ObjectAccessorWrapper getWrapper();
     }
 
 }

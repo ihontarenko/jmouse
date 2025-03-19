@@ -34,7 +34,7 @@ public final class Bind {
      * @return a new {@code Bind} instance
      */
     public static Bind with(Object data) {
-        return with(ObjectAccessor.wrap(data));
+        return with(ObjectAccessor.wrapObject(data));
     }
 
     /**

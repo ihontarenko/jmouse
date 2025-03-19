@@ -12,9 +12,7 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * or a key (for maps).
  * </p>
  */
-public class StandardTypesAccessor extends AbstractAccessor implements ObjectAccessorWrapper.Aware {
-
-    private ObjectAccessorWrapper factory;
+public class StandardTypesAccessor extends AbstractAccessor {
 
     /**
      * Creates a new {@link StandardTypesAccessor} with the given source object.
@@ -42,7 +40,7 @@ public class StandardTypesAccessor extends AbstractAccessor implements ObjectAcc
             value = asMap().get(name);
         }
 
-        return ObjectAccessor.wrap(value);
+        return wrap(value);
     }
 
     /**
@@ -65,8 +63,8 @@ public class StandardTypesAccessor extends AbstractAccessor implements ObjectAcc
             }
         } else if (isSet()) {
             Set<Object>      values   = asSet(Object.class);
-            Iterator<Object> iterator = values.iterator();
             int              count    = 0;
+            Iterator<Object> iterator = values.iterator();
             if (values.size() > index) {
                 while (iterator.hasNext()) {
                     value = iterator.next();
@@ -77,7 +75,7 @@ public class StandardTypesAccessor extends AbstractAccessor implements ObjectAcc
             }
         }
 
-        return ObjectAccessor.wrap(value);
+        return wrap(value);
     }
 
     /**
@@ -89,7 +87,7 @@ public class StandardTypesAccessor extends AbstractAccessor implements ObjectAcc
     @Override
     public void set(String name, Object value) {
         if (isMap()) {
-            asMap(String.class, Object.class).put(name, value);
+            asMap(Object.class, Object.class).put(name, value);
         }
     }
 
@@ -127,23 +125,5 @@ public class StandardTypesAccessor extends AbstractAccessor implements ObjectAcc
         return "%s: %s".formatted(getShortName(this), forInstance(unwrap()));
     }
 
-    /**
-     * Sets the ObjectAccessorWrapper.
-     *
-     * @param factory the factory to set
-     */
-    @Override
-    public void setFactory(ObjectAccessorWrapper factory) {
-        this.factory = factory;
-    }
 
-    /**
-     * Returns the ObjectAccessorWrapper.
-     *
-     * @return the ObjectAccessorWrapper
-     */
-    @Override
-    public ObjectAccessorWrapper getFactory() {
-        return factory;
-    }
 }
