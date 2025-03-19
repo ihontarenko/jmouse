@@ -1,5 +1,8 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.bind.accessor.DummyObjectAccessor;
+import org.jmouse.core.bind.accessor.NullObjectAccessor;
+
 import java.util.List;
 
 /**

@@ -1,8 +1,10 @@
-package org.jmouse.core.bind;
+package org.jmouse.core.bind.accessor;
 
+import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.ObjectAccessorProvider;
 import org.jmouse.core.reflection.TypeInformation;
 
-public class StandardTypesAccessorProvider implements ObjectAccessorProvider{
+public class StandardTypesAccessorProvider implements ObjectAccessorProvider {
 
     @Override
     public boolean supports(Object source) {

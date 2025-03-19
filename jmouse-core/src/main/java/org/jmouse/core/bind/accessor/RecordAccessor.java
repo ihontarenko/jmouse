@@ -1,5 +1,6 @@
-package org.jmouse.core.bind;
+package org.jmouse.core.bind.accessor;
 
+import org.jmouse.core.bind.AbstractBeanAccessor;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectIntrospector;
 

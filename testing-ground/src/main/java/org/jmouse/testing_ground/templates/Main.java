@@ -75,6 +75,7 @@ public class Main {
         Map<String, Object> destination = new HashMap<>();
 
         destination.put("level", 10);
+        destination.put("name", "Lalka");
 
         Bind.with(source).to(destination);
 
@@ -98,7 +99,7 @@ public class Main {
 
         scopedChain.setValue("user", List.of(Map.of("name", "Root!", "level", 333)));
         scopedChain.push();
-        scopedChain.setValue("user", List.of(Map.of("name", "Local!", "level", 999)));
+        scopedChain.setValue("user", List.of(destination));
 
         if (compiled instanceof ExpressionNode expressionNode) {
             Object value = expressionNode.evaluate(evaluationContext);

@@ -1,6 +1,5 @@
 package org.jmouse.el.node.expression;
 
-import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.AbstractExpressionNode;
 
@@ -18,8 +17,6 @@ public class PropertyNode extends AbstractExpressionNode {
 
     @Override
     public Object evaluate(EvaluationContext context) {
-        context.setValue(path, path);
-
         return context.getValue(getPath());
     }
 

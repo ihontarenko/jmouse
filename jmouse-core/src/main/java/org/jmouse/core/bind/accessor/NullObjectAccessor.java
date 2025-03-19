@@ -1,4 +1,8 @@
-package org.jmouse.core.bind;
+package org.jmouse.core.bind.accessor;
+
+import org.jmouse.core.bind.AbstractAccessor;
+import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.UnsupportedDataSourceException;
 
 public class NullObjectAccessor extends AbstractAccessor {
 

@@ -1,13 +1,17 @@
-package org.jmouse.core.bind;
+package org.jmouse.core.bind.accessor;
 
-public class PropertyValueResolverAccessor extends AbstractAccessor {
+import org.jmouse.core.bind.AbstractAccessor;
+import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.UnsupportedDataSourceException;
+
+public class DummyObjectAccessor extends AbstractAccessor {
 
     /**
      * Constructs an {@link AbstractAccessor} with the given source object.
      *
      * @param source the source object to wrap
      */
-    public PropertyValueResolverAccessor(PropertyValueResolver source) {
+    public DummyObjectAccessor(Object source) {
         super(source);
     }
 
@@ -19,7 +23,7 @@ public class PropertyValueResolverAccessor extends AbstractAccessor {
      */
     @Override
     public ObjectAccessor get(String name) {
-        return wrap(asType(PropertyValueResolver.class).getProperty(name));
+        throw new UnsupportedOperationException("DUMMY DATA SOURCE");
     }
 
     /**
@@ -30,9 +34,7 @@ public class PropertyValueResolverAccessor extends AbstractAccessor {
      */
     @Override
     public ObjectAccessor get(int index) {
-        throw new UnsupportedDataSourceException(
-                "Accessor '%s' does not support indexed accessing"
-                        .formatted(getClass().getName()));
+        throw new UnsupportedOperationException("DUMMY DATA SOURCE");
     }
 
     /**
@@ -43,20 +45,21 @@ public class PropertyValueResolverAccessor extends AbstractAccessor {
      */
     @Override
     public void set(String name, Object value) {
-        asType(PropertyValueResolver.class).setProperty(name, value);
+        throw new UnsupportedOperationException("DUMMY DATA SOURCE");
     }
 
     /**
      * Sets a property value by index.
      *
+     * <p>The default implementation throws an {@link UnsupportedDataSourceException},
+     * indicating that indexed access is not supported unless overridden by an implementation.</p>
+     *
      * @param index the property index
      * @param value the value to set
+     * @throws UnsupportedDataSourceException if indexed access is not supported
      */
     @Override
     public void set(int index, Object value) {
-        throw new UnsupportedDataSourceException(
-                "Accessor '%s' does not support indexed accessing"
-                        .formatted(getClass().getName()));
+        throw new UnsupportedOperationException("DUMMY DATA SOURCE");
     }
-
 }

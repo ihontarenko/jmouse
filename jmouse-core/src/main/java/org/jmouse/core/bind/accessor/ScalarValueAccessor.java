@@ -1,13 +1,16 @@
-package org.jmouse.core.bind;
+package org.jmouse.core.bind.accessor;
 
-public class DummyObjectAccessor extends AbstractAccessor {
+import org.jmouse.core.bind.AbstractAccessor;
+import org.jmouse.core.bind.ObjectAccessor;
+
+public class ScalarValueAccessor extends AbstractAccessor {
 
     /**
      * Constructs an {@link AbstractAccessor} with the given source object.
      *
      * @param source the source object to wrap
      */
-    public DummyObjectAccessor(Object source) {
+    public ScalarValueAccessor(Object source) {
         super(source);
     }
 
@@ -19,7 +22,7 @@ public class DummyObjectAccessor extends AbstractAccessor {
      */
     @Override
     public ObjectAccessor get(String name) {
-        throw new UnsupportedOperationException("DUMMY DATA SOURCE");
+        return null;
     }
 
     /**
@@ -30,7 +33,7 @@ public class DummyObjectAccessor extends AbstractAccessor {
      */
     @Override
     public ObjectAccessor get(int index) {
-        throw new UnsupportedOperationException("DUMMY DATA SOURCE");
+        return null;
     }
 
     /**
@@ -41,21 +44,18 @@ public class DummyObjectAccessor extends AbstractAccessor {
      */
     @Override
     public void set(String name, Object value) {
-        throw new UnsupportedOperationException("DUMMY DATA SOURCE");
+
     }
 
     /**
      * Sets a property value by index.
      *
-     * <p>The default implementation throws an {@link UnsupportedDataSourceException},
-     * indicating that indexed access is not supported unless overridden by an implementation.</p>
-     *
      * @param index the property index
      * @param value the value to set
-     * @throws UnsupportedDataSourceException if indexed access is not supported
      */
     @Override
     public void set(int index, Object value) {
-        throw new UnsupportedOperationException("DUMMY DATA SOURCE");
+
     }
+
 }

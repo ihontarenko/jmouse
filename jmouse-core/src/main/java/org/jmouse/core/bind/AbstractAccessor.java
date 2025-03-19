@@ -1,5 +1,7 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.bind.accessor.NullObjectAccessor;
+
 /**
  * An abstract base implementation of {@link ObjectAccessor}.
  * <p>

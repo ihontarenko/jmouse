@@ -1,8 +1,11 @@
-package org.jmouse.core.bind;
+package org.jmouse.core.bind.accessor;
 
+import org.jmouse.core.bind.AbstractAccessor;
+import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.PropertyAccessor;
+import org.jmouse.core.bind.UnsupportedDataSourceException;
 import org.jmouse.core.bind.descriptor.structured.map.MapDescriptor;
 import org.jmouse.core.bind.descriptor.structured.map.MapIntrospector;
-import org.jmouse.core.bind.descriptor.structured.map.MapPropertyDescriptor;
 
 import java.util.*;
 
@@ -94,10 +97,7 @@ public class StandardTypesAccessor extends AbstractAccessor {
             MapDescriptor<Object, Object> descriptor = new MapIntrospector<>(asMap(Object.class, Object.class))
                     .introspect().toDescriptor();
             PropertyAccessor<Map<Object, Object>> property = descriptor.getDefaultAccessor(name);
-            property.isWritable();
-            // todo:
             property.writeValue(asMap(Object.class, Object.class), value);
-//            asMap(Object.class, Object.class).put(name, value);
         }
     }
 

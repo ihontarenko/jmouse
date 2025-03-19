@@ -1,5 +1,7 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.bind.accessor.*;
+
 import java.util.List;
 
 /**

@@ -1,6 +1,11 @@
-package org.jmouse.core.bind;
+package org.jmouse.core.bind.accessor;
 
-public class PropertyValueResolverAccessorProvider implements ObjectAccessorProvider {
+import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.ObjectAccessorProvider;
+import org.jmouse.core.reflection.TypeInformation;
+
+public class ScalarValueAccessorProvider implements ObjectAccessorProvider {
+
     /**
      * Checks if this provider supports the given source object.
      *
@@ -9,7 +14,7 @@ public class PropertyValueResolverAccessorProvider implements ObjectAccessorProv
      */
     @Override
     public boolean supports(Object source) {
-        return source instanceof PropertyValueResolver;
+        return TypeInformation.forInstance(source).isScalar();
     }
 
     /**
@@ -20,7 +25,7 @@ public class PropertyValueResolverAccessorProvider implements ObjectAccessorProv
      */
     @Override
     public ObjectAccessor create(Object source) {
-        return new PropertyValueResolverAccessor((PropertyValueResolver) source);
+        return new ScalarValueAccessor(source);
     }
 
 }

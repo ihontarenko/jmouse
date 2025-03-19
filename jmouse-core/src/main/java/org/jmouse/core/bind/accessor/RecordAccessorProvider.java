@@ -1,5 +1,7 @@
-package org.jmouse.core.bind;
+package org.jmouse.core.bind.accessor;
 
+import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.ObjectAccessorProvider;
 import org.jmouse.core.reflection.TypeInformation;
 
 public class RecordAccessorProvider implements ObjectAccessorProvider {
