@@ -28,7 +28,7 @@ public class BasicAccessorWrapper implements ObjectAccessorWrapper {
     /**
      * Wraps the given source into a ObjectAccessor by delegating to the appropriate provider.
      * <p>
-     * If no provider supports the source, an UnsupportedDataSourceException is thrown.
+     * If no provider supports the source, an UnsupportedOperationException is thrown.
      * </p>
      *
      * @param source the source object to wrap

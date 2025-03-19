@@ -1,7 +1,7 @@
 package org.jmouse.core.bind.accessor;
 
 import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.UnsupportedDataSourceException;
+import org.jmouse.core.bind.UnsupportedOperationException;
 import org.jmouse.core.env.MapPropertySource;
 import org.jmouse.core.env.PropertyResolver;
 import org.jmouse.core.env.PropertySource;
@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class PropertyResolverAccessor implements ObjectAccessor {
 
-    private final StandardTypesAccessor delegate;
+    private final MapAccessor delegate;
 
     /**
      * Creates a new {@link PropertyResolverAccessor} by extracting properties
@@ -42,7 +42,7 @@ public class PropertyResolverAccessor implements ObjectAccessor {
         Map<String, Object> hierarchical = resolver.getRequiredProperty(temporaryKeyName, Map.class);
         resolver.removePropertySource(temporaryPropertySourceName);
 
-        this.delegate = new StandardTypesAccessor(hierarchical);
+        this.delegate = new MapAccessor(hierarchical);
     }
 
     /**
@@ -102,12 +102,12 @@ public class PropertyResolverAccessor implements ObjectAccessor {
     /**
      * Sets a property value by index.
      *
-     * <p>The default implementation throws an {@link UnsupportedDataSourceException},
+     * <p>The default implementation throws an {@link UnsupportedOperationException},
      * indicating that indexed access is not supported unless overridden by an implementation.</p>
      *
      * @param index the property index
      * @param value the value to set
-     * @throws UnsupportedDataSourceException if indexed access is not supported
+     * @throws UnsupportedOperationException if indexed access is not supported
      */
     @Override
     public void set(int index, Object value) {

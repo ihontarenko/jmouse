@@ -3,7 +3,7 @@ package org.jmouse.core.bind.accessor;
 import org.jmouse.core.bind.AbstractAccessor;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.PropertyValueResolver;
-import org.jmouse.core.bind.UnsupportedDataSourceException;
+import org.jmouse.core.bind.UnsupportedOperationException;
 
 /**
  * An ObjectAccessor implementation that wraps a {@link PropertyValueResolver}.
@@ -49,11 +49,11 @@ public class PropertyValueResolverAccessor extends AbstractAccessor {
      *
      * @param index the index of the nested data source
      * @return never returns normally
-     * @throws UnsupportedDataSourceException always, as indexed access is unsupported
+     * @throws UnsupportedOperationException always, as indexed access is unsupported
      */
     @Override
     public ObjectAccessor get(int index) {
-        throw new UnsupportedDataSourceException(
+        throw new UnsupportedOperationException(
                 "Accessor '%s' does not support indexed accessing"
                         .formatted(getClass().getName()));
     }
@@ -77,11 +77,11 @@ public class PropertyValueResolverAccessor extends AbstractAccessor {
      *
      * @param index the index of the property to set
      * @param value the value to set
-     * @throws UnsupportedDataSourceException always, as indexed access is unsupported
+     * @throws UnsupportedOperationException always, as indexed access is unsupported
      */
     @Override
     public void set(int index, Object value) {
-        throw new UnsupportedDataSourceException(
+        throw new UnsupportedOperationException(
                 "Accessor '%s' does not support indexed accessing"
                         .formatted(getClass().getName()));
     }

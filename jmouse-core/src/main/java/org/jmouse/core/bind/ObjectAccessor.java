@@ -88,12 +88,12 @@ public interface ObjectAccessor extends ClassTypeInspector {
     /**
      * Sets a property value by index.
      *
-     * <p>The default implementation throws an {@link UnsupportedDataSourceException},
+     * <p>The default implementation throws an {@link UnsupportedOperationException},
      * indicating that indexed access is not supported unless overridden by an implementation.</p>
      *
      * @param index the property index
      * @param value the value to set
-     * @throws UnsupportedDataSourceException if indexed access is not supported
+     * @throws UnsupportedOperationException if indexed access is not supported
      */
     void set(int index, Object value);
 

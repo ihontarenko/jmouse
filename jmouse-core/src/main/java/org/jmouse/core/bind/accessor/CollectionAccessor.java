@@ -3,11 +3,14 @@ package org.jmouse.core.bind.accessor;
 import org.jmouse.core.bind.AbstractAccessor;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.PropertyAccessor;
-import org.jmouse.core.bind.UnsupportedDataSourceException;
+import org.jmouse.core.bind.UnsupportedOperationException;
 import org.jmouse.core.bind.descriptor.structured.map.MapDescriptor;
 import org.jmouse.core.bind.descriptor.structured.map.MapIntrospector;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.jmouse.core.reflection.JavaType.forInstance;
 import static org.jmouse.core.reflection.Reflections.getShortName;
@@ -19,14 +22,14 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * or a key (for maps).
  * </p>
  */
-public class StandardTypesAccessor extends AbstractAccessor {
+public class CollectionAccessor extends AbstractAccessor {
 
     /**
-     * Creates a new {@link StandardTypesAccessor} with the given source object.
+     * Creates a new {@link CollectionAccessor} with the given source object.
      *
      * @param source the underlying data source (expected to be a {@link List} or {@link Map})
      */
-    public StandardTypesAccessor(Object source) {
+    public CollectionAccessor(Object source) {
         super(source);
     }
 
@@ -41,13 +44,9 @@ public class StandardTypesAccessor extends AbstractAccessor {
      */
     @Override
     public ObjectAccessor get(String name) {
-        Object value = null;
-
-        if (isMap()) {
-            value = asMap().get(name);
-        }
-
-        return wrap(value);
+        throw new UnsupportedOperationException(
+                "Accessor '%s' does not support named accessing"
+                        .formatted(getClass().getName()));
     }
 
     /**
@@ -93,23 +92,20 @@ public class StandardTypesAccessor extends AbstractAccessor {
      */
     @Override
     public void set(String name, Object value) {
-        if (isMap()) {
-            MapDescriptor<Object, Object> descriptor = new MapIntrospector<>(asMap(Object.class, Object.class))
-                    .introspect().toDescriptor();
-            PropertyAccessor<Map<Object, Object>> property = descriptor.getDefaultAccessor(name);
-            property.writeValue(asMap(Object.class, Object.class), value);
-        }
+        throw new UnsupportedOperationException(
+                "Accessor '%s' does not support named assigning"
+                        .formatted(getClass().getName()));
     }
 
     /**
      * Sets a property value by index.
      *
-     * <p>The default implementation throws an {@link UnsupportedDataSourceException},
+     * <p>The default implementation throws an {@link UnsupportedOperationException},
      * indicating that indexed access is not supported unless overridden by an implementation.</p>
      *
      * @param index the property index
      * @param value the value to set
-     * @throws UnsupportedDataSourceException if indexed access is not supported
+     * @throws UnsupportedOperationException if indexed access is not supported
      */
     @Override
     public void set(int index, Object value) {

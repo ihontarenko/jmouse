@@ -2,7 +2,7 @@ package org.jmouse.el.evaluation;
 
 import org.jmouse.core.bind.AbstractAccessor;
 import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.UnsupportedDataSourceException;
+import org.jmouse.core.bind.UnsupportedOperationException;
 
 public class ScopedChainValuesAccessor extends AbstractAccessor {
 
@@ -41,7 +41,7 @@ public class ScopedChainValuesAccessor extends AbstractAccessor {
      */
     @Override
     public ObjectAccessor get(int index) {
-        throw new UnsupportedDataSourceException(
+        throw new UnsupportedOperationException(
                 "Accessor '%s' does not support indexed accessing"
                         .formatted(getClass().getName()));
     }
@@ -59,7 +59,7 @@ public class ScopedChainValuesAccessor extends AbstractAccessor {
 
     @Override
     public void set(int index, Object value) {
-        throw new UnsupportedDataSourceException(
+        throw new UnsupportedOperationException(
                 "Accessor '%s' does not support indexed accessing"
                         .formatted(getClass().getName()));
     }

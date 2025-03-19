@@ -11,7 +11,7 @@ import java.util.List;
  * a variety of data source types, including standard types, Java Beans, records, and property resolvers.
  * The default constructor initializes the wrapper with the following providers:
  * <ul>
- *   <li>{@link StandardTypesAccessorProvider}</li>
+ *   <li>{@link MapAccessorProvider}</li>
  *   <li>{@link JavaBeanAccessorProvider}</li>
  *   <li>{@link RecordAccessorProvider}</li>
  *   <li>{@link PropertyResolverAccessorProvider}</li>
@@ -30,7 +30,8 @@ public class StandardAccessorWrapper extends BasicAccessorWrapper {
      */
     public StandardAccessorWrapper() {
         this(List.of(
-                new StandardTypesAccessorProvider(),
+                new MapAccessorProvider(),
+                new ScalarValueAccessorProvider(),
                 new PropertyValueResolverAccessorProvider(),
                 new JavaBeanAccessorProvider(),
                 new RecordAccessorProvider(),

@@ -51,16 +51,16 @@ abstract public class AbstractBeanAccessor extends AbstractAccessor {
     /**
      * Sets a property value by index.
      *
-     * <p>The default implementation throws an {@link UnsupportedDataSourceException},
+     * <p>The default implementation throws an {@link UnsupportedOperationException},
      * indicating that indexed access is not supported unless overridden by an implementation.</p>
      *
      * @param index the property index
      * @param value the value to set
-     * @throws UnsupportedDataSourceException if indexed access is not supported
+     * @throws UnsupportedOperationException if indexed access is not supported
      */
     @Override
     public void set(int index, Object value) {
-        throw new UnsupportedDataSourceException(
+        throw new UnsupportedOperationException(
                 "Accessor '%s' does not support indexed accessing"
                         .formatted(descriptor));
     }
@@ -89,11 +89,11 @@ abstract public class AbstractBeanAccessor extends AbstractAccessor {
      *
      * @param index the index to retrieve
      * @return never returns a value
-     * @throws UnsupportedDataSourceException always, since indexed access is not supported
+     * @throws UnsupportedOperationException always, since indexed access is not supported
      */
     @Override
     public ObjectAccessor get(int index) {
-        throw new UnsupportedDataSourceException(
+        throw new UnsupportedOperationException(
                 "Accessor '%s' does not support indexed accessing"
                         .formatted(descriptor));
     }

@@ -2,7 +2,7 @@ package org.jmouse.core.bind.accessor;
 
 import org.jmouse.core.bind.AbstractAccessor;
 import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.UnsupportedDataSourceException;
+import org.jmouse.core.bind.UnsupportedOperationException;
 
 public class DummyObjectAccessor extends AbstractAccessor {
 
@@ -23,7 +23,7 @@ public class DummyObjectAccessor extends AbstractAccessor {
      */
     @Override
     public ObjectAccessor get(String name) {
-        throw new UnsupportedOperationException("DUMMY DATA SOURCE");
+        throw new java.lang.UnsupportedOperationException("DUMMY DATA SOURCE");
     }
 
     /**
@@ -34,7 +34,7 @@ public class DummyObjectAccessor extends AbstractAccessor {
      */
     @Override
     public ObjectAccessor get(int index) {
-        throw new UnsupportedOperationException("DUMMY DATA SOURCE");
+        throw new java.lang.UnsupportedOperationException("DUMMY DATA SOURCE");
     }
 
     /**
@@ -45,21 +45,21 @@ public class DummyObjectAccessor extends AbstractAccessor {
      */
     @Override
     public void set(String name, Object value) {
-        throw new UnsupportedOperationException("DUMMY DATA SOURCE");
+        throw new java.lang.UnsupportedOperationException("DUMMY DATA SOURCE");
     }
 
     /**
      * Sets a property value by index.
      *
-     * <p>The default implementation throws an {@link UnsupportedDataSourceException},
+     * <p>The default implementation throws an {@link UnsupportedOperationException},
      * indicating that indexed access is not supported unless overridden by an implementation.</p>
      *
      * @param index the property index
      * @param value the value to set
-     * @throws UnsupportedDataSourceException if indexed access is not supported
+     * @throws UnsupportedOperationException if indexed access is not supported
      */
     @Override
     public void set(int index, Object value) {
-        throw new UnsupportedOperationException("DUMMY DATA SOURCE");
+        throw new java.lang.UnsupportedOperationException("DUMMY DATA SOURCE");
     }
 }

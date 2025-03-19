@@ -2,6 +2,7 @@ package org.jmouse.core.bind.accessor;
 
 import org.jmouse.core.bind.AbstractAccessor;
 import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.UnsupportedOperationException;
 
 public class ScalarValueAccessor extends AbstractAccessor {
 
@@ -22,7 +23,9 @@ public class ScalarValueAccessor extends AbstractAccessor {
      */
     @Override
     public ObjectAccessor get(String name) {
-        return null;
+        throw new UnsupportedOperationException(
+                "Accessor '%s' does not support indexed accessing"
+                        .formatted(getClass().getName()));
     }
 
     /**
@@ -33,7 +36,9 @@ public class ScalarValueAccessor extends AbstractAccessor {
      */
     @Override
     public ObjectAccessor get(int index) {
-        return null;
+        throw new UnsupportedOperationException(
+                "Accessor '%s' does not support indexed accessing"
+                        .formatted(getClass().getName()));
     }
 
     /**
@@ -44,7 +49,9 @@ public class ScalarValueAccessor extends AbstractAccessor {
      */
     @Override
     public void set(String name, Object value) {
-
+        throw new UnsupportedOperationException(
+                "Accessor '%s' does not support named assigning"
+                        .formatted(getClass().getName()));
     }
 
     /**
@@ -55,7 +62,9 @@ public class ScalarValueAccessor extends AbstractAccessor {
      */
     @Override
     public void set(int index, Object value) {
-
+        throw new UnsupportedOperationException(
+                "Accessor '%s' does not support indexed assigning"
+                        .formatted(getClass().getName()));
     }
 
 }
