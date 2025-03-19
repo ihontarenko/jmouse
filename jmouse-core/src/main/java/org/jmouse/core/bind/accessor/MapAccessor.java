@@ -21,6 +21,8 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  */
 public class MapAccessor extends AbstractAccessor {
 
+    private final MapDescriptor<Object, Object> descriptor;
+
     /**
      * Creates a new {@link MapAccessor} with the given source object.
      *
@@ -28,6 +30,7 @@ public class MapAccessor extends AbstractAccessor {
      */
     public MapAccessor(Object source) {
         super(source);
+        this.descriptor = new MapIntrospector<>(asMap(Object.class, Object.class)).introspect().toDescriptor();
     }
 
     /**
@@ -44,7 +47,7 @@ public class MapAccessor extends AbstractAccessor {
         Object value = null;
 
         if (isMap()) {
-            value = asMap().get(name);
+            value = descriptor.getDefaultAccessor(name).readValue(asMap(Object.class, Object.class));
         }
 
         return wrap(value);
@@ -75,10 +78,7 @@ public class MapAccessor extends AbstractAccessor {
     @Override
     public void set(String name, Object value) {
         if (isMap()) {
-            MapDescriptor<Object, Object> descriptor = new MapIntrospector<>(asMap(Object.class, Object.class))
-                    .introspect().toDescriptor();
-            PropertyAccessor<Map<Object, Object>> property = descriptor.getDefaultAccessor(name);
-            property.writeValue(asMap(Object.class, Object.class), value);
+            descriptor.getDefaultAccessor(name).writeValue(asMap(Object.class, Object.class), value);
         }
     }
 
@@ -95,7 +95,7 @@ public class MapAccessor extends AbstractAccessor {
     @Override
     public void set(int index, Object value) {
         throw new UnsupportedOperationException(
-                "Accessor '%s' does not support indexed accessing"
+                "Accessor '%s' does not support indexed assigning"
                         .formatted(getClass().getName()));
     }
 

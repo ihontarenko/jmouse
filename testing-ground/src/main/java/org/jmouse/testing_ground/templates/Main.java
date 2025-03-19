@@ -67,7 +67,7 @@ public class Main {
 //        TokenizableSource elString = new StringSource("el-string", "123 + user[0].level / 22");
 //        TokenizableSource elString = new StringSource("el-string", "22 / 7");
 //        TokenizableSource elString = new StringSource("el-string", "22 / 7 > 4");
-        TokenizableSource elString = new StringSource("el-string", "user[0].level");
+        TokenizableSource elString = new StringSource("el-string", "user[0].name");
         Recognizer<Token.Type, RawToken> elr = new EnumTokenRecognizer<>(BasicToken.class, 20);
         Lexer elLexer = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), elr));
 

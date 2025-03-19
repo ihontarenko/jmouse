@@ -2,7 +2,9 @@ package org.jmouse.core.bind;
 
 import org.jmouse.core.bind.accessor.DummyObjectAccessor;
 import org.jmouse.core.bind.accessor.NullObjectAccessor;
+import org.jmouse.util.Sorter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,7 +24,7 @@ public class BasicAccessorWrapper implements ObjectAccessorWrapper {
      * @param providers a list of ObjectAccessorProvider instances
      */
     public BasicAccessorWrapper(List<ObjectAccessorProvider> providers) {
-        this.providers = List.copyOf(providers);
+        this.providers = new ArrayList<>(List.copyOf(providers));
     }
 
     /**
@@ -40,6 +42,8 @@ public class BasicAccessorWrapper implements ObjectAccessorWrapper {
 
         if (source != null) {
             instance = new DummyObjectAccessor(source);
+
+            Sorter.sort(providers);
 
             for (ObjectAccessorProvider provider : providers) {
                 if (provider.supports(source)) {
