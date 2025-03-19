@@ -77,7 +77,6 @@ abstract public class AbstractBeanAccessor extends AbstractAccessor {
         PropertyDescriptor<Object> property = descriptor.getProperty(name);
 
         if (!descriptor.hasProperty(name)) {
-            // todo: consider to create virtual-property resolver
             throw new IllegalArgumentException(
                     "Accessor '%s' does not have property: '%s'.".formatted(descriptor, name));
         }

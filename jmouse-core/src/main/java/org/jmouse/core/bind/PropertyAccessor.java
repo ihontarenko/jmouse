@@ -17,30 +17,6 @@ import java.util.function.Supplier;
 public interface PropertyAccessor<T> {
 
     /**
-     * Injects a value into the specified property of the given object.
-     * <p>
-     * This method sets a new value for a property if the property is writable.
-     * </p>
-     *
-     * @param object the target object whose property will be modified
-     * @param value  the value to inject into the property
-     * @throws IllegalArgumentException if the property is not writable
-     */
-    void writeValue(T object, Object value);
-
-    /**
-     * Retrieves the current value of the specified property from the given object.
-     * <p>
-     * If the property is readable, this method returns its current value;
-     * otherwise, it may return {@code null}.
-     * </p>
-     *
-     * @param object the target object from which to retrieve the property value
-     * @return the value of the property, or {@code null} if it cannot be accessed
-     */
-    Object readValue(T object);
-
-    /**
      * Creates a direct (synchronous) PropertyAccessor based on the provided property descriptor.
      *
      * @param descriptor the descriptor of the property which includes getter and setter information
@@ -66,6 +42,30 @@ public interface PropertyAccessor<T> {
     }
 
     /**
+     * Injects a value into the specified property of the given object.
+     * <p>
+     * This method sets a new value for a property if the property is writable.
+     * </p>
+     *
+     * @param object the target object whose property will be modified
+     * @param value  the value to inject into the property
+     * @throws IllegalArgumentException if the property is not writable
+     */
+    void writeValue(T object, Object value);
+
+    /**
+     * Retrieves the current value of the specified property from the given object.
+     * <p>
+     * If the property is readable, this method returns its current value;
+     * otherwise, it may return {@code null}.
+     * </p>
+     *
+     * @param object the target object from which to retrieve the property value
+     * @return the value of the property, or {@code null} if it cannot be accessed
+     */
+    Object readValue(T object);
+
+    /**
      * Lazy implementation of a PropertyAccessor.
      * <p>
      * Uses a {@link Supplier} to defer obtaining the target object and delegates to a direct accessor.
@@ -76,7 +76,7 @@ public interface PropertyAccessor<T> {
     class LazyAccess<T> implements PropertyAccessor<Supplier<T>> {
 
         private final PropertyDescriptor<T> property;
-        private final PropertyAccessor<T> delegate;
+        private final PropertyAccessor<T>   delegate;
 
         /**
          * Constructs a LazyAccess instance with the specified property descriptor.

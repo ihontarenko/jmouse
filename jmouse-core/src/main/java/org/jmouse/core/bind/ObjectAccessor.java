@@ -1,6 +1,5 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.env.PropertyResolver;
 import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.core.reflection.JavaType;
 
@@ -29,23 +28,6 @@ public interface ObjectAccessor extends ClassTypeInspector {
      */
     static ObjectAccessor wrap(Object source) {
         return null;
-//        ObjectAccessor instance = new DummyObjectAccessor(source);
-//
-//        if (instance.isInstanceOf(PropertyResolver.class)) {
-//            instance = new PropertyResolverAccessor((PropertyResolver) source);
-//        } else if (instance.isBean()) {
-//            instance = new JavaBeanAccessor(source);
-//        } else if (instance.isValueObject()) {
-//            instance = new ValueObjectAccessor(source);
-//        } else if (instance.isScalar() || instance.isCollection() || instance.isMap() || instance.isArray()) {
-//            instance = new StandardTypesAccessor(instance.unwrap());
-//        }
-//
-//        if (instance.isNull()) {
-//            instance = new NullObjectAccessor();
-//        }
-//
-//        return instance;
     }
 
     /**

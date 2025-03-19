@@ -12,7 +12,9 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * or a key (for maps).
  * </p>
  */
-public class StandardTypesAccessor extends AbstractAccessor {
+public class StandardTypesAccessor extends AbstractAccessor implements ObjectAccessorWrapper.Aware {
+
+    private ObjectAccessorWrapper factory;
 
     /**
      * Creates a new {@link StandardTypesAccessor} with the given source object.
@@ -123,5 +125,25 @@ public class StandardTypesAccessor extends AbstractAccessor {
     @Override
     public String toString() {
         return "%s: %s".formatted(getShortName(this), forInstance(unwrap()));
+    }
+
+    /**
+     * Sets the ObjectAccessorWrapper.
+     *
+     * @param factory the factory to set
+     */
+    @Override
+    public void setFactory(ObjectAccessorWrapper factory) {
+        this.factory = factory;
+    }
+
+    /**
+     * Returns the ObjectAccessorWrapper.
+     *
+     * @return the ObjectAccessorWrapper
+     */
+    @Override
+    public ObjectAccessorWrapper getFactory() {
+        return factory;
     }
 }

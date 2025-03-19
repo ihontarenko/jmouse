@@ -3,7 +3,7 @@ package org.jmouse.core.bind;
 /**
  * A factory interface for creating ObjectAccessor instances.
  */
-public interface ObjectAccessorFactory {
+public interface ObjectAccessorWrapper {
     /**
      * Wraps the given source object into an ObjectAccessor.
      *
@@ -18,18 +18,18 @@ public interface ObjectAccessorFactory {
      */
     interface Aware {
         /**
-         * Sets the ObjectAccessorFactory.
+         * Sets the ObjectAccessorWrapper.
          *
          * @param factory the factory to set
          */
-        void setFactory(ObjectAccessorFactory factory);
+        void setFactory(ObjectAccessorWrapper factory);
 
         /**
-         * Returns the ObjectAccessorFactory.
+         * Returns the ObjectAccessorWrapper.
          *
-         * @return the ObjectAccessorFactory
+         * @return the ObjectAccessorWrapper
          */
-        ObjectAccessorFactory getFactory();
+        ObjectAccessorWrapper getFactory();
     }
 
 }

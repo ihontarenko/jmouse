@@ -9,7 +9,7 @@ import java.util.List;
  * whether they support a given source and create an accessor accordingly.
  * </p>
  */
-public class BasicAccessorFactory implements ObjectAccessorFactory {
+public class BasicAccessorWrapper implements ObjectAccessorWrapper {
 
     protected final List<ObjectAccessorProvider> providers;
 
@@ -18,7 +18,7 @@ public class BasicAccessorFactory implements ObjectAccessorFactory {
      *
      * @param providers a list of ObjectAccessorProvider instances
      */
-    public BasicAccessorFactory(List<ObjectAccessorProvider> providers) {
+    public BasicAccessorWrapper(List<ObjectAccessorProvider> providers) {
         this.providers = List.copyOf(providers);
     }
 
@@ -45,7 +45,7 @@ public class BasicAccessorFactory implements ObjectAccessorFactory {
                 }
             }
 
-            if (instance instanceof ObjectAccessorFactory.Aware aware) {
+            if (instance instanceof ObjectAccessorWrapper.Aware aware) {
                 aware.setFactory(this);
             }
         }

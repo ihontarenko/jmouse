@@ -4,7 +4,6 @@ import org.jmouse.core.bind.*;
 import org.jmouse.core.bind.introspection.structured.ObjectDescriptor;
 import org.jmouse.core.bind.introspection.structured.jb.JavaBeanIntrospector;
 import org.jmouse.testing_ground.binder.dto.*;
-import org.jmouse.util.Getter;
 import org.jmouse.util.Setter;
 
 import java.util.ArrayList;
@@ -43,7 +42,7 @@ public class Example {
         data.put("books", books);
         data.put("address", addresses);
 
-        ObjectAccessorFactory factory = new StandardAccessorFactory();
+        ObjectAccessorWrapper factory = new StandardAccessorWrapper();
 
 
 

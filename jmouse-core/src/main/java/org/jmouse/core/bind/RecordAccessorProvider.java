@@ -2,7 +2,7 @@ package org.jmouse.core.bind;
 
 import org.jmouse.core.reflection.TypeInformation;
 
-public class RecordObjectAccessorProvider implements ObjectAccessorProvider {
+public class RecordAccessorProvider implements ObjectAccessorProvider {
 
     @Override
     public boolean supports(Object source) {
@@ -11,7 +11,7 @@ public class RecordObjectAccessorProvider implements ObjectAccessorProvider {
 
     @Override
     public ObjectAccessor create(Object source) {
-        return new ValueObjectAccessor(source);
+        return new RecordAccessor(source);
     }
 
 }

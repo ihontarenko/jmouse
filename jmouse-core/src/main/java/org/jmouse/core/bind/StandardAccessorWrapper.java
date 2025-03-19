@@ -2,18 +2,18 @@ package org.jmouse.core.bind;
 
 import java.util.List;
 
-public class StandardAccessorFactory extends BasicAccessorFactory {
+public class StandardAccessorWrapper extends BasicAccessorWrapper {
 
-    public StandardAccessorFactory() {
+    public StandardAccessorWrapper() {
         this(List.of(
                 new StandardTypesAccessorProvider(),
-                new RecordObjectAccessorProvider(),
                 new JavaBeanAccessorProvider(),
+                new RecordAccessorProvider(),
                 new PropertyResolverAccessorProvider()
         ));
     }
 
-    public StandardAccessorFactory(List<ObjectAccessorProvider> providers) {
+    public StandardAccessorWrapper(List<ObjectAccessorProvider> providers) {
         super(providers);
     }
 
