@@ -73,7 +73,8 @@ public class MapIntrospector<K, V>
      * @return this introspector instance for method chaining
      */
     public MapIntrospector<K, V> properties() {
-        Map<K, V> kvMap = container.getTarget();
+        Map<K, V>           kvMap  = container.getTarget();
+        MapDescriptor<K, V> parent = toDescriptor();
 
         for (Map.Entry<K, V> kvEntry : kvMap.entrySet()) {
             MapPropertyIntrospector<K, V> introspector = new MapPropertyIntrospector<>(kvMap);
@@ -92,7 +93,7 @@ public class MapIntrospector<K, V>
             introspector.keyType(keyType).valueType(valueType);
             introspector.getter(key).setter(key).name(key.toString());
 
-            container.addProperty(introspector.toDescriptor());
+            container.addProperty(introspector.owner(parent).toDescriptor());
         }
 
         return self();

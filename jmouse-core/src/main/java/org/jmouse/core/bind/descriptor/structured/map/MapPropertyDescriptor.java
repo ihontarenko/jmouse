@@ -39,6 +39,16 @@ public class MapPropertyDescriptor<K, V>
     }
 
     /**
+     * Checks if the property is writable (i.e., has a setter).
+     *
+     * @return {@code true} if the property has a setter, {@code false} otherwise
+     */
+    @Override
+    public boolean isWritable() {
+        return PropertyDescriptor.super.isWritable() && !getOwner().getType().getClassType().getName().contains("Immutable");
+    }
+
+    /**
      * Returns the type descriptor of the map key.
      *
      * @return the key type descriptor

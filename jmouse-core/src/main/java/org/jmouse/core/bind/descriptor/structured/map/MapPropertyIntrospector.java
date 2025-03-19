@@ -2,6 +2,8 @@ package org.jmouse.core.bind.descriptor.structured.map;
 
 import org.jmouse.core.bind.descriptor.AbstractIntrospector;
 import org.jmouse.core.bind.descriptor.ClassTypeDescriptor;
+import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanDescriptor;
+import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanPropertyIntrospector;
 import org.jmouse.util.Getter;
 import org.jmouse.util.Setter;
 
@@ -93,6 +95,17 @@ public class MapPropertyIntrospector<K, V>
      * @return this introspector instance
      */
     public MapPropertyIntrospector<K, V> type(ClassTypeDescriptor type) {
+        return self();
+    }
+
+    /**
+     * Sets the owner descriptor for the property.
+     *
+     * @param descriptor the MapDescriptor descriptor
+     * @return this introspector instance
+     */
+    public MapPropertyIntrospector<K, V> owner(MapDescriptor<K, V> descriptor) {
+        container.setOwner(descriptor);
         return self();
     }
 
