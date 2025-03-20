@@ -42,7 +42,7 @@ public class ExpressionParser implements Parser {
             cursor.expect(T_IDENTIFIER);
             Node right = context.getParser(FilterParser.class).parse(cursor, context);
             if (right instanceof FilterNode filter) {
-                filter.setLeft(left);
+                filter.setLeft((ExpressionNode) left);
                 left = filter;
             }
         }

@@ -6,6 +6,7 @@ import org.jmouse.el.StringSource;
 import org.jmouse.el.evaluation.DefaultEvaluationContext;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.ScopedChain;
+import org.jmouse.el.extension.StandardExtension;
 import org.jmouse.el.lexer.recognizer.CompositeRecognizer;
 import org.jmouse.el.lexer.recognizer.EnumTokenRecognizer;
 import org.jmouse.el.lexer.recognizer.Recognizer;
@@ -68,7 +69,7 @@ public class Main {
 //        TokenizableSource elString = new StringSource("el-string", "22 / 7");
 //        TokenizableSource elString = new StringSource("el-string", "22 / 7 > 3");
 //        TokenizableSource elString = new StringSource("el-string", "2 + (2 + 2) * 2 / 3 (22 / 7) is odd");
-        TokenizableSource elString = new StringSource("el-string", "(++cnt / 2 >= 5.5) is bool");
+        TokenizableSource elString = new StringSource("el-string", "++cnt / 2 is odd(22 / 7)");
         Recognizer<Token.Type, RawToken> elr = new EnumTokenRecognizer<>(BasicToken.class, 20);
         Lexer elLexer = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), elr));
 
@@ -94,7 +95,7 @@ public class Main {
 
         EvaluationContext evaluationContext = new DefaultEvaluationContext();
 
-        evaluationContext.getExtensions().importExtension(new CoreExtension());
+        evaluationContext.getExtensions().importExtension(new StandardExtension());
 
         ScopedChain scopedChain = evaluationContext.getScopedChain();
 

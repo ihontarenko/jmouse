@@ -1,14 +1,17 @@
 package org.jmouse.el.node.expression;
 
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.extension.Arguments;
+import org.jmouse.el.extension.Test;
 import org.jmouse.el.node.AbstractExpressionNode;
-import org.jmouse.el.node.Node;
+import org.jmouse.el.node.ExpressionNode;
 
 public class TestNode extends AbstractExpressionNode {
 
-    private final String  name;
-    private       Node    arguments;
-    private       boolean negated;
+    private final String         name;
+    private       ExpressionNode arguments;
+    private       ExpressionNode left;
+    private       boolean        negated;
 
     public TestNode(String name) {
         this.name = name;
@@ -18,11 +21,11 @@ public class TestNode extends AbstractExpressionNode {
         return name;
     }
 
-    public Node getArguments() {
+    public ExpressionNode getArguments() {
         return arguments;
     }
 
-    public void setArguments(Node arguments) {
+    public void setArguments(ExpressionNode arguments) {
         this.arguments = arguments;
     }
 
@@ -34,20 +37,31 @@ public class TestNode extends AbstractExpressionNode {
         this.negated = negated;
     }
 
-    /**
-     * 🏗️ Evaluates the expression within the given context.
-     *
-     * @param context 🎛️ The evaluation context containing variables and functions.
-     * @return 📤 The result of evaluating the expression.
-     * @throws UnsupportedOperationException if evaluation is not implemented.
-     */
+    public ExpressionNode getLeft() {
+        return left;
+    }
+
+    public void setLeft(ExpressionNode left) {
+        this.left = left;
+    }
+
     @Override
     public Object evaluate(EvaluationContext context) {
-        return context.getExtensions().getTest(getName());
+        Arguments arguments = Arguments.empty();
+        Test      test      = context.getExtensions().getTest(getName());
+        Object    instance  = getLeft().evaluate(context);
+
+        if (getArguments() != null) {
+            if (getArguments().evaluate(context) instanceof Object[] array) {
+                arguments = Arguments.forArray(array);
+            }
+        }
+
+        return isNegated() != test.test(instance, arguments, context);
     }
 
     @Override
     public String toString() {
-        return "%s%s?".formatted(negated ? "!" : "", name);
+        return "IS %s %s%s".formatted(left, negated ? "NOT " : "", name);
     }
 }

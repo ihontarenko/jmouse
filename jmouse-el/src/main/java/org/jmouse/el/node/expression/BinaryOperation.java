@@ -76,6 +76,7 @@ public class BinaryOperation extends AbstractExpressionNode {
 
     @Override
     public Object evaluate(EvaluationContext context) {
+        Object result = null;
         Object left  = getLeft().evaluate(context);
         Object right = getRight().evaluate(context);
 
@@ -85,7 +86,9 @@ public class BinaryOperation extends AbstractExpressionNode {
             right = conversion.convert(right, left.getClass());
         }
 
-        return operator.getCalculator().calculate(left, right);
+        result = operator.getCalculator().calculate(left, right);
+
+        return result;
     }
 
     @Override

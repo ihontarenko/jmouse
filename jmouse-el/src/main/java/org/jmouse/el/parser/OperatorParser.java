@@ -7,6 +7,7 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.BinaryOperation;
+import org.jmouse.el.node.expression.TestNode;
 
 import static org.jmouse.el.lexer.BasicToken.*;
 
@@ -63,17 +64,16 @@ public class OperatorParser implements Parser {
                 break;
             }
 
-            cursor.next(); // Consume operator
-
-            ExpressionNode right;
+            cursor.next();
 
             if (operator == TestOperator.IS) {
-                right = (ExpressionNode) context.getParser(TestParser.class).parse(cursor, context);
+                TestNode test = (TestNode) context.getParser(TestParser.class).parse(cursor, context);
+                test.setLeft(left);
+                left = test;
             } else {
-                right = parseExpression(cursor, context, operator.getPrecedence() + 1);
+                ExpressionNode right = parseExpression(cursor, context, operator.getPrecedence() + 1);
+                left = new BinaryOperation(left, operator, right);
             }
-
-            left = new BinaryOperation(left, operator, right);
         }
 
         return left;
