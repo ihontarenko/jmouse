@@ -66,8 +66,9 @@ public class Main {
 //        TokenizableSource elString = new StringSource("el-string", "1 | toInt(-1) | toBigInt is not int(1++) || x is even or data.users[0].name | trim is odd");
 //        TokenizableSource elString = new StringSource("el-string", "123 + user[0].level / 22");
 //        TokenizableSource elString = new StringSource("el-string", "22 / 7");
-//        TokenizableSource elString = new StringSource("el-string", "22 / 7 > 4");
-        TokenizableSource elString = new StringSource("el-string", "user[0].name");
+//        TokenizableSource elString = new StringSource("el-string", "22 / 7 > 3");
+//        TokenizableSource elString = new StringSource("el-string", "2 + (2 + 2) * 2 / 3 (22 / 7) is odd");
+        TokenizableSource elString = new StringSource("el-string", "(++cnt / 2 >= 5.5) is bool");
         Recognizer<Token.Type, RawToken> elr = new EnumTokenRecognizer<>(BasicToken.class, 20);
         Lexer elLexer = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), elr));
 
@@ -98,8 +99,9 @@ public class Main {
         ScopedChain scopedChain = evaluationContext.getScopedChain();
 
         scopedChain.setValue("user", List.of(Map.of("name", "Root!", "level", 333)));
-        scopedChain.push();
-        scopedChain.setValue("user", List.of(destination));
+        scopedChain.setValue("cnt", 10D);
+//        scopedChain.push();
+//        scopedChain.setValue("user", List.of(destination));
 
         if (compiled instanceof ExpressionNode expressionNode) {
             Object value = expressionNode.evaluate(evaluationContext);

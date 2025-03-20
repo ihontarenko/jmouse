@@ -1,8 +1,13 @@
 package org.jmouse.el.node.expression.unary;
 
+import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Operator;
 import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.expression.PropertyNode;
 import org.jmouse.el.node.expression.UnaryOperation;
+
+import static org.jmouse.el.extension.operator.UnaryOperator.DECREMENT;
+import static org.jmouse.el.extension.operator.UnaryOperator.INCREMENT;
 
 /**
  * Represents a postfix unary operation in the Abstract Syntax Tree (AST).
@@ -23,5 +28,23 @@ public class PostfixUnaryOperation extends UnaryOperation {
      */
     public PostfixUnaryOperation(ExpressionNode operand, Operator operator) {
         super(operand, operator);
+    }
+
+    @Override
+    public Object evaluate(EvaluationContext context) {
+        Object value = operand.evaluate(context);
+
+        if (operand instanceof PropertyNode property && (operator == INCREMENT || operator == DECREMENT)) {
+            Class<?> originalType = value.getClass();
+            context.setValue(property.getPath(), context.getConversion().convert(
+                    operator.getCalculator().calculate(value), originalType));
+        }
+
+        return value;
+    }
+
+    @Override
+    public String toString() {
+        return "( %s %s )".formatted(operand, operator.getName());
     }
 }

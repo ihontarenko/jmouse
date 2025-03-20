@@ -22,12 +22,12 @@ abstract public class UnaryOperation extends AbstractExpressionNode {
      * <p>This field can represent operations such as increment, decrement, unary plus, or unary minus,
      * and is represented using a {@link Operator} value.</p>
      */
-    private final Operator operator;
+    protected final Operator operator;
 
     /**
      * The operand on which the unary operation is applied.
      */
-    private final ExpressionNode operand;
+    protected final ExpressionNode operand;
 
     /**
      * Constructs a {@code UnaryOperation} node with the specified operand and operator.
