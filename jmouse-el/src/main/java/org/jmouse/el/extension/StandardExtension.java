@@ -1,12 +1,18 @@
 package org.jmouse.el.extension;
 
+import org.jmouse.el.extension.filter.LowerFilter;
+import org.jmouse.el.extension.filter.UpperFilter;
 import org.jmouse.el.extension.function.MaxFunction;
 import org.jmouse.el.extension.function.MinFunction;
+import org.jmouse.el.extension.function.SetFunction;
 import org.jmouse.el.extension.operator.*;
+import org.jmouse.el.extension.test.ArrayTest;
 import org.jmouse.el.extension.test.EvenTest;
+import org.jmouse.el.extension.test.MapTest;
 import org.jmouse.el.extension.test.OddTest;
 import org.jmouse.el.parser.*;
 import org.jmouse.el.parser.sub.ArgumentsParser;
+import org.jmouse.el.parser.sub.KeyValueParser;
 import org.jmouse.el.parser.sub.ParenthesesParser;
 
 import java.util.ArrayList;
@@ -19,7 +25,16 @@ public class StandardExtension implements Extension {
     public List<Function> getFunctions() {
         return List.of(
                 new MinFunction(),
-                new MaxFunction()
+                new MaxFunction(),
+                new SetFunction()
+        );
+    }
+
+    @Override
+    public List<Filter> getFilters() {
+        return List.of(
+                new LowerFilter(),
+                new UpperFilter()
         );
     }
 
@@ -27,7 +42,9 @@ public class StandardExtension implements Extension {
     public List<Test> getTests() {
         return List.of(
                 new EvenTest(),
-                new OddTest()
+                new OddTest(),
+                new ArrayTest(),
+                new MapTest()
         );
     }
 
@@ -41,6 +58,9 @@ public class StandardExtension implements Extension {
                 new FilterParser(),
                 new PropertyParser(),
                 new LiteralParser(),
+                new ArrayParser(),
+                new MapParser(),
+                new KeyValueParser(),
                 new ParenthesesParser(),
                 new ArgumentsParser()
         );

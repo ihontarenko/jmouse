@@ -2,6 +2,7 @@ package org.jmouse.el.parser;
 
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.FunctionNode;
 import org.jmouse.el.parser.sub.ArgumentsParser;
@@ -32,7 +33,7 @@ public class FunctionParser implements Parser {
 
         if (cursor.isCurrent(BasicToken.T_OPEN_PAREN)) {
             context.setOptions(ParserOptions.withNextParser(ArgumentsParser.class));
-            function.setArguments(context.getParser(ParenthesesParser.class).parse(cursor, context));
+            function.setArguments((ExpressionNode)context.getParser(ParenthesesParser.class).parse(cursor, context));
             context.clearOptions();
         }
 

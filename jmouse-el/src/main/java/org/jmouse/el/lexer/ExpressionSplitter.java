@@ -26,7 +26,7 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
             "\\s*(?:(?<IDENTIFIER>[a-zA-Z_][a-zA-Z0-9_]*)" +
             "|(?<NUMBER>(?<!\\d)([+-]?\\d+(\\.\\d+)?([Ee][+-]?\\d+)?))" +
             "|(?<STRING>'[^']*'|\"[^\"]*\")" +
-            "|(?<OPERATOR><=|>=|!=|==|&&|\\|\\||-=|\\+=|\\+\\+|--|[-+*/%^><=!])" +
+            "|(?<OPERATOR><=|>=|!=|==|&&|\\|\\||-=|\\+=|\\+\\+|--|\\*\\*|[-+*/%^><=!])" +
             "|(?<OTHER>\\S))"
     );
 

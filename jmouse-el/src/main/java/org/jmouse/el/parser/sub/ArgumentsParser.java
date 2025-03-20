@@ -4,24 +4,46 @@ import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.ArgumentsNode;
+import org.jmouse.el.parser.OperatorParser;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContext;
-import org.jmouse.el.parser.OperatorParser;
 
+/**
+ * Parses a comma-separated list of arguments.
+ * <p>
+ * This parser uses an {@link OperatorParser} (from the context) to parse each argument
+ * and aggregates them into an {@link ArgumentsNode}.
+ * </p>
+ */
 public class ArgumentsParser implements Parser {
 
+    /**
+     * Parses arguments from the token stream and adds them to the given parent node.
+     *
+     * @param cursor  the token cursor
+     * @param parent  the node to which parsed arguments are added
+     * @param context the parser context for obtaining sub-parsers
+     */
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
-        Node   arguments = new ArgumentsNode();
-        Parser parser    = context.getParser(OperatorParser.class);
-
+        Parser parser = context.getParser(OperatorParser.class);
         do {
             Node argument = parser.parse(cursor, context);
-            arguments.add(argument);
+            parent.add(argument);
         } while (cursor.isCurrent(BasicToken.T_COMMA) && cursor.next() != null);
-
-        parent.add(arguments);
     }
 
+    /**
+     * Parses arguments and returns them as an {@link ArgumentsNode}.
+     *
+     * @param cursor  the token cursor
+     * @param context the parser context for obtaining sub-parsers
+     * @return an ArgumentsNode containing the parsed arguments
+     */
+    @Override
+    public Node parse(TokenCursor cursor, ParserContext context) {
+        Node arguments = new ArgumentsNode();
+        parse(cursor, arguments, context);
+        return arguments;
+    }
 }
-

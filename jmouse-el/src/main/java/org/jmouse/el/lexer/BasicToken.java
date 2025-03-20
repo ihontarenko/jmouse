@@ -45,6 +45,7 @@ public enum BasicToken implements Token.Type {
     T_DIVIDE_ASSIGN(6150, "/="),
     T_INCREMENT(6160, "++"),
     T_DECREMENT(6170, "--"),
+    T_EXPONENTIAL(6180, "**"),
 
     // Arithmetic operators and punctuation (Group 2000)
     T_PLUS(2030, "+"),

@@ -54,10 +54,10 @@ public enum MathematicOperator implements Operator {
      */
     MODULUS(MathematicCalculator.MODULUS, BasicToken.T_PERCENT, "MODULUS", 20),
     /**
-     * 🔼 Exponential operator (`^`), used for power calculations.
+     * 🔼 Exponential operator (`**`), used for power calculations.
      * Precedence: 30 (highest among binary operators)
      */
-    EXPONENTIAL(MathematicCalculator.EXPONENTIAL, BasicToken.T_CARET, "EXPONENTIAL", 30);
+    EXPONENTIAL(MathematicCalculator.EXPONENTIAL, BasicToken.T_EXPONENTIAL, "EXPONENTIAL", 30);
 
     private final Calculator<Number> calculator;
     private final Token.Type         type;

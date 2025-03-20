@@ -12,7 +12,7 @@ import org.jmouse.el.lexer.recognizer.EnumTokenRecognizer;
 import org.jmouse.el.lexer.recognizer.Recognizer;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.parser.OperatorParser;
-import org.jmouse.template.CoreExtension;
+import org.jmouse.template.TemplateCoreExtension;
 import org.jmouse.el.lexer.*;
 import org.jmouse.el.parser.DefaultParserContext;
 import org.jmouse.el.parser.ParserContext;
@@ -69,7 +69,9 @@ public class Main {
 //        TokenizableSource elString = new StringSource("el-string", "22 / 7");
 //        TokenizableSource elString = new StringSource("el-string", "22 / 7 > 3");
 //        TokenizableSource elString = new StringSource("el-string", "2 + (2 + 2) * 2 / 3 (22 / 7) is odd");
-        TokenizableSource elString = new StringSource("el-string", "++cnt / 2 is odd(22 / 7)");
+//        TokenizableSource elString = new StringSource("el-string", "++cnt / 2 is odd");
+//        TokenizableSource elString = new StringSource("el-string", "[1, '2', 3.14] is array");
+        TokenizableSource elString = new StringSource("el-string", "set('_map', {'name': 'John', 'level': 321 ** 3 / 33, 'min': min(123, 111)})");
         Recognizer<Token.Type, RawToken> elr = new EnumTokenRecognizer<>(BasicToken.class, 20);
         Lexer elLexer = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), elr));
 
@@ -87,7 +89,7 @@ public class Main {
 
         ParserContext parserContext = new DefaultParserContext();
 
-        parserContext.importExtension(new CoreExtension());
+        parserContext.importExtension(new TemplateCoreExtension());
 
         cursor.next();
         elCursor.next();

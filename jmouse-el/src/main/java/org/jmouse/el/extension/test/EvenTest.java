@@ -12,8 +12,8 @@ public class EvenTest extends AbstractTest {
      * Evaluates whether the provided instance represents an even number.
      */
     @Override
-    public boolean test(Object instance, Arguments arguments, EvaluationContext context) {
-        Double number = context.getConversion().convert(instance, Double.class);
+    public boolean test(Object value, Arguments arguments, EvaluationContext context) {
+        Double number = context.getConversion().convert(value, Double.class);
         return number % 2 == 0;
     }
 

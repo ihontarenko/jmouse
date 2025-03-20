@@ -9,11 +9,11 @@ import org.jmouse.el.evaluation.EvaluationContext;
 public class OddTest extends AbstractTest {
 
     /**
-     * Evaluates whether the given instance satisfies the odd condition.
+     * Evaluates whether the given value satisfies the odd condition.
      */
     @Override
-    public boolean test(Object instance, Arguments arguments, EvaluationContext context) {
-        return !new EvenTest().test(instance, arguments, context);
+    public boolean test(Object value, Arguments arguments, EvaluationContext context) {
+        return !new EvenTest().test(value, arguments, context);
     }
 
     /**

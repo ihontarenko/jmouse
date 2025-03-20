@@ -30,6 +30,10 @@ public class ExpressionParser implements Parser {
             left = new PrefixUnaryOperation((ExpressionNode) parse(cursor, context), context.getOperator(token.type()));
         } else if (cursor.matchesSequence(T_IDENTIFIER)) {
             left = context.getParser(PropertyParser.class).parse(cursor, context);
+        } else if (cursor.isCurrent(T_OPEN_BRACKET)) {
+            left = context.getParser(ArrayParser.class).parse(cursor, context);
+        } else if (cursor.isCurrent(T_OPEN_CURLY)) {
+            left = context.getParser(MapParser.class).parse(cursor, context);
         }
 
         if (cursor.isCurrent(T_DECREMENT, T_INCREMENT)) {

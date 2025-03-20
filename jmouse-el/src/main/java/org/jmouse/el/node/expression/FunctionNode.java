@@ -1,31 +1,98 @@
 package org.jmouse.el.node.expression;
 
+import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.evaluation.EvaluationException;
+import org.jmouse.el.extension.Arguments;
+import org.jmouse.el.extension.Function;
 import org.jmouse.el.node.AbstractExpressionNode;
-import org.jmouse.el.node.Node;
+import org.jmouse.el.node.ExpressionNode;
 
+/**
+ * Represents a function call expression node.
+ * <p>
+ * This node retrieves a function by name from the extension container, evaluates its arguments,
+ * and then executes the function with those arguments in the given evaluation context.
+ * </p>
+ */
 public class FunctionNode extends AbstractExpressionNode {
 
-    private final String name;
-    private       Node   arguments;
+    private final String         name;
+    private       ExpressionNode arguments;
 
+    /**
+     * Constructs a FunctionNode with the specified function name.
+     *
+     * @param name the name of the function to be called
+     */
     public FunctionNode(String name) {
         this.name = name;
     }
 
+    /**
+     * Returns the name of the function.
+     *
+     * @return the function name
+     */
     public String getName() {
         return name;
     }
 
-    public Node getArguments() {
+    /**
+     * Returns the expression node representing the function arguments.
+     *
+     * @return the arguments node, or {@code null} if no arguments are provided
+     */
+    public ExpressionNode getArguments() {
         return arguments;
     }
 
-    public void setArguments(Node arguments) {
+    /**
+     * Sets the expression node representing the function arguments.
+     *
+     * @param arguments the arguments node to set
+     */
+    public void setArguments(ExpressionNode arguments) {
         this.arguments = arguments;
     }
 
+    /**
+     * Evaluates the function call.
+     * <p>
+     * This method retrieves the {@link Function} from the extension container using the function name.
+     * It then evaluates the arguments (if any) and passes them to the function's execute method.
+     * If the function is not found, an {@link EvaluationException} is thrown.
+     * </p>
+     *
+     * @param context the evaluation context
+     * @return the result of executing the function
+     * @throws EvaluationException if the function cannot be found
+     */
+    @Override
+    public Object evaluate(EvaluationContext context) {
+        Function  function  = context.getExtensions().getFunction(getName());
+        Arguments arguments = Arguments.empty();
+
+        if (function == null) {
+            throw new EvaluationException("Function '%s' not found".formatted(getName()));
+        }
+
+        if (getArguments() != null) {
+            Object evaluatedArguments = getArguments().evaluate(context);
+            if (evaluatedArguments instanceof Object[] array) {
+                arguments = Arguments.forArray(array);
+            }
+        }
+
+        return function.execute(arguments, context);
+    }
+
+    /**
+     * Returns a string representation of the function call.
+     *
+     * @return a string in the format "functionName(ARGUMENTS[n])" where n is the number of arguments
+     */
     @Override
     public String toString() {
-        return "%s(%s)".formatted(name, arguments == null ? "" : "ARGUMENTS[%d]".formatted(arguments.children().size()));
+        return "%s(%s)".formatted(name, arguments);
     }
 }
