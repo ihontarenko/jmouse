@@ -1,5 +1,9 @@
 package org.jmouse.el.node.expression;
 
+import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.evaluation.EvaluationException;
+import org.jmouse.el.extension.Arguments;
+import org.jmouse.el.extension.Filter;
 import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.ExpressionNode;
 
@@ -70,6 +74,25 @@ public class FilterNode extends AbstractExpressionNode {
         this.left = left;
     }
 
+    @Override
+    public Object evaluate(EvaluationContext context) {
+        Filter    filter  = context.getExtensions().getFilter(getName());
+        Arguments arguments = Arguments.empty();
+
+        if (filter == null) {
+            throw new EvaluationException("Filter '%s' not found".formatted(getName()));
+        }
+
+        if (getArguments() != null) {
+            Object evaluatedArguments = getArguments().evaluate(context);
+            if (evaluatedArguments instanceof Object[] array) {
+                arguments = Arguments.forArray(array);
+            }
+        }
+
+        return filter.apply(getLeft().evaluate(context), arguments, context);
+    }
+
     /**
      * Returns a string representation of this filter node.
      *
@@ -77,6 +100,6 @@ public class FilterNode extends AbstractExpressionNode {
      */
     @Override
     public String toString() {
-        return "%s(%s)".formatted(name, left);
+        return "%s[ %s ]".formatted(name, left);
     }
 }

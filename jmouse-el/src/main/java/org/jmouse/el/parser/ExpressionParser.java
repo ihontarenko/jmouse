@@ -5,7 +5,6 @@ import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
-import org.jmouse.el.node.expression.FilterNode;
 import org.jmouse.el.node.expression.unary.PostfixUnaryOperation;
 import org.jmouse.el.node.expression.unary.PrefixUnaryOperation;
 
@@ -39,16 +38,6 @@ public class ExpressionParser implements Parser {
         if (cursor.isCurrent(T_DECREMENT, T_INCREMENT)) {
             left = new PostfixUnaryOperation((ExpressionNode) left, context.getOperator(cursor.peek().type()));
             cursor.next();
-        }
-
-        // parse right expression if present
-        while (cursor.hasNext() && cursor.matchesSequence(T_VERTICAL_SLASH, T_IDENTIFIER)) {
-            cursor.expect(T_IDENTIFIER);
-            Node right = context.getParser(FilterParser.class).parse(cursor, context);
-            if (right instanceof FilterNode filter) {
-                filter.setLeft((ExpressionNode) left);
-                left = filter;
-            }
         }
 
         if (left == null) {

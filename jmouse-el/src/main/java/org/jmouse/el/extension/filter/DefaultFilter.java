@@ -2,20 +2,17 @@ package org.jmouse.el.extension.filter;
 
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
-import org.jmouse.el.extension.Filter;
 
-import java.math.BigInteger;
-
-public class ToBigIntFilter implements Filter {
+public class DefaultFilter extends AbstractFilter {
 
     @Override
     public Object apply(Object input, Arguments arguments, EvaluationContext context) {
-        return context.getConversion().convert(input, BigInteger.class);
+        return input == null ? arguments.getFirst() : input;
     }
 
     @Override
     public String getName() {
-        return "toBigInt";
+        return "default";
     }
 
 }

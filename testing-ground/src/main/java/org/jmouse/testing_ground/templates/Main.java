@@ -22,6 +22,7 @@ import org.jmouse.template.lexer.TemplateTokenizer;
 import org.jmouse.template.loader.ClasspathLoader;
 import org.jmouse.template.loader.TemplateLoader;
 import org.jmouse.el.node.Node;
+import org.jmouse.testing_ground.binder.dto.Book;
 
 import java.io.Reader;
 import java.util.HashMap;
@@ -71,19 +72,10 @@ public class Main {
 //        TokenizableSource elString = new StringSource("el-string", "2 + (2 + 2) * 2 / 3 (22 / 7) is odd");
 //        TokenizableSource elString = new StringSource("el-string", "++cnt / 2 is odd");
 //        TokenizableSource elString = new StringSource("el-string", "[1, '2', 3.14] is array");
-        TokenizableSource elString = new StringSource("el-string", "set('_map', {'name': 'John', 'level': 321 ** 3 / 33, 'min': min(123, 111)})");
+//        TokenizableSource elString = new StringSource("el-string", "set('_map', {'name': 'John', 'level': 321 ** 3 / 33, 'min': min(123, 111)})");
+        TokenizableSource elString = new StringSource("el-string", "set('_name', book.author | sub(-1) | upper)");
         Recognizer<Token.Type, RawToken> elr = new EnumTokenRecognizer<>(BasicToken.class, 20);
         Lexer elLexer = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), elr));
-
-        Map<String, Object> source = Map.of("name", "John");
-        Map<String, Object> destination = new HashMap<>();
-
-        destination.put("level", 10);
-        destination.put("name", "Lalka");
-
-        Bind.with(source).to(destination);
-
-        PropertyPath path = PropertyPath.forPath("users[0].name");
 
         TokenCursor elCursor = elLexer.tokenize(elString);
 
@@ -101,7 +93,13 @@ public class Main {
 
         ScopedChain scopedChain = evaluationContext.getScopedChain();
 
+        Book book = new Book();
+        book.setAuthor("John");
+        book.setTitle("Doe");
+        book.setPages(671);
+
         scopedChain.setValue("user", List.of(Map.of("name", "Root!", "level", 333)));
+        scopedChain.setValue("book", book);
         scopedChain.setValue("cnt", 10D);
 //        scopedChain.push();
 //        scopedChain.setValue("user", List.of(destination));

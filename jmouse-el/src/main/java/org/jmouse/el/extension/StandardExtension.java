@@ -1,7 +1,6 @@
 package org.jmouse.el.extension;
 
-import org.jmouse.el.extension.filter.LowerFilter;
-import org.jmouse.el.extension.filter.UpperFilter;
+import org.jmouse.el.extension.filter.*;
 import org.jmouse.el.extension.function.MaxFunction;
 import org.jmouse.el.extension.function.MinFunction;
 import org.jmouse.el.extension.function.SetFunction;
@@ -34,7 +33,11 @@ public class StandardExtension implements Extension {
     public List<Filter> getFilters() {
         return List.of(
                 new LowerFilter(),
-                new UpperFilter()
+                new UpperFilter(),
+                new ToBigDecimalFilter(),
+                new SubFilter(),
+                new DefaultFilter(),
+                new TrimFilter()
         );
     }
 
