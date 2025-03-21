@@ -16,14 +16,14 @@ public interface ClassTypeInspector {
 
     /**
      * Checks if the inspected type is assignable from the given class.
-     *
-     * @param clazz the class to check against
-     * @return {@code true} if the inspected class is assignable from the given class, otherwise {@code false}
      */
     default boolean is(Class<?> clazz) {
         return clazz.isAssignableFrom(getClassType());
     }
 
+    /**
+     * Checks if the inspected type is assignable from the given inspector.
+     */
     default boolean is(ClassTypeInspector inspector) {
         return is(inspector.getClassType());
     }

@@ -1,5 +1,6 @@
 package org.jmouse.el.extension.function;
 
+import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.extension.Function;
@@ -8,8 +9,10 @@ public class MaxFunction implements Function {
 
     @Override
     public Object execute(Arguments arguments, EvaluationContext context) {
-        int a = (int) arguments.getFirst();
-        int b = (int) arguments.get(1);
+        Conversion conversion = context.getConversion();
+
+        int a = conversion.convert(arguments.getFirst(), int.class);
+        int b = conversion.convert(arguments.get(1), int.class);
 
         return Math.max(a, b);
     }

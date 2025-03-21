@@ -1,6 +1,7 @@
 package org.jmouse.el.extension.filter;
 
 import org.jmouse.core.convert.Conversion;
+import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 
@@ -15,7 +16,7 @@ public class SubFilter extends AbstractFilter {
      * @return the result of applying the filter to the input
      */
     @Override
-    public Object apply(Object input, Arguments arguments, EvaluationContext context) {
+    public Object apply(Object input, Arguments arguments, ClassTypeInspector inspector, EvaluationContext context) {
         String     value      = input.toString();
         Conversion conversion = context.getConversion();
 

@@ -75,8 +75,8 @@ public class Main {
 //        TokenizableSource elString = new StringSource("el-string", "2 + (2 + 2) * 2 / 3 (22 / 7) is odd");
 //        TokenizableSource elString = new StringSource("el-string", "++cnt / 2 is odd");
 //        TokenizableSource elString = new StringSource("el-string", "[1, '2', 3.14] is array");
-//        TokenizableSource elString = new StringSource("el-string", "set('_map', {'name': 'John', 'level': 321 ** 3 / 33, 'min': min(123, 111)})");
-        TokenizableSource elString = new StringSource("el-string", "set('_name', book.full | upper)");
+        TokenizableSource elString = new StringSource("el-string", "set('_map', {'name': 'John' | upper, 'level': 321 ** 5 / 33, 'min': min(123, 111)})");
+//        TokenizableSource elString = new StringSource("el-string", "set('_name', book.full | upper)");
         Recognizer<Token.Type, RawToken> elr = new EnumTokenRecognizer<>(BasicToken.class, 20);
         Lexer elLexer = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), elr));
 
