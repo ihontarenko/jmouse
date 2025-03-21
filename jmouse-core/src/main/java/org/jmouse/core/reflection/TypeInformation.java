@@ -1,6 +1,6 @@
 package org.jmouse.core.reflection;
 
-import java.util.*;
+import java.util.Objects;
 
 /**
  * Represents type descriptor and provides utility methods for type analysis.
@@ -58,7 +58,7 @@ public class TypeInformation implements ClassTypeInspector {
      * Creates a {@link TypeInformation} for a given instance object.
      */
     public static TypeInformation forInstance(Object instance) {
-        return new TypeInformation(JavaType.forInstance(instance));
+        return new TypeInformation(instance == null ? JavaType.NONE_TYPE : JavaType.forInstance(instance));
     }
 
     /**

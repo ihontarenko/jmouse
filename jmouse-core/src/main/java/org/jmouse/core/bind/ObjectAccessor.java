@@ -121,10 +121,14 @@ public interface ObjectAccessor extends ClassTypeInspector {
      * @return the nested {@link ObjectAccessor} corresponding to the given path
      * @throws NumberFormatException if an indexed path segment contains a non-numeric value
      */
-    default ObjectAccessor navigate(PropertyPath name) {
+    default ObjectAccessor navigate(PropertyPath name, int offset) {
         ObjectAccessor       nested  = this;
         int                  counter = 0;
         PropertyPath.Entries entries = name.entries();
+
+        if (offset > 0) {
+            entries = name.sup(offset).entries();
+        }
 
         for (CharSequence element : entries) {
             PropertyPath.Type type = entries.type(counter);
@@ -142,6 +146,10 @@ public interface ObjectAccessor extends ClassTypeInspector {
         }
 
         return nested;
+    }
+
+    default ObjectAccessor navigate(PropertyPath name) {
+        return navigate(name, 0);
     }
 
     /**
