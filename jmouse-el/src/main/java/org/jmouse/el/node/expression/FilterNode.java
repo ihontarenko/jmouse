@@ -74,9 +74,21 @@ public class FilterNode extends AbstractExpressionNode {
         this.left = left;
     }
 
+    /**
+     * Evaluates the filter node by applying the filter to the left-hand expression.
+     * <p>
+     * It retrieves the filter by name from the extensions, evaluates the left expression,
+     * processes any provided arguments, and applies the filter. If the filter is not found,
+     * an EvaluationException is thrown.
+     * </p>
+     *
+     * @param context the evaluation context
+     * @return the result of filter application
+     * @throws EvaluationException if the filter is not found
+     */
     @Override
     public Object evaluate(EvaluationContext context) {
-        Filter    filter  = context.getExtensions().getFilter(getName());
+        Filter    filter    = context.getExtensions().getFilter(getName());
         Arguments arguments = Arguments.empty();
 
         if (filter == null) {

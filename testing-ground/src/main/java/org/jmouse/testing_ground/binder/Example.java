@@ -64,7 +64,7 @@ public class Example {
         accessor.set("name", "John Doe");
 
         VirtualPropertyResolver resolver = VirtualPropertyResolver.defaultResolver();
-        resolver.register(new UserMainAddressVirtualProperty());
+        resolver.addVirtualProperty(new UserMainAddressVirtualProperty());
 
         PropertyValueResolver valueResolver = new DefaultPropertyValueResolver(accessor, resolver);
 

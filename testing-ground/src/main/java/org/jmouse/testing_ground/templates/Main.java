@@ -2,6 +2,8 @@ package org.jmouse.testing_ground.templates;
 
 import org.jmouse.core.bind.Bind;
 import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.bind.VirtualProperty;
+import org.jmouse.core.bind.VirtualPropertyResolver;
 import org.jmouse.el.StringSource;
 import org.jmouse.el.evaluation.DefaultEvaluationContext;
 import org.jmouse.el.evaluation.EvaluationContext;
@@ -11,6 +13,7 @@ import org.jmouse.el.lexer.recognizer.CompositeRecognizer;
 import org.jmouse.el.lexer.recognizer.EnumTokenRecognizer;
 import org.jmouse.el.lexer.recognizer.Recognizer;
 import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.OperatorParser;
 import org.jmouse.template.TemplateCoreExtension;
 import org.jmouse.el.lexer.*;
@@ -73,7 +76,7 @@ public class Main {
 //        TokenizableSource elString = new StringSource("el-string", "++cnt / 2 is odd");
 //        TokenizableSource elString = new StringSource("el-string", "[1, '2', 3.14] is array");
 //        TokenizableSource elString = new StringSource("el-string", "set('_map', {'name': 'John', 'level': 321 ** 3 / 33, 'min': min(123, 111)})");
-        TokenizableSource elString = new StringSource("el-string", "set('_name', book.author | sub(-1) | upper)");
+        TokenizableSource elString = new StringSource("el-string", "set('_name', book.full | upper)");
         Recognizer<Token.Type, RawToken> elr = new EnumTokenRecognizer<>(BasicToken.class, 20);
         Lexer elLexer = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), elr));
 
@@ -85,13 +88,35 @@ public class Main {
 
         cursor.next();
         elCursor.next();
-        Node compiled = parserContext.getParser(OperatorParser.class).parse(elCursor, parserContext);
+        Node compiled = parserContext.getParser(ExpressionParser.class).parse(elCursor, parserContext);
 
         EvaluationContext evaluationContext = new DefaultEvaluationContext();
 
         evaluationContext.getExtensions().importExtension(new StandardExtension());
 
         ScopedChain scopedChain = evaluationContext.getScopedChain();
+
+        evaluationContext.getVirtualProperties().addVirtualProperty(new VirtualProperty<Book>() {
+            @Override
+            public Class<Book> getInstanceType() {
+                return Book.class;
+            }
+
+            @Override
+            public String getName() {
+                return "full";
+            }
+
+            @Override
+            public void writeValue(Book object, Object value) {
+
+            }
+
+            @Override
+            public Object readValue(Book book) {
+                return STR."\{book.getAuthor()}: \{book.getTitle()}";
+            }
+        });
 
         Book book = new Book();
         book.setAuthor("John");

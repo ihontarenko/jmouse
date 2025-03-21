@@ -4,14 +4,14 @@ import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.ArgumentsNode;
-import org.jmouse.el.parser.OperatorParser;
+import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContext;
 
 /**
  * Parses a comma-separated list of arguments.
  * <p>
- * This parser uses an {@link OperatorParser} (from the context) to parse each argument
+ * This parser uses an {@link ExpressionParser} (from the context) to parse each argument
  * and aggregates them into an {@link ArgumentsNode}.
  * </p>
  */
@@ -26,7 +26,7 @@ public class ArgumentsParser implements Parser {
      */
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
-        Parser parser = context.getParser(OperatorParser.class);
+        Parser parser = context.getParser(ExpressionParser.class);
         do {
             Node argument = parser.parse(cursor, context);
             parent.add(argument);

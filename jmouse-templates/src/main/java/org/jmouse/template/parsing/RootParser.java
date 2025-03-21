@@ -14,7 +14,7 @@ import static org.jmouse.template.TemplateToken.*;
 
 /**
  * 🏗️ The root parser responsible for processing the entire template.
- * This parser delegates expressions to {@link ExpressionParser}.
+ * This parser delegates expressions to {@link PrimaryExpressionParser}.
  *
  * <p>
  * Parses:

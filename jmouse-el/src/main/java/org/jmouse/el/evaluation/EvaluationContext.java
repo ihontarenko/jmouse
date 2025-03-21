@@ -1,8 +1,6 @@
 package org.jmouse.el.evaluation;
 
-import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.ObjectAccessorWrapper;
-import org.jmouse.core.bind.StandardAccessorWrapper;
+import org.jmouse.core.bind.*;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.extension.ExtensionContainer;
 
@@ -14,7 +12,7 @@ import org.jmouse.el.extension.ExtensionContainer;
  * values using a standard {@link ObjectAccessor} wrapped by a default {@link ObjectAccessorWrapper}.
  * </p>
  */
-public interface EvaluationContext {
+public interface EvaluationContext extends VirtualPropertyResolver.Aware {
 
     /**
      * The default {@link ObjectAccessorWrapper} instance used to wrap object access operations.
@@ -54,18 +52,7 @@ public interface EvaluationContext {
      * @return the resolved value, or {@code null} if no value is found
      */
     default Object getValue(String name) {
-        Object      value = null;
-        ScopedChain chain = getScopedChain();
-
-        if (name.contains(".") || name.contains("[")) {
-            value = getValueAccessor().navigate(name).asObject();
-        }
-
-        if (value == null && chain.contains(name)) {
-            value = chain.getValue(name);
-        }
-
-        return value;
+        return getValueResolver().getProperty(name);
     }
 
     /**
@@ -78,7 +65,7 @@ public interface EvaluationContext {
      * @param value the value to set
      */
     default void setValue(String name, Object value) {
-        getValueAccessor().inject(name, value);
+        getValueResolver().setProperty(name, value);
     }
 
     /**
@@ -96,4 +83,9 @@ public interface EvaluationContext {
         ((ObjectAccessorWrapper.Aware) accessor).setWrapper(WRAPPER);
         return accessor;
     }
+
+    default PropertyValueResolver getValueResolver() {
+        return new ExpressionLanguageValuesResolver(getValueAccessor(), getVirtualProperties());
+    }
+
 }

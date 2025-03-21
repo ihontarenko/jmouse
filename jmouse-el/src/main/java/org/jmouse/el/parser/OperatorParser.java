@@ -7,38 +7,24 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.BinaryOperation;
-import org.jmouse.el.node.expression.FilterNode;
 import org.jmouse.el.node.expression.TestNode;
 
 import static org.jmouse.el.lexer.BasicToken.*;
 
 /**
- * 🔢 OperatorParser is responsible for parser mathematical and logical expressions.
+ * Parses arithmetic and logical expressions with operator precedence.
  * <p>
- * Supports:
- * <ul>
- *     <li>Logical: {@code a > b or (b < c and x == z) or w is true }</li>
- *     <li>Arithmetic: {@code 10 + (2 + 2) * 2 (22 / 7) }</li>
- * </ul>
- * <p>
- * Handles:
- * <ul>
- *     <li>Precedence-based parser</li>
- *     <li>Implicit multiplication (e.g., {@code 2(3 + 4) → 2 * (3 + 4)})</li>
- *     <li>Nested expressions with parentheses</li>
- * </ul>
- *
- * @author Ivan Hontarenko (Mr. Jerry Mouse)
- * @author ihontarenko@gmail.com
+ * Supports nested expressions, implicit multiplication (e.g. 2(3 + 4) → 2 * (3 + 4)), and test operators.
+ * </p>
  */
 public class OperatorParser implements Parser {
 
     /**
-     * Parses an operation tag and adds it as a child of the given parent node.
+     * Parses an expression and attaches it to the parent node.
      *
-     * @param cursor  the token cursor
-     * @param parent  the parent node to attach the parsed tag
-     * @param context the parser evaluation
+     * @param cursor  the token stream cursor
+     * @param parent  the parent node to add the parsed expression
+     * @param context the parser context
      */
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
@@ -46,12 +32,12 @@ public class OperatorParser implements Parser {
     }
 
     /**
-     * Parses an arithmetic or logical expression, considering operator precedence.
+     * Parses an expression considering operator precedence.
      *
      * @param cursor     the token cursor
-     * @param context    the parser evaluation
-     * @param precedence the current operator precedence level
-     * @return an expression node representing the parsed expression
+     * @param context    the parser context
+     * @param precedence the current precedence level
+     * @return the parsed expression node
      */
     private ExpressionNode parseExpression(TokenCursor cursor, ParserContext context, int precedence) {
         ExpressionNode left = parsePrimaryExpression(cursor, context);
@@ -60,7 +46,6 @@ public class OperatorParser implements Parser {
             Token    token    = cursor.peek();
             Operator operator = context.getOperator(token.type());
 
-            // Stop if operator precedence is lower than the current precedence
             if (operator == null || precedence > operator.getPrecedence()) {
                 break;
             }
@@ -76,47 +61,30 @@ public class OperatorParser implements Parser {
                 left = new BinaryOperation(left, operator, right);
             }
         }
-
-        // parse right expression if present
-        while (cursor.hasNext() && cursor.matchesSequence(T_VERTICAL_SLASH, T_IDENTIFIER)) {
-            cursor.expect(T_IDENTIFIER);
-            Node right = context.getParser(FilterParser.class).parse(cursor, context);
-            if (right instanceof FilterNode filter) {
-                filter.setLeft(left);
-                left = filter;
-            }
-        }
-
         return left;
     }
 
     /**
-     * Parses a primary expression, which could be:
-     * <ul>
-     *     <li>A nested expression within parentheses</li>
-     *     <li>A function call or a variable</li>
-     *     <li>An implicit multiplication (e.g., {@code 2(3 + 4)})</li>
-     * </ul>
+     * Parses a primary expression.
      *
      * @param cursor  the token cursor
-     * @param context the parser evaluation
+     * @param context the parser context
      * @return the parsed primary expression node
      */
     private ExpressionNode parsePrimaryExpression(TokenCursor cursor, ParserContext context) {
-        ExpressionParser parser = (ExpressionParser) context.getParser(ExpressionParser.class);
-        ExpressionNode   left;
+        PrimaryExpressionParser parser = (PrimaryExpressionParser) context.getParser(PrimaryExpressionParser.class);
+        ExpressionNode          left;
 
-        // Handle nested expressions inside parentheses
+        // Parenthesized expression
         if (cursor.isCurrent(T_OPEN_PAREN) && !cursor.isPrevious(T_IDENTIFIER)) {
             cursor.ensure(T_OPEN_PAREN);
             left = parseExpression(cursor, context, 0);
             cursor.ensure(T_CLOSE_PAREN);
         } else {
-            // Parse any standard expression (number, variable, function, etc.)
             left = (ExpressionNode) parser.parse(cursor, context);
         }
 
-        // Handle implicit multiplication: e.g., `2 (3 + 4)` -> `2 * (3 + 4)`
+        // Implicit multiplication: e.g., 2(3 + 4) becomes 2 * (3 + 4)
         if (cursor.isCurrent(T_OPEN_PAREN)) {
             Operator multiply = context.getOperator(T_MULTIPLY);
             left = new BinaryOperation(left, multiply, parsePrimaryExpression(cursor, context));

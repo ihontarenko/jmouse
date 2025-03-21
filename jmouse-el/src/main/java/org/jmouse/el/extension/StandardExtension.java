@@ -54,8 +54,9 @@ public class StandardExtension implements Extension {
     @Override
     public List<Parser> getParsers() {
         return List.of(
-                new OperatorParser(),
                 new ExpressionParser(),
+                new OperatorParser(),
+                new PrimaryExpressionParser(),
                 new FunctionParser(),
                 new TestParser(),
                 new FilterParser(),

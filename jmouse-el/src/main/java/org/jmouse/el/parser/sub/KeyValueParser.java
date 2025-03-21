@@ -6,6 +6,7 @@ import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.KeyValueNode;
 import org.jmouse.el.node.expression.MapNode;
+import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.OperatorParser;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContext;
@@ -29,7 +30,7 @@ public class KeyValueParser implements Parser {
      */
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
-        Parser parser = context.getParser(OperatorParser.class);
+        Parser parser = context.getParser(ExpressionParser.class);
         do {
             KeyValueNode kv = new KeyValueNode();
 

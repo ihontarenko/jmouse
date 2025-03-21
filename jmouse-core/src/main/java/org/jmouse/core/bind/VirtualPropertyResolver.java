@@ -28,15 +28,15 @@ public interface VirtualPropertyResolver {
      * @param name         the name of the virtual property
      * @param property     the VirtualProperty definition
      */
-    void register(Class<?> instanceType, String name, VirtualProperty<?> property);
+    void addVirtualProperty(Class<?> instanceType, String name, VirtualProperty<?> property);
 
     /**
      * Registers a virtual property using the instance type obtained from the property.
      *
      * @param property the VirtualProperty definition which contains its own instance type information and property name
      */
-    default void register(VirtualProperty<?> property) {
-        register(property.getInstanceType(), property.getName(), property);
+    default void addVirtualProperty(VirtualProperty<?> property) {
+        addVirtualProperty(property.getInstanceType(), property.getName(), property);
     }
 
     /**
@@ -50,7 +50,7 @@ public interface VirtualPropertyResolver {
      * @param name     the name of the virtual property to resolve
      * @return the registered VirtualProperty for the given instance type and name, or {@code null} if none is found
      */
-    VirtualProperty<?> resolveProperty(Object instance, String name);
+    VirtualProperty<?> getVirtualProperty(Object instance, String name);
 
     /**
      * An interface that allows an object to be aware of its VirtualPropertyResolver.
@@ -90,7 +90,7 @@ public interface VirtualPropertyResolver {
          * @param property     the VirtualProperty definition
          */
         @Override
-        public void register(Class<?> instanceType, String name, VirtualProperty<?> property) {
+        public void addVirtualProperty(Class<?> instanceType, String name, VirtualProperty<?> property) {
             properties.computeIfAbsent(instanceType, k -> new ConcurrentHashMap<>())
                     .put(name, property);
         }
@@ -106,7 +106,7 @@ public interface VirtualPropertyResolver {
          * @return the registered VirtualProperty, or {@code null} if none is found
          */
         @Override
-        public VirtualProperty<?> resolveProperty(Object instance, String name) {
+        public VirtualProperty<?> getVirtualProperty(Object instance, String name) {
             Map<String, VirtualProperty<?>> names = properties.get(instance.getClass());
             return names != null ? names.get(name) : null;
         }
