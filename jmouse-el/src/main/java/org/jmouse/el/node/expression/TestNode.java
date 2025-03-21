@@ -7,6 +7,8 @@ import org.jmouse.el.extension.Test;
 import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.ExpressionNode;
 
+import java.util.Arrays;
+
 /**
  * Represents a test expression node in the expression language.
  */
@@ -135,6 +137,6 @@ public class TestNode extends AbstractExpressionNode {
      */
     @Override
     public String toString() {
-        return "IS %s %s%s".formatted(left, negated ? "NOT " : "", name);
+        return "IS %s %s%s(%s)".formatted(left, negated ? "NOT " : "", name, arguments);
     }
 }

@@ -16,7 +16,7 @@ public interface VirtualProperty<T> extends PropertyAccessor<T> {
      *
      * @return the {@link Class} representing the type T
      */
-    Class<T> getInstanceType();
+    Class<T> getType();
 
     /**
      * Returns the name of this property.

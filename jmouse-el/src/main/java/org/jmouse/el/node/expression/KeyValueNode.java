@@ -72,6 +72,6 @@ public class KeyValueNode extends AbstractExpressionNode {
      */
     @Override
     public String toString() {
-        return "{%s : %s}".formatted(key, value);
+        return "[%s : %s]".formatted(key, value);
     }
 }

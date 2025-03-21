@@ -10,7 +10,7 @@ public class UserMainAddressVirtualProperty implements VirtualProperty<User> {
      * @return the {@link Class} representing the type T
      */
     @Override
-    public Class<User> getInstanceType() {
+    public Class<User> getType() {
         return User.class;
     }
 

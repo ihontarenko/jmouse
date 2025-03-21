@@ -19,6 +19,9 @@ import static org.jmouse.core.reflection.JavaType.forInstance;
  */
 public interface ObjectAccessor extends ClassTypeInspector {
 
+    /**
+     * A standard wrapper for object accessor operations.
+     */
     ObjectAccessorWrapper STANDARD_WRAPPER = new StandardAccessorWrapper();
 
     /**
@@ -31,16 +34,15 @@ public interface ObjectAccessor extends ClassTypeInspector {
      */
     static void verifyTypeCompatibility(String message, Class<?> expected, Class<?> actual) {
         if (actual != null && !expected.isAssignableFrom(actual)) {
-            throw new IllegalArgumentException(
-                    "[%s]: type '%s' is not assignable from '%s'".formatted(message, expected, actual));
+            throw new IllegalArgumentException("[%s]: type '%s' is not assignable from '%s'".formatted(message, expected, actual));
         }
     }
 
     /**
-     * Creates a {@link ObjectAccessor} instance from the given source object.
+     * Creates an ObjectAccessor instance from the given source object.
      *
      * @param source the source object
-     * @return a {@link ObjectAccessor} instance wrapping the source
+     * @return an ObjectAccessor instance wrapping the source
      */
     static ObjectAccessor wrapObject(Object source) {
         return STANDARD_WRAPPER.wrap(source);
@@ -54,26 +56,26 @@ public interface ObjectAccessor extends ClassTypeInspector {
     Object unwrap();
 
     /**
-     * Creates a {@link ObjectAccessor} instance from the given source object.
+     * Wraps the given source object into an ObjectAccessor.
      *
-     * @param source the source object
-     * @return a {@link ObjectAccessor} instance wrapping the source
+     * @param source the source object to wrap
+     * @return an ObjectAccessor instance wrapping the source
      */
     ObjectAccessor wrap(Object source);
 
     /**
-     * Retrieves a nested {@link ObjectAccessor} by name.
+     * Retrieves a nested ObjectAccessor by property name.
      *
      * @param name the name of the nested data source
-     * @return the nested {@link ObjectAccessor}
+     * @return the nested ObjectAccessor
      */
     ObjectAccessor get(String name);
 
     /**
-     * Retrieves a nested {@link ObjectAccessor} by index.
+     * Retrieves a nested ObjectAccessor by index.
      *
      * @param index the index of the nested data source
-     * @return the nested {@link ObjectAccessor}
+     * @return the nested ObjectAccessor
      */
     ObjectAccessor get(int index);
 
@@ -87,9 +89,10 @@ public interface ObjectAccessor extends ClassTypeInspector {
 
     /**
      * Sets a property value by index.
-     *
-     * <p>The default implementation throws an {@link UnsupportedOperationException},
-     * indicating that indexed access is not supported unless overridden by an implementation.</p>
+     * <p>
+     * The default implementation throws an {@link UnsupportedOperationException},
+     * indicating that indexed access is not supported unless overridden.
+     * </p>
      *
      * @param index the property index
      * @param value the value to set
@@ -98,35 +101,46 @@ public interface ObjectAccessor extends ClassTypeInspector {
     void set(int index, Object value);
 
     /**
-     * Retrieves a nested {@link ObjectAccessor} using a {@link PropertyPath}.
+     * Retrieves a nested ObjectAccessor using a PropertyPath string.
      *
-     * @param path the structured name path
-     * @return the nested {@link ObjectAccessor}
-     * @throws NumberFormatException if an indexed path contains a non-numeric value
+     * @param path the structured property path
+     * @return the nested ObjectAccessor
+     * @throws NumberFormatException if an indexed path segment contains a non-numeric value
      */
     default ObjectAccessor navigate(String path) {
         return navigate(PropertyPath.forPath(path));
     }
 
     /**
-     * Retrieves a nested {@link ObjectAccessor} using the specified {@link PropertyPath}.
+     * Retrieves a nested ObjectAccessor using a PropertyPath string.
+     *
+     * @param path the structured property path
+     * @param offset the number of initial segments to skip
+     * @return the nested ObjectAccessor
+     * @throws NumberFormatException if an indexed path segment contains a non-numeric value
+     */
+    default ObjectAccessor navigate(String path, int offset) {
+        return navigate(PropertyPath.forPath(path), offset);
+    }
+
+    /**
+     * Retrieves a nested ObjectAccessor using the specified PropertyPath with an offset.
      * <p>
-     * The method navigates through the nested structure represented by the given path.
-     * Each segment of the path is processed in order. If a segment is indexed (i.e. it represents
-     * an array element) and numeric, the method parses the segment as an integer index; otherwise,
-     * it treats the segment as a property name.
+     * The method navigates through the nested structure represented by the PropertyPath.
+     * If a segment is indexed, it is parsed as an integer; otherwise, it is treated as a property name.
      * </p>
      *
-     * @param name the structured property path used to navigate the nested properties
-     * @return the nested {@link ObjectAccessor} corresponding to the given path
-     * @throws NumberFormatException if an indexed path segment contains a non-numeric value
+     * @param name   the structured property path
+     * @param offset the number of initial segments to skip
+     * @return the nested ObjectAccessor corresponding to the path
+     * @throws NumberFormatException if an indexed segment contains a non-numeric value
      */
     default ObjectAccessor navigate(PropertyPath name, int offset) {
         ObjectAccessor       nested  = this;
         int                  counter = 0;
         PropertyPath.Entries entries = name.entries();
 
-        if (offset > 0) {
+        if (offset > 0 && name.entries().size() > 1) {
             entries = name.sup(offset).entries();
         }
 
@@ -148,35 +162,36 @@ public interface ObjectAccessor extends ClassTypeInspector {
         return nested;
     }
 
+    /**
+     * Retrieves a nested ObjectAccessor using the specified PropertyPath.
+     *
+     * @param name the structured property path
+     * @return the nested ObjectAccessor corresponding to the path
+     * @throws NumberFormatException if an indexed segment contains a non-numeric value
+     */
     default ObjectAccessor navigate(PropertyPath name) {
         return navigate(name, 0);
     }
 
     /**
-     * Injects the given value into the property specified by the given property name.
-     * <p>
-     * This is a convenience method that converts the provided string into a {@link PropertyPath}
-     * and then delegates to {@link #inject(PropertyPath, Object)}.
-     * </p>
+     * Injects the given value into the property specified by the property path string.
      *
-     * @param name  the structured property name as a string
-     * @param value the value to inject into the property
+     * @param name  the structured property name
+     * @param value the value to inject
      */
     default void inject(String name, Object value) {
         inject(PropertyPath.forPath(name), value);
     }
 
     /**
-     * Injects the given value into the property specified by the {@link PropertyPath}.
+     * Injects the given value into the property specified by the given PropertyPath.
      * <p>
-     * If the property path consists of multiple segments, the method navigates to the nested
-     * accessor corresponding to all but the last segment (using {@link PropertyPath#sup(int)}),
-     * and then sets the value using the last segment (obtained via {@link PropertyPath#tail()}).
-     * If the property path contains only a single segment, the value is set directly.
+     * If the PropertyPath contains multiple segments, the method navigates to the nested accessor
+     * corresponding to all but the last segment and sets the value using the last segment.
      * </p>
      *
-     * @param name  the structured property path identifying the property to inject the value into
-     * @param value the value to set on the identified property
+     * @param name  the structured property path identifying the property
+     * @param value the value to set
      */
     default void inject(PropertyPath name, Object value) {
         if (name.entries().size() > 1) {
@@ -189,47 +204,27 @@ public interface ObjectAccessor extends ClassTypeInspector {
     }
 
     /**
-     * Retrieves a list of keys representing the entries in this {@link ObjectAccessor}.
+     * Retrieves a set of keys representing the entries in this ObjectAccessor.
      * <p>
-     * If the data source is a map, the method returns its key set as strings.
-     * If the data source is a list, the method generates index-based keys
-     * in the format {@code [index]}.
+     * For maps, returns the key set as strings. For lists, generates keys in the format "[index]".
      * </p>
-     *
-     * <p>Example usage:</p>
-     * <pre>{@code
-     * DataSource source = ...;
-     * List<String> keys = source.keys();
-     * }</pre>
      *
      * @return a set of keys as strings
      */
     default Set<String> keySet() {
         Set<String> keys = new HashSet<>();
-
         if (isMap()) {
             keys = asMap().keySet().stream().map(Object::toString).collect(toUnmodifiableSet());
         } else if (isList()) {
             keys = IntStream.range(0, asList().size()).mapToObj("[%d]"::formatted).collect(toUnmodifiableSet());
         }
-
         return keys;
     }
 
     /**
-     * Retrieves a list of {@link PropertyPath} representations for the keys in this {@link ObjectAccessor}.
-     * <p>
-     * This method converts the keys obtained from {@link #keySet()} into {@link PropertyPath} objects,
-     * allowing structured representation of hierarchical data.
-     * </p>
+     * Converts the keys in this ObjectAccessor to PropertyPath instances.
      *
-     * <p>Example usage:</p>
-     * <pre>{@code
-     * DataSource source = ...;
-     * List<PropertyPath> names = source.names();
-     * }</pre>
-     *
-     * @return a set of {@link PropertyPath} instances representing the keys
+     * @return a set of PropertyPath instances representing the keys
      * @see #keySet()
      */
     default Set<PropertyPath> nameSet() {
@@ -237,9 +232,9 @@ public interface ObjectAccessor extends ClassTypeInspector {
     }
 
     /**
-     * Checks if the data source is {@code null}.
+     * Checks if the underlying data source is null.
      *
-     * @return {@code true} if the underlying source is {@code null}, otherwise {@code false}
+     * @return true if the source is null; false otherwise
      */
     default boolean isNull() {
         return unwrap() == null;
@@ -248,19 +243,19 @@ public interface ObjectAccessor extends ClassTypeInspector {
     /**
      * Checks if the data source is a simple type (String, Number, Boolean, or Character).
      *
-     * @return {@code true} if the data source is a simple type, otherwise {@code false}
+     * @return true if the source is a simple type; false otherwise
      */
     default boolean isSimple() {
         return isScalar();
     }
 
     /**
-     * Converts the data source to a specified type.
+     * Converts the data source to the specified target type.
      *
      * @param <T>  the target type
      * @param type the class representing the target type
      * @return an instance of the target type
-     * @throws IllegalArgumentException if the types are not compatible
+     * @throws IllegalArgumentException if the conversion is not possible
      */
     default <T> T asType(Class<T> type) {
         verifyTypeCompatibility("#as(Class<Type>)", type, getDataType());
@@ -268,7 +263,7 @@ public interface ObjectAccessor extends ClassTypeInspector {
     }
 
     /**
-     * Returns the raw object stored in the data source.
+     * Returns the raw underlying object.
      *
      * @return the raw object
      */
@@ -277,7 +272,7 @@ public interface ObjectAccessor extends ClassTypeInspector {
     }
 
     /**
-     * Converts the data source to a {@link String}.
+     * Converts the data source to a String.
      *
      * @return the string representation of the data source
      */
@@ -286,7 +281,7 @@ public interface ObjectAccessor extends ClassTypeInspector {
     }
 
     /**
-     * Converts the data source to a {@link Number}.
+     * Converts the data source to a Number.
      *
      * @return the numeric value of the data source
      */
@@ -304,110 +299,102 @@ public interface ObjectAccessor extends ClassTypeInspector {
     }
 
     /**
-     * Converts the data source to a {@link Collection}.
+     * Converts the data source to a Collection.
      *
-     * @return a list representation of the data source
+     * @return a Collection representation of the data source
      */
     default Collection<?> asCollection() {
         return asType(Collection.class);
     }
 
     /**
-     * Converts the data source to a {@link List}.
+     * Converts the data source to a List.
      *
-     * @return a list representation of the data source
+     * @return a List representation of the data source
      */
     default List<?> asList() {
         return asList(Object.class);
     }
 
     /**
-     * Converts the data source to a typed {@link List}.
+     * Converts the data source to a typed List.
      *
      * @param <T>  the element type
      * @param type the expected element type
-     * @return a typed list representation of the data source
-     * @throws IllegalArgumentException if type mismatch occurs
+     * @return a List of the specified type
+     * @throws IllegalArgumentException if there is a type mismatch
      */
     @SuppressWarnings({"unchecked"})
     default <T> List<T> asList(Class<T> type) {
         List<T>  value   = asType(List.class);
         Class<?> generic = forInstance(value).toList().getFirst().getRawType();
-
         if (generic == null) {
             generic = forInstance(value.getFirst()).getRawType();
         }
-
         verifyTypeCompatibility("#asList(Type)", type, generic);
-
         return value;
     }
 
     /**
-     * Converts the data source to a {@link Set}.
+     * Converts the data source to a Set.
      *
-     * @return a set representation of the data source
+     * @return a Set representation of the data source
      */
     default Set<?> asSet() {
         return asSet(Object.class);
     }
 
     /**
-     * Converts the data source to a typed {@link Set}.
+     * Converts the data source to a typed Set.
      *
      * @param <T>  the element type
      * @param type the expected element type
-     * @return a typed set representation of the data source
-     * @throws IllegalArgumentException if type mismatch occurs
+     * @return a Set of the specified type
+     * @throws IllegalArgumentException if there is a type mismatch
      */
     @SuppressWarnings({"unchecked"})
     default <T> Set<T> asSet(Class<T> type) {
         Set<T>   value   = asType(Set.class);
         Class<?> generic = forInstance(value).toSet().getFirst().getRawType();
-
         if (generic == null && !value.isEmpty()) {
             generic = forInstance(value.iterator().next()).getRawType();
         }
-
         verifyTypeCompatibility("#asSet(Type)", type, generic);
-
         return value;
     }
 
     /**
-     * Converts the data source to a {@link Map}.
+     * Converts the data source to a Map.
      *
-     * @return a map representation of the data source
+     * @return a Map representation of the data source
      */
     default Map<?, ?> asMap() {
         return asMap(Object.class, Object.class);
     }
 
     /**
-     * Converts the data source to a typed {@link Map}.
+     * Converts the data source to a typed Map.
      *
      * @param <K>       the key type
      * @param <V>       the value type
      * @param keyType   the expected key type
      * @param valueType the expected value type
-     * @return a typed map representation of the data source
-     * @throws IllegalArgumentException if type mismatch occurs
+     * @return a Map of the specified key and value types
+     * @throws IllegalArgumentException if there is a type mismatch
      */
     @SuppressWarnings({"unchecked"})
     default <K, V> Map<K, V> asMap(Class<K> keyType, Class<V> valueType) {
         Map<K, V> value = asType(Map.class);
         JavaType  type  = forInstance(value).toMap();
-
         verifyTypeCompatibility("#asMap(K, ?)", keyType, type.getFirst().getRawType());
         verifyTypeCompatibility("#asMap(?, V)", valueType, type.getLast().getRawType());
-
         return value;
     }
 
     /**
      * Returns the type of the data source.
      *
-     * @return the {@link Class} representing the data source type
+     * @return the Class representing the data source type
      */
     default Class<?> getDataType() {
         return requireNonNullElseGet(unwrap(), Object::new).getClass();
@@ -416,11 +403,11 @@ public interface ObjectAccessor extends ClassTypeInspector {
     /**
      * Returns the class type being inspected.
      *
-     * @return the {@link Class} structured representing the inspected type
+     * @return the Class representing the inspected type
      */
     @Override
     default Class<?> getClassType() {
         return getDataType();
     }
-
 }
+

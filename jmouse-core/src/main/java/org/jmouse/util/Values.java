@@ -12,11 +12,11 @@ public interface Values extends Streamable<Object> {
     /**
      * Creates an {@code Values} instance from the provided array of objects.
      *
-     * @param arguments an array of objects representing the arguments
-     * @return an {@code Values} instance wrapping the given arguments
+     * @param values an array of objects representing the values
+     * @return an {@code Values} instance wrapping the given values
      */
-    static Values forArray(Object... arguments) {
-        return new Basic(arguments);
+    static Values forArray(Object... values) {
+        return new Basic(values);
     }
 
     /**
@@ -134,6 +134,11 @@ public interface Values extends Streamable<Object> {
         @Override
         public Iterator<Object> iterator() {
             return values.iterator();
+        }
+
+        @Override
+        public String toString() {
+            return Arrays.toString(values.toArray());
         }
 
     }

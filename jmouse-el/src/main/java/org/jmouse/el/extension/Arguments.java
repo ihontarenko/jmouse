@@ -46,5 +46,6 @@ public interface Arguments extends Values {
         public Basic(Object... values) {
             super(values);
         }
+
     }
 }

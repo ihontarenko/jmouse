@@ -7,58 +7,56 @@ import org.jmouse.el.extension.ExtensionContainer;
 /**
  * Represents the evaluation context used for expression evaluation.
  * <p>
- * The {@code EvaluationContext} provides the scope chain, extension container, and conversion services
- * required during expression evaluation. It also supplies helper methods for retrieving and setting
- * values using a standard {@link ObjectAccessor} wrapped by a default {@link ObjectAccessorWrapper}.
+ * Provides the scope chain, extensions, and conversion services required during evaluation.
+ * Also supplies helper methods for retrieving and setting values via a standard
+ * {@link ObjectAccessor} wrapped by a default {@link ObjectAccessorWrapper}.
  * </p>
  */
 public interface EvaluationContext extends VirtualPropertyResolver.Aware {
 
     /**
-     * The default {@link ObjectAccessorWrapper} instance used to wrap object access operations.
+     * The default ObjectAccessorWrapper used to wrap object access operations.
      */
     ObjectAccessorWrapper WRAPPER = new StandardAccessorWrapper();
 
     /**
-     * Returns the current scope chain used for variable resolution.
+     * Returns the current scope chain for variable resolution.
      *
      * @return the current {@link ScopedChain} instance
      */
     ScopedChain getScopedChain();
 
     /**
-     * Returns the extension container holding custom extensions for expression evaluation.
+     * Returns the container holding custom extensions for expression evaluation.
      *
      * @return the {@link ExtensionContainer} instance
      */
     ExtensionContainer getExtensions();
 
     /**
-     * Returns the conversion service used for converting values between types.
+     * Returns the conversion service for converting values between types.
      *
      * @return the {@link Conversion} instance
      */
     Conversion getConversion();
 
     /**
-     * Retrieves the value associated with the specified name.
+     * Retrieves the value for the specified property name.
      * <p>
-     * If the name contains a dot ('.') or a bracket ('['), the value is obtained by navigating the property
-     * path via the {@link ObjectAccessor}. Otherwise, if the direct lookup returns {@code null} and the scoped chain
-     * contains the name, the value is retrieved from the scoped chain.
+     * Delegates to the value resolver to obtain the property value.
      * </p>
      *
      * @param name the property name or path
-     * @return the resolved value, or {@code null} if no value is found
+     * @return the resolved value, or {@code null} if not found
      */
     default Object getValue(String name) {
         return getValueResolver().getProperty(name);
     }
 
     /**
-     * Sets the value associated with the specified name.
+     * Sets the value for the specified property name.
      * <p>
-     * This method injects the given value into the underlying data source via the {@link ObjectAccessor}.
+     * Delegates to the value resolver to inject the value.
      * </p>
      *
      * @param name  the property name or path
@@ -69,14 +67,13 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
     }
 
     /**
-     * Retrieves an {@link ObjectAccessor} configured with the current scoped chain.
+     * Retrieves an ObjectAccessor configured with the current scoped chain.
      * <p>
-     * This method creates a new {@link ScopedChainValuesAccessor} based on the current scoped chain,
-     * sets the default wrapper, and returns it. The resulting accessor is used for accessing and manipulating
-     * scoped values.
+     * Creates a new {@link ScopedChainValuesAccessor} based on the current scope chain,
+     * sets the default wrapper, and returns it.
      * </p>
      *
-     * @return an {@link ObjectAccessor} instance for accessing scoped values
+     * @return an ObjectAccessor for accessing scoped values
      */
     default ObjectAccessor getValueAccessor() {
         ObjectAccessor accessor = new ScopedChainValuesAccessor(getScopedChain());
@@ -84,8 +81,16 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
         return accessor;
     }
 
+    /**
+     * Returns the PropertyValueResolver that resolves properties, including virtual ones.
+     * <p>
+     * It is constructed using the current ObjectAccessor and the VirtualPropertyResolver
+     * obtained from the EvaluationContext.
+     * </p>
+     *
+     * @return a PropertyValueResolver for resolving property values
+     */
     default PropertyValueResolver getValueResolver() {
         return new ExpressionLanguageValuesResolver(getValueAccessor(), getVirtualProperties());
     }
-
 }

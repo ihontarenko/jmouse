@@ -77,7 +77,10 @@ public class Main {
 //        TokenizableSource elString = new StringSource("el-string", "[1, '2', 3.14] is array");
 //        TokenizableSource elString = new StringSource("el-string", "set('_map', {'name': 'John' | upper, 'level': 321 ** 5 / 33, 'min': min(123, 111)})");
 //        TokenizableSource elString = new StringSource("el-string", "set('_name', book.full | upper)");
-        TokenizableSource elString = new StringSource("el-string", "set('_name', book.full | default('Unnamed') | upper)");
+//        TokenizableSource elString = new StringSource("el-string", "set('_name', book.full | default('Unnamed') | upper)");
+//        TokenizableSource elString = new StringSource("el-string", "user[0].book.title | default('qwe') | upper");
+//        TokenizableSource elString = new StringSource("el-string", "'test123' is inset(1, 2, 'test123', 3)");
+        TokenizableSource elString = new StringSource("el-string", "{user[0].book.title | upper : user[0].name | upper} is iterable");
         Recognizer<Token.Type, RawToken> elr = new EnumTokenRecognizer<>(BasicToken.class, 20);
         Lexer elLexer = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), elr));
 
@@ -99,7 +102,7 @@ public class Main {
 
         evaluationContext.getVirtualProperties().addVirtualProperty(new VirtualProperty<Book>() {
             @Override
-            public Class<Book> getInstanceType() {
+            public Class<Book> getType() {
                 return Book.class;
             }
 
@@ -115,20 +118,22 @@ public class Main {
 
             @Override
             public Object readValue(Book book) {
-                return STR."\{book.getAuthor()}: \{book.getTitle()}";
+                return STR."Author: \{book.getAuthor()}: Book: '\{book.getTitle()}' - \{book.getPages()} pages.";
+            }
+
+            @Override
+            public boolean isReadable() {
+                return true;
             }
         });
 
         Book book = new Book();
         book.setAuthor("John");
-        book.setTitle("Doe");
+        book.setTitle("It");
         book.setPages(671);
 
-        scopedChain.setValue("user", List.of(Map.of("name", "Root!", "level", 333)));
-        scopedChain.setValue("book", book);
+        scopedChain.setValue("user", List.of(Map.of("name", "Root!", "level", 333, "book", book)));
         scopedChain.setValue("cnt", 10D);
-//        scopedChain.push();
-//        scopedChain.setValue("user", List.of(destination));
 
         if (compiled instanceof ExpressionNode expressionNode) {
             Object value = expressionNode.evaluate(evaluationContext);

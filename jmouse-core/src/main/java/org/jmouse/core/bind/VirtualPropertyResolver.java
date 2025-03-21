@@ -36,7 +36,7 @@ public interface VirtualPropertyResolver {
      * @param property the VirtualProperty definition which contains its own instance type information and property name
      */
     default void addVirtualProperty(VirtualProperty<?> property) {
-        addVirtualProperty(property.getInstanceType(), property.getName(), property);
+        addVirtualProperty(property.getType(), property.getName(), property);
     }
 
     /**
