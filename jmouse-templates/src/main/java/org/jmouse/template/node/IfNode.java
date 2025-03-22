@@ -1,4 +1,4 @@
-package org.jmouse.template.node.renderable;
+package org.jmouse.template.node;
 
 import org.jmouse.el.node.AbstractRenderableNode;
 
@@ -7,7 +7,7 @@ import java.util.List;
 
 public class IfNode extends AbstractRenderableNode {
 
-    private final List<IfCondition>           conditions;
+    private final List<IfCondition> conditions;
 
     public IfNode() {
         this.conditions = new ArrayList<>();
@@ -19,6 +19,10 @@ public class IfNode extends AbstractRenderableNode {
 
     public void addElse(IfCondition condition) {
         conditions.addLast(condition);
+    }
+
+    public List<IfCondition> getConditions() {
+        return conditions;
     }
 
 }

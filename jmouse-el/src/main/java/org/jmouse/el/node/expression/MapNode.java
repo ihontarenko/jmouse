@@ -49,6 +49,6 @@ public class MapNode extends AbstractExpressionNode {
      */
     @Override
     public String toString() {
-        return "MAP[%s]".formatted(children().size());
+        return "MAP[%s]".formatted(children());
     }
 }

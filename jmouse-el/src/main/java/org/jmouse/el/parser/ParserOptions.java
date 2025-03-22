@@ -1,18 +1,12 @@
 package org.jmouse.el.parser;
 
 import org.jmouse.el.lexer.Token;
+import org.jmouse.el.lexer.TokenCursor;
 
 import java.util.function.Predicate;
 
 /**
  * Represents configurable options for the parser.
- *
- * <p>This interface provides mechanisms to define conditions that influence
- * the parser process, such as specifying a stopping condition.</p>
- *
- * <pre>{@code
- * ParserOptions options = ParserOptions.withStopCondition(token -> token.is(Token.Type.SEMICOLON));
- * }</pre>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -24,7 +18,7 @@ public interface ParserOptions {
      *
      * @return a {@link Predicate} that evaluates whether parser should stop at a given token
      */
-    default Predicate<Token> stopCondition() {
+    default Predicate<TokenCursor> stopCondition() {
         return token -> false;
     }
 
@@ -38,7 +32,7 @@ public interface ParserOptions {
      * @param stopCondition the stopping condition for the parser
      * @return a new instance of {@code ParserOptions} with the specified condition
      */
-    static ParserOptions withStopCondition(Predicate<Token> stopCondition) {
+    static ParserOptions withStopCondition(Predicate<TokenCursor> stopCondition) {
         return new Default(stopCondition, null);
     }
 
@@ -49,7 +43,7 @@ public interface ParserOptions {
     /**
      * DirectAccess implementation of {@link ParserOptions}.
      */
-    record Default(Predicate<Token> stopCondition, Class<? extends Parser> nextParser) implements ParserOptions {
+    record Default(Predicate<TokenCursor> stopCondition, Class<? extends Parser> nextParser) implements ParserOptions {
 
     }
 }

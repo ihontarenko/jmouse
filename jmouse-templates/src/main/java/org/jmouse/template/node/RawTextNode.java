@@ -1,6 +1,8 @@
-package org.jmouse.template.node.renderable;
+package org.jmouse.template.node;
 
 import org.jmouse.el.node.AbstractRenderableNode;
+
+import java.util.Arrays;
 
 /**
  * Represents a raw text node in a templating system.
@@ -34,5 +36,10 @@ public class RawTextNode extends AbstractRenderableNode {
      */
     public String getString() {
         return new String(data);
+    }
+
+    @Override
+    public String toString() {
+        return "RAW[%s]".formatted(new String(data));
     }
 }

@@ -72,6 +72,11 @@ public enum TemplateToken implements Token.Type {
     T_END_IF(20004, "endif", "fi"),
 
     /**
+     * 'elseif' keyword type (also supports "else-if" as an alternative).
+     */
+    T_ELSE_IF(20004, "elseif", "else-if"),
+
+    /**
      * 'else' keyword type.
      */
     T_ELSE(20005, "else"),

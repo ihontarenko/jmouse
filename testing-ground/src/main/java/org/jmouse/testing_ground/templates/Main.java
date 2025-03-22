@@ -1,20 +1,14 @@
 package org.jmouse.testing_ground.templates;
 
-import org.jmouse.core.bind.Bind;
-import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.core.bind.VirtualProperty;
-import org.jmouse.core.bind.VirtualPropertyResolver;
 import org.jmouse.el.StringSource;
 import org.jmouse.el.evaluation.DefaultEvaluationContext;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.ScopedChain;
-import org.jmouse.el.extension.StandardExtension;
 import org.jmouse.el.lexer.recognizer.CompositeRecognizer;
 import org.jmouse.el.lexer.recognizer.EnumTokenRecognizer;
 import org.jmouse.el.lexer.recognizer.Recognizer;
 import org.jmouse.el.node.ExpressionNode;
-import org.jmouse.el.parser.ExpressionParser;
-import org.jmouse.el.parser.OperatorParser;
 import org.jmouse.template.TemplateCoreExtension;
 import org.jmouse.el.lexer.*;
 import org.jmouse.el.parser.DefaultParserContext;
@@ -25,10 +19,10 @@ import org.jmouse.template.lexer.TemplateTokenizer;
 import org.jmouse.template.loader.ClasspathLoader;
 import org.jmouse.template.loader.TemplateLoader;
 import org.jmouse.el.node.Node;
+import org.jmouse.template.parsing.TemplateParser;
 import org.jmouse.testing_ground.binder.dto.Book;
 
 import java.io.Reader;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,8 +34,8 @@ public class Main {
         loader.setPrefix("templates/");
         loader.setSuffix(".html");
 
-        Reader            reader    = loader.load("simple");
-//        TokenizableSource string    = new StringSource("default.html", reader);
+        Reader            reader    = loader.load("default");
+        TokenizableSource string    = new StringSource("default.html", reader);
 //        TokenizableSource string    = new StringSource("simple.html", reader);
 //        TokenizableSource string    = new StringSource("index", "Hello {% for ab in   xyz  def %}! {{ users is not contains '123' }}");
 //        TokenizableSource string    = new StringSource("test-string", "Calculation: {{ 1 + 2 * 3 + 4 + 5 * 5 * 4 + 2 }}");
@@ -55,7 +49,7 @@ public class Main {
 //        TokenizableSource string    = new StringSource("string-test", "<h1>{{ 1 (2 + 3) * 4 }}</h1>");
 
 //        TokenizableSource string    = new StringSource("string-test", "<h1>{{ min(max() + 2 / 3 (1+1) ) }}</h1>");
-        TokenizableSource string    = new StringSource("string-test", "<h1>{% if x is even and y is not inset(1, 2, 3) || a > 1 and a < 10 and x is even or data.users[0].name is odd %}</h1>");
+//        TokenizableSource string    = new StringSource("string-test", "<h1>{% if x is even and y is not inset(1, 2, 3) || a > 1 and a < 10 and x is even or data.users[0].name is odd %}</h1>");
 //        TokenizableSource string    = new StringSource("string-test", "<h1>{{ data.users[0].name }}</h1>");
 
         CompositeRecognizer recognizer = new CompositeRecognizer();
@@ -75,12 +69,12 @@ public class Main {
 //        TokenizableSource elString = new StringSource("el-string", "2 + (2 + 2) * 2 / 3 (22 / 7) is odd");
 //        TokenizableSource elString = new StringSource("el-string", "++cnt / 2 is odd");
 //        TokenizableSource elString = new StringSource("el-string", "[1, '2', 3.14] is array");
-//        TokenizableSource elString = new StringSource("el-string", "set('_map', {'name': 'John' | upper, 'level': 321 ** 5 / 33, 'min': min(123, 111)})");
+        TokenizableSource elString = new StringSource("el-string", "set('_map', {'name': 'John' | upper, 'level': 321 ** 7 / 33 | toBigDecimal, 'min': min(123, 111), 'aaa': 5643%123})");
 //        TokenizableSource elString = new StringSource("el-string", "set('_name', book.full | upper)");
 //        TokenizableSource elString = new StringSource("el-string", "set('_name', book.full | default('Unnamed') | upper)");
 //        TokenizableSource elString = new StringSource("el-string", "user[0].book.title | default('qwe') | upper");
 //        TokenizableSource elString = new StringSource("el-string", "'test123' is inset(1, 2, 'test123', 3)");
-        TokenizableSource elString = new StringSource("el-string", "{user[0].book.title | upper : user[0].name | upper} is iterable");
+//        TokenizableSource elString = new StringSource("el-string", "{user[0].book.title | upper : user[0].name | upper} is map");
         Recognizer<Token.Type, RawToken> elr = new EnumTokenRecognizer<>(BasicToken.class, 20);
         Lexer elLexer = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), elr));
 
@@ -92,11 +86,11 @@ public class Main {
 
         cursor.next();
         elCursor.next();
-        Node compiled = parserContext.getParser(ExpressionParser.class).parse(elCursor, parserContext);
+        Node compiled = parserContext.getParser(TemplateParser.class).parse(cursor, parserContext);
 
         EvaluationContext evaluationContext = new DefaultEvaluationContext();
 
-        evaluationContext.getExtensions().importExtension(new StandardExtension());
+        evaluationContext.getExtensions().importExtension(new TemplateCoreExtension());
 
         ScopedChain scopedChain = evaluationContext.getScopedChain();
 
@@ -132,7 +126,7 @@ public class Main {
         book.setTitle("It");
         book.setPages(671);
 
-        scopedChain.setValue("user", List.of(Map.of("name", "Root!", "level", 333, "book", book)));
+        scopedChain.setValue("user", List.of(Map.of("name", "Root!", "active", true, "level", 333, "book", book)));
         scopedChain.setValue("cnt", 10D);
 
         if (compiled instanceof ExpressionNode expressionNode) {

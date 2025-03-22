@@ -1,4 +1,4 @@
-package org.jmouse.template.node.renderable;
+package org.jmouse.template.node;
 
 import org.jmouse.el.node.AbstractRenderableNode;
 

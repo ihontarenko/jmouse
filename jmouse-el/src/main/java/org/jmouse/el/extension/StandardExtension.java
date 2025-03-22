@@ -1,9 +1,7 @@
 package org.jmouse.el.extension;
 
 import org.jmouse.el.extension.filter.*;
-import org.jmouse.el.extension.function.MaxFunction;
-import org.jmouse.el.extension.function.MinFunction;
-import org.jmouse.el.extension.function.SetFunction;
+import org.jmouse.el.extension.function.*;
 import org.jmouse.el.extension.operator.*;
 import org.jmouse.el.extension.test.*;
 import org.jmouse.el.parser.*;

@@ -9,9 +9,7 @@ import org.jmouse.el.parser.ParserOptions;
 
 import java.util.function.Predicate;
 
-public class BlockParser implements Parser {
-
-    public static final String NAME = "block";
+public class BodyParser implements Parser {
 
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
@@ -19,15 +17,15 @@ public class BlockParser implements Parser {
 
         if (options != null) {
             Parser           parser  = context.getParser(RootParser.class);
-            Predicate<Token> stopper = options.stopCondition();
+            Predicate<TokenCursor> stopper = options.stopCondition();
             Token            token   = cursor.peek();
 
-            while (cursor.hasNext() && !stopper.test(token)) {
-                cursor.next();
-                parent.add(parser.parse(cursor, context));
+            while (cursor.hasNext() && !stopper.test(cursor)) {
+                Node node = parser.parse(cursor, context);
+                parent.add(node);
             }
 
-            if (stopper.test(token)) {
+            if (stopper.test(cursor)) {
                 cursor.next();
             }
         }
