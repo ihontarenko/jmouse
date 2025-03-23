@@ -37,7 +37,6 @@ public class IfParser implements TagParser {
 
         // Parse any consecutive else-if branches.
         while (CursorMatcher.sequence(T_ELSE_IF).matches(cursor)) {
-            cursor.next(); // Consume the T_OPEN_EXPRESSION.
             cursor.ensure(T_ELSE_IF);
             ExpressionNode elseIfCondition = (ExpressionNode) expressionParser.parse(cursor, context);
             cursor.ensure(T_CLOSE_EXPRESSION);

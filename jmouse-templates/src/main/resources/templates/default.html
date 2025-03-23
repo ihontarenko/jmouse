@@ -10,6 +10,8 @@
 <header>
     <h1>Welcome, Administrator {{ user.name | escape }}</h1>
 </header>
+{% elseif user.level > 32 %}
+waaaah!
 {% else %}
 <header>
     <h1>Welcome, {{ user.name | upper }}</h1>
@@ -23,15 +25,15 @@
     <!-- Форматування валюти -->
     <p>Your balance is: {{ balance | currency("USD") }}</p>
 
+    <!-- Арифметичний вираз -->
+    <p>Arithmetic test: {{ 2 + 4 * 3 / 6 + 1 / 3 ** 2 }}</p>
+
     <!-- Цикл для переліку елементів -->
     <ul>
-        {% for item in items %}
-        <li>{{ item.name | escape }}: {{ item.price | currency("USD") }}</li>
+        {% for user in users %}
+        <li>{{ user.name | escape }}: {{ item.price | currency("USD") }}</li>
         {% endfor %}
     </ul>
-
-    <!-- Арифметичний вираз -->
-    <p>Arithmetic test: {{ 2 + 4 * 3 / 6 + 1/3 }}</p>
 
     <!-- Вираз з префіксним і постфіксним інкрементом/декрементом -->
     <p>Increment test: {{ --counter + counter++ }}</p>
