@@ -1,5 +1,6 @@
 package org.jmouse.template.parsing;
 
+import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.*;
@@ -33,4 +34,21 @@ public class TemplateParser implements Parser {
 
         parent.add(body);
     }
+
+    public void parse(TokenCursor cursor, Node parent, ParserContext context, Matcher<TokenCursor> matcher) {
+        BodyNode               body    = new BodyNode();
+        Parser                 parser  = context.getParser(RootParser.class);
+
+        while (cursor.hasNext() && !matcher.matches(cursor)) {
+            Node node = parser.parse(cursor, context);
+            body.add(node);
+        }
+
+        if (matcher.matches(cursor)) {
+            cursor.next();
+        }
+
+        parent.add(body);
+    }
+
 }
