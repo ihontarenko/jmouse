@@ -10,6 +10,7 @@ import org.jmouse.el.node.RenderableNode;
 import org.jmouse.el.parser.*;
 import org.jmouse.template.TemplateToken;
 import org.jmouse.template.node.BodyNode;
+import org.jmouse.template.node.IfCondition;
 import org.jmouse.template.node.IfNode;
 import org.jmouse.template.parsing.TemplateParser;
 
@@ -19,30 +20,47 @@ public class IfParser implements TagParser {
 
     @Override
     public RenderableNode parse(TokenCursor cursor, ParserContext context) {
-        // consume 'if'
-        cursor.ensure(TemplateToken.T_IF);
-        IfNode         ifNode = new IfNode();
-        Parser         parser = context.getParser(ExpressionParser.class);
-        ExpressionNode condition   = (ExpressionNode) parser.parse(cursor, context);
-
-        cursor.ensure(TemplateToken.T_CLOSE_EXPRESSION);
-
-        Node           container      = BasicNode.forToken(null);
+        // Consume the "if" tag.
+        cursor.ensure(T_IF);
+        IfNode ifNode = new IfNode();
         TemplateParser templateParser = (TemplateParser) context.getParser(TemplateParser.class);
-        templateParser.parse(cursor, container, context, stopper());
+        Parser expressionParser = context.getParser(ExpressionParser.class);
 
-        RenderableNode renderableNode = (RenderableNode) container.first();
+        // Parse the if condition.
+        ExpressionNode expressionNode = (ExpressionNode) expressionParser.parse(cursor, context);
+        cursor.ensure(T_CLOSE_EXPRESSION);
 
-        if (CursorMatcher.sequence(T_ELSE).matches(cursor)) {
-            cursor.ensure(TemplateToken.T_ELSE);
-            cursor.ensure(TemplateToken.T_CLOSE_EXPRESSION);
-            Node           elseContainer      = BasicNode.forToken(null);
-            templateParser.parse(cursor, elseContainer, context, stopper());
-            RenderableNode elseRenderableNode = (RenderableNode) elseContainer.first();
-            System.out.println(elseRenderableNode);
+        // Parse the if block body.
+        Node ifBody = new BodyNode();
+        templateParser.parse(cursor, ifBody, context, stopper());
+        ifNode.addCondition(new IfCondition(expressionNode, (RenderableNode) ifBody.first()));
+
+        // Parse any consecutive else-if branches.
+        while (CursorMatcher.sequence(T_ELSE_IF).matches(cursor)) {
+            cursor.next(); // Consume the T_OPEN_EXPRESSION.
+            cursor.ensure(T_ELSE_IF);
+            ExpressionNode elseIfCondition = (ExpressionNode) expressionParser.parse(cursor, context);
+            cursor.ensure(T_CLOSE_EXPRESSION);
+            Node elseIfBody = new BodyNode();
+            templateParser.parse(cursor, elseIfBody, context, stopper());
+            ifNode.addCondition(new IfCondition(elseIfCondition, (RenderableNode) elseIfBody.first()));
         }
 
-        System.out.println("qwerqweqwe");
+        // Parse the optional else branch.
+        if (CursorMatcher.sequence(T_ELSE).matches(cursor)) {
+            cursor.ensure(T_ELSE);
+            cursor.ensure(T_CLOSE_EXPRESSION);
+            Node elseBody = new BodyNode();
+            templateParser.parse(cursor, elseBody, context, stopper());
+            ifNode.addElse(new IfCondition(null, (RenderableNode) elseBody.first()));
+        }
+
+        // Consume the "end if" tag.
+        if (CursorMatcher.sequence(T_END_IF).matches(cursor)) {
+            cursor.ensure(T_END_IF);
+        } else {
+            throw new RuntimeException("Missing end-if tag");
+        }
 
         return ifNode;
     }
