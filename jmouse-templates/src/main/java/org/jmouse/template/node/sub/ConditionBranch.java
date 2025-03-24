@@ -1,15 +1,15 @@
-package org.jmouse.template.node;
+package org.jmouse.template.node.sub;
 
 import org.jmouse.el.node.AbstractRenderableNode;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.RenderableNode;
 
-public class IfCondition extends AbstractRenderableNode {
+public class ConditionBranch extends AbstractRenderableNode {
 
     private final ExpressionNode when;
     private final RenderableNode then;
 
-    public IfCondition(ExpressionNode when, RenderableNode then) {
+    public ConditionBranch(ExpressionNode when, RenderableNode then) {
         this.when = when;
         this.then = then;
     }

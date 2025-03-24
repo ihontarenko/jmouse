@@ -1,6 +1,7 @@
 package org.jmouse.el.evaluation;
 
 import org.jmouse.core.convert.PredefinedConversion;
+import org.jmouse.core.convert.converter.NumberToNumberConverter;
 
 /**
  * An extension of {@link PredefinedConversion} tailored for the expression language.
@@ -20,5 +21,7 @@ public class ExpressionLanguageConversion extends PredefinedConversion {
      */
     public ExpressionLanguageConversion() {
         super();
+
+        registerConverter(new NumberToNumberConverter());
     }
 }

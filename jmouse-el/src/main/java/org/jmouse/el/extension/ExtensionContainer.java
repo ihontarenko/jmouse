@@ -116,11 +116,11 @@ public interface ExtensionContainer {
      * @param extension the extension to import
      */
     default void importExtension(Extension extension) {
+        extension.getTagParsers().forEach(this::addTagParser);
         extension.getFunctions().forEach(this::addFunction);
         extension.getTests().forEach(this::addTest);
         extension.getFilters().forEach(this::addFilter);
         extension.getOperators().forEach(this::addOperator);
-        extension.getTagParsers().forEach(this::addTagParser);
         extension.getParsers().forEach(this::addParser);
     }
 }

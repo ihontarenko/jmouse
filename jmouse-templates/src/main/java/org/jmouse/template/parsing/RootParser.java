@@ -14,13 +14,16 @@ import static org.jmouse.template.TemplateToken.*;
 
 /**
  * 🏗️ The root parser responsible for processing the entire template.
- * This parser delegates expressions to {@link PrimaryExpressionParser}.
- *
  * <p>
  * Parses:
- * - Plain text as {@link RawTextNode}
- * - Print expressions {@code {{ expression }}} as {@link PrintNode}
- * - Execution expressions {@code {% expression %}} as {@link BodyNode}
+ * <ul>
+ *   <li>Plain text as {@link RawTextNode}</li>
+ *   <li>Print expressions (e.g. <code>{{ expression }}</code>) as {@link PrintNode}</li>
+ *   <li>Execution expressions (e.g. <code>{% expression %}</code>) as {@link BodyNode}</li>
+ * </ul>
+ * </p>
+ * <p>
+ * Delegates expression parsing to {@link ExpressionParser} and tag parsing to appropriate {@link org.jmouse.el.parser.TagParser} implementations.
  * </p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
@@ -28,52 +31,51 @@ import static org.jmouse.template.TemplateToken.*;
  */
 public class RootParser implements Parser {
 
+    /**
+     * Parses the template content from the token stream and attaches the resulting nodes to the parent.
+     *
+     * @param cursor  the token cursor
+     * @param parent  the parent node to which parsed nodes are added
+     * @param context the parser context for retrieving sub-parsers
+     */
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
 
         if (cursor.isCurrent(T_RAW_TEXT)) {
-            // 📝 Raw text node
+            // Raw text node
             parent.add(new RawTextNode(cursor.peek().value()));
             cursor.next();
         } else if (cursor.isCurrent(T_OPEN_PRINT)) {
-            // 🏗️ Handling print expression: {{ expression }}
+            // Print expression: {{ expression }}
             cursor.ensure(T_OPEN_PRINT);
 
-            // ✅ Parse statements inside {{ statement }} block
-            Node node = context.getParser(ExpressionParser.class).parse(cursor, context);
-
-            // ✅ Expect closing braces "}}"
-            cursor.ensure(T_CLOSE_PRINT);
-
-            // ✅ Wrap expression inside PrintNode
-            if (node instanceof ExpressionNode expression) {
+            if (context.getParser(ExpressionParser.class).parse(cursor, context) instanceof ExpressionNode expression) {
                 parent.add(new PrintNode(expression));
             }
+
+            cursor.ensure(T_CLOSE_PRINT);
+
         } else if (cursor.isCurrent(T_OPEN_EXPRESSION)) {
-            // 🏗️ Handling execution expression: "{%"
+            // Execution expression: {% expression %}
             cursor.ensure(T_OPEN_EXPRESSION);
-            Token currentToken = cursor.peek();
 
-            // create body node (container)
-            BodyNode body = new BodyNode();
+            Token    token = cursor.peek();
+            BodyNode body  = new BodyNode();
 
-            TagParser tagParser = context.getTagParser(currentToken.value());
+            // Retrieve tag parser based on the token value.
+            TagParser tagParser = context.getTagParser(token.value());
 
             if (tagParser == null) {
-                throw new ParseException("No tag parser found: '%s'".formatted(currentToken.value()));
+                throw new ParseException("No tag parser found: '%s'".formatted(token.value()));
             }
 
             body.add(tagParser.parse(cursor, context));
 
-            // ✅ Expect closing expression tag: "%}"
             cursor.ensure(T_CLOSE_EXPRESSION);
-
-            // ✅ Add parsed body to parent
             parent.add(body);
         } else {
-            // 🚨 Unexpected token
+            // Unexpected token; expect end-of-line.
             cursor.expect(BasicToken.T_EOL);
         }
-
     }
 }

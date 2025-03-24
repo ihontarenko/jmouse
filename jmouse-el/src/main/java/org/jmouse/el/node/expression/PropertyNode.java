@@ -51,6 +51,6 @@ public class PropertyNode extends AbstractExpressionNode {
      */
     @Override
     public String toString() {
-        return "PROPERTY_PATH: '%s'".formatted(path);
+        return "PROPERTY_PATH['%s']".formatted(path);
     }
 }

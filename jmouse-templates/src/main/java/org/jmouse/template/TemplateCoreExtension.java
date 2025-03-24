@@ -5,14 +5,12 @@ import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.template.parsing.RootParser;
 import org.jmouse.template.parsing.TemplateParser;
-import org.jmouse.template.parsing.tag.ForParser;
-import org.jmouse.template.parsing.tag.IfParser;
-import org.jmouse.template.parsing.tag.LoremParser;
+import org.jmouse.template.parsing.tag.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TemplateCoreExtension extends StandardExtension {
+public class TemplateCoreExtension extends StandardExtension implements TemplateExtension {
 
     @Override
     public List<Parser> getParsers() {
@@ -29,6 +27,8 @@ public class TemplateCoreExtension extends StandardExtension {
         return List.of(
                 new ForParser(),
                 new IfParser(),
+                new ExtendsParser(),
+                new BlockParser(),
                 new LoremParser()
         );
     }

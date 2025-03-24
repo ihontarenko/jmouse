@@ -36,7 +36,7 @@ public enum ComparisonOperator implements Operator {
     /**
      * Equal ({@code ==}), returns {@code true} if both operands are equal.
      */
-    EQUAL(ComparisonCalculator.NOT_EQUAL, BasicToken.T_EQ, "EQUAL", 8),
+    EQUAL(ComparisonCalculator.EQUAL, BasicToken.T_EQ, "EQUAL", 8),
 
     /**
      * Not equal ({@code !=}), returns {@code true} if operands are not equal.

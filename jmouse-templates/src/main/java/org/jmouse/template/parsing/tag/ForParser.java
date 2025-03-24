@@ -13,6 +13,8 @@ public class ForParser implements TagParser {
     public RenderableNode parse(TokenCursor cursor, ParserContext context) {
         Token token = cursor.ensure(TemplateToken.T_FOR);
 
+        System.out.println(token);
+
         return null;
     }
 

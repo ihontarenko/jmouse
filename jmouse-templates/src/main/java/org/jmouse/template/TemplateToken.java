@@ -102,15 +102,20 @@ public enum TemplateToken implements Token.Type {
     T_BLOCK(20009, "block"),
 
     /**
+     * 'block' keyword type.
+     */
+    T_END_BLOCK(20010, "endblock"),
+
+    /**
      * 'macro' keyword type.
      */
-    T_MACRO(20010, "macro"),
+    T_MACRO(20011, "macro"),
 
     // Additional tokens
     /**
      * 'include' keyword type.
      */
-    T_INCLUDE(20011, "include"),
+    T_INCLUDE(20012, "include"),
 
     /**
      * 'call' keyword type.
