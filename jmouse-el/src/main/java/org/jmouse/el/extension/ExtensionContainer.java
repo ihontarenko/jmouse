@@ -1,7 +1,6 @@
 package org.jmouse.el.extension;
 
 import org.jmouse.el.lexer.Token;
-import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.parser.Parser;
 
 /**
@@ -15,21 +14,6 @@ import org.jmouse.el.parser.Parser;
  * @author ihontarenko@gmail.com
  */
 public interface ExtensionContainer {
-
-    /**
-     * 🔖 Retrieves a registered tag parser by its name.
-     *
-     * @param name the name of the tag parser
-     * @return the {@link TagParser} instance, or {@code null} if not found
-     */
-    TagParser getTagParser(String name);
-
-    /**
-     * ➕ Adds a new tag parser to the container.
-     *
-     * @param parser the {@link TagParser} instance to register
-     */
-    void addTagParser(TagParser parser);
 
     /**
      * 🔍 Retrieves a registered expression parser by its class type.
@@ -116,7 +100,6 @@ public interface ExtensionContainer {
      * @param extension the extension to import
      */
     default void importExtension(Extension extension) {
-        extension.getTagParsers().forEach(this::addTagParser);
         extension.getFunctions().forEach(this::addFunction);
         extension.getTests().forEach(this::addTest);
         extension.getFilters().forEach(this::addFilter);

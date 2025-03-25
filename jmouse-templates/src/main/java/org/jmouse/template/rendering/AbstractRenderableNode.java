@@ -1,14 +1,13 @@
-package org.jmouse.el.node;
+package org.jmouse.template.rendering;
 
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.RenderingException;
-
-import java.io.Writer;
+import org.jmouse.el.node.AbstractNode;
 
 public class AbstractRenderableNode extends AbstractNode implements RenderableNode {
 
     @Override
-    public void render(Writer writer, EvaluationContext context) {
+    public void render(Content content, RenderableEntity entity, EvaluationContext context) {
         throw new RenderingException("Renderable node '%s' is not supported yet.".formatted(this.getClass()));
     }
 

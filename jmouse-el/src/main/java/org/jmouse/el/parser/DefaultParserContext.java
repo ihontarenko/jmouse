@@ -13,16 +13,6 @@ public class DefaultParserContext implements ParserContext {
     }
 
     @Override
-    public TagParser getTagParser(String name) {
-        return extensions.getTagParser(name);
-    }
-
-    @Override
-    public void addTagParser(TagParser parser) {
-        extensions.addTagParser(parser);
-    }
-
-    @Override
     public Parser getParser(Class<? extends Parser> type) {
         return extensions.getParser(type);
     }

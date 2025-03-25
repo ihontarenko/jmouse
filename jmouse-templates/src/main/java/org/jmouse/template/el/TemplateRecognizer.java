@@ -1,4 +1,4 @@
-package org.jmouse.template.lexer;
+package org.jmouse.template.el;
 
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.RawToken;
@@ -6,7 +6,6 @@ import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.recognizer.CompositeRecognizer;
 import org.jmouse.el.lexer.recognizer.EnumTokenRecognizer;
 import org.jmouse.el.lexer.recognizer.Recognizer;
-import org.jmouse.template.TemplateToken;
 
 import java.util.Optional;
 

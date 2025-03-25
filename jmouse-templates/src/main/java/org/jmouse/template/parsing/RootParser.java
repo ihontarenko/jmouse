@@ -6,11 +6,12 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.*;
+import org.jmouse.template.rendering.TagParser;
 import org.jmouse.template.node.BodyNode;
 import org.jmouse.template.node.PrintNode;
 import org.jmouse.template.node.RawTextNode;
 
-import static org.jmouse.template.TemplateToken.*;
+import static org.jmouse.template.el.TemplateToken.*;
 
 /**
  * 🏗️ The root parser responsible for processing the entire template.
@@ -23,7 +24,7 @@ import static org.jmouse.template.TemplateToken.*;
  * </ul>
  * </p>
  * <p>
- * Delegates expression parsing to {@link ExpressionParser} and tag parsing to appropriate {@link org.jmouse.el.parser.TagParser} implementations.
+ * Delegates expression parsing to {@link ExpressionParser} and tag parsing to appropriate {@link TagParser} implementations.
  * </p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)

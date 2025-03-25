@@ -1,4 +1,4 @@
-package org.jmouse.template.lexer;
+package org.jmouse.template.el;
 
 import org.jmouse.el.lexer.ExpressionSplitter;
 import org.jmouse.el.lexer.RawToken;

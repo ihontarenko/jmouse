@@ -95,16 +95,6 @@ public class StandardExtension implements Extension {
     }
 
     /**
-     * Returns the list of tag parsers used in the expression language.
-     *
-     * @return a list of {@link TagParser} instances, or an empty list if none are defined
-     */
-    @Override
-    public List<TagParser> getTagParsers() {
-        return List.of();
-    }
-
-    /**
      * Returns the list of operators available in the expression language.
      *
      * @return a list of {@link Operator} instances

@@ -1,4 +1,4 @@
-package org.jmouse.template.lexer;
+package org.jmouse.template.el;
 
 import org.jmouse.el.lexer.*;
 import org.jmouse.el.lexer.recognizer.Recognizer;

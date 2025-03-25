@@ -1,6 +1,4 @@
-package org.jmouse.template.evaluation;
-
-import org.jmouse.template.Template;
+package org.jmouse.template;
 
 public interface TemplateInheritance {
 

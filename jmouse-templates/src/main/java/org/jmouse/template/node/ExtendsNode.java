@@ -1,10 +1,10 @@
 package org.jmouse.template.node;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.AbstractRenderableNode;
+import org.jmouse.template.rendering.AbstractRenderableNode;
 import org.jmouse.el.node.ExpressionNode;
-
-import java.io.Writer;
+import org.jmouse.template.rendering.Content;
+import org.jmouse.template.rendering.RenderableEntity;
 
 public class ExtendsNode extends AbstractRenderableNode {
 
@@ -19,8 +19,8 @@ public class ExtendsNode extends AbstractRenderableNode {
     }
 
     @Override
-    public void render(Writer writer, EvaluationContext context) {
-        super.render(writer, context);
+    public void render(Content content, RenderableEntity entity, EvaluationContext context) {
+        super.render(content, entity, context);
     }
 
 }
