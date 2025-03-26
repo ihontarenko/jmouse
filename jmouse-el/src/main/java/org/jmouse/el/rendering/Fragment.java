@@ -4,6 +4,4 @@ public interface Fragment {
 
     String getName();
 
-    Content getContent();
-
 }

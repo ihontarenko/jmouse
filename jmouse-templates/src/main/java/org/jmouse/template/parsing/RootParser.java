@@ -6,8 +6,8 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.*;
-import org.jmouse.el.parser.TagParser;
-import org.jmouse.template.node.BodyNode;
+import org.jmouse.el.rendering.EmptyNode;
+import org.jmouse.template.node.ContainerNode;
 import org.jmouse.template.node.PrintNode;
 import org.jmouse.template.node.RawTextNode;
 
@@ -20,7 +20,7 @@ import static org.jmouse.template.lexer.TemplateToken.*;
  * <ul>
  *   <li>Plain text as {@link RawTextNode}</li>
  *   <li>Print expressions (e.g. <code>{{ expression }}</code>) as {@link PrintNode}</li>
- *   <li>Execution expressions (e.g. <code>{% expression %}</code>) as {@link BodyNode}</li>
+ *   <li>Execution expressions (e.g. <code>{% expression %}</code>) as {@link ContainerNode}</li>
  * </ul>
  * </p>
  * <p>
@@ -60,8 +60,7 @@ public class RootParser implements Parser {
             // Execution expression: {% expression %}
             cursor.ensure(T_OPEN_EXPRESSION);
 
-            Token    token = cursor.peek();
-            BodyNode body  = new BodyNode();
+            Token token = cursor.peek();
 
             // Retrieve tag parser based on the token value.
             TagParser tagParser = context.getTagParser(token.value());
@@ -70,13 +69,14 @@ public class RootParser implements Parser {
                 throw new ParseException("No tag parser found: '%s'".formatted(token.value()));
             }
 
-            body.add(tagParser.parse(cursor, context));
+            Node tagNode = tagParser.parse(cursor, context);
 
             cursor.ensure(T_CLOSE_EXPRESSION);
-            parent.add(body);
+            parent.add(tagNode);
         } else {
             // Unexpected token; expect end-of-line.
             cursor.expect(BasicToken.T_EOL);
+            parent.add(new EmptyNode());
         }
     }
 }

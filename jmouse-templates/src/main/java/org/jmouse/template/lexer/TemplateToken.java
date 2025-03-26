@@ -59,7 +59,7 @@ public enum TemplateToken implements Token.Type {
     /**
      * 'endfor' keyword type.
      */
-    T_END_FOR(20002, "endfor"),
+    T_END_FOR(20002, "endfor", "end-for"),
 
     /**
      * 'if' keyword type.
@@ -69,7 +69,7 @@ public enum TemplateToken implements Token.Type {
     /**
      * 'endif' keyword type (also supports "fi" as an alternative).
      */
-    T_END_IF(20004, "endif", "fi"),
+    T_END_IF(20004, "endif", "end-if", "eif", "fi"),
 
     /**
      * 'elseif' keyword type (also supports "else-if" as an alternative).

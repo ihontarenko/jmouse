@@ -10,10 +10,12 @@ import org.jmouse.el.parser.DefaultParserContext;
 import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.ParserContext;
 
+import java.math.BigDecimal;
+
 public class Expressions {
 
     public static void main(String[] args) {
-        StringSource source = new StringSource("example", "(1+1)**9 / test is odd");
+        StringSource source = new StringSource("example", "test|toBigDecimal**3");
 
         DefaultTokenizer tokenizer = new DefaultTokenizer(new ExpressionSplitter(), new ExpressionRecognizer());
         Lexer             lexer     = new DefaultLexer(tokenizer);
@@ -33,9 +35,9 @@ public class Expressions {
 
         Object value = compiled.evaluate(evaluationContext);
 
-        Boolean integer = evaluationContext.getConversion().convert(value, Boolean.class);
+        BigDecimal result = evaluationContext.getConversion().convert(value, BigDecimal.class);
 
-        System.out.println(compiled);
+        System.out.println(result);
     }
 
 }

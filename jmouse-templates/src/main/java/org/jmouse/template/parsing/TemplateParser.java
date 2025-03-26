@@ -5,14 +5,14 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContext;
-import org.jmouse.template.node.BodyNode;
+import org.jmouse.template.node.ContainerNode;
 
 /**
  * 🏗️ The template parser that processes the entire template file.
  * <p>
  * This parser iterates over the token stream, invoking the {@link RootParser} for each segment
  * (raw text, print expressions, and execution expressions), and aggregates them into a single
- * {@link BodyNode} representing the complete template.
+ * {@link ContainerNode} representing the complete template.
  * </p>
  * <p>
  * An overloaded parse method allows stopping when a specified matcher condition is met.
@@ -31,14 +31,16 @@ public class TemplateParser implements Parser {
      */
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
-        BodyNode body = new BodyNode();
+        ContainerNode container = new ContainerNode();
+
+        container.setOnlySafeNodes(true);
 
         while (cursor.hasNext()) {
             // Delegate parsing to the RootParser for each section.
-            body.add(context.getParser(RootParser.class).parse(cursor, context));
+            container.add(context.getParser(RootParser.class).parse(cursor, context));
         }
 
-        parent.add(body);
+        parent.add(container);
     }
 
     /**
@@ -49,17 +51,17 @@ public class TemplateParser implements Parser {
      * @param matcher a matcher that defines the stopping condition
      */
     public Node parse(TokenCursor cursor, ParserContext context, Matcher<TokenCursor> matcher) {
-        BodyNode body   = new BodyNode();
-        Parser   parser = context.getParser(RootParser.class);
+        ContainerNode container = new ContainerNode();
+        Parser        parser    = context.getParser(RootParser.class);
 
         while (cursor.hasNext() && !matcher.matches(cursor)) {
-            body.add(parser.parse(cursor, context));
+            container.add(parser.parse(cursor, context));
         }
 
         if (matcher.matches(cursor)) {
             cursor.next();
         }
 
-        return body;
+        return container;
     }
 }

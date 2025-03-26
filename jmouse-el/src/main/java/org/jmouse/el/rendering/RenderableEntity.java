@@ -1,12 +1,12 @@
 package org.jmouse.el.rendering;
 
-import org.jmouse.el.StringSource;
+import org.jmouse.el.lexer.TokenizableSource;
 
 import java.util.List;
 
 public interface RenderableEntity {
 
-    StringSource getSource();
+    TokenizableSource getSource();
 
     String getName();
 
@@ -17,6 +17,8 @@ public interface RenderableEntity {
     List<Fragment> getFragments();
 
     EntityStack getStack();
+
+    void setParent(String parent);
 
     default void setParent(RenderableEntity parent) {
         getStack().inherit(parent);

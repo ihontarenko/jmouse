@@ -1,19 +1,7 @@
 package org.jmouse.template;
 
-import org.jmouse.el.StringSource;
+import org.jmouse.el.rendering.RenderableEntity;
 
-public interface Template {
-
-    StringSource getSource();
-
-    String getName();
-
-    void setParent(Template parent);
-
-    Template getParent();
-
-    default boolean hasParent() {
-        return getParent() != null;
-    }
+public interface Template extends RenderableEntity {
 
 }

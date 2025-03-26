@@ -1,18 +1,23 @@
 package org.jmouse.template;
 
-import org.jmouse.el.StringSource;
+import org.jmouse.el.lexer.TokenizableSource;
+import org.jmouse.el.rendering.EntityStack;
+import org.jmouse.el.rendering.Fragment;
+
+import java.util.List;
 
 public class StandardTemplate implements Template {
 
-    private final StringSource source;
-    private Template           parent;
+    private final TokenizableSource source;
+    private final EntityStack       stack;
 
-    public StandardTemplate(StringSource source) {
+    public StandardTemplate(TokenizableSource source) {
         this.source = source;
+        this.stack = EntityStack.empty();
     }
 
     @Override
-    public StringSource getSource() {
+    public TokenizableSource getSource() {
         return source;
     }
 
@@ -22,13 +27,28 @@ public class StandardTemplate implements Template {
     }
 
     @Override
-    public void setParent(Template parent) {
-        this.parent = parent;
+    public void setFragment(Fragment fragment) {
+
     }
 
     @Override
-    public Template getParent() {
-        return parent;
+    public Fragment getFragment(String name) {
+        return null;
+    }
+
+    @Override
+    public List<Fragment> getFragments() {
+        return List.of();
+    }
+
+    @Override
+    public EntityStack getStack() {
+        return stack;
+    }
+
+    @Override
+    public void setParent(String parent) {
+
     }
 
 }

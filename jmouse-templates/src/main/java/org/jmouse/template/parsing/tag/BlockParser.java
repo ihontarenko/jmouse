@@ -24,10 +24,12 @@ public class BlockParser implements TagParser {
         cursor.ensure(T_BLOCK);
         ExpressionNode name = (ExpressionNode) context.getParser(LiteralParser.class).parse(cursor, context);
         cursor.ensure(T_CLOSE_EXPRESSION);
-        RenderableNode content = (RenderableNode) parser.parse(cursor, context, matcher);
+        RenderableNode body = (RenderableNode) parser.parse(cursor, context, matcher);
 
         block.setName(name);
-        block.setBody(content);
+        block.setBody(body);
+
+        cursor.ensure(T_END_BLOCK);
 
         return block;
     }

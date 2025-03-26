@@ -20,7 +20,7 @@ public class ExtendsNode extends AbstractRenderableNode {
 
     @Override
     public void render(Content content, RenderableEntity entity, EvaluationContext context) {
-        super.render(content, entity, context);
+        entity.setParent(context.getConversion().convert(parent.evaluate(context), String.class));
     }
 
 }

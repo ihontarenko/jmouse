@@ -5,13 +5,36 @@ import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.template.parsing.RootParser;
 import org.jmouse.template.parsing.TemplateParser;
-import org.jmouse.template.parsing.tag.*;
+import org.jmouse.template.parsing.tag.BlockParser;
+import org.jmouse.template.parsing.tag.ExtendsParser;
+import org.jmouse.template.parsing.tag.ForParser;
+import org.jmouse.template.parsing.tag.IfParser;
+import org.jmouse.template.parsing.tag.LoremParser;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 📜 TemplateCoreExtension provides core extensions for the template engine.
+ * <p>
+ * It extends {@link StandardExtension} and implements {@link TemplateExtension},
+ * adding additional parsers and tag parsers specific to template processing, such as
+ * for loops, conditionals, inheritance, blocks, and placeholder text.
+ * </p>
+ *
+ * @author ...
+ */
 public class TemplateCoreExtension extends StandardExtension implements TemplateExtension {
 
+    /**
+     * Returns a list of parsers for template expressions and overall structure.
+     * <p>
+     * This method extends the base parsers from {@link StandardExtension} by adding the
+     * {@link TemplateParser} and {@link RootParser}, which handle the overall template layout.
+     * </p>
+     *
+     * @return a list of {@link Parser} instances used for template parsing
+     */
     @Override
     public List<Parser> getParsers() {
         List<Parser> parsers = new ArrayList<>(super.getParsers());
@@ -22,6 +45,21 @@ public class TemplateCoreExtension extends StandardExtension implements Template
         return parsers;
     }
 
+    /**
+     * Returns a list of tag parsers for processing template tags.
+     * <p>
+     * The provided tag parsers support the following tags:
+     * <ul>
+     *   <li>{@code for} – for iterating over collections</li>
+     *   <li>{@code if} – for conditional processing</li>
+     *   <li>{@code extends} – for template inheritance</li>
+     *   <li>{@code block} – for defining overridable content sections</li>
+     *   <li>{@code lorem} – for placeholder text</li>
+     * </ul>
+     * </p>
+     *
+     * @return a list of {@link TagParser} instances for handling template tags
+     */
     @Override
     public List<TagParser> getTagParsers() {
         return List.of(
@@ -32,5 +70,4 @@ public class TemplateCoreExtension extends StandardExtension implements Template
                 new LoremParser()
         );
     }
-
 }
