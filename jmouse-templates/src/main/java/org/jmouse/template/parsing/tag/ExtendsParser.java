@@ -2,11 +2,11 @@ package org.jmouse.template.parsing.tag;
 
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
-import org.jmouse.template.rendering.RenderableNode;
+import org.jmouse.el.rendering.RenderableNode;
 import org.jmouse.el.parser.LiteralParser;
 import org.jmouse.el.parser.ParserContext;
-import org.jmouse.template.rendering.TagParser;
-import org.jmouse.template.el.TemplateToken;
+import org.jmouse.el.parser.TagParser;
+import org.jmouse.template.lexer.TemplateToken;
 import org.jmouse.template.node.ExtendsNode;
 
 public class ExtendsParser implements TagParser {

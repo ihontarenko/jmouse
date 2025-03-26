@@ -1,10 +1,10 @@
 package org.jmouse.template.node;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.template.rendering.AbstractRenderableNode;
+import org.jmouse.el.rendering.AbstractRenderableNode;
 import org.jmouse.el.node.ExpressionNode;
-import org.jmouse.template.rendering.Content;
-import org.jmouse.template.rendering.RenderableEntity;
+import org.jmouse.el.rendering.Content;
+import org.jmouse.el.rendering.RenderableEntity;
 
 public class ExtendsNode extends AbstractRenderableNode {
 

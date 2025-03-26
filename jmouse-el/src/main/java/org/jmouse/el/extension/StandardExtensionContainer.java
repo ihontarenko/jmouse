@@ -4,6 +4,8 @@ import org.jmouse.el.ObjectContainer;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContainer;
+import org.jmouse.el.parser.TagParser;
+import org.jmouse.el.parser.TagParserContainer;
 
 /**
  * 🏗️ Standard implementation of {@link ExtensionContainer}.
@@ -18,6 +20,7 @@ import org.jmouse.el.parser.ParserContainer;
 public class StandardExtensionContainer implements ExtensionContainer {
 
     private final ObjectContainer<Class<? extends Parser>, Parser> parsers;
+    private final ObjectContainer<String, TagParser>               tags;
     private final ObjectContainer<Token.Type, Operator>            operators;
     private final ObjectContainer<String, Test>                    tests;
     private final ObjectContainer<String, Function>                functions;
@@ -27,11 +30,33 @@ public class StandardExtensionContainer implements ExtensionContainer {
      * 🛠️ Constructs an empty {@code StandardExtensionContainer}.
      */
     public StandardExtensionContainer() {
+        tags = new TagParserContainer();
         parsers = new ParserContainer();
         tests = new TestContainer();
         functions = new FunctionContainer();
         filters = new FilterContainer();
         operators = new OperatorContainer();
+    }
+
+    /**
+     * 🔖 Retrieves a registered tag parser by its name.
+     *
+     * @param name the name of the tag parser
+     * @return the {@link TagParser} instance, or {@code null} if not found
+     */
+    @Override
+    public TagParser getTagParser(String name) {
+        return tags.get(name);
+    }
+
+    /**
+     * ➕ Adds a new tag parser to the container.
+     *
+     * @param parser the {@link TagParser} instance to register
+     */
+    @Override
+    public void addTagParser(TagParser parser) {
+        tags.register(parser);
     }
 
     /**

@@ -13,9 +13,9 @@ import org.jmouse.template.TemplateCoreExtension;
 import org.jmouse.el.lexer.*;
 import org.jmouse.el.parser.DefaultParserContext;
 import org.jmouse.el.parser.ParserContext;
-import org.jmouse.template.el.TemplateToken;
-import org.jmouse.template.el.TemplateRecognizer;
-import org.jmouse.template.el.TemplateTokenizer;
+import org.jmouse.template.lexer.TemplateToken;
+import org.jmouse.template.lexer.TemplateRecognizer;
+import org.jmouse.template.lexer.TemplateTokenizer;
 import org.jmouse.template.loader.ClasspathLoader;
 import org.jmouse.template.loader.TemplateLoader;
 import org.jmouse.el.node.Node;
@@ -62,19 +62,19 @@ public class Main {
 
         TokenCursor cursor = lexer.tokenize(string);
 
-//        TokenizableSource elString = new StringSource("el-string", "1 | toInt(-1) | toBigInt is not int(1++) || x is even or data.users[0].name | trim is odd");
-//        TokenizableSource elString = new StringSource("el-string", "123 + user[0].level / 22");
-//        TokenizableSource elString = new StringSource("el-string", "22 / 7");
-//        TokenizableSource elString = new StringSource("el-string", "22 / 7 > 3");
-//        TokenizableSource elString = new StringSource("el-string", "2 + (2 + 2) * 2 / 3 (22 / 7) is odd");
-//        TokenizableSource elString = new StringSource("el-string", "++cnt / 2 is odd");
-//        TokenizableSource elString = new StringSource("el-string", "[1, '2', 3.14] is array");
-        TokenizableSource elString = new StringSource("el-string", "set('_map', {'name': 'John' | upper, 'level': 321 ** 7 / 33 | toBigDecimal, 'min': min(123, 111), 'aaa': 5643%123})");
-//        TokenizableSource elString = new StringSource("el-string", "set('_name', book.full | upper)");
-//        TokenizableSource elString = new StringSource("el-string", "set('_name', book.full | default('Unnamed') | upper)");
-//        TokenizableSource elString = new StringSource("el-string", "user[0].book.title | default('qwe') | upper");
-//        TokenizableSource elString = new StringSource("el-string", "'test123' is inset(1, 2, 'test123', 3)");
-//        TokenizableSource elString = new StringSource("el-string", "{user[0].book.title | upper : user[0].name | upper} is map");
+//        TokenizableSource elString = new StringSource("lexer-string", "1 | toInt(-1) | toBigInt is not int(1++) || x is even or data.users[0].name | trim is odd");
+//        TokenizableSource elString = new StringSource("lexer-string", "123 + user[0].level / 22");
+//        TokenizableSource elString = new StringSource("lexer-string", "22 / 7");
+//        TokenizableSource elString = new StringSource("lexer-string", "22 / 7 > 3");
+//        TokenizableSource elString = new StringSource("lexer-string", "2 + (2 + 2) * 2 / 3 (22 / 7) is odd");
+//        TokenizableSource elString = new StringSource("lexer-string", "++cnt / 2 is odd");
+//        TokenizableSource elString = new StringSource("lexer-string", "[1, '2', 3.14] is array");
+        TokenizableSource elString = new StringSource("lexer-string", "set('_map', {'name': 'John' | upper, 'level': 321 ** 7 / 33 | toBigDecimal, 'min': min(123, 111), 'aaa': 5643%123})");
+//        TokenizableSource elString = new StringSource("lexer-string", "set('_name', book.full | upper)");
+//        TokenizableSource elString = new StringSource("lexer-string", "set('_name', book.full | default('Unnamed') | upper)");
+//        TokenizableSource elString = new StringSource("lexer-string", "user[0].book.title | default('qwe') | upper");
+//        TokenizableSource elString = new StringSource("lexer-string", "'test123' is inset(1, 2, 'test123', 3)");
+//        TokenizableSource elString = new StringSource("lexer-string", "{user[0].book.title | upper : user[0].name | upper} is map");
         Recognizer<Token.Type, RawToken> elr = new EnumTokenRecognizer<>(BasicToken.class, 20);
         Lexer elLexer = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), elr));
 

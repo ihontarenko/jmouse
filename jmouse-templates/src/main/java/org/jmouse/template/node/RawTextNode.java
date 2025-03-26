@@ -1,6 +1,6 @@
 package org.jmouse.template.node;
 
-import org.jmouse.template.rendering.AbstractRenderableNode;
+import org.jmouse.el.rendering.AbstractRenderableNode;
 
 /**
  * Represents a raw text node in a templating system.

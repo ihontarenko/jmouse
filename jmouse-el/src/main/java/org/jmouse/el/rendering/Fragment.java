@@ -1,4 +1,4 @@
-package org.jmouse.template.rendering;
+package org.jmouse.el.rendering;
 
 public interface Fragment {
 

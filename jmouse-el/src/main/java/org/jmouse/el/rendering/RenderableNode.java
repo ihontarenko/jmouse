@@ -1,4 +1,4 @@
-package org.jmouse.template.rendering;
+package org.jmouse.el.rendering;
 
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.Node;

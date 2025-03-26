@@ -4,14 +4,14 @@ import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.CursorMatcher;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
-import org.jmouse.template.rendering.RenderableNode;
+import org.jmouse.el.rendering.RenderableNode;
 import org.jmouse.el.parser.LiteralParser;
 import org.jmouse.el.parser.ParserContext;
-import org.jmouse.template.rendering.TagParser;
+import org.jmouse.el.parser.TagParser;
 import org.jmouse.template.node.BlockNode;
 import org.jmouse.template.parsing.TemplateParser;
 
-import static org.jmouse.template.el.TemplateToken.*;
+import static org.jmouse.template.lexer.TemplateToken.*;
 
 public class BlockParser implements TagParser {
 

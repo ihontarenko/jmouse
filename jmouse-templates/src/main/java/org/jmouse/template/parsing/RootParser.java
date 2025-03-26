@@ -6,12 +6,12 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.*;
-import org.jmouse.template.rendering.TagParser;
+import org.jmouse.el.parser.TagParser;
 import org.jmouse.template.node.BodyNode;
 import org.jmouse.template.node.PrintNode;
 import org.jmouse.template.node.RawTextNode;
 
-import static org.jmouse.template.el.TemplateToken.*;
+import static org.jmouse.template.lexer.TemplateToken.*;
 
 /**
  * 🏗️ The root parser responsible for processing the entire template.

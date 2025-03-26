@@ -1,6 +1,7 @@
 package org.jmouse.el.extension;
 
 import org.jmouse.el.parser.Parser;
+import org.jmouse.el.parser.TagParser;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +18,15 @@ import java.util.List;
  * @author ihontarenko@gmail.com
  */
 public interface Extension {
+
+    /**
+     * 📌 Returns a list of custom tag parsers provided by this extension.
+     *
+     * @return a list of {@link TagParser} instances, or an empty list if none are provided.
+     */
+    default List<TagParser> getTagParsers() {
+        return Collections.emptyList();
+    }
 
     /**
      * 📌 Returns a list of expression parsers provided by this extension.

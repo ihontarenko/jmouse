@@ -1,8 +1,8 @@
 package org.jmouse.template.node.sub;
 
-import org.jmouse.template.rendering.AbstractRenderableNode;
+import org.jmouse.el.rendering.AbstractRenderableNode;
 import org.jmouse.el.node.ExpressionNode;
-import org.jmouse.template.rendering.RenderableNode;
+import org.jmouse.el.rendering.RenderableNode;
 
 public class ConditionBranch extends AbstractRenderableNode {
 

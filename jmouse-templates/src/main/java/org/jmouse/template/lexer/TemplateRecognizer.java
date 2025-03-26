@@ -1,4 +1,4 @@
-package org.jmouse.template.el;
+package org.jmouse.template.lexer;
 
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.RawToken;
