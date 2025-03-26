@@ -9,6 +9,7 @@ import org.jmouse.el.parser.DefaultParserContext;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.rendering.Content;
 import org.jmouse.el.rendering.RenderableEntity;
+import org.jmouse.template.BlockLinker;
 import org.jmouse.template.StandardTemplate;
 import org.jmouse.template.TemplateCoreExtension;
 import org.jmouse.template.lexer.TemplateRecognizer;
@@ -55,11 +56,7 @@ public class Templates {
         Node compiled = parserContext.getParser(TemplateParser.class).parse(cursor, parserContext);
         RenderableEntity entity  = new StandardTemplate(string);
 
-        compiled.execute(node -> {
-            if (node instanceof BlockNode block) {
-                System.out.println(block);
-            }
-        });
+        compiled.execute(new BlockLinker(entity, evaluationContext));
 
         if (compiled instanceof ContainerNode body) {
             StringWriter writer = new StringWriter();

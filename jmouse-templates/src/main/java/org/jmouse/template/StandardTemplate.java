@@ -1,15 +1,19 @@
 package org.jmouse.template;
 
 import org.jmouse.el.lexer.TokenizableSource;
+import org.jmouse.el.rendering.Block;
 import org.jmouse.el.rendering.EntityStack;
-import org.jmouse.el.rendering.Fragment;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class StandardTemplate implements Template {
 
-    private final TokenizableSource source;
-    private final EntityStack       stack;
+    private final TokenizableSource  source;
+    private final EntityStack        stack;
+    private final Map<String, Block> blocks = new HashMap<>();
 
     public StandardTemplate(TokenizableSource source) {
         this.source = source;
@@ -27,18 +31,18 @@ public class StandardTemplate implements Template {
     }
 
     @Override
-    public void setFragment(Fragment fragment) {
-
+    public void setBlock(Block block) {
+        blocks.put(block.getName(), block);
     }
 
     @Override
-    public Fragment getFragment(String name) {
-        return null;
+    public Block getBlock(String name) {
+        return blocks.get(name);
     }
 
     @Override
-    public List<Fragment> getFragments() {
-        return List.of();
+    public List<Block> getBlocks() {
+        return new ArrayList<>(blocks.values());
     }
 
     @Override

@@ -10,11 +10,11 @@ public interface RenderableEntity {
 
     String getName();
 
-    void setFragment(Fragment fragment);
+    void setBlock(Block block);
 
-    Fragment getFragment(String name);
+    Block getBlock(String name);
 
-    List<Fragment> getFragments();
+    List<Block> getBlocks();
 
     EntityStack getStack();
 
