@@ -4,7 +4,7 @@ import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.rendering.AbstractRenderableNode;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.rendering.Content;
-import org.jmouse.el.rendering.RenderableEntity;
+import org.jmouse.el.rendering.Template;
 import org.jmouse.el.rendering.RenderableNode;
 
 public class BlockNode extends AbstractRenderableNode {
@@ -29,8 +29,8 @@ public class BlockNode extends AbstractRenderableNode {
     }
 
     @Override
-    public void render(Content content, RenderableEntity entity, EvaluationContext context) {
-        super.render(content, entity, context);
+    public void render(Content content, Template entity, EvaluationContext context) {
+        content.append("block " + getName().evaluate(context) + "!\n");
     }
 
 }

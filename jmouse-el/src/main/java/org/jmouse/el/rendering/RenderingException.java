@@ -1,4 +1,4 @@
-package org.jmouse.el.evaluation;
+package org.jmouse.el.rendering;
 
 public class RenderingException extends RuntimeException {
 

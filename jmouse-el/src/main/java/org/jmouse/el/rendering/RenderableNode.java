@@ -8,12 +8,12 @@ import org.jmouse.el.node.Node;
  * <p>
  * A RenderableNode extends {@link Node} by providing a render method that outputs
  * its content to the provided {@link Content} container. The render method also receives
- * the current {@link RenderableEntity} (which may represent a template, block, or fragment)
+ * the current {@link Template} (which may represent a template, block, or fragment)
  * and the {@link EvaluationContext} used to resolve expressions during rendering.
  * </p>
  *
  * @see Content
- * @see RenderableEntity
+ * @see Template
  * @see EvaluationContext
  */
 public interface RenderableNode extends Node {
@@ -29,5 +29,5 @@ public interface RenderableNode extends Node {
      * @param entity  the current renderable entity (e.g., template, block, or fragment)
      * @param context the evaluation context for resolving expressions and variables
      */
-    void render(Content content, RenderableEntity entity, EvaluationContext context);
+    void render(Content content, Template entity, EvaluationContext context);
 }

@@ -5,24 +5,24 @@ import java.util.LinkedList;
 /**
  * 🔄 Represents a stack for managing template inheritance hierarchy.
  * <p>
- * This implementation of {@link EntityStack} uses a {@link LinkedList} to maintain
- * the hierarchy of {@link RenderableEntity} instances. The stack allows the renderer
+ * This implementation of {@link TemplateStack} uses a {@link LinkedList} to maintain
+ * the hierarchy of {@link Template} instances. The stack allows the renderer
  * to navigate between parent and child templates.
  * </p>
  */
-public final class Inheritance implements EntityStack {
+public final class Inheritance implements TemplateStack {
 
-    private final LinkedList<RenderableEntity> stack = new LinkedList<>();
-    private       int                          depth = 0;
+    private final LinkedList<Template> stack = new LinkedList<>();
+    private       int                  depth = 0;
 
     /**
      * Adds a new renderable entity to the hierarchy stack.
      *
-     * @param entity the renderable entity to add
+     * @param template the renderable entity to add
      */
     @Override
-    public void inherit(RenderableEntity entity) {
-        stack.addLast(entity);
+    public void inherit(Template template) {
+        stack.addLast(template);
     }
 
     /**
@@ -54,20 +54,20 @@ public final class Inheritance implements EntityStack {
     /**
      * Returns the current child entity from the stack.
      *
-     * @return the child {@link RenderableEntity}, or {@code null} if not available
+     * @return the child {@link Template}, or {@code null} if not available
      */
     @Override
-    public RenderableEntity getChild() {
+    public Template getChild() {
         return (depth > 0) ? stack.get(depth - 1) : null;
     }
 
     /**
      * Returns the current parent entity from the stack.
      *
-     * @return the parent {@link RenderableEntity}, or {@code null} if not available
+     * @return the parent {@link Template}, or {@code null} if not available
      */
     @Override
-    public RenderableEntity getParent() {
+    public Template getParent() {
         return (stack.size() - 1 > depth) ? stack.get(depth + 1) : null;
     }
 }

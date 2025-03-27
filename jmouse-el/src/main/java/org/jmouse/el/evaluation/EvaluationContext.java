@@ -5,11 +5,11 @@ import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.extension.ExtensionContainer;
 
 /**
- * Represents the evaluation context used for expression evaluation.
+ * ⚙️ Represents the evaluation context for expression evaluation.
  * <p>
- * Provides the scope chain, extensions, and conversion services required during evaluation.
- * Also supplies helper methods for retrieving and setting values via a standard
- * {@link ObjectAccessor} wrapped by a default {@link ObjectAccessorWrapper}.
+ * Provides the necessary services for expression evaluation such as variable scopes,
+ * extensions, conversion, and property resolution via a standard {@link ObjectAccessor}
+ * wrapped by a default {@link ObjectAccessorWrapper}.
  * </p>
  */
 public interface EvaluationContext extends VirtualPropertyResolver.Aware {
@@ -18,6 +18,22 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
      * The default ObjectAccessorWrapper used to wrap object access operations.
      */
     ObjectAccessorWrapper WRAPPER = new StandardAccessorWrapper();
+
+    /**
+     * Retrieves an object from the context using the specified key.
+     *
+     * @param key the key identifying the object
+     * @return the corresponding object, or {@code null} if not found
+     */
+    Object getObject(Object key);
+
+    /**
+     * Sets an object in the context for the specified key.
+     *
+     * @param key    the key identifying where the object is stored
+     * @param object the object to store
+     */
+    void setObject(Object key, Object object);
 
     /**
      * Returns the current scope chain for variable resolution.
@@ -41,9 +57,9 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
     Conversion getConversion();
 
     /**
-     * Retrieves the value for the specified property name.
+     * Retrieves the value associated with the specified property name.
      * <p>
-     * Delegates to the value resolver to obtain the property value.
+     * Delegates to the PropertyValueResolver to obtain the property value.
      * </p>
      *
      * @param name the property name or path
@@ -54,9 +70,9 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
     }
 
     /**
-     * Sets the value for the specified property name.
+     * Sets the value associated with the specified property name.
      * <p>
-     * Delegates to the value resolver to inject the value.
+     * Delegates to the PropertyValueResolver to inject the value.
      * </p>
      *
      * @param name  the property name or path
@@ -67,7 +83,7 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
     }
 
     /**
-     * Retrieves an ObjectAccessor configured with the current scoped chain.
+     * Retrieves an ObjectAccessor configured with the current scope chain.
      * <p>
      * Creates a new {@link ScopedChainValuesAccessor} based on the current scope chain,
      * sets the default wrapper, and returns it.
@@ -85,7 +101,7 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
      * Returns the PropertyValueResolver that resolves properties, including virtual ones.
      * <p>
      * It is constructed using the current ObjectAccessor and the VirtualPropertyResolver
-     * obtained from the EvaluationContext.
+     * from the evaluation context.
      * </p>
      *
      * @return a PropertyValueResolver for resolving property values

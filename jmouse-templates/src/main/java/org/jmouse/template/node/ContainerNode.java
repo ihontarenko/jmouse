@@ -6,7 +6,7 @@ import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.rendering.AbstractRenderableNode;
 import org.jmouse.el.rendering.Content;
-import org.jmouse.el.rendering.RenderableEntity;
+import org.jmouse.el.rendering.Template;
 import org.jmouse.el.rendering.RenderableNode;
 
 /**
@@ -32,7 +32,7 @@ public class ContainerNode extends AbstractRenderableNode {
      * @param context the evaluation context used during rendering
      */
     @Override
-    public void render(Content content, RenderableEntity entity, EvaluationContext context) {
+    public void render(Content content, Template entity, EvaluationContext context) {
         for (Node child : children()) {
             if (child instanceof RenderableNode renderable) {
                 if (entity.hasParent() && isOnlySafeNodes() && matcher.not().matches(child)) {

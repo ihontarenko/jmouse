@@ -3,20 +3,20 @@ package org.jmouse.el.rendering;
 /**
  * 🔄 Represents a stack of renderable entities for template inheritance.
  * <p>
- * The {@code EntityStack} maintains a hierarchy of {@link RenderableEntity} instances,
+ * The {@code EntityStack} maintains a hierarchy of {@link Template} instances,
  * enabling the management of parent-child relationships during template rendering.
  * It supports operations to inherit a new template, ascend or descend in the hierarchy,
  * and retrieve the current child or parent entity.
  * </p>
  */
-public sealed interface EntityStack permits Inheritance {
+public sealed interface TemplateStack permits Inheritance {
 
     /**
      * Returns an empty {@code EntityStack} instance.
      *
      * @return an empty EntityStack
      */
-    static EntityStack empty() {
+    static TemplateStack empty() {
         return new Inheritance();
     }
 
@@ -25,7 +25,7 @@ public sealed interface EntityStack permits Inheritance {
      *
      * @param template the renderable entity to inherit
      */
-    void inherit(RenderableEntity template);
+    void inherit(Template template);
 
     /**
      * Ascends the hierarchy, moving up one level.
@@ -40,16 +40,16 @@ public sealed interface EntityStack permits Inheritance {
     /**
      * Returns the current child entity from the stack.
      *
-     * @return the current child {@link RenderableEntity}, or {@code null} if none exists
+     * @return the current child {@link Template}, or {@code null} if none exists
      */
-    RenderableEntity getChild();
+    Template getChild();
 
     /**
      * Returns the current parent entity from the stack.
      *
-     * @return the current parent {@link RenderableEntity}, or {@code null} if none exists
+     * @return the current parent {@link Template}, or {@code null} if none exists
      */
-    RenderableEntity getParent();
+    Template getParent();
 
     /**
      * Checks if a child entity exists in the stack.

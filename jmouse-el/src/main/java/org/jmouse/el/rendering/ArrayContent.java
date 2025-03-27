@@ -17,26 +17,6 @@ public final class ArrayContent implements Content {
     private              int    length           = 0;
 
     /**
-     * Prepends the given character data to the beginning of the content.
-     * <p>
-     * Ensures there is sufficient capacity, shifts existing data to the right,
-     * and then copies the new data to the beginning of the internal buffer.
-     * </p>
-     *
-     * @param data the character array to prepend
-     */
-    @Override
-    public void prepend(char[] data) {
-        int length = data.length;
-        ensureCapacity(this.length + length);
-        // Shift existing data to the right to make room for new data
-        System.arraycopy(array, 0, array, length, this.length);
-        // Copy new data into the beginning of the array
-        System.arraycopy(data, 0, array, 0, length);
-        this.length += length;
-    }
-
-    /**
      * Appends the given character data to the end of the content.
      * <p>
      * Ensures there is sufficient capacity and then copies the new data into the internal buffer.

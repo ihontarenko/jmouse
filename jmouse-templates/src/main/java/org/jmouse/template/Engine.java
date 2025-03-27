@@ -1,20 +1,15 @@
 package org.jmouse.template;
 
 import org.jmouse.el.extension.ExtensionContainer;
+import org.jmouse.el.rendering.Template;
 import org.jmouse.template.loader.TemplateLoader;
 
-public interface TemplateManager {
+public interface Engine {
 
-    String resolveTemplate(String name);
-
-    Template loadTemplate(String name);
+    Template createTemplate(String name);
 
     Template getTemplate(String name);
 
-    Template getTemplate(String name, TemplateLoader<String> loader);
-
     ExtensionContainer getExtensions();
-
-
 
 }

@@ -1,6 +1,10 @@
 package org.jmouse.template.node;
 
+import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.rendering.AbstractRenderableNode;
+import org.jmouse.el.rendering.Content;
+import org.jmouse.el.rendering.Template;
+import org.jmouse.el.rendering.RenderingException;
 
 /**
  * Represents a raw text node in a templating system.
@@ -34,6 +38,23 @@ public class RawTextNode extends AbstractRenderableNode {
      */
     public String getString() {
         return new String(data);
+    }
+
+    /**
+     * Renders the node to the given content using the provided renderable entity and evaluation context.
+     * <p>
+     * This default implementation always throws a {@link RenderingException}, as rendering is not supported
+     * until overridden by a subclass.
+     * </p>
+     *
+     * @param content the container for the rendered output
+     * @param entity  the current renderable entity (template, block, etc.)
+     * @param context the evaluation context with runtime data and services
+     * @throws RenderingException always, since rendering is not implemented in this abstract class
+     */
+    @Override
+    public void render(Content content, Template entity, EvaluationContext context) {
+        content.append(getString());
     }
 
     @Override

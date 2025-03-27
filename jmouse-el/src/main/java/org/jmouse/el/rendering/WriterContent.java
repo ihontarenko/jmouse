@@ -26,17 +26,6 @@ public final class WriterContent implements Content {
     }
 
     /**
-     * Prepend is not supported in stream-based WriterContent.
-     *
-     * @param data the character array to prepend
-     * @throws UnsupportedOperationException always
-     */
-    @Override
-    public void prepend(char[] data) {
-        throw new UnsupportedOperationException("Content-writer in unsupported prepending");
-    }
-
-    /**
      * Appends the specified character data to the underlying writer.
      *
      * @param data the character array to append

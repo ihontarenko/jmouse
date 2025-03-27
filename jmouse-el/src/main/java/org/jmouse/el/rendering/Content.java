@@ -32,13 +32,6 @@ public sealed interface Content permits ArrayContent, WriterContent {
     }
 
     /**
-     * Prepends the specified character data to the beginning of the content.
-     *
-     * @param data the character array to prepend
-     */
-    void prepend(char[] data);
-
-    /**
      * Appends the specified character data to the end of the content.
      *
      * @param data the character array to append
@@ -69,15 +62,6 @@ public sealed interface Content permits ArrayContent, WriterContent {
     }
 
     /**
-     * Prepends the specified string to the content.
-     *
-     * @param data the string to prepend
-     */
-    default void prepend(String data) {
-        prepend(data.toCharArray());
-    }
-
-    /**
      * Appends the content of another Content instance.
      *
      * @param content the Content to append
@@ -86,12 +70,4 @@ public sealed interface Content permits ArrayContent, WriterContent {
         append(content.getDataArray());
     }
 
-    /**
-     * Prepends the content of another Content instance.
-     *
-     * @param content the Content to prepend
-     */
-    default void prepend(Content content) {
-        prepend(content.getDataArray());
-    }
 }

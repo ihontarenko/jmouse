@@ -8,10 +8,8 @@ import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.DefaultParserContext;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.rendering.Content;
-import org.jmouse.el.rendering.RenderableEntity;
-import org.jmouse.template.BlockLinker;
-import org.jmouse.template.StandardTemplate;
-import org.jmouse.template.TemplateCoreExtension;
+import org.jmouse.el.rendering.Template;
+import org.jmouse.template.*;
 import org.jmouse.template.lexer.TemplateRecognizer;
 import org.jmouse.template.lexer.TemplateTokenizer;
 import org.jmouse.template.loader.ClasspathLoader;
@@ -53,8 +51,15 @@ public class Templates {
 
         evaluationContext.getExtensions().importExtension(new TemplateCoreExtension());
 
-        Node compiled = parserContext.getParser(TemplateParser.class).parse(cursor, parserContext);
-        RenderableEntity entity  = new StandardTemplate(string);
+        Configuration configuration = new Configuration();
+
+        configuration.setPrefix("templates/");
+        configuration.setSuffix(".html");
+
+        Engine engine = new StandardEngine(configuration);
+
+        Node     compiled = parserContext.getParser(TemplateParser.class).parse(cursor, parserContext);
+        Template entity   = new StandardTemplate(string, engine);
 
         compiled.execute(new BlockLinker(entity, evaluationContext));
 
@@ -64,6 +69,7 @@ public class Templates {
             body.setOnlySafeNodes(true);
             body.setSafeNodes(RawTextNode.class, ExtendsNode.class);
             body.render(content, entity, evaluationContext);
+            System.out.println(writer);
         }
 
         System.out.println(compiled);

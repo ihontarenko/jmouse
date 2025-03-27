@@ -21,15 +21,15 @@ public interface TemplateLoader<T> {
     }
 
     default String getPrefix() {
-        return null;
+        return "";
     }
 
     default String getSuffix() {
-        return null;
+        return "";
     }
 
     default Charset getCharset() {
-        return null;
+        return Charset.UTF_8;
     }
 
 }

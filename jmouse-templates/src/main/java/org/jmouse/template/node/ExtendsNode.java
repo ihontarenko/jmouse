@@ -4,7 +4,7 @@ import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.rendering.AbstractRenderableNode;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.rendering.Content;
-import org.jmouse.el.rendering.RenderableEntity;
+import org.jmouse.el.rendering.Template;
 
 public class ExtendsNode extends AbstractRenderableNode {
 
@@ -19,7 +19,7 @@ public class ExtendsNode extends AbstractRenderableNode {
     }
 
     @Override
-    public void render(Content content, RenderableEntity entity, EvaluationContext context) {
+    public void render(Content content, Template entity, EvaluationContext context) {
         entity.setParent(context.getConversion().convert(parent.evaluate(context), String.class));
     }
 

@@ -1,10 +1,15 @@
 package org.jmouse.el.rendering;
 
+import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.lexer.TokenizableSource;
 
 import java.util.List;
 
-public interface RenderableEntity {
+public interface Template {
+
+    void evaluate(Content content, EvaluationContext context);
+
+    EvaluationContext createContext();
 
     TokenizableSource getSource();
 
@@ -16,15 +21,15 @@ public interface RenderableEntity {
 
     List<Block> getBlocks();
 
-    EntityStack getStack();
+    TemplateStack getStack();
 
     void setParent(String parent);
 
-    default void setParent(RenderableEntity parent) {
+    default void setParent(Template parent) {
         getStack().inherit(parent);
     }
 
-    default RenderableEntity getParent() {
+    default Template getParent() {
         return getStack().getParent();
     }
 
