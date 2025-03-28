@@ -7,9 +7,7 @@
 </head>
 <body>
 
-    <h1>Main Page - {{ title }}</h1>
-
-    <b>{% if users gt 1 && num <= 123 %}</b>
+    <h1>Main Page - {% block 'title' %}Default{% endblock %}</h1>
 
     {% block 'content' %}
         <h1>Index</h1>

@@ -1,11 +1,13 @@
 package org.jmouse.template.loader;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
 public class ClasspathLoader extends AbstractLoader<String> {
 
-    public static final String      SEPARATOR = "/";
-    private final       ClassLoader classLoader;
+    private final ClassLoader classLoader;
 
     public ClasspathLoader(ClassLoader classLoader) {
         this.classLoader = classLoader;
@@ -27,7 +29,7 @@ public class ClasspathLoader extends AbstractLoader<String> {
         }
 
         if (reader == null) {
-            throw new TemplateLoaderException("Failed to load template " + name);
+            throw new TemplateLoaderException("Failed to load resource " + name);
         }
 
         return reader;

@@ -21,12 +21,12 @@ public class AbstractRenderableNode extends AbstractNode implements RenderableNo
      * </p>
      *
      * @param content the container for the rendered output
-     * @param entity  the current renderable entity (template, block, etc.)
+     * @param self  the current renderable entity (template, block, etc.)
      * @param context the evaluation context with runtime data and services
      * @throws RenderingException always, since rendering is not implemented in this abstract class
      */
     @Override
-    public void render(Content content, Template entity, EvaluationContext context) {
+    public void render(Content content, Template self, EvaluationContext context) {
         throw new RenderingException("Renderable node '%s' is not supported yet.".formatted(this.getClass()));
     }
 }

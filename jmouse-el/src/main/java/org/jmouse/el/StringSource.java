@@ -98,6 +98,8 @@ public class StringSource implements TokenizableSource {
     public int getLineNumber(int offset) {
         int lines = 1;
 
+        offset = Math.min(offset, buffer.length);
+
         for (int i = 0; i < offset; i++) {
             char character = buffer[i];
             if (character == '\r' && buffer[i + 1] == '\n') {

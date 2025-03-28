@@ -55,6 +55,25 @@ public interface TokenCursor extends Streamable<Token> {
     }
 
     /**
+     * Attempts to consume the current token if it matches any of the expected types.
+     * If the current token matches one of the provided types, it is consumed and the cursor advances.
+     * Otherwise, the cursor remains unchanged.
+     *
+     * @param expected an array of token types to check against
+     * @return {@code true} if the token was consumed, {@code false} otherwise
+     */
+    default boolean currentIf(Token.Type... expected) {
+        boolean advanced = false;
+
+        if (isCurrent(expected)) {
+            next();
+            advanced = true;
+        }
+
+        return advanced;
+    }
+
+    /**
      * Consumes and returns the previous token in the stream.
      *
      * @return the previous Token object (including its value, position, and type)

@@ -4,6 +4,7 @@ import org.jmouse.core.bind.VirtualPropertyResolver;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.extension.StandardExtensionContainer;
+import org.jmouse.el.rendering.TemplateStack;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,7 @@ public class DefaultEvaluationContext implements EvaluationContext {
     private final ExtensionContainer      extensions;
     private final Conversion              conversion;
     private final Map<Object, Object>     objects;
+    private final TemplateStack           stack;
     private       VirtualPropertyResolver resolver;
 
     public DefaultEvaluationContext(ScopedChain chain, ExtensionContainer extensions, Conversion conversion) {
@@ -22,6 +24,7 @@ public class DefaultEvaluationContext implements EvaluationContext {
         this.conversion = conversion;
         this.resolver = new VirtualPropertyResolver.Default();
         this.objects = new HashMap<>();
+        this.stack = TemplateStack.empty();
     }
 
     public DefaultEvaluationContext(ExtensionContainer extensions) {
@@ -30,6 +33,11 @@ public class DefaultEvaluationContext implements EvaluationContext {
 
     public DefaultEvaluationContext() {
         this(new BasicValuesChain(), new StandardExtensionContainer(), new ExpressionLanguageConversion());
+    }
+
+    @Override
+    public TemplateStack getInheritance() {
+        return stack;
     }
 
     @Override

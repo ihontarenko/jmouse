@@ -28,17 +28,17 @@ public class ContainerNode extends AbstractRenderableNode {
      * </p>
      *
      * @param content the content container to which the output is appended
-     * @param entity  the current renderable entity
+     * @param self  the current renderable entity
      * @param context the evaluation context used during rendering
      */
     @Override
-    public void render(Content content, Template entity, EvaluationContext context) {
+    public void render(Content content, Template self, EvaluationContext context) {
         for (Node child : children()) {
             if (child instanceof RenderableNode renderable) {
-                if (entity.hasParent() && isOnlySafeNodes() && matcher.not().matches(child)) {
+                if (context.getInheritance().getParent() != null && isOnlySafeNodes() && !matcher.matches(child)) {
                     continue;
                 }
-                renderable.render(content, entity, context);
+                renderable.render(content, self, context);
             }
         }
     }

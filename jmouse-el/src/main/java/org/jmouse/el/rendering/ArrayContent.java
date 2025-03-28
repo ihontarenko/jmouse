@@ -72,4 +72,9 @@ public final class ArrayContent implements Content {
     private void grow(int capacity) {
         array = expand(array, Math.max(array.length << 1, capacity));
     }
+
+    @Override
+    public String toString() {
+        return new String(getDataArray());
+    }
 }

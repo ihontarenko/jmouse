@@ -76,6 +76,11 @@ public interface Cache<K extends Cache.Key, V> {
             final int prime = 31;
             return Objects.hashCode(object) * prime;
         }
+
+        @Override
+        public String toString() {
+            return "CACHE_KEY: [" + object + "]";
+        }
     }
 
 }

@@ -5,11 +5,11 @@ import org.jmouse.el.CursorMatcher;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
-import org.jmouse.el.rendering.RenderableNode;
 import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.parser.TagParser;
+import org.jmouse.el.rendering.RenderableNode;
 import org.jmouse.template.node.IfNode;
 import org.jmouse.template.node.sub.ConditionBranch;
 import org.jmouse.template.parsing.TemplateParser;
@@ -64,17 +64,12 @@ public class IfParser implements TagParser {
 
         // Parse any consecutive else-if branches.
         while (cursor.isCurrent(T_ELSE_IF)) {
-            // Consume the "else-if" tag.
             parseBranch(cursor, T_ELSE_IF, ifNode, context);
         }
 
         // Parse the optional else branch.
         if (cursor.isCurrent(T_ELSE)) {
-            cursor.ensure(T_ELSE);
-            cursor.ensure(T_CLOSE_EXPRESSION);
-            TemplateParser templateParser = (TemplateParser) context.getParser(TemplateParser.class);
-            RenderableNode elseBlock      = (RenderableNode) templateParser.parse(cursor, context, stopper());
-            ifNode.addBranch(new ConditionBranch(null, elseBlock));
+            parseBranch(cursor, T_ELSE, ifNode, context);
         }
 
         // Consume the "end if" tag.
@@ -91,18 +86,21 @@ public class IfParser implements TagParser {
      * </p>
      *
      * @param cursor   the token cursor
-     * @param tagToken the expected branch tag token (T_IF or T_ELSE_IF)
+     * @param tagToken the expected branch tag token (T_IF, T_ELSE_IF or T_ELSE)
      * @param ifNode   the IfNode to which the branch is added
      * @param context  the parser context for retrieving sub-parsers
      */
     private void parseBranch(TokenCursor cursor, Token.Type tagToken, IfNode ifNode, ParserContext context) {
         TemplateParser templateParser   = (TemplateParser) context.getParser(TemplateParser.class);
         Parser         expressionParser = context.getParser(ExpressionParser.class);
+        ExpressionNode condition        = null;
 
-        // Consume the branch tag (if or else-if).
+        // Consume the branch tag (if, else-if or else).
         cursor.ensure(tagToken);
         // Parse the condition expression.
-        ExpressionNode condition = (ExpressionNode) expressionParser.parse(cursor, context);
+        if (T_ELSE != tagToken) {
+            condition = (ExpressionNode) expressionParser.parse(cursor, context);
+        }
         // Ensure closing of the condition expression.
         cursor.ensure(T_CLOSE_EXPRESSION);
         // Parse the branch body until a stopper is reached.

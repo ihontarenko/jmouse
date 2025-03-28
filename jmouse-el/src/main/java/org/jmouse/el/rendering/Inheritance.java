@@ -33,9 +33,7 @@ public final class Inheritance implements TemplateStack {
      */
     @Override
     public void ascend() {
-        if (stack.size() - 1 > depth) {
-            depth++;
-        }
+        depth++;
     }
 
     /**
@@ -46,9 +44,7 @@ public final class Inheritance implements TemplateStack {
      */
     @Override
     public void descend() {
-        if (depth > 0) {
-            depth--;
-        }
+        depth--;
     }
 
     /**
@@ -68,6 +64,6 @@ public final class Inheritance implements TemplateStack {
      */
     @Override
     public Template getParent() {
-        return (stack.size() - 1 > depth) ? stack.get(depth + 1) : null;
+        return (stack.size() > depth) ? stack.get(depth) : null;
     }
 }

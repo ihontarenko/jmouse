@@ -3,11 +3,10 @@ package org.jmouse.template;
 import org.jmouse.el.StringSource;
 import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.extension.StandardExtensionContainer;
-import org.jmouse.el.lexer.DefaultLexer;
-import org.jmouse.el.lexer.Lexer;
-import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.lexer.*;
 import org.jmouse.el.parser.DefaultParserContext;
 import org.jmouse.el.parser.ParserContext;
+import org.jmouse.el.rendering.RenderableNode;
 import org.jmouse.el.rendering.Template;
 import org.jmouse.template.lexer.TemplateRecognizer;
 import org.jmouse.template.lexer.TemplateTokenizer;
@@ -17,17 +16,15 @@ import org.jmouse.template.parsing.TemplateParser;
 import java.io.Reader;
 import java.io.StringReader;
 
-public class StandardEngine implements Engine {
+public class LeafsEngine implements Engine {
 
     private final ExtensionContainer         extensions;
-    private final Configuration              configuration;
     private final Cache<Cache.Key, Template> cache;
     private       TemplateLoader<String>     loader;
     private       Lexer                      lexer;
     private       ParserContext              parserContext;
 
-    public StandardEngine(Configuration configuration) {
-        this.configuration = configuration;
+    public LeafsEngine() {
         this.cache = Cache.memory();
         this.extensions = new StandardExtensionContainer();
         initialize();
@@ -41,28 +38,71 @@ public class StandardEngine implements Engine {
 
     @Override
     public Template getTemplate(String name) {
-        Template  cached   = null;
+        Template  cached;
         Cache.Key cacheKey = Cache.Key.forObject(name);
 
         if (cache.contains(cacheKey)) {
             cached = cache.get(cacheKey);
         } else {
-
+            Reader   reader   = loadTemplate(name);
+            Template template = parseTemplate(name, reader);
+            // add new compiled template to cache
+            cache.put(cacheKey, template);
+            cached = template;
         }
 
         return cached;
     }
 
-    public TokenCursor getTokenCursor(String sourceName, Reader reader) {
-        return lexer.tokenize(new StringSource(sourceName, reader));
+    @Override
+    public Reader loadTemplate(String name) {
+        return loader.load(name);
     }
 
+    @Override
+    public Template parseTemplate(String name, Reader reader) {
+        TokenizableSource source = getSource(name, reader);
+        TokenCursor       cursor = getTokenCursor(source);
+
+        // skip T_SOL
+        cursor.currentIf(BasicToken.T_SOL);
+        RenderableNode root = (RenderableNode) parserContext.getParser(TemplateParser.class).parse(cursor, parserContext);
+
+        return new StandardTemplate(root, source, this);
+    }
+
+    @Override
+    public TokenizableSource getSource(String sourceName, Reader reader) {
+        return new StringSource(sourceName, reader);
+    }
+
+    @Override
+    public TokenCursor getTokenCursor(TokenizableSource source) {
+        return lexer.tokenize(source);
+    }
+
+    @Override
+    public TokenCursor getTokenCursor(String sourceName, Reader reader) {
+        return getTokenCursor(new StringSource(sourceName, reader));
+    }
+
+    @Override
     public TokenCursor getTokenCursor(String sourceName, String expression) {
-        return lexer.tokenize(new StringSource(sourceName, new StringReader(expression)));
+        return getTokenCursor(sourceName, new StringReader(expression));
     }
 
     @Override
     public ExtensionContainer getExtensions() {
         return extensions;
+    }
+
+    @Override
+    public TemplateLoader<String> getLoader() {
+        return loader;
+    }
+
+    @Override
+    public void setLoader(TemplateLoader<String> loader) {
+        this.loader = loader;
     }
 }

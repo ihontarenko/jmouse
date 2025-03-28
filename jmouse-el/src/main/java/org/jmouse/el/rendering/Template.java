@@ -4,10 +4,15 @@ import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.lexer.TokenizableSource;
 
 import java.util.List;
+import java.util.Map;
 
 public interface Template {
 
     void evaluate(Content content, EvaluationContext context);
+
+    void evaluate(Content content, Map<String, Object> values);
+
+    Content evaluate(EvaluationContext context);
 
     EvaluationContext createContext();
 
@@ -21,20 +26,8 @@ public interface Template {
 
     List<Block> getBlocks();
 
-    TemplateStack getStack();
+    void setParent(String parent, EvaluationContext context);
 
-    void setParent(String parent);
-
-    default void setParent(Template parent) {
-        getStack().inherit(parent);
-    }
-
-    default Template getParent() {
-        return getStack().getParent();
-    }
-
-    default boolean hasParent() {
-        return getParent() != null;
-    }
+    void setParent(Template parent, EvaluationContext context);
 
 }

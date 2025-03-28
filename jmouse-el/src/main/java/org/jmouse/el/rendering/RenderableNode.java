@@ -26,8 +26,8 @@ public interface RenderableNode extends Node {
      * </p>
      *
      * @param content the content container to which the output is appended
-     * @param entity  the current renderable entity (e.g., template, block, or fragment)
+     * @param self  the current renderable entity (e.g., template, block, or fragment)
      * @param context the evaluation context for resolving expressions and variables
      */
-    void render(Content content, Template entity, EvaluationContext context);
+    void render(Content content, Template self, EvaluationContext context);
 }

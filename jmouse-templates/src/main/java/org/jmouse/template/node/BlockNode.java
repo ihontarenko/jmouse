@@ -29,8 +29,8 @@ public class BlockNode extends AbstractRenderableNode {
     }
 
     @Override
-    public void render(Content content, Template entity, EvaluationContext context) {
-        content.append("block " + getName().evaluate(context) + "!\n");
+    public void render(Content content, Template self, EvaluationContext context) {
+        getBody().render(content, self, context);
     }
 
 }

@@ -19,7 +19,7 @@ public class PrintNode extends AbstractRenderableNode {
     }
 
     @Override
-    public void render(Content content, Template entity, EvaluationContext context) {
+    public void render(Content content, Template self, EvaluationContext context) {
         content.append(String.valueOf(expression.evaluate(context)));
     }
 }

@@ -22,4 +22,9 @@ public class ConditionBranch extends AbstractRenderableNode {
         return then;
     }
 
+    @Override
+    public String toString() {
+        return when == null ? "ELSE" : "IF(-ELSE)";
+    }
+
 }

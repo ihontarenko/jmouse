@@ -3,6 +3,7 @@ package org.jmouse.el.evaluation;
 import org.jmouse.core.bind.*;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.extension.ExtensionContainer;
+import org.jmouse.el.rendering.TemplateStack;
 
 /**
  * ⚙️ Represents the evaluation context for expression evaluation.
@@ -13,6 +14,8 @@ import org.jmouse.el.extension.ExtensionContainer;
  * </p>
  */
 public interface EvaluationContext extends VirtualPropertyResolver.Aware {
+
+    TemplateStack getInheritance();
 
     /**
      * The default ObjectAccessorWrapper used to wrap object access operations.
