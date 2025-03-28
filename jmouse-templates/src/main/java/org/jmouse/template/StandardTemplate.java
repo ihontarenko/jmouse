@@ -70,7 +70,7 @@ public class StandardTemplate implements Template {
 
     @Override
     public void setParent(String parent) {
-        System.out.println("set parent " + parent);
+        setParent(engine.getTemplate(parent));
     }
 
 }

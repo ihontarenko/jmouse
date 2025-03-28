@@ -9,7 +9,11 @@ public class DefaultParserContext implements ParserContext {
     private       ParserOptions      options;
 
     public DefaultParserContext() {
-        this.extensions = new StandardExtensionContainer();
+        this(new StandardExtensionContainer());
+    }
+
+    public DefaultParserContext(ExtensionContainer extensions) {
+        this.extensions = extensions;
     }
 
     @Override

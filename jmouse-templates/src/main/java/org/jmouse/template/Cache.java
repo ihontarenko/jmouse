@@ -7,32 +7,34 @@ import java.util.function.Supplier;
 
 public interface Cache<K extends Cache.Key, V> {
 
+    static <K extends Cache.Key, V> Cache<K, V> memory() {
+        return new Memory<>();
+    }
+
     class Memory<K extends Cache.Key, V> implements Cache<K, V> {
 
         private final Map<K, V> cache = new HashMap<>();
 
         @Override
-        public Value<V> get(K key) {
-            return Value.forObject(cache.get(key));
+        public V get(K key) {
+            return cache.get(key);
         }
 
         @Override
         public void put(K key, V value) {
-
+            cache.put(key, value);
         }
 
     }
 
-    Value<V> get(K key);
+    V get(K key);
 
-    default Value<V> get(K key, Supplier<V> supplier) {
-        Value<V> value = get(key);
+    default V get(K key, Supplier<V> supplier) {
+        V value = get(key);
 
         if (value == null && supplier != null) {
-            value = Value.forObject(supplier.get());
-            if (value.isPresent()) {
-                put(key, value.getValue());
-            }
+            value = supplier.get();
+            put(key, value);
         }
 
         return value;
@@ -48,35 +50,6 @@ public interface Cache<K extends Cache.Key, V> {
 
         static Key forObject(Object object) {
             return new ObjectKey(object);
-        }
-
-    }
-
-    interface Value<V> {
-
-        static <T> Value<T> forObject(T object) {
-            return new ObjectValue<>(object);
-        }
-
-        V getValue();
-
-        default boolean isPresent() {
-            return getValue() != null;
-        }
-
-    }
-
-    class ObjectValue<T> implements Value<T> {
-
-        private final T value;
-
-        public ObjectValue(T value) {
-            this.value = value;
-        }
-
-        @Override
-        public T getValue() {
-            return value;
         }
 
     }
