@@ -3,22 +3,24 @@ package org.jmouse.el.rendering;
 import java.util.LinkedList;
 
 /**
- * 🔄 Represents a stack for managing template inheritance hierarchy.
+ * Represents a stack for managing template inheritance hierarchy.
  * <p>
- * This implementation of {@link TemplateStack} uses a {@link LinkedList} to maintain
- * the hierarchy of {@link Template} instances. The stack allows the renderer
- * to navigate between parent and child templates.
+ * This implementation uses a {@link LinkedList} to store {@link Template} instances
+ * representing the inheritance chain. The {@code depth} field indicates the current
+ * position in the hierarchy: <br>
+ * - {@code getParent()} returns the template at the current depth. <br>
+ * - {@code getChild()} returns the template at depth - 1 (i.e. the more specific, child template).
  * </p>
  */
 public final class Inheritance implements TemplateStack {
 
     private final LinkedList<Template> stack = new LinkedList<>();
-    private       int                  depth = 0;
+    private int depth = 0;
 
     /**
-     * Adds a new renderable entity to the hierarchy stack.
+     * Adds a new template to the inheritance stack.
      *
-     * @param template the renderable entity to add
+     * @param template the template to add
      */
     @Override
     public void inherit(Template template) {
@@ -28,27 +30,36 @@ public final class Inheritance implements TemplateStack {
     /**
      * Moves one level deeper in the hierarchy.
      * <p>
-     * Increments the depth if possible.
+     * Increments the depth if a child template exists.
      * </p>
+     *
+     * @throws IllegalStateException if attempting to ascend beyond the available hierarchy
      */
     @Override
     public void ascend() {
-        depth++;
+        if (depth < stack.size()) {
+            depth++;
+        }
     }
 
     /**
      * Moves one level up in the hierarchy.
      * <p>
-     * Decrements the depth if greater than zero.
+     * Decrements the depth if it is greater than zero.
      * </p>
      */
     @Override
     public void descend() {
-        depth--;
+        if (depth > 0) {
+            depth--;
+        }
     }
 
     /**
-     * Returns the current child entity from the stack.
+     * Returns the current child template from the stack.
+     * <p>
+     * This is the template at level {@code depth - 1}. If {@code depth} is 0, no child is available.
+     * </p>
      *
      * @return the child {@link Template}, or {@code null} if not available
      */
@@ -58,12 +69,15 @@ public final class Inheritance implements TemplateStack {
     }
 
     /**
-     * Returns the current parent entity from the stack.
+     * Returns the current parent template from the stack.
+     * <p>
+     * This is the template at the current {@code depth} in the stack.
+     * </p>
      *
      * @return the parent {@link Template}, or {@code null} if not available
      */
     @Override
     public Template getParent() {
-        return (stack.size() > depth) ? stack.get(depth) : null;
+        return (stack.size() - 1 > depth) ? stack.get(depth + 1) : null;
     }
 }

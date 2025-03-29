@@ -8,11 +8,19 @@ import java.util.Map;
 
 public interface Template {
 
-    void evaluate(Content content, EvaluationContext context);
+    void renderBlock(String name, Content content, EvaluationContext context);
 
-    void evaluate(Content content, Map<String, Object> values);
+    void renderBlock(String name, Content content);
 
-    Content evaluate(EvaluationContext context);
+    Content renderBlock(String name);
+
+    void render(Content content, EvaluationContext context);
+
+    void render(Content content, Map<String, Object> values);
+
+    Content render(Map<String, Object> values);
+
+    Content render(EvaluationContext context);
 
     EvaluationContext createContext();
 
@@ -20,9 +28,15 @@ public interface Template {
 
     String getName();
 
+    void setMacro(Macro macro);
+
+    Macro getMacro(String name);
+
     void setBlock(Block block);
 
     Block getBlock(String name);
+
+    Block getBlock(String name, EvaluationContext context);
 
     List<Block> getBlocks();
 

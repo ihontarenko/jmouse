@@ -1,11 +1,9 @@
 package org.jmouse.template.node;
 
+import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.rendering.AbstractRenderableNode;
 import org.jmouse.el.node.ExpressionNode;
-import org.jmouse.el.rendering.Content;
-import org.jmouse.el.rendering.Template;
-import org.jmouse.el.rendering.RenderableNode;
+import org.jmouse.el.rendering.*;
 
 public class BlockNode extends AbstractRenderableNode {
 
@@ -30,7 +28,11 @@ public class BlockNode extends AbstractRenderableNode {
 
     @Override
     public void render(Content content, Template self, EvaluationContext context) {
-        getBody().render(content, self, context);
+        Conversion conversion = context.getConversion();
+        Object     compiled   = getName().evaluate(context);
+        String     name       = conversion.convert(compiled, String.class);
+
+        self.renderBlock(name, content, context);
     }
 
 }

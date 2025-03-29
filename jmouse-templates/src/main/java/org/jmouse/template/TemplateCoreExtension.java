@@ -5,11 +5,7 @@ import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.template.parsing.RootParser;
 import org.jmouse.template.parsing.TemplateParser;
-import org.jmouse.template.parsing.tag.BlockParser;
-import org.jmouse.template.parsing.tag.ExtendsParser;
-import org.jmouse.template.parsing.tag.ForParser;
-import org.jmouse.template.parsing.tag.IfParser;
-import org.jmouse.template.parsing.tag.LoremParser;
+import org.jmouse.template.parsing.tag.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +63,7 @@ public class TemplateCoreExtension extends StandardExtension implements Template
                 new IfParser(),
                 new ExtendsParser(),
                 new BlockParser(),
+                new MacroParser(),
                 new LoremParser()
         );
     }
