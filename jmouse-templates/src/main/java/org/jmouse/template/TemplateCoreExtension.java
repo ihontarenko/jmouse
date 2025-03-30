@@ -61,6 +61,7 @@ public class TemplateCoreExtension extends StandardExtension implements Template
         return List.of(
                 new ForParser(),
                 new IfParser(),
+                new IncludeParser(),
                 new ExtendsParser(),
                 new BlockParser(),
                 new MacroParser(),

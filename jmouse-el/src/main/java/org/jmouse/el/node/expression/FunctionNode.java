@@ -73,7 +73,7 @@ public class FunctionNode extends AbstractExpressionNode {
         Arguments arguments = Arguments.empty();
 
         if (function == null) {
-            throw new EvaluationException("Function '%s' not found".formatted(getName()));
+            throw new FunctionNotFoundException("Function '%s' not found".formatted(getName()));
         }
 
         if (getArguments() != null) {

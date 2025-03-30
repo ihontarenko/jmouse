@@ -1,16 +1,12 @@
 package org.jmouse.template;
 
-import org.jmouse.el.StringSource;
 import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.lexer.TokenizableSource;
-import org.jmouse.el.node.Node;
 import org.jmouse.el.rendering.Template;
 import org.jmouse.template.loader.TemplateLoader;
-import org.jmouse.template.parsing.TemplateParser;
 
 import java.io.Reader;
-import java.io.StringReader;
 
 public interface Engine {
 

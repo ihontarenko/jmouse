@@ -41,7 +41,7 @@ public class MacroNode extends AbstractRenderableNode {
 
     @Override
     public void render(Content content, Template self, EvaluationContext context) {
-        content.append("");
+
     }
 
     @Override

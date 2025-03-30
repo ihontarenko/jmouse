@@ -112,7 +112,7 @@ public class TestNode extends AbstractExpressionNode {
         Object    instance  = getLeft().evaluate(context);
 
         if (test == null) {
-            throw new EvaluationException("Test '%s' not found".formatted(getName()));
+            throw new TestNotFoundException("Test '%s' not found".formatted(getName()));
         }
 
         if (getArguments() != null) {

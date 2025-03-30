@@ -4,10 +4,9 @@ import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.NodeMatcher;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.Node;
-import org.jmouse.el.rendering.AbstractRenderableNode;
-import org.jmouse.el.rendering.Content;
-import org.jmouse.el.rendering.Template;
-import org.jmouse.el.rendering.RenderableNode;
+import org.jmouse.el.node.expression.FunctionNode;
+import org.jmouse.el.node.expression.FunctionNotFoundException;
+import org.jmouse.el.rendering.*;
 
 /**
  * 📝 ContainerNode represents a container for a sequence of renderable nodes.
@@ -38,7 +37,15 @@ public class ContainerNode extends AbstractRenderableNode {
                 if (context.getInheritance().getParent() != null && isOnlySafeNodes() && !matcher.matches(child)) {
                     continue;
                 }
-                renderable.render(content, self, context);
+
+                try {
+                    renderable.render(content, self, context);
+                } catch (FunctionNotFoundException exception) {
+                    if (renderable instanceof FunctionNode function) {
+                        Macro macro = self.getMacro(function.getName());
+                        System.out.println("macro: " + macro);
+                    }
+                }
             }
         }
     }

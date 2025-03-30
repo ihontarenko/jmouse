@@ -94,7 +94,7 @@ public class FilterNode extends AbstractExpressionNode {
         Arguments arguments = Arguments.empty();
 
         if (filter == null) {
-            throw new EvaluationException("Filter '%s' not found".formatted(getName()));
+            throw new FilterNotFoundException("Filter '%s' not found".formatted(getName()));
         }
 
         if (getArguments() != null) {

@@ -18,21 +18,21 @@ import java.io.StringReader;
 
 public class LeafsEngine implements Engine {
 
-    private final ExtensionContainer         extensions;
-    private final Cache<Cache.Key, Template> cache;
-    private       TemplateLoader<String>     loader;
-    private       Lexer                      lexer;
-    private       ParserContext              parserContext;
+    private ExtensionContainer         extensions;
+    private Cache<Cache.Key, Template> cache;
+    private TemplateLoader<String>     loader;
+    private Lexer                      lexer;
+    private ParserContext              parserContext;
 
     public LeafsEngine() {
-        this.cache = Cache.memory();
-        this.extensions = new StandardExtensionContainer();
         initialize();
     }
 
     public void initialize() {
+        this.cache = Cache.memory();
         this.lexer = new DefaultLexer(new TemplateTokenizer(new TemplateRecognizer()));
         this.parserContext = new DefaultParserContext(this.extensions);
+        this.extensions = new StandardExtensionContainer();
         this.extensions.importExtension(new TemplateCoreExtension());
     }
 
