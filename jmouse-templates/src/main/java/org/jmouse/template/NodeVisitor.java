@@ -1,18 +1,27 @@
 package org.jmouse.template;
 
 import org.jmouse.el.node.Node;
-import org.jmouse.template.node.BlockNode;
-import org.jmouse.template.node.MacroNode;
-import org.jmouse.template.node.RawTextNode;
+import org.jmouse.template.node.*;
 
 public interface NodeVisitor {
 
-    void visit(Node embedNode);
+    default void visit(Node defaultNode) {
+    }
 
-    void visit(RawTextNode textNode);
+    default void visit(RawTextNode textNode) {
+    }
 
-    void visit(BlockNode blockNode);
+    default void visit(BlockNode blockNode) {
+    }
 
-    void visit(MacroNode macroNode);
+    default void visit(MacroNode macroNode) {
+    }
+
+    default void visit(ExtendsNode extendsNode) {
+    }
+
+    default void visit(ImportNode importNode) {
+
+    }
 
 }

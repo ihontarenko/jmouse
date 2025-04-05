@@ -3,26 +3,9 @@ package org.jmouse.el.rendering;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.lexer.TokenizableSource;
 
-import java.util.List;
-import java.util.Map;
-
 public interface Template {
 
-    void renderBlock(String name, Content content, EvaluationContext context);
-
-    void renderBlock(String name, Content content);
-
-    Content renderBlock(String name);
-
-    void render(Content content, EvaluationContext context);
-
-    void render(Content content, Map<String, Object> values);
-
-    Content render(Map<String, Object> values);
-
-    Content render(EvaluationContext context);
-
-    EvaluationContext createContext();
+    EvaluationContext newContext();
 
     TokenizableSource getSource();
 
@@ -38,7 +21,7 @@ public interface Template {
 
     Block getBlock(String name, EvaluationContext context);
 
-    List<Block> getBlocks();
+    Template getParent(EvaluationContext context);
 
     void setParent(String parent, EvaluationContext context);
 
