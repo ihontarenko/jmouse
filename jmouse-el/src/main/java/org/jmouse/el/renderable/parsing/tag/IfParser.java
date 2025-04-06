@@ -9,7 +9,7 @@ import org.jmouse.el.core.parser.ExpressionParser;
 import org.jmouse.el.core.parser.Parser;
 import org.jmouse.el.core.parser.ParserContext;
 import org.jmouse.el.core.parser.TagParser;
-import org.jmouse.el.core.rendering.RenderableNode;
+import org.jmouse.el.renderable.RenderableNode;
 import org.jmouse.el.renderable.node.IfNode;
 import org.jmouse.el.renderable.node.sub.ConditionBranch;
 import org.jmouse.el.renderable.parsing.TemplateParser;

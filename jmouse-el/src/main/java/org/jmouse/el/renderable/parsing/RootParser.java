@@ -6,7 +6,7 @@ import org.jmouse.el.core.lexer.TokenCursor;
 import org.jmouse.el.core.node.ExpressionNode;
 import org.jmouse.el.core.node.Node;
 import org.jmouse.el.core.parser.*;
-import org.jmouse.el.core.rendering.EmptyNode;
+import org.jmouse.el.renderable.EmptyNode;
 import org.jmouse.el.renderable.node.ContainerNode;
 import org.jmouse.el.renderable.node.PrintNode;
 import org.jmouse.el.renderable.node.RawTextNode;

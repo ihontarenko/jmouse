@@ -4,7 +4,7 @@ import org.jmouse.core.bind.VirtualPropertyResolver;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.core.extension.ExtensionContainer;
 import org.jmouse.el.core.extension.StandardExtensionContainer;
-import org.jmouse.el.core.rendering.Inheritance;
+import org.jmouse.el.renderable.Inheritance;
 
 import java.util.HashMap;
 import java.util.Map;

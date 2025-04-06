@@ -2,7 +2,6 @@ package org.jmouse.el.renderable;
 
 import org.jmouse.el.core.evaluation.EvaluationContext;
 import org.jmouse.el.core.node.Node;
-import org.jmouse.el.core.rendering.Template;
 import org.jmouse.el.renderable.node.MacroNode;
 
 import java.util.function.Consumer;

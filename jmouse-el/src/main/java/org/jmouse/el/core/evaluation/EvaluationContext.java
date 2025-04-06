@@ -3,7 +3,7 @@ package org.jmouse.el.core.evaluation;
 import org.jmouse.core.bind.*;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.core.extension.ExtensionContainer;
-import org.jmouse.el.core.rendering.Inheritance;
+import org.jmouse.el.renderable.Inheritance;
 
 /**
  * ⚙️ Represents the evaluation context for expression evaluation.

@@ -5,7 +5,7 @@ import org.jmouse.el.core.node.ExpressionNode;
 import org.jmouse.el.core.parser.LiteralParser;
 import org.jmouse.el.core.parser.ParserContext;
 import org.jmouse.el.core.parser.TagParser;
-import org.jmouse.el.core.rendering.RenderableNode;
+import org.jmouse.el.renderable.RenderableNode;
 import org.jmouse.el.renderable.lexer.TemplateToken;
 import org.jmouse.el.renderable.node.IncludeNode;
 

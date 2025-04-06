@@ -2,7 +2,7 @@ package org.jmouse.el.renderable.parsing.tag;
 
 import org.jmouse.el.core.lexer.BasicToken;
 import org.jmouse.el.core.lexer.TokenCursor;
-import org.jmouse.el.core.rendering.RenderableNode;
+import org.jmouse.el.renderable.RenderableNode;
 import org.jmouse.el.renderable.node.RawTextNode;
 import org.jmouse.el.core.parser.ParserContext;
 import org.jmouse.el.core.parser.TagParser;

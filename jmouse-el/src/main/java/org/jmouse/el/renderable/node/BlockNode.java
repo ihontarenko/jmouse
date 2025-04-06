@@ -3,7 +3,10 @@ package org.jmouse.el.renderable.node;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.core.evaluation.EvaluationContext;
 import org.jmouse.el.core.node.ExpressionNode;
-import org.jmouse.el.core.rendering.*;
+import org.jmouse.el.renderable.AbstractRenderableNode;
+import org.jmouse.el.renderable.Content;
+import org.jmouse.el.renderable.RenderableNode;
+import org.jmouse.el.renderable.Template;
 
 public class BlockNode extends AbstractRenderableNode {
 

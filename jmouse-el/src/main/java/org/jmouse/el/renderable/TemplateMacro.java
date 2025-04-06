@@ -1,7 +1,5 @@
 package org.jmouse.el.renderable;
 
-import org.jmouse.el.core.rendering.Macro;
-
 public class TemplateMacro implements Macro {
 
     private final String name;

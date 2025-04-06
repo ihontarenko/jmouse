@@ -2,9 +2,9 @@ package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.core.evaluation.EvaluationContext;
 import org.jmouse.el.core.node.ExpressionNode;
-import org.jmouse.el.core.rendering.AbstractRenderableNode;
-import org.jmouse.el.core.rendering.Content;
-import org.jmouse.el.core.rendering.Template;
+import org.jmouse.el.renderable.AbstractRenderableNode;
+import org.jmouse.el.renderable.Content;
+import org.jmouse.el.renderable.Template;
 
 public class IncludeNode extends AbstractRenderableNode {
 

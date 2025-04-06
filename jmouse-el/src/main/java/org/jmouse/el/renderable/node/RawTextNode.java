@@ -1,10 +1,10 @@
 package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.core.evaluation.EvaluationContext;
-import org.jmouse.el.core.rendering.AbstractRenderableNode;
-import org.jmouse.el.core.rendering.Content;
-import org.jmouse.el.core.rendering.Template;
-import org.jmouse.el.core.rendering.RenderingException;
+import org.jmouse.el.renderable.AbstractRenderableNode;
+import org.jmouse.el.renderable.Content;
+import org.jmouse.el.renderable.Template;
+import org.jmouse.el.renderable.RenderingException;
 
 /**
  * Represents a raw text node in a templating system.

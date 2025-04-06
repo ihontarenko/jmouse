@@ -6,8 +6,6 @@ import org.jmouse.el.core.extension.StandardExtensionContainer;
 import org.jmouse.el.core.lexer.*;
 import org.jmouse.el.core.parser.DefaultParserContext;
 import org.jmouse.el.core.parser.ParserContext;
-import org.jmouse.el.core.rendering.RenderableNode;
-import org.jmouse.el.core.rendering.Template;
 import org.jmouse.el.renderable.lexer.TemplateRecognizer;
 import org.jmouse.el.renderable.lexer.TemplateTokenizer;
 import org.jmouse.el.renderable.loader.TemplateLoader;

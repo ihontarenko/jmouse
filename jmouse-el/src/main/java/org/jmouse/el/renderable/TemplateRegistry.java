@@ -1,8 +1,5 @@
 package org.jmouse.el.renderable;
 
-import org.jmouse.el.core.rendering.Block;
-import org.jmouse.el.core.rendering.Macro;
-
 import java.util.HashMap;
 import java.util.Map;
 

@@ -3,7 +3,6 @@ package org.jmouse.el.renderable;
 import org.jmouse.el.core.evaluation.DefaultEvaluationContext;
 import org.jmouse.el.core.evaluation.EvaluationContext;
 import org.jmouse.el.core.lexer.TokenizableSource;
-import org.jmouse.el.core.rendering.*;
 
 public class StandardTemplate implements Template {
 

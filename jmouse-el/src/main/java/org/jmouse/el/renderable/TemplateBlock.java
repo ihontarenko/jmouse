@@ -1,8 +1,5 @@
 package org.jmouse.el.renderable;
 
-import org.jmouse.el.core.rendering.Block;
-import org.jmouse.el.core.rendering.RenderableNode;
-
 public class TemplateBlock implements Block {
 
     private final String         name;

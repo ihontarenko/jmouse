@@ -1,7 +1,6 @@
 package org.jmouse.el.renderable;
 
 import org.jmouse.el.core.evaluation.EvaluationContext;
-import org.jmouse.el.core.rendering.Template;
 import org.jmouse.el.renderable.node.BlockNode;
 import org.jmouse.el.renderable.node.ExtendsNode;
 import org.jmouse.el.renderable.node.ImportNode;

@@ -1,7 +1,7 @@
 package org.jmouse.el.core.parser;
 
 import org.jmouse.el.core.lexer.TokenCursor;
-import org.jmouse.el.core.rendering.RenderableNode;
+import org.jmouse.el.renderable.RenderableNode;
 
 public interface TagParser {
 

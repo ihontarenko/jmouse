@@ -1,6 +1,6 @@
 package org.jmouse.el.renderable.node;
 
-import org.jmouse.el.core.rendering.AbstractRenderableNode;
+import org.jmouse.el.renderable.AbstractRenderableNode;
 import org.jmouse.el.renderable.node.sub.ConditionBranch;
 
 import java.util.ArrayList;
