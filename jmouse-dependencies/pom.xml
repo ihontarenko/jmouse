@@ -36,11 +36,6 @@
             </dependency>
             <dependency>
                 <groupId>org.jmouse</groupId>
-                <artifactId>jmouse-templates</artifactId>
-                <version>${jmouse.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-expression</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>

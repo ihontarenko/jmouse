@@ -33,7 +33,7 @@
         </dependency>
         <dependency>
             <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-templates</artifactId>
+            <artifactId>jmouse-el</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jmouse</groupId>

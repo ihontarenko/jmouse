@@ -9,8 +9,8 @@
         <version>1.0.0-Beta</version>
     </parent>
 
+    <name>jMouse - Expression Language</name>
     <artifactId>jmouse-el</artifactId>
-    <name>jMouse - EL</name>
     <packaging>jar</packaging>
 
     <properties>

@@ -30,14 +30,13 @@
     <modules>
         <module>jmouse-dependencies</module>
         <module>jmouse-core</module>
+        <module>jmouse-el</module>
         <module>jmouse-expression</module>
         <module>jmouse-validation</module>
         <module>jmouse-beans</module>
         <module>jmouse-context</module>
         <module>jmouse-web</module>
         <module>testing-ground</module>
-        <module>jmouse-templates</module>
-        <module>jmouse-el</module>
     </modules>
 
 </project>

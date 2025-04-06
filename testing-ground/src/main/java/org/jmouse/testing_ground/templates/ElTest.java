@@ -1,7 +1,7 @@
 package org.jmouse.testing_ground.templates;
 
-import org.jmouse.el.StringSource;
-import org.jmouse.el.lexer.TokenizableSource;
+import org.jmouse.el.core.StringSource;
+import org.jmouse.el.core.lexer.TokenizableSource;
 
 public class ElTest {
 
