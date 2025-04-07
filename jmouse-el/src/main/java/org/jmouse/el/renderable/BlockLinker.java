@@ -2,10 +2,10 @@ package org.jmouse.el.renderable;
 
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.core.evaluation.EvaluationContext;
-import org.jmouse.el.core.node.Node;
+import org.jmouse.el.core.node.NodeVisitor;
 import org.jmouse.el.renderable.node.BlockNode;
-
-import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Links BlockNode instances to the corresponding template.
@@ -14,7 +14,9 @@ import java.util.function.Consumer;
  * the names to String, and registers them with the template as TemplateBlocks.
  * </p>
  */
-public class BlockLinker implements Consumer<Node> {
+public class BlockLinker implements NodeVisitor {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(BlockLinker.class);
 
     private final Template          template;
     private final EvaluationContext context;
@@ -40,11 +42,16 @@ public class BlockLinker implements Consumer<Node> {
      * @param node the node to process
      */
     @Override
-    public void accept(Node node) {
-        if (node instanceof BlockNode block) {
-            Conversion conversion = context.getConversion();
-            Object     name       = block.getName().evaluate(context);
-            template.setBlock(new TemplateBlock(conversion.convert(name, String.class), block));
-        }
+    public void visit(BlockNode node) {
+        Conversion       conversion = context.getConversion();
+        Object           evaluated  = node.getName().evaluate(context);
+        TemplateRegistry registry   = template.getRegistry();
+
+        String name  = conversion.convert(evaluated, String.class);
+        Block  block = new TemplateBlock(name, node);
+
+        LOGGER.info("Registering block '{}' into '{}' template", name, template.getName());
+
+        registry.registerBlock(name, block);
     }
 }

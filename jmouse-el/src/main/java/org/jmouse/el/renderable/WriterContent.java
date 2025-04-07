@@ -25,6 +25,10 @@ public final class WriterContent implements Content {
         this.writer = writer;
     }
 
+    public Writer getWriter() {
+        return writer;
+    }
+
     /**
      * Appends the specified character data to the underlying writer.
      *

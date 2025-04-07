@@ -1,6 +1,5 @@
-package org.jmouse.el.renderable;
+package org.jmouse.el.core.node;
 
-import org.jmouse.el.core.node.Node;
 import org.jmouse.el.renderable.node.*;
 
 public interface NodeVisitor {

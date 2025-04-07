@@ -16,23 +16,16 @@ public interface Renderer {
 
         @Override
         public Content render(Template template, EvaluationContext context) {
-            // Фаза 1: Рекурсивно виконуємо препроцесінг для поточного шаблону та його батьків
-            preprocessTemplate(template, evaluationContext);
+            linking(template, context);
 
-            // Фаза 2: Рекурсивно зливаємо визначення з усіх шаблонів
-            TemplateRegistry effectiveRegistry = mergeRegistries(template);
+            TemplateRegistry registry = mergeRegistries(template);
+            Template root = getRootTemplate(template, context);
 
-            // Фаза 3: Знаходимо базовий шаблон (той, що не має батьків)
-            Template baseTemplate = getRootTemplate(template);
-            // За потреби можна додати інші візітори
+            Content content = Content.array();
 
-            // jMEL
+            root.getRoot().accept(new RenderVisitor(registry, context, content, template));
 
-            // Фаза 5: Рендеримо базовий шаблон за допомогою CompositeVisitor
-            Content content = new Content();
-            baseTemplate.getRoot().accept(compositeVisitor);
-
-            return finalContent;
+            return content;
         }
 
         private Template getRootTemplate(Template template, EvaluationContext context) {
@@ -52,6 +45,15 @@ public interface Renderer {
                 mergedRegistry = parentMerged.merge(mergedRegistry);
             }
             return mergedRegistry;
+        }
+
+        private void linking(Template template, EvaluationContext context) {
+            template.getRoot().accept(new MacroLinker(template, context));
+            template.getRoot().accept(new BlockLinker(template, context));
+
+            if (template.getParent(context) != null) {
+                linking(template.getParent(context), context);
+            }
         }
 
     }

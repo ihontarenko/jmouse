@@ -3,6 +3,7 @@ package org.jmouse.el.renderable;
 import org.jmouse.el.core.evaluation.DefaultEvaluationContext;
 import org.jmouse.el.core.evaluation.EvaluationContext;
 import org.jmouse.el.core.lexer.TokenizableSource;
+import org.jmouse.el.core.node.Node;
 
 public class StandardTemplate implements Template {
 
@@ -10,7 +11,6 @@ public class StandardTemplate implements Template {
     private final TemplateRegistry  registry;
     private final Engine            engine;
     private final RenderableNode    root;
-    private       Template          parent;
 
     public StandardTemplate(RenderableNode root, TokenizableSource source, Engine engine) {
         this.source = source;
@@ -29,6 +29,11 @@ public class StandardTemplate implements Template {
     @Override
     public TokenizableSource getSource() {
         return source;
+    }
+
+    @Override
+    public Node getRoot() {
+        return root;
     }
 
     @Override
@@ -87,6 +92,11 @@ public class StandardTemplate implements Template {
     @Override
     public void setParent(Template parent, EvaluationContext context) {
         context.getInheritance().inherit(parent);
+    }
+
+    @Override
+    public TemplateRegistry getRegistry() {
+        return registry;
     }
 
     @Override

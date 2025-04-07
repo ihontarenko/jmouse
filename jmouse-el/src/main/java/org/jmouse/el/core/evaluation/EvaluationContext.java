@@ -15,12 +15,12 @@ import org.jmouse.el.renderable.Inheritance;
  */
 public interface EvaluationContext extends VirtualPropertyResolver.Aware {
 
-    Inheritance getInheritance();
-
     /**
      * The default ObjectAccessorWrapper used to wrap object access operations.
      */
     ObjectAccessorWrapper WRAPPER = new StandardAccessorWrapper();
+
+    Inheritance getInheritance();
 
     /**
      * Retrieves an object from the context using the specified key.

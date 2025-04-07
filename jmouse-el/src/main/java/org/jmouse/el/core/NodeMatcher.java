@@ -14,6 +14,7 @@ public class NodeMatcher {
     }
 
     record NodeTypeMatcher(Class<? extends Node>... types) implements Matcher<Node> {
+
         @SafeVarargs
         public NodeTypeMatcher {
         }

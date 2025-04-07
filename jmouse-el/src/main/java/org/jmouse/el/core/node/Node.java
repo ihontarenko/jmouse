@@ -100,14 +100,13 @@ public interface Node {
     /**
      * Recursively executes the given consumer on this node and all its children.
      *
-     * @param executor the consumer to execute on each node
+     * @param visitor the consumer to execute on each node
      */
-    default void execute(Consumer<Node> executor) {
-        executor.accept(this);
-
+    default void accept(NodeVisitor visitor) {
+        visitor.visit(this);
         if (hasChildren()) {
             for (Node child : children()) {
-                child.execute(executor);
+                child.accept(visitor);
             }
         }
     }

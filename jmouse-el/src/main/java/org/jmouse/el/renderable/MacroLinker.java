@@ -1,12 +1,14 @@
 package org.jmouse.el.renderable;
 
 import org.jmouse.el.core.evaluation.EvaluationContext;
-import org.jmouse.el.core.node.Node;
+import org.jmouse.el.core.node.NodeVisitor;
 import org.jmouse.el.renderable.node.MacroNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.function.Consumer;
+public class MacroLinker implements NodeVisitor {
 
-public class MacroLinker implements Consumer<Node> {
+    private final static Logger LOGGER = LoggerFactory.getLogger(MacroLinker.class);
 
     private final Template          template;
     private final EvaluationContext context;
@@ -17,10 +19,9 @@ public class MacroLinker implements Consumer<Node> {
     }
 
     @Override
-    public void accept(Node node) {
-        if (node instanceof MacroNode macroNode) {
-            template.setMacro(new TemplateMacro(macroNode.getName()));
-        }
+    public void visit(MacroNode node) {
+        LOGGER.info("Registering macros '{}' into '{}' template", node.getName(), template.getName());
+        template.setMacro(new TemplateMacro(node.getName()));
     }
 
 }

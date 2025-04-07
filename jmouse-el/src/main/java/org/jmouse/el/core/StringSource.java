@@ -26,13 +26,13 @@ public class StringSource implements TokenizableSource {
     private static final int DEFAULT_ARRAY_SIZE = 32;
     private static final int DEFAULT_CAPACITY   = 1024;
 
-    private final String name;          // Template name
-    private       int    length = 0;    // Number of characters stored in buffer
-    private       char[] buffer;        // Character buffer for storing template data
-    private       int    size   = 0;    // Number of stored tokens
-    private       Type[] types;         // Array storing token types
-    private       int[]  offsets;       // Array storing token positions
-    private       int[]  lengths;       // Array storing token lengths
+    private final String name;              // Template name
+    private       int    length = 0;        // Number of characters stored in buffer
+    private       char[] buffer;            // Character buffer for storing template data
+    private       int    encounters = 0;    // Number of stored tokens
+    private       Type[] types;             // Array storing token types
+    private       int[]  offsets;           // Array storing token positions
+    private       int[]  lengths;           // Array storing token lengths
 
     public StringSource(String name, String text) {
         this(name, new StringReader(text));
@@ -134,11 +134,11 @@ public class StringSource implements TokenizableSource {
     public void entry(int offset, int length, Type type) {
         ensureCapacity();
 
-        this.offsets[this.size] = offset;
-        this.lengths[this.size] = length;
-        this.types[this.size] = type;
+        this.offsets[this.encounters] = offset;
+        this.lengths[this.encounters] = length;
+        this.types[this.encounters] = type;
 
-        this.size++;
+        this.encounters++;
     }
 
     /**
@@ -167,7 +167,7 @@ public class StringSource implements TokenizableSource {
      */
     @Override
     public int size() {
-        return size;
+        return encounters;
     }
 
     /**
@@ -222,7 +222,7 @@ public class StringSource implements TokenizableSource {
      */
     private void ensureIndex(int index) {
         if (index < 0 || index >= size()) {
-            Exceptions.throwIfOutOfRange(index, 0, size, "Index: %d, Size: %d".formatted(index, size));
+            Exceptions.throwIfOutOfRange(index, 0, encounters, "Index: %d, Size: %d".formatted(index, encounters));
         }
     }
 
@@ -230,7 +230,7 @@ public class StringSource implements TokenizableSource {
      * Ensures sufficient capacity in the arrays, expanding them if needed.
      */
     private void ensureCapacity() {
-        if (this.offsets.length <= this.size) {
+        if (this.offsets.length <= this.encounters) {
             this.offsets = expand(this.offsets, this.offsets.length << 1);
             this.types = expand(this.types, this.types.length << 1);
             this.lengths = expand(this.lengths, this.lengths.length << 1);
