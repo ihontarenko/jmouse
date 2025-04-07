@@ -1,6 +1,7 @@
 package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
+import org.jmouse.el.node.Visitor;
 
 /**
  * Represents a raw text node in a templating system.
@@ -34,6 +35,16 @@ public class RawTextNode extends AbstractNode {
      */
     public String getString() {
         return new String(data);
+    }
+
+    /**
+     * Recursively executes the given consumer on this node and all its children.
+     *
+     * @param visitor the consumer to execute on each node
+     */
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     @Override

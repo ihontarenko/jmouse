@@ -22,11 +22,22 @@ public class Templates {
         Renderer renderer = new Renderer.Default(engine);
         EvaluationContext context = template.newContext();
 
-        context.setValue("renderer", new Book());
+        template.getRoot();
+
+        context.setValue("book", getBook());
 
         Content content = renderer.render(template, context);
 
         System.out.println(content.toString());
+    }
+
+    private static Book getBook() {
+        Book book = new Book();
+
+        book.setTitle("The Lord of the Rings");
+        book.setAuthor("J. R. R. Tolkien");
+
+        return book;
     }
 
 }

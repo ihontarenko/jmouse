@@ -2,6 +2,7 @@ package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
 import org.jmouse.el.node.Node;
+import org.jmouse.el.node.Visitor;
 
 import java.util.List;
 
@@ -33,6 +34,16 @@ public class MacroNode extends AbstractNode {
 
     public void setBody(Node body) {
         this.body = body;
+    }
+
+    /**
+     * Recursively executes the given consumer on this node and all its children.
+     *
+     * @param visitor the consumer to execute on each node
+     */
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     @Override

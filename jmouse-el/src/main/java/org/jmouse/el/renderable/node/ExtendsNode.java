@@ -2,6 +2,7 @@ package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
 import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Visitor;
 
 /**
  * Represents an "extends" node in a template.
@@ -31,6 +32,16 @@ public class ExtendsNode extends AbstractNode {
      */
     public void setParent(ExpressionNode parent) {
         this.parent = parent;
+    }
+
+    /**
+     * Recursively executes the given consumer on this node and all its children.
+     *
+     * @param visitor the consumer to execute on each node
+     */
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
 }

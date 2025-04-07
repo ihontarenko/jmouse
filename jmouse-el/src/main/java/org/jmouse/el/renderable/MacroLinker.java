@@ -1,7 +1,6 @@
 package org.jmouse.el.renderable;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.NodeVisitor;
 import org.jmouse.el.renderable.node.MacroNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

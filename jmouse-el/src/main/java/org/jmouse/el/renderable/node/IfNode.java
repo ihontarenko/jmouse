@@ -1,6 +1,7 @@
 package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
+import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.node.sub.ConditionBranch;
 
 import java.util.ArrayList;
@@ -20,6 +21,16 @@ public class IfNode extends AbstractNode {
 
     public List<ConditionBranch> getBranches() {
         return conditions;
+    }
+
+    /**
+     * Recursively executes the given consumer on this node and all its children.
+     *
+     * @param visitor the consumer to execute on each node
+     */
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
 }

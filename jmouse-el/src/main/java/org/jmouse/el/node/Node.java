@@ -101,7 +101,7 @@ public interface Node {
      *
      * @param visitor the consumer to execute on each node
      */
-    default void accept(NodeVisitor visitor) {
+    default void accept(Visitor visitor) {
         visitor.visit(this);
         if (hasChildren()) {
             for (Node child : children()) {

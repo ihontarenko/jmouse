@@ -2,8 +2,10 @@ package org.jmouse.el.renderable;
 
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.NodeVisitor;
+import org.jmouse.el.node.Node;
 import org.jmouse.el.renderable.node.BlockNode;
+import org.jmouse.el.renderable.node.ContainerNode;
+import org.jmouse.el.renderable.node.IfNode;
 import org.jmouse.el.renderable.node.RawTextNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +41,18 @@ public class RenderVisitor implements NodeVisitor {
             LOGGER.info("Block '{}' will be rendered", name);
             actual.accept(this);
         }
+    }
+
+    @Override
+    public void visit(ContainerNode containerNode) {
+        for (Node child : containerNode.children()) {
+            child.accept(this);
+        }
+    }
+
+    @Override
+    public void visit(IfNode ifNode) {
+        System.out.println(ifNode);
     }
 
 }
