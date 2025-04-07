@@ -1,8 +1,8 @@
 package org.jmouse.el.renderable;
 
-import org.jmouse.el.core.extension.StandardExtension;
-import org.jmouse.el.core.parser.Parser;
-import org.jmouse.el.core.parser.TagParser;
+import org.jmouse.el.extension.StandardExtension;
+import org.jmouse.el.parser.Parser;
+import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.renderable.parsing.RootParser;
 import org.jmouse.el.renderable.parsing.TemplateParser;
 import org.jmouse.el.renderable.parsing.tag.*;

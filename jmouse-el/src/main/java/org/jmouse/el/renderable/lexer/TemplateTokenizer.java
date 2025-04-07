@@ -1,7 +1,7 @@
 package org.jmouse.el.renderable.lexer;
 
-import org.jmouse.el.core.lexer.*;
-import org.jmouse.el.core.lexer.recognizer.Recognizer;
+import org.jmouse.el.lexer.*;
+import org.jmouse.el.lexer.recognizer.Recognizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

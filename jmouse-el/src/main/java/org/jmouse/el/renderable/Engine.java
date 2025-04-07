@@ -1,8 +1,8 @@
 package org.jmouse.el.renderable;
 
-import org.jmouse.el.core.extension.ExtensionContainer;
-import org.jmouse.el.core.lexer.TokenCursor;
-import org.jmouse.el.core.lexer.TokenizableSource;
+import org.jmouse.el.extension.ExtensionContainer;
+import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.lexer.TokenizableSource;
 import org.jmouse.el.renderable.loader.TemplateLoader;
 
 import java.io.Reader;

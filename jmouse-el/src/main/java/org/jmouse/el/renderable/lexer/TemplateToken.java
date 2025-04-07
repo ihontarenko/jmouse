@@ -1,6 +1,6 @@
 package org.jmouse.el.renderable.lexer;
 
-import org.jmouse.el.core.lexer.Token;
+import org.jmouse.el.lexer.Token;
 
 /**
  * Enumeration of template tokens used in the template engine.

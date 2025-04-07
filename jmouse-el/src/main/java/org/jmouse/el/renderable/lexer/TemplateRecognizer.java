@@ -1,11 +1,11 @@
 package org.jmouse.el.renderable.lexer;
 
-import org.jmouse.el.core.lexer.BasicToken;
-import org.jmouse.el.core.lexer.RawToken;
-import org.jmouse.el.core.lexer.Token;
-import org.jmouse.el.core.lexer.recognizer.CompositeRecognizer;
-import org.jmouse.el.core.lexer.recognizer.EnumTokenRecognizer;
-import org.jmouse.el.core.lexer.recognizer.Recognizer;
+import org.jmouse.el.lexer.BasicToken;
+import org.jmouse.el.lexer.RawToken;
+import org.jmouse.el.lexer.Token;
+import org.jmouse.el.lexer.recognizer.CompositeRecognizer;
+import org.jmouse.el.lexer.recognizer.EnumTokenRecognizer;
+import org.jmouse.el.lexer.recognizer.Recognizer;
 
 import java.util.Optional;
 

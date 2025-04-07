@@ -1,13 +1,13 @@
 package org.jmouse.el.renderable;
 
-import org.jmouse.el.core.StringSource;
-import org.jmouse.el.core.extension.ExtensionContainer;
-import org.jmouse.el.core.extension.StandardExtensionContainer;
-import org.jmouse.el.core.lexer.*;
-import org.jmouse.el.core.node.Node;
-import org.jmouse.el.core.parser.DefaultParserContext;
-import org.jmouse.el.core.parser.Parser;
-import org.jmouse.el.core.parser.ParserContext;
+import org.jmouse.el.StringSource;
+import org.jmouse.el.extension.ExtensionContainer;
+import org.jmouse.el.extension.StandardExtensionContainer;
+import org.jmouse.el.lexer.*;
+import org.jmouse.el.node.Node;
+import org.jmouse.el.parser.DefaultParserContext;
+import org.jmouse.el.parser.Parser;
+import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.renderable.lexer.TemplateRecognizer;
 import org.jmouse.el.renderable.lexer.TemplateTokenizer;
 import org.jmouse.el.renderable.loader.TemplateLoader;

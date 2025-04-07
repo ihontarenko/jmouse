@@ -1,9 +1,9 @@
 package org.jmouse.el.renderable;
 
-import org.jmouse.el.core.evaluation.DefaultEvaluationContext;
-import org.jmouse.el.core.evaluation.EvaluationContext;
-import org.jmouse.el.core.lexer.TokenizableSource;
-import org.jmouse.el.core.node.Node;
+import org.jmouse.el.evaluation.DefaultEvaluationContext;
+import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.lexer.TokenizableSource;
+import org.jmouse.el.node.Node;
 
 public class StandardTemplate implements Template {
 

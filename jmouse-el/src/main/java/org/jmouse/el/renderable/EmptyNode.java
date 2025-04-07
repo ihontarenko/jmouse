@@ -1,6 +1,6 @@
 package org.jmouse.el.renderable;
 
-import org.jmouse.el.core.node.AbstractNode;
+import org.jmouse.el.node.AbstractNode;
 
 /**
  * Represents an empty renderable node.

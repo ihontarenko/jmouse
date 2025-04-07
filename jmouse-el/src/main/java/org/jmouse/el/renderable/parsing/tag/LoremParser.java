@@ -1,11 +1,11 @@
 package org.jmouse.el.renderable.parsing.tag;
 
-import org.jmouse.el.core.lexer.BasicToken;
-import org.jmouse.el.core.lexer.TokenCursor;
-import org.jmouse.el.core.node.Node;
+import org.jmouse.el.lexer.BasicToken;
+import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.node.Node;
 import org.jmouse.el.renderable.node.RawTextNode;
-import org.jmouse.el.core.parser.ParserContext;
-import org.jmouse.el.core.parser.TagParser;
+import org.jmouse.el.parser.ParserContext;
+import org.jmouse.el.parser.TagParser;
 
 public class LoremParser implements TagParser {
 

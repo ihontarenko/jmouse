@@ -1,24 +1,24 @@
 package org.jmouse.testing_ground.templates;
 
 import org.jmouse.core.bind.VirtualProperty;
-import org.jmouse.el.core.StringSource;
-import org.jmouse.el.core.evaluation.DefaultEvaluationContext;
-import org.jmouse.el.core.evaluation.EvaluationContext;
-import org.jmouse.el.core.evaluation.ScopedChain;
-import org.jmouse.el.core.lexer.recognizer.CompositeRecognizer;
-import org.jmouse.el.core.lexer.recognizer.EnumTokenRecognizer;
-import org.jmouse.el.core.lexer.recognizer.Recognizer;
-import org.jmouse.el.core.node.ExpressionNode;
+import org.jmouse.el.StringSource;
+import org.jmouse.el.evaluation.DefaultEvaluationContext;
+import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.evaluation.ScopedChain;
+import org.jmouse.el.lexer.recognizer.CompositeRecognizer;
+import org.jmouse.el.lexer.recognizer.EnumTokenRecognizer;
+import org.jmouse.el.lexer.recognizer.Recognizer;
+import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.renderable.TemplateCoreExtension;
-import org.jmouse.el.core.lexer.*;
-import org.jmouse.el.core.parser.DefaultParserContext;
-import org.jmouse.el.core.parser.ParserContext;
+import org.jmouse.el.lexer.*;
+import org.jmouse.el.parser.DefaultParserContext;
+import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.renderable.lexer.TemplateToken;
 import org.jmouse.el.renderable.lexer.TemplateRecognizer;
 import org.jmouse.el.renderable.lexer.TemplateTokenizer;
 import org.jmouse.el.renderable.loader.ClasspathLoader;
 import org.jmouse.el.renderable.loader.TemplateLoader;
-import org.jmouse.el.core.node.Node;
+import org.jmouse.el.node.Node;
 import org.jmouse.el.renderable.parsing.TemplateParser;
 import org.jmouse.testing_ground.binder.dto.Book;
 

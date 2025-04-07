@@ -1,15 +1,15 @@
 package org.jmouse.el.renderable.parsing.tag;
 
 import org.jmouse.core.matcher.Matcher;
-import org.jmouse.el.core.CursorMatcher;
-import org.jmouse.el.core.lexer.Token;
-import org.jmouse.el.core.lexer.TokenCursor;
-import org.jmouse.el.core.node.ExpressionNode;
-import org.jmouse.el.core.node.Node;
-import org.jmouse.el.core.parser.ExpressionParser;
-import org.jmouse.el.core.parser.Parser;
-import org.jmouse.el.core.parser.ParserContext;
-import org.jmouse.el.core.parser.TagParser;
+import org.jmouse.el.CursorMatcher;
+import org.jmouse.el.lexer.Token;
+import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Node;
+import org.jmouse.el.parser.ExpressionParser;
+import org.jmouse.el.parser.Parser;
+import org.jmouse.el.parser.ParserContext;
+import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.renderable.node.IfNode;
 import org.jmouse.el.renderable.node.sub.ConditionBranch;
 import org.jmouse.el.renderable.parsing.TemplateParser;

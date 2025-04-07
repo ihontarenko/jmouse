@@ -1,9 +1,9 @@
 package org.jmouse.el.renderable.lexer;
 
-import org.jmouse.el.core.lexer.ExpressionSplitter;
-import org.jmouse.el.core.lexer.RawToken;
-import org.jmouse.el.core.lexer.Splitter;
-import org.jmouse.el.core.lexer.TokenizableSource;
+import org.jmouse.el.lexer.ExpressionSplitter;
+import org.jmouse.el.lexer.RawToken;
+import org.jmouse.el.lexer.Splitter;
+import org.jmouse.el.lexer.TokenizableSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.jmouse.el.core.lexer.RawToken.Type.*;
+import static org.jmouse.el.lexer.RawToken.Type.*;
 
 /**
  * Splits raw text into tokens, distinguishing between plain text and templating expressions.

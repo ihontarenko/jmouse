@@ -1,11 +1,11 @@
 package org.jmouse.el.renderable.parsing.tag;
 
-import org.jmouse.el.core.node.Node;
+import org.jmouse.el.node.Node;
 import org.jmouse.el.renderable.lexer.TemplateToken;
-import org.jmouse.el.core.lexer.Token;
-import org.jmouse.el.core.lexer.TokenCursor;
-import org.jmouse.el.core.parser.TagParser;
-import org.jmouse.el.core.parser.ParserContext;
+import org.jmouse.el.lexer.Token;
+import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.parser.TagParser;
+import org.jmouse.el.parser.ParserContext;
 
 public class ForParser implements TagParser {
 

@@ -1,17 +1,17 @@
 package org.jmouse.testing_ground.templates;
 
 import org.jmouse.core.reflection.ClassTypeInspector;
-import org.jmouse.el.core.StringSource;
-import org.jmouse.el.core.evaluation.DefaultEvaluationContext;
-import org.jmouse.el.core.evaluation.EvaluationContext;
-import org.jmouse.el.core.extension.Arguments;
-import org.jmouse.el.core.extension.Filter;
-import org.jmouse.el.core.extension.StandardExtension;
-import org.jmouse.el.core.lexer.*;
-import org.jmouse.el.core.node.ExpressionNode;
-import org.jmouse.el.core.parser.DefaultParserContext;
-import org.jmouse.el.core.parser.ExpressionParser;
-import org.jmouse.el.core.parser.ParserContext;
+import org.jmouse.el.StringSource;
+import org.jmouse.el.evaluation.DefaultEvaluationContext;
+import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.extension.Arguments;
+import org.jmouse.el.extension.Filter;
+import org.jmouse.el.extension.StandardExtension;
+import org.jmouse.el.lexer.*;
+import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.parser.DefaultParserContext;
+import org.jmouse.el.parser.ExpressionParser;
+import org.jmouse.el.parser.ParserContext;
 import org.jmouse.testing_ground.binder.dto.User;
 
 public class Expressions {

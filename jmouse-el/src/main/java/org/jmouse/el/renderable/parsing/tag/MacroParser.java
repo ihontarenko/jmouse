@@ -1,22 +1,22 @@
 package org.jmouse.el.renderable.parsing.tag;
 
 import org.jmouse.core.matcher.Matcher;
-import org.jmouse.el.core.CursorMatcher;
-import org.jmouse.el.core.lexer.Token;
-import org.jmouse.el.core.lexer.TokenCursor;
-import org.jmouse.el.core.node.Node;
-import org.jmouse.el.core.node.expression.ArgumentsNode;
-import org.jmouse.el.core.node.expression.PropertyNode;
-import org.jmouse.el.core.parser.ParserContext;
-import org.jmouse.el.core.parser.TagParser;
-import org.jmouse.el.core.parser.sub.ArgumentsParser;
+import org.jmouse.el.CursorMatcher;
+import org.jmouse.el.lexer.Token;
+import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.node.Node;
+import org.jmouse.el.node.expression.ArgumentsNode;
+import org.jmouse.el.node.expression.PropertyNode;
+import org.jmouse.el.parser.ParserContext;
+import org.jmouse.el.parser.TagParser;
+import org.jmouse.el.parser.sub.ArgumentsParser;
 import org.jmouse.el.renderable.node.MacroNode;
 import org.jmouse.el.renderable.parsing.TemplateParser;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.jmouse.el.core.lexer.BasicToken.*;
+import static org.jmouse.el.lexer.BasicToken.*;
 import static org.jmouse.el.renderable.lexer.TemplateToken.*;
 
 /**

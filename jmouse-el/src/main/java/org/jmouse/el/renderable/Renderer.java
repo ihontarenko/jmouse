@@ -1,6 +1,6 @@
 package org.jmouse.el.renderable;
 
-import org.jmouse.el.core.evaluation.EvaluationContext;
+import org.jmouse.el.evaluation.EvaluationContext;
 
 public interface Renderer {
 

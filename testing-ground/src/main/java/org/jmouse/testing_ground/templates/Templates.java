@@ -1,12 +1,10 @@
 package org.jmouse.testing_ground.templates;
 
-import org.jmouse.el.core.evaluation.EvaluationContext;
+import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.renderable.*;
 import org.jmouse.el.renderable.loader.ClasspathLoader;
 import org.jmouse.el.renderable.loader.TemplateLoader;
 import org.jmouse.testing_ground.binder.dto.Book;
-
-import java.util.Map;
 
 public class Templates {
 

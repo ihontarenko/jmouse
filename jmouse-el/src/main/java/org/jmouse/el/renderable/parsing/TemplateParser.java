@@ -1,10 +1,10 @@
 package org.jmouse.el.renderable.parsing;
 
 import org.jmouse.core.matcher.Matcher;
-import org.jmouse.el.core.lexer.TokenCursor;
-import org.jmouse.el.core.node.Node;
-import org.jmouse.el.core.parser.Parser;
-import org.jmouse.el.core.parser.ParserContext;
+import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.node.Node;
+import org.jmouse.el.parser.Parser;
+import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.renderable.node.ContainerNode;
 
 /**

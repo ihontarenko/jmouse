@@ -1,12 +1,10 @@
 package org.jmouse.el.renderable;
 
 import org.jmouse.core.convert.Conversion;
-import org.jmouse.el.core.evaluation.EvaluationContext;
-import org.jmouse.el.core.node.NodeVisitor;
+import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.node.NodeVisitor;
 import org.jmouse.el.renderable.node.ExtendsNode;
 import org.jmouse.el.renderable.node.ImportNode;
-
-import java.util.Map;
 
 public class PreProcessingVisitor implements NodeVisitor {
 
