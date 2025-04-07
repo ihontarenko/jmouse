@@ -1,15 +1,15 @@
 package org.jmouse.el.renderable.node.sub;
 
-import org.jmouse.el.renderable.AbstractRenderableNode;
+import org.jmouse.el.core.node.AbstractNode;
 import org.jmouse.el.core.node.ExpressionNode;
-import org.jmouse.el.renderable.RenderableNode;
+import org.jmouse.el.core.node.Node;
 
-public class ConditionBranch extends AbstractRenderableNode {
+public class ConditionBranch extends AbstractNode {
 
     private final ExpressionNode when;
-    private final RenderableNode then;
+    private final Node           then;
 
-    public ConditionBranch(ExpressionNode when, RenderableNode then) {
+    public ConditionBranch(ExpressionNode when, Node then) {
         this.when = when;
         this.then = then;
     }
@@ -18,7 +18,7 @@ public class ConditionBranch extends AbstractRenderableNode {
         return when;
     }
 
-    public RenderableNode getThen() {
+    public Node getThen() {
         return then;
     }
 

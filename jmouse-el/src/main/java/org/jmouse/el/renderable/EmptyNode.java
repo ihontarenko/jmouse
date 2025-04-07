@@ -1,6 +1,6 @@
 package org.jmouse.el.renderable;
 
-import org.jmouse.el.core.evaluation.EvaluationContext;
+import org.jmouse.el.core.node.AbstractNode;
 
 /**
  * Represents an empty renderable node.
@@ -9,17 +9,6 @@ import org.jmouse.el.core.evaluation.EvaluationContext;
  * to the provided content. It can serve as a placeholder or default when no content is available.
  * </p>
  */
-public class EmptyNode extends AbstractRenderableNode {
+public class EmptyNode extends AbstractNode {
 
-    /**
-     * Renders the empty node by appending an empty string to the output content.
-     *
-     * @param content the content to render into
-     * @param self    the current template instance
-     * @param context the evaluation context providing runtime data and services
-     */
-    @Override
-    public void render(Content content, Template self, EvaluationContext context) {
-        content.append("");
-    }
 }

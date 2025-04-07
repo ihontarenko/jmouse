@@ -1,12 +1,12 @@
 package org.jmouse.el.renderable.node;
 
-import org.jmouse.el.renderable.AbstractRenderableNode;
+import org.jmouse.el.core.node.AbstractNode;
 import org.jmouse.el.renderable.node.sub.ConditionBranch;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class IfNode extends AbstractRenderableNode {
+public class IfNode extends AbstractNode {
 
     private final List<ConditionBranch> conditions;
 

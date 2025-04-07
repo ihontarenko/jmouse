@@ -4,7 +4,9 @@ import org.jmouse.el.core.StringSource;
 import org.jmouse.el.core.extension.ExtensionContainer;
 import org.jmouse.el.core.extension.StandardExtensionContainer;
 import org.jmouse.el.core.lexer.*;
+import org.jmouse.el.core.node.Node;
 import org.jmouse.el.core.parser.DefaultParserContext;
+import org.jmouse.el.core.parser.Parser;
 import org.jmouse.el.core.parser.ParserContext;
 import org.jmouse.el.renderable.lexer.TemplateRecognizer;
 import org.jmouse.el.renderable.lexer.TemplateTokenizer;
@@ -27,11 +29,11 @@ public class LeafsEngine implements Engine {
     }
 
     public void initialize() {
+        this.extensions = new StandardExtensionContainer();
+        this.extensions.importExtension(new TemplateCoreExtension());
         this.cache = Cache.memory();
         this.lexer = new DefaultLexer(new TemplateTokenizer(new TemplateRecognizer()));
         this.parserContext = new DefaultParserContext(this.extensions);
-        this.extensions = new StandardExtensionContainer();
-        this.extensions.importExtension(new TemplateCoreExtension());
     }
 
     @Override
@@ -44,7 +46,6 @@ public class LeafsEngine implements Engine {
         } else {
             Reader   reader   = loadTemplate(name);
             Template template = parseTemplate(name, reader);
-            // add new compiled template to cache
             cache.put(cacheKey, template);
             cached = template;
         }
@@ -61,10 +62,11 @@ public class LeafsEngine implements Engine {
     public Template parseTemplate(String name, Reader reader) {
         TokenizableSource source = getSource(name, reader);
         TokenCursor       cursor = getTokenCursor(source);
+        Parser            parser = parserContext.getParser(TemplateParser.class);
 
         // skip T_SOL
         cursor.currentIf(BasicToken.T_SOL);
-        RenderableNode root = (RenderableNode) parserContext.getParser(TemplateParser.class).parse(cursor, parserContext);
+        Node root = parser.parse(cursor, parserContext);
 
         return new StandardTemplate(root, source, this);
     }

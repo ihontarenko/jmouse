@@ -1,11 +1,10 @@
 package org.jmouse.testing_ground.templates;
 
-import org.jmouse.el.renderable.Engine;
-import org.jmouse.el.renderable.LeafsEngine;
-import org.jmouse.el.core.rendering.Content;
-import org.jmouse.el.core.rendering.Template;
+import org.jmouse.el.core.evaluation.EvaluationContext;
+import org.jmouse.el.renderable.*;
 import org.jmouse.el.renderable.loader.ClasspathLoader;
 import org.jmouse.el.renderable.loader.TemplateLoader;
+import org.jmouse.testing_ground.binder.dto.Book;
 
 import java.util.Map;
 
@@ -22,8 +21,12 @@ public class Templates {
         engine.setLoader(loader);
 
         Template template = engine.getTemplate("sub_sub");
+        Renderer renderer = new Renderer.Default(engine);
+        EvaluationContext context = template.newContext();
 
-        Content content = template.render(Map.of("name", "Leafs Template"));
+        context.setValue("renderer", new Book());
+
+        Content content = renderer.render(template, context);
 
         System.out.println(content.toString());
     }

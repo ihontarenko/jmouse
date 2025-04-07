@@ -10,7 +10,6 @@ import org.jmouse.el.core.node.expression.PropertyNode;
 import org.jmouse.el.core.parser.ParserContext;
 import org.jmouse.el.core.parser.TagParser;
 import org.jmouse.el.core.parser.sub.ArgumentsParser;
-import org.jmouse.el.renderable.RenderableNode;
 import org.jmouse.el.renderable.node.MacroNode;
 import org.jmouse.el.renderable.parsing.TemplateParser;
 
@@ -39,10 +38,10 @@ public class MacroParser implements TagParser {
      *
      * @param cursor  the token cursor for reading tokens
      * @param context the parser context for obtaining sub-parsers
-     * @return a RenderableNode representing the macro definition
+     * @return a Node representing the macro definition
      */
     @Override
-    public RenderableNode parse(TokenCursor cursor, ParserContext context) {
+    public Node parse(TokenCursor cursor, ParserContext context) {
         // Consume the "macro" token.
         cursor.ensure(T_MACRO);
 
@@ -69,7 +68,7 @@ public class MacroParser implements TagParser {
 
         // Parse macro body until the end macro tag is reached.
         Matcher<TokenCursor> stopper = CursorMatcher.sequence(T_OPEN_EXPRESSION, T_END_MACRO);
-        RenderableNode       body    = (RenderableNode) templateParser.parse(cursor, context, stopper);
+        Node       body    = templateParser.parse(cursor, context, stopper);
 
         // Ensure that the "endmacro" tag is present.
         cursor.ensure(T_END_MACRO);

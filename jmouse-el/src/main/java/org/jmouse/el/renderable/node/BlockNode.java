@@ -1,17 +1,13 @@
 package org.jmouse.el.renderable.node;
 
-import org.jmouse.core.convert.Conversion;
-import org.jmouse.el.core.evaluation.EvaluationContext;
+import org.jmouse.el.core.node.AbstractNode;
 import org.jmouse.el.core.node.ExpressionNode;
-import org.jmouse.el.renderable.AbstractRenderableNode;
-import org.jmouse.el.renderable.Content;
-import org.jmouse.el.renderable.RenderableNode;
-import org.jmouse.el.renderable.Template;
+import org.jmouse.el.core.node.Node;
 
-public class BlockNode extends AbstractRenderableNode {
+public class BlockNode extends AbstractNode {
 
     private ExpressionNode name;
-    private RenderableNode body;
+    private Node           body;
 
     public ExpressionNode getName() {
         return name;
@@ -21,21 +17,12 @@ public class BlockNode extends AbstractRenderableNode {
         this.name = name;
     }
 
-    public RenderableNode getBody() {
+    public Node getBody() {
         return body;
     }
 
-    public void setBody(RenderableNode body) {
+    public void setBody(Node body) {
         this.body = body;
-    }
-
-    @Override
-    public void render(Content content, Template self, EvaluationContext context) {
-        Conversion conversion = context.getConversion();
-        Object     compiled   = getName().evaluate(context);
-        String     name       = conversion.convert(compiled, String.class);
-
-        self.renderBlock(name, content, context);
     }
 
 }

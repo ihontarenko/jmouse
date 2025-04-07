@@ -1,11 +1,13 @@
 package org.jmouse.el.renderable;
 
+import org.jmouse.el.core.node.Node;
+
 public class TemplateBlock implements Block {
 
-    private final String         name;
-    private final RenderableNode block;
+    private final String name;
+    private final Node   block;
 
-    public TemplateBlock(String name, RenderableNode block) {
+    public TemplateBlock(String name, Node block) {
         this.name = name;
         this.block = block;
     }
@@ -16,7 +18,7 @@ public class TemplateBlock implements Block {
     }
 
     @Override
-    public RenderableNode getBlockNode() {
+    public Node getBlockNode() {
         return block;
     }
 

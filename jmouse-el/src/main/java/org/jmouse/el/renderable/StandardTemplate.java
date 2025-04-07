@@ -10,9 +10,9 @@ public class StandardTemplate implements Template {
     private final TokenizableSource source;
     private final TemplateRegistry  registry;
     private final Engine            engine;
-    private final RenderableNode    root;
+    private final Node    root;
 
-    public StandardTemplate(RenderableNode root, TokenizableSource source, Engine engine) {
+    public StandardTemplate(Node root, TokenizableSource source, Engine engine) {
         this.source = source;
         this.engine = engine;
         this.root = root;

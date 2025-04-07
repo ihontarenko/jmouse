@@ -2,20 +2,22 @@ package org.jmouse.el.renderable;
 
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.core.evaluation.EvaluationContext;
-import org.jmouse.el.core.node.Node;
 import org.jmouse.el.core.node.NodeVisitor;
 import org.jmouse.el.renderable.node.BlockNode;
-import org.jmouse.el.renderable.node.IncludeNode;
 import org.jmouse.el.renderable.node.RawTextNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RenderVisitor implements NodeVisitor {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(RenderVisitor.class);
+
     private final EvaluationContext context;
     private final TemplateRegistry  registry;
-    private final Content  content;
-    private final Template template;
+    private final Content           content;
+    private final Template          template;
 
-    public RenderVisitor(TemplateRegistry registry, EvaluationContext context, Content content, Template template) {
+    public RenderVisitor(Content content, TemplateRegistry registry, EvaluationContext context, Template template) {
         this.context = context;
         this.registry = registry;
         this.content = content;
@@ -30,16 +32,13 @@ public class RenderVisitor implements NodeVisitor {
     @Override
     public void visit(BlockNode node) {
         Conversion conversion = context.getConversion();
-        Object evaluated = node.getName().evaluate(context);
-        Node actual = template.getBlock(conversion.convert(evaluated, String.class)).getBlockNode();
+        String     name       = conversion.convert(node.getName().evaluate(context), String.class);
+        Block      block      = registry.getBlock(name);
+
+        if (block != null && block.getBlockNode() instanceof BlockNode actual) {
+            LOGGER.info("Block '{}' will be rendered", name);
+            actual.accept(this);
+        }
     }
 
-    @Override
-    public void visit(IncludeNode includeNode) {
-        Template         includedTemplate = registry.getEngine().getTemplate(includeNode.getIncludedTemplateName());
-        TemplateRenderer templateRenderer = new Renderer.Default(registry.getEngine());
-        Content          includedContent  = templateRenderer.render(includedTemplate, context);
-        content.append(includedContent.toString());
-    }
-    // Для ExtendNode та ImportNode рендеринг не генерує вивід
 }

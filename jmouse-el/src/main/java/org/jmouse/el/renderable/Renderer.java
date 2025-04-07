@@ -18,12 +18,12 @@ public interface Renderer {
         public Content render(Template template, EvaluationContext context) {
             linking(template, context);
 
-            TemplateRegistry registry = mergeRegistries(template);
-            Template root = getRootTemplate(template, context);
+            TemplateRegistry registry = merge(template, context);
+            Template         root     = getRootTemplate(template, context);
 
             Content content = Content.array();
 
-            root.getRoot().accept(new RenderVisitor(registry, context, content, template));
+            root.getRoot().accept(new RenderVisitor(content, registry, context, template));
 
             return content;
         }
@@ -38,18 +38,21 @@ public interface Renderer {
             return root;
         }
 
-        private TemplateRegistry mergeRegistries(Template template) {
-            TemplateRegistry mergedRegistry = template.getRegistry();
-            if (template.getParent() != null) {
-                TemplateRegistry parentMerged = mergeRegistries(template.getParent());
-                mergedRegistry = parentMerged.merge(mergedRegistry);
+        private TemplateRegistry merge(Template template, EvaluationContext context) {
+            TemplateRegistry merged = template.getRegistry();
+
+            if (template.getParent(context) != null) {
+                TemplateRegistry parent = merge(template.getParent(context), context);
+                merged = parent.merge(merged);
             }
-            return mergedRegistry;
+
+            return merged;
         }
 
         private void linking(Template template, EvaluationContext context) {
             template.getRoot().accept(new MacroLinker(template, context));
             template.getRoot().accept(new BlockLinker(template, context));
+//            template.getRoot().accept(new PreProcessingVisitor(template, context));
 
             if (template.getParent(context) != null) {
                 linking(template.getParent(context), context);

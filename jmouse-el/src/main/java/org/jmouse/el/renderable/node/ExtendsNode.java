@@ -1,11 +1,7 @@
 package org.jmouse.el.renderable.node;
 
-import org.jmouse.core.convert.Conversion;
-import org.jmouse.el.core.evaluation.EvaluationContext;
+import org.jmouse.el.core.node.AbstractNode;
 import org.jmouse.el.core.node.ExpressionNode;
-import org.jmouse.el.renderable.AbstractRenderableNode;
-import org.jmouse.el.renderable.Content;
-import org.jmouse.el.renderable.Template;
 
 /**
  * Represents an "extends" node in a template.
@@ -15,7 +11,7 @@ import org.jmouse.el.renderable.Template;
  * converts the result to a String, and then sets the parent template in the current template.
  * </p>
  */
-public class ExtendsNode extends AbstractRenderableNode {
+public class ExtendsNode extends AbstractNode {
 
     private ExpressionNode parent;
 
@@ -37,23 +33,4 @@ public class ExtendsNode extends AbstractRenderableNode {
         this.parent = parent;
     }
 
-    /**
-     * Renders the "extends" directive.
-     * <p>
-     * Evaluates the parent expression, converts the result to a String using the conversion service,
-     * and sets the parent template in the current template context.
-     * </p>
-     *
-     * @param content the content to render into (unused in this node)
-     * @param self    the current template
-     * @param context the evaluation context providing conversion and evaluation services
-     */
-    @Override
-    public void render(Content content, Template self, EvaluationContext context) {
-        Object     value      = getParent().evaluate(context);
-        Conversion conversion = context.getConversion();
-        String     parent     = conversion.convert(value, String.class);
-
-        self.setParent(parent, context);
-    }
 }

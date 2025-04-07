@@ -5,7 +5,7 @@ import org.jmouse.el.core.node.AbstractNode;
 public class ImportNode extends AbstractNode {
 
     private String alias;
-    private String template;
+    private String source;
 
     public String getAlias() {
         return alias;
@@ -15,11 +15,11 @@ public class ImportNode extends AbstractNode {
         this.alias = alias;
     }
 
-    public String getTemplate() {
-        return template;
+    public String getSource() {
+        return source;
     }
 
-    public void setTemplate(String template) {
-        this.template = template;
+    public void setSource(String source) {
+        this.source = source;
     }
 }

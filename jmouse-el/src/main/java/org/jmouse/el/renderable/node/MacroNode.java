@@ -1,18 +1,15 @@
 package org.jmouse.el.renderable.node;
 
-import org.jmouse.el.core.evaluation.EvaluationContext;
-import org.jmouse.el.renderable.AbstractRenderableNode;
-import org.jmouse.el.renderable.Content;
-import org.jmouse.el.renderable.RenderableNode;
-import org.jmouse.el.renderable.Template;
+import org.jmouse.el.core.node.AbstractNode;
+import org.jmouse.el.core.node.Node;
 
 import java.util.List;
 
-public class MacroNode extends AbstractRenderableNode {
+public class MacroNode extends AbstractNode {
 
-    private String         name;
-    private List<String>   arguments;
-    private RenderableNode body;
+    private String       name;
+    private List<String> arguments;
+    private Node         body;
 
     public String getName() {
         return name;
@@ -30,17 +27,12 @@ public class MacroNode extends AbstractRenderableNode {
         this.arguments = arguments;
     }
 
-    public RenderableNode getBody() {
+    public Node getBody() {
         return body;
     }
 
-    public void setBody(RenderableNode body) {
+    public void setBody(Node body) {
         this.body = body;
-    }
-
-    @Override
-    public void render(Content content, Template self, EvaluationContext context) {
-
     }
 
     @Override

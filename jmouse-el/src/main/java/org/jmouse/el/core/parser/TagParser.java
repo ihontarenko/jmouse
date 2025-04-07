@@ -1,11 +1,11 @@
 package org.jmouse.el.core.parser;
 
 import org.jmouse.el.core.lexer.TokenCursor;
-import org.jmouse.el.renderable.RenderableNode;
+import org.jmouse.el.core.node.Node;
 
 public interface TagParser {
 
-    RenderableNode parse(TokenCursor cursor, ParserContext context);
+    Node parse(TokenCursor cursor, ParserContext context);
 
     String getName();
 

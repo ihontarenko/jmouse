@@ -5,11 +5,11 @@ import org.jmouse.el.core.CursorMatcher;
 import org.jmouse.el.core.lexer.Token;
 import org.jmouse.el.core.lexer.TokenCursor;
 import org.jmouse.el.core.node.ExpressionNode;
+import org.jmouse.el.core.node.Node;
 import org.jmouse.el.core.parser.ExpressionParser;
 import org.jmouse.el.core.parser.Parser;
 import org.jmouse.el.core.parser.ParserContext;
 import org.jmouse.el.core.parser.TagParser;
-import org.jmouse.el.renderable.RenderableNode;
 import org.jmouse.el.renderable.node.IfNode;
 import org.jmouse.el.renderable.node.sub.ConditionBranch;
 import org.jmouse.el.renderable.parsing.TemplateParser;
@@ -53,10 +53,10 @@ public class IfParser implements TagParser {
      *
      * @param cursor  the token cursor positioned at the if tag
      * @param context the parser context for retrieving sub-parsers
-     * @return a RenderableNode representing the complete if structure
+     * @return a Node representing the complete if structure
      */
     @Override
-    public RenderableNode parse(TokenCursor cursor, ParserContext context) {
+    public Node parse(TokenCursor cursor, ParserContext context) {
         IfNode ifNode = new IfNode();
 
         // Consume the "if" tag.
@@ -104,7 +104,7 @@ public class IfParser implements TagParser {
         // Ensure closing of the condition expression.
         cursor.ensure(T_CLOSE_EXPRESSION);
         // Parse the branch body until a stopper is reached.
-        RenderableNode body = (RenderableNode) templateParser.parse(cursor, context, stopper());
+        Node body = templateParser.parse(cursor, context, stopper());
         // Add the branch to the IfNode.
         ifNode.addBranch(new ConditionBranch(condition, body));
     }

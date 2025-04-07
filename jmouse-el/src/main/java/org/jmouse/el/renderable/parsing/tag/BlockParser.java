@@ -4,7 +4,7 @@ import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.core.CursorMatcher;
 import org.jmouse.el.core.lexer.TokenCursor;
 import org.jmouse.el.core.node.ExpressionNode;
-import org.jmouse.el.renderable.RenderableNode;
+import org.jmouse.el.core.node.Node;
 import org.jmouse.el.core.parser.LiteralParser;
 import org.jmouse.el.core.parser.ParserContext;
 import org.jmouse.el.core.parser.TagParser;
@@ -16,7 +16,7 @@ import static org.jmouse.el.renderable.lexer.TemplateToken.*;
 public class BlockParser implements TagParser {
 
     @Override
-    public RenderableNode parse(TokenCursor cursor, ParserContext context) {
+    public Node parse(TokenCursor cursor, ParserContext context) {
         TemplateParser       parser  = (TemplateParser) context.getParser(TemplateParser.class);
         BlockNode            block   = new BlockNode();
         Matcher<TokenCursor> matcher = CursorMatcher.sequence(T_OPEN_EXPRESSION, T_END_BLOCK);
@@ -24,7 +24,7 @@ public class BlockParser implements TagParser {
         cursor.ensure(T_BLOCK);
         ExpressionNode name = (ExpressionNode) context.getParser(LiteralParser.class).parse(cursor, context);
         cursor.ensure(T_CLOSE_EXPRESSION);
-        RenderableNode body = (RenderableNode) parser.parse(cursor, context, matcher);
+        Node body = parser.parse(cursor, context, matcher);
 
         block.setName(name);
         block.setBody(body);

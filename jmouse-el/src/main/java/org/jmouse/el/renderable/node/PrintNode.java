@@ -1,12 +1,9 @@
 package org.jmouse.el.renderable.node;
 
-import org.jmouse.el.core.evaluation.EvaluationContext;
-import org.jmouse.el.renderable.AbstractRenderableNode;
+import org.jmouse.el.core.node.AbstractNode;
 import org.jmouse.el.core.node.ExpressionNode;
-import org.jmouse.el.renderable.Content;
-import org.jmouse.el.renderable.Template;
 
-public class PrintNode extends AbstractRenderableNode {
+public class PrintNode extends AbstractNode {
 
     private final ExpressionNode expression;
 
@@ -18,8 +15,4 @@ public class PrintNode extends AbstractRenderableNode {
         return expression;
     }
 
-    @Override
-    public void render(Content content, Template self, EvaluationContext context) {
-        content.append(String.valueOf(expression.evaluate(context)));
-    }
 }

@@ -33,8 +33,6 @@ public class TemplateParser implements Parser {
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
         ContainerNode container = new ContainerNode();
 
-        container.setOnlySafeNodes(true);
-
         while (cursor.hasNext()) {
             // Delegate parsing to the RootParser for each section.
             container.add(context.getParser(RootParser.class).parse(cursor, context));
