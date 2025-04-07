@@ -2,6 +2,7 @@ package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
 import org.jmouse.el.node.Visitor;
+import org.jmouse.el.renderable.NodeVisitor;
 import org.jmouse.el.renderable.node.sub.ConditionBranch;
 
 import java.util.ArrayList;
@@ -30,7 +31,9 @@ public class IfNode extends AbstractNode {
      */
     @Override
     public void accept(Visitor visitor) {
-        visitor.visit(this);
+        if (visitor instanceof NodeVisitor nv) {
+            nv.visit(this);
+        }
     }
 
 }

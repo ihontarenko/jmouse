@@ -70,6 +70,16 @@ public final class LinkedListInheritance implements Inheritance {
     }
 
     /**
+     * Returns the current template from the inheritance stack.
+     *
+     * @return the current {@link Template}
+     */
+    @Override
+    public Template getCurrent() {
+        return stack.get(depth);
+    }
+
+    /**
      * Returns the current parent template from the stack.
      * <p>
      * This is the template at the current {@code depth} in the stack.

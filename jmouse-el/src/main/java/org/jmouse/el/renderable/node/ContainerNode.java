@@ -2,6 +2,7 @@ package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
 import org.jmouse.el.node.Visitor;
+import org.jmouse.el.renderable.NodeVisitor;
 
 public class ContainerNode extends AbstractNode {
 
@@ -12,7 +13,9 @@ public class ContainerNode extends AbstractNode {
      */
     @Override
     public void accept(Visitor visitor) {
-        visitor.visit(this);
+        if (visitor instanceof NodeVisitor nv) {
+            nv.visit(this);
+        }
     }
 
 }

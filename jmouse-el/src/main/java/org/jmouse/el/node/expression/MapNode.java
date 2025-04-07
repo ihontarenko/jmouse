@@ -30,7 +30,7 @@ public class MapNode extends AbstractExpressionNode {
     public Object evaluate(EvaluationContext context) {
         Map<Object, Object> map = new HashMap<>();
 
-        for (Node child : children()) {
+        for (Node child : getChildren()) {
             if (child instanceof KeyValueNode kvNode) {
                 Object result = kvNode.evaluate(context);
                 if (result instanceof Map.Entry<?, ?> entry) {
@@ -49,6 +49,6 @@ public class MapNode extends AbstractExpressionNode {
      */
     @Override
     public String toString() {
-        return "MAP[%s]".formatted(children());
+        return "MAP[%s]".formatted(getChildren());
     }
 }

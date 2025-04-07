@@ -11,7 +11,7 @@ public interface Parser {
     default Node parse(TokenCursor cursor, ParserContext context) {
         Node container = BasicNode.forToken(null);
         parse(cursor, container, context);
-        return container.first();
+        return container.getFirst();
     }
 
 }

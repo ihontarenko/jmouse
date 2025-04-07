@@ -2,11 +2,10 @@ package org.jmouse.el.renderable;
 
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
-import org.jmouse.el.renderable.node.BlockNode;
-import org.jmouse.el.renderable.node.ContainerNode;
-import org.jmouse.el.renderable.node.IfNode;
-import org.jmouse.el.renderable.node.RawTextNode;
+import org.jmouse.el.node.expression.FunctionNode;
+import org.jmouse.el.renderable.node.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,18 +16,42 @@ public class RenderVisitor implements NodeVisitor {
     private final EvaluationContext context;
     private final TemplateRegistry  registry;
     private final Content           content;
-    private final Template          template;
 
-    public RenderVisitor(Content content, TemplateRegistry registry, EvaluationContext context, Template template) {
+    public RenderVisitor(Content content, TemplateRegistry registry, EvaluationContext context) {
         this.context = context;
         this.registry = registry;
         this.content = content;
-        this.template = template;
     }
 
     @Override
-    public void visit(RawTextNode node) {
+    public void visit(TextNode node) {
         content.append(node.getString());
+    }
+
+    @Override
+    public void visit(PrintNode printNode) {
+        ExpressionNode expression = printNode.getExpression();
+        Object         evaluated  = null;
+
+        try {
+            evaluated = expression.evaluate(context);
+        } catch (Exception exception) {
+            if (expression instanceof FunctionNode functionNode) {
+                Macro macro = registry.getMacro(functionNode.getName());
+                if (macro != null) {
+                    macro.node().accept(this);
+                }
+            }
+        }
+
+        if (evaluated != null) {
+            content.append(context.getConversion().convert(evaluated, String.class));
+        }
+    }
+
+    @Override
+    public void visit(MacroNode macroNode) {
+        System.out.println(macroNode.getName());
     }
 
     @Override
@@ -37,16 +60,9 @@ public class RenderVisitor implements NodeVisitor {
         String     name       = conversion.convert(node.getName().evaluate(context), String.class);
         Block      block      = registry.getBlock(name);
 
-        if (block != null && block.getBlockNode() instanceof BlockNode actual) {
+        if (block != null && block.node() instanceof BlockNode actual) {
             LOGGER.info("Block '{}' will be rendered", name);
-            actual.accept(this);
-        }
-    }
-
-    @Override
-    public void visit(ContainerNode containerNode) {
-        for (Node child : containerNode.children()) {
-            child.accept(this);
+            actual.getBody().accept(this);
         }
     }
 

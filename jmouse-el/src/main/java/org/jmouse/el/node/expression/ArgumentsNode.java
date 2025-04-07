@@ -31,7 +31,7 @@ public class ArgumentsNode extends AbstractExpressionNode {
     public Object evaluate(EvaluationContext context) {
         List<Object> compiled = new ArrayList<>();
 
-        for (Node child : children()) {
+        for (Node child : getChildren()) {
             if (child instanceof ExpressionNode expression) {
                 compiled.add(expression.evaluate(context));
             }
@@ -50,6 +50,6 @@ public class ArgumentsNode extends AbstractExpressionNode {
      */
     @Override
     public String toString() {
-        return "ARGUMENTS: " + children();
+        return "ARGUMENTS: " + getChildren();
     }
 }

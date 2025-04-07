@@ -14,8 +14,8 @@ import static org.jmouse.util.helper.Strings.underscored;
  */
 abstract public class AbstractNode implements Node {
 
-    protected final List<Node> children = new ArrayList<>(); // List of child nodes
-    protected       Node       parent; // Parent node reference
+    protected final List<Node> children = new ArrayList<>();    // List of child nodes
+    protected       Node       parent;                          // Parent node reference
 
     /**
      * Constructs an {@code AbstractNode} with no parent.
@@ -39,7 +39,7 @@ abstract public class AbstractNode implements Node {
      * @return the parent node or {@code null} if this is a root node
      */
     @Override
-    public Node parent() {
+    public Node getParent() {
         return this.parent;
     }
 
@@ -49,7 +49,7 @@ abstract public class AbstractNode implements Node {
      * @param node the parent node to set
      */
     @Override
-    public void parent(Node node) {
+    public void setParent(Node node) {
         this.parent = node;
     }
 
@@ -59,7 +59,7 @@ abstract public class AbstractNode implements Node {
      * @return a list of child nodes
      */
     @Override
-    public List<Node> children() {
+    public List<Node> getChildren() {
         return this.children;
     }
 

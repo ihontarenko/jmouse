@@ -4,8 +4,10 @@ import org.jmouse.el.node.Node;
 
 public interface Block {
 
-    String getName();
+    String name();
 
-    Node getBlockNode();
+    Node node();
+
+    String source();
 
 }

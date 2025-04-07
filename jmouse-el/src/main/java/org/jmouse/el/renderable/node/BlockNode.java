@@ -4,6 +4,7 @@ import org.jmouse.el.node.AbstractNode;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.Visitor;
+import org.jmouse.el.renderable.NodeVisitor;
 
 public class BlockNode extends AbstractNode {
 
@@ -33,7 +34,10 @@ public class BlockNode extends AbstractNode {
      */
     @Override
     public void accept(Visitor visitor) {
-        visitor.visit(this);
+        if (visitor instanceof NodeVisitor nv) {
+            nv.visit(this);
+        }
     }
+
 
 }

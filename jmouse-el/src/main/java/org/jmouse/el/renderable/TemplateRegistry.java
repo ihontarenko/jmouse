@@ -36,8 +36,8 @@ public class TemplateRegistry {
     public TemplateRegistry merge(TemplateRegistry child) {
         TemplateRegistry merged = new TemplateRegistry(engine);
 
-        merge(merged, this);
-        merge(merged, child);
+        merge(child, merged);
+        merge(this, merged);
 
         return merged;
     }

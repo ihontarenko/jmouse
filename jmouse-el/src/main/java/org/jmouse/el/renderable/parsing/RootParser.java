@@ -9,7 +9,7 @@ import org.jmouse.el.parser.*;
 import org.jmouse.el.renderable.EmptyNode;
 import org.jmouse.el.renderable.node.ContainerNode;
 import org.jmouse.el.renderable.node.PrintNode;
-import org.jmouse.el.renderable.node.RawTextNode;
+import org.jmouse.el.renderable.node.TextNode;
 
 import static org.jmouse.el.renderable.lexer.TemplateToken.*;
 
@@ -18,7 +18,7 @@ import static org.jmouse.el.renderable.lexer.TemplateToken.*;
  * <p>
  * Parses:
  * <ul>
- *   <li>Plain text as {@link RawTextNode}</li>
+ *   <li>Plain text as {@link TextNode}</li>
  *   <li>Print expressions (e.g. <code>{{ expression }}</code>) as {@link PrintNode}</li>
  *   <li>Execution expressions (e.g. <code>{% expression %}</code>) as {@link ContainerNode}</li>
  * </ul>
@@ -44,7 +44,7 @@ public class RootParser implements Parser {
 
         if (cursor.isCurrent(T_RAW_TEXT)) {
             // Raw text node
-            parent.add(new RawTextNode(cursor.peek().value()));
+            parent.add(new TextNode(cursor.peek().value()));
             cursor.next();
         } else if (cursor.isCurrent(T_OPEN_PRINT)) {
             // Print expression: {{ expression }}

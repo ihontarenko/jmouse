@@ -57,7 +57,7 @@ public class MacroParser implements TagParser {
         ArgumentsNode arguments  = (ArgumentsNode) context.getParser(ArgumentsParser.class).parse(cursor, context);
         List<String>  parameters = new ArrayList<>();
 
-        for (Node child : arguments.children()) {
+        for (Node child : arguments.getChildren()) {
             if (child instanceof PropertyNode property) {
                 parameters.add(property.getPath());
             }

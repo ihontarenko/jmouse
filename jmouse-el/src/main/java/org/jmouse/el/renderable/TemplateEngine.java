@@ -16,7 +16,7 @@ import org.jmouse.el.renderable.parsing.TemplateParser;
 import java.io.Reader;
 import java.io.StringReader;
 
-public class LeafsEngine implements Engine {
+public class TemplateEngine implements Engine {
 
     private ExtensionContainer         extensions;
     private Cache<Cache.Key, Template> cache;
@@ -24,7 +24,7 @@ public class LeafsEngine implements Engine {
     private Lexer                      lexer;
     private ParserContext              parserContext;
 
-    public LeafsEngine() {
+    public TemplateEngine() {
         initialize();
     }
 

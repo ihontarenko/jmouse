@@ -43,7 +43,7 @@ public class StandardTemplate implements Template {
 
     @Override
     public void setMacro(Macro macro) {
-        registry.registerMacro(macro.getName(), macro);
+        registry.registerMacro(macro.name(), macro);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class StandardTemplate implements Template {
 
     @Override
     public void setBlock(Block block) {
-        registry.registerBlock(block.getName(), block);
+        registry.registerBlock(block.name(), block);
     }
 
     @Override

@@ -14,7 +14,7 @@ public class Templates {
         loader.setPrefix("templates/");
         loader.setSuffix(".html");
 
-        Engine engine = new LeafsEngine();
+        Engine engine = new TemplateEngine();
 
         engine.setLoader(loader);
 
@@ -25,6 +25,7 @@ public class Templates {
         template.getRoot();
 
         context.setValue("book", getBook());
+        context.setValue("name", getBook().getAuthor());
 
         Content content = renderer.render(template, context);
 

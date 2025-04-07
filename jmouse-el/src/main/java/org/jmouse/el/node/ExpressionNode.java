@@ -18,17 +18,9 @@ public interface ExpressionNode extends Node {
      * @throws UnsupportedOperationException if evaluation is not implemented.
      */
     default Object evaluate(EvaluationContext context) {
-        throw evaluationNotImplemented();
-    }
-
-    /**
-     * 🚨 Throws an exception indicating that evaluation is not implemented.
-     *
-     * @return ❌ Exception with detailed message.
-     */
-    private UnsupportedOperationException evaluationNotImplemented() {
-        return new UnsupportedOperationException(
+        throw new UnsupportedOperationException(
                 "Evaluation for expression node '%s' is not implemented"
                         .formatted(this.getClass().getName()));
     }
+
 }

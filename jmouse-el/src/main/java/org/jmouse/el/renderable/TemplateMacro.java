@@ -1,15 +1,17 @@
 package org.jmouse.el.renderable;
 
-public class TemplateMacro implements Macro {
+import org.jmouse.el.renderable.node.MacroNode;
 
-    private final String name;
+/**
+ * Represents a template macro, which binds a macro name to its corresponding macro definition.
+ * <p>
+ * This record implements the {@link Macro} interface and encapsulates an immutable mapping
+ * between a macro name and a {@link MacroNode} that contains the macro's content.
+ * </p>
+ *
+ * @param name the name of the macro
+ * @param node the {@link MacroNode} representing the macro's definition and body
+ */
+public record TemplateMacro(String name, MacroNode node, String source) implements Macro {
 
-    public TemplateMacro(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
 }

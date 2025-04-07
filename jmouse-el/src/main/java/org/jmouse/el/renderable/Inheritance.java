@@ -57,6 +57,13 @@ public sealed interface Inheritance permits LinkedListInheritance {
     Template getChild();
 
     /**
+     * Returns the current template from the inheritance stack.
+     *
+     * @return the current {@link Template}
+     */
+    Template getCurrent();
+
+    /**
      * Returns the current parent template from the inheritance stack.
      *
      * @return the current parent {@link Template}, or {@code null} if no parent exists.
@@ -69,6 +76,14 @@ public sealed interface Inheritance permits LinkedListInheritance {
      * @return a {@link List} of {@link Template} instances representing the stack.
      */
     List<Template> getStack();
+
+    default Template getLower() {
+        return getStack().getFirst();
+    }
+
+    default Template getUpper() {
+        return getStack().getLast();
+    }
 
     /**
      * Checks if the inheritance stack currently has a child template.

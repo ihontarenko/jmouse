@@ -21,7 +21,7 @@ public interface Node {
      * @return {@code true} if the node has children, otherwise {@code false}
      */
     default boolean hasChildren() {
-        return !children().isEmpty();
+        return !getChildren().isEmpty();
     }
 
     /**
@@ -30,7 +30,7 @@ public interface Node {
      * @return {@code true} if the node has a parent, otherwise {@code false}
      */
     default boolean hasParent() {
-        return parent() != null;
+        return getParent() != null;
     }
 
     /**
@@ -47,29 +47,29 @@ public interface Node {
      *
      * @return the parent node or {@code null} if this is the root
      */
-    Node parent();
+    Node getParent();
 
     /**
      * Sets the parent node.
      *
      * @param node the parent node to set
      */
-    void parent(Node node);
+    void setParent(Node node);
 
     /**
      * Returns the list of child nodes.
      *
      * @return a list of child nodes
      */
-    List<Node> children();
+    List<Node> getChildren();
 
     /**
      * Returns the first child node.
      *
      * @return the first child node or {@code null} if no children exist
      */
-    default Node first() {
-        return hasChildren() ? children().getFirst() : null;
+    default Node getFirst() {
+        return hasChildren() ? getChildren().getFirst() : null;
     }
 
     /**
@@ -77,8 +77,8 @@ public interface Node {
      *
      * @return the last child node or {@code null} if no children exist
      */
-    default Node last() {
-        return hasChildren() ? children().getLast() : null;
+    default Node getLast() {
+        return hasChildren() ? getChildren().getLast() : null;
     }
 
     /**
@@ -91,8 +91,8 @@ public interface Node {
      */
     default void add(Node node) {
         if (this != node) {
-            node.parent(this);
-            children().add(node);
+            node.setParent(this);
+            getChildren().add(node);
         }
     }
 
@@ -104,7 +104,7 @@ public interface Node {
     default void accept(Visitor visitor) {
         visitor.visit(this);
         if (hasChildren()) {
-            for (Node child : children()) {
+            for (Node child : getChildren()) {
                 child.accept(visitor);
             }
         }

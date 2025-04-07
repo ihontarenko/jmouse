@@ -2,6 +2,7 @@ package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
 import org.jmouse.el.node.Visitor;
+import org.jmouse.el.renderable.NodeVisitor;
 
 /**
  * Represents a raw text node in a templating system.
@@ -12,7 +13,7 @@ import org.jmouse.el.node.Visitor;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class RawTextNode extends AbstractNode {
+public class TextNode extends AbstractNode {
 
     /**
      * The raw text content of this node.
@@ -24,7 +25,7 @@ public class RawTextNode extends AbstractNode {
      *
      * @param string the raw text content
      */
-    public RawTextNode(String string) {
+    public TextNode(String string) {
         this.data = string.toCharArray();
     }
 
@@ -44,7 +45,9 @@ public class RawTextNode extends AbstractNode {
      */
     @Override
     public void accept(Visitor visitor) {
-        visitor.visit(this);
+        if (visitor instanceof NodeVisitor nv) {
+            nv.visit(this);
+        }
     }
 
     @Override

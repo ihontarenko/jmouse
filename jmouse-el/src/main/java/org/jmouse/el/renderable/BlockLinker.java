@@ -47,7 +47,7 @@ public class BlockLinker implements NodeVisitor {
         TemplateRegistry registry   = template.getRegistry();
 
         String name  = conversion.convert(evaluated, String.class);
-        Block  block = new TemplateBlock(name, node);
+        Block  block = new TemplateBlock(name, node, template.getName());
 
         LOGGER.info("Registering block '{}' into '{}' template", name, template.getName());
 
