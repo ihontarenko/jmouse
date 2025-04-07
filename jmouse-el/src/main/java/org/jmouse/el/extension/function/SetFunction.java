@@ -32,9 +32,12 @@ public class SetFunction implements Function {
      */
     @Override
     public Object execute(Arguments arguments, EvaluationContext context) {
-        String name = String.valueOf(arguments.getFirst());
-        context.setValue(name, arguments.get(1));
-        return arguments.get(1);
+        String name  = String.valueOf(arguments.getFirst());
+        Object value = arguments.getFirst();
+
+        context.setValue(name, value);
+
+        return value;
     }
 
     /**
