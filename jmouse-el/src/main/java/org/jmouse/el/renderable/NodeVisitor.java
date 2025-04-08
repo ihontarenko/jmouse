@@ -1,6 +1,5 @@
 package org.jmouse.el.renderable;
 
-import org.jmouse.el.node.Node;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.node.*;
 
@@ -10,9 +9,7 @@ public interface NodeVisitor extends Visitor {
     }
 
     default void visit(ContainerNode containerNode) {
-        for (Node child : containerNode.getChildren()) {
-            child.accept(this);
-        }
+
     }
 
     default void visit(ExtendsNode extendsNode) {

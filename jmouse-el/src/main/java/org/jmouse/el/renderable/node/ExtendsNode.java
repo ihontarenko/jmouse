@@ -47,4 +47,8 @@ public class ExtendsNode extends AbstractNode {
         }
     }
 
+    @Override
+    public String toString() {
+        return "EXTENDS: " + getParent();
+    }
 }

@@ -2,6 +2,8 @@ package org.jmouse.el.renderable;
 
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.node.Node;
+import org.jmouse.el.renderable.node.ContainerNode;
 import org.jmouse.el.renderable.node.ExtendsNode;
 
 public class PreProcessingVisitor implements NodeVisitor {
@@ -12,6 +14,13 @@ public class PreProcessingVisitor implements NodeVisitor {
     public PreProcessingVisitor(Template template, EvaluationContext context) {
         this.context = context;
         this.template = template;
+    }
+
+    @Override
+    public void visit(ContainerNode container) {
+        for (Node child : container.getChildren()) {
+            child.accept(this);
+        }
     }
 
     @Override

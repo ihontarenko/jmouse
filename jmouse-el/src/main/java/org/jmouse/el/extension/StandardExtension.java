@@ -49,7 +49,8 @@ public class StandardExtension implements Extension {
                 new ToBigDecimalFilter(),
                 new SubFilter(),
                 new DefaultFilter(),
-                new TrimFilter()
+                new TrimFilter(),
+                new TypeFilter()
         );
     }
 

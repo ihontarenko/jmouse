@@ -6,6 +6,7 @@ import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.extension.Function;
 import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Visitor;
 
 /**
  * Represents a function call expression node.
@@ -84,6 +85,16 @@ public class FunctionNode extends AbstractExpressionNode {
         }
 
         return function.execute(arguments, context);
+    }
+
+    /**
+     * Recursively executes the given consumer on this node and all its children.
+     *
+     * @param visitor the consumer to execute on each node
+     */
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     /**

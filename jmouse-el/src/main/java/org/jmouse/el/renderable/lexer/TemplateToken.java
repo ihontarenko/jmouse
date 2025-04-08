@@ -87,60 +87,65 @@ public enum TemplateToken implements Token.Type {
     T_IN(20006, "in"),
 
     /**
+     * 'as' keyword type.
+     */
+    T_AS(20007, "as"),
+
+    /**
      * 'with' keyword type.
      */
-    T_WITH(20007, "with"),
+    T_WITH(20008, "with"),
 
     /**
      * 'extends' keyword type.
      */
-    T_EXTENDS(20008, "extends"),
+    T_EXTENDS(20009, "extends"),
 
     /**
      * 'block' keyword type.
      */
-    T_BLOCK(20009, "block"),
+    T_BLOCK(20010, "block"),
 
     /**
      * 'block' keyword type.
      */
-    T_END_BLOCK(20010, "endblock", "end_block"),
+    T_END_BLOCK(20011, "endblock", "end_block"),
 
     /**
      * 'macro' keyword type.
      */
-    T_MACRO(20011, "macro"),
+    T_MACRO(20012, "macro"),
 
     /**
      * 'macro' keyword type.
      */
-    T_END_MACRO(20012, "endmacro", "end_macro"),
+    T_END_MACRO(20013, "endmacro", "end_macro"),
 
     // Additional tokens
     /**
      * 'include' keyword type.
      */
-    T_INCLUDE(20013, "include"),
+    T_INCLUDE(20014, "include"),
 
     /**
      * 'call' keyword type.
      */
-    T_CALL(20014, "call"),
+    T_CALL(20015, "call"),
 
     /**
      * 'set' keyword type.
      */
-    T_SET(20015, "set"),
+    T_SET(20016, "set"),
 
     /**
      * 'endset' keyword type.
      */
-    T_END_SET(20016, "endset"),
+    T_END_SET(20017, "endset"),
 
     /**
      * 'import' keyword type.
      */
-    T_IMPORT(20017, "import"),
+    T_IMPORT(20018, "import"),
 
     /**
      * raw piece of html or text

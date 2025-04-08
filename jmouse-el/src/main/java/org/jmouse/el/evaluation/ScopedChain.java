@@ -81,6 +81,6 @@ public interface ScopedChain {
      * @return 🔍 {@code true} if the variable exists, otherwise {@code false}
      */
     default boolean contains(String name) {
-        return peek().contains(name);
+        return getValue(name) != null;
     }
 }

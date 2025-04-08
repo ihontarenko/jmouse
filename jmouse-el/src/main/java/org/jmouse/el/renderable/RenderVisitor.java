@@ -3,6 +3,7 @@ package org.jmouse.el.renderable;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.FunctionNode;
 import org.jmouse.el.node.expression.FunctionNotFoundException;
 import org.jmouse.el.renderable.node.*;
@@ -21,6 +22,13 @@ public class RenderVisitor implements NodeVisitor {
         this.context = context;
         this.registry = registry;
         this.content = content;
+    }
+
+    @Override
+    public void visit(ContainerNode container) {
+        for (Node child : container.getChildren()) {
+            child.accept(this);
+        }
     }
 
     @Override
@@ -51,8 +59,8 @@ public class RenderVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(MacroNode macroNode) {
-        System.out.println(macroNode.getName());
+    public void visit(FunctionNode function) {
+        System.out.println(function);
     }
 
     @Override

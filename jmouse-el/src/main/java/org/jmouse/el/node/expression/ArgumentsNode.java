@@ -4,6 +4,7 @@ import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
+import org.jmouse.el.node.Visitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,16 @@ public class ArgumentsNode extends AbstractExpressionNode {
         }
 
         return compiled.toArray();
+    }
+
+    /**
+     * Recursively executes the given consumer on this node and all its children.
+     *
+     * @param visitor the consumer to execute on each node
+     */
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     /**

@@ -6,6 +6,7 @@ import org.jmouse.el.extension.Operator;
 import org.jmouse.el.extension.operator.ComparisonOperator;
 import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Visitor;
 
 /**
  * Represents a binary operation node in the Abstract Syntax Tree (AST).
@@ -89,6 +90,18 @@ public class BinaryOperation extends AbstractExpressionNode {
         result = operator.getCalculator().calculate(left, right);
 
         return result;
+    }
+
+    /**
+     * Recursively executes the given consumer on this node and all its children.
+     *
+     * @param visitor the consumer to execute on each node
+     */
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+        left.accept(visitor);
+        right.accept(visitor);
     }
 
     @Override

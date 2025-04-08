@@ -1,28 +1,34 @@
 package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
+import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.NodeVisitor;
 
 public class ImportNode extends AbstractNode {
 
-    private String alias;
-    private String source;
+    private ExpressionNode alias;
+    private ExpressionNode source;
 
-    public String getAlias() {
+    public ExpressionNode getAlias() {
         return alias;
     }
 
-    public void setAlias(String alias) {
+    public void setAlias(ExpressionNode alias) {
         this.alias = alias;
     }
 
-    public String getSource() {
+    public ExpressionNode getSource() {
         return source;
     }
 
-    public void setSource(String source) {
+    public void setSource(ExpressionNode source) {
         this.source = source;
+    }
+
+    @Override
+    public String toString() {
+        return "IMPORT: " + getSource() + (getAlias() != null ? " AS " + getAlias() : "");
     }
 
     /**

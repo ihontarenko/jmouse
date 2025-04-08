@@ -2,7 +2,9 @@ package org.jmouse.el.renderable;
 
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.node.Node;
 import org.jmouse.el.renderable.node.BlockNode;
+import org.jmouse.el.renderable.node.ContainerNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +31,13 @@ public class BlockLinker implements NodeVisitor {
     public BlockLinker(Template template, EvaluationContext context) {
         this.template = template;
         this.context = context;
+    }
+
+    @Override
+    public void visit(ContainerNode container) {
+        for (Node child : container.getChildren()) {
+            child.accept(this);
+        }
     }
 
     /**
