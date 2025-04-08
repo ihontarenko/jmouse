@@ -18,9 +18,9 @@ public class Templates {
 
         engine.setLoader(loader);
 
-        Template template = engine.getTemplate("sub_sub");
-        Renderer renderer = new Renderer.Default(engine);
-        EvaluationContext context = template.newContext();
+        Template          template = engine.getTemplate("sub_sub");
+        Renderer          renderer = new TemplateRenderer(engine);
+        EvaluationContext context  = template.newContext();
 
         template.getRoot();
 

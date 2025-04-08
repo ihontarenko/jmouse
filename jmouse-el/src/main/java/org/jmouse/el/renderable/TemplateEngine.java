@@ -68,7 +68,7 @@ public class TemplateEngine implements Engine {
         cursor.currentIf(BasicToken.T_SOL);
         Node root = parser.parse(cursor, parserContext);
 
-        return new StandardTemplate(root, source, this);
+        return new DefaultTemplate(root, source, this);
     }
 
     @Override

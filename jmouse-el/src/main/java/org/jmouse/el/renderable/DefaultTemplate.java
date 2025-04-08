@@ -5,14 +5,14 @@ import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.lexer.TokenizableSource;
 import org.jmouse.el.node.Node;
 
-public class StandardTemplate implements Template {
+public class DefaultTemplate implements Template {
 
     private final TokenizableSource source;
     private final TemplateRegistry  registry;
     private final Engine            engine;
-    private final Node    root;
+    private final Node              root;
 
-    public StandardTemplate(Node root, TokenizableSource source, Engine engine) {
+    public DefaultTemplate(Node root, TokenizableSource source, Engine engine) {
         this.source = source;
         this.engine = engine;
         this.root = root;
