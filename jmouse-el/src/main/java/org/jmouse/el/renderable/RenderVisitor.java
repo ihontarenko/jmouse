@@ -34,6 +34,7 @@ public class RenderVisitor implements NodeVisitor {
         Object         evaluated  = null;
 
         try {
+            expression.accept(this);
             evaluated = expression.evaluate(context);
         } catch (FunctionNotFoundException exception) {
             if (expression instanceof FunctionNode functionNode) {
