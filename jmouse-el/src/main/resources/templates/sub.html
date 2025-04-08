@@ -5,3 +5,7 @@
 {% block 'content' %}
     <h1>Sub Template</h1>
 {% endblock %}
+
+{% macro someData(name, data) %}
+    {{ name }} - {{ data | type }}
+{% endmacro %}

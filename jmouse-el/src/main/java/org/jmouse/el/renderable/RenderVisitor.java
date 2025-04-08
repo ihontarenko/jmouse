@@ -3,8 +3,8 @@ package org.jmouse.el.renderable;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.ExpressionNode;
-import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.FunctionNode;
+import org.jmouse.el.node.expression.FunctionNotFoundException;
 import org.jmouse.el.renderable.node.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +35,11 @@ public class RenderVisitor implements NodeVisitor {
 
         try {
             evaluated = expression.evaluate(context);
-        } catch (Exception exception) {
+        } catch (FunctionNotFoundException exception) {
             if (expression instanceof FunctionNode functionNode) {
                 Macro macro = registry.getMacro(functionNode.getName());
                 if (macro != null) {
-                    macro.node().accept(this);
+                    macro.evaluate(this, functionNode, context);
                 }
             }
         }
