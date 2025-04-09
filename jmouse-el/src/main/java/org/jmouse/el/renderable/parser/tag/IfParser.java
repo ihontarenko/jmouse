@@ -1,4 +1,4 @@
-package org.jmouse.el.renderable.parsing.tag;
+package org.jmouse.el.renderable.parser.tag;
 
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.CursorMatcher;
@@ -12,7 +12,7 @@ import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.renderable.node.IfNode;
 import org.jmouse.el.renderable.node.sub.ConditionBranch;
-import org.jmouse.el.renderable.parsing.TemplateParser;
+import org.jmouse.el.renderable.parser.TemplateParser;
 
 import static org.jmouse.el.renderable.lexer.TemplateToken.*;
 
@@ -30,7 +30,7 @@ import static org.jmouse.el.renderable.lexer.TemplateToken.*;
 public class IfParser implements TagParser {
 
     /**
-     * Creates a matcher that stops branch parsing when encountering an else, else-if, or end-if tag.
+     * Creates a matcher that stops branch parser when encountering an else, else-if, or end-if tag.
      *
      * @return a Matcher for stopping conditions
      */

@@ -73,7 +73,7 @@ public class StandardExtension implements Extension {
     }
 
     /**
-     * Returns the list of parsers used for parsing expressions.
+     * Returns the list of parsers used for parser expressions.
      *
      * @return a list of {@link Parser} instances
      */

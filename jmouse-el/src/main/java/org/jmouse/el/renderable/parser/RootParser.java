@@ -1,4 +1,4 @@
-package org.jmouse.el.renderable.parsing;
+package org.jmouse.el.renderable.parser;
 
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
@@ -24,7 +24,7 @@ import static org.jmouse.el.renderable.lexer.TemplateToken.*;
  * </ul>
  * </p>
  * <p>
- * Delegates expression parsing to {@link ExpressionParser} and tag parsing to appropriate {@link TagParser} implementations.
+ * Delegates expression parser to {@link ExpressionParser} and tag parser to appropriate {@link TagParser} implementations.
  * </p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)

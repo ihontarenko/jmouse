@@ -11,7 +11,7 @@ import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.renderable.lexer.TemplateRecognizer;
 import org.jmouse.el.renderable.lexer.TemplateTokenizer;
 import org.jmouse.el.renderable.loader.TemplateLoader;
-import org.jmouse.el.renderable.parsing.TemplateParser;
+import org.jmouse.el.renderable.parser.TemplateParser;
 
 import java.io.Reader;
 import java.io.StringReader;

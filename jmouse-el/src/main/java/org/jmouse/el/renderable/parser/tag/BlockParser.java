@@ -1,4 +1,4 @@
-package org.jmouse.el.renderable.parsing.tag;
+package org.jmouse.el.renderable.parser.tag;
 
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.CursorMatcher;
@@ -9,7 +9,7 @@ import org.jmouse.el.parser.LiteralParser;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.renderable.node.BlockNode;
-import org.jmouse.el.renderable.parsing.TemplateParser;
+import org.jmouse.el.renderable.parser.TemplateParser;
 
 import static org.jmouse.el.renderable.lexer.TemplateToken.*;
 

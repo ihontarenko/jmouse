@@ -19,7 +19,7 @@ import org.jmouse.el.renderable.lexer.TemplateTokenizer;
 import org.jmouse.el.renderable.loader.ClasspathLoader;
 import org.jmouse.el.renderable.loader.TemplateLoader;
 import org.jmouse.el.node.Node;
-import org.jmouse.el.renderable.parsing.TemplateParser;
+import org.jmouse.el.renderable.parser.TemplateParser;
 import org.jmouse.testing_ground.binder.dto.Book;
 
 import java.io.Reader;

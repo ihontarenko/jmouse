@@ -9,7 +9,7 @@ import org.jmouse.el.parser.sub.ArgumentsParser;
 /**
  * Parses an array expression.
  * <p>
- * Ensures the array starts with '[' and ends with ']'. If not empty, it delegates element parsing
+ * Ensures the array starts with '[' and ends with ']'. If not empty, it delegates element parser
  * to the {@link ArgumentsParser} and wraps the results in an {@link ArrayNode}.
  * </p>
  */

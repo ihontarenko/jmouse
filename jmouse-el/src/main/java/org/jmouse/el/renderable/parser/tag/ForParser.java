@@ -1,4 +1,4 @@
-package org.jmouse.el.renderable.parsing.tag;
+package org.jmouse.el.renderable.parser.tag;
 
 import org.jmouse.el.node.Node;
 import org.jmouse.el.renderable.lexer.TemplateToken;

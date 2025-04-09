@@ -1,4 +1,4 @@
-package org.jmouse.el.renderable.parsing.tag;
+package org.jmouse.el.renderable.parser.tag;
 
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.CursorMatcher;
@@ -11,7 +11,7 @@ import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.parser.sub.ParametersParser;
 import org.jmouse.el.renderable.node.MacroNode;
-import org.jmouse.el.renderable.parsing.TemplateParser;
+import org.jmouse.el.renderable.parser.TemplateParser;
 
 import java.util.ArrayList;
 import java.util.List;

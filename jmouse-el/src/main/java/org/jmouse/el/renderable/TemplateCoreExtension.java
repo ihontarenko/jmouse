@@ -3,9 +3,9 @@ package org.jmouse.el.renderable;
 import org.jmouse.el.extension.StandardExtension;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.TagParser;
-import org.jmouse.el.renderable.parsing.RootParser;
-import org.jmouse.el.renderable.parsing.TemplateParser;
-import org.jmouse.el.renderable.parsing.tag.*;
+import org.jmouse.el.renderable.parser.RootParser;
+import org.jmouse.el.renderable.parser.TemplateParser;
+import org.jmouse.el.renderable.parser.tag.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +22,8 @@ import java.util.List;
  * The extension ensures that the template engine can correctly interpret and build the
  * abstract syntax tree (AST) for templates by extending the base parsers with:
  * <ul>
- *   <li>{@link TemplateParser} – for parsing template-specific syntax and structure.</li>
- *   <li>{@link RootParser} – for parsing the root of the template layout.</li>
+ *   <li>{@link TemplateParser} – for parser template-specific syntax and structure.</li>
+ *   <li>{@link RootParser} – for parser the root of the template layout.</li>
  * </ul>
  * Additionally, it provides a collection of {@link TagParser} implementations to process
  * individual template tags.
@@ -34,7 +34,7 @@ import java.util.List;
 public class TemplateCoreExtension extends StandardExtension implements TemplateExtension {
 
     /**
-     * Returns a list of parsers used for parsing template expressions and structure.
+     * Returns a list of parsers used for parser template expressions and structure.
      * <p>
      * This method extends the default list of parsers inherited from {@link StandardExtension}
      * by adding:
@@ -44,7 +44,7 @@ public class TemplateCoreExtension extends StandardExtension implements Template
      * </ul>
      * </p>
      *
-     * @return a list of {@link Parser} instances for template parsing
+     * @return a list of {@link Parser} instances for template parser
      */
     @Override
     public List<Parser> getParsers() {

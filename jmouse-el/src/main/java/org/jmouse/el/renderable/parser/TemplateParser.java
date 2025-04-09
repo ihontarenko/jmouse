@@ -1,4 +1,4 @@
-package org.jmouse.el.renderable.parsing;
+package org.jmouse.el.renderable.parser;
 
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.lexer.TokenCursor;
@@ -34,7 +34,7 @@ public class TemplateParser implements Parser {
         ContainerNode container = new ContainerNode();
 
         while (cursor.hasNext()) {
-            // Delegate parsing to the RootParser for each section.
+            // Delegate parser to the RootParser for each section.
             container.add(context.getParser(RootParser.class).parse(cursor, context));
         }
 
