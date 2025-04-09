@@ -3,6 +3,7 @@ package org.jmouse.el.renderable;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.Node;
+import org.jmouse.el.node.expression.NameNode;
 import org.jmouse.el.renderable.node.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +72,26 @@ public class PreProcessingVisitor implements NodeVisitor {
     }
 
     /**
+     * Visits an FromNode.
+     *
+     * @param from the import node to process
+     */
+    @Override
+    public void visit(FromNode from) {
+        Conversion       conversion = context.getConversion();
+        Object           source     = from.getSource().evaluate(context);
+        String           name       = conversion.convert(source, String.class);
+        TemplateRegistry self       = template.getRegistry();
+        Template         imported   = self.getEngine().getTemplate(name);
+
+        imported.getRoot().accept(new PreProcessingVisitor(imported, context));
+
+        for (NameNode nameNode : from.getNames().getNames()) {
+            self.registerMacro(nameNode.getAlias(), imported.getMacro(nameNode.getName()));
+        }
+    }
+
+    /**
      * Visits a MacroNode by registering the macro with the template.
      *
      * @param node the macro node to register
@@ -92,16 +113,12 @@ public class PreProcessingVisitor implements NodeVisitor {
      */
     @Override
     public void visit(BlockNode node) {
-        Conversion       conversion = context.getConversion();
-        Object           evaluated  = node.getName().evaluate(context);
-        TemplateRegistry registry   = template.getRegistry();
-
-        String name  = conversion.convert(evaluated, String.class);
-        Block  block = new TemplateBlock(name, node, template.getName());
+        Conversion conversion = context.getConversion();
+        Object     evaluated  = node.getName().evaluate(context);
+        String     name       = conversion.convert(evaluated, String.class);
 
         LOGGER.info("Registered block '{}' into template '{}'", name, template.getName());
-
-        registry.registerBlock(name, block);
+        template.setBlock(new TemplateBlock(name, node, template.getName()));
     }
 
     /**

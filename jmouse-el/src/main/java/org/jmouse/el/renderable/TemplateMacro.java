@@ -1,6 +1,7 @@
 package org.jmouse.el.renderable;
 
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.node.expression.FunctionNode;
 import org.jmouse.el.renderable.node.MacroNode;
@@ -28,7 +29,9 @@ public record TemplateMacro(String name, MacroNode node, String source) implemen
     public void evaluate(Visitor visitor, FunctionNode node, EvaluationContext context) {
         context.getScopedChain().push();
 
-        if (node.getArguments().evaluate(context) instanceof Object[] evaluated) {
+        ExpressionNode parameters = node.getArguments();
+
+        if (parameters != null && parameters.evaluate(context) instanceof Object[] evaluated) {
             List<Object>        values    = Arrays.asList(evaluated);
             List<String>        keys      = node().getArguments();
             Map<String, Object> arguments = range(0, values.size()).boxed().collect(toMap(keys::get, values::get));

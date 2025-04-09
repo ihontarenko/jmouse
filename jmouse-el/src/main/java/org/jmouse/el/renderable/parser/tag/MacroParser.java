@@ -49,16 +49,19 @@ public class MacroParser implements TagParser {
         TemplateParser templateParser = (TemplateParser) context.getParser(TemplateParser.class);
         Token          name           = cursor.ensure(T_IDENTIFIER);
         MacroNode      macro          = new MacroNode();
+        List<String>   names          = new ArrayList<>();
 
         macro.setName(name.value());
 
         // Parse macro parameters.
         cursor.ensure(T_OPEN_PAREN);
-        ParametersNode parameters = (ParametersNode) context.getParser(ParametersParser.class).parse(cursor, context);
-        List<String>   names      = new ArrayList<>();
 
-        for (ParameterNode parameter : parameters.getParameters()) {
-            names.add(parameter.getName());
+        if (!cursor.isCurrent(T_CLOSE_PAREN)) {
+            ParametersNode parameters = (ParametersNode) context.getParser(ParametersParser.class)
+                    .parse(cursor, context);
+            for (ParameterNode parameter : parameters.getParameters()) {
+                names.add(parameter.getName());
+            }
         }
 
         cursor.ensure(T_CLOSE_PAREN);

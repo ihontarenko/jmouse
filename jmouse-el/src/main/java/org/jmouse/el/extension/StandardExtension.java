@@ -5,10 +5,7 @@ import org.jmouse.el.extension.function.*;
 import org.jmouse.el.extension.operator.*;
 import org.jmouse.el.extension.test.*;
 import org.jmouse.el.parser.*;
-import org.jmouse.el.parser.sub.ArgumentsParser;
-import org.jmouse.el.parser.sub.KeyValueParser;
-import org.jmouse.el.parser.sub.ParametersParser;
-import org.jmouse.el.parser.sub.ParenthesesParser;
+import org.jmouse.el.parser.sub.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,6 +91,7 @@ public class StandardExtension implements Extension {
                 new KeyValueParser(),
                 new ParenthesesParser(),
                 new ArgumentsParser(),
+                new NamesParser(),
                 new ParametersParser()
         );
     }

@@ -1,3 +1,7 @@
 {% macro input(name, value: [], attributes: {'style': 'color: red;', 'auto':true}) %}
     <input style="border: 1px solid red" type="text" name="{{ name }}" value="{{ value }}" />
 {% endmacro %}
+
+{% macro hello() %}
+<h1>Hello!</h1>
+{% endmacro %}

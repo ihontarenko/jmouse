@@ -53,6 +53,14 @@ public interface NodeVisitor extends Visitor {
     }
 
     /**
+     * Visits an FromNode.
+     *
+     * @param from the import node to process
+     */
+    default void visit(FromNode from) {
+    }
+
+    /**
      * Visits an IncludeNode.
      *
      * @param includeNode the include node to process

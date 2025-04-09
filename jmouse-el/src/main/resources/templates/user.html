@@ -1,5 +1,9 @@
 {% extends 'layout/index' %}
 {% import 'macros' as m %}
+{% from 'macros' import hello as greetings, input as input_html %}
 {% block 'content' %}
 <h1><b>User</b></h1>
+via from: {{ greetings() }}
+<br>
+via import: {{ m.hello() }}
 {% endblock %}

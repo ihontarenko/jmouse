@@ -17,6 +17,6 @@ public class ArrayNode extends ArgumentsNode {
 
     @Override
     public String toString() {
-        return "ARRAY%s".formatted(getChildren());
+        return "ARRAY: %s".formatted(getChildren());
     }
 }
