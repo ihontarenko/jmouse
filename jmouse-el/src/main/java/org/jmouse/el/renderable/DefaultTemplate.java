@@ -60,25 +60,6 @@ public class DefaultTemplate implements Template {
     public Block getBlock(String name) {
         return registry.getBlock(name);
     }
-
-    @Override
-    public Block getBlock(String name, EvaluationContext context) {
-        Block       block       = getBlock(name);
-        Inheritance inheritance = context.getInheritance();
-        Template    child       = inheritance.getChild();
-
-        if (child != null) {
-            inheritance.descend();
-            Block overridden = child.getBlock(name, context);
-            if (overridden != null) {
-                block = overridden;
-            }
-            inheritance.ascend();
-        }
-
-        return block;
-    }
-
     @Override
     public Template getParent(EvaluationContext context) {
         return context.getInheritance().getParent();

@@ -11,4 +11,6 @@
 {% macro someData(name, data, num) %}
 <h1 style="color: red">{{ num }}</h1>
 <h4>{{ name }} - {{ data | type | upper }}</h4>
+{{ c.input('username', name) }}
 {% endmacro %}
+

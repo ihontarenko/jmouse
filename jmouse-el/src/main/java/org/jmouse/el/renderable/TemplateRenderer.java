@@ -39,12 +39,12 @@ public class TemplateRenderer implements Renderer {
     @Override
     public Content render(Template template, EvaluationContext context) {
         // Linking: process macros, blocks and other pre-processing steps.
-        linking(template, context);
+        preProcessing(template, context);
 
-        // Merge template registries from the inheritance stack.
-        // Determine the root (uppermost) template from the inheritance stack.
-        // Get the root node of the template.
-        TemplateRegistry registry = merge(context);
+        // 1. Merge template registries from the inheritance stack.
+        // 2. Determine the root (uppermost) template from the inheritance stack.
+        // 3. Get the root node of the template.
+        TemplateRegistry registry = getRegistry(context);
         Template         root     = getRootTemplate(context);
         Node             node     = root.getRoot();
 
@@ -73,7 +73,7 @@ public class TemplateRenderer implements Renderer {
      * @param context the evaluation context containing the inheritance stack
      * @return the merged TemplateRegistry
      */
-    private TemplateRegistry merge(EvaluationContext context) {
+    private TemplateRegistry getRegistry(EvaluationContext context) {
         Inheritance      inheritance = context.getInheritance();
         TemplateRegistry registry    = new TemplateRegistry(engine);
 
@@ -94,19 +94,17 @@ public class TemplateRenderer implements Renderer {
      * @param template the template to link
      * @param context  the evaluation context
      */
-    private void linking(Template template, EvaluationContext context) {
+    private void preProcessing(Template template, EvaluationContext context) {
         Node root = template.getRoot();
 
         // Link macros, blocks and perform pre-processing.
-        root.accept(new MacroLinker(template));
-        root.accept(new BlockLinker(template, context));
         root.accept(new PreProcessingVisitor(template, context));
 
         Template parent = template.getParent(context);
 
         if (parent != null) {
             context.getInheritance().ascend();
-            linking(parent, context);
+            preProcessing(parent, context);
             context.getInheritance().descend();
         }
     }

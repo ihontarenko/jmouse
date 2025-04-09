@@ -22,8 +22,6 @@ public interface Template {
 
     Block getBlock(String name);
 
-    Block getBlock(String name, EvaluationContext context);
-
     Template getParent(EvaluationContext context);
 
     void setParent(String parent, EvaluationContext context);

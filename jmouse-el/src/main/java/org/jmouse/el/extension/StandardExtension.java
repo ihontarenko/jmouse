@@ -83,6 +83,7 @@ public class StandardExtension implements Extension {
                 new OperatorParser(),
                 new PrimaryExpressionParser(),
                 new FunctionParser(),
+                new ScopedCallParser(),
                 new TestParser(),
                 new FilterParser(),
                 new PropertyParser(),

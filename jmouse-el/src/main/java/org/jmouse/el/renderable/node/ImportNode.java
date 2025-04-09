@@ -7,15 +7,15 @@ import org.jmouse.el.renderable.NodeVisitor;
 
 public class ImportNode extends AbstractNode {
 
-    private ExpressionNode alias;
+    private ExpressionNode scope;
     private ExpressionNode source;
 
-    public ExpressionNode getAlias() {
-        return alias;
+    public ExpressionNode getScope() {
+        return scope;
     }
 
-    public void setAlias(ExpressionNode alias) {
-        this.alias = alias;
+    public void setScope(ExpressionNode scope) {
+        this.scope = scope;
     }
 
     public ExpressionNode getSource() {
@@ -28,7 +28,7 @@ public class ImportNode extends AbstractNode {
 
     @Override
     public String toString() {
-        return "IMPORT: " + getSource() + (getAlias() != null ? " AS " + getAlias() : "");
+        return "IMPORT: " + getSource() + (getScope() != null ? " AS " + getScope() : "");
     }
 
     /**

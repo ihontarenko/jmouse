@@ -9,3 +9,7 @@ Title
 {% block 'h1' %}
 <h1>Header</h1>
 {% endblock %}
+
+{% macro input(name, value) %}
+<input style="border: 1px solid red" type="text" name="{{ name }}" value="{{ value }}" />
+{% endmacro %}

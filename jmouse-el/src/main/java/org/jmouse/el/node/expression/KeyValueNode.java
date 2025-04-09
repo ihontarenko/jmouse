@@ -3,6 +3,7 @@ package org.jmouse.el.node.expression;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Visitor;
 
 import java.util.AbstractMap;
 
@@ -63,6 +64,18 @@ public class KeyValueNode extends AbstractExpressionNode {
     @Override
     public Object evaluate(EvaluationContext context) {
         return new AbstractMap.SimpleEntry<>(key.evaluate(context), value.evaluate(context));
+    }
+
+    /**
+     * Recursively executes the given consumer on this node and all its children.
+     *
+     * @param visitor the consumer to execute on each node
+     */
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+        key.accept(visitor);
+        value.accept(visitor);
     }
 
     /**

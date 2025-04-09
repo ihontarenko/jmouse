@@ -1,17 +1,10 @@
 package org.jmouse.el.node;
 
-import org.jmouse.el.node.expression.ArgumentsNode;
-import org.jmouse.el.node.expression.ArrayNode;
-import org.jmouse.el.node.expression.BinaryOperation;
-import org.jmouse.el.node.expression.FunctionNode;
+import org.jmouse.el.node.expression.*;
 
 public interface Visitor {
 
     default void visit(Node node) {
-
-    }
-
-    default void visit(FunctionNode function) {
 
     }
 
@@ -24,6 +17,42 @@ public interface Visitor {
     }
 
     default void visit(BinaryOperation binary) {
+
+    }
+
+    default void visit(FilterNode filter) {
+
+    }
+
+    default void visit(FunctionNode function) {
+
+    }
+
+    default void visit(KeyValueNode keyValue) {
+
+    }
+
+    default void visit(LiteralNode<?> literal) {
+
+    }
+
+    default void visit(MapNode mapNode) {
+
+    }
+
+    default void visit(PropertyNode property) {
+
+    }
+
+    default void visit(ScopedCallNode scopedCall) {
+
+    }
+
+    default void visit(TestNode test) {
+
+    }
+
+    default void visit(UnaryOperation unary) {
 
     }
 

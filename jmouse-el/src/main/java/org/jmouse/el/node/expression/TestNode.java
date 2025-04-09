@@ -5,6 +5,7 @@ import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.extension.Test;
 import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Visitor;
 
 /**
  * Represents a test expression node in the expression language.
@@ -121,6 +122,18 @@ public class TestNode extends AbstractExpressionNode {
 
         // The test result is negated if the 'negated' flag is true.
         return isNegated() != test.test(instance, arguments, context);
+    }
+
+    /**
+     * Recursively executes the given consumer on this node and all its children.
+     *
+     * @param visitor the consumer to execute on each node
+     */
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+        left.accept(visitor);
+        arguments.accept(visitor);
     }
 
     /**

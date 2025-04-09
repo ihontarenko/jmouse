@@ -8,6 +8,7 @@ import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.extension.Filter;
 import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Visitor;
 
 /**
  * Represents a filter expression node that applies a filter to an expression.
@@ -108,6 +109,16 @@ public class FilterNode extends AbstractExpressionNode {
         ClassTypeInspector inspector = TypeInformation.forInstance(compiled);
 
         return filter.apply(compiled, arguments, inspector, context);
+    }
+
+    /**
+     * Recursively executes the given consumer on this node and all its children.
+     *
+     * @param visitor the consumer to execute on each node
+     */
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     /**

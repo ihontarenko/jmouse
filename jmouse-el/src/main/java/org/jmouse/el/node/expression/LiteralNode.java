@@ -2,6 +2,7 @@ package org.jmouse.el.node.expression;
 
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.AbstractExpressionNode;
+import org.jmouse.el.node.Visitor;
 
 /**
  * Represents a literal expression node that encapsulates a constant value.
@@ -32,6 +33,16 @@ abstract public class LiteralNode<T> extends AbstractExpressionNode {
      */
     public T getValue() {
         return value;
+    }
+
+    /**
+     * Recursively executes the given consumer on this node and all its children.
+     *
+     * @param visitor the consumer to execute on each node
+     */
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     /**

@@ -4,8 +4,10 @@ import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
+import org.jmouse.el.node.expression.BinaryOperation;
 import org.jmouse.el.node.expression.FunctionNode;
 import org.jmouse.el.node.expression.FunctionNotFoundException;
+import org.jmouse.el.node.expression.LiteralNode;
 import org.jmouse.el.renderable.node.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,12 @@ public class RenderVisitor implements NodeVisitor {
         ExpressionNode expression = printNode.getExpression();
         Object         evaluated  = null;
 
+        if (expression instanceof FunctionNode) {
+            expression.accept(this);
+        } else {
+            evaluated = expression.evaluate(context);
+        }
+
         try {
             expression.accept(this);
             evaluated = expression.evaluate(context);
@@ -59,11 +67,6 @@ public class RenderVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(FunctionNode function) {
-        System.out.println(function);
-    }
-
-    @Override
     public void visit(BlockNode node) {
         Conversion conversion = context.getConversion();
         String     name       = conversion.convert(node.getName().evaluate(context), String.class);
@@ -78,6 +81,22 @@ public class RenderVisitor implements NodeVisitor {
     @Override
     public void visit(IfNode ifNode) {
         System.out.println(ifNode);
+    }
+
+    @Override
+    public void visit(FunctionNode function) {
+        System.out.println("Function: " + function.getName());
+        System.out.println("Is Macro: " + (context.getExtensions().getFunction(function.getName()) == null));
+    }
+
+    @Override
+    public void visit(LiteralNode<?> literal) {
+        System.out.println("Literal: " + literal.getValue());
+    }
+
+    @Override
+    public void visit(BinaryOperation binary) {
+        System.out.println("Binary: " + binary.toString());
     }
 
 }

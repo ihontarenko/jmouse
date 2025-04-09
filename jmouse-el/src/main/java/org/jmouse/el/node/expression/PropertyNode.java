@@ -2,6 +2,7 @@ package org.jmouse.el.node.expression;
 
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.AbstractExpressionNode;
+import org.jmouse.el.node.Visitor;
 
 /**
  * Represents a property expression node.
@@ -42,6 +43,16 @@ public class PropertyNode extends AbstractExpressionNode {
     @Override
     public Object evaluate(EvaluationContext context) {
         return context.getValue(getPath());
+    }
+
+    /**
+     * Recursively executes the given consumer on this node and all its children.
+     *
+     * @param visitor the consumer to execute on each node
+     */
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     /**

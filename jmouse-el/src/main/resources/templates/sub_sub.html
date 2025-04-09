@@ -6,4 +6,4 @@
 {{ someData(book.title, "A", 333/17) }}
 {% endblock %}
 
-{% block 'title' %}{{ name | upper }} {{ someData('Ivan', [1, 2, 3 + 4 / 33], 22/7) }}{% endblock %}
+{% block 'title' %}{{ name | upper }} {{ someData('Ivan', [1, 2, 3 + 4 / 33], 22/7) }} {{ input('username', 'John Doe!!!') }}{% endblock %}

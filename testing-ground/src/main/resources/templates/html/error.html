@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Error!!!</title>
+    <title>Error!!! {{ 2 <= 3 || (1 > 0 && 2 < 3) ^ 3 >= 3 && 4 < min(3, 4) or 5 % 2 != 0 }}</title>
 </head>
 <body>
     <h1>Main Page - {% block 'title' %}Default{% endblock %}</h1>
@@ -17,5 +17,9 @@
     {% block 'content' %}
         <h1>Index</h1>
     {% endblock %}
+
+    <hr>
+
+    {% block 'h1' %}{% endblock %}
 </body>
 </html>

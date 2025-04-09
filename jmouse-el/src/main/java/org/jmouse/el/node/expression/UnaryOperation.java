@@ -3,6 +3,7 @@ package org.jmouse.el.node.expression;
 import org.jmouse.el.extension.Operator;
 import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Visitor;
 
 /**
  * Represents a unary operation tag node in the Abstract Syntax Tree (AST).
@@ -57,4 +58,15 @@ abstract public class UnaryOperation extends AbstractExpressionNode {
     public ExpressionNode getOperand() {
         return operand;
     }
+
+    /**
+     * Recursively executes the given consumer on this node and all its children.
+     *
+     * @param visitor the consumer to execute on each node
+     */
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
+
 }

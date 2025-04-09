@@ -84,7 +84,11 @@ public class BinaryOperation extends AbstractExpressionNode {
         if (operator instanceof ComparisonOperator) {
             Conversion conversion = context.getConversion();
             // aligning data types to a single one for comparisons
-            right = conversion.convert(right, left.getClass());
+            try {
+                right = conversion.convert(right, left.getClass());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         result = operator.getCalculator().calculate(left, right);

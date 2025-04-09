@@ -3,6 +3,7 @@ package org.jmouse.el.node.expression;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.Node;
+import org.jmouse.el.node.Visitor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +41,16 @@ public class MapNode extends AbstractExpressionNode {
         }
 
         return map;
+    }
+
+    /**
+     * Recursively executes the given consumer on this node and all its children.
+     *
+     * @param visitor the consumer to execute on each node
+     */
+    @Override
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     /**

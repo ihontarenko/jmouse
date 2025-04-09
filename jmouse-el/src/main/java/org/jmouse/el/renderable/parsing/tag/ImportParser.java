@@ -28,7 +28,7 @@ public class ImportParser implements TagParser {
         if (cursor.isCurrent(TemplateToken.T_AS)) {
             cursor.ensure(TemplateToken.T_AS);
             Token alias = cursor.ensure(BasicToken.T_IDENTIFIER);
-            node.setAlias(new StringLiteralNode(alias.value()));
+            node.setScope(new StringLiteralNode(alias.value()));
         }
 
         return node;
