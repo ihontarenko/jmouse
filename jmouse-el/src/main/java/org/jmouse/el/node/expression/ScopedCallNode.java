@@ -21,6 +21,16 @@ public class ScopedCallNode extends FunctionNode {
         this.scope = scope;
     }
 
+    /**
+     * Returns the name of the function.
+     *
+     * @return the function name
+     */
+    @Override
+    public String getName() {
+        return getScope() + "." + super.getName();
+    }
+
     @Override
     public String toString() {
         return "%s.%s".formatted(getScope(), super.toString());

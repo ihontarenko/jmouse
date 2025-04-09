@@ -56,13 +56,18 @@ public class PreProcessingVisitor implements NodeVisitor {
      */
     @Override
     public void visit(ImportNode importNode) {
-        Object   evaluation = importNode.getSource().evaluate(context);
-        String   name       = context.getConversion().convert(evaluation, String.class);
-        Template imported   = template.getRegistry().getEngine().getTemplate(name);
+        Conversion       conversion = context.getConversion();
+        Object           source     = importNode.getSource().evaluate(context);
+        String           name       = conversion.convert(source, String.class);
+        TemplateRegistry self       = template.getRegistry();
+        Template         imported   = self.getEngine().getTemplate(name);
 
-        System.out.println("scope: " + importNode.getScope());
+        Object evaluated = importNode.getScope().evaluate(context);
+        String scope     = conversion.convert(evaluated, String.class);
 
-        imported.getRoot().accept(this);
+        imported.getRoot().accept(new PreProcessingVisitor(imported, context));
+
+        self.importFrom(imported.getRegistry(), scope);
     }
 
     /**
