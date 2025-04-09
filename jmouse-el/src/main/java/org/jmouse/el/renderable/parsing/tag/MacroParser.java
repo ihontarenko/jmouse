@@ -5,11 +5,11 @@ import org.jmouse.el.CursorMatcher;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
-import org.jmouse.el.node.expression.ArgumentsNode;
-import org.jmouse.el.node.expression.PropertyNode;
+import org.jmouse.el.node.expression.ParameterNode;
+import org.jmouse.el.node.expression.ParametersNode;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.parser.TagParser;
-import org.jmouse.el.parser.sub.ArgumentsParser;
+import org.jmouse.el.parser.sub.ParametersParser;
 import org.jmouse.el.renderable.node.MacroNode;
 import org.jmouse.el.renderable.parsing.TemplateParser;
 
@@ -47,20 +47,18 @@ public class MacroParser implements TagParser {
 
         // Retrieve the macro name.
         TemplateParser templateParser = (TemplateParser) context.getParser(TemplateParser.class);
-        Token          macroNameToken = cursor.ensure(T_IDENTIFIER);
+        Token          name           = cursor.ensure(T_IDENTIFIER);
         MacroNode      macro          = new MacroNode();
 
-        macro.setName(macroNameToken.value());
+        macro.setName(name.value());
 
         // Parse macro parameters.
         cursor.ensure(T_OPEN_PAREN);
-        ArgumentsNode arguments  = (ArgumentsNode) context.getParser(ArgumentsParser.class).parse(cursor, context);
-        List<String>  parameters = new ArrayList<>();
+        ParametersNode parameters = (ParametersNode) context.getParser(ParametersParser.class).parse(cursor, context);
+        List<String>   names      = new ArrayList<>();
 
-        for (Node child : arguments.getChildren()) {
-            if (child instanceof PropertyNode property) {
-                parameters.add(property.getPath());
-            }
+        for (ParameterNode parameter : parameters.getParameters()) {
+            names.add(parameter.getName());
         }
 
         cursor.ensure(T_CLOSE_PAREN);
@@ -68,14 +66,14 @@ public class MacroParser implements TagParser {
 
         // Parse macro body until the end macro tag is reached.
         Matcher<TokenCursor> stopper = CursorMatcher.sequence(T_OPEN_EXPRESSION, T_END_MACRO);
-        Node       body    = templateParser.parse(cursor, context, stopper);
+        Node                 body    = templateParser.parse(cursor, context, stopper);
 
         // Ensure that the "endmacro" tag is present.
         cursor.ensure(T_END_MACRO);
 
         // Set the parsed body and parameter names on the MacroNode.
         macro.setBody(body);
-        macro.setArguments(parameters);
+        macro.setArguments(names);
 
         return macro;
     }

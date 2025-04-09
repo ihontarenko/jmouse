@@ -148,6 +148,21 @@ public enum TemplateToken implements Token.Type {
     T_IMPORT(20018, "import"),
 
     /**
+     * 'from' keyword type.
+     */
+    T_FROM(20019, "from"),
+
+    /**
+     * 'apply' keyword type.
+     */
+    T_APPLY(20020, "apply"),
+
+    /**
+     * 'endapply' keyword type.
+     */
+    T_END_APPLY(20021, "endapply", "end_apply"),
+
+    /**
      * raw piece of html or text
      */
     T_RAW_TEXT(30001);

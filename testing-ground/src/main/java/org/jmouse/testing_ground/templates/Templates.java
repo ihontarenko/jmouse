@@ -20,7 +20,7 @@ public class Templates {
 
         engine.setLoader(loader);
 
-        Template          template = engine.getTemplate("sub_sub");
+        Template          template = engine.getTemplate("user");
         Renderer          renderer = new TemplateRenderer(engine);
         EvaluationContext context  = template.newContext();
 

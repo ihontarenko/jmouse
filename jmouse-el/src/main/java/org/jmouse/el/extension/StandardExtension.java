@@ -7,6 +7,7 @@ import org.jmouse.el.extension.test.*;
 import org.jmouse.el.parser.*;
 import org.jmouse.el.parser.sub.ArgumentsParser;
 import org.jmouse.el.parser.sub.KeyValueParser;
+import org.jmouse.el.parser.sub.ParametersParser;
 import org.jmouse.el.parser.sub.ParenthesesParser;
 
 import java.util.ArrayList;
@@ -92,7 +93,8 @@ public class StandardExtension implements Extension {
                 new MapParser(),
                 new KeyValueParser(),
                 new ParenthesesParser(),
-                new ArgumentsParser()
+                new ArgumentsParser(),
+                new ParametersParser()
         );
     }
 
