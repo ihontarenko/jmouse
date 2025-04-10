@@ -12,13 +12,13 @@ import org.jmouse.el.node.expression.BinaryOperation;
 import org.jmouse.el.node.expression.FunctionNode;
 import org.jmouse.el.node.expression.FunctionNotFoundException;
 import org.jmouse.el.node.expression.LiteralNode;
+import org.jmouse.el.renderable.evaluation.LoopVariables;
 import org.jmouse.el.renderable.node.*;
 import org.jmouse.el.renderable.node.sub.ConditionBranch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 public class RenderVisitor implements NodeVisitor {
 
