@@ -1,0 +1,19 @@
+<h2>Hello {{ book.title }}!</h2>
+
+{% set values = [
+    ['Alice', 30, 'New York'],
+    ['Bob', 25, 'London'],
+    ['Charlie', 35, 'Paris']
+] %}
+
+{{ ++values[0][1] }}
+
+{{ values[0][1] }}
+
+<b>{{ values[1][2] }}</b>
+
+<b>{{ values is array }}</b>
+
+<b>{{ values is odd }}</b>
+
+<h1>{{ book.author }}</h1>

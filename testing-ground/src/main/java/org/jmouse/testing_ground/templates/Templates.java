@@ -14,7 +14,7 @@ public class Templates {
         TemplateLoader<String> loader = new ClasspathLoader();
 
         loader.setPrefix("templates/");
-        loader.setSuffix(".html");
+        loader.setSuffix(".jel.html");
 
         Engine engine = new TemplateEngine();
 
@@ -24,10 +24,7 @@ public class Templates {
         Renderer          renderer = new TemplateRenderer(engine);
         EvaluationContext context  = template.newContext();
 
-        template.getRoot();
-
         context.setValue("book", getBook());
-        context.setValue("name", getBook().getAuthor());
 
         template.getRoot().accept(new Visitor() {
             @Override

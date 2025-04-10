@@ -1,5 +1,7 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.bind.PropertyPath.Entries;
+import org.jmouse.core.bind.PropertyPath.Type;
 import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.core.reflection.JavaType;
 
@@ -34,7 +36,8 @@ public interface ObjectAccessor extends ClassTypeInspector {
      */
     static void verifyTypeCompatibility(String message, Class<?> expected, Class<?> actual) {
         if (actual != null && !expected.isAssignableFrom(actual)) {
-            throw new IllegalArgumentException("[%s]: type '%s' is not assignable from '%s'".formatted(message, expected, actual));
+            throw new IllegalArgumentException(
+                    "[%s]: type '%s' is not assignable from '%s'".formatted(message, expected, actual));
         }
     }
 
@@ -114,7 +117,7 @@ public interface ObjectAccessor extends ClassTypeInspector {
     /**
      * Retrieves a nested ObjectAccessor using a PropertyPath string.
      *
-     * @param path the structured property path
+     * @param path   the structured property path
      * @param offset the number of initial segments to skip
      * @return the nested ObjectAccessor
      * @throws NumberFormatException if an indexed path segment contains a non-numeric value
@@ -136,16 +139,16 @@ public interface ObjectAccessor extends ClassTypeInspector {
      * @throws NumberFormatException if an indexed segment contains a non-numeric value
      */
     default ObjectAccessor navigate(PropertyPath name, int offset) {
-        ObjectAccessor       nested  = this;
-        int                  counter = 0;
-        PropertyPath.Entries entries = name.entries();
+        ObjectAccessor nested  = this;
+        int            counter = 0;
+        Entries        entries = name.entries();
 
         if (offset > 0 && name.entries().size() > 1) {
             entries = name.sup(offset).entries();
         }
 
         for (CharSequence element : entries) {
-            PropertyPath.Type type = entries.type(counter);
+            Type type = entries.type(counter);
 
             if (!type.isEmpty()) {
                 if (type.isIndexed() && type.isNumeric()) {
@@ -195,9 +198,18 @@ public interface ObjectAccessor extends ClassTypeInspector {
      */
     default void inject(PropertyPath name, Object value) {
         if (name.entries().size() > 1) {
-            PropertyPath tail = name.tail();
-            PropertyPath path = name.sup(1);
-            navigate(path).set(tail.path(), value);
+            PropertyPath   tail    = name.tail();
+            PropertyPath   path    = name.sup(1);
+            Entries        entries = tail.entries();
+            Type           type    = entries.type(0);
+            String         key     = tail.path();
+            ObjectAccessor nested  = navigate(path);
+
+            if (type.isNumeric()) {
+                nested.set(Integer.parseInt(key), value);
+            } else {
+                nested.set(key, value);
+            }
         } else {
             set(name.path(), value);
         }

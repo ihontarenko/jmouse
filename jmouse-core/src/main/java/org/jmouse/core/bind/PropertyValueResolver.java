@@ -37,7 +37,7 @@ public interface PropertyValueResolver {
      * @param value        the value to assign to the property
      */
     default void setProperty(String name, Object value) {
-        getAccessor().set(name, value);
+        getAccessor().inject(name, value);
     }
 
     /**

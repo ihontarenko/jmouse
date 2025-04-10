@@ -170,7 +170,7 @@ public interface TokenCursor extends Streamable<Token> {
         boolean matches = true;
 
         for (int i = 0; i < expected.length; i++) {
-            matches &= checkAt(i, expected);
+            matches &= checkAt(i, expected[i]);
         }
 
         return matches;

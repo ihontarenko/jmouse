@@ -6,7 +6,7 @@ import org.jmouse.el.evaluation.DefaultEvaluationContext;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.extension.Filter;
-import org.jmouse.el.extension.StandardExtension;
+import org.jmouse.el.extension.CoreExtension;
 import org.jmouse.el.lexer.*;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.parser.DefaultParserContext;
@@ -26,12 +26,12 @@ public class Expressions {
         cursor.next();
 
         ParserContext parserContext = new DefaultParserContext();
-        parserContext.importExtension(new StandardExtension());
+        parserContext.importExtension(new CoreExtension());
 
         ExpressionNode compiled = (ExpressionNode) parserContext.getParser(ExpressionParser.class).parse(cursor, parserContext);
 
         EvaluationContext evaluationContext = new DefaultEvaluationContext();
-        evaluationContext.getExtensions().importExtension(new StandardExtension());
+        evaluationContext.getExtensions().importExtension(new CoreExtension());
         evaluationContext.getExtensions().addFilter(new Filter() {
             @Override
             public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {

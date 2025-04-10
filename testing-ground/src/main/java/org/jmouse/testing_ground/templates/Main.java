@@ -36,7 +36,7 @@ public class Main {
 
         Reader            reader    = loader.load("default");
         TokenizableSource string    = new StringSource("default.html", reader);
-//        TokenizableSource string    = new StringSource("simple.html", reader);
+//        TokenizableSource string    = new StringSource("simple.jel.html", reader);
 //        TokenizableSource string    = new StringSource("index", "Hello {% for ab in   xyz  def %}! {{ users is not contains '123' }}");
 //        TokenizableSource string    = new StringSource("test-string", "Calculation: {{ 1 + 2 * 3 + 4 + 5 * 5 * 4 + 2 }}");
 //        TokenizableSource string    = new StringSource("test-string", "Calculation: {{ --1 + 2++ * 3^2 (2 + 6) }}");

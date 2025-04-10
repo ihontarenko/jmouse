@@ -18,7 +18,7 @@ import java.util.List;
  * used in the expression language.
  * </p>
  */
-public class StandardExtension implements Extension {
+public class CoreExtension implements Extension {
 
     /**
      * Returns the list of functions available in the expression language.

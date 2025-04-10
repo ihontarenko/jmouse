@@ -46,7 +46,7 @@ public class RenderVisitor implements NodeVisitor {
         if (expression instanceof FunctionNode) {
             expression.accept(this);
         } else {
-            evaluated = expression.evaluate(context);
+//            evaluated = expression.evaluate(context);
         }
 
         try {

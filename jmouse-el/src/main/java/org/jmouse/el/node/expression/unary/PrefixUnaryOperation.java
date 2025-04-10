@@ -1,5 +1,6 @@
 package org.jmouse.el.node.expression.unary;
 
+import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Operator;
 import org.jmouse.el.node.ExpressionNode;
@@ -32,9 +33,15 @@ public class PrefixUnaryOperation extends UnaryOperation {
 
     @Override
     public Object evaluate(EvaluationContext context) {
-        Object value = operator.getCalculator().calculate(operand.evaluate(context));
+        Object     value      = operand.evaluate(context);
+        Conversion conversion = context.getConversion();
 
         if (operand instanceof PropertyNode property && (operator == INCREMENT || operator == DECREMENT)) {
+            Class<?> originalType = value.getClass();
+
+            value = operator.getCalculator().calculate(value);
+            value = conversion.convert(value, originalType);
+
             context.setValue(property.getPath(), value);
         }
 

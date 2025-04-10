@@ -48,6 +48,9 @@ public class TemplateRenderer implements Renderer {
         Template         root     = getRootTemplate(context);
         Node             node     = root.getRoot();
 
+        // Global variables
+        context.setValue("_self", template);
+
         // Create an initial Content object.
         Content content = Content.array();
 

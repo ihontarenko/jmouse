@@ -1,6 +1,6 @@
 package org.jmouse.el.renderable;
 
-import org.jmouse.el.extension.StandardExtension;
+import org.jmouse.el.extension.CoreExtension;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.renderable.parser.RootParser;
@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * TemplateCoreExtension provides the core extensions required by the template engine.
  * <p>
- * This extension builds upon the base functionality provided by {@link StandardExtension}
+ * This extension builds upon the base functionality provided by {@link CoreExtension}
  * and implements {@link TemplateExtension}. It supplies additional parsers for both
  * expressions and template-specific tag syntax. These parsers handle common template
  * constructs such as loops, conditionals, inheritance, blocks, macros, and placeholder text.
@@ -31,12 +31,12 @@ import java.util.List;
  *
  * @author ...
  */
-public class TemplateCoreExtension extends StandardExtension implements TemplateExtension {
+public class TemplateCoreExtension extends CoreExtension implements TemplateExtension {
 
     /**
      * Returns a list of parsers used for parser template expressions and structure.
      * <p>
-     * This method extends the default list of parsers inherited from {@link StandardExtension}
+     * This method extends the default list of parsers inherited from {@link CoreExtension}
      * by adding:
      * <ul>
      *   <li>{@link TemplateParser} – handles the overall layout and structure of templates.</li>
