@@ -15,7 +15,7 @@ public interface NodeVisitor extends Visitor {
     /**
      * Visits a SetNode.
      *
-     * @param setNode the block node to process
+     * @param setNode the set node to process
      */
     default void visit(SetNode setNode) {
     }
@@ -45,11 +45,27 @@ public interface NodeVisitor extends Visitor {
     }
 
     /**
+     * Visits an EmbedNode.
+     *
+     * @param embedNode the extends node to process
+     */
+    default void visit(EmbedNode embedNode) {
+    }
+
+    /**
      * Visits an IfNode.
      *
      * @param ifNode the if node to process
      */
     default void visit(IfNode ifNode) {
+    }
+
+    /**
+     * Visits an ForNode.
+     *
+     * @param forNode the for node to process
+     */
+    default void visit(ForNode forNode) {
     }
 
     /**
@@ -63,7 +79,7 @@ public interface NodeVisitor extends Visitor {
     /**
      * Visits an FromNode.
      *
-     * @param from the import node to process
+     * @param from the from node to process
      */
     default void visit(FromNode from) {
     }

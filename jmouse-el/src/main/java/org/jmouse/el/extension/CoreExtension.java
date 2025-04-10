@@ -48,7 +48,8 @@ public class CoreExtension implements Extension {
                 new SubFilter(),
                 new DefaultFilter(),
                 new TrimFilter(),
-                new TypeFilter()
+                new TypeFilter(),
+                new LengthFilter()
         );
     }
 

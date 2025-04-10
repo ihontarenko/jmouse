@@ -29,4 +29,9 @@ public class IncludeNode extends AbstractNode {
         }
     }
 
+    @Override
+    public String toString() {
+        return "INCLUDE: " + getPath();
+    }
+
 }

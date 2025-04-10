@@ -163,6 +163,21 @@ public enum TemplateToken implements Token.Type {
     T_END_APPLY(20021, "endapply", "end_apply"),
 
     /**
+     * 'embed' keyword type.
+     */
+    T_EMBED(20021, "embed"),
+
+    /**
+     * 'endembed' keyword type.
+     */
+    T_END_EMBED(20022, "endembed", "end_embed"),
+
+    /**
+     * 'ignore_missing' keyword type.
+     */
+    T_IGNORE_MISSING(21000, "ignore_missing"),
+
+    /**
      * raw piece of html or text
      */
     T_RAW_TEXT(30001);

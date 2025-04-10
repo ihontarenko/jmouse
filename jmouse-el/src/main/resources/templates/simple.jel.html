@@ -8,6 +8,81 @@
     ['Charlie', 35, 'Paris']
 ] %}
 
+<div style="border: 1px solid #a2ff00;">
+    <ul>
+        {% for v in values %}
+            <li>- values item: {{ v[2] }}</li>
+        {% else %}
+            <li>- not items for 'values'</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div style="border: 1px solid #a2ff00;">
+    {% for item in array %}
+        <i>{{ item }}</i>
+    <b>{{ loop.index }}</b>
+    <h1>last: {{ loop.last }}</h1>
+    <h2>first: {{ loop.first }}</h2>
+        {% embed 'card' %}
+            {% block 'card_content' %}
+                {{ book.author }}
+                embedded in simple template
+            {% endblock %}
+        {% endembed %}
+    {% else %}
+            - not items for 'array'
+    {% endfor %}
+</div>
+
+---
+
+<div style="border: 1px solid #ff4d00;">
+    <ul>
+        {% for item in map %}
+            <li>- map item: {{ item }}</li>
+        {% else %}
+            <li>- not items for 'map'</li>
+        {% endfor %}
+    </ul>
+</div>
+
+---
+
+<div style="border: 1px solid #00c4ff;">
+    <ul>
+        {% for item in list %}
+            <li>- list item: {{ item }}</li>
+        {% else %}
+            <li>- not items for 'list'</li>
+        {% endfor %}
+    </ul>
+</div>
+
+---
+
+<div style="border: 1px solid #ffd500;">
+    <ul>
+        {% for item in string %}
+            <li>- string item: {{ item }}</li>
+        {% else %}
+            <li>- not items for 'string'</li>
+        {% endfor %}
+    </ul>
+</div>
+
+---
+
+<div style="border: 1px solid #6753ff;">
+    <ul>
+        {% for item in book %}
+            <li>- book item: {{ item }}</li>
+        {% else %}
+            <li>- not items for 'book'</li>
+        {% endfor %}
+    </ul>
+</div>
+
 {{ ++values[0][1] }}
 
 {{ values[0][1] }}
@@ -25,3 +100,24 @@
 <b>{{ values is odd }}</b>
 
 <h1>{{ book.author }}</h1>
+
+<div style="border: 1px solid #ff00a3;">
+    {% embed 'user' %}{% endembed %}
+</div>
+
+<div style="border: 1px solid blueviolet;">
+    {% embed 'card' %}
+        {% block 'card_content' %}
+            {{ book.author }}
+            embedded in simple template
+        {% endblock %}
+    {% endembed %}
+</div>
+
+<div style="border: 1px solid green;">
+    {% embed 'card' %}
+        {% block 'card_content' %}
+        SECOND
+        {% endblock %}
+    {% endembed %}
+</div>

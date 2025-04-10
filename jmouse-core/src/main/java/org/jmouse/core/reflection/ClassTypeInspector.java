@@ -47,6 +47,15 @@ public interface ClassTypeInspector {
     }
 
     /**
+     * Checks if the inspected type is a {@link Iterable}.
+     *
+     * @return {@code true} if the class type is a iterable, otherwise {@code false}
+     */
+    default boolean isIterable() {
+        return is(Iterable.class);
+    }
+
+    /**
      * Checks if the inspected type is a {@link List}.
      *
      * @return {@code true} if the class type is a list, otherwise {@code false}

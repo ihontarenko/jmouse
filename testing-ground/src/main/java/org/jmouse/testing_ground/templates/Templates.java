@@ -8,6 +8,9 @@ import org.jmouse.el.renderable.loader.ClasspathLoader;
 import org.jmouse.el.renderable.loader.TemplateLoader;
 import org.jmouse.testing_ground.binder.dto.Book;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class Templates {
 
     public static void main(String[] args) {
@@ -25,6 +28,17 @@ public class Templates {
         EvaluationContext context  = template.newContext();
 
         context.setValue("book", getBook());
+        context.setValue("array", new String[]{"a", "b", "c"});
+        context.setValue("map", new HashMap<>(){{
+            put("key1", "valueA");
+            put("key2", "valueB");
+        }});
+        context.setValue("list", new ArrayList<>(){{
+            add(123);
+            add(456);
+            add(789);
+        }});
+        context.setValue("string", "Hello World");
 
         template.getRoot().accept(new Visitor() {
             @Override

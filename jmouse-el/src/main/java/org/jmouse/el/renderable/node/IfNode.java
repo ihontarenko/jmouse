@@ -36,4 +36,8 @@ public class IfNode extends AbstractNode {
         }
     }
 
+    @Override
+    public String toString() {
+        return "IF: " + conditions;
+    }
 }
