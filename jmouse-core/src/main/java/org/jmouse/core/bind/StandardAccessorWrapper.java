@@ -34,6 +34,7 @@ public class StandardAccessorWrapper extends BasicAccessorWrapper {
     public StandardAccessorWrapper() {
         this(List.of(
                 new ScalarValueAccessorProvider(),
+                new ArrayAccessorProvider(),
                 new CollectionAccessorProvider(),
                 new MapAccessorProvider(),
                 new PropertyValueResolverAccessorProvider(),

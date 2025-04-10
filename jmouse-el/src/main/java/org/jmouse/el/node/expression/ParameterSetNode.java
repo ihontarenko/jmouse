@@ -2,32 +2,23 @@ package org.jmouse.el.node.expression;
 
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.AbstractExpressionNode;
+import org.jmouse.el.node.Node;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ParametersNode extends AbstractExpressionNode {
+public class ParameterSetNode extends AbstractExpressionNode {
 
-    private final List<ParameterNode> parameters;
-
-    public ParametersNode() {
-        parameters = new ArrayList<>();
-    }
-
-    public void addParameter(ParameterNode parameter) {
-        parameters.add(parameter);
-    }
-
-    public List<ParameterNode> getParameters() {
-        return parameters;
+    public List<ParameterNode> getSet() {
+        return getChildren(ParameterNode.class);
     }
 
     @Override
     public Object evaluate(EvaluationContext context) {
         List<Object> compiled = new ArrayList<>();
 
-        for (ParameterNode parameter : getParameters()) {
+        for (ParameterNode parameter : getSet()) {
             compiled.add(parameter.evaluate(context));
         }
 
@@ -36,6 +27,6 @@ public class ParametersNode extends AbstractExpressionNode {
 
     @Override
     public String toString() {
-        return Arrays.toString(parameters.toArray());
+        return "PARAMETERS: " + getSet();
     }
 }

@@ -6,7 +6,7 @@ import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.ParameterNode;
-import org.jmouse.el.node.expression.ParametersNode;
+import org.jmouse.el.node.expression.ParameterSetNode;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.parser.sub.ParametersParser;
@@ -57,10 +57,10 @@ public class MacroParser implements TagParser {
         cursor.ensure(T_OPEN_PAREN);
 
         if (!cursor.isCurrent(T_CLOSE_PAREN)) {
-            ParametersNode parameters = (ParametersNode) context.getParser(ParametersParser.class)
-                    .parse(cursor, context);
-            for (ParameterNode parameter : parameters.getParameters()) {
-                names.add(parameter.getName());
+            if (context.getParser(ParametersParser.class).parse(cursor, context) instanceof ParameterSetNode parameters) {
+                for (ParameterNode parameter : parameters.getSet()) {
+                    names.add(parameter.getName());
+                }
             }
         }
 

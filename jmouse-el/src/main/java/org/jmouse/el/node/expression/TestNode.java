@@ -133,7 +133,10 @@ public class TestNode extends AbstractExpressionNode {
     public void accept(Visitor visitor) {
         visitor.visit(this);
         left.accept(visitor);
-        arguments.accept(visitor);
+
+        if (arguments != null) {
+            arguments.accept(visitor);
+        }
     }
 
     /**

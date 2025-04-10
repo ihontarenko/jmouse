@@ -51,6 +51,16 @@ public class PreProcessingVisitor implements NodeVisitor {
     }
 
     /**
+     * Visits a SetNode.
+     *
+     * @param setNode the block node to process
+     */
+    @Override
+    public void visit(SetNode setNode) {
+        context.setValue(setNode.getVariable(), setNode.getValue().evaluate(context));
+    }
+
+    /**
      * Visits an ImportNode.
      *
      * @param importNode the import node to process
@@ -86,8 +96,12 @@ public class PreProcessingVisitor implements NodeVisitor {
 
         imported.getRoot().accept(new PreProcessingVisitor(imported, context));
 
-        for (NameNode nameNode : from.getNames().getNames()) {
-            self.registerMacro(nameNode.getAlias(), imported.getMacro(nameNode.getName()));
+        for (NameNode nameNode : from.getNameSet().getSet()) {
+            Macro macro = imported.getMacro(nameNode.getName());
+            if (macro != null) {
+                String macroName = nameNode.getAlias() == null ? nameNode.getName() : nameNode.getAlias();
+                self.registerMacro(macroName, imported.getMacro(nameNode.getName()));
+            }
         }
     }
 

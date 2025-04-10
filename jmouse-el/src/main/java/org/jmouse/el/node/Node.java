@@ -1,5 +1,6 @@
 package org.jmouse.el.node;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -62,6 +63,23 @@ public interface Node {
      * @return a list of child nodes
      */
     List<Node> getChildren();
+
+    /**
+     * Returns the list of child nodes.
+     *
+     * @return a list of child nodes
+     */
+    default <T> List<T> getChildren(Class<T> type) {
+        List<T> result = new ArrayList<>();
+
+        for (Node child : getChildren()) {
+            if (type.isAssignableFrom(child.getClass())) {
+                result.add(type.cast(child));
+            }
+        }
+
+        return result;
+    }
 
     /**
      * Returns the first child node.

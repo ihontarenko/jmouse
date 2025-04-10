@@ -1,6 +1,8 @@
 package org.jmouse.core.bind;
 
 import org.jmouse.core.bind.accessor.NullObjectAccessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An abstract base implementation of {@link ObjectAccessor}.
@@ -13,12 +15,12 @@ import org.jmouse.core.bind.accessor.NullObjectAccessor;
  */
 public abstract class AbstractAccessor implements ObjectAccessor, ObjectAccessorWrapper.Aware {
 
-    private ObjectAccessorWrapper wrapper;
-
+    private static final Logger                LOGGER = LoggerFactory.getLogger(AbstractAccessor.class);
     /**
      * The underlying data source object.
      */
-    protected final Object source;
+    protected final      Object                source;
+    private              ObjectAccessorWrapper wrapper;
 
     /**
      * Constructs an {@link AbstractAccessor} with the given source object.
@@ -51,19 +53,11 @@ public abstract class AbstractAccessor implements ObjectAccessor, ObjectAccessor
 
         if (getWrapper() != null) {
             wrapped = getWrapper().wrap(source);
+        } else {
+            LOGGER.error("Accessor is not configured properly.");
         }
 
         return wrapped;
-    }
-
-    /**
-     * Sets the ObjectAccessorWrapper.
-     *
-     * @param wrapper the factory to set
-     */
-    @Override
-    public void setWrapper(ObjectAccessorWrapper wrapper) {
-        this.wrapper = wrapper;
     }
 
     /**
@@ -76,6 +70,15 @@ public abstract class AbstractAccessor implements ObjectAccessor, ObjectAccessor
         return wrapper;
     }
 
+    /**
+     * Sets the ObjectAccessorWrapper.
+     *
+     * @param wrapper the factory to set
+     */
+    @Override
+    public void setWrapper(ObjectAccessorWrapper wrapper) {
+        this.wrapper = wrapper;
+    }
 
 
 }

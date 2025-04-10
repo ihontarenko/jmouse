@@ -49,8 +49,10 @@ public class TemplateCoreExtension extends StandardExtension implements Template
     @Override
     public List<Parser> getParsers() {
         List<Parser> parsers = new ArrayList<>(super.getParsers());
+
         parsers.add(new TemplateParser());
         parsers.add(new RootParser());
+
         return parsers;
     }
 
@@ -78,6 +80,7 @@ public class TemplateCoreExtension extends StandardExtension implements Template
     @Override
     public List<TagParser> getTagParsers() {
         return List.of(
+                new SetParser(),
                 new ForParser(),
                 new IfParser(),
                 new IncludeParser(),

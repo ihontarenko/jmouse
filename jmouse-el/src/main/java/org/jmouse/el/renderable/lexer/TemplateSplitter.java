@@ -33,7 +33,8 @@ public class TemplateSplitter implements Splitter<List<RawToken>, TokenizableSou
     private static final Pattern EXPRESSION_PATTERN = Pattern.compile(
             "(?<OPEN>\\{(?<type>\\{|[%!#\\$\\*@])\\s*)" +  // Open: matches either "{{" or "{X" where X ∈ {%, !, #, $, *, @}
             "(?<INNER>.*?)\\s*" +                          // Inner: non-greedy match for the tag content
-            "(?<CLOSE>(?:\\}\\}|\\k<type>\\}))"            // Close: matches "}}" if type was "{" or "X}" if type is X
+            "(?<CLOSE>(?:\\}\\}|\\k<type>\\}))",           // Close: matches "}}" if type was "{" or "X}" if type is X
+            Pattern.DOTALL | Pattern.MULTILINE
     );
 
     private final Splitter<List<RawToken>, TokenizableSource> splitter;

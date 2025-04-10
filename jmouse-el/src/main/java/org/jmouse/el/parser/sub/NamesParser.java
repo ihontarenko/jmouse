@@ -4,7 +4,7 @@ import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.NameNode;
-import org.jmouse.el.node.expression.NamesNode;
+import org.jmouse.el.node.expression.NameSetNode;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.renderable.lexer.TemplateToken;
@@ -13,7 +13,7 @@ public class NamesParser implements Parser {
 
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
-        NamesNode names = new NamesNode();
+        NameSetNode names = new NameSetNode();
 
         do {
             NameNode name  = new NameNode();
