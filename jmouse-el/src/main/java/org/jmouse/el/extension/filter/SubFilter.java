@@ -13,10 +13,11 @@ public class SubFilter extends AbstractFilter {
      * @param input     the input value to be processed by the filter
      * @param arguments the arguments that customize the filter's behavior
      * @param context   the evaluation context in which the filter is applied
+     * @param type
      * @return the result of applying the filter to the input
      */
     @Override
-    public Object apply(Object input, Arguments arguments, ClassTypeInspector inspector, EvaluationContext context) {
+    public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
         String     value      = input.toString();
         Conversion conversion = context.getConversion();
 

@@ -7,7 +7,7 @@ import org.jmouse.el.extension.Filter;
  * <p>
  * This class provides a default {@code toString()} implementation that returns a string
  * in the format "Filter: {filterName}". Subclasses should implement {@link Filter#getName()}
- * and {@link Filter#apply(Object, org.jmouse.el.extension.Arguments, org.jmouse.core.reflection.ClassTypeInspector, org.jmouse.el.evaluation.EvaluationContext)}
+ * and {@link Filter#apply(Object, org.jmouse.el.extension.Arguments, org.jmouse.el.evaluation.EvaluationContext, org.jmouse.core.reflection.ClassTypeInspector)}
  * to provide specific filtering behavior.
  * </p>
  *

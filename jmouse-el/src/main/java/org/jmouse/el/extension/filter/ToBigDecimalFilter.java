@@ -20,7 +20,7 @@ public class ToBigDecimalFilter implements Filter {
      * Converts the input value to a {@link BigDecimal} using the conversion service.
      */
     @Override
-    public Object apply(Object input, Arguments arguments, ClassTypeInspector inspector, EvaluationContext context) {
+    public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
         return context.getConversion().convert(input, BigDecimal.class);
     }
 

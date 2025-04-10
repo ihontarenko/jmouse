@@ -1,5 +1,7 @@
 package org.jmouse.el.node.expression;
 
+import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.extension.Test;
@@ -120,8 +122,10 @@ public class TestNode extends AbstractExpressionNode {
             }
         }
 
+        ClassTypeInspector type = TypeInformation.forInstance(instance);
+
         // The test result is negated if the 'negated' flag is true.
-        return isNegated() != test.test(instance, arguments, context);
+        return isNegated() != test.test(instance, arguments, context, type);
     }
 
     /**

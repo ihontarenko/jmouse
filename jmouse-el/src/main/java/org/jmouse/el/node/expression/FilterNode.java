@@ -108,7 +108,7 @@ public class FilterNode extends AbstractExpressionNode {
         Object             compiled  = getLeft().evaluate(context);
         ClassTypeInspector inspector = TypeInformation.forInstance(compiled);
 
-        return filter.apply(compiled, arguments, inspector, context);
+        return filter.apply(compiled, arguments, context, inspector);
     }
 
     /**

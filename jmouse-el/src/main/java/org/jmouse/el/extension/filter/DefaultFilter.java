@@ -27,12 +27,12 @@ public class DefaultFilter extends AbstractFilter {
      *
      * @param input     the value to process; may be {@code null}
      * @param arguments the arguments that may contain a default value
-     * @param inspector the class type inspector (unused in this filter)
      * @param context   the evaluation context (unused in this filter)
+     * @param type      the class type inspector (unused in this filter)
      * @return the original input if not {@code null}, otherwise the first argument
      */
     @Override
-    public Object apply(Object input, Arguments arguments, ClassTypeInspector inspector, EvaluationContext context) {
+    public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
         return input == null ? arguments.getFirst() : input;
     }
 

@@ -11,7 +11,7 @@ public class TypeFilter extends AbstractFilter {
      * Applies this filter to the specified input.
      */
     @Override
-    public Object apply(Object input, Arguments arguments, ClassTypeInspector inspector, EvaluationContext context) {
+    public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
         return input == null ? "NULL" : JavaType.forInstance(input).getName();
     }
 

@@ -25,12 +25,12 @@ public class TrimFilter extends AbstractFilter {
      *
      * @param input     the value to be processed
      * @param arguments the filter arguments (ignored in this implementation)
-     * @param inspector the class type inspector (unused)
      * @param context   the evaluation context providing conversion services
+     * @param type      the class type inspector (unused)
      * @return the trimmed string if input is a {@code String}, or the original input otherwise
      */
     @Override
-    public Object apply(Object input, Arguments arguments, ClassTypeInspector inspector, EvaluationContext context) {
+    public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
         Object result = input;
 
         if (input instanceof String string) {

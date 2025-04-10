@@ -34,9 +34,9 @@ public class Expressions {
         evaluationContext.getExtensions().importExtension(new StandardExtension());
         evaluationContext.getExtensions().addFilter(new Filter() {
             @Override
-            public Object apply(Object input, Arguments arguments, ClassTypeInspector inspector, EvaluationContext context) {
+            public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
                 System.out.println(arguments.getFirst());
-                System.out.println(inspector.isBean());
+                System.out.println(type.isBean());
                 return ((String) input).length();
             }
 

@@ -11,7 +11,7 @@ public interface Filter {
     /**
      * Applies this filter to the specified input.
      */
-    Object apply(Object input, Arguments arguments, ClassTypeInspector inspector, EvaluationContext context);
+    Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type);
 
     /**
      * Returns the name of this filter.

@@ -26,12 +26,12 @@ public class LowerFilter extends AbstractFilter {
      *
      * @param input     the value to process; if it is a string, it will be converted to lowercase
      * @param arguments the filter arguments (unused in this filter)
-     * @param inspector the class type inspector (unused in this filter)
      * @param context   the evaluation context (unused in this filter)
+     * @param type      the class type inspector (unused in this filter)
      * @return the lowercase string if input is a string; otherwise, the original input
      */
     @Override
-    public Object apply(Object input, Arguments arguments, ClassTypeInspector inspector, EvaluationContext context) {
+    public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
         Object result = input;
 
         if (input instanceof String string) {
