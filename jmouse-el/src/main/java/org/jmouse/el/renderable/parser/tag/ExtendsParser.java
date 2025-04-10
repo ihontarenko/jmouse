@@ -19,7 +19,7 @@ public class ExtendsParser implements TagParser {
         ExpressionNode value = (ExpressionNode) context.getParser(LiteralParser.class)
                 .parse(cursor, context);
 
-        node.setParent(value);
+        node.setPath(value);
 
         return node;
     }

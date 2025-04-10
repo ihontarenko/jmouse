@@ -8,15 +8,15 @@ import org.jmouse.el.renderable.NodeVisitor;
 
 public class FromNode extends AbstractNode {
 
-    private ExpressionNode source;
+    private ExpressionNode path;
     private NameSetNode    names;
 
-    public ExpressionNode getSource() {
-        return source;
+    public ExpressionNode getPath() {
+        return path;
     }
 
-    public void setSource(ExpressionNode source) {
-        this.source = source;
+    public void setPath(ExpressionNode path) {
+        this.path = path;
     }
 
     public NameSetNode getNameSet() {

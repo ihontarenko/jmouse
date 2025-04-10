@@ -56,7 +56,7 @@ public class FromParser implements TagParser {
         // Create and populate the FromNode with the parsed source and names
         FromNode node = new FromNode();
 
-        node.setSource(source);
+        node.setPath(source);
         node.setNames(names);
 
         return node;

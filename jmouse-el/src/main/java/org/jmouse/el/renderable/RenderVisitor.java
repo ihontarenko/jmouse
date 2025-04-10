@@ -42,12 +42,12 @@ public class RenderVisitor implements NodeVisitor {
     public void visit(PrintNode printNode) {
         ExpressionNode expression = printNode.getExpression();
         Object         evaluated  = null;
-
-        if (expression instanceof FunctionNode) {
-            expression.accept(this);
-        } else {
-//            evaluated = expression.evaluate(context);
-        }
+//
+//        if (expression instanceof FunctionNode) {
+//            expression.accept(this);
+//        } else {
+////            evaluated = expression.evaluate(context);
+//        }
 
         try {
             expression.accept(this);
@@ -76,6 +76,27 @@ public class RenderVisitor implements NodeVisitor {
             LOGGER.info("Block '{}' will be rendered", name);
             actual.getBody().accept(this);
         }
+    }
+
+    /**
+     * Visits an IncludeNode.
+     *
+     * @param include the include node to process
+     */
+    @Override
+    public void visit(IncludeNode include) {
+        Conversion conversion = context.getConversion();
+        Object     path       = include.getPath().evaluate(context);
+        String     name       = conversion.convert(path, String.class);
+        Template   included   = registry.getEngine().getTemplate(name);
+
+        EvaluationContext ctx  = included.newContext();
+        Node              root = included.getRoot();
+
+        ctx.setValue("parent", ctx.getInheritance().getCurrent());
+
+        root.accept(new PreProcessingVisitor(included, ctx));
+        root.accept(new RenderVisitor(content, included.getRegistry(), ctx));
     }
 
     @Override

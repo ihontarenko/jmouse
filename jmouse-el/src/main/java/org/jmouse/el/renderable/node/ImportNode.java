@@ -8,7 +8,7 @@ import org.jmouse.el.renderable.NodeVisitor;
 public class ImportNode extends AbstractNode {
 
     private ExpressionNode scope;
-    private ExpressionNode source;
+    private ExpressionNode path;
 
     public ExpressionNode getScope() {
         return scope;
@@ -18,17 +18,17 @@ public class ImportNode extends AbstractNode {
         this.scope = scope;
     }
 
-    public ExpressionNode getSource() {
-        return source;
+    public ExpressionNode getPath() {
+        return path;
     }
 
-    public void setSource(ExpressionNode source) {
-        this.source = source;
+    public void setPath(ExpressionNode path) {
+        this.path = path;
     }
 
     @Override
     public String toString() {
-        return "IMPORT: " + getSource() + (getScope() != null ? " AS " + getScope() : "");
+        return "IMPORT: " + getPath() + (getScope() != null ? " AS " + getScope() : "");
     }
 
     /**

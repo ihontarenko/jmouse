@@ -22,7 +22,7 @@ public class ImportParser implements TagParser {
         ImportNode node   = new ImportNode();
 
         if (parser.parse(cursor, context) instanceof StringLiteralNode string) {
-            node.setSource(string);
+            node.setPath(string);
         }
 
         if (cursor.isCurrent(TemplateToken.T_AS)) {

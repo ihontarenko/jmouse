@@ -15,24 +15,24 @@ import org.jmouse.el.renderable.NodeVisitor;
  */
 public class ExtendsNode extends AbstractNode {
 
-    private ExpressionNode parent;
+    private ExpressionNode path;
 
     /**
      * Returns the expression node that evaluates to the parent template name.
      *
      * @return the parent expression node
      */
-    public ExpressionNode getParent() {
-        return parent;
+    public ExpressionNode getPath() {
+        return path;
     }
 
     /**
      * Sets the expression node that represents the parent template.
      *
-     * @param parent the parent expression node
+     * @param path the parent expression node
      */
-    public void setParent(ExpressionNode parent) {
-        this.parent = parent;
+    public void setPath(ExpressionNode path) {
+        this.path = path;
     }
 
     /**
@@ -49,6 +49,6 @@ public class ExtendsNode extends AbstractNode {
 
     @Override
     public String toString() {
-        return "EXTENDS: " + getParent();
+        return "EXTENDS: " + getPath();
     }
 }

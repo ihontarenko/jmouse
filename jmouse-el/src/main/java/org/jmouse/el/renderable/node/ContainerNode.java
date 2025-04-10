@@ -15,6 +15,8 @@ public class ContainerNode extends AbstractNode {
     public void accept(Visitor visitor) {
         if (visitor instanceof NodeVisitor nv) {
             nv.visit(this);
+        } else {
+            visitor.visit(this);
         }
     }
 

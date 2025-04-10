@@ -68,7 +68,7 @@ public class PreProcessingVisitor implements NodeVisitor {
     @Override
     public void visit(ImportNode importNode) {
         Conversion       conversion = context.getConversion();
-        Object           source     = importNode.getSource().evaluate(context);
+        Object           source     = importNode.getPath().evaluate(context);
         String           name       = conversion.convert(source, String.class);
         TemplateRegistry self       = template.getRegistry();
         Template         imported   = self.getEngine().getTemplate(name);
@@ -89,8 +89,8 @@ public class PreProcessingVisitor implements NodeVisitor {
     @Override
     public void visit(FromNode from) {
         Conversion       conversion = context.getConversion();
-        Object           source     = from.getSource().evaluate(context);
-        String           name       = conversion.convert(source, String.class);
+        Object           path       = from.getPath().evaluate(context);
+        String           name       = conversion.convert(path, String.class);
         TemplateRegistry self       = template.getRegistry();
         Template         imported   = self.getEngine().getTemplate(name);
 
@@ -147,7 +147,7 @@ public class PreProcessingVisitor implements NodeVisitor {
      */
     @Override
     public void visit(ExtendsNode node) {
-        Object     value      = node.getParent().evaluate(context);
+        Object     value      = node.getPath().evaluate(context);
         Conversion conversion = context.getConversion();
         String     location   = conversion.convert(value, String.class);
         Template   parent     = template.getRegistry().getEngine().getTemplate(location);

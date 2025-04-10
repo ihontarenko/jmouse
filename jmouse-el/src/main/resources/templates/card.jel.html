@@ -1,0 +1,10 @@
+{% from 'macros' import hello as hi %}
+<div>
+    {{ hi() }}
+    Card Template
+</div>
+<div>
+    {% block 'card' %}
+    default
+    {% endblock %}
+</div>

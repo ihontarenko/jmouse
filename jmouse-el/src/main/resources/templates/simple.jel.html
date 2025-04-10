@@ -1,5 +1,7 @@
 <h2>Hello {{ book.title }}!</h2>
 
+{% from 'macros' import hello %}
+
 {% set values = [
     ['Alice', 30, 'New York'],
     ['Bob', 25, 'London'],
@@ -13,6 +15,12 @@
 <b>{{ values[1][2] }}</b>
 
 <b>{{ values is array }}</b>
+
+<div style="border: 1px solid red;">
+    {% include 'card' %}
+</div>
+
+{{ hello() }}
 
 <b>{{ values is odd }}</b>
 
