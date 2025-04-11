@@ -3,6 +3,7 @@ package org.jmouse.el.evaluation;
 import org.jmouse.core.convert.PredefinedConversion;
 import org.jmouse.core.convert.converter.NumberToNumberConverter;
 import org.jmouse.el.evaluation.converter.BooleanToStringConverter;
+import org.jmouse.el.evaluation.converter.StringToBooleanConverter;
 
 /**
  * An extension of {@link PredefinedConversion} tailored for the expression language.
@@ -25,5 +26,6 @@ public class ExpressionLanguageConversion extends PredefinedConversion {
 
         registerConverter(new NumberToNumberConverter());
         registerConverter(new BooleanToStringConverter());
+        registerConverter(new StringToBooleanConverter());
     }
 }

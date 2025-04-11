@@ -1,6 +1,7 @@
 <h2>Hello {{ book.title }}!</h2>
 
 {% from 'macros' import hello %}
+{% import 'macros' as main %}
 
 {% set values = [
     ['Alice', 30, 'New York'],
@@ -8,10 +9,25 @@
     ['Charlie', 35, 'Paris']
 ] %}
 
+<div>
+    if-else block
+    {% if book.author %}
+        <header>
+            <h1>Welcome, Administrator {{ book.author | upper }}</h1>
+        </header>
+    {% elseif values[0][1] > 29 %}
+        {{ values[0][0] }}
+    {% else %}
+        <header>
+            <h1>Welcome, {{ user.name | upper }}</h1>
+        </header>
+    {% endif %}
+</div>
+
 <div style="border: 1px solid #a2ff00;">
     <ul>
         {% for v in values %}
-            <li>- values item: {{ v[2] }}</li>
+            <li>- values item: {{ v[2] | upper }} : {{ v[0] }}</li>
         {% else %}
             <li>- not items for 'values'</li>
         {% endfor %}
@@ -38,9 +54,10 @@
 ---
 
 <div style="border: 1px solid #ff4d00;">
+
     <ul>
         {% for item in map %}
-            <li>- map item: {{ item }}</li>
+            <li>{{ loop.index + 1 }}. Item: {{ loop.key }} = {{ item }} </li>
         {% else %}
             <li>- not items for 'map'</li>
         {% endfor %}
@@ -121,3 +138,8 @@
         {% endblock %}
     {% endembed %}
 </div>
+
+<div style="border: 1px solid green;">
+    {{ main.printUser('John') }}
+</div>
+

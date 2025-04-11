@@ -4,6 +4,7 @@ import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.CursorMatcher;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.ParameterNode;
 import org.jmouse.el.node.expression.ParameterSetNode;
@@ -14,7 +15,9 @@ import org.jmouse.el.renderable.node.MacroNode;
 import org.jmouse.el.renderable.parser.TemplateParser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.jmouse.el.lexer.BasicToken.*;
 import static org.jmouse.el.renderable.lexer.TemplateToken.*;
@@ -46,10 +49,11 @@ public class MacroParser implements TagParser {
         cursor.ensure(T_MACRO);
 
         // Retrieve the macro name.
-        TemplateParser templateParser = (TemplateParser) context.getParser(TemplateParser.class);
-        Token          name           = cursor.ensure(T_IDENTIFIER);
-        MacroNode      macro          = new MacroNode();
-        List<String>   names          = new ArrayList<>();
+        TemplateParser              templateParser = (TemplateParser) context.getParser(TemplateParser.class);
+        Token                       name           = cursor.ensure(T_IDENTIFIER);
+        MacroNode                   macro          = new MacroNode();
+        List<String>                names          = new ArrayList<>();
+        Map<String, ExpressionNode> defaults       = new HashMap<>();
 
         macro.setName(name.value());
 
@@ -57,9 +61,14 @@ public class MacroParser implements TagParser {
         cursor.ensure(T_OPEN_PAREN);
 
         if (!cursor.isCurrent(T_CLOSE_PAREN)) {
-            if (context.getParser(ParametersParser.class).parse(cursor, context) instanceof ParameterSetNode parameters) {
+            if (context.getParser(ParametersParser.class)
+                    .parse(cursor, context) instanceof ParameterSetNode parameters) {
                 for (ParameterNode parameter : parameters.getSet()) {
+                    ExpressionNode defaultValue = parameter.getDefaultValue();
                     names.add(parameter.getName());
+                    if (defaultValue != null) {
+                        defaults.put(parameter.getName(), defaultValue);
+                    }
                 }
             }
         }
@@ -76,6 +85,7 @@ public class MacroParser implements TagParser {
 
         // Set the parsed body and parameter names on the MacroNode.
         macro.setBody(body);
+        macro.setDefaultValues(defaults);
         macro.setArguments(names);
 
         return macro;

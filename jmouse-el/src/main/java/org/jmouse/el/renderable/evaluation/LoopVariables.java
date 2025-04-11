@@ -4,6 +4,7 @@ public class LoopVariables {
 
     private int     index;
     private Object  value;
+    private Object  key;
     private boolean last;
     private boolean first;
 
@@ -37,5 +38,13 @@ public class LoopVariables {
 
     public void setFirst(boolean first) {
         this.first = first;
+    }
+
+    public Object getKey() {
+        return key;
+    }
+
+    public void setKey(Object key) {
+        this.key = key;
     }
 }

@@ -1,17 +1,21 @@
 package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
+import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.NodeVisitor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MacroNode extends AbstractNode {
 
-    private String       name;
-    private List<String> arguments;
-    private Node         body;
+    private String                      name;
+    private List<String>                arguments;
+    private Node                        body;
+    private Map<String, ExpressionNode> defaultValues = new HashMap<>();
 
     public String getName() {
         return name;
@@ -35,6 +39,14 @@ public class MacroNode extends AbstractNode {
 
     public void setBody(Node body) {
         this.body = body;
+    }
+
+    public ExpressionNode getDefaultValue(String name) {
+        return defaultValues.get(name);
+    }
+
+    public void setDefaultValues(Map<String, ExpressionNode> defaultValues) {
+        this.defaultValues.putAll(defaultValues);
     }
 
     /**

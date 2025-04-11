@@ -28,7 +28,9 @@ public class StringLiteralNode extends LiteralNode<String> {
         String value = (String) super.evaluate(context);
 
         if (value != null && !value.isBlank() && value.length() > 2) {
-            value = value.substring(1, value.length() - 1);
+            if (value.startsWith("'") || value.startsWith("\"")) {
+                value = value.substring(1, value.length() - 1);
+            }
         }
 
         return value;

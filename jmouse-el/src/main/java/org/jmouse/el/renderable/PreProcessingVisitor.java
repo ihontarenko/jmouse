@@ -131,7 +131,7 @@ public class PreProcessingVisitor implements NodeVisitor {
         Object     evaluated  = node.getName().evaluate(context);
         String     name       = conversion.convert(evaluated, String.class);
 
-        LOGGER.info("Registered block '{}' into template '{}'", name, template.getName());
+        LOGGER.info("Registering block '{}' into template '{}'", name, template.getName());
         template.setBlock(new TemplateBlock(name, node, template.getName()));
     }
 

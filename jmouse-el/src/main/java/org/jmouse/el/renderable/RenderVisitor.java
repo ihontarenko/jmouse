@@ -1,16 +1,17 @@
 package org.jmouse.el.renderable;
 
+import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.el.StringSource;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.ScopedChain;
+import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.lexer.TokenizableSource;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.BinaryOperation;
 import org.jmouse.el.node.expression.FunctionNode;
-import org.jmouse.el.node.expression.FunctionNotFoundException;
 import org.jmouse.el.node.expression.LiteralNode;
 import org.jmouse.el.renderable.evaluation.LoopVariables;
 import org.jmouse.el.renderable.node.*;
@@ -18,7 +19,11 @@ import org.jmouse.el.renderable.node.sub.ConditionBranch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import static java.lang.String.valueOf;
 
 public class RenderVisitor implements NodeVisitor {
 
@@ -49,28 +54,15 @@ public class RenderVisitor implements NodeVisitor {
     @Override
     public void visit(PrintNode printNode) {
         ExpressionNode expression = printNode.getExpression();
-        Object         evaluated  = null;
-//
-//        if (expression instanceof FunctionNode) {
-//            expression.accept(this);
-//        } else {
-//            evaluated = expression.evaluate(context);
-//        }
 
-        try {
+        if (expression instanceof FunctionNode) {
             expression.accept(this);
-            evaluated = expression.evaluate(context);
-        } catch (FunctionNotFoundException exception) {
-            if (expression instanceof FunctionNode functionNode) {
-                Macro macro = registry.getMacro(functionNode.getName());
-                if (macro != null) {
-                    macro.evaluate(this, functionNode, context);
-                }
+        } else {
+            Conversion conversion = context.getConversion();
+            Object     evaluated  = expression.evaluate(context);
+            if (evaluated != null) {
+                content.append(conversion.convert(evaluated, String.class));
             }
-        }
-
-        if (evaluated != null) {
-            content.append(context.getConversion().convert(evaluated, String.class));
         }
     }
 
@@ -79,8 +71,8 @@ public class RenderVisitor implements NodeVisitor {
         if (node.getName().evaluate(context) instanceof String name) {
             Block block = registry.getBlock(name);
             if (block != null && block.node() instanceof BlockNode actual) {
-                LOGGER.info("Block '{}' will be rendered", name);
                 actual.getBody().accept(this);
+                LOGGER.info("Block '{}' rendered", name);
             }
         }
     }
@@ -133,7 +125,7 @@ public class RenderVisitor implements NodeVisitor {
             // Create a new "fake" template from the embed node's body and the dummy source.
             // Create a new evaluation context for the fake template.
             Engine            engine = registry.getEngine();
-            TokenizableSource source = new StringSource("embedded: " + path, "");
+            TokenizableSource source = new StringSource("fake: " + path, "");
             Template          real   = engine.getTemplate(path);
             Template          fake   = engine.newTemplate(embedNode.getBody(), source);
             EvaluationContext ctx    = fake.newContext();
@@ -144,48 +136,87 @@ public class RenderVisitor implements NodeVisitor {
             // Render the fake template using a new renderer instance and the fresh context.
             Content inner = new TemplateRenderer(engine).render(fake, ctx);
 
+            LOGGER.info("Embed '{}' rendered", path);
+
             // Append the rendered content of the embedded template to the current content.
             content.append(inner);
         }
     }
 
+    /**
+     * Processes an {@link IfNode} by iterating over its condition branches.
+     * <p>
+     * For each {@link ConditionBranch} in the IfNode, the "when" expression is evaluated. If the "when"
+     * expression is {@code null}, this branch is considered the 'else' clause. Otherwise, the expression
+     * is evaluated and converted to a Boolean. When a branch evaluates to {@code true} and has a corresponding
+     * "then" node, that node is processed and further branch evaluation is terminated.
+     * </p>
+     *
+     * @param ifNode the if-statement node to be processed
+     */
     @Override
     public void visit(IfNode ifNode) {
+        Conversion conversion = context.getConversion();
+
         for (ConditionBranch branch : ifNode.getBranches()) {
-            System.out.println(branch);
+            // If "when" is null, the branch represents the "else" clause.
+            ExpressionNode when      = branch.getWhen();
+            Node           then      = branch.getThen();
+            boolean        satisfied = when == null;
+
+            if (when != null) {
+                // Evaluate the condition and convert it to a Boolean.
+                satisfied = conversion.convert(when.evaluate(context), Boolean.class);
+            }
+
+            // Process the "then" block if the condition is satisfied and a branch exists.
+            if (satisfied && then != null) {
+                then.accept(this);
+                break;
+            }
         }
     }
 
+    /**
+     * Processes a ForNode by evaluating its iterable expression and executing the loop body for each element.
+     * If the iterable is empty and an "empty" block is defined, that block is executed instead.
+     *
+     * @param forNode the for-loop node containing the loop variable, iterable expression, loop body,
+     *                and optionally an empty block for when the iterable is empty
+     */
     @Override
     public void visit(ForNode forNode) {
+        // Evaluate the iterable expression.
         Object             evaluated = forNode.getIterable().evaluate(context);
         ClassTypeInspector type      = TypeInformation.forInstance(evaluated);
         Iterable<?>        iterable  = null;
+        Node               empty     = forNode.getEmpty();
 
+        // Convert evaluated object to an Iterable if possible.
         if (type.isIterable()) {
             iterable = ((Iterable<?>) evaluated);
         } else if (type.isMap()) {
             iterable = ((Map<?, ?>) evaluated).entrySet();
         } else if (type.isString()) {
-            iterable = ((String) evaluated).chars().mapToObj(c -> String.valueOf((char) c)).toList();
+            // Splits the string into a list of single-character strings
+            iterable = ((String) evaluated).chars().mapToObj(c -> valueOf((char) c)).toList();
         } else if (type.isArray()) {
             iterable = List.of(((Object[]) evaluated));
         }
 
-        if ((iterable == null || !iterable.iterator().hasNext()) && forNode.getEmpty() != null) {
-            forNode.getEmpty().accept(this);
-        } else {
-            Iterator<?> iterator = iterable.iterator();
-            ScopedChain scope    = context.getScopedChain();
-            int         counter  = 0;
-            Node        body     = forNode.getBody();
-            String      name     = forNode.getItem();
+        if (iterable != null && iterable.iterator().hasNext()) {
+            Iterator<?>   iterator = iterable.iterator();
+            ScopedChain   scope    = context.getScopedChain();
+            int           counter  = 0;
+            Node          body     = forNode.getBody();
+            String        name     = forNode.getItem();
+            LoopVariables loop     = new LoopVariables();
 
+            // Iterate over each element, updating loop variables and scope.
             while (iterator.hasNext()) {
                 scope.push();
 
-                Object        item = iterator.next();
-                LoopVariables loop = new LoopVariables();
+                Object item = iterator.next();
 
                 loop.setValue(item);
                 loop.setLast(!iterator.hasNext());
@@ -194,27 +225,55 @@ public class RenderVisitor implements NodeVisitor {
 
                 scope.setValue("loop", loop);
 
-                if (item instanceof Map.Entry<?,?> entry) {
+                // If the current loop item is a Map.Entry, extract its value as the loop item
+                // and register its key in the loop variables.
+                if (item instanceof Map.Entry<?, ?> entry) {
                     item = entry.getValue();
+                    loop.setKey(entry.getKey());
                 }
 
                 scope.setValue(name, item);
 
-                try {
-                    body.accept(this);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                body.accept(this);
 
                 scope.pop();
             }
+        } else if (empty != null) {
+            // Process the empty block if the iterable has no elements.
+            empty.accept(this);
         }
     }
 
+    /**
+     * Processes a FunctionNode by determining whether it should be evaluated as a function or as a macro.
+     * <p>
+     * The method first checks the extension container for a function definition with the given name.
+     * If no function is found, it looks up a macro by the same name in the template registry and, if present,
+     * evaluates the macro. Otherwise, it directly evaluates the function node, converts the result to a String,
+     * and appends it to the output content.
+     * </p>
+     *
+     * @param node the FunctionNode representing a function or macro call to be processed
+     */
     @Override
-    public void visit(FunctionNode function) {
-        System.out.println("Function: " + function.getName());
-        System.out.println("Is Macro: " + (context.getExtensions().getFunction(function.getName()) == null));
+    public void visit(FunctionNode node) {
+        ExtensionContainer extensions = context.getExtensions();
+        String             name       = node.getName();
+        Conversion         conversion = context.getConversion();
+
+        // If no function is defined in extensions, attempt to process it as a macro.
+        if (extensions.getFunction(name) == null) {
+            Macro macro = registry.getMacro(name);
+            if (macro != null) {
+                macro.evaluate(this, node, context);
+                LOGGER.info("Macro '{}' evaluated", name);
+            }
+        } else {
+            // Evaluate the function node and convert the result to a String.
+            Object evaluated = node.evaluate(context);
+            content.append(conversion.convert(evaluated, String.class));
+            LOGGER.info("Function '{}' evaluated", name);
+        }
     }
 
     @Override

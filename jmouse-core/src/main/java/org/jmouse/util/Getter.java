@@ -1,6 +1,7 @@
 package org.jmouse.util;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Map;
 
 import static org.jmouse.core.reflection.Reflections.getMethodName;
@@ -43,7 +44,9 @@ public interface Getter<T, R> {
     static <T, V> Getter<T, V> ofMethod(Method getter) {
         return (T instance) -> {
             try {
-                getter.setAccessible(true);
+                if ((getter.getModifiers() & Modifier.PUBLIC) == 0) {
+                    getter.setAccessible(true);
+                }
                 return (V) getter.invoke(instance);
             } catch (Exception exception) {
                 throw new GetterCallException(
