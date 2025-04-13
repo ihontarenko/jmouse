@@ -7,6 +7,7 @@ import org.jmouse.el.node.expression.FunctionNode;
 import org.jmouse.el.renderable.node.MacroNode;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +35,17 @@ public record TemplateMacro(String name, MacroNode node, String source) implemen
         if (parameters != null && parameters.evaluate(context) instanceof Object[] evaluated) {
             List<Object>        values    = Arrays.asList(evaluated);
             List<String>        keys      = node().getArguments();
-            Map<String, Object> arguments = range(0, values.size()).boxed().collect(toMap(keys::get, values::get));
+            Map<String, Object> arguments = new HashMap<>();
+
+            for (int i = 0, size = keys.size(); i < size; i++) {
+                String key = keys.get(i);
+                if (values.size() <= i && node().getDefaultValue(key) instanceof ExpressionNode defaultValue) {
+                    arguments.put(key, defaultValue.evaluate(context));
+                } else {
+                    arguments.put(key, values.get(i));
+                }
+            }
+
             arguments.forEach(context::setValue);
         }
 

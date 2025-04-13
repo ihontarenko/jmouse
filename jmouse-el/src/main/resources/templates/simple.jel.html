@@ -118,8 +118,10 @@
 
 <h1>{{ book.author }}</h1>
 
-<div style="border: 1px solid #ff00a3;">
-    {% embed 'user' %}{% endembed %}
+<div style="border: 1px solid #cdff00;">
+    {% embed 'user' %}
+    {{ main.printUser('Jane') }}
+    {% endembed %}
 </div>
 
 <div style="border: 1px solid blueviolet;">
@@ -140,6 +142,9 @@
 </div>
 
 <div style="border: 1px solid green;">
-    {{ main.printUser('John') }}
+    <ul>
+        <li>{{ main.printUser('John') }}</li>
+        <li>{{ main.printUser('John', 33) }}</li>
+    </ul>
 </div>
 
