@@ -11,11 +11,11 @@ import java.util.Map;
 
 public class DefaultEvaluationContext implements EvaluationContext {
 
-    private final ScopedChain             chain;
-    private final ExtensionContainer      extensions;
+    private  ExtensionContainer      extensions;
     private final Conversion              conversion;
     private final Map<Object, Object>     objects;
     private final Inheritance             stack;
+    private       ScopedChain             chain;
     private       VirtualPropertyResolver resolver;
 
     public DefaultEvaluationContext(ScopedChain chain, ExtensionContainer extensions, Conversion conversion) {
@@ -56,8 +56,18 @@ public class DefaultEvaluationContext implements EvaluationContext {
     }
 
     @Override
+    public void setScopedChain(ScopedChain chain) {
+        this.chain = chain;
+    }
+
+    @Override
     public ExtensionContainer getExtensions() {
         return extensions;
+    }
+
+    @Override
+    public void setExtensions(ExtensionContainer extensions) {
+        this.extensions = extensions;
     }
 
     @Override

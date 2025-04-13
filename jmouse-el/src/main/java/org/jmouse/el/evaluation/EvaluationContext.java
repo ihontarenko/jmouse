@@ -20,6 +20,11 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
      */
     ObjectAccessorWrapper WRAPPER = new StandardAccessorWrapper();
 
+    /**
+     * Returns the current inheritance chain that manages variable scope hierarchy.
+     *
+     * @return the current {@link Inheritance} instance
+     */
     Inheritance getInheritance();
 
     /**
@@ -46,11 +51,25 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
     ScopedChain getScopedChain();
 
     /**
+     * Sets the current chain of variable scopes.
+     *
+     * @param chain the {@link ScopedChain} to set as current
+     */
+    void setScopedChain(ScopedChain chain);
+
+    /**
      * Returns the container holding custom extensions for expression evaluation.
      *
      * @return the {@link ExtensionContainer} instance
      */
     ExtensionContainer getExtensions();
+
+    /**
+     * Sets the container for custom extensions.
+     *
+     * @param extensions the {@link ExtensionContainer} to use for this context
+     */
+    void setExtensions(ExtensionContainer extensions);
 
     /**
      * Returns the conversion service for converting values between types.

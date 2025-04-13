@@ -1,5 +1,8 @@
 package org.jmouse.el.evaluation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 🔗 Represents a scoped chain of variable contexts.
  * This interface allows managing <b>nested variable scopes</b>, enabling
@@ -12,6 +15,43 @@ package org.jmouse.el.evaluation;
  * @author ihontarenko@gmail.com
  */
 public interface ScopedChain {
+
+    /**
+     * Merges the scopes from the given source chain into this chain.
+     * <p>
+     * This method is a shorthand for calling {@code merge(source, this)}.
+     * It takes all variable definitions from the source chain and adds them
+     * into the current chain.
+     * </p>
+     *
+     * @param source the source {@code ScopedChain} whose scopes will be merged into this chain
+     */
+    default void merge(ScopedChain source) {
+        merge(source, this);
+    }
+
+    /**
+     * Merges the variable values from the source chain into the destination chain.
+     * <p>
+     * For each scope in the source chain, its variables are transferred to the destination
+     * chain. After merging each scope's variables, a new scope is pushed onto the destination chain.
+     * </p>
+     *
+     * @param source      the source ScopedChain to merge from
+     * @param destination the destination ScopedChain to merge into
+     */
+    default void merge(ScopedChain source, ScopedChain destination) {
+        List<ScopeValues> scopes = new ArrayList<>();
+
+        for (ScopeValues values : source.chain()) {
+            scopes.add(values);
+        }
+
+        for (ScopeValues values : scopes) {
+            values.getValues().forEach(destination::setValue);
+            destination.push();
+        }
+    }
 
     /**
      * ⬆️ Removes the current scope from the chain and returns it.
@@ -71,6 +111,10 @@ public interface ScopedChain {
      * @param value 🔢 the new value to set
      */
     default void setValue(String name, Object value) {
+        // todo: find according scope if any and set nor set in current
+
+
+
         peek().set(name, value);
     }
 

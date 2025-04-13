@@ -130,6 +130,8 @@ public class RenderVisitor implements NodeVisitor {
             Template          fake   = engine.newTemplate(embedNode.getBody(), source);
             EvaluationContext ctx    = fake.newContext();
 
+            ctx.setScopedChain(context.getScopedChain());
+
             // Establish inheritance: set the parent of the fake template to be the real template.
             fake.setParent(real, ctx);
 

@@ -1,5 +1,7 @@
 package org.jmouse.el.evaluation;
 
+import java.util.Map;
+
 /**
  * 🔑 Represents a single scope for variable storage.
  * This interface allows storing, retrieving, and modifying variables within a scope.
@@ -11,6 +13,13 @@ package org.jmouse.el.evaluation;
  * @author ihontarenko@gmail.com
  */
 public interface ScopeValues {
+
+    /**
+     * Returns the map containing all variables stored in this scope.
+     *
+     * @return a {@link Map} where keys are variable names and values are their corresponding values
+     */
+    Map<String, Object> getValues();
 
     /**
      * 🔍 Retrieves the value associated with the given variable name.

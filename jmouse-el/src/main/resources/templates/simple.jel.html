@@ -35,8 +35,9 @@
 </div>
 
 <div style="border: 1px solid #a2ff00;">
+    {% set c = 0 %}
     {% for item in array %}
-        <i>{{ item }}</i>
+        <i>#{{ c++ }} - {{ item }}</i>
     <b>{{ loop.index }}</b>
     <h1>last: {{ loop.last }}</h1>
     <h2>first: {{ loop.first }}</h2>

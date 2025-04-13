@@ -23,6 +23,16 @@ public class BasicScopeValues implements ScopeValues {
     private final Map<String, Object> values = new HashMap<>();
 
     /**
+     * Returns the map containing all variables stored in this scope.
+     *
+     * @return a {@link Map} where keys are variable names and values are their corresponding values
+     */
+    @Override
+    public Map<String, Object> getValues() {
+        return values;
+    }
+
+    /**
      * 🔍 Retrieves the value associated with the given variable name.
      *
      * @param name 🏷️ the variable name
@@ -43,4 +53,6 @@ public class BasicScopeValues implements ScopeValues {
     public void set(String name, Object value) {
         values.put(name, value);
     }
+
+
 }
