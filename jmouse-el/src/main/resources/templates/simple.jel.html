@@ -9,6 +9,12 @@
     ['Charlie', 35, 'Paris']
 ] %}
 
+{% set numbers = [0, 1, 2] %}
+{% for n in numbers %}
+    <h1 style="color: red;">{{ values[n][2] }}</h1>
+{% endfor %}
+
+
 {% set colors = ['red', 'green', "blue", '#6753ff'] %}
 {{ cl('default') }}
 {% for color in colors %}

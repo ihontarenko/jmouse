@@ -1,5 +1,6 @@
 package org.jmouse.testing_ground.templates;
 
+import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.Visitor;
