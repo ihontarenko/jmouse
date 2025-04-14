@@ -124,19 +124,21 @@ public class RenderVisitor implements NodeVisitor {
             // Obtain the target (real) template by path from the engine.
             // Create a new "fake" template from the embed node's body and the dummy source.
             // Create a new evaluation context for the fake template.
-            Engine            engine = registry.getEngine();
-            TokenizableSource source = new StringSource("fake: " + path, "");
-            Template          real   = engine.getTemplate(path);
-            Template          fake   = engine.newTemplate(embedNode.getBody(), source);
-            EvaluationContext ctx    = fake.newContext();
+            Engine            engine          = registry.getEngine();
+            TokenizableSource source          = new StringSource("fake: " + path, "");
+            Template          real            = engine.getTemplate(path);
+            Template          fake            = engine.newTemplate(embedNode.getBody(), source);
+            EvaluationContext embeddedContext = fake.newContext();
 
-            ctx.setScopedChain(context.getScopedChain());
-
+            // Link scoped values to embedded template
+            // Import registry from root to fake
             // Establish inheritance: set the parent of the fake template to be the real template.
-            fake.setParent(real, ctx);
+            embeddedContext.setScopedChain(context.getScopedChain());
+            fake.getRegistry().importFrom(registry);
+            fake.setParent(real, embeddedContext);
 
             // Render the fake template using a new renderer instance and the fresh context.
-            Content inner = new TemplateRenderer(engine).render(fake, ctx);
+            Content inner = new TemplateRenderer(engine).render(fake, embeddedContext);
 
             LOGGER.info("Embed '{}' rendered", path);
 

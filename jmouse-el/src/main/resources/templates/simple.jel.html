@@ -1,6 +1,6 @@
 <h2>Hello {{ book.title }}!</h2>
 
-{% from 'macros' import hello %}
+{% from 'macros' import hello, color as cl %}
 {% import 'macros' as main %}
 
 {% set values = [
@@ -8,6 +8,22 @@
     ['Bob', 25, 'London'],
     ['Charlie', 35, 'Paris']
 ] %}
+
+{% set colors = ['red', 'green', "blue", '#6753ff'] %}
+{{ cl('olololo') }}
+{% for color in colors %}
+    {% for item in map %}
+        {% embed 'card' %}
+            {% block 'card_content' %}
+                macro call: {{ cl(loop.key, color) }}
+                <hr>
+                --- start_color
+                    <h1 style="color: {{ color }};">{{ color }}</h1>
+                --- end_color
+            {% endblock %}
+        {% endembed %}
+    {% endfor %}
+{% endfor %}
 
 <div>
     if-else block
@@ -34,22 +50,24 @@
     </ul>
 </div>
 
-<div style="border: 1px solid #a2ff00;">
+<div style="border: 1px solid #6753ff;">
     {% set c = 0 %}
     {% for item in array %}
         <i>#{{ c++ }} - {{ item }}</i>
     <b>{{ loop.index }}</b>
     <h1>last: {{ loop.last }}</h1>
     <h2>first: {{ loop.first }}</h2>
+    {% set key = loop.key %}
         {% embed 'card' %}
             {% block 'card_content' %}
-                {{ book.author }}
                 embedded in simple template
+                <h1>{{ main.printUser('John', c) }}</h1>
             {% endblock %}
         {% endembed %}
     {% else %}
             - not items for 'array'
     {% endfor %}
+    <b>end count: {{ c }}</b>
 </div>
 
 ---

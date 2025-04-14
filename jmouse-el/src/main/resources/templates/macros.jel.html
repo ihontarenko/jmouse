@@ -1,5 +1,5 @@
 {% macro input(name, value: 'default', attributes: {'style': 'color: red;', 'auto':true}) %}
-    <input style="border: 1px solid red" type="text" name="{{ name }}" value="{{ value }}" />
+    <input style="border: 1px solid #ff0044" type="text" name="{{ name }}" value="{{ value }}" />
 {% endmacro %}
 
 {% macro hello() %}
@@ -8,4 +8,8 @@
 
 {% macro printUser(name, age:34) %}
     <h1>[user: {{ name }}; age: {{ age }}]</h1>
+{% endmacro %}
+
+{% macro color(value, name : "#00c4ff") %}
+    <h1 style="border: 1px solid {{ name }};">val:{{ value }}</h1>
 {% endmacro %}

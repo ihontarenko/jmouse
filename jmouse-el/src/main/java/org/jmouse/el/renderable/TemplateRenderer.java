@@ -38,8 +38,12 @@ public class TemplateRenderer implements Renderer {
      */
     @Override
     public Content render(Template template, EvaluationContext context) {
-        // Linking: process macros, blocks and other pre-processing steps.
-        preProcessing(template, context);
+        if (template.isUninitialized()) {
+            // Linking: process macros, blocks and other pre-processing steps.
+            preProcessing(template, context);
+
+            template.setInitialized();
+        }
 
         // 1. Merge template registries from the inheritance stack.
         // 2. Determine the root (uppermost) template from the inheritance stack.

@@ -107,15 +107,36 @@ public interface ScopedChain {
     /**
      * ✏️ Sets the value of a variable in the <b>current (top-most) scope</b>.
      *
-     * @param name 🏷️ the variable name
+     * @param name  🏷️ the variable name
      * @param value 🔢 the new value to set
      */
     default void setValue(String name, Object value) {
-        // todo: find according scope if any and set nor set in current
+        findByKey(name).set(name, value);
+    }
 
+    /**
+     * Searches for the first scope in the chain that contains the specified key.
+     * <p>
+     * This method first checks the current top-most scope using {@link #peek()}. If the key is not
+     * found there, it iterates over all scopes obtained from {@link #chain()} and returns the first
+     * scope that contains the key. If the key is not found in any scope, the current (top-most) scope
+     * is returned by default.
+     * </p>
+     *
+     * @param key the variable key to search for
+     * @return the {@link ScopeValues} instance that contains the key, or the top-most scope if not found
+     */
+    default ScopeValues findByKey(String key) {
+        ScopeValues values = peek();
 
+        for (ScopeValues current : chain()) {
+            if (current.contains(key)) {
+                values = current;
+                break;
+            }
+        }
 
-        peek().set(name, value);
+        return values;
     }
 
     /**

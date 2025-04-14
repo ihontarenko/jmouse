@@ -6,6 +6,14 @@ import org.jmouse.el.node.Node;
 
 public interface Template {
 
+    void setInitialized();
+
+    boolean isInitialized();
+
+    default boolean isUninitialized() {
+        return !isInitialized();
+    }
+
     EvaluationContext newContext();
 
     TokenizableSource getSource();

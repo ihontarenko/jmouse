@@ -10,13 +10,24 @@ public class DefaultTemplate implements Template {
     private final TokenizableSource source;
     private final TemplateRegistry  registry;
     private final Engine            engine;
-    private final Node              root;
+    private final Node    root;
+    private  boolean initialized = false;
 
     public DefaultTemplate(Node root, TokenizableSource source, Engine engine) {
         this.source = source;
         this.engine = engine;
         this.root = root;
         this.registry = new TemplateRegistry(engine);
+    }
+
+    @Override
+    public void setInitialized() {
+        initialized = true;
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return !initialized;
     }
 
     @Override
@@ -60,6 +71,7 @@ public class DefaultTemplate implements Template {
     public Block getBlock(String name) {
         return registry.getBlock(name);
     }
+
     @Override
     public Template getParent(EvaluationContext context) {
         return context.getInheritance().getParent();
