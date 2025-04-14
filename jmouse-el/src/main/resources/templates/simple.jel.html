@@ -10,7 +10,7 @@
 ] %}
 
 {% set colors = ['red', 'green', "blue", '#6753ff'] %}
-{{ cl('olololo') }}
+{{ cl('default') }}
 {% for color in colors %}
     {% for item in map %}
         {% embed 'card' %}
@@ -167,3 +167,8 @@
     </ul>
 </div>
 
+{% apply trim|upper %}
+<header>
+    <h1>Welcome, Administrator {{ book.author | upper }}</h1>
+</header>
+{% end_apply %}

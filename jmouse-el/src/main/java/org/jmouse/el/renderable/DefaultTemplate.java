@@ -10,8 +10,8 @@ public class DefaultTemplate implements Template {
     private final TokenizableSource source;
     private final TemplateRegistry  registry;
     private final Engine            engine;
-    private final Node    root;
-    private  boolean initialized = false;
+    private final Node              root;
+    private       boolean           initialized = false;
 
     public DefaultTemplate(Node root, TokenizableSource source, Engine engine) {
         this.source = source;
@@ -27,7 +27,7 @@ public class DefaultTemplate implements Template {
 
     @Override
     public boolean isInitialized() {
-        return !initialized;
+        return initialized;
     }
 
     @Override

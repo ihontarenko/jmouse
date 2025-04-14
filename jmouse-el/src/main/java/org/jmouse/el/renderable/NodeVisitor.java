@@ -13,6 +13,14 @@ import org.jmouse.el.renderable.node.*;
 public interface NodeVisitor extends Visitor {
 
     /**
+     * Visits a ApplyNode.
+     *
+     * @param applyNode the set node to process
+     */
+    default void visit(ApplyNode applyNode) {
+    }
+
+    /**
      * Visits a SetNode.
      *
      * @param setNode the set node to process

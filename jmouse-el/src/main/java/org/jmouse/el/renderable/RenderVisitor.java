@@ -10,9 +10,9 @@ import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.lexer.TokenizableSource;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
-import org.jmouse.el.node.expression.BinaryOperation;
+import org.jmouse.el.node.expression.FilterNode;
 import org.jmouse.el.node.expression.FunctionNode;
-import org.jmouse.el.node.expression.LiteralNode;
+import org.jmouse.el.node.expression.literal.StringLiteralNode;
 import org.jmouse.el.renderable.evaluation.LoopVariables;
 import org.jmouse.el.renderable.node.*;
 import org.jmouse.el.renderable.node.sub.ConditionBranch;
@@ -25,6 +25,14 @@ import java.util.Map;
 
 import static java.lang.String.valueOf;
 
+/**
+ * The RenderVisitor traverses the template AST and produces the final rendered output.
+ * <p>
+ * It processes various node types such as container, text, print, block, include, embed,
+ * if, for, function, and apply nodes. The visitor uses the provided evaluation context,
+ * template registry, and content accumulator to render the template.
+ * </p>
+ */
 public class RenderVisitor implements NodeVisitor {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(RenderVisitor.class);
@@ -33,12 +41,24 @@ public class RenderVisitor implements NodeVisitor {
     private final TemplateRegistry  registry;
     private final Content           content;
 
+    /**
+     * Constructs a RenderVisitor with the specified content accumulator, template registry, and evaluation context.
+     *
+     * @param content  the content accumulator for the rendered output
+     * @param registry the template registry containing block and macro definitions
+     * @param context  the evaluation context used for expression evaluation and variable scope resolution
+     */
     public RenderVisitor(Content content, TemplateRegistry registry, EvaluationContext context) {
         this.context = context;
         this.registry = registry;
         this.content = content;
     }
 
+    /**
+     * Processes a ContainerNode by recursively visiting its children.
+     *
+     * @param container the container node holding child nodes
+     */
     @Override
     public void visit(ContainerNode container) {
         for (Node child : container.getChildren()) {
@@ -46,11 +66,25 @@ public class RenderVisitor implements NodeVisitor {
         }
     }
 
+    /**
+     * Processes a TextNode by appending its text content to the output.
+     *
+     * @param node the text node whose content is appended
+     */
     @Override
     public void visit(TextNode node) {
         content.append(node.getString());
     }
 
+    /**
+     * Processes a PrintNode by evaluating its expression and appending the result to the output.
+     * <p>
+     * If the expression is an instance of FunctionNode, it delegates to that node's visitor method.
+     * Otherwise, the expression is evaluated, converted to a String, and appended to the output.
+     * </p>
+     *
+     * @param printNode the print node to process
+     */
     @Override
     public void visit(PrintNode printNode) {
         ExpressionNode expression = printNode.getExpression();
@@ -66,6 +100,11 @@ public class RenderVisitor implements NodeVisitor {
         }
     }
 
+    /**
+     * Processes a BlockNode by finding the corresponding block in the template registry and rendering its body.
+     *
+     * @param node the block node to process
+     */
     @Override
     public void visit(BlockNode node) {
         if (node.getName().evaluate(context) instanceof String name) {
@@ -78,9 +117,9 @@ public class RenderVisitor implements NodeVisitor {
     }
 
     /**
-     * Visits an IncludeNode.
+     * Processes an IncludeNode by loading an external template and rendering it within the current output.
      *
-     * @param include the include node to process
+     * @param include the include node specifying the external template to include
      */
     @Override
     public void visit(IncludeNode include) {
@@ -98,41 +137,34 @@ public class RenderVisitor implements NodeVisitor {
 
 
     /**
-     * Processes an embed node by rendering an embedded template and appending its content.
+     * Processes an EmbedNode by rendering an embedded template and appending its output.
      * <p>
-     * The method works as follows:
-     * <ol>
-     *   <li>Evaluates the path expression of the embed node to obtain the template path.</li>
-     *   <li>If the path is valid (i.e. a String), it retrieves the "real" template from the engine.</li>
-     *   <li>It then creates a new "fake" template using the embed node's body and a generated source identifier.
-     *       This fake template represents a temporary template that wraps the embed node's content.</li>
-     *   <li>A new evaluation context is created for the fake template.</li>
-     *   <li>The fake template's parent is set to the real template, establishing an inheritance relationship.</li>
-     *   <li>The fake template is rendered via a new {@link TemplateRenderer}, and its content is appended to the current output.</li>
-     * </ol>
-     * If the path expression does not evaluate to a String, the embed node is not processed.
+     * The embed node's path expression is evaluated to obtain the embedded template path.
+     * A temporary (fake) template is created using the embed node's body, and its parent is set
+     * to the real template loaded via the engine. A new evaluation context is created for the fake template.
+     * Finally, the fake template is rendered and its content appended to the output.
      * </p>
      *
-     * @param embedNode the embed node containing the path expression and the body to be embedded
+     * @param embedNode the embed node to process
      */
     @Override
     public void visit(EmbedNode embedNode) {
         // Evaluate the embed node's path to obtain the template path.
         if (embedNode.getPath().evaluate(context) instanceof String path) {
-            // Retrieve the engine from the template registry.
-            // Create a dummy TokenizableSource; the source identifier includes the embedded template path.
-            // Obtain the target (real) template by path from the engine.
-            // Create a new "fake" template from the embed node's body and the dummy source.
-            // Create a new evaluation context for the fake template.
+            // 1. Retrieve the engine from the template registry.
+            // 2. Create a dummy TokenizableSource; the source identifier includes the embedded template path.
+            // 3. Obtain the target (real) template by path from the engine.
+            // 4. Create a new "fake" template from the embed node's body and the dummy source.
+            // 5. Create a new evaluation context for the fake template.
             Engine            engine          = registry.getEngine();
             TokenizableSource source          = new StringSource("fake: " + path, "");
             Template          real            = engine.getTemplate(path);
             Template          fake            = engine.newTemplate(embedNode.getBody(), source);
             EvaluationContext embeddedContext = fake.newContext();
 
-            // Link scoped values to embedded template
-            // Import registry from root to fake
-            // Establish inheritance: set the parent of the fake template to be the real template.
+            // 1. Link scoped values to embedded template
+            // 2. Import registry from root to fake
+            // 3. Establish inheritance: set the parent of the fake template to be the real template.
             embeddedContext.setScopedChain(context.getScopedChain());
             fake.getRegistry().importFrom(registry);
             fake.setParent(real, embeddedContext);
@@ -148,15 +180,14 @@ public class RenderVisitor implements NodeVisitor {
     }
 
     /**
-     * Processes an {@link IfNode} by iterating over its condition branches.
+     * Processes an IfNode by evaluating each condition branch sequentially.
      * <p>
-     * For each {@link ConditionBranch} in the IfNode, the "when" expression is evaluated. If the "when"
-     * expression is {@code null}, this branch is considered the 'else' clause. Otherwise, the expression
-     * is evaluated and converted to a Boolean. When a branch evaluates to {@code true} and has a corresponding
-     * "then" node, that node is processed and further branch evaluation is terminated.
+     * For each branch, if the "when" expression is null (representing the else branch) or evaluates
+     * to true (after conversion to Boolean), the corresponding "then" block is processed and further
+     * evaluation is stopped.
      * </p>
      *
-     * @param ifNode the if-statement node to be processed
+     * @param ifNode the if node to process
      */
     @Override
     public void visit(IfNode ifNode) {
@@ -249,15 +280,14 @@ public class RenderVisitor implements NodeVisitor {
     }
 
     /**
-     * Processes a FunctionNode by determining whether it should be evaluated as a function or as a macro.
+     * Processes a FunctionNode by checking for an extension-defined function.
      * <p>
-     * The method first checks the extension container for a function definition with the given name.
-     * If no function is found, it looks up a macro by the same name in the template registry and, if present,
-     * evaluates the macro. Otherwise, it directly evaluates the function node, converts the result to a String,
-     * and appends it to the output content.
+     * If the extension container does not define a function with the given name,
+     * the method attempts to evaluate it as a macro. Otherwise, it evaluates the function,
+     * converts the result to a String, appends it to the output, and logs the event.
      * </p>
      *
-     * @param node the FunctionNode representing a function or macro call to be processed
+     * @param node the function node to process
      */
     @Override
     public void visit(FunctionNode node) {
@@ -280,14 +310,35 @@ public class RenderVisitor implements NodeVisitor {
         }
     }
 
+    /**
+     * Processes an ApplyNode by rendering its body and applying a chain of filters.
+     * <p>
+     * The body of the ApplyNode is first rendered to produce an intermediate result.
+     * Each filter in the chain is then applied sequentially to the result.
+     * The final processed output is appended to the current content.
+     * </p>
+     *
+     * @param applyNode the apply node containing a body and a chain of filters to apply
+     */
     @Override
-    public void visit(LiteralNode<?> literal) {
-        System.out.println("Literal: " + literal.getValue());
-    }
+    public void visit(ApplyNode applyNode) {
+        // Render the body of the apply node.
+        Content temporary = Content.array();
+        Node    node      = applyNode.getBody();
 
-    @Override
-    public void visit(BinaryOperation binary) {
-        System.out.println("Binary: " + binary.toString());
-    }
+        node.accept(new RenderVisitor(temporary, registry, context));
 
+        String inner = temporary.toString();
+
+        // Apply each filter in the chain sequentially.
+        for (FilterNode filter : applyNode.getChain()) {
+            filter.setLeft(new StringLiteralNode(inner));
+            if (filter.evaluate(context) instanceof String string) {
+                inner = string;
+            }
+        }
+
+        // Append the final filtered result to the overall content.
+        content.append(inner);
+    }
 }

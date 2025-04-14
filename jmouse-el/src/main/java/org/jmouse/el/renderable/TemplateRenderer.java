@@ -2,6 +2,8 @@ package org.jmouse.el.renderable;
 
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Default implementation of the Renderer interface.
@@ -18,7 +20,8 @@ import org.jmouse.el.node.Node;
  */
 public class TemplateRenderer implements Renderer {
 
-    private final Engine engine;
+    private final static Logger LOGGER = LoggerFactory.getLogger(TemplateRenderer.class);
+    private final        Engine engine;
 
     /**
      * Constructs a Default renderer with the specified engine.
@@ -38,10 +41,9 @@ public class TemplateRenderer implements Renderer {
      */
     @Override
     public Content render(Template template, EvaluationContext context) {
+        // Linking: process macros, blocks and other pre-processing steps.
         if (template.isUninitialized()) {
-            // Linking: process macros, blocks and other pre-processing steps.
             preProcessing(template, context);
-
             template.setInitialized();
         }
 
@@ -51,6 +53,8 @@ public class TemplateRenderer implements Renderer {
         TemplateRegistry registry = getRegistry(context);
         Template         root     = getRootTemplate(context);
         Node             node     = root.getRoot();
+
+        LOGGER.info("Rendering template '{}' <- '{}'", root.getName(), template.getName());
 
         // Global variables
         context.setValue("_self", template);

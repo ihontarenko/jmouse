@@ -12,11 +12,15 @@ import org.jmouse.el.renderable.lexer.TemplateRecognizer;
 import org.jmouse.el.renderable.lexer.TemplateTokenizer;
 import org.jmouse.el.renderable.loader.TemplateLoader;
 import org.jmouse.el.renderable.parser.TemplateParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Reader;
 import java.io.StringReader;
 
 public class TemplateEngine implements Engine {
+
+    private Logger LOGGER = LoggerFactory.getLogger(TemplateEngine.class);
 
     private ExtensionContainer         extensions;
     private Cache<Cache.Key, Template> cache;
@@ -43,11 +47,13 @@ public class TemplateEngine implements Engine {
 
         if (cache.contains(cacheKey)) {
             cached = cache.get(cacheKey);
+            LOGGER.info("Get '{}' cached", name);
         } else {
             Reader   reader   = loadTemplate(name);
             Template template = parseTemplate(name, reader);
             cache.put(cacheKey, template);
             cached = template;
+            LOGGER.info("Get '{}' new", name);
         }
 
         return cached;
