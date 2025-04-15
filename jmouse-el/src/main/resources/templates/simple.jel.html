@@ -10,8 +10,31 @@
 ] %}
 
 {% set numbers = [0, 1, 2] %}
+
+{% scope with {'externalNumbers': numbers} %}
+    <h3>Local</h3>
+    <ul>
+        {% for n in numbers %}
+            <li>
+                <u>local - {{ n }}</u>
+            </li>
+        {% endfor %}
+    </ul>
+    <h3>External</h3>
+    <ul>
+        {% for n in externalNumbers %}
+            <li>
+                <u>external - {{ n }}</u>
+            </li>
+        {% endfor %}
+    </ul>
+{% endscope %}
+
+
 {% for n in numbers %}
-    <h1 style="color: red;">{{ values[n][2] }}</h1>
+    {% if n is odd %}
+        <h1 style="color: red;">{{ values[n][2] }}</h1>
+    {% endif %}
 {% endfor %}
 
 
@@ -172,6 +195,9 @@
         <li>{{ main.printUser('John', 33) }}</li>
     </ul>
 </div>
+
+<b>{{ book.class }}</b>
+<b>{{ numbers[1].class }}</b>
 
 {% apply trim|upper %}
 <header>

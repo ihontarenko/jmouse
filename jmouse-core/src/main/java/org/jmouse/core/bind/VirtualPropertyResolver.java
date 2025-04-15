@@ -108,6 +108,15 @@ public interface VirtualPropertyResolver {
         @Override
         public VirtualProperty<?> getVirtualProperty(Object instance, String name) {
             Map<String, VirtualProperty<?>> names = properties.get(instance.getClass());
+
+            if (names == null) {
+                for (Class<?> type : properties.keySet()) {
+                    if (type.isAssignableFrom(instance.getClass())) {
+                        names = properties.get(type);
+                    }
+                }
+            }
+
             return names != null ? names.get(name) : null;
         }
 

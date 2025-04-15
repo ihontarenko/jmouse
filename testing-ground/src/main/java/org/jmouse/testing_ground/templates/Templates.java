@@ -2,6 +2,7 @@ package org.jmouse.testing_ground.templates;
 
 import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.evaluation.ReflectionClassPropertyResolver;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.*;
@@ -41,16 +42,11 @@ public class Templates {
         }});
         context.setValue("string", "Hello World");
 
-        template.getRoot().accept(new Visitor() {
-            @Override
-            public void visit(Node node) {
-                System.out.println(node);
-            }
-        });
+        context.getVirtualProperties().addVirtualProperty(new ReflectionClassPropertyResolver());
 
         Content content = renderer.render(template, context);
 
-        System.out.println(content.toString());
+        System.out.println(content.toString().length());
     }
 
     private static Book getBook() {

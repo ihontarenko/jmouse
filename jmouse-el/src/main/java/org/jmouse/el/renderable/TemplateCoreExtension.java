@@ -89,7 +89,7 @@ public class TemplateCoreExtension extends CoreExtension implements TemplateExte
                 new BlockParser(),
                 new MacroParser(),
                 new FromParser(),
-                new WithParser(),
+                new ScopeParser(),
                 new ApplyParser(),
                 new EmbedParser(),
                 new LoremParser()

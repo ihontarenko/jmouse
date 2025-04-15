@@ -12,6 +12,7 @@ import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.FilterNode;
 import org.jmouse.el.node.expression.FunctionNode;
+import org.jmouse.el.node.expression.MapNode;
 import org.jmouse.el.node.expression.literal.StringLiteralNode;
 import org.jmouse.el.renderable.evaluation.LoopVariables;
 import org.jmouse.el.renderable.node.*;
@@ -98,6 +99,39 @@ public class RenderVisitor implements NodeVisitor {
                 content.append(conversion.convert(evaluated, String.class));
             }
         }
+    }
+
+    /**
+     * Processes a ScopeNode AST node
+     *
+     * @param scopeNode the set node to process
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public void visit(ScopeNode scopeNode) {
+        Node        body  = scopeNode.getBody();
+        MapNode     with  = scopeNode.getWith();
+        ScopedChain chain = context.getScopedChain();
+
+        chain.push();
+
+        if (with != null && with.evaluate(context) instanceof Map<?,?> map) {
+            ((Map<String, Object>)map).forEach(chain::setValue);
+        }
+
+        body.accept(this);
+
+        chain.pop();
+    }
+
+    /**
+     * Visits a SetNode.
+     *
+     * @param setNode the block node to process
+     */
+    @Override
+    public void visit(SetNode setNode) {
+        context.setValue(setNode.getVariable(), setNode.getValue().evaluate(context));
     }
 
     /**

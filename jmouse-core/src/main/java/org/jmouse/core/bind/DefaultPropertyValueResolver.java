@@ -67,7 +67,7 @@ public class DefaultPropertyValueResolver implements PropertyValueResolver, Virt
         try {
             // Attempt to resolve the property via the default resolution mechanism.
             value = resolve(name);
-        } catch (IllegalArgumentException ignored) {
+        } catch (Exception ignored) {
             // Ignore exceptions during standard resolution.
         }
 

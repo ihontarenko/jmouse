@@ -173,6 +173,16 @@ public enum TemplateToken implements Token.Type {
     T_END_EMBED(20022, "endembed", "end_embed"),
 
     /**
+     * 'scope' keyword type.
+     */
+    T_SCOPE(20023, "scope"),
+
+    /**
+     * 'endscope' keyword type.
+     */
+    T_END_SCOPE(20023, "endscope", "end_scope"),
+
+    /**
      * 'ignore_missing' keyword type.
      */
     T_IGNORE_MISSING(21000, "ignore_missing"),

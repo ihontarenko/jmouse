@@ -51,16 +51,6 @@ public class PreProcessingVisitor implements NodeVisitor {
     }
 
     /**
-     * Visits a SetNode.
-     *
-     * @param setNode the block node to process
-     */
-    @Override
-    public void visit(SetNode setNode) {
-        context.setValue(setNode.getVariable(), setNode.getValue().evaluate(context));
-    }
-
-    /**
      * Visits an ImportNode.
      *
      * @param importNode the import node to process
