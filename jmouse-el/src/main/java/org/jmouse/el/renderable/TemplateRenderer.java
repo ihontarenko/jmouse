@@ -11,10 +11,10 @@ import org.slf4j.LoggerFactory;
  * This implementation performs the following steps:
  * <ol>
  *     <li>Linking: it binds macros and blocks using {@code MacroLinker} and {@code BlockLinker}
- *         and performs pre-processing via {@code PreProcessingVisitor}.</li>
+ *         and performs pre-processing via {@code InitializerVisitor}.</li>
  *     <li>Merging: it merges the template registries from the inheritance stack to form an effective registry.</li>
  *     <li>Determining the root template: retrieves the uppermost template from the inheritance stack.</li>
- *     <li>Rendering: it invokes a {@code RenderVisitor} on the root node to produce the final content.</li>
+ *     <li>Rendering: it invokes a {@code RendererVisitor} on the root node to produce the final content.</li>
  * </ol>
  * </p>
  */
@@ -62,8 +62,8 @@ public class TemplateRenderer implements Renderer {
         // Create an initial Content object.
         Content content = Content.array();
 
-        // Render the node using RenderVisitor.
-        node.accept(new RenderVisitor(content, registry, context));
+        // Render the node using RendererVisitor.
+        node.accept(new RendererVisitor(content, registry, context));
 
         return content;
     }
@@ -98,7 +98,7 @@ public class TemplateRenderer implements Renderer {
     /**
      * Performs linking of the template.
      * <p>
-     * This method recursively applies MacroLinker, BlockLinker, and PreProcessingVisitor to
+     * This method recursively applies MacroLinker, BlockLinker, and InitializerVisitor to
      * the template and its parent templates.
      * </p>
      *
@@ -109,7 +109,7 @@ public class TemplateRenderer implements Renderer {
         Node root = template.getRoot();
 
         // Link macros, blocks and perform pre-processing.
-        root.accept(new PreProcessingVisitor(template, context));
+        root.accept(new InitializerVisitor(template, context));
 
         Template parent = template.getParent(context);
 

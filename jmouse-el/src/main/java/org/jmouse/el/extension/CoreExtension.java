@@ -49,7 +49,8 @@ public class CoreExtension implements Extension {
                 new DefaultFilter(),
                 new TrimFilter(),
                 new TypeFilter(),
-                new LengthFilter()
+                new LengthFilter(),
+                new SplitFilter()
         );
     }
 
@@ -81,6 +82,7 @@ public class CoreExtension implements Extension {
                 new ExpressionParser(),
                 new OperatorParser(),
                 new PrimaryExpressionParser(),
+                new RangeParser(),
                 new FunctionParser(),
                 new ScopedCallParser(),
                 new TestParser(),

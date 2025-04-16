@@ -68,21 +68,19 @@ public class DefaultPropertyValueResolver implements PropertyValueResolver, Virt
             // Attempt to resolve the property via the default resolution mechanism.
             value = resolve(name);
         } catch (Exception ignored) {
-            // Ignore exceptions during standard resolution.
-        }
+            // If the direct value is null, try resolving it as a virtual property.
+            if (getVirtualProperties() != null) {
+                PropertyPath            path     = PropertyPath.forPath(name);
+                PropertyPath            tail     = path.tail();
+                VirtualPropertyResolver resolver = getVirtualProperties();
+                Object                  relative = getAccessor().navigate(path, 1).asObject();
 
-        // If the direct value is null, try resolving it as a virtual property.
-        if (value == null && getVirtualProperties() != null) {
-            PropertyPath            path     = PropertyPath.forPath(name);
-            PropertyPath            tail     = path.tail();
-            VirtualPropertyResolver resolver = getVirtualProperties();
-            Object                  relative = getAccessor().navigate(path, 1).asObject();
-
-            if (relative != null) {
-                @SuppressWarnings({"unchecked"}) VirtualProperty<Object> virtual = (VirtualProperty<Object>) resolver
-                        .getVirtualProperty(relative, tail.toString());
-                if (virtual != null && virtual.isReadable()) {
-                    value = virtual.readValue(relative);
+                if (relative != null) {
+                    @SuppressWarnings({"unchecked"}) VirtualProperty<Object> virtual = (VirtualProperty<Object>) resolver
+                            .getVirtualProperty(relative, tail.toString());
+                    if (virtual != null && virtual.isReadable()) {
+                        value = virtual.readValue(relative);
+                    }
                 }
             }
         }

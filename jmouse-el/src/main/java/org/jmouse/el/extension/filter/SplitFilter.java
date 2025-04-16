@@ -1,18 +1,22 @@
 package org.jmouse.el.extension.filter;
 
+import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.reflection.ClassTypeInspector;
-import org.jmouse.core.reflection.JavaType;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 
-public class TypeFilter extends AbstractFilter {
+public class SplitFilter extends AbstractFilter {
 
-    /**
-     * Applies this filter to the specified input.
-     */
     @Override
     public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
-        return input == null ? "NULL" : JavaType.forInstance(input).getRawType().getName();
+        Object[] result = new Object[0];
+
+        if (input instanceof String string) {
+            Conversion conversion = context.getConversion();
+            result = string.split(conversion.convert(arguments.getFirst(), String.class));
+        }
+
+        return result;
     }
 
     /**
@@ -20,6 +24,6 @@ public class TypeFilter extends AbstractFilter {
      */
     @Override
     public String getName() {
-        return "type";
+        return "split";
     }
 }

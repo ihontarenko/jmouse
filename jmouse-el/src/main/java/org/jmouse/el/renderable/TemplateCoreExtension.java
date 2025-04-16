@@ -81,6 +81,7 @@ public class TemplateCoreExtension extends CoreExtension implements TemplateExte
     public List<TagParser> getTagParsers() {
         return List.of(
                 new SetParser(),
+                new DoParser(),
                 new ForParser(),
                 new IfParser(),
                 new IncludeParser(),
@@ -92,6 +93,7 @@ public class TemplateCoreExtension extends CoreExtension implements TemplateExte
                 new ScopeParser(),
                 new ApplyParser(),
                 new EmbedParser(),
+                new RenderParser(),
                 new LoremParser()
         );
     }

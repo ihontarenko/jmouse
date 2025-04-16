@@ -88,7 +88,7 @@ public class TemplateRegistry {
      *
      * @param imported the source registry whose definitions are to be imported
      */
-    public void importFrom(TemplateRegistry imported) {
+    public void copyFrom(TemplateRegistry imported) {
         merge(imported, this);
     }
 
@@ -102,7 +102,7 @@ public class TemplateRegistry {
      * @param imported the registry from which definitions are imported
      * @param scope    the alias to prefix imported definition names with
      */
-    public void importFrom(TemplateRegistry imported, String scope) {
+    public void copyMacros(TemplateRegistry imported, String scope) {
         imported.macros.forEach((name, macro) -> {
             String scopedName = scope + "." + name;
             this.macros.put(scopedName, macro);

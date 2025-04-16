@@ -12,6 +12,7 @@ import org.jmouse.testing_ground.binder.dto.Book;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Templates {
 
@@ -19,17 +20,18 @@ public class Templates {
         TemplateLoader<String> loader = new ClasspathLoader();
 
         loader.setPrefix("templates/");
-        loader.setSuffix(".jel.html");
+        loader.setSuffix(".j.html");
 
         Engine engine = new TemplateEngine();
 
         engine.setLoader(loader);
 
-        Template          template = engine.getTemplate("simple");
+        Template          template = engine.getTemplate("site");
         Renderer          renderer = new TemplateRenderer(engine);
         EvaluationContext context  = template.newContext();
 
-        context.setValue("book", getBook());
+        context.setValue("book", getBook("Stephen King", "The Shining"));
+        context.setValue("books", getBookList());
         context.setValue("array", new String[]{"a", "b", "c"});
         context.setValue("map", new HashMap<>(){{
             put("key1", "valueA");
@@ -49,13 +51,30 @@ public class Templates {
         System.out.println(content.toString().length());
     }
 
-    private static Book getBook() {
+    private static Book getBook(String author, String title) {
         Book book = new Book();
 
-        book.setTitle("The Lord of the Rings");
-        book.setAuthor("J. R. R. Tolkien");
+        book.setTitle(title);
+        book.setAuthor(author);
 
         return book;
+    }
+
+    private static List<Book> getBookList() {
+        List<Book> books = new ArrayList<>();
+
+        books.add(getBook("J.K. Rowling", "Harry Potter and the Sorcerer's Stone"));
+        books.add(getBook("Suzanne Collins", "The Hunger Games"));
+        books.add(getBook("Stephen King", "The Shining"));
+        books.add(getBook("Gillan Flynn", "Gone Girl"));
+        books.add(getBook("Dan Brown", "The Da Vinci Code"));
+        books.add(getBook("John Green", "The Fault in Our Stars"));
+        books.add(getBook("Veronica Roth", "Divergent"));
+        books.add(getBook("Ernest Cline", "Ready Player One"));
+        books.add(getBook("E.L. James", "Fifty Shades of Grey"));
+        books.add(getBook("Stieg Larsson", "The Girl with the Dragon Tattoo"));
+
+        return books;
     }
 
 }

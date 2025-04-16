@@ -3,6 +3,7 @@ package org.jmouse.el.extension.filter;
 import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
+import org.jmouse.util.helper.Iterations;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -22,6 +23,8 @@ public class LengthFilter extends AbstractFilter {
             length = Array.getLength(input);
         } else if (type.isString()) {
             length = ((String) input).length();
+        } else if (type.isIterable()) {
+            length = Iterations.size((Iterable<?>)input);
         }
 
         return length;

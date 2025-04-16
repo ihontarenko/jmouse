@@ -1,0 +1,47 @@
+{% extends 'layout/index' %}
+{% block 'content' %}
+    Site Page
+    {% embed 'extention/card' %}
+        {% block 'card_content' %}1{% endblock %}
+    {% endembed %}
+    <hr>
+    {% set stringKey = "hello_world!!!" %}
+    <ul>
+        {% for key in stringKey|split('_') %}
+            <li>
+                <b>{{ key }}</b>
+            </li>
+        {% endfor %}
+    </ul>
+    <hr>
+    {% embed 'extention/card' %}
+        {% block 'card_content' %}
+        <div style="border: 1px solid #ff41ba">
+            {% for word in books[0]|type|split('\.') %}
+                <div>{{ word }}</div>
+            {% endfor %}
+        </div>
+        <div style="border: 1px solid red">
+            <ul>
+                {% for book in books %}
+                    <li>title: {{ book.title }}</li>
+                    <ul>
+                        {% for word in book.title|split(' ') %}
+                            <li>
+                                <i>{{ word | upper }}</i>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endfor %}
+            </ul>
+        </div>
+
+        {% endblock %}
+    {% endembed %}
+{% endblock %}
+{% block 'title' %}Site{% endblock %}
+{% block 'footer' %}
+    {% for i in 1..10 %}
+        Index: {{ i }}<br>
+    {% endfor %}
+{% endblock %}

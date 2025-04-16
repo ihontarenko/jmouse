@@ -3,24 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Pines Templates - Index</title>
+    <title>jMouse EL - {% block 'title' %}Default{% endblock %}</title>
 </head>
 <body>
 
-    <h1>Main Page - {% block 'title' %}Default{% endblock %}</h1>
+    <h1>jMouse EL - {% render 'title' %}</h1>
 
     {% block 'content' %}
         <h1>Index</h1>
     {% endblock %}
 
-    <ul>
-        <li>Loader</li>
-        <li>CharSequence</li>
-        <li>Lexer</li>
-    </ul>
-
     <footer>
-        Leafs - 2025
+        {% block 'footer' %}
+            default footer
+        {% endblock %}
     </footer>
 
 </body>

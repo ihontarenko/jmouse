@@ -111,7 +111,7 @@ public interface ScopedChain {
      * @param value 🔢 the new value to set
      */
     default void setValue(String name, Object value) {
-        findByKey(name).set(name, value);
+        findValuesByExistingKey(name).set(name, value);
     }
 
     /**
@@ -126,7 +126,7 @@ public interface ScopedChain {
      * @param key the variable key to search for
      * @return the {@link ScopeValues} instance that contains the key, or the top-most scope if not found
      */
-    default ScopeValues findByKey(String key) {
+    default ScopeValues findValuesByExistingKey(String key) {
         ScopeValues values = peek();
 
         for (ScopeValues current : chain()) {

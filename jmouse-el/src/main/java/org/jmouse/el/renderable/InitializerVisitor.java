@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The PreProcessingVisitor is responsible for traversing the template's AST and registering
+ * The InitializerVisitor is responsible for traversing the template's AST and registering
  * macros, blocks, and handling template extension directives before the rendering process.
  * <p>
  * This visitor processes container nodes by recursively visiting their children.
@@ -20,20 +20,20 @@ import org.slf4j.LoggerFactory;
  * and sets up the inheritance relationship.
  * </p>
  */
-public class PreProcessingVisitor implements NodeVisitor {
+public class InitializerVisitor implements NodeVisitor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PreProcessingVisitor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InitializerVisitor.class);
 
     private final EvaluationContext context;
     private final Template          template;
 
     /**
-     * Constructs a PreProcessingVisitor for the specified template and evaluation context.
+     * Constructs a InitializerVisitor for the specified template and evaluation context.
      *
      * @param template the template to process
      * @param context  the evaluation context containing conversion and other runtime data
      */
-    public PreProcessingVisitor(Template template, EvaluationContext context) {
+    public InitializerVisitor(Template template, EvaluationContext context) {
         this.context = context;
         this.template = template;
     }
@@ -66,9 +66,14 @@ public class PreProcessingVisitor implements NodeVisitor {
         Object evaluated = importNode.getScope().evaluate(context);
         String scope     = conversion.convert(evaluated, String.class);
 
-        imported.getRoot().accept(new PreProcessingVisitor(imported, context));
+        if (!imported.isInitialized()) {
+            imported.getRoot().accept(new InitializerVisitor(imported, context));
+            imported.setInitialized();
+        } else {
+            LOGGER.info("Already initialized: " + importNode);
+        }
 
-        self.importFrom(imported.getRegistry(), scope);
+        self.copyMacros(imported.getRegistry(), scope);
     }
 
     /**
@@ -84,7 +89,12 @@ public class PreProcessingVisitor implements NodeVisitor {
         TemplateRegistry self       = template.getRegistry();
         Template         imported   = self.getEngine().getTemplate(name);
 
-        imported.getRoot().accept(new PreProcessingVisitor(imported, context));
+        if (!imported.isInitialized()) {
+            imported.getRoot().accept(new InitializerVisitor(imported, context));
+            imported.setInitialized();
+        } else {
+            LOGGER.info("Already initialized: " + from);
+        }
 
         for (NameNode nameNode : from.getNameSet().getSet()) {
             Macro macro = imported.getMacro(nameNode.getName());
@@ -117,8 +127,8 @@ public class PreProcessingVisitor implements NodeVisitor {
      */
     @Override
     public void visit(BlockNode node) {
-        Conversion conversion = context.getConversion();
         Object     evaluated  = node.getName().evaluate(context);
+        Conversion conversion = context.getConversion();
         String     name       = conversion.convert(evaluated, String.class);
 
         LOGGER.info("Registering block '{}' into template '{}'", name, template.getName());

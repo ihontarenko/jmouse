@@ -27,29 +27,29 @@ import java.util.Map;
 import static java.lang.String.valueOf;
 
 /**
- * The RenderVisitor traverses the template AST and produces the final rendered output.
+ * The RendererVisitor traverses the template AST and produces the final rendered output.
  * <p>
  * It processes various node types such as container, text, print, block, include, embed,
  * if, for, function, and apply nodes. The visitor uses the provided evaluation context,
  * template registry, and content accumulator to render the template.
  * </p>
  */
-public class RenderVisitor implements NodeVisitor {
+public class RendererVisitor implements NodeVisitor {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(RenderVisitor.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(RendererVisitor.class);
 
     private final EvaluationContext context;
     private final TemplateRegistry  registry;
     private final Content           content;
 
     /**
-     * Constructs a RenderVisitor with the specified content accumulator, template registry, and evaluation context.
+     * Constructs a RendererVisitor with the specified content accumulator, template registry, and evaluation context.
      *
      * @param content  the content accumulator for the rendered output
      * @param registry the template registry containing block and macro definitions
      * @param context  the evaluation context used for expression evaluation and variable scope resolution
      */
-    public RenderVisitor(Content content, TemplateRegistry registry, EvaluationContext context) {
+    public RendererVisitor(Content content, TemplateRegistry registry, EvaluationContext context) {
         this.context = context;
         this.registry = registry;
         this.content = content;
@@ -102,6 +102,18 @@ public class RenderVisitor implements NodeVisitor {
     }
 
     /**
+     * Visits a DoNode.
+     *
+     * @param doNode the set node to process
+     */
+    @Override
+    public void visit(DoNode doNode) {
+        ExpressionNode expression = doNode.getExpression();
+        Object         evaluated  = expression.evaluate(context);
+        LOGGER.info("Do: {}; Result: {}", expression, evaluated);
+    }
+
+    /**
      * Processes a ScopeNode AST node
      *
      * @param scopeNode the set node to process
@@ -115,8 +127,8 @@ public class RenderVisitor implements NodeVisitor {
 
         chain.push();
 
-        if (with != null && with.evaluate(context) instanceof Map<?,?> map) {
-            ((Map<String, Object>)map).forEach(chain::setValue);
+        if (with != null && with.evaluate(context) instanceof Map<?, ?> map) {
+            ((Map<String, Object>) map).forEach(context::setValue);
         }
 
         body.accept(this);
@@ -132,6 +144,18 @@ public class RenderVisitor implements NodeVisitor {
     @Override
     public void visit(SetNode setNode) {
         context.setValue(setNode.getVariable(), setNode.getValue().evaluate(context));
+    }
+
+    /**
+     * Visits a RenderNode.
+     *
+     * @param renderNode the set node to process
+     */
+    @Override
+    public void visit(RenderNode renderNode) {
+        if (renderNode.getName().evaluate(context) instanceof String string) {
+            registry.getBlock(string).node().accept(this);
+        }
     }
 
     /**
@@ -164,8 +188,8 @@ public class RenderVisitor implements NodeVisitor {
 
             LOGGER.info("Include '{}' template", name);
 
-            root.accept(new PreProcessingVisitor(included, ctx));
-            root.accept(new RenderVisitor(content, included.getRegistry(), ctx));
+            root.accept(new InitializerVisitor(included, ctx));
+            root.accept(new RendererVisitor(content, included.getRegistry(), ctx));
         }
     }
 
@@ -191,7 +215,7 @@ public class RenderVisitor implements NodeVisitor {
             // 4. Create a new "fake" template from the embed node's body and the dummy source.
             // 5. Create a new evaluation context for the fake template.
             Engine            engine          = registry.getEngine();
-            TokenizableSource source          = new StringSource("fake: " + path, "");
+            TokenizableSource source          = new StringSource("embedded: " + path, "");
             Template          real            = engine.getTemplate(path);
             Template          fake            = engine.newTemplate(embedNode.getBody(), source);
             EvaluationContext embeddedContext = fake.newContext();
@@ -200,7 +224,7 @@ public class RenderVisitor implements NodeVisitor {
             // 2. Import registry from root to fake
             // 3. Establish inheritance: set the parent of the fake template to be the real template.
             embeddedContext.setScopedChain(context.getScopedChain());
-            fake.getRegistry().importFrom(registry);
+            fake.getRegistry().copyFrom(registry);
             fake.setParent(real, embeddedContext);
 
             // Render the fake template using a new renderer instance and the fresh context.
@@ -358,9 +382,9 @@ public class RenderVisitor implements NodeVisitor {
     public void visit(ApplyNode applyNode) {
         // Render the body of the apply node.
         Content temporary = Content.array();
-        Node    node      = applyNode.getBody();
+        Node    body      = applyNode.getBody();
 
-        node.accept(new RenderVisitor(temporary, registry, context));
+        body.accept(new RendererVisitor(temporary, registry, context));
 
         String inner = temporary.toString();
 

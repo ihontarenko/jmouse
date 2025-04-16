@@ -19,9 +19,11 @@ public class PrimaryExpressionParser implements Parser {
         // parse left expression
         if (cursor.matchesSequence(T_IDENTIFIER, BasicToken.T_OPEN_PAREN)) {
             left = context.getParser(FunctionParser.class).parse(cursor, context);
+        } else if (cursor.matchesSequence(T_INT, T_DOUBLE_DOT)) {
+            left = context.getParser(RangeParser.class).parse(cursor, context);
         } else if (cursor.isCurrent(T_INT, T_FLOAT, T_STRING, T_TRUE, T_FALSE, T_NULL)) {
             left = context.getParser(LiteralParser.class).parse(cursor, context);
-        } else if (cursor.matchesSequence(T_IDENTIFIER, T_DOT, T_IDENTIFIER, T_OPEN_PAREN)) {
+        }  else if (cursor.matchesSequence(T_IDENTIFIER, T_DOT, T_IDENTIFIER, T_OPEN_PAREN)) {
             left = context.getParser(ScopedCallParser.class).parse(cursor, context);
         } else if (cursor.matchesSequence(T_IDENTIFIER, T_DOT, T_IDENTIFIER)) {
             left = context.getParser(PropertyParser.class).parse(cursor, context);

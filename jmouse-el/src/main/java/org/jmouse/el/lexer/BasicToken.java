@@ -58,6 +58,7 @@ public enum BasicToken implements Token.Type {
     T_AT(2000, "@"),
     T_HASH(2010, "#"),
     T_DOT(2060, "."),
+    T_DOUBLE_DOT(2065, ".."),
     T_COMMA(2070, ","),
     T_NEGATE(2080, "!"),
     T_QUESTION(2090, "?"),

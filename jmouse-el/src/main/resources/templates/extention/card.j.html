@@ -1,0 +1,13 @@
+{% from 'extention/macros' import hello as hi %}
+{% import 'extention/macros' as main %}
+<div>
+    <h1>Card Template</h1>
+    --- START: card template
+    <div>
+        {{ hi() }}
+    </div>
+    <div>
+        {% block 'card_content' %}{% endblock %}
+    </div>
+    --- END: card template
+</div>
