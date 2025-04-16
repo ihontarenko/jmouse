@@ -25,4 +25,8 @@ public class UseNode extends AbstractNode {
         this.names = names;
     }
 
+    @Override
+    public String toString() {
+        return "USE: %s".formatted(path);
+    }
 }
