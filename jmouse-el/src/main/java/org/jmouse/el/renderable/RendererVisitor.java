@@ -311,10 +311,11 @@ public class RendererVisitor implements NodeVisitor {
 
                 Object item = iterator.next();
 
-                loop.setValue(item);
-                loop.setLast(!iterator.hasNext());
                 loop.setFirst(counter == 0);
                 loop.setIndex(counter++);
+                loop.setKey(counter);
+                loop.setValue(item);
+                loop.setLast(!iterator.hasNext());
 
                 scope.setValue("loop", loop);
 

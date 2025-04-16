@@ -193,6 +193,16 @@ public enum TemplateToken implements Token.Type {
     T_DO(20024, "do"),
 
     /**
+     * 'use' keyword type.
+     */
+    T_USE(20025, "use"),
+
+    /**
+     * 'get' keyword type.
+     */
+    T_GET(20026, "get"),
+
+    /**
      * 'ignore_missing' keyword type.
      */
     T_IGNORE_MISSING(21000, "ignore_missing"),

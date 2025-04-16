@@ -5,6 +5,7 @@ import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.renderable.parser.RootParser;
 import org.jmouse.el.renderable.parser.TemplateParser;
+import org.jmouse.el.renderable.parser.tag.UseParser;
 import org.jmouse.el.renderable.parser.tag.*;
 
 import java.util.ArrayList;
@@ -85,6 +86,7 @@ public class TemplateCoreExtension extends CoreExtension implements TemplateExte
                 new ForParser(),
                 new IfParser(),
                 new IncludeParser(),
+                new UseParser(),
                 new ImportParser(),
                 new ExtendsParser(),
                 new BlockParser(),
