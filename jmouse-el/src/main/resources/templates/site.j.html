@@ -1,14 +1,24 @@
 {% extends 'layout/index' %}
 {% use 'extention/blocks' get block import default_footer %}
+{% use 'extention/macros' get macro as m1v %}
 {% block 'content' %}
     Site Page
+
+    <div>
+        <h2>{{ 1..10 | join(", ") }}</h2>
+    </div>
+
+    <div>
+        {{ m1v.color('Hello Leafs!!!', '#ff00ff') }}
+    </div>
+
     {% embed 'extention/card' %}
         {% block 'card_content' %}1{% endblock %}
     {% endembed %}
     <hr>
-    {% set stringKey = "hello_world!!!" %}
+    {% set s = "hello_world!!!" %}
     <ul>
-        {% for key in stringKey|split('_') %}
+        {% for key in s|split('_') %}
             <li>
                 <b>{{ key }}</b>
             </li>

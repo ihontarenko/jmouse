@@ -50,7 +50,8 @@ public class CoreExtension implements Extension {
                 new TrimFilter(),
                 new TypeFilter(),
                 new LengthFilter(),
-                new SplitFilter()
+                new SplitFilter(),
+                new JoinFilter()
         );
     }
 

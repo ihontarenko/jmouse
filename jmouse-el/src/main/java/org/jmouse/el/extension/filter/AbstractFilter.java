@@ -1,5 +1,6 @@
 package org.jmouse.el.extension.filter;
 
+import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Filter;
 
 /**
@@ -30,4 +31,9 @@ abstract public class AbstractFilter implements Filter {
     public String toString() {
         return "Filter: " + getName();
     }
+
+    protected String toString(EvaluationContext context, Object input) {
+        return context.getConversion().convert(input, String.class);
+    }
+
 }
