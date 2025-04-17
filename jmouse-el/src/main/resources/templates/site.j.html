@@ -1,5 +1,5 @@
 {% extends 'layout/index' %}
-{% use 'extention/blocks' get block %}
+{% use 'extention/blocks' get block import default_footer %}
 {% block 'content' %}
     Site Page
     {% embed 'extention/card' %}
@@ -42,7 +42,7 @@
 {% endblock %}
 {% block 'title' %}Site{% endblock %}
 {% block 'footer' %}
-    {% render 'info' %}
+    {% render 'default_footer' %}
     {% for i in 1..10 %}
         Index: {{ i }}<br>
     {% endfor %}

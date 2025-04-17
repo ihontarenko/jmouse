@@ -10,6 +10,7 @@ public class BlockNode extends AbstractNode {
 
     private ExpressionNode name;
     private Node           body;
+    private boolean override = false;
 
     public ExpressionNode getName() {
         return name;
@@ -27,6 +28,14 @@ public class BlockNode extends AbstractNode {
         this.body = body;
     }
 
+    public boolean isOverride() {
+        return override;
+    }
+
+    public void setOverride(boolean override) {
+        this.override = override;
+    }
+
     /**
      * Recursively executes the given consumer on this node and all its children.
      *
@@ -38,6 +47,5 @@ public class BlockNode extends AbstractNode {
             nv.visit(this);
         }
     }
-
 
 }

@@ -38,6 +38,14 @@ public class UseNode extends AbstractNode {
         this.alias = alias;
     }
 
+    public Token.Type getType() {
+        return type;
+    }
+
+    public void setType(Token.Type type) {
+        this.type = type;
+    }
+
     @Override
     public void accept(Visitor visitor) {
         if (visitor instanceof NodeVisitor nv) {
@@ -50,11 +58,4 @@ public class UseNode extends AbstractNode {
         return "USE: %s FOR %s".formatted(path, type);
     }
 
-    public Token.Type getType() {
-        return type;
-    }
-
-    public void setType(Token.Type type) {
-        this.type = type;
-    }
 }

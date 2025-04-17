@@ -138,12 +138,18 @@ public class InitializerVisitor implements NodeVisitor {
      */
     @Override
     public void visit(BlockNode node) {
-        Object     evaluated  = node.getName().evaluate(context);
-        Conversion conversion = context.getConversion();
-        String     name       = conversion.convert(evaluated, String.class);
+        Object           evaluated  = node.getName().evaluate(context);
+        Conversion       conversion = context.getConversion();
+        String           name       = conversion.convert(evaluated, String.class);
+        TemplateRegistry registry   = template.getRegistry();
 
-        LOGGER.info("Registering block '{}' into template '{}'", name, template.getName());
-        template.setBlock(new TemplateBlock(name, node, template.getName()));
+
+        if (!registry.hasBlock(name) || node.isOverride()) {
+            LOGGER.info("Registering block '{}' into template '{}'", name, template.getName());
+            registry.registerBlock(name, new TemplateBlock(name, node, template.getName()));
+        } else {
+            LOGGER.warn("Template '{}' already has '{}' block", template, name);
+        }
     }
 
     /**
