@@ -5,47 +5,29 @@ import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.renderable.parser.RootParser;
 import org.jmouse.el.renderable.parser.TemplateParser;
-import org.jmouse.el.renderable.parser.tag.UseParser;
 import org.jmouse.el.renderable.parser.tag.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * TemplateCoreExtension provides the core extensions required by the template engine.
+ * Core extension for the template engine that adds template-specific parsing capabilities.
  * <p>
- * This extension builds upon the base functionality provided by {@link CoreExtension}
- * and implements {@link TemplateExtension}. It supplies additional parsers for both
- * expressions and template-specific tag syntax. These parsers handle common template
- * constructs such as loops, conditionals, inheritance, blocks, macros, and placeholder text.
- * </p>
- * <p>
- * The extension ensures that the template engine can correctly interpret and build the
- * abstract syntax tree (AST) for templates by extending the base parsers with:
+ * Extends {@link CoreExtension} by registering:
  * <ul>
- *   <li>{@link TemplateParser} – for parser template-specific syntax and structure.</li>
- *   <li>{@link RootParser} – for parser the root of the template layout.</li>
+ *   <li>Structural parsers for overall template syntax (via {@link TemplateParser} and {@link RootParser}).</li>
+ *   <li>A suite of {@link TagParser} implementations for common template tags
+ *       (e.g., loops, conditionals, inheritance, blocks, macros, imports, includes, etc.).</li>
  * </ul>
- * Additionally, it provides a collection of {@link TagParser} implementations to process
- * individual template tags.
  * </p>
- *
- * @author ...
  */
 public class TemplateCoreExtension extends CoreExtension implements TemplateExtension {
 
     /**
-     * Returns a list of parsers used for parser template expressions and structure.
-     * <p>
-     * This method extends the default list of parsers inherited from {@link CoreExtension}
-     * by adding:
-     * <ul>
-     *   <li>{@link TemplateParser} – handles the overall layout and structure of templates.</li>
-     *   <li>{@link RootParser} – processes the root element of a template.</li>
-     * </ul>
-     * </p>
+     * Returns the full set of expression and structural parsers, including
+     * the core extensions plus the template-specific parsers.
      *
-     * @return a list of {@link Parser} instances for template parser
+     * @return a list of {@link Parser} instances for parsing template syntax
      */
     @Override
     public List<Parser> getParsers() {
@@ -58,25 +40,10 @@ public class TemplateCoreExtension extends CoreExtension implements TemplateExte
     }
 
     /**
-     * Returns a list of tag parsers for processing the custom tags defined in templates.
-     * <p>
-     * The tag parsers provided by this extension support a variety of template directives:
-     * <ul>
-     *   <li>{@code for} – iterates over collections.</li>
-     *   <li>{@code if} – conditionally renders sections.</li>
-     *   <li>{@code extends} – defines template inheritance.</li>
-     *   <li>{@code block} – marks sections that can be overridden.</li>
-     *   <li>{@code macro} – defines reusable code blocks.</li>
-     *   <li>{@code include} – includes another template within the current one.</li>
-     *   <li>{@code import} – imports definitions (e.g., macros) from another template.</li>
-     *   <li>{@code from} – a helper tag typically used with import.</li>
-     *   <li>{@code with} – specifies arguments for macros or includes.</li>
-     *   <li>{@code apply} – apply function to code block.</li>
-     *   <li>{@code lorem} – generates placeholder text.</li>
-     * </ul>
-     * </p>
+     * Returns the collection of tag parsers used to recognize and handle
+     * template directives such as loops, imports, blocks, macros, and more.
      *
-     * @return a list of {@link TagParser} instances for handling template tags
+     * @return an immutable list of {@link TagParser} instances
      */
     @Override
     public List<TagParser> getTagParsers() {
@@ -87,11 +54,9 @@ public class TemplateCoreExtension extends CoreExtension implements TemplateExte
                 new IfParser(),
                 new IncludeParser(),
                 new UseParser(),
-                new ImportParser(),
                 new ExtendsParser(),
                 new BlockParser(),
                 new MacroParser(),
-                new FromParser(),
                 new ScopeParser(),
                 new ApplyParser(),
                 new EmbedParser(),

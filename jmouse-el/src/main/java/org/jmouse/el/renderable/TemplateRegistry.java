@@ -100,13 +100,16 @@ public class TemplateRegistry {
      * </p>
      *
      * @param imported the registry from which definitions are imported
-     * @param scope    the alias to prefix imported definition names with
+     * @param prefix    the alias to prefix imported definition names with
      */
-    public void copyMacros(TemplateRegistry imported, String scope) {
-        imported.macros.forEach((name, macro) -> {
-            String scopedName = scope + "." + name;
-            this.macros.put(scopedName, macro);
-        });
+    public void copyMacros(TemplateRegistry imported, String prefix) {
+        imported.macros.forEach(
+                (name, macro) -> macros.put(prefix == null ? name : prefix + "." + name, macro));
+    }
+
+    public void copyBlocks(TemplateRegistry imported, String prefix) {
+        imported.blocks.forEach(
+                (name, block) -> blocks.put(prefix == null ? name : prefix + "." + name, block));
     }
 
     /**

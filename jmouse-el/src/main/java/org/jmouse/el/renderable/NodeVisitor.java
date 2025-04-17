@@ -13,6 +13,14 @@ import org.jmouse.el.renderable.node.*;
 public interface NodeVisitor extends Visitor {
 
     /**
+     * Visits a UseNode.
+     *
+     * @param useNode the set node to process
+     */
+    default void visit(UseNode useNode) {
+    }
+
+    /**
      * Visits a DoNode.
      *
      * @param doNode the set node to process
@@ -98,22 +106,6 @@ public interface NodeVisitor extends Visitor {
      * @param forNode the for node to process
      */
     default void visit(ForNode forNode) {
-    }
-
-    /**
-     * Visits an ImportNode.
-     *
-     * @param importNode the import node to process
-     */
-    default void visit(ImportNode importNode) {
-    }
-
-    /**
-     * Visits an FromNode.
-     *
-     * @param from the from node to process
-     */
-    default void visit(FromNode from) {
     }
 
     /**

@@ -2,8 +2,11 @@ package org.jmouse.el.renderable;
 
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.lexer.Token;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.NameNode;
+import org.jmouse.el.node.expression.NameSetNode;
+import org.jmouse.el.renderable.lexer.TemplateToken;
 import org.jmouse.el.renderable.node.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,56 +54,64 @@ public class InitializerVisitor implements NodeVisitor {
     }
 
     /**
-     * Visits an ImportNode.
+     * Processes a UseNode by importing macro or block definitions from an external template.
+     * <p>
+     * The method performs the following steps:
+     * <ul>
+     *   <li>Evaluates the path expression to determine the external template name and retrieves it via the engine.</li>
+     *   <li>If the imported template is not initialized, its AST is preprocessed using an {@code InitializerVisitor} and
+     *       it is marked as initialized; otherwise, a log entry is recorded indicating it is already initialized.</li>
+     *   <li>If a set of specific names is provided, each name in the set is evaluated and used to locally register the
+     *       corresponding macro or block definition from the imported template.</li>
+     *   <li>If no names are provided but an alias is specified, then the entire set of macros or blocks is copied from
+     *       the imported template's registry into the current registry with keys prefixed by the alias.</li>
+     * </ul>
+     * </p>
      *
-     * @param importNode the import node to process
+     * @param useNode the UseNode containing the external template path, the type (macro or block),
+     *                and either a set of names or an alias for importing definitions
      */
     @Override
-    public void visit(ImportNode importNode) {
+    public void visit(UseNode useNode) {
         Conversion       conversion = context.getConversion();
-        Object           source     = importNode.getPath().evaluate(context);
+        Object           source     = useNode.getPath().evaluate(context);
         String           name       = conversion.convert(source, String.class);
         TemplateRegistry self       = template.getRegistry();
         Template         imported   = self.getEngine().getTemplate(name);
+        Token.Type       type       = useNode.getType();
 
-        Object evaluated = importNode.getScope().evaluate(context);
-        String scope     = conversion.convert(evaluated, String.class);
-
+        // Initialize the imported template if it has not been initialized already.
         if (!imported.isInitialized()) {
             imported.getRoot().accept(new InitializerVisitor(imported, context));
             imported.setInitialized();
         } else {
-            LOGGER.info("Already initialized: " + importNode);
+            LOGGER.info("Already initialized: {}", useNode);
         }
 
-        self.copyMacros(imported.getRegistry(), scope);
-    }
+        // If specific names are provided, register each corresponding definition.
+        if (useNode.getNames() != null) {
+            NameSetNode names = useNode.getNames();
 
-    /**
-     * Visits an FromNode.
-     *
-     * @param from the import node to process
-     */
-    @Override
-    public void visit(FromNode from) {
-        Conversion       conversion = context.getConversion();
-        Object           path       = from.getPath().evaluate(context);
-        String           name       = conversion.convert(path, String.class);
-        TemplateRegistry self       = template.getRegistry();
-        Template         imported   = self.getEngine().getTemplate(name);
-
-        if (!imported.isInitialized()) {
-            imported.getRoot().accept(new InitializerVisitor(imported, context));
-            imported.setInitialized();
+            for (NameNode nameNode : names.getSet()) {
+                String innerName = conversion.convert(nameNode.evaluate(context), String.class);
+                if (type == TemplateToken.T_MACRO) {
+                    self.registerMacro(innerName, imported.getMacro(nameNode.getName()));
+                } else if (type == TemplateToken.T_BLOCK) {
+                    self.registerBlock(innerName, imported.getBlock(nameNode.getName()));
+                }
+            }
         } else {
-            LOGGER.info("Already initialized: " + from);
-        }
+            // If no names are provided, use the alias (if any) to copy all definitions.
+            String alias = null;
 
-        for (NameNode nameNode : from.getNameSet().getSet()) {
-            Macro macro = imported.getMacro(nameNode.getName());
-            if (macro != null) {
-                String macroName = nameNode.getAlias() == null ? nameNode.getName() : nameNode.getAlias();
-                self.registerMacro(macroName, imported.getMacro(nameNode.getName()));
+            if (useNode.getAlias() != null) {
+                alias = conversion.convert(useNode.getAlias().evaluate(context), String.class);
+            }
+
+            if (type == TemplateToken.T_MACRO) {
+                self.copyMacros(imported.getRegistry(), alias);
+            } else if (type == TemplateToken.T_BLOCK) {
+                self.copyBlocks(imported.getRegistry(), alias);
             }
         }
     }
