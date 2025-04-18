@@ -122,6 +122,8 @@ public class CoreExtension implements Extension {
         operators.addAll(Arrays.asList(ComparisonOperator.values()));
         operators.addAll(Arrays.asList(TestOperator.values()));
 
+        operators.add(ConcatOperator.CONCAT);
+
         return operators;
     }
 }

@@ -3,11 +3,7 @@ package org.jmouse.el.extension.filter;
 import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
-import org.jmouse.util.helper.Iterations;
-
-import java.lang.reflect.Array;
-import java.util.Collection;
-import java.util.Map;
+import org.jmouse.util.helper.Iterables;
 
 public class LengthFilter extends AbstractFilter {
 
@@ -15,16 +11,8 @@ public class LengthFilter extends AbstractFilter {
     public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
         int length = -1;
 
-        if (type.isCollection()) {
-            length = ((Collection<?>)input).size();
-        } else if (type.isMap()) {
-            length = ((Map<?, ?>)input).size();
-        } else if (type.isArray()) {
-            length = Array.getLength(input);
-        } else if (type.isString()) {
-            length = ((String) input).length();
-        } else if (type.isIterable()) {
-            length = Iterations.size((Iterable<?>)input);
+        if (input != null) {
+            length = Iterables.size(Iterables.toIterable(input));
         }
 
         return length;

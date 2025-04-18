@@ -1,8 +1,6 @@
 package org.jmouse.el.renderable;
 
 import org.jmouse.core.convert.Conversion;
-import org.jmouse.core.reflection.ClassTypeInspector;
-import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.el.StringSource;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.ScopedChain;
@@ -17,14 +15,12 @@ import org.jmouse.el.node.expression.literal.StringLiteralNode;
 import org.jmouse.el.renderable.evaluation.LoopVariables;
 import org.jmouse.el.renderable.node.*;
 import org.jmouse.el.renderable.node.sub.ConditionBranch;
+import org.jmouse.util.helper.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-
-import static java.lang.String.valueOf;
 
 /**
  * The RendererVisitor traverses the template AST and produces the final rendered output.
@@ -281,21 +277,8 @@ public class RendererVisitor implements NodeVisitor {
     public void visit(ForNode forNode) {
         // Evaluate the iterable expression.
         Object             evaluated = forNode.getIterable().evaluate(context);
-        ClassTypeInspector type      = TypeInformation.forInstance(evaluated);
-        Iterable<?>        iterable  = null;
+        Iterable<?>        iterable  = Iterables.toIterable(evaluated);
         Node               empty     = forNode.getEmpty();
-
-        // Convert evaluated object to an Iterable if possible.
-        if (type.isIterable()) {
-            iterable = ((Iterable<?>) evaluated);
-        } else if (type.isMap()) {
-            iterable = ((Map<?, ?>) evaluated).entrySet();
-        } else if (type.isString()) {
-            // Splits the string into a list of single-character strings
-            iterable = ((String) evaluated).chars().mapToObj(c -> valueOf((char) c)).toList();
-        } else if (type.isArray()) {
-            iterable = List.of(((Object[]) evaluated));
-        }
 
         if (iterable != null && iterable.iterator().hasNext()) {
             Iterator<?>   iterator = iterable.iterator();
@@ -312,9 +295,10 @@ public class RendererVisitor implements NodeVisitor {
                 Object item = iterator.next();
 
                 loop.setFirst(counter == 0);
-                loop.setIndex(counter++);
-                loop.setKey(counter);
+                loop.setIndex0(counter++);
+                loop.setIndex(counter);
                 loop.setValue(item);
+                loop.setKey(counter);
                 loop.setLast(!iterator.hasNext());
 
                 scope.setValue("loop", loop);

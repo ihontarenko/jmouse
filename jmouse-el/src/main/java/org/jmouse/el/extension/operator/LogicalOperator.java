@@ -14,22 +14,30 @@ import org.jmouse.el.lexer.Token;
  */
 public enum LogicalOperator implements Operator {
 
-    /** Logical AND ({@code &&}). */
+    /**
+     * Logical AND ({@code &&}).
+     */
     AND(LogicalCalculator.AND, BasicToken.T_AND, "AND", 5),
 
-    /** Logical OR ({@code ||}). */
+    /**
+     * Logical OR ({@code ||}).
+     */
     OR(LogicalCalculator.OR, BasicToken.T_OR, "OR", 4),
 
-    /** Logical NOT ({@code !}). */
+    /**
+     * Logical NOT ({@code !}).
+     */
     NOT(LogicalCalculator.NOT, BasicToken.T_NEGATE, "NOT", 6),
 
-    /** Logical XOR ({@code ^}). */
+    /**
+     * Logical XOR ({@code ^}).
+     */
     XOR(LogicalCalculator.XOR, BasicToken.T_CARET, "XOR", 5);
 
     private final Calculator<Boolean> calculator;
-    private final Token.Type type;
-    private final String name;
-    private final int precedence;
+    private final Token.Type          type;
+    private final String              name;
+    private final int                 precedence;
 
     LogicalOperator(Calculator<Boolean> calculator, Token.Type type, String name, int precedence) {
         this.calculator = calculator;

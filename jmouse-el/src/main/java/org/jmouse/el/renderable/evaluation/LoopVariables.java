@@ -3,6 +3,7 @@ package org.jmouse.el.renderable.evaluation;
 public class LoopVariables {
 
     private int     index;
+    private int     index0;
     private Object  value;
     private Object  key;
     private boolean last;
@@ -46,5 +47,13 @@ public class LoopVariables {
 
     public void setKey(Object key) {
         this.key = key;
+    }
+
+    public int getIndex0() {
+        return index0;
+    }
+
+    public void setIndex0(int index0) {
+        this.index0 = index0;
     }
 }

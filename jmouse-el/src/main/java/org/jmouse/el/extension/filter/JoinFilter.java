@@ -5,7 +5,6 @@ import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 
 import java.util.Collection;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.joining;
