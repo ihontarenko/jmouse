@@ -5,6 +5,10 @@ import org.jmouse.el.extension.filter.converter.ToBigDecimalFilter;
 import org.jmouse.el.extension.filter.converter.ToIntFilter;
 import org.jmouse.el.extension.filter.converter.ToStringFilter;
 import org.jmouse.el.extension.function.*;
+import org.jmouse.el.extension.function.string.LcfirstFunction;
+import org.jmouse.el.extension.function.string.LclastFunction;
+import org.jmouse.el.extension.function.string.UcfirstFunction;
+import org.jmouse.el.extension.function.string.UclastFunction;
 import org.jmouse.el.extension.operator.*;
 import org.jmouse.el.extension.test.*;
 import org.jmouse.el.parser.*;
@@ -33,7 +37,12 @@ public class CoreExtension implements Extension {
         return List.of(
                 new MinFunction(),
                 new MaxFunction(),
-                new SetFunction()
+                new SetFunction(),
+                // string functions
+                new UclastFunction(),
+                new UcfirstFunction(),
+                new LclastFunction(),
+                new LcfirstFunction()
         );
     }
 

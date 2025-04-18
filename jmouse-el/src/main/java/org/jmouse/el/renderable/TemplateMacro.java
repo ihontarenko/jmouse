@@ -11,6 +11,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Represents a template macro, which binds a macro name to its corresponding macro definition.
@@ -41,6 +45,9 @@ public record TemplateMacro(String name, MacroNode node, String source) implemen
             List<Object>        values    = Arrays.asList(evaluated);
             List<String>        keys      = macro.getArguments();
             Map<String, Object> arguments = new HashMap<>();
+
+            int[] counter = {0};
+            Map<Integer, Object> map = Stream.of(evaluated).collect(toMap(k -> counter[0]++, k -> k));
 
             // Match each expected parameter with the provided value or a default, if available.
             for (int i = 0, size = keys.size(); i < size; i++) {

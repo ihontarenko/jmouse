@@ -61,6 +61,7 @@ public class TemplateCoreExtension extends CoreExtension implements TemplateExte
                 new ApplyParser(),
                 new EmbedParser(),
                 new RenderParser(),
+                new CacheParser(),
                 new LoremParser()
         );
     }

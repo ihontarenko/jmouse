@@ -34,9 +34,10 @@ public class RendererVisitor implements NodeVisitor {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(RendererVisitor.class);
 
-    private final EvaluationContext context;
-    private final TemplateRegistry  registry;
-    private final Content           content;
+    private final Cache<Cache.Key, Content> cache;
+    private final EvaluationContext         context;
+    private final TemplateRegistry          registry;
+    private final Content                   content;
 
     /**
      * Constructs a RendererVisitor with the specified content accumulator, template registry, and evaluation context.
@@ -49,6 +50,7 @@ public class RendererVisitor implements NodeVisitor {
         this.context = context;
         this.registry = registry;
         this.content = content;
+        this.cache = new Cache.Memory<>();
     }
 
     /**
@@ -95,6 +97,27 @@ public class RendererVisitor implements NodeVisitor {
                 content.append(conversion.convert(evaluated, String.class));
             }
         }
+    }
+
+    /**
+     * Visits a CacheNode.
+     *
+     * @param cacheNode the set node to process
+     */
+    @Override
+    public void visit(CacheNode cacheNode) {
+        Object    key      = cacheNode.getKey().evaluate(context);
+        Cache.Key cacheKey = Cache.Key.forObject(key);
+        Node      value    = cacheNode.getContent();
+        Content   cached   = cache.get(cacheKey);
+
+        if (cached == null) {
+            cached = Content.array();
+            value.accept(new RendererVisitor(cached, registry, context));
+            cache.put(cacheKey, cached);
+        }
+
+        content.append(cached);
     }
 
     /**
@@ -276,9 +299,9 @@ public class RendererVisitor implements NodeVisitor {
     @Override
     public void visit(ForNode forNode) {
         // Evaluate the iterable expression.
-        Object             evaluated = forNode.getIterable().evaluate(context);
-        Iterable<?>        iterable  = Iterables.toIterable(evaluated);
-        Node               empty     = forNode.getEmpty();
+        Object      evaluated = forNode.getIterable().evaluate(context);
+        Iterable<?> iterable  = Iterables.toIterable(evaluated);
+        Node        empty     = forNode.getEmpty();
 
         if (iterable != null && iterable.iterator().hasNext()) {
             Iterator<?>   iterator = iterable.iterator();
@@ -335,8 +358,8 @@ public class RendererVisitor implements NodeVisitor {
     @Override
     public void visit(FunctionNode node) {
         ExtensionContainer extensions = context.getExtensions();
-        String             name       = node.getName();
         Conversion         conversion = context.getConversion();
+        String             name       = node.getName();
 
         // If no function is defined in extensions, attempt to process it as a macro.
         if (extensions.getFunction(name) == null) {

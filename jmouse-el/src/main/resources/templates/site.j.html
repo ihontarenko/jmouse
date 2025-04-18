@@ -4,12 +4,32 @@
 {% block 'content' %}
     Site Page
 
+    {% set title = "hello world" %}
+
+    {% cache 'title' %}
+        <p>
+            {{ lclast(title|upper) }}
+        </p>
+    {% endcache %}
+
+    {% set title = "bye world!" %}
+
+    {% cache 'title' %}
+        <p>
+            {{ lclast(title|upper) }}
+        </p>
+    {% endcache %}
+
+    <p>
+        {{ uclast(title|lower) }}
+    </p>
+
     <div>
         <h2>{{ 1..10 | join(", ") }}</h2>
     </div>
 
     <div>
-        concat: {{ books[1].title ~ " : " ~ books[1].author ~ "(" ~ 1 * 2 ** 34 ~ ")" }}
+        concat: {{ books[1].title ~ " : " ~ books[1].author ~ "(" ~ 22/7 ~ ")" }}
     </div>
 
     <div>
