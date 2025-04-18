@@ -4,9 +4,10 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.FilterNode;
+import org.jmouse.el.node.expression.NullCoalesceNode;
+import org.jmouse.el.node.expression.TernaryNode;
 
-import static org.jmouse.el.lexer.BasicToken.T_IDENTIFIER;
-import static org.jmouse.el.lexer.BasicToken.T_VERTICAL_SLASH;
+import static org.jmouse.el.lexer.BasicToken.*;
 
 public class ExpressionParser implements Parser {
 
@@ -30,6 +31,24 @@ public class ExpressionParser implements Parser {
                 filter.setLeft(left);
                 left = filter;
             }
+        }
+
+        // null-coalescing operator “??”
+        if (cursor.currentIf(T_NULL_COALESCE)) {
+            NullCoalesceNode node = new NullCoalesceNode();
+            node.setNullable(left);
+            node.setOtherwise((ExpressionNode) parse(cursor, context));
+            left = node;
+        }
+
+        // ternary conditional “? trueExpression : falseExpression”
+        if (cursor.currentIf(T_QUESTION)) {
+            TernaryNode ternary = new TernaryNode();
+            ternary.setCondition(left);
+            ternary.setThenBranch((ExpressionNode) parse(cursor, context));
+            cursor.ensure(T_COLON);
+            ternary.setElseBranch((ExpressionNode) parse(cursor, context));
+            left = ternary;
         }
 
         parent.add(left);

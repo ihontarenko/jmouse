@@ -154,6 +154,6 @@ public class TestNode extends AbstractExpressionNode {
      */
     @Override
     public String toString() {
-        return "IS %s %s%s(%s)".formatted(left, negated ? "NOT " : "", name, arguments);
+        return "IS %s %s%s(%s)".formatted(left, negated ? "NOT " : "", name, arguments == null ? "" : arguments);
     }
 }

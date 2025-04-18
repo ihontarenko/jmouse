@@ -36,6 +36,7 @@ public enum BasicToken implements Token.Type {
     T_OR(1080, "||", "or"),
     T_IS(1090, "is"),
     T_CONTAINS(1100, "contains"),
+    T_NULL_COALESCE(1101, "??"),
 
     // Assignment operators (Group 6000)
     T_COLON_ASSIGN(6110, ":="),

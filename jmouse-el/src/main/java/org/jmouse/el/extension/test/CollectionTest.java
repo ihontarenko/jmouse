@@ -10,11 +10,11 @@ import org.jmouse.el.extension.Arguments;
  * Returns true if the provided value implements the Iterable interface.
  * </p>
  */
-public class IterableTest extends AbstractTest {
+public class CollectionTest extends AbstractTest {
 
     @Override
     public boolean test(Object value, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
-        return type.isIterable();
+        return type.isCollection();
     }
 
     /**
@@ -24,6 +24,6 @@ public class IterableTest extends AbstractTest {
      */
     @Override
     public String getName() {
-        return "iterable";
+        return "collection";
     }
 }

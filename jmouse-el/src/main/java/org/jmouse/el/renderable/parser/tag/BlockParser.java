@@ -45,6 +45,10 @@ public class BlockParser implements TagParser {
         // Parse the block name (literal expression)
         ExpressionNode name = (ExpressionNode)
                 context.getParser(LiteralParser.class).parse(cursor, context);
+
+        // Consume 'override' keyword if any
+        block.setOverride(cursor.currentIf(T_OVERRIDE));
+
         // Consume closing '%}'
         cursor.ensure(T_CLOSE_EXPRESSION);
         // Parse body until endblock

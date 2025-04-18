@@ -30,7 +30,7 @@ public class TestParser implements Parser {
         test.setNegated(negated);
 
         // Ensure that the current token is a test name
-        cursor.ensure(BasicToken.T_IDENTIFIER);
+        cursor.ensure(BasicToken.T_IDENTIFIER, BasicToken.T_NULL);
 
         if (cursor.isCurrent(BasicToken.T_OPEN_PAREN)) {
             context.setOptions(ParserOptions.withNextParser(ArgumentsParser.class));

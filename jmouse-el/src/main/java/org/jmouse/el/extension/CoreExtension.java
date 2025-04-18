@@ -1,6 +1,9 @@
 package org.jmouse.el.extension;
 
 import org.jmouse.el.extension.filter.*;
+import org.jmouse.el.extension.filter.converter.ToBigDecimalFilter;
+import org.jmouse.el.extension.filter.converter.ToIntFilter;
+import org.jmouse.el.extension.filter.converter.ToStringFilter;
 import org.jmouse.el.extension.function.*;
 import org.jmouse.el.extension.operator.*;
 import org.jmouse.el.extension.test.*;
@@ -44,14 +47,16 @@ public class CoreExtension implements Extension {
         return List.of(
                 new LowerFilter(),
                 new UpperFilter(),
-                new ToBigDecimalFilter(),
                 new SubFilter(),
                 new DefaultFilter(),
                 new TrimFilter(),
                 new TypeFilter(),
                 new LengthFilter(),
                 new SplitFilter(),
-                new JoinFilter()
+                new JoinFilter(),
+                new ToBigDecimalFilter(),
+                new ToIntFilter(),
+                new ToStringFilter()
         );
     }
 
@@ -66,9 +71,11 @@ public class CoreExtension implements Extension {
                 new EvenTest(),
                 new OddTest(),
                 new ArrayTest(),
+                new CollectionTest(),
                 new MapTest(),
                 new IterableTest(),
-                new InsetTest()
+                new InsetTest(),
+                new NullTest()
         );
     }
 

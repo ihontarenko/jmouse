@@ -68,7 +68,7 @@ public class TemplateSplitter implements Splitter<List<RawToken>, TokenizableSou
             if (startIndex > lastIndex) {
                 String rawContent = segment.subSequence(lastIndex, startIndex).toString();
                 tokens.add(new RawToken(rawContent, source.getLineNumber(offset + lastIndex), offset + lastIndex, RAW_TEXT));
-                LOGGER.info("Before open-close: '{}'", rawContent);
+                LOGGER.info("Before open-close: '{}'", rawContent.length());
             }
 
             if (matcher.group(INNER_GROUP) != null) {
@@ -101,7 +101,7 @@ public class TemplateSplitter implements Splitter<List<RawToken>, TokenizableSou
             String tail       = segment.subSequence(lastIndex, segment.length()).toString();
             int    lastOffset = offset + lastIndex;
             tokens.add(new RawToken(tail, source.getLineNumber(lastOffset), lastOffset, RAW_TEXT));
-            LOGGER.info("Tail: '{}'", tail);
+            LOGGER.info("Tail: '{}'", tail.length());
         }
 
         return tokens;
