@@ -42,8 +42,9 @@ public class TemplateRenderer implements Renderer {
     @Override
     public Content render(Template template, EvaluationContext context) {
         // Linking: process macros, blocks and other pre-processing steps.
+        // todo:
         if (template.isUninitialized()) {
-            preProcessing(template, context);
+            initialize(template, context);
             template.setInitialized();
         }
 
@@ -105,7 +106,7 @@ public class TemplateRenderer implements Renderer {
      * @param template the template to link
      * @param context  the evaluation context
      */
-    private void preProcessing(Template template, EvaluationContext context) {
+    private void initialize(Template template, EvaluationContext context) {
         Node root = template.getRoot();
 
         // Link macros, blocks and perform pre-processing.
@@ -115,7 +116,7 @@ public class TemplateRenderer implements Renderer {
 
         if (parent != null) {
             context.getInheritance().ascend();
-            preProcessing(parent, context);
+            initialize(parent, context);
             context.getInheritance().descend();
         }
     }
