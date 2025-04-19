@@ -32,10 +32,17 @@ final public class PropertyPath {
     /** An empty PropertyPath instance. */
     public static final Entries EMPTY = new Entries(0, new int[0], new int[0], new int[0], "");
 
+    /** Cached paths. */
+    public static final Map<String, PropertyPath> CACHE = new HashMap<>();
+
     /** The separator used in property paths (dot notation). */
     public static final char SEPARATOR = '.';
 
     private Entries entries;
+
+    static {
+        CACHE.put(null, empty());
+    }
 
     /**
      * Constructs a PropertyPath by lexer the given string.
@@ -71,7 +78,7 @@ final public class PropertyPath {
      * @return a PropertyPath instance, or an empty instance if the input is null
      */
     public static PropertyPath forPath(String name) {
-        return name == null ? empty() : new PropertyPath(name);
+        return CACHE.computeIfAbsent(name, PropertyPath::new);
     }
 
     /**

@@ -42,11 +42,7 @@ public class TemplateRenderer implements Renderer {
     @Override
     public Content render(Template template, EvaluationContext context) {
         // Linking: process macros, blocks and other pre-processing steps.
-        // todo:
-        if (template.isUninitialized()) {
-            initialize(template, context);
-            template.setInitialized();
-        }
+        initialize(template, context);
 
         // 1. Merge template registries from the inheritance stack.
         // 2. Determine the root (uppermost) template from the inheritance stack.
@@ -109,8 +105,11 @@ public class TemplateRenderer implements Renderer {
     private void initialize(Template template, EvaluationContext context) {
         Node root = template.getRoot();
 
-        // Link macros, blocks and perform pre-processing.
-        root.accept(new InitializerVisitor(template, context));
+        if (template.isUninitialized()) {
+            // Link macros, blocks and perform pre-processing.
+            root.accept(new InitializerVisitor(template, context));
+            template.setInitialized();
+        }
 
         Template parent = template.getParent(context);
 

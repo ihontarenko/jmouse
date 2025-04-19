@@ -1,6 +1,7 @@
 package org.jmouse.el.renderable;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 
 /**
@@ -23,6 +24,10 @@ public final class WriterContent implements Content {
      */
     public WriterContent(Writer writer) {
         this.writer = writer;
+    }
+
+    public WriterContent() {
+        this(new StringWriter());
     }
 
     public Writer getWriter() {

@@ -23,7 +23,7 @@ public class EvenTest extends AbstractTest {
         boolean    isEven     = false;
 
         if (type.isScalar()) {
-            isEven = (conversion.convert(value, Long.class) & 1) == 0;
+            isEven = (conversion.convert(value, Double.class) % 2) == 0;
         } else if (type.isArray()) {
             isEven = (Array.getLength(value) & 1) == 0;
         } else if (type.isCollection()) {

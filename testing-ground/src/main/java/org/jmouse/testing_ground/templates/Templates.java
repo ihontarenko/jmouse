@@ -1,5 +1,6 @@
 package org.jmouse.testing_ground.templates;
 
+import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.ReflectionClassPropertyResolver;
 import org.jmouse.el.renderable.*;
@@ -24,28 +25,44 @@ public class Templates {
         engine.setLoader(loader);
 
         Template          template = engine.getTemplate("site");
+//        Template          template = engine.getTemplate("benchmark");
         Renderer          renderer = new TemplateRenderer(engine);
         EvaluationContext context  = template.newContext();
 
         context.setValue("book", getBook("Stephen King", "The Shining"));
         context.setValue("books", getBookList());
         context.setValue("array", new String[]{"a", "b", "c"});
-        context.setValue("map", new HashMap<>(){{
+        context.setValue("map", new HashMap<>() {{
             put("key1", "valueA");
             put("key2", "valueB");
         }});
-        context.setValue("list", new ArrayList<>(){{
+        context.setValue("list", new ArrayList<>() {{
             add(123);
             add(456);
             add(789);
         }});
         context.setValue("string", "Hello World");
+        context.setValue("items", Stock.dummyItems());
 
         context.getVirtualProperties().addVirtualProperty(new ReflectionClassPropertyResolver());
 
         Content content = renderer.render(template, context);
 
         System.out.println(content.toString().length());
+
+        long start = System.currentTimeMillis();
+        long spend = 0;
+        int  times = 0;
+
+        while (spend < 1000) {
+            times++;
+            renderer.render(template, context);
+            spend = System.currentTimeMillis() - start;
+        }
+
+
+        System.out.println(times);
+        System.out.println(PropertyPath.CACHE);;
     }
 
     private static Book getBook(String author, String title) {
