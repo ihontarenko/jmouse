@@ -8,4 +8,7 @@
     <root level="debug">
         <appender-ref ref="STDOUT" />
     </root>
+
+    <logger name="org.jmouse.el" level="warn"/>
+    <logger name="org.jmouse.core.convert" level="warn"/>
 </configuration>

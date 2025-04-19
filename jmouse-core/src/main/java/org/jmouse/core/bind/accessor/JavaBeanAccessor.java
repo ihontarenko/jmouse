@@ -3,7 +3,11 @@ package org.jmouse.core.bind.accessor;
 import org.jmouse.core.bind.AbstractBeanAccessor;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
+import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanDescriptor;
 import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
@@ -15,6 +19,8 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * </p>
  */
 public class JavaBeanAccessor extends AbstractBeanAccessor {
+
+    public static final Map<Class<?>, JavaBeanDescriptor<?>> CACHED_DESCRIPTORS = new HashMap<>();
 
     /**
      * Creates a {@link JavaBeanAccessor} for the given structured instance.
@@ -29,7 +35,9 @@ public class JavaBeanAccessor extends AbstractBeanAccessor {
     @Override
     @SuppressWarnings({"unchecked"})
     protected ObjectDescriptor<Object> getDescriptor(Class<?> type) {
-        return new JavaBeanIntrospector<>((Class<Object>) type).introspect().toDescriptor();
+        return (ObjectDescriptor<Object>) CACHED_DESCRIPTORS.computeIfAbsent(type, (t) ->
+            new JavaBeanIntrospector<>(t).introspect().toDescriptor()
+        );
     }
 
 }

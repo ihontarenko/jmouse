@@ -131,11 +131,20 @@ public class JavaBeanPropertyDescriptor<T>
     public ClassTypeDescriptor getType() {
         ClassTypeDescriptor type = container.getType();
 
-        if (type == null && isWritable()) {
-            JavaType              javaType     = JavaType.forParameter(getSetterMethod().unwrap(), 0);
-            ClassTypeIntrospector introspector = new ClassTypeIntrospector(javaType);
-            toIntrospector().type(introspector.name().toDescriptor());
-            type = container.getType();
+        if (type == null) {
+            JavaType javaType = null;
+
+            if (isWritable()) {
+                javaType = JavaType.forParameter(getSetterMethod().unwrap(), 0);
+            } else if (isReadable()) {
+                javaType = JavaType.forMethodReturnType(getGetterMethod().unwrap());
+            }
+
+            if (javaType != null) {
+                ClassTypeIntrospector introspector = new ClassTypeIntrospector(javaType);
+                toIntrospector().type(introspector.name().toDescriptor());
+                type = container.getType();
+            }
         }
 
         return type;
@@ -178,6 +187,6 @@ public class JavaBeanPropertyDescriptor<T>
      */
     @Override
     public String toString() {
-        return "[%s]: %s".formatted(getName(), getType().getJavaType());
+        return "[%s]: %s".formatted(getName(), getType());
     }
 }

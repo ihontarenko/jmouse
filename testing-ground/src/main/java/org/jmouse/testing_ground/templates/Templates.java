@@ -1,9 +1,13 @@
 package org.jmouse.testing_ground.templates;
 
 import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.bind.accessor.JavaBeanAccessor;
+import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanDescriptor;
+import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.ReflectionClassPropertyResolver;
 import org.jmouse.el.renderable.*;
+import org.jmouse.el.renderable.evaluation.LoopVariables;
 import org.jmouse.el.renderable.loader.ClasspathLoader;
 import org.jmouse.el.renderable.loader.TemplateLoader;
 import org.jmouse.testing_ground.binder.dto.Book;
@@ -60,9 +64,9 @@ public class Templates {
             spend = System.currentTimeMillis() - start;
         }
 
-
-        System.out.println(times);
-        System.out.println(PropertyPath.CACHE);;
+        System.out.println("times: " + times);
+        System.out.println(JavaBeanAccessor.CACHED_DESCRIPTORS);
+        System.out.println(PropertyPath.CACHE);
     }
 
     private static Book getBook(String author, String title) {
