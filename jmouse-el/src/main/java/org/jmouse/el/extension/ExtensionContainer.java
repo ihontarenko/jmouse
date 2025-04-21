@@ -1,8 +1,11 @@
 package org.jmouse.el.extension;
 
+import org.jmouse.el.extension.attribute.AttributeResolver;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.parser.Parser;
+
+import java.util.List;
 
 /**
  * 🛠️ Manages various extensions used in the template engine, including functions, tests, filters, operators, and parsers.
@@ -15,6 +18,8 @@ import org.jmouse.el.parser.Parser;
  * @author ihontarenko@gmail.com
  */
 public interface ExtensionContainer {
+
+    List<AttributeResolver> getAttributeResolvers();
 
     /**
      * 🔖 Retrieves a registered tag parser by its name.
@@ -122,5 +127,6 @@ public interface ExtensionContainer {
         extension.getFilters().forEach(this::addFilter);
         extension.getOperators().forEach(this::addOperator);
         extension.getParsers().forEach(this::addParser);
+        getAttributeResolvers().addAll(extension.getAttributeResolvers());
     }
 }

@@ -53,9 +53,6 @@ public class TemplateRenderer implements Renderer {
 
         LOGGER.info("Rendering template '{}' <- '{}'", root.getName(), template.getName());
 
-        // Global variables
-        context.setValue("_self", template);
-
         // Create an initial Content object.
         Content content = Content.array();
 

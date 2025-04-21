@@ -1,7 +1,10 @@
 package org.jmouse.el.parser;
 
 import org.jmouse.el.extension.*;
+import org.jmouse.el.extension.attribute.AttributeResolver;
 import org.jmouse.el.lexer.Token;
+
+import java.util.List;
 
 public class DefaultParserContext implements ParserContext {
 
@@ -14,6 +17,11 @@ public class DefaultParserContext implements ParserContext {
 
     public DefaultParserContext(ExtensionContainer extensions) {
         this.extensions = extensions;
+    }
+
+    @Override
+    public List<AttributeResolver> getAttributeResolvers() {
+        return extensions.getAttributeResolvers();
     }
 
     @Override

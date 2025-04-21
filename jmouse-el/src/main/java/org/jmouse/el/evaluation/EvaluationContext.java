@@ -1,9 +1,14 @@
 package org.jmouse.el.evaluation;
 
 import org.jmouse.core.bind.*;
+import org.jmouse.core.bind.PropertyPath.Entries;
+import org.jmouse.el.extension.attribute.AttributeResolver;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.renderable.Inheritance;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * ⚙️ Represents the evaluation context for expression evaluation.
@@ -58,6 +63,17 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
     void setScopedChain(ScopedChain chain);
 
     /**
+     * Retrieves an ObjectAccessor configured with the current scope chain.
+     * <p>
+     * Creates a new {@link ScopedChainValuesAccessor} based on the current scope chain,
+     * sets the default wrapper, and returns it.
+     * </p>
+     *
+     * @return an ObjectAccessor for accessing scoped values
+     */
+    ObjectAccessor getValueAccessor();
+
+    /**
      * Returns the container holding custom extensions for expression evaluation.
      *
      * @return the {@link ExtensionContainer} instance
@@ -79,6 +95,13 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
     Conversion getConversion();
 
     /**
+     * Returns custom attribute resolvers to handle XML/HTML‑style attributes.
+     *
+     * @return a list of {@link AttributeResolver} instances, or an empty list
+     */
+    List<AttributeResolver> getAttributeResolvers();
+
+    /**
      * Retrieves the value associated with the specified property name.
      * <p>
      * Delegates to the PropertyValueResolver to obtain the property value.
@@ -88,8 +111,31 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
      * @return the resolved value, or {@code null} if not found
      */
     default Object getValue(String name) {
-        return getValueResolver().getProperty(name);
+        PropertyPath path    = PropertyPath.forPath(name);
+        Entries      entries = path.entries();
+        Object       value   = null;
+
+        if (entries.size() == 1) {
+            value = getScopedChain().getValue(name);
+        } else if (entries.size() == 2) {
+            String key       = entries.first().toString();
+            String last      = entries.last().toString();
+            Object container = getScopedChain().getValue(key);
+
+            for (AttributeResolver resolver : getAttributeResolvers()) {
+                value = resolver.resolve(container, last);
+                if (value != null) {
+                    break;
+                }
+            }
+        } else {
+            value = getValueResolver().getProperty(name);
+        }
+
+        return value;
     }
+
+
 
     /**
      * Sets the value associated with the specified property name.
@@ -104,20 +150,6 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
         getValueResolver().setProperty(name, value);
     }
 
-    /**
-     * Retrieves an ObjectAccessor configured with the current scope chain.
-     * <p>
-     * Creates a new {@link ScopedChainValuesAccessor} based on the current scope chain,
-     * sets the default wrapper, and returns it.
-     * </p>
-     *
-     * @return an ObjectAccessor for accessing scoped values
-     */
-    default ObjectAccessor getValueAccessor() {
-        ObjectAccessor accessor = new ScopedChainValuesAccessor(getScopedChain());
-        ((ObjectAccessorWrapper.Aware) accessor).setWrapper(WRAPPER);
-        return accessor;
-    }
 
     /**
      * Returns the PropertyValueResolver that resolves properties, including virtual ones.

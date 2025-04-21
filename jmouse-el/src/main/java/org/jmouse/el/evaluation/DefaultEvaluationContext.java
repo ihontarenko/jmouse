@@ -1,22 +1,27 @@
 package org.jmouse.el.evaluation;
 
+import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.ObjectAccessorWrapper;
 import org.jmouse.core.bind.VirtualPropertyResolver;
+import org.jmouse.el.extension.attribute.AttributeResolver;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.extension.StandardExtensionContainer;
 import org.jmouse.el.renderable.Inheritance;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DefaultEvaluationContext implements EvaluationContext {
 
-    private  ExtensionContainer      extensions;
     private final Conversion              conversion;
     private final Map<Object, Object>     objects;
     private final Inheritance             stack;
+    private       ExtensionContainer      extensions;
     private       ScopedChain             chain;
     private       VirtualPropertyResolver resolver;
+    private       ObjectAccessor          accessor;
 
     public DefaultEvaluationContext(ScopedChain chain, ExtensionContainer extensions, Conversion conversion) {
         this.chain = chain;
@@ -58,6 +63,16 @@ public class DefaultEvaluationContext implements EvaluationContext {
     @Override
     public void setScopedChain(ScopedChain chain) {
         this.chain = chain;
+        this.accessor = null;
+    }
+
+    @Override
+    public ObjectAccessor getValueAccessor() {
+        if (accessor == null) {
+            accessor = new ScopedChainValuesAccessor(getScopedChain());
+            ((ObjectAccessorWrapper.Aware) accessor).setWrapper(WRAPPER);
+        }
+        return accessor;
     }
 
     @Override
@@ -73,6 +88,11 @@ public class DefaultEvaluationContext implements EvaluationContext {
     @Override
     public Conversion getConversion() {
         return conversion;
+    }
+
+    @Override
+    public List<AttributeResolver> getAttributeResolvers() {
+        return extensions.getAttributeResolvers();
     }
 
     /**

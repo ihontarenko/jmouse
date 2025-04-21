@@ -1,11 +1,15 @@
 package org.jmouse.el.extension;
 
 import org.jmouse.el.ObjectContainer;
+import org.jmouse.el.extension.attribute.AttributeResolver;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContainer;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.parser.TagParserContainer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 🏗️ Standard implementation of {@link ExtensionContainer}.
@@ -25,17 +29,24 @@ public class StandardExtensionContainer implements ExtensionContainer {
     private final ObjectContainer<String, Test>                    tests;
     private final ObjectContainer<String, Function>                functions;
     private final ObjectContainer<String, Filter>                  filters;
+    private final List<AttributeResolver>                          attributeResolvers;
 
     /**
      * 🛠️ Constructs an empty {@code StandardExtensionContainer}.
      */
     public StandardExtensionContainer() {
+        attributeResolvers = new ArrayList<>();
         tags = new TagParserContainer();
         parsers = new ParserContainer();
         tests = new TestContainer();
         functions = new FunctionContainer();
         filters = new FilterContainer();
         operators = new OperatorContainer();
+    }
+
+    @Override
+    public List<AttributeResolver> getAttributeResolvers() {
+        return attributeResolvers;
     }
 
     /**

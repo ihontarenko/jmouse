@@ -1,5 +1,9 @@
 package org.jmouse.el.extension;
 
+import org.jmouse.el.extension.attribute.AttributeResolver;
+import org.jmouse.el.extension.attribute.JavaBeanAttributeResolver;
+import org.jmouse.el.extension.attribute.ListAttributeResolver;
+import org.jmouse.el.extension.attribute.MapAttributeResolver;
 import org.jmouse.el.extension.filter.*;
 import org.jmouse.el.extension.filter.converter.ToBigDecimalFilter;
 import org.jmouse.el.extension.filter.converter.ToIntFilter;
@@ -26,6 +30,20 @@ import java.util.List;
  * </p>
  */
 public class CoreExtension implements Extension {
+
+    /**
+     * Returns custom attribute resolvers to handle XML/HTML‑style attributes.
+     *
+     * @return a list of {@link AttributeResolver} instances, or an empty list
+     */
+    @Override
+    public List<AttributeResolver> getAttributeResolvers() {
+        return List.of(
+                new JavaBeanAttributeResolver(),
+                new MapAttributeResolver(),
+                new ListAttributeResolver()
+        );
+    }
 
     /**
      * Returns the list of functions available in the expression language.
