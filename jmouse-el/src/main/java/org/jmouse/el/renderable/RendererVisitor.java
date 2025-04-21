@@ -94,7 +94,18 @@ public class RendererVisitor implements NodeVisitor {
             Conversion conversion = context.getConversion();
             Object     evaluated  = expression.evaluate(context);
             if (evaluated != null) {
-                content.append(conversion.convert(evaluated, String.class));
+                String value;
+
+                // fast conversion, otherwise
+                if (evaluated instanceof String) {
+                    value = (String) evaluated;
+                } else if (evaluated instanceof Number number) {
+                    value = number.toString();
+                } else {
+                    value = conversion.convert(evaluated, String.class);
+                }
+
+                content.append(value);
             }
         }
     }

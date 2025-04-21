@@ -1,6 +1,5 @@
 package org.jmouse.el.node.expression;
 
-import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.Visitor;
@@ -43,28 +42,6 @@ public class PropertyNode extends AbstractExpressionNode {
      */
     @Override
     public Object evaluate(EvaluationContext context) {
-//        PropertyPath         oldPath = PropertyPath.forPath(getPath());
-//        PropertyPath         newPath = PropertyPath.forPath(null);
-//        PropertyPath.Entries entries = oldPath.entries();
-//        int                  size    = entries.size();
-//
-//        if (size > 1) {
-//            for (int i = 0; i < size; i++) {
-//                PropertyPath.Type type  = entries.type(i);
-//                String            value = entries.get(i).toString();
-//
-//                if (type.isIndexed() && !type.isNumeric()) {
-//                    value = "[%s]".formatted(context.getValue(value));
-//                } else if (type.isNumeric()) {
-//                    value = "[%s]".formatted(value);
-//                }
-//
-//                newPath = newPath.append(PropertyPath.forPath(value));
-//            }
-//        } else {
-//            newPath = oldPath;
-//        }
-
         return context.getValue(getPath());
     }
 

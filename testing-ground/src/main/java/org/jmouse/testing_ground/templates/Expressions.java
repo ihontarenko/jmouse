@@ -1,5 +1,6 @@
 package org.jmouse.testing_ground.templates;
 
+import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.el.StringSource;
 import org.jmouse.el.evaluation.DefaultEvaluationContext;
@@ -17,7 +18,7 @@ import org.jmouse.testing_ground.binder.dto.User;
 public class Expressions {
 
     public static void main(String[] args) {
-        StringSource source = new StringSource("example", "user.name | length('хуй')");
+        StringSource source = new StringSource("test expression", "user.name | upper");
 
         DefaultTokenizer tokenizer = new DefaultTokenizer(new ExpressionSplitter(), new ExpressionRecognizer());
         Lexer             lexer     = new DefaultLexer(tokenizer);
@@ -32,19 +33,6 @@ public class Expressions {
 
         EvaluationContext evaluationContext = new DefaultEvaluationContext();
         evaluationContext.getExtensions().importExtension(new CoreExtension());
-        evaluationContext.getExtensions().addFilter(new Filter() {
-            @Override
-            public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
-                System.out.println(arguments.getFirst());
-                System.out.println(type.isBean());
-                return ((String) input).length();
-            }
-
-            @Override
-            public String getName() {
-                return "length";
-            }
-        });
 
         evaluationContext.setValue("test", 256);
 
@@ -55,7 +43,17 @@ public class Expressions {
 
         Object value = compiled.evaluate(evaluationContext);
 
-        System.out.println(value);
+        long start = System.currentTimeMillis();
+        long spend = 0;
+        int  times = 0;
+
+        while (spend < 1000) {
+            times++;
+            spend = System.currentTimeMillis() - start;
+            compiled.evaluate(evaluationContext);
+        }
+
+        System.out.println("times: " + times);
     }
 
 }

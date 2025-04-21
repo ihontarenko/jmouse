@@ -1,9 +1,10 @@
 package org.jmouse.el.extension;
 
-import org.jmouse.el.extension.attribute.AttributeResolver;
+import org.jmouse.core.bind.AttributeResolver;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.parser.Parser;
+import org.jmouse.util.Sorter;
 
 import java.util.List;
 
@@ -128,5 +129,6 @@ public interface ExtensionContainer {
         extension.getOperators().forEach(this::addOperator);
         extension.getParsers().forEach(this::addParser);
         getAttributeResolvers().addAll(extension.getAttributeResolvers());
+        Sorter.sort(getAttributeResolvers());
     }
 }

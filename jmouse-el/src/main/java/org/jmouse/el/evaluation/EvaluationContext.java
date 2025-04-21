@@ -2,13 +2,12 @@ package org.jmouse.el.evaluation;
 
 import org.jmouse.core.bind.*;
 import org.jmouse.core.bind.PropertyPath.Entries;
-import org.jmouse.el.extension.attribute.AttributeResolver;
+import org.jmouse.core.bind.AttributeResolver;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.renderable.Inheritance;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * ⚙️ Represents the evaluation context for expression evaluation.

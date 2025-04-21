@@ -3,7 +3,7 @@ package org.jmouse.el.evaluation;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.ObjectAccessorWrapper;
 import org.jmouse.core.bind.VirtualPropertyResolver;
-import org.jmouse.el.extension.attribute.AttributeResolver;
+import org.jmouse.core.bind.AttributeResolver;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.extension.StandardExtensionContainer;

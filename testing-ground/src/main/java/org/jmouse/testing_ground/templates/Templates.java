@@ -30,8 +30,8 @@ public class Templates {
 
         engine.setLoader(loader);
 
-//        Template          template = engine.getTemplate("site");
-        Template          template = engine.getTemplate("benchmark");
+        Template          template = engine.getTemplate("site");
+//        Template          template = engine.getTemplate("benchmark");
         Renderer          renderer = new TemplateRenderer(engine);
         EvaluationContext context  = template.newContext();
 
@@ -56,46 +56,6 @@ public class Templates {
         Content content = renderer.render(template, context);
 
         System.out.println(content.toString().length());
-
-        long start = System.currentTimeMillis();
-        long spend = 0;
-        int  times = 0;
-
-        ObjectAccessor accessor = context.getValueResolver().getAccessor();
-
-        while (spend < 1000) {
-            times++;
-            renderer.render(template, context);
-            spend = System.currentTimeMillis() - start;
-
-//            for (int i = 0; i < 20; i++) {
-//                context.getValue("stock.name");
-//                context.getValue("stock.name2");
-//                context.getValue("stock.symbol");
-//                context.getValue("stock.url");
-//                context.getValue("stock.ratio");
-//                context.getValue("stock.name");
-//                context.getValue("stock.name2");
-//                context.getValue("stock.symbol");
-//                context.getValue("stock.url");
-//                context.getValue("stock.ratio");
-//                context.getValue("stock.name");
-//                context.getValue("stock.name2");
-//                context.getValue("stock.symbol");
-//                context.getValue("stock.url");
-//                context.getValue("stock.ratio");
-//                context.getValue("stock.ratio");
-//                context.getValue("stock.name");
-//                context.getValue("stock.name2");
-//                context.getValue("stock.symbol");
-//                context.getValue("stock.url");
-//                context.getValue("stock.ratio");
-//
-//            }
-
-        }
-
-        System.out.println("times: " + times);
         System.out.println(JavaBeanAccessor.CACHED_DESCRIPTORS);
         System.out.println(PropertyPath.CACHE);
     }

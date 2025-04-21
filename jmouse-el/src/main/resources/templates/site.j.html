@@ -53,20 +53,16 @@
         {% block 'card_content' %}
         <div style="border: 1px solid #ff41ba">
             {% for word in books[0]|type|split('\.') %}
-                <div>{{ word }}</div>
+                {% for l in word %}
+                    <div>- {{ l ~ " ---" }}</div>
+                {% endfor %}
+                <hr>
             {% endfor %}
         </div>
         <div style="border: 1px solid red">
             <ul>
                 {% for item in items %}
-                {% if loop.index is odd %}
-                {% set textColor = 'blue' %}
-                {% else %}
-                {% set textColor = 'red' %}
-                {% endif %}
-                <li style="color: {{ textColor }}">{{ item.symbol }} : {{ item.name }}</li>
-                {{ item.name }}{{ item.name }}{{ item.name }}{{ item.name }}{{ item.name }}{{ item.name }}{{ item.name }}{{ item.name }}
-                {{ item.name }}{{ item.name }}{{ item.name }}{{ item.name }}{{ item.name }}{{ item.name }}{{ item.name }}{{ item.name }}
+                <li style="color: {{ loop.index % 2 == 0 ? "#f0f" : '#ff0' }}">{{ item.symbol }} : {{ item.name }}</li>
                 {% endfor %}
             </ul>
         </div>

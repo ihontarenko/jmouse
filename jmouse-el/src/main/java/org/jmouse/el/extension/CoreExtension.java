@@ -1,6 +1,6 @@
 package org.jmouse.el.extension;
 
-import org.jmouse.el.extension.attribute.AttributeResolver;
+import org.jmouse.core.bind.AttributeResolver;
 import org.jmouse.el.extension.attribute.JavaBeanAttributeResolver;
 import org.jmouse.el.extension.attribute.ListAttributeResolver;
 import org.jmouse.el.extension.attribute.MapAttributeResolver;

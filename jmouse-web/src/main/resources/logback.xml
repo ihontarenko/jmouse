@@ -10,5 +10,5 @@
     </root>
 
     <logger name="org.jmouse.el" level="warn"/>
-    <logger name="org.jmouse.core.convert" level="warn"/>
+    <logger name="org.jmouse.core.convert" level="info"/>
 </configuration>

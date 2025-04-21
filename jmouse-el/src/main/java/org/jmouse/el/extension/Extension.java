@@ -1,6 +1,6 @@
 package org.jmouse.el.extension;
 
-import org.jmouse.el.extension.attribute.AttributeResolver;
+import org.jmouse.core.bind.AttributeResolver;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.TagParser;
 
