@@ -1,6 +1,7 @@
 {% extends 'layout/index' %}
 {% use 'extention/blocks' get block import default_footer as base_footer %}
 {% use 'extention/macros' get macro as m1v %}
+{% use 'layout/index' get block import footer as parent_footer %}
 {% block 'content' %}
     Site Page
 
@@ -58,7 +59,7 @@
                 <div>level 1 : {{ loop.index0 }}</div>
                 {% for l in word %}
                     <div>level 2 : {{ loop.index0 }}</div>
-                    <div>- {{ 'XXX: ' ~ l ~ " ---" }}</div>
+                    <div>- {{ '[ ' ~ l ~ " ]" }}</div>
                 {% endfor %}
                 <hr>
             {% endfor %}
@@ -68,6 +69,9 @@
                 {% for item in items %}
                 <li style="color: {{ loop.index % 2 == 0 ? "#f0f" : '#ff0' }}">{{ item.symbol }} : {{ item.name }}</li>
                 {% endfor %}
+                {% for item in books %}
+                    <li style="color: {{ loop.index % 2 == 0 ? "#f0f" : '#ff0' }}">{{ item.author }} : {{ item.title | upper }}</li>
+                {% endfor %}
             </ul>
         </div>
 
@@ -76,6 +80,10 @@
 {% endblock %}
 {% block 'title' %}Site{% endblock %}
 {% block 'footer' %}
+    <p>
+        parent footer:
+        {{ parent_footer }}
+    </p>
     inner footer: {% render 'base_footer' %}
     {% for i in 1..10 %}
         Index: {{ i }}<br>
