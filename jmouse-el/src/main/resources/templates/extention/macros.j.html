@@ -1,5 +1,7 @@
 {% macro input(name, value: 'default', attributes: {'style': 'color: red;', 'auto':true}) %}
-    <input style="border: 1px solid #ff0044" type="text" name="{{ name }}" value="{{ value }}" />
+    <input style="border: 1px solid #ff0044" type="text" name="{{ name }}" value="{{ value }}"
+    {% for value in attributes %}{{ loop.key }}="{{ value }}"{% endfor %}
+    />
 {% endmacro %}
 
 {% macro hello() %}

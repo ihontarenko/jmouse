@@ -184,7 +184,10 @@ public class RendererVisitor implements NodeVisitor {
     @Override
     public void visit(RenderNode renderNode) {
         if (renderNode.getName().evaluate(context) instanceof String string) {
-            registry.getBlock(string).node().accept(this);
+            if (registry.getBlock(string) instanceof Block block && block.node() instanceof BlockNode node) {
+                node.getBody().accept(this);
+                LOGGER.info("Forced block '{}' rendering", renderNode.getName());
+            }
         }
     }
 

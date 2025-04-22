@@ -1,8 +1,10 @@
 {% extends 'layout/index' %}
-{% use 'extention/blocks' get block import default_footer %}
+{% use 'extention/blocks' get block import default_footer as base_footer %}
 {% use 'extention/macros' get macro as m1v %}
 {% block 'content' %}
     Site Page
+
+    {{ m1v.input('email', "email", {"style":'border: 1px solid red;'}) }}
 
     {% set title = "hello world" %}
 
@@ -51,10 +53,12 @@
     <hr>
     {% embed 'extention/card' %}
         {% block 'card_content' %}
-        <div style="border: 1px solid #ff41ba">
+        <div style="border: 1px solid #49002f">
             {% for word in books[0]|type|split('\.') %}
+                <div>level 1 : {{ loop.index0 }}</div>
                 {% for l in word %}
-                    <div>- {{ l ~ " ---" }}</div>
+                    <div>level 2 : {{ loop.index0 }}</div>
+                    <div>- {{ 'XXX: ' ~ l ~ " ---" }}</div>
                 {% endfor %}
                 <hr>
             {% endfor %}
@@ -72,7 +76,7 @@
 {% endblock %}
 {% block 'title' %}Site{% endblock %}
 {% block 'footer' %}
-    {% render 'default_footer' %}
+    inner footer: {% render 'base_footer' %}
     {% for i in 1..10 %}
         Index: {{ i }}<br>
     {% endfor %}
