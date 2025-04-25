@@ -15,4 +15,8 @@ public class FilterContainer extends AbstractObjectContainer<String, Filter> {
         return extension.getName();
     }
 
+    @Override
+    public String toString() {
+        return "FILTERS: " + super.toString();
+    }
 }

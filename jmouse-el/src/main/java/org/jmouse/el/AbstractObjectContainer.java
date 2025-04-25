@@ -81,4 +81,9 @@ public abstract class AbstractObjectContainer<K, E> implements ObjectContainer<K
     public Set<K> keys() {
         return extensions.keySet();
     }
+
+    @Override
+    public String toString() {
+        return "[%d]".formatted(keys().size());
+    }
 }

@@ -9,4 +9,9 @@ public class ParserContainer extends AbstractObjectContainer<Class<? extends Par
         return extension.getClass();
     }
 
+    @Override
+    public String toString() {
+        return "PARSERS: " + super.toString();
+    }
+
 }

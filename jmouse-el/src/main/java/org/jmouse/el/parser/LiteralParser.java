@@ -53,7 +53,15 @@ public class LiteralParser implements Parser {
                 parent.add(new StringLiteralNode(token.value()));
                 break;
             case T_INT:
-                parent.add(new LongLiteralNode(Long.parseLong(token.value())));
+
+                try {
+                    parent.add(new IntegerLiteralNode(Integer.parseInt(token.value())));
+                } catch (NumberFormatException e) {
+                    try {
+                        parent.add(new LongLiteralNode(Long.parseLong(token.value())));
+                    } catch (NumberFormatException ignored) { }
+                }
+
                 break;
             case T_FLOAT:
                 parent.add(new DoubleLiteralNode(Double.parseDouble(token.value())));

@@ -23,4 +23,10 @@ public class OperatorContainer extends AbstractObjectContainer<Token.Type, Opera
     public Token.Type keyFor(Operator extension) {
         return extension.getType();
     }
+
+    @Override
+    public String toString() {
+        return "OPERATORS: " + super.toString();
+    }
+
 }

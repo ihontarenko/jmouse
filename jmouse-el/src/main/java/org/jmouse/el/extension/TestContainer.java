@@ -15,4 +15,9 @@ public class TestContainer extends AbstractObjectContainer<String, Test> {
         return extension.getName();
     }
 
+    @Override
+    public String toString() {
+        return "TESTS: " + super.toString();
+    }
+
 }

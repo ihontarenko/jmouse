@@ -11,8 +11,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import static org.jmouse.util.helper.Strings.underscored;
-
 public class ReflectionClassTypeDescriptor implements ClassTypeDescriptor {
 
     private final Class<?> nativeClass;
@@ -34,10 +32,10 @@ public class ReflectionClassTypeDescriptor implements ClassTypeDescriptor {
                     "Found more than one method for the given name. Try specifying argument types for disambiguation.");
         }
 
-        if (methods.size() == 0) {
+        if (methods.isEmpty()) {
             String parametersString = parameterTypes.length == 0 ? "" : Arrays.toString(parameterTypes);
 
-            if (parametersString.length() > 0) {
+            if (!parametersString.isEmpty()) {
                 parametersString = parametersString.substring(1).substring(0, parametersString.length() - 2);
             }
 

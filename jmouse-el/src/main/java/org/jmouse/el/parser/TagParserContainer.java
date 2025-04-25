@@ -22,4 +22,9 @@ public class TagParserContainer extends AbstractObjectContainer<String, TagParse
     public String keyFor(TagParser extension) {
         return extension.getName();
     }
+
+    @Override
+    public String toString() {
+        return "TAG-PARSERS: " + super.toString();
+    }
 }

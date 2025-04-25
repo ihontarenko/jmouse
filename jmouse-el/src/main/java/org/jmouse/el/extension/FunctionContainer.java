@@ -15,4 +15,9 @@ public class FunctionContainer extends AbstractObjectContainer<String, Function>
         return extension.getName();
     }
 
+    @Override
+    public String toString() {
+        return "FUNCTIONS: " + super.toString();
+    }
+
 }

@@ -80,9 +80,10 @@
 {% endblock %}
 {% block 'title' %}Site{% endblock %}
 {% block 'footer' %}
+    <h1>{{ underscored('helloWorld', true) }}</h1>
     <p>
         parent footer:
-        {{ parent_footer }}
+        {% render 'parent_footer' %}
     </p>
     inner footer: {% render 'base_footer' %}
     {% for i in 1..10 %}

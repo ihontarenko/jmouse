@@ -33,7 +33,7 @@ public class SetFunction implements Function {
     @Override
     public Object execute(Arguments arguments, EvaluationContext context) {
         String name  = String.valueOf(arguments.getFirst());
-        Object value = arguments.getFirst();
+        Object value = arguments.get(1);
 
         context.setValue(name, value);
 

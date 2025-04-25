@@ -1,47 +1,51 @@
 package org.jmouse.testing_ground.templates;
 
-import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.reflection.ClassTypeInspector;
-import org.jmouse.el.StringSource;
+import org.jmouse.core.matcher.Matcher;
+import org.jmouse.core.reflection.MethodFilter;
+import org.jmouse.core.reflection.MethodFinder;
+import org.jmouse.core.reflection.MethodMatchers;
+import org.jmouse.el.ExpressionEngine;
 import org.jmouse.el.evaluation.DefaultEvaluationContext;
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.extension.Arguments;
-import org.jmouse.el.extension.Filter;
 import org.jmouse.el.extension.CoreExtension;
-import org.jmouse.el.lexer.*;
+import org.jmouse.el.extension.ExtensionContainer;
+import org.jmouse.el.extension.Function;
+import org.jmouse.el.extension.MethodImporter;
+import org.jmouse.el.extension.function.reflection.JavaReflectedFunction;
 import org.jmouse.el.node.ExpressionNode;
-import org.jmouse.el.parser.DefaultParserContext;
-import org.jmouse.el.parser.ExpressionParser;
-import org.jmouse.el.parser.ParserContext;
 import org.jmouse.testing_ground.binder.dto.User;
+import org.jmouse.util.helper.Strings;
+
+import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 public class Expressions {
 
     public static void main(String[] args) {
-        StringSource source = new StringSource("test expression", "user.name | upper");
+        ExpressionEngine engine = new ExpressionEngine();
 
-        DefaultTokenizer tokenizer = new DefaultTokenizer(new ExpressionSplitter(), new ExpressionRecognizer());
-        Lexer             lexer     = new DefaultLexer(tokenizer);
-
-        TokenCursor cursor = lexer.tokenize(source);
-        cursor.next();
-
-        ParserContext parserContext = new DefaultParserContext();
-        parserContext.importExtension(new CoreExtension());
-
-        ExpressionNode compiled = (ExpressionNode) parserContext.getParser(ExpressionParser.class).parse(cursor, parserContext);
-
-        EvaluationContext evaluationContext = new DefaultEvaluationContext();
-        evaluationContext.getExtensions().importExtension(new CoreExtension());
+        EvaluationContext  evaluationContext = engine.newContext();
+        MethodImporter.importMethod(Strings.class, evaluationContext.getExtensions());
 
         evaluationContext.setValue("test", 256);
 
         User user = new User();
-        user.setName("ivan");
+        user.setName("IvanHontarenkoBorys");
 
         evaluationContext.setValue("user", user);
 
-        Object value = compiled.evaluate(evaluationContext);
+        engine.evaluate("set('var', cut(user.name | upper, '_', false, false, 1|int))", evaluationContext);
+
+        Object value = engine.evaluate("lclast(var)", evaluationContext);
+
+        engine.evaluate("set('math', 22 / 7)", evaluationContext);
+
+        System.out.println(value);
 
         long start = System.currentTimeMillis();
         long spend = 0;
@@ -50,7 +54,8 @@ public class Expressions {
         while (spend < 1000) {
             times++;
             spend = System.currentTimeMillis() - start;
-            compiled.evaluate(evaluationContext);
+            engine.evaluate("cut(user.name | upper, '_', false, false, 1)", evaluationContext);
+//            compiled.evaluate(evaluationContext);
         }
 
         System.out.println("times: " + times);

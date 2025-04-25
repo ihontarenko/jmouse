@@ -127,7 +127,9 @@ public class StandardConversion implements Conversion {
     public <T, R> R convert(T source, Class<T> sourceType, Class<R> targetType) {
         R converted = null;
 
-        if (source != null) {
+        if (targetType == Object.class) {
+            converted = (R) source;
+        } else if (source != null) {
             @SuppressWarnings({"unchecked"}) Class<R> normalizedType = (Class<R>) normalizer.normalize(targetType);
             ClassPair classPair = new ClassPair(sourceType, normalizedType);
 
