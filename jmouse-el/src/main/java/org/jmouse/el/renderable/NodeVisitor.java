@@ -45,6 +45,14 @@ public interface NodeVisitor extends Visitor {
     }
 
     /**
+     * Visits a ParentNode.
+     *
+     * @param parentNode the set node to process
+     */
+    default void visit(ParentNode parentNode) {
+    }
+
+    /**
      * Visits a ScopeNode.
      *
      * @param scopeNode the set node to process

@@ -30,6 +30,7 @@ public class Expressions {
         ExpressionEngine engine = new ExpressionEngine();
 
         EvaluationContext  evaluationContext = engine.newContext();
+
         MethodImporter.importMethod(Strings.class, evaluationContext.getExtensions());
 
         evaluationContext.setValue("test", 256);
@@ -54,7 +55,7 @@ public class Expressions {
         while (spend < 1000) {
             times++;
             spend = System.currentTimeMillis() - start;
-            engine.evaluate("cut(user.name | upper, '_', false, false, 1)", evaluationContext);
+            engine.evaluate("user.name ~ '22' | upper", evaluationContext);
 //            compiled.evaluate(evaluationContext);
         }
 

@@ -46,7 +46,7 @@ public class MethodImporter {
                 .collect(groupingBy(Method::getName, toList()));
 
         // Register each group of overloaded methods as a single reflected function
-        grouped.forEach((name, methods) -> container.addFunction(new JavaReflectedFunction(name, methods))
-        );
+        grouped.forEach((name, methods)
+                -> container.addFunction(new JavaReflectedFunction(name, methods)));
     }
 }

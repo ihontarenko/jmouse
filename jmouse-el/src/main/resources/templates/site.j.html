@@ -85,6 +85,9 @@
         parent footer:
         {% render 'parent_footer' %}
     </p>
+
+    <p>parent: {% parent 'footer' %}</p>
+
     inner footer: {% render 'base_footer' %}
     {% for i in 1..10 %}
         Index: {{ i }}<br>

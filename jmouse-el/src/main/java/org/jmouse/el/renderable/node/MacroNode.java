@@ -12,10 +12,10 @@ import java.util.Map;
 
 public class MacroNode extends AbstractNode {
 
-    private String                      name;
-    private List<String>                arguments;
-    private Node                        body;
-    private Map<String, ExpressionNode> defaultValues = new HashMap<>();
+    private final Map<String, ExpressionNode> defaultValues = new HashMap<>();
+    private       String                      name;
+    private       List<String>                arguments;
+    private       Node                        body;
 
     public String getName() {
         return name;

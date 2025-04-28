@@ -192,6 +192,25 @@ public class RendererVisitor implements NodeVisitor {
     }
 
     /**
+     * Visits a ParentNode.
+     *
+     * @param parentNode the set node to process
+     */
+    @Override
+    public void visit(ParentNode parentNode) {
+        if (parentNode.getName().evaluate(context) instanceof String string) {
+            Template parent = context.getInheritance().getParent();
+            if (parent != null) {
+                TemplateRegistry registry = parent.getRegistry();
+                if (registry.getBlock(string) instanceof Block block && block.node() instanceof BlockNode node) {
+                    node.getBody().accept(this);
+                    LOGGER.info("Parent block '{}' rendering", parentNode.getName());
+                }
+            }
+        }
+    }
+
+    /**
      * Processes a BlockNode by finding the corresponding block in the template registry and rendering its body.
      *
      * @param node the block node to process

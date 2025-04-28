@@ -122,8 +122,7 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
             Object container = getScopedChain().getValue(key);
 
             for (AttributeResolver resolver : getAttributeResolvers()) {
-                value = resolver.resolve(container, last);
-                if (value != null) {
+                if ((value = resolver.resolve(container, last)) != null) {
                     break;
                 }
             }

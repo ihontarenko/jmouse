@@ -218,6 +218,11 @@ public enum TemplateToken implements Token.Type {
     T_IGNORE_MISSING(21000, "ignore_missing"),
 
     /**
+     * 'parent' keyword type.
+     */
+    T_PARENT(21030, "parent"),
+
+    /**
      * 'override' keyword type.
      */
     T_OVERRIDE(21010, "override"),
