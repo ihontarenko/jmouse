@@ -27,7 +27,7 @@ public class StringLiteralNode extends LiteralNode<String> {
     public Object evaluate(EvaluationContext context) {
         String value = (String) super.evaluate(context);
 
-        if (value != null && !value.isBlank() && value.length() > 2) {
+        if (value != null && !value.isBlank() && value.length() >= 2) {
             if (value.startsWith("'") || value.startsWith("\"")) {
                 value = value.substring(1, value.length() - 1);
             }

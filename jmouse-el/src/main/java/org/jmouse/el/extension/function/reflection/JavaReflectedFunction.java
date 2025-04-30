@@ -77,7 +77,8 @@ public class JavaReflectedFunction implements Function {
 
         if (method == null) {
             throw new FunctionNotFoundException(
-                    "Function %s%s not found".formatted(name, Arrays.toString(types))
+                    "Function %s%s not found".formatted(name, Arrays.toString(types)
+                            .replace('[', '(').replace(']', ')'))
             );
         }
 

@@ -12,6 +12,9 @@ import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.renderable.Cache;
 
+import java.util.Collections;
+import java.util.Map;
+
 /**
  * 🔎 Engine for parsing, compiling, caching, and evaluating expressions.
  * <p>
@@ -19,7 +22,7 @@ import org.jmouse.el.renderable.Cache;
  * an {@link ExtensionContainer} for custom functions, operators, and filters.
  * </p>
  */
-public class ExpressionEngine {
+public class ExpressionLanguage {
 
     private final ParserContext                    context;
     private final Lexer                            lexer;
@@ -28,12 +31,12 @@ public class ExpressionEngine {
     private final ExtensionContainer               extensions;
 
     /**
-     * Constructs a new ExpressionEngine with default extensions, lexer, parser context, and cache.
+     * Constructs a new ExpressionLanguage with default extensions, lexer, parser context, and cache.
      * <p>
      * Automatically imports the core expression-language extension ({@link CoreExtension}).
      * </p>
      */
-    public ExpressionEngine() {
+    public ExpressionLanguage() {
         this.extensions = new StandardExtensionContainer() {{
             importExtension(new CoreExtension());
         }};
@@ -95,9 +98,22 @@ public class ExpressionEngine {
      * @param type       the target result type
      * @return the evaluated and converted result
      */
-    public Object evaluate(String expression, EvaluationContext context, Class<?> type) {
+    public Object evaluate(String expression, EvaluationContext context, Map<String, Object> data, Class<?> type) {
         Object result = compile(expression).evaluate(context);
+        data.forEach(context::setValue);
         return context.getConversion().convert(result, type);
+    }
+
+    /**
+     * Evaluates the specified expression in the given context, converting the result to the desired type.
+     *
+     * @param expression the expression to evaluate
+     * @param context    the {@link EvaluationContext} to use
+     * @param type       the target result type
+     * @return the evaluated and converted result
+     */
+    public Object evaluate(String expression, EvaluationContext context, Class<?> type) {
+        return evaluate(expression, context, Collections.emptyMap(), type);
     }
 
     /**

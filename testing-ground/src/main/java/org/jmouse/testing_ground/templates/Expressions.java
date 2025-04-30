@@ -1,35 +1,19 @@
 package org.jmouse.testing_ground.templates;
 
-import org.jmouse.core.matcher.Matcher;
-import org.jmouse.core.reflection.MethodFilter;
-import org.jmouse.core.reflection.MethodFinder;
-import org.jmouse.core.reflection.MethodMatchers;
-import org.jmouse.el.ExpressionEngine;
-import org.jmouse.el.evaluation.DefaultEvaluationContext;
+import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.extension.CoreExtension;
-import org.jmouse.el.extension.ExtensionContainer;
-import org.jmouse.el.extension.Function;
 import org.jmouse.el.extension.MethodImporter;
-import org.jmouse.el.extension.function.reflection.JavaReflectedFunction;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.testing_ground.binder.dto.Status;
 import org.jmouse.testing_ground.binder.dto.User;
+import org.jmouse.testing_ground.binder.dto.UserStatus;
 import org.jmouse.util.helper.Strings;
-
-import java.lang.reflect.Executable;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.*;
 
 public class Expressions {
 
     public static void main(String[] args) {
-        ExpressionEngine engine = new ExpressionEngine();
+        ExpressionLanguage el = new ExpressionLanguage();
 
-        EvaluationContext  evaluationContext = engine.newContext();
+        EvaluationContext  evaluationContext = el.newContext();
 
         MethodImporter.importMethod(Strings.class, evaluationContext.getExtensions());
 
@@ -37,14 +21,18 @@ public class Expressions {
 
         User user = new User();
         user.setName("IvanHontarenkoBorys");
+        user.setStatus(new UserStatus(Status.REGISTERED));
 
         evaluationContext.setValue("user", user);
 
-        engine.evaluate("set('var', cut(user.name | upper, '_', false, false, 1|int))", evaluationContext);
+        el.evaluate("set('var', cut(user.name | upper, '_', false, false, 1|int))", evaluationContext);
 
-        Object value = engine.evaluate("lclast(var)", evaluationContext);
+        Object value = el.evaluate("lclast(var) ~ '22'", evaluationContext);
 
-        engine.evaluate("set('math', 22 / 7)", evaluationContext);
+        el.evaluate("set('math', 22 / 7)", evaluationContext);
+        el.evaluate("set('username', user.name)", evaluationContext);
+        el.evaluate("set('result', isEmpty(''))", evaluationContext);
+        el.evaluate("set(user.name ~ '.' ~ user.status.status, isEmpty(''))", evaluationContext);
 
         System.out.println(value);
 
@@ -55,7 +43,7 @@ public class Expressions {
         while (spend < 1000) {
             times++;
             spend = System.currentTimeMillis() - start;
-            engine.evaluate("user.name ~ '22' | upper", evaluationContext);
+            el.evaluate("user.name ~ '22' | upper", evaluationContext);
 //            compiled.evaluate(evaluationContext);
         }
 
