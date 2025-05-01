@@ -13,26 +13,35 @@ public class Expressions {
     public static void main(String[] args) {
         ExpressionLanguage el = new ExpressionLanguage();
 
-        EvaluationContext  evaluationContext = el.newContext();
+        EvaluationContext  context = el.newContext();
 
-        MethodImporter.importMethod(Strings.class, evaluationContext.getExtensions());
+        MethodImporter.importMethod(Strings.class, context.getExtensions());
 
-        evaluationContext.setValue("test", 256);
+        context.setValue("test", 256);
 
         User user = new User();
         user.setName("IvanHontarenkoBorys");
         user.setStatus(new UserStatus(Status.REGISTERED));
 
-        evaluationContext.setValue("user", user);
+        User user2 = new User();
+        user2.setName("Borys");
+        user2.setStatus(new UserStatus(Status.REGISTERED));
 
-        el.evaluate("set('var', cut(user.name | upper, '_', false, false, 1|int))", evaluationContext);
+        context.setValue("user", user);
 
-        Object value = el.evaluate("lclast(var) ~ '22'", evaluationContext);
+        el.evaluate("set('var', cut(user.name | upper, '_', false, false, 1|int))", context);
 
-        el.evaluate("set('math', 22 / 7)", evaluationContext);
-        el.evaluate("set('username', user.name)", evaluationContext);
-        el.evaluate("set('result', isEmpty(''))", evaluationContext);
-        el.evaluate("set(user.name ~ '.' ~ user.status.status, isEmpty(''))", evaluationContext);
+        Object value = el.evaluate("lclast(var) ~ '22'", context);
+
+        el.evaluate("set('math', 22 / 7)", context);
+        el.evaluate("set('username', user.name)", context);
+
+        EvaluationContext ctx = el.newContext();
+        ctx.setValue("user", user2);
+        el.evaluate("set('username', user.name)", ctx);
+
+        el.evaluate("set('result', isEmpty(''))", context);
+        el.evaluate("set(user.name ~ '.' ~ user.status.status, isEmpty(''))", context);
 
         System.out.println(value);
 
@@ -43,7 +52,7 @@ public class Expressions {
         while (spend < 1000) {
             times++;
             spend = System.currentTimeMillis() - start;
-            el.evaluate("user.name ~ '22' | upper", evaluationContext);
+            el.evaluate("user.name ~ '22' | upper", context);
 //            compiled.evaluate(evaluationContext);
         }
 
