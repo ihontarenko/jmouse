@@ -33,10 +33,14 @@ public enum LogicalCalculator implements Calculator<Boolean> {
 
     @Override
     public Boolean calculate(Object... operands) {
-        return operation.apply(
-                (Boolean) Arrays.get(operands, 0, null),
-                (Boolean) Arrays.get(operands, 1, null)
-        );
+        Object valueA = Arrays.get(operands, 0, null);
+        Object valueB = Arrays.get(operands, 1, null);
+
+        if (valueA instanceof Boolean booleanA && valueB instanceof Boolean booleanB) {
+            return operation.apply(booleanA, booleanB);
+        }
+
+        return false;
     }
 
     /** AND operation */

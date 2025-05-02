@@ -2,6 +2,8 @@ package org.jmouse.el.extension.calculator;
 
 import org.jmouse.el.extension.Calculator;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BinaryOperator;
 
 /**
@@ -61,8 +63,17 @@ public enum MathematicCalculator implements Calculator<Number> {
 
     /** Addition operation. */
     public static class AdditiveOperation implements BinaryOperator<Number> {
+
+        public static final Map<Class<?>, BinaryOperator<Object>> OPERATORS = new HashMap<>();
+
         @Override
         public Number apply(Number left, Number right) {
+            BinaryOperator<Object> binaryOperator = OPERATORS.get(left.getClass());
+
+            if (binaryOperator != null) {
+                // return binaryOperator.apply(left, right);
+            }
+
             return left.doubleValue() + right.doubleValue();
         }
     }
