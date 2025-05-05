@@ -1,7 +1,9 @@
 package org.jmouse.el.extension.calculator;
 
+import org.jmouse.core.reflection.Reflections;
 import org.jmouse.el.extension.Calculator;
-import org.jmouse.el.extension.calculator.mathematic.IntegerAdditiveOperator;
+import org.jmouse.el.extension.calculator.mathematic.IntegerOperation;
+import org.jmouse.el.extension.calculator.mathematic.MathematicOperationException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +15,7 @@ import java.util.function.BinaryOperator;
  *
  * @author Ivan Hontarenko
  */
-public enum MathematicCalculator implements Calculator<Number> {
+public enum MathematicCalculator implements Calculator<Object> {
 
     /**
      * Addition ({@code +}), returns the sum of two numbers.
@@ -46,80 +48,99 @@ public enum MathematicCalculator implements Calculator<Number> {
      */
     EXPONENTIAL(new ExponentialOperation());
 
-    private final BinaryOperator<Number> operation;
+    private final BinaryOperator<Object> operation;
+
+    public static final Map<Class<?>, MathematicOperation<?>> OPERATIONS;
+
+    static {
+        OPERATIONS = new HashMap<>();
+        OPERATIONS.put(Integer.class, new IntegerOperation());
+    }
 
     /**
      * Constructs a new {@link MathematicCalculator} operator.
      *
      * @param operation The mathematical operation implementation.
      */
-    MathematicCalculator(BinaryOperator<Number> operation) {
+    MathematicCalculator(BinaryOperator<Object> operation) {
         this.operation = operation;
     }
 
     @Override
-    public Number calculate(Object... operands) {
-        return operation.apply((Number) operands[0], (Number) operands[1]);
+    public Object calculate(Object... operands) {
+        return operation.apply(operands[0], operands[1]);
     }
 
     /** Addition operation. */
-    public static class AdditiveOperation implements BinaryOperator<Number> {
-
-        public static final Map<Class<?>, BinaryOperator<Object>> OPERATORS = new HashMap<>();
-
-        static {
-            OPERATORS.put(Integer.class, new IntegerAdditiveOperator());
-        }
+    public static class AdditiveOperation implements BinaryOperator<Object> {
 
         @Override
-        public Number apply(Number left, Number right) {
-            BinaryOperator<Object> binaryOperator = OPERATORS.get(left.getClass());
+        public Object apply(Object left, Object right) {
+            MathematicOperation<Object> operation = (MathematicOperation<Object>) MathematicCalculator.OPERATIONS.get(left.getClass());
 
-            if (binaryOperator != null) {
-                // return binaryOperator.apply(left, right);
+            if (operation != null) {
+                return operation.plus(left, right);
             }
 
-            return left.doubleValue() + right.doubleValue();
+            throw new MathematicOperationException(
+                    "Addition not supported for %s and %s"
+                            .formatted(Reflections.describe(left), Reflections.describe(right)));
         }
     }
 
     /** Subtraction operation. */
-    public static class SubtractiveOperation implements BinaryOperator<Number> {
+    public static class SubtractiveOperation implements BinaryOperator<Object> {
         @Override
-        public Number apply(Number left, Number right) {
-            return left.doubleValue() - right.doubleValue();
+        public Object apply(Object left, Object right) {
+            MathematicOperation<Object> operation = (MathematicOperation<Object>) MathematicCalculator.OPERATIONS.get(left.getClass());
+
+            if (operation != null) {
+                return operation.minus(left, right);
+            }
+
+            throw new MathematicOperationException(
+                    "Subtraction not supported for %s and %s"
+                            .formatted(Reflections.describe(left), Reflections.describe(right)));
         }
     }
 
     /** Multiplication operation. */
-    public static class MultiplicativeOperation implements BinaryOperator<Number> {
+    public static class MultiplicativeOperation implements BinaryOperator<Object> {
         @Override
-        public Number apply(Number left, Number right) {
-            return left.doubleValue() * right.doubleValue();
+        public Number apply(Object left, Object right) {
+            return null;
         }
     }
 
     /** Division operation. */
-    public static class DivisionOperation implements BinaryOperator<Number> {
+    public static class DivisionOperation implements BinaryOperator<Object> {
         @Override
-        public Number apply(Number left, Number right) {
-            return right.doubleValue() == 0 ? Double.NaN : left.doubleValue() / right.doubleValue();
+        public Object apply(Object left, Object right) {
+            MathematicOperation<Object> operation = (MathematicOperation<Object>) MathematicCalculator.OPERATIONS.get(left.getClass());
+
+            if (operation != null) {
+                return operation.divide(left, right);
+            }
+
+            throw new MathematicOperationException(
+                    "Division not supported for %s and %s"
+                            .formatted(Reflections.describe(left), Reflections.describe(right)));
         }
     }
 
     /** Modulus operation. */
-    public static class ModulusOperation implements BinaryOperator<Number> {
+    public static class ModulusOperation implements BinaryOperator<Object> {
         @Override
-        public Number apply(Number left, Number right) {
-            return left.doubleValue() % right.doubleValue();
+        public Number apply(Object left, Object right) {
+            return null;
         }
     }
 
     /** Exponential operation. */
-    public static class ExponentialOperation implements BinaryOperator<Number> {
+    public static class ExponentialOperation implements BinaryOperator<Object> {
         @Override
-        public Number apply(Number left, Number right) {
-            return Math.pow(left.doubleValue(), right.doubleValue());
+        public Number apply(Object left, Object right) {
+            return null;
         }
     }
 

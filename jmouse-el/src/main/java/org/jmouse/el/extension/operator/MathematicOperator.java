@@ -59,7 +59,7 @@ public enum MathematicOperator implements Operator {
      */
     EXPONENTIAL(MathematicCalculator.EXPONENTIAL, BasicToken.T_EXPONENTIAL, "EXPONENTIAL", 30);
 
-    private final Calculator<Number> calculator;
+    private final Calculator<Object> calculator;
     private final Token.Type         type;
     private final String             name;
     private final int                precedence;
@@ -71,7 +71,7 @@ public enum MathematicOperator implements Operator {
      * @param name       🏷️ the name of the operator
      * @param precedence ⚖️ the precedence level of the operator
      */
-    MathematicOperator(Calculator<Number> calculator, Token.Type type, String name, int precedence) {
+    MathematicOperator(Calculator<Object> calculator, Token.Type type, String name, int precedence) {
         this.calculator = calculator;
         this.type = type;
         this.name = name;

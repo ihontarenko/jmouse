@@ -64,6 +64,21 @@ final public class Maths {
     }
 
     /**
+     * Modulus one number by another and returns the result as {@code double}.
+     *
+     * <h2>Example:</h2>
+     * <pre>{@code
+     * double result = MathFunctions.modulus(10, 2); // 0.0
+     * }</pre>
+     */
+    public static <T extends Number, U extends Number> double modulus(T a, U b) {
+        if (b.doubleValue() == 0) {
+            throw new ArithmeticException("Modulus by zero is not allowed");
+        }
+        return a.doubleValue() % b.doubleValue();
+    }
+
+    /**
      * Multiplies two numbers and returns the result as {@code double}.
      *
      * @param a the first multiplier, of type {@link Number}

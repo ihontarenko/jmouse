@@ -1018,4 +1018,12 @@ abstract public class Reflections {
         return JAVA_MODULE_NAMES.contains(clazz.getModule());
     }
 
+    public static String describe(Object instance) {
+        if (instance == null) {
+            return "NULL";
+        }
+
+        return "'%s' type(%s)".formatted(instance, instance.getClass().getName());
+    }
+
 }

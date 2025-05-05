@@ -77,23 +77,16 @@ public class BinaryOperation extends AbstractExpressionNode {
 
     @Override
     public Object evaluate(EvaluationContext context) {
-        Object result = null;
         Object left  = getLeft().evaluate(context);
         Object right = getRight().evaluate(context);
 
         if (operator instanceof ComparisonOperator) {
-            Conversion conversion = context.getConversion();
             // aligning data types to a single one for comparisons
-            try {
-                right = conversion.convert(right, left.getClass());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            Conversion conversion = context.getConversion();
+            right = conversion.convert(right, left.getClass());
         }
 
-        result = operator.getCalculator().calculate(left, right);
-
-        return result;
+        return operator.getCalculator().calculate(left, right);
     }
 
     /**

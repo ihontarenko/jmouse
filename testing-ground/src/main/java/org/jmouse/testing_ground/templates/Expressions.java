@@ -4,6 +4,7 @@ import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.MethodImporter;
 import org.jmouse.el.extension.calculator.MathematicCalculator;
+import org.jmouse.el.extension.calculator.mathematic.NumberOperation;
 import org.jmouse.testing_ground.binder.dto.Status;
 import org.jmouse.testing_ground.binder.dto.User;
 import org.jmouse.testing_ground.binder.dto.UserStatus;
@@ -19,8 +20,7 @@ public class Expressions {
 
         EvaluationContext  context = el.newContext();
 
-        MathematicCalculator.AdditiveOperation.OPERATORS
-                .put(String.class, null);
+        MathematicCalculator.PLUS.calculate(1, 2);
 
         Function<String, Integer> toInt  = Integer::parseInt;
         Function<Integer, Long>   toLong = Integer::longValue;
@@ -37,7 +37,7 @@ public class Expressions {
 
         User user2 = new User();
         user2.setName("Borys");
-        user2.setStatus(new UserStatus(Status.REGISTERED));
+        user2.setStatus(new UserStatus(Status.BLOCKED));
 
         context.setValue("user", user);
 
