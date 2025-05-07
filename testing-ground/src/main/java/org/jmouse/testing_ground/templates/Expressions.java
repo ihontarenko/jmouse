@@ -63,6 +63,8 @@ public class Expressions {
 
         el.evaluate("set('cnt', 0)", context);
 
+        el.evaluate("3.14 * 7");
+
         long start = System.currentTimeMillis();
         long spend = 0;
         int  times = 0;

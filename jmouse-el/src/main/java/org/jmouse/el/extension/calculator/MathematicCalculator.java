@@ -2,8 +2,7 @@ package org.jmouse.el.extension.calculator;
 
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.el.extension.Calculator;
-import org.jmouse.el.extension.calculator.mathematic.IntegerOperation;
-import org.jmouse.el.extension.calculator.mathematic.MathematicOperationException;
+import org.jmouse.el.extension.calculator.mathematic.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,6 +54,9 @@ public enum MathematicCalculator implements Calculator<Object> {
     static {
         OPERATIONS = new HashMap<>();
         OPERATIONS.put(Integer.class, new IntegerOperation());
+        OPERATIONS.put(Float.class, new FloatOperation());
+        OPERATIONS.put(Double.class, new DoubleOperation());
+        OPERATIONS.put(Long.class, new LongOperation());
     }
 
     /**
@@ -107,8 +109,16 @@ public enum MathematicCalculator implements Calculator<Object> {
     /** Multiplication operation. */
     public static class MultiplicativeOperation implements BinaryOperator<Object> {
         @Override
-        public Number apply(Object left, Object right) {
-            return null;
+        public Object apply(Object left, Object right) {
+            MathematicOperation<Object> operation = (MathematicOperation<Object>) MathematicCalculator.OPERATIONS.get(left.getClass());
+
+            if (operation != null) {
+                return operation.multiply(left, right);
+            }
+
+            throw new MathematicOperationException(
+                    "Multiplication not supported for %s and %s"
+                            .formatted(Reflections.describe(left), Reflections.describe(right)));
         }
     }
 
@@ -131,16 +141,32 @@ public enum MathematicCalculator implements Calculator<Object> {
     /** Modulus operation. */
     public static class ModulusOperation implements BinaryOperator<Object> {
         @Override
-        public Number apply(Object left, Object right) {
-            return null;
+        public Object apply(Object left, Object right) {
+            MathematicOperation<Object> operation = (MathematicOperation<Object>) MathematicCalculator.OPERATIONS.get(left.getClass());
+
+            if (operation != null) {
+                return operation.modulus(left, right);
+            }
+
+            throw new MathematicOperationException(
+                    "Modulus not supported for %s and %s"
+                            .formatted(Reflections.describe(left), Reflections.describe(right)));
         }
     }
 
     /** Exponential operation. */
     public static class ExponentialOperation implements BinaryOperator<Object> {
         @Override
-        public Number apply(Object left, Object right) {
-            return null;
+        public Object apply(Object left, Object right) {
+            MathematicOperation<Object> operation = (MathematicOperation<Object>) MathematicCalculator.OPERATIONS.get(left.getClass());
+
+            if (operation != null) {
+                return operation.exponential(left, right);
+            }
+
+            throw new MathematicOperationException(
+                    "Exponentiation not supported for %s and %s"
+                            .formatted(Reflections.describe(left), Reflections.describe(right)));
         }
     }
 
