@@ -52,6 +52,8 @@ public class IntegerOperationHandler implements OperationHandler<Integer, Number
             throw new IllegalOperationException("%s by zero".formatted(type));
         }
 
+        System.out.println(type);
+
         return switch (type) {
             case PLUS        -> x + y.intValue();
             case MINUS       -> x - y.intValue();

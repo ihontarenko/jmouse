@@ -44,9 +44,13 @@ public class Expressions {
                 el.evaluate("12 + 3.14")
         );
 
-        System.out.println(
-                el.evaluate("1.2 + 314")
-        );
+//        System.out.println(
+//                el.evaluate("12 + 1123456789123456.78")
+//        );
+//
+//        System.out.println(
+//                el.evaluate("1.2 + 314")
+//        );
 
         el.evaluate("set('var', cut(user.name | upper, '_', false, false, 1|int))", context);
 
