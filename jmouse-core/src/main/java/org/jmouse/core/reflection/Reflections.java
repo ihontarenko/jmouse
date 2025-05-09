@@ -1023,7 +1023,7 @@ abstract public class Reflections {
             return "NULL";
         }
 
-        return "'%s' type(%s)".formatted(instance, instance.getClass().getName());
+        return "'%s' type( %s)".formatted(instance, instance.getClass().getSimpleName());
     }
 
 }

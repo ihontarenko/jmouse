@@ -1,11 +1,10 @@
 package org.jmouse.el.extension.calculator;
 
-import org.jmouse.core.reflection.Reflections;
 import org.jmouse.el.extension.Calculator;
-import org.jmouse.el.extension.calculator.mathematic.*;
+import org.jmouse.el.extension.calculator.operation.Calculation;
+import org.jmouse.el.extension.calculator.operation.handler.IntegerOperationHandler;
+import org.jmouse.el.extension.calculator.operation.OperationType;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.BinaryOperator;
 
 /**
@@ -49,14 +48,10 @@ public enum MathematicCalculator implements Calculator<Object> {
 
     private final BinaryOperator<Object> operation;
 
-    public static final Map<Class<?>, MathematicOperation<?>> OPERATIONS;
+    public final static Calculation CALCULATION = new Calculation();
 
     static {
-        OPERATIONS = new HashMap<>();
-        OPERATIONS.put(Integer.class, new IntegerOperation());
-        OPERATIONS.put(Float.class, new FloatOperation());
-        OPERATIONS.put(Double.class, new DoubleOperation());
-        OPERATIONS.put(Long.class, new LongOperation());
+        CALCULATION.register(new IntegerOperationHandler());
     }
 
     /**
@@ -78,15 +73,7 @@ public enum MathematicCalculator implements Calculator<Object> {
 
         @Override
         public Object apply(Object left, Object right) {
-            MathematicOperation<Object> operation = (MathematicOperation<Object>) MathematicCalculator.OPERATIONS.get(left.getClass());
-
-            if (operation != null) {
-                return operation.plus(left, right);
-            }
-
-            throw new MathematicOperationException(
-                    "Addition not supported for %s and %s"
-                            .formatted(Reflections.describe(left), Reflections.describe(right)));
+            return CALCULATION.binary(OperationType.PLUS, left, right);
         }
     }
 
@@ -94,15 +81,7 @@ public enum MathematicCalculator implements Calculator<Object> {
     public static class SubtractiveOperation implements BinaryOperator<Object> {
         @Override
         public Object apply(Object left, Object right) {
-            MathematicOperation<Object> operation = (MathematicOperation<Object>) MathematicCalculator.OPERATIONS.get(left.getClass());
-
-            if (operation != null) {
-                return operation.minus(left, right);
-            }
-
-            throw new MathematicOperationException(
-                    "Subtraction not supported for %s and %s"
-                            .formatted(Reflections.describe(left), Reflections.describe(right)));
+            return CALCULATION.binary(OperationType.MINUS, left, right);
         }
     }
 
@@ -110,15 +89,7 @@ public enum MathematicCalculator implements Calculator<Object> {
     public static class MultiplicativeOperation implements BinaryOperator<Object> {
         @Override
         public Object apply(Object left, Object right) {
-            MathematicOperation<Object> operation = (MathematicOperation<Object>) MathematicCalculator.OPERATIONS.get(left.getClass());
-
-            if (operation != null) {
-                return operation.multiply(left, right);
-            }
-
-            throw new MathematicOperationException(
-                    "Multiplication not supported for %s and %s"
-                            .formatted(Reflections.describe(left), Reflections.describe(right)));
+            return CALCULATION.binary(OperationType.MULTIPLY, left, right);
         }
     }
 
@@ -126,15 +97,7 @@ public enum MathematicCalculator implements Calculator<Object> {
     public static class DivisionOperation implements BinaryOperator<Object> {
         @Override
         public Object apply(Object left, Object right) {
-            MathematicOperation<Object> operation = (MathematicOperation<Object>) MathematicCalculator.OPERATIONS.get(left.getClass());
-
-            if (operation != null) {
-                return operation.divide(left, right);
-            }
-
-            throw new MathematicOperationException(
-                    "Division not supported for %s and %s"
-                            .formatted(Reflections.describe(left), Reflections.describe(right)));
+            return CALCULATION.binary(OperationType.DIVIDE, left, right);
         }
     }
 
@@ -142,15 +105,7 @@ public enum MathematicCalculator implements Calculator<Object> {
     public static class ModulusOperation implements BinaryOperator<Object> {
         @Override
         public Object apply(Object left, Object right) {
-            MathematicOperation<Object> operation = (MathematicOperation<Object>) MathematicCalculator.OPERATIONS.get(left.getClass());
-
-            if (operation != null) {
-                return operation.modulus(left, right);
-            }
-
-            throw new MathematicOperationException(
-                    "Modulus not supported for %s and %s"
-                            .formatted(Reflections.describe(left), Reflections.describe(right)));
+            return CALCULATION.binary(OperationType.MODULUS, left, right);
         }
     }
 
@@ -158,15 +113,7 @@ public enum MathematicCalculator implements Calculator<Object> {
     public static class ExponentialOperation implements BinaryOperator<Object> {
         @Override
         public Object apply(Object left, Object right) {
-            MathematicOperation<Object> operation = (MathematicOperation<Object>) MathematicCalculator.OPERATIONS.get(left.getClass());
-
-            if (operation != null) {
-                return operation.exponential(left, right);
-            }
-
-            throw new MathematicOperationException(
-                    "Exponentiation not supported for %s and %s"
-                            .formatted(Reflections.describe(left), Reflections.describe(right)));
+            return CALCULATION.binary(OperationType.EXPONENTIAL, left, right);
         }
     }
 
