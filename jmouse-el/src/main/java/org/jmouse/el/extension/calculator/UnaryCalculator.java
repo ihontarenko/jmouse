@@ -1,6 +1,7 @@
 package org.jmouse.el.extension.calculator;
 
 import org.jmouse.el.extension.Calculator;
+import org.jmouse.el.extension.calculator.operation.OperationType;
 
 import java.util.function.UnaryOperator;
 
@@ -35,58 +36,12 @@ public enum UnaryCalculator implements Calculator<Object> {
     }
 
     /**
-     * Unary plus operation ({@code +}), preserves the sign of a number.
-     */
-    public static class UnaryPlusOperation implements UnaryOperator<Object> {
-        @Override
-        public Object apply(Object operand) {
-            if (operand instanceof Number number) {
-                return Math.abs(number.doubleValue());
-            }
-
-            throw new UnsupportedOperationException("Unsupported operand for UNARY_PLUS: " + operand);
-        }
-    }
-
-    /**
-     * Unary minus operation ({@code -}), negates the value of a number.
-     */
-    public static class UnaryMinusOperation implements UnaryOperator<Object> {
-        @Override
-        public Object apply(Object operand) {
-            if (operand instanceof Number number) {
-                return -Math.abs(number.doubleValue());
-            }
-
-            throw new UnsupportedOperationException("Unsupported operand for UNARY_MINUS: " + operand);
-        }
-    }
-
-    /**
-     * Logical negation operation ({@code !}), inverts a boolean value.
-     */
-    public static class LogicalNegationOperation implements UnaryOperator<Object> {
-        @Override
-        public Object apply(Object operand) {
-            if (operand instanceof Boolean booleanValue) {
-                return !booleanValue;
-            }
-
-            throw new UnsupportedOperationException("Unsupported operand for LOGICAL_NEGATION: " + operand);
-        }
-    }
-
-    /**
      * Increment operation ({@code ++}), increases a number by 1.
      */
     public static class IncrementOperation implements UnaryOperator<Object> {
         @Override
         public Object apply(Object operand) {
-            if (operand instanceof Number number) {
-                return number.doubleValue() + 1;
-            }
-
-            throw new UnsupportedOperationException("Unsupported operand for INCREMENT: " + operand);
+            return MathematicCalculator.CALCULATION.unary(OperationType.INCREMENT, operand);
         }
     }
 
@@ -96,11 +51,7 @@ public enum UnaryCalculator implements Calculator<Object> {
     public static class DecrementOperation implements UnaryOperator<Object> {
         @Override
         public Object apply(Object operand) {
-            if (operand instanceof Number number) {
-                return number.doubleValue() - 1;
-            }
-
-            throw new UnsupportedOperationException("Unsupported operand for DECREMENT: " + operand);
+            return MathematicCalculator.CALCULATION.unary(OperationType.DECREMENT, operand);
         }
     }
 

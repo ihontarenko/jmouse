@@ -2,7 +2,7 @@ package org.jmouse.el.extension.calculator;
 
 import org.jmouse.el.extension.Calculator;
 import org.jmouse.el.extension.calculator.operation.Calculation;
-import org.jmouse.el.extension.calculator.operation.handler.IntegerOperationHandler;
+import org.jmouse.el.extension.calculator.operation.handler.*;
 import org.jmouse.el.extension.calculator.operation.OperationType;
 
 import java.util.function.BinaryOperator;
@@ -51,7 +51,17 @@ public enum MathematicCalculator implements Calculator<Object> {
     public final static Calculation CALCULATION = new Calculation();
 
     static {
+        CALCULATION.register(new BigIntegerOperationHandler());
+        CALCULATION.register(new BigDecimalOperationHandler());
+        CALCULATION.register(new ShortOperationHandler());
+        CALCULATION.register(new ByteOperationHandler());
+        CALCULATION.register(new CharacterOperationHandler());
         CALCULATION.register(new IntegerOperationHandler());
+        CALCULATION.register(new LongOperationHandler());
+        CALCULATION.register(new FloatOperationHandler());
+        CALCULATION.register(new DoubleOperationHandler());
+        CALCULATION.register(new StringOperationHandler());
+        CALCULATION.register(new CollectionOperationHandler());
     }
 
     /**

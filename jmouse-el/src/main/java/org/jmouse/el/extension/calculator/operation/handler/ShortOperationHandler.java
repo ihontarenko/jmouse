@@ -8,14 +8,14 @@ import static org.jmouse.el.extension.calculator.operation.OperationType.DIVIDE;
 import static org.jmouse.el.extension.calculator.operation.OperationType.MODULUS;
 
 /**
- * {@link OperationHandler} that performs integer‐based arithmetic.
+ * {@link OperationHandler} that performs short‐based arithmetic.
  * <p>
  * Supports binary operations (PLUS, MINUS, MULTIPLY, DIVIDE, MODULUS, EXPONENTIAL)
- * where the left operand is an {@link Integer} and the right operand is any {@link Number},
+ * where the left operand is an {@link Short} and the right operand is any {@link Number},
  * as well as unary operations (INCREMENT, DECREMENT).
  * </p>
  */
-public class IntegerOperationHandler implements OperationHandler<Integer, Number> {
+public class ShortOperationHandler implements OperationHandler<Short, Number> {
 
     /**
      * Determines if this handler supports the given operation type and operand classes.
@@ -27,7 +27,7 @@ public class IntegerOperationHandler implements OperationHandler<Integer, Number
      */
     @Override
     public boolean supports(OperationType type, Class<?> x, Class<?> y) {
-        boolean supported = x != null && Integer.class.isAssignableFrom(x);
+        boolean supported = x != null && Short.class.isAssignableFrom(x);
 
         if (supported && y != null && !Number.class.isAssignableFrom(y)) {
             supported = false;
@@ -40,14 +40,14 @@ public class IntegerOperationHandler implements OperationHandler<Integer, Number
      * Executes the specified integer operation.
      *
      * @param type      the operation type
-     * @param x         the left operand (non‐null {@link Integer})
+     * @param x         the left operand (non‐null {@link Short})
      * @param operand   the right operand (may be {@link Number} or {@code null} for unary ops)
-     * @return the result as {@link Integer} for integer ops or {@link Double} for exponentiation
+     * @return the result as {@link Short} for integer ops or {@link Double} for exponentiation
      * @throws IllegalOperationException if division or modulus by zero is attempted
      */
     @Override
-    public Object execute(OperationType type, Integer x, Number operand) {
-        int y = (operand == null ? 0 : operand.intValue());
+    public Object execute(OperationType type, Short x, Number operand) {
+        short y = (operand == null ? 0 : operand.shortValue());
 
         // Check division/modulus by zero
         if ((type == DIVIDE || type == MODULUS) && y == 0) {
@@ -55,14 +55,14 @@ public class IntegerOperationHandler implements OperationHandler<Integer, Number
         }
 
         return switch (type) {
-            case PLUS        -> x + y;
-            case MINUS       -> x - y;
-            case MULTIPLY    -> x * y;
-            case DIVIDE      -> x / y;
-            case MODULUS     -> x % y;
+            case PLUS        -> (short) (x + y);
+            case MINUS       -> (short) (x - y);
+            case MULTIPLY    -> (short) (x * y);
+            case DIVIDE      -> (x / y);
+            case MODULUS     -> (short) (x % y);
             case EXPONENTIAL -> Math.pow(x, y);
-            case INCREMENT   -> x + 1;
-            case DECREMENT   -> x - 1;
+            case INCREMENT   -> (short) (x + 1);
+            case DECREMENT   -> (short) (x - 1);
         };
     }
 

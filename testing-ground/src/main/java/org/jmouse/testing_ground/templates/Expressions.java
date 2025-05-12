@@ -10,6 +10,9 @@ import org.jmouse.testing_ground.binder.dto.UserStatus;
 import org.jmouse.util.helper.Strings;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 public class Expressions {
@@ -76,6 +79,29 @@ public class Expressions {
 
         el.evaluate("3.14 * 7");
 
+        context.setValue("x", new BigInteger("23"));
+        context.setValue("name", "Ivan");
+
+        el.evaluate("x * 7", context);
+        el.evaluate("name * 3", context);
+        el.evaluate("name + 3", context);
+
+        List<String> names = new ArrayList<>();
+
+        context.setValue("names", names);
+        context.setValue("si", (short) 23);
+        context.setValue("bi", (byte) 23);
+        context.setValue("ci", (char) 23);
+
+
+
+        el.evaluate("si + 2", context);
+        el.evaluate("bi + 2", context);
+        el.evaluate("ci + 2", context);
+        el.evaluate("names + user.name", context);
+        el.evaluate("names + 'John'", context);
+        el.evaluate("names + 'Doe'", context);
+
         long start = System.currentTimeMillis();
         long spend = 0;
         int  times = 0;
@@ -85,6 +111,7 @@ public class Expressions {
             spend = System.currentTimeMillis() - start;
             el.evaluate("user.name ~ '22' | upper", context);
             el.evaluate("cnt++", context);
+            el.evaluate("names + cnt", context);
 //            compiled.evaluate(evaluationContext);
         }
 
