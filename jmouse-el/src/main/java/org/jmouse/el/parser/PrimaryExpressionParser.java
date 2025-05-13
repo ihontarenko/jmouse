@@ -37,6 +37,10 @@ public class PrimaryExpressionParser implements Parser {
             left = context.getParser(ArrayParser.class).parse(cursor, context);
         } else if (cursor.isCurrent(T_OPEN_CURLY)) {
             left = context.getParser(MapParser.class).parse(cursor, context);
+        } else if (cursor.isCurrent(T_OPEN_PAREN)) {
+            cursor.ensure(T_OPEN_PAREN);
+            left = context.getParser(OperatorParser.class).parse(cursor, context);
+            cursor.ensure(T_CLOSE_PAREN);
         }
 
         if (cursor.isCurrent(T_DECREMENT, T_INCREMENT)) {

@@ -147,8 +147,10 @@ public class CoreExtension implements Extension {
         operators.addAll(Arrays.asList(UnaryOperator.values()));
         operators.addAll(Arrays.asList(LogicalOperator.values()));
         operators.addAll(Arrays.asList(ComparisonOperator.values()));
-        operators.addAll(Arrays.asList(TestOperator.values()));
 
+        operators.add(FilterOperator.FILTER);
+        operators.add(TestOperator.IS);
+        operators.add(NullCoalesceOperator.NULL_COALESCE);
         operators.add(ConcatOperator.CONCAT);
 
         return operators;

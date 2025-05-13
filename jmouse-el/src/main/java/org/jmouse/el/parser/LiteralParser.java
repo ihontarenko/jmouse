@@ -6,6 +6,12 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.literal.*;
 
+import java.math.BigDecimal;
+
+import static java.lang.Float.MAX_VALUE;
+import static java.lang.Float.MIN_NORMAL;
+import static java.math.BigDecimal.ZERO;
+import static java.math.BigDecimal.valueOf;
 import static org.jmouse.el.lexer.BasicToken.*;
 
 /**
@@ -65,12 +71,15 @@ public class LiteralParser implements Parser {
                 break;
             case T_FLOAT:
 
-                try {
+                BigDecimal decimal = new BigDecimal(token.value()).abs();
+
+                boolean inRange = decimal.compareTo(valueOf(MAX_VALUE)) <= 0
+                        && (decimal.compareTo(valueOf(MIN_NORMAL)) >= 0 || decimal.compareTo(ZERO) == 0);
+
+                if (decimal.precision() > 7 && inRange) {
                     parent.add(new FloatLiteralNode(Float.parseFloat(token.value())));
-                } catch (NumberFormatException nfe) {
-                    try {
-                        parent.add(new DoubleLiteralNode(Double.parseDouble(token.value())));
-                    } catch (NumberFormatException ignored) { }
+                } else {
+                    parent.add(new DoubleLiteralNode(Double.parseDouble(token.value())));
                 }
 
                 break;

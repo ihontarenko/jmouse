@@ -43,9 +43,9 @@ public class Expressions {
 
         context.setValue("user", user);
 
-        System.out.println(
-                el.evaluate("12 + 3.14")
-        );
+//        System.out.println(
+//                el.evaluate("12 + 3.14")
+//        );
 
 //        System.out.println(
 //                el.evaluate("12 + 1123456789123456.78")
@@ -54,6 +54,22 @@ public class Expressions {
 //        System.out.println(
 //                el.evaluate("1.2 + 314")
 //        );
+
+        context.setValue("list", new ArrayList<>());
+
+        context.setValue("ci", (char) 23);
+
+        el.evaluate("list + ((ci + 2 + (14 - 1) | int / 7) is even)", context);
+
+        el.evaluate("user.name ?? 'Guest'", context);
+
+//        el.evaluate("(ci + 2 + (14 - 1 | int) / 7) | string", context);
+//        el.evaluate("(ci + 7) | string", context);
+//        el.evaluate("ci + (7 | string)", context);
+
+        System.out.println(
+                ((List<?>)context.getValue("list")).getFirst()
+        );
 
         el.evaluate("set('var', cut(user.name | upper, '_', false, false, 1|int))", context);
 
@@ -91,13 +107,15 @@ public class Expressions {
         context.setValue("names", names);
         context.setValue("si", (short) 23);
         context.setValue("bi", (byte) 23);
-        context.setValue("ci", (char) 23);
+
 
 
 
         el.evaluate("si + 2", context);
+        el.evaluate("(bi + 2) | int", context);
         el.evaluate("bi + 2", context);
         el.evaluate("ci + 2", context);
+
         el.evaluate("names + user.name", context);
         el.evaluate("names + 'John'", context);
         el.evaluate("names + 'Doe'", context);

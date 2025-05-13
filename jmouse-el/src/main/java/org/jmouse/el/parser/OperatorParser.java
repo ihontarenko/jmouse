@@ -1,12 +1,16 @@
 package org.jmouse.el.parser;
 
 import org.jmouse.el.extension.Operator;
+import org.jmouse.el.extension.operator.FilterOperator;
+import org.jmouse.el.extension.operator.NullCoalesceOperator;
 import org.jmouse.el.extension.operator.TestOperator;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.BinaryOperation;
+import org.jmouse.el.node.expression.FilterNode;
+import org.jmouse.el.node.expression.NullCoalesceNode;
 import org.jmouse.el.node.expression.TestNode;
 
 import static org.jmouse.el.lexer.BasicToken.*;
@@ -56,6 +60,18 @@ public class OperatorParser implements Parser {
                 TestNode test = (TestNode) context.getParser(TestParser.class).parse(cursor, context);
                 test.setLeft(left);
                 left = test;
+            } else if (operator == NullCoalesceOperator.NULL_COALESCE) {
+                NullCoalesceNode node = new NullCoalesceNode();
+                node.setNullable(left);
+                node.setOtherwise((ExpressionNode) parse(cursor, context));
+                left = node;
+            } else if (operator == FilterOperator.FILTER) {
+                while (cursor.hasNext() && cursor.isCurrent(T_IDENTIFIER)) {
+                    if (context.getParser(FilterParser.class).parse(cursor, context) instanceof FilterNode filter) {
+                        filter.setLeft(left);
+                        left = filter;
+                    }
+                }
             } else {
                 ExpressionNode right = parseExpression(cursor, context, operator.getPrecedence() + 1);
                 left = new BinaryOperation(left, operator, right);
@@ -76,13 +92,13 @@ public class OperatorParser implements Parser {
         ExpressionNode          left;
 
         // Parenthesized expression
-        if (cursor.isCurrent(T_OPEN_PAREN) && !cursor.isPrevious(T_IDENTIFIER)) {
-            cursor.ensure(T_OPEN_PAREN);
-            left = parseExpression(cursor, context, 0);
-            cursor.ensure(T_CLOSE_PAREN);
-        } else {
+//        if (cursor.isCurrent(T_OPEN_PAREN) && !cursor.isPrevious(T_IDENTIFIER)) {
+//            cursor.ensure(T_OPEN_PAREN);
+//            left = parseExpression(cursor, context, 0);
+//            cursor.ensure(T_CLOSE_PAREN);
+//        } else {
             left = (ExpressionNode) parser.parse(cursor, context);
-        }
+//        }
 
         // Implicit multiplication: e.g., 2(3 + 4) becomes 2 * (3 + 4)
         if (cursor.isCurrent(T_OPEN_PAREN)) {
