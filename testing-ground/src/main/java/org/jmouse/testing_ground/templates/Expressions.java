@@ -62,6 +62,9 @@ public class Expressions {
         el.evaluate("list + ((ci + 2 + (14 - 1) | int / 7) is even)", context);
 
         el.evaluate("user.name ?? 'Guest'", context);
+        el.evaluate("list + (list is type('collection')) | string", context);
+        el.evaluate("[1, 2, 3]");
+        el.evaluate("{user.status.status | string : user.name | length | float}", context);
 
 //        el.evaluate("(ci + 2 + (14 - 1 | int) / 7) | string", context);
 //        el.evaluate("(ci + 7) | string", context);

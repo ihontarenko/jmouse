@@ -197,6 +197,7 @@ public class StandardConversion implements Conversion {
         List<Class<?>> targetCandidates = new ArrayList<>(List.of(Reflections.getClassInterfaces(targetType)));
 
         sourceCandidates.add(sourceType);
+        sourceCandidates.add(sourceType.getSuperclass());
         targetCandidates.add(targetType);
 
         for (Class<?> sourceCandidate : sourceCandidates) {

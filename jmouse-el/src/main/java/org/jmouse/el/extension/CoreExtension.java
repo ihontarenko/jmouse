@@ -5,9 +5,7 @@ import org.jmouse.el.extension.attribute.JavaBeanAttributeResolver;
 import org.jmouse.el.extension.attribute.ListAttributeResolver;
 import org.jmouse.el.extension.attribute.MapAttributeResolver;
 import org.jmouse.el.extension.filter.*;
-import org.jmouse.el.extension.filter.converter.ToBigDecimalFilter;
-import org.jmouse.el.extension.filter.converter.ToIntFilter;
-import org.jmouse.el.extension.filter.converter.ToStringFilter;
+import org.jmouse.el.extension.filter.converter.*;
 import org.jmouse.el.extension.function.*;
 import org.jmouse.el.extension.function.string.LcfirstFunction;
 import org.jmouse.el.extension.function.string.LclastFunction;
@@ -81,9 +79,17 @@ public class CoreExtension implements Extension {
                 new LengthFilter(),
                 new SplitFilter(),
                 new JoinFilter(),
-                new ToBigDecimalFilter(),
+                new ToByteFilter(),
+                new ToShortFilter(),
                 new ToIntFilter(),
-                new ToStringFilter()
+                new ToLongFilter(),
+                new ToFloatFilter(),
+                new ToDoubleFilter(),
+                new ToCharacterFilter(),
+                new ToBigIntFilter(),
+                new ToBigDecimalFilter(),
+                new ToStringFilter(),
+                new ToListFilter()
         );
     }
 
@@ -101,8 +107,9 @@ public class CoreExtension implements Extension {
                 new CollectionTest(),
                 new MapTest(),
                 new IterableTest(),
-                new InsetTest(),
-                new NullTest()
+                new ContainsTest(),
+                new NullTest(),
+                new TypeTest()
         );
     }
 

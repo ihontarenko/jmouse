@@ -4,6 +4,7 @@ import org.jmouse.core.convert.converter.CollectionConverters;
 import org.jmouse.core.convert.converter.DateAndTimeConverters;
 import org.jmouse.core.convert.converter.NumberToStringConverter;
 import org.jmouse.core.convert.converter.StringToNumberConverter;
+import org.jmouse.core.convert.converter.enums.EnumToScalarConverter;
 import org.jmouse.core.convert.converter.enums.IntegerToEnumConverter;
 import org.jmouse.core.convert.converter.enums.StringToEnumConverter;
 import org.jmouse.core.reflection.Reflections;
@@ -17,6 +18,7 @@ abstract public class PredefinedConversion extends StandardConversion {
         // default enum to string, integer converters
         registerConverter(new StringToEnumConverter());
         registerConverter(new IntegerToEnumConverter());
+        registerConverter(new EnumToScalarConverter());
 
         // collection and array converters
         for (GenericConverter<?, ?> converter : CollectionConverters.getConverters()) {

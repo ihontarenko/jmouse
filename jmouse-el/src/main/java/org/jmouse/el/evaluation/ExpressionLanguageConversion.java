@@ -2,6 +2,7 @@ package org.jmouse.el.evaluation;
 
 import org.jmouse.core.convert.PredefinedConversion;
 import org.jmouse.core.convert.converter.CharacterToNumberConverter;
+import org.jmouse.core.convert.converter.NumberToCharacterConverter;
 import org.jmouse.core.convert.converter.NumberToNumberConverter;
 import org.jmouse.el.evaluation.converter.BooleanToStringConverter;
 import org.jmouse.el.evaluation.converter.CharacterToStringConverter;
@@ -27,6 +28,7 @@ public class ExpressionLanguageConversion extends PredefinedConversion {
         super();
 
         registerConverter(new NumberToNumberConverter());
+        registerConverter(new NumberToCharacterConverter());
         registerConverter(new BooleanToStringConverter());
         registerConverter(new CharacterToStringConverter());
         registerConverter(new CharacterToNumberConverter());

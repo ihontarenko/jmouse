@@ -5,23 +5,23 @@ import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.extension.Filter;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
- * A filter that converts the input value to a {@link BigDecimal}.
+ * A filter that converts the input value to a {@link BigInteger}.
  *
  * @author Ivan Hontarenko
  * @author Mr. Jerry Mouse
  * @author ihontarenko@gmail.com
  */
-public class ToBigDecimalFilter implements Filter {
+public class ToBigIntFilter implements Filter {
 
     /**
-     * Converts the input value to a {@link BigDecimal} using the conversion service.
+     * Converts the input value to a {@link BigInteger} using the conversion service.
      */
     @Override
     public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
-        return context.getConversion().convert(input, BigDecimal.class);
+        return context.getConversion().convert(input, BigInteger.class);
     }
 
     /**
@@ -29,6 +29,6 @@ public class ToBigDecimalFilter implements Filter {
      */
     @Override
     public String getName() {
-        return "bigDecimal";
+        return "bigInt";
     }
 }
