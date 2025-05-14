@@ -18,6 +18,7 @@ public class User {
     private Set<Book>       books;
     private UserStatus status;
 
+    @BindRequired
     public String getName() {
         return name;
     }

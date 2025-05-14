@@ -98,10 +98,9 @@ public class ExpressionLanguage {
      * @param type       the target result type
      * @return the evaluated and converted result
      */
-    public Object evaluate(String expression, EvaluationContext context, Map<String, Object> data, Class<?> type) {
-        Object result = compile(expression).evaluate(context);
+    public <T> T evaluate(String expression, EvaluationContext context, Map<String, Object> data, Class<T> type) {
         data.forEach(context::setValue);
-        return context.getConversion().convert(result, type);
+        return context.getConversion().convert(compile(expression).evaluate(context), type);
     }
 
     /**
@@ -112,7 +111,7 @@ public class ExpressionLanguage {
      * @param type       the target result type
      * @return the evaluated and converted result
      */
-    public Object evaluate(String expression, EvaluationContext context, Class<?> type) {
+    public <T> T evaluate(String expression, EvaluationContext context, Class<T> type) {
         return evaluate(expression, context, Collections.emptyMap(), type);
     }
 
@@ -134,7 +133,7 @@ public class ExpressionLanguage {
      * @param type       the target result type
      * @return the evaluated and converted result
      */
-    public Object evaluate(String expression, Class<?> type) {
+    public <T> T evaluate(String expression, Class<T> type) {
         return evaluate(expression, newContext(), type);
     }
 

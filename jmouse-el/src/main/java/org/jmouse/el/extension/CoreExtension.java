@@ -79,6 +79,9 @@ public class CoreExtension implements Extension {
                 new LengthFilter(),
                 new SplitFilter(),
                 new JoinFilter(),
+                new LastFilter(),
+                new FirstFilter(),
+                new ToBooleanFilter(),
                 new ToByteFilter(),
                 new ToShortFilter(),
                 new ToIntFilter(),
@@ -89,7 +92,8 @@ public class CoreExtension implements Extension {
                 new ToBigIntFilter(),
                 new ToBigDecimalFilter(),
                 new ToStringFilter(),
-                new ToListFilter()
+                new ToListFilter(),
+                new ToArrayFilter()
         );
     }
 
@@ -126,6 +130,7 @@ public class CoreExtension implements Extension {
                 new PrimaryExpressionParser(),
                 new RangeParser(),
                 new FunctionParser(),
+                new LambdaParser(),
                 new ScopedCallParser(),
                 new TestParser(),
                 new FilterParser(),

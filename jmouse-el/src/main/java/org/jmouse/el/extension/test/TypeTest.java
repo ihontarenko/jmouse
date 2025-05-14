@@ -22,11 +22,23 @@ public class TypeTest extends AbstractTest {
             DataType dataType = DataType.valueOf(string.toUpperCase());
 
             result = switch (dataType) {
-                case STRING -> value instanceof String;
-                case NUMERIC -> value instanceof Number;
-                case ITERABLE -> value instanceof Iterable<?>;
-                case COLLECTION -> value instanceof Collection<?>;
-                case ARRAY -> value instanceof Object[];
+                case STRING -> type.isString();
+                case NUMERIC -> type.isNumber();
+                case ITERABLE -> type.isIterable();
+                case COLLECTION -> type.isCollection();
+                case ARRAY -> type.isArray();
+                case ENUM -> type.isEnum();
+                case BYTE -> value instanceof Byte;
+                case SHORT -> value instanceof Short;
+                case CHAR -> type.isCharacter();
+                case INT -> value instanceof Integer;
+                case LONG -> value instanceof Long;
+                case FLOAT -> value instanceof Float;
+                case DOUBLE -> type.is(Double.class);
+                case BOOLEAN -> type.isBoolean();
+                case LIST -> type.isList();
+                case SET -> type.isSet();
+                case MAP -> type.isMap();
             };
         }
 
@@ -44,7 +56,11 @@ public class TypeTest extends AbstractTest {
     }
 
     enum DataType {
-        STRING, NUMERIC, ITERABLE, COLLECTION, ARRAY
+        // global
+        STRING, NUMERIC, ITERABLE, COLLECTION, ARRAY, ENUM,
+        // specific
+        BYTE, SHORT, CHAR, INT, LONG, FLOAT, DOUBLE, BOOLEAN,
+        LIST, SET, MAP
     }
 
 }

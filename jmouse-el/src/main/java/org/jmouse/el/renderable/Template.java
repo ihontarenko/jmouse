@@ -130,4 +130,9 @@ public interface Template {
      * @return the {@link TemplateRegistry} associated with this template
      */
     TemplateRegistry getRegistry();
+
+    /**
+     * Cached parts of current template
+     */
+    Cache<Cache.Key, Content> getCache();
 }

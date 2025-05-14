@@ -4,8 +4,7 @@ import org.jmouse.el.extension.calculator.operation.IllegalOperationException;
 import org.jmouse.el.extension.calculator.operation.OperationHandler;
 import org.jmouse.el.extension.calculator.operation.OperationType;
 
-import static org.jmouse.el.extension.calculator.operation.OperationType.DIVIDE;
-import static org.jmouse.el.extension.calculator.operation.OperationType.MODULUS;
+import static org.jmouse.el.extension.calculator.operation.OperationType.*;
 
 /**
  * {@link OperationHandler} that performs long‐based arithmetic.
@@ -52,6 +51,9 @@ public class LongOperationHandler implements OperationHandler<Long, Number> {
         // Check division/modulus by zero
         if ((type == DIVIDE || type == MODULUS) && y == 0) {
             throw new IllegalOperationException("%s by zero".formatted(type));
+        } else if (type == EXPONENTIAL && y < 0) {
+            throw new IllegalOperationException(
+                    "Exponential operation with negative value %s".formatted(y));
         }
 
         return switch (type) {

@@ -1,5 +1,6 @@
 package org.jmouse.el.parser;
 
+import org.jmouse.el.CursorMatcher;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
@@ -19,9 +20,11 @@ public class PrimaryExpressionParser implements Parser {
         // parse left expression
         if (cursor.matchesSequence(T_IDENTIFIER, BasicToken.T_OPEN_PAREN)) {
             left = context.getParser(FunctionParser.class).parse(cursor, context);
+        } if (CursorMatcher.lambda().matches(cursor)) {
+            left = context.getParser(LambdaParser.class).parse(cursor, context);
         } else if (cursor.matchesSequence(T_INT, T_DOUBLE_DOT)) {
             left = context.getParser(RangeParser.class).parse(cursor, context);
-        } else if (cursor.isCurrent(T_INT, T_FLOAT, T_STRING, T_TRUE, T_FALSE, T_NULL)) {
+        } else if (CursorMatcher.literal().matches(cursor)) {
             left = context.getParser(LiteralParser.class).parse(cursor, context);
         }  else if (cursor.matchesSequence(T_IDENTIFIER, T_DOT, T_IDENTIFIER, T_OPEN_PAREN)) {
             left = context.getParser(ScopedCallParser.class).parse(cursor, context);
@@ -39,7 +42,7 @@ public class PrimaryExpressionParser implements Parser {
             left = context.getParser(MapParser.class).parse(cursor, context);
         } else if (cursor.isCurrent(T_OPEN_PAREN)) {
             cursor.ensure(T_OPEN_PAREN);
-            left = context.getParser(OperatorParser.class).parse(cursor, context);
+            left = context.getParser(ExpressionParser.class).parse(cursor, context);
             cursor.ensure(T_CLOSE_PAREN);
         }
 

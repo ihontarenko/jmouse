@@ -6,8 +6,7 @@ import org.jmouse.el.extension.calculator.operation.OperationType;
 
 import java.math.BigInteger;
 
-import static org.jmouse.el.extension.calculator.operation.OperationType.DIVIDE;
-import static org.jmouse.el.extension.calculator.operation.OperationType.MODULUS;
+import static org.jmouse.el.extension.calculator.operation.OperationType.*;
 
 public class BigIntegerOperationHandler implements OperationHandler<BigInteger, Number> {
 
@@ -28,6 +27,9 @@ public class BigIntegerOperationHandler implements OperationHandler<BigInteger, 
 
         if ((type == DIVIDE || type == MODULUS) && BigInteger.ZERO.equals(y)) {
             throw new IllegalOperationException("%s by zero".formatted(type));
+        } else if (type == EXPONENTIAL && y.intValue() < 0) {
+            throw new IllegalOperationException(
+                    "Exponential operation with negative value %d (raw: %s)".formatted(y.intValue(), y));
         }
 
         return switch (type) {

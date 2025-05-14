@@ -7,8 +7,7 @@ import org.jmouse.el.extension.calculator.operation.OperationType;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import static org.jmouse.el.extension.calculator.operation.OperationType.DIVIDE;
-import static org.jmouse.el.extension.calculator.operation.OperationType.MODULUS;
+import static org.jmouse.el.extension.calculator.operation.OperationType.*;
 
 public class BigDecimalOperationHandler implements OperationHandler<BigDecimal, Number> {
 
@@ -29,6 +28,9 @@ public class BigDecimalOperationHandler implements OperationHandler<BigDecimal, 
 
         if ((type == DIVIDE || type == MODULUS) && BigDecimal.ZERO.equals(y)) {
             throw new IllegalOperationException("%s by zero".formatted(type));
+        } else if (type == EXPONENTIAL && y.intValue() < 0) {
+            throw new IllegalOperationException(
+                    "Exponential operation with negative value %d (raw: %s)".formatted(y.intValue(), y));
         }
 
         return switch (type) {

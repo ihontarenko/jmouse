@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class StandardConversion implements Conversion {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StandardConversion.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StandardConversion.class.getPackageName() + ".CONVERTER");
 
     private final Map<ClassPair, GenericConverter<?, ?>> converters = new ConcurrentHashMap<>();
     private final TypeNormalizer                         normalizer = new TypeNormalizer.EnumTypeNormalizer();

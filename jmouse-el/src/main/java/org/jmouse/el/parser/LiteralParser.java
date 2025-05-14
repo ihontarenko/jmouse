@@ -7,6 +7,7 @@ import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.literal.*;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import static java.lang.Float.MAX_VALUE;
 import static java.lang.Float.MIN_NORMAL;
@@ -15,32 +16,31 @@ import static java.math.BigDecimal.valueOf;
 import static org.jmouse.el.lexer.BasicToken.*;
 
 /**
- * Parses literal tokens and converts them into corresponding literal AST nodes.
+ * Parses literal tokens (string, boolean, null, character, and numeric literals)
+ * and converts them into corresponding AST nodes.
  * <p>
- * The {@code LiteralParser} handles numeric, string, boolean, and null literals.
- * It examines the next token from the {@link TokenCursor}, ensures it is one of the expected
- * literal types, and then creates an appropriate literal node which is added to the parent node.
+ * Numeric literals may include an optional type suffix (B, S, I, L, F, D, C).
+ * When no suffix is present (token type T_NUMERIC), the parser distinguishes
+ * between integer (int/long) and floating-point (float/double) based on content
+ * and range checks.
  * </p>
+ * <p>Example literals:</p>
+ * <pre>{@code
+ *   42          // int or long
+ *   42L         // long
+ *   3.14        // float or double
+ *   2.5E2F      // float
+ *   'x'         // character
+ *   "hello"    // string
+ *   true        // boolean
+ *   null        // null
+ * }</pre>
+ *
+ * @author Ivan Hontarenko (Mr. Jerry Mouse)
+ * @author ihontarenko@gmail.com
  */
 public class LiteralParser implements Parser {
 
-    /**
-     * Parses a literal token from the provided cursor and adds a corresponding literal node to the parent node.
-     * <p>
-     * Supported literal tokens include:
-     * <ul>
-     *   <li>{@code T_INT} – parsed as a {@link LongLiteralNode}</li>
-     *   <li>{@code T_FLOAT} – parsed as a {@link DoubleLiteralNode}</li>
-     *   <li>{@code T_STRING} – parsed as a {@link StringLiteralNode}</li>
-     *   <li>{@code T_TRUE} and {@code T_FALSE} – parsed as a {@link BooleanLiteralNode}</li>
-     *   <li>{@code T_NULL} – parsed as a {@link NullLiteralNode}</li>
-     * </ul>
-     * </p>
-     *
-     * @param cursor  the token cursor from which to read the literal token
-     * @param parent  the parent node to which the parsed literal node should be added
-     * @param context the parser context for accessing additional parsers or configuration
-     */
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
         // Peek at the next token without advancing the cursor.
@@ -48,7 +48,8 @@ public class LiteralParser implements Parser {
         BasicToken type  = (BasicToken) token.type();
 
         // Ensure the token is one of the expected literal types.
-        cursor.ensure(BasicToken.T_INT, T_FLOAT, T_STRING, T_TRUE, T_FALSE, T_NULL);
+        cursor.ensure(T_NUMERIC, T_STRING, T_TRUE, T_FALSE, T_NULL,
+                      T_BYTE, T_SHORT, T_CHARACTER, T_INT, T_LONG, T_FLOAT, T_DOUBLE);
 
         // Create and add the appropriate literal node based on the token type.
         switch (type) {
@@ -58,35 +59,72 @@ public class LiteralParser implements Parser {
             case T_STRING:
                 parent.add(new StringLiteralNode(token.value()));
                 break;
-            case T_INT:
-
-                try {
-                    parent.add(new IntegerLiteralNode(Integer.parseInt(token.value())));
-                } catch (NumberFormatException e) {
-                    try {
-                        parent.add(new LongLiteralNode(Long.parseLong(token.value())));
-                    } catch (NumberFormatException ignored) { }
-                }
-
-                break;
-            case T_FLOAT:
-
-                BigDecimal decimal = new BigDecimal(token.value()).abs();
-
-                boolean inRange = decimal.compareTo(valueOf(MAX_VALUE)) <= 0
-                        && (decimal.compareTo(valueOf(MIN_NORMAL)) >= 0 || decimal.compareTo(ZERO) == 0);
-
-                if (decimal.precision() > 7 && inRange) {
-                    parent.add(new FloatLiteralNode(Float.parseFloat(token.value())));
-                } else {
-                    parent.add(new DoubleLiteralNode(Double.parseDouble(token.value())));
-                }
-
-                break;
             case T_TRUE:
             case T_FALSE:
                 parent.add(new BooleanLiteralNode(type == T_TRUE));
                 break;
+            case T_NUMERIC:
+                // numeric literal without explicit suffix
+                String raw = token.value();
+
+                if (raw.contains(".") || raw.toLowerCase().contains("e")) {
+                    BigDecimal big  = new BigDecimal(raw);
+                    float      f    = big.floatValue();
+                    double     d    = big.doubleValue();
+                    BigDecimal bigF = new BigDecimal(Float.toString(f));
+                    BigDecimal bigD = BigDecimal.valueOf(d);
+
+                    if (big.compareTo(bigF) == 0) {
+                        parent.add(new FloatLiteralNode(f));
+                    } else if (big.compareTo(bigD) == 0) {
+                        parent.add(new DoubleLiteralNode(d));
+                    } else {
+                        parent.add(new BigDecimalLiteralNode(big));
+                    }
+
+                } else {
+                    try {
+                        parent.add(new IntegerLiteralNode(Integer.parseInt(token.value())));
+                    } catch (NumberFormatException e) {
+                        try {
+                            parent.add(new LongLiteralNode(Long.parseLong(token.value())));
+                        } catch (NumberFormatException ignored) {
+                            parent.add(new BigIntegerLiteralNode(new BigInteger(token.value())));
+                        }
+                    }
+                }
+
+                break;
+
+            case T_BYTE:
+                // suffix B/b indicates byte literal
+                parent.add(new ByteLiteralNode(Byte.parseByte(token.value())));
+                break;
+            case T_CHARACTER:
+                // character literal, token.value() includes quotes
+                parent.add(new CharacterLiteralNode((char) Byte.parseByte(token.value())));
+                break;
+            case T_SHORT:
+                // suffix S/s indicates short literal
+                parent.add(new ShortLiteralNode(Short.parseShort(token.value())));
+                break;
+            case T_INT:
+                // suffix I/i indicates integer literal
+                parent.add(new IntegerLiteralNode(Integer.parseInt(token.value())));
+                break;
+            case T_LONG:
+                // suffix L/l indicates long literal
+                parent.add(new LongLiteralNode(Long.parseLong(token.value())));
+                break;
+            case T_FLOAT:
+                // suffix F/f indicates float literal
+                parent.add(new FloatLiteralNode(Float.parseFloat(token.value())));
+                break;
+            case T_DOUBLE:
+                // suffix D/d indicates double literal
+                parent.add(new DoubleLiteralNode(Double.parseDouble(token.value())));
+                break;
+
         }
     }
 }

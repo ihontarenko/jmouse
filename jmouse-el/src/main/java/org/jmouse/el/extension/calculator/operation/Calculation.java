@@ -92,8 +92,8 @@ public class Calculation {
 
         if (handler == null) {
             throw new CalculationOperationException(
-                    "No operator-handler registered for '%s' -> '%s'"
-                            .formatted(type, xType.getSimpleName()));
+                    "No operator-handler registered for '%s': '%s' -> '%s'"
+                            .formatted(type, xType.getSimpleName(), yType.getSimpleName()));
         }
 
         return handler;

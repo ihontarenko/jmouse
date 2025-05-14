@@ -10,7 +10,7 @@ public class FloatLiteralNode extends LiteralNode<Float> {
     /**
      * Constructs a {@code FloatLiteralNode} with the specified {@code Float} value.
      *
-     * @param value the double value to be encapsulated as a literal
+     * @param value the float value to be encapsulated as a literal
      */
     public FloatLiteralNode(Float value) {
         super(value);

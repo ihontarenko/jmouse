@@ -129,10 +129,12 @@ public interface ScopedChain {
     default ScopeValues findValuesByExistingKey(String key) {
         ScopeValues values = peek();
 
-        for (ScopeValues current : chain()) {
-            if (current.contains(key)) {
-                values = current;
-                break;
+        if (!values.contains(key)) {
+            for (ScopeValues current : chain()) {
+                if (current.contains(key)) {
+                    values = current;
+                    break;
+                }
             }
         }
 

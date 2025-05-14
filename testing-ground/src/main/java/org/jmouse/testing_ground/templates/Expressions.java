@@ -1,9 +1,11 @@
 package org.jmouse.testing_ground.templates;
 
+import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.MethodImporter;
 import org.jmouse.el.extension.calculator.MathematicCalculator;
+import org.jmouse.el.extension.i18nExtension;
 import org.jmouse.testing_ground.binder.dto.Status;
 import org.jmouse.testing_ground.binder.dto.User;
 import org.jmouse.testing_ground.binder.dto.UserStatus;
@@ -20,7 +22,15 @@ public class Expressions {
     public static void main(String[] args) {
         ExpressionLanguage el = new ExpressionLanguage();
 
+        PropertyPath path = PropertyPath.forPath("user.names[0].default");
+
+        for (CharSequence entry : path.entries()) {
+            System.out.println(entry);
+        }
+
         EvaluationContext  context = el.newContext();
+
+//        el.getExtensions().importExtension(new i18nExtension());
 
 //        MathematicCalculator.PLUS.calculate(1, 2);
 
@@ -32,6 +42,7 @@ public class Expressions {
         MethodImporter.importMethod(Strings.class, context.getExtensions());
 
         context.setValue("test", 256);
+        context.setValue("time", System.currentTimeMillis());
 
         User user = new User();
         user.setName("Ivan");
@@ -58,25 +69,31 @@ public class Expressions {
         context.setValue("list", new ArrayList<>());
 
         context.setValue("ci", (char) 23);
+        context.setValue("data", List.of(1, 2, 3));
 
+        el.evaluate("22 / 7");
+        el.evaluate("time - 2", context);
+
+        Double d2 = el.evaluate("22f / 7", Double.class);
+
+//        el.evaluate("i18n('i18n.default', 'jmouse.el.name', 1, 2, 3) | upper");
+
+        el.evaluate("(a, b:'Default-B') -> a ~ b");
+        el.evaluate("() -> 'hello'");
+        el.evaluate("() -> {}");
+
+        el.evaluate("list + (((list | length is even) ? 'Even' : 'Odd') | upper)", context);
         el.evaluate("list + ((ci + 2 + (14 - 1) | int / 7) is even)", context);
 
         el.evaluate("user.name ?? 'Guest'", context);
         el.evaluate("list + (list is type('collection')) | string", context);
+        el.evaluate("123 is type('collection')", context);
         el.evaluate("[1, 2, 3]");
         el.evaluate("{user.status.status | string : user.name | length | float}", context);
 
-//        el.evaluate("(ci + 2 + (14 - 1 | int) / 7) | string", context);
-//        el.evaluate("(ci + 7) | string", context);
-//        el.evaluate("ci + (7 | string)", context);
-
-        System.out.println(
-                ((List<?>)context.getValue("list")).getFirst()
-        );
-
         el.evaluate("set('var', cut(user.name | upper, '_', false, false, 1|int))", context);
 
-        Object value = el.evaluate("lclast(var) ~ '22'", context);
+        Object value = el.evaluate("(lclast(var) | last) ~ '22'", context);
 
         el.evaluate("set('math', 22 / 7)", context);
         el.evaluate("set('username', user.name)", context);
@@ -97,6 +114,7 @@ public class Expressions {
         el.evaluate("set('cnt', 0)", context);
 
         el.evaluate("3.14 * 7");
+        Double d1 = el.evaluate("22 | double / 7", Double.class);
 
         context.setValue("x", new BigInteger("23"));
         context.setValue("name", "Ivan");
@@ -111,9 +129,6 @@ public class Expressions {
         context.setValue("si", (short) 23);
         context.setValue("bi", (byte) 23);
 
-
-
-
         el.evaluate("si + 2", context);
         el.evaluate("(bi + 2) | int", context);
         el.evaluate("bi + 2", context);
@@ -124,6 +139,9 @@ public class Expressions {
         el.evaluate("names + 'Doe'", context);
 
         long start = System.currentTimeMillis();
+
+
+
         long spend = 0;
         int  times = 0;
 

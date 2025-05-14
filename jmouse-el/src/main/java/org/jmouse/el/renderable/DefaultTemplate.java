@@ -7,17 +7,19 @@ import org.jmouse.el.node.Node;
 
 public class DefaultTemplate implements Template {
 
-    private final TokenizableSource source;
-    private final TemplateRegistry  registry;
-    private final Engine            engine;
-    private final Node              root;
-    private       boolean           initialized = false;
+    private final TokenizableSource         source;
+    private final TemplateRegistry          registry;
+    private final Engine                    engine;
+    private final Node                      root;
+    private final Cache<Cache.Key, Content> cache;
+    private       boolean                   initialized = false;
 
     public DefaultTemplate(Node root, TokenizableSource source, Engine engine) {
         this.source = source;
         this.engine = engine;
         this.root = root;
         this.registry = new TemplateRegistry(engine);
+        this.cache = new Cache.Memory<>();
     }
 
     @Override
@@ -90,6 +92,11 @@ public class DefaultTemplate implements Template {
     @Override
     public TemplateRegistry getRegistry() {
         return registry;
+    }
+
+    @Override
+    public Cache<Cache.Key, Content> getCache() {
+        return cache;
     }
 
     @Override

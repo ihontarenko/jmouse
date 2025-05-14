@@ -109,7 +109,7 @@ public class JdkMessageBundle implements MessageBundle {
             MessageBundle messageBundle = null;
 
             try {
-                ResourceBundle bundle = ResourceBundle.getBundle(basename, locale, classLoader);
+                ResourceBundle bundle = ResourceBundle.getBundle(basename, locale, classLoader, new CharsetResourceBundleControl());
                 if (bundle != null) {
                     messageBundle = new JdkMessageBundle(bundle);
                 }

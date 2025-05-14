@@ -37,6 +37,7 @@ public enum BasicToken implements Token.Type {
     T_IS(1090, "is"),
     T_CONTAINS(1100, "contains"),
     T_NULL_COALESCE(1101, "??"),
+    T_ARROW(1102, "->"),
 
     // Assignment operators (Group 6000)
     T_COLON_ASSIGN(6110, ":="),
@@ -81,7 +82,13 @@ public enum BasicToken implements Token.Type {
     // Literals (Group 3000 for strings, Group 4000 for numbers)
     T_STRING(3000),
     T_INT(4000),
-    T_FLOAT(5000),
+    T_NUMERIC(4001),
+    T_SHORT(4100),
+    T_BYTE(4200),
+    T_CHARACTER(4300),
+    T_LONG(4300),
+    T_FLOAT(4400),
+    T_DOUBLE(4500),
 
     // Keywords and constants (Group 9000)
     T_FALSE(9000, "false"),

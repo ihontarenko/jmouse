@@ -4,8 +4,7 @@ import org.jmouse.el.extension.calculator.operation.IllegalOperationException;
 import org.jmouse.el.extension.calculator.operation.OperationHandler;
 import org.jmouse.el.extension.calculator.operation.OperationType;
 
-import static org.jmouse.el.extension.calculator.operation.OperationType.DIVIDE;
-import static org.jmouse.el.extension.calculator.operation.OperationType.MODULUS;
+import static org.jmouse.el.extension.calculator.operation.OperationType.*;
 
 /**
  * {@link OperationHandler} that performs char‐based arithmetic.

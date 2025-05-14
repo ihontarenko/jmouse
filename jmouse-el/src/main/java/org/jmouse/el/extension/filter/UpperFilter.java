@@ -29,9 +29,11 @@ public class UpperFilter extends AbstractFilter {
     @Override
     public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
         Object result = input;
+
         if (input instanceof String string) {
             result = string.toUpperCase();
         }
+
         return result;
     }
 

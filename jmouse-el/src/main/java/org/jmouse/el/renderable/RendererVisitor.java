@@ -34,7 +34,6 @@ public class RendererVisitor implements NodeVisitor {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(RendererVisitor.class);
 
-    private final Cache<Cache.Key, Content> cache;
     private final EvaluationContext         context;
     private final TemplateRegistry          registry;
     private final Content                   content;
@@ -50,7 +49,6 @@ public class RendererVisitor implements NodeVisitor {
         this.context = context;
         this.registry = registry;
         this.content = content;
-        this.cache = new Cache.Memory<>();
     }
 
     /**
@@ -96,7 +94,7 @@ public class RendererVisitor implements NodeVisitor {
             if (evaluated != null) {
                 String value;
 
-                // fast conversion, otherwise
+                // either fast conversion or conversion mechanism
                 if (evaluated instanceof String) {
                     value = (String) evaluated;
                 } else if (evaluated instanceof Number number) {
@@ -117,9 +115,11 @@ public class RendererVisitor implements NodeVisitor {
      */
     @Override
     public void visit(CacheNode cacheNode) {
-        Object    key      = cacheNode.getKey().evaluate(context);
-        Cache.Key cacheKey = Cache.Key.forObject(key);
-        Node      value    = cacheNode.getContent();
+        Object                    key      = cacheNode.getKey().evaluate(context);
+        Cache.Key                 cacheKey = Cache.Key.forObject(key);
+        Node                      value    = cacheNode.getContent();
+        Cache<Cache.Key, Content> cache    = context.getInheritance().getCurrent().getCache();
+
         Content   cached   = cache.get(cacheKey);
 
         if (cached == null) {

@@ -1,5 +1,6 @@
 package org.jmouse.el.lexer;
 
+import org.jmouse.el.extension.NumberQualifier;
 import org.jmouse.el.lexer.recognizer.Recognizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,11 +80,26 @@ public class DefaultTokenizer implements Tokenizer<TokenizableSource, Token> {
                 }
                 case NUMBER -> {
                     // Detect integer and floating-point numbers
-                    Token.Type tokenType = BasicToken.T_INT;
-                    String     value     = rawToken.value();
+                    Token.Type      tokenType = BasicToken.T_NUMERIC;
+                    String          value     = rawToken.value();
+                    String          suffix    = value.substring(value.length() - 1);
+                    NumberQualifier qualifier = NumberQualifier.find(suffix.toUpperCase());
 
-                    if (value.contains(".") || value.toLowerCase().contains("e")) {
-                        tokenType = BasicToken.T_FLOAT;
+                    if (qualifier != null) {
+                        tokenType = switch (qualifier) {
+                            case BYTE -> BasicToken.T_BYTE;
+                            case SHORT -> BasicToken.T_SHORT;
+                            case CHARACTER -> BasicToken.T_CHARACTER;
+                            case INT -> BasicToken.T_INT;
+                            case LONG -> BasicToken.T_LONG;
+                            case FLOAT -> BasicToken.T_FLOAT;
+                            case DOUBLE -> BasicToken.T_DOUBLE;
+                        };
+
+                        String oldValue = rawToken.value();
+                        String newValue = oldValue.substring(0, oldValue.length() - 1);
+
+                        rawToken = new RawToken(newValue, rawToken.line(), rawToken.offset(), rawToken.type());
                     }
 
                     yield entry(tokenType, rawToken, counter);

@@ -46,9 +46,6 @@ public record TemplateMacro(String name, MacroNode node, String source) implemen
             List<String>        keys      = macro.getArguments();
             Map<String, Object> arguments = new HashMap<>();
 
-            int[] counter = {0};
-            Map<Integer, Object> map = Stream.of(evaluated).collect(toMap(k -> counter[0]++, k -> k));
-
             // Match each expected parameter with the provided value or a default, if available.
             for (int i = 0, size = keys.size(); i < size; i++) {
                 String key = keys.get(i);
