@@ -28,36 +28,36 @@ public enum MathematicOperator implements Operator {
      * ➕ Addition operator (`+`), used for summation.
      * Precedence: 10
      */
-    PLUS(MathematicCalculator.PLUS, BasicToken.T_PLUS, "PLUS", 10),
+    PLUS(MathematicCalculator.PLUS, BasicToken.T_PLUS, "PLUS", 600),
 
     /**
      * ➖ Subtraction operator (`-`), used for difference calculations.
      * Precedence: 10
      */
-    SUBTRACT(MathematicCalculator.SUBTRACT, BasicToken.T_MINUS, "SUBTRACT", 10),
+    SUBTRACT(MathematicCalculator.SUBTRACT, BasicToken.T_MINUS, "SUBTRACT", 600),
 
     /**
      * ✖️ Multiplication operator (`*`), used for product calculations.
      * Precedence: 20
      */
-    MULTIPLY(MathematicCalculator.MULTIPLY, BasicToken.T_MULTIPLY, "MULTIPLY", 20),
+    MULTIPLY(MathematicCalculator.MULTIPLY, BasicToken.T_MULTIPLY, "MULTIPLY", 700),
 
     /**
      * ➗ Division operator (`/`), used for quotient calculations.
      * Precedence: 20
      */
-    DIVIDE(MathematicCalculator.DIVIDE, BasicToken.T_DIVIDE, "DIVIDE", 20),
+    DIVIDE(MathematicCalculator.DIVIDE, BasicToken.T_DIVIDE, "DIVIDE", 700),
 
     /**
      * 🔢 Modulus operator (`%`), returns the remainder of a division.
      * Precedence: 20 (same as multiplication and division)
      */
-    MODULUS(MathematicCalculator.MODULUS, BasicToken.T_PERCENT, "MODULUS", 20),
+    MODULUS(MathematicCalculator.MODULUS, BasicToken.T_PERCENT, "MODULUS", 700),
     /**
      * 🔼 Exponential operator (`**`), used for power calculations.
      * Precedence: 30 (highest among binary operators)
      */
-    EXPONENTIAL(MathematicCalculator.EXPONENTIAL, BasicToken.T_EXPONENTIAL, "EXPONENTIAL", 30);
+    EXPONENTIAL(MathematicCalculator.EXPONENTIAL, BasicToken.T_EXPONENTIAL, "EXPONENTIAL", 800);
 
     private final Calculator<Object> calculator;
     private final Token.Type         type;

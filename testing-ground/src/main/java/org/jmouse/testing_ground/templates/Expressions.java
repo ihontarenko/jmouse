@@ -70,17 +70,27 @@ public class Expressions {
 
         context.setValue("ci", (char) 23);
         context.setValue("data", List.of(1, 2, 3));
+        context.setValue("strings", List.of("ZZ", "YY"));
 
+        el.compile("1 + (2 * 2) | int > 5 and 4 < 5 - 2 / 3");
         el.evaluate("22 / 7");
+        el.evaluate("2 .. 22 / 2");
+        el.evaluate("'a' .. strings[0]", context);
         el.evaluate("time - 2", context);
 
         Double d2 = el.evaluate("22f / 7", Double.class);
 
 //        el.evaluate("i18n('i18n.default', 'jmouse.el.name', 1, 2, 3) | upper");
 
-        el.evaluate("(a, b:'Default-B') -> a ~ b");
+        el.evaluate("set('tag', (name, value) -> '<' ~ name ~ '>' ~ value ~ '</' ~ name ~ '>')", context);
+        el.evaluate("tag('abc', 'qwe')", context);
         el.evaluate("() -> 'hello'");
         el.evaluate("() -> {}");
+        el.evaluate("set('toString', (v) -> v|string)", context);
+        el.evaluate("set('getNumberType', (v) -> v|int is even ? 'Even' : 'Odd')", context);
+        el.evaluate("getNumberType(1i)", context);
+
+        el.evaluate("toString(123.123)");
 
         el.evaluate("list + (((list | length is even) ? 'Even' : 'Odd') | upper)", context);
         el.evaluate("list + ((ci + 2 + (14 - 1) | int / 7) is even)", context);
@@ -95,7 +105,7 @@ public class Expressions {
 
         Object value = el.evaluate("(lclast(var) | last) ~ '22'", context);
 
-        el.evaluate("set('math', 22 / 7)", context);
+        el.evaluate("set('pi', 22 / 7)", context);
         el.evaluate("set('username', user.name)", context);
 
         EvaluationContext ctx = el.newContext();

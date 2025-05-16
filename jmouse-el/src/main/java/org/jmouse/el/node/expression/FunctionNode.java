@@ -4,6 +4,7 @@ import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.EvaluationException;
 import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.extension.Function;
+import org.jmouse.el.extension.Lambda;
 import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Visitor;
@@ -74,7 +75,14 @@ public class FunctionNode extends AbstractExpressionNode {
         Arguments arguments = Arguments.empty();
 
         if (function == null) {
-            throw new FunctionNotFoundException("Function '%s' not found".formatted(getName()));
+            if (context.getValue(getName()) instanceof Lambda lambda) {
+                function = lambda;
+            }
+
+            if (function == null) {
+                throw new FunctionNotFoundException(
+                        "No function or lambda with name '%s' can be found.".formatted(getName()));
+            }
         }
 
         if (getArguments() != null) {
@@ -104,6 +112,6 @@ public class FunctionNode extends AbstractExpressionNode {
      */
     @Override
     public String toString() {
-        return "%s(%s)".formatted(name, arguments);
+        return "f:%s(%s)".formatted(name, arguments == null ? "" : arguments);
     }
 }

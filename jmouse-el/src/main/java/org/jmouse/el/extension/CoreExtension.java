@@ -163,6 +163,7 @@ public class CoreExtension implements Extension {
         operators.add(FilterOperator.FILTER);
         operators.add(TestOperator.IS);
         operators.add(NullCoalesceOperator.NULL_COALESCE);
+        operators.add(RangeOperator.RANGE);
         operators.add(ConcatOperator.CONCAT);
 
         return operators;

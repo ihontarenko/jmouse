@@ -8,7 +8,7 @@ import org.jmouse.el.lexer.Token;
 
 public enum ConcatOperator implements Operator {
 
-    CONCAT(new ConcatCalculator(), BasicToken.T_TILDA, "concat", 10);
+    CONCAT(new ConcatCalculator(), BasicToken.T_TILDA, "concat", 550);
 
     private final Calculator<String> calculator;
     private final Token.Type         type;

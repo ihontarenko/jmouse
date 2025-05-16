@@ -22,8 +22,6 @@ public class PrimaryExpressionParser implements Parser {
             left = context.getParser(FunctionParser.class).parse(cursor, context);
         } if (CursorMatcher.lambda().matches(cursor)) {
             left = context.getParser(LambdaParser.class).parse(cursor, context);
-        } else if (cursor.matchesSequence(T_INT, T_DOUBLE_DOT)) {
-            left = context.getParser(RangeParser.class).parse(cursor, context);
         } else if (CursorMatcher.literal().matches(cursor)) {
             left = context.getParser(LiteralParser.class).parse(cursor, context);
         }  else if (cursor.matchesSequence(T_IDENTIFIER, T_DOT, T_IDENTIFIER, T_OPEN_PAREN)) {

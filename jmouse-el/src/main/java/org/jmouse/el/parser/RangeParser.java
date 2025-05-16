@@ -4,16 +4,15 @@ import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.RangeNode;
 
-import static org.jmouse.el.lexer.BasicToken.T_DOUBLE_DOT;
-import static org.jmouse.el.lexer.BasicToken.T_INT;
+import static org.jmouse.el.lexer.BasicToken.*;
 
 public class RangeParser implements Parser{
 
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
-        String start = cursor.ensure(T_INT).value();
+        String start = cursor.ensure(T_NUMERIC).value();
         cursor.ensure(T_DOUBLE_DOT);
-        String end = cursor.ensure(T_INT).value();
+        String end = cursor.ensure(T_NUMERIC).value();
 
         RangeNode node = new RangeNode();
 

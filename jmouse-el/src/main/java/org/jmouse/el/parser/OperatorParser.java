@@ -89,16 +89,7 @@ public class OperatorParser implements Parser {
      */
     private ExpressionNode parsePrimaryExpression(TokenCursor cursor, ParserContext context) {
         PrimaryExpressionParser parser = (PrimaryExpressionParser) context.getParser(PrimaryExpressionParser.class);
-        ExpressionNode          left;
-
-        // Parenthesized expression
-//        if (cursor.isCurrent(T_OPEN_PAREN) && !cursor.isPrevious(T_IDENTIFIER)) {
-//            cursor.ensure(T_OPEN_PAREN);
-//            left = parseExpression(cursor, context, 0);
-//            cursor.ensure(T_CLOSE_PAREN);
-//        } else {
-            left = (ExpressionNode) parser.parse(cursor, context);
-//        }
+        ExpressionNode          left   = (ExpressionNode) parser.parse(cursor, context);
 
         // Implicit multiplication: e.g., 2(3 + 4) becomes 2 * (3 + 4)
         if (cursor.isCurrent(T_OPEN_PAREN)) {

@@ -21,13 +21,13 @@ public enum UnaryOperator implements Operator {
      * Increment operator ({@code ++}), increases a value by 1.
      * Precedence: 40 (higher than binary operators).
      */
-    INCREMENT(UnaryCalculator.INCREMENT, BasicToken.T_INCREMENT, "INCREMENT", 40),
+    INCREMENT(UnaryCalculator.INCREMENT, BasicToken.T_INCREMENT, "INCREMENT", 900),
 
     /**
      * Decrement operator ({@code --}), decreases a value by 1.
      * Precedence: 40 (higher than binary operators).
      */
-    DECREMENT(UnaryCalculator.DECREMENT, BasicToken.T_DECREMENT, "DECREMENT", 40);
+    DECREMENT(UnaryCalculator.DECREMENT, BasicToken.T_DECREMENT, "DECREMENT", 900);
 
     private final Calculator<Object> calculator;
     private final Token.Type         type;

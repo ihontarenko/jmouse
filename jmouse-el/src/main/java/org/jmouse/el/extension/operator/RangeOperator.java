@@ -2,7 +2,7 @@ package org.jmouse.el.extension.operator;
 
 import org.jmouse.el.extension.Calculator;
 import org.jmouse.el.extension.Operator;
-import org.jmouse.el.extension.calculator.NullCoalesceCalculator;
+import org.jmouse.el.extension.calculator.RangeCalculator;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 
@@ -11,24 +11,24 @@ import org.jmouse.el.lexer.Token;
  * <p>
  * Example:
  * <pre>{@code
- *     user.name ?? "Guest"
+ *     2 .. 4 + 5
  * }</pre>
  *
  * @author Ivan Hontarenko
  */
-public enum NullCoalesceOperator implements Operator {
+public enum RangeOperator implements Operator {
 
     /**
-     * Test operator ({@code NULL_COALESCE}), used for applying tests to values.
+     * Test operator ({@code ..}), used for applying tests to values.
      */
-    NULL_COALESCE(new NullCoalesceCalculator(), BasicToken.T_NULL_COALESCE, "??", 400);
+    RANGE(new RangeCalculator(), BasicToken.T_DOUBLE_DOT, "..", 650);
 
     private final Calculator<Object> calculator;
     private final Token.Type         type;
     private final String             name;
     private final int                precedence;
 
-    NullCoalesceOperator(Calculator<Object> calculator, Token.Type type, String name, int precedence) {
+    RangeOperator(Calculator<Object> calculator, Token.Type type, String name, int precedence) {
         this.calculator = calculator;
         this.type = type;
         this.name = name;

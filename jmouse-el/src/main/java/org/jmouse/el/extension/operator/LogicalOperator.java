@@ -17,22 +17,22 @@ public enum LogicalOperator implements Operator {
     /**
      * Logical AND ({@code &&}).
      */
-    AND(LogicalCalculator.AND, BasicToken.T_AND, "AND", 5),
+    AND(LogicalCalculator.AND, BasicToken.T_AND, "AND", 200),
 
     /**
      * Logical OR ({@code ||}).
      */
-    OR(LogicalCalculator.OR, BasicToken.T_OR, "OR", 4),
+    OR(LogicalCalculator.OR, BasicToken.T_OR, "OR", 100),
 
     /**
      * Logical NOT ({@code !}).
      */
-    NOT(LogicalCalculator.NOT, BasicToken.T_NEGATE, "NOT", 6),
+    NOT(LogicalCalculator.NOT, BasicToken.T_NEGATE, "NOT", 150),
 
     /**
      * Logical XOR ({@code ^}).
      */
-    XOR(LogicalCalculator.XOR, BasicToken.T_CARET, "XOR", 5);
+    XOR(LogicalCalculator.XOR, BasicToken.T_CARET, "XOR", 150);
 
     private final Calculator<Boolean> calculator;
     private final Token.Type          type;

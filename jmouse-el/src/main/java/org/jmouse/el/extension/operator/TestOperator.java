@@ -20,7 +20,7 @@ public enum TestOperator implements Operator {
     /**
      * Test operator ({@code IS}), used for applying tests to values.
      */
-    IS(BasicToken.T_IS, "IS", 9);
+    IS(BasicToken.T_IS, "IS", 450);
 
     private final Token.Type type;
     private final String     name;

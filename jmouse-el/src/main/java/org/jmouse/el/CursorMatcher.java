@@ -27,7 +27,9 @@ public class CursorMatcher {
 
         @Override
         public boolean matches(TokenCursor cursor) {
-            return cursor.matchesSequence(BasicToken.T_OPEN_PAREN, T_IDENTIFIER)
+            return cursor.matchesSequence(BasicToken.T_OPEN_PAREN, T_IDENTIFIER, T_CLOSE_PAREN)
+                    || cursor.matchesSequence(BasicToken.T_OPEN_PAREN, T_IDENTIFIER, T_COLON)
+                    || cursor.matchesSequence(BasicToken.T_OPEN_PAREN, T_IDENTIFIER, T_COMMA, T_IDENTIFIER)
                     || cursor.matchesSequence(BasicToken.T_OPEN_PAREN, T_CLOSE_PAREN, T_ARROW);
         }
 

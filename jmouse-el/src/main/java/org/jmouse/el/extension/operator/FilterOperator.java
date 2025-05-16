@@ -20,7 +20,7 @@ public enum FilterOperator implements Operator {
     /**
      * Test operator ({@code T_VERTICAL_SLASH}), used for applying tests to values.
      */
-    FILTER(BasicToken.T_VERTICAL_SLASH, "FILTER", Integer.MAX_VALUE);
+    FILTER(BasicToken.T_VERTICAL_SLASH, "FILTER", 850);
 
     private final Token.Type type;
     private final String     name;

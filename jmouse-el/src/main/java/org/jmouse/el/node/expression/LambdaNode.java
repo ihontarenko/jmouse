@@ -1,6 +1,7 @@
 package org.jmouse.el.node.expression;
 
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.extension.Lambda;
 import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.ExpressionNode;
 
@@ -27,11 +28,27 @@ public class LambdaNode extends AbstractExpressionNode {
 
     @Override
     public Object evaluate(EvaluationContext context) {
-        return super.evaluate(context);
+        Lambda lambda = new Lambda(body);
+
+        if (parameters != null) {
+            for (ParameterNode parameter : parameters.getSet()) {
+                String name         = parameter.getName();
+                Object defaultValue = null;
+
+                if (parameter.getDefaultValue() != null) {
+                    defaultValue = parameter.getDefaultValue().evaluate(context);
+                }
+
+                lambda.addParameter(name);
+                lambda.setDefault(name, defaultValue);
+            }
+        }
+
+        return lambda;
     }
 
     @Override
     public String toString() {
-        return "LAMBDA: %s".formatted(parameters);
+        return "LAMBDA_NODE%s".formatted(parameters == null ? "" : ": " + parameters);
     }
 }

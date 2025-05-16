@@ -16,32 +16,32 @@ public enum ComparisonOperator implements Operator {
     /**
      * Greater than ({@code >}), returns {@code true} if left operand is greater.
      */
-    GT(ComparisonCalculator.GT, BasicToken.T_GT, "GREATER_THAN", 7),
+    GT(ComparisonCalculator.GT, BasicToken.T_GT, "GREATER_THAN", 300),
 
     /**
      * Less than ({@code <}), returns {@code true} if left operand is smaller.
      */
-    LT(ComparisonCalculator.LT, BasicToken.T_LT, "LESS_THAN", 7),
+    LT(ComparisonCalculator.LT, BasicToken.T_LT, "LESS_THAN", 300),
 
     /**
      * Greater than or equal ({@code >=}), returns {@code true} if left operand is greater or equal.
      */
-    GTE(ComparisonCalculator.GTE, BasicToken.T_GE, "GREATER_THAN_OR_EQUAL", 7),
+    GTE(ComparisonCalculator.GTE, BasicToken.T_GE, "GREATER_THAN_OR_EQUAL", 300),
 
     /**
      * Less than or equal ({@code <=}), returns {@code true} if left operand is smaller or equal.
      */
-    LTE(ComparisonCalculator.LTE, BasicToken.T_LE, "LESS_THAN_OR_EQUAL", 7),
+    LTE(ComparisonCalculator.LTE, BasicToken.T_LE, "LESS_THAN_OR_EQUAL", 300),
 
     /**
      * Equal ({@code ==}), returns {@code true} if both operands are equal.
      */
-    EQUAL(ComparisonCalculator.EQUAL, BasicToken.T_EQ, "EQUAL", 8),
+    EQUAL(ComparisonCalculator.EQUAL, BasicToken.T_EQ, "EQUAL", 300),
 
     /**
      * Not equal ({@code !=}), returns {@code true} if operands are not equal.
      */
-    NOT_EQUAL(ComparisonCalculator.NOT_EQUAL, BasicToken.T_NE, "NOT_EQUAL", 8);
+    NOT_EQUAL(ComparisonCalculator.NOT_EQUAL, BasicToken.T_NE, "NOT_EQUAL", 300);
 
     private final Calculator<Boolean> calculator;
     private final Token.Type          type;
