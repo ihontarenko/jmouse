@@ -28,8 +28,14 @@
     </p>
 
     <div>
-        <h2>{{ 1..10 | join(", ") }}</h2>
+        <h2>{{ (1..10) | join(", ") }}</h2>
     </div>
+
+        {% for title in books|filter(b -> b.author|length < 11)|map(b -> b.title|upper ~ ' : ' ~ b.author) %}
+        <li>
+            <h4>title:{{ title }}</h4>
+        </li>
+        {% endfor %}
 
     <div>
         concat: {{ books[1].title ~ " : " ~ books[1].author ~ "(" ~ 22/7 ~ ")" }}

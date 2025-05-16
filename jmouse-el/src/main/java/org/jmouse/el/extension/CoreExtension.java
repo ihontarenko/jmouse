@@ -70,6 +70,8 @@ public class CoreExtension implements Extension {
     @Override
     public List<Filter> getFilters() {
         return List.of(
+                new FilterFilter(),
+                new MapFilter(),
                 new LowerFilter(),
                 new UpperFilter(),
                 new SubFilter(),
@@ -81,6 +83,7 @@ public class CoreExtension implements Extension {
                 new JoinFilter(),
                 new LastFilter(),
                 new FirstFilter(),
+                // type-converters
                 new ToBooleanFilter(),
                 new ToByteFilter(),
                 new ToShortFilter(),

@@ -3,6 +3,7 @@ package org.jmouse.util.helper;
 import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.core.reflection.TypeInformation;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +30,8 @@ public class Iterables {
 
         if (type.isIterable()) {
             iterable = ((Iterable<?>) object);
+        } else if (type.is(Iterator.class)) {
+            iterable = () -> (Iterator<Object>) object;
         } else if (type.isMap()) {
             iterable = ((Map<?, ?>) object).entrySet();
         } else if (type.isString()) {

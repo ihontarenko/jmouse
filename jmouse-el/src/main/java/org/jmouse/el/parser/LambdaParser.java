@@ -42,7 +42,7 @@ public class LambdaParser implements Parser {
         LambdaNode lambda = new LambdaNode();
 
         // Expect opening parenthesis for parameters
-        cursor.ensure(T_OPEN_PAREN);
+        cursor.currentIf(T_OPEN_PAREN);
 
         // Parse optional parameter list
         if (cursor.isCurrent(T_IDENTIFIER)) {
@@ -53,7 +53,7 @@ public class LambdaParser implements Parser {
         }
 
         // Expect closing parenthesis and arrow token
-        cursor.ensure(T_CLOSE_PAREN);
+        cursor.currentIf(T_CLOSE_PAREN);
         cursor.ensure(T_ARROW);
 
         // Optional block braces around body
