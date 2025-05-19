@@ -38,7 +38,7 @@
         {% endfor %}
 
     <div>
-        concat: {{ books[1].title ~ " : " ~ books[1].author ~ "(" ~ 22/7 ~ ")" }}
+        concat: {{ books[1].title ~ " : " ~ books[1].author ~ "(" ~ (22f/7)|float ~ ")" }}
     </div>
 
     <div>
@@ -60,24 +60,18 @@
     <hr>
     {% embed 'extention/card' %}
         {% block 'card_content' %}
-        <div style="border: 1px solid #49002f">
-            {% for word in books[0]|type|split('\.') %}
-                <div>level 1 : {{ loop.index0 }}</div>
-                {% for l in word %}
-                    <div>level 2 : {{ loop.index0 }}</div>
-                    <div>- {{ '[ ' ~ l ~ " ]" }}</div>
-                {% endfor %}
-                <hr>
-            {% endfor %}
-        </div>
         <div style="border: 1px solid red">
             <ul>
-                {% for item in items %}
+                stocks:
+                {% for item in items|filter(i -> i.name is starts('A')) %}
                 <li style="color: {{ loop.index % 2 == 0 ? "#f0f" : '#ff0' }}">{{ item.symbol }} : {{ item.name }}</li>
                 {% endfor %}
+                ---
+                books:
                 {% for item in books %}
                     <li style="color: {{ loop.index % 2 == 0 ? "#f0f" : '#ff0' }}">{{ item.author }} : {{ item.title | upper }}</li>
                 {% endfor %}
+                ---
             </ul>
         </div>
 
@@ -95,7 +89,7 @@
     <p>parent: {% parent 'footer' %}</p>
 
     inner footer: {% render 'base_footer' %}
-    {% for i in 1..10 %}
+    {% for i in (1..100)|filter(n -> n % 8 == 0) %}
         Index: {{ i }}<br>
     {% endfor %}
 {% endblock %}

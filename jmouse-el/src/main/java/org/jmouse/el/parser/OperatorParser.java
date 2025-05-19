@@ -56,27 +56,33 @@ public class OperatorParser implements Parser {
 
             cursor.next();
 
-            if (operator == TestOperator.IS) {
-                TestNode test = (TestNode) context.getParser(TestParser.class).parse(cursor, context);
-                test.setLeft(left);
-                left = test;
-            } else if (operator == NullCoalesceOperator.NULL_COALESCE) {
-                NullCoalesceNode node = new NullCoalesceNode();
-                node.setNullable(left);
-                node.setOtherwise((ExpressionNode) parse(cursor, context));
-                left = node;
-            } else if (operator == FilterOperator.FILTER) {
-                while (cursor.hasNext() && cursor.isCurrent(T_IDENTIFIER)) {
-                    if (context.getParser(FilterParser.class).parse(cursor, context) instanceof FilterNode filter) {
-                        filter.setLeft(left);
-                        left = filter;
+            switch (operator) {
+                case TestOperator.IS -> {
+                    TestNode test = (TestNode) context.getParser(TestParser.class).parse(cursor, context);
+                    test.setLeft(left);
+                    left = test;
+                }
+                case NullCoalesceOperator.NULL_COALESCE -> {
+                    NullCoalesceNode node = new NullCoalesceNode();
+                    node.setNullable(left);
+                    node.setOtherwise((ExpressionNode) parse(cursor, context));
+                    left = node;
+                }
+                case FilterOperator.FILTER -> {
+                    while (cursor.hasNext() && cursor.isCurrent(T_IDENTIFIER)) {
+                        if (context.getParser(FilterParser.class).parse(cursor, context) instanceof FilterNode filter) {
+                            filter.setLeft(left);
+                            left = filter;
+                        }
                     }
                 }
-            } else {
-                ExpressionNode right = parseExpression(cursor, context, operator.getPrecedence() + 1);
-                left = new BinaryOperation(left, operator, right);
+                default -> {
+                    ExpressionNode right = parseExpression(cursor, context, operator.getPrecedence() + 1);
+                    left = new BinaryOperation(left, operator, right);
+                }
             }
         }
+
         return left;
     }
 

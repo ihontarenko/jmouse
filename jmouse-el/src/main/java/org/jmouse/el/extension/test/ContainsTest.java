@@ -12,7 +12,13 @@ public class ContainsTest extends AbstractTest {
     @Override
     public boolean test(Object value, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
         if (value instanceof Collection<?> collection) {
-            return new HashSet<>(arguments.toList()).containsAll(collection);
+            if (arguments.getFirst() instanceof Collection<?> needed) {
+                return new HashSet<>(collection).containsAll(needed);
+            }
+
+            return new HashSet<>(collection).contains(arguments.getFirst());
+        } else if (value instanceof String string) {
+            return string.contains(context.getConversion().convert(arguments.getFirst(), String.class));
         }
 
         return arguments.toList().contains(value);

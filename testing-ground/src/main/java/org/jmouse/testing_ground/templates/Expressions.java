@@ -3,6 +3,7 @@ package org.jmouse.testing_ground.templates;
 import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.extension.Lambda;
 import org.jmouse.el.extension.MethodImporter;
 import org.jmouse.el.extension.calculator.MathematicCalculator;
 import org.jmouse.el.extension.i18nExtension;
@@ -72,6 +73,7 @@ public class Expressions {
         context.setValue("data", List.of(1, 2, 3));
         context.setValue("strings", List.of("ZZ", "YY"));
 
+        el.compile("(1..10)|filter(n -> n is odd)").evaluate(context);
         el.compile("[1, 2, 3, 4, 5]|map(i -> i * 2)").evaluate(context);
 
         el.compile("1 + (2 * 2) | int > 5 and 4 < 5 - 2 / 3");
@@ -85,9 +87,13 @@ public class Expressions {
 //        el.evaluate("i18n('i18n.default', 'jmouse.el.name', 1, 2, 3) | upper");
 
         el.evaluate("set('tag', (name, value) -> '<' ~ name ~ '>' ~ value ~ '</' ~ name ~ '>')", context);
-        el.evaluate("tag('abc', 'qwe')", context);
+        el.evaluate("tag('abc', 'qwe') : charAt(0)", context);
         el.evaluate("() -> 'hello'");
-        el.evaluate("() -> {}");
+        el.evaluate("() -> {{}}"); // return empty map
+        el.evaluate("() -> {}"); // return null
+        el.evaluate("() -> null"); // return null
+
+
         el.evaluate("set('toString', (v) -> v|string)", context);
         el.evaluate("set('getNumberType', v -> v|int is even ? 'Even' : 'Odd')", context);
         el.evaluate("getNumberType(1)", context);

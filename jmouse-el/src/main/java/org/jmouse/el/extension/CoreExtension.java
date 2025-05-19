@@ -166,6 +166,7 @@ public class CoreExtension implements Extension {
         operators.addAll(Arrays.asList(ComparisonOperator.values()));
 
         operators.add(FilterOperator.FILTER);
+        // operators.add(AttributeAccessOperator.ACCESS);
         operators.add(TestOperator.IS);
         operators.add(NullCoalesceOperator.NULL_COALESCE);
         operators.add(RangeOperator.RANGE);
