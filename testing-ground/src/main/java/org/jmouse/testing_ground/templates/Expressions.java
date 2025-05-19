@@ -89,10 +89,10 @@ public class Expressions {
         el.evaluate("() -> 'hello'");
         el.evaluate("() -> {}");
         el.evaluate("set('toString', (v) -> v|string)", context);
-        el.evaluate("set('getNumberType', (v) -> v|int is even ? 'Even' : 'Odd')", context);
-        el.evaluate("getNumberType(1i)", context);
+        el.evaluate("set('getNumberType', v -> v|int is even ? 'Even' : 'Odd')", context);
+        el.evaluate("getNumberType(1)", context);
 
-        el.evaluate("toString(123.123)");
+        el.evaluate("toString(123.123)", context);
 
         el.evaluate("list + (((list | length is even) ? 'Even' : 'Odd') | upper)", context);
         el.evaluate("list + ((ci + 2 + (14 - 1) | int / 7) is even)", context);
@@ -152,7 +152,7 @@ public class Expressions {
 
         long start = System.currentTimeMillis();
 
-
+        el.evaluate("names | filter(n -> n is ends('e')) | list", context);
 
         long spend = 0;
         int  times = 0;
@@ -160,9 +160,9 @@ public class Expressions {
         while (spend < 1000) {
             times++;
             spend = System.currentTimeMillis() - start;
-            el.evaluate("user.name ~ '22' | upper", context);
-            el.evaluate("cnt++", context);
-            el.evaluate("names + cnt", context);
+//            el.evaluate("user.name ~ '22' | upper", context);
+//            el.evaluate("cnt++", context);
+            el.evaluate("names | filter(n -> n is ends('e')) | list", context);
 //            compiled.evaluate(evaluationContext);
         }
 

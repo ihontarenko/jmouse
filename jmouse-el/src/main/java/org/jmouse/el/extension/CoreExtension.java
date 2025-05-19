@@ -116,7 +116,9 @@ public class CoreExtension implements Extension {
                 new IterableTest(),
                 new ContainsTest(),
                 new NullTest(),
-                new TypeTest()
+                new TypeTest(),
+                new StartsTest(),
+                new EndsTest()
         );
     }
 

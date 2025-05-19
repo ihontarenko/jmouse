@@ -4,10 +4,7 @@ import org.jmouse.core.convert.PredefinedConversion;
 import org.jmouse.core.convert.converter.CharacterToNumberConverter;
 import org.jmouse.core.convert.converter.NumberToCharacterConverter;
 import org.jmouse.core.convert.converter.NumberToNumberConverter;
-import org.jmouse.el.evaluation.converter.BooleanToStringConverter;
-import org.jmouse.el.evaluation.converter.CharacterToStringConverter;
-import org.jmouse.el.evaluation.converter.StringToBooleanConverter;
-import org.jmouse.el.evaluation.converter.StringToCharacterConverter;
+import org.jmouse.el.evaluation.converter.*;
 
 /**
  * An extension of {@link PredefinedConversion} tailored for the expression language.
@@ -35,5 +32,6 @@ public class ExpressionLanguageConversion extends PredefinedConversion {
         registerConverter(new CharacterToNumberConverter());
         registerConverter(new StringToBooleanConverter());
         registerConverter(new StringToCharacterConverter());
+        registerConverter(new IteratorToCollection());
     }
 }
