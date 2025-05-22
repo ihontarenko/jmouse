@@ -9,6 +9,9 @@
     <version>1.0.0-Beta</version>
     <packaging>pom</packaging>
 
+    <description>jMouse Framework - BOM-POM</description>
+    <url>https://github.com/ihontarenko/jmouse</url>
+
     <licenses>
         <license>
             <name>MIT License</name>
@@ -23,6 +26,12 @@
             <email>ihontarenko@gmail.com</email>
         </developer>
     </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
+        <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-dependencies</url>
+    </scm>
 
     <properties>
         <java.version>21</java.version>
@@ -188,9 +197,7 @@
     </dependencyManagement>
 
     <build>
-
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
@@ -205,7 +212,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.sonatype.central</groupId>
                 <artifactId>central-publishing-maven-plugin</artifactId>
@@ -215,7 +221,6 @@
                     <publishingServerId>central</publishingServerId>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 
