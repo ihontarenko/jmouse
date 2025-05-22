@@ -71,13 +71,13 @@
     <modules>
         <module>jmouse-dependencies</module>
         <module>jmouse-core</module>
-<!--        <module>jmouse-el</module>-->
-<!--        <module>jmouse-expression</module>-->
-<!--        <module>jmouse-validation</module>-->
-<!--        <module>jmouse-beans</module>-->
-<!--        <module>jmouse-context</module>-->
-<!--        <module>jmouse-web</module>-->
-<!--        <module>testing-ground</module>-->
+        <module>jmouse-el</module>
+        <module>jmouse-expression</module>
+        <module>jmouse-validation</module>
+        <module>jmouse-beans</module>
+        <module>jmouse-context</module>
+        <module>jmouse-web</module>
+        <module>testing-ground</module>
     </modules>
 
     <build>
@@ -154,7 +154,8 @@
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>${maven-javadoc.version}</version>
                     <configuration>
-                        <doclint>all,-missing</doclint>
+<!--                        <doclint>all,-missing</doclint>-->
+                        <doclint>none</doclint>
                     </configuration>
                     <executions>
                         <execution>
