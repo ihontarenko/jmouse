@@ -96,7 +96,8 @@ public class CoreExtension implements Extension {
                 new ToBigDecimalFilter(),
                 new ToStringFilter(),
                 new ToListFilter(),
-                new ToArrayFilter()
+                new ToArrayFilter(),
+                new ToIteratorFilter()
         );
     }
 

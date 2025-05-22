@@ -78,7 +78,6 @@ public class JdkProxy implements InvocationHandler, Proxy {
     /**
      * Creates and returns a proxy instance for the target structured using the specified {@link ClassLoader}.
      *
-     * @param classLoader the class loader to define the proxy class.
      * @return the proxy instance.
      */
     @Override

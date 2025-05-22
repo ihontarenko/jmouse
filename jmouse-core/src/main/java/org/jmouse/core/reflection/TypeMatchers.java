@@ -20,7 +20,7 @@ public class TypeMatchers {
      *
      * @param expectedType the expected type
      * @return a matcher that returns true if the given type is similar to the expected type
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Class<?>> matcher = TypeMatchers.isSimilar(int.class);
      * boolean result = matcher.matches(Integer.class); // returns true
@@ -47,7 +47,7 @@ public class TypeMatchers {
      *
      * @param expectedType the expected type
      * @return a matcher that returns true if the given type is a subtype of the expected type
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Class<?>> matcher = TypeMatchers.isSubtype(Number.class);
      * boolean result = matcher.matches(Integer.class); // returns true

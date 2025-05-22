@@ -168,7 +168,7 @@ public class StandardConversion implements Conversion {
 
                 converted = (R) intermediate;
             } else {
-//                LOGGER.info("Converter: {}", classPair);
+                LOGGER.info("Converter: {}", classPair);
                 converted = converter.convert(source, targetType);
             }
 

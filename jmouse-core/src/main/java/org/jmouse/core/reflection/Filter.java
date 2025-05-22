@@ -15,11 +15,11 @@ import java.util.function.Function;
  * The filter also provides access to the current {@link Matcher} used for filtering.
  *
  * <p>Example usage:
- * <pre>
+ * <pre>{@code
  *     Filter<Method> filter = new MethodFilter(support, matcher, SomeClass.class);
  *     List<Method> methods = filter.find();
  *     Matcher<Method> currentMatcher = filter.matcher();
- * </pre>
+ * }</pre>
  *
  * @param <T> the type of {@link Member} (e.g., {@link java.lang.reflect.Method}, {@link java.lang.reflect.Field})
  */

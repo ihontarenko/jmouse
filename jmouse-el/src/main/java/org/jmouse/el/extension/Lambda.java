@@ -4,10 +4,9 @@ import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.ScopedChain;
 import org.jmouse.el.node.ExpressionNode;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static java.util.Objects.requireNonNullElseGet;
 
 /**
  * Represents a user-defined lambda function with named parameters, default values,
@@ -26,9 +25,10 @@ import java.util.Map;
  */
 public final class Lambda implements Function {
 
-    private final List<String> parameters = new ArrayList<>();
+    private final List<String>        parameters    = new ArrayList<>();
     private final Map<String, Object> defaultValues = new HashMap<>();
-    private final ExpressionNode body;
+    private final ExpressionNode      body;
+    private       String              name;
 
     /**
      * Constructs a new Lambda with the given expression node as its body.
@@ -60,6 +60,12 @@ public final class Lambda implements Function {
 
             if (value == null) {
                 value = getDefault(parameter);
+
+                if (value == null) {
+                    throw new IllegalLambdaExecutionException(
+                            "Lambda function '%s' requires parameter '%s'"
+                                    .formatted(getName(), parameter));
+                }
             }
 
             chain.setValue(parameter, value);
@@ -76,6 +82,10 @@ public final class Lambda implements Function {
         chain.pop();  // restore previous scope
 
         return result;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
@@ -118,7 +128,7 @@ public final class Lambda implements Function {
      */
     @Override
     public String getName() {
-        return "lambda";
+        return name == null ? "UNNAMED_LAMBDA" : name;
     }
 
     /**

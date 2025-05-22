@@ -18,7 +18,6 @@ import java.util.function.*;
  *   <li>{@link WildcardType} - wildcard bounds</li>
  *   <li>{@link GenericArrayType} - generic arrays</li>
  * </ul>
- * <p>
  */
 public class JavaType implements ClassTypeInspector {
 
@@ -180,7 +179,7 @@ public class JavaType implements ClassTypeInspector {
      *
      * @param field the field whose type is to be resolved
      * @return a {@link JavaType} instance for the field type
-     * <p>
+     *
      * @see Field#getGenericType()
      */
     public static JavaType forField(Field field) {
@@ -199,11 +198,10 @@ public class JavaType implements ClassTypeInspector {
 
     /**
      * Creates a {@link JavaType} for a specific exception type declared by a {@link Method}.
-     * <p>
      * This executable retrieves the exception type at the specified index in the executable's
      * declared exceptions and constructs a {@link JavaType} representation of it.
      * If the specified index is out of bounds, an {@link IllegalArgumentException} is thrown.
-     * </p>
+     *
      *
      * @param executable the executable whose exception type is to be resolved
      * @param index  the index of the exception type in the declared exceptions

@@ -28,7 +28,6 @@ final public class Files {
      * @param path           the input path
      * @param defaultProtocol the default protocol to return if no protocol is found
      * @return the extracted protocol, or the default protocol if none exists
-     * <p>
      */
     public static String extractProtocol(String path, String defaultProtocol) {
         int colonIndex = path.indexOf(COLON);
@@ -42,7 +41,6 @@ final public class Files {
 
     /**
      * Removes the protocol (e.g., "file://", "http://") from the given path.
-     * <p>
      * If no protocol is present, the original path is returned.
      *
      * @param path the file path or URL string
@@ -60,7 +58,7 @@ final public class Files {
 
     /**
      * Converts a URL to a file system path.
-     * <p>
+     *
      * This method resolves the URL to a URI and converts it to a file path string.
      *
      * @param url the URL to convert
@@ -77,7 +75,7 @@ final public class Files {
 
     /**
      * Normalizes the given file path to use the system's default file separator.
-     * <p>
+     *
      * If the path is {@code null}, it returns the system's default separator.
      * Converts all forward slashes ('/') in the path to the system-specific separator.
      *
@@ -91,7 +89,7 @@ final public class Files {
     /**
      * Normalizes the given file path to use the system's default file separator,
      * and then replaces the system separator with the specified separator.
-     * <p>
+     *
      * This method is useful for enforcing a specific separator ('/' or '\\')
      * regardless of the operating system.
      *

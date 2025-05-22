@@ -15,7 +15,7 @@ import static org.jmouse.core.reflection.Reflections.instantiate;
  * <p>This class provides methods to create default or customized {@link EventManager} objects.
  * It can scan for annotated classes, validate their compatibility, and automatically register event listeners.</p>
  *
- * <h3>Usage Examples:</h3>
+ * Usage Examples:
  *
  * <pre>{@code
  * // Create a default EventManager

@@ -32,7 +32,7 @@ public interface TypeNormalizer {
          * unchanged.
          *
          * @param type the class to check and potentially normalize
-         * @return {@link Enum#class} if {@code type} is an enum; otherwise, the original {@code type}
+         * @return Class of {@link Enum} if {@code type} is an enum; otherwise, the original {@code type}
          */
         @Override
         public Class<?> normalize(Class<?> type) {

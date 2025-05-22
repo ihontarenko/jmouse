@@ -116,7 +116,7 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
 
         if (entries.size() == 1) {
             value = getScopedChain().getValue(name);
-        } else if (entries.size() == 2) {
+        } else if (entries.size() == 2 && !entries.type(1).isNumeric()) {
             String key       = entries.first().toString();
             String last      = entries.last().toString();
             Object container = getScopedChain().getValue(key);

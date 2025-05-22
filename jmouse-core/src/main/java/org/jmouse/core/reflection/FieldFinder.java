@@ -22,7 +22,7 @@ public class FieldFinder implements MemberFinder<Field> {
      * @param clazz       the class whose fields are to be searched
      * @param annotations the annotations to filter fields by
      * @return an array of fields that are annotated with any of the given annotations
-     * @example
+     * <p>Example
      * <pre>{@code
      * // Example: Finding all fields annotated with @Deprecated or @NotNull
      * Field[] annotatedFields = FieldFinder.getAnnotatedWith(SomeClass.class, Deprecated.class, NotNull.class);

@@ -31,7 +31,7 @@ final public class Maths {
      * @return the sum of {@code a} and {@code b} as {@code double}
      * @throws NullPointerException if either {@code a} or {@code b} is {@code null}
      *
-     * <h2>Example:</h2>
+     * Example:
      * <pre>{@code
      * double result = MathFunctions.sum(5, 3.2); // 8.2
      * }</pre>
@@ -51,7 +51,7 @@ final public class Maths {
      * @throws ArithmeticException if {@code b} is zero
      * @throws NullPointerException if either {@code a} or {@code b} is {@code null}
      *
-     * <h2>Example:</h2>
+     * Example:
      * <pre>{@code
      * double result = MathFunctions.divide(10, 2); // 5.0
      * }</pre>
@@ -66,7 +66,7 @@ final public class Maths {
     /**
      * Modulus one number by another and returns the result as {@code double}.
      *
-     * <h2>Example:</h2>
+     * Example:
      * <pre>{@code
      * double result = MathFunctions.modulus(10, 2); // 0.0
      * }</pre>
@@ -87,7 +87,7 @@ final public class Maths {
      * @param <U> the type of the second number
      * @return the product of {@code a * b} as {@code double}
      *
-     * <h2>Example:</h2>
+     * Example:
      * <pre>{@code
      * double result = MathFunctions.multiply(4, 2.5); // 10.0
      * }</pre>
@@ -105,7 +105,7 @@ final public class Maths {
      * @param <U> the type of the second number
      * @return the result of {@code a - b} as {@code double}
      *
-     * <h2>Example:</h2>
+     * Example:
      * <pre>{@code
      * double result = MathFunctions.subtract(10, 7); // 3.0
      * }</pre>
@@ -123,7 +123,7 @@ final public class Maths {
      * @param <U> the type of the exponent
      * @return the result of {@code base^exponent} as {@code double}
      *
-     * <h2>Example:</h2>
+     * Example:
      * <pre>{@code
      * double result = MathFunctions.power(2, 3); // 8.0
      * }</pre>
@@ -139,7 +139,7 @@ final public class Maths {
      * @param <T> the type of the number
      * @return the absolute value of {@code a} as {@code double}
      *
-     * <h2>Example:</h2>
+     * Example:
      * <pre>{@code
      * double result = MathFunctions.abs(-5); // 5.0
      * }</pre>

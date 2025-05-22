@@ -41,13 +41,11 @@ final public class AntMatcher implements Matcher<String> {
     /**
      * Matches the given string against the Ant-style pattern.
      *
-     * <p>
-     * This method splits both the input string and the pattern into segments using the specified token
+     * <p>This method splits both the input string and the pattern into segments using the specified token
      * (default is "/"). It then compares the segments recursively to determine if the input string matches
-     * the pattern.
-     * </p>
+     * the pattern.</p>
      *
-     * <h3>Steps:</h3>
+     * Steps:
      * <ol>
      *   <li>Splits the input string into segments based on the token.</li>
      *   <li>Creates a modifiable copy of the pattern segments for processing.</li>

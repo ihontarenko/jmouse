@@ -33,5 +33,6 @@ public class ExpressionLanguageConversion extends PredefinedConversion {
         registerConverter(new StringToBooleanConverter());
         registerConverter(new StringToCharacterConverter());
         registerConverter(new IteratorToCollection());
+        registerConverter(new IterableToIteratorConverter());
     }
 }

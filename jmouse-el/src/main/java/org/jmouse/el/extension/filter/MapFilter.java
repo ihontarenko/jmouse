@@ -21,7 +21,7 @@ public class MapFilter extends AbstractFilter {
 
         if (!(arguments.getFirst() instanceof Lambda lambda)) {
             throw new IllegalArgumentException(
-                    "Filter 'map' expects a lambda argument");
+                    "Filter 'map' expects a lambda argument, got: " + arguments.getFirst());
         } else {
             return StreamSupport.stream(iterable.spliterator(), false)
                     .map(item -> lambda.execute(Arguments.forArray(item), context)).iterator();

@@ -24,7 +24,7 @@ public class FieldMatchers {
      *
      * @param modifier the modifier to check (e.g., {@link Modifier#PUBLIC})
      * @return a matcher that checks for the given modifier
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Field> publicMatcher = FieldMatchers.withModifier(Modifier.PUBLIC);
      * }</pre>
@@ -38,7 +38,7 @@ public class FieldMatchers {
      *
      * @return a matcher that checks if a field is private
      * @see Modifier#PRIVATE
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Field> privateMatcher = FieldMatchers.isPrivate();
      * }</pre>
@@ -52,7 +52,7 @@ public class FieldMatchers {
      *
      * @return a matcher that checks if a field is protected
      * @see Modifier#PROTECTED
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Field> protectedMatcher = FieldMatchers.isProtected();
      * }</pre>
@@ -66,7 +66,7 @@ public class FieldMatchers {
      *
      * @return a matcher that checks if a field is public
      * @see Modifier#PUBLIC
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Field> publicMatcher = FieldMatchers.isPublic();
      * }</pre>
@@ -80,7 +80,7 @@ public class FieldMatchers {
      *
      * @param annotation the annotation to check
      * @return a matcher that checks if a field has the specified annotation
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Field> annotatedMatcher = FieldMatchers.isAnnotatedWith(Deprecated.class);
      * }</pre>
@@ -94,7 +94,7 @@ public class FieldMatchers {
      *
      * @param type the type of the field to check
      * @return a matcher that checks if a field has the specified type
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Field> typeMatcher = FieldMatchers.hasType(String.class);
      * }</pre>
@@ -108,7 +108,7 @@ public class FieldMatchers {
      *
      * @param prefix the prefix to check for
      * @return a matcher that checks if the field name starts with the given prefix
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Field> startsWithMatcher = FieldMatchers.nameStarts("user");
      * }</pre>
@@ -122,7 +122,7 @@ public class FieldMatchers {
      *
      * @param suffix the suffix to check for
      * @return a matcher that checks if the field name ends with the given suffix
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Field> endsWithMatcher = FieldMatchers.nameEnds("Id");
      * }</pre>
@@ -136,7 +136,7 @@ public class FieldMatchers {
      *
      * @param substring the substring to check for
      * @return a matcher that checks if the field name contains the given substring
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Field> containsMatcher = FieldMatchers.nameContains("name");
      * }</pre>
@@ -150,7 +150,7 @@ public class FieldMatchers {
      *
      * @param actual the name to check
      * @return a matcher that checks if the field name is equal to the given name
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Field> equalsMatcher = FieldMatchers.nameEquals("userName");
      * }</pre>
@@ -164,7 +164,7 @@ public class FieldMatchers {
      *
      * @param textMatcher the matcher to use for checking the field name
      * @return a matcher that checks the field name
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Field> customNameMatcher = FieldMatchers.withName(TextMatchers.startsWith("user"));
      * }</pre>

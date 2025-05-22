@@ -55,24 +55,18 @@ public class Expressions {
 
         context.setValue("user", user);
 
-//        System.out.println(
-//                el.evaluate("12 + 3.14")
-//        );
-
-//        System.out.println(
-//                el.evaluate("12 + 1123456789123456.78")
-//        );
-//
-//        System.out.println(
-//                el.evaluate("1.2 + 314")
-//        );
-
         context.setValue("list", new ArrayList<>());
 
         context.setValue("ci", (char) 23);
         context.setValue("data", List.of(1, 2, 3));
         context.setValue("strings", List.of("ZZ", "YY"));
 
+        el.evaluate("set('a', [1, 2f, 3d, 44c, 5])", context);
+        el.evaluate("a[3]", context);
+
+        el.evaluate("(1..33)|iterator|list");
+
+        el.compile("user.name >= 18 ? 'Adult' : 'Minor'").evaluate(context);
         el.compile("(1..10)|filter(n -> n is odd)").evaluate(context);
         el.compile("[1, 2, 3, 4, 5]|map(i -> i * 2)").evaluate(context);
 
@@ -93,10 +87,11 @@ public class Expressions {
         el.evaluate("() -> {}"); // return null
         el.evaluate("() -> null"); // return null
 
-
         el.evaluate("set('toString', (v) -> v|string)", context);
         el.evaluate("set('getNumberType', v -> v|int is even ? 'Even' : 'Odd')", context);
         el.evaluate("getNumberType(1)", context);
+
+        el.evaluate("[1, 2, 3, 22d / 7]|map(toString)", context);
 
         el.evaluate("toString(123.123)", context);
 
@@ -151,6 +146,7 @@ public class Expressions {
         el.evaluate("(bi + 2) | int", context);
         el.evaluate("bi + 2", context);
         el.evaluate("ci + 2", context);
+        el.evaluate("[10, 20, 30] | join(':', '<', '>')");
 
         el.evaluate("names + user.name", context);
         el.evaluate("names + 'John'", context);
@@ -169,7 +165,6 @@ public class Expressions {
 //            el.evaluate("user.name ~ '22' | upper", context);
 //            el.evaluate("cnt++", context);
             el.evaluate("names | filter(n -> n is ends('e')) | list", context);
-//            compiled.evaluate(evaluationContext);
         }
 
         System.out.println("times: " + times);

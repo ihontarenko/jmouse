@@ -76,6 +76,7 @@ public class FunctionNode extends AbstractExpressionNode {
 
         if (function == null) {
             if (context.getValue(getName()) instanceof Lambda lambda) {
+                lambda.setName(getName());
                 function = lambda;
             }
 

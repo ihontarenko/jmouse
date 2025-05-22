@@ -32,7 +32,7 @@ public class MethodMatchers {
      *
      * @param modifier the modifier to check (e.g., {@link Modifier#PUBLIC})
      * @return a matcher that checks for the given modifier
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> publicMatcher = MethodMatchers.withModifier(Modifier.PUBLIC);
      * }</pre>
@@ -46,7 +46,7 @@ public class MethodMatchers {
      *
      * @return a matcher that checks if the method or constructor is private
      * @see Modifier#PRIVATE
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> privateMatcher = MethodMatchers.isPrivate();
      * }</pre>
@@ -60,7 +60,7 @@ public class MethodMatchers {
      *
      * @return a matcher that checks if the method or constructor is protected
      * @see Modifier#PROTECTED
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> protectedMatcher = MethodMatchers.isProtected();
      * }</pre>
@@ -74,7 +74,7 @@ public class MethodMatchers {
      *
      * @return a matcher that checks if the method or constructor is public
      * @see Modifier#PUBLIC
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> publicMatcher = MethodMatchers.isPublic();
      * }</pre>
@@ -88,7 +88,7 @@ public class MethodMatchers {
      *
      * @return a matcher that checks if the method or constructor is static
      * @see Modifier#STATIC
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> staticMatcher = MethodMatchers.isStatic();
      * }</pre>
@@ -102,7 +102,7 @@ public class MethodMatchers {
      *
      * @return a matcher that checks if the method is abstract
      * @see Modifier#ABSTRACT
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> staticMatcher = MethodMatchers.isAbstract();
      * }</pre>
@@ -116,7 +116,7 @@ public class MethodMatchers {
      *
      * @return a matcher that checks if the method or constructor is final
      * @see Modifier#FINAL
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> finalMatcher = MethodMatchers.isFinal();
      * }</pre>
@@ -130,7 +130,7 @@ public class MethodMatchers {
      *
      * @return a matcher that checks if the method is a default interface method
      * @see Method#isDefault()
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Method> defaultMethodMatcher = MethodMatchers.isDefault();
      * }</pre>
@@ -144,7 +144,7 @@ public class MethodMatchers {
      *
      * @param annotation the annotation to check for
      * @return a matcher that checks if the method or constructor is annotated with the specified annotation
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> annotatedMatcher = MethodMatchers.isAnnotatedWith(Deprecated.class);
      * }</pre>
@@ -158,7 +158,7 @@ public class MethodMatchers {
      *
      * @param returnType the return type to check for
      * @return a matcher that checks if the method has the specified return type
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Method> returnTypeMatcher = MethodMatchers.hasReturnType(String.class);
      * }</pre>
@@ -172,7 +172,7 @@ public class MethodMatchers {
      *
      * @param count the number of parameters
      * @return a matcher that checks if the method or constructor has the specified number of parameters
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> parameterCountMatcher = MethodMatchers.hasParameterCount(2);
      * }</pre>
@@ -186,7 +186,7 @@ public class MethodMatchers {
      *
      * @param parameterTypes the parameter types to check
      * @return a matcher that checks if the method or constructor has the specified parameter types
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> parameterTypeMatcher = MethodMatchers.hasParameterTypes(String.class, int.class);
      * }</pre>
@@ -201,7 +201,7 @@ public class MethodMatchers {
      *
      * @param parameterTypes the parameter types to check
      * @return a matcher that checks if the method or constructor has compatible parameter types
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> softParameterTypeMatcher = MethodMatchers.hasSoftParameterTypes(int.class, String.class);
      * }</pre>
@@ -215,7 +215,7 @@ public class MethodMatchers {
      *
      * @param exceptionType the exception type to check for
      * @return a matcher that checks if the method or constructor throws the specified exception
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> exceptionMatcher = MethodMatchers.throwsException(IOException.class);
      * }</pre>
@@ -229,7 +229,7 @@ public class MethodMatchers {
      *
      * @param prefix the prefix to check for
      * @return a matcher that checks if the method or constructor name starts with the given prefix
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> startsWithMatcher = MethodMatchers.nameStarts("get");
      * }</pre>
@@ -303,7 +303,7 @@ public class MethodMatchers {
      *
      * @param suffix the suffix to check for
      * @return a matcher that checks if the method or constructor name ends with the given suffix
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> endsWithMatcher = MethodMatchers.nameEnds("Service");
      * }</pre>
@@ -317,7 +317,7 @@ public class MethodMatchers {
      *
      * @param substring the substring to check for
      * @return a matcher that checks if the method or constructor name contains the given substring
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> containsMatcher = MethodMatchers.nameContains("save");
      * }</pre>
@@ -331,7 +331,7 @@ public class MethodMatchers {
      *
      * @param actual the name to check for
      * @return a matcher that checks if the method or constructor name is equal to the given name
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> equalsMatcher = MethodMatchers.nameEquals("toString");
      * }</pre>
@@ -345,7 +345,7 @@ public class MethodMatchers {
      *
      * @param textMatcher the matcher to use for checking the method or constructor name
      * @return a matcher that checks the method or constructor name
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Executable> customNameMatcher = MethodMatchers.withName(TextMatchers.startsWith("get"));
      * }</pre>
@@ -358,7 +358,7 @@ public class MethodMatchers {
      * Creates a matcher that checks if a constructor is a default constructor (no arguments).
      *
      * @return a matcher that checks if the constructor is a default constructor
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Constructor<?>> defaultConstructorMatcher = MethodMatchers.isDefaultConstructor();
      * }</pre>
@@ -371,7 +371,7 @@ public class MethodMatchers {
      * Creates a matcher that checks if a constructor is a copy constructor (one argument of the same type).
      *
      * @return a matcher that checks if the constructor is a copy constructor
-     * @example
+     * <p>Example
      * <pre>{@code
      * Matcher<Constructor<?>> copyConstructorMatcher = MethodMatchers.isCopyConstructor();
      * }</pre>

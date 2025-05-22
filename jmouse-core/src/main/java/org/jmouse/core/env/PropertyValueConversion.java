@@ -7,24 +7,21 @@ import org.jmouse.core.convert.converter.StringToNumberConverter;
 
 /**
  * Provides a set of standard converters for property value transformation.
- * <p>
- * This class extends {@link StandardConversion} and registers commonly used
+ * <p>This class extends {@link StandardConversion} and registers commonly used
  * converters for handling property values, ensuring smooth type conversion
- * within the environment.
- * </p>
+ * within the environment.</p>
  */
 public class PropertyValueConversion extends StandardConversion {
 
     /**
      * Constructs a new {@code PropertyValueConversion} instance with pre-registered converters.
-     * <p>
+     * <br>
      * The following converters are registered:
      * <ul>
      *     <li>{@link HierarchicalMapConverter} - Converts flat property maps into hierarchical structures.</li>
      *     <li>{@link NumberToStringConverter} - Converts numeric values to their string representation.</li>
      *     <li>{@link StringToNumberConverter} - Converts string values into numeric types.</li>
      * </ul>
-     * </p>
      */
     public PropertyValueConversion() {
         registerConverter(new HierarchicalMapConverter());

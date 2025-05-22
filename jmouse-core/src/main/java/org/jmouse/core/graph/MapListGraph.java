@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * for each node in a {@link ConcurrentHashMap} to allow concurrent modifications.
  *
  * <p>Edges are added in both directions, effectively making this an undirected graph.
- * However, the interface used (`Graph<T>`) implies directionality and can be adapted
+ * However, the interface used ({@code Graph<T>}) implies directionality and can be adapted
  * for directed behaviors if needed.
  *
  * @param <T> the type of nodes in the graph
