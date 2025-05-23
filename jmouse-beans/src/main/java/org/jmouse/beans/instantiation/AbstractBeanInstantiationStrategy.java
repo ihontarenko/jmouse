@@ -3,8 +3,7 @@ package org.jmouse.beans.instantiation;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.definition.BeanDependency;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * An abstract base class for {@link BeanInstantiationStrategy} implementations.
@@ -27,7 +26,19 @@ import java.util.List;
  * }
  * }</pre>
  */
-public abstract class AbstractBeanInstantiationStrategy implements BeanInstantiationStrategy {
+public abstract class AbstractBeanInstantiationStrategy implements BeanInstantiationStrategy, DependencyResolver.Aware {
+
+    private DependencyResolver dependencyResolver;
+
+    @Override
+    public void setDependencyResolver(DependencyResolver resolver) {
+        this.dependencyResolver = resolver;
+    }
+
+    @Override
+    public DependencyResolver getDependencyResolver() {
+        return dependencyResolver;
+    }
 
     /**
      * Resolves a list of {@link BeanDependency} instances into actual bean objects
@@ -41,7 +52,7 @@ public abstract class AbstractBeanInstantiationStrategy implements BeanInstantia
         List<Object> arguments = new ArrayList<>();
 
         for (BeanDependency dependency : dependencies) {
-            arguments.add(context.getBean(dependency.type(), dependency.name()));
+            arguments.add(dependencyResolver.resolve(dependency, context));
         }
 
         return arguments.toArray(Object[]::new);

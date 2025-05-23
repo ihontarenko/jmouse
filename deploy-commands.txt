@@ -1,0 +1,1 @@
+$ mvn clean deploy -pl jmouse-beans,jmouse-context

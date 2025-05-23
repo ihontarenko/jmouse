@@ -6,6 +6,7 @@ import org.jmouse.core.env.Environment;
 import org.jmouse.core.reflection.ClassFinder;
 import org.jmouse.context.ApplicationConfigurer;
 import org.jmouse.context.ApplicationFactory;
+import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.initializer.ServletWebApplicationInitializer;
 import org.jmouse.web.initializer.application.WebBeanContextServletInitializer;
@@ -22,8 +23,8 @@ public class WebApplicationLauncher {
 
     private final Class<?>[]                         baseClasses;
     private final ApplicationFactory<WebBeanContext> applicationFactory = new WebApplicationFactory();
-    private  Map<WebServers, WebServerConfig> webserver;
-    private Binder binder;
+    private       Binder                             binder;
+    private       Map<WebServers, WebServerConfig>   webserver;
 
     public WebApplicationLauncher(Class<?>... baseClasses) {
         this.baseClasses = baseClasses;
@@ -46,16 +47,12 @@ public class WebApplicationLauncher {
 
         binder = Binder.withValueAccessor(environment);
 
-        WebBeanContext webBeanContext = applicationFactory.createContext(WebBeanContext.DEFAULT_WEB_CONTEXT_NAME, rootWebBeanContext, baseClasses);
-
-        Bind.with(binder).to("jmouse.web", this);
-
-        Bind.with(binder).to("jmouse.web.server.default", WebServers.class).ifPresent(webServers -> {
-            System.out.println("DirectAccess WebServers Configuration: " + getWebserver().get(webServers));
-        });
+        WebBeanContext webBeanContext = applicationFactory.createContext(
+                WebBeanContext.DEFAULT_WEB_CONTEXT_NAME, rootWebBeanContext, baseClasses);
 
         // web server part
         rootWebBeanContext.getBeans(ServletWebApplicationInitializer.class);
+        rootWebBeanContext.getBeans(ExpressionLanguage.class);
         WebServerFactory factory   = rootWebBeanContext.getBean(WebServerFactory.class);
         WebServer        webServer = factory.getWebServer(new WebBeanContextServletInitializer(webBeanContext));
         webServer.start();

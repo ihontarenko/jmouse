@@ -12,7 +12,7 @@ public class StartApplication {
     public static void main(String... arguments) {
         WebBeanContext context = new WebApplicationLauncher(StartApplication.class, ApplicationBeanContext.class).launch();
 
-        System.out.println("--- Java Web Application ---");
+        System.out.println("--- Java Home ---");
         Bind.with(context.getEnvironment()).toString("JAVA_HOME").ifPresent(System.out::println);
 
         Conversion conversion = context.getBean(Conversion.class);

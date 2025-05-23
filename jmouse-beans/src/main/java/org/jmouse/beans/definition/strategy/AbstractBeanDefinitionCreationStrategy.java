@@ -1,17 +1,21 @@
 package org.jmouse.beans.definition.strategy;
 
-import org.jmouse.core.reflection.Reflections;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.annotation.BeanCollection;
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.beans.annotation.Qualifier;
+import org.jmouse.beans.definition.AggregatedBeansDependency;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDependency;
 import org.jmouse.beans.definition.SimpleBeanDependency;
+import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Parameter;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -65,13 +69,15 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
      * @return a {@link BeanDependency} representing the parameter
      */
     protected BeanDependency createDependency(Parameter parameter) {
-        String name = null;
+        String   name     = Reflections.getAnnotationValue(parameter, Qualifier.class, Qualifier::value);
+        JavaType javaType = JavaType.forParameter(parameter);
 
-        if (parameter.isAnnotationPresent(Qualifier.class)) {
-            name = parameter.getAnnotation(Qualifier.class).value();
+        if (Collection.class.isAssignableFrom(parameter.getType()) && parameter.isAnnotationPresent(
+                BeanCollection.class)) {
+            return new AggregatedBeansDependency(javaType, name);
         }
 
-        return new SimpleBeanDependency(parameter.getType(), name);
+        return new SimpleBeanDependency(javaType, name);
     }
 
     /**

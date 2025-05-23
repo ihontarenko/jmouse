@@ -1,5 +1,7 @@
 package org.jmouse.beans.definition;
 
+import org.jmouse.core.reflection.JavaType;
+
 /**
  * Represents a dependency required by a bean.
  * <p>
@@ -20,7 +22,16 @@ public interface BeanDependency {
      *
      * @return the class type of the dependency.
      */
-    Class<?> type();
+    default Class<?> type() {
+        return javaType().getRawType();
+    }
+
+    /**
+     * Gets the java-type of the dependency.
+     *
+     * @return the class type of the dependency.
+     */
+    JavaType javaType();
 
     /**
      * Gets the name of the dependency.

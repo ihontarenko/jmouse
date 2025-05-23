@@ -2,10 +2,7 @@ package org.jmouse.beans;
 
 import org.jmouse.beans.definition.BeanDefinitionFactory;
 import org.jmouse.beans.definition.SimpleBeanDefinitionFactory;
-import org.jmouse.beans.instantiation.BeanInstantiationFactory;
-import org.jmouse.beans.instantiation.ConstructorBeanInstantiationStrategy;
-import org.jmouse.beans.instantiation.MethodBeanInstantiationStrategy;
-import org.jmouse.beans.instantiation.ObjectFactoryBeanInstantiationStrategy;
+import org.jmouse.beans.instantiation.*;
 import org.slf4j.Logger;
 import org.jmouse.beans.definition.strategy.ConstructorBeanDefinitionCreationStrategy;
 import org.jmouse.beans.definition.strategy.MethodBeanDefinitionCreationStrategy;
@@ -89,15 +86,19 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
 
         LOGGER.info("Initialize default bean factory");
 
-        if (factory instanceof BeanContextAware contextAware) {
-            contextAware.setBeanContext(context);
-        }
+        BeanContextAware contextAware = (BeanContextAware) factory;
+        contextAware.setBeanContext(context);
 
-        if (factory instanceof BeanInstantiationFactory instantiation) {
-            instantiation.addStrategy(new ConstructorBeanInstantiationStrategy());
-            instantiation.addStrategy(new MethodBeanInstantiationStrategy());
-            instantiation.addStrategy(new ObjectFactoryBeanInstantiationStrategy());
-        }
+        DependencyResolver dependencyResolver = new DefaultDependencyResolver();
+
+        BeanInstantiationFactory instantiation = (BeanInstantiationFactory) factory;
+        instantiation.addStrategy(new ConstructorBeanInstantiationStrategy() {{
+            setDependencyResolver(dependencyResolver);
+        }});
+        instantiation.addStrategy(new MethodBeanInstantiationStrategy() {{
+            setDependencyResolver(dependencyResolver);
+        }});
+        instantiation.addStrategy(new ObjectFactoryBeanInstantiationStrategy());
 
         context.setBeanFactory(factory);
     }
