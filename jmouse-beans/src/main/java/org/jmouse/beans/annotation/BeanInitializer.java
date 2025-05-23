@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates a method that should be called after a structured is constructed,
+ * Indicates a method that should be called after a bean is constructed,
  * typically for performing custom initialization logic.
  * <p>
  * Example usage:

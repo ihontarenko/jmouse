@@ -13,7 +13,7 @@ import java.util.List;
  * DirectAccess implementation of {@link BeanNameResolver}.
  * <p>
  * This class manages a list of {@link BeanNameStrategy} instances and uses them to resolve
- * structured names based on annotated elements. Strategies are evaluated in the order they are
+ * bean names based on annotated elements. Strategies are evaluated in the order they are
  * added, and the first matching strategy is used to resolve the name.
  * </p>
  */
@@ -22,7 +22,7 @@ public class DefaultBeanNameResolver implements BeanNameResolver {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultBeanNameResolver.class);
 
     /**
-     * List of registered {@link BeanNameStrategy} instances used for resolving structured names.
+     * List of registered {@link BeanNameStrategy} instances used for resolving bean names.
      */
     private final List<BeanNameStrategy> strategies = new ArrayList<>();
 
@@ -42,14 +42,14 @@ public class DefaultBeanNameResolver implements BeanNameResolver {
     }
 
     /**
-     * Resolves the name of a structured based on the provided annotated element.
+     * Resolves the name of a bean based on the provided annotated element.
      * <p>
      * The method iterates through all registered strategies and uses the first one
-     * that supports the given element to resolve the structured name.
+     * that supports the given element to resolve the bean name.
      * </p>
      *
-     * @param element the annotated element representing the structured (e.g., class, method).
-     * @return the resolved structured name.
+     * @param element the annotated element representing the bean (e.g., class, method).
+     * @return the resolved bean name.
      * @throws BeanNameException if no strategy supports the given element.
      */
     @Override
@@ -64,7 +64,7 @@ public class DefaultBeanNameResolver implements BeanNameResolver {
         }
 
         if (beanName == null) {
-            throw new BeanNameException("Failed to resolve structured name for '%s' element".formatted(element));
+            throw new BeanNameException("Failed to resolve bean name for '%s' element".formatted(element));
         }
 
         return beanName;

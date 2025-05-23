@@ -16,10 +16,10 @@ import static org.jmouse.core.reflection.TypeMatchers.implementsGenericInterface
 
 /**
  * A simple implementation of the {@link BeanDefinitionFactory} that uses a list of strategies
- * to create structured definitions.
+ * to create bean definitions.
  * <p>
  * This factory supports the registration of custom {@link BeanDefinitionCreationStrategy} instances,
- * which are used to process different types of objects and generate structured definitions.
+ * which are used to process different types of objects and generate bean definitions.
  */
 public class SimpleBeanDefinitionFactory implements BeanDefinitionFactory {
 
@@ -42,16 +42,16 @@ public class SimpleBeanDefinitionFactory implements BeanDefinitionFactory {
     }
 
     /**
-     * Creates a {@link BeanDefinition} for the given structured using the registered strategies.
+     * Creates a {@link BeanDefinition} for the given bean using the registered strategies.
      * <p>
-     * If a preferred name is provided, it is passed to the strategy for naming the structured definition.
-     * The factory iterates over its strategies to find a suitable one that supports the given structured.
+     * If a preferred name is provided, it is passed to the strategy for naming the bean definition.
+     * The factory iterates over its strategies to find a suitable one that supports the given bean.
      * If no suitable strategy is found, a {@link BeanDefinitionException} is thrown.
      * <p>
-     * If the created structured definition does not specify a scope, it defaults to {@link BeanScope#SINGLETON}.
+     * If the created bean definition does not specify a scope, it defaults to {@link BeanScope#SINGLETON}.
      *
-     * @param preferredName the preferred name for the structured, or {@code null} to use the default naming strategy.
-     * @param object        the structured for which to create the structured definition.
+     * @param preferredName the preferred name for the bean, or {@code null} to use the default naming strategy.
+     * @param object        the bean for which to create the bean definition.
      * @param context       the {@link BeanContext} used during creation.
      * @return the created {@link BeanDefinition}.
      * @throws BeanDefinitionException if no suitable strategy is found.
@@ -61,7 +61,7 @@ public class SimpleBeanDefinitionFactory implements BeanDefinitionFactory {
         BeanDefinition definition = null;
 
         if (object == null) {
-            LOGGER.error("Bean definition creation skipped: input structured is NULL.");
+            LOGGER.error("Bean definition creation skipped: input bean is NULL.");
             return definition;
         }
 
@@ -84,14 +84,14 @@ public class SimpleBeanDefinitionFactory implements BeanDefinitionFactory {
                 definition = preferredName == null
                         ? typedStrategy.create(object, context) : typedStrategy.create(preferredName, object, context);
 
-                LOGGER.info("Definition structured '{}' created. With: '{}'.",definition.getBeanName(),
+                LOGGER.info("Definition bean '{}' created. With: '{}'.",definition.getBeanName(),
                             getShortName(strategy.getClass()));
             }
         }
 
         if (definition == null) {
             throw new BeanDefinitionException(
-                    "No strategy found to create a structured definition for the structured type '%s' and preferred name '%s'."
+                    "No strategy found to create a bean definition for the bean type '%s' and preferred name '%s'."
                             .formatted(objectClass, preferredName));
         }
 

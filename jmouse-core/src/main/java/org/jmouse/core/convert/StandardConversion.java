@@ -106,6 +106,27 @@ public class StandardConversion implements Conversion {
     }
 
     /**
+     * Attempts to locate a {@link GenericConverter} by exploring compatible
+     * source and target types based on the provided {@link ClassPair}.
+     * <p>
+     * This method delegates to {@link #getConverter(ClassPair)} after
+     * identifying a concrete pair of types through {@code searchPossibleCandidate}.
+     * It is commonly invoked by higher‐level lookup methods that accept
+     * source and target classes separately.
+     * </p>
+     *
+     * @param <S>       the source type parameter
+     * @param <T>       the target type parameter
+     * @param classPair a {@link ClassPair} encapsulating the source and
+     *                  target types to search for
+     * @return a compatible {@link GenericConverter} if found, or {@code null}
+     */
+    @Override
+    public <S, T> GenericConverter<S, T> findConverter(ClassPair classPair) {
+        return getConverter(searchPossibleCandidate(classPair.classA(), classPair.classB()));
+    }
+
+    /**
      * Converts the given {@code source} structured from type {@code T} to type {@code R} using a registered converter.
      * <p>
      * The method first looks up a converter based on the source and target types. If a converter is found,

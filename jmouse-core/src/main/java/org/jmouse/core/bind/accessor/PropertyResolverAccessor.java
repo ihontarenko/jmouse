@@ -1,6 +1,7 @@
 package org.jmouse.core.bind.accessor;
 
 import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.ObjectAccessorWrapper;
 import org.jmouse.core.bind.UnsupportedOperationException;
 import org.jmouse.core.env.MapPropertySource;
 import org.jmouse.core.env.PropertyResolver;
@@ -12,9 +13,9 @@ import java.util.Map;
  * A {@link ObjectAccessor} implementation that wraps a {@link PropertyResolver},
  * converting its properties into a hierarchical structure.
  */
-public class PropertyResolverAccessor implements ObjectAccessor {
+public class PropertyResolverAccessor implements ObjectAccessor, ObjectAccessorWrapper.Aware {
 
-    private final MapAccessor delegate;
+    private final MapAccessor           delegate;
 
     /**
      * Creates a new {@link PropertyResolverAccessor} by extracting properties
@@ -112,5 +113,25 @@ public class PropertyResolverAccessor implements ObjectAccessor {
     @Override
     public void set(int index, Object value) {
         delegate.set(index, value);
+    }
+
+    /**
+     * Sets the ObjectAccessorWrapper.
+     *
+     * @param wrapper the factory to set
+     */
+    @Override
+    public void setWrapper(ObjectAccessorWrapper wrapper) {
+        this.delegate.setWrapper(wrapper);;
+    }
+
+    /**
+     * Returns the ObjectAccessorWrapper.
+     *
+     * @return the ObjectAccessorWrapper
+     */
+    @Override
+    public ObjectAccessorWrapper getWrapper() {
+        return delegate.getWrapper();
     }
 }

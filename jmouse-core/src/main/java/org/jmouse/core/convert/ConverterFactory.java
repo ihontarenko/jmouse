@@ -115,6 +115,24 @@ public interface ConverterFactory {
     <S, T> GenericConverter<S, T> getConverter(ClassPair classPair);
 
     /**
+     * Attempts to locate a {@link GenericConverter} by exploring compatible
+     * source and target types based on the provided {@link ClassPair}.
+     * <p>
+     * This method delegates to {@link #getConverter(ClassPair)} after
+     * identifying a concrete pair of types through {@code searchPossibleCandidate}.
+     * It is commonly invoked by higher‐level lookup methods that accept
+     * source and target classes separately.
+     * </p>
+     *
+     * @param <S>       the source type parameter
+     * @param <T>       the target type parameter
+     * @param classPair a {@link ClassPair} encapsulating the source and
+     *                  target types to search for
+     * @return a compatible {@link GenericConverter} if found, or {@code null}
+     */
+    <S, T> GenericConverter<S, T> findConverter(ClassPair classPair);
+
+    /**
      * Searches for a transition chain that allows conversion from {@code sourceType} to {@code targetType}
      * using intermediate conversion steps. If a direct conversion is not available, this method
      * attempts to construct a path of conversions that ultimately leads to the desired type.

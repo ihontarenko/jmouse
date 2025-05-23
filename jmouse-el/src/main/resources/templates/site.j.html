@@ -92,4 +92,8 @@
     {% for i in (1..100)|filter(n -> n % 8 == 0) %}
         Index: {{ i }}<br>
     {% endfor %}
+<hr>
+    {% for i in 1..64 %}
+    Value: {{ 2|bigInt ** i }}<br>
+    {% endfor %}
 {% endblock %}

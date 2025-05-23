@@ -35,7 +35,7 @@ public class StandardPropertyResolver extends AbstractPropertyResolver {
         if (value != null) {
             ClassPair pair = ClassPair.of(value.getClass(), targetType);
             if (conversion.hasConverter(pair)) {
-                value = conversion.convert(value, targetType);
+                value = conversion.findConverter(pair).convert(value, (Class<Object>) targetType);
             }
         }
 

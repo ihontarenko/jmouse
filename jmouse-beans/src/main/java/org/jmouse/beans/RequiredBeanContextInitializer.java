@@ -47,7 +47,7 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
         registerDefaultPostProcessors(context);
 
         // Self-referencing registration
-        LOGGER.info("Self referencing: Bean type '{}' -> Bean structured '{}'",
+        LOGGER.info("Self referencing: Bean type '{}' -> Bean bean '{}'",
                     getShortName(BeanContext.class), getShortName(context.getClass()));
         context.registerBean(context.getClass(), context);
         context.registerBean(ProxyFactory.class, new AnnotationProxyFactory(context.getBaseClasses()));
@@ -68,7 +68,7 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
     }
 
     /**
-     * Registers default structured post-processors.
+     * Registers default bean post-processors.
      *
      * @param context the {@link BeanContext} to configure.
      */
@@ -87,7 +87,7 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
     private void registerDefaultBeanFactory(BeanContext context) {
         BeanFactory factory = new DefaultBeanFactory();
 
-        LOGGER.info("Initialize default structured factory");
+        LOGGER.info("Initialize default bean factory");
 
         if (factory instanceof BeanContextAware contextAware) {
             contextAware.setBeanContext(context);
@@ -110,7 +110,7 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
     private void registerDefaultBeanNameResolver(BeanContext context) {
         BeanNameResolver resolver = new DefaultBeanNameResolver();
 
-        LOGGER.info("Initialize new structured name resolver");
+        LOGGER.info("Initialize new bean name resolver");
 
         resolver.addStrategy(new AnnotationBeanNameStrategy());
 
@@ -125,7 +125,7 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
     private void registerDefaultBeanDefinitionFactory(BeanContext context) {
         BeanDefinitionFactory factory = new SimpleBeanDefinitionFactory();
 
-        LOGGER.info("Initialize new structured definition factory");
+        LOGGER.info("Initialize new bean definition factory");
 
         factory.addStrategy(new ConstructorBeanDefinitionCreationStrategy());
         factory.addStrategy(new MethodBeanDefinitionCreationStrategy());

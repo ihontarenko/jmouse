@@ -3,7 +3,7 @@ package org.jmouse.beans;
 import org.jmouse.beans.definition.BeanDefinition;
 
 /**
- * Interface representing a factory for creating structured instances.
+ * Interface representing a factory for creating bean instances.
  * <p>
  * A {@code BeanFactory} is responsible for creating objects based on
  * their {@link BeanDefinition}, resolving their dependencies, and managing
@@ -11,7 +11,7 @@ import org.jmouse.beans.definition.BeanDefinition;
  * </p>
  * <p>
  * This interface is typically used by a {@link BeanContext} to delegate
- * the creation of structured instances.
+ * the creation of bean instances.
  * </p>
  *
  * @see BeanDefinition
@@ -20,16 +20,16 @@ import org.jmouse.beans.definition.BeanDefinition;
 public interface BeanFactory {
 
     /**
-     * Creates a new instance of a structured based on the provided {@link BeanDefinition}.
+     * Creates a new instance of a bean based on the provided {@link BeanDefinition}.
      * <p>
      * The factory uses the information in the {@code BeanDefinition} to determine
-     * how to construct the structured, resolve its dependencies, and initialize it.
+     * how to construct the bean, resolve its dependencies, and initialize it.
      * </p>
      *
-     * @param definition the structured definition containing descriptor about the structured
-     * @param <T>        the type of the structured
-     * @return the newly created structured instance
-     * @throws BeanInstantiationException if the structured cannot be created due to errors
+     * @param definition the bean definition containing descriptor about the bean
+     * @param <T>        the type of the bean
+     * @return the newly created bean instance
+     * @throws BeanInstantiationException if the bean cannot be created due to errors
      *                                    in the definition or during dependency resolution
      */
     <T> T createBean(BeanDefinition definition);

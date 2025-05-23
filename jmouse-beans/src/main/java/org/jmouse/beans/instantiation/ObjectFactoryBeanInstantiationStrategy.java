@@ -9,17 +9,17 @@ import org.jmouse.beans.definition.ObjectFactoryBeanDefinition;
 
 /**
  * A {@link BeanInstantiationStrategy} implementation for beans defined by an {@link ObjectFactory}.
- * This strategy creates structured instances using the provided {@link ObjectFactory}.
+ * This strategy creates bean instances using the provided {@link ObjectFactory}.
  */
 public class ObjectFactoryBeanInstantiationStrategy extends AbstractBeanInstantiationStrategy {
 
     /**
-     * Creates a structured instance using the {@link ObjectFactory} provided in the {@link ObjectFactoryBeanDefinition}.
+     * Creates a bean instance using the {@link ObjectFactory} provided in the {@link ObjectFactoryBeanDefinition}.
      *
-     * @param definition the structured definition containing the {@link ObjectFactory}.
-     * @param context    the {@link BeanContext} in which the structured is being created.
-     * @return the created structured instance.
-     * @throws BeanInstantiationException if the {@link ObjectFactory} is null or fails to produce an structured.
+     * @param definition the bean definition containing the {@link ObjectFactory}.
+     * @param context    the {@link BeanContext} in which the bean is being created.
+     * @return the created bean instance.
+     * @throws BeanInstantiationException if the {@link ObjectFactory} is null or fails to produce an bean.
      */
     @Override
     public Object create(BeanDefinition definition, BeanContext context) {
@@ -27,7 +27,7 @@ public class ObjectFactoryBeanInstantiationStrategy extends AbstractBeanInstanti
 
         if (objectFactory == null) {
             throw new BeanInstantiationException(
-                    "Bean instantiation failed because structured-factory is required to produce a non-null structured.");
+                    "Bean instantiation failed because bean-factory is required to produce a non-null bean.");
         }
 
         return objectFactory.createObject();
@@ -38,7 +38,7 @@ public class ObjectFactoryBeanInstantiationStrategy extends AbstractBeanInstanti
      * <p>
      * This strategy supports definitions with an instantiation type of {@link BeanInstantiationType#OBJECT_FACTORY}.
      *
-     * @param definition the structured definition to evaluate
+     * @param definition the bean definition to evaluate
      * @return {@code true} if the definition is supported, otherwise {@code false}
      */
     @Override

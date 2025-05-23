@@ -3,6 +3,7 @@ package org.jmouse.core.bind.accessor;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.ObjectAccessorProvider;
 import org.jmouse.core.reflection.TypeInformation;
+import org.jmouse.util.Priority;
 
 /**
  * An {@link ObjectAccessorProvider} implementation that supports Java Bean objects.
@@ -12,6 +13,7 @@ import org.jmouse.core.reflection.TypeInformation;
  * instance (specifically, a {@link JavaBeanAccessor}).
  * </p>
  */
+@Priority(-2000)
 public class JavaBeanAccessorProvider implements ObjectAccessorProvider {
 
     /**

@@ -23,7 +23,7 @@ public class ConcurrentHashMapBeanContainerRegistry implements BeanContainerRegi
      * A mapping of {@link Scope} to their respective {@link BeanContainer}.
      * <p>
      * This map is used to dynamically associate scopes with their corresponding
-     * containers, allowing for flexible management of structured instances based on scope.
+     * containers, allowing for flexible management of bean instances based on scope.
      * </p>
      */
     private final Map<Scope, BeanContainer> containers = new ConcurrentHashMap<>();
@@ -77,7 +77,7 @@ public class ConcurrentHashMapBeanContainerRegistry implements BeanContainerRegi
     /**
      * Checks if a {@link BeanContainer} is registered for the specified {@link Scope}.
      *
-     * @param scope the scope to check for a registered structured container.
+     * @param scope the scope to check for a registered bean container.
      * @return {@code true} if a container is registered for the given scope, {@code false} otherwise.
      * @throws IllegalArgumentException if the scope is {@code null}.
      */

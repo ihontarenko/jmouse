@@ -17,8 +17,8 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * A {@link BeanPostProcessor} implementation for injecting dependencies into fields
  * annotated with {@link Dependency}.
  * <p>
- * This processor scans the structured's class for fields annotated with {@link Dependency},
- * retrieves the corresponding structured instance from the {@link BeanContext}, and injects
+ * This processor scans the bean's class for fields annotated with {@link Dependency},
+ * retrieves the corresponding bean instance from the {@link BeanContext}, and injects
  * it into the annotated field.
  * </p>
  *
@@ -33,13 +33,13 @@ public class InjectDependencyBeanPostProcessor implements BeanPostProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(InjectDependencyBeanPostProcessor.class);
 
     /**
-     * Processes the given structured instance before initialization by injecting dependencies
+     * Processes the given bean instance before initialization by injecting dependencies
      * into fields annotated with {@link Dependency}.
      *
-     * @param bean       the structured instance to process.
-     * @param definition the {@link BeanDefinition} associated with the structured.
+     * @param bean       the bean instance to process.
+     * @param definition the {@link BeanDefinition} associated with the bean.
      * @param context    the {@link BeanContext} for retrieving dependencies.
-     * @return the processed structured instance with dependencies injected.
+     * @return the processed bean instance with dependencies injected.
      */
     @Override
     public Object postProcessBeforeInitialize(Object bean, BeanDefinition definition, BeanContext context) {

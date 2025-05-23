@@ -3,7 +3,7 @@ package org.jmouse.beans;
 import org.jmouse.core.reflection.Reflections;
 
 /**
- * Exception thrown when an unsupported {@link Scope} is encountered in a structured context or container.
+ * Exception thrown when an unsupported {@link Scope} is encountered in a bean context or container.
  * <p>
  * This exception is typically used to indicate that the current implementation
  * does not support the specified scope.
@@ -19,7 +19,7 @@ public class UnsupportedScopeException extends RuntimeException {
      * @param caller the class where the exception occurred.
      */
     public UnsupportedScopeException(Scope scope, Class<?> caller) {
-        this("Unsupported structured scope '%s' detected in context '%s'."
+        this("Unsupported bean scope '%s' detected in context '%s'."
                      .formatted(scope.name(), Reflections.getShortName(caller)));
     }
 

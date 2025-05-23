@@ -30,7 +30,7 @@ import java.util.List;
 public abstract class AbstractBeanInstantiationStrategy implements BeanInstantiationStrategy {
 
     /**
-     * Resolves a list of {@link BeanDependency} instances into actual structured objects
+     * Resolves a list of {@link BeanDependency} instances into actual bean objects
      * by querying the provided {@link BeanContext}.
      *
      * @param dependencies a list of dependencies to resolve

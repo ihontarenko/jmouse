@@ -2,7 +2,7 @@ package org.jmouse.beans.definition;
 
 /**
  * A simple implementation of the {@link BeanDependency} interface.
- * Represents a dependency required by a structured, defined by its type and optional name.
+ * Represents a dependency required by a bean, defined by its type and optional name.
  *
  * <p>Example usage:
  * <pre>{@code

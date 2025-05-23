@@ -8,7 +8,7 @@ import java.util.List;
 
 
 /**
- * Represents the parser interface for managing the structured lifecycle, definitions, containers,
+ * Represents the parser interface for managing the bean lifecycle, definitions, containers,
  * and scope resolution within the application context.
  *
  * @see BeanContainer
@@ -24,7 +24,7 @@ public interface BeanContext extends BeanContainer, BeanContainerRegistry,
      * Sets the base classes to be scanned and processed by this context.
      * <p>
      * These classes are used to detect annotations, definitions, and additional context information
-     * necessary for structured registration and initialization.
+     * necessary for bean registration and initialization.
      * </p>
      *
      * @param baseClasses the array of base classes to be set.
@@ -42,7 +42,7 @@ public interface BeanContext extends BeanContainer, BeanContainerRegistry,
      * Retrieves the names of all beans that match the specified type.
      *
      * @param type the class type of the beans.
-     * @return a list of structured names that match the given type.
+     * @return a list of bean names that match the given type.
      */
     List<String> getBeanNames(Class<?> type);
 
@@ -58,42 +58,42 @@ public interface BeanContext extends BeanContainer, BeanContainerRegistry,
     /**
      * Retrieves the current {@link BeanFactory}.
      *
-     * @return the associated structured factory.
+     * @return the associated bean factory.
      */
     BeanFactory getBeanFactory();
 
     /**
      * Retrieves the current {@link BeanDefinitionFactory}.
      *
-     * @return the associated structured definition factory.
+     * @return the associated bean definition factory.
      */
     BeanDefinitionFactory getBeanDefinitionFactory();
 
     /**
      * Sets the {@link BeanDefinitionFactory} for this context.
      *
-     * @param definitionFactory the structured definition factory to set.
+     * @param definitionFactory the bean definition factory to set.
      */
     void setBeanDefinitionFactory(BeanDefinitionFactory definitionFactory);
 
     /**
      * Retrieves the current {@link BeanNameResolver}.
      *
-     * @return the associated structured name resolver.
+     * @return the associated bean name resolver.
      */
     BeanNameResolver getNameResolver();
 
     /**
      * Sets the {@link BeanFactory} for this context.
      *
-     * @param beanFactory the structured factory to set.
+     * @param beanFactory the bean factory to set.
      */
     void setBeanFactory(BeanFactory beanFactory);
 
     /**
      * Sets the {@link BeanNameResolver} for this context.
      *
-     * @param nameResolver the structured name resolver to set.
+     * @param nameResolver the bean name resolver to set.
      */
     void setNameResolver(BeanNameResolver nameResolver);
 
@@ -115,14 +115,14 @@ public interface BeanContext extends BeanContainer, BeanContainerRegistry,
     void setBeanContainerRegistry(BeanContainerRegistry containerRegistry);
 
     /**
-     * Sets the parent context for this structured context.
+     * Sets the parent context for this bean context.
      *
      * @param parent the parent {@link BeanContext}.
      */
     void setParentContext(BeanContext parent);
 
     /**
-     * Retrieves the parent context of this structured context.
+     * Retrieves the parent context of this bean context.
      *
      * @return the parent {@link BeanContext}.
      */

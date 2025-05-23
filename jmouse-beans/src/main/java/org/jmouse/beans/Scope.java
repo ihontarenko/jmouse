@@ -1,7 +1,7 @@
 package org.jmouse.beans;
 
 /**
- * Interface representing a generic scope for managing structured lifecycles in the container.
+ * Interface representing a generic scope for managing bean lifecycles in the container.
  * <p>
  * Scopes define the lifecycle and sharing behavior of beans, such as whether they are
  * singletons, prototypes, or specific to certain contexts like HTTP requests or sessions.

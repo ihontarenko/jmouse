@@ -1,10 +1,10 @@
 package org.jmouse.beans.definition;
 
 /**
- * Represents a dependency required by a structured.
+ * Represents a dependency required by a bean.
  * <p>
  * A {@code BeanDependency} defines the type and optional name of the dependency,
- * which can be used to resolve it in a structured container.
+ * which can be used to resolve it in a bean container.
  *
  * <p>Example usage:
  * <pre>{@code

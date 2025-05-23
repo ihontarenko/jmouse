@@ -10,17 +10,17 @@ import org.jmouse.beans.definition.ObjectFactoryBeanDefinition;
 /**
  * A strategy for creating {@link BeanDefinition} instances from {@link ObjectFactory} objects.
  * <p>
- * This strategy supports creating structured definitions where the structured instance is provided by a factory.
- * The default structured scope for such definitions is {@link BeanScope#PROTOTYPE}.
+ * This strategy supports creating bean definitions where the bean instance is provided by a factory.
+ * The default bean scope for such definitions is {@link BeanScope#PROTOTYPE}.
  */
 public class ObjectFactoryBeanDefinitionCreationStrategy implements BeanDefinitionCreationStrategy<ObjectFactory<Object>> {
 
     /**
-     * Determines if this strategy supports the provided structured.
+     * Determines if this strategy supports the provided bean.
      * <p>
-     * Currently, this strategy does not support implicit structured definition creation from arbitrary objects.
+     * Currently, this strategy does not support implicit bean definition creation from arbitrary objects.
      *
-     * @param object the structured to check.
+     * @param object the bean to check.
      * @return {@code false}, as only named factories are supported.
      */
     @Override
@@ -29,26 +29,26 @@ public class ObjectFactoryBeanDefinitionCreationStrategy implements BeanDefiniti
     }
 
     /**
-     * Unsupported operation for creating a structured definition without an explicit name.
+     * Unsupported operation for creating a bean definition without an explicit name.
      *
-     * @param object  the factory structured.
-     * @param context the structured context.
+     * @param object  the factory bean.
+     * @param context the bean context.
      * @return nothing, as this operation always throws an exception.
      * @throws BeanContextException indicating that this operation is unsupported.
      */
     @Override
     public BeanDefinition create(ObjectFactory<Object> object, BeanContext context) {
-        throw new BeanContextException("Unsupported structured definition creation without explicit structured name");
+        throw new BeanContextException("Unsupported bean definition creation without explicit bean name");
     }
 
     /**
-     * Creates a {@link BeanDefinition} from the given {@link ObjectFactory} and an explicit structured name.
+     * Creates a {@link BeanDefinition} from the given {@link ObjectFactory} and an explicit bean name.
      * <p>
-     * The structured scope for definitions created by this strategy is set to {@link BeanScope#PROTOTYPE}.
+     * The bean scope for definitions created by this strategy is set to {@link BeanScope#PROTOTYPE}.
      *
-     * @param name    the name of the structured.
-     * @param object  the factory structured providing the structured instance.
-     * @param context the structured context.
+     * @param name    the name of the bean.
+     * @param object  the factory bean providing the bean instance.
+     * @param context the bean context.
      * @return the created {@link BeanDefinition}.
      */
     @Override

@@ -15,7 +15,7 @@ import java.util.List;
  * A strategy for instantiating beans using factory methods.
  * <p>
  * This strategy resolves dependencies for the factory method's parameters,
- * retrieves or creates the factory structured, and invokes the method to create the structured.
+ * retrieves or creates the factory bean, and invokes the method to create the bean.
  * <p>
  * Example usage:
  * <pre>{@code
@@ -31,15 +31,15 @@ import java.util.List;
 public class MethodBeanInstantiationStrategy extends AbstractBeanInstantiationStrategy {
 
     /**
-     * Creates a structured instance using a factory method specified in the {@link MethodBeanDefinition}.
+     * Creates a bean instance using a factory method specified in the {@link MethodBeanDefinition}.
      * <p>
      * This method resolves dependencies required for the factory method, retrieves or creates
-     * the factory structured, and invokes the method to create the structured.
+     * the factory bean, and invokes the method to create the bean.
      *
-     * @param definition the structured definition describing how the structured should be created
+     * @param definition the bean definition describing how the bean should be created
      * @param context    the {@link BeanContext} for resolving dependencies and factory objects
-     * @return the instantiated structured structured
-     * @throws BeanInstantiationException if dependency resolution, factory structured retrieval,
+     * @return the instantiated bean bean
+     * @throws BeanInstantiationException if dependency resolution, factory bean retrieval,
      *                                    or method invocation fails
      */
     @Override
@@ -56,7 +56,7 @@ public class MethodBeanInstantiationStrategy extends AbstractBeanInstantiationSt
                 arguments = resolveDependencies(dependencies, context);
             } catch (Exception exception) {
                 throw new BeanInstantiationException(
-                        "Failed to create structured via method strategy for structured type: %s"
+                        "Failed to create bean via method strategy for bean type: %s"
                                 .formatted(definition.getBeanClass()), exception);
             }
         }
@@ -65,14 +65,14 @@ public class MethodBeanInstantiationStrategy extends AbstractBeanInstantiationSt
     }
 
     /**
-     * Resolves or retrieves the factory structured for the given {@link MethodBeanDefinition}.
+     * Resolves or retrieves the factory bean for the given {@link MethodBeanDefinition}.
      * <p>
-     * If the factory structured is not explicitly set, it is retrieved from the parent structured definition
+     * If the factory bean is not explicitly set, it is retrieved from the parent bean definition
      * in the {@link BeanContext}.
      *
-     * @param definition the method-based structured definition
-     * @param context    the {@link BeanContext} to resolve the factory structured
-     * @return the factory structured to invoke the method on
+     * @param definition the method-based bean definition
+     * @param context    the {@link BeanContext} to resolve the factory bean
+     * @return the factory bean to invoke the method on
      */
     private Object resolveFactoryBean(MethodBeanDefinition definition, BeanContext context) {
         Object factoryBean = definition.getFactoryObject();
@@ -82,7 +82,7 @@ public class MethodBeanInstantiationStrategy extends AbstractBeanInstantiationSt
 
             factoryBean = context.getBean(parent.getBeanName());
 
-            // Set the resolved factory structured for all child definitions of the parent
+            // Set the resolved factory bean for all child definitions of the parent
             for (BeanDefinition childDefinition : parent.getChildrenDefinitions()) {
                 if (childDefinition instanceof MethodBeanDefinition methodBeanDefinition) {
                     methodBeanDefinition.setFactoryObject(factoryBean);
@@ -98,7 +98,7 @@ public class MethodBeanInstantiationStrategy extends AbstractBeanInstantiationSt
      * <p>
      * This strategy supports definitions with an instantiation type of {@link BeanInstantiationType#FACTORY_METHOD}.
      *
-     * @param definition the structured definition to evaluate
+     * @param definition the bean definition to evaluate
      * @return {@code true} if the definition is supported, otherwise {@code false}
      */
     @Override

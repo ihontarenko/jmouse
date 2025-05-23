@@ -15,16 +15,16 @@ import java.util.Set;
 /**
  * A strategy for creating {@link MethodBeanDefinition} instances from {@link Method} elements.
  * <p>
- * This strategy processes methods annotated with specific annotations to create structured definitions
- * and resolve dependencies required for method-based structured instantiation.
+ * This strategy processes methods annotated with specific annotations to create bean definitions
+ * and resolve dependencies required for method-based bean instantiation.
  */
 public class MethodBeanDefinitionCreationStrategy extends AbstractBeanDefinitionCreationStrategy<Method> {
 
     /**
-     * Creates a {@link BeanDefinition} with a specified name from the provided structured.
+     * Creates a {@link BeanDefinition} with a specified name from the provided bean.
      *
-     * @param name    the name of the structured.
-     * @param method  the structured from which the structured definition is created.
+     * @param name    the name of the bean.
+     * @param method  the bean from which the bean definition is created.
      * @param context the {@link BeanContext} used during creation.
      * @return the created {@link BeanDefinition}.
      */
@@ -56,11 +56,11 @@ public class MethodBeanDefinitionCreationStrategy extends AbstractBeanDefinition
     /**
      * Updates the parent definition for the given method-based definition.
      * <p>
-     * Ensures that the declaring class of the method is also registered as a structured definition.
+     * Ensures that the declaring class of the method is also registered as a bean definition.
      * If it doesn't exist, a new definition is created via the {@link BeanDefinitionFactory}.
      * Then links the method-based definition as a child of that parent definition.
      *
-     * @param definition the method-based structured definition
+     * @param definition the method-based bean definition
      * @param context    the {@link BeanContext} in which the parent resides
      */
     public void updateParentDefinition(MethodBeanDefinition definition, BeanContext context) {
@@ -83,10 +83,10 @@ public class MethodBeanDefinitionCreationStrategy extends AbstractBeanDefinition
     }
 
     /**
-     * Determines if this strategy supports the provided structured.
+     * Determines if this strategy supports the provided bean.
      *
-     * @param object the structured to check.
-     * @return {@code true} if the strategy supports the structured, {@code false} otherwise.
+     * @param object the bean to check.
+     * @return {@code true} if the strategy supports the bean, {@code false} otherwise.
      */
     @Override
     public boolean supports(Object object) {

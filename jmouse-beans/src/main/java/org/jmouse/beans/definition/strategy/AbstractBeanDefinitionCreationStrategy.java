@@ -17,8 +17,8 @@ import java.util.List;
 /**
  * An abstract base class for creating {@link BeanDefinition} objects from annotated elements.
  * <p>
- * This class provides utility methods for resolving dependencies, updating structured lifecycle,
- * and generating structured definitions based on annotations and parameters.
+ * This class provides utility methods for resolving dependencies, updating bean lifecycle,
+ * and generating bean definitions based on annotations and parameters.
  *
  * @param <T> the type of the annotated element (e.g., {@link java.lang.Class}, {@link java.lang.reflect.Method})
  */
@@ -43,7 +43,7 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
     }
 
     /**
-     * Creates structured dependencies for the given array of parameters.
+     * Creates bean dependencies for the given array of parameters.
      * Each parameter is converted into a {@link BeanDependency} using {@link #createDependency(Parameter)}.
      *
      * @param dependencies the list in which to store the created dependencies
@@ -75,10 +75,10 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
     }
 
     /**
-     * Updates the structured definition by inspecting the {@link Provide} annotation on the provided element.
+     * Updates the bean definition by inspecting the {@link Provide} annotation on the provided element.
      * If present, the annotation's scope value is assigned to the {@code definition}.
      *
-     * @param definition the structured definition to update
+     * @param definition the bean definition to update
      * @param element    the annotated element (class or method) that may hold the {@link Provide} annotation
      */
     protected void updateBeanDefinition(BeanDefinition definition, AnnotatedElement element) {
@@ -89,10 +89,10 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
     }
 
     /**
-     * Determines if this strategy supports the provided structured.
+     * Determines if this strategy supports the provided bean.
      *
-     * @param object the structured to check.
-     * @return {@code true} if the strategy supports the structured, {@code false} otherwise.
+     * @param object the bean to check.
+     * @return {@code true} if the strategy supports the bean, {@code false} otherwise.
      */
     @Override
     public boolean supports(Object object) {

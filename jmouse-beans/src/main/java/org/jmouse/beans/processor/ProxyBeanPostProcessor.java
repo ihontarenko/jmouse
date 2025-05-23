@@ -12,8 +12,8 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
 /**
  * A {@link BeanPostProcessor} implementation that handles proxy-related logic for beans.
  * <p>
- * This processor checks if a structured definition is marked as proxied and logs information
- * about the proxied structured during the initialization phase. It can be extended in the future
+ * This processor checks if a bean definition is marked as proxied and logs information
+ * about the proxied bean during the initialization phase. It can be extended in the future
  * to apply proxying logic dynamically.
  * </p>
  *
@@ -24,16 +24,16 @@ public class ProxyBeanPostProcessor implements BeanPostProcessor {
     private final static Logger LOGGER = LoggerFactory.getLogger(ProxyBeanPostProcessor.class);
 
     /**
-     * Processes a structured before its initialization.
+     * Processes a bean before its initialization.
      * <p>
-     * If the structured's definition is marked as proxied, logs the structured's name and type.
-     * The current implementation returns the original structured without applying any proxy logic.
+     * If the bean's definition is marked as proxied, logs the bean's name and type.
+     * The current implementation returns the original bean without applying any proxy logic.
      * </p>
      *
-     * @param bean       the original structured instance
-     * @param definition the structured's definition descriptor
+     * @param bean       the original bean instance
+     * @param definition the bean's definition descriptor
      * @param context    the current {@link BeanContext}
-     * @return the structured instance (proxy or original)
+     * @return the bean instance (proxy or original)
      */
     @Override
     public Object postProcessBeforeInitialize(Object bean, BeanDefinition definition, BeanContext context) {
@@ -43,11 +43,11 @@ public class ProxyBeanPostProcessor implements BeanPostProcessor {
             ProxyFactory proxyFactory = context.getBean(ProxyFactory.class);
             Class<?>[]   ifaces       = Reflections.getClassInterfaces(bean.getClass());
             if (ifaces.length > 0) {
-                LOGGER.info("Proxied structured '{}' of type '{}'",
+                LOGGER.info("Proxied bean '{}' of type '{}'",
                         definition.getBeanName(), getShortName(definition.getBeanClass()));
                 proxy = proxyFactory.createProxy(bean);
             } else {
-                LOGGER.error("Bean '{}' cannot be proxied with JDK Proxy. Ensure the structured implements an interface.",
+                LOGGER.error("Bean '{}' cannot be proxied with JDK Proxy. Ensure the bean implements an interface.",
                         definition.getBeanName());
             }
         }

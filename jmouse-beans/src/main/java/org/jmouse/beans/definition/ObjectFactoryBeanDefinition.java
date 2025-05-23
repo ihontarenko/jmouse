@@ -6,7 +6,7 @@ import org.jmouse.beans.ObjectFactory;
 
 /**
  * A {@link BeanDefinition} implementation for beans created using an {@link ObjectFactory}.
- * Stores the factory and descriptor about the structured.
+ * Stores the factory and descriptor about the bean.
  */
 public class ObjectFactoryBeanDefinition extends AbstractBeanDefinition {
 
@@ -15,9 +15,9 @@ public class ObjectFactoryBeanDefinition extends AbstractBeanDefinition {
     /**
      * Constructs an {@link ObjectFactoryBeanDefinition}.
      *
-     * @param name          the name of the structured.
-     * @param type          the type of the structured.
-     * @param objectFactory the factory responsible for creating the structured.
+     * @param name          the name of the bean.
+     * @param type          the type of the bean.
+     * @param objectFactory the factory responsible for creating the bean.
      */
     public ObjectFactoryBeanDefinition(String name, Class<?> type, ObjectFactory<Object> objectFactory) {
         super(name, type);
@@ -27,7 +27,7 @@ public class ObjectFactoryBeanDefinition extends AbstractBeanDefinition {
     }
 
     /**
-     * Retrieves the creation type for this structured definition.
+     * Retrieves the creation type for this bean definition.
      *
      * @return {@link BeanInstantiationType#OBJECT_FACTORY}.
      */
@@ -37,18 +37,18 @@ public class ObjectFactoryBeanDefinition extends AbstractBeanDefinition {
     }
 
     /**
-     * Retrieves the {@link ObjectFactory} associated with this structured definition.
+     * Retrieves the {@link ObjectFactory} associated with this bean definition.
      *
-     * @return the structured factory.
+     * @return the bean factory.
      */
     public ObjectFactory<Object> getObjectFactory() {
         return objectFactory;
     }
 
     /**
-     * Returns a string representation of this structured definition.
+     * Returns a string representation of this bean definition.
      *
-     * @return a string representation including the name and type of the structured.
+     * @return a string representation including the name and type of the bean.
      */
     @Override
     public String toString() {
