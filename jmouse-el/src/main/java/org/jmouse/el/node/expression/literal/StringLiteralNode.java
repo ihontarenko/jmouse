@@ -1,5 +1,6 @@
 package org.jmouse.el.node.expression.literal;
 
+import org.jmouse.core.MimeParser;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.expression.LiteralNode;
 
@@ -28,9 +29,7 @@ public class StringLiteralNode extends LiteralNode<String> {
         String value = (String) super.evaluate(context);
 
         if (value != null && !value.isBlank() && value.length() >= 2) {
-            if (value.startsWith("'") || value.startsWith("\"")) {
-                value = value.substring(1, value.length() - 1);
-            }
+            value = MimeParser.unquote(value);
         }
 
         return value;
