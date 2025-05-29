@@ -4,7 +4,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanContextAware;
 import org.jmouse.web.initializer.ServletWebApplicationInitializer;
-import org.jmouse.web.servlet.initializer.FrameworkInitializer;
+import org.jmouse.web.servlet.initializer.jMouseServletContainerInitializer;
 import org.jmouse.web.server.WebServer;
 import org.jmouse.web.server.WebServerFactory;
 
@@ -37,7 +37,7 @@ public class TomcatWebServerFactory implements WebServerFactory, BeanContextAwar
         WebServer                    webServer  = new TomcatWebServer();
         // todo: need to add some properties reader or environment mechanism
         WebServer.Configurer<Tomcat> configurer = new TomcatWebServerConfigurer(8899,
-                new FrameworkInitializer(initializers));
+                new jMouseServletContainerInitializer(initializers));
 
         if (webServer.server() != null) {
             webServer.configure(configurer);

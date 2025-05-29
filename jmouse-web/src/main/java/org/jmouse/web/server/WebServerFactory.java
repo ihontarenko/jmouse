@@ -13,6 +13,8 @@ import org.jmouse.web.initializer.ServletWebApplicationInitializer;
  */
 public interface WebServerFactory {
 
+    String WEB_SERVER_CONFIGURATION_PATH = "jmouse.web.server";
+
     /**
      * Returns a {@link WebServer} instance configured with the specified initializers.
      *

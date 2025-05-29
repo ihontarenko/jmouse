@@ -2,6 +2,9 @@ package org.jmouse.context;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanFactory;
+import org.jmouse.beans.BeanNotFoundException;
+import org.jmouse.beans.BeanScope;
+import org.jmouse.core.bind.Binder;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.env.PropertyResolver;
 import org.jmouse.core.io.ResourceLoader;
@@ -21,12 +24,29 @@ import org.jmouse.core.io.ResourceLoader;
  */
 public interface ApplicationBeanContext extends BeanContext, BeanFactory, PropertyResolver {
 
+    String ENVIRONMENT_BINDER_BEAN_NAME = "environmentBinder";
+
     /**
      * Retrieves the current {@link Environment} associated with this context.
      *
      * @return the {@link Environment} instance
      */
     Environment getEnvironment();
+
+    /**
+     * Retrieves the current {@link Environment} associated with this context.
+     *
+     * @return the {@link Environment} instance
+     */
+    default Binder getEnvironmentBinder() {
+        try {
+            return getBean(Binder.class, ENVIRONMENT_BINDER_BEAN_NAME);
+        } catch (BeanNotFoundException e) {
+            Binder binder = Binder.withValueAccessor(getEnvironment());
+            registerBean(ApplicationBeanContext.ENVIRONMENT_BINDER_BEAN_NAME, binder, BeanScope.SINGLETON);
+            return binder;
+        }
+    }
 
     /**
      * Retrieves the {@link ResourceLoader} for accessing resources.

@@ -22,16 +22,16 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * Automatically detects and initializes implementations of {@link ServletWebApplicationInitializer} during the servlet container startup.
  */
 @HandlesTypes(ServletWebApplicationInitializer.class)
-public class FrameworkInitializer implements ServletContainerInitializer {
+public class jMouseServletContainerInitializer implements ServletContainerInitializer {
 
     /**
      * Logger for logging initialization process
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(FrameworkInitializer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(jMouseServletContainerInitializer.class);
 
     private final List<ServletWebApplicationInitializer> initializers = new ArrayList<>();
 
-    public FrameworkInitializer(ServletWebApplicationInitializer... initializers) {
+    public jMouseServletContainerInitializer(ServletWebApplicationInitializer... initializers) {
         this.initializers.addAll(List.of(initializers));
     }
 

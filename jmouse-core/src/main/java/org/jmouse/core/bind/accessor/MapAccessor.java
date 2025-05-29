@@ -4,6 +4,7 @@ import org.jmouse.core.bind.AbstractAccessor;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.PropertyAccessor;
 import org.jmouse.core.bind.UnsupportedOperationException;
+import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.bind.descriptor.structured.map.MapDescriptor;
 import org.jmouse.core.bind.descriptor.structured.map.MapIntrospector;
 
@@ -46,8 +47,8 @@ public class MapAccessor extends AbstractAccessor {
     public ObjectAccessor get(String name) {
         Object value = null;
 
-        if (isMap()) {
-            value = descriptor.getDefaultAccessor(name).readValue(asMap(Object.class, Object.class));
+        if (isMap() && descriptor.getProperty(name) instanceof PropertyDescriptor<Map<Object, Object>> property) {
+            value = property.getAccessor().readValue(asMap(Object.class, Object.class));
         }
 
         return wrap(value);

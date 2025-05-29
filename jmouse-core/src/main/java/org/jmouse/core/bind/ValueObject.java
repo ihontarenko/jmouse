@@ -1,5 +1,9 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
+import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
+import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectDescriptor;
+import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectIntrospector;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.util.CachedSupplier;
@@ -9,7 +13,9 @@ import org.jmouse.util.helper.Arrays;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.RecordComponent;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -26,11 +32,12 @@ import static org.jmouse.core.reflection.Reflections.*;
  */
 final public class ValueObject<T extends Record> extends Bean<T> {
 
-    private Constructor<T> constructor;
+    private final Constructor<T> constructor;
 
+    @SuppressWarnings({"unchecked"})
     private ValueObject(Class<?> type) {
-        super(forClass(type));
-        addComponents();
+        super(forClass(type), new ValueObjectIntrospector<>((Class<T>) type).introspect().toDescriptor());
+        constructor = (Constructor<T>) findFirstConstructor(type, getRecordComponentsTypes(type));
     }
 
     /**
@@ -45,84 +52,12 @@ final public class ValueObject<T extends Record> extends Bean<T> {
     }
 
     /**
-     * Extracts record components and initializes properties for the record type.
-     */
-    private void addComponents() {
-        Class<?> recordType = type.getRawType();
-
-        if (recordType.isRecord()) {
-            Stream.of(recordType.getRecordComponents()).forEach(this::addProperty);
-        }
-
-        constructor = (Constructor<T>) findFirstConstructor(recordType, getRecordComponentsTypes(recordType));
-    }
-
-    /**
-     * Adds a record component as a property.
-     *
-     * @param component the record component to be added
-     */
-    private void addProperty(RecordComponent component) {
-        if (component != null) {
-            String      name     = component.getName();
-            Property<T> property = createProperty(name);
-            property.setComponent(component);
-            property.setRawGetter(component.getAccessor());
-            properties.put(name, property);
-        }
-    }
-
-    /**
-     * Creates a new property for the record component.
-     *
-     * @param name the property name
-     * @return a new {@code Property} instance
-     */
-    private Property<T> createProperty(String name) {
-        return new Property<>(name, this.type);
-    }
-
-    /**
      * Returns a new instance of {@code Values}, which holds key-value pairs for record components.
      *
      * @return an empty {@code Values} instance
      */
     public Values getRecordValues() {
         return new Values(this);
-    }
-
-    public BeanConstructor<T, Values> constructor() {
-        return values -> SingletonSupplier.of(() -> {
-            Object[] arguments = new Object[properties.size()];
-            int      index     = 0;
-
-            if (constructor == null) {
-                throw new IllegalStateException(
-                        "No applicable constructor was found for this record type: %s".formatted(type));
-            }
-
-            if (values.size() != properties.size()) {
-                throw new IllegalArgumentException(
-                        "Property mismatch: %s requires all %d properties to be set, but found only %d"
-                                .formatted(type, properties.size(), values.size()));
-            }
-
-            for (Bean.Property<?> property : getProperties()) {
-                Object   value        = values.get(property);
-                JavaType propertyType = property.getType();
-                Class<?> classType    = Arrays.boxType(propertyType.getRawType());
-
-                try {
-                    arguments[index++] = classType.cast(value);
-                } catch (ClassCastException e) {
-                    throw new IllegalArgumentException(
-                            "Property '%s' of type '%s' cannot be cast to '%s'. Value should be converted or passed before"
-                                    .formatted(property.getName(), propertyType, value.getClass()));
-                }
-            }
-
-            return Reflections.instantiate(constructor, arguments);
-        });
     }
 
     /**
@@ -139,7 +74,7 @@ final public class ValueObject<T extends Record> extends Bean<T> {
         }
 
         return new CachedSupplier<>(() -> {
-            Object[] arguments = new Object[properties.size()];
+            Object[] arguments = new Object[getProperties().size()];
             int      index     = 0;
 
             if (constructor == null) {
@@ -147,15 +82,15 @@ final public class ValueObject<T extends Record> extends Bean<T> {
                         "No applicable constructor was found for this record type: %s".formatted(type));
             }
 
-            if (values.size() != properties.size()) {
+            if (values.size() != getProperties().size()) {
                 throw new IllegalArgumentException(
                         "Property mismatch: %s requires all %d properties to be set, but found only %d"
-                                .formatted(type, properties.size(), values.size()));
+                                .formatted(type, getProperties().size(), values.size()));
             }
 
-            for (Bean.Property<?> property : getProperties()) {
+            for (PropertyDescriptor<?> property : getProperties()) {
                 Object   value        = values.get(property);
-                JavaType propertyType = property.getType();
+                JavaType propertyType = property.getType().getJavaType();
                 Class<?> classType    = Arrays.boxType(propertyType.getRawType());
 
                 try {
@@ -173,44 +108,42 @@ final public class ValueObject<T extends Record> extends Bean<T> {
 
     @Override
     public String toString() {
-        return "ValueObject: %s; Properties: %d".formatted(type, properties.size());
+        return "ValueObject: %s; Properties: %d".formatted(type, getProperties().size());
     }
 
     /**
-     * Represents a record component property within a {@code ValueObject}.
+     * Retrieves all properties defined in this structured.
      *
-     * @param <T> the type of the record
+     * @return a collection of properties
      */
-    public static class Property<T> extends Bean.Property<T> {
+    @Override
+    @SuppressWarnings({"unchecked"})
+    public Collection<? extends PropertyDescriptor<T>> getProperties() {
+        return ((ValueObjectDescriptor<T>)descriptor).getProperties().values();
+    }
 
-        private RecordComponent component;
+    /**
+     * Retrieves a specific property by name.
+     *
+     * @param name the name of the property
+     * @return the property associated with the given name, or {@code null} if not found
+     */
+    @Override
+    @SuppressWarnings({"unchecked"})
+    public PropertyDescriptor<T> getProperty(String name) {
+        return ((ValueObjectDescriptor<T>)descriptor).getProperty(name);
+    }
 
-        public Property(String name, JavaType owner) {
-            super(name, owner);
-        }
-
-        @Override
-        public <V> void setValue(Factory<T> factory, V value) {
-            throw new UnsupportedOperationException("Record is immutable and unable to set value");
-        }
-
-        /**
-         * Gets the associated record component.
-         *
-         * @return the record component
-         */
-        public RecordComponent getComponent() {
-            return component;
-        }
-
-        /**
-         * Sets the associated record component.
-         *
-         * @param component the record component to set
-         */
-        public void setComponent(RecordComponent component) {
-            this.component = component;
-        }
+    /**
+     * Checks whether this structured contains a property with the given name.
+     *
+     * @param name the property name to check
+     * @return {@code true} if the property exists, otherwise {@code false}
+     */
+    @Override
+    @SuppressWarnings({"unchecked"})
+    public boolean hasProperty(String name) {
+        return ((ValueObjectDescriptor<T>)descriptor).hasProperty(name);
     }
 
     /**
@@ -263,7 +196,7 @@ final public class ValueObject<T extends Record> extends Bean<T> {
          * @param property the property reference
          * @return the stored value or {@code null} if not present
          */
-        public Object get(Bean.Property<?> property) {
+        public Object get(PropertyDescriptor<?> property) {
             return get(property.getName());
         }
     }

@@ -1,5 +1,7 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.bind.descriptor.MethodDescriptor;
+import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.util.Factory;
 import org.jmouse.util.Priority;
@@ -62,10 +64,10 @@ public class JavaBeanBinder extends AbstractBinder {
         }
 
         // Iterate through all the properties of the JavaBean to map values
-        for (Bean.Property<T> property : bean.getProperties()) {
+        for (PropertyDescriptor<T> property : bean.getProperties()) {
             PropertyPath     propertyName = PropertyPath.forPath(getPreferredName(property));
-            JavaType         propertyType = property.getType();
-            Supplier<Object> value        = property.getValue(factory);
+            JavaType         propertyType = property.getType().getJavaType();
+            Supplier<Object> value        = bean.getValue(property, factory);
 
             // Check if the property is writable then perform value binding for the property
             if (property.isWritable()) {
@@ -81,7 +83,7 @@ public class JavaBeanBinder extends AbstractBinder {
                     continue;
                 }
 
-                property.setValue(factory, result.getValue());
+                bean.setValue(property, factory, result.getValue());
 
                 callback.onBound(propertyPath, bindableProperty, context, result);
             }
@@ -97,10 +99,17 @@ public class JavaBeanBinder extends AbstractBinder {
      * and no value present will be thrown {@link IllegalStateException}
      * </p>
      */
-    protected void checkRequirements(BindResult<?> result, PropertyPath propertyName, Bean.Property<?> property) {
+    protected void checkRequirements(BindResult<?> result, PropertyPath propertyName, PropertyDescriptor<?> property) {
         if (result.isEmpty()) {
-            if (property.getRawSetter().isAnnotationPresent(BindRequired.class)) {
-                String message = getAnnotationValue(property.getRawSetter(), BindRequired.class, BindRequired::value);
+            MethodDescriptor methodDescriptor = property.getSetterMethod();
+
+            if (methodDescriptor == null) {
+                return;
+            }
+
+            Method setter = methodDescriptor.unwrap();
+            if (setter.isAnnotationPresent(BindRequired.class)) {
+                String message = getAnnotationValue(setter, BindRequired.class, BindRequired::value);
 
                 if (Strings.isEmpty(message)) {
                     message = "Property '%s' required to be bound but value do not present on path: '%s'"
@@ -123,11 +132,11 @@ public class JavaBeanBinder extends AbstractBinder {
      * @param property the JavaBean property
      * @return the preferred property name
      */
-    protected String getPreferredName(Bean.Property<?> property) {
+    protected String getPreferredName(PropertyDescriptor<?> property) {
         String name = property.getName();
 
         if (property.isWritable()) {
-            Method setter = property.getRawSetter();
+            Method setter = property.getSetterMethod().unwrap();
             if (setter != null && setter.isAnnotationPresent(BindName.class)) {
                 String preferredPath = setter.getAnnotation(BindName.class).value();
                 if (preferredPath != null && !preferredPath.isEmpty()) {
