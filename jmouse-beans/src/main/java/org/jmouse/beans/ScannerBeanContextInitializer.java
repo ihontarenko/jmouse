@@ -6,6 +6,7 @@ import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDefinitionFactory;
 import org.jmouse.beans.scanner.ConfigurationAnnotatedClassBeanScanner;
 import org.jmouse.beans.scanner.ProvideAnnotatedClassesBeanScanner;
+import org.jmouse.core.reflection.Reflections;
 import org.jmouse.util.Priority;
 import org.jmouse.util.helper.Arrays;
 import org.slf4j.Logger;
@@ -74,14 +75,14 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
                 }
 
                 counter++;
-                BeanDefinition beanDefinition = definitionFactory.createDefinition(element, context);
                 try {
-                    context.registerDefinition(beanDefinition);
+                    context.registerDefinition(definitionFactory.createDefinition(element, context));
                 } catch (Exception exception) {
-                    SuppressException annotation = beanDefinition.getAnnotation(SuppressException.class);
+                    Class<? extends Throwable>[] types = Reflections.getAnnotationValue(
+                            element, SuppressException.class, SuppressException::value);
 
-                    if (annotation != null) {
-                        for (Class<? extends Throwable> throwableType : annotation.value()) {
+                    if (types != null) {
+                        for (Class<? extends Throwable> throwableType : types) {
                             if (throwableType.isAssignableFrom(exception.getClass())) {
                                 LOGGER.warn("Suppressed exception '{}'", exception.getMessage());
                                 continue SCAN;

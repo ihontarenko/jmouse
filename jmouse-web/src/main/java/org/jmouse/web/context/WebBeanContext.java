@@ -4,6 +4,8 @@ import jakarta.servlet.ServletContext;
 import org.jmouse.context.ApplicationBeanContext;
 import org.jmouse.beans.BeanContext;
 
+import java.util.Enumeration;
+
 /**
  * Represents a web-specific extension of the {@link BeanContext}.
  * Supports servlet-specific configurations and scoped beans.
@@ -43,5 +45,35 @@ public interface WebBeanContext extends ApplicationBeanContext {
      * @return the servlet context
      */
     ServletContext getServletContext();
+
+    static WebBeanContext getRequiredWebBeanContext(ServletContext servletContext) {
+        WebBeanContext rootContext = getRootWebBeanContext(servletContext);
+
+        if (rootContext == null) {
+            throw new WebContextException("No WebBeanContext[%s] found.".formatted(DEFAULT_ROOT_WEB_CONTEXT_NAME));
+        }
+
+        return rootContext;
+    }
+
+    static WebBeanContext getRootWebBeanContext(ServletContext servletContext) {
+        return (WebBeanContext) servletContext.getAttribute(ROOT_WEB_BEAN_CONTEXT_ATTRIBUTE);
+    }
+
+    static WebBeanContext findWebBeanContext(ServletContext servletContext) {
+        WebBeanContext webBeanContext = getRootWebBeanContext(servletContext);
+
+        if (webBeanContext == null) {
+            Enumeration<String> attributeNames = servletContext.getAttributeNames();
+            while (attributeNames.hasMoreElements()) {
+                if (servletContext.getAttribute(attributeNames.nextElement()) instanceof WebBeanContext context) {
+                    webBeanContext = context;
+                    break;
+                }
+            }
+        }
+
+        return webBeanContext;
+    }
 
 }

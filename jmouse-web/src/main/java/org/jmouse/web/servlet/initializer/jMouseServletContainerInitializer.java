@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.util.Sorter;
-import org.jmouse.web.initializer.ServletWebApplicationInitializer;
+import org.jmouse.web.initializer.WebApplicationInitializer;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -19,9 +19,9 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**
  * A {@link ServletContainerInitializer} implementation for initializing application-specific components.
- * Automatically detects and initializes implementations of {@link ServletWebApplicationInitializer} during the servlet container startup.
+ * Automatically detects and initializes implementations of {@link WebApplicationInitializer} during the servlet container startup.
  */
-@HandlesTypes(ServletWebApplicationInitializer.class)
+@HandlesTypes(WebApplicationInitializer.class)
 public class jMouseServletContainerInitializer implements ServletContainerInitializer {
 
     /**
@@ -29,15 +29,15 @@ public class jMouseServletContainerInitializer implements ServletContainerInitia
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(jMouseServletContainerInitializer.class);
 
-    private final List<ServletWebApplicationInitializer> initializers = new ArrayList<>();
+    private final List<WebApplicationInitializer> initializers = new ArrayList<>();
 
-    public jMouseServletContainerInitializer(ServletWebApplicationInitializer... initializers) {
+    public jMouseServletContainerInitializer(WebApplicationInitializer... initializers) {
         this.initializers.addAll(List.of(initializers));
     }
 
     @Override
     public void onStartup(Set<Class<?>> initializerClasses, ServletContext servletContext) throws ServletException {
-        Matcher<Class<?>> matcher = isSupertype(ServletWebApplicationInitializer.class)
+        Matcher<Class<?>> matcher = isSupertype(WebApplicationInitializer.class)
                 .and(isInterface().not()).and(isAbstract().not());
 
         if (initializerClasses != null) {
@@ -51,8 +51,8 @@ public class jMouseServletContainerInitializer implements ServletContainerInitia
                         Constructor<?> constructor = Reflections.findFirstConstructor(initializerClass);
 
                         // Instantiate the class using the constructor
-                        ServletWebApplicationInitializer initializer =
-                                (ServletWebApplicationInitializer) Reflections.instantiate(constructor);
+                        WebApplicationInitializer initializer =
+                                (WebApplicationInitializer) Reflections.instantiate(constructor);
 
                         initializers.add(initializer);
                     } catch (Throwable throwable) {
@@ -75,7 +75,7 @@ public class jMouseServletContainerInitializer implements ServletContainerInitia
             initializers.sort(Sorter.PRIORITY_COMPARATOR);
 
             // Invoke onStartup for each initializer
-            for (ServletWebApplicationInitializer initializer : initializers) {
+            for (WebApplicationInitializer initializer : initializers) {
                 String initializerName = getShortName(initializer.getClass());
                 LOGGER.info("Before executing initializer: {}", initializerName);
                 initializer.onStartup(servletContext);

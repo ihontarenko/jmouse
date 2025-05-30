@@ -7,7 +7,7 @@ import java.util.Map;
 public class WebServerConfigHolder {
 
     private Map<WebServers, WebServerConfig> webserversConfiguration;
-    private WebServers defaultWebServer;
+    private WebServers                       defaultWebServer;
 
     @BindName("configuration")
     public void setWebServerConfigs(Map<WebServers, WebServerConfig> webserversConfiguration) {

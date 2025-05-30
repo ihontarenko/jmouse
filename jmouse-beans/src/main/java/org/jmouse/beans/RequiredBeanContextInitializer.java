@@ -3,6 +3,7 @@ package org.jmouse.beans;
 import org.jmouse.beans.definition.BeanDefinitionFactory;
 import org.jmouse.beans.definition.SimpleBeanDefinitionFactory;
 import org.jmouse.beans.instantiation.*;
+import org.jmouse.beans.processor.BeanNameKeeperBeanPostProcessor;
 import org.slf4j.Logger;
 import org.jmouse.beans.definition.strategy.ConstructorBeanDefinitionCreationStrategy;
 import org.jmouse.beans.definition.strategy.MethodBeanDefinitionCreationStrategy;
@@ -74,6 +75,7 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
         context.addBeanPostProcessor(new InjectDependencyBeanPostProcessor());
         context.addBeanPostProcessor(new ProxyBeanPostProcessor());
         context.addBeanPostProcessor(new BeanContextAwareBeanPostProcessor());
+        context.addBeanPostProcessor(new BeanNameKeeperBeanPostProcessor());
     }
 
     /**

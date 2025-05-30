@@ -18,6 +18,11 @@ import org.jmouse.core.reflection.JavaType;
 public interface BeanDependency {
 
     /**
+     * Dependant target object
+     */
+    Object dependant();
+
+    /**
      * Gets the type of the dependency.
      *
      * @return the class type of the dependency.

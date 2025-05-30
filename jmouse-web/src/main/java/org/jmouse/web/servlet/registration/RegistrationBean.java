@@ -2,12 +2,18 @@ package org.jmouse.web.servlet.registration;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import org.jmouse.core.reflection.Reflections;
+import org.jmouse.util.Priority;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Common interface for programmatic registration of web components
  * (servlets, filters, listeners) into a ServletContext.
  */
-public interface WebServerRegistrationBean {
+public interface RegistrationBean {
+
+    Logger LOGGER = LoggerFactory.getLogger(RegistrationBean.class);
 
     /**
      * Register the underlying component with the given ServletContext.
@@ -19,12 +25,14 @@ public interface WebServerRegistrationBean {
     /**
      * Order of this registration; lower values have higher priority.
      */
-    int getOrder();
+    default int getOrder() {
+        return Reflections.getAnnotationValue(getClass(), Priority.class, Priority::value);
+    }
 
     /**
-     * Set the registration order.
+     * Set order of this registration; lower values have higher priority.
      */
-    void setOrder(int order);
+    default void setOrder(int order) {}
 
     /**
      * Is current registration is enabled.

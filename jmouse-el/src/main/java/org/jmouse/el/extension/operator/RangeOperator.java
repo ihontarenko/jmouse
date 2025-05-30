@@ -7,7 +7,7 @@ import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 
 /**
- * Represents the "??" null-coalesce operator ({@code IS}).
+ * Represents the ".." range operator ({@code T_DOUBLE_DOT}).
  * <p>
  * Example:
  * <pre>{@code

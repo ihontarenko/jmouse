@@ -6,6 +6,16 @@ import org.jmouse.el.extension.calculator.ConcatCalculator;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 
+/**
+ * Represents the "~" concatenation operator ({@code T_TILDA}).
+ * <p>
+ * Example:
+ * <pre>{@code
+ *     '(NumberPI: ' ~ (22d / 7) ~ ')'
+ * }</pre>
+ *
+ * @author Ivan Hontarenko
+ */
 public enum ConcatOperator implements Operator {
 
     CONCAT(new ConcatCalculator(), BasicToken.T_TILDA, "concat", 550);

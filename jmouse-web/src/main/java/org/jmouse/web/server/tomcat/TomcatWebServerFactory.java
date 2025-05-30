@@ -3,12 +3,19 @@ package org.jmouse.web.server.tomcat;
 import org.apache.catalina.startup.Tomcat;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanContextAware;
-import org.jmouse.web.initializer.ServletWebApplicationInitializer;
-import org.jmouse.web.servlet.initializer.jMouseServletContainerInitializer;
+import org.jmouse.beans.annotation.Dependency;
+import org.jmouse.web.configuration.WebServerFactoryConfiguration;
+import org.jmouse.web.initializer.WebApplicationInitializer;
 import org.jmouse.web.server.WebServer;
+import org.jmouse.web.server.WebServerConfig;
 import org.jmouse.web.server.WebServerFactory;
+import org.jmouse.web.server.WebServers;
+import org.jmouse.web.servlet.initializer.jMouseServletContainerInitializer;
 
 public class TomcatWebServerFactory implements WebServerFactory, BeanContextAware {
+
+    @Dependency
+    private WebServerFactoryConfiguration.WebServerConfigHolder configuration;
 
     private BeanContext context;
 
@@ -33,11 +40,11 @@ public class TomcatWebServerFactory implements WebServerFactory, BeanContextAwar
     }
 
     @Override
-    public WebServer getWebServer(ServletWebApplicationInitializer... initializers) {
+    public WebServer getWebServer(WebApplicationInitializer... initializers) {
         WebServer                    webServer  = new TomcatWebServer();
-        // todo: need to add some properties reader or environment mechanism
-        WebServer.Configurer<Tomcat> configurer = new TomcatWebServerConfigurer(8899,
-                new jMouseServletContainerInitializer(initializers));
+        WebServerConfig              config     = configuration.getWebServerConfig(WebServers.TOMCAT);
+        WebServer.Configurer<Tomcat> configurer = new TomcatWebServerConfigurer(
+                config.port(), new jMouseServletContainerInitializer(initializers));
 
         if (webServer.server() != null) {
             webServer.configure(configurer);

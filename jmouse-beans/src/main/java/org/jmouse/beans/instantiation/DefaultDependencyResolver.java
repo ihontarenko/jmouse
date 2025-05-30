@@ -1,12 +1,14 @@
 package org.jmouse.beans.instantiation;
 
 import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.BeanInstantiationException;
 import org.jmouse.beans.definition.AggregatedBeansDependency;
 import org.jmouse.beans.definition.BeanDependency;
 import org.jmouse.core.reflection.JavaType;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -39,16 +41,19 @@ public class DefaultDependencyResolver implements DependencyResolver {
     public Object resolve(BeanDependency dependency, BeanContext context) {
         Object resolved;
 
-        if (dependency instanceof AggregatedBeansDependency(JavaType javaType, String name)) {
+        if (dependency instanceof AggregatedBeansDependency(JavaType javaType, String name, Object dependant)) {
             // Fetch all beans of the declared raw type
             Collection<Object> beans = context.getBeans(javaType.getFirst().getRawType());
 
             // If the target type is a Set, wrap in HashSet to enforce uniqueness
             if (Set.class.isAssignableFrom(javaType.getRawType())) {
-                beans = new HashSet<>(beans);
+                resolved = new HashSet<>(beans);
+            } else if (List.class.isAssignableFrom(javaType.getRawType())) {
+                resolved = beans;
+            } else {
+                throw new BeanInstantiationException(
+                        "Unable resolve aggregated dependency. Dependant: (%s)".formatted(dependant));
             }
-
-            resolved = beans;
         } else {
             // Single-bean lookup by type and name
             resolved = context.getBean(dependency.type(), dependency.name());

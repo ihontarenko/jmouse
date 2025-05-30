@@ -11,7 +11,7 @@ import org.jmouse.util.Priority;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.servlet.RequestContextListener;
 import org.jmouse.web.servlet.WebBeanContextListener;
-import org.jmouse.web.servlet.registration.WebServerRegistrationBean;
+import org.jmouse.web.servlet.registration.RegistrationBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,21 +22,22 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**
  * Initializer for configuring the {@link ServletContext} with the {@link WebBeanContextListener}.
- * Extends {@link AbstractApplicationInitializer} to include additional setup logic.
+ * Extends {@link AbstractWebApplicationInitializer} to include additional setup logic.
  */
 @Priority(Integer.MIN_VALUE)
-public class WebBeanContextServletInitializer extends AbstractApplicationInitializer {
+public class jMouseWebApplicationInitializer extends AbstractWebApplicationInitializer {
 
+    public static final  String JMOUSE_WEB_SERVLET_REGISTRATION_PATH = "jmouse.web.servlet.registration";
     /**
      * Logger for logging initialization process
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(WebBeanContextServletInitializer.class);
-    public static final String JMOUSE_WEB_SERVLET_REGISTRATION_PATH = "jmouse.web.servlet.registration";
+    private static final Logger LOGGER                               = LoggerFactory.getLogger(
+            jMouseWebApplicationInitializer.class);
 
     private final WebBeanContext context;
 
     @BeanConstructor
-    public WebBeanContextServletInitializer(WebBeanContext context) {
+    public jMouseWebApplicationInitializer(WebBeanContext context) {
         this.context = context;
     }
 
@@ -60,12 +61,12 @@ public class WebBeanContextServletInitializer extends AbstractApplicationInitial
 
         context.getBean(ApplicationFactory.class);
 
-        Binder binder = Binder.withValueAccessor(context.getEnvironment());
-        BindResult<List<WebServerRegistrationBean>> registrations = Bind.with(binder)
-                .toList(JMOUSE_WEB_SERVLET_REGISTRATION_PATH, WebServerRegistrationBean.class);
+        Binder                             binder        = Binder.withValueAccessor(context.getEnvironment());
+        BindResult<List<RegistrationBean>> registrations = Bind.with(binder)
+                .toList(JMOUSE_WEB_SERVLET_REGISTRATION_PATH, RegistrationBean.class);
 
         registrations.ifPresent(beanRegistrations -> {
-            for (WebServerRegistrationBean registration : beanRegistrations) {
+            for (RegistrationBean registration : beanRegistrations) {
 //                ServletRegistration.Dynamic dynamic = servletContext
 //                        .addServlet(registration.getName(), new FrameworkDispatcherServlet(webBeanContext));
 //                dynamic.addMapping(registration.mappings());

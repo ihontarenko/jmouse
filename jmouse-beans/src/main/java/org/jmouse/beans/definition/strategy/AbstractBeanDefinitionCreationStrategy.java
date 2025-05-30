@@ -74,10 +74,10 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
 
         if (Collection.class.isAssignableFrom(parameter.getType()) && parameter.isAnnotationPresent(
                 BeanCollection.class)) {
-            return new AggregatedBeansDependency(javaType, name);
+            return new AggregatedBeansDependency(javaType, name, parameter);
         }
 
-        return new SimpleBeanDependency(javaType, name);
+        return new SimpleBeanDependency(javaType, name, parameter);
     }
 
     /**

@@ -42,7 +42,7 @@ public enum MathematicCalculator implements Calculator<Object> {
     MODULUS(new ModulusOperation()),
 
     /**
-     * Exponential ({@code ^}), returns {@code a^b}.
+     * Exponential ({@code **}), returns {@code a**b}.
      */
     EXPONENTIAL(new ExponentialOperation());
 

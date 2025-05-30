@@ -7,7 +7,7 @@ import jakarta.servlet.ServletException;
  * Interface for initializing a web application.
  * Implementations provide custom startup logic for configuring the {@link ServletContext}.
  */
-public interface ServletWebApplicationInitializer {
+public interface WebApplicationInitializer {
 
     /**
      * Called during the startup phase of the servlet context.

@@ -8,7 +8,8 @@ import org.jmouse.core.reflection.JavaType;
  *
  * @param javaType the type of the dependency.
  * @param name the optional name of the dependency.
+ * @param dependant the dependant object.
  */
-public record SimpleBeanDependency(JavaType javaType, String name) implements BeanDependency {
+public record SimpleBeanDependency(JavaType javaType, String name, Object dependant) implements BeanDependency {
 
 }

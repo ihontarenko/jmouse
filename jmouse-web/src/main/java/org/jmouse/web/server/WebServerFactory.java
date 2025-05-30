@@ -1,15 +1,15 @@
 package org.jmouse.web.server;
 
-import org.jmouse.web.initializer.ServletWebApplicationInitializer;
+import org.jmouse.web.initializer.WebApplicationInitializer;
 
 /**
  * Factory interface for creating {@link WebServer} instances.
  * <p>
  * Implementations of this interface are responsible for configuring and providing
- * {@link WebServer} instances, optionally initialized with one or more {@link ServletWebApplicationInitializer}s.
+ * {@link WebServer} instances, optionally initialized with one or more {@link WebApplicationInitializer}s.
  *
  * @see WebServer
- * @see ServletWebApplicationInitializer
+ * @see WebApplicationInitializer
  */
 public interface WebServerFactory {
 
@@ -18,9 +18,9 @@ public interface WebServerFactory {
     /**
      * Returns a {@link WebServer} instance configured with the specified initializers.
      *
-     * @param initializers the {@link ServletWebApplicationInitializer}s to configure the web server
+     * @param initializers the {@link WebApplicationInitializer}s to configure the web server
      * @return a configured {@link WebServer} instance
      */
-    WebServer getWebServer(ServletWebApplicationInitializer... initializers);
+    WebServer getWebServer(WebApplicationInitializer... initializers);
 
 }
