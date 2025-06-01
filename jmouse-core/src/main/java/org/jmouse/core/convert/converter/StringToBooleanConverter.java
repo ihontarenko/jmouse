@@ -1,4 +1,4 @@
-package org.jmouse.el.evaluation.converter;
+package org.jmouse.core.convert.converter;
 
 import org.jmouse.core.convert.ClassPair;
 import org.jmouse.core.convert.GenericConverter;
@@ -14,7 +14,10 @@ public class StringToBooleanConverter implements GenericConverter<String, Boolea
 
     @Override
     public Set<ClassPair> getSupportedTypes() {
-        return Set.of(ClassPair.of(String.class, Boolean.class));
+        return Set.of(
+                ClassPair.of(String.class, Boolean.class),
+                ClassPair.of(String.class, boolean.class)
+        );
     }
 
 }

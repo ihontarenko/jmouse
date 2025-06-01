@@ -45,13 +45,13 @@ abstract public class AbstractRegistrationBean implements RegistrationBean, WebA
         String name = getName();
 
         if (!isEnabled()) {
-            LOGGER.warn("Registration for '{}' is disabled", name);
+            LOGGER.warn("{} - disabled", getDescription());
             return;
         }
 
         register(servletContext);
 
-        LOGGER.info("{} - successfully registered", getDescription());
+        LOGGER.info("{} - registered", getDescription());
     }
 
     /**

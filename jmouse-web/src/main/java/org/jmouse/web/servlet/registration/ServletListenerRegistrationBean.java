@@ -16,7 +16,7 @@ public class ServletListenerRegistrationBean<L extends EventListener> extends Ab
      *
      * @param name short name for this component; may be {@code null}
      */
-    protected ServletListenerRegistrationBean(String name, L listener) {
+    public ServletListenerRegistrationBean(String name, L listener) {
         super(name);
         this.listener = listener;
     }

@@ -2,7 +2,10 @@ package org.jmouse.web.initializer.application;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.util.Sorter;
+import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.initializer.WebApplicationInitializer;
+import org.jmouse.web.servlet.RequestContextListener;
+import org.jmouse.web.servlet.WebBeanContextListener;
 import org.jmouse.web.servlet.registration.AbstractRegistrationBean;
 import org.jmouse.web.servlet.registration.FilterRegistrationBean;
 import org.jmouse.web.servlet.registration.ServletListenerRegistrationBean;
@@ -27,9 +30,18 @@ public class ServletContextRegistrations {
             }
         }
 
+        initializePredefined(initializers, context);
+
         Sorter.sort(initializers);
 
         return initializers;
+    }
+
+    private void initializePredefined(List<WebApplicationInitializer> initializers, BeanContext context) {
+        initializers.add(new ServletListenerRegistrationBean<>(
+                "webBeanContextListener", new WebBeanContextListener((WebBeanContext) context)));
+        initializers.add(new ServletListenerRegistrationBean<>(
+                "requestContextListener", new RequestContextListener()));
     }
 
 }

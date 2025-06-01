@@ -14,7 +14,9 @@ public class LoggingServletFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+
         LOGGER.info("RQ_ID: {}", ((RequestFacade) request).getRequestURL());
+
         chain.doFilter(request, response);
     }
 }

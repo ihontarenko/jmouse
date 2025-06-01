@@ -23,6 +23,7 @@ import org.jmouse.web.servlet.registration.FilterRegistrationBean;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class WebApplicationLauncher {
 
@@ -30,6 +31,19 @@ public class WebApplicationLauncher {
 
     public WebApplicationLauncher(Class<?>... baseClasses) {
         this.baseClasses = baseClasses;
+    }
+
+    private static ScannerBeanContextInitializer getScannerBeanContextInitializer() {
+        ScannerBeanContextInitializer scannerBeanContextInitializer = new ScannerBeanContextInitializer();
+
+        scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
+                ClassFinder.findImplementations(WebApplicationInitializer.class, rootTypes)));
+        scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
+                ClassFinder.findImplementations(ApplicationConfigurer.class, rootTypes)));
+        scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
+                ClassFinder.findAnnotatedClasses(BeanProperties.class, rootTypes)));
+
+        return scannerBeanContextInitializer;
     }
 
     public WebBeanContext launch() {
@@ -54,24 +68,11 @@ public class WebApplicationLauncher {
         return rootContext;
     }
 
-    private static ScannerBeanContextInitializer getScannerBeanContextInitializer() {
-        ScannerBeanContextInitializer scannerBeanContextInitializer = new ScannerBeanContextInitializer();
-
-        scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
-                ClassFinder.findImplementations(WebApplicationInitializer.class, rootTypes)));
-        scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
-                ClassFinder.findImplementations(ApplicationConfigurer.class, rootTypes)));
-        scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
-                ClassFinder.findAnnotatedClasses(BeanProperties.class, rootTypes)));
-
-        return scannerBeanContextInitializer;
-    }
-
     public WebServer createWebServer(WebBeanContext rootContext) {
         WebServerConfigHolder webServerConfigHolder = new WebServerConfigHolder();
 
-        Bind.with(rootContext.getEnvironmentBinder()).to(
-                WebServerFactory.WEB_SERVER_CONFIGURATION_PATH, webServerConfigHolder);
+        Bind.with(rootContext.getEnvironmentBinder())
+                .to(WebServerFactory.WEB_SERVER_CONFIGURATION_PATH, webServerConfigHolder);
 
         WebServerFactory factory = rootContext.getBean(WebServerFactory.class);
         return factory.getWebServer(new jMouseWebApplicationInitializer(rootContext));
@@ -81,22 +82,57 @@ public class WebApplicationLauncher {
     public static class ServletDispatcherConfiguration {
 
         @Provide
-        public ServletRegistrationBean<?> defaultDispatcher(WebBeanContext rootContext) {
+        public ServletRegistrationBean<?> defaultDispatcher(WebBeanContext rootContext, DispatcherProperties properties) {
             ServletRegistrationBean<?> registration = new FrameworkDispatcherServletRegistration(rootContext);
-            registration.setLoadOnStartup(1);
-            registration.addMappings("/*");
-            registration.setEnabled(true);
+
+            registration.setEnabled(properties.isEnabled());
+            registration.setLoadOnStartup(properties.getLoadOnStartup());
+            registration.addMappings(properties.getMappings());
+
             return registration;
         }
 
         @Provide
         public FilterRegistrationBean<LoggingServletFilter> loggingServletFilter() {
-            FilterRegistrationBean<LoggingServletFilter> registration
-                    = new FilterRegistrationBean<>("logging", new LoggingServletFilter());
+            FilterRegistrationBean<LoggingServletFilter> registration = new FilterRegistrationBean<>(
+                    "logging", new LoggingServletFilter());
             registration.setEnabled(true);
             registration.addUrlPatterns("/*");
             registration.setDispatcherTypes(DispatcherType.REQUEST);
             return registration;
+        }
+
+        @BeanProperties("jmouse.web.server.dispatcher")
+        public static class DispatcherProperties {
+
+            private boolean  enabled;
+            private String[] mappings;
+            private int      loadOnStartup;
+
+            public boolean isEnabled() {
+                return enabled;
+            }
+
+            public void setEnabled(boolean enabled) {
+                this.enabled = enabled;
+            }
+
+            public String[] getMappings() {
+                return mappings;
+            }
+
+            public void setMappings(String[] mappings) {
+                this.mappings = mappings;
+            }
+
+            public int getLoadOnStartup() {
+                return loadOnStartup;
+            }
+
+            public void setLoadOnStartup(int loadOnStartup) {
+                this.loadOnStartup = loadOnStartup;
+            }
+
         }
 
     }

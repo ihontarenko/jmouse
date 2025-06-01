@@ -1,9 +1,6 @@
 package org.jmouse.core.convert;
 
-import org.jmouse.core.convert.converter.CollectionConverters;
-import org.jmouse.core.convert.converter.DateAndTimeConverters;
-import org.jmouse.core.convert.converter.NumberToStringConverter;
-import org.jmouse.core.convert.converter.StringToNumberConverter;
+import org.jmouse.core.convert.converter.*;
 import org.jmouse.core.convert.converter.enums.EnumToScalarConverter;
 import org.jmouse.core.convert.converter.enums.IntegerToEnumConverter;
 import org.jmouse.core.convert.converter.enums.StringToEnumConverter;
@@ -19,6 +16,9 @@ abstract public class PredefinedConversion extends StandardConversion {
         registerConverter(new StringToEnumConverter());
         registerConverter(new IntegerToEnumConverter());
         registerConverter(new EnumToScalarConverter());
+        // boolean to string and vice versa
+        registerConverter(new BooleanToStringConverter());
+        registerConverter(new StringToBooleanConverter());
 
         // collection and array converters
         for (GenericConverter<?, ?> converter : CollectionConverters.getConverters()) {
