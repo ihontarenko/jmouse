@@ -1,6 +1,9 @@
 package org.jmouse.web;
 
+import jakarta.servlet.DispatcherType;
 import org.jmouse.beans.ScannerBeanContextInitializer;
+import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.beans.annotation.Provide;
 import org.jmouse.context.ApplicationConfigurer;
 import org.jmouse.context.ApplicationFactory;
 import org.jmouse.context.BeanProperties;
@@ -14,6 +17,10 @@ import org.jmouse.web.initializer.context.StartupRootApplicationContextInitializ
 import org.jmouse.web.server.WebServer;
 import org.jmouse.web.server.WebServerConfigHolder;
 import org.jmouse.web.server.WebServerFactory;
+import org.jmouse.web.servlet.FrameworkDispatcherServletRegistration;
+import org.jmouse.web.servlet.filter.LoggingServletFilter;
+import org.jmouse.web.servlet.registration.FilterRegistrationBean;
+import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
 import java.util.ArrayList;
 
@@ -36,9 +43,9 @@ public class WebApplicationLauncher {
 
         rootContext.addInitializer(scannerBeanContextInitializer);
         rootContext.addInitializer(new StartupRootApplicationContextInitializer(environment));
-
         rootContext.refresh();
 
+        // attach ApplicationFactory object
         rootContext.registerBean(ApplicationFactory.class, applicationFactory);
 
         // web server part
@@ -68,6 +75,30 @@ public class WebApplicationLauncher {
 
         WebServerFactory factory = rootContext.getBean(WebServerFactory.class);
         return factory.getWebServer(new jMouseWebApplicationInitializer(rootContext));
+    }
+
+    @Configuration
+    public static class ServletDispatcherConfiguration {
+
+        @Provide
+        public ServletRegistrationBean<?> defaultDispatcher(WebBeanContext rootContext) {
+            ServletRegistrationBean<?> registration = new FrameworkDispatcherServletRegistration(rootContext);
+            registration.setLoadOnStartup(1);
+            registration.addMappings("/*");
+            registration.setEnabled(true);
+            return registration;
+        }
+
+        @Provide
+        public FilterRegistrationBean<LoggingServletFilter> loggingServletFilter() {
+            FilterRegistrationBean<LoggingServletFilter> registration
+                    = new FilterRegistrationBean<>("logging", new LoggingServletFilter());
+            registration.setEnabled(true);
+            registration.addUrlPatterns("/*");
+            registration.setDispatcherTypes(DispatcherType.REQUEST);
+            return registration;
+        }
+
     }
 
 }

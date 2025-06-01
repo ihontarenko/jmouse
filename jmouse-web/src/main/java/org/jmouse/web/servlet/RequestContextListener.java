@@ -42,6 +42,8 @@ public class RequestContextListener implements ServletRequestListener {
             RequestAttributesHolder.setRequestAttributes(
                     RequestAttributes.of(BeanScope.REQUEST, servletRequest)
             );
+
+            RequestAttributesHolder.getRequestAttributes().setAttribute("attr1", "val");
         }
     }
 

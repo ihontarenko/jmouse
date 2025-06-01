@@ -6,6 +6,7 @@ import org.jmouse.beans.annotation.Provide;
 import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.util.helper.Strings;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -35,6 +36,16 @@ public class BeansConfiguration {
     @Provide
     public List<Integer> getYears() {
         return List.of(2024, 2025);
+    }
+
+    @Provide
+    public Collection<Integer> getIntegers() {
+        return List.of(1, 2, 3);
+    }
+
+    @Provide
+    public Collection<Float> getFloats() {
+        return List.of(1f, 2f, 3f);
     }
 
 }

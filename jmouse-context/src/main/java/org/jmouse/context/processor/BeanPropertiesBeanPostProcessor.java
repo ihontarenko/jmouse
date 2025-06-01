@@ -13,17 +13,12 @@ public class BeanPropertiesBeanPostProcessor implements BeanPostProcessor {
     @Override
     public Object postProcessBeforeInitialize(Object bean, BeanDefinition definition, BeanContext context) {
         BeanProperties annotation = definition.getAnnotation(BeanProperties.class);
-        Binder         binder     = null;
 
-        if (annotation == null) {
-            return bean;
-        }
-
-        if (context instanceof ApplicationBeanContext beanContext) {
+        if (annotation != null && context instanceof ApplicationBeanContext beanContext) {
             Bindable<?> bindable = Bindable.ofInstance(bean);
             String      path     = annotation.value();
+            Binder      binder   = beanContext.getEnvironmentBinder();
 
-            binder = beanContext.getEnvironmentBinder();
             binder.bind(path, bindable);
         }
 

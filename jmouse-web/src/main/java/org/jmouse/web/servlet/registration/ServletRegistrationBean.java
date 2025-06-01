@@ -3,8 +3,7 @@ package org.jmouse.web.servlet.registration;
 import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRegistration;
-import org.jmouse.beans.annotation.SuppressException;
-import org.jmouse.beans.definition.BeanDefinitionException;
+import org.jmouse.beans.annotation.Ignore;
 import org.jmouse.core.reflection.Reflections;
 
 import java.beans.Introspector;
@@ -12,7 +11,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-@SuppressException({BeanDefinitionException.class})
+@Ignore
 public class ServletRegistrationBean<S extends Servlet>
         extends AbstractDynamicRegistrationBean<ServletRegistration.Dynamic> {
 
@@ -76,5 +75,10 @@ public class ServletRegistrationBean<S extends Servlet>
 
     public void addMappings(String... mappings) {
         this.mappings.addAll(Set.of(mappings));
+    }
+
+    @Override
+    public String getDescription() {
+        return "servlet " + getName();
     }
 }

@@ -856,6 +856,8 @@ abstract public class Reflections {
             clazz = Array.newInstance(arrayClass, 0).getClass();
         } else if (type instanceof ParameterizedType parameterizedType) {
             clazz = (Class<?>) parameterizedType.getRawType();
+        } else if (type instanceof WildcardType wildcardType) {
+            clazz = Object.class;
         } else {
             clazz = (Class<?>) type;
         }

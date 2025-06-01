@@ -28,7 +28,7 @@ public class Example {
 //        context.registerBean("adminUser", () -> adminUser);
         context.registerBean("adminUser", adminUser, BeanScope.PROTOTYPE);
 
-        context.getDefinition("adminUser").setProxied(true);
+        context.getDefinition("adminUser").setProxied(false);
 
         System.out.println(context.getBean(AdminUser.class));
 
