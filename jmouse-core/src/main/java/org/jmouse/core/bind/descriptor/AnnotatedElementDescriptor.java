@@ -24,7 +24,8 @@ import java.util.List;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public abstract class AnnotatedElementDescriptor<E extends AnnotatedElement, C extends AnnotatedElementData<E>, I extends AnnotatedElementIntrospector<?, ?, ?, ?>>
+public abstract class AnnotatedElementDescriptor<E extends AnnotatedElement, C extends AnnotatedElementData<E>, I
+        extends AnnotatedElementIntrospector<?, ?, ?, ?>>
         extends AbstractDescriptor<E, C, I> {
 
     protected AnnotatedElementDescriptor(I introspector, C container) {

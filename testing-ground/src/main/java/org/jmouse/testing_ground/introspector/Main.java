@@ -39,7 +39,8 @@ public class Main {
 
         JavaBeanDescriptor<User> javaBeanDescriptor = javaBeanIntrospector.toDescriptor();
 
-        javaBeanDescriptor.getProperties().forEach((s, userPropertyDescriptor) -> System.out.println(userPropertyDescriptor));
+        javaBeanDescriptor.getProperties().forEach(
+                (s, userPropertyDescriptor) -> System.out.println(userPropertyDescriptor));
 
         ValueObjectIntrospector<ClientUser> valueObjectIntrospector = new ValueObjectIntrospector<>(ClientUser.class);
         ValueObjectDescriptor<ClientUser> valueObjectDescriptor = valueObjectIntrospector.introspect().toDescriptor();

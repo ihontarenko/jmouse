@@ -1,5 +1,7 @@
 package org.jmouse.el.extension.calculator.operation;
 
+import org.jmouse.core.convert.ClassPair;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,8 +94,8 @@ public class Calculation {
 
         if (handler == null) {
             throw new CalculationOperationException(
-                    "No operator-handler registered for '%s': '%s' -> '%s'"
-                            .formatted(type, xType.getSimpleName(), yType.getSimpleName()));
+                    "No operator-handler registered for: %s(%s)"
+                            .formatted(type, new ClassPair(xType, yType)));
         }
 
         return handler;

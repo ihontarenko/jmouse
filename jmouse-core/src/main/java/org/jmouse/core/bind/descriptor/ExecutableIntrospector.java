@@ -69,9 +69,10 @@ abstract public class ExecutableIntrospector<
      */
     public I parameters() {
         Parameter[] parameters = container.getTarget().getParameters();
+        ExecutableDescriptor<E, C, I> executable = toDescriptor();
 
         for (Parameter parameter : parameters) {
-            parameter(new ParameterIntrospector(parameter).introspect().toDescriptor());
+            parameter(new ParameterIntrospector(parameter).introspect().executable(executable).toDescriptor());
         }
 
         return self();

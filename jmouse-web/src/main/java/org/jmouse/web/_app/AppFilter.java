@@ -9,13 +9,10 @@ import java.io.IOException;
 public class AppFilter implements Filter {
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        Filter.super.init(filterConfig);
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
+        System.out.println(getClass().getName() +": -> "+ request.getServletContext().getServletContextName());
+        chain.doFilter(request, response);
     }
 
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-                                                                                                     ServletException {
-        System.out.println(request);
-    }
 }

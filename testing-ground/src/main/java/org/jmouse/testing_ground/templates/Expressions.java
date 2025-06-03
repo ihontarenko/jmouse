@@ -29,6 +29,8 @@ public class Expressions {
             System.out.println(entry);
         }
 
+        MathematicCalculator.MULTIPLY.calculate(22f, 3);
+
         EvaluationContext  context = el.newContext();
 
 //        el.getExtensions().importExtension(new i18nExtension());

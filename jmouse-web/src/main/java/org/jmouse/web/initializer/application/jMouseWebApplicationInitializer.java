@@ -7,7 +7,6 @@ import org.jmouse.util.Priority;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.initializer.WebApplicationInitializer;
 import org.jmouse.web.servlet.WebBeanContextListener;
-import org.jmouse.web.servlet.registration.RegistrationBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +43,6 @@ public class jMouseWebApplicationInitializer extends AbstractWebApplicationIniti
                 .getRegistrationBeanInitializers(context)) {
             registration.onStartup(servletContext);
         }
-
-        context.getBeans(RegistrationBean.class);
     }
 
 }

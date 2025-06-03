@@ -23,6 +23,11 @@ public class ParameterIntrospector
         return self();
     }
 
+    public ParameterIntrospector executable(ExecutableDescriptor<?, ?, ?> executable) {
+        container.setExecutable(executable);
+        return self();
+    }
+
     @Override
     public ParameterIntrospector introspect() {
         return name().type().annotations();

@@ -14,6 +14,10 @@ public class ParameterDescriptor extends AnnotatedElementDescriptor<Parameter, P
         return container.getType();
     }
 
+    public ExecutableDescriptor<?, ?, ?> getExecutable() {
+        return container.getExecutable();
+    }
+
     @Override
     public ParameterIntrospector toIntrospector() {
         return introspector;

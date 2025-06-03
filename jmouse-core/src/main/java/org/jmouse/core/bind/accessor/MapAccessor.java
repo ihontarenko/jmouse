@@ -78,8 +78,8 @@ public class MapAccessor extends AbstractAccessor {
      */
     @Override
     public void set(String name, Object value) {
-        if (isMap()) {
-            descriptor.getDefaultAccessor(name).writeValue(asMap(Object.class, Object.class), value);
+        if (isMap() && descriptor.getProperty(name) instanceof PropertyDescriptor<Map<Object, Object>> property) {
+            property.getAccessor().writeValue(asMap(Object.class, Object.class), value);
         }
     }
 

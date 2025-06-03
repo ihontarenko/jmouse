@@ -2,10 +2,9 @@ package org.jmouse.core.bind;
 
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.reflection.TypeInformation;
+import org.jmouse.util.Factory;
 import org.jmouse.util.Priority;
 import org.jmouse.util.Setter;
-
-import java.util.function.Supplier;
 
 /**
  * Binder for Java records, enabling their instantiation and property binding from a data source.
@@ -81,7 +80,7 @@ public class ValueObjectBinder extends AbstractBinder {
         // Create a ValueObject representation of the record
         ValueObject<?>     vo      = ValueObject.of((Class<? extends Record>) rawType);
         ValueObject.Values values  = vo.getRecordValues();
-        Supplier<?>        factory = vo.getInstance(values);
+        Factory<?>         factory = vo.getInstance(values);
 
         // Iterate over record properties and bind values from the data source
         for (PropertyDescriptor<?> property : vo.getProperties()) {
@@ -99,8 +98,11 @@ public class ValueObjectBinder extends AbstractBinder {
         // Invoke the callback after binding
         callback.onBound(name, bindable, context, null);
 
+        @SuppressWarnings({"unchecked"})
+        T instance = (T) factory.create();
+
         // Instantiate and return the record
-        return BindResult.of((T) factory.get());
+        return BindResult.of(instance);
     }
 
     /**

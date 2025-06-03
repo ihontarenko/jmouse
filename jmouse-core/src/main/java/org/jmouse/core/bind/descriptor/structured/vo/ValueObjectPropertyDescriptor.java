@@ -13,7 +13,7 @@ public class ValueObjectPropertyDescriptor<T>
         implements PropertyDescriptor<T> {
 
     public static final UnsupportedOperationException UNSUPPORTED_OPERATION_EXCEPTION = new UnsupportedOperationException(
-            "Descriptor is immutable use introspector to modify it.");
+            "Descriptor is immutable unable to modify it.");
 
     protected ValueObjectPropertyDescriptor(ValueObjectPropertyIntrospector<T> introspector, PropertyData<T> container) {
         super(introspector, container);

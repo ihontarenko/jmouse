@@ -1,6 +1,7 @@
 package org.jmouse.core.bind;
 
 import org.jmouse.core.bind.descriptor.AbstractDescriptor;
+import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.util.Factory;
@@ -19,7 +20,7 @@ import java.util.function.Supplier;
  */
 abstract public class Bean<T> {
 
-    protected final AbstractDescriptor<T, ?, ?> descriptor;
+    protected final ObjectDescriptor<T> descriptor;
 
     /**
      * The Java type represented by this structured.
@@ -31,7 +32,7 @@ abstract public class Bean<T> {
      *
      * @param type the Java type this structured represents
      */
-    protected Bean(JavaType type, AbstractDescriptor<T, ?, ?> descriptor) {
+    protected Bean(JavaType type, ObjectDescriptor<T> descriptor) {
         this.type = type;
         this.descriptor = descriptor;
     }
@@ -41,7 +42,9 @@ abstract public class Bean<T> {
      *
      * @return a collection of properties
      */
-    abstract public Collection<? extends PropertyDescriptor<T>> getProperties();
+    public Collection<? extends PropertyDescriptor<T>> getProperties() {
+        return descriptor.getProperties().values();
+    }
 
     /**
      * Retrieves a specific property by name.
@@ -49,7 +52,9 @@ abstract public class Bean<T> {
      * @param name the name of the property
      * @return the property associated with the given name, or {@code null} if not found
      */
-    abstract public PropertyDescriptor<T> getProperty(String name);
+    public PropertyDescriptor<T> getProperty(String name) {
+        return descriptor.getProperty(name);
+    }
 
     /**
      * Checks whether this structured contains a property with the given name.
@@ -57,7 +62,9 @@ abstract public class Bean<T> {
      * @param name the property name to check
      * @return {@code true} if the property exists, otherwise {@code false}
      */
-    abstract public boolean hasProperty(String name);
+    public boolean hasProperty(String name) {
+        return descriptor.hasProperty(name);
+    }
 
     /**
      * Retrieves the value of this property from an instance provided by the factory.

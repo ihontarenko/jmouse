@@ -60,7 +60,8 @@ public enum MathematicCalculator implements Calculator<Object> {
         CALCULATION.register(new LongOperationHandler());
         CALCULATION.register(new FloatOperationHandler());
         CALCULATION.register(new DoubleOperationHandler());
-        CALCULATION.register(new StringOperationHandler());
+        CALCULATION.register(new StringNumberOperationHandler());
+        CALCULATION.register(new StringStringOperationHandler());
         CALCULATION.register(new CollectionOperationHandler());
     }
 

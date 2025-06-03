@@ -9,13 +9,13 @@ import java.util.List;
 import static org.jmouse.el.extension.calculator.operation.OperationType.MULTIPLY;
 import static org.jmouse.el.extension.calculator.operation.OperationType.PLUS;
 
-public class StringOperationHandler implements OperationHandler<String, Number> {
+public class StringStringOperationHandler implements OperationHandler<String, CharSequence> {
 
     @Override
     public boolean supports(OperationType type, Class<?> x, Class<?> y) {
         boolean supported = x != null && String.class.isAssignableFrom(x);
 
-        if (supported && y != null && !Number.class.isAssignableFrom(y)) {
+        if (supported && y != null && !CharSequence.class.isAssignableFrom(y)) {
             supported = false;
         }
 
@@ -23,13 +23,12 @@ public class StringOperationHandler implements OperationHandler<String, Number> 
     }
 
     @Override
-    public Object execute(OperationType type, String text, Number number) {
+    public Object execute(OperationType type, String text, CharSequence sequence) {
         return switch (type) {
-            case PLUS -> text.concat(number.toString());
-            case MULTIPLY -> text.repeat(number.intValue());
+            case PLUS -> text.concat(sequence.toString());
             default -> throw new IllegalOperationException(
                     "Operator '%s' can't be applied to string. Only %s can be applied."
-                            .formatted(type, List.of(MULTIPLY, PLUS)));
+                            .formatted(type, List.of(PLUS)));
         };
     }
 }

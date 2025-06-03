@@ -17,6 +17,9 @@ import java.util.List;
 
 public class ServletContextRegistrations {
 
+    public static final String WEB_BEAN_CONTEXT_LISTENER_NAME = "webBeanContextListener";
+    public static final String REQUEST_CONTEXT_LISTENER_NAME  = "requestContextListener";
+
     public Collection<WebApplicationInitializer> getRegistrationBeanInitializers(BeanContext context) {
         List<WebApplicationInitializer> initializers = new ArrayList<>();
 
@@ -38,10 +41,16 @@ public class ServletContextRegistrations {
     }
 
     private void initializePredefined(List<WebApplicationInitializer> initializers, BeanContext context) {
-        initializers.add(new ServletListenerRegistrationBean<>(
-                "webBeanContextListener", new WebBeanContextListener((WebBeanContext) context)));
-        initializers.add(new ServletListenerRegistrationBean<>(
-                "requestContextListener", new RequestContextListener()));
+        ServletListenerRegistrationBean<?> webBeanContextListener = new ServletListenerRegistrationBean<>(
+                WEB_BEAN_CONTEXT_LISTENER_NAME, new WebBeanContextListener((WebBeanContext) context));
+        ServletListenerRegistrationBean<?> requestContextListener = new ServletListenerRegistrationBean<>(
+                REQUEST_CONTEXT_LISTENER_NAME, new RequestContextListener());
+
+        webBeanContextListener.setEnabled(true);
+        requestContextListener.setEnabled(true);
+
+        initializers.add(requestContextListener);
+        initializers.add(webBeanContextListener);
     }
 
 }

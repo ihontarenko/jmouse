@@ -1,13 +1,12 @@
 package org.jmouse.testing_ground.binder.dto;
 
+import org.jmouse.beans.annotation.BeanCollection;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.core.bind.BindRequired;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @BeanFactories
 @Configuration(name = "userDTO")
@@ -24,8 +23,12 @@ public class User {
     }
 
     @BindRequired
-    public void setName(String name) {
+    public void setName(@Qualifier("uname") @BeanCollection String name) {
         this.name = name;
+    }
+
+    public void setCopy(Locale.LanguageRange range) {
+
     }
 
     public List<Address> getAddress() {

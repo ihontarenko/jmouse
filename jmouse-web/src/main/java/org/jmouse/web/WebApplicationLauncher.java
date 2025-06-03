@@ -17,8 +17,10 @@ import org.jmouse.web.initializer.context.StartupRootApplicationContextInitializ
 import org.jmouse.web.server.WebServer;
 import org.jmouse.web.server.WebServerConfigHolder;
 import org.jmouse.web.server.WebServerFactory;
+import org.jmouse.web.servlet.FrameworkDispatcherServlet;
 import org.jmouse.web.servlet.FrameworkDispatcherServletRegistration;
 import org.jmouse.web.servlet.filter.LoggingServletFilter;
+import org.jmouse.web.servlet.filter.properties.FilterInitializers;
 import org.jmouse.web.servlet.registration.FilterRegistrationBean;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
@@ -93,12 +95,37 @@ public class WebApplicationLauncher {
         }
 
         @Provide
-        public FilterRegistrationBean<LoggingServletFilter> loggingServletFilter() {
+        public ServletRegistrationBean<?> indexDispatcher(WebBeanContext rootContext, DispatcherProperties properties) {
+            ServletRegistrationBean<?> registration = new ServletRegistrationBean<>(null, new FrameworkDispatcherServlet(rootContext));
+
+            registration.setEnabled(properties.isEnabled());
+            registration.setLoadOnStartup(properties.getLoadOnStartup() + 1);
+            registration.addMappings("/index");
+
+            return registration;
+        }
+
+        @Provide
+        public FilterRegistrationBean<LoggingServletFilter> loggingServletFilter(FilterInitializers filterInitializers) {
             FilterRegistrationBean<LoggingServletFilter> registration = new FilterRegistrationBean<>(
                     "logging", new LoggingServletFilter());
+
             registration.setEnabled(true);
             registration.addUrlPatterns("/*");
             registration.setDispatcherTypes(DispatcherType.REQUEST);
+
+            return registration;
+        }
+
+        @Provide
+        public FilterRegistrationBean<LoggingServletFilter> loggingServletFilter2(FilterInitializers filterInitializers) {
+            FilterRegistrationBean<LoggingServletFilter> registration = new FilterRegistrationBean<>(
+                    "logging2", new LoggingServletFilter());
+
+            registration.setEnabled(true);
+            registration.addUrlPatterns("/*");
+            registration.setDispatcherTypes(DispatcherType.REQUEST);
+
             return registration;
         }
 

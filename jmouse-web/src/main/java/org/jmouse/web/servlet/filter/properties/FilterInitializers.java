@@ -23,6 +23,10 @@ public class FilterInitializers {
         this.context = context;
     }
 
+    public Properties getPropertiesFor(Class<?> filterType) {
+        return getProperties().get(filterType.getName());
+    }
+
     public List<Class<?>> getFilterClasses() {
         List<? extends Class<?>> filterClasses = this.filterClasses;
 

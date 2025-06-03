@@ -1,23 +1,17 @@
 package org.jmouse.core.bind;
 
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
-import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
 import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectIntrospector;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.util.CachedSupplier;
 import org.jmouse.util.Factory;
-import org.jmouse.util.SingletonSupplier;
 import org.jmouse.util.helper.Arrays;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.RecordComponent;
-import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import static org.jmouse.core.reflection.JavaType.forClass;
 import static org.jmouse.core.reflection.Reflections.*;
@@ -68,12 +62,12 @@ final public class ValueObject<T extends Record> extends Bean<T> {
      * @throws IllegalArgumentException if the values do not match the expected properties
      * @throws IllegalStateException    if no constructor is found for the record type
      */
-    public Supplier<T> getInstance(Values values) {
+    public Factory<T> getInstance(Values values) {
         if (values.owner != this) {
             throw new IllegalArgumentException("Virtual instances can only be owned by " + this);
         }
 
-        return new CachedSupplier<>(() -> {
+        return Factory.of(new CachedSupplier<>(() -> {
             Object[] arguments = new Object[getProperties().size()];
             int      index     = 0;
 
@@ -103,47 +97,12 @@ final public class ValueObject<T extends Record> extends Bean<T> {
             }
 
             return Reflections.instantiate(constructor, arguments);
-        });
+        }));
     }
 
     @Override
     public String toString() {
         return "ValueObject: %s; Properties: %d".formatted(type, getProperties().size());
-    }
-
-    /**
-     * Retrieves all properties defined in this structured.
-     *
-     * @return a collection of properties
-     */
-    @Override
-    @SuppressWarnings({"unchecked"})
-    public Collection<? extends PropertyDescriptor<T>> getProperties() {
-        return ((ValueObjectDescriptor<T>)descriptor).getProperties().values();
-    }
-
-    /**
-     * Retrieves a specific property by name.
-     *
-     * @param name the name of the property
-     * @return the property associated with the given name, or {@code null} if not found
-     */
-    @Override
-    @SuppressWarnings({"unchecked"})
-    public PropertyDescriptor<T> getProperty(String name) {
-        return ((ValueObjectDescriptor<T>)descriptor).getProperty(name);
-    }
-
-    /**
-     * Checks whether this structured contains a property with the given name.
-     *
-     * @param name the property name to check
-     * @return {@code true} if the property exists, otherwise {@code false}
-     */
-    @Override
-    @SuppressWarnings({"unchecked"})
-    public boolean hasProperty(String name) {
-        return ((ValueObjectDescriptor<T>)descriptor).hasProperty(name);
     }
 
     /**
