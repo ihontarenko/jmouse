@@ -8,7 +8,7 @@ import java.util.*;
 
 abstract public class ExecutableData<M extends Executable> extends AnnotatedElementData<M> {
 
-    private final Map<String, ParameterDescriptor> parameters     = new HashMap<>();
+    private final Map<String, ParameterDescriptor> parameters     = new LinkedHashMap<>();
     private final List<ClassTypeDescriptor>        exceptionTypes = new ArrayList<>();
 
     public ExecutableData(M target) {

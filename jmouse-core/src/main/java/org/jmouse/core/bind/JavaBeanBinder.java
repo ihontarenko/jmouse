@@ -75,6 +75,10 @@ public class JavaBeanBinder extends AbstractBinder {
                 Bindable<Object>   bindableProperty = of(propertyType).withSuppliedInstance(value);
                 BindResult<Object> result           = bindValue(propertyPath, bindableProperty, accessor, callback);
 
+                if (result.isEmpty()) {
+                    result = BindResult.of(getDefaultIfPresent(property));
+                }
+
                 checkRequirements(result, propertyName, property);
 
                 // If no value was found in the data source, skip this property
@@ -146,6 +150,19 @@ public class JavaBeanBinder extends AbstractBinder {
         }
 
         return name;
+    }
+
+    protected String getDefaultIfPresent(PropertyDescriptor<?> property) {
+        String defaultValue = null;
+
+        if (property.isWritable()) {
+            Method setter = property.getSetterMethod().unwrap();
+            if (setter != null && setter.isAnnotationPresent(BindDefault.class)) {
+                defaultValue = setter.getAnnotation(BindDefault.class).value();
+            }
+        }
+
+        return defaultValue;
     }
 
     /**

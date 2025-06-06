@@ -1,6 +1,5 @@
 package org.jmouse.web;
 
-import jakarta.servlet.DispatcherType;
 import org.jmouse.beans.ScannerBeanContextInitializer;
 import org.jmouse.beans.annotation.Configuration;
 import org.jmouse.beans.annotation.Provide;
@@ -10,8 +9,11 @@ import org.jmouse.context.BeanProperties;
 import org.jmouse.core.bind.Bind;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.reflection.ClassFinder;
+import org.jmouse.util.SingletonSupplier;
+import org.jmouse.web.configuration.SessionProperties;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.initializer.WebApplicationInitializer;
+import org.jmouse.web.initializer.application.WebApplicationInitializerProvider;
 import org.jmouse.web.initializer.application.jMouseWebApplicationInitializer;
 import org.jmouse.web.initializer.context.StartupRootApplicationContextInitializer;
 import org.jmouse.web.server.WebServer;
@@ -19,13 +21,12 @@ import org.jmouse.web.server.WebServerConfigHolder;
 import org.jmouse.web.server.WebServerFactory;
 import org.jmouse.web.servlet.FrameworkDispatcherServlet;
 import org.jmouse.web.servlet.FrameworkDispatcherServletRegistration;
-import org.jmouse.web.servlet.filter.LoggingServletFilter;
-import org.jmouse.web.servlet.filter.properties.FilterInitializers;
-import org.jmouse.web.servlet.registration.FilterRegistrationBean;
+import org.jmouse.web.servlet.SessionCookieInitializer;
+import org.jmouse.web.servlet.registration.RegistrationBean;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.List;
 
 public class WebApplicationLauncher {
 
@@ -64,6 +65,8 @@ public class WebApplicationLauncher {
         // attach ApplicationFactory object
         rootContext.registerBean(ApplicationFactory.class, applicationFactory);
 
+        SessionProperties properties = rootContext.getBean(SessionProperties.class);
+
         // web server part
         createWebServer(rootContext).start();
 
@@ -71,13 +74,15 @@ public class WebApplicationLauncher {
     }
 
     public WebServer createWebServer(WebBeanContext rootContext) {
-        WebServerConfigHolder webServerConfigHolder = new WebServerConfigHolder();
+        WebServerConfigHolder           webServerConfigHolder = new WebServerConfigHolder();
+        List<WebApplicationInitializer> initializers          = new WebApplicationInitializerProvider(
+                rootContext).getWebApplicationInitializersExcluding(RegistrationBean.class);
 
         Bind.with(rootContext.getEnvironmentBinder())
                 .to(WebServerFactory.WEB_SERVER_CONFIGURATION_PATH, webServerConfigHolder);
 
         WebServerFactory factory = rootContext.getBean(WebServerFactory.class);
-        return factory.getWebServer(new jMouseWebApplicationInitializer(rootContext));
+        return factory.getWebServer(initializers.toArray(WebApplicationInitializer[]::new));
     }
 
     @Configuration
@@ -106,35 +111,16 @@ public class WebApplicationLauncher {
         }
 
         @Provide
-        public FilterRegistrationBean<LoggingServletFilter> loggingServletFilter(FilterInitializers filterInitializers) {
-            FilterRegistrationBean<LoggingServletFilter> registration = new FilterRegistrationBean<>(
-                    "logging", new LoggingServletFilter());
-
-            registration.setEnabled(true);
-            registration.addUrlPatterns("/*");
-            registration.setDispatcherTypes(DispatcherType.REQUEST);
-
-            return registration;
-        }
-
-        @Provide
-        public FilterRegistrationBean<LoggingServletFilter> loggingServletFilter2(FilterInitializers filterInitializers) {
-            FilterRegistrationBean<LoggingServletFilter> registration = new FilterRegistrationBean<>(
-                    "logging2", new LoggingServletFilter());
-
-            registration.setEnabled(true);
-            registration.addUrlPatterns("/*");
-            registration.setDispatcherTypes(DispatcherType.REQUEST);
-
-            return registration;
+        public SessionCookieInitializer sessionInitializer(WebBeanContext rootContext) {
+            return new SessionCookieInitializer(SingletonSupplier.of(() -> rootContext.getBean(SessionProperties.class)));
         }
 
         @BeanProperties("jmouse.web.server.dispatcher")
         public static class DispatcherProperties {
 
-            private boolean  enabled;
             private String[] mappings;
             private int      loadOnStartup;
+            private boolean  enabled;
 
             public boolean isEnabled() {
                 return enabled;

@@ -1,5 +1,7 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.bind.descriptor.AnnotationDescriptor;
+import org.jmouse.core.bind.descriptor.MethodDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.util.Factory;
@@ -93,6 +95,7 @@ public class ValueObjectBinder extends AbstractBinder {
 
             // Set the bound value if available
             result.ifPresent(bound -> setter.set(values, bound));
+            result.ifAbsent(() -> setter.set(values, getDefaultIfPresent(property)));
         }
 
         // Invoke the callback after binding
@@ -103,6 +106,25 @@ public class ValueObjectBinder extends AbstractBinder {
 
         // Instantiate and return the record
         return BindResult.of(instance);
+    }
+
+    protected Object getDefaultIfPresent(PropertyDescriptor<?> property) {
+        Object           defaultValue     = null;
+        MethodDescriptor methodDescriptor = property.getGetterMethod();
+
+        if (methodDescriptor != null && methodDescriptor.getAnnotations() != null) {
+            AnnotationDescriptor annotationDescriptor = methodDescriptor.getAnnotations().getFirst();
+            if (annotationDescriptor.unwrap() instanceof BindDefault bindDefault) {
+                defaultValue = bindDefault.value();
+            }
+        }
+
+        if (defaultValue != null) {
+            Class<?> targetType = property.getType().getClassType();
+            defaultValue = context.getConversion().convert(defaultValue, targetType);
+        }
+
+        return defaultValue;
     }
 
     /**

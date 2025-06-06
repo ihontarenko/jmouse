@@ -2,6 +2,7 @@ package org.jmouse.core.bind.descriptor.structured.vo;
 
 import org.jmouse.core.bind.descriptor.AbstractDescriptor;
 import org.jmouse.core.bind.descriptor.ClassTypeDescriptor;
+import org.jmouse.core.bind.descriptor.MethodDescriptor;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyData;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
@@ -69,6 +70,16 @@ public class ValueObjectPropertyDescriptor<T>
     @Override
     public Getter<T, Object> getGetter() {
         return container.getGetter();
+    }
+
+    /**
+     * Returns the getter method descriptor for this property.
+     *
+     * @return the getter method descriptor, or {@code null} if not available
+     */
+    @Override
+    public MethodDescriptor getGetterMethod() {
+        return container.getGetterMethod();
     }
 
     /**

@@ -106,6 +106,17 @@ public final class BindResult<T> {
     }
 
     /**
+     * Performs the given action if the value is absent.
+     *
+     * @param function the action to perform
+     */
+    public void ifAbsent(Runnable function) {
+        if (isEmpty()) {
+            Objects.requireNonNullElseGet(function, () -> () -> {}).run();
+        }
+    }
+
+    /**
      * Returns the contained value if present; otherwise, returns the provided default value.
      *
      * @param defaultValue the default value to return if no value is present

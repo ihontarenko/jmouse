@@ -3,6 +3,7 @@ package org.jmouse.web.servlet.filter;
 import jakarta.servlet.*;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanNameKeeper;
+import org.jmouse.beans.BeanNotFoundException;
 import org.jmouse.web.context.WebBeanContext;
 
 import java.io.IOException;
@@ -85,8 +86,8 @@ public class DelegatingBeanFilter implements Filter, BeanNameKeeper {
      * @throws ServletException if the delegate filter throws a servlet exception
      */
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-                                                                                                     ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
         Filter delegate = this.delegate;
 
         if (delegate == null) {
@@ -114,7 +115,8 @@ public class DelegatingBeanFilter implements Filter, BeanNameKeeper {
         BeanContext context = getBeanContext();
 
         if (context == null) {
-            context = WebBeanContext.findWebBeanContext(getDelegateConfig().getServletContext());
+            ServletContext sc = getDelegateConfig().getServletContext();
+            context = WebBeanContext.findWebBeanContext(sc);
 
             if (context == null) {
                 throw new IllegalStateException("Unable to find WebBeanContext");
@@ -123,13 +125,11 @@ public class DelegatingBeanFilter implements Filter, BeanNameKeeper {
             this.beanContext = context;
         }
 
-        Filter bean = context.getBean(Filter.class, getBeanName());
-
-        if (bean == null) {
-            throw new IllegalStateException("No Filter bean named '" + getBeanName() + "' found in context");
+        try {
+            return context.getBean(Filter.class, getBeanName());
+        } catch (BeanNotFoundException bnf) {
+            throw new IllegalStateException("No Filter bean found: " + bnf.getMessage());
         }
-
-        return bean;
     }
 
     /**

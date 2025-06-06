@@ -2,11 +2,13 @@ package org.jmouse.web.servlet.filter;
 
 import jakarta.servlet.*;
 import org.apache.catalina.connector.RequestFacade;
+import org.jmouse.beans.annotation.Provide;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+@Provide("logFilter")
 public class LoggingServletFilter implements Filter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggingServletFilter.class);

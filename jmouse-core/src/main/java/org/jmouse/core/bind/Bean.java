@@ -1,6 +1,5 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.descriptor.AbstractDescriptor;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.reflection.JavaType;
