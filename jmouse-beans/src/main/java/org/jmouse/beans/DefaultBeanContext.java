@@ -22,7 +22,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static java.util.stream.Collectors.joining;
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**
@@ -257,6 +256,13 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
 
         if (beanNames.size() == 1) {
             return getBean(beanNames.getFirst());
+        }
+
+        Optional<String> primaryName = beanNames.stream()
+                .filter(name -> getDefinition(name).isPrimary()).findFirst();
+
+        if (primaryName.isPresent()) {
+            return getBean(primaryName.get());
         }
 
         throw new BeanContextException(

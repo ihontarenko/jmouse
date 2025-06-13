@@ -76,7 +76,13 @@ public class JavaBeanBinder extends AbstractBinder {
                 BindResult<Object> result           = bindValue(propertyPath, bindableProperty, accessor, callback);
 
                 if (result.isEmpty()) {
-                    result = BindResult.of(getDefaultIfPresent(property));
+                    Object defaultObject = getDefaultIfPresent(property);
+
+                    if (defaultObject != null) {
+                        defaultObject = context.getConversion().convert(defaultObject, propertyType.getClassType());
+                    }
+
+                    result = BindResult.of(defaultObject);
                 }
 
                 checkRequirements(result, propertyName, property);

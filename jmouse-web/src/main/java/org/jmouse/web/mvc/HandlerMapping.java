@@ -1,4 +1,4 @@
-package org.jmouse.mvc;
+package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
 

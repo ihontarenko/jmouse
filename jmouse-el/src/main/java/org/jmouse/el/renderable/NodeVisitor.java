@@ -13,6 +13,14 @@ import org.jmouse.el.renderable.node.*;
 public interface NodeVisitor extends Visitor {
 
     /**
+     * Visits a URLNode.
+     *
+     * @param urlNode the url node to process
+     */
+    default void visit(URLNode urlNode) {
+    }
+
+    /**
      * Visits a CacheNode.
      *
      * @param cacheNode the set node to process

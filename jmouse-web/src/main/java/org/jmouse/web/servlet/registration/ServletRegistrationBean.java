@@ -153,4 +153,14 @@ public class ServletRegistrationBean<S extends Servlet>
     public String getDescription() {
         return "servlet " + getName();
     }
+
+    /**
+     * Determine the order of this registration relative to others.
+     *
+     * @return the order value (lower =&gt; higher priority)
+     */
+    @Override
+    public int getOrder() {
+        return -1000 + getLoadOnStartup();
+    }
 }

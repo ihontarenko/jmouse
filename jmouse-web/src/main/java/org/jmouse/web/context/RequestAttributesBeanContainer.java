@@ -1,8 +1,10 @@
 package org.jmouse.web.context;
 
 import org.jmouse.beans.BeanContainer;
+import org.jmouse.beans.BeanScope;
 import org.jmouse.web.request.RequestAttributes;
 import org.jmouse.web.request.RequestAttributesHolder;
+import org.jmouse.web.request.SessionAttributesHolder;
 import org.jmouse.web.servlet.RequestContextListener;
 
 /**
@@ -16,13 +18,19 @@ import org.jmouse.web.servlet.RequestContextListener;
  * allowing this container to bind beans to the lifecycle of that request.
  * </p>
  */
-public class RequestScopedBeanContainer implements BeanContainer {
+public class RequestAttributesBeanContainer implements BeanContainer {
 
     /**
      * Prefix applied to all bean names to form the actual request attribute key.
      * Prevents collisions with other request attributes.
      */
-    public static final String BEAN_NAMES_PREFIX = RequestScopedBeanContainer.class.getName() + ".BEAN:";
+    public static final String BEAN_NAMES_PREFIX = RequestAttributesBeanContainer.class.getName() + ".BEAN:";
+
+    private final BeanScope scope;
+
+    public RequestAttributesBeanContainer(BeanScope scope) {
+        this.scope = scope;
+    }
 
     /**
      * Retrieve a bean from the current request scope by name.
@@ -87,12 +95,15 @@ public class RequestScopedBeanContainer implements BeanContainer {
      *                             {@link RequestContextListener} is not registered
      */
     public RequestAttributes getRequestAttributes() {
-        RequestAttributes attributes = RequestAttributesHolder.getRequestAttributes();
+        RequestAttributes attributes = switch (scope) {
+            case REQUEST -> RequestAttributesHolder.getRequestAttributes();
+            case SESSION -> SessionAttributesHolder.getRequestAttributes();
+            default -> throw new WebContextException("Unsupported scope %s".formatted(scope));
+        };
 
         if (attributes == null) {
             throw new WebContextException(
-                    "Unsupported bean-scope REQUEST. Is '%s' listener registered or no active request?".formatted(
-                            RequestContextListener.class.getName()));
+                    "Unsupported bean-scope %s during no active server request.".formatted(scope));
         }
 
         return attributes;

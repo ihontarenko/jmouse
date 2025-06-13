@@ -22,23 +22,40 @@ public class WebApplicationInitializerProvider {
         return List.copyOf(context.getBeans(WebApplicationInitializer.class));
     }
 
-    public List<WebApplicationInitializer> getWebApplicationInitializersExcluding(Class<?>... types) {
+    public List<WebApplicationInitializer> getExcluding(Class<?>... types) {
         List<WebApplicationInitializer> initializers = getWebApplicationInitializers();
+        Matcher<Class<?>>               matcher      = createClassMatcherForTypes(types);
 
-        if (types != null && types.length > 0) {
-            Optional<Matcher<Class<?>>> optional = Arrays.stream(types)
-                    .map(ClassMatchers::isSupertype).reduce(Matcher::logicalOr);
-
-            Matcher<Class<?>> matcher = optional.get();
-            initializers = initializers.stream()
-                    .filter(initializer -> !matcher.matches(initializer.getClass())).toList();
-        }
+        initializers = initializers.stream().filter(
+                initializer -> !matcher.matches(initializer.getClass())).toList();
 
         return initializers;
     }
 
-    public List<WebApplicationInitializer> getWebApplicationInitializersWithoutRegistration() {
-        return getWebApplicationInitializersExcluding(RegistrationBean.class);
+    public List<WebApplicationInitializer> getIncluding(Class<?>... types) {
+        List<WebApplicationInitializer> initializers = getWebApplicationInitializers();
+        Matcher<Class<?>>               matcher      = createClassMatcherForTypes(types);
+
+        initializers = initializers.stream().filter(
+                initializer -> matcher.matches(initializer.getClass())).toList();
+
+        return initializers;
+    }
+
+    public List<WebApplicationInitializer> getRegistrationBeans() {
+        return getIncluding(RegistrationBean.class);
+    }
+
+    private Matcher<Class<?>> createClassMatcherForTypes(Class<?>... types) {
+        Matcher<Class<?>> matcher = Matcher.constant(true);
+
+        if (types != null && types.length > 0) {
+            Optional<Matcher<Class<?>>> optional = Arrays.stream(types).map(ClassMatchers::isSupertype)
+                    .reduce(Matcher::logicalOr);
+            matcher = optional.get();
+        }
+
+        return matcher;
     }
 
 }

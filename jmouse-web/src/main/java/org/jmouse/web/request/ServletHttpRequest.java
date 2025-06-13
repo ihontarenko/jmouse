@@ -2,7 +2,7 @@ package org.jmouse.web.request;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-public class ServletHttpRequest implements HttpRequest {
+public class ServletHttpRequest implements ServletRequest {
 
     private final HttpServletRequest request;
 

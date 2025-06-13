@@ -21,9 +21,11 @@ public class ServletContextRegistrations {
     public static final String REQUEST_CONTEXT_LISTENER_NAME  = "requestContextListener";
 
     public Collection<WebApplicationInitializer> getRegistrationBeanInitializers(BeanContext context) {
-        List<WebApplicationInitializer> initializers = new ArrayList<>();
+        List<WebApplicationInitializer>   initializers = new ArrayList<>();
+        WebApplicationInitializerProvider provider     = new WebApplicationInitializerProvider(
+                (WebBeanContext) context);
 
-        for (AbstractRegistrationBean bean : context.getBeans(AbstractRegistrationBean.class)) {
+        for (WebApplicationInitializer bean : provider.getRegistrationBeans()) {
             if (bean instanceof ServletRegistrationBean<?> servletRegistrationBean) {
                 initializers.add(servletRegistrationBean);
             } else if (bean instanceof FilterRegistrationBean<?> filterRegistrationBean) {

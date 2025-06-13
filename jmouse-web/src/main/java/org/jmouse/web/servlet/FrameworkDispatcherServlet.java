@@ -28,6 +28,7 @@ public class FrameworkDispatcherServlet extends FrameworkDispatcher {
         rs.setStatus(HttpStatus.OK.getCode());
 
         writer.write("<h1>ZAiS</h1>");
+        writer.write("<h1>"+ rs.encodeURL("/") +"</h1>");
         writer.write(method.name());
 
         writer.write("<h2>");
@@ -39,15 +40,15 @@ public class FrameworkDispatcherServlet extends FrameworkDispatcher {
         writer.write("</h3>");
 
         writer.write("<h4>1. ");
-        writer.write((String) context.getBean("rqUUID"));
+        writer.write((String) context.getBean("s1"));
         writer.write("</h4>");
 
         writer.write("<h4>2. ");
-        writer.write((String) context.getBean("rqUUID"));
+        writer.write((String) context.getBean("s1"));
         writer.write("</h4>");
 
         writer.write("<h4>3. ");
-        writer.write((String) context.getBean("rqUUID"));
+        writer.write((String) context.getBean("s2"));
         writer.write("</h4>");
 
         writer.write("<h4>EL ");

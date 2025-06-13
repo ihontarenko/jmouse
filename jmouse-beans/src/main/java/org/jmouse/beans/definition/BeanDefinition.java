@@ -39,6 +39,22 @@ public interface BeanDefinition {
     }
 
     /**
+     * Indicates whether the bean represented by this definition is primary.=
+     *
+     * @return {@code true} if the bean is primary, otherwise {@code false}.
+     */
+    default boolean isPrimary() {
+        return false;
+    }
+
+    /**
+     * Sets whether the bean represented by this definition is primary.
+     *
+     * @param primary {@code true} if the bean should be primary, {@code false} otherwise.
+     */
+    void setPrimary(boolean primary);
+
+    /**
      * Indicates whether the bean represented by this definition is proxied.
      * <p>
      * A proxied bean typically wraps the actual bean instance with additional functionality,
