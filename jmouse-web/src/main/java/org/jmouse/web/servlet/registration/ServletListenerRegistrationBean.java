@@ -3,10 +3,12 @@ package org.jmouse.web.servlet.registration;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import org.jmouse.beans.annotation.Ignore;
+import org.jmouse.util.Priority;
 
 import java.util.EventListener;
 
 @Ignore
+@Priority(-1500)
 public class ServletListenerRegistrationBean<L extends EventListener> extends AbstractRegistrationBean {
 
     private L listener;

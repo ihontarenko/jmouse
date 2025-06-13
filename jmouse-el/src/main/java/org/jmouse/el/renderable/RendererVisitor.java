@@ -74,6 +74,17 @@ public class RendererVisitor implements NodeVisitor {
     }
 
     /**
+     * Visits a URLNode.
+     *
+     * @param urlNode the url node to process
+     */
+    @Override
+    public void visit(URLNode urlNode) {
+        // todo:
+        content.append("RAW_URL:" + urlNode.getRawURL());
+    }
+
+    /**
      * Processes a PrintNode by evaluating its expression and appending the result to the output.
      * <p>
      * If the expression is an instance of FunctionNode, it delegates to that node's visitor method.

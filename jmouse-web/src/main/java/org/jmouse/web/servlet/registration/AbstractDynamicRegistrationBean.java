@@ -14,7 +14,8 @@ import java.util.Map;
  *
  * @param <D> the specific type of {@link Registration.Dynamic} returned by {@link #doRegistration}
  */
-abstract public class AbstractDynamicRegistrationBean<D extends Registration.Dynamic> extends AbstractRegistrationBean {
+abstract public class AbstractDynamicRegistrationBean<D extends Registration.Dynamic>
+        extends AbstractRegistrationBean {
 
     private boolean             asyncSupported = true;
     private Map<String, String> initParameters = new LinkedHashMap<>();

@@ -2,6 +2,7 @@ package org.jmouse.beans.definition.strategy;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.annotation.BeanCollection;
+import org.jmouse.beans.annotation.Primary;
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.beans.definition.AggregatedBeansDependency;
@@ -91,6 +92,7 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
         if (element.isAnnotationPresent(Provide.class)) {
             definition.setProxied(Reflections.getAnnotationValue(element, Provide.class, Provide::proxied));
             definition.setScope(Reflections.getAnnotationValue(element, Provide.class, Provide::scope));
+            definition.setPrimary(element.isAnnotationPresent(Primary.class));
         }
     }
 

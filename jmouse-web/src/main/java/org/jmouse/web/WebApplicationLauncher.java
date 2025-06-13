@@ -1,27 +1,29 @@
 package org.jmouse.web;
 
+import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.ScannerBeanContextInitializer;
 import org.jmouse.beans.annotation.Configuration;
 import org.jmouse.beans.annotation.Provide;
+import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.context.ApplicationConfigurer;
 import org.jmouse.context.ApplicationFactory;
 import org.jmouse.context.BeanProperties;
-import org.jmouse.core.bind.Bind;
+import org.jmouse.core.bind.BindDefault;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.reflection.ClassFinder;
+import org.jmouse.util.IdGenerator;
+import org.jmouse.util.SimpleRandomStringGenerator;
 import org.jmouse.util.SingletonSupplier;
-import org.jmouse.web.configuration.SessionProperties;
+import org.jmouse.web.servlet.SessionProperties;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.initializer.WebApplicationInitializer;
 import org.jmouse.web.initializer.application.WebApplicationInitializerProvider;
-import org.jmouse.web.initializer.application.jMouseWebApplicationInitializer;
 import org.jmouse.web.initializer.context.StartupRootApplicationContextInitializer;
 import org.jmouse.web.server.WebServer;
-import org.jmouse.web.server.WebServerConfigHolder;
 import org.jmouse.web.server.WebServerFactory;
 import org.jmouse.web.servlet.FrameworkDispatcherServlet;
 import org.jmouse.web.servlet.FrameworkDispatcherServletRegistration;
-import org.jmouse.web.servlet.SessionCookieInitializer;
+import org.jmouse.web.servlet.SessionConfigurationInitializer;
 import org.jmouse.web.servlet.registration.RegistrationBean;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
@@ -41,10 +43,10 @@ public class WebApplicationLauncher {
 
         scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
                 ClassFinder.findImplementations(WebApplicationInitializer.class, rootTypes)));
-        scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
-                ClassFinder.findImplementations(ApplicationConfigurer.class, rootTypes)));
-        scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
-                ClassFinder.findAnnotatedClasses(BeanProperties.class, rootTypes)));
+        scannerBeanContextInitializer.addScanner(
+                rootTypes -> new ArrayList<>(ClassFinder.findImplementations(ApplicationConfigurer.class, rootTypes)));
+        scannerBeanContextInitializer.addScanner(
+                rootTypes -> new ArrayList<>(ClassFinder.findAnnotatedClasses(BeanProperties.class, rootTypes)));
 
         return scannerBeanContextInitializer;
     }
@@ -52,12 +54,10 @@ public class WebApplicationLauncher {
     public WebBeanContext launch() {
         ApplicationFactory<WebBeanContext> applicationFactory = new WebApplicationFactory();
         Environment                        environment        = applicationFactory.createDefaultEnvironment();
-
-        ScannerBeanContextInitializer scannerBeanContextInitializer = getScannerBeanContextInitializer();
-
-        WebBeanContext rootContext = applicationFactory.createContext(
+        WebBeanContext                     rootContext        = applicationFactory.createContext(
                 WebBeanContext.DEFAULT_ROOT_WEB_CONTEXT_NAME, baseClasses);
 
+        ScannerBeanContextInitializer scannerBeanContextInitializer = getScannerBeanContextInitializer();
         rootContext.addInitializer(scannerBeanContextInitializer);
         rootContext.addInitializer(new StartupRootApplicationContextInitializer(environment));
         rootContext.refresh();
@@ -65,7 +65,10 @@ public class WebApplicationLauncher {
         // attach ApplicationFactory object
         rootContext.registerBean(ApplicationFactory.class, applicationFactory);
 
-        SessionProperties properties = rootContext.getBean(SessionProperties.class);
+        IdGenerator<String> idGenerator = new SimpleRandomStringGenerator(11);
+
+        rootContext.registerBean("s1", idGenerator::generate, BeanScope.REQUEST);
+        rootContext.registerBean("s2", idGenerator::generate, BeanScope.SESSION);
 
         // web server part
         createWebServer(rootContext).start();
@@ -74,23 +77,45 @@ public class WebApplicationLauncher {
     }
 
     public WebServer createWebServer(WebBeanContext rootContext) {
-        WebServerConfigHolder           webServerConfigHolder = new WebServerConfigHolder();
-        List<WebApplicationInitializer> initializers          = new WebApplicationInitializerProvider(
-                rootContext).getWebApplicationInitializersExcluding(RegistrationBean.class);
-
-        Bind.with(rootContext.getEnvironmentBinder())
-                .to(WebServerFactory.WEB_SERVER_CONFIGURATION_PATH, webServerConfigHolder);
+        List<WebApplicationInitializer> initializers = new WebApplicationInitializerProvider(
+                rootContext).getExcluding(RegistrationBean.class);
 
         WebServerFactory factory = rootContext.getBean(WebServerFactory.class);
+
         return factory.getWebServer(initializers.toArray(WebApplicationInitializer[]::new));
     }
 
     @Configuration
     public static class ServletDispatcherConfiguration {
 
+        @Provide("defaultDispatcherContext")
+        public WebBeanContext webDefaultBeanContext(WebBeanContext rootContext) {
+            ApplicationFactory<WebBeanContext> factory        = rootContext.getBean(ApplicationFactory.class);
+            WebBeanContext                     webBeanContext = factory.createContext(
+                    "DEFAULT_DISPATCHER_CONTEXT", rootContext);
+
+            webBeanContext.registerBean("dispatcher", "DEFAULT DISPATCHER!!!");
+
+            return webBeanContext;
+        }
+
+        @Provide("indexDispatcherContext")
+        public WebBeanContext indexDispatcherContext(WebBeanContext rootContext) {
+            ApplicationFactory<WebBeanContext> factory        = rootContext.getBean(ApplicationFactory.class);
+            WebBeanContext                     webBeanContext = factory.createContext(
+                    "INDEX_DISPATCHER_CONTEXT", rootContext);
+
+            webBeanContext.registerBean("dispatcher", "index dispatcher!!!");
+
+            return webBeanContext;
+        }
+
         @Provide
-        public ServletRegistrationBean<?> defaultDispatcher(WebBeanContext rootContext, DispatcherProperties properties) {
-            ServletRegistrationBean<?> registration = new FrameworkDispatcherServletRegistration(rootContext);
+        public ServletRegistrationBean<?> defaultDispatcher(
+                @Qualifier(WebBeanContext.DEFAULT_ROOT_WEB_CONTEXT_NAME) WebBeanContext rootContext,
+                @Qualifier("defaultDispatcherContext") WebBeanContext webBeanContext,
+                DispatcherProperties properties) {
+            ServletRegistrationBean<?> registration = new FrameworkDispatcherServletRegistration(webBeanContext);
 
             registration.setEnabled(properties.isEnabled());
             registration.setLoadOnStartup(properties.getLoadOnStartup());
@@ -100,8 +125,12 @@ public class WebApplicationLauncher {
         }
 
         @Provide
-        public ServletRegistrationBean<?> indexDispatcher(WebBeanContext rootContext, DispatcherProperties properties) {
-            ServletRegistrationBean<?> registration = new ServletRegistrationBean<>(null, new FrameworkDispatcherServlet(rootContext));
+        public ServletRegistrationBean<?> indexDispatcher(
+                WebBeanContext rootContext,
+                @Qualifier("indexDispatcherContext") WebBeanContext webBeanContext,
+                DispatcherProperties properties) {
+            ServletRegistrationBean<?> registration = new ServletRegistrationBean<>(
+                    null, new FrameworkDispatcherServlet(webBeanContext));
 
             registration.setEnabled(properties.isEnabled());
             registration.setLoadOnStartup(properties.getLoadOnStartup() + 1);
@@ -111,8 +140,9 @@ public class WebApplicationLauncher {
         }
 
         @Provide
-        public SessionCookieInitializer sessionInitializer(WebBeanContext rootContext) {
-            return new SessionCookieInitializer(SingletonSupplier.of(() -> rootContext.getBean(SessionProperties.class)));
+        public SessionConfigurationInitializer sessionInitializer(WebBeanContext rootContext) {
+            return new SessionConfigurationInitializer(
+                    SingletonSupplier.of(() -> rootContext.getBean(SessionProperties.class)));
         }
 
         @BeanProperties("jmouse.web.server.dispatcher")
@@ -126,6 +156,7 @@ public class WebApplicationLauncher {
                 return enabled;
             }
 
+            @BindDefault("true")
             public void setEnabled(boolean enabled) {
                 this.enabled = enabled;
             }
@@ -134,6 +165,7 @@ public class WebApplicationLauncher {
                 return mappings;
             }
 
+            @BindDefault("/*")
             public void setMappings(String[] mappings) {
                 this.mappings = mappings;
             }
@@ -142,6 +174,7 @@ public class WebApplicationLauncher {
                 return loadOnStartup;
             }
 
+            @BindDefault("1")
             public void setLoadOnStartup(int loadOnStartup) {
                 this.loadOnStartup = loadOnStartup;
             }

@@ -68,6 +68,11 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     protected boolean proxied = false;
 
     /**
+     * Indicates whether the bean is primary.
+     */
+    protected boolean primary = false;
+
+    /**
      * The parent bean definition, if any.
      */
     protected BeanDefinition parent;
@@ -188,6 +193,26 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     @Override
     public void setProxied(boolean proxied) {
         this.proxied = proxied;
+    }
+
+    /**
+     * Indicates whether the bean represented by this definition is primary.=
+     *
+     * @return {@code true} if the bean is primary, otherwise {@code false}.
+     */
+    @Override
+    public boolean isPrimary() {
+        return primary;
+    }
+
+    /**
+     * Sets whether the bean represented by this definition is primary.
+     *
+     * @param primary {@code true} if the bean should be primary, {@code false} otherwise.
+     */
+    @Override
+    public void setPrimary(boolean primary) {
+        this.primary = primary;
     }
 
     /**

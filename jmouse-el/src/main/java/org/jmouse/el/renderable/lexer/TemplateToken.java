@@ -213,6 +213,11 @@ public enum TemplateToken implements Token.Type {
     T_END_CACHE(20029, "endcache", "end_cache"),
 
     /**
+     * 'url' keyword type.
+     */
+    T_URL(20030, "url"),
+
+    /**
      * 'ignore_missing' keyword type.
      */
     T_IGNORE_MISSING(21000, "ignore_missing"),

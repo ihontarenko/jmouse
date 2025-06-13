@@ -1,5 +1,7 @@
 package org.jmouse.util;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -12,79 +14,111 @@ import static java.lang.Boolean.TRUE;
 /**
  * A utility for managing value-based transformations and conditional execution.
  * <p>
- * {@link ValueFlow} provides a fluent API for defining transformations, conditions,
+ * {@link AttributeMapper} provides a fluent API for defining transformations, conditions,
  * and executions based on a wrapped value provided via a {@link Supplier}.
  * </p>
  * <p>
  * Example usage:
  * <pre>{@code
  * // Example of numerical value validation with AND and OR conditions
- * ValueFlow.get()
- *     .create(() -> 15)
+ * AttributeMapper.get()
+ *     .get(() -> 15)
  *     .when(x -> x > 10)
  *     .and(x -> x < 20) // Executes if x > 10 and x < 20
- *     .toConsume(value -> System.out.println("Valid number: " + value));
+ *     .accept(value -> System.out.println("Valid number: " + value));
  *
  * // Example of string validation with an OR condition
- * ValueFlow.get()
- *     .create(() -> "Hello")
+ * AttributeMapper.get()
+ *     .get(() -> "Hello")
  *     .when(String::isEmpty)
  *     .when(s -> s.startsWith("H"), false) // Equivalent to OR condition
- *     .toConsume(value -> System.out.println("String matches condition: " + value));
+ *     .accept(value -> System.out.println("String matches condition: " + value));
  *
  * // Transforming a string to uppercase if it is not null
- * ValueFlow.get()
- *     .create(() -> "java")
+ * AttributeMapper.get()
+ *     .get(() -> "java")
  *     .whenNonNull()
  *     .as(String::toUpperCase)
- *     .toConsume(value -> System.out.println("Uppercased: " + value));
+ *     .accept(value -> System.out.println("Uppercased: " + value));
  *
  * // Converting a numerical value to an integer if it is greater than 0
- * ValueFlow.get()
- *     .create(() -> 42.8)
+ * AttributeMapper.get()
+ *     .get(() -> 42.8)
  *     .when(x -> x > 0)
  *     .asInt(Number::intValue)
- *     .toConsume(value -> System.out.println("Converted to int: " + value));
+ *     .accept(value -> System.out.println("Converted to int: " + value));
  * }</pre>
  */
 
-public class ValueFlow {
+public class AttributeMapper {
 
-    private static final ValueFlow MAPPER = new ValueFlow();
+    private static final AttributeMapper MAPPER = new AttributeMapper();
 
-    private ValueFlow() {
+    private AttributeMapper() {
     }
 
     /**
-     * Retrieves the singleton instance of {@link ValueFlow}.
+     * Retrieves the singleton instance of {@link AttributeMapper}.
      *
      * @return the singleton instance
      */
-    public static ValueFlow get() {
+    public static AttributeMapper get() {
         return MAPPER;
     }
 
     /**
-     * Creates a new {@link Value} instance based on a given {@link Supplier}.
+     * Creates a new {@link Container} instance based on a given {@link Supplier}.
      *
      * @param supplier the value supplier
      * @param <T>      the type of the value
-     * @return a new {@link Value} instance
+     * @return a new {@link Container} instance
      */
-    public <T> Value<T> create(Supplier<T> supplier) {
-        return new Value<>(SingletonSupplier.of(supplier), null);
+    public <T> Container<T> get(Supplier<T> supplier) {
+        return new Container<>(SingletonSupplier.of(supplier), null);
     }
 
     /**
-     * Creates a new {@link ValueFlow.Value} instance from a given structured.
+     * Creates a new {@link Container} by accessing a value from the given {@link Map} using a specified key.
+     *
+     * <p>The map is not copied, so the resulting {@link Container} reflects the current value associated with the key
+     * when {@code Value#get(Map, K)} is called.
+     *
+     * @param map the source map
+     * @param key the key whose value should be retrieved
+     * @param <K> the key type
+     * @param <T> the value type
+     * @return a {@link Container} representing the value at the specified key
+     */
+    public <K, T> Container<T> get(Map<K, T> map, K key) {
+        return new Container<>(SingletonSupplier.of(() -> map.get(key)), null);
+    }
+
+    /**
+     * Creates a new {@link Container} by accessing an element from a {@link List} at a specified index.
+     *
+     * <p>The list is not copied, so the resulting {@link Container} retrieves the element at the given index
+     * at the time {@code Value#get(List, int)} is invoked.
+     *
+     * @param list  the source list
+     * @param index the index of the desired element
+     * @param <T>   the type of the list elements
+     * @return a {@link Container} wrapping the list element at the given index
+     * @throws IndexOutOfBoundsException if the index is invalid at the time of access
+     */
+    public <T> Container<T> get(List<T> list, int index) {
+        return new Container<>(SingletonSupplier.of(() -> list.get(index)), null);
+    }
+
+    /**
+     * Creates a new {@link Container} instance from a given structured.
      * This is a convenient method that wraps the provided instance into a supplier.
      *
      * @param instance the instance to wrap
      * @param <T>      the type of the instance
-     * @return a {@link ValueFlow.Value} wrapping the given instance
+     * @return a {@link Container} wrapping the given instance
      */
-    public <T> Value<T> create(T instance) {
-        return create(() -> instance);
+    public <T> Container<T> get(T instance) {
+        return get(() -> instance);
     }
 
     /**
@@ -100,12 +134,12 @@ public class ValueFlow {
      *
      * @param <T> the type of the contained value
      */
-    final public static class Value<T> {
+    final public static class Container<T> {
 
         private final Supplier<T>  value;
         private final Predicate<T> predicate;
 
-        private Value(final Supplier<T> value, final Predicate<T> predicate) {
+        private Container(final Supplier<T> value, final Predicate<T> predicate) {
             this.value = value;
             this.predicate = predicate;
         }
@@ -115,13 +149,13 @@ public class ValueFlow {
          *
          * @param adapter the transformation function
          * @param <R>     the target type
-         * @return a new {@link Value} instance with the transformed type
+         * @return a new {@link Container} instance with the transformed type
          */
-        public <R> Value<R> as(final Function<T, R> adapter) {
+        public <R> Container<R> as(final Function<T, R> adapter) {
             Supplier<Boolean> external  = () -> predicate.test(value.get());
             Supplier<R>       supplier  = () -> external.get() ? adapter.apply(value.get()) : null;
             Predicate<R>      predicate = (v) -> external.get();
-            return new Value<>(supplier, predicate);
+            return new Container<>(supplier, predicate);
         }
 
         /**
@@ -129,9 +163,9 @@ public class ValueFlow {
          *
          * @param adapter the transformation function
          * @param <R>     the number type
-         * @return a new {@link Value} containing an integer
+         * @return a new {@link Container} containing an integer
          */
-        public <R extends Number> Value<Integer> asInt(final Function<T, R> adapter) {
+        public <R extends Number> Container<Integer> asInt(final Function<T, R> adapter) {
             return as(adapter).as(Number::intValue);
         }
 
@@ -139,21 +173,21 @@ public class ValueFlow {
          * Adds a condition to the value.
          *
          * @param predicate the predicate to apply
-         * @return a new {@link Value} instance with the applied condition
+         * @return a new {@link Container} instance with the applied condition
          */
-        public Value<T> when(final Predicate<T> predicate, final boolean condition) {
+        public Container<T> when(final Predicate<T> predicate, final boolean condition) {
             Predicate<T> self = this.predicate;
-            self = self == null ? predicate : condition ? predicate.and(self) : predicate.or(self);
-            return new Value<>(value, self);
+            self = (self == null) ? predicate : (condition ? predicate.and(self) : predicate.or(self));
+            return new Container<>(value, self);
         }
 
         /**
          * Adds a condition to the value.
          *
          * @param predicate the predicate to apply
-         * @return a new {@link Value} instance with the applied condition
+         * @return a new {@link Container} instance with the applied condition
          */
-        public Value<T> when(final Predicate<T> predicate) {
+        public Container<T> when(final Predicate<T> predicate) {
             return when(predicate, true);
         }
 
@@ -161,9 +195,9 @@ public class ValueFlow {
          * Combines the current condition with another using logical AND.
          *
          * @param predicate the additional predicate
-         * @return a new {@link Value} instance with the combined condition
+         * @return a new {@link Container} instance with the combined condition
          */
-        public Value<T> and(final Predicate<T> predicate) {
+        public Container<T> and(final Predicate<T> predicate) {
             return when(predicate, true);
         }
 
@@ -171,45 +205,45 @@ public class ValueFlow {
          * Combines the current condition with another using logical OR.
          *
          * @param predicate the additional predicate
-         * @return a new {@link Value} instance with the combined condition
+         * @return a new {@link Container} instance with the combined condition
          */
-        public Value<T> or(final Predicate<T> predicate) {
+        public Container<T> or(final Predicate<T> predicate) {
             return when(predicate, false);
         }
 
         /**
          * Ensures the value is non-null before proceeding.
          *
-         * @return a new {@link Value} instance with a null check
+         * @return a new {@link Container} instance with a null check
          */
-        public Value<T> whenNonNull() {
-            return new Value<>(new NullSafeSupplier<>(value), Objects::nonNull);
+        public Container<T> whenNonNull() {
+            return new Container<>(new NullSafeSupplier<>(value), Objects::nonNull);
         }
 
         /**
          * Inverts the existing condition.
          *
-         * @return a new {@link Value} instance with a negated condition
+         * @return a new {@link Container} instance with a negated condition
          */
-        public Value<T> whenNot() {
+        public Container<T> whenNot() {
             return when(predicate.negate());
         }
 
         /**
          * Applies an action if the value is {@code false}.
          *
-         * @return a new {@link Value} instance with the applied condition
+         * @return a new {@link Container} instance with the applied condition
          */
-        public Value<T> whenFalse() {
+        public Container<T> whenFalse() {
             return when(FALSE::equals);
         }
 
         /**
          * Applies an action if the value is {@code true}.
          *
-         * @return a new {@link Value} instance with the applied condition
+         * @return a new {@link Container} instance with the applied condition
          */
-        public Value<T> whenTrue() {
+        public Container<T> whenTrue() {
             return when(TRUE::equals);
         }
 
@@ -218,8 +252,8 @@ public class ValueFlow {
          *
          * @param consumer the consumer to execute
          */
-        public void toConsume(final Consumer<T> consumer) {
-            if (predicate.test(value.get())) {
+        public void accept(final Consumer<T> consumer) {
+            if (test(value.get())) {
                 consumer.accept(value.get());
             }
         }
@@ -240,10 +274,14 @@ public class ValueFlow {
          *
          * @param function the function to execute
          */
-        public void toCall(final VoidFunction function) {
+        public void call(final VoidFunction function) {
             if (predicate.test(value.get())) {
                 function.call();
             }
+        }
+
+        private boolean test(T value) {
+            return Objects.requireNonNullElseGet(predicate, () -> (T v) -> true).test(value);
         }
 
     }

@@ -3,6 +3,7 @@ package org.jmouse.web.servlet.registration;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import org.jmouse.core.reflection.Reflections;
+import org.jmouse.util.Ordered;
 import org.jmouse.util.Priority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,7 @@ import org.slf4j.LoggerFactory;
  * Common interface for programmatic registration of web components
  * (servlets, filters, listeners) into a ServletContext.
  */
-public interface RegistrationBean {
+public interface RegistrationBean extends Ordered {
 
     Logger LOGGER = LoggerFactory.getLogger(RegistrationBean.class);
 
@@ -25,8 +26,15 @@ public interface RegistrationBean {
     /**
      * Order of this registration; lower values have higher priority.
      */
+    @Override
     default int getOrder() {
-        return Reflections.getAnnotationValue(getClass(), Priority.class, Priority::value);
+        Integer order = Reflections.getAnnotationValue(getClass(), Priority.class, Priority::value);
+
+        if (order == null) {
+            order = 0;
+        }
+
+        return order;
     }
 
     /**

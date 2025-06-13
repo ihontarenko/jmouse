@@ -13,7 +13,8 @@ public class WebApplicationBeanContext extends AbstractWebApplicationBeanContext
         setBaseClasses(baseClasses);
 
         registerBeanContainer(ThreadLocalScope.THREAD_LOCAL_SCOPE, new ThreadLocalBeanContainer());
-        registerBeanContainer(BeanScope.REQUEST, new RequestScopedBeanContainer());
+        registerBeanContainer(BeanScope.REQUEST, new RequestAttributesBeanContainer(BeanScope.REQUEST));
+        registerBeanContainer(BeanScope.SESSION, new RequestAttributesBeanContainer(BeanScope.SESSION));
     }
 
     public WebApplicationBeanContext(Class<?>... baseClasses) {

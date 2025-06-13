@@ -56,7 +56,6 @@ public class Templates {
         Content content = renderer.render(template, context);
 
         System.out.println(content.toString().length());
-        System.out.println(JavaBeanAccessor.CACHED_DESCRIPTORS);
         System.out.println(PropertyPath.CACHE);
     }
 

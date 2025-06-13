@@ -9,8 +9,6 @@ import org.jmouse.beans.BeanScope;
 import org.jmouse.web.request.RequestAttributes;
 import org.jmouse.web.request.RequestAttributesHolder;
 
-import static org.jmouse.core.reflection.Reflections.getShortName;
-
 /**
  * A listener for creating and cleaning up {@link RequestAttributes}
  * during the lifecycle of an HTTP servlet request.
@@ -37,13 +35,10 @@ public class RequestContextListener implements ServletRequestListener {
     @Override
     public void requestInitialized(ServletRequestEvent event) {
         if (event.getServletRequest() instanceof HttpServletRequest servletRequest) {
-            LOGGER.info("Update {}[{}] structured to '{}' holder", getShortName(servletRequest.getClass().getName()),
-                        servletRequest.getRequestURI(), RequestAttributesHolder.class.getName());
+            LOGGER.info("Update [{}] bean to '{}' holder", servletRequest.getClass().getName(), RequestAttributesHolder.class.getName());
             RequestAttributesHolder.setRequestAttributes(
                     RequestAttributes.of(BeanScope.REQUEST, servletRequest)
             );
-
-            RequestAttributesHolder.getRequestAttributes().setAttribute("attr1", "val");
         }
     }
 

@@ -5,6 +5,7 @@ import jakarta.servlet.Filter;
 import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletContext;
 import org.jmouse.beans.annotation.Ignore;
+import org.jmouse.util.Priority;
 
 import java.util.*;
 
@@ -19,6 +20,7 @@ import java.util.*;
  * @param <F> the type of {@link Filter} to register
  */
 @Ignore
+@Priority(-2000)
 public class FilterRegistrationBean<F extends Filter>
         extends AbstractDynamicRegistrationBean<FilterRegistration.Dynamic> {
 
