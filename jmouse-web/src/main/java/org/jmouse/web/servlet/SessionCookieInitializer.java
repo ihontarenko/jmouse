@@ -30,6 +30,7 @@ public class SessionCookieInitializer implements WebApplicationInitializer {
 
             config.setName(cookie.name());
             config.setPath(cookie.path());
+            config.setDomain(cookie.domain());
             config.setMaxAge(cookie.maxAge());
             config.setHttpOnly(cookie.httpOnly());
             config.setSecure(cookie.secure());

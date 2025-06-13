@@ -3,6 +3,11 @@ package org.jmouse.web.servlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
+import org.jmouse.el.ExpressionLanguage;
+import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.renderable.*;
+import org.jmouse.el.renderable.loader.ClasspathLoader;
+import org.jmouse.el.renderable.loader.TemplateLoader;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.http.HttpStatus;
@@ -45,7 +50,32 @@ public class FrameworkDispatcherServlet extends FrameworkDispatcher {
         writer.write((String) context.getBean("rqUUID"));
         writer.write("</h4>");
 
+        writer.write("<h4>EL ");
+        writer.write(context.getBean(ExpressionLanguage.class).evaluate("22 | bigDecimal / 7", String.class));
+        writer.write("</h4>");
+
         writer.write("<h2>" + getServletName() + "</h2>");
+
+        TemplateLoader<String> loader = new ClasspathLoader();
+
+        loader.setPrefix("templates/");
+        loader.setSuffix(".j.html");
+
+        TemplateEngine engine = new TemplateEngine();
+
+        engine.setLoader(loader);
+
+        Template template = engine.getTemplate("jmouse");
+        EvaluationContext evaluationContext = template.newContext();
+
+        evaluationContext.setValue("title", getServletName());
+
+        Renderer renderer = new TemplateRenderer(engine);
+        Content  content  = renderer.render(template, evaluationContext);
+
+        writer.write(content.getDataArray());
+
+
     }
 
 }

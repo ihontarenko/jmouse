@@ -19,6 +19,7 @@ public class SessionProperties {
     public record Cookie(
             @BindDefault("JMOUSE_SESSION_ID") String name,
             @BindDefault("/") String path,
+            @BindDefault("*") String domain,
             @BindDefault("900000") int maxAge,
             @BindDefault("true") boolean httpOnly,
             @BindDefault("true") boolean secure
