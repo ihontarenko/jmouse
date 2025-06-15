@@ -18,9 +18,11 @@ import java.io.Writer;
 import java.time.Instant;
 import java.util.Map;
 
-public class FrameworkDispatcherServlet extends ServletDispatcher {
+public class FrameworkDispatcher extends ServletDispatcher {
 
-    public FrameworkDispatcherServlet(WebBeanContext context) {
+    public static final String DEFAULT_DISPATCHER = "defaultDispatcher";
+
+    public FrameworkDispatcher(WebBeanContext context) {
         super(context);
     }
 

@@ -22,8 +22,8 @@ import org.jmouse.web.initializer.application.WebApplicationInitializerProvider;
 import org.jmouse.web.initializer.context.StartupRootApplicationContextInitializer;
 import org.jmouse.web.server.WebServer;
 import org.jmouse.web.server.WebServerFactory;
-import org.jmouse.mvc.FrameworkDispatcherServlet;
-import org.jmouse.mvc.FrameworkDispatcherServletRegistration;
+import org.jmouse.mvc.FrameworkDispatcher;
+import org.jmouse.mvc.FrameworkDispatcherRegistration;
 import org.jmouse.web.servlet.SessionConfigurationInitializer;
 import org.jmouse.web.servlet.registration.RegistrationBean;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;
@@ -116,7 +116,7 @@ public class WebApplicationLauncher {
                 @Qualifier(WebBeanContext.DEFAULT_ROOT_WEB_CONTEXT_NAME) WebBeanContext rootContext,
                 @Qualifier("defaultDispatcherContext") WebBeanContext webBeanContext,
                 DispatcherProperties properties) {
-            ServletRegistrationBean<?> registration = new FrameworkDispatcherServletRegistration(webBeanContext);
+            ServletRegistrationBean<?> registration = new FrameworkDispatcherRegistration(webBeanContext);
 
             registration.setEnabled(properties.isEnabled());
             registration.setLoadOnStartup(properties.getLoadOnStartup());
@@ -131,7 +131,7 @@ public class WebApplicationLauncher {
                 @Qualifier("indexDispatcherContext") WebBeanContext webBeanContext,
                 DispatcherProperties properties) {
             ServletRegistrationBean<?> registration = new ServletRegistrationBean<>(
-                    null, new FrameworkDispatcherServlet(webBeanContext));
+                    null, new FrameworkDispatcher(webBeanContext));
 
             registration.setEnabled(properties.isEnabled());
             registration.setLoadOnStartup(properties.getLoadOnStartup() + 1);
