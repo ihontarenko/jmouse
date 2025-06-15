@@ -4,15 +4,15 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.web.request.http.HttpMethod;
 
 import java.io.IOException;
 
-abstract public class FrameworkDispatcher extends HttpServlet {
+abstract public class ServletDispatcher extends HttpServlet {
 
     protected final WebBeanContext context;
 
-    public FrameworkDispatcher(WebBeanContext context) {
+    public ServletDispatcher(WebBeanContext context) {
         this.context = context;
     }
 

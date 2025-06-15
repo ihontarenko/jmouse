@@ -1,4 +1,4 @@
-package org.jmouse.web.configuration;
+package org.jmouse.web.factories;
 
 import org.jmouse.beans.annotation.Configuration;
 import org.jmouse.beans.annotation.Provide;

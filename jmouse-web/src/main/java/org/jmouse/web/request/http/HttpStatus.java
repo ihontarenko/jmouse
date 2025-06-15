@@ -1,4 +1,4 @@
-package org.jmouse.web.http;
+package org.jmouse.web.request.http;
 
 /**
  * Enum representing HTTP status codes with a brief text description and category.

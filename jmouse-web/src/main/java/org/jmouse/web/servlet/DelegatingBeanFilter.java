@@ -1,4 +1,4 @@
-package org.jmouse.web.mvc.filter;
+package org.jmouse.web.servlet;
 
 import jakarta.servlet.*;
 import org.jmouse.beans.BeanContext;

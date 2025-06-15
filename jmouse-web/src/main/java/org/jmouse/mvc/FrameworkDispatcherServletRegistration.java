@@ -1,4 +1,4 @@
-package org.jmouse.web.servlet;
+package org.jmouse.mvc;
 
 import org.jmouse.beans.annotation.Ignore;
 import org.jmouse.web.context.WebBeanContext;

@@ -1,6 +1,6 @@
-package org.jmouse.web.mvc;
+package org.jmouse.mvc;
 
-import org.jmouse.web.http.HttpStatus;
+import org.jmouse.web.request.http.HttpStatus;
 
 public interface HandlerResponse {
 

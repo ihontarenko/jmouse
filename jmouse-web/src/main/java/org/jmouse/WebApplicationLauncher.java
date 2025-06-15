@@ -1,4 +1,4 @@
-package org.jmouse.web;
+package org.jmouse;
 
 import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.ScannerBeanContextInitializer;
@@ -14,6 +14,7 @@ import org.jmouse.core.reflection.ClassFinder;
 import org.jmouse.util.IdGenerator;
 import org.jmouse.util.SimpleRandomStringGenerator;
 import org.jmouse.util.SingletonSupplier;
+import org.jmouse.web.WebApplicationFactory;
 import org.jmouse.web.servlet.SessionProperties;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.initializer.WebApplicationInitializer;
@@ -21,8 +22,8 @@ import org.jmouse.web.initializer.application.WebApplicationInitializerProvider;
 import org.jmouse.web.initializer.context.StartupRootApplicationContextInitializer;
 import org.jmouse.web.server.WebServer;
 import org.jmouse.web.server.WebServerFactory;
-import org.jmouse.web.servlet.FrameworkDispatcherServlet;
-import org.jmouse.web.servlet.FrameworkDispatcherServletRegistration;
+import org.jmouse.mvc.FrameworkDispatcherServlet;
+import org.jmouse.mvc.FrameworkDispatcherServletRegistration;
 import org.jmouse.web.servlet.SessionConfigurationInitializer;
 import org.jmouse.web.servlet.registration.RegistrationBean;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;

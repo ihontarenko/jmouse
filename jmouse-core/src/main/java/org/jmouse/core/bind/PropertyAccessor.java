@@ -22,7 +22,7 @@ public interface PropertyAccessor<T> {
      * @param value  the value to inject into the property
      * @throws IllegalArgumentException if the property is not writable
      */
-    void writeValue(T object, Object value);
+    default void writeValue(T object, Object value) {}
 
     /**
      * Retrieves the current value of the specified property from the given object.
@@ -34,7 +34,9 @@ public interface PropertyAccessor<T> {
      * @param object the target object from which to retrieve the property value
      * @return the value of the property, or {@code null} if it cannot be accessed
      */
-    Object readValue(T object);
+    default Object readValue(T object) {
+        return null;
+    }
 
     /**
      * Checks if the property is readable (i.e., has a getter).

@@ -1,5 +1,6 @@
 package org.jmouse.web;
 
+import org.jmouse.WebApplicationLauncher;
 import org.jmouse.context.ApplicationBeanContext;
 
 public class StartApplication {

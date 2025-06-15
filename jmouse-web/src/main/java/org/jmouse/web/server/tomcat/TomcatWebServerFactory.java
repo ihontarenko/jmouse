@@ -4,7 +4,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanContextAware;
 import org.jmouse.beans.annotation.Dependency;
-import org.jmouse.web.configuration.WebServerFactoryConfiguration;
+import org.jmouse.web.factories.WebServerFactoryConfiguration;
 import org.jmouse.web.initializer.WebApplicationInitializer;
 import org.jmouse.web.server.WebServer;
 import org.jmouse.web.server.WebServerConfig;
