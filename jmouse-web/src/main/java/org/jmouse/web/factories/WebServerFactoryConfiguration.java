@@ -1,6 +1,6 @@
 package org.jmouse.web.factories;
 
-import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.beans.annotation.Factories;
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.context.BeanProperties;
 import org.jmouse.core.bind.BindName;
@@ -11,7 +11,7 @@ import org.jmouse.web.server.tomcat.TomcatWebServerFactory;
 
 import java.util.Map;
 
-@Configuration(name = "webServerFactoryConfiguration")
+@Factories(name = "webServerFactoryConfiguration")
 public class WebServerFactoryConfiguration {
 
     @Provide(proxied = true, value = "webServerFactory")

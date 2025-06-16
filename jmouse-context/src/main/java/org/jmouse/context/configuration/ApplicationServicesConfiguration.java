@@ -3,7 +3,7 @@ package org.jmouse.context.configuration;
 import org.jmouse.beans.annotation.BeanCollection;
 import org.jmouse.core.convert.PredefinedConversion;
 import org.jmouse.core.convert.converter.*;
-import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.beans.annotation.Factories;
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.common.mapping.Mapping;
@@ -16,7 +16,7 @@ import org.jmouse.el.extension.Extension;
 
 import java.util.Set;
 
-@Configuration
+@Factories
 public class ApplicationServicesConfiguration {
 
     @Provide

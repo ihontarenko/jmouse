@@ -1,7 +1,7 @@
 package org.jmouse.testing_ground.beancontext.application;
 
 import org.jmouse.beans.BeanScope;
-import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.beans.annotation.Factories;
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.util.helper.Strings;
@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-@Configuration
+@Factories
 public class BeansConfiguration {
 
     @Provide("defaultUserName")

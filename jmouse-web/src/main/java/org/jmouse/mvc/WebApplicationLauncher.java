@@ -1,8 +1,8 @@
-package org.jmouse;
+package org.jmouse.mvc;
 
 import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.ScannerBeanContextInitializer;
-import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.beans.annotation.Factories;
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.context.ApplicationConfigurer;
@@ -22,8 +22,6 @@ import org.jmouse.web.initializer.application.WebApplicationInitializerProvider;
 import org.jmouse.web.initializer.context.StartupRootApplicationContextInitializer;
 import org.jmouse.web.server.WebServer;
 import org.jmouse.web.server.WebServerFactory;
-import org.jmouse.mvc.FrameworkDispatcher;
-import org.jmouse.mvc.FrameworkDispatcherRegistration;
 import org.jmouse.web.servlet.SessionConfigurationInitializer;
 import org.jmouse.web.servlet.registration.RegistrationBean;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;
@@ -86,7 +84,7 @@ public class WebApplicationLauncher {
         return factory.getWebServer(initializers.toArray(WebApplicationInitializer[]::new));
     }
 
-    @Configuration
+    @Factories
     public static class ServletDispatcherConfiguration {
 
         @Provide("defaultDispatcherContext")

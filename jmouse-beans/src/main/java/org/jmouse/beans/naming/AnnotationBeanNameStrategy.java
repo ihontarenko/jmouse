@@ -1,7 +1,7 @@
 package org.jmouse.beans.naming;
 
 import org.jmouse.beans.annotation.BeanName;
-import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.beans.annotation.Factories;
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.core.reflection.Reflections;
@@ -20,7 +20,7 @@ import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
  * <ol>
  *     <li>{@link Qualifier#value()}</li>
  *     <li>{@link Provide#value()}</li>
- *     <li>{@link Configuration#name()}</li>
+ *     <li>{@link Factories#name()}</li>
  * </ol>
  * If none of these annotations provide a value, it falls back to:
  * <ul>
@@ -54,7 +54,7 @@ public class AnnotationBeanNameStrategy implements BeanNameStrategy {
                 e -> getAnnotationValue(e, BeanName.class, BeanName::value),
                 e -> getAnnotationValue(e, Qualifier.class, Qualifier::value),
                 e -> getAnnotationValue(e, Provide.class, Provide::value),
-                e -> getAnnotationValue(e, Configuration.class, Configuration::name),
+                e -> getAnnotationValue(e, Factories.class, Factories::name),
                 e -> e instanceof Class<?> ? new ClassNameStrategy().resolve(e) : null,
                 e -> e instanceof Method m ? Strings.uncapitalize(Reflections.getMethodName(m)) : null
         );

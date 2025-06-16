@@ -1,7 +1,7 @@
 package org.jmouse.beans.scanner;
 
 import org.jmouse.beans.BeanScanner;
-import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.beans.annotation.Factories;
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.core.reflection.ClassFinder;
 import org.jmouse.core.reflection.MethodFinder;
@@ -13,10 +13,10 @@ import java.util.List;
 
 /**
  * A {@link BeanScanner} implementation that scans for methods annotated with {@link Provide}
- * in classes annotated with {@link Configuration}.
+ * in classes annotated with {@link Factories}.
  *
  * <p>This scanner uses the {@link ClassFinder} to locate classes annotated with
- * {@link Configuration} and the {@link MethodFinder} to filter and find methods
+ * {@link Factories} and the {@link MethodFinder} to filter and find methods
  * annotated with {@link Provide} within those classes.</p>
  *
  * <p>Example usage:</p>
@@ -29,7 +29,7 @@ import java.util.List;
 public class ConfigurationAnnotatedClassBeanScanner implements BeanScanner<AnnotatedElement> {
 
     /**
-     * Scans the specified base classes for classes annotated with {@link Configuration}.
+     * Scans the specified base classes for classes annotated with {@link Factories}.
      * Finds and returns methods annotated with {@link Provide} within those classes.
      *
      * @param baseClasses the base classes to scan for annotated elements.
@@ -40,7 +40,7 @@ public class ConfigurationAnnotatedClassBeanScanner implements BeanScanner<Annot
         List<AnnotatedElement> elements = new ArrayList<>();
 
         // Find classes annotated with @Configuration
-        for (Class<?> klass : ClassFinder.findAnnotatedClasses(Configuration.class, baseClasses)) {
+        for (Class<?> klass : ClassFinder.findAnnotatedClasses(Factories.class, baseClasses)) {
             // Add factory @Configuration annotated class
             elements.add(klass);
             // Find methods annotated with @Provide in each @Configuration class

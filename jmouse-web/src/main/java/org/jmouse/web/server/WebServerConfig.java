@@ -1,6 +1,5 @@
 package org.jmouse.web.server;
 
-import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.Qualifier;
 
 /**
@@ -13,6 +12,5 @@ import org.jmouse.beans.annotation.Qualifier;
  * @param port the port on which the server will listen
  * @param name the name of the web server instance
  */
-@BeanFactories("defaultFactories")
 public record WebServerConfig(@Qualifier("localPort") int port, @Qualifier("default") WebServers name) {
 }

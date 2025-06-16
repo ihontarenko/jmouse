@@ -5,12 +5,12 @@ import org.jmouse.beans.definition.DuplicateBeanDefinitionException;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.env.MapPropertySource;
 import org.jmouse.beans.BeanContainer;
-import org.jmouse.beans.annotation.Configuration;
+import org.jmouse.beans.annotation.Factories;
 import org.jmouse.context.ApplicationConfigurer;
 
 import java.util.Map;
 
-@Configuration
+@Factories
 @SuppressException(DuplicateBeanDefinitionException.class)
 public class StandartWebApplicationConfigurer implements ApplicationConfigurer {
 

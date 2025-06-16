@@ -1,7 +1,7 @@
-package org.jmouse.web;
+package org.jmouse;
 
-import org.jmouse.WebApplicationLauncher;
 import org.jmouse.context.ApplicationBeanContext;
+import org.jmouse.mvc.WebApplicationLauncher;
 
 public class StartApplication {
 
