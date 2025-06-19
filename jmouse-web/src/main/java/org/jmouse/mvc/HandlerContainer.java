@@ -15,7 +15,7 @@ import java.util.List;
  *
  * <h3>Usage</h3>
  * <pre>{@code
- * HandlerExecution execution = new HandlerExecution(handler);
+ * HandlerContainer execution = new HandlerContainer(handler);
  * execution.addInterceptor(new LoggingInterceptor());
  * if (execution.preHandle(request, response)) {
  *     HandlerResponse result = adapter.handle(request, response, handler);
@@ -26,17 +26,17 @@ import java.util.List;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @see HandlerInterceptor
  */
-public final class HandlerExecution {
+public final class HandlerContainer {
 
     private final List<HandlerInterceptor> interceptors = new ArrayList<>();
-    private Object handler;
+    private       Object                   handler;
 
     /**
-     * Constructs a new {@code HandlerExecution} with the specified handler.
+     * Constructs a new {@code HandlerContainer} with the specified handler.
      *
      * @param handler the resolved handler object for the request
      */
-    public HandlerExecution(Object handler) {
+    public HandlerContainer(Object handler) {
         this.handler = handler;
     }
 

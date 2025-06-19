@@ -74,13 +74,17 @@ public class jMouseServletContainerInitializer implements ServletContainerInitia
 
             initializers.sort(Sorter.PRIORITY_COMPARATOR);
 
+            LOGGER.info("Initializers {} before executing", initializers.size());
+
             // Invoke onStartup for each initializer
             for (WebApplicationInitializer initializer : initializers) {
                 String initializerName = getShortName(initializer.getClass());
-                LOGGER.info("Before executing initializer: {}", initializerName);
+                LOGGER.info("Start executing initializer: {}", initializerName);
                 initializer.onStartup(servletContext);
-                LOGGER.info("After executing initializer: {}", initializerName);
+                LOGGER.info("Finish executing initializer: {}", initializerName);
             }
+
+            LOGGER.info("Initializers {} executed successfully", initializers.size());
         } else {
             servletContext.log("No ApplicationInitializers was found in classpath");
         }

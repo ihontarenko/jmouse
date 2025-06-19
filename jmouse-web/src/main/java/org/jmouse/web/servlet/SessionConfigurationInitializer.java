@@ -34,7 +34,7 @@ import java.util.function.Supplier;
  * <p>Logs the applied configuration once it's set.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
- * @authoremail ihontarenko@gmail.com
+ * @author ihontarenko@gmail.com
  * @see SessionProperties
  * @see SessionCookieConfig
  * @see WebApplicationInitializer

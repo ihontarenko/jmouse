@@ -1,52 +1,71 @@
 package org.jmouse.core.env;
 
+import java.util.Map;
+
 /**
- * Represents a source of properties with methods to retrieve property values by name.
- * <p>
- * This interface provides a mechanism to access properties from a specific source (e.g., file, environment variables)
- * and includes utility methods for checking property existence and retrieving all property names.
- * </p>
+ * 📦 Property source abstraction.
+ * Used to resolve config values (e.g. from file, env, etc).
  *
- * @param <T> the type of the underlying property source
+ * @param <T> type of the raw underlying source
  */
 public interface PropertySource<T> {
 
     /**
-     * Returns the name of this property source.
+     * 🏷️ Name of this source.
      *
-     * @return the name of the property source
+     * @return source name
      */
     String getName();
 
     /**
-     * Returns the underlying source of this property source.
+     * 🔍 Raw source object.
      *
-     * @return the underlying source of properties
+     * @return source
      */
     T getSource();
 
     /**
-     * Checks if the specified property exists in this source.
+     * ❓ Check if a key exists.
      *
-     * @param name the name of the property to check
-     * @return {@code true} if the property exists, {@code false} otherwise
+     * @param name property name
+     * @return {@code true} if defined
      */
     default boolean containsProperty(String name) {
         return getProperty(name) != null;
     }
 
     /**
-     * Retrieves the value of the specified property from this source.
+     * 📥 Get property by key.
      *
-     * @param name the name of the property to retrieve
-     * @return the value of the property, or {@code null} if the property is not found
+     * @param name property name
+     * @return value or {@code null}
      */
     Object getProperty(String name);
 
     /**
-     * Returns all property names available in this source.
+     * 📚 All keys defined in this source.
      *
-     * @return an array of all property names
+     * @return array of keys
      */
     String[] getPropertyNames();
+
+    /**
+     * 🧾 Load from classpath resource.
+     *
+     * @param path location (e.g. "/config.yml")
+     * @return map-based source
+     */
+    static PropertySource<Map<String, Object>> loadProperties(String path) {
+        return new ClasspathPropertySource(path, path);
+    }
+
+    /**
+     * 🧾 Load from classpath using simple name.
+     *
+     * @param type class to derive resource name from
+     * @return map-based source
+     */
+    static PropertySource<Map<String, Object>> loadProperties(Class<?> type) {
+        return loadProperties(type.getSimpleName() + ".properties");
+    }
 }

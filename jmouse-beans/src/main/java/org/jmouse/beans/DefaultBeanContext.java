@@ -400,7 +400,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         // Invoke the initializer method if present in the bean class
         for (Method initializer : Reflections.findAllAnnotatedMethods(
                 definition.getBeanClass(), BeanInitializer.class)) {
-            Reflections.invokeMethod(instance, initializer);
+            Reflections.invokeMethod(instance, initializer, this);
         }
 
         // Perform post-initialization steps using registered BeanPostProcessors
@@ -454,10 +454,6 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
 
         for (String beanName : getBeanNames(type)) {
             beans.add(getBean(beanName));
-        }
-
-        if (parent != null) {
-            beans.addAll(parent.getBeans(type));
         }
 
         return beans;

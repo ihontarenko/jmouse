@@ -30,17 +30,17 @@ import java.util.Set;
  *     <li>{@code cookie.secure} = true</li>
  * </ul>
  *
+ * @author Ivan Hontarenko (Mr. Jerry Mouse)
+ * @author ihontarenko@gmail.com
  * @see SessionConfigurationInitializer
  * @see jakarta.servlet.SessionCookieConfig
  * @see jakarta.servlet.SessionTrackingMode
- * @author Ivan Hontarenko (Mr. Jerry Mouse)
- * @author ihontarenko@gmail.com
  */
 @BeanProperties("jmouse.web.server.session")
 public class SessionProperties {
 
-    private Cookie cookie;
-    private int timeout;
+    private Cookie                   cookie;
+    private int                      timeout;
     private Set<SessionTrackingMode> trackingMode;
 
     /**
@@ -108,11 +108,8 @@ public class SessionProperties {
      * @param httpOnly whether the cookie is HTTP-only (default: {@code true})
      * @param secure   whether the cookie is secure (sent only over HTTPS) (default: {@code true})
      */
-    public record Cookie(
-            @BindDefault("JMOUSE_SESSION_ID") String name,
-            @BindDefault("/") String path,
-            @BindDefault("900000") int maxAge,
-            @BindDefault("true") boolean httpOnly,
-            @BindDefault("true") boolean secure
-    ) { }
+    public record Cookie(@BindDefault("JMOUSE_SESSION_ID") String name, @BindDefault("/") String path,
+                         @BindDefault("900000") int maxAge, @BindDefault("true") boolean httpOnly,
+                         @BindDefault("true") boolean secure) {
+    }
 }

@@ -28,7 +28,7 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
 @Priority(Integer.MIN_VALUE)
 final class RequiredBeanContextInitializer implements BeanContextInitializer {
 
-    private static final Logger LOGGER = getLogger(getShortName(BeanContextInitializer.class) + ".DEFAULT_INITIALIZER");
+    private static final Logger LOGGER = getLogger(BeanContextInitializer.class.getName() + ".DEFAULT_INITIALIZER");
 
     /**
      * Initializes the provided {@link BeanContext} with default settings.

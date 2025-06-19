@@ -7,31 +7,63 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-abstract public class AbstractHandlerMapping implements HandlerMapping {
+/**
+ * 🧭 Base class for handler mappings.
+ *
+ * Provides common logic for resolving a handler and attaching sorted interceptors.
+ * Subclasses must implement handler lookup and interceptor list retrieval.
+ *
+ * Example usage:
+ * <pre>{@code
+ * public class MyHandlerMapping extends AbstractHandlerMapping {
+ *     protected Object doGetHandler(HttpServletRequest req) { ... }
+ *     protected List<HandlerInterceptor> getHandlerInterceptors() { ... }
+ * }
+ * }</pre>
+ *
+ * @author Ivan Hontarenko (Mr. Jerry Mouse)
+ */
+public abstract class AbstractHandlerMapping implements HandlerMapping {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractHandlerMapping.class);
 
+    /**
+     * 🔎 Resolves the handler for the current request and attaches interceptors.
+     *
+     * @param request current HTTP request
+     * @return container with handler and interceptors, or {@code null} if no handler found
+     */
     @Override
-    public HandlerExecution getHandler(HttpServletRequest request) {
+    public HandlerContainer getHandler(HttpServletRequest request) {
         Object handler = doGetHandler(request);
 
         if (handler == null) {
             return null;
         }
 
-        HandlerExecution         execution    = new HandlerExecution(handler);
+        HandlerContainer         container    = new HandlerContainer(handler);
         List<HandlerInterceptor> interceptors = getHandlerInterceptors();
 
         if (interceptors != null && !interceptors.isEmpty()) {
             Sorter.sort(interceptors);
-            interceptors.forEach(execution::addInterceptor);
+            interceptors.forEach(container::addInterceptor);
         }
 
-        return execution;
+        return container;
     }
 
-    abstract protected Object doGetHandler(HttpServletRequest request);
+    /**
+     * 🎯 Resolve handler object from request.
+     *
+     * @param request HTTP request
+     * @return handler object or {@code null} if not matched
+     */
+    protected abstract Object doGetHandler(HttpServletRequest request);
 
-    abstract protected List<HandlerInterceptor> getHandlerInterceptors();
-
+    /**
+     * 🧩 List of interceptors for current mapping.
+     *
+     * @return list of interceptors (can be empty)
+     */
+    protected abstract List<HandlerInterceptor> getHandlerInterceptors();
 }

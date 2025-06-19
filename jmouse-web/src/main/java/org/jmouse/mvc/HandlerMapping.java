@@ -31,5 +31,5 @@ public interface HandlerMapping {
      * @param request the current HTTP request
      * @return the matched handler object, or {@code null} if none found
      */
-    Object getHandler(HttpServletRequest request);
+    HandlerContainer getHandler(HttpServletRequest request);
 }

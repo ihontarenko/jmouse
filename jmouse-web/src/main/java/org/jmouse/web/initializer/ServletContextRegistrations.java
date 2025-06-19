@@ -1,12 +1,10 @@
-package org.jmouse.web.initializer.application;
+package org.jmouse.web.initializer;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.util.Sorter;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.initializer.WebApplicationInitializer;
 import org.jmouse.web.servlet.RequestContextListener;
 import org.jmouse.web.servlet.WebBeanContextListener;
-import org.jmouse.web.servlet.registration.AbstractRegistrationBean;
 import org.jmouse.web.servlet.registration.FilterRegistrationBean;
 import org.jmouse.web.servlet.registration.ServletListenerRegistrationBean;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;
@@ -41,8 +39,8 @@ public class ServletContextRegistrations {
      * @return sorted list of all applicable initializers
      */
     public Collection<WebApplicationInitializer> getRegistrationBeanInitializers(BeanContext context) {
-        List<WebApplicationInitializer> initializers = new ArrayList<>();
-        WebApplicationInitializerProvider provider = new WebApplicationInitializerProvider(
+        List<WebApplicationInitializer>   initializers = new ArrayList<>();
+        WebApplicationInitializerProvider provider     = new WebApplicationInitializerProvider(
                 (WebBeanContext) context);
 
         for (WebApplicationInitializer bean : provider.getRegistrationBeans()) {

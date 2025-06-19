@@ -20,6 +20,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>1.0-rc1</version>
+        </dependency>
         <!-- jMouse -->
         <dependency>
             <groupId>org.jmouse</groupId>

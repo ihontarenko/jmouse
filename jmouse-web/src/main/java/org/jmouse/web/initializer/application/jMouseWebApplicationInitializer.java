@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.util.Priority;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.initializer.ServletContextRegistrations;
 import org.jmouse.web.initializer.WebApplicationInitializer;
 import org.jmouse.web.servlet.WebBeanContextListener;
 import org.slf4j.Logger;

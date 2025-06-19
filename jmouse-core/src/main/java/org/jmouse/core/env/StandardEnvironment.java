@@ -62,7 +62,7 @@ public class StandardEnvironment implements Environment {
      */
     @Override
     public String[] getActiveProfiles() {
-        String[] activeProfiles = profiles.toArray(String[]::new);
+        String[] activeProfiles = this.profiles.toArray(String[]::new);
 
         if (Arrays.empty(activeProfiles)) {
             String profiles = getProperty("profiles");

@@ -1,14 +1,12 @@
-package org.jmouse.web.initializer.application;
+package org.jmouse.web.initializer;
 
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.reflection.ClassMatchers;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.initializer.WebApplicationInitializer;
 import org.jmouse.web.servlet.registration.RegistrationBean;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Provides access to registered {@link WebApplicationInitializer} beans

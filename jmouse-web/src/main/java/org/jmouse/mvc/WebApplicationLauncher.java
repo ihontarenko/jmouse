@@ -2,6 +2,7 @@ package org.jmouse.mvc;
 
 import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.ScannerBeanContextInitializer;
+import org.jmouse.beans.annotation.BeanCollection;
 import org.jmouse.beans.annotation.Factories;
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.beans.annotation.Qualifier;
@@ -11,6 +12,7 @@ import org.jmouse.context.BeanProperties;
 import org.jmouse.core.bind.BindDefault;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.reflection.ClassFinder;
+import org.jmouse.mvc.mapping.DirectRequestPathMapping;
 import org.jmouse.util.IdGenerator;
 import org.jmouse.util.SimpleRandomStringGenerator;
 import org.jmouse.util.SingletonSupplier;
@@ -18,7 +20,7 @@ import org.jmouse.web.WebApplicationFactory;
 import org.jmouse.web.servlet.SessionProperties;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.initializer.WebApplicationInitializer;
-import org.jmouse.web.initializer.application.WebApplicationInitializerProvider;
+import org.jmouse.web.initializer.WebApplicationInitializerProvider;
 import org.jmouse.web.initializer.context.StartupRootApplicationContextInitializer;
 import org.jmouse.web.server.WebServer;
 import org.jmouse.web.server.WebServerFactory;
@@ -28,6 +30,7 @@ import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class WebApplicationLauncher {
 
@@ -42,8 +45,10 @@ public class WebApplicationLauncher {
 
         scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
                 ClassFinder.findImplementations(WebApplicationInitializer.class, rootTypes)));
-        scannerBeanContextInitializer.addScanner(
-                rootTypes -> new ArrayList<>(ClassFinder.findImplementations(ApplicationConfigurer.class, rootTypes)));
+        scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
+                ClassFinder.findImplementations(ApplicationConfigurer.class, rootTypes)));
+        scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
+                ClassFinder.findImplementations(WebMvcInitializer.class, rootTypes)));
         scannerBeanContextInitializer.addScanner(
                 rootTypes -> new ArrayList<>(ClassFinder.findAnnotatedClasses(BeanProperties.class, rootTypes)));
 
@@ -87,6 +92,12 @@ public class WebApplicationLauncher {
     @Factories
     public static class ServletDispatcherConfiguration {
 
+        @Provide("requestPathMappingRegistrations")
+        public List<DirectRequestPathMapping.Registration> requestPathMappingRegistrations(
+                @BeanCollection Set<DirectRequestPathMapping.Registration> registrations) {
+            return List.copyOf(registrations);
+        }
+
         @Provide("defaultDispatcherContext")
         public WebBeanContext webDefaultBeanContext(WebBeanContext rootContext) {
             ApplicationFactory<WebBeanContext> factory        = rootContext.getBean(ApplicationFactory.class);
@@ -94,17 +105,6 @@ public class WebApplicationLauncher {
                     "DEFAULT_DISPATCHER_CONTEXT", rootContext);
 
             webBeanContext.registerBean("dispatcher", "DEFAULT DISPATCHER!!!");
-
-            return webBeanContext;
-        }
-
-        @Provide("indexDispatcherContext")
-        public WebBeanContext indexDispatcherContext(WebBeanContext rootContext) {
-            ApplicationFactory<WebBeanContext> factory        = rootContext.getBean(ApplicationFactory.class);
-            WebBeanContext                     webBeanContext = factory.createContext(
-                    "INDEX_DISPATCHER_CONTEXT", rootContext);
-
-            webBeanContext.registerBean("dispatcher", "index dispatcher!!!");
 
             return webBeanContext;
         }
@@ -119,21 +119,6 @@ public class WebApplicationLauncher {
             registration.setEnabled(properties.isEnabled());
             registration.setLoadOnStartup(properties.getLoadOnStartup());
             registration.addMappings(properties.getMappings());
-
-            return registration;
-        }
-
-        @Provide
-        public ServletRegistrationBean<?> indexDispatcher(
-                WebBeanContext rootContext,
-                @Qualifier("indexDispatcherContext") WebBeanContext webBeanContext,
-                DispatcherProperties properties) {
-            ServletRegistrationBean<?> registration = new ServletRegistrationBean<>(
-                    null, new FrameworkDispatcher(webBeanContext));
-
-            registration.setEnabled(properties.isEnabled());
-            registration.setLoadOnStartup(properties.getLoadOnStartup() + 1);
-            registration.addMappings("/index");
 
             return registration;
         }
