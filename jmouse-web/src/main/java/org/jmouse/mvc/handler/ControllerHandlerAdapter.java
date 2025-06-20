@@ -14,7 +14,7 @@ public class ControllerHandlerAdapter extends AbstractHandlerAdapter {
 
         try {
             controller.handle(request, response);
-        } catch (IOException ioException) {
+        } catch (IOException ignored) {
 
         }
 
@@ -22,7 +22,7 @@ public class ControllerHandlerAdapter extends AbstractHandlerAdapter {
     }
 
     @Override
-    public boolean supports(Object handler) {
+    public boolean supportsHandler(Object handler) {
         return handler instanceof Controller;
     }
 

@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * POJOs, function-based handlers, etc.) in a uniform way, by adapting them to a common invocation model.</p>
  *
  * <p>Handler adapters are typically registered in a central dispatching mechanism,
- * and chosen based on {@link #supports(Object)} check.</p>
+ * and chosen based on {@link #supportsHandler(Object)} check.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -25,7 +25,7 @@ public interface HandlerAdapter {
      * @param handler the handler to check
      * @return {@code true} if this adapter supports the handler, {@code false} otherwise
      */
-    boolean supports(Object handler);
+    boolean supportsHandler(Object handler);
 
     /**
      * 🚀 Handles the request using the given handler object, producing a {@link HandlerResult}.

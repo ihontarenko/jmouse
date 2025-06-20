@@ -5,11 +5,17 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.annotation.Factories;
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.context.ApplicationBeanContext;
+import org.jmouse.core.proxy.MethodInterceptor;
+import org.jmouse.core.proxy.MethodInvocation;
+import org.jmouse.core.proxy.ProxyContext;
+import org.jmouse.core.proxy.annotation.ProxyMethodInterceptor;
 import org.jmouse.mvc.WebApplicationLauncher;
 import org.jmouse.mvc.WebMvcInitializer;
 import org.jmouse.mvc.mapping.DirectRequestPathMapping.Registration;
+import org.jmouse.web.server.WebServerFactory;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 
 public class StartApplication {
 
@@ -53,6 +59,29 @@ public class StartApplication {
         @Override
         public Class<Object> objectClass() {
             return Object.class;
+        }
+    }
+
+    @ProxyMethodInterceptor(WebServerFactory.class)
+    public static class WebServerFactoryInterceptor implements MethodInterceptor {
+
+        @Override
+        public void before(ProxyContext context, Method method, Object[] arguments) {
+            System.out.println("before");
+            System.out.println(method.getName());
+        }
+
+        @Override
+        public Object invoke(MethodInvocation invocation) throws Throwable {
+            System.out.println("invoke");
+            System.out.println(invocation.getTarget());
+            return invocation.proceed();
+        }
+
+        @Override
+        public void after(ProxyContext context, Method method, Object[] arguments, Object result) {
+            System.out.println("after");
+            System.out.println(method.getName());
         }
     }
 

@@ -32,7 +32,7 @@ public class FrameworkDispatcher extends ServletDispatcher {
         response.setStatus(HttpStatus.OK.getCode());
 
         for (HandlerMapping mapping : handlerMappings) {
-            HandlerContainer chain = mapping.getHandler(request);
+            Handler chain = mapping.getHandler(request);
 
             if (chain != null) {
                 if (chain.getHandler() instanceof Controller controller) {

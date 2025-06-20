@@ -34,14 +34,14 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
      * @return container with handler and interceptors, or {@code null} if no handler found
      */
     @Override
-    public HandlerContainer getHandler(HttpServletRequest request) {
+    public Handler getHandler(HttpServletRequest request) {
         Object handler = doGetHandler(request);
 
         if (handler == null) {
             return null;
         }
 
-        HandlerContainer         container    = new HandlerContainer(handler);
+        Handler                  container    = new Handler(handler);
         List<HandlerInterceptor> interceptors = getHandlerInterceptors();
 
         if (interceptors != null && !interceptors.isEmpty()) {
