@@ -18,7 +18,7 @@ import java.util.List;
  * HandlerContainer execution = new HandlerContainer(handler);
  * execution.addInterceptor(new LoggingInterceptor());
  * if (execution.preHandle(request, response)) {
- *     HandlerResponse result = adapter.handle(request, response, handler);
+ *     HandlerResult result = adapter.handle(request, response, handler);
  *     execution.postHandle(request, response, result);
  * }
  * }</pre>
@@ -103,7 +103,7 @@ public final class HandlerContainer {
      * @param response the current HTTP response
      * @param result   the handler's response
      */
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, HandlerResponse result) {
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, HandlerResult result) {
         for (HandlerInterceptor interceptor : getInterceptors()) {
             interceptor.postHandle(request, response, getHandler(), result);
         }

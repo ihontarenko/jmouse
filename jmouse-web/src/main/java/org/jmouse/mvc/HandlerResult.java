@@ -9,7 +9,7 @@ import org.jmouse.web.request.http.HttpStatus;
  * @author Ivan Hontarenko
  * @see HandlerAdapter
  */
-public interface HandlerResponse {
+public interface HandlerResult {
 
     /**
      * Returns the HTTP status that should be used for the response.

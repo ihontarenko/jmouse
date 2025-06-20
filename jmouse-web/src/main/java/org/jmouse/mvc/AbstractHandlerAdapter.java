@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpServletResponse;
 abstract public class AbstractHandlerAdapter implements HandlerAdapter {
 
     @Override
-    public HandlerResponse handle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        HandlerResponse handlerResponse = null;
+    public HandlerResult handle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        HandlerResult handlerResponse = null;
 
         Object returnValue = doHandle(request, response, handler);
 

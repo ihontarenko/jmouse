@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
- * @see HandlerResponse
+ * @see HandlerResult
  * @see FrameworkDispatcher
  */
 public interface HandlerAdapter {
@@ -28,13 +28,13 @@ public interface HandlerAdapter {
     boolean supports(Object handler);
 
     /**
-     * 🚀 Handles the request using the given handler object, producing a {@link HandlerResponse}.
+     * 🚀 Handles the request using the given handler object, producing a {@link HandlerResult}.
      *
      * @param request  the incoming HTTP servlet request
      * @param response the outgoing HTTP servlet response
      * @param handler  the actual handler object (e.g., controller)
-     * @return a {@link HandlerResponse} object representing the result of invocation
+     * @return a {@link HandlerResult} object representing the result of invocation
      * @throws RuntimeException if the handler cannot process the request
      */
-    HandlerResponse handle(HttpServletRequest request, HttpServletResponse response, Object handler);
+    HandlerResult handle(HttpServletRequest request, HttpServletResponse response, Object handler);
 }
