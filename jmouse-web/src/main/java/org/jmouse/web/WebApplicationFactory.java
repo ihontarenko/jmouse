@@ -28,10 +28,6 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
     public WebBeanContext createContext(String contextId, WebBeanContext rootContext, Class<?>... classes) {
         Set<Class<?>> baseClasses = new HashSet<>(Set.of(classes));
 
-        if (rootContext != null) {
-            baseClasses.addAll(Set.of(rootContext.getBaseClasses()));
-        }
-
         WebBeanContext context = createContextInstance(contextId, baseClasses.toArray(Class<?>[]::new));
 
         context.refresh();

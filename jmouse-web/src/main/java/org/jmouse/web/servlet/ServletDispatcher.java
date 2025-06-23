@@ -27,8 +27,9 @@ abstract public class ServletDispatcher extends HttpServlet {
         doDispatch(request, response, HttpMethod.valueOf(request.getMethod()));
     }
 
-    abstract protected void doDispatch(HttpServletRequest rq, HttpServletResponse rs, HttpMethod method) throws
-                                                                                                         IOException;
+    abstract protected void doDispatch(HttpServletRequest rq, HttpServletResponse rs, HttpMethod method)
+            throws IOException;
+
     @SuppressWarnings("unchecked")
     protected Set<HandlerMapping> initializeHandlerMappings() {
         List<HandlerMapping> handlerMappings = context.getBeans(HandlerMapping.class);

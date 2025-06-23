@@ -48,9 +48,9 @@ public class WebApplicationLauncher {
         scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
                 ClassFinder.findImplementations(ApplicationConfigurer.class, rootTypes)));
         scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
-                ClassFinder.findImplementations(WebMvcInitializer.class, rootTypes)));
-        scannerBeanContextInitializer.addScanner(
-                rootTypes -> new ArrayList<>(ClassFinder.findAnnotatedClasses(BeanProperties.class, rootTypes)));
+                ClassFinder.findImplementations(BeanInstanceInitializer.class, rootTypes)));
+        scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
+                ClassFinder.findAnnotatedClasses(BeanProperties.class, rootTypes)));
 
         return scannerBeanContextInitializer;
     }
@@ -111,7 +111,6 @@ public class WebApplicationLauncher {
 
         @Provide
         public ServletRegistrationBean<?> defaultDispatcher(
-                @Qualifier(WebBeanContext.DEFAULT_ROOT_WEB_CONTEXT_NAME) WebBeanContext rootContext,
                 @Qualifier("defaultDispatcherContext") WebBeanContext webBeanContext,
                 DispatcherProperties properties) {
             ServletRegistrationBean<?> registration = new FrameworkDispatcherRegistration(webBeanContext);

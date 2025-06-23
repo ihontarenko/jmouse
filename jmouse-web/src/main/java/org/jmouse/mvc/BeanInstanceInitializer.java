@@ -9,7 +9,7 @@ package org.jmouse.mvc;
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  */
-public interface WebMvcInitializer<T> {
+public interface BeanInstanceInitializer<T> {
 
     /**
      * 🔧 Apply additional configuration to the target object.
