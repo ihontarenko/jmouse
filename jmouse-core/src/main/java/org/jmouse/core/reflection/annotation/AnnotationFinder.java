@@ -38,34 +38,7 @@ public interface AnnotationFinder {
      * @param element annotated element (e.g. class, method, field)
      * @return set of annotations that match the matcher
      */
-    static Collection<Annotation> findAll(Matcher<Annotation> matcher, AnnotatedElement element) {
-        Collection<Annotation> annotations = CACHE.get(element);
-
-        if (annotations == null) {
-            annotations = new HashSet<>();
-
-            Deque<Annotation> stack   = new ArrayDeque<>(Arrays.asList(element.getAnnotations()));
-            Set<Annotation>   visited = new HashSet<>();
-
-            while (!stack.isEmpty()) {
-                Annotation                  current = stack.pop();
-                Class<? extends Annotation> type    = current.annotationType();
-
-                if (visited.contains(current)) {
-                    continue;
-                }
-
-                annotations.add(current);
-                visited.add(current);
-
-                for (Annotation annotation : type.getAnnotations()) {
-                    stack.push(annotation);
-                }
-            }
-
-            CACHE.put(element, annotations);
-        }
-
-        return Streamable.of(annotations).filter(matcher::matches).toSet();
+    static Collection<AnnotationData> findAll(Matcher<Annotation> matcher, AnnotatedElement element) {
+        return Streamable.of(AnnotationScanner.scan(element)).filter(ma -> matcher.matches(ma.annotation())).toSet();
     }
 }

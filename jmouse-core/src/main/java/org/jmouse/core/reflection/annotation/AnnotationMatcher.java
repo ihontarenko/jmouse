@@ -14,12 +14,22 @@ import java.lang.annotation.Annotation;
 public class AnnotationMatcher {
 
     /**
-     * ✅ Matches annotations of the given type or its meta-types.
+     * ✅ Match by annotation class.
      *
-     * @param annotationType target annotation class
-     * @return matcher that checks for assignability from {@code annotationType}
+     * @param annotationType target annotation type
+     * @return matcher that checks for assignability
      */
-    public static Matcher<Annotation> isAnnotation(final Class<? extends Annotation> annotationType) {
+    public static Matcher<Annotation> isAnnotation(Class<? extends Annotation> annotationType) {
         return a -> ClassMatchers.isSupertype(annotationType).matches(a.getClass());
+    }
+
+    /**
+     * ✅ Match by {@link AnnotationData}'s annotation type.
+     *
+     * @param annotationData wrapper containing the annotation
+     * @return matcher that checks for assignability
+     */
+    public static Matcher<Annotation> isAnnotation(AnnotationData annotationData) {
+        return isAnnotation(annotationData.annotationType());
     }
 }

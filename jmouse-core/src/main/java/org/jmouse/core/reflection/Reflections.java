@@ -1,7 +1,9 @@
 package org.jmouse.core.reflection;
 
+import org.jmouse.core.reflection.annotation.AnnotationData;
 import org.jmouse.core.reflection.annotation.AnnotationFinder;
 import org.jmouse.core.reflection.annotation.AnnotationMatcher;
+import org.jmouse.util.Streamable;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -17,6 +19,9 @@ import java.util.stream.Collectors;
 
 import static org.jmouse.core.reflection.MethodMatchers.hasParameterTypes;
 import static org.jmouse.core.reflection.MethodMatchers.isAbstract;
+import static org.jmouse.core.reflection.annotation.AnnotationFinder.findAll;
+import static org.jmouse.core.reflection.annotation.AnnotationMatcher.isAnnotation;
+import static org.jmouse.util.Streamable.of;
 import static org.jmouse.util.helper.Strings.uncapitalize;
 
 /**
@@ -1010,8 +1015,8 @@ abstract public class Reflections {
         return value;
     }
 
-    public static <A extends Annotation> Set<A> getAnnotations(AnnotatedElement element, Class<A> annotationType) {
-        return (Set<A>) AnnotationFinder.findAll(AnnotationMatcher.isAnnotation(annotationType), element);
+    public static Set<Annotation> getAnnotations(AnnotatedElement element, Class<? extends Annotation> annotationType) {
+        return of(findAll(isAnnotation(annotationType), element)).map(AnnotationData::annotation).toSet();
     }
 
     /**
