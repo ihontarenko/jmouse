@@ -4,6 +4,7 @@ import org.jmouse.core.matcher.Matcher;
 import org.jmouse.util.Streamable;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.util.*;
 
 /**
@@ -32,6 +33,24 @@ public class MergedAnnotation {
     }
 
     /**
+     * 📦 Raw metadata container.
+     *
+     * @return underlying annotation data
+     */
+    public AnnotationData getAnnotationData() {
+        return annotationData;
+    }
+
+    /**
+     * 🧩 Element annotated by this annotation (e.g. class, method).
+     *
+     * @return annotated element
+     */
+    public AnnotatedElement getAnnotatedElement() {
+        return annotationData.annotatedElement();
+    }
+
+    /**
      * 🎯 The actual annotation instance.
      */
     public Annotation getAnnotation() {
@@ -48,8 +67,8 @@ public class MergedAnnotation {
     /**
      * 📎 Optional parent annotation in the meta-chain.
      */
-    public Optional<MergedAnnotation> getParent() {
-        return annotationData.getParent().map(MergedAnnotation::new);
+    public Optional<MergedAnnotation> getMetaOf() {
+        return annotationData.getMetaOf().map(MergedAnnotation::new);
     }
 
     /**
@@ -72,10 +91,29 @@ public class MergedAnnotation {
      * @param type annotation class to search for
      * @return optional merged annotation
      */
-    public <A extends Annotation> Optional<MergedAnnotation> getMerged(Class<A> type) {
+    public Optional<MergedAnnotation> getMerged(Class<? extends Annotation> type) {
         Matcher<Annotation> matcher = AnnotationMatcher.isAnnotation(type);
         return Streamable.findFirst(getFlattened(), ma -> matcher.matches(ma.getAnnotation()));
     }
+
+    /**
+     * 🎯 Get actual annotation instance by type.
+     *
+     * @param type annotation class
+     * @param <A>  annotation type
+     * @return the annotation instance
+     * @throws IllegalStateException if not found
+     */
+    @SuppressWarnings("unchecked")
+    public <A extends Annotation> A getAnnotation(Class<A> type) {
+        Optional<MergedAnnotation> mergedAnnotation = getMerged(type);
+
+        mergedAnnotation.orElseThrow(
+                () -> new IllegalStateException("No annotation found for " + type));
+
+        return (A) mergedAnnotation.get().getAnnotation();
+    }
+
 
     /**
      * 🧷 Whether this annotation is a meta-annotation (depth > 0).

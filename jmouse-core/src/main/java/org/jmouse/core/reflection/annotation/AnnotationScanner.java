@@ -21,14 +21,17 @@ public class AnnotationScanner {
      * 🧠 Get scanned annotations from cache or perform scan.
      */
     public static Set<AnnotationData> scan(AnnotatedElement element) {
-        return CACHE.computeIfAbsent(element, AnnotationScanner::scanInternal);
+        return CACHE.computeIfAbsent(element, e -> {
+            Set<AnnotationData> annotations = new LinkedHashSet<>();
+            scanInternal(e, annotations);
+            return annotations;
+        });
     }
 
     /**
      * 🔁 Recursive annotation discovery with depth/meta tracking.
      */
-    public static Set<AnnotationData> scanInternal(AnnotatedElement element) {
-        Set<AnnotationData>   annotations = new LinkedHashSet<>();
+    public static void scanInternal(AnnotatedElement element, Set<AnnotationData> annotations) {
         Set<String>           visited     = new HashSet<>();
         Deque<AnnotationData> stack       = new ArrayDeque<>();
         AnnotationData        parent      = null;
@@ -46,26 +49,16 @@ public class AnnotationScanner {
                 continue;
             }
 
-            AnnotationData data = new AnnotationData(item.annotation(), item.annotatedElement(), item.parent(), 0);
+            AnnotationData annotationData = new AnnotationData(item.annotation(), item.annotatedElement(), item.parent(), 0);
 
-            annotations.add(data);
+            annotations.add(annotationData);
             visited.add(key);
 
-            for (Annotation metaAnnotation : type.getAnnotations()) {
-                Class<? extends Annotation> metaType = metaAnnotation.annotationType();
-                String metaKey = type + "#" + metaType.getName();
-
-                if (visited.contains(metaKey) || isIgnorable(metaType)) {
-                    continue;
-                }
-
-                AnnotationData nested = new AnnotationData(metaAnnotation, type, data, item.depth() + 1);
-                data.metas().add(nested);
-                stack.push(nested);
+            if (type.getAnnotations().length > 0) {
+                scanInternal(type, annotationData.metas());
             }
         }
 
-        return annotations;
     }
 
     /**

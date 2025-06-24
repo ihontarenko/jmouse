@@ -3,17 +3,14 @@ package _app;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.annotation.Factories;
-import org.jmouse.beans.conditions.ClassInClasspathCondition;
-import org.jmouse.beans.conditions.OnlyIf;
 import org.jmouse.beans.annotation.Provide;
-import org.jmouse.beans.conditions.OnlyIfProperty;
+import org.jmouse.context.BeanRestrictionIfProperty;
 import org.jmouse.mvc.mapping.DirectRequestPathMapping;
 
 import java.io.IOException;
 
 @Factories
-@OnlyIf(ClassInClasspathCondition.class)
-@OnlyIfProperty(name = "app.name", value = "jMouse")
+@BeanRestrictionIfProperty(name = "app.name", value = "jMouse")
 public class DemoAppFactories {
 
     @Provide

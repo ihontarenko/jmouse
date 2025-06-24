@@ -2,9 +2,7 @@ package org.jmouse.beans;
 
 import org.jmouse.beans.annotation.Ignore;
 import org.jmouse.beans.conditions.ConditionEvaluator;
-import org.jmouse.beans.conditions.OnlyIf;
 import org.jmouse.beans.annotation.SuppressException;
-import org.jmouse.beans.conditions.BeanCondition;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDefinitionFactory;
 import org.jmouse.beans.scanner.ConfigurationAnnotatedClassBeanScanner;
@@ -83,7 +81,7 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
                 try {
                     BeanDefinition definition = definitionFactory.createDefinition(element, context);
 
-                    if (!conditionEvaluator.evaluate(definition)) {
+                    if (!conditionEvaluator.evaluate(definition, context)) {
                         continue;
                     }
 

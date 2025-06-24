@@ -7,38 +7,62 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-public record AnnotationData(Annotation annotation, AnnotatedElement annotatedElement, AnnotationData parent, Set<AnnotationData> metas,
-                             int depth) {
+/**
+ * 📎 Represents a single annotation with metadata context.
+ *
+ * @param annotation       the actual annotation
+ * @param annotatedElement the target element
+ * @param parent           parent meta-annotation (if any)
+ * @param metas            direct meta-annotations
+ * @param depth            level in hierarchy
+ */
+public record AnnotationData(
+        Annotation annotation,
+        AnnotatedElement annotatedElement,
+        AnnotationData parent,
+        Set<AnnotationData> metas,
+        int depth
+) {
 
+    /**
+     * 📌 Constructs a data record with an empty set of meta-annotations.
+     */
     public AnnotationData(Annotation annotation, AnnotatedElement annotatedElement, AnnotationData parent, int depth) {
         this(annotation, annotatedElement, parent, new LinkedHashSet<>(), depth);
     }
 
+    /**
+     * 🔁 Meta-annotations directly applied on this annotation.
+     */
     public Set<AnnotationData> metas() {
         return metas;
     }
 
+    /**
+     * 🧬 Annotation type.
+     */
     public Class<? extends Annotation> annotationType() {
         return annotation.annotationType();
     }
 
-    public Optional<AnnotationData> getParent() {
+    /**
+     * 🔗 Parent annotation if this is a meta-annotation.
+     */
+    public Optional<AnnotationData> getMetaOf() {
         return Optional.ofNullable(parent);
     }
 
     @Override
     public boolean equals(Object object) {
-        if (this == object) {
+        if (this == object)
             return true;
-        }
 
-        if (!(object instanceof AnnotationData that)) {
+        if (!(object instanceof AnnotationData that))
             return false;
-        }
 
         return Objects.equals(annotation, that.annotation)
                 && Objects.equals(annotatedElement, that.annotatedElement)
-                && Objects.equals(depth, that.depth);
+                && depth == that.depth;
     }
 
     @Override
