@@ -1,12 +1,14 @@
 package org.jmouse.beans;
 
 import org.jmouse.beans.annotation.Ignore;
+import org.jmouse.beans.conditions.ConditionEvaluator;
+import org.jmouse.beans.conditions.OnlyIf;
 import org.jmouse.beans.annotation.SuppressException;
+import org.jmouse.beans.conditions.BeanCondition;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDefinitionFactory;
 import org.jmouse.beans.scanner.ConfigurationAnnotatedClassBeanScanner;
 import org.jmouse.beans.scanner.ProvideAnnotatedClassesBeanScanner;
-import org.jmouse.core.reflection.Reflections;
 import org.jmouse.util.Priority;
 import org.jmouse.util.helper.Arrays;
 import org.slf4j.Logger;
@@ -16,6 +18,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
 import static org.jmouse.core.reflection.Reflections.getShortName;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -66,6 +69,8 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
         int                   counter           = 0;
         BeanDefinitionFactory definitionFactory = context.getBeanDefinitionFactory();
 
+        ConditionEvaluator conditionEvaluator = new ConditionEvaluator();
+
         for (BeanScanner<AnnotatedElement> scanner : scanners) {
             SCAN:
             for (AnnotatedElement element : scanner.scan(uniqueTypes)) {
@@ -76,9 +81,18 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
 
                 counter++;
                 try {
-                    context.registerDefinition(definitionFactory.createDefinition(element, context));
+                    BeanDefinition definition = definitionFactory.createDefinition(element, context);
+
+                    if (!conditionEvaluator.evaluate(definition)) {
+                        continue;
+                    }
+
+                    if (definition != null) {
+                        context.registerDefinition(definition);
+                    }
+
                 } catch (Exception exception) {
-                    Class<? extends Throwable>[] types = Reflections.getAnnotationValue(
+                    Class<? extends Throwable>[] types = getAnnotationValue(
                             element, SuppressException.class, SuppressException::value);
 
                     if (types != null) {

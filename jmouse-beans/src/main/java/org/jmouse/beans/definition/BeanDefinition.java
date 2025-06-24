@@ -6,6 +6,7 @@ import org.jmouse.beans.Scope;
 import org.jmouse.beans.instantiation.BeanInstantiationStrategy;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
 import java.util.List;
 
@@ -226,6 +227,13 @@ public interface BeanDefinition {
      * @param annotations a collection of annotations to set.
      */
     void setAnnotations(Collection<Annotation> annotations);
+
+    /**
+     * 🧠 Underlying annotated element (e.g. class, method).
+     *
+     * @return annotated element
+     */
+    AnnotatedElement getAnnotatedElement();
 
     /**
      * Checks if this bean definition is annotated with the specified class.

@@ -6,12 +6,15 @@ import org.jmouse.beans.annotation.BeanCollection;
 import org.jmouse.beans.annotation.Factories;
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.beans.annotation.Qualifier;
+import org.jmouse.beans.conditions.OnlyIf;
+import org.jmouse.beans.conditions.OnlyIfProperty;
 import org.jmouse.context.ApplicationConfigurer;
 import org.jmouse.context.ApplicationFactory;
 import org.jmouse.context.BeanProperties;
 import org.jmouse.core.bind.BindDefault;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.reflection.ClassFinder;
+import org.jmouse.core.reflection.Reflections;
 import org.jmouse.mvc.mapping.DirectRequestPathMapping;
 import org.jmouse.util.IdGenerator;
 import org.jmouse.util.SimpleRandomStringGenerator;
@@ -73,7 +76,7 @@ public class WebApplicationLauncher {
 
         rootContext.registerBean("s1", idGenerator::generate, BeanScope.REQUEST);
         rootContext.registerBean("s2", idGenerator::generate, BeanScope.SESSION);
-
+        Reflections.getAnnotations(ServletDispatcherConfiguration.class, OnlyIf.class);
         // web server part
         createWebServer(rootContext).start();
 
@@ -90,6 +93,7 @@ public class WebApplicationLauncher {
     }
 
     @Factories
+    @OnlyIfProperty(name = "application", value = "jMouse", operator = OnlyIfProperty.ComparisonOperator.CONTAINS)
     public static class ServletDispatcherConfiguration {
 
         @Provide("requestPathMappingRegistrations")

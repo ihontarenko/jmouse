@@ -3,6 +3,7 @@ package org.jmouse.beans.definition;
 import org.jmouse.beans.BeanInstantiationType;
 import org.jmouse.core.reflection.Reflections;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
 /**
@@ -32,6 +33,16 @@ public class MethodBeanDefinition extends AbstractBeanDefinition {
     @Override
     public BeanInstantiationType getInstantiationType() {
         return BeanInstantiationType.FACTORY_METHOD;
+    }
+
+    /**
+     * 🧠 Underlying annotated element (e.g. class, method).
+     *
+     * @return annotated element
+     */
+    @Override
+    public AnnotatedElement getAnnotatedElement() {
+        return method;
     }
 
     /**

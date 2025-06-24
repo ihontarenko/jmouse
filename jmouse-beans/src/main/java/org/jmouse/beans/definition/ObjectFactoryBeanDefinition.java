@@ -4,6 +4,8 @@ import org.jmouse.beans.BeanInstantiationType;
 import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.ObjectFactory;
 
+import java.lang.reflect.AnnotatedElement;
+
 /**
  * A {@link BeanDefinition} implementation for beans created using an {@link ObjectFactory}.
  * Stores the factory and descriptor about the bean.
@@ -59,4 +61,13 @@ public class ObjectFactoryBeanDefinition extends AbstractBeanDefinition {
         return builder.toString();
     }
 
+    /**
+     * 🧠 Underlying annotated element (e.g. class, method).
+     *
+     * @return annotated element
+     */
+    @Override
+    public AnnotatedElement getAnnotatedElement() {
+        throw new UnsupportedOperationException("Not supported for ObjectFactoryBeanDefinition");
+    }
 }

@@ -1,5 +1,8 @@
 package org.jmouse.core.reflection;
 
+import org.jmouse.core.reflection.annotation.AnnotationFinder;
+import org.jmouse.core.reflection.annotation.AnnotationMatcher;
+
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -1005,6 +1008,10 @@ abstract public class Reflections {
         }
 
         return value;
+    }
+
+    public static <A extends Annotation> Set<A> getAnnotations(AnnotatedElement element, Class<A> annotationType) {
+        return (Set<A>) AnnotationFinder.findAll(AnnotationMatcher.isAnnotation(annotationType), element);
     }
 
     /**
