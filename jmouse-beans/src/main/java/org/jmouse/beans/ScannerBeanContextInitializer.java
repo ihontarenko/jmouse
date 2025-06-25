@@ -5,7 +5,7 @@ import org.jmouse.beans.conditions.ConditionEvaluator;
 import org.jmouse.beans.annotation.SuppressException;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDefinitionFactory;
-import org.jmouse.beans.scanner.ConfigurationAnnotatedClassBeanScanner;
+import org.jmouse.beans.scanner.FactoriesAnnotatedClassBeanScanner;
 import org.jmouse.beans.scanner.ProvideAnnotatedClassesBeanScanner;
 import org.jmouse.util.Priority;
 import org.jmouse.util.helper.Arrays;
@@ -49,7 +49,7 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
         this.baseClasses = baseClasses;
 
         addScanner(new ProvideAnnotatedClassesBeanScanner());
-        addScanner(new ConfigurationAnnotatedClassBeanScanner());
+        addScanner(new FactoriesAnnotatedClassBeanScanner());
     }
 
     /**
@@ -78,6 +78,7 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
                 }
 
                 counter++;
+
                 try {
                     BeanDefinition definition = definitionFactory.createDefinition(element, context);
 

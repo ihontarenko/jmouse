@@ -1,23 +1,17 @@
 package org.jmouse.mvc;
 
-import org.jmouse.beans.BeanScope;
-import org.jmouse.beans.ScannerBeanContextInitializer;
-import org.jmouse.beans.annotation.BeanCollection;
+import org.jmouse.beans.annotation.AggregatedBeans;
 import org.jmouse.beans.annotation.Factories;
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.beans.annotation.Qualifier;
-import org.jmouse.beans.conditions.BeanRestriction;
-import org.jmouse.context.BeanRestrictionIfProperty;
-import org.jmouse.context.ApplicationConfigurer;
+import org.jmouse.context.BeanConstraintIfProperty;
 import org.jmouse.context.ApplicationFactory;
 import org.jmouse.context.BeanProperties;
 import org.jmouse.core.bind.BindDefault;
 import org.jmouse.core.env.Environment;
-import org.jmouse.core.reflection.ClassFinder;
-import org.jmouse.core.reflection.Reflections;
+import org.jmouse.jMouseWebRoot;
+import org.jmouse.mvc.context.CoreScannerBeanContextInitializer;
 import org.jmouse.mvc.mapping.DirectRequestPathMapping;
-import org.jmouse.util.IdGenerator;
-import org.jmouse.util.SimpleRandomStringGenerator;
 import org.jmouse.util.SingletonSupplier;
 import org.jmouse.web.WebApplicationFactory;
 import org.jmouse.web.servlet.SessionProperties;
@@ -31,7 +25,6 @@ import org.jmouse.web.servlet.SessionConfigurationInitializer;
 import org.jmouse.web.servlet.registration.RegistrationBean;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -43,40 +36,23 @@ public class WebApplicationLauncher {
         this.baseClasses = baseClasses;
     }
 
-    private static ScannerBeanContextInitializer getScannerBeanContextInitializer() {
-        ScannerBeanContextInitializer scannerBeanContextInitializer = new ScannerBeanContextInitializer();
-
-        scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
-                ClassFinder.findImplementations(WebApplicationInitializer.class, rootTypes)));
-        scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
-                ClassFinder.findImplementations(ApplicationConfigurer.class, rootTypes)));
-        scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
-                ClassFinder.findImplementations(BeanInstanceInitializer.class, rootTypes)));
-        scannerBeanContextInitializer.addScanner(rootTypes -> new ArrayList<>(
-                ClassFinder.findAnnotatedClasses(BeanProperties.class, rootTypes)));
-
-        return scannerBeanContextInitializer;
-    }
-
     public WebBeanContext launch() {
         ApplicationFactory<WebBeanContext> applicationFactory = new WebApplicationFactory();
         Environment                        environment        = applicationFactory.createDefaultEnvironment();
         WebBeanContext                     rootContext        = applicationFactory.createContext(
                 WebBeanContext.DEFAULT_ROOT_WEB_CONTEXT_NAME, baseClasses);
 
-        ScannerBeanContextInitializer scannerBeanContextInitializer = getScannerBeanContextInitializer();
-        rootContext.addInitializer(scannerBeanContextInitializer);
+        rootContext.setBaseClasses(jMouseWebRoot.class);
+
+        rootContext.registerBean(Environment.class, environment);
+
+        rootContext.addInitializer(new CoreScannerBeanContextInitializer());
         rootContext.addInitializer(new StartupRootApplicationContextInitializer(environment));
         rootContext.refresh();
 
         // attach ApplicationFactory object
         rootContext.registerBean(ApplicationFactory.class, applicationFactory);
 
-        IdGenerator<String> idGenerator = new SimpleRandomStringGenerator(11);
-
-        rootContext.registerBean("s1", idGenerator::generate, BeanScope.REQUEST);
-        rootContext.registerBean("s2", idGenerator::generate, BeanScope.SESSION);
-        Reflections.getAnnotations(ServletDispatcherConfiguration.class, BeanRestriction.class);
         // web server part
         createWebServer(rootContext).start();
 
@@ -92,13 +68,14 @@ public class WebApplicationLauncher {
         return factory.getWebServer(initializers.toArray(WebApplicationInitializer[]::new));
     }
 
+
     @Factories
-    @BeanRestrictionIfProperty(name = "application", value = "jMouse", operator = BeanRestrictionIfProperty.ComparisonOperator.CONTAINS)
+    @BeanConstraintIfProperty(name = "application", value = "jMouse", operator = BeanConstraintIfProperty.ComparisonOperator.CONTAINS)
     public static class ServletDispatcherConfiguration {
 
         @Provide("requestPathMappingRegistrations")
         public List<DirectRequestPathMapping.Registration> requestPathMappingRegistrations(
-                @BeanCollection Set<DirectRequestPathMapping.Registration> registrations) {
+                @AggregatedBeans Set<DirectRequestPathMapping.Registration> registrations) {
             return List.copyOf(registrations);
         }
 

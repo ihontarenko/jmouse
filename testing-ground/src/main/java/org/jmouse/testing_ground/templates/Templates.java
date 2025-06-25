@@ -8,11 +8,13 @@ import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.ExpressionLanguageValuesResolver;
 import org.jmouse.el.evaluation.ReflectionClassPropertyResolver;
+import org.jmouse.el.extension.MethodImporter;
 import org.jmouse.el.renderable.*;
 import org.jmouse.el.renderable.evaluation.LoopVariables;
 import org.jmouse.el.renderable.loader.ClasspathLoader;
 import org.jmouse.el.renderable.loader.TemplateLoader;
 import org.jmouse.testing_ground.binder.dto.Book;
+import org.jmouse.util.helper.Strings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,10 +32,13 @@ public class Templates {
 
         engine.setLoader(loader);
 
+
         Template          template = engine.getTemplate("site");
 //        Template          template = engine.getTemplate("benchmark");
         Renderer          renderer = new TemplateRenderer(engine);
         EvaluationContext context  = template.newContext();
+
+        MethodImporter.importMethod(Strings.class, context.getExtensions());
 
         context.setValue("book", getBook("Stephen King", "The Shining"));
         context.setValue("books", getBookList());

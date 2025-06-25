@@ -31,9 +31,7 @@ public class StartupRootApplicationContextInitializer implements BeanContextInit
      */
     @Override
     public void initialize(BeanContext context) {
-        context.registerBean(Environment.class, environment);
         context.registerBean(ResourceLoader.class, new CompositeResourceLoader());
-
         performConfigurers(context);
     }
 

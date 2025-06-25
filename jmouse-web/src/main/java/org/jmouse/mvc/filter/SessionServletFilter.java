@@ -4,15 +4,11 @@ import jakarta.servlet.*;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.BeanScope;
-import org.jmouse.beans.annotation.BeanCollection;
-import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.beans.annotation.Provide;
-import org.jmouse.web.initializer.WebApplicationInitializer;
 import org.jmouse.web.request.RequestAttributes;
 import org.jmouse.web.request.SessionAttributesHolder;
 
 import java.io.IOException;
-import java.util.Set;
 
 /**
  * 📶 Servlet {@link Filter} that binds current HTTP request to session-scoped {@link RequestAttributes}.

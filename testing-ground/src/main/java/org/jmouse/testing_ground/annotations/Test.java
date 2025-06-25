@@ -1,6 +1,6 @@
 package org.jmouse.testing_ground.annotations;
 
-import org.jmouse.beans.conditions.BeanRestriction;
+import org.jmouse.beans.conditions.BeanConstraint;
 import org.jmouse.core.reflection.annotation.AnnotationData;
 import org.jmouse.core.reflection.annotation.AnnotationScanner;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
@@ -22,7 +22,7 @@ public class Test {
 
         MergedAnnotation mergedAnnotation = new MergedAnnotation(annotations.iterator().next());
 
-        Optional<MergedAnnotation> optional = mergedAnnotation.getMerged(BeanRestriction.class);
+        Optional<MergedAnnotation> optional = mergedAnnotation.getMerged(BeanConstraint.class);
 
         for (var data : annotations) {
             System.out.println("@" + data.annotationType().getSimpleName()

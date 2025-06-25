@@ -35,7 +35,7 @@ public final class ConditionEvaluator {
         if (!mergedAnnotations.isEmpty()) {
             for (MergedAnnotation mergedAnnotation : mergedAnnotations) {
                 ConditionalMetadata metadata   = createConditionalMetadata(definition, mergedAnnotation);
-                BeanRestriction     annotation = mergedAnnotation.getAnnotation(BeanRestriction.class);
+                BeanConstraint      annotation = mergedAnnotation.getAnnotation(BeanConstraint.class);
 
                 for (Class<? extends BeanCondition> beanConditionClass : annotation.value()) {
                     @SuppressWarnings("unchecked")
@@ -65,7 +65,7 @@ public final class ConditionEvaluator {
     private List<MergedAnnotation> getMergedAnnotations(BeanDefinition definition) {
         return Streamable.of(AnnotationScanner.scan(definition.getAnnotatedElement()))
                 .map(MergedAnnotation::new)
-                .filter(ma -> ma.isAnnotationPresent(BeanRestriction.class))
+                .filter(ma -> ma.isAnnotationPresent(BeanConstraint.class))
                 .toList();
     }
 }

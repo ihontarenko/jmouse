@@ -5,6 +5,7 @@ import org.jmouse.el.StringSource;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.ScopedChain;
 import org.jmouse.el.extension.ExtensionContainer;
+import org.jmouse.el.extension.Lambda;
 import org.jmouse.el.lexer.TokenizableSource;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
@@ -401,22 +402,19 @@ public class RendererVisitor implements NodeVisitor {
      */
     @Override
     public void visit(FunctionNode node) {
-        ExtensionContainer extensions = context.getExtensions();
-        Conversion         conversion = context.getConversion();
-        String             name       = node.getName();
+        Conversion conversion = context.getConversion();
+        String     name       = node.getName();
+        Macro      macro;
 
         // If no function is defined in extensions, attempt to process it as a macro.
-        if (extensions.getFunction(name) == null) {
-            Macro macro = registry.getMacro(name);
-            if (macro != null) {
-                macro.evaluate(this, node, context);
-                LOGGER.info("Macro '{}' evaluated", name);
-            }
+        if ((macro = registry.getMacro(name)) != null) {
+            macro.evaluate(this, node, context);
+            LOGGER.info("Macro '{}' evaluated", name);
         } else {
             // Evaluate the function node and convert the result to a String.
             Object evaluated = node.evaluate(context);
             content.append(conversion.convert(evaluated, String.class));
-            LOGGER.info("Function '{}' evaluated", name);
+            LOGGER.info("{} '{}' evaluated", context.getValue(node.getName()) != null ? "Lambda" : "Function", name);
         }
     }
 

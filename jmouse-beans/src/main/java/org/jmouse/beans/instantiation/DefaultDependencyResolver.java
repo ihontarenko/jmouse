@@ -4,6 +4,8 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanInstantiationException;
 import org.jmouse.beans.definition.AggregatedBeansDependency;
 import org.jmouse.beans.definition.BeanDependency;
+import org.jmouse.core.matcher.Matcher;
+import org.jmouse.core.reflection.ClassMatchers;
 import org.jmouse.core.reflection.JavaType;
 
 import java.util.Collection;
@@ -25,6 +27,9 @@ import java.util.Set;
  */
 public class DefaultDependencyResolver implements DependencyResolver {
 
+    private static final Matcher<Class<?>> IS_SET  = ClassMatchers.isSubtype(Set.class);
+    private static final Matcher<Class<?>> IS_LIST = ClassMatchers.isSubtype(List.class);
+
     /**
      * {@inheritDoc}
      * <p>
@@ -43,13 +48,13 @@ public class DefaultDependencyResolver implements DependencyResolver {
 
         if (dependency instanceof AggregatedBeansDependency(JavaType javaType, String name, Object dependant)) {
             // Fetch all beans of the declared raw type
-            Collection<Object> beans = context.getBeans(javaType.getFirst().getRawType());
+            Collection<Object> beans = context.getBeans(getAggregatedType(javaType));
 
             // If the target type is a Set, wrap in HashSet to enforce uniqueness
-            if (Set.class.isAssignableFrom(javaType.getRawType())) {
-                resolved = new HashSet<>(beans);
-            } else if (List.class.isAssignableFrom(javaType.getRawType())) {
-                resolved = beans;
+            if (IS_SET.matches(javaType.getRawType())) {
+                resolved = Set.copyOf(beans);
+            } else if (IS_LIST.matches(javaType.getRawType())) {
+                resolved = List.copyOf(beans);
             } else {
                 throw new BeanInstantiationException(
                         "Unable resolve aggregated dependency. Dependant: (%s)".formatted(dependant));
@@ -60,6 +65,10 @@ public class DefaultDependencyResolver implements DependencyResolver {
         }
 
         return resolved;
+    }
+
+    private Class<Object> getAggregatedType(JavaType javaType) {
+        return javaType.getFirst().getRawType();
     }
 
 }

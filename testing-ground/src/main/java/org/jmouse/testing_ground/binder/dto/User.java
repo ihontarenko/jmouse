@@ -1,6 +1,6 @@
 package org.jmouse.testing_ground.binder.dto;
 
-import org.jmouse.beans.annotation.BeanCollection;
+import org.jmouse.beans.annotation.AggregatedBeans;
 import org.jmouse.beans.annotation.Factories;
 import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.core.bind.BindRequired;
@@ -21,7 +21,7 @@ public class User {
     }
 
     @BindRequired
-    public void setName(@Qualifier("uname") @BeanCollection String name) {
+    public void setName(@Qualifier("uname") @AggregatedBeans String name) {
         this.name = name;
     }
 

@@ -7,6 +7,6 @@ import java.lang.annotation.*;
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface BeanRestriction {
+public @interface BeanConstraint {
     Class<? extends BeanCondition>[] value();
 }

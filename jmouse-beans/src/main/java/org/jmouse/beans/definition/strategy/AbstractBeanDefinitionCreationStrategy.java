@@ -1,7 +1,7 @@
 package org.jmouse.beans.definition.strategy;
 
 import org.jmouse.beans.BeanContext;
-import org.jmouse.beans.annotation.BeanCollection;
+import org.jmouse.beans.annotation.AggregatedBeans;
 import org.jmouse.beans.annotation.Primary;
 import org.jmouse.beans.annotation.Provide;
 import org.jmouse.beans.annotation.Qualifier;
@@ -74,7 +74,7 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
         JavaType javaType = JavaType.forParameter(parameter);
 
         if (Collection.class.isAssignableFrom(parameter.getType()) && parameter.isAnnotationPresent(
-                BeanCollection.class)) {
+                AggregatedBeans.class)) {
             return new AggregatedBeansDependency(javaType, name, parameter);
         }
 

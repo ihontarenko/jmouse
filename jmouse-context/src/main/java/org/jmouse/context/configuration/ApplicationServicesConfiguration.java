@@ -1,6 +1,6 @@
 package org.jmouse.context.configuration;
 
-import org.jmouse.beans.annotation.BeanCollection;
+import org.jmouse.beans.annotation.AggregatedBeans;
 import org.jmouse.core.convert.PredefinedConversion;
 import org.jmouse.core.convert.converter.*;
 import org.jmouse.beans.annotation.Factories;
@@ -36,7 +36,7 @@ public class ApplicationServicesConfiguration {
     }
 
     @Provide
-    public ExpressionLanguage expressionLanguage(@BeanCollection Set<Extension> extensions) {
+    public ExpressionLanguage expressionLanguage(@AggregatedBeans Set<Extension> extensions) {
         ExpressionLanguage el = new ExpressionLanguage();
 
         if (extensions != null) {

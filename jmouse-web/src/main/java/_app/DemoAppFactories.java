@@ -4,13 +4,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.annotation.Factories;
 import org.jmouse.beans.annotation.Provide;
-import org.jmouse.context.BeanRestrictionIfProperty;
+import org.jmouse.context.BeanConstraintIfProperty;
 import org.jmouse.mvc.mapping.DirectRequestPathMapping;
 
 import java.io.IOException;
 
 @Factories
-@BeanRestrictionIfProperty(name = "app.name", value = "jMouse")
+@BeanConstraintIfProperty(name = "app.name", value = "jMouse")
 public class DemoAppFactories {
 
     @Provide

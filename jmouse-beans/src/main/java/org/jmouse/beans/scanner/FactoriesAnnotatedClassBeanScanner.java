@@ -21,12 +21,12 @@ import java.util.List;
  *
  * <p>Example usage:</p>
  * <pre>{@code
- * ConfigurationAnnotatedClassBeanScanner scanner = new ConfigurationAnnotatedClassBeanScanner();
+ * FactoriesAnnotatedClassBeanScanner scanner = new FactoriesAnnotatedClassBeanScanner();
  * Collection<AnnotatedElement> elements = scanner.scan(MyAppConfig.class);
  * elements.forEach(element -> System.out.println("Found: " + element));
  * }</pre>
  */
-public class ConfigurationAnnotatedClassBeanScanner implements BeanScanner<AnnotatedElement> {
+public class FactoriesAnnotatedClassBeanScanner implements BeanScanner<AnnotatedElement> {
 
     /**
      * Scans the specified base classes for classes annotated with {@link Factories}.

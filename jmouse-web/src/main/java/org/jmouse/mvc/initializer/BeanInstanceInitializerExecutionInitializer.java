@@ -1,7 +1,6 @@
 package org.jmouse.mvc.initializer;
 
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
 import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.mvc.BeanInstanceInitializer;
 import org.jmouse.util.Priority;
@@ -30,7 +29,7 @@ import java.util.List;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  */
 @Priority(1)
-public class WebMvcApplicationInitializer implements WebApplicationInitializer {
+public class BeanInstanceInitializerExecutionInitializer implements WebApplicationInitializer {
 
     private final WebBeanContext context;
 
@@ -40,7 +39,7 @@ public class WebMvcApplicationInitializer implements WebApplicationInitializer {
      * @param context active web bean context
      */
     @BeanConstructor
-    public WebMvcApplicationInitializer(WebBeanContext context) {
+    public BeanInstanceInitializerExecutionInitializer(WebBeanContext context) {
         this.context = context;
     }
 

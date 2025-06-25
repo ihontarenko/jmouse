@@ -3,9 +3,12 @@
 {% use 'extension/macros' get macro as m1v %}
 {% use 'layout/index' get block import footer as parent_footer %}
 {% block 'content' %}
-    Site Page
 
-    {{ m1v.input('email', "email", {"style":'border: 1px solid red;'}) }}
+    {% set uc = s -> s | upper ~ "!" %}
+
+    Site Page - {{ uc('index') }}
+
+    {{ m1v.input('email', uc("email"), {"style":'border: 1px solid red;'}) }}
 
     {% set title = "hello world" %}
 
@@ -31,7 +34,7 @@
         <h2>{{ (1..10) | join(", ") }}</h2>
     </div>
 
-        {% for title in books|filter(b -> b.author|length < 11)|map(b -> b.title|upper ~ ' : ' ~ b.author) %}
+        {% for title in books|filter(b -> b.author|length < 11)|map(uc) %}
         <li>
             <h4>title:{{ title }}</h4>
         </li>
@@ -45,7 +48,7 @@
         {{ m1v.color('Hello Leafs!!!', '#ff00ff') }}
     </div>
 
-    {% embed 'extention/card' %}
+    {% embed 'extension/card' %}
         {% block 'card_content' %}1{% endblock %}
     {% endembed %}
     <hr>
@@ -58,7 +61,7 @@
         {% endfor %}
     </ul>
     <hr>
-    {% embed 'extention/card' %}
+    {% embed 'extension/card' %}
         {% block 'card_content' %}
         <div style="border: 1px solid red">
             <ul>

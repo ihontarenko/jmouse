@@ -77,6 +77,7 @@
         <module>jmouse-beans</module>
         <module>jmouse-context</module>
         <module>jmouse-web</module>
+        <module>wep-app</module>
         <module>testing-ground</module>
     </modules>
 
