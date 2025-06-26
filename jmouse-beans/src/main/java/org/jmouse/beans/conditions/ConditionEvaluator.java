@@ -9,7 +9,10 @@ import org.jmouse.util.Streamable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,17 +38,17 @@ public final class ConditionEvaluator {
         if (!mergedAnnotations.isEmpty()) {
             for (MergedAnnotation mergedAnnotation : mergedAnnotations) {
                 ConditionalMetadata metadata   = createConditionalMetadata(definition, mergedAnnotation);
-                BeanConstraint      annotation = mergedAnnotation.getAnnotation(BeanConstraint.class);
+                BeanCondition       annotation = mergedAnnotation.getAnnotation(BeanCondition.class);
 
-                for (Class<? extends BeanCondition> beanConditionClass : annotation.value()) {
+                for (Class<? extends BeanRegistrationCondition> beanConditionClass : annotation.value()) {
                     @SuppressWarnings("unchecked")
-                    Constructor<? extends BeanCondition> constructor =
-                            (Constructor<? extends BeanCondition>) Reflections.findFirstConstructor(beanConditionClass);
+                    Constructor<? extends BeanRegistrationCondition> constructor =
+                            (Constructor<? extends BeanRegistrationCondition>) Reflections.findFirstConstructor(beanConditionClass);
 
-                    BeanCondition beanCondition = Reflections.instantiate(constructor);
+                    BeanRegistrationCondition beanCondition = Reflections.instantiate(constructor);
 
                     if (!beanCondition.match(metadata, context)) {
-                        LOGGER.debug("🧩 Bean '{}' skipped due to failed condition: @{} ({})",
+                        LOGGER.warn("Bean '{}' skipped due to failed condition: @{} ({})",
                                      definition.getBeanName(),
                                      mergedAnnotation.getAnnotationType().getSimpleName(),
                                      beanConditionClass.getSimpleName());
@@ -63,9 +66,15 @@ public final class ConditionEvaluator {
     }
 
     private List<MergedAnnotation> getMergedAnnotations(BeanDefinition definition) {
-        return Streamable.of(AnnotationScanner.scan(definition.getAnnotatedElement()))
-                .map(MergedAnnotation::new)
-                .filter(ma -> ma.isAnnotationPresent(BeanConstraint.class))
-                .toList();
+        List<MergedAnnotation> mergedAnnotations = Collections.emptyList();
+
+        try {
+            mergedAnnotations = Streamable.of(AnnotationScanner.scan(definition.getAnnotatedElement()))
+                    .map(MergedAnnotation::new)
+                    .filter(ma -> ma.isAnnotationPresent(BeanCondition.class))
+                    .toList();
+        } catch (UnsupportedOperationException ignored) { }
+
+        return mergedAnnotations;
     }
 }

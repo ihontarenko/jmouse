@@ -1,10 +1,12 @@
 package org.jmouse.beans.conditions;
 
-import org.jmouse.beans.BeanContext;
+import java.lang.annotation.*;
 
 /**
- * Base contract for evaluating conditions before bean registration.
+ * Register bean only if the given condition(s) match.
  */
-public interface BeanCondition {
-    boolean match(ConditionalMetadata metadata, BeanContext context);
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface BeanCondition {
+    Class<? extends BeanRegistrationCondition>[] value();
 }

@@ -77,7 +77,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @param source the source object for binding
      * @return a new {@code Binder} instance
      */
-    public static Binder withValueAccessor(Object source) {
+    public static Binder forObject(Object source) {
         return new Binder(DEFAULT_WRAPPER.wrap(source));
     }
 

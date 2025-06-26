@@ -3,8 +3,8 @@ package org.jmouse.context.configuration;
 import org.jmouse.beans.annotation.AggregatedBeans;
 import org.jmouse.core.convert.PredefinedConversion;
 import org.jmouse.core.convert.converter.*;
-import org.jmouse.beans.annotation.Factories;
-import org.jmouse.beans.annotation.Provide;
+import org.jmouse.beans.annotation.BeanFactories;
+import org.jmouse.beans.annotation.Bean;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.common.mapping.Mapping;
 import org.jmouse.common.mapping.MappingFactory;
@@ -16,15 +16,15 @@ import org.jmouse.el.extension.Extension;
 
 import java.util.Set;
 
-@Factories
+@BeanFactories
 public class ApplicationServicesConfiguration {
 
-    @Provide
+    @Bean
     public Mapping mappingService(ApplicationBeanContext context) {
         return MappingFactory.create(context.getBaseClasses());
     }
 
-    @Provide(proxied = true)
+    @Bean(proxied = true)
     public Conversion conversionService() {
         Conversion conversion = new PredefinedConversion() {
         };
@@ -35,7 +35,7 @@ public class ApplicationServicesConfiguration {
         return conversion;
     }
 
-    @Provide
+    @Bean
     public ExpressionLanguage expressionLanguage(@AggregatedBeans Set<Extension> extensions) {
         ExpressionLanguage el = new ExpressionLanguage();
 
@@ -46,12 +46,12 @@ public class ApplicationServicesConfiguration {
         return el;
     }
 
-    @Provide
+    @Bean
     public Extension getDefaultExtension() {
         return new Extension() { };
     }
 
-    @Provide
+    @Bean
     public MessageSource messageSource() {
         StandardMessageSourceBundle sourceBundle = new StandardMessageSourceBundle(ApplicationServicesConfiguration.class.getClassLoader());
 

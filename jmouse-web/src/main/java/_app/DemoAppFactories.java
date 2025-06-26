@@ -2,28 +2,28 @@ package _app;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.beans.annotation.Factories;
-import org.jmouse.beans.annotation.Provide;
-import org.jmouse.context.BeanConstraintIfProperty;
+import org.jmouse.beans.annotation.Bean;
+import org.jmouse.beans.annotation.BeanFactories;
+import org.jmouse.context.BeanConditionIfProperty;
 import org.jmouse.mvc.mapping.DirectRequestPathMapping;
 
 import java.io.IOException;
 
-@Factories
-@BeanConstraintIfProperty(name = "app.name", value = "jMouse")
+@BeanFactories
+@BeanConditionIfProperty(name = "app.name", value = "jMouse")
 public class DemoAppFactories {
 
-    @Provide
+    @Bean
     public DirectRequestPathMapping.Registration helloPage() {
         return new DirectRequestPathMapping.Registration("/hello", (request, response) -> response.getWriter().write("Hello World!"));
     }
 
-    @Provide
+    @Bean
     public DirectRequestPathMapping.Registration worldPage() {
         return new DirectRequestPathMapping.Registration("/world", (request, response) -> response.getWriter().write("Hello World!!!"));
     }
 
-    @Provide
+    @Bean
     public DirectRequestPathMapping.Registration defaultPage() {
         return new DirectRequestPathMapping.Registration("/page", this::page);
     }

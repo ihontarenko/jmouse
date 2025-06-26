@@ -1,7 +1,7 @@
 package _app;
 
 import org.jmouse.context.ApplicationBeanContext;
-import org.jmouse.jMouseWebRoot;
+import org.jmouse.web.jMouseWebRoot;
 import org.jmouse.mvc.WebApplicationLauncher;
 import org.jmouse.mvc.BeanInstanceInitializer;
 import org.jmouse.mvc.mapping.DirectRequestPathMapping;
@@ -10,7 +10,8 @@ public class StartApplication {
 
     public static void main(String... arguments) {
         // todo: resolve scopes of contexts
-        new WebApplicationLauncher(StartApplication.class, ApplicationBeanContext.class, jMouseWebRoot.class).launch();
+        new WebApplicationLauncher(StartApplication.class, ApplicationBeanContext.class, jMouseWebRoot.class)
+                .launch(arguments);
     }
 
     public static class AppInitializer implements BeanInstanceInitializer<DirectRequestPathMapping> {

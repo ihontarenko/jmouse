@@ -83,9 +83,6 @@ public class SimpleBeanDefinitionFactory implements BeanDefinitionFactory {
 
                 definition = preferredName == null
                         ? typedStrategy.create(object, context) : typedStrategy.create(preferredName, object, context);
-
-                LOGGER.info("Definition bean '{}' created. With: '{}'.",definition.getBeanName(),
-                            getShortName(strategy.getClass()));
             }
         }
 

@@ -1,14 +1,11 @@
 package org.jmouse.beans;
 
 import org.jmouse.beans.annotation.Ignore;
-import org.jmouse.beans.conditions.ConditionEvaluator;
 import org.jmouse.beans.annotation.SuppressException;
-import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDefinitionFactory;
-import org.jmouse.beans.scanner.FactoriesAnnotatedClassBeanScanner;
-import org.jmouse.beans.scanner.ProvideAnnotatedClassesBeanScanner;
+import org.jmouse.beans.scanner.BeanFactoriesAnnotatedClassBeanScanner;
+import org.jmouse.beans.scanner.BeanAnnotatedClassesBeanScanner;
 import org.jmouse.util.Priority;
-import org.jmouse.util.helper.Arrays;
 import org.slf4j.Logger;
 
 import java.lang.reflect.AnnotatedElement;
@@ -48,8 +45,8 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
     public ScannerBeanContextInitializer(Class<?>... baseClasses) {
         this.baseClasses = baseClasses;
 
-        addScanner(new ProvideAnnotatedClassesBeanScanner());
-        addScanner(new FactoriesAnnotatedClassBeanScanner());
+        addScanner(new BeanAnnotatedClassesBeanScanner());
+        addScanner(new BeanFactoriesAnnotatedClassBeanScanner());
     }
 
     /**
@@ -62,16 +59,12 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
     public void initialize(BeanContext context) {
         LOGGER.info("{} scanners ready for run", scanners.size());
 
-        Class<?>[]            rootClasses       = Arrays.concatenate(baseClasses, context.getBaseClasses());
-        Class<?>[]            uniqueTypes       = Arrays.unique(rootClasses);
         int                   counter           = 0;
         BeanDefinitionFactory definitionFactory = context.getBeanDefinitionFactory();
 
-        ConditionEvaluator conditionEvaluator = new ConditionEvaluator();
-
         for (BeanScanner<AnnotatedElement> scanner : scanners) {
             SCAN:
-            for (AnnotatedElement element : scanner.scan(uniqueTypes)) {
+            for (AnnotatedElement element : scanner.scan(baseClasses)) {
                 if (ignoreElement(element)) {
                     LOGGER.warn("Ignoring candidate '{}'", element);
                     continue;
@@ -80,16 +73,7 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
                 counter++;
 
                 try {
-                    BeanDefinition definition = definitionFactory.createDefinition(element, context);
-
-                    if (!conditionEvaluator.evaluate(definition, context)) {
-                        continue;
-                    }
-
-                    if (definition != null) {
-                        context.registerDefinition(definition);
-                    }
-
+                    context.registerDefinition(definitionFactory.createDefinition(element, context));
                 } catch (Exception exception) {
                     Class<? extends Throwable>[] types = getAnnotationValue(
                             element, SuppressException.class, SuppressException::value);

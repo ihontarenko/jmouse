@@ -1,6 +1,6 @@
 package org.jmouse.mvc.filter;
 
-import org.jmouse.beans.annotation.Provide;
+import org.jmouse.beans.annotation.Bean;
 import org.jmouse.util.Priority;
 import org.jmouse.mvc.DelegatingBeanFilterRegistration;
 
@@ -11,7 +11,7 @@ import org.jmouse.mvc.DelegatingBeanFilterRegistration;
  * 📦 This filter enables HTTP session support for MVC controllers and
  * is typically placed early in the filter chain.
  *
- * 🧵 It is automatically registered as a bean via {@link Provide}, and
+ * 🧵 It is automatically registered as a bean via {@link Bean}, and
  * its {@link Priority} ensures it runs before most other filters.
  *
  * ⏱️ Runs with high priority: {@code -2100}

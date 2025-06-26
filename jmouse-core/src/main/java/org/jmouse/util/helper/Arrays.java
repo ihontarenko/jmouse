@@ -1,6 +1,8 @@
 package org.jmouse.util.helper;
 
 import java.lang.reflect.Array;
+import java.util.HashSet;
+import java.util.Set;
 
 import static java.util.Arrays.sort;
 
@@ -131,6 +133,39 @@ public final class Arrays {
 
         return result;
     }
+
+    /**
+     * 🔍 Finds all indices of the target value in the given array.
+     *
+     * @param array  source array
+     * @param target value to search for
+     * @return array of matching indices
+     */
+    public static int[] search(Object[] array, Object target) {
+        Set<Integer> indices = new HashSet<>();
+
+        if (array != null && array.length > 0) {
+
+            // 🎯 Fast path: single-element array always returns [0]
+            if (array.length == 1) {
+                return new int[]{0};
+            }
+
+            int index = 0;
+
+            // 🔁 Iterate and match target
+            for (Object object : array) {
+                if (object != null && object.equals(target)) {
+                    indices.add(index);
+                }
+                index++;
+            }
+        }
+
+        // 📦 Convert to int[]
+        return indices.stream().mapToInt(Integer::intValue).toArray();
+    }
+
 
     /**
      * Expands an array to a new size, appending default values as needed.

@@ -5,14 +5,14 @@ import org.jmouse.beans.definition.DuplicateBeanDefinitionException;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.env.MapPropertySource;
 import org.jmouse.beans.BeanContainer;
-import org.jmouse.beans.annotation.Factories;
+import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.context.ApplicationConfigurer;
 
 import java.util.Map;
 
-@Factories
+@BeanFactories
 @SuppressException(DuplicateBeanDefinitionException.class)
-public class StandartWebApplicationConfigurer implements ApplicationConfigurer {
+public class StandardWebApplicationConfigurer implements ApplicationConfigurer {
 
     @Override
     public void configureEnvironment(Environment environment) {

@@ -1,8 +1,8 @@
 package org.jmouse.testing_ground.beancontext.application;
 
-import org.jmouse.beans.annotation.Provide;
+import org.jmouse.beans.annotation.Bean;
 
-@Provide(proxied = true, value = "root")
+@Bean(proxied = true, value = "root")
 public class TestRoot implements GetValue {
 
     public String getValue() {

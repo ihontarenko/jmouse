@@ -1,6 +1,6 @@
 package org.jmouse.beans.definition.strategy;
 
-import org.jmouse.beans.annotation.Provide;
+import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.naming.BeanNameResolver;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.annotation.BeanConstructor;
@@ -22,7 +22,7 @@ import java.util.Set;
  *   <li>Searches for a constructor annotated with {@link BeanConstructor} if present; otherwise,
  *       it falls back to the first available constructor.</li>
  *   <li>Creates dependencies from the constructor parameters.</li>
- *   <li>Updates the bean lifecycle based on annotations like {@link Provide}.</li>
+ *   <li>Updates the bean lifecycle based on annotations like {@link Bean}.</li>
  * </ul>
  *
  * <p>Example usage:

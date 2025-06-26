@@ -63,6 +63,8 @@ public class Expressions {
         context.setValue("data", List.of(1, 2, 3));
         context.setValue("strings", List.of("ZZ", "YY"));
 
+        el.evaluate("['John', 'Kratos', 'Jarvis'] | filter(s -> s is starts('K')) | first");
+
         el.evaluate("set('a', [1, 2f, 3d, 44c, 5])", context);
         el.evaluate("a[3]", context);
 
@@ -78,6 +80,7 @@ public class Expressions {
         el.evaluate("'a' .. strings[0]", context);
         el.evaluate("time - 2", context);
 
+
         Double d2 = el.evaluate("22f / 7", Double.class);
 
 //        el.evaluate("i18n('i18n.default', 'jmouse.el.name', 1, 2, 3) | upper");
@@ -88,6 +91,9 @@ public class Expressions {
         el.evaluate("() -> {{}}"); // return empty map
         el.evaluate("() -> {}"); // return null
         el.evaluate("() -> null"); // return null
+
+        el.evaluate("[1, 2, 3]++");
+        el.evaluate("[1, 2, 3, 2, 1, 4, 5, 2, 3, 1, 3] - 2", context);
 
         el.evaluate("set('toString', (v) -> v|string)", context);
         el.evaluate("set('getNumberType', v -> v|int is even ? 'Even' : 'Odd')", context);

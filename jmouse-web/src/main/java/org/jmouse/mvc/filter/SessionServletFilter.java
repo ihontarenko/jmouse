@@ -4,7 +4,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.BeanScope;
-import org.jmouse.beans.annotation.Provide;
+import org.jmouse.beans.annotation.Bean;
 import org.jmouse.web.request.RequestAttributes;
 import org.jmouse.web.request.SessionAttributesHolder;
 
@@ -43,7 +43,7 @@ import java.io.IOException;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-@Provide
+@Bean
 public class SessionServletFilter implements Filter {
 
     /**

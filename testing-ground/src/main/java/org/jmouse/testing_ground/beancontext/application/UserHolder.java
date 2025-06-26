@@ -1,8 +1,8 @@
 package org.jmouse.testing_ground.beancontext.application;
 
-import org.jmouse.beans.annotation.Provide;
+import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.Qualifier;
 
-@Provide
+@Bean
 public record UserHolder(@Qualifier("client") User user) {
 }

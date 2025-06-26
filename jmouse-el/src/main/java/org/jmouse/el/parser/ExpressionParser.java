@@ -3,7 +3,6 @@ package org.jmouse.el.parser;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
-import org.jmouse.el.node.expression.NullCoalesceNode;
 import org.jmouse.el.node.expression.TernaryNode;
 
 import static org.jmouse.el.lexer.BasicToken.*;

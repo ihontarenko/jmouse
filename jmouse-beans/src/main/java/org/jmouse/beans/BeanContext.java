@@ -8,17 +8,42 @@ import java.util.List;
 
 
 /**
- * Represents the parser interface for managing the bean lifecycle, definitions, containers,
- * and scope resolution within the application context.
+ * 🎯 Represents the central parser and registry for bean lifecycle in the application context.
+ * <p>
+ * Combines multiple responsibilities:
+ * <ul>
+ *     <li>📦 Managing bean containers and scopes</li>
+ *     <li>🛠 Registering and initializing bean definitions</li>
+ *     <li>🔁 Applying bean post-processors</li>
+ *     <li>🎯 Resolving beans by name and type</li>
+ * </ul>
  *
- * @see BeanContainer
- * @see BeanContainerRegistry
- * @see BeanDefinitionContainer
- * @see BeanInitializer
- * @see BeanPostProcessorAware
+ * @see BeanContainer           for low-level access to scoped beans
+ * @see BeanContainerRegistry  for managing multiple containers
+ * @see BeanDefinitionContainer for tracking bean definitions
+ * @see BeanInitializer        for creating and injecting beans
+ * @see BeanPostProcessorAware for post-processing support
  */
 public interface BeanContext extends BeanContainer, BeanContainerRegistry,
         BeanDefinitionContainer, BeanInitializer, BeanPostProcessorAware {
+
+    /**
+     * 📌 Defines how this context will behave when a bean is not found locally.
+     * <p>Default strategy is {@code DELEGATE_TO_PARENT} — try parent context first.
+     *
+     * @return the configured lookup strategy
+     */
+    default BeanLookupStrategy getBeanLookupStrategy() {
+        return BeanLookupStrategy.DELEGATE_TO_PARENT;
+    }
+
+    /**
+     * ⚙️ Set lookup strategy for missing beans.
+     * <p>Defines how this context behaves when a bean is not found locally.
+     *
+     * @param beanLookupStrategy the strategy to apply (e.g. inherit or delegate)
+     */
+    void setBeanLookupStrategy(BeanLookupStrategy beanLookupStrategy);
 
     /**
      * Sets the base classes to be scanned and processed by this context.

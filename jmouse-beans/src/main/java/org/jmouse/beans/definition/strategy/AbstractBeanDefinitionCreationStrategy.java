@@ -2,8 +2,8 @@ package org.jmouse.beans.definition.strategy;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.annotation.AggregatedBeans;
-import org.jmouse.beans.annotation.Primary;
-import org.jmouse.beans.annotation.Provide;
+import org.jmouse.beans.annotation.Bean;
+import org.jmouse.beans.annotation.PrimaryBean;
 import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.beans.definition.AggregatedBeansDependency;
 import org.jmouse.beans.definition.BeanDefinition;
@@ -82,17 +82,17 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
     }
 
     /**
-     * Updates the bean definition by inspecting the {@link Provide} annotation on the provided element.
+     * Updates the bean definition by inspecting the {@link Bean} annotation on the provided element.
      * If present, the annotation's scope value is assigned to the {@code definition}.
      *
      * @param definition the bean definition to update
-     * @param element    the annotated element (class or method) that may hold the {@link Provide} annotation
+     * @param element    the annotated element (class or method) that may hold the {@link Bean} annotation
      */
     protected void updateBeanDefinition(BeanDefinition definition, AnnotatedElement element) {
-        if (element.isAnnotationPresent(Provide.class)) {
-            definition.setProxied(Reflections.getAnnotationValue(element, Provide.class, Provide::proxied));
-            definition.setScope(Reflections.getAnnotationValue(element, Provide.class, Provide::scope));
-            definition.setPrimary(element.isAnnotationPresent(Primary.class));
+        if (element.isAnnotationPresent(Bean.class)) {
+            definition.setProxied(Reflections.getAnnotationValue(element, Bean.class, Bean::proxied));
+            definition.setScope(Reflections.getAnnotationValue(element, Bean.class, Bean::scope));
+            definition.setPrimary(element.isAnnotationPresent(PrimaryBean.class));
         }
     }
 

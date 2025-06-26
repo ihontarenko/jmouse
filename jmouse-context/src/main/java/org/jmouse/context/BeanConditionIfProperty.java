@@ -1,8 +1,8 @@
 package org.jmouse.context;
 
 import org.jmouse.beans.BeanContext;
-import org.jmouse.beans.conditions.AbstractBeanCondition;
-import org.jmouse.beans.conditions.BeanConstraint;
+import org.jmouse.beans.conditions.AbstractBeanRegistrationCondition;
+import org.jmouse.beans.conditions.BeanCondition;
 import org.jmouse.beans.conditions.ConditionalMetadata;
 import org.jmouse.core.env.Environment;
 import org.slf4j.Logger;
@@ -16,8 +16,8 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@BeanConstraint(BeanConstraintIfProperty.PropertyCondition.class)
-public @interface BeanConstraintIfProperty {
+@BeanCondition(BeanConditionIfProperty.PropertyCondition.class)
+public @interface BeanConditionIfProperty {
 
     /**
      * 🔑 Property key to check.
@@ -49,14 +49,14 @@ public @interface BeanConstraintIfProperty {
     /**
      * ✅ Condition that checks environment for property presence and value.
      */
-    class PropertyCondition extends AbstractBeanCondition {
+    class PropertyCondition extends AbstractBeanRegistrationCondition {
 
         private static final Logger LOGGER = LoggerFactory.getLogger(PropertyCondition.class);
 
         @Override
         public boolean match(ConditionalMetadata metadata, BeanContext context) {
-            BeanConstraintIfProperty annotation = metadata.getAnnotation(BeanConstraintIfProperty.class);
-            boolean                  match      = annotation.matchIfMissing();
+            BeanConditionIfProperty annotation = metadata.getAnnotation(BeanConditionIfProperty.class);
+            boolean                 match      = annotation.matchIfMissing();
 
             if (context instanceof ApplicationBeanContext applicationContext) {
                 Environment environment = applicationContext.getEnvironment();

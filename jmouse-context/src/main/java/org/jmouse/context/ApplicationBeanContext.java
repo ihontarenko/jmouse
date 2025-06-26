@@ -42,7 +42,7 @@ public interface ApplicationBeanContext extends BeanContext, BeanFactory, Proper
         try {
             return getBean(Binder.class, ENVIRONMENT_BINDER_BEAN_NAME);
         } catch (BeanNotFoundException e) {
-            Binder binder = Binder.withValueAccessor(getEnvironment());
+            Binder binder = Binder.forObject(getEnvironment());
             registerBean(ApplicationBeanContext.ENVIRONMENT_BINDER_BEAN_NAME, binder, BeanScope.SINGLETON);
             return binder;
         }

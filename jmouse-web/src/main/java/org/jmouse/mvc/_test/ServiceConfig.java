@@ -1,12 +1,14 @@
 package org.jmouse.mvc._test;
 
-import org.jmouse.beans.annotation.Factories;
-import org.jmouse.beans.annotation.Provide;
+import org.jmouse.beans.annotation.Bean;
+import org.jmouse.beans.annotation.BeanFactories;
+import org.jmouse.mvc.context.BeanConditionExists;
 
-@Factories
+@BeanFactories
 public class ServiceConfig {
 
-    @Provide
+    @Bean("service")
+    @BeanConditionExists("service")
     public Service getService() {
         return new Service("core");
     }

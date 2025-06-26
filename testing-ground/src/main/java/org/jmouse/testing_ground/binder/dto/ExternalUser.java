@@ -1,9 +1,9 @@
 package org.jmouse.testing_ground.binder.dto;
 
-import org.jmouse.beans.annotation.Factories;
+import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.core.bind.BindRequired;
 
-@Factories(name = "userDTO")
+@BeanFactories(name = "userDTO")
 public class ExternalUser {
 
     private String name;

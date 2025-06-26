@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static org.jmouse.beans.BeanLookupStrategy.INHERIT_DEFINITION;
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**
@@ -144,6 +145,11 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * Unique context ID
      */
     private String contextId;
+
+    /**
+     * 🧭 Defines how to resolve beans
+     * */
+    private BeanLookupStrategy lookupStrategy;
 
     /**
      * Constructs a new {@code DefaultBeanContext} with the specified parent context and base classes.
@@ -297,18 +303,19 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Retrieves a bean by its name. If the bean is not yet instantiated, it is created
-     * and initialized using its associated {@link BeanDefinition}.
+     * 🧠 Resolves a bean by name using the configured lookup strategy.
+     * <p>
+     * If the definition is not found locally, it may be inherited from parent context or delegated.
      *
      * @param name the name of the bean
-     * @param <T>  the type parameter
-     * @return the bean instance
-     * @throws BeanContextException if no bean definition exists for the given name
+     * @return the resolved bean instance
+     * @throws BeanNotFoundException if the bean cannot be found in any context
      */
     @Override
     public <T> T getBean(String name) {
         BeanDefinition   definition    = getDefinition(name);
-        ObjectFactory<T> objectFactory = () -> this.createBean(definition);
+        BeanDefinition   tmp           = definition;
+        ObjectFactory<T> objectFactory = () -> this.createBean(tmp);
         T                instance      = null;
 
         if (definition != null) {
@@ -321,17 +328,30 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
             instance = instanceContainer.getBean(name, objectFactory);
         }
 
+        if (instance == null && getBeanLookupStrategy() == INHERIT_DEFINITION && parent != null) {
+            definition = parent.getDefinition(name);
+
+            if (definition != null) {
+                registerDefinition(definition);
+                instance = getBean(name);
+            }
+        }
+
         // if bean not found try to search it in parent context
         if (instance == null && parent != null) {
             instance = parent.getBean(name);
         }
 
+        // If still not found — fail
         if (instance == null) {
-            throw new BeanNotFoundException("Bean '%s' not found".formatted(name));
+            throw new BeanNotFoundException(
+                    "Bean '%s' could not be resolved via lookup strategy '%s'"
+                            .formatted(name, getBeanLookupStrategy()));
         }
 
         return instance;
     }
+
 
     /**
      * Creates a bean instance from the given {@link BeanDefinition}, handling
@@ -572,6 +592,30 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         }
 
         return getBeanContainer(definition.getScope()).containsBean(name);
+    }
+
+    /**
+     * ⚙️ Set lookup strategy for missing beans.
+     * <p>Defines how this context behaves when a bean is not found locally.
+     *
+     * @param lookupStrategy the strategy to apply (e.g. inherit or delegate)
+     */
+    @Override
+    public void setBeanLookupStrategy(BeanLookupStrategy lookupStrategy) {
+        this.lookupStrategy = lookupStrategy;
+    }
+
+    /**
+     * 📌 Defines how this context will behave when a bean is not found locally.
+     * <p>Default strategy is {@code DELEGATE_TO_PARENT} — try parent context first.
+     *
+     * @return the configured lookup strategy
+     */
+    @Override
+    public BeanLookupStrategy getBeanLookupStrategy() {
+        return lookupStrategy == null
+                ? BeanContext.super.getBeanLookupStrategy()
+                : lookupStrategy;
     }
 
     /**

@@ -35,10 +35,10 @@ public class PostfixUnaryOperation extends UnaryOperation {
     public Object evaluate(EvaluationContext context) {
         Object     value      = operand.evaluate(context);
         Conversion conversion = context.getConversion();
+        Object     calculated = operator.getCalculator().calculate(value);
 
-        if (operand instanceof PropertyNode property && (operator == INCREMENT || operator == DECREMENT)) {
+        if (operand instanceof PropertyNode property) {
             Class<?> originalType = value.getClass();
-            Object   calculated   = operator.getCalculator().calculate(value);
             context.setValue(property.getPath(), conversion.convert(calculated, originalType));
         }
 

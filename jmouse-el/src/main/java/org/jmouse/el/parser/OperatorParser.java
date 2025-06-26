@@ -10,7 +10,7 @@ import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.BinaryOperation;
 import org.jmouse.el.node.expression.FilterNode;
-import org.jmouse.el.node.expression.NullCoalesceNode;
+import org.jmouse.el.node.expression.NullSafeFallbackNode;
 import org.jmouse.el.node.expression.TestNode;
 
 import static org.jmouse.el.lexer.BasicToken.*;
@@ -63,7 +63,7 @@ public class OperatorParser implements Parser {
                     left = test;
                 }
                 case NullCoalesceOperator.NULL_COALESCE -> {
-                    NullCoalesceNode node = new NullCoalesceNode();
+                    NullSafeFallbackNode node = new NullSafeFallbackNode();
                     node.setNullable(left);
                     node.setOtherwise((ExpressionNode) parse(cursor, context));
                     left = node;

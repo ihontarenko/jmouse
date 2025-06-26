@@ -1,13 +1,13 @@
 package org.jmouse.testing_ground.binder.dto;
 
 import org.jmouse.beans.annotation.AggregatedBeans;
-import org.jmouse.beans.annotation.Factories;
+import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.core.bind.BindRequired;
 
 import java.util.*;
 
-@Factories(name = "userDTO")
+@BeanFactories(name = "userDTO")
 public class User {
 
     private String name;

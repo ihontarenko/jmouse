@@ -25,12 +25,12 @@ import java.lang.annotation.Target;
  *
  * <p>Example Usage:</p>
  * <pre>{@code
- * @Provide(value = "userService", scope = BeanScope.SINGLETON, proxied = true)
+ * @Bean(value = "userService", scope = BeanScope.SINGLETON, proxied = true)
  * public class UserService {
  *     // DirectAccess of the service
  * }
  *
- * @Provide(scope = BeanScope.PROTOTYPE)
+ * @Bean(scope = BeanScope.PROTOTYPE)
  * public UserRepository userRepository() {
  *     return new UserRepository();
  * }
@@ -40,7 +40,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Provide {
+public @interface Bean {
 
     /**
      * Specifies the name of the bean.

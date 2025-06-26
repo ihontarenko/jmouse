@@ -43,7 +43,9 @@ public interface ConditionalMetadata {
             return (A) annotation.get().getAnnotation();
         }
 
-        throw new ClassCastException(annotation.getClass().getName() + " is not a " + annotationType.getName());
+        throw new IllegalStateException(
+                "Annotation '%s' not present in merged annotation"
+                        .formatted(annotationType.getName()));
     }
 
     /**

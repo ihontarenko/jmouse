@@ -55,11 +55,11 @@ user.age >= 18 ? 'Adult' : 'Minor'
 ### 🧮 Math & Type Operations
 
 ```javascript
-22 / 7                             # 3.14...
+22f / 7                             # 3.14...
 1 + (2 * 2) > 5 and 4 < 5 - 2 / 3
-123 | double / 7                   # Floating point division
-si + 2                             # Short + int
-bi + 2                             # Byte + int
+123 | double / 7                    # Floating point division
+[1, 2, 3] + 4                       # [1, 2, 3, 4]
+[1, 2, 3] - 2                       # [1, 3]
 ```
 
 ---
@@ -101,7 +101,7 @@ tag('title', 'jMouse')            # -> <title>jMouse</title>
 ```javascript
 set('toString', (v) -> v | string)
 set('getNumberType', v -> v | int is even ? 'Even' : 'Odd')
-getNumberType(5)                  # -> 'Odd'
+getNumberType(5)                  # 'Odd'
 ```
 
 ---
@@ -112,6 +112,7 @@ getNumberType(5)                  # -> 'Odd'
 () -> 'hello'                     # string 'hello'
 () -> {}                          # null
 () -> {{}}                        # empty map
+['John', 'Kratos', 'Jarvis'] | filter(s -> s is starts('K')) | first # Kratos
 ```
 
 ---

@@ -6,21 +6,21 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 🏷️ Qualifies injection by name when multiple candidates exist.
+ * 🏭 Marks a class that provides one or more bean factories.
  * <p>
- * Used to disambiguate between beans of the same type.
+ * Optional name may be used to categorize or identify the factory group.
  * </p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  */
-@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Qualifier {
+public @interface BeanFactories {
 
     /**
-     * ✏️ Name of the target bean.
+     * 🏷 Optional group name for the factory.
      *
-     * @return bean name
+     * @return group identifier (default: empty)
      */
-    String value();
+    String name() default "";
 }

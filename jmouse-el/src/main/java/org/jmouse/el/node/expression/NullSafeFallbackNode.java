@@ -18,7 +18,7 @@ import org.jmouse.el.node.ExpressionNode;
  * </pre>
  * </p>
  */
-public class NullCoalesceNode extends AbstractExpressionNode {
+public class NullSafeFallbackNode extends AbstractExpressionNode {
 
     /**
      * The expression whose result may be null.

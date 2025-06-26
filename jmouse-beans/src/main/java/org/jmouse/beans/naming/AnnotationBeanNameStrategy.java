@@ -1,8 +1,8 @@
 package org.jmouse.beans.naming;
 
+import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanName;
-import org.jmouse.beans.annotation.Factories;
-import org.jmouse.beans.annotation.Provide;
+import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.util.helper.Strings;
@@ -19,8 +19,8 @@ import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
  * or {@link Method}. This strategy prioritizes annotation values in the following order:
  * <ol>
  *     <li>{@link Qualifier#value()}</li>
- *     <li>{@link Provide#value()}</li>
- *     <li>{@link Factories#name()}</li>
+ *     <li>{@link Bean#value()}</li>
+ *     <li>{@link BeanFactories#name()}</li>
  * </ol>
  * If none of these annotations provide a value, it falls back to:
  * <ul>
@@ -53,8 +53,8 @@ public class AnnotationBeanNameStrategy implements BeanNameStrategy {
         List<Function<AnnotatedElement, Object>> functions = List.of(
                 e -> getAnnotationValue(e, BeanName.class, BeanName::value),
                 e -> getAnnotationValue(e, Qualifier.class, Qualifier::value),
-                e -> getAnnotationValue(e, Provide.class, Provide::value),
-                e -> getAnnotationValue(e, Factories.class, Factories::name),
+                e -> getAnnotationValue(e, Bean.class, Bean::value),
+                e -> getAnnotationValue(e, BeanFactories.class, BeanFactories::name),
                 e -> e instanceof Class<?> ? new ClassNameStrategy().resolve(e) : null,
                 e -> e instanceof Method m ? Strings.uncapitalize(Reflections.getMethodName(m)) : null
         );

@@ -10,10 +10,10 @@ import org.jmouse.web.initializer.WebApplicationInitializer;
 
 import java.util.ArrayList;
 
-@Priority(100)
-public class CoreScannerBeanContextInitializer extends ScannerBeanContextInitializer {
+@Priority(50)
+public class WebMvcApplicationScannerBeanContextInitializer extends ScannerBeanContextInitializer {
 
-    public CoreScannerBeanContextInitializer(Class<?>... baseClasses) {
+    public WebMvcApplicationScannerBeanContextInitializer(Class<?>... baseClasses) {
         super(baseClasses);
 
         addScanner(rootTypes -> new ArrayList<>(

@@ -1,4 +1,4 @@
-package org.jmouse;
+package org.jmouse.web;
 
 public interface jMouseWebRoot {
 }

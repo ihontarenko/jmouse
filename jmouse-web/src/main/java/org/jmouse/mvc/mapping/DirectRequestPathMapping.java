@@ -2,8 +2,8 @@ package org.jmouse.mvc.mapping;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanInitializer;
-import org.jmouse.beans.annotation.Provide;
 import org.jmouse.mvc.AbstractHandlerMapping;
 import org.jmouse.mvc.HandlerInterceptor;
 import org.jmouse.mvc.handler.Controller;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Provide
+@Bean
 public class DirectRequestPathMapping extends AbstractHandlerMapping {
 
     private final Map<String, Controller> controllers;
