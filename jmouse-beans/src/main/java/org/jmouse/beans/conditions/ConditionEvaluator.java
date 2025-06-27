@@ -9,9 +9,7 @@ import org.jmouse.util.Streamable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,7 +49,7 @@ public final class ConditionEvaluator {
                         LOGGER.warn("Bean '{}' skipped due to failed condition: @{} ({})",
                                      definition.getBeanName(),
                                      mergedAnnotation.getAnnotationType().getSimpleName(),
-                                     beanConditionClass.getSimpleName());
+                                     metadata.getAnnotatedElement());
                         return false;
                     }
                 }

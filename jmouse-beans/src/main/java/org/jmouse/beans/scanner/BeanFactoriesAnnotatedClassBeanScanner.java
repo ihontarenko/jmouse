@@ -39,9 +39,9 @@ public class BeanFactoriesAnnotatedClassBeanScanner implements BeanScanner<Annot
     public Collection<AnnotatedElement> scan(Class<?>... baseClasses) {
         List<AnnotatedElement> elements = new ArrayList<>();
 
-        // Find classes annotated with @Configuration
+        // Find classes annotated with @Factories
         for (Class<?> klass : ClassFinder.findAnnotatedClasses(BeanFactories.class, baseClasses)) {
-            // Add factory @Configuration annotated class
+            // Add factory @Factories annotated class
             elements.add(klass);
             // Find methods annotated with @Bean in each @Configuration class
             elements.addAll(new MethodFinder().filter(klass).annotated(Bean.class).find());

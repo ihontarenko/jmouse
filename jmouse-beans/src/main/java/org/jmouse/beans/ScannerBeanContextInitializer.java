@@ -1,15 +1,13 @@
 package org.jmouse.beans;
 
-import org.jmouse.beans.annotation.Ignore;
 import org.jmouse.beans.annotation.SuppressException;
 import org.jmouse.beans.definition.BeanDefinitionFactory;
-import org.jmouse.beans.scanner.BeanFactoriesAnnotatedClassBeanScanner;
-import org.jmouse.beans.scanner.BeanAnnotatedClassesBeanScanner;
 import org.jmouse.util.Priority;
+import org.jmouse.util.Sorter;
+import org.jmouse.util.helper.Arrays;
 import org.slf4j.Logger;
 
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,9 +42,6 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
      */
     public ScannerBeanContextInitializer(Class<?>... baseClasses) {
         this.baseClasses = baseClasses;
-
-        addScanner(new BeanAnnotatedClassesBeanScanner());
-        addScanner(new BeanFactoriesAnnotatedClassBeanScanner());
     }
 
     /**
@@ -59,17 +54,17 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
     public void initialize(BeanContext context) {
         LOGGER.info("{} scanners ready for run", scanners.size());
 
+        List<BeanScanner<AnnotatedElement>> scanners = this.scanners;
+
+        Sorter.sort(scanners);
+
         int                   counter           = 0;
         BeanDefinitionFactory definitionFactory = context.getBeanDefinitionFactory();
+        Class<?>[]            baseClasses       = Arrays.concatenate(this.baseClasses, context.getBaseClasses());
 
         for (BeanScanner<AnnotatedElement> scanner : scanners) {
             SCAN:
             for (AnnotatedElement element : scanner.scan(baseClasses)) {
-                if (ignoreElement(element)) {
-                    LOGGER.warn("Ignoring candidate '{}'", element);
-                    continue;
-                }
-
                 counter++;
 
                 try {
@@ -93,28 +88,6 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
         }
 
         LOGGER.info("{} annotated elements were handled", counter);
-    }
-
-    /**
-     * Checks whether the given {@link AnnotatedElement} should be ignored based on the presence of the {@link Ignore} annotation.
-     * <p>
-     * The method evaluates:
-     * <ul>
-     *     <li>If the element itself is annotated with {@link Ignore}, it will be ignored.</li>
-     *     <li>If the element is a {@link Method}, and its declaring class is annotated with {@link Ignore}, it will also be ignored.</li>
-     * </ul>
-     *
-     * @param element the {@link AnnotatedElement} to check
-     * @return {@code true} if the element should be ignored, {@code false} otherwise
-     */
-    private boolean ignoreElement(AnnotatedElement element) {
-        boolean ignore = element.isAnnotationPresent(Ignore.class);
-
-        if (!ignore && element instanceof Method method) {
-            ignore = method.getDeclaringClass().isAnnotationPresent(Ignore.class);
-        }
-
-        return ignore;
     }
 
     /**

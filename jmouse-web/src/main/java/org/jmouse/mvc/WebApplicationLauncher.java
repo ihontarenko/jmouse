@@ -2,10 +2,9 @@ package org.jmouse.mvc;
 
 import org.jmouse.context.ApplicationFactory;
 import org.jmouse.core.env.Environment;
+import org.jmouse.mvc.context.*;
 import org.jmouse.web.WebLauncher;
 import org.jmouse.web.jMouseWebRoot;
-import org.jmouse.mvc.context.CoreScannerBeanContextInitializer;
-import org.jmouse.mvc.context.WebMvcApplicationScannerBeanContextInitializer;
 import org.jmouse.web.WebApplicationFactory;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.initializer.WebApplicationInitializer;
@@ -14,6 +13,7 @@ import org.jmouse.web.initializer.context.StartupRootApplicationContextInitializ
 import org.jmouse.web.server.WebServer;
 import org.jmouse.web.server.WebServerFactory;
 import org.jmouse.web.servlet.registration.RegistrationBean;
+import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
 import java.util.List;
 
@@ -40,13 +40,29 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
 
         rootContext.registerBean(Environment.class, environment);
 
-        rootContext.addInitializer(new WebMvcApplicationScannerBeanContextInitializer(applicationClasses));
-        rootContext.addInitializer(new CoreScannerBeanContextInitializer(jMouseWebRoot.class, jMouseWebMvcRoot.class));
+        // ⚙️ Core configuration (WebServerFactory, BeanInstanceInitializer)
+        rootContext.addInitializer(new CoreFrameworkInitializer());
+
+        // ⚙️ Core configuration (BeanProperties, ApplicationConfigurer)
+        rootContext.addInitializer(new CoreConfigurationInitializer());
+
+        // ☀️ Custom startup initializer
         rootContext.addInitializer(new StartupRootApplicationContextInitializer(environment));
+
         rootContext.refresh();
 
         // attach ApplicationFactory object
         rootContext.registerBean(ApplicationFactory.class, applicationFactory);
+
+        // 🔵 2. DispatcherContext (child)
+        WebBeanContext dispatcherContext = applicationFactory.createContext("dispatcher", rootContext);
+
+        dispatcherContext.addInitializer(new WebInfrastructureInitializer(jMouseWebMvcRoot.class));
+        dispatcherContext.addInitializer(new WebControllersInitializer(applicationClasses));
+        dispatcherContext.refresh(); // 🟦 run initializing of local context
+
+        // 🧩 Реєстрація DispatcherServlet
+        registerDispatcherServlet(rootContext, dispatcherContext);
 
         // web server part
         createWebServer(rootContext).start();
@@ -62,6 +78,16 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
         WebServerFactory factory = rootContext.getBean(WebServerFactory.class);
 
         return factory.getWebServer(initializers.toArray(WebApplicationInitializer[]::new));
+    }
+
+    private void registerDispatcherServlet(WebBeanContext root, WebBeanContext dispatcher) {
+        FrameworkDispatcherRegistration registration = new FrameworkDispatcherRegistration(dispatcher);
+
+        registration.addMappings("/*");
+        registration.setEnabled(true);
+        registration.setLoadOnStartup(1);
+
+        root.registerBean(ServletRegistrationBean.class, () -> registration);
     }
 
 }

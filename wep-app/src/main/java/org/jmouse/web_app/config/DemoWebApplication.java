@@ -7,9 +7,9 @@ import org.jmouse.mvc._test.Service;
 @BeanFactories
 public class DemoWebApplication {
 
-//    @Bean("service")
-//    public Service getService() {
-//        return new Service("local_app");
-//    }
+    @Bean("service")
+    public Service getService() {
+        return new Service("local_app");
+    }
 
 }

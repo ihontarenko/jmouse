@@ -1,10 +1,7 @@
 package org.jmouse.mvc;
 
 import org.jmouse.beans.BeanLookupStrategy;
-import org.jmouse.beans.annotation.AggregatedBeans;
-import org.jmouse.beans.annotation.Bean;
-import org.jmouse.beans.annotation.BeanFactories;
-import org.jmouse.beans.annotation.Qualifier;
+import org.jmouse.beans.annotation.*;
 import org.jmouse.context.ApplicationFactory;
 import org.jmouse.context.BeanConditionIfProperty;
 import org.jmouse.mvc.mapping.DirectRequestPathMapping;
@@ -19,6 +16,7 @@ import java.util.Set;
 
 @BeanFactories
 @BeanConditionIfProperty(name = "jmouse.web.enable", value = "true")
+@Ignore(useFunny = true)
 public class ServletDispatcherConfiguration {
 
     @Bean("requestPathMappingRegistrations")
