@@ -22,6 +22,13 @@ public interface Streamable<T> extends Iterable<T>, Supplier<Stream<T>> {
     }
 
     /**
+     * 🔍 Finds the all matching elements.
+     */
+    static <T> List<T> findAll(Iterable<T> iterable, Predicate<? super T> predicate) {
+        return of(iterable).filter(predicate).stream().toList();
+    }
+
+    /**
      * 🚿 Returns a sequential stream.
      */
     default Stream<T> stream() {

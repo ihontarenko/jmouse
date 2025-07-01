@@ -16,7 +16,6 @@ import java.util.Set;
 
 @BeanFactories
 @BeanConditionIfProperty(name = "jmouse.web.enable", value = "true")
-@Ignore(useFunny = true)
 public class ServletDispatcherConfiguration {
 
     @Bean("requestPathMappingRegistrations")

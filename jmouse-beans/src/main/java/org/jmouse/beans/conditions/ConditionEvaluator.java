@@ -3,7 +3,6 @@ package org.jmouse.beans.conditions;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.core.reflection.Reflections;
-import org.jmouse.core.reflection.annotation.AnnotationScanner;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.util.Streamable;
 import org.slf4j.Logger;
@@ -13,8 +12,23 @@ import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.List;
 
+import static org.jmouse.core.reflection.annotation.MergedAnnotation.forElement;
+
+
 /**
- * ✅ Evaluates conditional annotations and decides if a bean should be included.
+ * ✅ Evaluates whether a {@link BeanDefinition} satisfies all registered {@link BeanCondition}s.
+ * <p>
+ * This class inspects the merged annotations of a bean (including meta-annotations),
+ * and applies all registered {@link BeanRegistrationCondition} checks.
+ * </p>
+ *
+ * <p>Usage:</p>
+ * <pre>{@code
+ * ConditionEvaluator evaluator = new ConditionEvaluator();
+ * boolean result = evaluator.evaluate(beanDefinition, context);
+ * }</pre>
+ *
+ * @author Ivan Hontarenko
  */
 public final class ConditionEvaluator {
 
@@ -36,7 +50,7 @@ public final class ConditionEvaluator {
         if (!mergedAnnotations.isEmpty()) {
             for (MergedAnnotation mergedAnnotation : mergedAnnotations) {
                 ConditionalMetadata metadata   = createConditionalMetadata(definition, mergedAnnotation);
-                BeanCondition       annotation = mergedAnnotation.getAnnotation(BeanCondition.class);
+                BeanCondition       annotation = mergedAnnotation.getNativeAnnotation(BeanCondition.class);
 
                 for (Class<? extends BeanRegistrationCondition> beanConditionClass : annotation.value()) {
                     @SuppressWarnings("unchecked")
@@ -46,7 +60,7 @@ public final class ConditionEvaluator {
                     BeanRegistrationCondition beanCondition = Reflections.instantiate(constructor);
 
                     if (!beanCondition.match(metadata, context)) {
-                        LOGGER.warn("Bean '{}' skipped due to failed condition: @{} ({})",
+                        LOGGER.warn("⛔ Bean '{}' skipped due to failed condition: @{} on {}",
                                      definition.getBeanName(),
                                      mergedAnnotation.getAnnotationType().getSimpleName(),
                                      metadata.getAnnotatedElement());
@@ -59,20 +73,28 @@ public final class ConditionEvaluator {
         return true;
     }
 
+
+    /**
+     * Creates metadata context for evaluating a specific condition annotation.
+     */
     private ConditionalMetadata createConditionalMetadata(BeanDefinition definition, MergedAnnotation annotation) {
         return new SimpleConditionalMetadata(annotation, definition);
     }
 
+    /**
+     * Extracts all merged annotations on the bean that are annotated with {@link BeanCondition}.
+     * This includes both direct and meta-annotations.
+     *
+     * @param definition the bean definition
+     * @return list of relevant {@link MergedAnnotation}s
+     */
     private List<MergedAnnotation> getMergedAnnotations(BeanDefinition definition) {
-        List<MergedAnnotation> mergedAnnotations = Collections.emptyList();
-
         try {
-            mergedAnnotations = Streamable.of(AnnotationScanner.scan(definition.getAnnotatedElement()))
-                    .map(MergedAnnotation::new)
+            return Streamable.of(MergedAnnotation.forElement(definition.getAnnotatedElement()).getMetas())
                     .filter(ma -> ma.isAnnotationPresent(BeanCondition.class))
                     .toList();
-        } catch (UnsupportedOperationException ignored) { }
-
-        return mergedAnnotations;
+        } catch (UnsupportedOperationException ignored) {
+            return Collections.emptyList();
+        }
     }
 }

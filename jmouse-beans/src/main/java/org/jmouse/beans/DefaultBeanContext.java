@@ -373,9 +373,12 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public <T> T createBean(BeanDefinition definition) {
-
         if (definition == null) {
             throw new BeanContextException("Bean definition required");
+        }
+
+        if (!definition.isEnabled()) {
+            throw new BeanContextException("Bean definition disabled");
         }
 
         Supplier<BeanInstantiationException> exceptionSupplier = ()

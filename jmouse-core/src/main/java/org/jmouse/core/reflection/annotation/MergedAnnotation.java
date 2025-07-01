@@ -53,7 +53,7 @@ public class MergedAnnotation {
     /**
      * 🎯 The actual annotation instance.
      */
-    public Annotation getAnnotation() {
+    public Annotation getNativeAnnotation() {
         return annotationData.annotation();
     }
 
@@ -86,34 +86,86 @@ public class MergedAnnotation {
     }
 
     /**
-     * 🔍 Search for merged annotation by type.
+     * 🧩 Wraps all annotations of the given element into a single {@link MergedAnnotation}.
+     * <p>
+     * Useful as a shortcut to avoid manual scanning and conversion of {@link AnnotationData}
+     * into multiple {@code MergedAnnotation} instances. The result acts as a synthetic,
+     * aggregate wrapper that allows unified access to annotation metadata.
+     * </p>
      *
-     * @param type annotation class to search for
-     * @return optional merged annotation
+     * <pre>{@code
+     * // Instead of:
+     * Set<AnnotationData> annotations = AnnotationScanner.scan(SomeClass.class);
+     * List<MergedAnnotation> merged = Streamable.of(annotations).map(MergedAnnotation::new).toList();
+     *
+     * // Use:
+     * MergedAnnotation merged = MergedAnnotation.forElement(SomeClass.class);
+     * }</pre>
+     *
+     * @param element the annotated element to wrap (e.g., class or method)
+     * @return a synthetic merged annotation representing all annotations on the element
      */
-    public Optional<MergedAnnotation> getMerged(Class<? extends Annotation> type) {
-        Matcher<Annotation> matcher = AnnotationMatcher.isAnnotation(type);
-        return Streamable.findFirst(getFlattened(), ma -> matcher.matches(ma.getAnnotation()));
+    public static MergedAnnotation forElement(AnnotatedElement element) {
+        return new MergedAnnotation(SyntheticAnnotation.forAnnotatedElement(element));
     }
 
     /**
-     * 🎯 Get actual annotation instance by type.
+     * 🔍 Retrieves the first {@link MergedAnnotation} of the specified type,
+     * including meta-annotations.
      *
-     * @param type annotation class
-     * @param <A>  annotation type
-     * @return the annotation instance
+     * @param type the annotation type to search for
+     * @return optional merged annotation of that type
+     */
+    public Optional<MergedAnnotation> getAnnotation(Class<? extends Annotation> type) {
+        Matcher<Annotation> matcher = AnnotationMatcher.isAnnotation(type);
+        return Streamable.findFirst(getFlattened(), ma -> matcher.matches(ma.getNativeAnnotation()));
+    }
+
+    /**
+     * 📚 Retrieves all {@link MergedAnnotation}s of the specified type,
+     * including direct and meta-level matches.
+     *
+     * @param type the annotation type to filter by
+     * @return list of all matching merged annotations
+     */
+    public List<MergedAnnotation> getAnnotations(Class<? extends Annotation> type) {
+        Matcher<Annotation> matcher = AnnotationMatcher.isAnnotation(type);
+        return Streamable.findAll(getFlattened(), ma -> matcher.matches(ma.getNativeAnnotation()));
+    }
+
+    /**
+     * 🎯 Returns the native annotation instance of the given type.
+     * <p>
+     * If multiple annotations of this type are present, returns the first one found.
+     * </p>
+     *
+     * @param <A>  the annotation type
+     * @param type the class of the annotation
+     * @return native annotation instance
      * @throws IllegalStateException if not found
      */
     @SuppressWarnings("unchecked")
-    public <A extends Annotation> A getAnnotation(Class<A> type) {
-        Optional<MergedAnnotation> mergedAnnotation = getMerged(type);
+    public <A extends Annotation> A getNativeAnnotation(Class<A> type) {
+        Optional<MergedAnnotation> mergedAnnotation = getAnnotation(type);
 
         mergedAnnotation.orElseThrow(
-                () -> new IllegalStateException("No annotation found for " + type));
+                () -> new IllegalStateException("No annotation found for: " + type));
 
-        return (A) mergedAnnotation.get().getAnnotation();
+        return (A) mergedAnnotation.get().getNativeAnnotation();
     }
 
+    /**
+     * 🎯 Returns all native annotation instances of the given type.
+     *
+     * @param <A>  the annotation type
+     * @param type the annotation class
+     * @return list of annotation instances
+     */
+    @SuppressWarnings("unchecked")
+    public <A extends Annotation> List<A> getNativeAnnotations(Class<A> type) {
+        return (List<A>) getAnnotations(type).stream()
+                .map(MergedAnnotation::getNativeAnnotation).toList();
+    }
 
     /**
      * 🧷 Whether this annotation is a meta-annotation (depth > 0).
@@ -126,7 +178,7 @@ public class MergedAnnotation {
      * 🔍 Check if a merged annotation of the given type exists.
      */
     public boolean isAnnotationPresent(Class<? extends Annotation> type) {
-        return getMerged(type).isPresent();
+        return getAnnotation(type).isPresent();
     }
 
     /**

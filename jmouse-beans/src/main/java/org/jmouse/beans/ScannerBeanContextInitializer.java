@@ -70,11 +70,11 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
                 try {
                     context.registerDefinition(definitionFactory.createDefinition(element, context));
                 } catch (Exception exception) {
-                    Class<? extends Throwable>[] types = getAnnotationValue(
+                    Class<? extends Throwable>[] throwableTypes = getAnnotationValue(
                             element, SuppressException.class, SuppressException::value);
 
-                    if (types != null) {
-                        for (Class<? extends Throwable> throwableType : types) {
+                    if (throwableTypes != null) {
+                        for (Class<? extends Throwable> throwableType : throwableTypes) {
                             if (throwableType.isAssignableFrom(exception.getClass())) {
                                 LOGGER.warn("Suppressed exception '{}'", exception.getMessage());
                                 continue SCAN;

@@ -46,14 +46,18 @@ public @interface BeanConditionExists {
 
         @Override
         public boolean match(ConditionalMetadata metadata, BeanContext context) {
-            BeanConditionExists annotation = metadata.getAnnotation(BeanConditionExists.class);
-            String              value      = annotation.value();
+            try {
+                BeanConditionExists annotation = metadata.getAnnotation(BeanConditionExists.class);
+                String              value      = annotation.value();
 
-            if (value != null && !value.isBlank()) {
-                return !context.containsDefinition(value);
+                if (value != null && !value.isBlank()) {
+                    return !context.containsDefinition(value);
+                }
+
+                return true;
+            } catch (IllegalStateException exception) {
+                return false;
             }
-
-            return true;
         }
     }
 }

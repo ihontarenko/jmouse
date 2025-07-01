@@ -61,9 +61,11 @@ public class AbstractApplicationBeanContext extends DefaultBeanContext implement
                         getContextId());
             super.registerDefinition(definition);
         } else {
-            LOGGER.debug("Skipped bean '{}' [type={}] – does not meet registration criteria",
+            LOGGER.info("Skipped bean '{}' [type={}] – does not meet registration criteria",
                          definition.getBeanName(),
                          definition.getBeanClass().getName());
+            definition.setEnabled(false);
+            super.registerDefinition(definition);
         }
     }
 

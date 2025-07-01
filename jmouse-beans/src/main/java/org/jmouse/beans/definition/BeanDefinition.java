@@ -4,6 +4,7 @@ import org.jmouse.beans.BeanInstantiationType;
 import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.Scope;
 import org.jmouse.beans.instantiation.BeanInstantiationStrategy;
+import org.jmouse.core.reflection.annotation.MergedAnnotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -18,6 +19,24 @@ import java.util.List;
  * allowing hierarchical organization of definitions.
  */
 public interface BeanDefinition {
+
+    /**
+     * Indicates whether this bean definition is currently enabled for registration.
+     * <p>
+     * Disabled definitions are ignored during the context startup or refresh phase.
+     *
+     * @return {@code true} if the definition is enabled, {@code false} otherwise.
+     */
+    boolean isEnabled();
+
+    /**
+     * Enables or disables this bean definition for context registration.
+     * <p>
+     * When {@code false}, this bean will not be processed or registered in the container.
+     *
+     * @param enabled {@code true} to enable the bean, {@code false} to exclude it.
+     */
+    void setEnabled(boolean enabled);
 
     /**
      * Determines if this definition represents a singleton or non-bean lifecycle.
@@ -242,4 +261,8 @@ public interface BeanDefinition {
      * @return {@code true} if annotated, otherwise {@code false}.
      */
     boolean isAnnotatedWith(Class<?> annotatedClass);
+
+    default MergedAnnotation getMergedAnnotation() {
+        return MergedAnnotation.forElement(getAnnotatedElement());
+    }
 }

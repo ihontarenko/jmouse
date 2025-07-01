@@ -3,6 +3,8 @@ package org.jmouse.core.reflection;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.reflection.scanner.ClassScanner;
 import org.jmouse.core.reflection.scanner.DefaultClassScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -34,12 +36,14 @@ import static org.jmouse.core.reflection.ClassMatchers.*;
  */
 public interface ClassFinder {
 
+    Logger LOGGER = LoggerFactory.getLogger(ClassFinder.class);
+
     /**
      * A cache for storing previously scanned and filtered classes.
      * Key: hash of base classes and matcher used in the search.
      * Value: a collection of matched classes.
      */
-    Map<Integer, Collection<Class<?>>> CACHE = new HashMap<>();
+    Map<CacheKey, Collection<Class<?>>> CACHE = new HashMap<>();
 
     /**
      * The default class scanner used for locating classes in the classpath.
@@ -140,35 +144,15 @@ public interface ClassFinder {
     }
 
     /**
-     * Finds all classes that match the given criteria, sorts them using the provided comparators,
-     * and optionally scans the provided base classes' packages.
+     * 🔍 Scans and filters classes from base packages using the given matcher and optional comparators.
      *
-     * <p>This method performs the following operations:</p>
-     * <ul>
-     *     <li>If no base classes are provided, it retrieves default root classes from the {@link ScannerContext}.</li>
-     *     <li>Checks the {@link #CACHE} for already scanned and matched results. If found, returns the cached collection.</li>
-     *     <li>Uses the {@link ClassScanner} to scan the packages of the base classes for all available classes.</li>
-     *     <li>Applies the provided {@link Matcher} to filter the scanned classes.</li>
-     *     <li>Sorts the filtered classes using the provided list of {@link Comparator} objects.
-     *         If no comparators are provided, the original order is maintained.</li>
-     * </ul>
+     * <p>⚡ Supports caching and lazy evaluation. If no base classes are provided,
+     * the context's default roots are used. Results can be sorted using provided comparators.</p>
      *
-     * <p>Important notes:</p>
-     * <ul>
-     *     <li>The caching mechanism is based on a hash of the matcher and base classes to optimize performance.</li>
-     *     <li>Sorting is optional, and the classes can be returned in their natural or scanned order if no comparators are provided.</li>
-     *     <li>This method is thread-safe if the {@link #CACHE}, {@link ClassScanner}, and {@link ScannerContext} are accessed in a thread-safe manner.</li>
-     * </ul>
-     *
-     * @param matcher     the matcher used to filter classes based on specific criteria; cannot be {@code null}.
-     * @param comparators a list of comparators used to sort the filtered classes; can be empty to maintain original order.
-     * @param baseClasses the base classes whose packages will be scanned; if empty, defaults from {@link ScannerContext} are used.
-     * @return a collection of classes that match the given criteria, sorted as specified.
-     * @throws IllegalArgumentException if the matcher is {@code null}.
-     * @see Matcher
-     * @see Comparator
-     * @see ClassScanner
-     * @see ScannerContext
+     * @param matcher     a matcher to filter scanned classes
+     * @param comparators optional comparators for sorting results
+     * @param baseClasses root classes to scan from (optional)
+     * @return collection of matched and optionally sorted classes
      */
     static Collection<Class<?>> findAll(
             Matcher<Class<?>> matcher, Collection<Comparator<Class<?>>> comparators, Class<?>... baseClasses) {
@@ -178,7 +162,7 @@ public interface ClassFinder {
         }
 
         // Build a unique cache key based on base classes and matcher
-        final int cacheKey = Objects.hash(baseClasses);
+        final CacheKey cacheKey = CacheKey.of(baseClasses);
 
         // Check cache
         Collection<Class<?>> classes = CACHE.get(cacheKey);
@@ -199,7 +183,11 @@ public interface ClassFinder {
                 .orElse((a, b) -> 0);
 
         // Filter and sort classes
-        return classes.stream().filter(matcher::matches).sorted(comparator).toList();
+        List<Class<?>> result = classes.stream().filter(matcher::matches).sorted(comparator).toList();
+
+        LOGGER.info("📦 Scanned: {} → Matched: {}; Matcher: {}", classes.size(), result.size(), matcher);
+
+        return result;
     }
 
     /**
@@ -209,6 +197,39 @@ public interface ClassFinder {
      */
     static ScannerContext getContext() {
         return CONTEXT;
+    }
+
+    class CacheKey {
+
+        private final Class<?>[] classes;
+
+        public CacheKey(Class<?>[] classes) {
+            this.classes = classes;
+        }
+
+        @Override
+        public String toString() {
+            return "KEY:[%s]".formatted(Arrays.toString(classes));
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object instanceof CacheKey cacheKey) {
+                return Objects.deepEquals(classes, cacheKey.classes);
+            }
+
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(classes);
+        }
+
+        public static CacheKey of(Class<?>... classes) {
+            return new CacheKey(classes);
+        }
+
     }
 
 }

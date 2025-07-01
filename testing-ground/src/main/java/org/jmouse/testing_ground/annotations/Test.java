@@ -20,9 +20,11 @@ public class Test {
 
         List<MergedAnnotation> mergedAnnotations = Streamable.of(annotations).map(MergedAnnotation::new).toList();
 
+        MergedAnnotation merged = MergedAnnotation.forElement(ServletDispatcherConfiguration.class);
+
         MergedAnnotation mergedAnnotation = new MergedAnnotation(annotations.iterator().next());
 
-        Optional<MergedAnnotation> optional = mergedAnnotation.getMerged(BeanCondition.class);
+        Optional<MergedAnnotation> optional = mergedAnnotation.getAnnotation(BeanCondition.class);
 
         for (var data : annotations) {
             System.out.println("@" + data.annotationType().getSimpleName()

@@ -45,7 +45,6 @@ import java.io.IOException;
  * @author ihontarenko@gmail.com
  */
 @Bean
-@SkipBean
 public class SessionServletFilter implements Filter {
 
     /**

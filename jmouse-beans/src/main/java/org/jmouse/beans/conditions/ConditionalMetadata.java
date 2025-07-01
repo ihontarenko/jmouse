@@ -37,15 +37,15 @@ public interface ConditionalMetadata {
      * @throws ClassCastException if annotation is missing
      */
     default <A extends Annotation> A getAnnotation(Class<A> annotationType) {
-        Optional<MergedAnnotation> annotation = getMergedAnnotation().getMerged(annotationType);
+        Optional<MergedAnnotation> annotation = getMergedAnnotation().getAnnotation(annotationType);
 
         if (annotation.isPresent()) {
-            return (A) annotation.get().getAnnotation();
+            return (A) annotation.get().getNativeAnnotation();
         }
 
         throw new IllegalStateException(
-                "Annotation '%s' not present in merged annotation"
-                        .formatted(annotationType.getName()));
+                "Annotation '%s' not present in merged annotation. Target: %s"
+                        .formatted(annotationType.getName(), getAnnotatedElement()));
     }
 
     /**

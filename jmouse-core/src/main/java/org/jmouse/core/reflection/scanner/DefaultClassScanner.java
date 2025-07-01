@@ -65,7 +65,7 @@ public class DefaultClassScanner implements ClassScanner {
 
             // Adjust path for JRT resources
             if (Reflections.isJrtResource(baseClass)) {
-                antPath = "%s:%s/%s".formatted(Resource.JRT_PROTOCOL, baseClass.getModule().getName(), path);
+                antPath = "%s:%s/%s/*.class".formatted(Resource.JRT_PROTOCOL, baseClass.getModule().getName(), path);
             }
 
             Collection<Resource> resources = loader.findResources(antPath);

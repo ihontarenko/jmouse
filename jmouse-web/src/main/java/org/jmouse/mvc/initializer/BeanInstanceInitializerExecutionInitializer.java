@@ -2,6 +2,7 @@ package org.jmouse.mvc.initializer;
 
 import jakarta.servlet.ServletContext;
 import org.jmouse.beans.annotation.BeanConstructor;
+import org.jmouse.core.reflection.JavaType;
 import org.jmouse.mvc.BeanInstanceInitializer;
 import org.jmouse.util.Priority;
 import org.jmouse.util.Sorter;
@@ -61,7 +62,11 @@ public class BeanInstanceInitializerExecutionInitializer implements WebApplicati
         if (initializers != null && !initializers.isEmpty()) {
             Sorter.sort(initializers);
             for (BeanInstanceInitializer beanInitializer : initializers) {
-                LOGGER.info("Initializing bean: {}", beanInitializer.objectClass().getName());
+
+                JavaType type = JavaType.forInstance(beanInitializer).locate(BeanInstanceInitializer.class);
+                JavaType targetType = type.getFirst();
+
+                LOGGER.info("Initializing bean: {}", type);
                 handleInitializer(beanInitializer, beanInitializer.objectClass());
             }
         }

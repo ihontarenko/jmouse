@@ -1029,7 +1029,7 @@ abstract public class Reflections {
      * Java modules in {@code JAVA_MODULE_NAMES}.
      */
     public static boolean isJrtResource(Class<?> clazz) {
-        return JAVA_MODULE_NAMES.contains(clazz.getModule());
+        return JAVA_MODULE_NAMES.contains(clazz.getModule().getName());
     }
 
     public static String describe(Object instance) {

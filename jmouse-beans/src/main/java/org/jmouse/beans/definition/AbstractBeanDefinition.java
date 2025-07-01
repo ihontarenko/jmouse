@@ -97,6 +97,8 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
      */
     protected BeanInstantiationStrategy strategy;
 
+    protected boolean enabled;
+
     /**
      * Constructs a new {@code AbstractBeanDefinition} with the specified name and type.
      *
@@ -109,6 +111,31 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
         this.dependencies = new ArrayList<>();
         this.children = new ArrayList<>();
         this.annotations = new HashMap<>();
+        this.enabled = true;
+    }
+
+    /**
+     * Enables or disables this bean definition for context registration.
+     * <p>
+     * When {@code false}, this bean will not be processed or registered in the container.
+     *
+     * @param enabled {@code true} to enable the bean, {@code false} to exclude it.
+     */
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    /**
+     * Indicates whether this bean definition is currently enabled for registration.
+     * <p>
+     * Disabled definitions are ignored during the context startup or refresh phase.
+     *
+     * @return {@code true} if the definition is enabled, {@code false} otherwise.
+     */
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
     /**
