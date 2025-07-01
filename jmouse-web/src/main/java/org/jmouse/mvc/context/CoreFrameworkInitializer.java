@@ -1,21 +1,13 @@
 package org.jmouse.mvc.context;
 
 import org.jmouse.beans.ScannerBeanContextInitializer;
-import org.jmouse.core.reflection.ClassFinder;
-import org.jmouse.mvc.BeanInstanceInitializer;
-import org.jmouse.web.server.WebServerFactory;
+import org.jmouse.util.Priority;
 
-import java.util.ArrayList;
-
+@Priority(100)
 public class CoreFrameworkInitializer extends ScannerBeanContextInitializer {
 
     public CoreFrameworkInitializer(Class<?>... basePackages) {
         super(basePackages);
-
-        addScanner(types -> new ArrayList<>(
-                ClassFinder.findImplementations(WebServerFactory.class, types)));
-        addScanner(types -> new ArrayList<>(
-                ClassFinder.findImplementations(BeanInstanceInitializer.class, types)));
     }
 
 }

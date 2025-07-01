@@ -3,6 +3,7 @@ package org.jmouse.beans;
 import org.jmouse.beans.scanner.BeanAnnotatedClassesBeanScanner;
 import org.jmouse.beans.scanner.BeanFactoriesAnnotatedClassBeanScanner;
 import org.jmouse.beans.scanner.BeanImportAnnotatedClassBeanScanner;
+import org.jmouse.util.Priority;
 
 /**
  * 🧪 Initializes bean context by scanning common bean annotations.
@@ -21,6 +22,7 @@ import org.jmouse.beans.scanner.BeanImportAnnotatedClassBeanScanner;
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  */
+@Priority(-1000)
 public class BeansScannerBeanContextInitializer extends ScannerBeanContextInitializer {
 
     public BeansScannerBeanContextInitializer(Class<?>... baseClasses) {

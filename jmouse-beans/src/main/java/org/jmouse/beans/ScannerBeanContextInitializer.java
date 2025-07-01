@@ -52,7 +52,7 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
      */
     @Override
     public void initialize(BeanContext context) {
-        LOGGER.info("{} scanners ready for run", scanners.size());
+        LOGGER.info("\uD83D\uDEE0\uFE0F {} scanners ready to run", scanners.size());
 
         List<BeanScanner<AnnotatedElement>> scanners = this.scanners;
 
@@ -63,6 +63,9 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
         Class<?>[]            baseClasses       = Arrays.concatenate(this.baseClasses, context.getBaseClasses());
 
         for (BeanScanner<AnnotatedElement> scanner : scanners) {
+
+            LOGGER.info("\uD83D\uDD0E Running scanner: {}", scanner.getClass().getSimpleName());
+
             SCAN:
             for (AnnotatedElement element : scanner.scan(baseClasses)) {
                 counter++;

@@ -9,6 +9,7 @@ public class ServletDispatcherProperties {
     private String[] mappings;
     private int      loadOnStartup;
     private boolean  enabled;
+    private String   name = "default";
 
     public boolean isEnabled() {
         return enabled;
@@ -37,4 +38,11 @@ public class ServletDispatcherProperties {
         this.loadOnStartup = loadOnStartup;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

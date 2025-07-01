@@ -5,6 +5,7 @@ import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.core.reflection.ClassFinder;
 import org.jmouse.core.reflection.MethodFinder;
+import org.jmouse.util.Priority;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.List;
  * elements.forEach(element -> System.out.println("Found: " + element));
  * }</pre>
  */
+@Priority(Integer.MIN_VALUE + 1)
 public class BeanFactoriesAnnotatedClassBeanScanner implements BeanScanner<AnnotatedElement> {
 
     /**

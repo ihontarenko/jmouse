@@ -6,18 +6,24 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 📦 Imports other bean classes into the current context.
+ * 🔍 Triggers additional bean scanning on specified classes/packages.
+ *
+ * <p>
+ * Used to explicitly include types or configuration classes in the scanning process.
+ * </p>
+ *
+ * 🧠 Useful when auto-scanning is insufficient or needs fine-tuning.
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface BeanImport {
+public @interface BeanScan {
 
     /**
-     * 👥 Classes to be imported into the current context.
+     * 👁️ Classes to include in additional scanning.
      *
-     * @return array of classes to import
+     * @return array of classes or package references
      */
     Class<?>[] value() default {};
 }

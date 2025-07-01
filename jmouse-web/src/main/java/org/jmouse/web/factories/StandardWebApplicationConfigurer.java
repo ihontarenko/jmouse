@@ -1,6 +1,7 @@
 package org.jmouse.web.factories;
 
 import org.jmouse.beans.annotation.BeanImport;
+import org.jmouse.beans.annotation.BeanScan;
 import org.jmouse.beans.annotation.SuppressException;
 import org.jmouse.beans.definition.DuplicateBeanDefinitionException;
 import org.jmouse.context.configuration.ApplicationServicesConfiguration;
@@ -13,7 +14,7 @@ import org.jmouse.context.ApplicationConfigurer;
 import java.util.Map;
 
 @BeanFactories
-@BeanImport(ApplicationServicesConfiguration.class)
+@BeanScan(ApplicationServicesConfiguration.class)
 @SuppressException(DuplicateBeanDefinitionException.class)
 public class StandardWebApplicationConfigurer implements ApplicationConfigurer {
 

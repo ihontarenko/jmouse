@@ -28,7 +28,6 @@ import org.jmouse.web.servlet.registration.FilterRegistrationBean;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-@Ignore
 @Priority(-1900)
 public class DelegatingBeanFilterRegistration extends FilterRegistrationBean<DelegatingBeanFilter> {
 

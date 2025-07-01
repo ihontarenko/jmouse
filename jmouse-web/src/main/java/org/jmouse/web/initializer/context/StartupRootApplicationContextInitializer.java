@@ -15,7 +15,7 @@ import org.jmouse.context.ApplicationConfigurer;
 
 import java.util.List;
 
-@Priority(-1)
+@Priority(Integer.MAX_VALUE)
 public class StartupRootApplicationContextInitializer implements BeanContextInitializer {
 
     private final Environment environment;

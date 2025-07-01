@@ -1,10 +1,13 @@
 package org.jmouse.web.servlet.registration;
 
+import jakarta.servlet.Registration;
 import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRegistration;
 import org.jmouse.beans.annotation.Ignore;
 import org.jmouse.core.reflection.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.beans.Introspector;
 import java.util.HashSet;
@@ -23,6 +26,8 @@ import java.util.Set;
 @Ignore
 public class ServletRegistrationBean<S extends Servlet>
         extends AbstractDynamicRegistrationBean<ServletRegistration.Dynamic> {
+
+    private static final Logger SERVLET_REGISTRATION_LOGGER = LoggerFactory.getLogger(ServletRegistrationBean.class);
 
     /**
      * Default URL pattern if no mappings are provided.
@@ -70,7 +75,16 @@ public class ServletRegistrationBean<S extends Servlet>
      */
     @Override
     protected ServletRegistration.Dynamic doRegistration(String name, ServletContext sc) {
-        return sc.addServlet(getServletName(), getServlet());
+        ServletRegistration.Dynamic registration = sc.addServlet(getServletName(), getServlet());
+
+        if (registration != null) {
+            SERVLET_REGISTRATION_LOGGER.info("Servlet '{}' registered under name '{}' with mappings {}",
+                        getServlet().getClass().getName(),
+                        getServletName(),
+                        getMappings());
+        }
+
+        return registration;
     }
 
     /**

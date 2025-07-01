@@ -4,6 +4,7 @@ import org.jmouse.beans.BeanScanner;
 import org.jmouse.beans.annotation.BeanImport;
 import org.jmouse.core.reflection.ClassFinder;
 import org.jmouse.core.reflection.Reflections;
+import org.jmouse.util.Priority;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.List;
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  */
+@Priority(-100)
 public class BeanImportAnnotatedClassBeanScanner implements BeanScanner<AnnotatedElement> {
 
     private static final BeanScanner<AnnotatedElement> BEAN_SCANNER = new BeanFactoriesAnnotatedClassBeanScanner();
