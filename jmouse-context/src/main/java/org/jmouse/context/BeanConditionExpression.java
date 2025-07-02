@@ -81,23 +81,23 @@ public @interface BeanConditionExpression {
                 Object result = expressionLanguage.evaluate(expression, evaluationContext);
                 match = false;
 
-                if (result instanceof Boolean bool) {
-                    match = bool;
-                    LOGGER.info("✅ Expression '{}' evaluated to boolean: {}", expression, bool);
-                } else if (result instanceof String str) {
+                if (result instanceof Boolean booleanValue) {
+                    match = booleanValue;
+                    LOGGER.info("✅ Expression '{}' evaluated to boolean: {}", expression, booleanValue);
+                } else if (result instanceof String string) {
                     match = switch (annotation.operator()) {
-                        case EQ -> str.equals(annotation.expected());
-                        case CONTAINS -> str.contains(annotation.expected());
-                        case STARTS -> str.startsWith(annotation.expected());
-                        case ENDS -> str.endsWith(annotation.expected());
+                        case EQ -> string.equals(annotation.expected());
+                        case CONTAINS -> string.contains(annotation.expected());
+                        case STARTS -> string.startsWith(annotation.expected());
+                        case ENDS -> string.endsWith(annotation.expected());
                     };
 
                     if (match) {
-                        LOGGER.info("✅ Expression '{}' matched with [{} '{}']", expression, annotation.operator(),
-                                    annotation.expected());
+                        LOGGER.info("✅ Expression '{}' matched with [{} '{}']",
+                                    expression, annotation.operator(), annotation.expected());
                     } else {
-                        LOGGER.info("⛔ Expression '{}' did NOT match [{} '{}']", expression, annotation.operator(),
-                                    annotation.expected());
+                        LOGGER.info("⛔ Expression '{}' did NOT match [{} '{}']",
+                                    expression, annotation.operator(), annotation.expected());
                     }
 
                 } else {
