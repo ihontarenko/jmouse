@@ -6,6 +6,7 @@ import org.jmouse.beans.DefaultBeanContext;
 import org.jmouse.beans.conditions.ConditionEvaluator;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.context.processor.BeanPropertiesBeanPostProcessor;
+import org.jmouse.context.processor.EnvironmentValueBeanPostProcessor;
 import org.jmouse.context.processor.ResourceInjectionBeanPostProcessor;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.env.PropertySource;
@@ -77,6 +78,7 @@ public class AbstractApplicationBeanContext extends DefaultBeanContext implement
     private void registerRequiredComponents() {
         addBeanPostProcessor(new ResourceInjectionBeanPostProcessor());
         addBeanPostProcessor(new BeanPropertiesBeanPostProcessor());
+        addBeanPostProcessor(new EnvironmentValueBeanPostProcessor());
     }
 
     /**

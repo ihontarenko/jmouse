@@ -4,25 +4,56 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanContextAware;
 import org.jmouse.beans.BeanLookupStrategy;
 import org.jmouse.beans.annotation.*;
-import org.jmouse.context.ApplicationFactory;
-import org.jmouse.context.BeanConditionIfProperty;
+import org.jmouse.context.*;
+import org.jmouse.core.bind.BindName;
 import org.jmouse.mvc.mapping.DirectRequestPathMapping;
 import org.jmouse.util.SingletonSupplier;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.server.WebServers;
 import org.jmouse.web.servlet.SessionConfigurationInitializer;
 import org.jmouse.web.servlet.SessionProperties;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @BeanFactories
 @BeanConditionIfProperty(name = "jmouse.web.enable", value = "true")
+@BeanConditionExpression(value = "jmouse.web.enable eq 'true'")
 public class ServletDispatcherConfiguration implements BeanContextAware {
 
     public static final String CONTEXT_PREFIX = "Context";
 
+    @EnvironmentValue("jmouse.web.server.dispatcher.loadOnStartup")
+    private int defaultLoadOnStartup;
+
+    @EnvironmentValue("jmouse.web.server.dispatcher.mappings")
+    private String[] defaultMapping;
+
+    @EnvironmentValue("jmouse.web.server.default")
+    private WebServers webServers;
+
+    @EnvironmentValue("jmouse.web.server.dispatcher")
+    private Map<String, Object> defaultConfig;
+
     private BeanContext context;
+
+    public void setWebServers(WebServers webServers) {
+        this.webServers = webServers;
+    }
+
+    public void setDefaultConfig(Map<String, Object> defaultConfig) {
+        this.defaultConfig = defaultConfig;
+    }
+
+    public void setDefaultLoadOnStartup(int defaultLoadOnStartup) {
+        this.defaultLoadOnStartup = defaultLoadOnStartup;
+    }
+
+    public void setDefaultMapping(String[] defaultMapping) {
+        this.defaultMapping = defaultMapping;
+    }
 
     @Bean
     public ServletContextManager servletContextManager(WebBeanContext rootContext) {
@@ -30,6 +61,7 @@ public class ServletDispatcherConfiguration implements BeanContextAware {
     }
 
     @Bean(proxied = true)
+    @BeanConditionExpression(value = "'jMouse_Hello' | upper", expected = "JMOUSE", operator = ComparisonOperator.STARTS)
     public ServletRegistrationBean<?> defaultDispatcher(
             ServletContextManager servletContextManager, ServletDispatcherProperties properties) {
         WebBeanContext dispatcherContext = servletContextManager.createDispatcherContext(

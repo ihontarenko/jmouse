@@ -40,13 +40,6 @@ public @interface BeanConditionIfProperty {
     ComparisonOperator operator() default ComparisonOperator.EQ;
 
     /**
-     * 🔀 Comparison logic for property matching.
-     */
-    enum ComparisonOperator {
-        EQ, CONTAINS, STARTS, ENDS
-    }
-
-    /**
      * ✅ Condition that checks environment for property presence and value.
      */
     class PropertyCondition extends AbstractBeanRegistrationCondition {

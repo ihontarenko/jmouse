@@ -24,7 +24,7 @@ public class ApplicationServicesConfiguration {
         return MappingFactory.create(context.getBaseClasses());
     }
 
-    @Bean(proxied = true)
+    @Bean(value = "conversion", proxied = true)
     public Conversion conversionService() {
         Conversion conversion = new PredefinedConversion() {
         };
@@ -35,7 +35,7 @@ public class ApplicationServicesConfiguration {
         return conversion;
     }
 
-    @Bean
+    @Bean("el")
     public ExpressionLanguage expressionLanguage(@AggregatedBeans Set<Extension> extensions) {
         ExpressionLanguage el = new ExpressionLanguage();
 

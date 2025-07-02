@@ -41,7 +41,7 @@ abstract public class AbstractBeanAccessor extends AbstractAccessor {
         PropertyDescriptor<Object> property = descriptor.getProperty(name);
 
         if (!descriptor.hasProperty(name)) {
-            throw new IllegalArgumentException(
+            throw new BeanPropertyNotFound(
                     "Accessor '%s' does not have property: '%s'.".formatted(descriptor, name));
         }
 

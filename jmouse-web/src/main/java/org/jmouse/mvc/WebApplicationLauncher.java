@@ -61,7 +61,7 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
     @Override
     public WebServer createWebServer(WebBeanContext rootContext) {
         List<WebApplicationInitializer> initializers = new WebApplicationInitializerProvider(
-                rootContext).getExcluding(WebApplicationInitializer.class);
+                rootContext).getIncluding(RegistrationBean.class);
 
         // initializers run instantiations of registaration. but should be for per servlet
         WebServerFactory factory = rootContext.getBean(WebServerFactory.class);
