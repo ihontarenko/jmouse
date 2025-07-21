@@ -1,17 +1,17 @@
 package org.jmouse.mvc;
 
-import org.jmouse.beans.annotation.Ignore;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
 /**
- * 🌀 Registers the core {@link FrameworkDispatcher} servlet into the web application context.
+ * 🌀 Registers the core {@link FrameworkDispatcher} servlet.
  * <p>
- * This registration bean ensures that the dispatcher is available to handle incoming requests
- * and integrates it with the {@link WebBeanContext} for dependency resolution.
+ * Integrates with {@link WebBeanContext} for full DI support and request handling.
  * </p>
  *
- * <p>This class is marked with {@code @Ignore} so it can be excluded from component scanning.</p>
+ * <pre>{@code
+ * new FrameworkDispatcherRegistration(webContext);
+ * }</pre>
  *
  * @see FrameworkDispatcher
  * @see WebBeanContext
@@ -20,17 +20,24 @@ import org.jmouse.web.servlet.registration.ServletRegistrationBean;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @since 1.0
  */
-@Ignore
 public class FrameworkDispatcherRegistration extends ServletRegistrationBean<FrameworkDispatcher> {
 
     /**
-     * Constructs and registers the default {@link FrameworkDispatcher} servlet
-     * using the provided {@link WebBeanContext}.
+     * ⚙️ Constructs dispatcher registration with default name.
      *
-     * @param context the web bean context used for handler resolution and dependency injection
+     * @param context the web application context
      */
     public FrameworkDispatcherRegistration(WebBeanContext context) {
-        super(FrameworkDispatcher.DEFAULT_DISPATCHER, new FrameworkDispatcher(context));
+        this(FrameworkDispatcher.DEFAULT_DISPATCHER, context);
     }
 
+    /**
+     * ⚙️ Constructs dispatcher registration with a custom servlet name.
+     *
+     * @param servletName custom dispatcher servlet name
+     * @param context     the web application context
+     */
+    public FrameworkDispatcherRegistration(String servletName, WebBeanContext context) {
+        super(servletName, new FrameworkDispatcher(context));
+    }
 }

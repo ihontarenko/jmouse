@@ -12,7 +12,7 @@ import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
 @BeanFactories
 @BeanConditionIfProperty(name = "jmouse.web.enable", value = "true")
-@BeanConditionForRootContext
+@BeanForRootContext
 @BeanConditionExpression(value = "jmouse.web.enable eq 'true'")
 public class ServletDispatcherConfiguration implements BeanContextAware {
 
@@ -28,7 +28,7 @@ public class ServletDispatcherConfiguration implements BeanContextAware {
     @Bean(proxied = true)
     public ServletRegistrationBean<?> defaultDispatcher(
             ServletContextManager servletContextManager, ServletDispatcherProperties properties) {
-        WebBeanContext dispatcherContext = servletContextManager.createDispatcherContext(
+        WebBeanContext dispatcherContext = servletContextManager.createServletDispatcherContext(
                 properties.getName() + CONTEXT_PREFIX, getBeanContext().getBaseClasses());
         ServletRegistrationBean<?> registration = new FrameworkDispatcherRegistration(dispatcherContext);
 

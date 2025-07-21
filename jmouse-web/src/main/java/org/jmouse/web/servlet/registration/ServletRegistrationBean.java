@@ -1,10 +1,8 @@
 package org.jmouse.web.servlet.registration;
 
-import jakarta.servlet.Registration;
 import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRegistration;
-import org.jmouse.beans.annotation.Ignore;
 import org.jmouse.core.reflection.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,16 +21,15 @@ import java.util.Set;
  *
  * @param <S> the type of {@link Servlet} to register
  */
-@Ignore
 public class ServletRegistrationBean<S extends Servlet>
         extends AbstractDynamicRegistrationBean<ServletRegistration.Dynamic> {
-
-    private static final Logger SERVLET_REGISTRATION_LOGGER = LoggerFactory.getLogger(ServletRegistrationBean.class);
 
     /**
      * Default URL pattern if no mappings are provided.
      */
-    public static final String[] DEFAULT_MAPPINGS = {"/*"};
+    public static final  String[] DEFAULT_MAPPINGS            = {"/*"};
+    public static final  String   SERVLET_MAPPINGS_ATTRIBUTE  = ServletRegistrationBean.class.getName() + ".SERVLET_MAPPINGS";
+    private static final Logger   SERVLET_REGISTRATION_LOGGER = LoggerFactory.getLogger(ServletRegistrationBean.class);
 
     private final S           servlet;
     private       int         loadOnStartup = -1;
@@ -79,9 +76,10 @@ public class ServletRegistrationBean<S extends Servlet>
 
         if (registration != null) {
             SERVLET_REGISTRATION_LOGGER.info("Servlet '{}' registered under name '{}' with mappings {}",
-                        getServlet().getClass().getName(),
-                        getServletName(),
-                        getMappings());
+                                             getServlet().getClass().getName(),
+                                             getServletName(),
+                                             getMappings());
+            sc.setAttribute(SERVLET_MAPPINGS_ATTRIBUTE, getMappings());
         }
 
         return registration;
@@ -176,5 +174,11 @@ public class ServletRegistrationBean<S extends Servlet>
     @Override
     public int getOrder() {
         return -1000 + getLoadOnStartup();
+    }
+
+    @Override
+    public String toString() {
+        return "ServletRegistrationBean[%d][name='%s', servlet=%s, mappings=%s, loadOnStartup=%d]".formatted(
+                getOrder(), getServletName(), servlet.getClass().getSimpleName(), mappings, loadOnStartup);
     }
 }

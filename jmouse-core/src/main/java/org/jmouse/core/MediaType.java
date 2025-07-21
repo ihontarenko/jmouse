@@ -15,6 +15,12 @@ public class MediaType extends MimeType {
 
     private double qFactor;
 
+    public static final MediaType TEXT_PLAIN;
+
+    static {
+        TEXT_PLAIN = new MediaType("text", "plain");
+    }
+
     /**
      * Create a MediaType with wildcard subtype, default qFactor=1.0.
      *

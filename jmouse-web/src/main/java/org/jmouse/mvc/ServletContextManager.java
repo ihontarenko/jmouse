@@ -1,6 +1,11 @@
 package org.jmouse.mvc;
 
+import org.jmouse.beans.annotation.Bean;
+import org.jmouse.beans.annotation.BeanConstructor;
+import org.jmouse.beans.annotation.PrimaryBean;
 import org.jmouse.context.ApplicationFactory;
+import org.jmouse.context.BeanForRootContext;
+import org.jmouse.context.BeanForWebContext;
 import org.jmouse.mvc.context.WebControllersInitializer;
 import org.jmouse.mvc.context.WebInfrastructureInitializer;
 import org.jmouse.web.context.WebBeanContext;
@@ -21,6 +26,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  */
+@Bean
+@PrimaryBean
+@BeanForWebContext
 public class ServletContextManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServletContextManager.class);
@@ -32,6 +40,7 @@ public class ServletContextManager {
      *
      * @param rootContext the global root context for all web modules
      */
+    @BeanConstructor
     public ServletContextManager(WebBeanContext rootContext) {
         this.rootContext = rootContext;
     }
@@ -48,11 +57,11 @@ public class ServletContextManager {
      * @return the fully initialized dispatcher context
      */
     @SuppressWarnings("unchecked")
-    public WebBeanContext createDispatcherContext(String name, Class<?>[] basePackages) {
+    public WebBeanContext createServletDispatcherContext(String name, Class<?>[] basePackages) {
         LOGGER.info("⚙️ Creating dispatcher context: '{}'", name);
 
-        ApplicationFactory<WebBeanContext> factory = rootContext.getBean(ApplicationFactory.class);
-        WebBeanContext dispatcherContext = factory.createContext(name, rootContext);
+        ApplicationFactory<WebBeanContext> factory           = rootContext.getBean(ApplicationFactory.class);
+        WebBeanContext                     dispatcherContext = factory.createContext(name, rootContext);
 
         dispatcherContext.addInitializer(new WebInfrastructureInitializer(basePackages));
         dispatcherContext.addInitializer(new WebControllersInitializer(basePackages));

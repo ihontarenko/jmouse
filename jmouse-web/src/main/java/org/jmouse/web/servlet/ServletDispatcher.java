@@ -7,6 +7,7 @@ import org.jmouse.context.FrameworkFactories;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.mvc.HandlerMapping;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.request.RequestPath;
 import org.jmouse.web.request.http.HttpMethod;
 
 import java.io.IOException;
@@ -24,6 +25,12 @@ abstract public class ServletDispatcher extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        RequestPath requestPath = (RequestPath) request.getAttribute(RequestPath.REQUEST_PATH_ATTRIBUTE);
+
+        if (requestPath == null) {
+            request.setAttribute(RequestPath.REQUEST_PATH_ATTRIBUTE, RequestPath.ofRequest(request));
+        }
+
         doDispatch(request, response, HttpMethod.valueOf(request.getMethod()));
     }
 

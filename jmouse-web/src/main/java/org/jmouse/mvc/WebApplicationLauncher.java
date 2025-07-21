@@ -45,6 +45,7 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
         rootContext.addInitializer(new ApplicationContextBeansScanner());
 
         rootContext.addInitializer(new CoreFrameworkInitializer());
+
         rootContext.addInitializer(new StartupRootApplicationContextInitializer(environment));
 
         rootContext.refresh();
