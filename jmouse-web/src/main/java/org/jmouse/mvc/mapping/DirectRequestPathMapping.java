@@ -32,7 +32,7 @@ public class DirectRequestPathMapping extends AbstractHandlerMapping {
 
     @Override
     protected Object doGetHandler(HttpServletRequest request) {
-        return controllers.get(request.getRequestURI());
+        return controllers.get(getMappingPath(request));
     }
 
     @Override

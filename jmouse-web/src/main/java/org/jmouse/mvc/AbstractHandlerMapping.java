@@ -2,6 +2,7 @@ package org.jmouse.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.util.Sorter;
+import org.jmouse.web.request.RequestPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +51,16 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
         }
 
         return container;
+    }
+
+    public String getMappingPath(HttpServletRequest request) {
+        String mappingPath = request.getRequestURI();
+
+        if (request.getAttribute(RequestPath.REQUEST_PATH_ATTRIBUTE) instanceof RequestPath requestPath) {
+            mappingPath = requestPath.requestPath();
+        }
+
+        return mappingPath;
     }
 
     /**
