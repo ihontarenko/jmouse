@@ -34,17 +34,10 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
         WebBeanContext                     rootContext        = applicationFactory.createRootContext();
 
         configureContextInitializers(rootContext);
+
+        rootContext.addBaseClasses(applicationClasses);
         rootContext.refresh();
 
-        rootContext.registerBean(WebBeanContext.DEFAULT_APPLICATION_CLASSES_BEAN, applicationClasses);
-
-        Class<?>[] oldClasses = rootContext.getBaseClasses();
-
-        rootContext.setBaseClasses(applicationClasses);
-
-        new ApplicationContextBeansScanner().initialize(rootContext);
-
-        // web server part
         createWebServer(rootContext).start();
 
         return rootContext;
@@ -52,13 +45,8 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
 
     public void configureContextInitializers(WebBeanContext rootContext) {
         rootContext.addInitializer(new BeanScanAnnotatedContextInitializer());
-        rootContext.addInitializer(new CoreFrameworkInitializer());
         rootContext.addInitializer(new StartupRootApplicationContextInitializer(rootContext.getEnvironment()));
         rootContext.addInitializer(new ApplicationContextBeansScanner());
-    }
-
-    public void configurePostContextInitializers(WebBeanContext rootContext) {
-
     }
 
     @Override
@@ -66,7 +54,6 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
         List<WebApplicationInitializer> registrationBeans
                 = WebBeanContext.getBeansOfType(WebApplicationInitializer.class, rootContext);
 
-        // initializers run instantiations of registration. but should be for per servlet
         WebServerFactory factory = rootContext.getBean(WebServerFactory.class);
 
         return factory.createWebServer(registrationBeans.toArray(WebApplicationInitializer[]::new));

@@ -8,8 +8,8 @@ import org.jmouse.mvc.ReturnValueHandler;
 
 import java.util.ArrayList;
 
-public class WebInfrastructureInitializer extends ScannerBeanContextInitializer {
-    public WebInfrastructureInitializer(Class<?>... basePackages) {
+public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializer {
+    public WebMvcInfrastructureInitializer(Class<?>... basePackages) {
         super(basePackages);
 
         addScanner(types -> new ArrayList<>(

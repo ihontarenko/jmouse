@@ -6,8 +6,8 @@ import org.jmouse.core.reflection.ClassFinder;
 
 import java.util.ArrayList;
 
-public class WebControllersInitializer extends ScannerBeanContextInitializer {
-    public WebControllersInitializer(Class<?>... basePackages) {
+public class WebMvcControllersInitializer extends ScannerBeanContextInitializer {
+    public WebMvcControllersInitializer(Class<?>... basePackages) {
         super(basePackages);
 
         addScanner(types -> new ArrayList<>(

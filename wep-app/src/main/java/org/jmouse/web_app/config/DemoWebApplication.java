@@ -17,7 +17,7 @@ public class DemoWebApplication {
 
     @Bean("webServerFactory")
     public WebServerFactory createWebServerFactory() {
-        return new TomcatWebServerFactory();
+        return new TomcatWebServerFactory() {};
     }
 
 }

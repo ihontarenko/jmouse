@@ -61,9 +61,9 @@ public class ScannerBeanContextInitializer implements BeanContextInitializer {
         int                   counter           = 0;
         BeanDefinitionFactory definitionFactory = context.getBeanDefinitionFactory();
         Class<?>[]            baseClasses       = Arrays.concatenate(this.baseClasses, context.getBaseClasses());
-        Class<?>[]            reversed          = Arrays.reverse(baseClasses);
+//        Class<?>[]            reversed          = Arrays.reverse(baseClasses);
 
-        baseClasses = reversed;
+//        baseClasses = reversed;
 
         for (BeanScanner<AnnotatedElement> scanner : scanners) {
 

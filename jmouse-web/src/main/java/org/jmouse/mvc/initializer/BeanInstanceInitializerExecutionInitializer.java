@@ -1,6 +1,7 @@
 package org.jmouse.mvc.initializer;
 
 import jakarta.servlet.ServletContext;
+import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.mvc.BeanInstanceInitializer;
@@ -32,6 +33,7 @@ import java.util.List;
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  */
+@Bean
 @Priority(1)
 public class BeanInstanceInitializerExecutionInitializer implements WebApplicationInitializer {
 

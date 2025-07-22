@@ -2,7 +2,11 @@ package org.jmouse.web;
 
 import org.jmouse.context.AbstractApplicationFactory;
 import org.jmouse.context.ApplicationFactory;
+import org.jmouse.context.conversion.ContextConversion;
+import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.env.*;
+import org.jmouse.core.io.CompositeResourceLoader;
+import org.jmouse.core.io.ResourceLoader;
 import org.jmouse.mvc.jMouseWebMvcRoot;
 import org.jmouse.web.context.WebApplicationBeanContext;
 import org.jmouse.web.context.WebBeanContext;
@@ -41,6 +45,8 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
 
         context.registerBean(Environment.class, createDefaultEnvironment());
         context.registerBean(ApplicationFactory.class, this);
+        context.registerBean(Conversion.class, new ContextConversion());
+        context.registerBean(ResourceLoader.class, new CompositeResourceLoader());
 
         return context;
     }

@@ -173,7 +173,7 @@ public interface ClassFinder {
         Collection<Class<?>> classes = CACHE.get(cacheKey);
 
         if (classes == null) {
-            classes = new HashSet<>();
+            classes = new LinkedHashSet<>();
 
             for (Class<?> baseClass : baseClasses) {
                 classes.addAll(SCANNER.scan(baseClass.getClassLoader(), baseClass));

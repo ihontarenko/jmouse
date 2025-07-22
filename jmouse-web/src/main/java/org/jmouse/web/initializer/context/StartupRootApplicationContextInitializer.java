@@ -31,21 +31,16 @@ public class StartupRootApplicationContextInitializer implements BeanContextInit
      */
     @Override
     public void initialize(BeanContext context) {
-        context.registerBean(ResourceLoader.class, new CompositeResourceLoader());
         performConfigurers(context);
     }
 
     public void performConfigurers(BeanContext context) {
         List<ApplicationConfigurer> configurers = context.getBeans(ApplicationConfigurer.class);
-
         if (!configurers.isEmpty()) {
             configurers.sort(Sorter.PRIORITY_COMPARATOR);
-            BeanContainer container = context.getBeanContainer(BeanScope.SINGLETON);
             for (ApplicationConfigurer configurer : configurers) {
-                configurer.registerSingleton(container);
                 configurer.configureEnvironment(environment);
                 configurer.configureConversion(context.getBean(Conversion.class));
-                configurer.configureMapping(context.getBean(Mapping.class));
             }
         }
     }
