@@ -21,6 +21,6 @@ public interface WebServerFactory {
      * @param initializers the {@link WebApplicationInitializer}s to configure the web server
      * @return a configured {@link WebServer} instance
      */
-    WebServer getWebServer(WebApplicationInitializer... initializers);
+    WebServer createWebServer(WebApplicationInitializer... initializers);
 
 }

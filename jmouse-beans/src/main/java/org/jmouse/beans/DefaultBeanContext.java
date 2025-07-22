@@ -169,7 +169,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
                 new ScopedHashMapBeanContainer(this.scopeResolver)
         );
 
-        setBaseClasses(baseClasses);
+        addBaseClasses(baseClasses);
         setContextId(DEFAULT_CONTEXT_NAME);
     }
 
@@ -631,8 +631,18 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * @param baseClasses the array of base classes to be set.
      */
     @Override
-    public void setBaseClasses(Class<?>... baseClasses) {
+    public void addBaseClasses(Class<?>... baseClasses) {
         this.baseClasses = Arrays.unique(Arrays.concatenate(baseClasses, this.baseClasses));
+    }
+
+    /**
+     * Sets the base classes to be scanned and processed by this context.
+     *
+     * @param baseClasses the array of base classes to be set.
+     */
+    @Override
+    public void setBaseClasses(Class<?>... baseClasses) {
+        this.baseClasses = baseClasses;
     }
 
     /**
@@ -643,7 +653,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     @Override
     public Class<?>[] getBaseClasses() {
         if (Arrays.empty(baseClasses)) {
-            setBaseClasses(getClass());
+            addBaseClasses(getClass());
         }
 
         return baseClasses;

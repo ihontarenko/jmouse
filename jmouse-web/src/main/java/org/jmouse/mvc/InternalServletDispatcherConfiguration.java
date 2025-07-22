@@ -4,7 +4,7 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanContextAware;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
-import org.jmouse.context.BeanConditionExpression;
+import org.jmouse.context.BeanConditionIfProperty;
 import org.jmouse.context.BeanProperties;
 import org.jmouse.core.bind.BindDefault;
 import org.jmouse.mvc.mapping.DirectRequestPathMapping;
@@ -12,7 +12,7 @@ import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
 @BeanFactories
-@BeanConditionExpression(value = "jmouse.web.server.internal.dispatcher.enabled eq 'true'")
+@BeanConditionIfProperty(name = "jmouse.web.server.internal.dispatcher.enabled", value = "true")
 public class InternalServletDispatcherConfiguration implements BeanContextAware {
 
     public static final String CONTEXT_PREFIX = "Context";

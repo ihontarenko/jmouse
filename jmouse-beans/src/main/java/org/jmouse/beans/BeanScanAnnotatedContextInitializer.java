@@ -39,7 +39,7 @@ public class BeanScanAnnotatedContextInitializer implements BeanContextInitializ
         }
 
         if (scanTypes.length > 0) {
-            context.setBaseClasses(scanTypes);
+            context.addBaseClasses(scanTypes);
         }
     }
 }

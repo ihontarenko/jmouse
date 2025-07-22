@@ -61,6 +61,11 @@ public interface ClassFinder {
     Comparator<Class<?>> ORDER_CLASS_NAME = Comparator.comparing(Class::getName);
 
     /**
+     * A comparator for no ordering.
+     */
+    Comparator<Class<?>> NO_ORDERING = (o1, o2) -> 0;
+
+    /**
      * A comparator for sorting classes alphabetically by their simple-names.
      */
     Comparator<Class<?>> ORDER_CLASS_SIMPLE_NAME = Comparator.comparing(Class::getSimpleName);
@@ -127,7 +132,7 @@ public interface ClassFinder {
      * @return a collection of matching classes
      */
     static Collection<Class<?>> findAll(Matcher<Class<?>> matcher, Class<?>... baseClasses) {
-        return findAll(matcher, ORDER_CLASS_NAME, baseClasses);
+        return findAll(matcher, NO_ORDERING, baseClasses);
     }
 
     /**

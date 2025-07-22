@@ -40,7 +40,7 @@ public class TomcatWebServerFactory implements WebServerFactory, BeanContextAwar
     }
 
     @Override
-    public WebServer getWebServer(WebApplicationInitializer... initializers) {
+    public WebServer createWebServer(WebApplicationInitializer... initializers) {
         WebServer                    webServer  = new TomcatWebServer();
         WebServerConfig              config     = configuration.getWebServerConfig(WebServers.TOMCAT);
         WebServer.Configurer<Tomcat> configurer = new TomcatWebServerConfigurer(

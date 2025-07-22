@@ -30,7 +30,7 @@ public class WebApplicationBeanContext extends AbstractWebApplicationBeanContext
     public WebApplicationBeanContext(BeanContext parent, Class<?>... baseClasses) {
         super(parent);
 
-        setBaseClasses(baseClasses);
+        addBaseClasses(baseClasses);
 
         registerBeanContainer(ThreadLocalScope.THREAD_LOCAL_SCOPE, new ThreadLocalBeanContainer());
         registerBeanContainer(BeanScope.REQUEST, new RequestAttributesBeanContainer(BeanScope.REQUEST));

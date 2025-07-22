@@ -1,4 +1,5 @@
-package org.jmouse.mvc._test;
+package org.jmouse.mvc;
 
 public record Service(String name) {
+
 }

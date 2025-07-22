@@ -1,42 +1,41 @@
 package org.jmouse.context;
 
-import org.jmouse.beans.BeanContext;
-
 /**
- * A factory interface for creating application contexts.
- * <p>
- * This interface provides methods to initialize an {@link ApplicationBeanContext} instance,
- * either as a standalone context or as a child of an existing {@link BeanContext}.
- * </p>
+ * 🏭 Factory for creating {@link ApplicationBeanContext} instances.
  *
- * @param <T> the type of the {@link ApplicationBeanContext} that this factory creates
+ * <p>Supports standalone and hierarchical context creation.</p>
+ *
+ * @param <T> type of the application context
+ *
+ * @author Ivan Hontarenko (Mr. Jerry Mouse)
+ * @author ihontarenko@gmail.com
  */
 public interface ApplicationContextFactory<T extends ApplicationBeanContext> {
 
     /**
-     * Creates a new application context with the specified context ID.
-     * <p>
-     * The created context is initialized with the given component classes.
-     * </p>
+     * 🎯 Creates a new application context with given ID and components.
      *
-     * @param contextId the unique identifier for the application context
-     * @param classes   the component classes to be registered in the context
-     * @return a new instance of {@code T} representing the application context
+     * @param contextId unique context identifier
+     * @param classes   component classes to register
+     * @return new application context
      */
     T createContext(String contextId, Class<?>... classes);
 
     /**
-     * Creates a new application context with the specified context ID and parent context.
-     * <p>
-     * This method allows creating a hierarchical context structure, where the newly created
-     * context inherits dependencies from the given {@code rootContext}.
-     * </p>
+     * 🧬 Creates a new context with a parent context.
+     * <p>Allows dependency inheritance from the root context.</p>
      *
-     * @param contextId   the unique identifier for the application context
-     * @param rootContext the parent {@link BeanContext} from which dependencies can be inherited
-     * @param classes     the component classes to be registered in the new context
-     * @return a new instance of {@code T} representing the child application context
+     * @param contextId   unique context identifier
+     * @param rootContext parent context for inheritance
+     * @param classes     component classes to register
+     * @return new child application context
      */
     T createContext(String contextId, T rootContext, Class<?>... classes);
 
+    /**
+     * 🌱 Creates an empty root-level application context.
+     *
+     * @return root application context
+     */
+    T createRootContext();
 }

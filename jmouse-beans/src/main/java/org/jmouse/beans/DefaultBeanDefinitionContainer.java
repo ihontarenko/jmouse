@@ -41,6 +41,10 @@ public class DefaultBeanDefinitionContainer implements BeanDefinitionContainer {
             throw new BeanDefinitionException("Bean definition is required but NULL passed");
         }
 
+        if (!definition.isEnabled()) {
+            throw new BeanDefinitionException("Bean definition is disabled");
+        }
+
         String beanName = definition.getBeanName();
 
         if (containsDefinition(beanName)) {

@@ -65,8 +65,8 @@ public class AbstractApplicationBeanContext extends DefaultBeanContext implement
             LOGGER.info("Skipped bean '{}' [type={}] – does not meet registration criteria",
                          definition.getBeanName(),
                          definition.getBeanClass().getName());
-            definition.setEnabled(false);
-            super.registerDefinition(definition);
+//            definition.setEnabled(false);
+//            super.registerDefinition(definition);
         }
     }
 

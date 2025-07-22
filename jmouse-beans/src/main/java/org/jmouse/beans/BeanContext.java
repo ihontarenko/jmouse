@@ -46,6 +46,13 @@ public interface BeanContext extends BeanContainer, BeanContainerRegistry,
     void setBeanLookupStrategy(BeanLookupStrategy beanLookupStrategy);
 
     /**
+     * Adds the base classes to be scanned and processed by this context.
+     *
+     * @param baseClasses the array of base classes to be set.
+     */
+    void addBaseClasses(Class<?>... baseClasses);
+
+    /**
      * Sets the base classes to be scanned and processed by this context.
      * <p>
      * These classes are used to detect annotations, definitions, and additional context information

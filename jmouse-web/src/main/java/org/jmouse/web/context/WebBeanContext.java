@@ -5,6 +5,7 @@ import org.jmouse.context.ApplicationBeanContext;
 import org.jmouse.beans.BeanContext;
 
 import java.util.Enumeration;
+import java.util.List;
 
 /**
  * 🌐 Web-specific {@link BeanContext}.
@@ -24,7 +25,12 @@ public interface WebBeanContext extends ApplicationBeanContext {
     /**
      * 🧩 Name of child web context.
      */
-    String DEFAULT_WEB_CONTEXT_NAME = "WEB-APPLICATION";
+    String DEFAULT_WEB_CONTEXT_NAME = "applicationContext";
+
+    /**
+     * 🧩 Name of child application classes.
+     */
+    String DEFAULT_APPLICATION_CLASSES_BEAN = "applicationClasses";
 
     /**
      * 🪝 Servlet attribute key to store root context.
@@ -88,5 +94,13 @@ public interface WebBeanContext extends ApplicationBeanContext {
         }
 
         return webBeanContext;
+    }
+
+    static <T> List<T> getBeansOfType(Class<T> type, WebBeanContext context) {
+        return context.getBeans(type);
+    }
+
+    static <T> List<T> getBeansOfType(Class<T> type, ServletContext context) {
+        return getBeansOfType(type, getRequiredWebBeanContext(context));
     }
 }

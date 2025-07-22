@@ -4,17 +4,20 @@ import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.context.BeanProperties;
 import org.jmouse.core.bind.BindName;
+import org.jmouse.mvc.context.BeanConditionExists;
 import org.jmouse.web.server.WebServerConfig;
 import org.jmouse.web.server.WebServerFactory;
 import org.jmouse.web.server.WebServers;
 import org.jmouse.web.server.tomcat.TomcatWebServerFactory;
 
+import java.util.Collections;
 import java.util.Map;
 
 @BeanFactories(name = "webServerFactoryConfiguration")
 public class WebServerFactoryConfiguration {
 
-    @Bean(proxied = true, value = "webServerFactory")
+    @Bean("webServerFactory")
+    @BeanConditionExists("webServerFactory")
     public WebServerFactory createWebServerFactory() {
         return new TomcatWebServerFactory();
     }

@@ -18,7 +18,7 @@ public class DirectRequestPathMapping extends AbstractHandlerMapping {
     @BeanInitializer
     public void init(BeanContext context) {
         for (Registration registration : context.getBeans(Registration.class)) {
-            addController(registration.getRoute(), registration.getController());
+            addController(registration.route(), registration.controller());
         }
     }
 
@@ -40,37 +40,6 @@ public class DirectRequestPathMapping extends AbstractHandlerMapping {
         return List.of();
     }
 
-    public static class Registration {
-
-        private String route;
-        private Controller controller;
-
-        public Registration(String route, Controller controller) {
-            this.route = route;
-            this.controller = controller;
-        }
-
-        public String getRoute() {
-            return route;
-        }
-
-        public Controller getController() {
-            return controller;
-        }
-
-        public void setController(Controller controller) {
-            this.controller = controller;
-        }
-
-        public void setRoute(String route) {
-            this.route = route;
-        }
-
-        @Override
-        public String toString() {
-            return route;
-        }
-
-    }
+    public record Registration(String route, Controller controller) { }
 
 }

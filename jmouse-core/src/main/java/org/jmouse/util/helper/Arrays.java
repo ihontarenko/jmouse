@@ -199,6 +199,18 @@ public final class Arrays {
         return newArray;
     }
 
+    public static <T> T[] reverse(T[] a) {
+        T[] b = (T[]) Array.newInstance(a.getClass().getComponentType(), a.length);
+        int n = a.length;
+        int j = n;
+
+        for (int i = 0; i < n; i++) {
+            b[--j] = a[i];
+        }
+
+        return b;
+    }
+
     /**
      * Checks if the given array is null or empty.
      *

@@ -1,7 +1,9 @@
 package org.jmouse.web;
 
 import org.jmouse.context.AbstractApplicationFactory;
+import org.jmouse.context.ApplicationFactory;
 import org.jmouse.core.env.*;
+import org.jmouse.mvc.jMouseWebMvcRoot;
 import org.jmouse.web.context.WebApplicationBeanContext;
 import org.jmouse.web.context.WebBeanContext;
 
@@ -28,6 +30,17 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
 
         context.refresh();
         context.setParentContext(rootContext);
+
+        return context;
+    }
+
+    @Override
+    public WebBeanContext createRootContext() {
+        WebBeanContext context = createContext(WebBeanContext.DEFAULT_ROOT_WEB_CONTEXT_NAME,
+                jMouseWebRoot.class, jMouseWebMvcRoot.class);
+
+        context.registerBean(Environment.class, createDefaultEnvironment());
+        context.registerBean(ApplicationFactory.class, this);
 
         return context;
     }

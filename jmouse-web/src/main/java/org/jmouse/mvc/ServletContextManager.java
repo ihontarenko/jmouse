@@ -3,14 +3,12 @@ package org.jmouse.mvc;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.beans.annotation.PrimaryBean;
+import org.jmouse.context.ApplicationContextBeansScanner;
 import org.jmouse.context.ApplicationFactory;
-import org.jmouse.context.BeanForRootContext;
 import org.jmouse.context.BeanForWebContext;
 import org.jmouse.mvc.context.WebControllersInitializer;
 import org.jmouse.mvc.context.WebInfrastructureInitializer;
 import org.jmouse.web.context.WebBeanContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 🧩 Manages creation and registration of servlet-based dispatcher contexts.
@@ -20,8 +18,8 @@ import org.slf4j.LoggerFactory;
  * </p>
  *
  * <pre>{@code
- * ServletContextManager manager = new ServletContextManager(rootContext);
- * WebBeanContext context = manager.createDispatcherContext("main", MyControllers.class);
+ * ServletContextManager    manager = new ServletContextManager(rootContext);
+ * WebBeanContext           context = manager.createServletDispatcherContext("main", Controllers.class);
  * }</pre>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
@@ -31,18 +29,16 @@ import org.slf4j.LoggerFactory;
 @BeanForWebContext
 public class ServletContextManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServletContextManager.class);
-
-    private final WebBeanContext rootContext;
+    private final WebBeanContext context;
 
     /**
      * 🔧 Constructs a manager with a shared root context.
      *
-     * @param rootContext the global root context for all web modules
+     * @param context the global root context for all web modules
      */
     @BeanConstructor
-    public ServletContextManager(WebBeanContext rootContext) {
-        this.rootContext = rootContext;
+    public ServletContextManager(WebBeanContext context) {
+        this.context = context;
     }
 
     /**
@@ -58,17 +54,16 @@ public class ServletContextManager {
      */
     @SuppressWarnings("unchecked")
     public WebBeanContext createServletDispatcherContext(String name, Class<?>[] basePackages) {
-        LOGGER.info("⚙️ Creating dispatcher context: '{}'", name);
+        Class<?>[] applicationClasses = context.getBean(Class[].class, WebBeanContext.DEFAULT_APPLICATION_CLASSES_BEAN);
 
-        ApplicationFactory<WebBeanContext> factory           = rootContext.getBean(ApplicationFactory.class);
-        WebBeanContext                     dispatcherContext = factory.createContext(name, rootContext);
+        ApplicationFactory<WebBeanContext> factory           = context.getBean(ApplicationFactory.class);
+        WebBeanContext                     dispatcherContext = factory.createContext(name, context, applicationClasses);
 
-        dispatcherContext.addInitializer(new WebInfrastructureInitializer(basePackages));
-        dispatcherContext.addInitializer(new WebControllersInitializer(basePackages));
+        dispatcherContext.addInitializer(new WebControllersInitializer(applicationClasses));
+        dispatcherContext.addInitializer(new WebInfrastructureInitializer(applicationClasses));
+        dispatcherContext.addInitializer(new ApplicationContextBeansScanner(applicationClasses));
 
-        LOGGER.info("🚀 Initializing dispatcher context: '{}'", name);
         dispatcherContext.refresh();
-        LOGGER.info("✅ Dispatcher context '{}' ready", name);
 
         return dispatcherContext;
     }
