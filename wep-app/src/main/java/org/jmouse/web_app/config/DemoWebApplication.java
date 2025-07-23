@@ -3,10 +3,7 @@ package org.jmouse.web_app.config;
 import app.api.WebConfig;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.Bean;
-import org.jmouse.context.ApplicationFactory;
 import org.jmouse.mvc.FrameworkDispatcherRegistration;
-import org.jmouse.mvc.context.WebMvcInfrastructureInitializer;
-import org.jmouse.mvc.jMouseWebMvcRoot;
 import org.jmouse.mvc.mapping.ControllerRegistration;
 import org.jmouse.web.WebContextBuilder;
 import org.jmouse.web.context.WebBeanContext;
@@ -36,7 +33,7 @@ public class DemoWebApplication {
 
     @Bean(proxied = true)
     public ServletRegistrationBean<?> apiDispatcher(WebBeanContext rootContext, WebContextBuilder builder) {
-        WebBeanContext context = builder.name("apiContext")
+        WebBeanContext context = builder.name("api-ctx")
                 .baseClasses(WebConfig.class).parent(rootContext)
                 .useWebMvc().useDefault()
                 .build();
