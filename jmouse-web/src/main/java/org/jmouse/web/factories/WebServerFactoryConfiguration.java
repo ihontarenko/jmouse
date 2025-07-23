@@ -2,6 +2,7 @@ package org.jmouse.web.factories;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
+import org.jmouse.context.BeanConditionExpression;
 import org.jmouse.context.BeanProperties;
 import org.jmouse.core.bind.BindName;
 import org.jmouse.mvc.context.BeanConditionExists;
@@ -14,6 +15,7 @@ import java.util.Collections;
 import java.util.Map;
 
 @BeanFactories(name = "webServerFactoryConfiguration")
+@BeanConditionExpression("jmouse.web.app | sout")
 public class WebServerFactoryConfiguration {
 
     @Bean("webServerFactory")

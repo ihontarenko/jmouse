@@ -5,13 +5,11 @@ import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.context.ApplicationFactory;
 import org.jmouse.mvc.FrameworkDispatcherRegistration;
-import org.jmouse.mvc.ServletDispatcherProperties;
-import org.jmouse.mvc.WebBeanContextConfigurer;
-import org.jmouse.mvc.context.BeanConditionExists;
+import org.jmouse.mvc.context.WebMvcInfrastructureInitializer;
 import org.jmouse.mvc.jMouseWebMvcRoot;
-import org.jmouse.mvc.mapping.DirectRequestPathMapping;
+import org.jmouse.mvc.mapping.ControllerRegistration;
+import org.jmouse.web.WebContextBuilder;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.jMouseWebRoot;
 import org.jmouse.web.server.WebServerFactory;
 import org.jmouse.web.server.tomcat.TomcatWebServerFactory;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;
@@ -31,32 +29,21 @@ public class DemoWebApplication {
     }
 
     @Bean
-    public DirectRequestPathMapping.Registration registration() {
-        return new DirectRequestPathMapping.Registration("/app", (request, response)
+    public ControllerRegistration registration() {
+        return new ControllerRegistration("/app", (request, response)
                 -> response.getWriter().write("web_app"));
     }
 
     @Bean(proxied = true)
-    public ServletRegistrationBean<?> apiDispatcher(WebBeanContext rootContext) {
+    public ServletRegistrationBean<?> apiDispatcher(WebBeanContext rootContext, WebContextBuilder builder, WebContextBuilder builderB) {
 
-        WebBeanContext webBeanContext = (WebBeanContext) rootContext.getBean(ApplicationFactory.class)
-                .createContext("apiContext", rootContext, WebConfig.class);
+        builder.name("apiContext");
 
-        webBeanContext.addBaseClasses(jMouseWebMvcRoot.class);
+        @SuppressWarnings("unchecked")
+        WebBeanContext context = (WebBeanContext) rootContext.getBean(ApplicationFactory.class)
+                .createApplicationContext("apiContext", rootContext, WebConfig.class);
 
-        WebBeanContextConfigurer configurer = webBeanContext.getBean(WebBeanContextConfigurer.class);
-
-        configurer.webmvcInitializers(webBeanContext);
-
-        webBeanContext.refresh();
-
-        webBeanContext.setBaseClasses(WebConfig.class);
-
-        configurer.defaultInitializers(webBeanContext);
-
-        webBeanContext.refresh();
-
-        ServletRegistrationBean<?> registration = new FrameworkDispatcherRegistration("apiDispatcher", webBeanContext);
+        ServletRegistrationBean<?> registration = new FrameworkDispatcherRegistration("apiDispatcher", context);
 
         registration.setEnabled(true);
         registration.setLoadOnStartup(2);

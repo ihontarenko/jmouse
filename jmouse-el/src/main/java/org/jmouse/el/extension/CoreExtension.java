@@ -7,10 +7,7 @@ import org.jmouse.el.extension.attribute.MapAttributeResolver;
 import org.jmouse.el.extension.filter.*;
 import org.jmouse.el.extension.filter.converter.*;
 import org.jmouse.el.extension.function.*;
-import org.jmouse.el.extension.function.string.LcfirstFunction;
-import org.jmouse.el.extension.function.string.LclastFunction;
-import org.jmouse.el.extension.function.string.UcfirstFunction;
-import org.jmouse.el.extension.function.string.UclastFunction;
+import org.jmouse.el.extension.function.string.*;
 import org.jmouse.el.extension.operator.*;
 import org.jmouse.el.extension.test.*;
 import org.jmouse.el.parser.*;
@@ -97,7 +94,9 @@ public class CoreExtension implements Extension {
                 new ToStringFilter(),
                 new ToListFilter(),
                 new ToArrayFilter(),
-                new ToIteratorFilter()
+                new ToIteratorFilter(),
+                // specific
+                new SoutFilter()
         );
     }
 

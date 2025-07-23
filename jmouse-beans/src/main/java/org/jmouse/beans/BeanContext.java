@@ -5,6 +5,7 @@ import org.jmouse.beans.definition.BeanDefinitionFactory;
 import org.jmouse.beans.processor.BeanPostProcessorAware;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -71,6 +72,15 @@ public interface BeanContext extends BeanContainer, BeanContainerRegistry,
     Class<?>[] getBaseClasses();
 
     /**
+     * Checks whether a bean with the given name is defined **locally** in this context,
+     * excluding any parent contexts.
+     *
+     * @param name the name of the bean
+     * @return {@code true} if the bean exists in this context only; {@code false} if it's inherited or absent
+     */
+    boolean isLocalBean(String name);
+
+    /**
      * Retrieves the names of all beans that match the specified type.
      *
      * @param type the class type of the beans.
@@ -86,6 +96,15 @@ public interface BeanContext extends BeanContainer, BeanContainerRegistry,
      * @return a list of beans matching the given type.
      */
     <T> List<T> getBeans(Class<T> type);
+
+    /**
+     * Retrieves a map of bean names to their instances, matching the specified type.
+     *
+     * @param type the class type of the beans
+     * @param <T>  the type of the beans
+     * @return a map containing bean names as keys and their corresponding bean instances as values
+     */
+    <T> Map<String, T> getBeansOfType(Class<T> type);
 
     /**
      * Retrieves the current {@link BeanFactory}.

@@ -1,28 +1,89 @@
 package org.jmouse.web.servlet;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.context.FrameworkFactories;
-import org.jmouse.core.reflection.Reflections;
-import org.jmouse.mvc.HandlerMapping;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.RequestPath;
 import org.jmouse.web.request.http.HttpMethod;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Set;
 
+/**
+ * Base servlet for handling HTTP requests in jMouse framework 🌐
+ * <p>
+ * Provides lifecycle integration and dispatching logic. Concrete implementations
+ * must define initialization and dispatch behavior.
+ * </p>
+ *
+ * <p><b>Usage:</b></p>
+ * <pre>{@code
+ * public class AppDispatcher extends ServletDispatcher {
+ *     @Override
+ *     protected void doInitialize() {
+ *         // initialization logic
+ *     }
+ *
+ *     @Override
+ *     protected void doDispatch(HttpServletRequest rq, HttpServletResponse rs, HttpMethod method) throws IOException {
+ *         // dispatch logic
+ *     }
+ *
+ *     @Override
+ *     protected void doInitialize(WebBeanContext context) {
+ *         // optional context-based init
+ *     }
+ * }
+ * }</pre>
+ *
+ * @author Ivan Hontarenko (Mr. Jerry Mouse)
+ * @author ihontarenko@gmail.com
+ */
 abstract public class ServletDispatcher extends HttpServlet {
 
-    protected final WebBeanContext     context;
-    protected final FrameworkFactories frameworkProperties = FrameworkFactories.load(getClass());
+    /**
+     * Optional pre-injected web application context.
+     */
+    protected WebBeanContext context;
 
+    /**
+     * Framework configuration holder.
+     */
+    protected FrameworkFactories frameworkProperties = FrameworkFactories.load(getClass());
+
+    /**
+     * Default constructor. Context will be initialized later.
+     */
+    public ServletDispatcher() {
+        this(null);
+    }
+
+    /**
+     * Constructor with predefined context.
+     *
+     * @param context WebBeanContext to be used
+     */
     public ServletDispatcher(WebBeanContext context) {
         this.context = context;
     }
 
+    /**
+     * Servlet initialization entry point.
+     */
+    @Override
+    public void init() throws ServletException {
+        doInitialize();
+    }
+
+    /**
+     * Core HTTP entry point. Stores {@link RequestPath} and delegates to {@code doDispatch}.
+     *
+     * @param request  the HTTP request
+     * @param response the HTTP response
+     * @throws IOException in case of I/O failure
+     */
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
         RequestPath requestPath = (RequestPath) request.getAttribute(RequestPath.REQUEST_PATH_ATTRIBUTE);
@@ -34,19 +95,26 @@ abstract public class ServletDispatcher extends HttpServlet {
         doDispatch(request, response, HttpMethod.valueOf(request.getMethod()));
     }
 
+    /**
+     * Lifecycle method called by {@link #init()}. Used to initialize servlet without explicit context.
+     */
+    abstract protected void doInitialize();
+
+    /**
+     * Lifecycle method for manual context-based initialization.
+     *
+     * @param context injected {@link WebBeanContext}
+     */
+    abstract protected void doInitialize(WebBeanContext context);
+
+    /**
+     * Dispatch method to handle request by method type.
+     *
+     * @param rq     HTTP request
+     * @param rs     HTTP response
+     * @param method resolved {@link HttpMethod}
+     * @throws IOException in case of I/O failure
+     */
     abstract protected void doDispatch(HttpServletRequest rq, HttpServletResponse rs, HttpMethod method)
             throws IOException;
-
-    @SuppressWarnings("unchecked")
-    protected Set<HandlerMapping> initializeHandlerMappings() {
-        List<HandlerMapping> handlerMappings = context.getBeans(HandlerMapping.class);
-
-        if (handlerMappings.isEmpty()) {
-            handlerMappings = (List<HandlerMapping>) frameworkProperties.getFactories(HandlerMapping.class)
-                    .stream().map(Reflections::findFirstConstructor).map(Reflections::instantiate).toList();
-        }
-
-        return Set.copyOf(handlerMappings);
-    }
-
 }

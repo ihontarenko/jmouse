@@ -38,4 +38,11 @@ public interface ApplicationContextFactory<T extends ApplicationBeanContext> {
      * @return root application context
      */
     T createRootContext();
+
+    /**
+     * 🌱 Creates an empty application-level context.
+     *
+     * @return application context
+     */
+    T createApplicationContext(String contextId, T rootContext, Class<?>... classes);
 }

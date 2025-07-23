@@ -3,29 +3,68 @@ package org.jmouse.mvc;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
+import org.jmouse.core.reflection.Reflections;
 import org.jmouse.mvc.handler.Controller;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.RequestPath;
 import org.jmouse.web.request.http.HttpMethod;
 import org.jmouse.web.request.http.HttpStatus;
 import org.jmouse.web.servlet.ServletDispatcher;
-import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 public class FrameworkDispatcher extends ServletDispatcher {
 
-    private Set<HandlerMapping>  handlerMappings;
+    public static final String DEFAULT_DISPATCHER = "defaultDispatcher";
+
+    private List<HandlerMapping> handlerMappings;
     private List<HandlerAdapter> handlerAdapters;
 
-    public static final String DEFAULT_DISPATCHER = "defaultDispatcher";
+    public FrameworkDispatcher() {
+    }
 
     public FrameworkDispatcher(WebBeanContext context) {
         super(context);
+    }
 
-        handlerMappings = initializeHandlerMappings();
+    @Override
+    protected void doInitialize() {
+        WebBeanContext rootContext = WebBeanContext.getRootWebBeanContext(getServletContext());
+
+        if (context == null) {
+            context = rootContext;
+        }
+
+        doInitialize(context);
+    }
+
+    @Override
+    protected void doInitialize(WebBeanContext context) {
+        initHandlerMappings(context);
+        initHandlerAdapters(context);
+    }
+
+    private void initHandlerMappings(WebBeanContext context) {
+        List<HandlerMapping> handlerMappings = context.getBeans(HandlerMapping.class);
+
+        if (handlerMappings.isEmpty()) {
+            handlerMappings = (List<HandlerMapping>) frameworkProperties.getFactories(HandlerMapping.class).stream()
+                    .map(Reflections::findFirstConstructor).map(Reflections::instantiate).toList();
+        }
+
+        this.handlerMappings = List.copyOf(handlerMappings);
+    }
+
+    private void initHandlerAdapters(WebBeanContext context) {
+        List<HandlerAdapter> handlerAdapters = context.getBeans(HandlerAdapter.class);
+
+        if (handlerAdapters.isEmpty()) {
+            handlerAdapters = (List<HandlerAdapter>) frameworkProperties.getFactories(HandlerAdapter.class).stream()
+                    .map(Reflections::findFirstConstructor).map(Reflections::instantiate).toList();
+        }
+
+        this.handlerAdapters = List.copyOf(handlerAdapters);
     }
 
     @Override

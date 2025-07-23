@@ -13,6 +13,7 @@ import org.jmouse.util.Priority;
 import org.jmouse.util.Sorter;
 import org.jmouse.context.ApplicationConfigurer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Priority(Integer.MAX_VALUE)
@@ -35,7 +36,7 @@ public class StartupRootApplicationContextInitializer implements BeanContextInit
     }
 
     public void performConfigurers(BeanContext context) {
-        List<ApplicationConfigurer> configurers = context.getBeans(ApplicationConfigurer.class);
+        List<ApplicationConfigurer> configurers = new ArrayList<>(context.getBeans(ApplicationConfigurer.class));
         if (!configurers.isEmpty()) {
             configurers.sort(Sorter.PRIORITY_COMPARATOR);
             for (ApplicationConfigurer configurer : configurers) {

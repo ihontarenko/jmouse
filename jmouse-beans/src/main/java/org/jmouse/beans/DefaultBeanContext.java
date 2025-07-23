@@ -434,6 +434,17 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         return instance;
     }
 
+    /**
+     * Checks whether a bean with the given name is defined **locally** in this context,
+     * excluding any parent contexts.
+     *
+     * @param name the name of the bean
+     * @return {@code true} if the bean exists in this context only; {@code false} if it's inherited or absent
+     */
+    @Override
+    public boolean isLocalBean(String name) {
+        return getDefinition(name) != null;
+    }
 
     /**
      * Retrieves the names of all beans that match the specified type.
@@ -447,7 +458,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public List<String> getBeanNames(Class<?> type) {
-        List<String> names = new ArrayList<>();
+        Set<String> names = new HashSet<>();
 
         for (BeanDefinition definition : getDefinitions(BeanDefinitionMatchers.isSupertype(type))) {
             names.add(definition.getBeanName());
@@ -457,7 +468,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
             names.addAll(parent.getBeanNames(type));
         }
 
-        return names;
+        return List.copyOf(names);
     }
 
     /**
@@ -473,10 +484,21 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public <T> List<T> getBeans(Class<T> type) {
-        List<T> beans = new ArrayList<>();
+        return List.copyOf(getBeansOfType(type).values());
+    }
 
-        for (String beanName : getBeanNames(type)) {
-            beans.add(getBean(beanName));
+    /**
+     * Retrieves a map of bean names to their instances, matching the specified type.
+     *
+     * @param type the class type of the beans
+     * @return a map containing bean names as keys and their corresponding bean instances as values
+     */
+    @Override
+    public <T> Map<String, T> getBeansOfType(Class<T> type) {
+        Map<String, T> beans = new LinkedHashMap<>(4);
+
+        for (String name : getBeanNames(type)) {
+            beans.put(name, getBean(name));
         }
 
         return beans;

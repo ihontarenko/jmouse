@@ -33,13 +33,11 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
         ApplicationFactory<WebBeanContext> applicationFactory = new WebApplicationFactory();
         WebBeanContext                     rootContext        = applicationFactory.createRootContext();
 
-        // attach configurer for child context
-        rootContext.registerBean(WebBeanContextConfigurer.class, new WebBeanContextConfigurer());
-
-        WebBeanContextConfigurer webBeanContextConfigurer = rootContext.getBean(WebBeanContextConfigurer.class);
-
-        webBeanContextConfigurer.defaultInitializers(rootContext);
-        webBeanContextConfigurer.webmvcInitializers(rootContext);
+        rootContext.addInitializer(new BeanScanAnnotatedContextInitializer());
+        rootContext.addInitializer(new ApplicationContextBeansScanner());
+        rootContext.addInitializer(new StartupRootApplicationContextInitializer(rootContext.getEnvironment()));
+        rootContext.addInitializer(new WebMvcControllersInitializer());
+        rootContext.addInitializer(new WebMvcInfrastructureInitializer());
 
         rootContext.addBaseClasses(applicationClasses);
         rootContext.refresh();
