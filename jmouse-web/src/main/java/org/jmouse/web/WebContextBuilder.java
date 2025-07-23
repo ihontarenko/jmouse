@@ -10,8 +10,8 @@ public interface WebContextBuilder {
     WebContextBuilder baseClasses(Class<?>... baseClasses);
     WebContextBuilder parent(WebBeanContext parent);
     WebContextBuilder addInitializer(BeanContextInitializer initializer);
-    WebContextBuilder useDefaultInitializers();
-    WebContextBuilder useWebMvcInitializers();
+    WebContextBuilder useDefault();
+    WebContextBuilder useWebMvc();
     WebContextBuilder customize(Consumer<WebBeanContext> customizer);
     WebBeanContext build();
 }

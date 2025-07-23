@@ -35,13 +35,11 @@ public class DemoWebApplication {
     }
 
     @Bean(proxied = true)
-    public ServletRegistrationBean<?> apiDispatcher(WebBeanContext rootContext, WebContextBuilder builder, WebContextBuilder builderB) {
-
-        builder.name("apiContext");
-
-        @SuppressWarnings("unchecked")
-        WebBeanContext context = (WebBeanContext) rootContext.getBean(ApplicationFactory.class)
-                .createApplicationContext("apiContext", rootContext, WebConfig.class);
+    public ServletRegistrationBean<?> apiDispatcher(WebBeanContext rootContext, WebContextBuilder builder) {
+        WebBeanContext context = builder.name("apiContext")
+                .baseClasses(WebConfig.class).parent(rootContext)
+                .useWebMvc().useDefault()
+                .build();
 
         ServletRegistrationBean<?> registration = new FrameworkDispatcherRegistration("apiDispatcher", context);
 

@@ -61,13 +61,13 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
     }
 
     @Override
-    public WebContextBuilder useDefaultInitializers() {
+    public WebContextBuilder useDefault() {
         this.useDefault = true;
         return this;
     }
 
     @Override
-    public WebContextBuilder useWebMvcInitializers() {
+    public WebContextBuilder useWebMvc() {
         this.useWebMvc = true;
         return this;
     }
