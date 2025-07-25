@@ -68,20 +68,12 @@ public class FrameworkDispatcher extends ServletDispatcher {
         response.setStatus(HttpStatus.OK.getCode());
         response.setContentType("text/html;charset=utf-8");
 
-        Handler container = null;
-
-        for (HandlerMapping mapping : handlerMappings) {
-            container = mapping.getHandler(request);
-            if (container != null) {
-                break;
-            }
-        }
-
+        Handler handler = getHandler(request);
         HandlerAdapter handlerAdapter = null;
 
-        if (container != null) {
+        if (handler != null) {
             for (HandlerAdapter ha : handlerAdapters) {
-                if (ha.supportsHandler(container.getHandler())) {
+                if (ha.supportsHandler(handler.getHandler())) {
                     handlerAdapter = ha;
                     break;
                 }
@@ -89,12 +81,29 @@ public class FrameworkDispatcher extends ServletDispatcher {
         }
 
         if (handlerAdapter != null) {
-            if (container.preHandle(request, response)) {
-                HandlerResult handlerResult = handlerAdapter.handle(request, response, container.getHandler());
-                container.postHandle(request, response, handlerResult);
+            if (handler.preHandle(request, response)) {
+                HandlerResult handlerResult = handlerAdapter.handle(request, response, handler.getHandler());
+                handler.postHandle(request, response, handlerResult);
             }
         }
 
+    }
+
+    protected Handler getHandler(HttpServletRequest request) throws ServletDispatcherException {
+        Handler handler = null;
+
+        for (HandlerMapping mapping : handlerMappings) {
+            handler = mapping.getHandler(request);
+            if (handler != null) {
+                break;
+            }
+        }
+
+        if (handler == null) {
+            throw new ServletDispatcherException("No applicable mapping found. " + request.getPathInfo());
+        }
+
+        return handler;
     }
 
 }
