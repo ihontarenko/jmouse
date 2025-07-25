@@ -8,7 +8,7 @@ import org.jmouse.web.WebLauncher;
 import org.jmouse.web.initializer.WebApplicationInitializer;
 import org.jmouse.web.WebApplicationFactory;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.initializer.context.StartupRootApplicationContextInitializer;
+import org.jmouse.web.initializer.context.StartupApplicationContextInitializer;
 import org.jmouse.web.server.WebServer;
 import org.jmouse.web.server.WebServerFactory;
 
@@ -30,29 +30,29 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
      */
     @Override
     public WebBeanContext launch(String... arguments) {
-        ApplicationFactory<WebBeanContext> applicationFactory = new WebApplicationFactory();
-        WebBeanContext                     rootContext        = applicationFactory.createRootContext();
+        ApplicationFactory<WebBeanContext> factory = new WebApplicationFactory();
+        WebBeanContext                     context = factory.createRootContext();
 
-        rootContext.addInitializer(new BeanScanAnnotatedContextInitializer());
-        rootContext.addInitializer(new ApplicationContextBeansScanner());
-        rootContext.addInitializer(new StartupRootApplicationContextInitializer(rootContext.getEnvironment()));
-        rootContext.addInitializer(new WebMvcControllersInitializer());
-        rootContext.addInitializer(new WebMvcInfrastructureInitializer());
+        context.addInitializer(new BeanScanAnnotatedContextInitializer());
+        context.addInitializer(new ApplicationContextBeansScanner());
+        context.addInitializer(new StartupApplicationContextInitializer(context.getEnvironment()));
+        context.addInitializer(new WebMvcControllersInitializer());
+        context.addInitializer(new WebMvcInfrastructureInitializer());
 
-        rootContext.addBaseClasses(applicationClasses);
-        rootContext.refresh();
+        context.addBaseClasses(applicationClasses);
+        context.refresh();
 
-        createWebServer(rootContext).start();
+        createWebServer(context).start();
 
-        return rootContext;
+        return context;
     }
 
     @Override
-    public WebServer createWebServer(WebBeanContext rootContext) {
+    public WebServer createWebServer(WebBeanContext context) {
         List<WebApplicationInitializer> registrationBeans
-                = WebBeanContext.getBeansOfType(WebApplicationInitializer.class, rootContext);
+                = WebBeanContext.getBeansOfType(WebApplicationInitializer.class, context);
 
-        WebServerFactory factory = rootContext.getBean(WebServerFactory.class);
+        WebServerFactory factory = context.getBean(WebServerFactory.class);
 
         return factory.createWebServer(registrationBeans.toArray(WebApplicationInitializer[]::new));
     }

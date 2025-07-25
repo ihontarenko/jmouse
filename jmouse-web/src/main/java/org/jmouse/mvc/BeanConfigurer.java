@@ -9,19 +9,12 @@ package org.jmouse.mvc;
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  */
-public interface BeanInstanceInitializer<T> {
+public interface BeanConfigurer<T> {
 
     /**
      * 🔧 Apply additional configuration to the target object.
      *
      * @param object instance to initialize
      */
-    void initialize(T object);
-
-    /**
-     * 📦 Type this initializer applies to.
-     *
-     * @return class of the initialized type
-     */
-    Class<T> objectClass();
+    void configure(T object);
 }

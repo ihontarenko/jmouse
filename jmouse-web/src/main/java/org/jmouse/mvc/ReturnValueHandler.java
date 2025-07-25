@@ -4,4 +4,6 @@ public interface ReturnValueHandler {
 
     boolean supportsReturnType(Class<?> returnType);
 
+    void handleReturnValue(HandlerResult handlerResult);
+
 }

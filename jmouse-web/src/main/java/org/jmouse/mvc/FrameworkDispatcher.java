@@ -2,11 +2,7 @@ package org.jmouse.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.core.MediaType;
-import org.jmouse.core.reflection.Reflections;
-import org.jmouse.mvc.handler.Controller;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.request.RequestPath;
 import org.jmouse.web.request.http.HttpMethod;
 import org.jmouse.web.request.http.HttpStatus;
 import org.jmouse.web.servlet.ServletDispatcher;
@@ -20,6 +16,7 @@ public class FrameworkDispatcher extends ServletDispatcher {
 
     private List<HandlerMapping> handlerMappings;
     private List<HandlerAdapter> handlerAdapters;
+    private List<ReturnValueHandler> returnValueHandlers;
 
     public FrameworkDispatcher() {
     }
@@ -49,8 +46,7 @@ public class FrameworkDispatcher extends ServletDispatcher {
         List<HandlerMapping> handlerMappings = context.getBeans(HandlerMapping.class);
 
         if (handlerMappings.isEmpty()) {
-            handlerMappings = (List<HandlerMapping>) frameworkProperties.getFactories(HandlerMapping.class).stream()
-                    .map(Reflections::findFirstConstructor).map(Reflections::instantiate).toList();
+            handlerMappings = frameworkProperties.createFactories(HandlerMapping.class);
         }
 
         this.handlerMappings = List.copyOf(handlerMappings);
@@ -60,8 +56,7 @@ public class FrameworkDispatcher extends ServletDispatcher {
         List<HandlerAdapter> handlerAdapters = context.getBeans(HandlerAdapter.class);
 
         if (handlerAdapters.isEmpty()) {
-            handlerAdapters = (List<HandlerAdapter>) frameworkProperties.getFactories(HandlerAdapter.class).stream()
-                    .map(Reflections::findFirstConstructor).map(Reflections::instantiate).toList();
+            handlerAdapters = frameworkProperties.createFactories(HandlerAdapter.class);
         }
 
         this.handlerAdapters = List.copyOf(handlerAdapters);
@@ -70,23 +65,33 @@ public class FrameworkDispatcher extends ServletDispatcher {
     @Override
     protected void doDispatch(HttpServletRequest request, HttpServletResponse response, HttpMethod method)
             throws IOException {
-        MediaType mediaType = MediaType.TEXT_PLAIN;
-        mediaType.performParameters("charset", "utf-8");
-
         response.setStatus(HttpStatus.OK.getCode());
         response.setContentType("text/html;charset=utf-8");
 
-        RequestPath requestPath = (RequestPath) request.getAttribute(RequestPath.REQUEST_PATH_ATTRIBUTE);
-
-        response.getWriter().write(requestPath.toString());
+        Handler container = null;
 
         for (HandlerMapping mapping : handlerMappings) {
-            Handler chain = mapping.getHandler(request);
+            container = mapping.getHandler(request);
+            if (container != null) {
+                break;
+            }
+        }
 
-            if (chain != null) {
-                if (chain.getHandler() instanceof Controller controller) {
-                    controller.handle(request, response);
+        HandlerAdapter handlerAdapter = null;
+
+        if (container != null) {
+            for (HandlerAdapter ha : handlerAdapters) {
+                if (ha.supportsHandler(container.getHandler())) {
+                    handlerAdapter = ha;
+                    break;
                 }
+            }
+        }
+
+        if (handlerAdapter != null) {
+            if (container.preHandle(request, response)) {
+                HandlerResult handlerResult = handlerAdapter.handle(request, response, container.getHandler());
+                container.postHandle(request, response, handlerResult);
             }
         }
 

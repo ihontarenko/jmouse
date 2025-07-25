@@ -5,7 +5,9 @@ import org.jmouse.context.ApplicationBeanContext;
 import org.jmouse.beans.BeanContext;
 
 import java.util.Enumeration;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 🌐 Web-specific {@link BeanContext}.
@@ -96,11 +98,58 @@ public interface WebBeanContext extends ApplicationBeanContext {
         return webBeanContext;
     }
 
+    /**
+     * 📦 Retrieves beans by type from the specified {@link WebBeanContext}.
+     *
+     * @param type    the bean type
+     * @param context the web context
+     * @return list of beans of the given type
+     */
     static <T> List<T> getBeansOfType(Class<T> type, WebBeanContext context) {
         return context.getBeans(type);
     }
 
+    /**
+     * 📦 Retrieves beans by type from a {@link ServletContext}.
+     *
+     * @param type    the bean type
+     * @param context the servlet context
+     * @return list of beans of the given type
+     */
     static <T> List<T> getBeansOfType(Class<T> type, ServletContext context) {
         return getBeansOfType(type, getRequiredWebBeanContext(context));
     }
+
+    /**
+     * 🔍 Finds local beans (not inherited) by type.
+     *
+     * @param type    the bean type
+     * @param context the web context
+     * @return map of local bean names to instances
+     */
+    static <T> Map<String, T> getLocalBeansOfType(Class<T> type, WebBeanContext context) {
+        Map<String, T> beans = context.getBeansOfType(type);
+        Map<String, T> local = new LinkedHashMap<>(4);
+
+        beans.forEach((name, bean) -> {
+            if (context.isLocalBean(name)) {
+                local.put(name, bean);
+            }
+        });
+
+        return local;
+    }
+
+    /**
+     * 🧹 Shortcut to get local beans as a list.
+     *
+     * @param type    the bean type
+     * @param context the web context
+     * @return list of local beans
+     */
+    static <T> List<T> getLocalBeans(Class<T> type, WebBeanContext context) {
+        return List.copyOf(getLocalBeansOfType(type, context).values());
+    }
+
+
 }

@@ -11,7 +11,6 @@ import org.jmouse.web.server.WebServerFactory;
 import org.jmouse.web.server.WebServers;
 import org.jmouse.web.server.tomcat.TomcatWebServerFactory;
 
-import java.util.Collections;
 import java.util.Map;
 
 @BeanFactories(name = "webServerFactoryConfiguration")

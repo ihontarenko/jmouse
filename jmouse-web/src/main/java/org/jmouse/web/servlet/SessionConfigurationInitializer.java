@@ -4,6 +4,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.SessionCookieConfig;
 import org.jmouse.beans.annotation.Ignore;
 import org.jmouse.util.AttributeMapper;
+import org.jmouse.util.Priority;
 import org.jmouse.web.initializer.WebApplicationInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,7 @@ import java.util.function.Supplier;
  * @see AttributeMapper
  */
 @Ignore
+@Priority(-500)
 public class SessionConfigurationInitializer implements WebApplicationInitializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionConfigurationInitializer.class);

@@ -9,6 +9,9 @@ import org.jmouse.core.env.Environment;
 import org.jmouse.core.env.PropertyResolver;
 import org.jmouse.core.io.ResourceLoader;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * A specialized {@link BeanContext} that combines functionality from {@link BeanFactory},
  * {@link PropertyResolver}, and environment/resource management.

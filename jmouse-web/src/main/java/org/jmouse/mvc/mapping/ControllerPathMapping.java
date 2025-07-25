@@ -5,27 +5,32 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.annotation.BeanInitializer;
 import org.jmouse.mvc.AbstractHandlerMapping;
 import org.jmouse.mvc.HandlerInterceptor;
+import org.jmouse.mvc.HandlerInterceptorRegistry;
 import org.jmouse.mvc.handler.Controller;
+import org.jmouse.web.context.WebBeanContext;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DirectRequestPathMapping extends AbstractHandlerMapping {
+public class ControllerPathMapping extends AbstractHandlerMapping {
 
     private final Map<String, Controller> controllers;
+    private HandlerInterceptorRegistry registry;
 
     @BeanInitializer
-    public void init(BeanContext context) {
-        for (String beanName : context.getBeanNames(ControllerRegistration.class)) {
-            if (context.isLocalBean(beanName)) {
-                ControllerRegistration registration = context.getBean(beanName);
-                addController(registration.route(), registration.controller());
-            }
+    public void initialize(BeanContext context) {
+        List<ControllerRegistration> registrations = WebBeanContext.getLocalBeans(
+                ControllerRegistration.class, (WebBeanContext) context);
+
+        for (ControllerRegistration registration : registrations) {
+            addController(registration.route(), registration.controller());
         }
+
+        registry = context.getBean(HandlerInterceptorRegistry.class);
     }
 
-    public DirectRequestPathMapping() {
+    public ControllerPathMapping() {
         this.controllers = new ConcurrentHashMap<>();
     }
 
@@ -40,7 +45,7 @@ public class DirectRequestPathMapping extends AbstractHandlerMapping {
 
     @Override
     protected List<HandlerInterceptor> getHandlerInterceptors() {
-        return List.of();
+        return registry.getInterceptors();
     }
 
 

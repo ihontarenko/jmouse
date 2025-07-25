@@ -89,4 +89,11 @@ public class FrameworkFactories {
     public void addFactory(Class<?> clazz, Class<?> factory) {
         addFactories(clazz, Collections.singleton(factory));
     }
+
+    @SuppressWarnings("unchecked")
+    public <T> List<T> createFactories(Class<T> clazz) {
+        return (List<T>) getFactories(clazz).stream()
+                .map(Reflections::findFirstConstructor).map(Reflections::instantiate).toList();
+    }
+
 }

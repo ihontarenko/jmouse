@@ -10,7 +10,7 @@ import org.jmouse.mvc.context.WebMvcControllersInitializer;
 import org.jmouse.mvc.context.WebMvcInfrastructureInitializer;
 import org.jmouse.mvc.jMouseWebMvcRoot;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.initializer.context.StartupRootApplicationContextInitializer;
+import org.jmouse.web.initializer.context.StartupApplicationContextInitializer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -152,7 +152,7 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
             context.addInitializer(new BeanScanAnnotatedContextInitializer());
             context.addInitializer(new ApplicationContextBeansScanner());
             if (parent != null) {
-                context.addInitializer(new StartupRootApplicationContextInitializer(parent.getEnvironment()));
+                context.addInitializer(new StartupApplicationContextInitializer(parent.getEnvironment()));
             }
         }
 

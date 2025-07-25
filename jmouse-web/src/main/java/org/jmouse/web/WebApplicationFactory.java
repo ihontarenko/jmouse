@@ -15,7 +15,7 @@ import org.jmouse.mvc.context.WebMvcInfrastructureInitializer;
 import org.jmouse.mvc.jMouseWebMvcRoot;
 import org.jmouse.web.context.WebApplicationBeanContext;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.initializer.context.StartupRootApplicationContextInitializer;
+import org.jmouse.web.initializer.context.StartupApplicationContextInitializer;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -106,7 +106,7 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
         // Add common application initializers
         context.addInitializer(new BeanScanAnnotatedContextInitializer());
         context.addInitializer(new ApplicationContextBeansScanner());
-        context.addInitializer(new StartupRootApplicationContextInitializer(rootContext.getEnvironment()));
+        context.addInitializer(new StartupApplicationContextInitializer(rootContext.getEnvironment()));
         context.addInitializer(new WebMvcControllersInitializer());
 
         context.refresh(); // Re-run initialization after initializers added

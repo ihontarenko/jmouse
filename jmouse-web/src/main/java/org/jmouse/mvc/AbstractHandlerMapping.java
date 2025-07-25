@@ -6,6 +6,7 @@ import org.jmouse.web.request.RequestPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,9 +44,9 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
         }
 
         Handler                  container    = new Handler(handler);
-        List<HandlerInterceptor> interceptors = getHandlerInterceptors();
+        List<HandlerInterceptor> interceptors = new ArrayList<>(getHandlerInterceptors());
 
-        if (interceptors != null && !interceptors.isEmpty()) {
+        if (!interceptors.isEmpty()) {
             Sorter.sort(interceptors);
             interceptors.forEach(container::addInterceptor);
         }
