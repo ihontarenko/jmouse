@@ -100,6 +100,11 @@ public final class PathPattern {
         return Objects.hashCode(pattern);
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " [" + expression + "]";
+    }
+
     /**
      * 📌 Internal structure describing a route parameter.
      *

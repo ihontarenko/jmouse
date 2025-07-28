@@ -119,6 +119,7 @@ public interface MemberFinder<T extends Member> {
      * @param comparators a collection of comparators to sort the matched members; if empty, no sorting is applied
      * @return a collection of members that match the criteria, sorted as specified
      */
+    @SuppressWarnings({"unchecked"})
     default Collection<T> find(Class<?> clazz, Matcher<? super T> matcher, Collection<Comparator<? super T>> comparators) {
         Matcher<Member> strictMatcher = MemberMatcher.isDeclaredClass(clazz).and((Matcher<? super Member>) matcher);
         Collection<T>   members       = getMembers(clazz);

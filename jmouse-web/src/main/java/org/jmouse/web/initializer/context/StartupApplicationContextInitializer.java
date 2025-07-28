@@ -62,14 +62,14 @@ public class StartupApplicationContextInitializer implements BeanContextInitiali
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void performBeanConfigurers(BeanContext context) {
-        List<BeanConfigurer> initializers = new ArrayList<>(
+        List<BeanConfigurer> beanConfigurers = new ArrayList<>(
                 WebBeanContext.getLocalBeans(
                         BeanConfigurer.class, (WebBeanContext) context)
         );
 
-        if (!initializers.isEmpty()) {
-            Sorter.sort(initializers);
-            for (BeanConfigurer<?> beanConfigurer : initializers) {
+        if (!beanConfigurers.isEmpty()) {
+            Sorter.sort(beanConfigurers);
+            for (BeanConfigurer<?> beanConfigurer : beanConfigurers) {
                 JavaType type = JavaType.forInstance(beanConfigurer)
                         .locate(BeanConfigurer.class).getFirst();
                 handleBeanConfigurer(context, (BeanConfigurer<Object>) beanConfigurer, type.getClassType());
