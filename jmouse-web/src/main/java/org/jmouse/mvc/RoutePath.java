@@ -1,4 +1,6 @@
 package org.jmouse.mvc;
 
-public class RoutePath {
+import java.util.Map;
+
+public record RoutePath(String pattern, Map<String, Object> variables) {
 }

@@ -3,26 +3,18 @@ package org.jmouse.mvc.mapping;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.annotation.BeanInitializer;
-import org.jmouse.mvc.AbstractHandlerMapping;
-import org.jmouse.mvc.HandlerInterceptor;
-import org.jmouse.mvc.HandlerInterceptorRegistry;
+import org.jmouse.mvc.*;
 import org.jmouse.mvc.handler.Controller;
-import org.jmouse.util.PlaceholderReplacer;
-import org.jmouse.util.PlaceholderResolver;
-import org.jmouse.util.StandardPlaceholderReplacer;
-import org.jmouse.web.WebApplicationFactory;
 import org.jmouse.web.context.WebBeanContext;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ControllerPathMapping extends AbstractHandlerMapping {
 
-    private final Map<String, Controller>    controllers;
-    private       HandlerInterceptorRegistry registry;
-    private       PlaceholderReplacer        placeholderReplacer;
+    private final Map<PathPattern, Controller> controllers;
+    private       HandlerInterceptorRegistry   registry;
 
     public ControllerPathMapping() {
         this.controllers = new ConcurrentHashMap<>();
@@ -30,8 +22,6 @@ public class ControllerPathMapping extends AbstractHandlerMapping {
 
     @BeanInitializer
     public void initialize(BeanContext context) {
-        placeholderReplacer = context.getBean(WebApplicationFactory.ROUTE_REPLACER_BEAN_NAME);
-
         List<ControllerRegistration> registrations = WebBeanContext.getLocalBeans(
                 ControllerRegistration.class, (WebBeanContext) context);
 
@@ -43,19 +33,24 @@ public class ControllerPathMapping extends AbstractHandlerMapping {
     }
 
     public void addController(String route, Controller controller) {
-        // todo: route should be parsed if any
-        // todo: handler should be present like container with path variables etc.
-
-        String parsed = placeholderReplacer.replace(route, (p, d) -> p.toUpperCase(Locale.ROOT) + "( "+ d +" )");
-
-        this.controllers.put(parsed, controller);
+        this.controllers.put(new PathPattern(route), controller);
     }
 
     @Override
     protected Object doGetHandler(HttpServletRequest request) {
-        String              mappingPath = getMappingPath(request);
+        String mappingPath = getMappingPath(request);
 
-        return controllers.get(mappingPath);
+        Object handler = null;
+
+        for (Map.Entry<PathPattern, Controller> entry : controllers.entrySet()) {
+            PathPattern pathPattern = entry.getKey();
+            if (pathPattern.matches(mappingPath)) {
+                RoutePath routePath = pathPattern.parse(mappingPath);
+                handler = new MappedHandler(entry.getValue(), routePath);
+            }
+        }
+
+        return handler;
     }
 
     @Override
