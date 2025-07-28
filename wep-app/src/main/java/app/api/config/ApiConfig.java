@@ -19,4 +19,16 @@ public class ApiConfig {
                 -> response.getWriter().write("app_api_web"));
     }
 
+    @Bean
+    public ControllerRegistration endRegistration() {
+        return new ControllerRegistration("/end", (request, response)
+                -> response.getWriter().write("end!!!"));
+    }
+
+    @Bean
+    public ControllerRegistration userIdRegistration() {
+        return new ControllerRegistration("/user/{id}/{status:REGISTERED|BLOCKED}", (request, response)
+                -> response.getWriter().write("user id"));
+    }
+
 }

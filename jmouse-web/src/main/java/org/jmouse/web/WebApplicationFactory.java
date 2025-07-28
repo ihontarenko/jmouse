@@ -13,6 +13,7 @@ import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.mvc.context.WebMvcControllersInitializer;
 import org.jmouse.mvc.context.WebMvcInfrastructureInitializer;
 import org.jmouse.mvc.jMouseWebMvcRoot;
+import org.jmouse.util.StandardPlaceholderReplacer;
 import org.jmouse.web.context.WebApplicationBeanContext;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.initializer.context.StartupApplicationContextInitializer;
@@ -37,6 +38,9 @@ import java.util.Set;
  * @author ihontarenko@gmail.com
  */
 public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanContext> {
+
+    public static final String ROUTE_REPLACER_BEAN_NAME   = "routeReplacer";
+    public static final String DEFAULT_REPLACER_BEAN_NAME = "defaultReplacer";
 
     /**
      * Creates a new {@link WebBeanContext} with no parent.
@@ -78,14 +82,15 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
      */
     @Override
     public WebBeanContext createRootContext() {
-        WebBeanContext context = createContext(WebBeanContext.DEFAULT_ROOT_WEB_CONTEXT_NAME,
-                                               jMouseWebRoot.class, jMouseWebMvcRoot.class);
+        WebBeanContext context = createContext(WebBeanContext.DEFAULT_ROOT_WEB_CONTEXT_NAME, jMouseWebRoot.class, jMouseWebMvcRoot.class);
 
         context.registerBean(Environment.class, createDefaultEnvironment());
         context.registerBean(ApplicationFactory.class, this);
         context.registerBean(Conversion.class, new ContextConversion());
         context.registerBean(ResourceLoader.class, new CompositeResourceLoader());
         context.registerBean(ExpressionLanguage.class, new ExpressionLanguage());
+        context.registerBean(DEFAULT_REPLACER_BEAN_NAME, new StandardPlaceholderReplacer());
+        context.registerBean(ROUTE_REPLACER_BEAN_NAME, new StandardPlaceholderReplacer("{", "}", ":"));
 
         return context;
     }

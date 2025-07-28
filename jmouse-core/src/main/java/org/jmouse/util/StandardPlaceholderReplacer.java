@@ -89,22 +89,21 @@ public class StandardPlaceholderReplacer implements PlaceholderReplacer {
 
             if (end != -1) {
                 String placeholder = builder.substring(start + prefix.length(), end);
-                String resolved    = resolver.resolvePlaceholder(placeholder);
+                String resolved;
 
-                // Detect circular references
-                detector.detect(() -> placeholder, () -> ILLEGAL_STATE_EXCEPTION);
-
-                // Handle default value syntax: ${key:default}
-                if (resolved == null && placeholder.contains(separator)) {
+                if (placeholder.contains(separator)) {
+                    // Handle default value syntax: ${key:default}
                     int    separatorIndex = placeholder.indexOf(separator);
                     String defaultValue   = placeholder.substring(separatorIndex + separator.length());
 
-                    resolved = resolver.resolvePlaceholder(placeholder.substring(0, separatorIndex));
-
-                    if (resolved == null) {
-                        resolved = defaultValue;
-                    }
+                    resolved = resolver.resolvePlaceholder(placeholder.substring(0, separatorIndex), defaultValue);
+                } else {
+                    // Handle simple value syntax: ${app.name}
+                    resolved    = resolver.resolvePlaceholder(placeholder, null);
                 }
+
+                // Detect circular references
+                detector.detect(() -> placeholder, () -> ILLEGAL_STATE_EXCEPTION);
 
                 // Recursively resolve nested placeholders
                 if (resolved != null) {

@@ -17,7 +17,7 @@ public class RegexPlaceholderReplacer implements PlaceholderReplacer {
 
         while (matcher.find()) {
             String placeholder = matcher.group(1);
-            String result      = resolver.resolvePlaceholder(placeholder);
+            String result      = resolver.resolvePlaceholder(placeholder, null);
             matcher.appendReplacement(builder, Matcher.quoteReplacement(result));
         }
 
