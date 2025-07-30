@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.context.FrameworkFactories;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.request.RequestAttributesHolder;
 import org.jmouse.web.request.RequestPath;
 import org.jmouse.web.request.http.HttpMethod;
 
@@ -86,7 +87,7 @@ abstract public class ServletDispatcher extends HttpServlet {
      */
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        RequestPath requestPath = (RequestPath) request.getAttribute(RequestPath.REQUEST_PATH_ATTRIBUTE);
+        RequestPath requestPath = RequestAttributesHolder.getRequestPath();
 
         if (requestPath == null) {
             request.setAttribute(RequestPath.REQUEST_PATH_ATTRIBUTE, RequestPath.ofRequest(request));

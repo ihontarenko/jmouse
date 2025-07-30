@@ -10,29 +10,57 @@ import java.util.regex.Pattern;
 /**
  * 🧭 Parses path patterns like <code>/user/{id:\d+}/status/{status}</code> into regular expressions
  * and extracts matched parameters into {@link RoutePath}.
- * <p>
- * 💡 Example:
+ *
+ * <p>💡 Example:
  * <pre>{@code
- * PathPattern pattern = new PathPattern("/user/{id:\\d+}/status/{status}");
+ * PathPattern pattern = new PathPattern("/user/{id:int}/status/{status}");
  * RoutePath route = pattern.parse("/user/42/status/ACTIVE");
- * route.get("id"); // -> "42"
- * route.get("status"); // -> "ACTIVE"
+ * int id = route.getInt("id", -1);
+ * String status = route.getString("status", "UNKNOWN");
  * }</pre>
+ *
+ * Supports:
+ * <ul>
+ *   <li>Named parameters</li>
+ *   <li>Typed parameters: {@code int}, {@code boolean}</li>
+ *   <li>Custom regex per parameter</li>
+ * </ul>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
 public final class PathPattern {
 
-    private static final PlaceholderReplacer REPLACER  = new StandardPlaceholderReplacer("{", "}", ":");
-    private static final String              MATCH_ALL = "[^/]+";
+    /** 🔠 Type name for boolean params */
+    public static final String BOOLEAN_NAME = "boolean";
+
+    /** 🔠 Type name for boolean params (alias) */
+    public static final String BOOL_NAME = "bool";
+
+    /** 🔢 Type name for integer params */
+    public static final String INT_NAME = "int";
+
+    /** 🔁 Placeholder replacer: `{name:pattern}` */
+    public static final PlaceholderReplacer REPLACER = new StandardPlaceholderReplacer("{", "}", ":");
+
+    /** 📦 Default pattern for untyped params */
+    public static final String MATCH_ALL = "[^/]+";
+
+    /** ✅ Pattern for boolean values */
+    public static final String MATCH_BOOLEAN = "true|false";
+
+    /** 🔢 Pattern for integers */
+    public static final String MATCH_INT = "\\d+";
+
+    /** 🔢 Type name for custom regexp */
+    public static final String CUSTOM_NAME = "custom";
 
     private final String          pattern;
     private final Pattern         expression;
     private final List<Parameter> parameters = new ArrayList<>();
 
     /**
-     * Constructs a {@code PathPattern} by compiling the given template.
+     * 🔧 Constructs a {@code PathPattern} by compiling the given template.
      *
      * @param pattern route pattern, e.g., {@code /user/{id:\d+}/status/{status}}
      */
@@ -42,10 +70,10 @@ public final class PathPattern {
     }
 
     /**
-     * Parses the given input URI and extracts path parameters.
+     * 🎯 Parses the input path and returns extracted typed parameters.
      *
-     * @param input URI string, e.g., {@code /user/42/status/ACTIVE}
-     * @return parsed {@link RoutePath} with extracted variables
+     * @param input URI path, e.g., {@code /user/42/status/ACTIVE}
+     * @return {@link RoutePath} with extracted values
      */
     public RoutePath parse(String input) {
         Matcher             matcher   = expression.matcher(input);
@@ -53,7 +81,15 @@ public final class PathPattern {
 
         if (matcher.matches()) {
             for (Parameter parameter : parameters) {
-                variables.put(parameter.name(), matcher.group(parameter.name()));
+                Object raw = matcher.group(parameter.name());
+
+                Object variable = switch (parameter.type().name()) {
+                    case INT_NAME                   -> Integer.parseInt(raw.toString());
+                    case BOOLEAN_NAME, BOOL_NAME    -> Boolean.parseBoolean(raw.toString());
+                    default                         -> raw;
+                };
+
+                variables.put(parameter.name(), variable);
             }
         }
 
@@ -61,38 +97,53 @@ public final class PathPattern {
     }
 
     /**
-     * Checks if the input URI matches this pattern.
+     * 🔍 Checks if the input matches the compiled pattern.
      *
-     * @param input URI string to match
-     * @return {@code true} if pattern matches, {@code false} otherwise
+     * @param input input URI
+     * @return true if matched
      */
     public boolean matches(String input) {
         return expression.matcher(input).matches();
     }
 
     /**
-     * Compiles the pattern into a named group regex.
+     * 🔨 Compiles the route pattern into a regex with named capture groups.
      */
     private Pattern compile(String pattern) {
         return Pattern.compile("^%s$".formatted(REPLACER.replace(pattern, this::replace)));
     }
 
     /**
-     * Replaces a placeholder with a named capturing regex group.
+     * 🔧 Replaces a placeholder with a named capture group.
+     *
+     * @param name    parameter name
+     * @param pattern type or regex
+     * @return regex group string
      */
-    private String replace(String name, String defaultValue) {
-        parameters.add(new Parameter(name, false));
-        return "(?<%s>%s)".formatted(name, defaultValue == null ? MATCH_ALL : defaultValue);
+    private String replace(String name, String pattern) {
+        Parameter.Type type = getParameterType(pattern);
+        parameters.add(new Parameter(name, name.contains("?"), type));
+        return "(?<%s>%s)".formatted(name, type.pattern());
+    }
+
+    /**
+     * 🧠 Infers parameter type by placeholder pattern.
+     */
+    private Parameter.Type getParameterType(String pattern) {
+        if (pattern == null) pattern = MATCH_ALL;
+
+        return switch (pattern) {
+            case INT_NAME                   -> new Parameter.Type(Integer.class, pattern, MATCH_INT);
+            case BOOLEAN_NAME, BOOL_NAME    -> new Parameter.Type(Boolean.class, pattern, MATCH_BOOLEAN);
+            default                         -> new Parameter.Type(Object.class, CUSTOM_NAME, pattern);
+        };
     }
 
     @Override
     public boolean equals(Object object) {
         if (object == null || getClass() != object.getClass())
             return false;
-
-        PathPattern that = (PathPattern) object;
-
-        return Objects.equals(pattern, that.pattern);
+        return Objects.equals(pattern, ((PathPattern) object).pattern);
     }
 
     @Override
@@ -108,9 +159,20 @@ public final class PathPattern {
     /**
      * 📌 Internal structure describing a route parameter.
      *
-     * @param name     parameter name
-     * @param optional whether it's optional (not implemented yet)
+     * @param name     name of parameter
+     * @param optional currently unused, reserved for future
+     * @param type     parameter type definition
      */
-    record Parameter(String name, boolean optional) {
+    record Parameter(String name, boolean optional, Type type) {
+
+        /**
+         * 🧩 Describes parameter type and regex used.
+         *
+         * @param type    Java type
+         * @param name    symbolic type name (e.g. "int", "boolean")
+         * @param pattern regex used for matching
+         */
+        record Type(Class<?> type, String name, String pattern) {
+        }
     }
 }

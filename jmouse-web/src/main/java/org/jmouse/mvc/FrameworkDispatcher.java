@@ -14,8 +14,8 @@ public class FrameworkDispatcher extends ServletDispatcher {
 
     public static final String DEFAULT_DISPATCHER = "defaultDispatcher";
 
-    private List<HandlerMapping> handlerMappings;
-    private List<HandlerAdapter> handlerAdapters;
+    private List<HandlerMapping>     handlerMappings;
+    private List<HandlerAdapter>     handlerAdapters;
     private List<ReturnValueHandler> returnValueHandlers;
 
     public FrameworkDispatcher() {
@@ -63,33 +63,50 @@ public class FrameworkDispatcher extends ServletDispatcher {
     }
 
     @Override
-    protected void doDispatch(HttpServletRequest request, HttpServletResponse response, HttpMethod method)
-            throws IOException {
+    protected void doDispatch(HttpServletRequest request, HttpServletResponse response, HttpMethod method) {
         response.setStatus(HttpStatus.OK.getCode());
         response.setContentType("text/html;charset=utf-8");
 
-        Handler handler = getHandler(request);
-        HandlerAdapter handlerAdapter = null;
+        Handler        handler        = getHandler(request);
 
         if (handler != null) {
-            for (HandlerAdapter ha : handlerAdapters) {
-                if (ha.supportsHandler(handler.getHandler())) {
-                    handlerAdapter = ha;
-                    break;
-                }
-            }
-        }
+            Object handlerObject = handler.getHandler();
 
-        if (handlerAdapter != null) {
+            if (handlerObject instanceof MappedHandler mappedHandler) {
+                handlerObject = mappedHandler.handler();
+            }
+
+            HandlerAdapter handlerAdapter  = getHandlerAdapter(handlerObject);
+
             if (handler.preHandle(request, response)) {
-                HandlerResult handlerResult = handlerAdapter.handle(request, response, handler.getHandler());
+                HandlerResult handlerResult = handlerAdapter.handle(request, response, handlerObject);
                 handler.postHandle(request, response, handlerResult);
             }
         }
-
     }
 
-    protected Handler getHandler(HttpServletRequest request) throws ServletDispatcherException {
+    protected ReturnValueHandler getReturnValueHandler(Object returnValue) {
+        return null;
+    }
+
+    protected HandlerAdapter getHandlerAdapter(Object handler) {
+        HandlerAdapter handlerAdapter = null;
+
+        for (HandlerAdapter adapter : handlerAdapters) {
+            if (adapter.supportsHandler(handler)) {
+                handlerAdapter = adapter;
+                break;
+            }
+        }
+
+        if (handlerAdapter == null) {
+            throw new HandlerMappingException("No handler found [%s]".formatted(handler));
+        }
+
+        return handlerAdapter;
+    }
+
+    protected Handler getHandler(HttpServletRequest request) {
         Handler handler = null;
 
         for (HandlerMapping mapping : handlerMappings) {
@@ -100,7 +117,7 @@ public class FrameworkDispatcher extends ServletDispatcher {
         }
 
         if (handler == null) {
-            throw new ServletDispatcherException("No applicable mapping found. " + request.getPathInfo());
+            throw new HandlerMappingException("No mapping found [%s].".formatted(request.getPathInfo()));
         }
 
         return handler;

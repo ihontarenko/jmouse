@@ -46,4 +46,11 @@ public class ServletListenerRegistrationBean<L extends EventListener> extends Ab
     public String getDescription() {
         return "listener " + getName();
     }
+
+    @Override
+    public String toString() {
+        return "ServletListenerRegistrationBean[%d]['%s', implementation=%s]".formatted(
+                getOrder(), getDescription(), listener.getClass().getSimpleName());
+    }
+
 }

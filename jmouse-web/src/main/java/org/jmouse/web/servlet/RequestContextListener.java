@@ -3,6 +3,7 @@ package org.jmouse.web.servlet;
 import jakarta.servlet.ServletRequestEvent;
 import jakarta.servlet.ServletRequestListener;
 import jakarta.servlet.http.HttpServletRequest;
+import org.jmouse.web.request.RequestPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jmouse.beans.BeanScope;
@@ -35,23 +36,33 @@ public class RequestContextListener implements ServletRequestListener {
     @Override
     public void requestInitialized(ServletRequestEvent event) {
         if (event.getServletRequest() instanceof HttpServletRequest servletRequest) {
-            LOGGER.info("Update [{}] bean to '{}' holder", servletRequest.getClass().getName(), RequestAttributesHolder.class.getName());
+            RequestPath requestPath = (RequestPath) servletRequest.getAttribute(RequestPath.REQUEST_PATH_ATTRIBUTE);
+
+            if (requestPath == null) {
+                requestPath = RequestPath.ofRequest(servletRequest);
+                servletRequest.setAttribute(RequestPath.REQUEST_PATH_ATTRIBUTE, requestPath);
+                RequestAttributesHolder.setRequestPath(requestPath);
+                LOGGER.info("Attach [{}] to request", requestPath);
+            }
+
             RequestAttributesHolder.setRequestAttributes(
                     RequestAttributes.of(BeanScope.REQUEST, servletRequest)
             );
+
+            LOGGER.info("Update [{}] bean to '{}' holder", servletRequest.getClass().getName(), RequestAttributesHolder.class.getName());
         }
     }
 
     /**
      * Cleans up the request attributes when the HTTP request is destroyed.
      * Removes the current thread's {@link RequestAttributes} using
-     * {@link RequestAttributesHolder#clearRequestAttributes()}.
+     * {@link RequestAttributesHolder#removeRequestAttributes()}.
      *
      * @param event the {@link ServletRequestEvent} containing the request
      */
     @Override
     public void requestDestroyed(ServletRequestEvent event) {
         LOGGER.info("Remove request holder {}", RequestAttributesHolder.class.getName());
-        RequestAttributesHolder.clearRequestAttributes();
+        RequestAttributesHolder.removeRequestAttributes();
     }
 }

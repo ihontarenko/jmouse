@@ -24,6 +24,8 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public interface HandlerMapping {
 
+    String ROUTE_PATH_ATTRIBUTE = HandlerMapping.class.getName() + ".ROUTE_PATH_ATTRIBUTE";
+
     /**
      * Returns a handler object for the given request.
      * If no suitable handler is found, this method may return {@code null}.

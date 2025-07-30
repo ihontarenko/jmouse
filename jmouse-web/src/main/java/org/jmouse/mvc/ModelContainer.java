@@ -2,8 +2,6 @@ package org.jmouse.mvc;
 
 import org.jmouse.web.request.http.HttpStatus;
 
-import java.util.Map;
-
 /**
  * 📦 Container for holding model attributes, view name or direct return value,
  * and response status during request processing.
@@ -15,7 +13,7 @@ import java.util.Map;
  * @see ReturnValueHandler
  * @see HandlerAdapter
  */
-public class MvcResponseContainer {
+public class ModelContainer {
 
     private       HttpStatus httpStatus     = HttpStatus.OK;
     private final Model      model          = new DefaultModel();
@@ -87,6 +85,13 @@ public class MvcResponseContainer {
      */
     public void markRequestHandled() {
         this.requestHandled = true;
+    }
+
+    /**
+     * Marks this request as unhandled (response uncommitted yet).
+     */
+    public void markRequestUnhandled() {
+        this.requestHandled = false;
     }
 
     /**

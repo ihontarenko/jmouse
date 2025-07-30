@@ -431,6 +431,10 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
             instance = (T) processor.postProcessAfterInitialize(instance, definition, this);
         }
 
+        if (instance instanceof InitializingBean initializingBean) {
+            initializingBean.afterCompletion(this);
+        }
+
         return instance;
     }
 

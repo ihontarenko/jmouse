@@ -5,6 +5,7 @@ import org.jmouse.context.ApplicationContextBeansScanner;
 import org.jmouse.context.ApplicationFactory;
 import org.jmouse.mvc.context.*;
 import org.jmouse.web.WebLauncher;
+import org.jmouse.web.initializer.ServletContextRegistrations;
 import org.jmouse.web.initializer.WebApplicationInitializer;
 import org.jmouse.web.WebApplicationFactory;
 import org.jmouse.web.context.WebBeanContext;
@@ -12,6 +13,7 @@ import org.jmouse.web.initializer.context.StartupApplicationContextInitializer;
 import org.jmouse.web.server.WebServer;
 import org.jmouse.web.server.WebServerFactory;
 
+import java.util.Collection;
 import java.util.List;
 
 public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {

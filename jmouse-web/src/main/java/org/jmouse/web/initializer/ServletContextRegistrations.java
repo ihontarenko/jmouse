@@ -4,8 +4,10 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.util.Sorter;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.servlet.RequestContextListener;
+import org.jmouse.web.servlet.SessionConfigurationInitializer;
 import org.jmouse.web.servlet.WebBeanContextListener;
 import org.jmouse.web.servlet.registration.FilterRegistrationBean;
+import org.jmouse.web.servlet.registration.RegistrationBean;
 import org.jmouse.web.servlet.registration.ServletListenerRegistrationBean;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
@@ -44,12 +46,8 @@ public class ServletContextRegistrations {
                 (WebBeanContext) context);
 
         for (WebApplicationInitializer bean : provider.getRegistrationBeans()) {
-            if (bean instanceof ServletRegistrationBean<?> servlet) {
-                initializers.add(servlet);
-            } else if (bean instanceof FilterRegistrationBean<?> filter) {
-                initializers.add(filter);
-            } else if (bean instanceof ServletListenerRegistrationBean<?> listener) {
-                initializers.add(listener);
+            if (bean instanceof RegistrationBean registrationBean) {
+                initializers.add((WebApplicationInitializer) registrationBean);
             }
         }
 
@@ -70,5 +68,6 @@ public class ServletContextRegistrations {
 
         initializers.add(requestContextListener);
         initializers.add(webBeanContextListener);
+        initializers.add(context.getBean(SessionConfigurationInitializer.class));
     }
 }
