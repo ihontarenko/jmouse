@@ -69,6 +69,10 @@ public final class PathPattern {
         this.expression = compile(pattern);
     }
 
+    public String getPattern() {
+        return pattern;
+    }
+
     /**
      * 🎯 Parses the input path and returns extracted typed parameters.
      *

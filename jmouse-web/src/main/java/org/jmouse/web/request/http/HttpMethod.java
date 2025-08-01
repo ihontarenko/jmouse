@@ -21,6 +21,10 @@ public enum HttpMethod {
         this.hasBody = hasBody;
     }
 
+    public static HttpMethod ofName(String name) {
+        return valueOf(name);
+    }
+
     /**
      * Checks if the HTTP method is safe (does not modify the server state).
      * @return true if the method is safe, false otherwise.

@@ -1,17 +1,19 @@
 package org.jmouse.mvc.adapter;
 
-import org.jmouse.mvc.ExecutionResult;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.jmouse.mvc.MvcContainer;
 import org.jmouse.mvc.ReturnValueHandler;
 
 public class VoidReturnValueHandler implements ReturnValueHandler {
 
     @Override
-    public boolean supportsReturnType(Object returnValue) {
-        return returnValue == null;
+    public boolean supportsReturnType(MvcContainer returnType) {
+        return false;
     }
 
     @Override
-    public void handleReturnValue(ExecutionResult executionResult) {
-        // nothing to write
+    public void handleReturnValue(MvcContainer mvcContainer, HttpServletRequest request, HttpServletResponse response) {
+
     }
 }

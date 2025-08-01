@@ -18,32 +18,19 @@ abstract public class AbstractHandlerAdapter implements HandlerAdapter, Initiali
     private List<ReturnValueHandler> returnValueHandlers = new ArrayList<>();
 
     @Override
-    public ExecutionResult handle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        ExecutionResult result = new HandlerExecutionResult(null);
+    public MvcContainer handle(HttpServletRequest request, HttpServletResponse response, MappedHandler handler) {
+        MvcContainer container = new MvcHandlerContainer(null);
 
-        result.setState(ExecutionState.UNHANDLED);
+        container.setState(ExecutionState.UNHANDLED);
 
-        Object returnValue = doHandle(request, response, handler, result);
+        Object returnValue = doHandle(request, response, handler, container);
 
-        result.setReturnValue(returnValue);
+        container.setReturnValue(returnValue);
 
         getReturnValueProcessor()
-                .process(result.getReturnValue(), request, response);
+                .process(container, request, response);
 
-        if (returnValue == null || response.isCommitted()) {
-            result.setState(ExecutionState.HANDLED);
-
-            if (!response.isCommitted()) {
-                LOGGER.warn("Handler return NULL value. HTTP-Response is not flushed!");
-            }
-
-            if (returnValue != null) {
-                returnValue = null;
-                LOGGER.warn("HTTP-Response is commited. Return value will ignored.");
-            }
-        }
-
-        return result;
+        return container;
     }
 
     public ReturnValueProcessor getReturnValueProcessor() {
@@ -61,7 +48,7 @@ abstract public class AbstractHandlerAdapter implements HandlerAdapter, Initiali
     }
 
     abstract protected Object doHandle(
-            HttpServletRequest request, HttpServletResponse response, Object handler, ExecutionResult mvcResult);
+            HttpServletRequest request, HttpServletResponse response, MappedHandler handler, MvcContainer mvcResult);
 
     @Override
     public void afterCompletion(BeanContext context) {

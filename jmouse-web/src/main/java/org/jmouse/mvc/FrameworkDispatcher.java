@@ -4,10 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.http.HttpMethod;
-import org.jmouse.web.request.http.HttpStatus;
 import org.jmouse.web.servlet.ServletDispatcher;
 
-import java.io.IOException;
 import java.util.List;
 
 public class FrameworkDispatcher extends ServletDispatcher {
@@ -67,22 +65,17 @@ public class FrameworkDispatcher extends ServletDispatcher {
         Handler handlerContainer = getHandler(request);
 
         if (handlerContainer != null) {
-            Object handler = handlerContainer.getHandler();
-
-            if (handler instanceof MappedHandler mappedHandler) {
-                handler = mappedHandler.handler();
-            }
-
-            HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
+            MappedHandler  handler = handlerContainer.getHandler();
+            HandlerAdapter adapter = getHandlerAdapter(handler);
 
             if (handlerContainer.preHandle(request, response)) {
-                ExecutionResult executionResult = handlerAdapter.handle(request, response, handler);
+                MvcContainer executionResult = adapter.handle(request, response, handler);
                 handlerContainer.postHandle(request, response, executionResult);
             }
         }
     }
 
-    protected HandlerAdapter getHandlerAdapter(Object handler) {
+    protected HandlerAdapter getHandlerAdapter(MappedHandler handler) {
         HandlerAdapter handlerAdapter = null;
 
         for (HandlerAdapter adapter : handlerAdapters) {

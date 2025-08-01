@@ -2,11 +2,12 @@ package org.jmouse.mvc.mapping;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.mvc.AbstractHandlerPathMapping;
-import org.jmouse.mvc.adapter.FunctionalRoute;
+import org.jmouse.mvc.MappedHandler;
+import org.jmouse.mvc.adapter.ControllerMethod;
 import org.jmouse.web.context.WebBeanContext;
 
 /**
- * 🧠 Maps {@link FunctionalRoute} instances based on registered {@link RouteRegistration}.
+ * 🧠 Maps {@link ControllerMethod} instances based on registered {@link ControllerMethodRegistration}.
  *
  * <p>Used to associate lambda-based handlers with route patterns at runtime.
  * Scans all local {@code FunctionalRouteRegistration} beans during initialization.
@@ -25,30 +26,30 @@ import org.jmouse.web.context.WebBeanContext;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class FunctionalRouteMapping extends AbstractHandlerPathMapping<FunctionalRoute> {
+public class ControllerMethodMapping extends AbstractHandlerPathMapping<ControllerMethod> {
 
     /**
-     * Resolves the {@link FunctionalRoute} handler for the incoming request.
+     * Resolves the {@link ControllerMethod} handler for the incoming request.
      *
      * @param request current HTTP request
      * @return the matched handler, or {@code null} if no match found
      */
     @Override
-    protected Object doGetHandler(HttpServletRequest request) {
+    protected MappedHandler doGetHandler(HttpServletRequest request) {
         return getMappedHandler(request);
     }
 
     /**
-     * Initializes this mapping by scanning all {@link RouteRegistration}
+     * Initializes this mapping by scanning all {@link ControllerMethodRegistration}
      * beans in the current {@link WebBeanContext} and registering them.
      *
      * @param context current web application context
      */
     @Override
     protected void doInitialize(WebBeanContext context) {
-        for (RouteRegistration r : WebBeanContext.getLocalBeans(
-                RouteRegistration.class, context)) {
-            addHandlerMapping(r.method(), r.route(), r.functionalRoute());
+        for (ControllerMethodRegistration registration : WebBeanContext.getLocalBeans(
+                ControllerMethodRegistration.class, context)) {
+            addHandlerMapping(registration.route(), registration.functionalRoute());
         }
     }
 }

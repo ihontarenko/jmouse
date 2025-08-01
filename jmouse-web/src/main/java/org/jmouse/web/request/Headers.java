@@ -169,4 +169,8 @@ public final class Headers {
         addHeader(HttpHeader.REFERER, referer);
     }
 
+    @Override
+    public String toString() {
+        return "HTTP-Headers: %s".formatted(headers);
+    }
 }

@@ -15,14 +15,12 @@ public class ReturnValueProcessor {
         this.handlers = handlers;
     }
 
-    public void process(Object returnValue, HttpServletRequest request, HttpServletResponse response)  {
+    public void process(MvcContainer container, HttpServletRequest request, HttpServletResponse response)  {
         for (ReturnValueHandler handler : handlers) {
-//            if (handler.supportsReturnType(returnValue)) {
-//                handler.handleReturnValue(returnValue, request, response);
-//                return;
-//            }
+            if (handler.supportsReturnType(container)) {
+                handler.handleReturnValue(container, request, response);
+                return;
+            }
         }
-
-        throw new IllegalStateException("No ReturnValueHandler for type: " + (returnValue == null ? "null" : returnValue.getClass()));
     }
 }

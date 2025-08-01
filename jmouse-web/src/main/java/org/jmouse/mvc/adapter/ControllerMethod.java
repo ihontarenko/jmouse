@@ -6,6 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @FunctionalInterface
-public interface FunctionalRoute {
+public interface ControllerMethod {
     void handle(HttpServletRequest request, HttpServletResponse response) throws IOException;
 }

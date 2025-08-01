@@ -1,9 +1,6 @@
 package org.jmouse.mvc;
 
-import org.jmouse.context.Controller;
-import org.jmouse.core.MediaType;
 import org.jmouse.web.request.Headers;
-import org.jmouse.web.request.http.HttpMethod;
 import org.jmouse.web.request.http.HttpStatus;
 
 /**
@@ -12,12 +9,12 @@ import org.jmouse.web.request.http.HttpStatus;
  * Represents a structured handler result including return value, model,
  * headers, status, and metadata for further processing.
  *
- * Use {@link HandlerExecutionResult} for construction.
+ * Use {@link MvcHandlerContainer} for construction.
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
- * @see HandlerExecutionResult
+ * @see MvcHandlerContainer
  */
-public interface ExecutionResult {
+public interface MvcContainer {
 
     /**
      * Returns current state of the result.

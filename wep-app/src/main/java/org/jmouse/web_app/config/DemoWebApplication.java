@@ -4,10 +4,10 @@ import app.api.WebConfig;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.mvc.FrameworkDispatcherRegistration;
-import org.jmouse.mvc.mapping.RouteRegistration;
+import org.jmouse.mvc.Route;
+import org.jmouse.mvc.mapping.ControllerMethodRegistration;
 import org.jmouse.web.WebContextBuilder;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.request.http.HttpMethod;
 import org.jmouse.web.server.WebServerFactory;
 import org.jmouse.web.server.tomcat.TomcatWebServerFactory;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;
@@ -27,8 +27,8 @@ public class DemoWebApplication {
     }
 
     @Bean
-    public RouteRegistration registration() {
-        return new RouteRegistration(HttpMethod.GET, "/app", (request, response)
+    public ControllerMethodRegistration registration() {
+        return new ControllerMethodRegistration(Route.GET("/app"), (request, response)
                 -> response.getWriter().write("web_app"));
     }
 

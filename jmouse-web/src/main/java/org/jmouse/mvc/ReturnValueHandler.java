@@ -1,9 +1,12 @@
 package org.jmouse.mvc;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 public interface ReturnValueHandler {
 
-    boolean supportsReturnType(Object returnType);
+    boolean supportsReturnType(MvcContainer returnType);
 
-    void handleReturnValue(ExecutionResult executionResult);
+    void handleReturnValue(MvcContainer mvcContainer, HttpServletRequest request, HttpServletResponse response);
 
 }

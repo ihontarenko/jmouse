@@ -29,14 +29,14 @@ import java.util.List;
 public final class Handler {
 
     private final List<HandlerInterceptor> interceptors = new ArrayList<>();
-    private       Object                   handler;
+    private       MappedHandler            handler;
 
     /**
      * Constructs a new {@code HandlerContainer} with the specified handler.
      *
      * @param handler the resolved handler object for the request
      */
-    public Handler(Object handler) {
+    public Handler(MappedHandler handler) {
         this.handler = handler;
     }
 
@@ -63,7 +63,7 @@ public final class Handler {
      *
      * @return the handler object
      */
-    public Object getHandler() {
+    public MappedHandler getHandler() {
         return handler;
     }
 
@@ -72,7 +72,7 @@ public final class Handler {
      *
      * @param handler the new handler object
      */
-    public void setHandler(Object handler) {
+    public void setHandler(MappedHandler handler) {
         this.handler = handler;
     }
 
@@ -103,7 +103,7 @@ public final class Handler {
      * @param response the current HTTP response
      * @param result   the handler's response
      */
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, ExecutionResult result) {
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, MvcContainer result) {
         for (HandlerInterceptor interceptor : getInterceptors()) {
             interceptor.postHandle(request, response, getHandler(), result);
         }

@@ -38,7 +38,7 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
      */
     @Override
     public Handler getHandler(HttpServletRequest request) {
-        Object handler = doGetHandler(request);
+        MappedHandler handler = doGetHandler(request);
 
         if (handler == null) {
             return null;
@@ -55,6 +55,15 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
         return container;
     }
 
+    /**
+     * 📍 Extracts the raw path used for handler mapping.
+     *
+     * <p>If {@link RequestPath} is available in the current request attributes, returns its
+     * logical path. Otherwise, defaults to the raw request URI.</p>
+     *
+     * @param request current HTTP request
+     * @return resolved mapping path
+     */
     public String getMappingPath(HttpServletRequest request) {
         String      mappingPath = request.getRequestURI();
         RequestPath requestPath = RequestAttributesHolder.getRequestPath();
@@ -72,7 +81,7 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
      * @param request HTTP request
      * @return handler object or {@code null} if not matched
      */
-    protected abstract Object doGetHandler(HttpServletRequest request);
+    protected abstract MappedHandler doGetHandler(HttpServletRequest request);
 
     /**
      * 🧩 List of interceptors for current mapping.

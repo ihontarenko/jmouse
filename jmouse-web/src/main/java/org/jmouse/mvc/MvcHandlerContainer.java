@@ -3,7 +3,7 @@ package org.jmouse.mvc;
 import org.jmouse.web.request.Headers;
 import org.jmouse.web.request.http.HttpStatus;
 
-public class HandlerExecutionResult implements ExecutionResult {
+public class MvcHandlerContainer implements MvcContainer {
 
     private final Model          model   = new DefaultModel();
     private       Object         returnValue;
@@ -11,7 +11,7 @@ public class HandlerExecutionResult implements ExecutionResult {
     private       HttpStatus     httpStatus;
     private       ExecutionState state   = ExecutionState.UNHANDLED;
 
-    public HandlerExecutionResult(Object returnValue) {
+    public MvcHandlerContainer(Object returnValue) {
         this.returnValue = returnValue;
     }
 

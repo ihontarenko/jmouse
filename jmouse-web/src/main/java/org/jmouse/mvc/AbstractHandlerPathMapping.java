@@ -44,8 +44,8 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      * @param route   path pattern, e.g. {@code /user/{id}}
      * @param handler handler instance
      */
-    public void addHandlerMapping(HttpMethod method, String route, H handler) {
-        handlers.put(Route.of(method, route), handler);
+    public void addHandlerMapping(Route route, H handler) {
+        handlers.put(route, handler);
     }
 
     @Override
@@ -60,17 +60,25 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      * @return matched handler with route info, or null if no match
      */
     public MappedHandler getMappedHandler(HttpServletRequest request) {
-        MappedHandler mappedHandler = null;
         String        mappingPath   = getMappingPath(request);
         HttpMethod    httpMethod    = HttpMethod.valueOf(request.getMethod());
+        MappedHandler mappedHandler = null;
+
+        RouteMatcher matcher = RouteMatcher.ofRequest(request);
 
         for (Map.Entry<Route, H> entry : handlers.entrySet()) {
             Route       route       = entry.getKey();
             PathPattern pathPattern = route.path();
+            HttpMethod  method      = route.method();
 
-            if (pathPattern.matches(mappingPath) && route.methods().contains(httpMethod)) {
+            matcher.matches(route);
+
+            if (pathPattern.matches(mappingPath) && method.equals(httpMethod)) {
                 RoutePath routePath = pathPattern.parse(mappingPath);
-                mappedHandler = new MappedHandler(entry.getValue(), routePath);
+
+                System.out.println(request.getContentType());
+
+                mappedHandler = new RouteMappedHandler(entry.getValue(), route);
                 request.setAttribute(ROUTE_PATH_ATTRIBUTE, routePath);
                 break;
             }
