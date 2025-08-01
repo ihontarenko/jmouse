@@ -2,7 +2,8 @@ package email.app;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
-import org.jmouse.mvc.mapping.ControllerRegistration;
+import org.jmouse.mvc.mapping.RouteRegistration;
+import org.jmouse.web.request.http.HttpMethod;
 
 @BeanFactories
 public class EmailCfg {
@@ -13,8 +14,8 @@ public class EmailCfg {
     }
 
     @Bean
-    public ControllerRegistration cfgRegistration() {
-        return new ControllerRegistration("/email", (request, response)
+    public RouteRegistration cfgRegistration() {
+        return new RouteRegistration(HttpMethod.GET, "/email", (request, response)
                 -> response.getWriter().write("email_config"));
     }
 

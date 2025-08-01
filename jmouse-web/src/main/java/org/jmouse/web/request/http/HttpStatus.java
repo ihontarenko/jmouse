@@ -72,8 +72,8 @@ public enum HttpStatus implements HttpStatusCode {
     NOT_EXTENDED("Not Extended", 510, HttpStatusType.SERVER_ERROR),
     NETWORK_AUTHENTICATION_REQUIRED("Network Authentication Required", 511, HttpStatusType.SERVER_ERROR);
 
-    private final String text;
-    private final int code;
+    private final String         text;
+    private final int            code;
     private final HttpStatusType type;
 
     /**
@@ -150,5 +150,24 @@ public enum HttpStatus implements HttpStatusCode {
     public boolean isError() {
         return is4xx() || is5xx();
     }
+
+    @Override
+    public String toString() {
+        return "%s[%d]: %s".formatted(getType(), getCode(), getText());
+    }
+
+    public static HttpStatus ofCode(int code) {
+        HttpStatus status = null;
+
+        for (HttpStatus candidate : values()) {
+            if (candidate.code == code) {
+                status = candidate;
+                break;
+            }
+        }
+
+        return status;
+    }
+
 
 }

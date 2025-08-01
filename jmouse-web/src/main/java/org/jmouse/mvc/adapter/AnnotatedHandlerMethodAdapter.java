@@ -1,4 +1,4 @@
-package org.jmouse.mvc.handler;
+package org.jmouse.mvc.adapter;
 
 public class AnnotatedHandlerMethodAdapter {
 }

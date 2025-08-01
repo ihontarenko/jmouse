@@ -4,6 +4,6 @@ public interface ReturnValueHandler {
 
     boolean supportsReturnType(Object returnType);
 
-    void handleReturnValue(HandlerResult handlerResult);
+    void handleReturnValue(ExecutionResult executionResult);
 
 }

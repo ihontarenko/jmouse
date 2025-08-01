@@ -1,10 +1,10 @@
-package org.jmouse.mvc.mapping;
+package org.jmouse.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.BeanContext;
-import org.jmouse.beans.BeanContextAware;
-import org.jmouse.mvc.*;
+import org.jmouse.beans.InitializingBean;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.request.http.HttpMethod;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +23,6 @@ import java.util.Map;
  * Supports:
  * <ul>
  *   <li>Typed routing via {@link PathPattern} and {@link RoutePath}</li>
- *   <li>DI via {@link BeanContextAware}</li>
  *   <li>Interceptor support via {@link HandlerInterceptorRegistry}</li>
  * </ul>
  *
@@ -31,15 +30,13 @@ import java.util.Map;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMapping implements BeanContextAware {
+public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMapping implements InitializingBean {
 
     /**
      * 🗺️ Map of path patterns to handlers
      */
-    private final Map<PathPattern, H> handlers = new HashMap<>();
-
-    private HandlerInterceptorRegistry registry;
-    private WebBeanContext             context;
+    private final Map<Route, H>              handlers = new HashMap<>();
+    private       HandlerInterceptorRegistry registry;
 
     /**
      * ➕ Registers a route and its corresponding handler.
@@ -47,19 +44,13 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      * @param route   path pattern, e.g. {@code /user/{id}}
      * @param handler handler instance
      */
-    public void addHandlerMapping(String route, H handler) {
-        handlers.put(new PathPattern(route), handler);
+    public void addHandlerMapping(HttpMethod method, String route, H handler) {
+        handlers.put(Route.of(method, route), handler);
     }
 
     @Override
-    public BeanContext getBeanContext() {
-        return context;
-    }
-
-    @Override
-    public void setBeanContext(BeanContext context) {
-        this.context = (WebBeanContext) context;
-        initialize(this.context);
+    public void afterCompletion(BeanContext context) {
+        initialize((WebBeanContext) context);
     }
 
     /**
@@ -71,11 +62,13 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
     public MappedHandler getMappedHandler(HttpServletRequest request) {
         MappedHandler mappedHandler = null;
         String        mappingPath   = getMappingPath(request);
+        HttpMethod    httpMethod    = HttpMethod.valueOf(request.getMethod());
 
-        for (Map.Entry<PathPattern, H> entry : handlers.entrySet()) {
-            PathPattern pathPattern = entry.getKey();
+        for (Map.Entry<Route, H> entry : handlers.entrySet()) {
+            Route       route       = entry.getKey();
+            PathPattern pathPattern = route.path();
 
-            if (pathPattern.matches(mappingPath)) {
+            if (pathPattern.matches(mappingPath) && route.methods().contains(httpMethod)) {
                 RoutePath routePath = pathPattern.parse(mappingPath);
                 mappedHandler = new MappedHandler(entry.getValue(), routePath);
                 request.setAttribute(ROUTE_PATH_ATTRIBUTE, routePath);

@@ -3,72 +3,71 @@ package org.jmouse.mvc;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.BeanContext;
-import org.jmouse.beans.BeanContextAware;
-import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.InitializingBean;
-import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.util.Sorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-abstract public class AbstractHandlerAdapter implements HandlerAdapter, BeanContextAware, InitializingBean {
+import java.util.ArrayList;
+import java.util.List;
 
-    private WebBeanContext context;
+abstract public class AbstractHandlerAdapter implements HandlerAdapter, InitializingBean {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AbstractHandlerAdapter.class);
 
+    private List<ReturnValueHandler> returnValueHandlers = new ArrayList<>();
+
     @Override
-    public HandlerResult handle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        HandlerResult        handlerResponse = null;
-        WebBeanContext context   = getContext(request);
-        ModelContainer container = new ModelContainer();
+    public ExecutionResult handle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        ExecutionResult result = new HandlerExecutionResult(null);
 
-        context.registerBean(Model.class, container.getModel(), BeanScope.REQUEST);
+        result.setState(ExecutionState.UNHANDLED);
 
-        container.markRequestUnhandled();
+        Object returnValue = doHandle(request, response, handler, result);
 
-        Object returnValue = doHandle(request, response, handler);
+        result.setReturnValue(returnValue);
+
+        getReturnValueProcessor()
+                .process(result.getReturnValue(), request, response);
 
         if (returnValue == null || response.isCommitted()) {
-            container.markRequestHandled();
+            result.setState(ExecutionState.HANDLED);
 
             if (!response.isCommitted()) {
-                LOGGER.warn("Handler returns a null value and http-response is not flushed!");
+                LOGGER.warn("Handler return NULL value. HTTP-Response is not flushed!");
             }
 
             if (returnValue != null) {
                 returnValue = null;
-                LOGGER.warn("Handler already written http-response. return value will ignored");
+                LOGGER.warn("HTTP-Response is commited. Return value will ignored.");
             }
         }
 
-        return handlerResponse;
+        return result;
     }
 
-    abstract protected Object doHandle(HttpServletRequest request, HttpServletResponse response, Object handler);
-
-    public WebBeanContext getContext(HttpServletRequest request) {
-        WebBeanContext context = (WebBeanContext) getBeanContext();
-
-        if (context == null) {
-            context = WebBeanContext.getRequiredWebBeanContext(request.getServletContext());
-        }
-
-        return context;
+    public ReturnValueProcessor getReturnValueProcessor() {
+        List<ReturnValueHandler> returnValueHandlers = new ArrayList<>(getReturnValueHandlers());
+        Sorter.sort(returnValueHandlers);
+        return new ReturnValueProcessor(returnValueHandlers);
     }
+
+    public List<ReturnValueHandler> getReturnValueHandlers() {
+        return returnValueHandlers;
+    }
+
+    public void setReturnValueHandlers(List<ReturnValueHandler> returnValueHandlers) {
+        this.returnValueHandlers = returnValueHandlers;
+    }
+
+    abstract protected Object doHandle(
+            HttpServletRequest request, HttpServletResponse response, Object handler, ExecutionResult mvcResult);
 
     @Override
     public void afterCompletion(BeanContext context) {
-        context.getBeans(ReturnValueHandler.class);
-    }
-
-    @Override
-    public BeanContext getBeanContext() {
-        return context;
-    }
-
-    @Override
-    public void setBeanContext(BeanContext context) {
-        this.context = (WebBeanContext) context;
+        setReturnValueHandlers(
+                List.copyOf(context.getBeans(ReturnValueHandler.class))
+        );
     }
 
 }

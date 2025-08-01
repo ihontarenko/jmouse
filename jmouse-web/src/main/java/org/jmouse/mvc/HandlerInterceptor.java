@@ -4,13 +4,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * 🛡️ Contract for intercepting execution of a handler (e.g., controller) in the jMouse MVC framework.
+ * 🛡️ Contract for intercepting execution of a handler (e.g., functionalRoute) in the jMouse MVC framework.
  *
  * <p>Interceptors allow preprocessing and postprocessing of requests. They are useful for:
  * <ul>
  *     <li>authentication and authorization</li>
  *     <li>logging and metrics</li>
- *     <li>modifying requests or responses before/after controller execution</li>
+ *     <li>modifying requests or responses before/after functionalRoute execution</li>
  * </ul>
  *
  * <h3>Example usage</h3>
@@ -59,7 +59,7 @@ public interface HandlerInterceptor {
      * @param result   the result returned from the handler, may be {@code null}
      */
     default void postHandle(
-            HttpServletRequest request, HttpServletResponse response, Object handler, HandlerResult result) {
+            HttpServletRequest request, HttpServletResponse response, Object handler, ExecutionResult result) {
         // No-op by default
     }
 }

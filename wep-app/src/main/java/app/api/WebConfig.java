@@ -5,10 +5,10 @@ import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.BeanScan;
 import org.jmouse.mvc.HandlerMapping;
-import org.jmouse.mvc.Model;
 import org.jmouse.mvc.RoutePath;
-import org.jmouse.mvc.mapping.ControllerRegistration;
+import org.jmouse.mvc.mapping.RouteRegistration;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.request.http.HttpMethod;
 
 import java.io.Writer;
 
@@ -17,18 +17,18 @@ import java.io.Writer;
 public class WebConfig {
 
     @Bean
-    public ControllerRegistration cfgRegistration() {
-        return new ControllerRegistration("/cfg", (request, response)
+    public RouteRegistration cfgRegistration() {
+        return new RouteRegistration(HttpMethod.GET, "/cfg", (request, response)
                 -> response.getWriter().write("web_config"));
     }
 
     @Bean
-    public ControllerRegistration helloRegistration(WebBeanContext webBeanContext) {
-        return new ControllerRegistration("/hello/{id:int}/{active:boolean}", (request, response) -> {
+    public RouteRegistration helloRegistration(WebBeanContext webBeanContext) {
+        return new RouteRegistration(HttpMethod.GET, "/hello/{id:int}/{active:boolean}", (request, response) -> {
             RoutePath routePath = (RoutePath) request.getAttribute(HandlerMapping.ROUTE_PATH_ATTRIBUTE);
             Writer    writer    = response.getWriter();
 
-            webBeanContext.getBean(Model.class);
+//            webBeanContext.getBean(Model.class);
 
             writer.write("<h1>Hello! ID: %s</h1>".formatted(routePath.variables().get("id")));
         });

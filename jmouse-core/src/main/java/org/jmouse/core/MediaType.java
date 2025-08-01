@@ -1,8 +1,12 @@
 package org.jmouse.core;
 
+import org.jmouse.util.Charset;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+
+import static org.jmouse.util.Charset.UTF_8;
 
 /**
  * Extension of {@link MimeType} that adds support for the HTTP "q" (quality) parameter.
@@ -16,9 +20,23 @@ public class MediaType extends MimeType {
     private double qFactor;
 
     public static final MediaType TEXT_PLAIN;
+    public static final MediaType TEXT;
+    public static final MediaType APPLICATION_JSON;
+    public static final MediaType JSON;
+    public static final MediaType APPLICATION_XML;
+    public static final MediaType XML;
+    public static final MediaType TEXT_HTML;
+    public static final MediaType HTML;
 
     static {
-        TEXT_PLAIN = new MediaType("text", "plain");
+        TEXT_PLAIN = new MediaType("text", "plain", Map.of(PARAMETER_NAME_CHARSET, UTF_8.getName()));
+        TEXT = TEXT_PLAIN;
+        APPLICATION_JSON = new MediaType("application", "json", Map.of(PARAMETER_NAME_CHARSET, UTF_8.getName()));
+        JSON = APPLICATION_JSON;
+        APPLICATION_XML = new MediaType("application", "xml", Map.of(PARAMETER_NAME_CHARSET, UTF_8.getName()));
+        XML = APPLICATION_XML;
+        TEXT_HTML = new MediaType("text", "html", Map.of(PARAMETER_NAME_CHARSET, UTF_8.getName()));
+        HTML = TEXT_HTML;
     }
 
     /**

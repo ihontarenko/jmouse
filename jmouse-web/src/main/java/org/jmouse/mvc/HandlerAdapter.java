@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * 🧩 Strategy interface for invoking a handler (e.g., controller) within the jMouse MVC framework.
+ * 🧩 Strategy interface for invoking a handler (e.g., functionalRoute) within the jMouse MVC framework.
  *
  * <p>{@code HandlerAdapter} allows the framework to invoke various kinds of handlers (annotated methods,
  * POJOs, function-based handlers, etc.) in a uniform way, by adapting them to a common invocation model.</p>
@@ -32,9 +32,9 @@ public interface HandlerAdapter {
      *
      * @param request  the incoming HTTP servlet request
      * @param response the outgoing HTTP servlet response
-     * @param handler  the actual handler object (e.g., controller)
+     * @param handler  the actual handler object (e.g., functionalRoute)
      * @return a {@link HandlerResult} object representing the result of invocation
      * @throws RuntimeException if the handler cannot process the request
      */
-    HandlerResult handle(HttpServletRequest request, HttpServletResponse response, Object handler);
+    ExecutionResult handle(HttpServletRequest request, HttpServletResponse response, Object handler);
 }

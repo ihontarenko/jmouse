@@ -15,7 +15,7 @@ public class ReturnValueProcessor {
         this.handlers = handlers;
     }
 
-    public void process(Object returnValue, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public void process(Object returnValue, HttpServletRequest request, HttpServletResponse response)  {
         for (ReturnValueHandler handler : handlers) {
 //            if (handler.supportsReturnType(returnValue)) {
 //                handler.handleReturnValue(returnValue, request, response);

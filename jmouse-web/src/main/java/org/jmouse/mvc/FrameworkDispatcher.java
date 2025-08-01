@@ -64,29 +64,22 @@ public class FrameworkDispatcher extends ServletDispatcher {
 
     @Override
     protected void doDispatch(HttpServletRequest request, HttpServletResponse response, HttpMethod method) {
-        response.setStatus(HttpStatus.OK.getCode());
-        response.setContentType("text/html;charset=utf-8");
+        Handler handlerContainer = getHandler(request);
 
-        Handler        handler        = getHandler(request);
+        if (handlerContainer != null) {
+            Object handler = handlerContainer.getHandler();
 
-        if (handler != null) {
-            Object handlerObject = handler.getHandler();
-
-            if (handlerObject instanceof MappedHandler mappedHandler) {
-                handlerObject = mappedHandler.handler();
+            if (handler instanceof MappedHandler mappedHandler) {
+                handler = mappedHandler.handler();
             }
 
-            HandlerAdapter handlerAdapter  = getHandlerAdapter(handlerObject);
+            HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
 
-            if (handler.preHandle(request, response)) {
-                HandlerResult handlerResult = handlerAdapter.handle(request, response, handlerObject);
-                handler.postHandle(request, response, handlerResult);
+            if (handlerContainer.preHandle(request, response)) {
+                ExecutionResult executionResult = handlerAdapter.handle(request, response, handler);
+                handlerContainer.postHandle(request, response, executionResult);
             }
         }
-    }
-
-    protected ReturnValueHandler getReturnValueHandler(Object returnValue) {
-        return null;
     }
 
     protected HandlerAdapter getHandlerAdapter(Object handler) {

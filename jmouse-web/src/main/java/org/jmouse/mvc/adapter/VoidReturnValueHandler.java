@@ -1,8 +1,6 @@
-package org.jmouse.mvc.handler;
+package org.jmouse.mvc.adapter;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.mvc.HandlerResult;
+import org.jmouse.mvc.ExecutionResult;
 import org.jmouse.mvc.ReturnValueHandler;
 
 public class VoidReturnValueHandler implements ReturnValueHandler {
@@ -13,7 +11,7 @@ public class VoidReturnValueHandler implements ReturnValueHandler {
     }
 
     @Override
-    public void handleReturnValue(HandlerResult handlerResult) {
+    public void handleReturnValue(ExecutionResult executionResult) {
         // nothing to write
     }
 }
