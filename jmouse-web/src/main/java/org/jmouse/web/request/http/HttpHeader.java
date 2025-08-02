@@ -90,6 +90,19 @@ public enum HttpHeader {
         this.value = value;
     }
 
+    public static HttpHeader ofHeader(String headerName) {
+        HttpHeader httpHeader = null;
+
+        for (HttpHeader header : values()) {
+            if (headerName.equalsIgnoreCase(header.value())) {
+                httpHeader = header;
+                break;
+            }
+        }
+
+        return httpHeader;
+    }
+
     /**
      * Returns the actual HTTP header name 📦
      */

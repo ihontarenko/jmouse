@@ -124,7 +124,13 @@ public class MediaType extends MimeType {
      * @return MediaType instance with parsed qFactor
      */
     public static MediaType forString(String type) {
-        return new MediaType(MimeType.forString(type));
+        MediaType mediaType = null;
+
+        if (type != null) {
+            mediaType = new MediaType(MimeType.forString(type));
+        }
+
+        return mediaType;
     }
 
 }

@@ -1,13 +1,12 @@
 package org.jmouse.mvc.routing.condition;
 
-import org.jmouse.mvc.routing.RequestRoute;
-import org.jmouse.mvc.routing.MappingCondition;
+import org.jmouse.mvc.routing.MappingMatcher;
+import org.jmouse.web.request.RequestRoute;
 import org.jmouse.web.request.http.HttpMethod;
 
-import java.util.HashSet;
 import java.util.Set;
 
-public class HttpMethodCondition implements MappingCondition {
+public class HttpMethodCondition implements MappingMatcher {
 
     private final Set<HttpMethod> methods;
 
@@ -21,17 +20,7 @@ public class HttpMethodCondition implements MappingCondition {
     }
 
     @Override
-    public MappingCondition combine(MappingCondition other) {
-        if (other instanceof HttpMethodCondition condition) {
-            Set<HttpMethod> combined = new HashSet<>(this.methods);
-            combined.addAll(condition.methods);
-            return new HttpMethodCondition(combined.toArray(HttpMethod[]::new));
-        }
-        return this;
-    }
-
-    @Override
-    public int compareTo(MappingCondition other) {
+    public int compareWith(MappingMatcher other, RequestRoute requestRoute) {
         if (!(other instanceof HttpMethodCondition condition))
             return 0;
 

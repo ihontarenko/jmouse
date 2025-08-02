@@ -3,12 +3,13 @@ package org.jmouse.mvc;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
+import org.jmouse.mvc.routing.MappingMatcher;
+import org.jmouse.mvc.routing.RouteMapping;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.request.RequestRoute;
 import org.jmouse.web.request.http.HttpMethod;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 🧭 Abstract base for route-based handler mappings.
@@ -63,6 +64,27 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
         String        mappingPath   = getMappingPath(request);
         HttpMethod    httpMethod    = HttpMethod.valueOf(request.getMethod());
         MappedHandler mappedHandler = null;
+        RequestRoute requestRoute = RequestRoute.ofRequest(request);
+
+        List<RouteMapping> mappings  = new ArrayList<>();
+
+        for (Route route : handlers.keySet()) {
+            mappings.add(new RouteMapping(route));
+        }
+
+        List<RouteMapping> candidates = new ArrayList<>();
+
+        for (RouteMapping mapping : mappings) {
+            if (mapping.matches(requestRoute)) {
+                candidates.add(mapping);
+            }
+        }
+
+        candidates.sort((a, b) -> -1 * a.compareWith(b, requestRoute));
+
+        RouteMapping winner = candidates.getFirst();
+
+        System.out.println(candidates);
 
         for (Map.Entry<Route, H> entry : handlers.entrySet()) {
             Route       route       = entry.getKey();

@@ -1,10 +1,10 @@
 package org.jmouse.mvc.routing.condition;
 
-import org.jmouse.mvc.routing.MappingCondition;
-import org.jmouse.mvc.routing.RequestRoute;
+import org.jmouse.mvc.routing.MappingMatcher;
+import org.jmouse.web.request.RequestRoute;
 import org.jmouse.web.request.http.HttpHeader;
 
-public class RequestHeaderCondition implements MappingCondition {
+public class RequestHeaderCondition implements MappingMatcher {
 
     private final HttpHeader header;
     private final Object     requiredValue;
@@ -26,12 +26,7 @@ public class RequestHeaderCondition implements MappingCondition {
     }
 
     @Override
-    public MappingCondition combine(MappingCondition other) {
-        return this;
-    }
-
-    @Override
-    public int compareTo(MappingCondition other) {
+    public int compareWith(MappingMatcher other, RequestRoute requestRoute) {
         if (!(other instanceof RequestHeaderCondition condition))
             return 0;
         return header.compareTo(condition.header);

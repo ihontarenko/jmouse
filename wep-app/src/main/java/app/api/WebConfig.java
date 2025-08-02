@@ -25,7 +25,7 @@ public class WebConfig {
     }
 
     @Bean
-    public ControllerMethodRegistration indexRegistration() {
+    public ControllerMethodRegistration route1Registration() {
         Route route = Route.route()
                 .GET("/index")
                 .header(HttpHeader.CONTENT_MD5, "123qwe")
@@ -33,7 +33,50 @@ public class WebConfig {
                 .build();
 
         return new ControllerMethodRegistration(route, (request, response)
-                -> response.getWriter().write("[{'name':'Ivan'}]"));
+                -> response.getWriter().write("[{'name':'Route 1'}]"));
+    }
+
+    @Bean
+    public ControllerMethodRegistration route2Registration() {
+        Route route = Route.route()
+                .GET("/index")
+                .produces(MediaType.APPLICATION_JSON)
+                .build();
+
+        return new ControllerMethodRegistration(route, (request, response)
+                -> response.getWriter().write("[{'name':'Route 2'}]"));
+    }
+
+    @Bean
+    public ControllerMethodRegistration route3Registration() {
+        Route route = Route.route()
+                .GET("/index")
+                .produces(MediaType.APPLICATION_XML)
+                .build();
+
+        return new ControllerMethodRegistration(route, (request, response)
+                -> response.getWriter().write("[{'name':'Route 3'}]"));
+    }
+
+    @Bean
+    public ControllerMethodRegistration route4Registration() {
+        Route route = Route.route()
+                .GET("/index")
+                .build();
+
+        return new ControllerMethodRegistration(route, (request, response)
+                -> response.getWriter().write("[{'name':'Route 4'}]"));
+    }
+
+    @Bean
+    public ControllerMethodRegistration route5Registration() {
+        Route route = Route.route()
+                .GET("/index")
+                .produces(MediaType.TEXT_HTML)
+                .build();
+
+        return new ControllerMethodRegistration(route, (request, response)
+                -> response.getWriter().write("[{'name':'Route 5'}]"));
     }
 
     @Bean

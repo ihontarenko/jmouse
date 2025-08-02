@@ -78,6 +78,12 @@ public final class Headers {
      * 🎯 Typed getter for Content-Type.
      */
     public MediaType getContentType() {
+        Object contentType = headers.get(HttpHeader.CONTENT_TYPE);
+
+        if (contentType instanceof String string) {
+            addHeader(HttpHeader.CONTENT_TYPE, MediaType.forString(string));
+        }
+
         return (MediaType) headers.get(HttpHeader.CONTENT_TYPE);
     }
 

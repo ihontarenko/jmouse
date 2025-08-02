@@ -1,12 +1,12 @@
 package org.jmouse.mvc.routing.condition;
 
 import org.jmouse.core.MediaType;
-import org.jmouse.mvc.routing.MappingCondition;
-import org.jmouse.mvc.routing.RequestRoute;
+import org.jmouse.mvc.routing.MappingMatcher;
+import org.jmouse.web.request.RequestRoute;
 
 import java.util.Set;
 
-public class RequestConsumesCondition implements MappingCondition {
+public class RequestConsumesCondition implements MappingMatcher {
 
     private final Set<MediaType> consumable;
 
@@ -31,15 +31,7 @@ public class RequestConsumesCondition implements MappingCondition {
     }
 
     @Override
-    public MappingCondition combine(MappingCondition other) {
-        if (!(other instanceof RequestConsumesCondition condition))
-            return this;
-
-        return new RequestConsumesCondition(Set.copyOf(condition.consumable));
-    }
-
-    @Override
-    public int compareTo(MappingCondition other) {
+    public int compareWith(MappingMatcher other, RequestRoute requestRoute) {
         if (!(other instanceof RequestConsumesCondition condition))
             return 0;
 

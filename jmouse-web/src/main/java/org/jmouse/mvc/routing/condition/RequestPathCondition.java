@@ -2,15 +2,15 @@ package org.jmouse.mvc.routing.condition;
 
 import org.jmouse.mvc.PathPattern;
 import org.jmouse.mvc.Route;
-import org.jmouse.mvc.routing.MappingCondition;
-import org.jmouse.mvc.routing.RequestRoute;
+import org.jmouse.mvc.routing.MappingMatcher;
+import org.jmouse.web.request.RequestRoute;
 
 /**
  * Matches a route based on the path pattern 🛣️.
  *
  * @author Ivan Hontarenko
  */
-public class RequestPathCondition implements MappingCondition {
+public class RequestPathCondition implements MappingMatcher {
 
     private final Route route;
 
@@ -20,16 +20,11 @@ public class RequestPathCondition implements MappingCondition {
 
     @Override
     public boolean matches(RequestRoute requestRoute) {
-        return route.pathPattern().matches(requestRoute.path());
+        return route.pathPattern().matches(requestRoute.requestPath().requestPath());
     }
 
     @Override
-    public MappingCondition combine(MappingCondition other) {
-        return this;
-    }
-
-    @Override
-    public int compareTo(MappingCondition other) {
+    public int compareWith(MappingMatcher other, RequestRoute requestRoute) {
         if (!(other instanceof RequestPathCondition condition)) {
             return 0;
         }
