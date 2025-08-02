@@ -5,6 +5,7 @@ import org.jmouse.core.reflection.ClassFinder;
 import org.jmouse.mvc.HandlerAdapter;
 import org.jmouse.mvc.HandlerMapping;
 import org.jmouse.mvc.ReturnValueHandler;
+import org.jmouse.mvc.routing.MappingRegistry;
 
 import java.util.ArrayList;
 
@@ -18,5 +19,7 @@ public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializ
                 ClassFinder.findImplementations(ReturnValueHandler.class, types)));
         addScanner(types -> new ArrayList<>(
                 ClassFinder.findImplementations(HandlerAdapter.class, types)));
+        addScanner(types -> new ArrayList<>(
+                ClassFinder.findInheritedClasses(MappingRegistry.class, types)));
     }
 }

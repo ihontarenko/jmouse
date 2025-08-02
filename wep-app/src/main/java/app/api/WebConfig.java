@@ -96,11 +96,24 @@ public class WebConfig {
         Route route = Route.route()
                 .GET("/index")
                 .produces(MediaType.TEXT_HTML)
-                .queryParameter("v", "2")
+                .queryParameter("lang", "uk")
                 .build();
 
         return new ControllerMethodRegistration(route, (request, response)
                 -> response.getWriter().write("[{'name':'Route 7'}]"));
+    }
+
+    @Bean
+    public ControllerMethodRegistration route8Registration() {
+        Route route = Route.route()
+                .GET("/index")
+                .produces(MediaType.TEXT_HTML)
+                .header(HttpHeader.ACCEPT_LANGUAGE, "uk")
+                .queryParameter("lang", "uk")
+                .build();
+
+        return new ControllerMethodRegistration(route, (request, response)
+                -> response.getWriter().write("[{'name':'Route 8'}]"));
     }
 
     @Bean
