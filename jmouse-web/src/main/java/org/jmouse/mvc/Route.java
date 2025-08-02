@@ -168,6 +168,7 @@ public final class Route {
 
         return method == route.method &&
                 Objects.equals(path, route.path) &&
+                Objects.equals(queryParameters, route.queryParameters) &&
                 Objects.equals(consumes, route.consumes) &&
                 Objects.equals(produces, route.produces) &&
                 Objects.equals(headers, route.headers);
@@ -175,13 +176,14 @@ public final class Route {
 
     @Override
     public int hashCode() {
-        return Objects.hash(method, path, consumes, produces, headers);
+        return Objects.hash(method, path, queryParameters, consumes, produces, headers);
     }
 
     @Override
     public String toString() {
         return "Route[" +
                 method + " " + (path.getPattern()) +
+                (queryParameters.isEmpty() ? "" : ", queryParameters=" + queryParameters) +
                 (consumes.isEmpty() ? "" : ", consumes=" + consumes) +
                 (produces.isEmpty() ? "" : ", produces=" + produces) +
                 (headers.isEmpty()  ? "" : ", headers="  + headers) +
@@ -271,7 +273,7 @@ public final class Route {
          * Adds a header constraint for the route (e.g. {@code X-Custom: value}).
          */
         public Builder header(HttpHeader name, Object value) {
-            this.headers.addHeader(name, value);
+            this.headers.setHeader(name, value);
             return this;
         }
 

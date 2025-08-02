@@ -19,7 +19,7 @@ public class RequestPathCondition implements MappingMatcher {
 
     @Override
     public boolean matches(RequestRoute requestRoute) {
-        return pathPattern.matches(requestRoute.requestPath().requestPath());
+        return pathPattern.matches(requestRoute.requestPath().path());
     }
 
     @Override

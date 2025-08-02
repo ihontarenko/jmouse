@@ -2,9 +2,9 @@ package org.jmouse.web.request;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.MediaType;
-import org.jmouse.web.RequestHeaders;
 import org.jmouse.web.request.http.HttpMethod;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -25,8 +25,16 @@ import java.util.Set;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public record RequestRoute(RequestPath requestPath, HttpMethod method, Headers headers, MediaType contentType,
-                           Set<MediaType> accept) {
+public record RequestRoute(
+        HttpMethod method,
+        RequestPath requestPath,
+        QueryParameters queryParameters,
+        Headers headers,
+        MediaType contentType,
+        Set<MediaType> accept
+) {
+
+    public static final String REQUEST_ROUTE_ATTRIBUTE = RequestRoute.class.getName() + ".REQUEST_ROUTE";
 
     /**
      * 🏗️ Builds a {@code RequestRoute} from a {@link HttpServletRequest}.
@@ -43,8 +51,9 @@ public record RequestRoute(RequestPath requestPath, HttpMethod method, Headers h
         Headers headers = requestHeaders.headers();
 
         return new RequestRoute(
-                requestPath,
                 HttpMethod.ofName(request.getMethod()),
+                requestPath,
+                QueryParameters.ofMap(request.getParameterMap()),
                 headers,
                 headers.getContentType(),
                 Set.copyOf(headers.getAccept())

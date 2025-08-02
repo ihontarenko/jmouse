@@ -53,26 +53,25 @@ public class RouteMapping implements MappingMatcher {
      * @param route the route to parse
      */
     private void createMatchers(Route route) {
-        // 🔹 Path
         matchers.add(new RequestPathCondition(route.pathPattern()));
-
-        // 🔹 Method
         matchers.add(new HttpMethodCondition(route.httpMethod()));
 
-        // 🔹 Consumes (Content-Type)
         if (!route.consumes().isEmpty()) {
             matchers.add(new ConsumesMatcher(route.consumes()));
         }
 
-        // 🔹 Produces (Accept)
         if (!route.produces().isEmpty()) {
             matchers.add(new ProducesMatcher(route.produces()));
         }
 
-        // 🔹 Headers
         if (!route.headers().isEmpty()) {
             route.headers().asMap().forEach((header, value)
                     -> matchers.add(new HttpHeaderMatcher(header, value)));
+        }
+
+        if (!route.queryParameters().isEmpty()) {
+            route.queryParameters().forEach((parameter, value)
+                    -> matchers.add(new QueryParameterMatcher(parameter, value)));
         }
     }
 

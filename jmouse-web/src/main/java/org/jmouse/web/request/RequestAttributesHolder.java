@@ -1,63 +1,65 @@
 package org.jmouse.web.request;
 
 /**
- * 🔒 Thread-bound holder for {@link RequestAttributes} and {@link RequestPath}.
+ * 🔒 Thread-bound holder for {@link RequestAttributes} and request-scoped metadata.
  *
- * <p>Provides per-thread request context. Automatically propagated to child threads via {@link InheritableThreadLocal}.
- * <p>Used internally in Dispatcher chain, filters, interceptors.
+ * <p>This class maintains per-thread request data using {@link InheritableThreadLocal},
+ * allowing scoped access to {@link RequestPath}, {@link QueryParameters}, {@link RequestRoute}, and {@link RequestHeaders}.
  *
- * <p><b>💡 Example:</b>
+ * <p>Used internally by the Dispatcher, filters, interceptors, and other framework components
+ * to share request metadata across layers without passing it explicitly.
+ *
+ * <p><b>💡 Example usage:</b>
  * <pre>{@code
- * // At the start of request
- * RequestAttributesHolder.setRequestAttributes(new MyRequestAttributes(...));
- * RequestAttributesHolder.setRequestPath(parsedRequestPath);
+ * RequestAttributesHolder.setRequestAttributes(new ServletRequestAttributes(...));
+ * RequestAttributesHolder.setRequestPath(parsedPath);
  *
- * // Somewhere deeper
- * String userId = (String) RequestAttributesHolder.getRequestAttributes()
- *         .getAttribute("user.id");
+ * String userId = (String) RequestAttributesHolder.getRequestAttributes().getAttribute("user.id");
  *
- * // After response commit
  * RequestAttributesHolder.removeRequestAttributes();
  * RequestAttributesHolder.removeRequestPath();
  * }</pre>
  *
- * @author Ivan Hontarenko (Mr. Jerry Mouse)
+ * @author Ivan Hontarenko
  * @since jMouse Web 1.0
  */
 public class RequestAttributesHolder {
 
-    private static final ThreadLocal<RequestAttributes> ATTRIBUTES_THREAD_LOCAL = new InheritableThreadLocal<>();
-    private static final ThreadLocal<RequestPath> REQUEST_PATH_THREAD_LOCAL = new InheritableThreadLocal<>();
+    private static final ThreadLocal<RequestAttributes> ATTRIBUTES_THREAD_LOCAL       = new InheritableThreadLocal<>();
+    private static final ThreadLocal<RequestPath>       REQUEST_PATH_THREAD_LOCAL     = new InheritableThreadLocal<>();
+    private static final ThreadLocal<QueryParameters>   QUERY_PARAMETERS_THREAD_LOCAL = new InheritableThreadLocal<>();
+    private static final ThreadLocal<RequestRoute>      REQUEST_ROUTE_THREAD_LOCAL    = new InheritableThreadLocal<>();
+    private static final ThreadLocal<RequestHeaders>    REQUEST_HEADERS_THREAD_LOCAL  = new InheritableThreadLocal<>();
 
     /**
-     * 🧵 Returns the {@link RequestAttributes} bound to the current thread.
+     * 🧵 Get the current {@link RequestAttributes} bound to the thread.
      *
-     * @return current request attributes, or {@code null} if not set
+     * @return request attributes or {@code null} if not set
      */
     public static RequestAttributes getRequestAttributes() {
         return ATTRIBUTES_THREAD_LOCAL.get();
     }
 
     /**
-     * 🧵 Binds the given {@link RequestAttributes} to the current thread.
+     * 🔗 Set {@link RequestAttributes} for the current thread.
      *
-     * @param attributes the request attributes to set
+     * @param attributes the request attributes
      */
     public static void setRequestAttributes(RequestAttributes attributes) {
         ATTRIBUTES_THREAD_LOCAL.set(attributes);
     }
 
     /**
-     * ❌ Clears any {@link RequestAttributes} bound to the current thread.
+     * ❌ Remove {@link RequestAttributes} from the current thread.
      */
     public static void removeRequestAttributes() {
         ATTRIBUTES_THREAD_LOCAL.remove();
     }
 
     /**
-     * 🔎 Returns the current {@link RequestPath} from thread-local or fallback to {@link RequestAttributes}.
+     * 🔍 Get the {@link RequestPath} from thread-local or fallback to attributes.
      *
-     * @return parsed request path, or {@code null} if not available
+     * @return parsed request path or {@code null} if not set
      */
     public static RequestPath getRequestPath() {
         RequestPath requestPath = REQUEST_PATH_THREAD_LOCAL.get();
@@ -71,18 +73,114 @@ public class RequestAttributesHolder {
     }
 
     /**
-     * 🔗 Binds a {@link RequestPath} to the current thread.
+     * ⛓ Set {@link RequestPath} for the current thread.
      *
-     * @param requestPath parsed path info (typically from router)
+     * @param requestPath the parsed path object
      */
     public static void setRequestPath(RequestPath requestPath) {
         REQUEST_PATH_THREAD_LOCAL.set(requestPath);
     }
 
     /**
-     * ❌ Clears any {@link RequestPath} bound to the current thread.
+     * ❌ Remove {@link RequestPath} from thread-local storage.
      */
     public static void removeRequestPath() {
         REQUEST_PATH_THREAD_LOCAL.remove();
+    }
+
+    /**
+     * Get the current {@link RequestRoute} from thread-local or fallback to attributes.
+     *
+     * @return the request route or {@code null} if not set
+     */
+    public static RequestRoute getRequestRoute() {
+        RequestRoute requestRoute = REQUEST_ROUTE_THREAD_LOCAL.get();
+
+        if (requestRoute == null) {
+            requestRoute = (RequestRoute) getRequestAttributes()
+                    .getAttribute(RequestRoute.REQUEST_ROUTE_ATTRIBUTE);
+        }
+
+        return requestRoute;
+    }
+
+    /**
+     * Set {@link RequestRoute} for the current thread.
+     *
+     * @param requestRoute route metadata for current request
+     */
+    public static void setRequestRoute(RequestRoute requestRoute) {
+        REQUEST_ROUTE_THREAD_LOCAL.set(requestRoute);
+    }
+
+    /**
+     * ❌ Remove {@link RequestRoute} from thread-local storage.
+     */
+    public static void removeRequestRoute() {
+        REQUEST_ROUTE_THREAD_LOCAL.remove();
+    }
+
+    /**
+     * Get {@link RequestHeaders} from thread-local or fallback to attributes.
+     *
+     * @return headers for current request
+     */
+    public static RequestHeaders getRequestHeaders() {
+        RequestHeaders requestHeaders = REQUEST_HEADERS_THREAD_LOCAL.get();
+
+        if (requestHeaders == null) {
+            requestHeaders = (RequestHeaders) getRequestAttributes()
+                    .getAttribute(RequestHeaders.REQUEST_HEADERS_ATTRIBUTE);
+        }
+
+        return requestHeaders;
+    }
+
+    /**
+     * Set {@link RequestHeaders} for the current thread.
+     *
+     * @param requestHeaders the headers instance
+     */
+    public static void setRequestHeaders(RequestHeaders requestHeaders) {
+        REQUEST_HEADERS_THREAD_LOCAL.set(requestHeaders);
+    }
+
+    /**
+     * ❌ Remove {@link RequestHeaders} from thread-local storage.
+     */
+    public static void removeRequestHeaders() {
+        REQUEST_HEADERS_THREAD_LOCAL.remove();
+    }
+
+    /**
+     * Get {@link QueryParameters} from thread-local or fallback to attributes.
+     *
+     * @return query parameter wrapper for current request
+     */
+    public static QueryParameters getQueryParameters() {
+        QueryParameters queryParameters = QUERY_PARAMETERS_THREAD_LOCAL.get();
+
+        if (queryParameters == null) {
+            queryParameters = (QueryParameters) getRequestAttributes()
+                    .getAttribute(QueryParameters.QUERY_PARAMETERS_ATTRIBUTE);
+        }
+
+        return queryParameters;
+    }
+
+    /**
+     * Set {@link QueryParameters} for the current thread.
+     *
+     * @param queryParameters parsed query parameters
+     */
+    public static void setQueryParameters(QueryParameters queryParameters) {
+        QUERY_PARAMETERS_THREAD_LOCAL.set(queryParameters);
+    }
+
+    /**
+     * ❌ Remove {@link QueryParameters} from thread-local storage.
+     */
+    public static void removeQueryParameters() {
+        QUERY_PARAMETERS_THREAD_LOCAL.remove();
     }
 }

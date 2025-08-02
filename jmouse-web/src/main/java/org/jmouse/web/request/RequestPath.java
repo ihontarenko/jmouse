@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * <ul>
  *     <li>{@code contextPath} — application context (e.g., {@code /api})</li>
  *     <li>{@code servletPath} — servlet mapping path (e.g., {@code /dispatcher})</li>
- *     <li>{@code requestPath} — the remaining path info after the servlet (e.g., {@code /users/42})</li>
+ *     <li>{@code path} — the remaining path info after the servlet (e.g., {@code /users/42})</li>
  * </ul>
  * </p>
  *
@@ -17,12 +17,12 @@ import jakarta.servlet.http.HttpServletRequest;
  * RequestPath path = RequestPath.ofRequest(request);
  * System.out.println(path.contextPath()); // /app
  * System.out.println(path.servletPath()); // /api
- * System.out.println(path.requestPath()); // /users
+ * System.out.println(path.path()); // /users
  * }</pre>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  */
-public record RequestPath(String contextPath, String servletPath, String requestPath) {
+public record RequestPath(String contextPath, String servletPath, String path) {
 
     /**
      * 💾 Request attribute name for caching {@link RequestPath} instance in servlet request.

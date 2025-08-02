@@ -34,11 +34,11 @@ import java.util.List;
  */
 public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMapping implements InitializingBean {
 
-    private final MappingRegistry<H, RouteMapping> mappingRegistry = new MappingRegistry<>();
+    private MappingRegistry<H, RouteMapping> mappingRegistry;
     /**
      * 🗺️ Map of path patterns to handlers
      */
-    private       HandlerInterceptorRegistry       interceptorRegistry;
+    private HandlerInterceptorRegistry       interceptorRegistry;
 
     /**
      * ➕ Registers a route and its corresponding handler.
@@ -47,8 +47,8 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      * @param handler handler instance
      */
     public void addHandlerMapping(Route route, H handler) {
-        RouteMapping mapping = new RouteMapping(route);
-        mappingRegistry.register(mapping, new MappingRegistration<>(mapping, handler));
+        MappingRegistration<H, RouteMapping> registration = new MappingRegistration<>(new RouteMapping(route), handler);
+        mappingRegistry.register(registration.mapping(), registration);
     }
 
     @Override
@@ -73,7 +73,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
             H                                    handler      = registration.handler();
             Route                                route        = winner.getRoute();
 
-            RouteMatch routeMatch = route.pathPattern().parse(requestRoute.requestPath().requestPath());
+            RouteMatch routeMatch = route.pathPattern().parse(requestRoute.requestPath().path());
 
             mappedHandler = new RouteMappedHandler(handler, routeMatch, route);
 
@@ -113,12 +113,35 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
     }
 
     /**
+     * 📦 Returns the current {@link MappingRegistry} instance used to store {@link RouteMapping}s.
+     *
+     * @return the configured mapping registry
+     */
+    public MappingRegistry<H, RouteMapping> getMappingRegistry() {
+        return mappingRegistry;
+    }
+
+    /**
+     * 🛠️ Sets a custom {@link MappingRegistry} instance.
+     *
+     * <p>Useful for replacing the default registry with a preconfigured or extended version.</p>
+     *
+     * @param mappingRegistry the new mapping registry to use
+     */
+    public void setMappingRegistry(MappingRegistry<H, RouteMapping> mappingRegistry) {
+        this.mappingRegistry = mappingRegistry;
+    }
+
+
+    /**
      * ⚙️ Initializes the mapping with context and interceptors.
      *
      * @param context current web bean context
      */
+    @SuppressWarnings("unchecked")
     protected void initialize(WebBeanContext context) {
         setHandlerInterceptorsRegistry(context.getBean(HandlerInterceptorRegistry.class));
+        setMappingRegistry(context.getBean(MappingRegistry.class));
         doInitialize(context);
     }
 

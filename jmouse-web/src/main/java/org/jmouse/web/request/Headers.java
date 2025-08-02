@@ -31,7 +31,7 @@ public final class Headers {
     /**
      * ➕ Adds or replaces a header.
      */
-    public void addHeader(HttpHeader header, Object value) {
+    public void setHeader(HttpHeader header, Object value) {
         headers.put(header, value);
     }
 
@@ -78,7 +78,7 @@ public final class Headers {
         Object contentType = headers.get(HttpHeader.CONTENT_TYPE);
 
         if (contentType instanceof String string) {
-            addHeader(HttpHeader.CONTENT_TYPE, MediaType.forString(string));
+            setHeader(HttpHeader.CONTENT_TYPE, MediaType.forString(string));
         }
 
         return (MediaType) headers.get(HttpHeader.CONTENT_TYPE);
@@ -88,7 +88,7 @@ public final class Headers {
      * 📝 Typed setter for Content-Type.
      */
     public void setContentType(MediaType contentType) {
-        addHeader(HttpHeader.CONTENT_TYPE, contentType);
+        setHeader(HttpHeader.CONTENT_TYPE, contentType);
     }
 
     /**
@@ -108,7 +108,7 @@ public final class Headers {
      * 📝 Typed setter for Accept header.
      */
     public void setAccept(List<MediaType> accept) {
-        addHeader(HttpHeader.ACCEPT, String.join(",", Streamable.of(accept).map(MediaType::toString)));
+        setHeader(HttpHeader.ACCEPT, String.join(",", Streamable.of(accept).map(MediaType::toString)));
     }
 
     /**
@@ -122,7 +122,7 @@ public final class Headers {
      * 🔐 Sets Authorization header.
      */
     public void setAuthorization(String authHeader) {
-        addHeader(HttpHeader.AUTHORIZATION, authHeader);
+        setHeader(HttpHeader.AUTHORIZATION, authHeader);
     }
 
     /**
@@ -136,7 +136,7 @@ public final class Headers {
      * 🧭 Sets User-Agent header.
      */
     public void setUserAgent(String userAgent) {
-        addHeader(HttpHeader.USER_AGENT, userAgent);
+        setHeader(HttpHeader.USER_AGENT, userAgent);
     }
 
     /**
@@ -150,7 +150,7 @@ public final class Headers {
      * 🌐 Sets Host header.
      */
     public void setHost(String host) {
-        addHeader(HttpHeader.HOST, host);
+        setHeader(HttpHeader.HOST, host);
     }
 
     /**
@@ -164,7 +164,7 @@ public final class Headers {
      * 🍪 Sets Cookie header.
      */
     public void setCookie(String cookie) {
-        addHeader(HttpHeader.COOKIE, cookie);
+        setHeader(HttpHeader.COOKIE, cookie);
     }
 
     /**
@@ -178,7 +178,7 @@ public final class Headers {
      * 🔙 Sets Referer header.
      */
     public void setReferer(String referer) {
-        addHeader(HttpHeader.REFERER, referer);
+        setHeader(HttpHeader.REFERER, referer);
     }
 
     /**
@@ -210,6 +210,6 @@ public final class Headers {
 
     @Override
     public String toString() {
-        return "HTTP-Headers: %s".formatted(headers);
+        return "Headers" + headers;
     }
 }
