@@ -8,7 +8,7 @@ public interface Mapping<T> {
     /**
      * @return Route conditions (path, method, media types, etc).
      */
-    RouteCondition getCondition();
+    MappingCondition getCondition();
 
     /**
      * @return The target handler (method, function, controller, etc).

@@ -120,14 +120,14 @@ public final class Route {
     /**
      * @return HTTP method (GET, POST, etc.)
      */
-    public HttpMethod method() {
+    public HttpMethod httpMethod() {
         return method;
     }
 
     /**
      * @return Parsed path pattern with variables and constraints
      */
-    public PathPattern path() {
+    public PathPattern pathPattern() {
         return path;
     }
 

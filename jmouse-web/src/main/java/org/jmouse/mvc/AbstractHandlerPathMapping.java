@@ -66,8 +66,8 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
 
         for (Map.Entry<Route, H> entry : handlers.entrySet()) {
             Route       route       = entry.getKey();
-            PathPattern pathPattern = route.path();
-            HttpMethod  method      = route.method();
+            PathPattern pathPattern = route.pathPattern();
+            HttpMethod  method      = route.httpMethod();
 
             if (pathPattern.matches(mappingPath) && method.equals(httpMethod)) {
                 RouteMatch routeMatch = pathPattern.parse(mappingPath);
