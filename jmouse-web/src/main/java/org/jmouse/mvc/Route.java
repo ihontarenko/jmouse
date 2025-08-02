@@ -5,10 +5,7 @@ import org.jmouse.web.request.Headers;
 import org.jmouse.web.request.http.HttpHeader;
 import org.jmouse.web.request.http.HttpMethod;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 🧭 Immutable route definition used for mapping requests to handlers.
@@ -30,15 +27,17 @@ import java.util.Set;
  */
 public final class Route {
 
-    private final HttpMethod     method;
-    private final PathPattern    path;
-    private final Set<MediaType> consumes;
-    private final Set<MediaType> produces;
-    private final Headers        headers = new Headers();
+    private final HttpMethod          method;
+    private final PathPattern         path;
+    private final Map<String, Object> queryParameters;
+    private final Set<MediaType>      consumes;
+    private final Set<MediaType>      produces;
+    private final Headers             headers = new Headers();
 
     private Route(Builder builder) {
         this.method = builder.method;
         this.path = new PathPattern(builder.path);
+        this.queryParameters = Map.copyOf(builder.queryParameters);
         this.consumes = Set.copyOf(builder.consumes);
         this.produces = Set.copyOf(builder.produces);
         this.headers.setAll(builder.headers.asMap());
@@ -132,6 +131,13 @@ public final class Route {
     }
 
     /**
+     * @return Query parameters matchers required for this route
+     */
+    public Map<String, Object> queryParameters() {
+        return queryParameters;
+    }
+
+    /**
      * @return Accepted request body media types (e.g. JSON, XML)
      */
     public Set<MediaType> consumes() {
@@ -187,11 +193,12 @@ public final class Route {
      */
     public static final class Builder {
 
-        private final Headers        headers  = new Headers();
-        private final Set<MediaType> consumes = new LinkedHashSet<>();
-        private final Set<MediaType> produces = new LinkedHashSet<>();
-        private       HttpMethod     method;
-        private       String         path;
+        private final Headers             headers         = new Headers();
+        private final Set<MediaType>      consumes        = new LinkedHashSet<>();
+        private final Set<MediaType>      produces        = new LinkedHashSet<>();
+        private       HttpMethod          method;
+        private       String              path;
+        private final Map<String, Object> queryParameters = new LinkedHashMap<>();
 
         /**
          * Sets the HTTP method for the route.
@@ -265,6 +272,14 @@ public final class Route {
          */
         public Builder header(HttpHeader name, Object value) {
             this.headers.addHeader(name, value);
+            return this;
+        }
+
+        /**
+         * Adds a query parameter constraint for the route (e.g. {@code page=2}).
+         */
+        public Builder queryParameter(String name, Object value) {
+            this.queryParameters.put(name, value);
             return this;
         }
 

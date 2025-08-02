@@ -2,8 +2,6 @@ package org.jmouse.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.util.Sorter;
-import org.jmouse.web.request.RequestAttributesHolder;
-import org.jmouse.web.request.RequestPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,26 +51,6 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
         }
 
         return container;
-    }
-
-    /**
-     * 📍 Extracts the raw path used for handler mapping.
-     *
-     * <p>If {@link RequestPath} is available in the current request attributes, returns its
-     * logical path. Otherwise, defaults to the raw request URI.</p>
-     *
-     * @param request current HTTP request
-     * @return resolved mapping path
-     */
-    public String getMappingPath(HttpServletRequest request) {
-        String      mappingPath = request.getRequestURI();
-        RequestPath requestPath = RequestAttributesHolder.getRequestPath();
-
-        if (requestPath != null) {
-            mappingPath = requestPath.requestPath();
-        }
-
-        return mappingPath;
     }
 
     /**

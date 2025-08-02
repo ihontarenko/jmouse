@@ -68,7 +68,7 @@ public class ProducesMatcher implements MappingMatcher {
      * @return comparison result (-1, 0, 1)
      */
     @Override
-    public int compareWith(MappingMatcher other, RequestRoute requestRoute) {
+    public int compare(MappingMatcher other, RequestRoute requestRoute) {
         if (!(other instanceof ProducesMatcher that)) {
             return 0;
         }

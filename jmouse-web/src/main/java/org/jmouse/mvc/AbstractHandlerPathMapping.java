@@ -92,7 +92,8 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
             }
         }
 
-        candidates.sort((a, b) -> -1 * a.compareWith(b, requestRoute));
+        candidates.sort((a, b)
+                -> -1 * a.compare(b, requestRoute));
 
         return candidates.getFirst();
     }

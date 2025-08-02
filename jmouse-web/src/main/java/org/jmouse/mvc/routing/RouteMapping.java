@@ -71,7 +71,8 @@ public class RouteMapping implements MappingMatcher {
 
         // 🔹 Headers
         if (!route.headers().isEmpty()) {
-            route.headers().asMap().forEach((header, requiredValue) -> matchers.add(new HttpHeaderMatcher(header, requiredValue)));
+            route.headers().asMap().forEach((header, value)
+                    -> matchers.add(new HttpHeaderMatcher(header, value)));
         }
     }
 
@@ -122,7 +123,7 @@ public class RouteMapping implements MappingMatcher {
      * @return negative if this is less specific, positive if more specific, zero if equal
      */
     @Override
-    public int compareWith(MappingMatcher other, RequestRoute requestRoute) {
+    public int compare(MappingMatcher other, RequestRoute requestRoute) {
         if (other instanceof RouteMapping that) {
 
             int result = Integer.compare(this.matchers.size(), that.matchers.size());
@@ -135,7 +136,7 @@ public class RouteMapping implements MappingMatcher {
                 MappingMatcher matcherA = (MappingMatcher) this.matchers.get(i);
                 MappingMatcher matcherB = (MappingMatcher) that.matchers.get(i);
 
-                result = matcherA.compareWith(matcherB, requestRoute);
+                result = matcherA.compare(matcherB, requestRoute);
 
                 if (result != 0) {
                     return result;

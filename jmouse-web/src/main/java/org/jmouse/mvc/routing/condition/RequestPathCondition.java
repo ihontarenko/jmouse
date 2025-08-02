@@ -23,7 +23,7 @@ public class RequestPathCondition implements MappingMatcher {
     }
 
     @Override
-    public int compareWith(MappingMatcher other, RequestRoute requestRoute) {
+    public int compare(MappingMatcher other, RequestRoute requestRoute) {
         if (!(other instanceof RequestPathCondition condition)) {
             return 0;
         }

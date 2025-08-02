@@ -26,7 +26,7 @@ public class HttpHeaderMatcher implements MappingMatcher {
     }
 
     @Override
-    public int compareWith(MappingMatcher other, RequestRoute requestRoute) {
+    public int compare(MappingMatcher other, RequestRoute requestRoute) {
         if (!(other instanceof HttpHeaderMatcher condition))
             return 0;
         return header.compareTo(condition.header);

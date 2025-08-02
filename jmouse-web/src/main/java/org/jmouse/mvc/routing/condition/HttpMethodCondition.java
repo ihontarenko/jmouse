@@ -20,7 +20,7 @@ public class HttpMethodCondition implements MappingMatcher {
     }
 
     @Override
-    public int compareWith(MappingMatcher other, RequestRoute requestRoute) {
+    public int compare(MappingMatcher other, RequestRoute requestRoute) {
         if (!(other instanceof HttpMethodCondition condition))
             return 0;
 

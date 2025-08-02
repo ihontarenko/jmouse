@@ -25,6 +25,6 @@ public interface MappingMatcher extends Matcher<RequestRoute> {
      * @return a negative integer, zero, or a positive integer
      *         as this matcher is less specific, equal, or more specific
      */
-    int compareWith(MappingMatcher other, RequestRoute requestRoute);
+    int compare(MappingMatcher other, RequestRoute requestRoute);
 
 }
