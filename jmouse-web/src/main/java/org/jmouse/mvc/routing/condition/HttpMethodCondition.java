@@ -27,4 +27,8 @@ public class HttpMethodCondition implements MappingMatcher {
         return Integer.compare(this.methods.size(), condition.methods.size());
     }
 
+    @Override
+    public String toString() {
+        return "HttpMethodCondition: %s".formatted(methods);
+    }
 }

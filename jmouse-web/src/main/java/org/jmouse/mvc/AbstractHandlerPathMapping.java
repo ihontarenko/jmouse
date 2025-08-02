@@ -3,13 +3,14 @@ package org.jmouse.mvc;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
-import org.jmouse.mvc.routing.MappingMatcher;
+import org.jmouse.mvc.routing.MappingRegistration;
+import org.jmouse.mvc.routing.MappingRegistry;
 import org.jmouse.mvc.routing.RouteMapping;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.RequestRoute;
-import org.jmouse.web.request.http.HttpMethod;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 🧭 Abstract base for route-based handler mappings.
@@ -33,11 +34,11 @@ import java.util.*;
  */
 public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMapping implements InitializingBean {
 
+    private final MappingRegistry<H, RouteMapping> mappingRegistry = new MappingRegistry<>();
     /**
      * 🗺️ Map of path patterns to handlers
      */
-    private final Map<Route, H>              handlers = new HashMap<>();
-    private       HandlerInterceptorRegistry registry;
+    private       HandlerInterceptorRegistry       interceptorRegistry;
 
     /**
      * ➕ Registers a route and its corresponding handler.
@@ -46,7 +47,8 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      * @param handler handler instance
      */
     public void addHandlerMapping(Route route, H handler) {
-        handlers.put(route, handler);
+        RouteMapping mapping = new RouteMapping(route);
+        mappingRegistry.register(mapping, new MappingRegistration<>(mapping, handler));
     }
 
     @Override
@@ -61,20 +63,30 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      * @return matched handler with route info, or null if no match
      */
     public MappedHandler getMappedHandler(HttpServletRequest request) {
-        String        mappingPath   = getMappingPath(request);
-        HttpMethod    httpMethod    = HttpMethod.valueOf(request.getMethod());
+        RequestRoute  requestRoute  = RequestRoute.ofRequest(request);
         MappedHandler mappedHandler = null;
-        RequestRoute requestRoute = RequestRoute.ofRequest(request);
 
-        List<RouteMapping> mappings  = new ArrayList<>();
+        RouteMapping winner = matchRouteMapping(requestRoute);
 
-        for (Route route : handlers.keySet()) {
-            mappings.add(new RouteMapping(route));
+        if (winner != null) {
+            MappingRegistration<H, RouteMapping> registration = mappingRegistry.getRegistration(winner);
+            H                                    handler      = registration.handler();
+            Route                                route        = winner.getRoute();
+
+            RouteMatch routeMatch = route.pathPattern().parse(requestRoute.requestPath().requestPath());
+
+            mappedHandler = new RouteMappedHandler(handler, routeMatch, route);
+
+            request.setAttribute(ROUTE_MACTH_ATTRIBUTE, routeMatch);
         }
 
+        return mappedHandler;
+    }
+
+    private RouteMapping matchRouteMapping(RequestRoute requestRoute) {
         List<RouteMapping> candidates = new ArrayList<>();
 
-        for (RouteMapping mapping : mappings) {
+        for (RouteMapping mapping : mappingRegistry.getMappings()) {
             if (mapping.matches(requestRoute)) {
                 candidates.add(mapping);
             }
@@ -82,31 +94,12 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
 
         candidates.sort((a, b) -> -1 * a.compareWith(b, requestRoute));
 
-        RouteMapping winner = candidates.getFirst();
-
-        System.out.println(candidates);
-
-        for (Map.Entry<Route, H> entry : handlers.entrySet()) {
-            Route       route       = entry.getKey();
-            PathPattern pathPattern = route.pathPattern();
-            HttpMethod  method      = route.httpMethod();
-
-            if (pathPattern.matches(mappingPath) && method.equals(httpMethod)) {
-                RouteMatch routeMatch = pathPattern.parse(mappingPath);
-
-                mappedHandler = new RouteMappedHandler(entry.getValue(), routeMatch, route);
-
-                request.setAttribute(ROUTE_MACTH_ATTRIBUTE, routeMatch);
-                break;
-            }
-        }
-
-        return mappedHandler;
+        return candidates.getFirst();
     }
 
     @Override
     protected List<HandlerInterceptor> getHandlerInterceptors() {
-        return registry.getInterceptors();
+        return interceptorRegistry.getInterceptors();
     }
 
     /**
@@ -115,7 +108,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      * @param registry configured registry
      */
     public void setHandlerInterceptorsRegistry(HandlerInterceptorRegistry registry) {
-        this.registry = registry;
+        this.interceptorRegistry = registry;
     }
 
     /**

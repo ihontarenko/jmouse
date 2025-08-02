@@ -18,14 +18,14 @@ import java.util.Set;
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  */
-public class RequestProducesCondition implements MappingMatcher {
+public class ProducesMatcher implements MappingMatcher {
 
     private final Set<MediaType> producible;
 
     /**
      * @param producible media types that a route can produce (e.g. JSON, HTML)
      */
-    public RequestProducesCondition(Set<MediaType> producible) {
+    public ProducesMatcher(Set<MediaType> producible) {
         this.producible = producible;
     }
 
@@ -69,7 +69,7 @@ public class RequestProducesCondition implements MappingMatcher {
      */
     @Override
     public int compareWith(MappingMatcher other, RequestRoute requestRoute) {
-        if (!(other instanceof RequestProducesCondition that)) {
+        if (!(other instanceof ProducesMatcher that)) {
             return 0;
         }
 
@@ -100,6 +100,11 @@ public class RequestProducesCondition implements MappingMatcher {
         }
 
         return qFactor;
+    }
+
+    @Override
+    public String toString() {
+        return "ProducesMatcher: %s".formatted(producible);
     }
 
 }

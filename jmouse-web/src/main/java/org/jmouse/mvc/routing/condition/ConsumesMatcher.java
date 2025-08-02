@@ -6,11 +6,11 @@ import org.jmouse.web.request.RequestRoute;
 
 import java.util.Set;
 
-public class RequestConsumesCondition implements MappingMatcher {
+public class ConsumesMatcher implements MappingMatcher {
 
     private final Set<MediaType> consumable;
 
-    public RequestConsumesCondition(Set<MediaType> consumable) {
+    public ConsumesMatcher(Set<MediaType> consumable) {
         this.consumable = consumable;
     }
 
@@ -32,9 +32,15 @@ public class RequestConsumesCondition implements MappingMatcher {
 
     @Override
     public int compareWith(MappingMatcher other, RequestRoute requestRoute) {
-        if (!(other instanceof RequestConsumesCondition condition))
+        if (!(other instanceof ConsumesMatcher condition))
             return 0;
 
         return Integer.compare(condition.consumable.size(), this.consumable.size());
     }
+
+    @Override
+    public String toString() {
+        return "ConsumesMatcher: %s".formatted(consumable);
+    }
+
 }

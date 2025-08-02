@@ -79,6 +79,13 @@ public interface Streamable<T> extends Iterable<T>, Supplier<Stream<T>> {
     }
 
     /**
+     * 🧮 Reduces values.
+     */
+    default Optional<T> reduce(BinaryOperator<T> accumulator) {
+        return stream().reduce(accumulator);
+    }
+
+    /**
      * 🔍 Finds first.
      */
     default Optional<T> findFirst() {

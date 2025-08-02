@@ -1,5 +1,3 @@
 package org.jmouse.mvc.routing;
 
-import org.jmouse.mvc.Route;
-
-public record MappingRegistration(Route route, Object handler) { }
+public record MappingRegistration<T, M>(M mapping, T handler) { }

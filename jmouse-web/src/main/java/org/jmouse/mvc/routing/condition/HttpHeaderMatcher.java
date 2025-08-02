@@ -4,12 +4,12 @@ import org.jmouse.mvc.routing.MappingMatcher;
 import org.jmouse.web.request.RequestRoute;
 import org.jmouse.web.request.http.HttpHeader;
 
-public class RequestHeaderCondition implements MappingMatcher {
+public class HttpHeaderMatcher implements MappingMatcher {
 
     private final HttpHeader header;
     private final Object     requiredValue;
 
-    public RequestHeaderCondition(HttpHeader header, Object requiredValue) {
+    public HttpHeaderMatcher(HttpHeader header, Object requiredValue) {
         this.header = header;
         this.requiredValue = requiredValue;
     }
@@ -27,8 +27,13 @@ public class RequestHeaderCondition implements MappingMatcher {
 
     @Override
     public int compareWith(MappingMatcher other, RequestRoute requestRoute) {
-        if (!(other instanceof RequestHeaderCondition condition))
+        if (!(other instanceof HttpHeaderMatcher condition))
             return 0;
         return header.compareTo(condition.header);
+    }
+
+    @Override
+    public String toString() {
+        return "HttpHeaderMatcher: [%s: %s]".formatted(header, requiredValue);
     }
 }
