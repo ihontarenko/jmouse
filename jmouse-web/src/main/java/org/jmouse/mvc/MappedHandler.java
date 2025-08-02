@@ -38,6 +38,15 @@ public interface MappedHandler {
     }
 
     /**
+     * 🧭 Optional route match if mapped via explicit route.
+     *
+     * @return associated {@link RouteMatch} or {@code null} if not mapped
+     */
+    default RouteMatch routeMatch() {
+        return null;
+    }
+
+    /**
      * ❓ Indicates whether this resolution includes a mapped route.
      *
      * @return {@code true} if {@link #route()} is not {@code null}

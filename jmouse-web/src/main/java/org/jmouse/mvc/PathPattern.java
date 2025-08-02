@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 /**
  * 🧭 Parses path patterns like <code>/user/{id:\d+}/status/{status}</code> into regular expressions
- * and extracts matched parameters into {@link RoutePath}.
+ * and extracts matched parameters into {@link RouteMatch}.
  *
  * <p>💡 Example:
  * <pre>{@code
@@ -77,9 +77,9 @@ public final class PathPattern {
      * 🎯 Parses the input path and returns extracted typed parameters.
      *
      * @param input URI path, e.g., {@code /user/42/status/ACTIVE}
-     * @return {@link RoutePath} with extracted values
+     * @return {@link RouteMatch} with extracted values
      */
-    public RoutePath parse(String input) {
+    public RouteMatch parse(String input) {
         Matcher             matcher   = expression.matcher(input);
         Map<String, Object> variables = new LinkedHashMap<>(8);
 
@@ -97,7 +97,7 @@ public final class PathPattern {
             }
         }
 
-        return new RoutePath(input, variables);
+        return new RouteMatch(input, variables);
     }
 
     /**

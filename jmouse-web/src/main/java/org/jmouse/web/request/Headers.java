@@ -1,10 +1,13 @@
 package org.jmouse.web.request;
 
 import org.jmouse.core.MediaType;
+import org.jmouse.core.MimeParser;
+import org.jmouse.util.Streamable;
 import org.jmouse.web.request.http.HttpHeader;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -88,15 +91,21 @@ public final class Headers {
     /**
      * 🎯 Typed getter for Accept header.
      */
-    public MediaType getAccept() {
-        return (MediaType) headers.get(HttpHeader.ACCEPT);
+    public List<MediaType> getAccept() {
+        Object accept = headers.get(HttpHeader.ACCEPT);
+
+        if (accept == null) {
+            return Collections.emptyList();
+        }
+
+        return Streamable.of(MimeParser.parseMimeTypes(accept.toString())).map(MediaType::new).toList();
     }
 
     /**
      * 📝 Typed setter for Accept header.
      */
-    public void setAccept(MediaType accept) {
-        addHeader(HttpHeader.ACCEPT, accept);
+    public void setAccept(List<MediaType> accept) {
+        addHeader(HttpHeader.ACCEPT, String.join(",", Streamable.of(accept).map(MediaType::toString)));
     }
 
     /**

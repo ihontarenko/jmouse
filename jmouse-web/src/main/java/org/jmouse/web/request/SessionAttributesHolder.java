@@ -24,25 +24,25 @@ public class SessionAttributesHolder {
     }
 
     /**
-     * Retrieves the current {@link ServletSession} instance from thread-local storage.
+     * Retrieves the current {@link WebSession} instance from thread-local storage.
      *
      * <p>This is a convenience method that casts the internally stored {@link RequestAttributes}
-     * to a {@link ServletSession}. It assumes that the stored instance is of the correct type.
+     * to a {@link WebSession}. It assumes that the stored instance is of the correct type.
      *
      * <p><strong>Note:</strong> If the stored attributes are not an instance of {@code ServletSession},
      * this method will throw a {@link ClassCastException}.
      *
-     * @return the current {@link ServletSession} instance, or {@code null} if none is set
-     * @throws ClassCastException if the stored attributes are not of type {@link ServletSession}
+     * @return the current {@link WebSession} instance, or {@code null} if none is set
+     * @throws ClassCastException if the stored attributes are not of type {@link WebSession}
      */
-    public static ServletSession getSession() {
-        ServletSession session = null;
+    public static WebSession getSession() {
+        WebSession session = null;
 
-        if (ATTRIBUTES_THREAD_LOCAL.get() instanceof ServletSession servletSession) {
+        if (ATTRIBUTES_THREAD_LOCAL.get() instanceof WebSession servletSession) {
             session = servletSession;
         } else {
             RequestAttributes attributes = getRequestAttributes();
-            if (attributes.getAttribute(ServletSession.SERVLET_SESSION_ATTRIBUTE) instanceof ServletSession servletSession) {
+            if (attributes.getAttribute(WebSession.SERVLET_SESSION_ATTRIBUTE) instanceof WebSession servletSession) {
                 session = servletSession;
             }
         }
@@ -58,8 +58,8 @@ public class SessionAttributesHolder {
      */
     public static void setRequestAttributes(RequestAttributes attributes) {
         ATTRIBUTES_THREAD_LOCAL.set(attributes);
-        if (attributes instanceof ServletSession servletSession) {
-            attributes.setAttribute(ServletSession.SERVLET_SESSION_ATTRIBUTE, servletSession);
+        if (attributes instanceof WebSession servletSession) {
+            attributes.setAttribute(WebSession.SERVLET_SESSION_ATTRIBUTE, servletSession);
         }
     }
 

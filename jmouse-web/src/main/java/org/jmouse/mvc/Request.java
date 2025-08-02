@@ -1,7 +1,7 @@
 package org.jmouse.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.web.request.ServletRequest;
+import org.jmouse.web.request.WebRequest;
 import org.jmouse.web.request.http.HttpMethod;
 
 /**
@@ -35,7 +35,7 @@ public interface Request {
 
     boolean accepts(String contentType);
 
-    ServletRequest request();
+    WebRequest request();
 
     default HttpServletRequest raw() {
         return request().getRequest();

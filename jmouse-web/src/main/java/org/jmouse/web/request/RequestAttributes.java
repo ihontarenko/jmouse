@@ -42,8 +42,8 @@ public interface RequestAttributes {
 
     static RequestAttributes of(Scope scope, HttpServletRequest request) {
         return switch (scope.id()) {
-            case REQUEST -> new ServletHttpRequest(request);
-            case SESSION -> new ServletHttpSession(request);
+            case REQUEST -> new WebHttpRequest(request);
+            case SESSION -> new WebHttpSession(request);
             default -> throw new WebContextException(
                     "Unsupported scope ID '%s' type. Available only REQUEST and SESSION".formatted(scope.id()));
         };

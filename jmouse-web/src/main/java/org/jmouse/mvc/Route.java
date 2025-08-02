@@ -153,9 +153,13 @@ public final class Route {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Route route)) return false;
+    public boolean equals(Object that) {
+        if (this == that)
+            return true;
+
+        if (!(that instanceof Route route))
+            return false;
+
         return method == route.method &&
                 Objects.equals(path, route.path) &&
                 Objects.equals(consumes, route.consumes) &&

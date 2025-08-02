@@ -2,6 +2,8 @@ package org.jmouse.mvc;
 
 import org.jmouse.beans.annotation.*;
 import org.jmouse.context.*;
+import org.jmouse.mvc.filter.RequestWrapperFilterRegistration;
+import org.jmouse.mvc.filter.SessionServletFilterRegistration;
 import org.jmouse.util.SingletonSupplier;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.servlet.RequestContextListener;
@@ -54,6 +56,16 @@ public class ServletDispatcherConfiguration {
         registrationBean.setEnabled(true);
 
         return registrationBean;
+    }
+
+    @Bean
+    public SessionServletFilterRegistration sessionServletFilterRegistration() {
+        return new SessionServletFilterRegistration();
+    }
+
+    @Bean
+    public RequestWrapperFilterRegistration requestWrapperFilterRegistration() {
+        return new RequestWrapperFilterRegistration();
     }
 
 }

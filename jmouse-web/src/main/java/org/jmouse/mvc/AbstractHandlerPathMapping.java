@@ -22,7 +22,7 @@ import java.util.Map;
  * <p>
  * Supports:
  * <ul>
- *   <li>Typed routing via {@link PathPattern} and {@link RoutePath}</li>
+ *   <li>Typed routing via {@link PathPattern} and {@link RouteMatch}</li>
  *   <li>Interceptor support via {@link HandlerInterceptorRegistry}</li>
  * </ul>
  *
@@ -64,22 +64,17 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
         HttpMethod    httpMethod    = HttpMethod.valueOf(request.getMethod());
         MappedHandler mappedHandler = null;
 
-        RouteMatcher matcher = RouteMatcher.ofRequest(request);
-
         for (Map.Entry<Route, H> entry : handlers.entrySet()) {
             Route       route       = entry.getKey();
             PathPattern pathPattern = route.path();
             HttpMethod  method      = route.method();
 
-            matcher.matches(route);
-
             if (pathPattern.matches(mappingPath) && method.equals(httpMethod)) {
-                RoutePath routePath = pathPattern.parse(mappingPath);
+                RouteMatch routeMatch = pathPattern.parse(mappingPath);
 
-                System.out.println(request.getContentType());
+                mappedHandler = new RouteMappedHandler(entry.getValue(), routeMatch, route);
 
-                mappedHandler = new RouteMappedHandler(entry.getValue(), route);
-                request.setAttribute(ROUTE_PATH_ATTRIBUTE, routePath);
+                request.setAttribute(ROUTE_MACTH_ATTRIBUTE, routeMatch);
                 break;
             }
         }

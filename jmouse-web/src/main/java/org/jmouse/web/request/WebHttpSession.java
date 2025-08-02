@@ -9,9 +9,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ServletHttpSession extends ServletHttpRequest implements ServletSession {
+public class WebHttpSession extends WebHttpRequest implements WebSession {
 
-    public ServletHttpSession(HttpServletRequest request) {
+    public WebHttpSession(HttpServletRequest request) {
         super(request);
     }
 

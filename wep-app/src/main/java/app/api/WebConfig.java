@@ -7,7 +7,7 @@ import org.jmouse.beans.annotation.BeanScan;
 import org.jmouse.core.MediaType;
 import org.jmouse.mvc.HandlerMapping;
 import org.jmouse.mvc.Route;
-import org.jmouse.mvc.RoutePath;
+import org.jmouse.mvc.RouteMatch;
 import org.jmouse.mvc.mapping.ControllerMethodRegistration;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.http.HttpHeader;
@@ -39,8 +39,8 @@ public class WebConfig {
     @Bean
     public ControllerMethodRegistration helloRegistration(WebBeanContext webBeanContext) {
         return new ControllerMethodRegistration(Route.GET("/hello/{id:int}/{active:boolean}"), (request, response) -> {
-            RoutePath routePath = (RoutePath) request.getAttribute(HandlerMapping.ROUTE_PATH_ATTRIBUTE);
-            Writer    writer    = response.getWriter();
+            RouteMatch routePath = (RouteMatch) request.getAttribute(HandlerMapping.ROUTE_MACTH_ATTRIBUTE);
+            Writer     writer    = response.getWriter();
 
 //            webBeanContext.getBean(Model.class);
 
