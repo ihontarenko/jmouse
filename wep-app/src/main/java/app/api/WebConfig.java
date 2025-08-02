@@ -80,6 +80,18 @@ public class WebConfig {
     }
 
     @Bean
+    public ControllerMethodRegistration route6Registration() {
+        Route route = Route.route()
+                .GET("/index")
+                .produces(MediaType.TEXT_HTML)
+                .header(HttpHeader.ETAG, "Tag!")
+                .build();
+
+        return new ControllerMethodRegistration(route, (request, response)
+                -> response.getWriter().write("[{'name':'Route 6'}]"));
+    }
+
+    @Bean
     public ControllerMethodRegistration helloRegistration(WebBeanContext webBeanContext) {
         return new ControllerMethodRegistration(Route.GET("/hello/{id:int}/{active:boolean}"), (request, response) -> {
             RouteMatch routePath = (RouteMatch) request.getAttribute(HandlerMapping.ROUTE_MACTH_ATTRIBUTE);

@@ -147,6 +147,7 @@ public final class PathPattern {
     public boolean equals(Object object) {
         if (object == null || getClass() != object.getClass())
             return false;
+
         return Objects.equals(pattern, ((PathPattern) object).pattern);
     }
 

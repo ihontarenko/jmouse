@@ -5,10 +5,7 @@ import org.jmouse.core.MimeParser;
 import org.jmouse.util.Streamable;
 import org.jmouse.web.request.http.HttpHeader;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 📦 Holds HTTP headers in a mutable but encapsulated way.
@@ -182,6 +179,33 @@ public final class Headers {
      */
     public void setReferer(String referer) {
         addHeader(HttpHeader.REFERER, referer);
+    }
+
+    /**
+     * 📌 Equality check based on headers map.
+     *
+     * @param other other object
+     * @return true if headers are equal
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (this == other)
+            return true;
+
+        if (!(other instanceof Headers that))
+            return false;
+
+        return Objects.equals(headers, that.headers);
+    }
+
+    /**
+     * 📌 Computes hash code from internal headers map.
+     *
+     * @return hash code
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(headers);
     }
 
     @Override

@@ -153,13 +153,12 @@ public class RouteMapping implements MappingMatcher {
         if (!(other instanceof RouteMapping that))
             return false;
 
-        return Objects.equals(route, that.route)
-                && Objects.equals(matchers, that.matchers);
+        return Objects.equals(route, that.route);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(route, matchers);
+        return Objects.hash(route);
     }
 
     @Override

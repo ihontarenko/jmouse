@@ -27,6 +27,13 @@ public final class MappingRegistry<T, M> {
      * @return the previous registration associated with the mapping, or {@code null} if none
      */
     public MappingRegistration<T, M> register(M mapping, MappingRegistration<T, M> registration) {
+        MappingRegistration<?, ?> previous = getRegistration(mapping);
+
+        if (previous != null) {
+            throw new IllegalStateException(
+                    "AMBIGUOUS MAPPING! Cannot register mapping %s there is already exists!".formatted(mapping));
+        }
+
         return registry.put(mapping, registration);
     }
 
