@@ -6,7 +6,6 @@ import org.jmouse.util.Getter;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Map;
 
 /**
  * 🛠️ Default implementation for resolving and mapping annotation attributes via {@link AttributeFor}.
@@ -89,7 +88,9 @@ public class AnnotationMapping implements AnnotationAttributeMapping {
     @SuppressWarnings("unchecked")
     public <T> T getAttributeValue(int index, Class<T> type) {
         Method attribute = attributes.getAttribute(index);
-        if (attribute == null) return null;
+
+        if (attribute == null)
+            return null;
 
         Object raw = Getter.ofMethod(attribute).get(annotation);
 
