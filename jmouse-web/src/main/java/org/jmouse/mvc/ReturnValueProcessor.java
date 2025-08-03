@@ -19,7 +19,6 @@ public class ReturnValueProcessor {
         for (ReturnValueHandler handler : handlers) {
             if (handler.supportsReturnType(container)) {
                 handler.handleReturnValue(container, request, response);
-                return;
             }
         }
     }

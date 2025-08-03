@@ -20,7 +20,7 @@ public class Test {
 
         List<MergedAnnotation> mergedAnnotations = Streamable.of(annotations).map(MergedAnnotation::new).toList();
 
-        MergedAnnotation merged = MergedAnnotation.forElement(ServletDispatcherConfiguration.class);
+        MergedAnnotation merged = MergedAnnotation.wrapWithSynthetic(ServletDispatcherConfiguration.class);
 
         MergedAnnotation mergedAnnotation = new MergedAnnotation(annotations.iterator().next());
 

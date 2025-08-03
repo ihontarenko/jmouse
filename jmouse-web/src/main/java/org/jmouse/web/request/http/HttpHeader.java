@@ -82,7 +82,9 @@ public enum HttpHeader {
     X_REQUESTED_WITH("X-Requested-With"),
     X_FRAME_OPTIONS("X-Frame-Options"),
     SET_COOKIE("Set-Cookie"),
-    COOKIE("Cookie");
+    COOKIE("Cookie"),
+
+    X_TEXT("X-Text");
 
     private final String value;
 

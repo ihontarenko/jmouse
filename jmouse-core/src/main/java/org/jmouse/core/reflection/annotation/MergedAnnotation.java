@@ -9,7 +9,7 @@ import java.util.*;
 
 /**
  * 🧬 Represents a merged annotation with its meta-annotations.
- *
+ * <p>
  * Preserves the full hierarchy of annotations (including meta-levels)
  * and allows flat traversal or filtering by type.
  *
@@ -17,19 +17,54 @@ import java.util.*;
  */
 public class MergedAnnotation {
 
-    private final AnnotationData         annotationData;
-    private final Set<MergedAnnotation>  metaAnnotations = new LinkedHashSet<>();
-    private       List<MergedAnnotation> flatAnnotations;
+    private final MergedAnnotation parent;
+    private final    MergedAnnotation           root;
+    private final    AnnotationData             annotationData;
+    private final    Set<MergedAnnotation>      metaAnnotations = new LinkedHashSet<>();
+    private final    AnnotationAttributeMapping mapping;
+    private volatile List<MergedAnnotation>     flatAnnotations;
+
+    public MergedAnnotation(AnnotationData annotationData) {
+        this(annotationData, null);
+    }
 
     /**
      * 🔁 Build merged annotation tree from base data.
      */
-    public MergedAnnotation(AnnotationData annotationData) {
+    public MergedAnnotation(AnnotationData annotationData, MergedAnnotation parent) {
+        this.parent = parent;
+        this.root = parent == null ? this : parent.getRoot();
         this.annotationData = annotationData;
 
         for (AnnotationData meta : annotationData.metas()) {
-            metaAnnotations.add(new MergedAnnotation(meta));
+            this.metaAnnotations.add(new MergedAnnotation(meta));
         }
+
+        this.mapping = new AnnotationMapping(annotationData.annotation(), getRoot());
+    }
+
+    /**
+     * 🧩 Wraps all annotations of the given element into a single {@link MergedAnnotation}.
+     * <p>
+     * Useful as a shortcut to avoid manual scanning and conversion of {@link AnnotationData}
+     * into multiple {@code MergedAnnotation} instances. The result acts as a synthetic,
+     * aggregate wrapper that allows unified access to annotation metadata.
+     * </p>
+     *
+     * <pre>{@code
+     * // Instead of:
+     * Set<AnnotationData> annotations = AnnotationScanner.scan(SomeClass.class);
+     * List<MergedAnnotation> merged = Streamable.of(annotations).map(MergedAnnotation::new).toList();
+     *
+     * // Use:
+     * MergedAnnotation merged = MergedAnnotation.forElement(SomeClass.class);
+     * }</pre>
+     *
+     * @param element the annotated element to wrap (e.g., class or method)
+     * @return a synthetic merged annotation representing all annotations on the element
+     */
+    public static MergedAnnotation wrapWithSynthetic(AnnotatedElement element) {
+        return new MergedAnnotation(SyntheticAnnotation.forAnnotatedElement(element));
     }
 
     /**
@@ -86,27 +121,24 @@ public class MergedAnnotation {
     }
 
     /**
-     * 🧩 Wraps all annotations of the given element into a single {@link MergedAnnotation}.
-     * <p>
-     * Useful as a shortcut to avoid manual scanning and conversion of {@link AnnotationData}
-     * into multiple {@code MergedAnnotation} instances. The result acts as a synthetic,
-     * aggregate wrapper that allows unified access to annotation metadata.
-     * </p>
-     *
-     * <pre>{@code
-     * // Instead of:
-     * Set<AnnotationData> annotations = AnnotationScanner.scan(SomeClass.class);
-     * List<MergedAnnotation> merged = Streamable.of(annotations).map(MergedAnnotation::new).toList();
-     *
-     * // Use:
-     * MergedAnnotation merged = MergedAnnotation.forElement(SomeClass.class);
-     * }</pre>
-     *
-     * @param element the annotated element to wrap (e.g., class or method)
-     * @return a synthetic merged annotation representing all annotations on the element
+     * Return annotation attribute mappings
      */
-    public static MergedAnnotation forElement(AnnotatedElement element) {
-        return new MergedAnnotation(SyntheticAnnotation.forAnnotatedElement(element));
+    public AnnotationAttributeMapping getMapping() {
+        return mapping;
+    }
+
+    /**
+     * Reference to parent annotation
+     */
+    public Optional<MergedAnnotation> getParent() {
+        return Optional.ofNullable(parent);
+    }
+
+    /**
+     * Reference to root annotation
+     */
+    public MergedAnnotation getRoot() {
+        return root;
     }
 
     /**
@@ -148,8 +180,7 @@ public class MergedAnnotation {
     public <A extends Annotation> A getNativeAnnotation(Class<A> type) {
         Optional<MergedAnnotation> mergedAnnotation = getAnnotation(type);
 
-        mergedAnnotation.orElseThrow(
-                () -> new IllegalStateException("No annotation found for: " + type));
+        mergedAnnotation.orElseThrow(() -> new IllegalStateException("No annotation found for: " + type));
 
         return (A) mergedAnnotation.get().getNativeAnnotation();
     }
@@ -163,8 +194,7 @@ public class MergedAnnotation {
      */
     @SuppressWarnings("unchecked")
     public <A extends Annotation> List<A> getNativeAnnotations(Class<A> type) {
-        return (List<A>) getAnnotations(type).stream()
-                .map(MergedAnnotation::getNativeAnnotation).toList();
+        return (List<A>) getAnnotations(type).stream().map(MergedAnnotation::getNativeAnnotation).toList();
     }
 
     /**
@@ -214,10 +244,6 @@ public class MergedAnnotation {
 
     @Override
     public String toString() {
-        return "@%s (depth=%d) on %s".formatted(
-                getAnnotationType().getSimpleName(),
-                getDepth(),
-                annotationData.annotatedElement()
-        );
+        return "@%s (depth=%d) on %s".formatted(getAnnotationType().getSimpleName(), getDepth(), annotationData.annotatedElement());
     }
 }

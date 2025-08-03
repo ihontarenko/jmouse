@@ -263,6 +263,6 @@ public interface BeanDefinition {
     boolean isAnnotatedWith(Class<?> annotatedClass);
 
     default MergedAnnotation getMergedAnnotation() {
-        return MergedAnnotation.forElement(getAnnotatedElement());
+        return MergedAnnotation.wrapWithSynthetic(getAnnotatedElement());
     }
 }

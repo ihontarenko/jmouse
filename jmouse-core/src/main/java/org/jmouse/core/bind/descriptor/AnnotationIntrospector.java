@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
 
 public class AnnotationIntrospector extends AbstractIntrospector<AnnotationData, AnnotationIntrospector, Annotation, AnnotationDescriptor> {
 
-    protected AnnotationIntrospector(Annotation target) {
+    public AnnotationIntrospector(Annotation target) {
         super(target);
     }
 

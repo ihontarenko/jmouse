@@ -60,7 +60,7 @@ public class EnvironmentValueBeanPostProcessor implements BeanPostProcessor {
         JavaBeanAccessor accessor    = new JavaBeanAccessor(bean);
 
         for (Field field : fields) {
-            EnvironmentValue annotation  = MergedAnnotation.forElement(field)
+            EnvironmentValue annotation  = MergedAnnotation.wrapWithSynthetic(field)
                     .getNativeAnnotation(EnvironmentValue.class);
             String           propertyKey = annotation.value();
             Object           value       = Bind.with(binder).get(propertyKey, field.getType());

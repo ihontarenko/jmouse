@@ -33,7 +33,7 @@ public class WebConfig {
                 .build();
 
         return new ControllerMethodRegistration(route, (request, response)
-                -> response.getWriter().write("[{'name':'Route 1'}]"));
+                -> response.getWriter().write("[{\"name\":\"Route 1\"}]"));
     }
 
     @Bean

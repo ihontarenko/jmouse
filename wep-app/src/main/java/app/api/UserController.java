@@ -1,6 +1,6 @@
 package app.api;
 
-import org.jmouse.context.Controller;
+import org.jmouse.mvc.mapping.annnotation.Controller;
 
 @Controller
 public class UserController {

@@ -1,7 +1,10 @@
 package org.jmouse.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.InitializingBean;
 import org.jmouse.util.Sorter;
+import org.jmouse.web.context.WebBeanContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +27,7 @@ import java.util.List;
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  */
-public abstract class AbstractHandlerMapping implements HandlerMapping {
+public abstract class AbstractHandlerMapping implements HandlerMapping, InitializingBean {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractHandlerMapping.class);
 
@@ -54,6 +57,25 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
     }
 
     /**
+     * 🔄 Called after DI context is fully initialized.
+     *
+     * @param context fully initialized context (should be WebBeanContext)
+     */
+    @Override
+    public void afterCompletion(BeanContext context) {
+        initialize((WebBeanContext) context);
+    }
+
+    /**
+     * ⚙️ Initializes the mapping
+     *
+     * @param context current web bean context
+     */
+    protected void initialize(WebBeanContext context) {
+        doInitialize(context);
+    }
+
+    /**
      * 🎯 Resolve handler object from request.
      *
      * @param request HTTP request
@@ -67,4 +89,11 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
      * @return list of interceptors (can be empty)
      */
     protected abstract List<HandlerInterceptor> getHandlerInterceptors();
+
+    /**
+     * 🔧 Hook for subclasses to register handlers.
+     *
+     * @param context current context
+     */
+    protected abstract void doInitialize(WebBeanContext context);
 }

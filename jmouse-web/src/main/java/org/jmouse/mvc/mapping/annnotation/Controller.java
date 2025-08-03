@@ -1,4 +1,4 @@
-package org.jmouse.context;
+package org.jmouse.mvc.mapping.annnotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

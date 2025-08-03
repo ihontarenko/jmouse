@@ -42,7 +42,7 @@ import java.util.List;
  * @see RouteMappedHandler
  * @see WebBeanContext
  */
-public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMapping implements InitializingBean {
+public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMapping {
 
     private MappingRegistry<H>         mappingRegistry;
     private HandlerInterceptorRegistry interceptorRegistry;
@@ -56,16 +56,6 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
     public void addHandlerMapping(Route route, H handler) {
         MappingRegistration<H> registration = new MappingRegistration<>(new MappingCriteria(route), handler);
         mappingRegistry.register(registration.criteria(), registration);
-    }
-
-    /**
-     * 🔄 Called after DI context is fully initialized.
-     *
-     * @param context fully initialized context (should be WebBeanContext)
-     */
-    @Override
-    public void afterCompletion(BeanContext context) {
-        initialize((WebBeanContext) context);
     }
 
     /**
@@ -175,16 +165,11 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      * @param context current web bean context
      */
     @SuppressWarnings("unchecked")
+    @Override
     protected void initialize(WebBeanContext context) {
         setHandlerInterceptorsRegistry(context.getBean(HandlerInterceptorRegistry.class));
         setMappingRegistry(context.getBean(MappingRegistry.class));
-        doInitialize(context);
+        super.initialize(context);
     }
 
-    /**
-     * 🔧 Hook for subclasses to register handlers.
-     *
-     * @param context current context
-     */
-    protected abstract void doInitialize(WebBeanContext context);
 }

@@ -12,8 +12,6 @@ import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.List;
 
-import static org.jmouse.core.reflection.annotation.MergedAnnotation.forElement;
-
 
 /**
  * ✅ Evaluates whether a {@link BeanDefinition} satisfies all registered {@link BeanCondition}s.
@@ -90,7 +88,7 @@ public final class ConditionEvaluator {
      */
     private List<MergedAnnotation> getMergedAnnotations(BeanDefinition definition) {
         try {
-            return Streamable.of(MergedAnnotation.forElement(definition.getAnnotatedElement()).getMetas())
+            return Streamable.of(MergedAnnotation.wrapWithSynthetic(definition.getAnnotatedElement()).getMetas())
                     .filter(ma -> ma.isAnnotationPresent(BeanCondition.class))
                     .toList();
         } catch (UnsupportedOperationException ignored) {
