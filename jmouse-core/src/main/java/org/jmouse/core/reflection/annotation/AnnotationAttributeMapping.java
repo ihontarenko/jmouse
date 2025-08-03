@@ -11,15 +11,7 @@ public interface AnnotationAttributeMapping {
 
     <T> T getAttributeValue(int index, Class<T> type);
 
-    default <T> T getAttributeValue(String name, Class<T> type) {
-        int index = getAttributeIndex(name);
-
-        if (index != -1) {
-            return getAttributeValue(index, type);
-        }
-
-        return null;
-    }
+    <T> T getAttributeValue(String name, Class<T> type);
 
     /**
      * Maps attributes from source to target annotation type.

@@ -105,6 +105,13 @@ public class AnnotationAttributes {
     }
 
     /**
+     * 📥 Gets all attributes method
+     */
+    public Method[] getAttributes() {
+        return attributes;
+    }
+
+    /**
      * 🔎 Finds index of attribute method by name.
      *
      * @param name attribute name

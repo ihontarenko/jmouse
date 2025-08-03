@@ -3,6 +3,7 @@ package org.jmouse.web_app.controller;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.core.reflection.annotation.MergedAnnotations;
 import org.jmouse.mvc.mapping.annnotation.GetMapping;
+import org.jmouse.mvc.mapping.annnotation.Mapping;
 
 import java.lang.reflect.Method;
 
@@ -14,6 +15,10 @@ public class Synt {
         MergedAnnotation mapping = merged.getAnnotation(GetMapping.class).get();
 
         MergedAnnotations annotations = MergedAnnotations.ofAnnotatedElement(method);
+
+        Mapping mappingAnnotation = mapping.createSynthesizedAnnotation(Mapping.class);
+
+        mappingAnnotation.path();
 
         Object value = mapping.getMapping().getAttributeValue("path", Object.class);
 

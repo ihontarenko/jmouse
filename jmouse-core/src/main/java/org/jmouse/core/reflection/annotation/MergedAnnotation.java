@@ -17,7 +17,7 @@ import java.util.*;
  */
 public class MergedAnnotation {
 
-    private final MergedAnnotation parent;
+    private final    MergedAnnotation           parent;
     private final    MergedAnnotation           root;
     private final    AnnotationData             annotationData;
     private final    Set<MergedAnnotation>      metaAnnotations = new LinkedHashSet<>();
@@ -37,7 +37,7 @@ public class MergedAnnotation {
         this.annotationData = annotationData;
 
         for (AnnotationData meta : annotationData.metas()) {
-            this.metaAnnotations.add(new MergedAnnotation(meta));
+            this.metaAnnotations.add(new MergedAnnotation(meta, this));
         }
 
         this.mapping = new AnnotationMapping(annotationData.annotation(), getRoot());
@@ -240,6 +240,10 @@ public class MergedAnnotation {
         }
 
         return flattened;
+    }
+
+    public <A extends Annotation> A createSynthesizedAnnotation(Class<A> type) {
+        return SynthesizedAnnotationProxy.create(this, type);
     }
 
     @Override

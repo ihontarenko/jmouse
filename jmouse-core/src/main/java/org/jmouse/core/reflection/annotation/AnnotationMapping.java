@@ -32,10 +32,39 @@ public class AnnotationMapping implements AnnotationAttributeMapping {
     }
 
     @Override
+    public <T> T getAttributeValue(String name, Class<T> type) {
+        int index = getAttributeIndex(name);
+
+        if (index != -1) {
+            T value = getAttributeValue(index, type);
+            if (value != null) {
+                return value;
+            }
+        }
+
+        for (MergedAnnotation annotation : root.getFlattened()) {
+            AnnotationAttributes attributes = AnnotationAttributes.forAnnotationType(annotation.getAnnotationType());
+            for (Method method : attributes.getAttributes()) {
+                AttributeFor alias = method.getAnnotation(AttributeFor.class);
+                if (alias != null && alias.attribute().equals(name)) {
+                    Object value = Getter.ofMethod(method).get(annotation.getNativeAnnotation());
+                    if (value != null && !isDefaultValue(method, value)) {
+                        return type.cast(value);
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public <T> T getAttributeValue(int index, Class<T> type) {
         Method attribute = attributes.getAttribute(index);
-
-        if (attribute == null) return null;
+        if (attribute == null) {
+            return null;
+        }
 
         T value = (T) Getter.ofMethod(attribute).get(annotation);
 
