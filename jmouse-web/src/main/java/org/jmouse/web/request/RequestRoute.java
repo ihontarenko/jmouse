@@ -47,8 +47,7 @@ public record RequestRoute(
     public static RequestRoute ofRequest(HttpServletRequest request) {
         RequestPath    requestPath    = RequestAttributesHolder.getRequestPath();
         RequestHeaders requestHeaders = RequestHeaders.ofRequest(request);
-
-        Headers headers = requestHeaders.headers();
+        Headers        headers        = requestHeaders.headers();
 
         return new RequestRoute(
                 HttpMethod.ofName(request.getMethod()),

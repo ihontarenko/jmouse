@@ -42,7 +42,7 @@ public interface MappedHandler {
      *
      * @return associated {@link RouteMatch} or {@code null} if not mapped
      */
-    default RouteMatch routeMatch() {
+    default RouteMatch match() {
         return null;
     }
 

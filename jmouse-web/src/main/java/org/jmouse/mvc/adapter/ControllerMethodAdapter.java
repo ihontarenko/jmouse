@@ -18,7 +18,9 @@ public class ControllerMethodAdapter extends AbstractHandlerAdapter {
 
         try {
             controller.handle(request, response);
-            postHandle(response, container);
+
+
+
             response.flushBuffer();
         } catch (IOException e) {
             container.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);

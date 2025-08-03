@@ -28,9 +28,9 @@ import java.util.Optional;
  *
  * @author Ivan Hontarenko
  */
-public class RouteMapping implements MappingMatcher {
+public class MappingCriteria implements MappingMatcher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RouteMapping.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MappingCriteria.class);
 
     private final Route                       route;
     private final List<Matcher<RequestRoute>> matchers = new ArrayList<>();
@@ -41,7 +41,7 @@ public class RouteMapping implements MappingMatcher {
      *
      * @param route the route to be converted into matchers
      */
-    public RouteMapping(Route route) {
+    public MappingCriteria(Route route) {
         this.route = route;
         createMatchers(route);
     }
@@ -86,7 +86,7 @@ public class RouteMapping implements MappingMatcher {
         Optional<Matcher<RequestRoute>> matcher = Streamable.of(matchers)
                 .reduce(Matcher::logicalAnd);
 
-        LOGGER.info("RouteMapping: {} will be proceed!", matcher);
+        LOGGER.info("MappingCriteria: {} will be proceed!", matcher);
 
         return matcher.orElseGet(()
                 -> Matcher.constant(true)).matches(requestRoute);
@@ -111,6 +111,15 @@ public class RouteMapping implements MappingMatcher {
     }
 
     /**
+     * ➕ Adds a custom matcher to this route.
+     *
+     * @param customMatcher matcher to add for additional matching logic
+     */
+    public void addCustomMatcher(Matcher<RequestRoute> customMatcher) {
+        matchers.add(customMatcher);
+    }
+
+    /**
      * Compares this mapping with another mapping to determine
      * which is more specific relative to the given request.
      * <p>
@@ -123,7 +132,7 @@ public class RouteMapping implements MappingMatcher {
      */
     @Override
     public int compare(MappingMatcher other, RequestRoute requestRoute) {
-        if (other instanceof RouteMapping that) {
+        if (other instanceof MappingCriteria that) {
 
             int result = Integer.compare(this.matchers.size(), that.matchers.size());
 
@@ -142,6 +151,7 @@ public class RouteMapping implements MappingMatcher {
                 }
             }
         }
+
         return 0;
     }
 
@@ -150,7 +160,7 @@ public class RouteMapping implements MappingMatcher {
         if (this == other)
             return true;
 
-        if (!(other instanceof RouteMapping that))
+        if (!(other instanceof MappingCriteria that))
             return false;
 
         return Objects.equals(route, that.route);
@@ -163,6 +173,6 @@ public class RouteMapping implements MappingMatcher {
 
     @Override
     public String toString() {
-        return "RouteMapping[" + matchers.size() + "] " + route;
+        return "MappingCriteria[" + matchers.size() + "] " + route;
     }
 }

@@ -5,7 +5,7 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
 import org.jmouse.mvc.routing.MappingRegistration;
 import org.jmouse.mvc.routing.MappingRegistry;
-import org.jmouse.mvc.routing.RouteMapping;
+import org.jmouse.mvc.routing.MappingCriteria;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.RequestRoute;
 
@@ -13,32 +13,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 🧭 Abstract base for route-based handler mappings.
- * Matches incoming HTTP requests by {@link PathPattern} and resolves handlers of type {@code H}.
+ * 🧭 Abstract base class for route-based handler mappings.
+ * <p>
+ * Matches incoming HTTP requests against {@link PathPattern} routes and provides
+ * the matching handler of type {@code H}.
  *
- * <p>💡 Example:
+ * <p>Usage example:
  * <pre>{@code
  * AbstractHandlerPathMapping<Controller> mapping = ...;
- * mapping.addHandlerMapping("/user/{id}", new UserController());
+ * mapping.addHandlerMapping(Route.GET("/user/{id}"), new UserController());
  * }</pre>
- * <p>
- * Supports:
+ *
+ * <p>Supports:
  * <ul>
- *   <li>Typed routing via {@link PathPattern} and {@link RouteMatch}</li>
+ *   <li>Typed route matching via {@link PathPattern} and {@link RouteMatch}</li>
+ *   <li>Dynamic handler registration via {@link #addHandlerMapping(Route, Object)}</li>
+ *   <li>Request-scoped route resolution with {@link #getMappedHandler(HttpServletRequest)}</li>
  *   <li>Interceptor support via {@link HandlerInterceptorRegistry}</li>
  * </ul>
  *
- * @param <H> handler type (e.g. Controller, Function, etc.)
- * @author Ivan Hontarenko (Mr. Jerry Mouse)
- * @author ihontarenko@gmail.com
+ * <p>Subclasses should implement {@link #doInitialize(WebBeanContext)} to register their handlers
+ * during context initialization.
+ *
+ * @param <H> the handler type (e.g. controller, function, command handler, etc.)
+ * @author Ivan Hontarenko
+ * @see MappingRegistry
+ * @see MappingCriteria
+ * @see RouteMappedHandler
+ * @see WebBeanContext
  */
 public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMapping implements InitializingBean {
 
-    private MappingRegistry<H, RouteMapping> mappingRegistry;
-    /**
-     * 🗺️ Map of path patterns to handlers
-     */
-    private HandlerInterceptorRegistry       interceptorRegistry;
+    private MappingRegistry<H>         mappingRegistry;
+    private HandlerInterceptorRegistry interceptorRegistry;
 
     /**
      * ➕ Registers a route and its corresponding handler.
@@ -47,46 +54,70 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      * @param handler handler instance
      */
     public void addHandlerMapping(Route route, H handler) {
-        MappingRegistration<H, RouteMapping> registration = new MappingRegistration<>(new RouteMapping(route), handler);
-        mappingRegistry.register(registration.mapping(), registration);
+        MappingRegistration<H> registration = new MappingRegistration<>(new MappingCriteria(route), handler);
+        mappingRegistry.register(registration.criteria(), registration);
     }
 
+    /**
+     * 🔄 Called after DI context is fully initialized.
+     *
+     * @param context fully initialized context (should be WebBeanContext)
+     */
     @Override
     public void afterCompletion(BeanContext context) {
         initialize((WebBeanContext) context);
     }
 
     /**
-     * 🔍 Resolves the handler and route info for a given request.
+     * 📍 Resolves the {@link MappedHandler} for the incoming request,
+     * including route match and handler metadata.
      *
-     * @param request HTTP request
-     * @return matched handler with route info, or null if no match
+     * Example:
+     * <pre>{@code
+     * MappedHandler handler = mappingHandlerAdapter.getMappedHandler(request);
+     * }</pre>
+     *
+     * @param request HTTP servlet request
+     * @return {@link MappedHandler} with parsed route and handler, or {@code null} if no match found
      */
     public MappedHandler getMappedHandler(HttpServletRequest request) {
-        RequestRoute  requestRoute  = RequestRoute.ofRequest(request);
-        MappedHandler mappedHandler = null;
-
-        RouteMapping winner = matchRouteMapping(requestRoute);
+        RequestRoute    requestRoute  = RequestRoute.ofRequest(request);
+        MappedHandler   mappedHandler = null;
+        MappingCriteria winner        = getWinner(requestRoute);
 
         if (winner != null) {
-            MappingRegistration<H, RouteMapping> registration = mappingRegistry.getRegistration(winner);
-            H                                    handler      = registration.handler();
-            Route                                route        = winner.getRoute();
+            MappingRegistration<H> registration = mappingRegistry.getRegistration(winner);
 
-            RouteMatch routeMatch = route.pathPattern().parse(requestRoute.requestPath().path());
+            H          handler = registration.handler();
+            Route      route   = winner.getRoute();
+            RouteMatch match   = route.pathPattern().parse(requestRoute.requestPath().path());
 
-            mappedHandler = new RouteMappedHandler(handler, routeMatch, route);
+            mappedHandler = new RouteMappedHandler(handler, match, route);
 
-            request.setAttribute(ROUTE_MACTH_ATTRIBUTE, routeMatch);
+            request.setAttribute(ROUTE_MACTH_ATTRIBUTE, match);
         }
 
         return mappedHandler;
     }
 
-    private RouteMapping matchRouteMapping(RequestRoute requestRoute) {
-        List<RouteMapping> candidates = new ArrayList<>();
+    /**
+     * 🥇 Selects the most specific and applicable {@link MappingCriteria}
+     * that matches the incoming {@link RequestRoute}.
+     *
+     * This method:
+     * <ul>
+     *     <li>Filters all matching criteria</li>
+     *     <li>Sorts them by specificity (using {@code compare()})</li>
+     *     <li>Returns the most specific match</li>
+     * </ul>
+     *
+     * @param requestRoute parsed request route from incoming HTTP request
+     * @return best matching {@link MappingCriteria}, or {@code null} if none matched
+     */
+    private MappingCriteria getWinner(RequestRoute requestRoute) {
+        List<MappingCriteria> candidates = new ArrayList<>();
 
-        for (RouteMapping mapping : mappingRegistry.getMappings()) {
+        for (MappingCriteria mapping : mappingRegistry.getMappingCriteria()) {
             if (mapping.matches(requestRoute)) {
                 candidates.add(mapping);
             }
@@ -95,9 +126,15 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
         candidates.sort((a, b)
                 -> -1 * a.compare(b, requestRoute));
 
-        return candidates.getFirst();
+        return candidates.isEmpty() ? null : candidates.getFirst();
     }
 
+    /**
+     * 🧱 Returns all registered {@link HandlerInterceptor}s to be applied
+     * to the current request processing pipeline.
+     *
+     * @return list of interceptors
+     */
     @Override
     protected List<HandlerInterceptor> getHandlerInterceptors() {
         return interceptorRegistry.getInterceptors();
@@ -113,11 +150,11 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
     }
 
     /**
-     * 📦 Returns the current {@link MappingRegistry} instance used to store {@link RouteMapping}s.
+     * 📦 Returns the current {@link MappingRegistry} instance used to store {@link MappingCriteria}s.
      *
      * @return the configured mapping registry
      */
-    public MappingRegistry<H, RouteMapping> getMappingRegistry() {
+    public MappingRegistry<H> getMappingRegistry() {
         return mappingRegistry;
     }
 
@@ -128,10 +165,9 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      *
      * @param mappingRegistry the new mapping registry to use
      */
-    public void setMappingRegistry(MappingRegistry<H, RouteMapping> mappingRegistry) {
+    public void setMappingRegistry(MappingRegistry<H> mappingRegistry) {
         this.mappingRegistry = mappingRegistry;
     }
-
 
     /**
      * ⚙️ Initializes the mapping with context and interceptors.

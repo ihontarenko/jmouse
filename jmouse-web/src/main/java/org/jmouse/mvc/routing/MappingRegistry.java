@@ -15,9 +15,9 @@ import java.util.Map;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public final class MappingRegistry<T, M> {
+public final class MappingRegistry<T> {
 
-    private final Map<M, MappingRegistration<T, M>> registry = new LinkedHashMap<>();
+    private final Map<MappingCriteria, MappingRegistration<T>> registry = new LinkedHashMap<>();
 
     /**
      * Registers a new mapping with its registration.
@@ -26,15 +26,15 @@ public final class MappingRegistry<T, M> {
      * @param registration the registration associated with the mapping
      * @return the previous registration associated with the mapping, or {@code null} if none
      */
-    public MappingRegistration<T, M> register(M mapping, MappingRegistration<T, M> registration) {
-        MappingRegistration<?, ?> previous = getRegistration(mapping);
+    public MappingRegistration<T> register(MappingCriteria criteria, MappingRegistration<T> registration) {
+        MappingRegistration<?> previous = getRegistration(criteria);
 
         if (previous != null) {
             throw new IllegalStateException(
-                    "AMBIGUOUS MAPPING! Cannot register mapping %s there is already exists!".formatted(mapping));
+                    "AMBIGUOUS MAPPING! Cannot register mapping-criteria %s there is already exists!".formatted(criteria));
         }
 
-        return registry.put(mapping, registration);
+        return registry.put(criteria, registration);
     }
 
     /**
@@ -43,7 +43,7 @@ public final class MappingRegistry<T, M> {
      * @param mapping the mapping key
      * @return the associated registration, or {@code null} if not found
      */
-    public MappingRegistration<T, M> getRegistration(M mapping) {
+    public MappingRegistration<T> getRegistration(MappingCriteria mapping) {
         return registry.get(mapping);
     }
 
@@ -53,8 +53,8 @@ public final class MappingRegistry<T, M> {
      * @param mapping the mapping key to remove
      * @return the removed registration, or {@code null} if none existed
      */
-    public MappingRegistration<T, M> remove(M mapping) {
-        return registry.remove(mapping);
+    public MappingRegistration<T> remove(MappingCriteria criteria) {
+        return registry.remove(criteria);
     }
 
     /**
@@ -63,8 +63,8 @@ public final class MappingRegistry<T, M> {
      * @param mapping the mapping key to check
      * @return {@code true} if the mapping exists, {@code false} otherwise
      */
-    public boolean contains(M mapping) {
-        return registry.containsKey(mapping);
+    public boolean contains(MappingCriteria criteria) {
+        return registry.containsKey(criteria);
     }
 
     /**
@@ -72,7 +72,7 @@ public final class MappingRegistry<T, M> {
      *
      * @return a collection of all mapping registrations
      */
-    public Collection<MappingRegistration<T, M>> getRegistrations() {
+    public Collection<MappingRegistration<T>> getRegistrations() {
         return registry.values();
     }
 
@@ -81,7 +81,7 @@ public final class MappingRegistry<T, M> {
      *
      * @return a collection of all mapping registrations
      */
-    public Collection<M> getMappings() {
+    public Collection<MappingCriteria> getMappingCriteria() {
         return registry.keySet();
     }
 
