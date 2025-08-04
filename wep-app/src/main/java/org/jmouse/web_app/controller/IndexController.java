@@ -20,7 +20,7 @@ public class IndexController {
                     @Header(name = "X-TEXT", value = "HELLO")
             }
     )
-    public String demo(@PathVariable("id") String id) {
+    public String demo(@PathVariable("id") Long id) {
         return "index/demo" + id;
     }
 

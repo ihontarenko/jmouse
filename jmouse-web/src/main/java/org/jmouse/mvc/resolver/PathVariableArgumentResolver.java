@@ -1,7 +1,7 @@
 package org.jmouse.mvc.resolver;
 
 import org.jmouse.mvc.AbstractArgumentResolver;
-import org.jmouse.mvc.HandlerInvocation;
+import org.jmouse.mvc.MappingResult;
 import org.jmouse.mvc.MethodParameter;
 import org.jmouse.mvc.RouteMatch;
 import org.jmouse.mvc.mapping.annnotation.PathVariable;
@@ -20,13 +20,13 @@ public class PathVariableArgumentResolver extends AbstractArgumentResolver {
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, HandlerInvocation invocation) {
+    public Object resolveArgument(MethodParameter parameter, MappingResult mappingResult) {
         PathVariable pathVariable  = parameter.getAnnotation(PathVariable.class);
+        RouteMatch   match         = mappingResult.match();
         Object       argumentValue = null;
         String       variableName  = pathVariable.value();
 
         if (variableName != null && !variableName.isBlank()) {
-            RouteMatch match = invocation.mappedHandler().match();
             argumentValue = match.getVariable(variableName, null);
         }
 

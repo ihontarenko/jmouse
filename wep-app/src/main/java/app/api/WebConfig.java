@@ -119,7 +119,7 @@ public class WebConfig {
     @Bean
     public ControllerMethodRegistration helloRegistration(WebBeanContext webBeanContext) {
         return new ControllerMethodRegistration(Route.GET("/hello/{id:int}/{active:boolean}"), (request, response) -> {
-            RouteMatch routePath = (RouteMatch) request.getAttribute(HandlerMapping.ROUTE_MACTH_ATTRIBUTE);
+            RouteMatch routePath = (RouteMatch) request.getAttribute(HandlerMapping.ROUTE_MATCH_ATTRIBUTE);
             Writer     writer    = response.getWriter();
 
 //            webBeanContext.getBean(Model.class);

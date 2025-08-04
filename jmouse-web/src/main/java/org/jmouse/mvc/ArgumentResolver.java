@@ -18,5 +18,5 @@ public interface ArgumentResolver {
      */
     boolean supportsParameter(MethodParameter parameter);
 
-    Object resolveArgument(MethodParameter parameter, HandlerInvocation invocation);
+    Object resolveArgument(MethodParameter parameter, MappingResult mappingResult);
 }

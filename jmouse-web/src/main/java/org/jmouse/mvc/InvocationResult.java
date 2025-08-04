@@ -6,12 +6,13 @@ import org.jmouse.web.request.http.HttpStatus;
 /**
  * 🧩 Execution result returned from a {@link HandlerAdapter}.
  *
- * Represents a structured handler result including return value, model,
- * headers, status, and metadata for further processing.
+ * <p>Encapsulates the outcome of a controller invocation — including
+ * return value, model data, HTTP headers, and status code.
  *
- * Use {@link DefaultInvocationResult} for construction.
+ * <p>Use {@link DefaultInvocationResult} for concrete implementation.
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
+ * @author ihontarenko@gmail.com
  * @see DefaultInvocationResult
  */
 public interface InvocationResult {
@@ -22,15 +23,20 @@ public interface InvocationResult {
     ExecutionState getState();
 
     /**
-     * Sets the state of execution, such as {@code HANDLED} or {@code UNHANDLED}.
+     * Sets the execution state (e.g. {@code HANDLED} or {@code UNHANDLED}).
      */
     void setState(ExecutionState state);
 
     /**
-     * Return value from controller method (can be null).
+     * Return value from controller method (nullable).
      */
     Object getReturnValue();
 
+    /**
+     * Sets the HTTP status to be used in the response.
+     *
+     * <p>If {@code null}, the default status {@code 200 OK} will be applied.
+     */
     void setReturnValue(Object returnValue);
 
     /**
@@ -39,29 +45,33 @@ public interface InvocationResult {
     Model getModel();
 
     /**
-     * HTTP headers.
+     * HTTP headers to write to response.
      */
     Headers getHeaders();
 
     /**
-     * Optional HTTP status (null = 200 OK).
+     * Optional HTTP status code (nullable, default = 200 OK).
      */
     HttpStatus getHttpStatus();
 
+    /**
+     * 📡 Sets HTTP status for the response.
+     *
+     * @param status HTTP status (nullable, default = 200 OK)
+     */
     void setHttpStatus(HttpStatus status);
 
     /**
-     * Utility: whether this result was marked as handled.
+     * ✅ Whether this result was marked as handled.
      */
     default boolean isHandled() {
         return getState() == ExecutionState.HANDLED;
     }
 
     /**
-     * Utility: whether this result is unhandled.
+     * ❌ Whether this result is unhandled.
      */
     default boolean isUnhandled() {
         return getState() == ExecutionState.UNHANDLED;
     }
-
 }

@@ -86,7 +86,7 @@ public class MappingCriteria implements MappingMatcher {
         Optional<Matcher<RequestRoute>> matcher = Streamable.of(matchers)
                 .reduce(Matcher::logicalAnd);
 
-        LOGGER.info("MappingCriteria: {} will be proceed!", matcher);
+        LOGGER.debug("MappingCriteria: {} will be proceed!", matcher);
 
         return matcher.orElseGet(()
                 -> Matcher.constant(true)).matches(requestRoute);

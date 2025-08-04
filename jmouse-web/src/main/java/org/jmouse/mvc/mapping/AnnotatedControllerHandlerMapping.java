@@ -53,10 +53,10 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
             if (context.isLocalBean(beanName)) {
                 BeanDefinition definition = context.getDefinition(beanName);
                 if (definition.isAnnotatedWith(Controller.class)) {
-                    Object bean = context.getBean(definition.getBeanName());
-                    Collection<Method> methods = new MethodFinder().find(
-                            definition.getBeanClass(), MethodMatchers.isPublic());
-                    initializeMethods(methods, bean, context);
+                    Object             bean    = context.getBean(definition.getBeanName());
+                    Collection<Method> methods = new MethodFinder()
+                            .find(definition.getBeanClass(), MethodMatchers.isPublic());
+                    initializeMethods(methods, bean);
                 }
             }
         }
@@ -68,7 +68,7 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
      * @param methods controller methods
      * @param bean controller instance
      */
-    private void initializeMethods(Collection<Method> methods, Object bean, WebBeanContext context) {
+    private void initializeMethods(Collection<Method> methods, Object bean) {
         for (Method method : methods) {
             AnnotationRepository       repository = AnnotationRepository.ofAnnotatedElement(method);
             Optional<MergedAnnotation> optional   = repository.get(Mapping.class);
@@ -78,7 +78,7 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
                 Mapping          mapping    = annotation.createSynthesizedAnnotation(Mapping.class);
                 Route            route      = createRoute(mapping);
 
-                addHandlerMapping(route, new HandlerMethod(context, bean, method));
+                addHandlerMapping(route, new HandlerMethod(bean, method));
             }
         }
     }

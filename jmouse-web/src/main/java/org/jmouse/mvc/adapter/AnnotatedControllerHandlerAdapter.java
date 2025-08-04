@@ -12,9 +12,15 @@ import java.util.List;
 public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
 
     @Override
-    protected Object doHandle(HandlerInvocation invocation) {
-        MappedHandler mappedHandler = invocation.mappedHandler();
+    protected Object doHandle(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            MappedHandler mappedHandler,
+            InvocationResult result
+    ) {
         HandlerMethod handlerMethod = (HandlerMethod) mappedHandler.handler();
+        MappingResult mappingResult = MappingResult.of(mappedHandler.match(), mappedHandler.route());
+
         Object        returnValue;
 
         try {
@@ -25,7 +31,7 @@ public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
             for (MethodParameter parameter : handlerMethod.getParameters()) {
                 for (ArgumentResolver argumentResolver : getArgumentResolvers()) {
                     if (argumentResolver.supportsParameter(parameter)) {
-                        resolved.add(argumentResolver.resolveArgument(parameter, invocation));
+                        resolved.add(argumentResolver.resolveArgument(parameter, mappingResult));
                     }
                 }
             }

@@ -32,15 +32,18 @@ public class ControllerMethodHandlerAdapter extends AbstractHandlerAdapter {
      * @throws HandlerAdapterException in case of I/O failure
      */
     @Override
-    protected Object doHandle(HandlerInvocation invocation) {
-        MappedHandler    mappedHandler    = invocation.mappedHandler();
-        ControllerMethod controller       = (ControllerMethod) mappedHandler.handler();
-        InvocationResult invocationResult = invocation.invocationResult();
+    protected Object doHandle(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            MappedHandler mappedHandler,
+            InvocationResult result
+    ) {
+        ControllerMethod controller = (ControllerMethod) mappedHandler.handler();
 
         try {
-            controller.handle(invocation.request(), invocation.response());
+            controller.handle(request, response);
         } catch (IOException e) {
-            invocationResult.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            result.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
             throw new HandlerAdapterException("Handler failed during execution.", e);
         }
 

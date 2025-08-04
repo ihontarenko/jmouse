@@ -45,17 +45,12 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
      */
     @Override
     public InvocationResult handle(HttpServletRequest request, HttpServletResponse response, MappedHandler handler) {
-        InvocationResult  result     = new DefaultInvocationResult(null);
-        HandlerInvocation invocation = new DefaultHandlerInvocation(request, response, handler, result);
+        InvocationResult result = new DefaultInvocationResult(null);
 
         result.setState(ExecutionState.UNHANDLED);
+        result.setReturnValue(doHandle(request, response, handler, result));
 
-        Object returnValue = doHandle(invocation);
-
-        result.setReturnValue(returnValue);
-
-        getReturnValueProcessor()
-                .process(result, request, response);
+        getReturnValueProcessor().process(result, request, response);
 
         return result;
     }
@@ -136,7 +131,12 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
     /**
      * 🔧 Subclasses must implement the handler invocation logic.
      */
-    protected abstract Object doHandle(HandlerInvocation invocation);
+    protected abstract Object doHandle(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            MappedHandler mappedHandler,
+            InvocationResult result
+    );
 
     /**
      * 🔧 Subclasses may perform custom initialization here.

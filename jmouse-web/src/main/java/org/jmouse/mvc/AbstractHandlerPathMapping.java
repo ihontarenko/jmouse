@@ -82,7 +82,9 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
 
             mappedHandler = new RouteMappedHandler(handler, match, route);
 
-            request.setAttribute(ROUTE_MACTH_ATTRIBUTE, match);
+            request.setAttribute(ROUTE_MATCH_ATTRIBUTE, match);
+
+            LOGGER.info("Matched: {}", winner);
         }
 
         return mappedHandler;
