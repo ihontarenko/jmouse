@@ -6,8 +6,6 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
 import org.jmouse.util.Sorter;
 import org.jmouse.web.context.WebBeanContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +27,6 @@ import java.util.List;
  */
 public abstract class AbstractHandlerAdapter implements HandlerAdapter, InitializingBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHandlerAdapter.class);
-
     private List<ReturnValueHandler> returnValueHandlers = new ArrayList<>();
     private List<ArgumentResolver>   argumentResolvers   = new ArrayList<>();
 
@@ -48,9 +44,11 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
         InvocationResult result = new DefaultInvocationResult(null);
 
         result.setState(ExecutionState.UNHANDLED);
-        result.setReturnValue(doHandle(request, response, handler, result));
+        doHandle(request, response, handler, result);
 
-        getReturnValueProcessor().process(result, request, response);
+        if (result.isUnhandled()) {
+            getReturnValueProcessor().process(result, request, response);
+        }
 
         return result;
     }
@@ -131,7 +129,7 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
     /**
      * 🔧 Subclasses must implement the handler invocation logic.
      */
-    protected abstract Object doHandle(
+    protected abstract void doHandle(
             HttpServletRequest request,
             HttpServletResponse response,
             MappedHandler mappedHandler,

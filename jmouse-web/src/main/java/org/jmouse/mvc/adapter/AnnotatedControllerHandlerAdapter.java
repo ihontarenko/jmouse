@@ -5,14 +5,27 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.mvc.*;
 import org.jmouse.web.context.WebBeanContext;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * 🎬 HandlerAdapter implementation for controllers with annotated handler methods.
+ *
+ * <p>This adapter invokes the {@link HandlerMethod} using the configured
+ * argument resolvers and sets the invocation result return value.
+ *
+ * @author Ivan Hontarenko (Mr. Jerry Mouse)
+ * @author ihontarenko@gmail.com
+ */
 public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
 
+    /**
+     * Handles the HTTP request by invoking the handler method.
+     *
+     * @param request       the current HTTP request
+     * @param response      the current HTTP response
+     * @param mappedHandler the mapped handler containing the handler method and route info
+     * @param result        the invocation result to populate with return value
+     */
     @Override
-    protected Object doHandle(
+    protected void doHandle(
             HttpServletRequest request,
             HttpServletResponse response,
             MappedHandler mappedHandler,
@@ -21,38 +34,28 @@ public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
         HandlerMethod handlerMethod = (HandlerMethod) mappedHandler.handler();
         MappingResult mappingResult = MappingResult.of(mappedHandler.match(), mappedHandler.route());
 
-        Object        returnValue;
+        HandlerMethodInvocation invocation = new HandlerMethodInvocation(
+                handlerMethod, mappingResult, getArgumentResolvers());
 
-        try {
-            Object       bean      = handlerMethod.getBean();
-            Object[]     arguments = {};
-            List<Object> resolved  = new ArrayList<>();
-
-            for (MethodParameter parameter : handlerMethod.getParameters()) {
-                for (ArgumentResolver argumentResolver : getArgumentResolvers()) {
-                    if (argumentResolver.supportsParameter(parameter)) {
-                        resolved.add(argumentResolver.resolveArgument(parameter, mappingResult));
-                    }
-                }
-            }
-
-            if (!resolved.isEmpty()) {
-                arguments = resolved.toArray();
-            }
-
-            returnValue = handlerMethod.getMethod().invoke(bean, arguments);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-
-        return returnValue;
+        result.setReturnValue(invocation.invoke());
     }
 
+    /**
+     * Initialization hook, no initialization needed here.
+     *
+     * @param context the web bean context
+     */
     @Override
     protected void doInitialize(WebBeanContext context) {
         // No-op
     }
 
+    /**
+     * Indicates whether this adapter supports the given handler.
+     *
+     * @param handler the mapped handler
+     * @return {@code true} if the handler is a {@link HandlerMethod}, {@code false} otherwise
+     */
     @Override
     public boolean supportsHandler(MappedHandler handler) {
         return handler.handler() instanceof HandlerMethod;
