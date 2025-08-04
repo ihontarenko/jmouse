@@ -22,7 +22,7 @@ public final class MappingRegistry<T> {
     /**
      * Registers a new mapping with its registration.
      *
-     * @param mapping the mapping key
+     * @param criteria the mapping key
      * @param registration the registration associated with the mapping
      * @return the previous registration associated with the mapping, or {@code null} if none
      */

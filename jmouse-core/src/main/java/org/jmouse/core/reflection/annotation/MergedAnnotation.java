@@ -19,9 +19,9 @@ public class MergedAnnotation {
 
     private final    MergedAnnotation           parent;
     private final    MergedAnnotation           root;
+    private final    AnnotationAttributeMapping annotationMapping;
     private final    AnnotationData             annotationData;
     private final    Set<MergedAnnotation>      metaAnnotations = new LinkedHashSet<>();
-    private final    AnnotationAttributeMapping mapping;
     private volatile List<MergedAnnotation>     flatAnnotations;
 
     public MergedAnnotation(AnnotationData annotationData) {
@@ -40,7 +40,7 @@ public class MergedAnnotation {
             this.metaAnnotations.add(new MergedAnnotation(meta, this));
         }
 
-        this.mapping = new AnnotationMapping(annotationData.annotation(), getRoot());
+        this.annotationMapping = new AnnotationMapping(annotationData.annotation(), getRoot());
     }
 
     /**
@@ -123,8 +123,8 @@ public class MergedAnnotation {
     /**
      * Return annotation attribute mappings
      */
-    public AnnotationAttributeMapping getMapping() {
-        return mapping;
+    public AnnotationAttributeMapping getAnnotationMapping() {
+        return annotationMapping;
     }
 
     /**

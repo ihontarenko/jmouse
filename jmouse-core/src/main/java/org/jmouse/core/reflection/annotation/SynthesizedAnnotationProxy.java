@@ -47,7 +47,8 @@ public record SynthesizedAnnotationProxy<A extends Annotation>(
     public static <A extends Annotation> A create(MergedAnnotation annotation, Class<A> type) {
         ClassLoader classLoader = type.getClassLoader();
         Class<?>[]  interfaces  = new Class<?>[]{type};
-        return (A) Proxy.newProxyInstance(classLoader, interfaces, new SynthesizedAnnotationProxy<>(annotation, type));
+        return (A) Proxy.newProxyInstance(
+                classLoader, interfaces, new SynthesizedAnnotationProxy<>(annotation, type));
     }
 
     /**
@@ -75,16 +76,16 @@ public record SynthesizedAnnotationProxy<A extends Annotation>(
      *
      * @param proxy  the proxy instance
      * @param method the invoked method
-     * @param args   method arguments
+     * @param arguments   method arguments
      * @return resolved value
      */
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] arguments) throws Throwable {
         return switch (method.getName()) {
-            case "equals" -> handleEquals(proxy, args[0]);
+            case "annotationType" -> type;
+            case "equals" -> handleEquals(proxy, arguments[0]);
             case "hashCode" -> handleHashCode();
             case "toString" -> annotation.toString();
-            case "annotationType" -> type;
             default -> getAttributeValue(method);
         };
     }
@@ -93,9 +94,11 @@ public record SynthesizedAnnotationProxy<A extends Annotation>(
      * Handles equality check for synthesized annotations.
      */
     private boolean handleEquals(Object proxy, Object other) {
-        if (proxy == other) return true;
+        if (proxy == other)
+            return true;
 
-        if (!type.isInstance(other)) return false;
+        if (!type.isInstance(other))
+            return false;
 
         for (Method method : type.getDeclaredMethods()) {
             Object valueA = getAttributeValue(method);
@@ -107,7 +110,8 @@ public record SynthesizedAnnotationProxy<A extends Annotation>(
                 return false;
             }
 
-            if (!valueA.equals(valueB)) return false;
+            if (!valueA.equals(valueB))
+                return false;
         }
 
         return true;
@@ -127,8 +131,8 @@ public record SynthesizedAnnotationProxy<A extends Annotation>(
      * @return resolved value or default
      */
     private Object getAttributeValue(Method method) {
-        AnnotationAttributeMapping mapping = annotation.getMapping();
-        Object                     value   = mapping.getAttributeValue(method.getName(), method.getReturnType());
+        AnnotationAttributeMapping mapping = annotation.getAnnotationMapping();
+        Object                     value   = mapping.getAttributeValue(method);
 
         if (value == null) {
             return method.getDefaultValue();

@@ -8,7 +8,7 @@ import java.lang.annotation.*;
 @Documented
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Mapping(httpMethod = HttpMethod.GET)
+@Mapping(httpMethod = HttpMethod.DELETE)
 public @interface GetMapping {
 
     @AttributeFor(attribute = "path", annotation = Mapping.class)

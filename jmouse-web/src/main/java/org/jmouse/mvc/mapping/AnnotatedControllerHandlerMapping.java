@@ -2,66 +2,112 @@ package org.jmouse.mvc.mapping;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.definition.BeanDefinition;
+import org.jmouse.core.MediaType;
 import org.jmouse.core.reflection.MethodFinder;
 import org.jmouse.core.reflection.MethodMatchers;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
-import org.jmouse.core.reflection.annotation.MergedAnnotations;
+import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.mvc.AbstractHandlerPathMapping;
 import org.jmouse.mvc.HandlerMethod;
 import org.jmouse.mvc.MappedHandler;
+import org.jmouse.mvc.Route;
 import org.jmouse.mvc.mapping.annnotation.Controller;
+import org.jmouse.mvc.mapping.annnotation.Header;
 import org.jmouse.mvc.mapping.annnotation.Mapping;
+import org.jmouse.mvc.mapping.annnotation.QueryParameter;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.request.http.HttpHeader;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
+import static org.jmouse.util.Streamable.of;
+
+/**
+ * 📌 Detects controller beans and registers their annotated handler methods.
+ *
+ * <p>Supports {@link Controller} and {@link Mapping} annotations.
+ *
+ * @author Ivan Hontarenko (Mr. Jerry Mouse)
+ * @author ihontarenko@gmail.com
+ */
 public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMapping<HandlerMethod> {
 
+    /**
+     * 📌 Matches an incoming request to a registered handler method.
+     *
+     * @param request incoming HTTP request
+     * @return matched handler or {@code null}
+     */
     @Override
     protected MappedHandler doGetHandler(HttpServletRequest request) {
         return null;
     }
 
+    /**
+     * 📌 Scans local beans for {@link Controller}-annotated classes and registers handler methods.
+     *
+     * @param context active web context
+     */
     @Override
     protected void doInitialize(WebBeanContext context) {
-        List<String> beanNames = context.getBeanNames(Object.class);
-
-        for (String beanName : beanNames) {
+        for (String beanName : context.getBeanNames(Object.class)) {
             if (context.isLocalBean(beanName)) {
                 BeanDefinition definition = context.getDefinition(beanName);
-
                 if (definition.isAnnotatedWith(Controller.class)) {
-                    Object handlerBean = context.getBean(definition.getBeanName());
-
+                    Object bean = context.getBean(definition.getBeanName());
                     Collection<Method> methods = new MethodFinder().find(
                             definition.getBeanClass(), MethodMatchers.isPublic());
-
-                    for (Method method : methods) {
-                        MergedAnnotation annotation = MergedAnnotation.wrapWithSynthetic(method);
-                        MergedAnnotations annotations = MergedAnnotations.ofAnnotatedElement(method);
-
-                        if (annotation.isAnnotationPresent(Mapping.class)) {
-                            System.out.println(annotation);
-                            Mapping mapping = annotation.createSynthesizedAnnotation(Mapping.class);
-                        }
-
-                        Optional<MergedAnnotation> first = annotations.get(Mapping.class);
-
-                        if (first.isPresent()) {
-                            Mapping mapping = first.get().createSynthesizedAnnotation(Mapping.class);
-                            mapping.path();
-                        }
-                    }
+                    initializeMethods(methods, bean);
                 }
-
             }
         }
-
     }
 
+    /**
+     * 📌 Extracts {@link Mapping} from each method and registers it with its route.
+     *
+     * @param methods controller methods
+     * @param bean controller instance
+     */
+    private void initializeMethods(Collection<Method> methods, Object bean) {
+        for (Method method : methods) {
+            AnnotationRepository       repository = AnnotationRepository.ofAnnotatedElement(method);
+            Optional<MergedAnnotation> annotation = repository.get(Mapping.class);
+            if (annotation.isPresent()) {
+                Mapping mapping = annotation.get().createSynthesizedAnnotation(Mapping.class);
+                Route   route   = createRoute(mapping);
+                addHandlerMapping(route, new HandlerMethod(bean, method));
+            }
+        }
+    }
 
+    /**
+     * 📌 Builds a {@link Route} from the {@link Mapping} annotation.
+     *
+     * @param mapping mapping metadata
+     * @return constructed route
+     */
+    private Route createRoute(Mapping mapping) {
+        Route.Builder builder = Route.route()
+                .method(mapping.httpMethod())
+                .path(mapping.path())
+                .consumes(of(mapping.consumes())
+                                  .map(MediaType::forString).toList().toArray(MediaType[]::new))
+                .produces(of(mapping.produces())
+                                  .map(MediaType::forString).toList().toArray(MediaType[]::new));
 
+        // Add expected headers
+        for (Header header : mapping.headers()) {
+            builder.header(HttpHeader.ofHeader(header.name()), header.value());
+        }
+
+        // Add expected query parameters
+        for (QueryParameter queryParameter : mapping.queryParameters()) {
+            builder.queryParameter(queryParameter.name(), queryParameter.value());
+        }
+
+        return builder.build();
+    }
 }

@@ -18,4 +18,9 @@ public class IndexController {
         return "index/demo";
     }
 
+    @GetMapping(requestPath = "/welcome/{id}")
+    public String hello() {
+        return "index/demo";
+    }
+
 }

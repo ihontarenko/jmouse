@@ -1,28 +1,20 @@
 package org.jmouse.core.reflection.annotation;
 
-import org.jmouse.core.bind.descriptor.AnnotationDescriptor;
-import org.jmouse.core.bind.descriptor.AnnotationIntrospector;
 import org.jmouse.util.Getter;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 /**
- * 🛠️ Default implementation for resolving and mapping annotation attributes via {@link AttributeFor}.
- * <p>
- * Supports attribute aliasing between annotations and recursive flattening of meta-annotations.
- * </p>
+ * 🔗 Default implementation of {@link AnnotationAttributeMapping}.
  *
+ * <p>Resolves attribute values from a single annotation and its meta-annotations,
+ * supporting aliasing via {@link AttributeFor}.
+ *
+ * <p>Example usage:
  * <pre>{@code
- * @Meta
- * @interface A {
- *   String value() default "test";
- * }
- *
- * @AttributeFor(attribute = "value", annotation = A.class)
- * @interface B {
- *   String alias() default "test";
- * }
+ * AnnotationMapping mapping = new AnnotationMapping(annotation, mergedRoot);
+ * String name = mapping.getAttributeValue("name", String.class);
  * }</pre>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
@@ -30,130 +22,130 @@ import java.lang.reflect.Method;
  */
 public class AnnotationMapping implements AnnotationAttributeMapping {
 
-    private final AnnotationDescriptor descriptor;
     private final Annotation           annotation;
     private final AnnotationAttributes attributes;
     private final MergedAnnotation     root;
 
     /**
-     * Creates mapping from an annotation with its merged hierarchy.
+     * 🏗️ Constructs a new mapping for the given annotation and its root metadata.
      *
-     * @param annotation annotation instance
-     * @param root       root merged annotation context
+     * @param annotation the annotation to wrap
+     * @param root the root merged annotation (with full hierarchy)
      */
     public AnnotationMapping(Annotation annotation, MergedAnnotation root) {
         this.annotation = annotation;
-        this.descriptor = new AnnotationIntrospector(annotation).introspect().toDescriptor();
         this.attributes = AnnotationAttributes.forAnnotationType(annotation.annotationType());
         this.root = root;
     }
 
-    /**
-     * 🔍 Finds the index of the attribute with the given name.
-     *
-     * @param name attribute name
-     * @return index or -1 if not found
-     */
+    /** {@inheritDoc} */
     @Override
     public int getAttributeIndex(String name) {
         return attributes.indexOf(name);
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public <T> T getAttributeValue(String name, Class<T> type) {
+        Method method = attributes.getAttribute(name);
+
+        if (method != null) {
+            return getAttributeValue(method, type);
+        }
+
+        return resolve(name, type);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Object getAttributeValue(Method method) {
+        return getAttributeValue(method, method.getReturnType());
+    }
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getAttributeValue(Method method, Class<T> type) {
+        Object value = Getter.ofMethod(method).get(annotation);
+
+        if (value != null && !isDefaultValue(method, value)) {
+            return (T) value;
+        }
+
+        return resolve(method.getName(), type);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean isDefaultValue(Method method, Object value) {
+        Object defaultValue = method.getDefaultValue();
+
+        if (defaultValue != null) {
+            return defaultValue.equals(value);
+        }
+
+        return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public AnnotationAttributes getAttributes() {
+        return attributes;
+    }
+
     /**
-     * 🔁 Resolves attribute value by name, using alias fallback if defined via {@link AttributeFor}.
+     * 🔄 Attempts to resolve an attribute value from meta-annotations by alias or name.
      *
      * @param name attribute name
      * @param type expected type
-     * @return resolved value or {@code null} if not present
+     * @return resolved value or {@code null} if not found
      */
-    @Override
-    public <T> T getAttributeValue(String name, Class<T> type) {
-        int index = getAttributeIndex(name);
+    private <T> T resolve(String name, Class<T> type) {
+        T result = null;
 
-        if (index == -1) {
-            return getAttributeValue(index, type);
-        }
+        for (MergedAnnotation meta : root.getFlattened()) {
+            if (annotation.equals(meta.getNativeAnnotation())) {
+                continue;
+            }
 
-        return resolveAliasByName(name, type);
-    }
+            if ((result = resolve(meta, name, type)) != null) {
+                break;
+            }
 
-    /**
-     * 🔢 Gets value by attribute index, including fallback to aliases.
-     *
-     * @param index attribute index
-     * @param type  expected type
-     * @return attribute value or {@code null}
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T getAttributeValue(int index, Class<T> type) {
-        Method attribute = attributes.getAttribute(index);
-
-        if (attribute == null)
-            return null;
-
-        Object raw = Getter.ofMethod(attribute).get(annotation);
-
-        if (raw != null && !isDefaultValue(attribute, raw)) {
-            return (T) raw;
-        }
-
-        AttributeFor alias = attribute.getAnnotation(AttributeFor.class);
-
-        return (alias != null) ? resolveAliasValue(alias, type) : null;
-    }
-
-    /**
-     * 🪞 Fallback resolution if no index found — scans meta-annotations and aliases.
-     */
-    private <T> T resolveAliasByName(String name, Class<T> type) {
-        for (MergedAnnotation annotation : root.getFlattened()) {
-            AnnotationAttributes attributes = AnnotationAttributes.forAnnotationType(annotation.getAnnotationType());
-            for (Method method : attributes.getAttributes()) {
-                AttributeFor alias = method.getAnnotation(AttributeFor.class);
-                if (alias != null && alias.attribute().equals(name)) {
-                    Object value = Getter.ofMethod(method).get(annotation.getNativeAnnotation());
-                    if (value != null && !isDefaultValue(method, value)) {
-                        return type.cast(value);
-                    }
+            for (MergedAnnotation nested : meta.getMetas()) {
+                if ((result = resolve(nested, name, type)) != null) {
+                    break;
                 }
             }
         }
-        return null;
+
+        return result;
     }
 
     /**
-     * ✅ Checks if the value is the default declared in annotation.
+     * 🎯 Attempts to resolve an attribute from a specific annotation level.
      *
-     * @param attribute method reference
-     * @param value     current value
-     * @return {@code true} if value is default
+     * @param annotation the merged annotation to check
+     * @param name attribute name
+     * @param type expected type
+     * @return resolved value or {@code null} if not found or default
      */
-    @Override
-    public boolean isDefaultValue(Method attribute, Object value) {
-        Object defaultValue = attribute.getDefaultValue();
+    private <T> T resolve(MergedAnnotation annotation, String name, Class<T> type) {
+        AnnotationAttributes attributes = annotation.getAnnotationMapping().getAttributes();
 
-        if (defaultValue == null) {
-            return false;
+        for (Method method : attributes.getAttributes()) {
+            AttributeFor alias       = method.getAnnotation(AttributeFor.class);
+            boolean      isLinkMatch = alias != null && alias.attribute().equals(name);
+            boolean      isNameMatch = method.getName().equals(name);
+
+            if (isLinkMatch || isNameMatch) {
+                Object value = Getter.ofMethod(method).get(annotation.getNativeAnnotation());
+                if (value != null && !isDefaultValue(method, value)) {
+                    return type.cast(value);
+                }
+            }
         }
 
-        return defaultValue.equals(value);
-    }
-
-    /**
-     * 🔄 Resolves value of an aliased attribute from the declared target.
-     *
-     * @param alias alias declaration
-     * @param type  expected result type
-     * @param <T>   generic type
-     * @return aliased value or {@code null}
-     */
-    private <T> T resolveAliasValue(AttributeFor alias, Class<T> type) {
-        Class<? extends Annotation> target          = alias.annotation();
-        String                      targetAttribute = alias.attribute();
-
-        return root.getAnnotation(target)
-                .map(m -> m.getMapping().getAttributeValue(targetAttribute, type))
-                .orElse(null);
+        return null;
     }
 }

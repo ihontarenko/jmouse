@@ -16,18 +16,18 @@ import java.util.*;
  * @Controller
  * public class MyController {}
  *
- * MergedAnnotations annotations = MergedAnnotations.ofAnnotatedElement(GetMapping.class);
+ * AnnotationRepository annotations = AnnotationRepository.ofAnnotatedElement(GetMapping.class);
  * Optional<MergedAnnotation> controller = annotations.get(Controller.class);
  * }</pre>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public final class MergedAnnotations {
+public final class AnnotationRepository {
 
     private final Map<Class<? extends Annotation>, List<MergedAnnotation>> index;
 
-    private MergedAnnotations(List<MergedAnnotation> roots) {
+    private AnnotationRepository(List<MergedAnnotation> roots) {
         this.index = indexing(roots);
     }
 
@@ -36,14 +36,14 @@ public final class MergedAnnotations {
      * including its direct annotations and recursively their meta-annotations.
      *
      * @param element the annotated element to scan
-     * @return a {@link MergedAnnotations} instance
+     * @return a {@link AnnotationRepository} instance
      */
-    public static MergedAnnotations ofAnnotatedElement(AnnotatedElement element) {
+    public static AnnotationRepository ofAnnotatedElement(AnnotatedElement element) {
         Set<AnnotationData>    scanned = AnnotationScanner.scan(element);
         List<MergedAnnotation> roots   = scanned.stream().map(data
                 -> new MergedAnnotation(data, null)).toList();
 
-        return new MergedAnnotations(roots);
+        return new AnnotationRepository(roots);
     }
 
     /**
@@ -85,9 +85,8 @@ public final class MergedAnnotations {
 
         while (!queue.isEmpty()) {
             MergedAnnotation current = queue.poll();
-            index
-                    .computeIfAbsent(current.getAnnotationType(), __ -> new ArrayList<>())
-                    .add(current);
+            index.computeIfAbsent(current.getAnnotationType(), __
+                    -> new ArrayList<>()).add(current);
             queue.addAll(current.getMetas());
         }
 
