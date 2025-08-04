@@ -14,6 +14,7 @@ public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
             HttpServletRequest request, HttpServletResponse response, MappedHandler handler, MvcContainer container) {
         HandlerMethod handlerMethod = (HandlerMethod) handler.handler();
         Object        returnValue;
+
         try {
             Object bean = handlerMethod.getBean();
             returnValue = handlerMethod.getMethod().invoke(bean);
