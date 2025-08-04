@@ -11,10 +11,7 @@ import org.jmouse.mvc.AbstractHandlerPathMapping;
 import org.jmouse.mvc.HandlerMethod;
 import org.jmouse.mvc.MappedHandler;
 import org.jmouse.mvc.Route;
-import org.jmouse.mvc.mapping.annnotation.Controller;
-import org.jmouse.mvc.mapping.annnotation.Header;
-import org.jmouse.mvc.mapping.annnotation.Mapping;
-import org.jmouse.mvc.mapping.annnotation.QueryParameter;
+import org.jmouse.mvc.mapping.annnotation.*;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.http.HttpHeader;
 
@@ -59,7 +56,7 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
                     Object bean = context.getBean(definition.getBeanName());
                     Collection<Method> methods = new MethodFinder().find(
                             definition.getBeanClass(), MethodMatchers.isPublic());
-                    initializeMethods(methods, bean);
+                    initializeMethods(methods, bean, context);
                 }
             }
         }
@@ -71,14 +68,17 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
      * @param methods controller methods
      * @param bean controller instance
      */
-    private void initializeMethods(Collection<Method> methods, Object bean) {
+    private void initializeMethods(Collection<Method> methods, Object bean, WebBeanContext context) {
         for (Method method : methods) {
             AnnotationRepository       repository = AnnotationRepository.ofAnnotatedElement(method);
-            Optional<MergedAnnotation> annotation = repository.get(Mapping.class);
-            if (annotation.isPresent()) {
-                Mapping mapping = annotation.get().createSynthesizedAnnotation(Mapping.class);
-                Route   route   = createRoute(mapping);
-                addHandlerMapping(route, new HandlerMethod(bean, method));
+            Optional<MergedAnnotation> optional   = repository.get(Mapping.class);
+
+            if (optional.isPresent()) {
+                MergedAnnotation annotation = optional.get();
+                Mapping          mapping    = annotation.createSynthesizedAnnotation(Mapping.class);
+                Route            route      = createRoute(mapping);
+
+                addHandlerMapping(route, new HandlerMethod(context, bean, method));
             }
         }
     }

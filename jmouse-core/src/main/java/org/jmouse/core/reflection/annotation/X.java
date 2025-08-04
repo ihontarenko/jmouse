@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @A
 @interface B {
-    @AttributeFor(annotation = A.class, attribute = "value")
+    @MapTo(annotation = A.class, attribute = "value")
     String name() default "";
 }
 

@@ -3,13 +3,16 @@ package org.jmouse.core.reflection.annotation;
 import org.jmouse.util.Getter;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * 🔗 Default implementation of {@link AnnotationAttributeMapping}.
  *
  * <p>Resolves attribute values from a single annotation and its meta-annotations,
- * supporting aliasing via {@link AttributeFor}.
+ * supporting aliasing via {@link MapTo}.
  *
  * <p>Example usage:
  * <pre>{@code
@@ -81,6 +84,9 @@ public class AnnotationMapping implements AnnotationAttributeMapping {
         Object defaultValue = method.getDefaultValue();
 
         if (defaultValue != null) {
+            if (defaultValue instanceof Object[] arrayA && value instanceof Object[] arrayB) {
+                return Arrays.equals(arrayA, arrayB);
+            }
             return defaultValue.equals(value);
         }
 
@@ -104,18 +110,8 @@ public class AnnotationMapping implements AnnotationAttributeMapping {
         T result = null;
 
         for (MergedAnnotation meta : root.getFlattened()) {
-            if (annotation.equals(meta.getNativeAnnotation())) {
-                continue;
-            }
-
             if ((result = resolve(meta, name, type)) != null) {
                 break;
-            }
-
-            for (MergedAnnotation nested : meta.getMetas()) {
-                if ((result = resolve(nested, name, type)) != null) {
-                    break;
-                }
             }
         }
 
@@ -131,12 +127,21 @@ public class AnnotationMapping implements AnnotationAttributeMapping {
      * @return resolved value or {@code null} if not found or default
      */
     private <T> T resolve(MergedAnnotation annotation, String name, Class<T> type) {
-        AnnotationAttributes attributes = annotation.getAnnotationMapping().getAttributes();
+        AnnotationAttributes        attributes = annotation.getAnnotationMapping().getAttributes();
+        Class<? extends Annotation> targetType = this.annotation.annotationType();
+        Class<? extends Annotation> sourceType = annotation.getAnnotationType();
 
         for (Method method : attributes.getAttributes()) {
-            AttributeFor alias       = method.getAnnotation(AttributeFor.class);
-            boolean      isLinkMatch = alias != null && alias.attribute().equals(name);
-            boolean      isNameMatch = method.getName().equals(name);
+            MapTo   mapTo         = method.getAnnotation(MapTo.class);
+            boolean isLinkMatch   = mapTo != null && (mapTo.attribute() == null || mapTo.attribute().equals(name));
+            boolean isNameMatch   = method.getName().equals(name);
+
+            if (isLinkMatch) {
+                isLinkMatch = mapTo.annotation().equals(targetType);
+                if (mapTo.annotation() == Annotation.class) {
+                    isLinkMatch = sourceType == targetType;
+                }
+            }
 
             if (isLinkMatch || isNameMatch) {
                 Object value = Getter.ofMethod(method).get(annotation.getNativeAnnotation());
@@ -148,4 +153,5 @@ public class AnnotationMapping implements AnnotationAttributeMapping {
 
         return null;
     }
+
 }

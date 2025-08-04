@@ -46,7 +46,7 @@ public class HttpHeaderMatcher implements MappingMatcher {
             return requestValue.equals(requiredValue);
         }
 
-        return true;
+        return false;
     }
 
     /**

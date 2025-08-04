@@ -24,26 +24,23 @@ public class ControllerMethodHandlerAdapter extends AbstractHandlerAdapter {
      *
      * <ul>
      *   <li>Ensures default content type if not set</li>
-     *   <li>Sets {@link HttpStatus} to {@link MvcContainer}</li>
+     *   <li>Sets {@link HttpStatus} to {@link InvocationResult}</li>
      *   <li>Flushes the response buffer</li>
      * </ul>
      *
-     * @param request   current HTTP request
-     * @param response  current HTTP response
-     * @param handler   the {@link MappedHandler} wrapping {@link ControllerMethod}
-     * @param container execution container to collect metadata
      * @return always {@code null}
      * @throws HandlerAdapterException in case of I/O failure
      */
     @Override
-    protected Object doHandle(
-            HttpServletRequest request, HttpServletResponse response, MappedHandler handler, MvcContainer container) {
-        ControllerMethod controller = (ControllerMethod) handler.handler();
+    protected Object doHandle(HandlerInvocation invocation) {
+        MappedHandler    mappedHandler    = invocation.mappedHandler();
+        ControllerMethod controller       = (ControllerMethod) mappedHandler.handler();
+        InvocationResult invocationResult = invocation.invocationResult();
 
         try {
-            controller.handle(request, response);
+            controller.handle(invocation.request(), invocation.response());
         } catch (IOException e) {
-            container.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            invocationResult.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
             throw new HandlerAdapterException("Handler failed during execution.", e);
         }
 

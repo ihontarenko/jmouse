@@ -1,8 +1,6 @@
 package org.jmouse.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.beans.BeanContext;
-import org.jmouse.beans.InitializingBean;
 import org.jmouse.mvc.routing.MappingRegistration;
 import org.jmouse.mvc.routing.MappingRegistry;
 import org.jmouse.mvc.routing.MappingCriteria;

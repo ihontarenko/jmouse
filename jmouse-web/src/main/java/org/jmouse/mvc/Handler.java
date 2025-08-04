@@ -103,7 +103,7 @@ public final class Handler {
      * @param response the current HTTP response
      * @param result   the handler's response
      */
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, MvcContainer result) {
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, InvocationResult result) {
         for (HandlerInterceptor interceptor : getInterceptors()) {
             interceptor.postHandle(request, response, getHandler(), result);
         }

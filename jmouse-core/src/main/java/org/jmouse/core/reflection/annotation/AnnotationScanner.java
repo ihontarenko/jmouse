@@ -28,37 +28,29 @@ public class AnnotationScanner {
         });
     }
 
-    /**
-     * 🔁 Recursive annotation discovery with depth/meta tracking.
-     */
     public static void scanInternal(AnnotatedElement element, Set<AnnotationData> annotations) {
-        Set<String>           visited     = new HashSet<>();
-        Deque<AnnotationData> stack       = new ArrayDeque<>();
-        AnnotationData        parent      = null;
+        scanInternal(element, annotations, null, 0, new HashSet<>());
+    }
+
+    private static void scanInternal(
+            AnnotatedElement element, Set<AnnotationData> annotations, AnnotationData parent,
+            int depth, Set<String> visited) {
 
         for (Annotation annotation : element.getAnnotations()) {
-            stack.push(new AnnotationData(annotation, element, parent, 0));
-        }
-
-        while (!stack.isEmpty()) {
-            AnnotationData              item = stack.pop();
-            Class<? extends Annotation> type = item.annotationType();
-            String                      key  = item.annotatedElement() + "#" + type.getName();
+            Class<? extends Annotation> type = annotation.annotationType();
+            String                      key  = element + "#" + type.getName();
 
             if (visited.contains(key) || isIgnorable(type)) {
                 continue;
             }
 
-            AnnotationData annotationData = new AnnotationData(item.annotation(), item.annotatedElement(), item.parent(), 0);
+            AnnotationData current = new AnnotationData(annotation, element, parent, depth);
 
-            annotations.add(annotationData);
+            annotations.add(current);
             visited.add(key);
 
-            if (type.getAnnotations().length > 0) {
-                scanInternal(type, annotationData.metas());
-            }
+            scanInternal(type, current.metas(), current, depth + 1, visited);
         }
-
     }
 
     /**

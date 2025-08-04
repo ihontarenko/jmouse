@@ -77,6 +77,15 @@ public class MergedAnnotation {
     }
 
     /**
+     * Annotation's attribute value
+     *
+     * @return underlying annotation's attribute value
+     */
+    public Object getValue(String name) {
+        return getAnnotationMapping().getAttributeValue(name, Object.class);
+    }
+
+    /**
      * 🧩 Element annotated by this annotation (e.g. class, method).
      *
      * @return annotated element

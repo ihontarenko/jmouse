@@ -10,7 +10,7 @@ import java.util.List;
 
 public class FrameworkDispatcher extends ServletDispatcher {
 
-    public static final String DEFAULT_DISPATCHER = "defaultDispatcher";
+    public static final String DEFAULT_DISPATCHER = "jMouseDefaultDispatcher";
 
     private List<HandlerMapping>     handlerMappings;
     private List<HandlerAdapter>     handlerAdapters;
@@ -69,7 +69,7 @@ public class FrameworkDispatcher extends ServletDispatcher {
             HandlerAdapter adapter = getHandlerAdapter(handler);
 
             if (handlerContainer.preHandle(request, response)) {
-                MvcContainer executionResult = adapter.handle(request, response, handler);
+                InvocationResult executionResult = adapter.handle(request, response, handler);
                 handlerContainer.postHandle(request, response, executionResult);
             }
         }

@@ -59,7 +59,7 @@ public interface HandlerInterceptor {
      * @param result   the result returned from the handler, may be {@code null}
      */
     default void postHandle(
-            HttpServletRequest request, HttpServletResponse response, Object handler, MvcContainer result) {
+            HttpServletRequest request, HttpServletResponse response, Object handler, InvocationResult result) {
         // No-op by default
     }
 }

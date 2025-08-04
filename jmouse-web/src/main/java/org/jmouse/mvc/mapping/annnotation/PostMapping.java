@@ -8,8 +8,8 @@ import java.lang.annotation.*;
 @Documented
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Mapping(httpMethod = HttpMethod.GET)
-public @interface GetMapping {
+@Mapping(httpMethod = HttpMethod.POST)
+public @interface PostMapping {
 
     @MapTo(attribute = "path", annotation = Mapping.class)
     String requestPath();
@@ -17,7 +17,7 @@ public @interface GetMapping {
     /**
      * 🎯 Optional list of header-based conditions.
      */
-    @MapTo(attribute = "headers", annotation = Mapping.class)
+    @MapTo(annotation = Mapping.class)
     Header[] headers() default {};
 
     /**

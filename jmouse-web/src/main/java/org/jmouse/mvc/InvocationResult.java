@@ -9,12 +9,12 @@ import org.jmouse.web.request.http.HttpStatus;
  * Represents a structured handler result including return value, model,
  * headers, status, and metadata for further processing.
  *
- * Use {@link MvcHandlerContainer} for construction.
+ * Use {@link DefaultInvocationResult} for construction.
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
- * @see MvcHandlerContainer
+ * @see DefaultInvocationResult
  */
-public interface MvcContainer {
+public interface InvocationResult {
 
     /**
      * Returns current state of the result.

@@ -8,16 +8,16 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface AttributeFor {
+public @interface MapTo {
 
     /**
      * The target annotation type to map to.
      */
-    Class<? extends Annotation> annotation();
+    Class<? extends Annotation> annotation() default Annotation.class;
 
     /**
      * The name of the target annotation attribute.
      */
-    String attribute();
+    String attribute() default "";
 
 }

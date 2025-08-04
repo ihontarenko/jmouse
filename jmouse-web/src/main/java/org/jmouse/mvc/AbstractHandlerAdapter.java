@@ -32,6 +32,7 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHandlerAdapter.class);
 
     private List<ReturnValueHandler> returnValueHandlers = new ArrayList<>();
+    private List<ArgumentResolver>   argumentResolvers   = new ArrayList<>();
 
     /**
      * 🧩 Handles the request by delegating to the actual handler, capturing the result,
@@ -43,19 +44,20 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
      * @return MvcContainer with execution metadata and return value
      */
     @Override
-    public MvcContainer handle(HttpServletRequest request, HttpServletResponse response, MappedHandler handler) {
-        MvcContainer container = new MvcHandlerContainer(null);
+    public InvocationResult handle(HttpServletRequest request, HttpServletResponse response, MappedHandler handler) {
+        InvocationResult  result     = new DefaultInvocationResult(null);
+        HandlerInvocation invocation = new DefaultHandlerInvocation(request, response, handler, result);
 
-        container.setState(ExecutionState.UNHANDLED);
+        result.setState(ExecutionState.UNHANDLED);
 
-        Object returnValue = doHandle(request, response, handler, container);
+        Object returnValue = doHandle(invocation);
 
-        container.setReturnValue(returnValue);
+        result.setReturnValue(returnValue);
 
         getReturnValueProcessor()
-                .process(container, request, response);
+                .process(result, request, response);
 
-        return container;
+        return result;
     }
 
     /**
@@ -89,6 +91,24 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
     }
 
     /**
+     * 🧩 Returns the list of {@link ArgumentResolver}s used for method argument binding.
+     *
+     * @return configured argument resolvers
+     */
+    public List<ArgumentResolver> getArgumentResolvers() {
+        return argumentResolvers;
+    }
+
+    /**
+     * 🧷 Replaces the current {@link ArgumentResolver}s.
+     *
+     * @param argumentResolvers new resolvers to apply
+     */
+    public void setArgumentResolvers(List<ArgumentResolver> argumentResolvers) {
+        this.argumentResolvers = argumentResolvers;
+    }
+
+    /**
      * 🌱 Called after bean context initialization.
      * Casts and delegates to {@link #initialize(WebBeanContext)}.
      *
@@ -107,23 +127,16 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
      */
     protected void initialize(WebBeanContext context) {
         setReturnValueHandlers(
-                List.copyOf(context.getBeans(ReturnValueHandler.class))
-        );
+                List.copyOf(context.getBeans(ReturnValueHandler.class)));
+        setArgumentResolvers(
+                List.copyOf(context.getBeans(ArgumentResolver.class)));
         doInitialize(context);
     }
 
     /**
      * 🔧 Subclasses must implement the handler invocation logic.
-     *
-     * @param request    HTTP request
-     * @param response   HTTP response
-     * @param handler    mapped handler
-     * @param mvcResult  result container
-     * @return method return value
      */
-    protected abstract Object doHandle(
-            HttpServletRequest request, HttpServletResponse response,
-            MappedHandler handler, MvcContainer mvcResult);
+    protected abstract Object doHandle(HandlerInvocation invocation);
 
     /**
      * 🔧 Subclasses may perform custom initialization here.
