@@ -13,8 +13,7 @@ package org.jmouse.mvc;
  * }</pre>
  *
  * @param handler     the actual handler to be executed
- * @param match  the result of route pattern matching
- * @param route       the declared route definition
+ * @param mappingResult  the result of route pattern matching
  *
  * @see Route
  * @see RouteMatch
@@ -23,5 +22,5 @@ package org.jmouse.mvc;
  * ✍️ Author: Ivan Hontarenko (Mr. Jerry Mouse)
  * 📧 Email: ihontarenko@gmail.com
  */
-public record RouteMappedHandler(Object handler, RouteMatch match, Route route) implements MappedHandler {
+public record RouteMappedHandler(Object handler, MappingResult mappingResult) implements MappedHandler {
 }

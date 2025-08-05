@@ -47,7 +47,7 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
         doHandle(request, response, handler, result);
 
         if (result.isUnhandled()) {
-            getReturnValueProcessor().process(result, request, response);
+            getReturnValueProcessor().process(null, result, request, response);
         }
 
         return result;

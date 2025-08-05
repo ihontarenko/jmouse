@@ -19,6 +19,9 @@ import java.io.IOException;
  */
 public class ControllerMethodHandlerAdapter extends AbstractHandlerAdapter {
 
+    public static final MethodParameter METHOD_PARAMETER = MethodParameter.forMethod(
+            -1, ControllerMethod.class, "handle", HttpServletRequest.class, HttpServletResponse.class);
+
     /**
      * 🛠 Handles the request by invoking {@link ControllerMethod}.
      *

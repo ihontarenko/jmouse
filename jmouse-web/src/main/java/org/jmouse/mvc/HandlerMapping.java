@@ -34,4 +34,12 @@ public interface HandlerMapping {
      * @return the matched handler object, or {@code null} if none found
      */
     Handler getHandler(HttpServletRequest request);
+
+    /**
+     * Whether the given mapping object is supported by this mapping implementation.
+     *
+     * @param mapped the candidate handler mapping object
+     * @return {@code true} if supported, {@code false} otherwise
+     */
+    boolean supportsMappedHandler(Object mapped);
 }

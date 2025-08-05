@@ -1,5 +1,6 @@
 package org.jmouse.web_app.controller;
 
+import org.jmouse.mvc.Model;
 import org.jmouse.mvc.mapping.annnotation.*;
 import org.jmouse.web.request.http.HttpMethod;
 
@@ -20,8 +21,10 @@ public class IndexController {
                     @Header(name = "X-TEXT", value = "HELLO")
             }
     )
-    public String demo(@PathVariable("id") Long id) {
-        return "index/demo" + id;
+    @MethodDescription("Demo Endpoint!")
+    public String demo(@PathVariable("id") Long id, Model model) {
+        model.addAttribute("ID", id);
+        return "index/demo";
     }
 
     @GetMapping(requestPath = "/welcome/{id}")

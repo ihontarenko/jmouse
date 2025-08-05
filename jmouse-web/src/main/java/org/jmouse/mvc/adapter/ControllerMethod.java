@@ -23,7 +23,6 @@ import java.io.IOException;
  */
 @FunctionalInterface
 public interface ControllerMethod {
-
     /**
      * Handles the incoming request and writes the response.
      *

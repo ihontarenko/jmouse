@@ -31,11 +31,12 @@ public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
             MappedHandler mappedHandler,
             InvocationResult result
     ) {
-        HandlerMethod handlerMethod = (HandlerMethod) mappedHandler.handler();
-        MappingResult mappingResult = MappingResult.of(mappedHandler.match(), mappedHandler.route());
+        HandlerMethod   handlerMethod   = (HandlerMethod) mappedHandler.handler();
+        MappingResult   mappingResult   = mappedHandler.mappingResult();
+        MethodParameter methodParameter = MethodParameter.forMethod(handlerMethod.getMethod(), -1);
 
         HandlerMethodInvocation invocation = new HandlerMethodInvocation(
-                handlerMethod, mappingResult, getArgumentResolvers());
+                handlerMethod, mappingResult, result, getArgumentResolvers());
 
         result.setReturnValue(invocation.invoke());
     }
@@ -47,7 +48,7 @@ public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
      */
     @Override
     protected void doInitialize(WebBeanContext context) {
-        // No-op
+        // NO-OP
     }
 
     /**

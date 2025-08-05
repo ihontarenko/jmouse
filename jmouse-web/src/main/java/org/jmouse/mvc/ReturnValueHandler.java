@@ -5,8 +5,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public interface ReturnValueHandler {
 
-    boolean supportsReturnType(InvocationResult returnType);
+    boolean supportsReturnType(MethodParameter returnType, InvocationResult result);
 
-    void handleReturnValue(InvocationResult mvcContainer, HttpServletRequest request, HttpServletResponse response);
+    void handleReturnValue(InvocationResult result, HttpServletRequest request, HttpServletResponse response);
 
 }

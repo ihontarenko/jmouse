@@ -46,6 +46,17 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
     private HandlerInterceptorRegistry interceptorRegistry;
 
     /**
+     * Resolves the {@link H} handler for the incoming request.
+     *
+     * @param request current HTTP request
+     * @return the matched handler, or {@code null} if no match found
+     */
+    @Override
+    protected MappedHandler doGetHandler(HttpServletRequest request) {
+        return getMappedHandler(request);
+    }
+
+    /**
      * ➕ Registers a route and its corresponding handler.
      *
      * @param route   path pattern, e.g. {@code /user/{id}}
@@ -75,12 +86,17 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
 
         if (winner != null) {
             MappingRegistration<H> registration = mappingRegistry.getRegistration(winner);
+            H                      handler      = registration.handler();
 
-            H          handler = registration.handler();
-            Route      route   = winner.getRoute();
-            RouteMatch match   = route.pathPattern().parse(requestRoute.requestPath().path());
+            if (!supportsMappedHandler(handler)) {
+                return null;
+            }
 
-            mappedHandler = new RouteMappedHandler(handler, match, route);
+            Route         route         = winner.getRoute();
+            RouteMatch    match         = route.pathPattern().parse(requestRoute.requestPath().path());
+            MappingResult mappingResult = MappingResult.of(match, route);
+
+            mappedHandler = new RouteMappedHandler(handler, mappingResult);
 
             request.setAttribute(ROUTE_MATCH_ATTRIBUTE, match);
 

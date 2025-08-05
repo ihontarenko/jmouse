@@ -1,8 +1,6 @@
 package org.jmouse.mvc.mapping;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.mvc.AbstractHandlerPathMapping;
-import org.jmouse.mvc.MappedHandler;
 import org.jmouse.mvc.adapter.ControllerMethod;
 import org.jmouse.web.context.WebBeanContext;
 
@@ -29,17 +27,6 @@ import org.jmouse.web.context.WebBeanContext;
 public class ControllerMethodMapping extends AbstractHandlerPathMapping<ControllerMethod> {
 
     /**
-     * Resolves the {@link ControllerMethod} handler for the incoming request.
-     *
-     * @param request current HTTP request
-     * @return the matched handler, or {@code null} if no match found
-     */
-    @Override
-    protected MappedHandler doGetHandler(HttpServletRequest request) {
-        return getMappedHandler(request);
-    }
-
-    /**
      * Initializes this mapping by scanning all {@link ControllerMethodRegistration}
      * beans in the current {@link WebBeanContext} and registering them.
      *
@@ -49,7 +36,21 @@ public class ControllerMethodMapping extends AbstractHandlerPathMapping<Controll
     protected void doInitialize(WebBeanContext context) {
         for (ControllerMethodRegistration registration : WebBeanContext.getLocalBeans(
                 ControllerMethodRegistration.class, context)) {
-            addHandlerMapping(registration.route(), registration.functionalRoute());
+            addHandlerMapping(registration.route(), registration.controllerMethod());
         }
+    }
+
+    /**
+     * ✅ Determines whether the given mapped handler is a {@link ControllerMethod}.
+     *
+     * <p>Used to check if this adapter or handler processor supports the
+     * specified mapped handler during dispatching.
+     *
+     * @param mapped the handler object to inspect
+     * @return {@code true} if the handler is a {@link ControllerMethod}, {@code false} otherwise
+     */
+    @Override
+    public boolean supportsMappedHandler(Object mapped) {
+        return mapped instanceof ControllerMethod;
     }
 }

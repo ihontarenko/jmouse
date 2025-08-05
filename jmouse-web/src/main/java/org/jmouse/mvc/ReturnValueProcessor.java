@@ -15,9 +15,9 @@ public class ReturnValueProcessor {
         this.handlers = handlers;
     }
 
-    public void process(InvocationResult container, HttpServletRequest request, HttpServletResponse response)  {
+    public void process(MethodParameter returnType, InvocationResult container, HttpServletRequest request, HttpServletResponse response)  {
         for (ReturnValueHandler handler : handlers) {
-            if (handler.supportsReturnType(container)) {
+            if (handler.supportsReturnType(returnType, container)) {
                 handler.handleReturnValue(container, request, response);
             }
         }

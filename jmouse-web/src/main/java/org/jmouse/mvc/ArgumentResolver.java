@@ -10,13 +10,8 @@ package org.jmouse.mvc;
  */
 public interface ArgumentResolver {
 
-    /**
-     * ✅ Whether this resolver supports the given parameter.
-     *
-     * @param parameter the method parameter to check
-     * @return {@code true} if this resolver can handle the parameter
-     */
     boolean supportsParameter(MethodParameter parameter);
 
-    Object resolveArgument(MethodParameter parameter, MappingResult mappingResult);
+    Object resolveArgument(MethodParameter parameter, MappingResult mappingResult, InvocationResult invocationResult);
+
 }

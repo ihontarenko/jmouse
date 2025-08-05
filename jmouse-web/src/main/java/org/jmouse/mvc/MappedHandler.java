@@ -28,13 +28,17 @@ public interface MappedHandler {
      */
     Object handler();
 
+    default MappingResult mappingResult() {
+        return null;
+    }
+
     /**
      * 🧭 Optional route definition if mapped via explicit route.
      *
      * @return associated {@link Route} or {@code null} if not mapped
      */
     default Route route() {
-        return null;
+        return isMapped() ? mappingResult().route() : null;
     }
 
     /**
@@ -43,7 +47,7 @@ public interface MappedHandler {
      * @return associated {@link RouteMatch} or {@code null} if not mapped
      */
     default RouteMatch match() {
-        return null;
+        return isMapped() ? mappingResult().match() : null;
     }
 
     /**
@@ -52,6 +56,6 @@ public interface MappedHandler {
      * @return {@code true} if {@link #route()} is not {@code null}
      */
     default boolean isMapped() {
-        return route() != null;
+        return mappingResult() != null;
     }
 }

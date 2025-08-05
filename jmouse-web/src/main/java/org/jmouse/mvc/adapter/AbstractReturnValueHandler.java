@@ -11,9 +11,9 @@ import org.jmouse.web.context.WebBeanContext;
 abstract public class AbstractReturnValueHandler implements ReturnValueHandler, InitializingBean {
 
     @Override
-    public void handleReturnValue(InvocationResult mvcContainer, HttpServletRequest request, HttpServletResponse response) {
+    public void handleReturnValue(InvocationResult result, HttpServletRequest request, HttpServletResponse response) {
 
-        doReturnValueHandle(mvcContainer, request, response);
+        doReturnValueHandle(result, request, response);
 
     }
 
@@ -29,6 +29,6 @@ abstract public class AbstractReturnValueHandler implements ReturnValueHandler, 
     protected abstract void doInitialize(WebBeanContext context);
 
     protected abstract void doReturnValueHandle(
-            InvocationResult mvcContainer, HttpServletRequest request, HttpServletResponse response);
+            InvocationResult result, HttpServletRequest request, HttpServletResponse response);
 
 }

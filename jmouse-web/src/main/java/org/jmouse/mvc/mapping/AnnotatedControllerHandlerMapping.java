@@ -32,17 +32,6 @@ import static org.jmouse.util.Streamable.of;
 public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMapping<HandlerMethod> {
 
     /**
-     * 📌 Matches an incoming request to a registered handler method.
-     *
-     * @param request incoming HTTP request
-     * @return matched handler or {@code null}
-     */
-    @Override
-    protected MappedHandler doGetHandler(HttpServletRequest request) {
-        return null;
-    }
-
-    /**
      * 📌 Scans local beans for {@link Controller}-annotated classes and registers handler methods.
      *
      * @param context active web context
@@ -109,5 +98,19 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
         }
 
         return builder.build();
+    }
+
+    /**
+     * ✅ Checks whether the given mapped handler is a {@link HandlerMethod}.
+     *
+     * <p>This is used to determine if the current component can handle
+     * the provided handler type during request dispatching.
+     *
+     * @param mapped the mapped handler object to check
+     * @return {@code true} if it is a {@link HandlerMethod}, {@code false} otherwise
+     */
+    @Override
+    public boolean supportsMappedHandler(Object mapped) {
+        return mapped instanceof HandlerMethod;
     }
 }

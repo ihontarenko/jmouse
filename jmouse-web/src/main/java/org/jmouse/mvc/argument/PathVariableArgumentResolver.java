@@ -1,11 +1,10 @@
-package org.jmouse.mvc.resolver;
+package org.jmouse.mvc.argument;
 
-import org.jmouse.mvc.AbstractArgumentResolver;
-import org.jmouse.mvc.MappingResult;
-import org.jmouse.mvc.MethodParameter;
-import org.jmouse.mvc.RouteMatch;
+import org.jmouse.mvc.*;
 import org.jmouse.mvc.mapping.annnotation.PathVariable;
 import org.jmouse.web.context.WebBeanContext;
+
+import java.lang.reflect.Parameter;
 
 /**
  * 🛣️ Resolver for method arguments annotated with {@link PathVariable}.
@@ -41,18 +40,21 @@ public class PathVariableArgumentResolver extends AbstractArgumentResolver {
      */
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasAnnotation(PathVariable.class);
+        return parameter.isParameter() && parameter.getParameter().isAnnotationPresent(PathVariable.class);
     }
 
     /**
      * Resolves the argument value from the route variables and converts it.
      *
-     * @param parameter the method parameter
+     * @param methodParameter the method parameter
      * @param mappingResult the current mapping result with route match info
+     * @param invocationResult the result container of the handler
      * @return the converted argument value, or null if not found
      */
     @Override
-    public Object resolveArgument(MethodParameter parameter, MappingResult mappingResult) {
+    public Object resolveArgument(
+            MethodParameter methodParameter, MappingResult mappingResult, InvocationResult invocationResult) {
+        Parameter    parameter     = methodParameter.getParameter();
         PathVariable pathVariable  = parameter.getAnnotation(PathVariable.class);
         RouteMatch   match         = mappingResult.match();
         Object       argumentValue = null;
@@ -63,6 +65,6 @@ public class PathVariableArgumentResolver extends AbstractArgumentResolver {
         }
 
         // Convert the argument value to the parameter's declared type
-        return conversion.convert(argumentValue, parameter.getJavaType().getClassType());
+        return conversion.convert(argumentValue, methodParameter.getType());
     }
 }

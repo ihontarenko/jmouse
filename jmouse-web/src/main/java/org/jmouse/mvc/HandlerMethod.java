@@ -3,7 +3,6 @@ package org.jmouse.mvc;
 import org.jmouse.core.bind.descriptor.MethodDescriptor;
 import org.jmouse.core.bind.descriptor.MethodIntrospector;
 import org.jmouse.core.reflection.Reflections;
-import org.jmouse.web.context.WebBeanContext;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -44,7 +43,7 @@ public class HandlerMethod {
         this.method = method;
         this.descriptor = new MethodIntrospector(method).introspect().toDescriptor();
         this.parameters = Stream.of(method.getParameters())
-                .map(MethodParameter::ofParameter).toList();
+                .map(MethodParameter::forParameter).toList();
     }
 
     /**

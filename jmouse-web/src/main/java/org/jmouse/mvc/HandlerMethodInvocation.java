@@ -1,6 +1,13 @@
 package org.jmouse.mvc;
 
+import org.jmouse.core.bind.descriptor.AnnotationDescriptor;
+import org.jmouse.core.reflection.Reflections;
+import org.jmouse.mvc.mapping.annnotation.MethodDescription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,9 +28,12 @@ import java.util.List;
  */
 public class HandlerMethodInvocation {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(HandlerMethodInvocation.class);
+
+    private final List<ArgumentResolver> argumentResolvers;
     private final HandlerMethod          handlerMethod;
     private final MappingResult          mappingResult;
-    private final List<ArgumentResolver> argumentResolvers;
+    private final InvocationResult       invocationResult;
 
     /**
      * Constructs a new invocation context for a handler method.
@@ -33,9 +43,14 @@ public class HandlerMethodInvocation {
      * @param argumentResolvers  available argument resolvers
      */
     public HandlerMethodInvocation(
-            HandlerMethod handlerMethod, MappingResult mappingResult, List<ArgumentResolver> argumentResolvers) {
+            HandlerMethod handlerMethod,
+            MappingResult mappingResult,
+            InvocationResult invocationResult,
+            List<ArgumentResolver> argumentResolvers
+    ) {
         this.handlerMethod = handlerMethod;
         this.mappingResult = mappingResult;
+        this.invocationResult = invocationResult;
         this.argumentResolvers = argumentResolvers;
     }
 
@@ -66,28 +81,52 @@ public class HandlerMethodInvocation {
     public Object invoke() {
         Object[]     arguments = {};
         List<Object> resolved  = new ArrayList<>();
+        Method       method    = handlerMethod.getMethod();
 
         for (MethodParameter parameter : handlerMethod.getParameters()) {
-            for (ArgumentResolver argumentResolver : argumentResolvers) {
-                // todo: throw if no supported
-                if (argumentResolver.supportsParameter(parameter)) {
-                    resolved.add(argumentResolver.resolveArgument(parameter, mappingResult));
-                }
-            }
+            resolved.add(
+                    getArgumentResolver(parameter).resolveArgument(parameter, mappingResult, invocationResult));
         }
 
         if (!resolved.isEmpty()) {
             arguments = resolved.toArray();
         }
 
-        Object returnValue;
-
-        try {
-            returnValue = handlerMethod.getMethod().invoke(handlerMethod.getBean(), arguments);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+        for (AnnotationDescriptor annotation : handlerMethod.getDescriptor().getAnnotations()) {
+            if (annotation.unwrap().annotationType() == MethodDescription.class) {
+                MethodDescription.LOGGER.info("Endpoint Information: {}", annotation.getAttribute("value"));
+            }
         }
 
-        return returnValue;
+        return Reflections.invokeMethod(handlerMethod.getBean(), method, arguments);
     }
+
+    /**
+     * 🧩 Selects a suitable {@link ArgumentResolver} for the given method parameter.
+     *
+     * <p>Scans the available resolvers and returns the first one that supports the parameter.
+     * Throws an {@link ArgumentResolverException} if no matching resolver is found.
+     *
+     * @param parameter the method parameter to resolve
+     * @return the supporting {@link ArgumentResolver}
+     * @throws ArgumentResolverException if no resolver supports the parameter
+     */
+    private ArgumentResolver getArgumentResolver(MethodParameter parameter) {
+        ArgumentResolver resolver = null;
+
+        for (ArgumentResolver argumentResolver : argumentResolvers) {
+            if (argumentResolver.supportsParameter(parameter)) {
+                resolver = argumentResolver;
+                break;
+            }
+        }
+
+        if (resolver == null) {
+            throw new ArgumentResolverException(
+                    "No argument resolver found for parameter: %s".formatted(parameter));
+        }
+
+        return resolver;
+    }
+
 }
