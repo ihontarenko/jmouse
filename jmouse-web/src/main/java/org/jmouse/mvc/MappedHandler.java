@@ -28,6 +28,10 @@ public interface MappedHandler {
      */
     Object handler();
 
+    default MethodParameter methodParameter() {
+        return null;
+    }
+
     default MappingResult mappingResult() {
         return null;
     }

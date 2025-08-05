@@ -1,0 +1,64 @@
+package org.jmouse.mvc.template;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.renderable.Content;
+import org.jmouse.el.renderable.Renderer;
+import org.jmouse.el.renderable.Template;
+import org.jmouse.mvc.AbstractView;
+
+import java.io.IOException;
+import java.util.Map;
+
+/**
+ * 🧩 A concrete {@link org.jmouse.mvc.View} implementation that renders a {@link Template}
+ * using a {@link Renderer} and an {@link EvaluationContext}.
+ *
+ * <p>This class is typically used for rendering internal template-based views where model attributes
+ * are evaluated and injected into the template content dynamically.</p>
+ *
+ * <p>It is suitable for views written using a custom templating engine or expression language
+ * defined in the <code>org.jmouse.el</code> package.</p>
+ *
+ * @author Ivan Hontarenko (Mr. Jerry Mouse)
+ * @author ihontarenko@gmail.com
+ * @see Template
+ * @see Renderer
+ */
+public class InternalView extends AbstractView {
+
+    private final Template template;
+    private final Renderer renderer;
+
+    /**
+     * Constructs a new InternalView with the given template and renderer.
+     *
+     * @param template the parsed template to be rendered
+     * @param renderer the rendering engine responsible for producing output
+     */
+    public InternalView(Template template, Renderer renderer) {
+        this.template = template;
+        this.renderer = renderer;
+    }
+
+    /**
+     * Renders the template by evaluating it against the provided model,
+     * and writes the result to the HTTP response.
+     *
+     * @param model    the model attributes to expose in the template
+     * @param request  the current HTTP servlet request
+     * @param response the current HTTP servlet response
+     */
+    @Override
+    public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
+        EvaluationContext context = template.newContext();
+        model.forEach(context::setValue);
+
+        try {
+            response.getWriter().write(renderer.render(template, context).getDataArray());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to render template", e);
+        }
+    }
+}

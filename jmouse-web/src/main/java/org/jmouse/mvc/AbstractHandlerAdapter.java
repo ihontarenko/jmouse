@@ -41,18 +41,16 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
      */
     @Override
     public InvocationOutcome handle(HttpServletRequest request, HttpServletResponse response, MappedHandler handler) {
-        InvocationOutcome result         = new DefaultInvocationOutcome(null);
-        RequestContext    requestContext = new RequestContext(request, response);
+        InvocationOutcome outcome = new Outcome(null);
+        RequestContext    context = new RequestContext(request, response);
 
-        result.setState(ExecutionState.UNHANDLED);
-        doHandle(request, response, handler, result);
+        doHandle(request, response, handler, outcome);
 
-        if (result.isUnhandled()) {
-            getReturnValueProcessor()
-                    .process(null, result, requestContext);
+        if (outcome.isUnhandled()) {
+            getReturnValueProcessor().process(handler.methodParameter(), outcome, context);
         }
 
-        return result;
+        return outcome;
     }
 
     /**
@@ -121,22 +119,15 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
      * @param context the web application context
      */
     protected void initialize(WebBeanContext context) {
-        setReturnValueHandlers(
-                List.copyOf(context.getBeans(ReturnValueHandler.class)));
-        setArgumentResolvers(
-                List.copyOf(context.getBeans(ArgumentResolver.class)));
+        setReturnValueHandlers(List.copyOf(context.getBeans(ReturnValueHandler.class)));
+        setArgumentResolvers(List.copyOf(context.getBeans(ArgumentResolver.class)));
         doInitialize(context);
     }
 
     /**
      * 🔧 Subclasses must implement the handler invocation logic.
      */
-    protected abstract void doHandle(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            MappedHandler mappedHandler,
-            InvocationOutcome result
-    );
+    protected abstract void doHandle(HttpServletRequest request, HttpServletResponse response, MappedHandler mappedHandler, InvocationOutcome result);
 
     /**
      * 🔧 Subclasses may perform custom initialization here.

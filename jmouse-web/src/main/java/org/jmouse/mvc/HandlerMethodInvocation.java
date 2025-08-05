@@ -29,25 +29,18 @@ public class HandlerMethodInvocation {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(HandlerMethodInvocation.class);
 
+    private final HandlerMethodContext   handlerContext;
     private final List<ArgumentResolver> argumentResolvers;
-    private final HandlerMethod          handlerMethod;
-    private final MappingResult     mappingResult;
-    private final InvocationOutcome invocationResult;
+    private final MappingResult          mappingResult;
+    private final InvocationOutcome      invocationResult;
 
-    /**
-     * Constructs a new invocation context for a handler method.
-     *
-     * @param handlerMethod      the target method and bean
-     * @param mappingResult      matched route and metadata
-     * @param argumentResolvers  available argument resolvers
-     */
     public HandlerMethodInvocation(
-            HandlerMethod handlerMethod,
+            HandlerMethodContext handlerContext,
             MappingResult mappingResult,
             InvocationOutcome invocationResult,
             List<ArgumentResolver> argumentResolvers
     ) {
-        this.handlerMethod = handlerMethod;
+        this.handlerContext = handlerContext;
         this.mappingResult = mappingResult;
         this.invocationResult = invocationResult;
         this.argumentResolvers = argumentResolvers;
@@ -59,7 +52,7 @@ public class HandlerMethodInvocation {
      * @return handler method
      */
     public HandlerMethod getHandlerMethod() {
-        return handlerMethod;
+        return handlerContext.handlerMethod();
     }
 
     /**
@@ -78,9 +71,10 @@ public class HandlerMethodInvocation {
      * @throws RuntimeException if the method cannot be invoked
      */
     public Object invoke() {
-        Object[]     arguments = {};
-        List<Object> resolved  = new ArrayList<>();
-        Method       method    = handlerMethod.getMethod();
+        HandlerMethod handlerMethod = handlerContext.handlerMethod();
+        Object[]      arguments     = {};
+        List<Object>  resolved      = new ArrayList<>();
+        Method        method        = handlerMethod.getMethod();
 
         for (MethodParameter parameter : handlerMethod.getParameters()) {
             resolved.add(

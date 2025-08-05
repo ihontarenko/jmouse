@@ -22,23 +22,24 @@ public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
      * @param request       the current HTTP request
      * @param response      the current HTTP response
      * @param mappedHandler the mapped handler containing the handler method and route info
-     * @param result        the invocation result to populate with return value
+     * @param outcome        the invocation outcome to populate with return value
      */
     @Override
     protected void doHandle(
             HttpServletRequest request,
             HttpServletResponse response,
             MappedHandler mappedHandler,
-            InvocationOutcome result
+            InvocationOutcome outcome
     ) {
         HandlerMethod   handlerMethod   = (HandlerMethod) mappedHandler.handler();
         MappingResult   mappingResult   = mappedHandler.mappingResult();
         MethodParameter methodParameter = MethodParameter.forMethod(handlerMethod.getMethod(), -1);
+        RequestContext  requestContext  = new RequestContext(request, response);
 
         HandlerMethodInvocation invocation = new HandlerMethodInvocation(
-                handlerMethod, mappingResult, result, getArgumentResolvers());
+                new HandlerMethodContext(requestContext, handlerMethod), mappingResult, outcome, getArgumentResolvers());
 
-        result.setReturnValue(invocation.invoke());
+        outcome.setReturnValue(invocation.invoke());
     }
 
     /**

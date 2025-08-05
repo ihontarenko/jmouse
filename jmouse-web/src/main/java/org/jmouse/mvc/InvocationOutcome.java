@@ -9,11 +9,11 @@ import org.jmouse.web.request.http.HttpStatus;
  * <p>Encapsulates the outcome of a controller invocation — including
  * return value, model data, HTTP headers, and status code.
  *
- * <p>Use {@link DefaultInvocationOutcome} for concrete implementation.
+ * <p>Use {@link Outcome} for concrete implementation.
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
- * @see DefaultInvocationOutcome
+ * @see Outcome
  */
 public interface InvocationOutcome {
 

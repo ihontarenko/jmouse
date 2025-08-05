@@ -1,6 +1,9 @@
 package org.jmouse.mvc.mapping;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.mvc.AbstractHandlerPathMapping;
+import org.jmouse.mvc.MethodParameter;
 import org.jmouse.mvc.adapter.ControllerMethod;
 import org.jmouse.web.context.WebBeanContext;
 
@@ -25,6 +28,9 @@ import org.jmouse.web.context.WebBeanContext;
  * @author ihontarenko@gmail.com
  */
 public class ControllerMethodMapping extends AbstractHandlerPathMapping<ControllerMethod> {
+
+    public static final MethodParameter METHOD_PARAMETER = MethodParameter.forMethod(
+            -1, ControllerMethod.class, "handle", HttpServletRequest.class, HttpServletResponse.class);
 
     /**
      * Initializes this mapping by scanning all {@link ControllerMethodRegistration}
@@ -52,5 +58,19 @@ public class ControllerMethodMapping extends AbstractHandlerPathMapping<Controll
     @Override
     public boolean supportsMappedHandler(Object mapped) {
         return mapped instanceof ControllerMethod;
+    }
+
+    /**
+     * 🧩 Returns a pre-defined {@link MethodParameter} for the given handler.
+     *
+     * <p>This implementation always returns a static parameter, independent of the input.
+     * Typically used when the target method parameter is known and constant.
+     *
+     * @param handler the controller method (ignored in this implementation)
+     * @return the predefined {@code MethodParameter}
+     */
+    @Override
+    protected MethodParameter getMethodParameter(ControllerMethod handler) {
+        return METHOD_PARAMETER;
     }
 }

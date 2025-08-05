@@ -22,5 +22,6 @@ package org.jmouse.mvc;
  * ✍️ Author: Ivan Hontarenko (Mr. Jerry Mouse)
  * 📧 Email: ihontarenko@gmail.com
  */
-public record RouteMappedHandler(Object handler, MappingResult mappingResult) implements MappedHandler {
+public record RouteMappedHandler(Object handler, MappingResult mappingResult, MethodParameter methodParameter)
+        implements MappedHandler {
 }

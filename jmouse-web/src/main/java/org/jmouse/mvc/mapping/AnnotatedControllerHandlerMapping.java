@@ -7,10 +7,7 @@ import org.jmouse.core.reflection.MethodFinder;
 import org.jmouse.core.reflection.MethodMatchers;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
-import org.jmouse.mvc.AbstractHandlerPathMapping;
-import org.jmouse.mvc.HandlerMethod;
-import org.jmouse.mvc.MappedHandler;
-import org.jmouse.mvc.Route;
+import org.jmouse.mvc.*;
 import org.jmouse.mvc.mapping.annnotation.*;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.http.HttpHeader;
@@ -111,5 +108,18 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
     @Override
     public boolean supportsMappedHandler(Object mapped) {
         return mapped instanceof HandlerMethod;
+    }
+
+    /**
+     * 📦 Resolves the return type parameter of the given handler method.
+     *
+     * <p>Always resolves with {@code index = -1}, which refers to the method return type.
+     *
+     * @param handler the handler method to resolve from
+     * @return a {@link MethodParameter} representing the method's return type
+     */
+    @Override
+    protected MethodParameter getMethodParameter(HandlerMethod handler) {
+        return MethodParameter.forMethod(handler.getMethod(), -1);
     }
 }

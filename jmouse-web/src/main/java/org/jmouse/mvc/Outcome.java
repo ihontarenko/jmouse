@@ -12,7 +12,7 @@ import org.jmouse.web.request.http.HttpStatus;
  *
  * <p>Usage example:
  * <pre>{@code
- * DefaultInvocationOutcome result = new DefaultInvocationOutcome(someReturnValue);
+ * Outcome result = new Outcome(someReturnValue);
  * result.setHttpStatus(HttpStatus.OK);
  * result.getModel().addAttribute("key", value);
  * result.setState(ExecutionState.HANDLED);
@@ -21,7 +21,7 @@ import org.jmouse.web.request.http.HttpStatus;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class DefaultInvocationOutcome implements InvocationOutcome {
+public class Outcome implements InvocationOutcome {
 
     private final Model          model   = new DefaultModel();
     private final Headers        headers = new Headers();
@@ -34,7 +34,7 @@ public class DefaultInvocationOutcome implements InvocationOutcome {
      *
      * @param returnValue the raw return value from handler method
      */
-    public DefaultInvocationOutcome(Object returnValue) {
+    public Outcome(Object returnValue) {
         this.returnValue = returnValue;
     }
 
@@ -118,5 +118,10 @@ public class DefaultInvocationOutcome implements InvocationOutcome {
     @Override
     public Headers getHeaders() {
         return headers;
+    }
+
+    @Override
+    public String toString() {
+        return "OUTCOME: [HANDLED: %s]".formatted(isHandled());
     }
 }

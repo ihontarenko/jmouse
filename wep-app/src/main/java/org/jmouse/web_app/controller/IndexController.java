@@ -22,6 +22,7 @@ public class IndexController {
             }
     )
     @MethodDescription("Demo Endpoint!")
+    @ViewMapping("ViewMapping/index/demo")
     public String demo(@PathVariable("id") Long id, Model model) {
         model.addAttribute("ID", id);
         return "index/demo";
