@@ -14,7 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
- * @see InvocationResult
+ * @see InvocationOutcome
  * @see FrameworkDispatcher
  */
 public interface HandlerAdapter {
@@ -28,13 +28,13 @@ public interface HandlerAdapter {
     boolean supportsHandler(MappedHandler handler);
 
     /**
-     * 🚀 Handles the request using the given handler object, producing a {@link InvocationResult}.
+     * 🚀 Handles the request using the given handler object, producing a {@link InvocationOutcome}.
      *
      * @param request  the incoming HTTP servlet request
      * @param response the outgoing HTTP servlet response
      * @param handler  the actual handler object (e.g., controllerMethod)
-     * @return a {@link InvocationResult} object representing the result of invocation
+     * @return a {@link InvocationOutcome} object representing the result of invocation
      * @throws RuntimeException if the handler cannot process the request
      */
-    InvocationResult handle(HttpServletRequest request, HttpServletResponse response, MappedHandler handler);
+    InvocationOutcome handle(HttpServletRequest request, HttpServletResponse response, MappedHandler handler);
 }

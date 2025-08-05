@@ -27,7 +27,7 @@ public class ControllerMethodHandlerAdapter extends AbstractHandlerAdapter {
      *
      * <ul>
      *   <li>Ensures default content type if not set</li>
-     *   <li>Sets {@link HttpStatus} to {@link InvocationResult}</li>
+     *   <li>Sets {@link HttpStatus} to {@link InvocationOutcome}</li>
      *   <li>Flushes the response buffer</li>
      * </ul>
      *
@@ -38,7 +38,7 @@ public class ControllerMethodHandlerAdapter extends AbstractHandlerAdapter {
             HttpServletRequest request,
             HttpServletResponse response,
             MappedHandler mappedHandler,
-            InvocationResult result
+            InvocationOutcome result
     ) {
         try {
             ControllerMethod controller = (ControllerMethod) mappedHandler.handler();

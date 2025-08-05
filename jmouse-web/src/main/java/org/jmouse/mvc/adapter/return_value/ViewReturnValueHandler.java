@@ -1,11 +1,10 @@
 package org.jmouse.mvc.adapter.return_value;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
-import org.jmouse.mvc.InvocationResult;
+import org.jmouse.mvc.InvocationOutcome;
 import org.jmouse.mvc.MethodParameter;
+import org.jmouse.mvc.RequestContext;
 import org.jmouse.mvc.adapter.AbstractReturnValueHandler;
 import org.jmouse.mvc.mapping.annnotation.ViewMapping;
 import org.jmouse.web.context.WebBeanContext;
@@ -22,15 +21,15 @@ public class ViewReturnValueHandler extends AbstractReturnValueHandler {
     }
 
     @Override
-    protected void doReturnValueHandle(InvocationResult result, HttpServletRequest request, HttpServletResponse response) {
+    protected void doReturnValueHandle(InvocationOutcome result, RequestContext requestContext) {
 
     }
 
     @Override
-    public boolean supportsReturnType(MethodParameter returnType, InvocationResult result) {
+    public boolean supportsReturnType(MethodParameter returnType, InvocationOutcome outcome) {
         Optional<MergedAnnotation> optional    = AnnotationRepository.ofAnnotatedElement(returnType.getExecutable())
                 .get(ViewMapping.class);
-        Object                     returnValue = result.getReturnValue();
+        Object                     returnValue = outcome.getReturnValue();
 
         if (optional.isPresent()) {
             return true;

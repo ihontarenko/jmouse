@@ -15,7 +15,7 @@ package org.jmouse.mvc;
  *         return parameter.hasAnnotation(PathVariable.class);
  *     }
  *
- *     public Object resolveArgument(MethodParameter parameter, MappingResult mappingResult, InvocationResult result) {
+ *     public Object resolveArgument(MethodParameter parameter, MappingResult mappingResult, InvocationOutcome result) {
  *         return mappingResult.getPathVariables().get(parameter.getName());
  *     }
  * }
@@ -23,7 +23,7 @@ package org.jmouse.mvc;
  *
  * @see MethodParameter
  * @see MappingResult
- * @see InvocationResult
+ * @see InvocationOutcome
  * @see ReturnValueHandler
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -47,6 +47,6 @@ public interface ArgumentResolver {
      * @return the resolved value to be injected into the method argument
      */
     Object resolveArgument(
-            MethodParameter parameter, MappingResult mappingResult, InvocationResult invocationResult);
+            MethodParameter parameter, MappingResult mappingResult, InvocationOutcome invocationResult);
 
 }

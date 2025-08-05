@@ -53,7 +53,7 @@ public class PathVariableArgumentResolver extends AbstractArgumentResolver {
      */
     @Override
     public Object resolveArgument(
-            MethodParameter methodParameter, MappingResult mappingResult, InvocationResult invocationResult) {
+            MethodParameter methodParameter, MappingResult mappingResult, InvocationOutcome invocationResult) {
         Parameter    parameter     = methodParameter.getParameter();
         PathVariable pathVariable  = parameter.getAnnotation(PathVariable.class);
         RouteMatch   match         = mappingResult.match();

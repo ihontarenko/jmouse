@@ -6,7 +6,6 @@ import org.jmouse.mvc.mapping.annnotation.MethodDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +31,8 @@ public class HandlerMethodInvocation {
 
     private final List<ArgumentResolver> argumentResolvers;
     private final HandlerMethod          handlerMethod;
-    private final MappingResult          mappingResult;
-    private final InvocationResult       invocationResult;
+    private final MappingResult     mappingResult;
+    private final InvocationOutcome invocationResult;
 
     /**
      * Constructs a new invocation context for a handler method.
@@ -45,7 +44,7 @@ public class HandlerMethodInvocation {
     public HandlerMethodInvocation(
             HandlerMethod handlerMethod,
             MappingResult mappingResult,
-            InvocationResult invocationResult,
+            InvocationOutcome invocationResult,
             List<ArgumentResolver> argumentResolvers
     ) {
         this.handlerMethod = handlerMethod;

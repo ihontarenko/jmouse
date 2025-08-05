@@ -69,7 +69,7 @@ public class FrameworkDispatcher extends ServletDispatcher {
             HandlerAdapter adapter = getHandlerAdapter(handler);
 
             if (handlerContainer.preHandle(request, response)) {
-                InvocationResult executionResult = adapter.handle(request, response, handler);
+                InvocationOutcome executionResult = adapter.handle(request, response, handler);
                 handlerContainer.postHandle(request, response, executionResult);
             }
         }

@@ -40,14 +40,16 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
      * @return MvcContainer with execution metadata and return value
      */
     @Override
-    public InvocationResult handle(HttpServletRequest request, HttpServletResponse response, MappedHandler handler) {
-        InvocationResult result = new DefaultInvocationResult(null);
+    public InvocationOutcome handle(HttpServletRequest request, HttpServletResponse response, MappedHandler handler) {
+        InvocationOutcome result         = new DefaultInvocationOutcome(null);
+        RequestContext    requestContext = new RequestContext(request, response);
 
         result.setState(ExecutionState.UNHANDLED);
         doHandle(request, response, handler, result);
 
         if (result.isUnhandled()) {
-            getReturnValueProcessor().process(null, result, request, response);
+            getReturnValueProcessor()
+                    .process(null, result, requestContext);
         }
 
         return result;
@@ -133,7 +135,7 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
             HttpServletRequest request,
             HttpServletResponse response,
             MappedHandler mappedHandler,
-            InvocationResult result
+            InvocationOutcome result
     );
 
     /**

@@ -6,7 +6,7 @@ import org.jmouse.web.context.WebBeanContext;
 /**
  * 🧩 Resolver for {@link Model} method parameters.
  *
- * <p>Injects the current {@link Model} instance from the {@link InvocationResult}
+ * <p>Injects the current {@link Model} instance from the {@link InvocationOutcome}
  * into controller method parameters.
  *
  * <pre>{@code
@@ -57,7 +57,7 @@ public class ModelArgumentResolver extends AbstractArgumentResolver {
      */
     @Override
     public Object resolveArgument(
-            MethodParameter parameter, MappingResult mappingResult, InvocationResult invocationResult) {
+            MethodParameter parameter, MappingResult mappingResult, InvocationOutcome invocationResult) {
         return invocationResult.getModel();
     }
 }

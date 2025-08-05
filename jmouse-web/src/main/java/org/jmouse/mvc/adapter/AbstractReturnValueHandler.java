@@ -1,20 +1,17 @@
 package org.jmouse.mvc.adapter;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
-import org.jmouse.mvc.InvocationResult;
+import org.jmouse.mvc.InvocationOutcome;
+import org.jmouse.mvc.RequestContext;
 import org.jmouse.mvc.ReturnValueHandler;
 import org.jmouse.web.context.WebBeanContext;
 
 abstract public class AbstractReturnValueHandler implements ReturnValueHandler, InitializingBean {
 
     @Override
-    public void handleReturnValue(InvocationResult result, HttpServletRequest request, HttpServletResponse response) {
-
-        doReturnValueHandle(result, request, response);
-
+    public void handleReturnValue(InvocationOutcome result, RequestContext requestContext) {
+        doReturnValueHandle(result, requestContext);
     }
 
     @Override
@@ -29,6 +26,6 @@ abstract public class AbstractReturnValueHandler implements ReturnValueHandler, 
     protected abstract void doInitialize(WebBeanContext context);
 
     protected abstract void doReturnValueHandle(
-            InvocationResult result, HttpServletRequest request, HttpServletResponse response);
+            InvocationOutcome result, RequestContext requestContext);
 
 }

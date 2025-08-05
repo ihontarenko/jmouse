@@ -4,7 +4,7 @@ import org.jmouse.web.request.Headers;
 import org.jmouse.web.request.http.HttpStatus;
 
 /**
- * 🧩 Default implementation of {@link InvocationResult}.
+ * 🧩 Default implementation of {@link InvocationOutcome}.
  *
  * Encapsulates the outcome of a handler invocation including
  * the return value, model attributes, HTTP status, headers,
@@ -12,7 +12,7 @@ import org.jmouse.web.request.http.HttpStatus;
  *
  * <p>Usage example:
  * <pre>{@code
- * DefaultInvocationResult result = new DefaultInvocationResult(someReturnValue);
+ * DefaultInvocationOutcome result = new DefaultInvocationOutcome(someReturnValue);
  * result.setHttpStatus(HttpStatus.OK);
  * result.getModel().addAttribute("key", value);
  * result.setState(ExecutionState.HANDLED);
@@ -21,7 +21,7 @@ import org.jmouse.web.request.http.HttpStatus;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class DefaultInvocationResult implements InvocationResult {
+public class DefaultInvocationOutcome implements InvocationOutcome {
 
     private final Model          model   = new DefaultModel();
     private final Headers        headers = new Headers();
@@ -34,7 +34,7 @@ public class DefaultInvocationResult implements InvocationResult {
      *
      * @param returnValue the raw return value from handler method
      */
-    public DefaultInvocationResult(Object returnValue) {
+    public DefaultInvocationOutcome(Object returnValue) {
         this.returnValue = returnValue;
     }
 

@@ -1,10 +1,10 @@
 package org.jmouse.mvc.adapter.return_value;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
-import org.jmouse.mvc.InvocationResult;
+import org.jmouse.mvc.InvocationOutcome;
 import org.jmouse.mvc.MethodParameter;
+import org.jmouse.mvc.RequestContext;
 import org.jmouse.mvc.adapter.AbstractReturnValueHandler;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.Headers;
@@ -36,23 +36,16 @@ public class VoidReturnValueHandler extends AbstractReturnValueHandler {
      * @return {@code true} if return value is {@code null}
      */
     @Override
-    public boolean supportsReturnType(MethodParameter returnType, InvocationResult result) {
+    public boolean supportsReturnType(MethodParameter returnType, InvocationOutcome result) {
         return result.getReturnValue() == null;
     }
 
-    /**
-     * 🧩 Writes nothing to response, but adds debug header {@code X-TEXT: NO-OP!}.
-     *
-     * @param result controller invocation result
-     * @param request      HTTP request
-     * @param response     HTTP response
-     */
     @Override
-    protected void doReturnValueHandle(
-            InvocationResult result, HttpServletRequest request, HttpServletResponse response) {
-        String    contentType = response.getContentType();
-        Headers   headers     = result.getHeaders();
-        MediaType consumes    = MediaType.TEXT;
+    protected void doReturnValueHandle(InvocationOutcome result, RequestContext requestContext) {
+        HttpServletResponse response    = requestContext.response();
+        String              contentType = response.getContentType();
+        Headers             headers     = result.getHeaders();
+        MediaType           consumes    = MediaType.TEXT;
 
         if (contentType == null || contentType.isBlank()) {
             headers.setContentType(consumes);

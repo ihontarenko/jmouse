@@ -1,7 +1,5 @@
 package org.jmouse.mvc;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -15,10 +13,10 @@ public class ReturnValueProcessor {
         this.handlers = handlers;
     }
 
-    public void process(MethodParameter returnType, InvocationResult container, HttpServletRequest request, HttpServletResponse response)  {
+    public void process(MethodParameter returnType, InvocationOutcome container, RequestContext requestContext)  {
         for (ReturnValueHandler handler : handlers) {
             if (handler.supportsReturnType(returnType, container)) {
-                handler.handleReturnValue(container, request, response);
+                handler.handleReturnValue(container, requestContext);
             }
         }
     }

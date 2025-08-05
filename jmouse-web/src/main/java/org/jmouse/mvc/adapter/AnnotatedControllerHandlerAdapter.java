@@ -29,7 +29,7 @@ public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
             HttpServletRequest request,
             HttpServletResponse response,
             MappedHandler mappedHandler,
-            InvocationResult result
+            InvocationOutcome result
     ) {
         HandlerMethod   handlerMethod   = (HandlerMethod) mappedHandler.handler();
         MappingResult   mappingResult   = mappedHandler.mappingResult();
