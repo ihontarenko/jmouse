@@ -64,9 +64,8 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
 
             if (optional.isPresent()) {
                 MergedAnnotation annotation = optional.get();
-                Mapping          mapping    = annotation.createSynthesizedAnnotation(Mapping.class);
+                Mapping          mapping    = annotation.synthesize();
                 Route            route      = createRoute(mapping);
-
                 addHandlerMapping(route, new HandlerMethod(bean, method));
             }
         }

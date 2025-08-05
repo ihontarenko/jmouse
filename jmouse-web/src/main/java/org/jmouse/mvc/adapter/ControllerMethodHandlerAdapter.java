@@ -31,7 +31,6 @@ public class ControllerMethodHandlerAdapter extends AbstractHandlerAdapter {
      *   <li>Flushes the response buffer</li>
      * </ul>
      *
-     * @return always {@code null}
      * @throws HandlerAdapterException in case of I/O failure
      */
     @Override

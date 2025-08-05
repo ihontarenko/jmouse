@@ -11,7 +11,6 @@ public class EnvironmentInitializer implements BeanConfigurer<Environment> {
 
     @Override
     public void configure(Environment environment) {
-        System.out.println("EnvironmentInitializer.............");
         environment.addPropertySource(
                 new MapPropertySource("EnvironmentInitializer",
                                       Map.of("jmouse.web.name", "jMouse: class -> " + getClass().getName())

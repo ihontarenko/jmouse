@@ -228,7 +228,12 @@ public class MergedAnnotation {
     }
 
     /**
-     * 📚 Flatten hierarchy to list (breadth-first).
+     * 📚 Flatten annotation hierarchy (breadth-first).
+     *
+     * <p>Returns a list of this annotation and all its meta-annotations in breadth-first order.
+     * Used for scanning or attribute resolution across layers.
+     *
+     * @return flat list of annotations starting from this
      */
     public List<MergedAnnotation> getFlattened() {
         List<MergedAnnotation> flattened = this.flatAnnotations;
@@ -251,12 +256,41 @@ public class MergedAnnotation {
         return flattened;
     }
 
-    public <A extends Annotation> A createSynthesizedAnnotation(Class<A> type) {
+    /**
+     * 🌀 Synthesize this merged annotation into a runtime proxy.
+     *
+     * <p>Returns a dynamic proxy implementing the original annotation type.
+     * Values are resolved via this merged context.
+     *
+     * @param <A> annotation type
+     * @return synthesized annotation proxy
+     */
+    @SuppressWarnings("unchecked")
+    public <A extends Annotation> A synthesize() {
+        return (A) SynthesizedAnnotationProxy.create(this, getAnnotationType());
+    }
+
+    /**
+     * 🌀 Synthesize this merged annotation as a specific type.
+     *
+     * @param type annotation type to synthesize
+     * @param <A> annotation type
+     * @return synthesized annotation proxy
+     */
+    public <A extends Annotation> A synthesize(Class<A> type) {
         return SynthesizedAnnotationProxy.create(this, type);
     }
 
+    /**
+     * 🔍 String view of this merged annotation.
+     *
+     * <p>Example: <code>@MyAnnotation (depth=1) on class my.Controller</code>
+     *
+     * @return compact string representation
+     */
     @Override
     public String toString() {
-        return "@%s (depth=%d) on %s".formatted(getAnnotationType().getSimpleName(), getDepth(), annotationData.annotatedElement());
+        return "@%s (depth=%d) on %s"
+                .formatted(getAnnotationType().getSimpleName(), getDepth(), annotationData.annotatedElement());
     }
 }

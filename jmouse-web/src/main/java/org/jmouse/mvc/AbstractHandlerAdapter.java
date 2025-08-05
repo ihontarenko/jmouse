@@ -27,8 +27,8 @@ import java.util.List;
  */
 public abstract class AbstractHandlerAdapter implements HandlerAdapter, InitializingBean {
 
-    private List<ReturnValueHandler> returnValueHandlers = new ArrayList<>();
     private List<ArgumentResolver>   argumentResolvers   = new ArrayList<>();
+    private List<ReturnValueHandler> returnValueHandlers = new ArrayList<>();
 
     /**
      * 🧩 Handles the request by delegating to the actual handler, capturing the result,

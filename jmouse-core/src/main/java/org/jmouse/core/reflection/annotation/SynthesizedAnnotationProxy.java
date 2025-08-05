@@ -86,7 +86,7 @@ public record SynthesizedAnnotationProxy<A extends Annotation>(
             case "annotationType" -> type;
             case "equals" -> handleEquals(proxy, arguments[0]);
             case "hashCode" -> handleHashCode();
-            case "toString" -> annotation.toString();
+            case "toString" -> "Synthesized from: (" + annotation.toString() + ")";
             default -> getAttributeValue(method);
         };
     }

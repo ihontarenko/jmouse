@@ -33,7 +33,7 @@ public class ModelArgumentResolver extends AbstractArgumentResolver {
      */
     @Override
     protected void doInitialize(WebBeanContext context) {
-        // no-op
+        // NO-OP
     }
 
     /**
@@ -44,7 +44,7 @@ public class ModelArgumentResolver extends AbstractArgumentResolver {
      */
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.isParameter() && parameter.getType() == Model.class;
+        return parameter.isParameter() && parameter.getParameterType() == Model.class;
     }
 
     /**

@@ -65,6 +65,6 @@ public class PathVariableArgumentResolver extends AbstractArgumentResolver {
         }
 
         // Convert the argument value to the parameter's declared type
-        return conversion.convert(argumentValue, methodParameter.getType());
+        return conversion.convert(argumentValue, methodParameter.getParameterType());
     }
 }
