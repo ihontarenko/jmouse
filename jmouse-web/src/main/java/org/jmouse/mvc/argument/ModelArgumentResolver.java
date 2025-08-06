@@ -51,13 +51,18 @@ public class ModelArgumentResolver extends AbstractArgumentResolver {
      * 📦 Returns the {@link Model} instance from the current invocation result.
      *
      * @param parameter the target parameter
+     * @param requestContext   the current web request context (includes headers, session, etc.)
      * @param mappingResult the mapping result
      * @param invocationResult the result container of the handler
      * @return the current Model instance
      */
     @Override
     public Object resolveArgument(
-            MethodParameter parameter, MappingResult mappingResult, InvocationOutcome invocationResult) {
+            MethodParameter parameter,
+            RequestContext requestContext,
+            MappingResult mappingResult,
+            InvocationOutcome invocationResult
+    ) {
         return invocationResult.getModel();
     }
 }

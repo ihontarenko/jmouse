@@ -14,7 +14,7 @@ import org.jmouse.el.renderable.parser.TemplateParser;
 import static org.jmouse.el.renderable.lexer.TemplateToken.*;
 
 /**
- * Parses the {@code block} tag, which defines a named, overridable section of a template.
+ * Parses the {@code block} tag, which defines a named, overridable section of a view.
  * <p>
  * Syntax:
  * <pre>

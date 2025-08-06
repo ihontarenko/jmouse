@@ -33,7 +33,6 @@ public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
     ) {
         HandlerMethod   handlerMethod   = (HandlerMethod) mappedHandler.handler();
         MappingResult   mappingResult   = mappedHandler.mappingResult();
-        MethodParameter methodParameter = MethodParameter.forMethod(handlerMethod.getMethod(), -1);
         RequestContext  requestContext  = new RequestContext(request, response);
 
         HandlerMethodInvocation invocation = new HandlerMethodInvocation(

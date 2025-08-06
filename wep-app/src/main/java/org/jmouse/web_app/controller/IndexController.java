@@ -2,6 +2,7 @@ package org.jmouse.web_app.controller;
 
 import org.jmouse.mvc.Model;
 import org.jmouse.mvc.mapping.annnotation.*;
+import org.jmouse.web.request.http.HttpHeader;
 import org.jmouse.web.request.http.HttpMethod;
 
 @Controller
@@ -14,18 +15,20 @@ public class IndexController {
 
     @GetMapping(
             requestPath = "/demo/{id}",
-            queryParameters = {
-                    @QueryParameter(name = "lang", value = "uk")
-            },
-            headers = {
-                    @Header(name = "X-TEXT", value = "HELLO")
-            }
+            queryParameters = {@QueryParameter(name = "lang", value = "uk")},
+            headers = {@Header(name = "X-TEXT", value = "HELLO")}
     )
     @MethodDescription("Demo Endpoint!")
-    @ViewMapping("ViewMapping/index/demo")
-    public String demo(@PathVariable("id") Long id, Model model) {
+    @ViewMapping("index/demo")
+    public String demo(@PathVariable("id") Long id, Model model,
+                       @RequestHeader(HttpHeader.USER_AGENT) String userAgent,
+                       @RequestMethod HttpMethod method) {
+
         model.addAttribute("ID", id);
-        return "index/demo";
+        model.addAttribute("userAgent", userAgent);
+        model.addAttribute("method", method);
+
+        return "view -> index/demo";
     }
 
     @GetMapping(requestPath = "/welcome/{id}")

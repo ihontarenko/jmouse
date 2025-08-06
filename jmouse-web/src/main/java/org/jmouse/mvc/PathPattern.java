@@ -60,7 +60,7 @@ public final class PathPattern {
     private final List<Parameter> parameters = new ArrayList<>();
 
     /**
-     * 🔧 Constructs a {@code PathPattern} by compiling the given template.
+     * 🔧 Constructs a {@code PathPattern} by compiling the given view.
      *
      * @param pattern route pattern, e.g., {@code /user/{id:\d+}/status/{status}}
      */

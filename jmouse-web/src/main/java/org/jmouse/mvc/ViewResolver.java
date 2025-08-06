@@ -4,7 +4,7 @@ package org.jmouse.mvc;
  * 🧩 Strategy interface for resolving a {@link View} by its logical path.
  *
  * <p>Used by the MVC framework to translate a view name (e.g. {@code "user/profile"})
- * into a concrete {@link View} implementation (e.g. HTML, JSON, template engine).
+ * into a concrete {@link View} implementation (e.g. HTML, JSON, view engine).
  *
  * <p>Custom implementations may support prefix/suffix mapping, localization,
  * view caching, or dynamic resolution.

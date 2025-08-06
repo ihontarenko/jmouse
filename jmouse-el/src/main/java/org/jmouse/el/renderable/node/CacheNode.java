@@ -7,7 +7,7 @@ import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.NodeVisitor;
 
 /**
- * Represents a cache directive in a template.
+ * Represents a cache directive in a view.
  * <p>
  * The {@code CacheNode} captures a block of content and associates it with a cache key.
  * When rendering, the engine may store or retrieve the rendered output for that key.

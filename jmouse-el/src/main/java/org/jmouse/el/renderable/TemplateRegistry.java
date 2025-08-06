@@ -5,7 +5,7 @@ import java.util.Map;
 
 /**
  * The TemplateRegistry class maintains the definitions of blocks and macros
- * for a template. It allows for registering, retrieving, checking existence,
+ * for a view. It allows for registering, retrieving, checking existence,
  * merging, and importing of definitions across templates.
  */
 public class TemplateRegistry {

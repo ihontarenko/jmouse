@@ -1,4 +1,4 @@
-package org.jmouse.mvc.template;
+package org.jmouse.mvc.view;
 
 import org.jmouse.context.BeanProperties;
 import org.jmouse.core.bind.BindDefault;

@@ -21,9 +21,9 @@ public interface TokenizableSource extends CharSequence, Streamable<TokenizableS
     int getLineNumber(int offset);
 
     /**
-     * Returns the name of the string-template.
+     * Returns the name of the string-view.
      *
-     * @return the template name
+     * @return the view name
      */
     String getName();
 

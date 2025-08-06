@@ -8,11 +8,11 @@ import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.renderable.node.ContainerNode;
 
 /**
- * 🏗️ The template parser that processes the entire template file.
+ * 🏗️ The view parser that processes the entire view file.
  * <p>
  * This parser iterates over the token stream, invoking the {@link RootParser} for each segment
  * (raw text, print expressions, and execution expressions), and aggregates them into a single
- * {@link ContainerNode} representing the complete template.
+ * {@link ContainerNode} representing the complete view.
  * </p>
  * <p>
  * An overloaded parse method allows stopping when a specified matcher condition is met.
@@ -23,10 +23,10 @@ import org.jmouse.el.renderable.node.ContainerNode;
 public class TemplateParser implements Parser {
 
     /**
-     * Parses the entire template from the token stream and adds the resulting nodes to the parent.
+     * Parses the entire view from the token stream and adds the resulting nodes to the parent.
      *
      * @param cursor  the token cursor
-     * @param parent  the parent node that will contain the parsed template nodes
+     * @param parent  the parent node that will contain the parsed view nodes
      * @param context the parser context for retrieving sub-parsers
      */
     @Override
@@ -42,7 +42,7 @@ public class TemplateParser implements Parser {
     }
 
     /**
-     * Parses template content until the provided matcher condition is met.
+     * Parses view content until the provided matcher condition is met.
      *
      * @param cursor  the token cursor
      * @param context the parser context for retrieving sub-parsers

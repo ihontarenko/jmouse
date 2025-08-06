@@ -3,10 +3,10 @@ package org.jmouse.el.renderable;
 import org.jmouse.el.node.Node;
 
 /**
- * Represents a template block.
+ * Represents a view block.
  * <p>
  * This record binds a block name to its corresponding content node.
- * It provides an immutable representation of a block defined within a template,
+ * It provides an immutable representation of a block defined within a view,
  * where the {@code name} identifies the block and the {@code node} contains its content.
  * </p>
  *

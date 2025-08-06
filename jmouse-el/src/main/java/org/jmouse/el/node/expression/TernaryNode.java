@@ -6,14 +6,14 @@ import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.ExpressionNode;
 
 /**
- * Represents a ternary (conditional) expression in the template language.
+ * Represents a ternary (conditional) expression in the view language.
  * <p>
  * The expression evaluates the {@code condition}. If it converts to {@code true},
  * the {@code thenBranch} is evaluated and returned; otherwise the {@code elseBranch}
  * is evaluated and returned.
  * </p>
  * <p>
- * Syntax example in a template:
+ * Syntax example in a view:
  * <pre>
  *   {{ user.isAdmin ? "Admin" : "User" }}
  * </pre>

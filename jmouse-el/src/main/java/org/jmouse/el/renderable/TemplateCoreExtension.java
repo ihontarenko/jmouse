@@ -11,12 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Core extension for the template engine that adds template-specific parsing capabilities.
+ * Core extension for the view engine that adds view-specific parsing capabilities.
  * <p>
  * Extends {@link CoreExtension} by registering:
  * <ul>
- *   <li>Structural parsers for overall template syntax (via {@link TemplateParser} and {@link RootParser}).</li>
- *   <li>A suite of {@link TagParser} implementations for common template tags
+ *   <li>Structural parsers for overall view syntax (via {@link TemplateParser} and {@link RootParser}).</li>
+ *   <li>A suite of {@link TagParser} implementations for common view tags
  *       (e.g., loops, conditionals, inheritance, blocks, macros, imports, includes, etc.).</li>
  * </ul>
  * </p>
@@ -25,9 +25,9 @@ public class TemplateCoreExtension extends CoreExtension implements TemplateExte
 
     /**
      * Returns the full set of expression and structural parsers, including
-     * the core extensions plus the template-specific parsers.
+     * the core extensions plus the view-specific parsers.
      *
-     * @return a list of {@link Parser} instances for parsing template syntax
+     * @return a list of {@link Parser} instances for parsing view syntax
      */
     @Override
     public List<Parser> getParsers() {
@@ -41,7 +41,7 @@ public class TemplateCoreExtension extends CoreExtension implements TemplateExte
 
     /**
      * Returns the collection of tag parsers used to recognize and handle
-     * template directives such as loops, imports, blocks, macros, and more.
+     * view directives such as loops, imports, blocks, macros, and more.
      *
      * @return an immutable list of {@link TagParser} instances
      */

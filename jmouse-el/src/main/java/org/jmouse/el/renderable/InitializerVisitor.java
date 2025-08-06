@@ -12,14 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The InitializerVisitor is responsible for traversing the template's AST and registering
- * macros, blocks, and handling template extension directives before the rendering process.
+ * The InitializerVisitor is responsible for traversing the view's AST and registering
+ * macros, blocks, and handling view extension directives before the rendering process.
  * <p>
  * This visitor processes container nodes by recursively visiting their children.
- * For {@code MacroNode} instances, it registers the macro definition with the associated template.
+ * For {@code MacroNode} instances, it registers the macro definition with the associated view.
  * For {@code BlockNode} instances, it evaluates the block name, converts it to a String,
- * creates a new template block, and registers it in the template's registry.
- * For {@code ExtendsNode} instances, it evaluates the parent template location, loads the parent template,
+ * creates a new view block, and registers it in the view's registry.
+ * For {@code ExtendsNode} instances, it evaluates the parent view location, loads the parent view,
  * and sets up the inheritance relationship.
  * </p>
  */
@@ -31,9 +31,9 @@ public class InitializerVisitor implements NodeVisitor {
     private final Template          template;
 
     /**
-     * Constructs a InitializerVisitor for the specified template and evaluation context.
+     * Constructs a InitializerVisitor for the specified view and evaluation context.
      *
-     * @param template the template to process
+     * @param template the view to process
      * @param context  the evaluation context containing conversion and other runtime data
      */
     public InitializerVisitor(Template template, EvaluationContext context) {
@@ -54,21 +54,21 @@ public class InitializerVisitor implements NodeVisitor {
     }
 
     /**
-     * Processes a UseNode by importing macro or block definitions from an external template.
+     * Processes a UseNode by importing macro or block definitions from an external view.
      * <p>
      * The method performs the following steps:
      * <ul>
-     *   <li>Evaluates the path expression to determine the external template name and retrieves it via the engine.</li>
-     *   <li>If the imported template is not initialized, its AST is preprocessed using an {@code InitializerVisitor} and
+     *   <li>Evaluates the path expression to determine the external view name and retrieves it via the engine.</li>
+     *   <li>If the imported view is not initialized, its AST is preprocessed using an {@code InitializerVisitor} and
      *       it is marked as initialized; otherwise, a log entry is recorded indicating it is already initialized.</li>
      *   <li>If a set of specific names is provided, each name in the set is evaluated and used to locally register the
-     *       corresponding macro or block definition from the imported template.</li>
+     *       corresponding macro or block definition from the imported view.</li>
      *   <li>If no names are provided but an alias is specified, then the entire set of macros or blocks is copied from
-     *       the imported template's registry into the current registry with keys prefixed by the alias.</li>
+     *       the imported view's registry into the current registry with keys prefixed by the alias.</li>
      * </ul>
      * </p>
      *
-     * @param useNode the UseNode containing the external template path, the type (macro or block),
+     * @param useNode the UseNode containing the external view path, the type (macro or block),
      *                and either a set of names or an alias for importing definitions
      */
     @Override
@@ -80,7 +80,7 @@ public class InitializerVisitor implements NodeVisitor {
         Template         imported   = self.getEngine().getTemplate(name);
         Token.Type       type       = useNode.getType();
 
-        // Initialize the imported template if it has not been initialized already.
+        // Initialize the imported view if it has not been initialized already.
         if (!imported.isInitialized()) {
             imported.getRoot().accept(new InitializerVisitor(imported, context));
             imported.setInitialized();
@@ -117,21 +117,21 @@ public class InitializerVisitor implements NodeVisitor {
     }
 
     /**
-     * Visits a MacroNode by registering the macro with the template.
+     * Visits a MacroNode by registering the macro with the view.
      *
      * @param node the macro node to register
      */
     @Override
     public void visit(MacroNode node) {
-        LOGGER.info("Registering macro '{}' into template '{}'", node.getName(), template.getName());
+        LOGGER.info("Registering macro '{}' into view '{}'", node.getName(), template.getName());
         template.setMacro(new TemplateMacro(node.getName(), node, template.getName()));
     }
 
     /**
-     * Processes a BlockNode by evaluating its name, creating a template block, and registering it.
+     * Processes a BlockNode by evaluating its name, creating a view block, and registering it.
      * <p>
      * It uses the current EvaluationContext to evaluate and convert the block name to a String,
-     * then creates a TemplateBlock and registers it in the template's registry.
+     * then creates a TemplateBlock and registers it in the view's registry.
      * </p>
      *
      * @param node the BlockNode to process
@@ -145,7 +145,7 @@ public class InitializerVisitor implements NodeVisitor {
 
 
         if (!registry.hasBlock(name) || node.isOverride()) {
-            LOGGER.info("Registering block '{}' into template '{}'", name, template.getName());
+            LOGGER.info("Registering block '{}' into view '{}'", name, template.getName());
             registry.registerBlock(name, new TemplateBlock(name, node, template.getName()));
         } else {
             LOGGER.warn("Template '{}' already has '{}' block", template, name);
@@ -153,14 +153,14 @@ public class InitializerVisitor implements NodeVisitor {
     }
 
     /**
-     * Processes an ExtendsNode by evaluating the parent template location, loading the parent template,
-     * and setting it as the parent for the current template.
+     * Processes an ExtendsNode by evaluating the parent view location, loading the parent view,
+     * and setting it as the parent for the current view.
      * <p>
      * The parent's location is evaluated using the EvaluationContext and converted to a String.
-     * The parent template is then retrieved from the Engine, and the inheritance relationship is set.
+     * The parent view is then retrieved from the Engine, and the inheritance relationship is set.
      * </p>
      *
-     * @param node the ExtendsNode containing the parent template information
+     * @param node the ExtendsNode containing the parent view information
      */
     @Override
     public void visit(ExtendsNode node) {
@@ -169,7 +169,7 @@ public class InitializerVisitor implements NodeVisitor {
         String     location   = conversion.convert(value, String.class);
         Template   parent     = template.getRegistry().getEngine().getTemplate(location);
 
-        LOGGER.info("Inherited parent template '{}' for template '{}'", location, template.getName());
+        LOGGER.info("Inherited parent view '{}' for view '{}'", location, template.getName());
 
         template.setParent(parent, context);
     }

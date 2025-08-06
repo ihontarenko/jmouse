@@ -22,8 +22,8 @@ import java.io.StringReader;
  * TemplateEngine is the core class responsible for loading, parsing, and caching templates.
  * <p>
  * It initializes the necessary components including the extension container, lexer, parser context,
- * and cache. It also provides methods to load a template from a resource, tokenize its source,
- * parse it into an abstract syntax tree (AST), and create a new template instance.
+ * and cache. It also provides methods to load a view from a resource, tokenize its source,
+ * parse it into an abstract syntax tree (AST), and create a new view instance.
  * </p>
  */
 public class TemplateEngine implements Engine {
@@ -44,7 +44,7 @@ public class TemplateEngine implements Engine {
     }
 
     /**
-     * Initializes the template engine by setting up the extension container, cache,
+     * Initializes the view engine by setting up the extension container, cache,
      * lexer, and parser context.
      * <p>
      * The extension container is configured with standard extensions (e.g. {@link TemplateCoreExtension}),
@@ -60,14 +60,14 @@ public class TemplateEngine implements Engine {
     }
 
     /**
-     * Retrieves a template by its name.
+     * Retrieves a view by its name.
      * <p>
-     * The method checks the cache for an existing template instance. If found, it returns the cached template;
-     * otherwise, it loads the template using {@link #loadTemplate(String)}, parses it, caches the new instance,
+     * The method checks the cache for an existing view instance. If found, it returns the cached view;
+     * otherwise, it loads the view using {@link #loadTemplate(String)}, parses it, caches the new instance,
      * and returns it.
      * </p>
      *
-     * @param name the name of the template to retrieve
+     * @param name the name of the view to retrieve
      * @return the {@link Template} instance corresponding to the provided name
      */
     @Override
@@ -86,17 +86,17 @@ public class TemplateEngine implements Engine {
             cache.put(cacheKey, template);
             cached = template;
 
-            LOGGER.info("Parsed and cached new template '{}'", name);
+            LOGGER.info("Parsed and cached new view '{}'", name);
         }
 
         return cached;
     }
 
     /**
-     * Loads the raw template source for the specified template name.
+     * Loads the raw view source for the specified view name.
      *
-     * @param name the name of the template to load
-     * @return a {@link Reader} for reading the template source
+     * @param name the name of the view to load
+     * @return a {@link Reader} for reading the view source
      */
     @Override
     public Reader loadTemplate(String name) {
@@ -104,14 +104,14 @@ public class TemplateEngine implements Engine {
     }
 
     /**
-     * Parses the template source into an AST and creates a new template instance.
+     * Parses the view source into an AST and creates a new view instance.
      * <p>
      * This method converts the raw source into a {@link TokenizableSource}, tokenizes it to produce a {@link TokenCursor},
-     * and then invokes the appropriate parser to build the AST. The resulting template is then constructed.
+     * and then invokes the appropriate parser to build the AST. The resulting view is then constructed.
      * </p>
      *
-     * @param name   the name of the template
-     * @param reader the reader for the template source
+     * @param name   the name of the view
+     * @param reader the reader for the view source
      * @return the parsed {@link Template} instance
      */
     @Override
@@ -128,10 +128,10 @@ public class TemplateEngine implements Engine {
     }
 
     /**
-     * Creates a new template instance based on the provided AST root and source.
+     * Creates a new view instance based on the provided AST root and source.
      *
-     * @param root   the root node of the template AST
-     * @param source the tokenizable source of the template
+     * @param root   the root node of the view AST
+     * @param source the tokenizable source of the view
      * @return a new {@link Template} instance
      */
     @Override
@@ -187,7 +187,7 @@ public class TemplateEngine implements Engine {
     }
 
     /**
-     * Returns the container for custom extensions used during template parsing and rendering.
+     * Returns the container for custom extensions used during view parsing and rendering.
      *
      * @return the {@link ExtensionContainer} instance
      */
@@ -197,7 +197,7 @@ public class TemplateEngine implements Engine {
     }
 
     /**
-     * Returns the current template loader.
+     * Returns the current view loader.
      *
      * @return the {@link TemplateLoader} for String-based templates
      */
@@ -207,7 +207,7 @@ public class TemplateEngine implements Engine {
     }
 
     /**
-     * Sets the template loader to be used by this engine.
+     * Sets the view loader to be used by this engine.
      *
      * @param loader the {@link TemplateLoader} to set
      */

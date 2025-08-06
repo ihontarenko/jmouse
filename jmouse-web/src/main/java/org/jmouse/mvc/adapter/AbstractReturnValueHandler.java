@@ -3,29 +3,76 @@ package org.jmouse.mvc.adapter;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
 import org.jmouse.mvc.InvocationOutcome;
+import org.jmouse.mvc.MethodParameter;
 import org.jmouse.mvc.RequestContext;
 import org.jmouse.mvc.ReturnValueHandler;
 import org.jmouse.web.context.WebBeanContext;
 
-abstract public class AbstractReturnValueHandler implements ReturnValueHandler, InitializingBean {
+/**
+ * 🔄 Base class for {@link ReturnValueHandler} implementations.
+ *
+ * <p>Provides lifecycle integration via {@link InitializingBean}
+ * and delegates return value processing to subclasses.
+ *
+ * <p>Typical usage:
+ * <pre>{@code
+ * public class JsonReturnValueHandler extends AbstractReturnValueHandler {
+ *     protected void doReturnValueHandle(MethodParameter returnType, InvocationOutcome result, RequestContext ctx) {
+ *         // Serialize result to JSON and write to response
+ *     }
+ *
+ *     protected void doInitialize(WebBeanContext context) {
+ *         // Load ObjectMapper, etc.
+ *     }
+ * }
+ * }</pre>
+ *
+ * @author Ivan Hontarenko
+ * @author ihontarenko@gmail.com
+ */
+public abstract class AbstractReturnValueHandler implements ReturnValueHandler, InitializingBean {
 
+    /**
+     * 🔁 Delegates to {@link #doReturnValueHandle(MethodParameter, InvocationOutcome, RequestContext)}.
+     */
     @Override
-    public void handleReturnValue(InvocationOutcome result, RequestContext requestContext) {
-        doReturnValueHandle(result, requestContext);
+    public void handleReturnValue(MethodParameter returnType, InvocationOutcome outcome, RequestContext requestContext) {
+        doReturnValueHandle(returnType, outcome, requestContext);
     }
 
+    /**
+     * 🚀 Called after the bean is initialized in the context.
+     * Casts {@link BeanContext} to {@link WebBeanContext} and delegates to {@link #initialize(WebBeanContext)}.
+     */
     @Override
     public void afterCompletion(BeanContext context) {
         initialize((WebBeanContext) context);
     }
 
+    /**
+     * 🔧 Initializes this handler using the given {@link WebBeanContext}.
+     */
     protected void initialize(WebBeanContext context) {
         doInitialize(context);
     }
 
+    /**
+     * 🧩 Subclass-specific initialization logic.
+     *
+     * @param context current web bean context
+     */
     protected abstract void doInitialize(WebBeanContext context);
 
+    /**
+     * 🧪 Subclass-specific return value handling logic.
+     *
+     * @param returnType      method return type
+     * @param result          actual return value + metadata
+     * @param requestContext  request-specific state
+     */
     protected abstract void doReturnValueHandle(
-            InvocationOutcome result, RequestContext requestContext);
-
+            MethodParameter returnType,
+            InvocationOutcome result,
+            RequestContext requestContext
+    );
 }

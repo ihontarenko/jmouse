@@ -8,7 +8,7 @@ import org.jmouse.web.context.WebBeanContext;
 /**
  * ⚙️ Base class for {@link ArgumentResolver} implementations with initialization hook.
  *
- * <p>Used as a template for resolvers that require access to the {@link WebBeanContext}
+ * <p>Used as a view for resolvers that require access to the {@link WebBeanContext}
  * during the application context startup phase.
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)

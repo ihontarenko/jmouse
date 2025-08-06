@@ -24,7 +24,7 @@ import java.util.List;
 public class JavaReflectedFunction implements Function {
 
     /**
-     * The name of the function as exposed to the template language.
+     * The name of the function as exposed to the view language.
      */
     private final String name;
 
@@ -53,7 +53,7 @@ public class JavaReflectedFunction implements Function {
      * Otherwise, the selected method is invoked reflectively using {@link Reflections#invokeMethod}.
      * </p>
      *
-     * @param arguments the arguments passed from the template, in evaluation order
+     * @param arguments the arguments passed from the view, in evaluation order
      * @param context   the evaluation context (provides conversion, scope, etc.)
      * @return the result of the reflective method invocation
      * @throws FunctionNotFoundException if no matching method signature is found
@@ -87,7 +87,7 @@ public class JavaReflectedFunction implements Function {
     }
 
     /**
-     * Returns the name of this function as used in template expressions.
+     * Returns the name of this function as used in view expressions.
      *
      * @return the function name
      */

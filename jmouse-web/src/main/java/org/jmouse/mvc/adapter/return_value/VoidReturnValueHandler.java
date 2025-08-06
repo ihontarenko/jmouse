@@ -32,16 +32,16 @@ public class VoidReturnValueHandler extends AbstractReturnValueHandler {
     /**
      * ✅ Supports only {@code null} return values.
      *
-     * @param result the MvcContainer with method return info
+     * @param outcome the MvcContainer with method return info
      * @return {@code true} if return value is {@code null}
      */
     @Override
-    public boolean supportsReturnType(MethodParameter returnType, InvocationOutcome result) {
-        return result.getReturnValue() == null;
+    public boolean supportsReturnType(MethodParameter returnType, InvocationOutcome outcome) {
+        return outcome.getReturnValue() == null;
     }
 
     @Override
-    protected void doReturnValueHandle(InvocationOutcome result, RequestContext requestContext) {
+    protected void doReturnValueHandle(MethodParameter returnType, InvocationOutcome result, RequestContext requestContext) {
         HttpServletResponse response    = requestContext.response();
         String              contentType = response.getContentType();
         Headers             headers     = result.getHeaders();

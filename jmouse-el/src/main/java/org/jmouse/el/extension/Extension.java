@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 🔌 Core extension point for the template engine.
+ * 🔌 Core extension point for the view engine.
  * <p>
  * Allows plug‑in of custom behavior such as:
  * <ul>
@@ -38,7 +38,7 @@ public interface Extension {
     }
 
     /**
-     * Returns custom tag parsers for template directives.
+     * Returns custom tag parsers for view directives.
      *
      * @return a list of {@link TagParser} instances, or an empty list
      */

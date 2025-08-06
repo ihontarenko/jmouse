@@ -31,7 +31,7 @@ public class DefaultTokenizer implements Tokenizer<TokenizableSource, Token> {
 
     /**
      * Constructs a {@code TemplateTokenizer} with predefined type recognizers.
-     * Registers standard and template tokens with specific priority values.
+     * Registers standard and view tokens with specific priority values.
      */
     public DefaultTokenizer(Splitter<List<RawToken>, TokenizableSource> splitter, Recognizer<Token.Type, RawToken> recognizer) {
         this.splitter = splitter;

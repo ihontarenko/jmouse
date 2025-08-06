@@ -1,9 +1,8 @@
-package org.jmouse.mvc.template;
+package org.jmouse.mvc.view;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.renderable.Content;
 import org.jmouse.el.renderable.Renderer;
 import org.jmouse.el.renderable.Template;
 import org.jmouse.mvc.AbstractView;
@@ -15,8 +14,8 @@ import java.util.Map;
  * 🧩 A concrete {@link org.jmouse.mvc.View} implementation that renders a {@link Template}
  * using a {@link Renderer} and an {@link EvaluationContext}.
  *
- * <p>This class is typically used for rendering internal template-based views where model attributes
- * are evaluated and injected into the template content dynamically.</p>
+ * <p>This class is typically used for rendering internal view-based views where model attributes
+ * are evaluated and injected into the view content dynamically.</p>
  *
  * <p>It is suitable for views written using a custom templating engine or expression language
  * defined in the <code>org.jmouse.el</code> package.</p>
@@ -32,9 +31,9 @@ public class InternalView extends AbstractView {
     private final Renderer renderer;
 
     /**
-     * Constructs a new InternalView with the given template and renderer.
+     * Constructs a new InternalView with the given view and renderer.
      *
-     * @param template the parsed template to be rendered
+     * @param template the parsed view to be rendered
      * @param renderer the rendering engine responsible for producing output
      */
     public InternalView(Template template, Renderer renderer) {
@@ -43,10 +42,10 @@ public class InternalView extends AbstractView {
     }
 
     /**
-     * Renders the template by evaluating it against the provided model,
+     * Renders the view by evaluating it against the provided model,
      * and writes the result to the HTTP response.
      *
-     * @param model    the model attributes to expose in the template
+     * @param model    the model attributes to expose in the view
      * @param request  the current HTTP servlet request
      * @param response the current HTTP servlet response
      */
@@ -58,7 +57,7 @@ public class InternalView extends AbstractView {
         try {
             response.getWriter().write(renderer.render(template, context).getDataArray());
         } catch (IOException e) {
-            throw new RuntimeException("Failed to render template", e);
+            throw new RuntimeException("Failed to render view", e);
         }
     }
 }

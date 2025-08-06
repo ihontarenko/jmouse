@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * 🏗️ Standard implementation of {@link ExtensionContainer}.
  * <p>
- * This container holds various template engine extensions, including functions, tests, filters,
+ * This container holds various view engine extensions, including functions, tests, filters,
  * operators, and parsers. It provides methods for managing and retrieving them dynamically.
  * </p>
  *

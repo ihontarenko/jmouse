@@ -6,11 +6,11 @@ import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.NodeVisitor;
 
 /**
- * Represents an "extends" node in a template.
+ * Represents an "extends" node in a view.
  * <p>
- * This node is used to specify that a template extends a parent template.
- * It evaluates an expression that should resolve to the parent template's name,
- * converts the result to a String, and then sets the parent template in the current template.
+ * This node is used to specify that a view extends a parent view.
+ * It evaluates an expression that should resolve to the parent view's name,
+ * converts the result to a String, and then sets the parent view in the current view.
  * </p>
  */
 public class ExtendsNode extends AbstractNode {
@@ -18,7 +18,7 @@ public class ExtendsNode extends AbstractNode {
     private ExpressionNode path;
 
     /**
-     * Returns the expression node that evaluates to the parent template name.
+     * Returns the expression node that evaluates to the parent view name.
      *
      * @return the parent expression node
      */
@@ -27,7 +27,7 @@ public class ExtendsNode extends AbstractNode {
     }
 
     /**
-     * Sets the expression node that represents the parent template.
+     * Sets the expression node that represents the parent view.
      *
      * @param path the parent expression node
      */

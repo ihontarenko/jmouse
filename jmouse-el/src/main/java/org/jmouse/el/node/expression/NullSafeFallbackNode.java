@@ -5,14 +5,14 @@ import org.jmouse.el.node.AbstractExpressionNode;
 import org.jmouse.el.node.ExpressionNode;
 
 /**
- * Represents a null-coalescing expression in the template language.
+ * Represents a null-coalescing expression in the view language.
  * <p>
  * Evaluates the {@code nullable} expression first; if its result is non-null,
  * that value is returned. Otherwise, the {@code otherwise} expression is evaluated
  * and its result returned.
  * </p>
  * <p>
- * Syntax example in a template:
+ * Syntax example in a view:
  * <pre>
  *   {{ user.name ?? "Anonymous" }}
  * </pre>

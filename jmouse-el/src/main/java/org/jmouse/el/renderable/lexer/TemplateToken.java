@@ -3,7 +3,7 @@ package org.jmouse.el.renderable.lexer;
 import org.jmouse.el.lexer.Token;
 
 /**
- * Enumeration of template tokens used in the template engine.
+ * Enumeration of view tokens used in the view engine.
  * Each type has a unique type identifier and example string(s) associated with it.
  */
 public enum TemplateToken implements Token.Type {
@@ -241,7 +241,7 @@ public enum TemplateToken implements Token.Type {
     private final String[] values;
 
     /**
-     * Constructs a template type with the specified type and example usages.
+     * Constructs a view type with the specified type and example usages.
      *
      * @param type     the unique type identifier for this type
      * @param values example strings representing the type

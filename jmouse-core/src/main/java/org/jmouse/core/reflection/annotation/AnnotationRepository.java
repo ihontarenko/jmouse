@@ -25,10 +25,20 @@ import java.util.*;
  */
 public final class AnnotationRepository {
 
+    private final static Map<AnnotatedElement, AnnotationRepository> CACHE = new LinkedHashMap<>();
+
     private final Map<Class<? extends Annotation>, List<MergedAnnotation>> index;
 
     private AnnotationRepository(List<MergedAnnotation> roots) {
         this.index = indexing(roots);
+    }
+
+    public static AnnotationRepository compute(AnnotatedElement element) {
+        Set<AnnotationData>    scanned = AnnotationScanner.scan(element);
+        List<MergedAnnotation> roots   = scanned.stream()
+                .map(data -> new MergedAnnotation(data, null)).toList();
+
+        return new AnnotationRepository(roots);
     }
 
     /**
@@ -39,11 +49,7 @@ public final class AnnotationRepository {
      * @return a {@link AnnotationRepository} instance
      */
     public static AnnotationRepository ofAnnotatedElement(AnnotatedElement element) {
-        Set<AnnotationData>    scanned = AnnotationScanner.scan(element);
-        List<MergedAnnotation> roots   = scanned.stream().map(data
-                -> new MergedAnnotation(data, null)).toList();
-
-        return new AnnotationRepository(roots);
+        return CACHE.computeIfAbsent(element, AnnotationRepository::compute);
     }
 
     /**
@@ -91,5 +97,10 @@ public final class AnnotationRepository {
         }
 
         return index;
+    }
+
+    @Override
+    public String toString() {
+        return "AnnotationRepository:%s".formatted(index.keySet());
     }
 }

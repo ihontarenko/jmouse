@@ -11,7 +11,7 @@ public class TemplateTokenizer extends DefaultTokenizer {
 
     /**
      * Constructs a {@code TemplateTokenizer} with predefined type recognizers.
-     * Registers standard and template tokens with specific priority values.
+     * Registers standard and view tokens with specific priority values.
      */
     public TemplateTokenizer(Recognizer<Token.Type, RawToken> recognizer) {
         super(new TemplateSplitter(), recognizer);

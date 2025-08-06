@@ -42,11 +42,16 @@ public interface ArgumentResolver {
      * 🎯 Resolves the actual argument value to inject into the controller method.
      *
      * @param parameter        the method parameter to resolve
+     * @param requestContext   the current web request context (includes headers, session, etc.)
      * @param mappingResult    resolved routing and request mapping information
      * @param invocationResult current invocation context (model, status, etc.)
      * @return the resolved value to be injected into the method argument
      */
     Object resolveArgument(
-            MethodParameter parameter, MappingResult mappingResult, InvocationOutcome invocationResult);
+            MethodParameter parameter,
+            RequestContext requestContext,
+            MappingResult mappingResult,
+            InvocationOutcome invocationResult
+    );
 
 }

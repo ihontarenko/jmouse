@@ -28,7 +28,7 @@ public class StringSource implements TokenizableSource {
 
     private final String name;              // Template name
     private       int    length = 0;        // Number of characters stored in buffer
-    private       char[] buffer;            // Character buffer for storing template data
+    private       char[] buffer;            // Character buffer for storing view data
     private       int    encounters = 0;    // Number of stored tokens
     private       Type[] types;             // Array storing token types
     private       int[]  offsets;           // Array storing token positions
@@ -51,7 +51,7 @@ public class StringSource implements TokenizableSource {
     /**
      * Reads the entire content of the given {@link Reader} into the internal buffer.
      *
-     * @param reader the reader providing template content
+     * @param reader the reader providing view content
      */
     private void toCharArray(Reader reader) {
         char[] buffer = new char[DEFAULT_CAPACITY * 4];
@@ -64,7 +64,7 @@ public class StringSource implements TokenizableSource {
                 this.length += length;
             }
         } catch (IOException exception) {
-            throw new StringReaderException("Error reading template", exception);
+            throw new StringReaderException("Error reading view", exception);
         }
     }
 
@@ -114,9 +114,9 @@ public class StringSource implements TokenizableSource {
     }
 
     /**
-     * Returns the name of the template.
+     * Returns the name of the view.
      *
-     * @return the template name
+     * @return the view name
      */
     @Override
     public String getName() {

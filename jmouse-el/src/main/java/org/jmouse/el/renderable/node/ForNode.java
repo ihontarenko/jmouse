@@ -7,7 +7,7 @@ import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.NodeVisitor;
 
 /**
- * Represents a "for" loop node in the template engine.
+ * Represents a "for" loop node in the view engine.
  * <p>
  * A ForNode encapsulates the loop variable (item), an iterable expression,
  * the body (content to render for each item), and an optional empty block to be rendered

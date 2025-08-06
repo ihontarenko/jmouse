@@ -17,14 +17,14 @@ import org.jmouse.el.renderable.parser.TemplateParser;
 import static org.jmouse.el.renderable.lexer.TemplateToken.*;
 
 /**
- * Parses the {@code embed} tag from a template.
+ * Parses the {@code embed} tag from a view.
  * <p>
  * The embed tag is expected to have the following syntax:
  * <pre>
  *   {% embed <expression> [with <mapExpression>] %} ... {% endembed %}
  * </pre>
  * The tag starts with the {@code T_EMBED} token, followed by an expression
- * (evaluated to a template path) and optionally a {@code with} clause for parameters.
+ * (evaluated to a view path) and optionally a {@code with} clause for parameters.
  * Then, the tag content is parsed until the end token {@code T_END_EMBED} is encountered.
  * </p>
  */

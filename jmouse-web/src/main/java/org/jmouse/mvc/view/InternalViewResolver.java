@@ -1,6 +1,8 @@
-package org.jmouse.mvc.template;
+package org.jmouse.mvc.view;
 
+import org.jmouse.beans.annotation.AggregatedBeans;
 import org.jmouse.beans.annotation.BeanConstructor;
+import org.jmouse.el.extension.Extension;
 import org.jmouse.el.renderable.*;
 import org.jmouse.el.renderable.loader.ClasspathLoader;
 import org.jmouse.el.renderable.loader.TemplateLoader;
@@ -8,12 +10,13 @@ import org.jmouse.mvc.AbstractViewResolver;
 import org.jmouse.mvc.View;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
- * 🛠️ Internal template engine-based {@link org.jmouse.mvc.ViewResolver} implementation.
+ * 🛠️ Internal view engine-based {@link org.jmouse.mvc.ViewResolver} implementation.
  *
- * <p>This class integrates a custom template engine (based on {@link TemplateEngine})
+ * <p>This class integrates a custom view engine (based on {@link TemplateEngine})
  * to resolve views located in the classpath. Templates are expected to reside
  * in the {@code /templates/} directory and use the {@code .j.html} extension.</p>
  *
@@ -26,14 +29,14 @@ import java.util.Map;
  * @see Template
  * @see Renderer
  */
-public class InternalTemplateEngine extends AbstractViewResolver {
+public class InternalViewResolver extends AbstractViewResolver {
 
     private final Engine            engine = new TemplateEngine();
     private final Map<String, View> cache  = new HashMap<>();
     private final Renderer          renderer;
 
     /**
-     * Constructs a new {@code InternalTemplateEngine} with default classpath-based loader settings.
+     * Constructs a new {@code InternalViewResolver} with default classpath-based loader settings.
      * <p>
      * The loader is configured to read templates from:
      * <pre>
@@ -41,7 +44,7 @@ public class InternalTemplateEngine extends AbstractViewResolver {
      * </pre>
      */
     @BeanConstructor
-    public InternalTemplateEngine(InternalViewProperties properties) {
+    public InternalViewResolver(InternalViewProperties properties, @AggregatedBeans List<Extension> extensions) {
         TemplateLoader<String> loader = new ClasspathLoader();
 
         loader.setPrefix(properties.getPrefix());
@@ -49,6 +52,10 @@ public class InternalTemplateEngine extends AbstractViewResolver {
 
         engine.setLoader(loader);
         renderer = new TemplateRenderer(engine);
+
+        if (extensions != null) {
+            extensions.forEach(engine.getExtensions()::importExtension);
+        }
     }
 
     /**
@@ -65,9 +72,9 @@ public class InternalTemplateEngine extends AbstractViewResolver {
     }
 
     /**
-     * Internal method to load and wrap a template view.
+     * Internal method to load and wrap a view view.
      *
-     * @param path the template path
+     * @param path the view path
      * @return an {@link InternalView} ready for rendering
      */
     private View resolveTemplate(String path) {

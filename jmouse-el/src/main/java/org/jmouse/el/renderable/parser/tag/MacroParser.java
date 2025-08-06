@@ -23,7 +23,7 @@ import static org.jmouse.el.lexer.BasicToken.*;
 import static org.jmouse.el.renderable.lexer.TemplateToken.*;
 
 /**
- * Parses a macro definition in a template.
+ * Parses a macro definition in a view.
  * <p>
  * This parser processes macro tags by extracting the macro name, its parameters,
  * and its body. The expected syntax is:

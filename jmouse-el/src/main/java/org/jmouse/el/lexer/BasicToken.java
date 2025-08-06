@@ -1,7 +1,7 @@
 package org.jmouse.el.lexer;
 
 /**
- * BasicToken defines token types for the template language.
+ * BasicToken defines token types for the view language.
  *
  * <p>Tokens are grouped by category using numeric ranges:
  * <br>

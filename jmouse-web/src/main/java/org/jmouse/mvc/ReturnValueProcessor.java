@@ -34,7 +34,7 @@ public class ReturnValueProcessor {
     public void process(MethodParameter returnType, InvocationOutcome outcome, RequestContext requestContext) {
         for (ReturnValueHandler handler : handlers) {
             if (handler.supportsReturnType(returnType, outcome)) {
-                handler.handleReturnValue(outcome, requestContext);
+                handler.handleReturnValue(returnType, outcome, requestContext);
             }
         }
     }

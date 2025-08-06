@@ -34,7 +34,7 @@ public class Templates {
 
 
         Template          template = engine.getTemplate("site");
-//        Template          template = engine.getTemplate("benchmark");
+//        Template          view = engine.getTemplate("benchmark");
         Renderer          renderer = new TemplateRenderer(engine);
         EvaluationContext context  = template.newContext();
 

@@ -2,6 +2,8 @@ package org.jmouse.mvc;
 
 import org.jmouse.core.bind.descriptor.AnnotationDescriptor;
 import org.jmouse.core.reflection.Reflections;
+import org.jmouse.core.reflection.annotation.AnnotationRepository;
+import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.mvc.mapping.annnotation.MethodDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 🧠 Responsible for invoking a {@link HandlerMethod} with resolved arguments.
@@ -32,18 +35,20 @@ public class HandlerMethodInvocation {
     private final HandlerMethodContext   handlerContext;
     private final List<ArgumentResolver> argumentResolvers;
     private final MappingResult          mappingResult;
+    private final AnnotationRepository   annotationRepository;
     private final InvocationOutcome      invocationResult;
 
     public HandlerMethodInvocation(
             HandlerMethodContext handlerContext,
             MappingResult mappingResult,
-            InvocationOutcome invocationResult,
-            List<ArgumentResolver> argumentResolvers
+            InvocationOutcome outcome,
+            List<ArgumentResolver> resolvers
     ) {
         this.handlerContext = handlerContext;
         this.mappingResult = mappingResult;
-        this.invocationResult = invocationResult;
-        this.argumentResolvers = argumentResolvers;
+        this.annotationRepository = AnnotationRepository.ofAnnotatedElement(getHandlerMethod().getMethod());
+        this.invocationResult = outcome;
+        this.argumentResolvers = resolvers;
     }
 
     /**
@@ -71,24 +76,22 @@ public class HandlerMethodInvocation {
      * @throws RuntimeException if the method cannot be invoked
      */
     public Object invoke() {
-        HandlerMethod handlerMethod = handlerContext.handlerMethod();
-        Object[]      arguments     = {};
-        List<Object>  resolved      = new ArrayList<>();
-        Method        method        = handlerMethod.getMethod();
+        HandlerMethod         handlerMethod = handlerContext.handlerMethod();
+        List<MethodParameter> parameters    = handlerMethod.getParameters();
+        Object[]              arguments     = new Object[parameters.size()];
+        Method                method        = handlerMethod.getMethod();
 
-        for (MethodParameter parameter : handlerMethod.getParameters()) {
-            resolved.add(
-                    getArgumentResolver(parameter).resolveArgument(parameter, mappingResult, invocationResult));
+        for (MethodParameter parameter : parameters) {
+            Object resolved = getArgumentResolver(parameter)
+                    .resolveArgument(parameter, handlerContext.requestContext(), mappingResult, invocationResult);
+            arguments[parameter.getParameterIndex()] = resolved;
         }
 
-        if (!resolved.isEmpty()) {
-            arguments = resolved.toArray();
-        }
+        Optional<MergedAnnotation> annotation = annotationRepository.get(MethodDescription.class);
 
-        for (AnnotationDescriptor annotation : handlerMethod.getDescriptor().getAnnotations()) {
-            if (annotation.unwrap().annotationType() == MethodDescription.class) {
-                MethodDescription.LOGGER.info("Endpoint Information: {}", annotation.getAttribute("value"));
-            }
+        if (annotation.isPresent()) {
+            MethodDescription description = annotation.get().synthesize();
+            MethodDescription.LOGGER.info("Endpoint Information: {}", description.value());
         }
 
         return Reflections.invokeMethod(handlerMethod.getBean(), method, arguments);

@@ -9,7 +9,7 @@ import org.jmouse.util.Sorter;
 import java.util.List;
 
 /**
- * 🛠️ Manages various extensions used in the template engine, including functions, tests, filters, operators, and parsers.
+ * 🛠️ Manages various extensions used in the view engine, including functions, tests, filters, operators, and parsers.
  * <p>
  * This container allows dynamic registration and retrieval of extensions by their name or type,
  * making it a central registry for managing custom behaviors.

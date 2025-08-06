@@ -53,17 +53,47 @@ public class ViewReturnValueHandler extends AbstractReturnValueHandler {
     }
 
     /**
-     * Processes the return value by resolving and rendering the associated view.
+     * 🧪 Handles the return value when it represents a view to be rendered.
      *
-     * @param result         the invocation outcome containing model and return value
-     * @param requestContext the current HTTP request/response context
+     * <p>Supports two strategies:
+     * <ul>
+     *     <li>🔍 If the method is annotated with {@link ViewMapping}, the view name is resolved from the annotation.</li>
+     *     <li>📝 If the return value is a {@code String} starting with {@code view:}, it's treated as a direct view name.</li>
+     * </ul>
+     *
+     * <p>If a view name is resolved, it's rendered via the configured {@link ViewResolver}.
+     *
+     * @param returnType      the method return type metadata
+     * @param outcome         the return value and model container
+     * @param requestContext  current request/response context
      */
     @Override
-    protected void doReturnValueHandle(InvocationOutcome result, RequestContext requestContext) {
-        View view = viewResolver.resolveView((String) result.getReturnValue());
-        view.render(result.getModel().getAttributes(), requestContext.request(), requestContext.response());
-        result.setState(ExecutionState.HANDLED);
+    protected void doReturnValueHandle(MethodParameter returnType, InvocationOutcome outcome, RequestContext requestContext) {
+        Optional<MergedAnnotation> optional = AnnotationRepository.ofAnnotatedElement(returnType.getAnnotatedElement())
+                .get(ViewMapping.class);
+
+        String viewName = null;
+
+        if (optional.isPresent()) {
+            ViewMapping mapping = optional.get().synthesize();
+            viewName = mapping.name();
+        } else if (outcome.getReturnValue() instanceof String name && name.startsWith(VIEW_PREFIX)) {
+            viewName = name.substring(VIEW_PREFIX.length());
+        }
+
+        if (viewName != null && !viewName.isBlank()) {
+            try {
+                View view = viewResolver.resolveView(viewName);
+                view.render(outcome.getModel().getAttributes(), requestContext.request(), requestContext.response());
+                outcome.setState(ExecutionState.HANDLED);
+            } catch (Exception e) {
+                throw new NotFoundException("Unable to render view", e);
+            }
+        } else {
+            throw new NotFoundException("Unable to resolve view");
+        }
     }
+
 
     /**
      * Checks if the return type is supported.

@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toMap;
 
 /**
- * Represents a template macro, which binds a macro name to its corresponding macro definition.
+ * Represents a view macro, which binds a macro name to its corresponding macro definition.
  * <p>
  * This record implements the {@link Macro} interface and encapsulates an immutable mapping
  * between a macro name and a {@link MacroNode} that contains the macro's content.

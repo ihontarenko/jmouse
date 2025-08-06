@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a stack of renderable templates for managing template inheritance.
+ * Represents a stack of renderable templates for managing view inheritance.
  * <p>
  * The {@code Inheritance} interface provides operations to manage a hierarchy of
- * {@link Template} instances, such as pushing a new template onto the stack (inherit),
- * ascending to a parent template, descending to a child template, and retrieving the current
- * child or parent template.
+ * {@link Template} instances, such as pushing a new view onto the stack (inherit),
+ * ascending to a parent view, descending to a child view, and retrieving the current
+ * child or parent view.
  * </p>
  * <p>
  * This interface is sealed and its permitted implementation is {@link LinkedListInheritance}.
@@ -27,7 +27,7 @@ public sealed interface Inheritance permits LinkedListInheritance {
     }
 
     /**
-     * Pushes the specified template onto the inheritance stack.
+     * Pushes the specified view onto the inheritance stack.
      *
      * @param template the {@link Template} to inherit.
      */
@@ -36,8 +36,8 @@ public sealed interface Inheritance permits LinkedListInheritance {
     /**
      * Ascends one level in the inheritance hierarchy.
      * <p>
-     * Typically, this operation removes the current child template from the stack,
-     * moving the pointer to the parent template.
+     * Typically, this operation removes the current child view from the stack,
+     * moving the pointer to the parent view.
      * </p>
      */
     void ascend();
@@ -45,27 +45,27 @@ public sealed interface Inheritance permits LinkedListInheritance {
     /**
      * Descends one level in the inheritance hierarchy.
      * <p>
-     * This operation allows navigating into a child template if available.
+     * This operation allows navigating into a child view if available.
      * </p>
      */
     void descend();
 
     /**
-     * Returns the current child template from the inheritance stack.
+     * Returns the current child view from the inheritance stack.
      *
      * @return the current child {@link Template}, or {@code null} if the stack is empty.
      */
     Template getChild();
 
     /**
-     * Returns the current template from the inheritance stack.
+     * Returns the current view from the inheritance stack.
      *
      * @return the current {@link Template}
      */
     Template getCurrent();
 
     /**
-     * Returns the current parent template from the inheritance stack.
+     * Returns the current parent view from the inheritance stack.
      *
      * @return the current parent {@link Template}, or {@code null} if no parent exists.
      */
@@ -87,18 +87,18 @@ public sealed interface Inheritance permits LinkedListInheritance {
     }
 
     /**
-     * Checks if the inheritance stack currently has a child template.
+     * Checks if the inheritance stack currently has a child view.
      *
-     * @return {@code true} if a child template exists; {@code false} otherwise.
+     * @return {@code true} if a child view exists; {@code false} otherwise.
      */
     default boolean hasChild() {
         return getChild() != null;
     }
 
     /**
-     * Checks if the inheritance stack currently has a parent template.
+     * Checks if the inheritance stack currently has a parent view.
      *
-     * @return {@code true} if a parent template exists; {@code false} otherwise.
+     * @return {@code true} if a parent view exists; {@code false} otherwise.
      */
     default boolean hasParent() {
         return getParent() != null;

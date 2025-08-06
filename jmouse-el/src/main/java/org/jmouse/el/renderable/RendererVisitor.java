@@ -24,11 +24,11 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * The RendererVisitor traverses the template AST and produces the final rendered output.
+ * The RendererVisitor traverses the view AST and produces the final rendered output.
  * <p>
  * It processes various node types such as container, text, print, block, include, embed,
  * if, for, function, and apply nodes. The visitor uses the provided evaluation context,
- * template registry, and content accumulator to render the template.
+ * view registry, and content accumulator to render the view.
  * </p>
  */
 public class RendererVisitor implements NodeVisitor {
@@ -40,10 +40,10 @@ public class RendererVisitor implements NodeVisitor {
     private final Content                   content;
 
     /**
-     * Constructs a RendererVisitor with the specified content accumulator, template registry, and evaluation context.
+     * Constructs a RendererVisitor with the specified content accumulator, view registry, and evaluation context.
      *
      * @param content  the content accumulator for the rendered output
-     * @param registry the template registry containing block and macro definitions
+     * @param registry the view registry containing block and macro definitions
      * @param context  the evaluation context used for expression evaluation and variable scope resolution
      */
     public RendererVisitor(Content content, TemplateRegistry registry, EvaluationContext context) {
@@ -223,7 +223,7 @@ public class RendererVisitor implements NodeVisitor {
     }
 
     /**
-     * Processes a BlockNode by finding the corresponding block in the template registry and rendering its body.
+     * Processes a BlockNode by finding the corresponding block in the view registry and rendering its body.
      *
      * @param node the block node to process
      */
@@ -239,9 +239,9 @@ public class RendererVisitor implements NodeVisitor {
     }
 
     /**
-     * Processes an IncludeNode by loading an external template and rendering it within the current output.
+     * Processes an IncludeNode by loading an external view and rendering it within the current output.
      *
-     * @param include the include node specifying the external template to include
+     * @param include the include node specifying the external view to include
      */
     @Override
     public void visit(IncludeNode include) {
@@ -250,7 +250,7 @@ public class RendererVisitor implements NodeVisitor {
             EvaluationContext ctx      = included.newContext();
             Node              root     = included.getRoot();
 
-            LOGGER.info("Include '{}' template", name);
+            LOGGER.info("Include '{}' view", name);
 
             root.accept(new InitializerVisitor(included, ctx));
             root.accept(new RendererVisitor(content, included.getRegistry(), ctx));
@@ -259,44 +259,44 @@ public class RendererVisitor implements NodeVisitor {
 
 
     /**
-     * Processes an EmbedNode by rendering an embedded template and appending its output.
+     * Processes an EmbedNode by rendering an embedded view and appending its output.
      * <p>
-     * The embed node's path expression is evaluated to obtain the embedded template path.
-     * A temporary (fake) template is created using the embed node's body, and its parent is set
-     * to the real template loaded via the engine. A new evaluation context is created for the fake template.
-     * Finally, the fake template is rendered and its content appended to the output.
+     * The embed node's path expression is evaluated to obtain the embedded view path.
+     * A temporary (fake) view is created using the embed node's body, and its parent is set
+     * to the real view loaded via the engine. A new evaluation context is created for the fake view.
+     * Finally, the fake view is rendered and its content appended to the output.
      * </p>
      *
      * @param embedNode the embed node to process
      */
     @Override
     public void visit(EmbedNode embedNode) {
-        // Evaluate the embed node's path to obtain the template path.
+        // Evaluate the embed node's path to obtain the view path.
         if (embedNode.getPath().evaluate(context) instanceof String path) {
-            // 1. Retrieve the engine from the template registry.
-            // 2. Create a dummy TokenizableSource; the source identifier includes the embedded template path.
-            // 3. Obtain the target (real) template by path from the engine.
-            // 4. Create a new "fake" template from the embed node's body and the dummy source.
-            // 5. Create a new evaluation context for the fake template.
+            // 1. Retrieve the engine from the view registry.
+            // 2. Create a dummy TokenizableSource; the source identifier includes the embedded view path.
+            // 3. Obtain the target (real) view by path from the engine.
+            // 4. Create a new "fake" view from the embed node's body and the dummy source.
+            // 5. Create a new evaluation context for the fake view.
             Engine            engine          = registry.getEngine();
             TokenizableSource source          = new StringSource("embedded: " + path, "");
             Template          real            = engine.getTemplate(path);
             Template          fake            = engine.newTemplate(embedNode.getBody(), source);
             EvaluationContext embeddedContext = fake.newContext();
 
-            // 1. Link scoped values to embedded template
+            // 1. Link scoped values to embedded view
             // 2. Import registry from root to fake
-            // 3. Establish inheritance: set the parent of the fake template to be the real template.
+            // 3. Establish inheritance: set the parent of the fake view to be the real view.
             embeddedContext.setScopedChain(context.getScopedChain());
             fake.getRegistry().copyFrom(registry);
             fake.setParent(real, embeddedContext);
 
-            // Render the fake template using a new renderer instance and the fresh context.
+            // Render the fake view using a new renderer instance and the fresh context.
             Content inner = new TemplateRenderer(engine).render(fake, embeddedContext);
 
             LOGGER.info("Embed '{}' rendered", path);
 
-            // Append the rendered content of the embedded template to the current content.
+            // Append the rendered content of the embedded view to the current content.
             content.append(inner);
         }
     }

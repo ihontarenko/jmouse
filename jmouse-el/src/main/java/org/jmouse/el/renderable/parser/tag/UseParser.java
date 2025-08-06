@@ -18,7 +18,7 @@ import static org.jmouse.el.renderable.lexer.TemplateToken.*;
 
 /**
  * Parses the {@code use} tag, which allows importing macros or blocks
- * from another template into the current template's registry.
+ * from another view into the current view's registry.
  * <p>
  * Syntax examples:
  * <ul>
@@ -42,7 +42,7 @@ public class UseParser implements TagParser {
         // Consume '{% use %}'
         cursor.ensure(T_USE);
 
-        // Parse the path expression to the other template
+        // Parse the path expression to the other view
         ExpressionNode path = (ExpressionNode) context.getParser(ExpressionParser.class).parse(cursor, context);
 
         // Consume 'get' keyword

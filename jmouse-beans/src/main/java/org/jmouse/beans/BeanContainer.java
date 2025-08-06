@@ -9,7 +9,7 @@ import org.jmouse.core.reflection.Reflections;
  */
 public interface BeanContainer {
 
-    // Error message template for unsupported method calls
+    // Error message view for unsupported method calls
     String UNSUPPORTED_CALL_EXCEPTION_MESSAGE = "Method '%s' is unsupported in this '%s' implementation.";
 
     Logger LOGGER = LoggerFactory.getLogger(BeanContainer.class);

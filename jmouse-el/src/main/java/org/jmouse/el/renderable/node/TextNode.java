@@ -8,7 +8,7 @@ import org.jmouse.el.renderable.NodeVisitor;
  * Represents a raw text node in a templating system.
  *
  * <p>This node is used to store plain text that does not require further processing,
- * such as static HTML or text content in a template.</p>
+ * such as static HTML or text content in a view.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com

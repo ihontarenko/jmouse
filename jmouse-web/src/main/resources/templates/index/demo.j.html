@@ -1,7 +1,13 @@
-demo hello!
-
-id: {{ ID }}
-
-{% set pi = 22d / 7 %}
-
-<h1>{{ pi }}</h1>
+{% extends 'jmouse' %}
+{% block 'main' %}
+    demo hello!
+    <h2>User-Agent: <b>{{ userAgent }}</b></h2>
+    <h4>Request-Method: {{ method }}</h4>
+    id: {{ ID }}
+    <p>
+        {{ ID | double / 77 }}
+    </p>
+    {% set pi = 22d / 7 %}
+    <h1>{{ pi }}</h1>
+    <h3>{{ data }}</h3>
+{% endblock %}

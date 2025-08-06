@@ -14,7 +14,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Utility for importing public static methods from a given class as template functions.
+ * Utility for importing public static methods from a given class as view functions.
  * <p>
  * Scans all public static methods of the specified source class, groups them by method name,
  * and registers each group as a {@link JavaReflectedFunction} in the provided

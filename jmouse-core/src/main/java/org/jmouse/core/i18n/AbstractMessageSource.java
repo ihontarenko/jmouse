@@ -193,9 +193,9 @@ public abstract class AbstractMessageSource implements MessageSource {
     protected abstract MessageFormat resolveMessage(String key, Locale locale);
 
     /**
-     * Resolves a formatted message for the given resolved message template and locale.
+     * Resolves a formatted message for the given resolved message view and locale.
      *
-     * @param template  the message template
+     * @param template  the message view
      * @param locale    the target locale
      * @return the resolved {@link MessageFormat}, or {@code null} if not found
      */

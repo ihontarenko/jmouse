@@ -17,7 +17,7 @@ import static org.jmouse.el.lexer.RawToken.Type.*;
 /**
  * Splits raw text into tokens, distinguishing between plain text and templating expressions.
  *
- * <p>Uses a regex-based approach to identify expressions enclosed within template delimiters,
+ * <p>Uses a regex-based approach to identify expressions enclosed within view delimiters,
  * such as <code>{{tag}}</code> or <code>{% statement %}</code>, and processes them accordingly.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
@@ -44,7 +44,7 @@ public class TemplateSplitter implements Splitter<List<RawToken>, TokenizableSou
     }
 
     /**
-     * Splits the given source into raw tokens, distinguishing between plain source and template expressions.
+     * Splits the given source into raw tokens, distinguishing between plain source and view expressions.
      *
      * @param source the input character sequence
      * @param offset the starting offset for tokenization
