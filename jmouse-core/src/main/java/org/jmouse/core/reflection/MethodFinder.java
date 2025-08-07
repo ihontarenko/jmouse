@@ -22,7 +22,7 @@ public class MethodFinder implements MemberFinder<Method> {
      */
     @Override
     public Collection<Method> getMembers(Class<?> clazz, boolean deepScan) {
-        Set<Method> methods = new HashSet<>(Set.of(clazz.getDeclaredMethods()));
+        Set<Method> methods = new LinkedHashSet<>(Set.of(clazz.getDeclaredMethods()));
 
         // Optionally scan superclasses for methods (except Object.class)
         if (deepScan && clazz.getSuperclass() != null && clazz.getSuperclass() != Object.class) {

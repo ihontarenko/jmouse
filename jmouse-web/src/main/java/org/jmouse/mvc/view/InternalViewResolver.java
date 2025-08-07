@@ -8,6 +8,7 @@ import org.jmouse.el.renderable.loader.ClasspathLoader;
 import org.jmouse.el.renderable.loader.TemplateLoader;
 import org.jmouse.mvc.AbstractViewResolver;
 import org.jmouse.mvc.View;
+import org.jmouse.mvc.ViewProperties;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +45,7 @@ public class InternalViewResolver extends AbstractViewResolver {
      * </pre>
      */
     @BeanConstructor
-    public InternalViewResolver(InternalViewProperties properties, @AggregatedBeans List<Extension> extensions) {
+    public InternalViewResolver(ViewProperties properties, @AggregatedBeans List<Extension> extensions) {
         TemplateLoader<String> loader = new ClasspathLoader();
 
         loader.setPrefix(properties.getPrefix());
@@ -56,6 +57,18 @@ public class InternalViewResolver extends AbstractViewResolver {
         if (extensions != null) {
             extensions.forEach(engine.getExtensions()::importExtension);
         }
+    }
+
+    public Engine getEngine() {
+        return engine;
+    }
+
+    public Map<String, View> getCache() {
+        return cache;
+    }
+
+    public Renderer getRenderer() {
+        return renderer;
     }
 
     /**

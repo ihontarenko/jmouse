@@ -8,6 +8,7 @@ import org.jmouse.core.bind.descriptor.MethodDescriptor;
 import org.jmouse.util.Getter;
 import org.jmouse.util.Setter;
 
+import java.lang.reflect.Modifier;
 import java.util.function.Supplier;
 
 /**
@@ -103,7 +104,7 @@ public interface PropertyDescriptor<T> {
      * @return {@code true} if the property has a setter, {@code false} otherwise
      */
     default boolean isWritable() {
-        return getSetter() != null;
+        return getSetter() != null /*&& (getSetterMethod().unwrap().getModifiers() & Modifier.ABSTRACT) == 0*/;
     }
 
     /**

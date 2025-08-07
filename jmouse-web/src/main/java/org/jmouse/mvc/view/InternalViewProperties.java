@@ -2,6 +2,7 @@ package org.jmouse.mvc.view;
 
 import org.jmouse.context.BeanProperties;
 import org.jmouse.core.bind.BindDefault;
+import org.jmouse.mvc.ViewProperties;
 
 /**
  * 🧾 Configuration for internal view rendering.
@@ -19,10 +20,8 @@ import org.jmouse.core.bind.BindDefault;
  * @author ihontarenko@gmail.com
  */
 @BeanProperties(InternalViewProperties.JMOUSE_VIEW_INTERNAL_PATH)
-public class InternalViewProperties {
+public class InternalViewProperties implements ViewProperties {
 
-    public static final String DEFAULT_SUFFIX            = ".j.html";
-    public static final String DEFAULT_PREFIX            = "templates/";
     public static final String JMOUSE_VIEW_INTERNAL_PATH = "jmouse.view.internal";
 
     private String prefix;
@@ -33,6 +32,7 @@ public class InternalViewProperties {
      *
      * @return the view path prefix
      */
+    @Override
     public String getPrefix() {
         return prefix;
     }
@@ -42,7 +42,7 @@ public class InternalViewProperties {
      *
      * @param prefix directory prefix for view resolution
      */
-    @BindDefault(DEFAULT_PREFIX)
+    @Override
     public void setPrefix(String prefix) {
         this.prefix = prefix;
     }
@@ -52,6 +52,7 @@ public class InternalViewProperties {
      *
      * @return the view file extension
      */
+    @Override
     public String getSuffix() {
         return suffix;
     }
@@ -61,7 +62,7 @@ public class InternalViewProperties {
      *
      * @param suffix file extension for view resolution
      */
-    @BindDefault(DEFAULT_SUFFIX)
+    @Override
     public void setSuffix(String suffix) {
         this.suffix = suffix;
     }

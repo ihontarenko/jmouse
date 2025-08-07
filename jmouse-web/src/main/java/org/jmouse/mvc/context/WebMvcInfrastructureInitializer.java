@@ -22,6 +22,8 @@ public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializ
         addScanner(types -> new ArrayList<>(
                 ClassFinder.findImplementations(ViewResolver.class, types)));
         addScanner(types -> new ArrayList<>(
+                ClassFinder.findImplementations(ExceptionResolver.class, types)));
+        addScanner(types -> new ArrayList<>(
                 ClassFinder.findInheritedClasses(MappingRegistry.class, types)));
     }
 }

@@ -60,9 +60,8 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
             Optional<MergedAnnotation> optional   = repository.get(Mapping.class);
 
             if (optional.isPresent()) {
-                MergedAnnotation annotation = optional.get();
-                Mapping          mapping    = annotation.synthesize();
-                Route            route      = createRoute(mapping);
+                Mapping annotation = optional.get().synthesize();
+                Route   route      = createRoute(annotation);
                 addHandlerMapping(route, new HandlerMethod(bean, method));
             }
         }
@@ -75,13 +74,15 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
      * @return constructed route
      */
     private Route createRoute(Mapping mapping) {
+        MediaType[] consumes = of(mapping.consumes())
+                .map(MediaType::forString).toList().toArray(MediaType[]::new);
+        MediaType[] produces = of(mapping.produces())
+                .map(MediaType::forString).toList().toArray(MediaType[]::new);
         Route.Builder builder = Route.route()
                 .method(mapping.httpMethod())
                 .path(mapping.path())
-                .consumes(of(mapping.consumes())
-                                  .map(MediaType::forString).toList().toArray(MediaType[]::new))
-                .produces(of(mapping.produces())
-                                  .map(MediaType::forString).toList().toArray(MediaType[]::new));
+                .consumes(consumes)
+                .produces(produces);
 
         // Add expected headers
         for (Header header : mapping.headers()) {
