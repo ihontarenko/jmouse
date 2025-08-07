@@ -208,7 +208,8 @@ public final class MethodParameter {
      * @return a string like {@code com.example.MyClass#myMethod[1]}
      */
     public String parameterLocation() {
-        return "%s#%s[%d]".formatted(executable.getDeclaringClass().getName(), executable.getName(), parameterIndex);
+        return "%s#%s[%d]:%s".formatted(executable.getDeclaringClass().getName(),
+                executable.getName(), parameterIndex, getParameterType().getSimpleName());
     }
 
     /**

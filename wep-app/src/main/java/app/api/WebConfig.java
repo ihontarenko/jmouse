@@ -34,6 +34,12 @@ public class WebConfig {
     }
 
     @Bean
+    public ControllerMethodRegistration mapRegistration() {
+        return new ControllerMethodRegistration(Route.GET("/map"), (request, response)
+                -> response.getWriter().write("map"));
+    }
+
+    @Bean
     public ControllerMethodRegistration route1Registration() {
         Route route = Route.route()
                 .GET("/index")

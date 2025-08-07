@@ -55,7 +55,8 @@ public class InternalView extends AbstractView {
         model.forEach(context::setValue);
 
         try {
-            response.getWriter().write(renderer.render(template, context).getDataArray());
+            char[] data = renderer.render(template, context).getDataArray();
+            response.getWriter().write(data);
         } catch (IOException e) {
             throw new RuntimeException("Failed to render view", e);
         }

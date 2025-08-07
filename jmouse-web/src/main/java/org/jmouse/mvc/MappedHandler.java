@@ -1,18 +1,22 @@
 package org.jmouse.mvc;
 
 /**
- * 🔍 Resolves the handler and its route mapping.
- * <p>
- * Used internally by {@code HandlerMapping} to wrap handler method or instance
- * along with optional {@link Route} metadata.
- * </p>
+ * 🔍 Represents a resolved handler along with its route mapping metadata.
  *
- * <p><b>Example:</b></p>
+ * <p>This interface is used internally by {@link HandlerMapping} implementations
+ * to encapsulate the handler instance (e.g., a controller method or lambda)
+ * and associated routing information.</p>
+ *
+ * <p>Handlers may be mapped explicitly to routes, in which case
+ * {@link #mappingResult()}, {@link #route()} and {@link #match()} provide
+ * metadata about the route and the route matching result.</p>
+ *
+ * <p><b>Example usage:</b></p>
  * <pre>{@code
  * if (resolution.isMapped()) {
  *     Route route = resolution.route();
  *     Object handler = resolution.handler();
- *     // invoke handler
+ *     // invoke handler using the resolved route and handler instance
  * }
  * }</pre>
  *
@@ -22,42 +26,54 @@ package org.jmouse.mvc;
 public interface MappedHandler {
 
     /**
-     * 🎯 The resolved handler (e.g. method, lambda, controller).
+     * 🎯 Returns the actual handler object to invoke, such as a method, lambda, or controller instance.
      *
-     * @return the handler object
+     * @return the resolved handler instance
      */
     Object handler();
 
+    /**
+     * Returns the method parameter metadata if applicable.
+     * <p>By default, returns {@code null}.</p>
+     *
+     * @return method parameter information or {@code null} if not applicable
+     */
     default MethodParameter methodParameter() {
         return null;
     }
 
+    /**
+     * Returns the {@link MappingResult} containing route and match metadata.
+     * <p>By default, returns {@code null} if this handler is not route-mapped.</p>
+     *
+     * @return mapping result or {@code null} if unmapped
+     */
     default MappingResult mappingResult() {
         return null;
     }
 
     /**
-     * 🧭 Optional route definition if mapped via explicit route.
+     * 🧭 Returns the route definition if this handler is mapped via an explicit route.
      *
-     * @return associated {@link Route} or {@code null} if not mapped
+     * @return the {@link Route} or {@code null} if not mapped
      */
     default Route route() {
         return isMapped() ? mappingResult().route() : null;
     }
 
     /**
-     * 🧭 Optional route match if mapped via explicit route.
+     * 🧭 Returns the route match details if this handler is mapped via an explicit route.
      *
-     * @return associated {@link RouteMatch} or {@code null} if not mapped
+     * @return the {@link RouteMatch} or {@code null} if not mapped
      */
     default RouteMatch match() {
         return isMapped() ? mappingResult().match() : null;
     }
 
     /**
-     * ❓ Indicates whether this resolution includes a mapped route.
+     * ❓ Indicates whether this handler is associated with a mapped route.
      *
-     * @return {@code true} if {@link #route()} is not {@code null}
+     * @return {@code true} if a route mapping exists, {@code false} otherwise
      */
     default boolean isMapped() {
         return mappingResult() != null;

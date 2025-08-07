@@ -3,9 +3,9 @@ package org.jmouse.mvc.adapter.return_value;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
 import org.jmouse.mvc.InvocationOutcome;
-import org.jmouse.mvc.MethodParameter;
 import org.jmouse.mvc.RequestContext;
 import org.jmouse.mvc.adapter.AbstractReturnValueHandler;
+import org.jmouse.util.Priority;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.Headers;
 import org.jmouse.web.request.http.HttpHeader;
@@ -27,6 +27,7 @@ import org.jmouse.web.request.http.HttpStatus;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @since 1.0
  */
+@Priority(-1)
 public class VoidReturnValueHandler extends AbstractReturnValueHandler {
 
     /**
@@ -37,25 +38,23 @@ public class VoidReturnValueHandler extends AbstractReturnValueHandler {
      */
     @Override
     public boolean supportsReturnType(InvocationOutcome outcome) {
-        return outcome.getReturnValue() == null;
+        return outcome.getReturnValue() == null || outcome.getMethodParameter().getParameterType() == void.class;
     }
 
     @Override
-    protected void doReturnValueHandle(InvocationOutcome result, RequestContext requestContext) {
+    protected void doReturnValueHandle(InvocationOutcome outcome, RequestContext requestContext) {
         HttpServletResponse response    = requestContext.response();
         String              contentType = response.getContentType();
-        Headers             headers     = result.getHeaders();
-        MediaType           consumes    = MediaType.TEXT;
+        MediaType           consumes    = outcome.getHeaders().getContentType();
 
-        if (contentType == null || contentType.isBlank()) {
-            headers.setContentType(consumes);
+        if ((contentType == null || contentType.isBlank()) && consumes != null) {
+            response.setContentType(consumes.toString());
         }
 
-        if (response.getStatus() != 0) {
-            result.setHttpStatus(HttpStatus.ofCode(response.getStatus()));
-        }
+        HttpStatus httpStatus = outcome.getHttpStatus();
 
-        headers.setHeader(HttpHeader.X_TEXT, "NO-OP!");
+        response.setStatus(httpStatus == null ? HttpStatus.OK.getCode() : httpStatus.getCode());
+        response.setHeader(HttpHeader.X_TEXT.value(), "NO-OP!");
     }
 
     /**

@@ -36,8 +36,7 @@ public class RequestHeaderArgumentResolver extends AbstractArgumentResolver {
 
         if (optional.isPresent()) {
             RequestHeader      annotation  = optional.get().synthesize();
-            HttpServletRequest request     = requestContext.request();
-            String             headerValue = request.getHeader(annotation.value().toString());
+            Object             headerValue = requestHeaders.headers().getHeader(annotation.value());
             return conversion.convert(headerValue, parameter.getParameterType());
         }
 

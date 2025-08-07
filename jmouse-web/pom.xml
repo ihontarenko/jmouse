@@ -49,6 +49,18 @@
             <artifactId>logback-classic</artifactId>
             <optional>true</optional>
         </dependency>
+        <!-- Jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- XML support -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+        </dependency>
+
         <!-- Tomcat Embed -->
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>

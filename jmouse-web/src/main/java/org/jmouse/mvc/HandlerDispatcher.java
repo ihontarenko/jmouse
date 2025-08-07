@@ -5,10 +5,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
 import org.jmouse.context.FrameworkFactories;
+import org.jmouse.core.reflection.ReflectionException;
+import org.jmouse.util.Sorter;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.request.ExceptionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,6 +50,27 @@ public class HandlerDispatcher implements InitializingBean {
     private List<HandlerAdapter> handlerAdapters;
 
     /**
+     * List of available {@link ReturnValueHandler}s to handle return value
+     */
+    private List<ReturnValueHandler> returnValueHandlers;
+
+    /**
+     * Initializes return value handlers
+     */
+    private void initReturnValueHandlers(WebBeanContext context) {
+        List<ReturnValueHandler> returnValueHandlers = context.getBeans(ReturnValueHandler.class);
+
+        if (returnValueHandlers.isEmpty()) {
+            returnValueHandlers = frameworkProperties.createFactories(ReturnValueHandler.class);
+        }
+
+        returnValueHandlers = new ArrayList<>(returnValueHandlers);
+        Sorter.sort(returnValueHandlers);
+
+        this.returnValueHandlers = List.copyOf(returnValueHandlers);
+    }
+
+    /**
      * Initializes handler mappings from the given context or fallback factory mechanism.
      */
     private void initHandlerMappings(WebBeanContext context) {
@@ -67,6 +92,9 @@ public class HandlerDispatcher implements InitializingBean {
         if (exceptionResolvers.isEmpty()) {
             exceptionResolvers = frameworkProperties.createFactories(ExceptionResolver.class);
         }
+
+        exceptionResolvers = new ArrayList<>(exceptionResolvers);
+        Sorter.sort(exceptionResolvers);
 
         this.exceptionResolvers = List.copyOf(exceptionResolvers);
     }
@@ -94,9 +122,10 @@ public class HandlerDispatcher implements InitializingBean {
      * @param response the outgoing HTTP response
      */
     public void dispatch(HttpServletRequest request, HttpServletResponse response) {
-        Exception      dispatchException = null;
-        MappedHandler  handler           = null;
-        RequestContext requestContext    = new RequestContext(request, response);
+        Exception         dispatchException = null;
+        MappedHandler     handler           = null;
+        RequestContext    requestContext    = new RequestContext(request, response);
+        InvocationOutcome outcome           = null;
 
         try {
             Handler handlerContainer = getMappedHandler(request);
@@ -106,20 +135,26 @@ public class HandlerDispatcher implements InitializingBean {
                 HandlerAdapter adapter = getHandlerAdapter(handler);
 
                 if (handlerContainer.preHandle(request, response)) {
-                    InvocationOutcome outcome = adapter.handle(request, response, handler);
+                    outcome = adapter.handle(request, response, handler);
                     handlerContainer.postHandle(request, response, outcome);
                 }
             }
+        } catch (ReflectionException reflectionException) {
+            dispatchException = (Exception) reflectionException.getCause();
         } catch (Exception e) {
             dispatchException = e;
         }
 
         try {
             if (dispatchException != null) {
-                InvocationOutcome outcome = processHandlerException(requestContext, handler, dispatchException);
-                if (handler != null && handler.handler() instanceof AbstractHandlerAdapter adapter) {
-                    adapter.getReturnValueProcessor().process(outcome, requestContext);
+                ExceptionHolder.setException(request, dispatchException);
+                InvocationOutcome exceptionOutcome = processHandlerException(requestContext, handler, dispatchException);
+
+                if (handler != null && outcome == null) {
+                    exceptionOutcome.setMethodParameter(handler.methodParameter());
                 }
+
+                new ReturnValueProcessor(returnValueHandlers).process(exceptionOutcome, requestContext);
             }
         } catch (Exception e) {
             LOGGER.error("HANDLER DISPATCHER FAILED!", e);
@@ -226,5 +261,6 @@ public class HandlerDispatcher implements InitializingBean {
         initHandlerMappings(context);
         initExceptionResolver(context);
         initHandlerAdapters(context);
+        initReturnValueHandlers(context);
     }
 }

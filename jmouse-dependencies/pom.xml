@@ -43,6 +43,7 @@
         <jmouse.version>1.0.0-Beta</jmouse.version>
         <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
         <jakarta-validation.version>3.1.1</jakarta-validation.version>
+        <jackson.version>2.17.1</jackson.version>
         <slf4j.version>2.0.13</slf4j.version>
         <logback.version>1.5.6</logback.version>
         <log4j.version>1.2.17</log4j.version>
@@ -97,6 +98,20 @@
                 <groupId>jakarta.validation</groupId>
                 <artifactId>jakarta.validation-api</artifactId>
                 <version>${jakarta-validation.version}</version>
+            </dependency>
+
+            <!-- JSON -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <!-- XML support -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-xml</artifactId>
+                <version>${jackson.version}</version>
             </dependency>
 
             <!-- Slf4j / Logging -->

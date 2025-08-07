@@ -44,14 +44,14 @@ public interface InvocationOutcome {
      *
      * @return method parameter metadata
      */
-    MethodParameter getReturnMethodParameter();
+    MethodParameter getMethodParameter();
 
     /**
      * 📌 Sets the method parameter metadata related to return value.
      *
      * @param parameter method return parameter metadata
      */
-    void setReturnMethodParameter(MethodParameter parameter);
+    void setMethodParameter(MethodParameter parameter);
 
     /**
      * Mutable model for view rendering.

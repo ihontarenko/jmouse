@@ -76,14 +76,15 @@ public class HandlerMethodInvocation {
      * @throws RuntimeException if the method cannot be invoked
      */
     public Object invoke() {
-        HandlerMethod         handlerMethod = handlerContext.handlerMethod();
-        List<MethodParameter> parameters    = handlerMethod.getParameters();
-        Object[]              arguments     = new Object[parameters.size()];
-        Method                method        = handlerMethod.getMethod();
+        HandlerMethod         handlerMethod  = handlerContext.handlerMethod();
+        List<MethodParameter> parameters     = handlerMethod.getParameters();
+        Object[]              arguments      = new Object[parameters.size()];
+        Method                method         = handlerMethod.getMethod();
+        RequestContext        requestContext = handlerContext.requestContext();
 
         for (MethodParameter parameter : parameters) {
             Object resolved = getArgumentResolver(parameter)
-                    .resolveArgument(parameter, handlerContext.requestContext(), mappingResult, invocationResult);
+                    .resolveArgument(parameter, requestContext, mappingResult, invocationResult);
             arguments[parameter.getParameterIndex()] = resolved;
         }
 

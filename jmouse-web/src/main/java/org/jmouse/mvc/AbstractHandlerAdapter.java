@@ -44,6 +44,8 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
         InvocationOutcome outcome = new Outcome(null);
         RequestContext    context = new RequestContext(request, response);
 
+        outcome.setMethodParameter(handler.methodParameter());
+
         doHandle(request, response, handler, outcome);
 
         if (outcome.isUnhandled()) {

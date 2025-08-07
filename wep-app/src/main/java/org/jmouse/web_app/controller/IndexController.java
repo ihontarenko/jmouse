@@ -23,17 +23,20 @@ public class IndexController {
     @ViewMapping("index/demo")
     public String demo(@PathVariable("id") Long id, Model model,
                        @RequestHeader(HttpHeader.USER_AGENT) String userAgent,
-                       @RequestMethod HttpMethod method) {
+                       @RequestMethod HttpMethod method,
+                       @RequestParameter("lang") String lang,
+                       @RequestParameter("externalId") Long externalId) {
 
         model.addAttribute("ID", id);
         model.addAttribute("userAgent", userAgent);
         model.addAttribute("method", method);
+        model.addAttribute("lang", lang);
 
         return "view -> index/demo";
     }
 
     @GetMapping(requestPath = "/welcome/{id}")
-    public String hello(Class<?> type, @PathVariable("aaa") String name) {
+    public String hello(Class<?> type, @PathVariable("aaa") String name, @RequestParameter("lang") String lang) {
         return "index/demo";
     }
 

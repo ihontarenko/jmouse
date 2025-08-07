@@ -5,9 +5,12 @@ import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.mvc.*;
 import org.jmouse.mvc.adapter.AbstractReturnValueHandler;
 import org.jmouse.mvc.mapping.annnotation.ViewMapping;
+import org.jmouse.util.Priority;
 import org.jmouse.web.context.WebBeanContext;
 
 import java.util.Optional;
+
+import static org.jmouse.core.reflection.annotation.AnnotationRepository.ofAnnotatedElement;
 
 /**
  * 🖼️ Handles return values that resolve to views.
@@ -35,6 +38,7 @@ import java.util.Optional;
  * @see AbstractReturnValueHandler
  * @see ViewMapping
  */
+@Priority(0)
 public class ViewReturnValueHandler extends AbstractReturnValueHandler {
 
     /** Prefix used to identify view-returning methods via string return values. */
@@ -68,8 +72,8 @@ public class ViewReturnValueHandler extends AbstractReturnValueHandler {
      */
     @Override
     protected void doReturnValueHandle(InvocationOutcome outcome, RequestContext requestContext) {
-        MethodParameter            returnType = outcome.getReturnMethodParameter();
-        Optional<MergedAnnotation> optional   = AnnotationRepository.ofAnnotatedElement(
+        MethodParameter            returnType = outcome.getMethodParameter();
+        Optional<MergedAnnotation> optional   = ofAnnotatedElement(
                 returnType.getAnnotatedElement()).get(ViewMapping.class);
 
         String viewName = null;
@@ -85,6 +89,7 @@ public class ViewReturnValueHandler extends AbstractReturnValueHandler {
             try {
                 View view = viewResolver.resolveView(viewName);
                 view.render(outcome.getModel().getAttributes(), requestContext.request(), requestContext.response());
+                outcome.getHeaders().setContentType(view.getContentType());
                 outcome.setState(ExecutionState.HANDLED);
             } catch (Exception e) {
                 throw new NotFoundException("Unable to render view", e);
@@ -93,7 +98,6 @@ public class ViewReturnValueHandler extends AbstractReturnValueHandler {
             throw new NotFoundException("Unable to resolve view");
         }
     }
-
 
     /**
      * Checks if the return type is supported.
@@ -106,12 +110,10 @@ public class ViewReturnValueHandler extends AbstractReturnValueHandler {
      */
     @Override
     public boolean supportsReturnType(InvocationOutcome outcome) {
-        MethodParameter returnType = outcome.getReturnMethodParameter();
-        Optional<MergedAnnotation> optional = AnnotationRepository
-                .ofAnnotatedElement(returnType.getAnnotatedElement())
+        MethodParameter            returnType  = outcome.getMethodParameter();
+        Optional<MergedAnnotation> optional    = ofAnnotatedElement(returnType.getAnnotatedElement())
                 .get(ViewMapping.class);
-
-        Object returnValue = outcome.getReturnValue();
+        Object                     returnValue = outcome.getReturnValue();
 
         if (optional.isPresent()) {
             return true;
