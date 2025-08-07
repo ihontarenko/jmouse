@@ -74,15 +74,13 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
      * @return constructed route
      */
     private Route createRoute(Mapping mapping) {
-        MediaType[] consumes = of(mapping.consumes())
-                .map(MediaType::forString).toList().toArray(MediaType[]::new);
-        MediaType[] produces = of(mapping.produces())
-                .map(MediaType::forString).toList().toArray(MediaType[]::new);
         Route.Builder builder = Route.route()
                 .method(mapping.httpMethod())
                 .path(mapping.path())
-                .consumes(consumes)
-                .produces(produces);
+                .consumes(of(mapping.consumes())
+                                  .map(MediaType::forString).toList().toArray(MediaType[]::new))
+                .produces(of(mapping.produces())
+                                  .map(MediaType::forString).toList().toArray(MediaType[]::new));
 
         for (Header header : mapping.headers()) {
             builder.header(HttpHeader.ofHeader(header.name()), header.value());

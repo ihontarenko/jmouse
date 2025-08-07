@@ -1,12 +1,11 @@
 package org.jmouse.mvc.exception;
 
-import org.jmouse.mvc.AbstractExceptionResolver;
-import org.jmouse.mvc.InvocationOutcome;
-import org.jmouse.mvc.NotFoundException;
-import org.jmouse.mvc.RequestContext;
+import org.jmouse.mvc.*;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.request.http.HttpHeader;
+import org.jmouse.web.request.http.HttpStatus;
 
-public class NotFoundExceptionResolver extends AbstractExceptionResolver<NotFoundException> {
+public class NotFoundExceptionResolver extends AbstractExceptionResolver {
 
     @Override
     protected void doInitialize(WebBeanContext context) {
@@ -15,8 +14,9 @@ public class NotFoundExceptionResolver extends AbstractExceptionResolver<NotFoun
 
     @Override
     protected void doExceptionResolve(
-            RequestContext requestContext, InvocationOutcome outcome, NotFoundException exception) {
-
+            RequestContext requestContext, MappedHandler mappedHandler, Exception exception) {
+        requestContext.response().setStatus(HttpStatus.NOT_FOUND.getCode());
+        requestContext.response().setHeader(HttpHeader.X_TEXT.toString(), exception.getMessage());
     }
 
     @Override

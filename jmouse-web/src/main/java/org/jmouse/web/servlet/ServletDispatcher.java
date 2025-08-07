@@ -50,11 +50,6 @@ abstract public class ServletDispatcher extends HttpServlet {
     protected WebBeanContext context;
 
     /**
-     * Framework configuration holder.
-     */
-    protected FrameworkFactories frameworkProperties = FrameworkFactories.load(getClass());
-
-    /**
      * Default constructor. Context will be initialized later.
      */
     public ServletDispatcher() {
@@ -93,7 +88,7 @@ abstract public class ServletDispatcher extends HttpServlet {
             request.setAttribute(RequestPath.REQUEST_PATH_ATTRIBUTE, RequestPath.ofRequest(request));
         }
 
-        doDispatch(request, response, HttpMethod.valueOf(request.getMethod()));
+        doDispatch(request, response);
     }
 
     /**
@@ -111,11 +106,10 @@ abstract public class ServletDispatcher extends HttpServlet {
     /**
      * Dispatch method to handle request by method type.
      *
-     * @param rq     HTTP request
-     * @param rs     HTTP response
-     * @param method resolved {@link HttpMethod}
+     * @param request     HTTP request
+     * @param response    HTTP response
      * @throws IOException in case of I/O failure
      */
-    abstract protected void doDispatch(HttpServletRequest rq, HttpServletResponse rs, HttpMethod method)
+    abstract protected void doDispatch(HttpServletRequest request, HttpServletResponse response)
             throws IOException;
 }

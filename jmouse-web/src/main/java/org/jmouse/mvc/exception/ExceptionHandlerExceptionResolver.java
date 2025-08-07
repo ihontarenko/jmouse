@@ -2,10 +2,11 @@ package org.jmouse.mvc.exception;
 
 import org.jmouse.mvc.AbstractExceptionResolver;
 import org.jmouse.mvc.InvocationOutcome;
+import org.jmouse.mvc.MappedHandler;
 import org.jmouse.mvc.RequestContext;
 import org.jmouse.web.context.WebBeanContext;
 
-public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver<Throwable> {
+public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver {
 
     @Override
     public boolean supportsException(Throwable exception) {
@@ -19,7 +20,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
 
     @Override
     protected void doExceptionResolve(
-            RequestContext requestContext, InvocationOutcome outcome, Throwable exception) {
+            RequestContext requestContext, MappedHandler mappedHandler, Exception exception) {
 
     }
 

@@ -8,21 +8,55 @@ import org.jmouse.web.servlet.ServletDispatcher;
 
 import java.util.List;
 
+/**
+ * 🚦 Central dispatcher for the jMouse MVC framework.
+ * <p>
+ * Integrates {@link HandlerDispatcher} with the servlet lifecycle.
+ * Handles incoming HTTP requests and delegates them to the handler subsystem.
+ * </p>
+ *
+ * <p>Typical entry point for the framework via {@code web.xml} or programmatic registration.</p>
+ *
+ * <pre>{@code
+ * <servlet>
+ *     <servlet-name>dispatcher</servlet-name>
+ *     <servlet-class>org.jmouse.mvc.FrameworkDispatcher</servlet-class>
+ * </servlet>
+ * }</pre>
+ *
+ * @see ServletDispatcher
+ * @see HandlerDispatcher
+ */
 public class FrameworkDispatcher extends ServletDispatcher {
 
+    /**
+     * 🏷 Default name for the jMouse dispatcher servlet.
+     */
     public static final String DEFAULT_DISPATCHER = "jMouseDefaultDispatcher";
 
-    private List<HandlerMapping>     handlerMappings;
-    private List<HandlerAdapter>     handlerAdapters;
-    private List<ReturnValueHandler> returnValueHandlers;
+    /**
+     * 🧭 Core handler dispatcher responsible for request routing and execution.
+     */
+    private final HandlerDispatcher dispatcher = new HandlerDispatcher();
 
+    /**
+     * Creates an uninitialized dispatcher.
+     */
     public FrameworkDispatcher() {
     }
 
+    /**
+     * Creates a dispatcher with a pre-configured {@link WebBeanContext}.
+     *
+     * @param context web bean context for dependency injection and configuration
+     */
     public FrameworkDispatcher(WebBeanContext context) {
         super(context);
     }
 
+    /**
+     * 🔧 Initializes dispatcher from the servlet context if no context was set.
+     */
     @Override
     protected void doInitialize() {
         WebBeanContext rootContext = WebBeanContext.getRootWebBeanContext(getServletContext());
@@ -34,79 +68,24 @@ public class FrameworkDispatcher extends ServletDispatcher {
         doInitialize(context);
     }
 
+    /**
+     * 🔧 Initializes internal {@link HandlerDispatcher} with the given context.
+     *
+     * @param context the initialized web bean context
+     */
     @Override
     protected void doInitialize(WebBeanContext context) {
-        initHandlerMappings(context);
-        initHandlerAdapters(context);
+        dispatcher.initialize(context);
     }
 
-    private void initHandlerMappings(WebBeanContext context) {
-        List<HandlerMapping> handlerMappings = context.getBeans(HandlerMapping.class);
-
-        if (handlerMappings.isEmpty()) {
-            handlerMappings = frameworkProperties.createFactories(HandlerMapping.class);
-        }
-
-        this.handlerMappings = List.copyOf(handlerMappings);
-    }
-
-    private void initHandlerAdapters(WebBeanContext context) {
-        List<HandlerAdapter> handlerAdapters = context.getBeans(HandlerAdapter.class);
-
-        if (handlerAdapters.isEmpty()) {
-            handlerAdapters = frameworkProperties.createFactories(HandlerAdapter.class);
-        }
-
-        this.handlerAdapters = List.copyOf(handlerAdapters);
-    }
-
+    /**
+     * 🚀 Delegates the HTTP request to the internal handler dispatcher.
+     *
+     * @param request  incoming HTTP servlet request
+     * @param response outgoing HTTP servlet response
+     */
     @Override
-    protected void doDispatch(HttpServletRequest request, HttpServletResponse response, HttpMethod method) {
-        Handler handlerContainer = getHandler(request);
-
-        if (handlerContainer != null) {
-            MappedHandler  handler = handlerContainer.getHandler();
-            HandlerAdapter adapter = getHandlerAdapter(handler);
-
-            if (handlerContainer.preHandle(request, response)) {
-                InvocationOutcome executionResult = adapter.handle(request, response, handler);
-                handlerContainer.postHandle(request, response, executionResult);
-            }
-        }
+    protected void doDispatch(HttpServletRequest request, HttpServletResponse response) {
+        dispatcher.dispatch(request, response);
     }
-
-    protected HandlerAdapter getHandlerAdapter(MappedHandler handler) {
-        HandlerAdapter handlerAdapter = null;
-
-        for (HandlerAdapter adapter : handlerAdapters) {
-            if (adapter.supportsHandler(handler)) {
-                handlerAdapter = adapter;
-                break;
-            }
-        }
-
-        if (handlerAdapter == null) {
-            throw new HandlerMappingException("No handler found [%s]".formatted(handler));
-        }
-
-        return handlerAdapter;
-    }
-
-    protected Handler getHandler(HttpServletRequest request) {
-        Handler handler = null;
-
-        for (HandlerMapping mapping : handlerMappings) {
-            handler = mapping.getHandler(request);
-            if (handler != null) {
-                break;
-            }
-        }
-
-        if (handler == null) {
-            throw new HandlerMappingException("No mapping found [%s].".formatted(request.getPathInfo()));
-        }
-
-        return handler;
-    }
-
 }

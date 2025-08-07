@@ -27,9 +27,8 @@ import java.util.List;
  */
 public abstract class AbstractHandlerAdapter implements HandlerAdapter, InitializingBean {
 
-    private       List<ArgumentResolver>     argumentResolvers   = new ArrayList<>();
-    private List<ExceptionResolver<?>> exceptionResolvers  = new ArrayList<>();
-    private       List<ReturnValueHandler>   returnValueHandlers = new ArrayList<>();
+    private List<ArgumentResolver>   argumentResolvers   = new ArrayList<>();
+    private List<ReturnValueHandler> returnValueHandlers = new ArrayList<>();
 
     /**
      * 🧩 Handles the request by delegating to the actual handler, capturing the result,
@@ -45,15 +44,7 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
         InvocationOutcome outcome = new Outcome(null);
         RequestContext    context = new RequestContext(request, response);
 
-        try {
-            doHandle(request, response, handler, outcome);
-        } catch (Throwable exception) {
-            for (ExceptionResolver<?> exceptionResolver : getExceptionResolvers()) {
-                if (exceptionResolver.supportsException(exception)) {
-                    System.out.println(exception);
-                }
-            }
-        }
+        doHandle(request, response, handler, outcome);
 
         if (outcome.isUnhandled()) {
             getReturnValueProcessor().process(handler.methodParameter(), outcome, context);
@@ -111,22 +102,6 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
     }
 
     /**
-     * 🧲 Returns the configured {@link ExceptionResolver}s.
-     */
-    public List<ExceptionResolver<?>> getExceptionResolvers() {
-        return exceptionResolvers;
-    }
-
-    /**
-     * 🧷 Replaces the current {@link ExceptionResolver}s.
-     *
-     * @param exceptionResolvers new resolvers to apply
-     */
-    public void setExceptionResolvers(List<ExceptionResolver<?>> exceptionResolvers) {
-        this.exceptionResolvers = exceptionResolvers;
-    }
-
-    /**
      * 🌱 Called after bean context initialization.
      * Casts and delegates to {@link #initialize(WebBeanContext)}.
      *
@@ -143,11 +118,9 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
      *
      * @param context the web application context
      */
-    @SuppressWarnings("unchecked")
     protected void initialize(WebBeanContext context) {
         setReturnValueHandlers(List.copyOf(context.getBeans(ReturnValueHandler.class)));
         setArgumentResolvers(List.copyOf(context.getBeans(ArgumentResolver.class)));
-        setExceptionResolvers(List.copyOf(context.getBeans(ExceptionResolver.class)));
         doInitialize(context);
     }
 

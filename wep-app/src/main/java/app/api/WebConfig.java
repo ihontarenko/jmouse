@@ -6,6 +6,7 @@ import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.BeanScan;
 import org.jmouse.core.MediaType;
 import org.jmouse.mvc.HandlerMapping;
+import org.jmouse.mvc.NotFoundException;
 import org.jmouse.mvc.Route;
 import org.jmouse.mvc.RouteMatch;
 import org.jmouse.mvc.mapping.ControllerMethodRegistration;
@@ -17,6 +18,14 @@ import java.io.Writer;
 @BeanFactories
 @BeanScan(EmailCfg.class)
 public class WebConfig {
+
+    @Bean
+    public ControllerMethodRegistration errorRegistration() {
+        return new ControllerMethodRegistration(Route.GET("/error"), (request, response) -> {
+            throw new NotFoundException("Not found");
+        });
+    }
+
 
     @Bean
     public ControllerMethodRegistration cfgRegistration() {
