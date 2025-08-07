@@ -84,12 +84,10 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
                 .consumes(consumes)
                 .produces(produces);
 
-        // Add expected headers
         for (Header header : mapping.headers()) {
             builder.header(HttpHeader.ofHeader(header.name()), header.value());
         }
 
-        // Add expected query parameters
         for (QueryParameter queryParameter : mapping.queryParameters()) {
             builder.queryParameter(queryParameter.name(), queryParameter.value());
         }
