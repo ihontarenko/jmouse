@@ -44,8 +44,8 @@ public abstract class AbstractExceptionResolver
      * @param exception      the exception thrown
      */
     @Override
-    public void resolveException(RequestContext requestContext, MappedHandler mappedHandler, Exception exception) {
-        doExceptionResolve(requestContext, mappedHandler, exception);
+    public InvocationOutcome resolveException(RequestContext requestContext, MappedHandler mappedHandler, Exception exception) {
+        return doExceptionResolve(requestContext, mappedHandler, exception);
     }
 
     /**
@@ -82,6 +82,6 @@ public abstract class AbstractExceptionResolver
      * @param mappedHandler  the matched handler
      * @param exception      the thrown exception
      */
-    protected abstract void doExceptionResolve(
+    protected abstract InvocationOutcome doExceptionResolve(
             RequestContext requestContext, MappedHandler mappedHandler, Exception exception);
 }

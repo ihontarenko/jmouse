@@ -1,7 +1,6 @@
-package org.jmouse.mvc.view;
+package org.jmouse.mvc.view.internal;
 
 import org.jmouse.context.BeanProperties;
-import org.jmouse.core.bind.BindDefault;
 import org.jmouse.mvc.ViewProperties;
 
 /**

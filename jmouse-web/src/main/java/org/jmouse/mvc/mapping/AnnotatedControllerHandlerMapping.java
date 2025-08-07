@@ -8,6 +8,7 @@ import org.jmouse.core.reflection.MethodMatchers;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.mvc.*;
+import org.jmouse.mvc.exception.ExceptionHandlerExceptionResolver;
 import org.jmouse.mvc.mapping.annnotation.*;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.http.HttpHeader;
@@ -42,7 +43,7 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
                     Object             bean    = context.getBean(definition.getBeanName());
                     Collection<Method> methods = new MethodFinder()
                             .find(definition.getBeanClass(), MethodMatchers.isPublic());
-                    initializeMethods(methods, bean);
+                    initializeMethods(methods, bean, context);
                 }
             }
         }
@@ -53,16 +54,24 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
      *
      * @param methods controller methods
      * @param bean controller instance
+     * @param context active web context
      */
-    private void initializeMethods(Collection<Method> methods, Object bean) {
+    private void initializeMethods(Collection<Method> methods, Object bean, WebBeanContext context) {
         for (Method method : methods) {
-            AnnotationRepository       repository = AnnotationRepository.ofAnnotatedElement(method);
-            Optional<MergedAnnotation> optional   = repository.get(Mapping.class);
+            AnnotationRepository       repository       = AnnotationRepository.ofAnnotatedElement(method);
+            Optional<MergedAnnotation> mapping          = repository.get(Mapping.class);
+            Optional<MergedAnnotation> exceptionHandler = repository.get(ExceptionHandler.class);
 
-            if (optional.isPresent()) {
-                Mapping annotation = optional.get().synthesize();
+            if (mapping.isPresent()) {
+                Mapping annotation = mapping.get().synthesize();
                 Route   route      = createRoute(annotation);
                 addHandlerMapping(route, new HandlerMethod(bean, method));
+            }
+
+            if (exceptionHandler.isPresent()) {
+                ExceptionHandler annotation = exceptionHandler.get().synthesize();
+                System.out.println(annotation);
+                ExceptionHandlerExceptionResolver resolver = context.getBean(ExceptionHandlerExceptionResolver.class);
             }
         }
     }

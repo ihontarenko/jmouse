@@ -1,11 +1,11 @@
-package org.jmouse.mvc.view;
+package org.jmouse.mvc.view.internal;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.renderable.Renderer;
 import org.jmouse.el.renderable.Template;
-import org.jmouse.mvc.AbstractView;
+import org.jmouse.mvc.view.AbstractView;
 
 import java.io.IOException;
 import java.util.Map;

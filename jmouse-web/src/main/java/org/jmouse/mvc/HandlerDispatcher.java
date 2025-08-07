@@ -116,7 +116,10 @@ public class HandlerDispatcher implements InitializingBean {
 
         try {
             if (dispatchException != null) {
-                processHandlerException(requestContext, handler, dispatchException);
+                InvocationOutcome outcome = processHandlerException(requestContext, handler, dispatchException);
+                if (handler != null && handler.handler() instanceof AbstractHandlerAdapter adapter) {
+                    adapter.getReturnValueProcessor().process(handler.methodParameter(), outcome, requestContext);
+                }
             }
         } catch (Exception e) {
             LOGGER.error("HANDLER DISPATCHER FAILED!", e);
@@ -188,14 +191,19 @@ public class HandlerDispatcher implements InitializingBean {
      * @param exception      the exception that occurred
      * @throws Exception rethrows the original exception if not handled
      */
-    protected void processHandlerException(
+    protected InvocationOutcome processHandlerException(
             RequestContext requestContext, MappedHandler mappedHandler, Exception exception) throws Exception {
+        HttpServletResponse servletResponse   = requestContext.response();
+        ExceptionResolver   exceptionResolver = getExceptionResolver(exception);
 
-        ExceptionResolver exceptionResolver = getExceptionResolver(exception);
+        try {
+            servletResponse.resetBuffer();
+        } catch (IllegalStateException ignore) {
+            // response already commited
+        }
 
         if (exceptionResolver != null) {
-            exceptionResolver.resolveException(requestContext, mappedHandler, exception);
-            return;
+            return exceptionResolver.resolveException(requestContext, mappedHandler, exception);
         }
 
         throw exception;

@@ -1,5 +1,6 @@
 package org.jmouse.web_app.controller;
 
+import org.jmouse.mvc.HandlerMappingException;
 import org.jmouse.mvc.Model;
 import org.jmouse.mvc.mapping.annnotation.*;
 import org.jmouse.web.request.http.HttpHeader;
@@ -34,6 +35,11 @@ public class IndexController {
     @GetMapping(requestPath = "/welcome/{id}")
     public String hello(Class<?> type, @PathVariable("aaa") String name) {
         return "index/demo";
+    }
+
+    @ExceptionHandler(HandlerMappingException.class)
+    public String exceptionHandler() {
+        return "index/error";
     }
 
 }

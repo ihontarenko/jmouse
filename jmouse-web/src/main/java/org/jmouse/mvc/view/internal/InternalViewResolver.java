@@ -1,4 +1,4 @@
-package org.jmouse.mvc.view;
+package org.jmouse.mvc.view.internal;
 
 import org.jmouse.beans.annotation.AggregatedBeans;
 import org.jmouse.beans.annotation.BeanConstructor;
@@ -6,9 +6,9 @@ import org.jmouse.el.extension.Extension;
 import org.jmouse.el.renderable.*;
 import org.jmouse.el.renderable.loader.ClasspathLoader;
 import org.jmouse.el.renderable.loader.TemplateLoader;
-import org.jmouse.mvc.AbstractViewResolver;
 import org.jmouse.mvc.View;
 import org.jmouse.mvc.ViewProperties;
+import org.jmouse.mvc.view.AbstractViewResolver;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,32 +17,38 @@ import java.util.Map;
 /**
  * 🛠️ Internal view engine-based {@link org.jmouse.mvc.ViewResolver} implementation.
  *
- * <p>This class integrates a custom view engine (based on {@link TemplateEngine})
- * to resolve views located in the classpath. Templates are expected to reside
- * in the {@code /templates/} directory and use the {@code .j.html} extension.</p>
+ * <p>Resolves views using the {@link TemplateEngine} and {@link TemplateRenderer}
+ * with templates loaded from the classpath.</p>
  *
- * <p>Resolved views are cached in memory for performance efficiency.</p>
+ * 📦 Templates are expected in:
+ * <pre>
+ *     /templates/{viewName}.j.html
+ * </pre>
  *
- * @author Ivan Hontarenko (Mr. Jerry Mouse)
- * @author ihontarenko@gmail.com
- * @see InternalView
+ * ⚡ Views are cached after first resolution for fast reuse.
+ *
+ * 📌 Example:
+ * <pre>{@code
+ * // Resolves view "/templates/home.j.html"
+ * View view = viewResolver.resolveView("home");
+ * }</pre>
+ *
+ * @author Ivan Hontarenko
  * @see TemplateEngine
- * @see Template
+ * @see InternalView
  * @see Renderer
  */
 public class InternalViewResolver extends AbstractViewResolver {
 
-    private final Engine            engine = new TemplateEngine();
-    private final Map<String, View> cache  = new HashMap<>();
-    private final Renderer          renderer;
+    private final Engine engine = new TemplateEngine();
+    private final Map<String, View> cache = new HashMap<>();
+    private final Renderer renderer;
 
     /**
-     * Constructs a new {@code InternalViewResolver} with default classpath-based loader settings.
-     * <p>
-     * The loader is configured to read templates from:
-     * <pre>
-     *     /templates/&lt;viewName&gt;.j.html
-     * </pre>
+     * 🧱 Constructs a view resolver with a classpath loader and optional extensions.
+     *
+     * @param properties  configuration for prefix/suffix (e.g. "/templates/", ".j.html")
+     * @param extensions  optional expression language extensions
      */
     @BeanConstructor
     public InternalViewResolver(ViewProperties properties, @AggregatedBeans List<Extension> extensions) {
@@ -59,25 +65,38 @@ public class InternalViewResolver extends AbstractViewResolver {
         }
     }
 
+    /**
+     * 🧪 Exposes the underlying {@link Engine}.
+     *
+     * @return the configured {@link TemplateEngine}
+     */
     public Engine getEngine() {
         return engine;
     }
 
+    /**
+     * 🗂️ Exposes the internal view cache.
+     *
+     * @return cached views map
+     */
     public Map<String, View> getCache() {
         return cache;
     }
 
+    /**
+     * 🎨 Returns the renderer used to evaluate views.
+     *
+     * @return renderer instance
+     */
     public Renderer getRenderer() {
         return renderer;
     }
 
     /**
-     * Resolves a view by its logical path.
-     * <p>
-     * Caches previously resolved templates for reuse.
+     * 🔍 Resolves a logical view name into a {@link View}, using caching.
      *
-     * @param viewPath the logical view path (e.g. "home", "user/profile")
-     * @return the resolved {@link View}, or {@code null} if not found
+     * @param viewPath logical view name (e.g. "dashboard", "user/profile")
+     * @return resolved view instance
      */
     @Override
     public View resolveView(String viewPath) {
@@ -85,10 +104,10 @@ public class InternalViewResolver extends AbstractViewResolver {
     }
 
     /**
-     * Internal method to load and wrap a view view.
+     * 📥 Loads and wraps the template from the engine.
      *
-     * @param path the view path
-     * @return an {@link InternalView} ready for rendering
+     * @param path the view path (without prefix/suffix)
+     * @return new {@link InternalView} instance
      */
     private View resolveTemplate(String path) {
         return new InternalView(engine.getTemplate(path), renderer);

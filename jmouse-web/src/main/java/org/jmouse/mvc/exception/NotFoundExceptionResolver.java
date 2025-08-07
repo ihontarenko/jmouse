@@ -13,10 +13,11 @@ public class NotFoundExceptionResolver extends AbstractExceptionResolver {
     }
 
     @Override
-    protected void doExceptionResolve(
+    protected InvocationOutcome doExceptionResolve(
             RequestContext requestContext, MappedHandler mappedHandler, Exception exception) {
         requestContext.response().setStatus(HttpStatus.NOT_FOUND.getCode());
         requestContext.response().setHeader(HttpHeader.X_TEXT.toString(), exception.getMessage());
+        return null;
     }
 
     @Override

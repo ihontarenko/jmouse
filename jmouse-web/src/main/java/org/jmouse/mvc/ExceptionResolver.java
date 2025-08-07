@@ -27,5 +27,5 @@ public interface ExceptionResolver {
      * @param mappedHandler  the handler that was executing when the exception occurred
      * @param exception      the exception to resolve
      */
-    void resolveException(RequestContext requestContext, MappedHandler mappedHandler, Exception exception);
+    InvocationOutcome resolveException(RequestContext requestContext, MappedHandler mappedHandler, Exception exception);
 }
