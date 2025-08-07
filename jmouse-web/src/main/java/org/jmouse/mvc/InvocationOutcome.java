@@ -40,6 +40,20 @@ public interface InvocationOutcome {
     void setReturnValue(Object returnValue);
 
     /**
+     * 📌 Metadata describing the controller method's return type.
+     *
+     * @return method parameter metadata
+     */
+    MethodParameter getReturnMethodParameter();
+
+    /**
+     * 📌 Sets the method parameter metadata related to return value.
+     *
+     * @param parameter method return parameter metadata
+     */
+    void setReturnMethodParameter(MethodParameter parameter);
+
+    /**
      * Mutable model for view rendering.
      */
     Model getModel();

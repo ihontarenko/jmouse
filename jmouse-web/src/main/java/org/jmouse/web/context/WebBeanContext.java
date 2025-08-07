@@ -1,13 +1,18 @@
 package org.jmouse.web.context;
 
 import jakarta.servlet.ServletContext;
+import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.context.ApplicationBeanContext;
 import org.jmouse.beans.BeanContext;
+import org.jmouse.core.reflection.MethodFinder;
+import org.jmouse.core.reflection.MethodMatchers;
+import org.jmouse.mvc.mapping.annnotation.Controller;
 
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * 🌐 Web-specific {@link BeanContext}.
@@ -151,5 +156,29 @@ public interface WebBeanContext extends ApplicationBeanContext {
         return List.copyOf(getLocalBeansOfType(type, context).values());
     }
 
+    /**
+     * 🔍 Selects methods annotated with the given annotation from local beans.
+     *
+     * <p>Iterates over all local beans and applies the given {@link BiConsumer} to
+     * methods matching the provided annotation type.
+     *
+     * @param annotationType the annotation to look for on methods
+     * @param consumer       the consumer to handle found methods and their owning bean
+     * @param context        the current web context
+     */
+    static void selectMethods(Class<? extends Annotation> annotationType,
+            BiConsumer<Collection<Method>, Object> consumer, WebBeanContext context) {
+        for (String beanName : context.getBeanNames(Object.class)) {
+            if (context.isLocalBean(beanName)) {
+                BeanDefinition definition = context.getDefinition(beanName);
+                if (definition.isAnnotatedWith(annotationType)) {
+                    Object             bean    = context.getBean(definition.getBeanName());
+                    Collection<Method> methods = new MethodFinder()
+                            .find(definition.getBeanClass(), MethodMatchers.isPublic());
+                    consumer.accept(methods, bean);
+                }
+            }
+        }
+    }
 
 }

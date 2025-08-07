@@ -118,7 +118,7 @@ public class HandlerDispatcher implements InitializingBean {
             if (dispatchException != null) {
                 InvocationOutcome outcome = processHandlerException(requestContext, handler, dispatchException);
                 if (handler != null && handler.handler() instanceof AbstractHandlerAdapter adapter) {
-                    adapter.getReturnValueProcessor().process(handler.methodParameter(), outcome, requestContext);
+                    adapter.getReturnValueProcessor().process(outcome, requestContext);
                 }
             }
         } catch (Exception e) {

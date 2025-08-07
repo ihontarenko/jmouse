@@ -36,12 +36,12 @@ public class VoidReturnValueHandler extends AbstractReturnValueHandler {
      * @return {@code true} if return value is {@code null}
      */
     @Override
-    public boolean supportsReturnType(MethodParameter returnType, InvocationOutcome outcome) {
+    public boolean supportsReturnType(InvocationOutcome outcome) {
         return outcome.getReturnValue() == null;
     }
 
     @Override
-    protected void doReturnValueHandle(MethodParameter returnType, InvocationOutcome result, RequestContext requestContext) {
+    protected void doReturnValueHandle(InvocationOutcome result, RequestContext requestContext) {
         HttpServletResponse response    = requestContext.response();
         String              contentType = response.getContentType();
         Headers             headers     = result.getHeaders();

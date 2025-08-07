@@ -15,20 +15,18 @@ public interface ReturnValueHandler {
     /**
      * 🔍 Checks if this handler can process the given return type.
      *
-     * @param returnType the return type of the controller method
      * @param outcome the actual outcome after method invocation
      * @return {@code true} if supported
      */
-    boolean supportsReturnType(MethodParameter returnType, InvocationOutcome outcome);
+    boolean supportsReturnType(InvocationOutcome outcome);
 
     /**
      * 🧪 Handles the controller return value.
      *
      * <p>May write to the response, modify model attributes, or trigger view rendering.
      *
-     * @param returnType the declared method return type
      * @param outcome the actual outcome
      * @param requestContext current request context
      */
-    void handleReturnValue(MethodParameter returnType, InvocationOutcome outcome, RequestContext requestContext);
+    void handleReturnValue(InvocationOutcome outcome, RequestContext requestContext);
 }

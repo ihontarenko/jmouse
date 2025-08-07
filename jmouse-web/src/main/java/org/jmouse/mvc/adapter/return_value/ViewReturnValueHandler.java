@@ -63,14 +63,14 @@ public class ViewReturnValueHandler extends AbstractReturnValueHandler {
      *
      * <p>If a view name is resolved, it's rendered via the configured {@link ViewResolver}.
      *
-     * @param returnType      the method return type metadata
      * @param outcome         the return value and model container
      * @param requestContext  current request/response context
      */
     @Override
-    protected void doReturnValueHandle(MethodParameter returnType, InvocationOutcome outcome, RequestContext requestContext) {
-        Optional<MergedAnnotation> optional = AnnotationRepository.ofAnnotatedElement(returnType.getAnnotatedElement())
-                .get(ViewMapping.class);
+    protected void doReturnValueHandle(InvocationOutcome outcome, RequestContext requestContext) {
+        MethodParameter            returnType = outcome.getReturnMethodParameter();
+        Optional<MergedAnnotation> optional   = AnnotationRepository.ofAnnotatedElement(
+                returnType.getAnnotatedElement()).get(ViewMapping.class);
 
         String viewName = null;
 
@@ -101,12 +101,12 @@ public class ViewReturnValueHandler extends AbstractReturnValueHandler {
      * <p>This includes methods annotated with {@link ViewMapping}
      * or returning a {@code String} starting with {@code "view:"}.
      *
-     * @param returnType the method return type metadata
      * @param outcome    the actual method result
      * @return {@code true} if handled by this strategy
      */
     @Override
-    public boolean supportsReturnType(MethodParameter returnType, InvocationOutcome outcome) {
+    public boolean supportsReturnType(InvocationOutcome outcome) {
+        MethodParameter returnType = outcome.getReturnMethodParameter();
         Optional<MergedAnnotation> optional = AnnotationRepository
                 .ofAnnotatedElement(returnType.getAnnotatedElement())
                 .get(ViewMapping.class);

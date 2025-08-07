@@ -23,11 +23,12 @@ import org.jmouse.web.request.http.HttpStatus;
  */
 public class Outcome implements InvocationOutcome {
 
-    private final Model          model   = new DefaultModel();
-    private final Headers        headers = new Headers();
-    private       Object         returnValue;
-    private       HttpStatus     httpStatus;
-    private       ExecutionState state   = ExecutionState.UNHANDLED;
+    private final Model           model   = new DefaultModel();
+    private final Headers         headers = new Headers();
+    private       Object          returnValue;
+    private       HttpStatus      httpStatus;
+    private       MethodParameter returnType;
+    private       ExecutionState  state   = ExecutionState.UNHANDLED;
 
     /**
      * Constructs a new result wrapping the given return value.
@@ -76,6 +77,26 @@ public class Outcome implements InvocationOutcome {
     @Override
     public void setReturnValue(Object returnValue) {
         this.returnValue = returnValue;
+    }
+
+    /**
+     * 📌 Metadata describing the controller method's return type.
+     *
+     * @return method parameter metadata
+     */
+    @Override
+    public MethodParameter getReturnMethodParameter() {
+        return returnType;
+    }
+
+    /**
+     * 📌 Sets the method parameter metadata related to return value.
+     *
+     * @param parameter method return parameter metadata
+     */
+    @Override
+    public void setReturnMethodParameter(MethodParameter parameter) {
+        this.returnType = returnType;
     }
 
     /**

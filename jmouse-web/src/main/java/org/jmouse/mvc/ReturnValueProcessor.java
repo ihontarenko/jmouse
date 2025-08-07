@@ -27,14 +27,13 @@ public class ReturnValueProcessor {
     /**
      * 🚚 Processes the return value using a matching {@link ReturnValueHandler}.
      *
-     * @param returnType the declared return type of the method
      * @param outcome the invocation result to be processed
      * @param requestContext current request/response context
      */
-    public void process(MethodParameter returnType, InvocationOutcome outcome, RequestContext requestContext) {
+    public void process(InvocationOutcome outcome, RequestContext requestContext) {
         for (ReturnValueHandler handler : handlers) {
-            if (handler.supportsReturnType(returnType, outcome)) {
-                handler.handleReturnValue(returnType, outcome, requestContext);
+            if (handler.supportsReturnType(outcome)) {
+                handler.handleReturnValue(outcome, requestContext);
             }
         }
     }

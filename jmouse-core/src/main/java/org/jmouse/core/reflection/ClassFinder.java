@@ -114,14 +114,25 @@ public interface ClassFinder {
     }
 
     /**
-     * Finds all implementations of a given interface.
+     * 🧬 Finds all non-abstract subclasses of the given superclass.
      *
-     * @param superClass the superclass to look for
+     * @param superClass the superclass to match
      * @param baseClasses the base classes to scan
-     * @return a collection of implementations
+     * @return non-abstract subclasses
      */
     static Collection<Class<?>> findInheritedClasses(Class<?> superClass, Class<?>... baseClasses) {
         return findAll(isSubtype(superClass).and(isAbstract().not()), baseClasses);
+    }
+
+    /**
+     * 🧱 Finds all non-abstract classes that are exactly equal to the given class.
+     *
+     * @param superClass the exact class to match
+     * @param baseClasses the base classes to scan
+     * @return non-abstract exact matches
+     */
+    static Collection<Class<?>> findExactlyClasses(Class<?> superClass, Class<?>... baseClasses) {
+        return findAll(isSame(superClass).and(isAbstract().not()), baseClasses);
     }
 
     /**

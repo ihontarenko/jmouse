@@ -33,11 +33,11 @@ import org.jmouse.web.context.WebBeanContext;
 public abstract class AbstractReturnValueHandler implements ReturnValueHandler, InitializingBean {
 
     /**
-     * 🔁 Delegates to {@link #doReturnValueHandle(MethodParameter, InvocationOutcome, RequestContext)}.
+     * 🔁 Delegates to {@link #doReturnValueHandle(InvocationOutcome, RequestContext)}.
      */
     @Override
-    public void handleReturnValue(MethodParameter returnType, InvocationOutcome outcome, RequestContext requestContext) {
-        doReturnValueHandle(returnType, outcome, requestContext);
+    public void handleReturnValue(InvocationOutcome outcome, RequestContext requestContext) {
+        doReturnValueHandle(outcome, requestContext);
     }
 
     /**
@@ -66,13 +66,8 @@ public abstract class AbstractReturnValueHandler implements ReturnValueHandler, 
     /**
      * 🧪 Subclass-specific return value handling logic.
      *
-     * @param returnType      method return type
      * @param result          actual return value + metadata
      * @param requestContext  request-specific state
      */
-    protected abstract void doReturnValueHandle(
-            MethodParameter returnType,
-            InvocationOutcome result,
-            RequestContext requestContext
-    );
+    protected abstract void doReturnValueHandle(InvocationOutcome result, RequestContext requestContext);
 }

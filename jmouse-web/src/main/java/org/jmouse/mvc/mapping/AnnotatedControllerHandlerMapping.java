@@ -1,14 +1,9 @@
 package org.jmouse.mvc.mapping;
 
-import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.core.MediaType;
-import org.jmouse.core.reflection.MethodFinder;
-import org.jmouse.core.reflection.MethodMatchers;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.mvc.*;
-import org.jmouse.mvc.exception.ExceptionHandlerExceptionResolver;
 import org.jmouse.mvc.mapping.annnotation.*;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.http.HttpHeader;
@@ -36,17 +31,7 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
      */
     @Override
     protected void doInitialize(WebBeanContext context) {
-        for (String beanName : context.getBeanNames(Object.class)) {
-            if (context.isLocalBean(beanName)) {
-                BeanDefinition definition = context.getDefinition(beanName);
-                if (definition.isAnnotatedWith(Controller.class)) {
-                    Object             bean    = context.getBean(definition.getBeanName());
-                    Collection<Method> methods = new MethodFinder()
-                            .find(definition.getBeanClass(), MethodMatchers.isPublic());
-                    initializeMethods(methods, bean, context);
-                }
-            }
-        }
+        WebBeanContext.selectMethods(Controller.class, this::initializeMethods, context);
     }
 
     /**
@@ -54,24 +39,15 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
      *
      * @param methods controller methods
      * @param bean controller instance
-     * @param context active web context
      */
-    private void initializeMethods(Collection<Method> methods, Object bean, WebBeanContext context) {
+    private void initializeMethods(Collection<Method> methods, Object bean) {
         for (Method method : methods) {
-            AnnotationRepository       repository       = AnnotationRepository.ofAnnotatedElement(method);
-            Optional<MergedAnnotation> mapping          = repository.get(Mapping.class);
-            Optional<MergedAnnotation> exceptionHandler = repository.get(ExceptionHandler.class);
-
+            AnnotationRepository       repository = AnnotationRepository.ofAnnotatedElement(method);
+            Optional<MergedAnnotation> mapping    = repository.get(Mapping.class);
             if (mapping.isPresent()) {
                 Mapping annotation = mapping.get().synthesize();
                 Route   route      = createRoute(annotation);
                 addHandlerMapping(route, new HandlerMethod(bean, method));
-            }
-
-            if (exceptionHandler.isPresent()) {
-                ExceptionHandler annotation = exceptionHandler.get().synthesize();
-                System.out.println(annotation);
-                ExceptionHandlerExceptionResolver resolver = context.getBean(ExceptionHandlerExceptionResolver.class);
             }
         }
     }

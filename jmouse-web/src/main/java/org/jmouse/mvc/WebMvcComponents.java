@@ -25,14 +25,4 @@ public class WebMvcComponents {
         return new HandlerInterceptorRegistry();
     }
 
-//    /**
-//     * 🧭 Creates the main routing registry.
-//     *
-//     * @return a new {@link MappingRegistry} instance
-//     */
-//    @Bean
-//    public MappingRegistry<?, ?> mappingRegistry() {
-//        return new MappingRegistry<>();
-//    }
-
 }
