@@ -25,12 +25,8 @@ public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
      * @param outcome        the invocation outcome to populate with return value
      */
     @Override
-    protected void doHandle(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            MappedHandler mappedHandler,
-            InvocationOutcome outcome
-    ) {
+    protected void doHandle(HttpServletRequest request, HttpServletResponse response, MappedHandler mappedHandler,
+                            InvocationOutcome outcome) {
         HandlerMethod  handlerMethod  = (HandlerMethod) mappedHandler.handler();
         MappingResult  mappingResult  = mappedHandler.mappingResult();
         RequestContext requestContext = new RequestContext(request, response);

@@ -71,7 +71,7 @@ public class ViewReturnValueHandler extends AbstractReturnValueHandler {
      */
     @Override
     protected void doReturnValueHandle(InvocationOutcome outcome, RequestContext requestContext) {
-        MethodParameter            returnType = outcome.getMethodParameter();
+        MethodParameter            returnType = outcome.getReturnParameter();
         Optional<MergedAnnotation> optional   = ofAnnotatedElement(
                 returnType.getAnnotatedElement()).get(ViewMapping.class);
 
@@ -91,7 +91,7 @@ public class ViewReturnValueHandler extends AbstractReturnValueHandler {
                 outcome.getHeaders().setContentType(view.getContentType());
                 outcome.setState(ExecutionState.HANDLED);
             } catch (Exception e) {
-                throw new NotFoundException("Unable to render view", e);
+                throw new NotFoundException("Rendering failed: " + e.getMessage(), e);
             }
         } else {
             throw new NotFoundException("Unable to resolve view");
@@ -109,17 +109,19 @@ public class ViewReturnValueHandler extends AbstractReturnValueHandler {
      */
     @Override
     public boolean supportsReturnType(InvocationOutcome outcome) {
-        MethodParameter            returnType  = outcome.getMethodParameter();
+        MethodParameter            returnType  = outcome.getReturnParameter();
         Optional<MergedAnnotation> optional    = ofAnnotatedElement(returnType.getAnnotatedElement())
                 .get(ViewMapping.class);
         Object                     returnValue = outcome.getReturnValue();
 
         if (optional.isPresent()) {
             return true;
-        } else if (returnValue instanceof String viewName) {
+        }
+
+        if (returnValue instanceof String viewName) {
             return viewName.startsWith(VIEW_PREFIX);
         }
 
-        return false;
+        return returnValue instanceof View;
     }
 }

@@ -58,7 +58,8 @@ public class HandlerDispatcher implements InitializingBean {
      * Initializes return value handlers
      */
     private void initReturnValueHandlers(WebBeanContext context) {
-        List<ReturnValueHandler> returnValueHandlers = context.getBeans(ReturnValueHandler.class);
+        List<ReturnValueHandler> returnValueHandlers = WebBeanContext.getLocalBeans(
+                ReturnValueHandler.class, context);
 
         if (returnValueHandlers.isEmpty()) {
             returnValueHandlers = frameworkProperties.createFactories(ReturnValueHandler.class);
@@ -74,11 +75,15 @@ public class HandlerDispatcher implements InitializingBean {
      * Initializes handler mappings from the given context or fallback factory mechanism.
      */
     private void initHandlerMappings(WebBeanContext context) {
-        List<HandlerMapping> handlerMappings = context.getBeans(HandlerMapping.class);
+        List<HandlerMapping> handlerMappings = WebBeanContext.getLocalBeans(
+                HandlerMapping.class, context);
 
         if (handlerMappings.isEmpty()) {
             handlerMappings = frameworkProperties.createFactories(HandlerMapping.class);
         }
+
+        handlerMappings = new ArrayList<>(handlerMappings);
+        Sorter.sort(handlerMappings);
 
         this.handlerMappings = List.copyOf(handlerMappings);
     }
@@ -87,7 +92,8 @@ public class HandlerDispatcher implements InitializingBean {
      * Initializes exception resolvers from the context or fallback factory.
      */
     private void initExceptionResolver(WebBeanContext context) {
-        List<ExceptionResolver> exceptionResolvers = context.getBeans(ExceptionResolver.class);
+        List<ExceptionResolver> exceptionResolvers = WebBeanContext.getLocalBeans(
+                ExceptionResolver.class, context);
 
         if (exceptionResolvers.isEmpty()) {
             exceptionResolvers = frameworkProperties.createFactories(ExceptionResolver.class);
@@ -150,8 +156,8 @@ public class HandlerDispatcher implements InitializingBean {
                 ExceptionHolder.setException(request, dispatchException);
                 InvocationOutcome exceptionOutcome = processHandlerException(requestContext, handler, dispatchException);
 
-                if (handler != null && outcome == null) {
-                    exceptionOutcome.setMethodParameter(handler.methodParameter());
+                if (handler != null && outcome == null && exceptionOutcome.getReturnParameter() == null) {
+                    exceptionOutcome.setReturnParameter(handler.methodParameter());
                 }
 
                 new ReturnValueProcessor(returnValueHandlers).process(exceptionOutcome, requestContext);

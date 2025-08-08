@@ -44,7 +44,7 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
         InvocationOutcome outcome = new Outcome(null);
         RequestContext    context = new RequestContext(request, response);
 
-        outcome.setMethodParameter(handler.methodParameter());
+        outcome.setReturnParameter(handler.methodParameter());
 
         doHandle(request, response, handler, outcome);
 
@@ -121,8 +121,17 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
      * @param context the web application context
      */
     protected void initialize(WebBeanContext context) {
-        setReturnValueHandlers(List.copyOf(context.getBeans(ReturnValueHandler.class)));
-        setArgumentResolvers(List.copyOf(context.getBeans(ArgumentResolver.class)));
+        List<ReturnValueHandler> returnValueHandlers = new ArrayList<>(
+                WebBeanContext.getLocalBeans(ReturnValueHandler.class, context));
+        Sorter.sort(returnValueHandlers);
+
+        List<ArgumentResolver> argumentResolvers = new ArrayList<>(
+                WebBeanContext.getLocalBeans(ArgumentResolver.class, context));
+        Sorter.sort(argumentResolvers);
+
+        setReturnValueHandlers(List.copyOf(returnValueHandlers));
+        setArgumentResolvers(List.copyOf(argumentResolvers));
+
         doInitialize(context);
     }
 

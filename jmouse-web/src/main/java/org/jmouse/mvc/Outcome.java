@@ -85,7 +85,7 @@ public class Outcome implements InvocationOutcome {
      * @return method parameter metadata
      */
     @Override
-    public MethodParameter getMethodParameter() {
+    public MethodParameter getReturnParameter() {
         return returnType;
     }
 
@@ -95,7 +95,7 @@ public class Outcome implements InvocationOutcome {
      * @param parameter method return parameter metadata
      */
     @Override
-    public void setMethodParameter(MethodParameter parameter) {
+    public void setReturnParameter(MethodParameter parameter) {
         this.returnType = parameter;
     }
 

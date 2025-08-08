@@ -18,9 +18,10 @@ import java.util.List;
 public final class MethodParameter {
 
     private final int        parameterIndex;
-    private final Executable executable;
-    private       Class<?>   parameterType;
     private       Parameter  parameter;
+    private final Executable executable;
+    private       Class<?>   returnType;
+    private       Class<?>   parameterType;
 
     /**
      * Creates a new {@code MethodParameter} for the given {@link Executable} (method or constructor) and index.
@@ -177,16 +178,8 @@ public final class MethodParameter {
     public Class<?> getParameterType() {
         Class<?> parameterType = this.parameterType;
 
-        if (parameterType == null) {
-            if (isReturnType()) {
-                Method method = getMethod();
-                if (method == null) {
-                    return void.class;
-                }
-                parameterType = method.getReturnType();
-            } else {
-                parameterType = getExecutable().getParameterTypes()[this.parameterIndex];
-            }
+        if (parameterType == null && isParameter()) {
+            parameterType = getExecutable().getParameterTypes()[this.parameterIndex];
             this.parameterType = parameterType;
         }
 
@@ -200,6 +193,23 @@ public final class MethodParameter {
      */
     public int getParameterIndex() {
         return parameterIndex;
+    }
+
+    /**
+     * Returns the raw Java type of method return type.
+     *
+     * @return the method's return type {@link Class} object
+     */
+    public Class<?> getReturnType() {
+        Class<?> returnType = this.returnType;
+
+        if (returnType == null && isReturnType()) {
+            Method method = getMethod();
+            returnType = method == null ? void.class : method.getReturnType();
+            this.returnType = returnType;
+        }
+
+        return returnType;
     }
 
     /**

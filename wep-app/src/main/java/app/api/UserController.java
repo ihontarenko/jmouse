@@ -1,9 +1,8 @@
 package app.api;
 
-import org.jmouse.mvc.mapping.annotation.Controller;
-import org.jmouse.mvc.mapping.annotation.GetMapping;
-import org.jmouse.mvc.mapping.annotation.Mapping;
-import org.jmouse.mvc.mapping.annotation.MethodDescription;
+import org.jmouse.mvc.Model;
+import org.jmouse.mvc.NotFoundException;
+import org.jmouse.mvc.mapping.annotation.*;
 import org.jmouse.web.request.http.HttpMethod;
 
 @Controller
@@ -11,18 +10,26 @@ public class UserController {
 
     @Mapping(path = "/customer/{id}", httpMethod = HttpMethod.GET)
     public String index() {
-        return "index/home";
+        return "view:index/home";
     }
 
     @GetMapping(requestPath = "/customer/demo/{id}")
     public String demo() {
-        return "index/demo";
+        return "view:index/demo";
     }
 
     @MethodDescription("Hello World!")
     @GetMapping(requestPath = "/customer/welcome/{id:int}")
     public String hello() {
-        return "index/demo";
+        return "view:index/demo";
     }
+
+    @ExceptionHandler(NotFoundException.class)
+    public String notFoundExceptionHandler(Model model, NotFoundException e) {
+        model.addAttribute("message", e.getMessage());
+        model.addAttribute("stackTrace", e.getStackTrace());
+        return "view:index/error";
+    }
+
 
 }

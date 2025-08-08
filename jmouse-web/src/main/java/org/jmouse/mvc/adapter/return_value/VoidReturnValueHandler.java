@@ -7,7 +7,6 @@ import org.jmouse.mvc.RequestContext;
 import org.jmouse.mvc.adapter.AbstractReturnValueHandler;
 import org.jmouse.util.Priority;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.request.Headers;
 import org.jmouse.web.request.http.HttpHeader;
 import org.jmouse.web.request.http.HttpStatus;
 
@@ -38,7 +37,7 @@ public class VoidReturnValueHandler extends AbstractReturnValueHandler {
      */
     @Override
     public boolean supportsReturnType(InvocationOutcome outcome) {
-        return outcome.getReturnValue() == null || outcome.getMethodParameter().getParameterType() == void.class;
+        return outcome.getReturnValue() == null || outcome.getReturnParameter().getParameterType() == void.class;
     }
 
     @Override

@@ -625,7 +625,11 @@ abstract public class Reflections {
     }
 
     public static String getPropertyName(Method method, String prefix) {
-        return uncapitalize(method.getName().substring(prefix.length()));
+        if (method.getName().length() > prefix.length()) {
+            return uncapitalize(method.getName().substring(prefix.length()));
+        }
+
+        return uncapitalize(method.getName());
     }
 
     /**

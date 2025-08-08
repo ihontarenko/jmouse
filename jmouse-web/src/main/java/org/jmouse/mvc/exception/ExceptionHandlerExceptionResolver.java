@@ -5,6 +5,7 @@ import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.mvc.*;
 import org.jmouse.mvc.mapping.annotation.Controller;
 import org.jmouse.mvc.mapping.annotation.ExceptionHandler;
+import org.jmouse.util.Sorter;
 import org.jmouse.web.context.WebBeanContext;
 
 import java.lang.reflect.Method;
@@ -83,7 +84,14 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
     @Override
     protected void doInitialize(WebBeanContext context) {
         WebBeanContext.selectMethods(Controller.class, this::initializeMethods, context);
-        argumentResolvers = context.getBeans(ArgumentResolver.class);
+
+        List<ArgumentResolver> argumentResolvers = new ArrayList<>(
+                WebBeanContext.getLocalBeans(ArgumentResolver.class, context)
+        );
+
+        Sorter.sort(argumentResolvers);
+
+        this.argumentResolvers = List.copyOf(argumentResolvers);
     }
 
     /**
@@ -125,7 +133,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
             HandlerMethodInvocation invocation = new HandlerMethodInvocation(context, mappedHandler.mappingResult(),
                     outcome, argumentResolvers);
             outcome.setReturnValue(invocation.invoke());
-            outcome.setMethodParameter(MethodParameter.forMethod(handlerMethod.getMethod(), -1));
+            outcome.setReturnParameter(MethodParameter.forMethod(handlerMethod.getMethod(), -1));
         }
 
         return outcome;
