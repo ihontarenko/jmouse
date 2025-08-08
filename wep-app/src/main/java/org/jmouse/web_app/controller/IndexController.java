@@ -26,13 +26,11 @@ public class IndexController {
                        @RequestMethod HttpMethod method,
                        @RequestParameter("lang") String lang,
                        @RequestParameter("externalId") Long externalId) {
-
         model.addAttribute("ID", id);
         model.addAttribute("userAgent", userAgent);
         model.addAttribute("method", method);
         model.addAttribute("lang", lang);
-
-        return "view -> index/demo";
+        return "view:index/demo";
     }
 
     @GetMapping(requestPath = "/welcome/{id}")

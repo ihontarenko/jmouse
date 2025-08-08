@@ -23,7 +23,7 @@ public class TextReturnValueHandler extends AbstractReturnValueHandler {
         HttpServletResponse servletResponse = requestContext.response();
 
         try {
-            servletResponse.getWriter().write("TEXT:" + returnValue);
+            servletResponse.getWriter().write(returnValue);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

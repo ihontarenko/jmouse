@@ -219,7 +219,7 @@ public final class MethodParameter {
      */
     public String parameterLocation() {
         return "%s#%s[%d]:%s".formatted(executable.getDeclaringClass().getName(),
-                executable.getName(), parameterIndex, getParameterType().getSimpleName());
+                executable.getName(), parameterIndex, getParameterType());
     }
 
     /**
