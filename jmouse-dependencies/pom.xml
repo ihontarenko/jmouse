@@ -49,6 +49,8 @@
         <log4j.version>1.2.17</log4j.version>
         <tomcat-embed.version>10.1.31</tomcat-embed.version>
         <jmh.version>1.37</jmh.version>
+        <jaxb.version>4.0.0</jaxb.version>
+        <jaxb-runtime.version>4.0.2</jaxb-runtime.version>
     </properties>
 
     <dependencyManagement>
@@ -112,6 +114,20 @@
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-xml</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+
+            <!-- JAXB API -->
+            <dependency>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
+                <version>${jaxb.version}</version>
+            </dependency>
+
+            <!-- JAXB Runtime (Implementation) -->
+            <dependency>
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
+                <version>${jaxb-runtime.version}</version>
             </dependency>
 
             <!-- Slf4j / Logging -->
