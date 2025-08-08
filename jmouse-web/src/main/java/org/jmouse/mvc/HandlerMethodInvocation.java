@@ -1,15 +1,13 @@
 package org.jmouse.mvc;
 
-import org.jmouse.core.bind.descriptor.AnnotationDescriptor;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
-import org.jmouse.mvc.mapping.annnotation.MethodDescription;
+import org.jmouse.mvc.mapping.annotation.MethodDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

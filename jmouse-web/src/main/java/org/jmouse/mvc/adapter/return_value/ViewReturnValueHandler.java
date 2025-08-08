@@ -1,10 +1,9 @@
 package org.jmouse.mvc.adapter.return_value;
 
-import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.mvc.*;
 import org.jmouse.mvc.adapter.AbstractReturnValueHandler;
-import org.jmouse.mvc.mapping.annnotation.ViewMapping;
+import org.jmouse.mvc.mapping.annotation.ViewMapping;
 import org.jmouse.util.Priority;
 import org.jmouse.web.context.WebBeanContext;
 

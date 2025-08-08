@@ -1,10 +1,9 @@
 package org.jmouse.mvc.argument;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.mvc.*;
-import org.jmouse.mvc.mapping.annnotation.RequestHeader;
+import org.jmouse.mvc.mapping.annotation.RequestHeader;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.RequestAttributesHolder;
 import org.jmouse.web.request.RequestHeaders;

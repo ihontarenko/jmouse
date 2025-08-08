@@ -1,7 +1,7 @@
 package org.jmouse.mvc.argument;
 
 import org.jmouse.mvc.*;
-import org.jmouse.mvc.mapping.annnotation.RequestParameter;
+import org.jmouse.mvc.mapping.annotation.RequestParameter;
 import org.jmouse.web.context.WebBeanContext;
 
 /**

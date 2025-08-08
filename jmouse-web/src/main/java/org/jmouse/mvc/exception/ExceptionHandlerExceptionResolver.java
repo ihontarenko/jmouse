@@ -3,8 +3,8 @@ package org.jmouse.mvc.exception;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.mvc.*;
-import org.jmouse.mvc.mapping.annnotation.Controller;
-import org.jmouse.mvc.mapping.annnotation.ExceptionHandler;
+import org.jmouse.mvc.mapping.annotation.Controller;
+import org.jmouse.mvc.mapping.annotation.ExceptionHandler;
 import org.jmouse.web.context.WebBeanContext;
 
 import java.lang.reflect.Method;
@@ -54,7 +54,12 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
      */
     @Override
     public boolean supportsException(Throwable exception) {
-        return supportedExceptions.contains(exception.getClass());
+        for (Class<? extends Throwable> supportedException : supportedExceptions) {
+            if (supportedException.isAssignableFrom(exception.getClass())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

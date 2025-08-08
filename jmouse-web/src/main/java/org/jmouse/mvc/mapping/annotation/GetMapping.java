@@ -1,4 +1,4 @@
-package org.jmouse.mvc.mapping.annnotation;
+package org.jmouse.mvc.mapping.annotation;
 
 import org.jmouse.core.reflection.annotation.MapTo;
 import org.jmouse.web.request.http.HttpMethod;
@@ -8,8 +8,8 @@ import java.lang.annotation.*;
 @Documented
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Mapping(httpMethod = HttpMethod.POST)
-public @interface PostMapping {
+@Mapping(httpMethod = HttpMethod.GET)
+public @interface GetMapping {
 
     @MapTo(attribute = "path", annotation = Mapping.class)
     String requestPath();
@@ -17,7 +17,7 @@ public @interface PostMapping {
     /**
      * 🎯 Optional list of header-based conditions.
      */
-    @MapTo(annotation = Mapping.class)
+    @MapTo(attribute = "headers", annotation = Mapping.class)
     Header[] headers() default {};
 
     /**

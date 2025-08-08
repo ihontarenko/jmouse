@@ -4,7 +4,7 @@ import org.jmouse.core.MediaType;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.mvc.*;
-import org.jmouse.mvc.mapping.annnotation.*;
+import org.jmouse.mvc.mapping.annotation.*;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.http.HttpHeader;
 

@@ -1,6 +1,5 @@
-package org.jmouse.mvc.mapping.annnotation;
+package org.jmouse.mvc.mapping.annotation;
 
-import org.jmouse.core.reflection.annotation.MapTo;
 import org.jmouse.web.request.http.HttpMethod;
 
 import java.lang.annotation.*;
@@ -26,8 +25,8 @@ import java.lang.annotation.*;
  *
  * 💡 Can be used on a class level for base path and method level for sub-paths.
  *
- * @see org.jmouse.mvc.mapping.annnotation.Header
- * @see org.jmouse.mvc.mapping.annnotation.QueryParameter
+ * @see org.jmouse.mvc.mapping.annotation.Header
+ * @see org.jmouse.mvc.mapping.annotation.QueryParameter
  * @see org.jmouse.web.request.RequestRoute
  * @see org.jmouse.mvc.Route
  *

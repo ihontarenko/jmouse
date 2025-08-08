@@ -1,4 +1,4 @@
-package org.jmouse.mvc.mapping.annnotation;
+package org.jmouse.mvc.mapping.annotation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

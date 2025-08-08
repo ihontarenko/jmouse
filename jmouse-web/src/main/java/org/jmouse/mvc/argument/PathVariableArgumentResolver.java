@@ -1,7 +1,7 @@
 package org.jmouse.mvc.argument;
 
 import org.jmouse.mvc.*;
-import org.jmouse.mvc.mapping.annnotation.PathVariable;
+import org.jmouse.mvc.mapping.annotation.PathVariable;
 import org.jmouse.web.context.WebBeanContext;
 
 import java.lang.reflect.Parameter;

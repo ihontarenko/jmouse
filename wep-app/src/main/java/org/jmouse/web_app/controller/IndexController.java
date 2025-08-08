@@ -2,7 +2,7 @@ package org.jmouse.web_app.controller;
 
 import org.jmouse.mvc.HandlerMappingException;
 import org.jmouse.mvc.Model;
-import org.jmouse.mvc.mapping.annnotation.*;
+import org.jmouse.mvc.mapping.annotation.*;
 import org.jmouse.web.request.http.HttpHeader;
 import org.jmouse.web.request.http.HttpMethod;
 

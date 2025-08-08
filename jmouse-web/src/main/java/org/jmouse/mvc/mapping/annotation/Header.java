@@ -1,4 +1,4 @@
-package org.jmouse.mvc.mapping.annnotation;
+package org.jmouse.mvc.mapping.annotation;
 
 /**
  * 📬 Annotation for mapping a route based on a specific HTTP header and its value.

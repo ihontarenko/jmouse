@@ -1,9 +1,9 @@
 package org.jmouse.web_app.controller;
 
 import org.jmouse.mvc.Model;
-import org.jmouse.mvc.mapping.annnotation.Controller;
-import org.jmouse.mvc.mapping.annnotation.ExceptionHandler;
-import org.jmouse.mvc.mapping.annnotation.GetMapping;
+import org.jmouse.mvc.mapping.annotation.Controller;
+import org.jmouse.mvc.mapping.annotation.ExceptionHandler;
+import org.jmouse.mvc.mapping.annotation.GetMapping;
 
 import java.io.IOException;
 import java.util.Map;

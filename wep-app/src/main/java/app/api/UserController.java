@@ -1,9 +1,9 @@
 package app.api;
 
-import org.jmouse.mvc.mapping.annnotation.Controller;
-import org.jmouse.mvc.mapping.annnotation.GetMapping;
-import org.jmouse.mvc.mapping.annnotation.Mapping;
-import org.jmouse.mvc.mapping.annnotation.MethodDescription;
+import org.jmouse.mvc.mapping.annotation.Controller;
+import org.jmouse.mvc.mapping.annotation.GetMapping;
+import org.jmouse.mvc.mapping.annotation.Mapping;
+import org.jmouse.mvc.mapping.annotation.MethodDescription;
 import org.jmouse.web.request.http.HttpMethod;
 
 @Controller
