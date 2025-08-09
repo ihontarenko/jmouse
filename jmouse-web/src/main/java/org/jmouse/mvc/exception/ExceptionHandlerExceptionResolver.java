@@ -127,10 +127,11 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
             RequestContext requestContext, MappedHandler mappedHandler, Exception exception) {
         InvocationOutcome outcome       = new Outcome(null);
         HandlerMethod     handlerMethod = getExceptionHandler(exception.getClass());
+        MappingResult     mappingResult = mappedHandler == null ? null : mappedHandler.mappingResult();
 
         if (handlerMethod != null) {
             HandlerMethodContext    context    = new HandlerMethodContext(requestContext, handlerMethod);
-            HandlerMethodInvocation invocation = new HandlerMethodInvocation(context, mappedHandler.mappingResult(),
+            HandlerMethodInvocation invocation = new HandlerMethodInvocation(context, mappingResult,
                     outcome, argumentResolvers);
             outcome.setReturnValue(invocation.invoke());
             outcome.setReturnParameter(MethodParameter.forMethod(handlerMethod.getMethod(), -1));

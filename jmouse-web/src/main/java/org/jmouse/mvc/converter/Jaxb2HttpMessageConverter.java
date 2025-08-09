@@ -14,23 +14,18 @@ public class Jaxb2HttpMessageConverter extends AbstractHttpMessageConverter<Obje
 
     private final JAXBContext jaxbContext;
 
-    public Jaxb2HttpMessageConverter(JAXBContext context) {
-        super(List.of(MEDIA_TYPE));
-        this.jaxbContext = context;
-    }
-
     public Jaxb2HttpMessageConverter() {
         super(List.of(MEDIA_TYPE));
         this.jaxbContext = null;
     }
 
     @Override
-    protected boolean supports(Class<?> clazz) {
+    protected boolean supportsType(Class<?> clazz) {
         return clazz.isAnnotationPresent(XmlRootElement.class) || clazz.isAnnotationPresent(XmlType.class);
     }
 
     @Override
-    public void write(Object body, Class<?> type, HttpOutputMessage outputMessage) throws IOException {
+    public void doWrite(Object data, Class<?> type, HttpOutputMessage outputMessage) throws IOException {
         try {
             JAXBContext context    = getJaxbContext(type);
             Marshaller  marshaller = context.createMarshaller();
@@ -38,14 +33,14 @@ public class Jaxb2HttpMessageConverter extends AbstractHttpMessageConverter<Obje
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
             outputMessage.getHeaders().setContentType(MEDIA_TYPE);
 
-            marshaller.marshal(body, outputMessage.getOutputStream());
+            marshaller.marshal(data, outputMessage.getOutputStream());
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public Object read(Class<? extends Object> clazz, HttpInputMessage inputMessage) throws IOException {
+    public Object doRead(Class<?> clazz, HttpInputMessage inputMessage) throws IOException {
         try {
             JAXBContext  context      = getJaxbContext(clazz);
             Unmarshaller unmarshaller = context.createUnmarshaller();

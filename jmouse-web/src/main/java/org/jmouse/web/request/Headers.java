@@ -92,6 +92,33 @@ public final class Headers {
     }
 
     /**
+     * 📏 Gets Content-Length header.
+     */
+    public long getContentLength() {
+        Object value = headers.get(HttpHeader.CONTENT_LENGTH);
+
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+
+        if (value instanceof String str) {
+            try {
+                return Long.parseLong(str);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+
+        return 0L;
+    }
+
+    /**
+     * 📏 Sets Content-Length header.
+     */
+    public void setContentLength(long length) {
+        setHeader(HttpHeader.CONTENT_LENGTH, length);
+    }
+
+    /**
      * 🎯 Typed getter for Accept header.
      */
     public List<MediaType> getAccept() {

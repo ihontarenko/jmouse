@@ -2,6 +2,7 @@ package org.jmouse.mvc.adapter;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
+import org.jmouse.beans.InitializingBeanSupport;
 import org.jmouse.mvc.InvocationOutcome;
 import org.jmouse.mvc.MethodParameter;
 import org.jmouse.mvc.RequestContext;
@@ -30,7 +31,7 @@ import org.jmouse.web.context.WebBeanContext;
  * @author Ivan Hontarenko
  * @author ihontarenko@gmail.com
  */
-public abstract class AbstractReturnValueHandler implements ReturnValueHandler, InitializingBean {
+public abstract class AbstractReturnValueHandler implements ReturnValueHandler, InitializingBeanSupport<WebBeanContext> {
 
     /**
      * 🔁 Delegates to {@link #doReturnValueHandle(InvocationOutcome, RequestContext)}.
@@ -39,29 +40,6 @@ public abstract class AbstractReturnValueHandler implements ReturnValueHandler, 
     public void handleReturnValue(InvocationOutcome outcome, RequestContext requestContext) {
         doReturnValueHandle(outcome, requestContext);
     }
-
-    /**
-     * 🚀 Called after the bean is initialized in the context.
-     * Casts {@link BeanContext} to {@link WebBeanContext} and delegates to {@link #initialize(WebBeanContext)}.
-     */
-    @Override
-    public void afterCompletion(BeanContext context) {
-        initialize((WebBeanContext) context);
-    }
-
-    /**
-     * 🔧 Initializes this handler using the given {@link WebBeanContext}.
-     */
-    protected void initialize(WebBeanContext context) {
-        doInitialize(context);
-    }
-
-    /**
-     * 🧩 Subclass-specific initialization logic.
-     *
-     * @param context current web bean context
-     */
-    protected abstract void doInitialize(WebBeanContext context);
 
     /**
      * 🧪 Subclass-specific return value handling logic.

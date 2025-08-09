@@ -29,6 +29,7 @@ public class MediaType extends MimeType {
     public static final MediaType XML; // alias
     public static final MediaType APPLICATION_FORM_URLENCODED;
     public static final MediaType MULTIPART_FORM_DATA;
+    public static final MediaType APPLICATION_YAML;
 
     public static final MediaType TEXT_PLAIN;
     public static final MediaType TEXT; // alias
@@ -92,6 +93,8 @@ public class MediaType extends MimeType {
         APPLICATION_XML = new MediaType("application", "xml", Map.of(PARAMETER_NAME_CHARSET, UTF_8.getName()));
         XML = APPLICATION_XML;
         APPLICATION_XML_VALUE = APPLICATION_XML.toString();
+
+        APPLICATION_YAML = new MediaType("application", "yaml", Map.of(PARAMETER_NAME_CHARSET, UTF_8.getName()));
 
         APPLICATION_FORM_URLENCODED = new MediaType("application", "x-www-form-urlencoded");
         APPLICATION_FORM_URLENCODED_VALUE = APPLICATION_FORM_URLENCODED.toString();

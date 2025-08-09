@@ -40,7 +40,7 @@ public class IndexController {
 
     @ExceptionHandler(HandlerMappingException.class)
     public String exceptionHandler() {
-        return "index/error";
+        return "view:index/error";
     }
 
 }

@@ -146,6 +146,13 @@ public class MimeType {
     }
 
     /**
+     * @return the full string type
+     */
+    public String getStringType() {
+        return type + "/" + subtype;
+    }
+
+    /**
      * @return the primary type
      */
     public String getType() {

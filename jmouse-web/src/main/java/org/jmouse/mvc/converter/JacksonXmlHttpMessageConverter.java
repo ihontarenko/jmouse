@@ -8,39 +8,32 @@ import java.util.List;
 
 public class JacksonXmlHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
-    private static final MediaType MEDIA_TYPE = MediaType.APPLICATION_XML;
-
     private final XmlMapper xmlMapper;
 
     public JacksonXmlHttpMessageConverter() {
-        super(MEDIA_TYPE);
+        super(MediaType.APPLICATION_XML);
         this.xmlMapper = new XmlMapper();
     }
 
-    public JacksonXmlHttpMessageConverter(XmlMapper xmlMapper) {
-        super(MEDIA_TYPE);
-        this.xmlMapper = xmlMapper;
-    }
-
     @Override
-    protected boolean supports(Class<?> clazz) {
+    protected boolean supportsType(Class<?> clazz) {
         return true;
     }
 
     @Override
-    public void write(Object body, Class<?> type, HttpOutputMessage outputMessage) throws IOException {
-        outputMessage.getHeaders().setContentType(MEDIA_TYPE);
-        xmlMapper.writeValue(outputMessage.getOutputStream(), body);
+    public void doWrite(Object data, Class<?> type, HttpOutputMessage outputMessage) throws IOException {
+        outputMessage.getHeaders().setContentType(MediaType.APPLICATION_XML);
+        xmlMapper.writeValue(outputMessage.getOutputStream(), data);
     }
 
     @Override
-    public Object read(Class<? extends Object> clazz, HttpInputMessage inputMessage) throws IOException {
+    public Object doRead(Class<?> clazz, HttpInputMessage inputMessage) throws IOException {
         return xmlMapper.readValue(inputMessage.getInputStream(), clazz);
     }
 
     @Override
     public List<MediaType> getSupportedMediaTypes() {
-        return List.of(MEDIA_TYPE);
+        return List.of(MediaType.APPLICATION_XML);
     }
 
 }

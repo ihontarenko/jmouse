@@ -46,12 +46,12 @@ public class MessageConverterManager implements InitializingBean {
     @SuppressWarnings("unchecked")
     public <T> HttpMessageConverter<T> getMessageConverter(T value, String contentType) {
         for (HttpMessageConverter<?> converter : converters) {
-            if (converter.canWrite(value.getClass(), MediaType.forString(contentType))) {
+            if (converter.isWritable(value.getClass(), MediaType.forString(contentType))) {
                 return (HttpMessageConverter<T>) converter;
             }
         }
 
-        throw new UnsuitableException("No suitable converter found: " + contentType);
+        return null;
     }
 
     /**

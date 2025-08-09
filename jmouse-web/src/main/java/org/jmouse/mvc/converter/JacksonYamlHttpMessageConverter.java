@@ -7,16 +7,20 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class JacksonJsonHttpMessageConverter extends AbstractJacksonHttpMessageConverter<Object> {
+public class JacksonYamlHttpMessageConverter extends AbstractJacksonHttpMessageConverter<Object> {
 
-    public JacksonJsonHttpMessageConverter() {
-        super(MediaType.APPLICATION_JSON);
+    private final ObjectMapper objectMapper;
+
+    public JacksonYamlHttpMessageConverter() {
+        super(MediaType.APPLICATION_YAML);
+        this.objectMapper = new ObjectMapper();
     }
 
-    public JacksonJsonHttpMessageConverter(ObjectMapper objectMapper) {
+    public JacksonYamlHttpMessageConverter(ObjectMapper objectMapper) {
         super(List.of(
-                MediaType.APPLICATION_JSON
+                MediaType.APPLICATION_YAML
         ));
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -43,14 +47,13 @@ public class JacksonJsonHttpMessageConverter extends AbstractJacksonHttpMessageC
 
     @Override
     public void doWrite(Object data, Class<?> type, HttpOutputMessage outputMessage) throws IOException, UnwritableException {
-        outputMessage.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        outputMessage.getHeaders().setContentType(MediaType.APPLICATION_YAML);
         ObjectMapper objectMapper =  getObjectMapper(outputMessage.getHeaders().getContentType());
         objectMapper.writeValue(outputMessage.getOutputStream(), data);
     }
 
     @Override
     public Object doRead(Class<? extends Object> clazz, HttpInputMessage inputMessage) throws IOException {
-        ObjectMapper objectMapper =  getObjectMapper(inputMessage.getHeaders().getContentType());
         return objectMapper.readValue(inputMessage.getInputStream(), clazz);
     }
 

@@ -84,7 +84,8 @@ public enum HttpHeader {
     SET_COOKIE("Set-Cookie"),
     COOKIE("Cookie"),
 
-    X_TEXT("X-Text");
+    X_TEXT("X-Text"),
+    X_JMOUSE_DEBUG("X-jMouse-Debug");
 
     private final String value;
 

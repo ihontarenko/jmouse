@@ -1,6 +1,7 @@
 package org.jmouse.mvc;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.jmouse.core.MediaType;
 import org.jmouse.mvc.converter.HttpOutputMessage;
 import org.jmouse.web.request.Headers;
 
@@ -11,6 +12,7 @@ public class WebHttpServletResponse implements HttpOutputMessage {
 
     private final HttpServletResponse response;
     private final Headers headers;
+    private boolean headersWritten = false;
 
     public WebHttpServletResponse(HttpServletResponse response) {
         this.response = response;
@@ -19,12 +21,28 @@ public class WebHttpServletResponse implements HttpOutputMessage {
 
     @Override
     public OutputStream getOutputStream() throws IOException {
+        writeHeaders();
         return response.getOutputStream();
     }
 
     @Override
     public Headers getHeaders() {
         return headers;
+    }
+
+    protected void writeHeaders() {
+        if (!headersWritten) {
+            headersWritten = true;
+
+            getHeaders().asMap().forEach((headerName, headerValue) -> {
+                response.setHeader(headerName.value(), headerValue.toString());
+            });
+
+            MediaType contentType = getHeaders().getContentType();
+
+            response.setContentType(contentType.getStringType());
+            response.setCharacterEncoding(contentType.getCharset());
+        }
     }
 
 }

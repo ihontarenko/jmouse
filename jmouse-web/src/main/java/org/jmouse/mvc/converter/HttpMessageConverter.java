@@ -25,7 +25,7 @@ public interface HttpMessageConverter<T> {
      * @param mediaType desired {@link MediaType}
      * @return {@code true} if writable
      */
-    boolean canWrite(Class<?> clazz, MediaType mediaType);
+    boolean isWritable(Class<?> clazz, MediaType mediaType);
 
     /**
      * ✅ Checks if the converter can read the given class with the specified media type.
@@ -34,7 +34,7 @@ public interface HttpMessageConverter<T> {
      * @param mediaType desired {@link MediaType}
      * @return {@code true} if readable
      */
-    boolean canRead(Class<?> clazz, MediaType mediaType);
+    boolean isReadable(Class<?> clazz, MediaType mediaType);
 
     /**
      * ✏️ Writes the given object to the HTTP output message.

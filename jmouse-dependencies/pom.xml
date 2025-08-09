@@ -116,6 +116,13 @@
                 <version>${jackson.version}</version>
             </dependency>
 
+            <!-- YAML support -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
             <!-- JAXB API -->
             <dependency>
                 <groupId>jakarta.xml.bind</groupId>

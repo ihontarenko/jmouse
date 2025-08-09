@@ -22,9 +22,11 @@ import static org.jmouse.core.reflection.annotation.AnnotationRepository.ofAnnot
  *
  * <p>Example usage:
  * <pre>{@code
- * @ViewMapping
+ * // prioritized
+ * @ViewMapping("index/home")
  * public String home(Model model) {
  *     model.add("user", currentUser);
+ *     // or return prefixed view-name
  *     return "view:home";
  * }
  * }</pre>
@@ -51,7 +53,7 @@ public class ViewReturnValueHandler extends AbstractReturnValueHandler {
      * @param context the web bean context
      */
     @Override
-    protected void doInitialize(WebBeanContext context) {
+    public void doInitialize(WebBeanContext context) {
         viewResolver = context.getBean(ViewResolver.class);
     }
 
@@ -90,6 +92,7 @@ public class ViewReturnValueHandler extends AbstractReturnValueHandler {
                 view.render(outcome.getModel().getAttributes(), requestContext.request(), requestContext.response());
                 outcome.getHeaders().setContentType(view.getContentType());
                 outcome.setState(ExecutionState.HANDLED);
+                requestContext.response().setContentType(view.getContentType().getStringType());
             } catch (Exception e) {
                 throw new NotFoundException("Rendering failed: " + e.getMessage(), e);
             }
