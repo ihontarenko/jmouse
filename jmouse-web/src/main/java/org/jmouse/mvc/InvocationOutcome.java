@@ -59,11 +59,6 @@ public interface InvocationOutcome {
     Model getModel();
 
     /**
-     * HTTP headers to write to response.
-     */
-    Headers getHeaders();
-
-    /**
      * Optional HTTP status code (nullable, default = 200 OK).
      */
     HttpStatus getHttpStatus();

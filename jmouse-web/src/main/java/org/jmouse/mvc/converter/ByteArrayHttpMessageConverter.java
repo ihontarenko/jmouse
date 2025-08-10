@@ -1,11 +1,13 @@
 package org.jmouse.mvc.converter;
 
 import org.jmouse.core.MediaType;
+import org.jmouse.util.Priority;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+@Priority(Integer.MIN_VALUE)
 public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<byte[]> {
 
     protected ByteArrayHttpMessageConverter() {
@@ -14,6 +16,9 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 
     @Override
     protected void doWrite(byte[] data, Class<?> type, HttpOutputMessage outputMessage) throws IOException {
+
+        outputMessage.getHeaders().setContentLength(data.length * 3);
+
         outputMessage.getOutputStream().write(data);
     }
 

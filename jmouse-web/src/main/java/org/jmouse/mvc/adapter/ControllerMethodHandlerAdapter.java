@@ -42,16 +42,6 @@ public class ControllerMethodHandlerAdapter extends AbstractHandlerAdapter {
     }
 
     /**
-     * 🚫 No initialization required for {@link ControllerMethodHandlerAdapter}.
-     *
-     * @param context current web context
-     */
-    @Override
-    protected void doInitialize(WebBeanContext context) {
-        // No-op
-    }
-
-    /**
      * ✅ Checks if the handler is a {@link ControllerMethod}.
      *
      * @param handler mapped handler

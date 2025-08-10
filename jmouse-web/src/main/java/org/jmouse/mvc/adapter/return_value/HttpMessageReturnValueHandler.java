@@ -6,6 +6,7 @@ import org.jmouse.core.MimeParser;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.mvc.InvocationOutcome;
+import org.jmouse.mvc.MethodParameter;
 import org.jmouse.mvc.RequestContext;
 import org.jmouse.mvc.WebHttpServletResponse;
 import org.jmouse.mvc.adapter.AbstractReturnValueHandler;
@@ -22,30 +23,50 @@ import org.jmouse.web.request.RequestAttributesHolder;
 import org.jmouse.web.request.http.HttpHeader;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * 📡 Handles return values by converting them to HTTP responses using message converters.
+ * 📡 Handles controller return values by converting them into HTTP responses using {@link HttpMessageConverter}s.
  *
- * <p>Selects an appropriate {@link HttpMessageConverter} based on the request's Accept header
- * or the controller's {@link Mapping#produces()} declaration.</p>
+ * <p>Determines the appropriate {@link HttpMessageConverter} by checking:</p>
+ * <ul>
+ *   <li>The {@link Mapping#produces()} attribute on the handler method, if present</li>
+ *   <li>The <code>Accept</code> header from the incoming request</li>
+ * </ul>
  *
- * <p>Writes the converted output to the {@link HttpServletResponse} with proper headers.</p>
+ * <p>Writes the converted output to the {@link HttpServletResponse} and applies the correct
+ * <code>Content-Type</code> header. Also injects debug information into the
+ * <code>X-JMOUSE-DEBUG</code> response header.</p>
  *
  * @author Ivan Hontarenko
  */
 @Priority(500)
 public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
 
+    /** The manager responsible for locating the appropriate {@link HttpMessageConverter}. */
     private MessageConverterManager converterManager;
 
+    /**
+     * Initializes this handler by retrieving the {@link MessageConverterManager} from the application context.
+     *
+     * @param context the current {@link WebBeanContext}
+     */
     @Override
-    protected void doInitialize(WebBeanContext context) {
+    public void doInitialize(WebBeanContext context) {
         converterManager = context.getBean(MessageConverterManager.class);
     }
 
+    /**
+     * Handles the given controller method return value by selecting an appropriate
+     * {@link HttpMessageConverter} and writing the converted output to the HTTP response.
+     *
+     * @param outcome        the invocation outcome, containing the return value and method metadata
+     * @param requestContext the current request context
+     * @throws UnsuitableException if no compatible message converter is found
+     */
     @Override
     protected void doReturnValueHandle(InvocationOutcome outcome, RequestContext requestContext) {
         Object                       returnValue      = outcome.getReturnValue();
@@ -53,28 +74,19 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
         HttpMessageConverter<Object> messageConverter = null;
         Headers                      incomingHeaders  = RequestAttributesHolder.getRequestHeaders().headers();
         MediaType                    contentType      = null;
+        List<MediaType>              acceptance       = getProduces(outcome.getReturnParameter());
 
-        // Sort Accept header by descending quality factor
-        List<MediaType> acceptance = incomingHeaders.getAccept();
+        // Fallback to Accept header if no explicit 'produces' declaration
+        if (acceptance.isEmpty()) {
+            acceptance = incomingHeaders.getAccept();
+        }
+
+        // Sort by quality factor (q)
+        acceptance = new ArrayList<>(acceptance);
         acceptance.sort(Comparator.comparingDouble(MediaType::getQFactor));
         acceptance = acceptance.reversed();
 
-        // If Accept header is empty, try to get produces info from @Mapping annotation
-        if (acceptance.isEmpty()) {
-            Optional<MergedAnnotation> optional = AnnotationRepository.ofAnnotatedElement(outcome.getReturnParameter()
-                    .getAnnotatedElement()).get(Mapping.class);
-            if (optional.isPresent()) {
-                Mapping mapping = optional.get().synthesize();
-                if (mapping.produces() != null && mapping.produces().length > 0) {
-                    acceptance = Streamable.of(mapping.produces())
-                            .map(MimeParser::parseMimeType)
-                            .map(MediaType::new)
-                            .toList();
-                }
-            }
-        }
-
-        // Find a suitable message converter for the accepted media types
+        // Select the first matching converter
         if (!acceptance.isEmpty()) {
             for (MediaType acceptType : acceptance) {
                 messageConverter = converterManager.getMessageConverter(returnValue, acceptType.toString());
@@ -93,17 +105,49 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
         Headers           outputHeaders = httpMessage.getHeaders();
 
         outputHeaders.setContentType(contentType);
-        outputHeaders.setHeader(HttpHeader.X_JMOUSE_DEBUG, "debug message!");
+        outputHeaders.setHeader(HttpHeader.X_JMOUSE_DEBUG, "DEBUG MESSAGE!");
 
         try {
-            messageConverter.write(returnValue, Object.class, httpMessage);
+            messageConverter.write(returnValue, outcome.getReturnParameter().getReturnType(), httpMessage);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    /**
+     * Checks whether this handler supports the given return type.
+     *
+     * @param outcome the invocation outcome to check
+     * @return {@code true} if the return value is non-null and not {@code void}, otherwise {@code false}
+     */
     @Override
     public boolean supportsReturnType(InvocationOutcome outcome) {
         return outcome.getReturnValue() != null && !outcome.getReturnParameter().getReturnType().equals(void.class);
+    }
+
+    /**
+     * Retrieves the list of media types declared via {@link Mapping#produces()} on the given method parameter.
+     *
+     * @param parameter the method parameter to inspect
+     * @return a list of produced media types, or an empty list if none declared
+     */
+    protected List<MediaType> getProduces(MethodParameter parameter) {
+        List<MediaType>            acceptance = new ArrayList<>();
+        Optional<MergedAnnotation> annotation = AnnotationRepository
+                .ofAnnotatedElement(parameter.getAnnotatedElement())
+                .get(Mapping.class);
+
+        if (annotation.isPresent()) {
+            Mapping  mapping  = annotation.get().synthesize();
+            String[] produces = mapping.produces();
+            if (produces != null && produces.length > 0) {
+                acceptance = Streamable.of(produces)
+                        .map(MimeParser::parseMimeType)
+                        .map(MediaType::new)
+                        .toList();
+            }
+        }
+
+        return acceptance;
     }
 }

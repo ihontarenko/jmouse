@@ -1,6 +1,7 @@
 package org.jmouse.mvc.mapping.annotation;
 
 import org.jmouse.core.reflection.annotation.MapTo;
+import org.jmouse.mvc.adapter.return_value.ViewResolverReturnValueHandler;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -19,7 +20,7 @@ import java.lang.annotation.Target;
  * }
  * }</pre>
  *
- * @see org.jmouse.mvc.adapter.return_value.ViewReturnValueHandler
+ * @see ViewResolverReturnValueHandler
  * @see org.jmouse.mvc.ViewResolver
  * @see MapTo
  *

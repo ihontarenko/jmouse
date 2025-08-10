@@ -1,5 +1,6 @@
 package org.jmouse.web_app.controller;
 
+import org.jmouse.core.MediaType;
 import org.jmouse.mvc.Model;
 import org.jmouse.mvc.mapping.annotation.Controller;
 import org.jmouse.mvc.mapping.annotation.ExceptionHandler;
@@ -58,6 +59,13 @@ public class SharedController {
     })
     public ResponseModel returnValueTest() throws IOException {
         return new ResponseModel(Map.of("text", "Hello World!", "IDs", List.of(1, 2, 3)));
+    }
+
+    @GetMapping(requestPath = "/shared/streamData", produces = {
+            "application/octet-stream"
+    })
+    public byte[] streamData() {
+        return new ResponseModel(Map.of("text", "Hello World!", "IDs", List.of(1, 2, 3))).toString().getBytes();
     }
 
 }

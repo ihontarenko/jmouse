@@ -6,7 +6,6 @@ import org.jmouse.mvc.InvocationOutcome;
 import org.jmouse.mvc.RequestContext;
 import org.jmouse.mvc.adapter.AbstractReturnValueHandler;
 import org.jmouse.util.Priority;
-import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.http.HttpHeader;
 import org.jmouse.web.request.http.HttpStatus;
 
@@ -27,7 +26,7 @@ import org.jmouse.web.request.http.HttpStatus;
  * @since 1.0
  */
 @Priority(-1)
-public class VoidReturnValueHandler extends AbstractReturnValueHandler {
+public class VoidMethodReturnValueHandler extends AbstractReturnValueHandler {
 
     /**
      * ✅ Supports only {@code null} return values.
@@ -44,10 +43,9 @@ public class VoidReturnValueHandler extends AbstractReturnValueHandler {
     protected void doReturnValueHandle(InvocationOutcome outcome, RequestContext requestContext) {
         HttpServletResponse response    = requestContext.response();
         String              contentType = response.getContentType();
-        MediaType           consumes    = outcome.getHeaders().getContentType();
 
-        if ((contentType == null || contentType.isBlank()) && consumes != null) {
-            response.setContentType(consumes.toString());
+        if ((contentType == null || contentType.isBlank())) {
+            response.setContentType(MediaType.TEXT_PLAIN_VALUE);
         }
 
         HttpStatus httpStatus = outcome.getHttpStatus();
@@ -56,13 +54,4 @@ public class VoidReturnValueHandler extends AbstractReturnValueHandler {
         response.setHeader(HttpHeader.X_TEXT.value(), "NO-OP!");
     }
 
-    /**
-     * ⚙️ No initialization logic required.
-     *
-     * @param context current web context
-     */
-    @Override
-    protected void doInitialize(WebBeanContext context) {
-        // No-op
-    }
 }

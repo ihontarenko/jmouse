@@ -1,5 +1,6 @@
 package org.jmouse.mvc.adapter.return_value;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.mvc.*;
 import org.jmouse.mvc.adapter.AbstractReturnValueHandler;
@@ -40,7 +41,7 @@ import static org.jmouse.core.reflection.annotation.AnnotationRepository.ofAnnot
  * @see ViewMapping
  */
 @Priority(0)
-public class ViewReturnValueHandler extends AbstractReturnValueHandler {
+public class ViewResolverReturnValueHandler extends AbstractReturnValueHandler {
 
     /** Prefix used to identify view-returning methods via string return values. */
     public static final String VIEW_PREFIX = "view:";
@@ -77,7 +78,8 @@ public class ViewReturnValueHandler extends AbstractReturnValueHandler {
         Optional<MergedAnnotation> optional   = ofAnnotatedElement(
                 returnType.getAnnotatedElement()).get(ViewMapping.class);
 
-        String viewName = null;
+        String              viewName = null;
+        HttpServletResponse response = requestContext.response();
 
         if (optional.isPresent()) {
             ViewMapping mapping = optional.get().synthesize();
@@ -89,10 +91,10 @@ public class ViewReturnValueHandler extends AbstractReturnValueHandler {
         if (viewName != null && !viewName.isBlank()) {
             try {
                 View view = viewResolver.resolveView(viewName);
-                view.render(outcome.getModel().getAttributes(), requestContext.request(), requestContext.response());
-                outcome.getHeaders().setContentType(view.getContentType());
+                view.render(outcome.getModel().getAttributes(), requestContext.request(), response);
                 outcome.setState(ExecutionState.HANDLED);
-                requestContext.response().setContentType(view.getContentType().getStringType());
+
+                response.setContentType(view.getContentType().getStringType());
             } catch (Exception e) {
                 throw new NotFoundException("Rendering failed: " + e.getMessage(), e);
             }

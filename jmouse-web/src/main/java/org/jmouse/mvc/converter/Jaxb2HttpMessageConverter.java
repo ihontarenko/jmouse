@@ -4,10 +4,12 @@ import jakarta.xml.bind.*;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import org.jmouse.core.MediaType;
+import org.jmouse.util.Priority;
 
 import java.io.IOException;
 import java.util.List;
 
+@Priority(Integer.MIN_VALUE + 300)
 public class Jaxb2HttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
     private static final MediaType MEDIA_TYPE = MediaType.APPLICATION_XML;

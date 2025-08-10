@@ -2,11 +2,13 @@ package org.jmouse.mvc.converter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jmouse.core.MediaType;
+import org.jmouse.util.Priority;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Priority(Integer.MIN_VALUE + 100000)
 public class JacksonYamlHttpMessageConverter extends AbstractJacksonHttpMessageConverter<Object> {
 
     private final ObjectMapper objectMapper;

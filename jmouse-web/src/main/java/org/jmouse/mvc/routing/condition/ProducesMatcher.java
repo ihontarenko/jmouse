@@ -45,7 +45,7 @@ public class ProducesMatcher implements MappingMatcher {
 
         for (MediaType acceptedType : accepted) {
             for (MediaType producible : producible) {
-                if (producible.includes(acceptedType)) {
+                if (producible.compatible(acceptedType)) {
                     return true;
                 }
             }

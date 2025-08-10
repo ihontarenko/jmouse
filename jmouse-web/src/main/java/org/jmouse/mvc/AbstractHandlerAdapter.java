@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
+import org.jmouse.beans.InitializingBeanSupport;
 import org.jmouse.util.Sorter;
 import org.jmouse.web.context.WebBeanContext;
 
@@ -25,7 +26,7 @@ import java.util.List;
  * @author Ivan Hontarenko
  * @since 1.0
  */
-public abstract class AbstractHandlerAdapter implements HandlerAdapter, InitializingBean {
+public abstract class AbstractHandlerAdapter implements HandlerAdapter, InitializingBeanSupport<WebBeanContext> {
 
     private List<ArgumentResolver>   argumentResolvers   = new ArrayList<>();
     private List<ReturnValueHandler> returnValueHandlers = new ArrayList<>();
@@ -120,13 +121,13 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
      *
      * @param context the web application context
      */
-    protected void initialize(WebBeanContext context) {
+    public void initialize(WebBeanContext context) {
         List<ReturnValueHandler> returnValueHandlers = new ArrayList<>(
                 WebBeanContext.getLocalBeans(ReturnValueHandler.class, context));
-        Sorter.sort(returnValueHandlers);
-
-        List<ArgumentResolver> argumentResolvers = new ArrayList<>(
+        List<ArgumentResolver>   argumentResolvers   = new ArrayList<>(
                 WebBeanContext.getLocalBeans(ArgumentResolver.class, context));
+
+        Sorter.sort(returnValueHandlers);
         Sorter.sort(argumentResolvers);
 
         setReturnValueHandlers(List.copyOf(returnValueHandlers));
@@ -140,10 +141,4 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
      */
     protected abstract void doHandle(HttpServletRequest request, HttpServletResponse response, MappedHandler mappedHandler, InvocationOutcome result);
 
-    /**
-     * 🔧 Subclasses may perform custom initialization here.
-     *
-     * @param context the web bean context
-     */
-    protected abstract void doInitialize(WebBeanContext context);
 }

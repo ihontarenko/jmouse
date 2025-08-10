@@ -5,21 +5,15 @@ import org.jmouse.mvc.InvocationOutcome;
 import org.jmouse.mvc.RequestContext;
 import org.jmouse.mvc.adapter.AbstractReturnValueHandler;
 import org.jmouse.util.Priority;
-import org.jmouse.web.context.WebBeanContext;
 
 import java.io.IOException;
 
 @Priority(1000)
-public class TextReturnValueHandler extends AbstractReturnValueHandler {
-
-    @Override
-    protected void doInitialize(WebBeanContext context) {
-
-    }
+public class StringValueReturnValueHandler extends AbstractReturnValueHandler {
 
     @Override
     protected void doReturnValueHandle(InvocationOutcome result, RequestContext requestContext) {
-        String returnValue     = (String) result.getReturnValue();
+        String              returnValue     = (String) result.getReturnValue();
         HttpServletResponse servletResponse = requestContext.response();
 
         try {

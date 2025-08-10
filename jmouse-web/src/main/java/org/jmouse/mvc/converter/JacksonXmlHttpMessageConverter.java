@@ -2,10 +2,12 @@ package org.jmouse.mvc.converter;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.jmouse.core.MediaType;
+import org.jmouse.util.Priority;
 
 import java.io.IOException;
 import java.util.List;
 
+@Priority(Integer.MIN_VALUE + 200)
 public class JacksonXmlHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
     private final XmlMapper xmlMapper;

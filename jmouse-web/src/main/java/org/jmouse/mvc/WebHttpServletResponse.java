@@ -7,6 +7,7 @@ import org.jmouse.web.request.Headers;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 public class WebHttpServletResponse implements HttpOutputMessage {
 
@@ -39,9 +40,12 @@ public class WebHttpServletResponse implements HttpOutputMessage {
             });
 
             MediaType contentType = getHeaders().getContentType();
-
             response.setContentType(contentType.getStringType());
-            response.setCharacterEncoding(contentType.getCharset());
+
+            Charset charset = contentType.getCharset();
+            if (charset != null) {
+                response.setCharacterEncoding(charset);
+            }
         }
     }
 
