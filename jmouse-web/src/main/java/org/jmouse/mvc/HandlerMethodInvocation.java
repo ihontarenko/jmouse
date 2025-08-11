@@ -118,7 +118,7 @@ public class HandlerMethodInvocation {
 
         if (resolver == null) {
             throw new ArgumentResolverException(
-                    "No argument resolver found for parameter: %s".formatted(parameter));
+                    "NO ARGUMENT RESOLVER!: %s".formatted(parameter));
         }
 
         return resolver;

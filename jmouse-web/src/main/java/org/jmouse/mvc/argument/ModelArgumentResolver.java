@@ -27,16 +27,6 @@ import org.jmouse.web.context.WebBeanContext;
 public class ModelArgumentResolver extends AbstractArgumentResolver {
 
     /**
-     * ⚙️ Initialization logic for this resolver (unused here).
-     *
-     * @param context the current web bean context
-     */
-    @Override
-    protected void doInitialize(WebBeanContext context) {
-        // NO-OP
-    }
-
-    /**
      * ✅ Supports parameters of type {@link Model}.
      *
      * @param parameter the method parameter to check

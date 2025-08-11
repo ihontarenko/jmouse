@@ -38,16 +38,6 @@ public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
     }
 
     /**
-     * Initialization hook, no initialization needed here.
-     *
-     * @param context the web bean context
-     */
-    @Override
-    protected void doInitialize(WebBeanContext context) {
-        // NO-OP
-    }
-
-    /**
      * Indicates whether this adapter supports the given handler.
      *
      * @param handler the mapped handler

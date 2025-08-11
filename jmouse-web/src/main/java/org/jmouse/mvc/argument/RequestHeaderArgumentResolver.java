@@ -13,11 +13,6 @@ import java.util.Optional;
 public class RequestHeaderArgumentResolver extends AbstractArgumentResolver {
 
     @Override
-    protected void doInitialize(WebBeanContext context) {
-
-    }
-
-    @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.isParameter() && parameter.getParameter().isAnnotationPresent(RequestHeader.class);
     }

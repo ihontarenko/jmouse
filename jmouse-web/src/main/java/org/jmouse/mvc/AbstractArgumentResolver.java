@@ -2,6 +2,7 @@ package org.jmouse.mvc;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
+import org.jmouse.beans.InitializingBeanSupport;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.web.context.WebBeanContext;
 
@@ -14,7 +15,7 @@ import org.jmouse.web.context.WebBeanContext;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public abstract class AbstractArgumentResolver implements ArgumentResolver, InitializingBean {
+public abstract class AbstractArgumentResolver implements ArgumentResolver, InitializingBeanSupport<WebBeanContext> {
 
     protected Conversion conversion;
 
@@ -33,15 +34,8 @@ public abstract class AbstractArgumentResolver implements ArgumentResolver, Init
      *
      * @param context the web-specific bean context
      */
-    protected void initialize(WebBeanContext context) {
+    public void initialize(WebBeanContext context) {
         this.conversion = context.getBean(Conversion.class);
         doInitialize(context);
     }
-
-    /**
-     * 🔧 Implement this method in subclasses to configure the resolver.
-     *
-     * @param context the current {@link WebBeanContext}
-     */
-    protected abstract void doInitialize(WebBeanContext context);
 }

@@ -29,17 +29,6 @@ import org.jmouse.web.request.ExceptionHolder;
 public class ExceptionArgumentResolver extends AbstractArgumentResolver {
 
     /**
-     * Initializes this resolver with the application context.
-     * No initialization logic required for this resolver.
-     *
-     * @param context the web application context
-     */
-    @Override
-    protected void doInitialize(WebBeanContext context) {
-        // No initialization required
-    }
-
-    /**
      * Checks whether the given method parameter is of type {@link Exception}
      * or a subclass thereof.
      *

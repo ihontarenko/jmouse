@@ -23,11 +23,6 @@ import org.jmouse.web.context.WebBeanContext;
  */
 public class RequestParameterArgumentResolver extends AbstractArgumentResolver {
 
-    @Override
-    protected void doInitialize(WebBeanContext context) {
-        // No special initialization needed
-    }
-
     /**
      * Checks if the method parameter is annotated with {@link RequestParameter}.
      *

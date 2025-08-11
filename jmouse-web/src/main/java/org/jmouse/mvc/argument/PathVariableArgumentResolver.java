@@ -23,16 +23,6 @@ import java.lang.reflect.Parameter;
 public class PathVariableArgumentResolver extends AbstractArgumentResolver {
 
     /**
-     * Initialization hook, no-op in this implementation.
-     *
-     * @param context the bean context
-     */
-    @Override
-    protected void doInitialize(WebBeanContext context) {
-        // No initialization needed
-    }
-
-    /**
      * Supports parameters annotated with {@link PathVariable}.
      *
      * @param parameter the method parameter to check

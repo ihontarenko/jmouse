@@ -56,7 +56,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
     @Override
     public boolean supportsException(Throwable exception) {
         for (Class<? extends Throwable> supportedException : supportedExceptions) {
-            if (supportedException.isAssignableFrom(exception.getClass())) {
+            if (supportedException.equals(exception.getClass())) {
                 return true;
             }
         }

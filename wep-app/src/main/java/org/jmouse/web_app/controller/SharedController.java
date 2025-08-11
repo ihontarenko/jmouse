@@ -1,10 +1,12 @@
 package org.jmouse.web_app.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.MediaType;
 import org.jmouse.mvc.Model;
 import org.jmouse.mvc.mapping.annotation.Controller;
 import org.jmouse.mvc.mapping.annotation.ExceptionHandler;
 import org.jmouse.mvc.mapping.annotation.GetMapping;
+import org.jmouse.mvc.mapping.annotation.PostMapping;
 
 import java.io.IOException;
 import java.util.List;
@@ -65,6 +67,14 @@ public class SharedController {
             "application/octet-stream"
     })
     public byte[] streamData() {
+        return new ResponseModel(Map.of("text", "Hello World!", "IDs", List.of(1, 2, 3))).toString().getBytes();
+    }
+
+    @PostMapping(requestPath = "/shared/postRequest")
+    public byte[] postRequest(HttpServletRequest request) {
+
+        System.out.println(request.getParameterMap());
+
         return new ResponseModel(Map.of("text", "Hello World!", "IDs", List.of(1, 2, 3))).toString().getBytes();
     }
 

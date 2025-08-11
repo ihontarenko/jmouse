@@ -24,7 +24,6 @@ import org.jmouse.web.request.http.HttpStatus;
 public class Outcome implements InvocationOutcome {
 
     private final Model           model   = new DefaultModel();
-    private final Headers         headers = new Headers();
     private       Object          returnValue;
     private       HttpStatus      httpStatus;
     private       MethodParameter returnType;
@@ -129,16 +128,6 @@ public class Outcome implements InvocationOutcome {
     @Override
     public void setHttpStatus(HttpStatus status) {
         this.httpStatus = status;
-    }
-
-    /**
-     * Returns the HTTP headers to include in the response.
-     *
-     * @return the {@link Headers} instance, never {@code null}
-     */
-    @Override
-    public Headers getHeaders() {
-        return headers;
     }
 
     @Override

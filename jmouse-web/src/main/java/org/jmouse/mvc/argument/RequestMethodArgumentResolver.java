@@ -10,11 +10,6 @@ import org.jmouse.web.request.http.HttpMethod;
 public class RequestMethodArgumentResolver extends AbstractArgumentResolver {
 
     @Override
-    protected void doInitialize(WebBeanContext context) {
-
-    }
-
-    @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.isParameter() && parameter.getParameter().isAnnotationPresent(RequestMethod.class);
     }
