@@ -101,9 +101,8 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
 
             request.setAttribute(ROUTE_MATCH_ATTRIBUTE, match);
 
-            LOGGER.info(
-                    AnsiColors.colorize("✅🔥 ${GREEN_BOLD_BRIGHT}MATCHED:${RESET} ${BLACK_BOLD_BRIGHT|YELLOW_BG_BRIGHT}%s${RESET}", winner)
-            );
+            LOGGER.info(AnsiColors.colorize(
+                    "✅🔥 ${GREEN_BOLD_BRIGHT}MATCHED:${RESET} ${BLACK_BOLD_BRIGHT|YELLOW_BG_BRIGHT}%s${RESET}", winner));
         }
 
         return mappedHandler;

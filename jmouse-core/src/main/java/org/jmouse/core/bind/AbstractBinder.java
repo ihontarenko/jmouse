@@ -61,8 +61,12 @@ abstract public class AbstractBinder implements ObjectBinder {
         TypeInformation valueDescriptor = TypeInformation.forClass(value.getDataType());
         ObjectBinder    rootBinder      = context.getRootBinder();
 
+        boolean isConvertible = context.getConversion().hasConverter(
+                valueDescriptor.getClassType(), descriptor.getClassType()
+        );
+
         // Scalar or object binding logic
-        if (descriptor.isScalar() || descriptor.isObject() || descriptor.isClass() || descriptor.isEnum()) {
+        if (descriptor.isScalar() || descriptor.isClass() || descriptor.isEnum() || isConvertible) {
             Object result = value.asObject();
 
             // If the value is scalar, convert it to the target type

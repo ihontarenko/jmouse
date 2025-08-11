@@ -4,6 +4,7 @@ import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRegistration;
 import org.jmouse.core.reflection.Reflections;
+import org.jmouse.web.request.multipart.MultipartProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,9 +32,10 @@ public class ServletRegistrationBean<S extends Servlet>
     public static final  String   SERVLET_MAPPINGS_ATTRIBUTE  = ServletRegistrationBean.class.getName() + ".SERVLET_MAPPINGS";
     private static final Logger   SERVLET_REGISTRATION_LOGGER = LoggerFactory.getLogger(ServletRegistrationBean.class);
 
-    private final S           servlet;
-    private       int         loadOnStartup = -1;
-    private       Set<String> mappings      = new LinkedHashSet<>();
+    private final S                   servlet;
+    private       int                 loadOnStartup = -1;
+    private       Set<String>         mappings      = new LinkedHashSet<>();
+    private       MultipartProperties multipartProperties;
 
     /**
      * Create a new {@code ServletRegistrationBean} with the given registration name and servlet instance.
@@ -54,9 +56,14 @@ public class ServletRegistrationBean<S extends Servlet>
     @Override
     public void configure(ServletRegistration.Dynamic dynamic) {
         String[] patterns = DEFAULT_MAPPINGS;
+        MultipartProperties properties = getMultipartProperties();
 
         if (!getMappings().isEmpty()) {
             patterns = getMappings().toArray(String[]::new);
+        }
+
+        if (properties != null && properties.isEnabled()) {
+            dynamic.setMultipartConfig(properties.getMultipartConfig());
         }
 
         dynamic.addMapping(patterns);
@@ -154,6 +161,24 @@ public class ServletRegistrationBean<S extends Servlet>
      */
     public void addMappings(String... mappings) {
         this.mappings.addAll(Set.of(mappings));
+    }
+
+    /**
+     * 📦 Get multipart request handling properties.
+     *
+     * @return the configured multipart properties
+     */
+    public MultipartProperties getMultipartProperties() {
+        return multipartProperties;
+    }
+
+    /**
+     * ⚙️ Set multipart request handling properties.
+     *
+     * @param multipartProperties the multipart properties to use
+     */
+    public void setMultipartProperties(MultipartProperties multipartProperties) {
+        this.multipartProperties = multipartProperties;
     }
 
     /**

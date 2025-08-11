@@ -450,4 +450,17 @@ public enum Charset {
         return notes;
     }
 
+    public static Charset forString(String string) {
+        Charset charset = null;
+
+        for (Charset candidate : values()) {
+            if (candidate.getName().equalsIgnoreCase(string)) {
+                charset = candidate;
+                break;
+            }
+        }
+
+        return charset;
+    }
+
 }

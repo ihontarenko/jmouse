@@ -12,12 +12,10 @@ import java.util.List;
 @Priority(Integer.MIN_VALUE + 300)
 public class Jaxb2HttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
-    private static final MediaType MEDIA_TYPE = MediaType.APPLICATION_XML;
-
     private final JAXBContext jaxbContext;
 
     public Jaxb2HttpMessageConverter() {
-        super(List.of(MEDIA_TYPE));
+        super(List.of(MediaType.APPLICATION_XML));
         this.jaxbContext = null;
     }
 
@@ -33,7 +31,7 @@ public class Jaxb2HttpMessageConverter extends AbstractHttpMessageConverter<Obje
             Marshaller  marshaller = context.createMarshaller();
 
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            outputMessage.getHeaders().setContentType(MEDIA_TYPE);
+            outputMessage.getHeaders().setContentType(MediaType.APPLICATION_XML);
 
             marshaller.marshal(data, outputMessage.getOutputStream());
         } catch (JAXBException e) {

@@ -2,10 +2,12 @@ package org.jmouse.mvc;
 
 import org.jmouse.beans.annotation.*;
 import org.jmouse.context.*;
+import org.jmouse.mvc.filter.MultipartRequestFilterRegistration;
 import org.jmouse.mvc.filter.RequestWrapperFilterRegistration;
 import org.jmouse.mvc.filter.SessionServletFilterRegistration;
 import org.jmouse.util.SingletonSupplier;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.request.multipart.MultipartProperties;
 import org.jmouse.web.servlet.RequestContextListener;
 import org.jmouse.web.servlet.SessionConfigurationInitializer;
 import org.jmouse.web.servlet.SessionProperties;
@@ -17,17 +19,18 @@ import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 @BeanConditionIfProperty(name = "jmouse.web.enable", value = "true")
 public class ServletDispatcherConfiguration {
 
-    public static final String REQUEST_CONTEXT_NAME = "requestContextListener";
+    public static final String REQUEST_CONTEXT_NAME              = "requestContextListener";
     public static final String WEB_SERVLET_CONTEXT_LISTENER_NAME = "webServletContextListener";
 
     @Bean(proxied = true)
     public ServletRegistrationBean<?> defaultDispatcher(
-            ServletDispatcherProperties properties, WebBeanContext rootContext) {
+            ServletDispatcherProperties properties, MultipartProperties multipart, WebBeanContext rootContext) {
         ServletRegistrationBean<?> registration = new FrameworkDispatcherRegistration(rootContext);
 
         registration.setEnabled(properties.isEnabled());
         registration.setLoadOnStartup(properties.getLoadOnStartup());
         registration.addMappings(properties.getMappings());
+        registration.setMultipartProperties(multipart);
 
         return registration;
     }
@@ -66,6 +69,11 @@ public class ServletDispatcherConfiguration {
     @Bean
     public RequestWrapperFilterRegistration requestWrapperFilterRegistration() {
         return new RequestWrapperFilterRegistration();
+    }
+
+    @Bean
+    public MultipartRequestFilterRegistration multipartRequestFilterRegistration() {
+        return new MultipartRequestFilterRegistration();
     }
 
 }

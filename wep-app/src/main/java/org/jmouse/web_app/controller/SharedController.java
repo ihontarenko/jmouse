@@ -1,12 +1,17 @@
 package org.jmouse.web_app.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
 import org.jmouse.mvc.Model;
 import org.jmouse.mvc.mapping.annotation.Controller;
 import org.jmouse.mvc.mapping.annotation.ExceptionHandler;
 import org.jmouse.mvc.mapping.annotation.GetMapping;
 import org.jmouse.mvc.mapping.annotation.PostMapping;
+import org.jmouse.web.request.http.HttpHeader;
+import org.jmouse.web.request.multipart.Disposition;
+import org.jmouse.web.request.multipart.MultipartFile;
+import org.jmouse.web.request.multipart.MultipartWebRequest;
 
 import java.io.IOException;
 import java.util.List;
@@ -70,10 +75,20 @@ public class SharedController {
         return new ResponseModel(Map.of("text", "Hello World!", "IDs", List.of(1, 2, 3))).toString().getBytes();
     }
 
-    @PostMapping(requestPath = "/shared/postRequest")
-    public byte[] postRequest(HttpServletRequest request) {
+    @PostMapping(requestPath = "/shared/postRequest", produces = "image/jpeg")
+    public byte[] postRequest(HttpServletRequest request, HttpServletResponse response){
 
-        System.out.println(request.getParameterMap());
+        if (request instanceof MultipartWebRequest multipartWebRequest) {
+            MultipartFile file = multipartWebRequest.getFirstFile("file");
+
+            try {
+                response.setHeader(HttpHeader.CONTENT_DISPOSITION.value(), Disposition.create()
+                        .type("inline").filename("uploaded.jpg").build().toString());
+                return file.getBytes();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         return new ResponseModel(Map.of("text", "Hello World!", "IDs", List.of(1, 2, 3))).toString().getBytes();
     }
