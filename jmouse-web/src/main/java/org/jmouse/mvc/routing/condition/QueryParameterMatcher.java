@@ -1,7 +1,7 @@
 package org.jmouse.mvc.routing.condition;
 
 import org.jmouse.mvc.routing.MappingMatcher;
-import org.jmouse.web.request.RequestRoute;
+import org.jmouse.web.http.request.RequestRoute;
 
 /**
  * 🧭 Matches an HTTP query parameter to a required value.

@@ -8,7 +8,7 @@ import org.jmouse.util.Priority;
 import org.jmouse.web.View;
 import org.jmouse.web.ViewResolver;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.request.RequestContext;
+import org.jmouse.web.http.request.RequestContext;
 
 import java.util.Optional;
 

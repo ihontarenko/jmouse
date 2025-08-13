@@ -5,9 +5,9 @@ import org.jmouse.mvc.*;
 import org.jmouse.web.annotation.RequestMethod;
 import org.jmouse.web.method.AbstractArgumentResolver;
 import org.jmouse.web.method.MethodParameter;
-import org.jmouse.web.request.RequestContext;
-import org.jmouse.web.request.WebRequest;
-import org.jmouse.web.request.http.HttpMethod;
+import org.jmouse.web.http.request.RequestContext;
+import org.jmouse.web.http.request.WebRequest;
+import org.jmouse.web.http.request.http.HttpMethod;
 
 public class RequestMethodArgumentResolver extends AbstractArgumentResolver {
 

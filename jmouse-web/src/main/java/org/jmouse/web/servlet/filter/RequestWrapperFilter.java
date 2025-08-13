@@ -3,7 +3,7 @@ package org.jmouse.web.servlet.filter;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.annotation.Bean;
-import org.jmouse.web.request.WebHttpRequest;
+import org.jmouse.web.http.request.WebHttpRequest;
 
 import java.io.IOException;
 

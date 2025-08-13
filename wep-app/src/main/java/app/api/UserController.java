@@ -3,7 +3,8 @@ package app.api;
 import org.jmouse.mvc.Model;
 import org.jmouse.mvc.NotFoundException;
 import org.jmouse.web.annotation.*;
-import org.jmouse.web.request.http.HttpMethod;
+import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.http.request.http.HttpMethod;
 
 @Controller
 public class UserController {
@@ -20,7 +21,7 @@ public class UserController {
 
     @MethodDescription("Hello World!")
     @GetMapping(requestPath = "/customer/welcome/{id:int}")
-    public String hello() {
+    public String hello(WebBeanContext webBeanContext) {
         return "view:index/demo";
     }
 

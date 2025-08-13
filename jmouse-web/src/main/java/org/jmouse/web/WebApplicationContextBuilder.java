@@ -6,6 +6,7 @@ import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.context.ApplicationContextBeansScanner;
+import org.jmouse.core.Bits;
 import org.jmouse.mvc.context.WebMvcControllersInitializer;
 import org.jmouse.mvc.context.WebMvcInfrastructureInitializer;
 import org.jmouse.mvc.jMouseWebMvcRoot;
@@ -17,6 +18,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+
+import static org.jmouse.mvc.context.WebMvcInfrastructureInitializer.*;
 
 /**
  * 🔧 Builder for creating and customizing {@link WebBeanContext} instances.
@@ -37,12 +40,24 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
 
     private final WebApplicationFactory        factory;
     private final Set<Class<?>>                baseClasses  = new HashSet<>();
+    private final Set<Class<?>>                coreClasses  = new HashSet<>(
+            Set.of(jMouseWebMvcRoot.class, jMouseWebRoot.class)
+    );
     private final List<BeanContextInitializer> initializers = new ArrayList<>();
-    private       String                       contextId;
-    private       WebBeanContext               parent;
-    private       boolean                      useDefault   = false;
-    private       boolean                      useWebMvc    = false;
-    private       Consumer<WebBeanContext>     customizer   = ctx -> {};
+    private final Bits                         userScanBits = Bits.of(
+            WebMvcInfrastructureInitializer.HANDLER_MAPPING,
+            WebMvcInfrastructureInitializer.HANDLER_ADAPTER,
+            WebMvcInfrastructureInitializer.ARGUMENT_RESOLVER,
+            WebMvcInfrastructureInitializer.RETURN_VALUE_HANDLER,
+            WebMvcInfrastructureInitializer.RETURN_VALUE_PROCESSOR,
+            WebMvcInfrastructureInitializer.ROUTING_REGISTRY
+    );
+
+    private String                   contextId;
+    private WebBeanContext           parent;
+    private boolean                  useDefault = false;
+    private boolean                  useWebMvc  = false;
+    private Consumer<WebBeanContext> customizer = ctx -> {};
 
     /**
      * 🧱 Constructs a new builder with the provided factory.
@@ -75,6 +90,18 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
     @Override
     public WebContextBuilder baseClasses(Class<?>... baseClasses) {
         this.baseClasses.addAll(List.of(baseClasses));
+        return this;
+    }
+
+    /**
+     * 📦 Sets the core classes for bean scanning.
+     *
+     * @param coreClasses the classes to scan
+     * @return this builder
+     */
+    @Override
+    public WebContextBuilder coreClasses(Class<?>... coreClasses) {
+        this.coreClasses.addAll(List.of(coreClasses));
         return this;
     }
 
@@ -169,7 +196,11 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
         context.refresh();
 
         if (useWebMvc) {
-            new WebMvcInfrastructureInitializer(jMouseWebMvcRoot.class).initialize(context);
+            new WebMvcInfrastructureInitializer(userScanBits).initialize(context);
+            new WebMvcInfrastructureInitializer(Bits.of(
+                    ROUTING_REGISTRY,
+                    RETURN_VALUE_PROCESSOR
+            ), coreClasses.toArray(Class<?>[]::new)).initialize(context);
         }
 
         return context;

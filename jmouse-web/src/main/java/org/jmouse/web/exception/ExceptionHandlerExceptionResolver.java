@@ -9,7 +9,7 @@ import org.jmouse.util.Sorter;
 import org.jmouse.web.AbstractExceptionResolver;
 import org.jmouse.web.method.*;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.request.RequestContext;
+import org.jmouse.web.http.request.RequestContext;
 
 import java.lang.reflect.Method;
 import java.util.*;

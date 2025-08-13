@@ -4,7 +4,7 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
 import org.jmouse.mvc.InvocationOutcome;
 import org.jmouse.mvc.MappedHandler;
-import org.jmouse.web.request.RequestContext;
+import org.jmouse.web.http.request.RequestContext;
 import org.jmouse.web.context.WebBeanContext;
 
 /**

@@ -4,11 +4,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.context.FrameworkFactories;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.request.RequestAttributesHolder;
-import org.jmouse.web.request.RequestPath;
-import org.jmouse.web.request.http.HttpMethod;
+import org.jmouse.web.http.request.RequestAttributesHolder;
+import org.jmouse.web.http.request.RequestPath;
 
 import java.io.IOException;
 

@@ -1,7 +1,7 @@
 package org.jmouse.web.method;
 
 import org.jmouse.mvc.*;
-import org.jmouse.web.request.RequestContext;
+import org.jmouse.web.http.request.RequestContext;
 
 /**
  * 🧪 Strategy for resolving method parameters from the request context.

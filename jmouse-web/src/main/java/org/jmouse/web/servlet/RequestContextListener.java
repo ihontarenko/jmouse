@@ -3,7 +3,7 @@ package org.jmouse.web.servlet;
 import jakarta.servlet.ServletRequestEvent;
 import jakarta.servlet.ServletRequestListener;
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.web.request.*;
+import org.jmouse.web.http.request.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jmouse.beans.BeanScope;
@@ -41,13 +41,13 @@ public class RequestContextListener implements ServletRequestListener {
 
             // Attach objects to thread-local context (if present)
             attach(servletRequest, RequestAttributesHolder::setRequestPath,
-                    RequestPath.ofRequest(servletRequest), RequestPath.REQUEST_PATH_ATTRIBUTE);
+                   RequestPath.ofRequest(servletRequest), RequestPath.REQUEST_PATH_ATTRIBUTE);
             attach(servletRequest, RequestAttributesHolder::setRequestRoute,
-                    RequestRoute.ofRequest(servletRequest), RequestRoute.REQUEST_ROUTE_ATTRIBUTE);
+                   RequestRoute.ofRequest(servletRequest), RequestRoute.REQUEST_ROUTE_ATTRIBUTE);
             attach(servletRequest, RequestAttributesHolder::setQueryParameters,
-                    RequestAttributesHolder.getRequestRoute().queryParameters(), QueryParameters.QUERY_PARAMETERS_ATTRIBUTE);
+                   RequestAttributesHolder.getRequestRoute().queryParameters(), QueryParameters.QUERY_PARAMETERS_ATTRIBUTE);
             attach(servletRequest, RequestAttributesHolder::setRequestHeaders,
-                    new RequestHeaders(RequestAttributesHolder.getRequestRoute().headers()), RequestHeaders.REQUEST_HEADERS_ATTRIBUTE);
+                   new RequestHeaders(RequestAttributesHolder.getRequestRoute().headers()), RequestHeaders.REQUEST_HEADERS_ATTRIBUTE);
 
             // Set core request attributes (used as fallback context container)
             RequestAttributesHolder.setRequestAttributes(

@@ -4,7 +4,7 @@ import org.jmouse.mvc.*;
 import org.jmouse.web.annotation.PathVariable;
 import org.jmouse.web.method.AbstractArgumentResolver;
 import org.jmouse.web.method.MethodParameter;
-import org.jmouse.web.request.RequestContext;
+import org.jmouse.web.http.request.RequestContext;
 
 import java.lang.reflect.Parameter;
 

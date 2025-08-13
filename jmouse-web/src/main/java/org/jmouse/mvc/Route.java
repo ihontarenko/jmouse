@@ -1,9 +1,9 @@
 package org.jmouse.mvc;
 
 import org.jmouse.core.MediaType;
-import org.jmouse.web.request.Headers;
-import org.jmouse.web.request.http.HttpHeader;
-import org.jmouse.web.request.http.HttpMethod;
+import org.jmouse.web.http.request.Headers;
+import org.jmouse.web.http.request.http.HttpHeader;
+import org.jmouse.web.http.request.http.HttpMethod;
 
 import java.util.*;
 

@@ -2,7 +2,7 @@ package org.jmouse.web;
 
 import org.jmouse.mvc.InvocationOutcome;
 import org.jmouse.mvc.MappedHandler;
-import org.jmouse.web.request.RequestContext;
+import org.jmouse.web.http.request.RequestContext;
 
 /**
  * ❗ Handles exceptions thrown during handler execution.

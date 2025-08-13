@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.mvc.*;
 import org.jmouse.web.method.AbstractArgumentResolver;
 import org.jmouse.web.method.MethodParameter;
-import org.jmouse.web.request.RequestContext;
+import org.jmouse.web.http.request.RequestContext;
 
 /**
  * 🎯 Resolves method parameters for core request/response objects.

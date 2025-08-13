@@ -265,7 +265,15 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         }
 
         Optional<String> primaryName = beanNames.stream()
-                .filter(name -> getDefinition(name).isPrimary()).findFirst();
+                .filter(name -> {
+                    BeanDefinition definition = getDefinition(name);
+
+                    if (definition == null) {
+                        return false;
+                    }
+
+                    return definition.isPrimary();
+                }).findFirst();
 
         if (primaryName.isPresent()) {
             return getBean(primaryName.get());

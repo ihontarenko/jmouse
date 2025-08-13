@@ -1,5 +1,6 @@
 package org.jmouse.core;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -223,5 +224,76 @@ public class MediaType extends MimeType {
 
         return mediaType;
     }
+
+    /**
+     * 📊 Sort media types by preference.
+     *
+     * <p>Orders the list by ascending <em>q-factor</em> (quality value), then by
+     * lexical order of their string representation to ensure deterministic results.</p>
+     *
+     * @param mediaTypes the list of media types to sort (not modified)
+     * @return a new list containing the same items in prioritized order
+     */
+    public static List<MediaType> prioritize(List<MediaType> mediaTypes) {
+        List<MediaType>       prioritized = new ArrayList<>(mediaTypes);
+        Comparator<MediaType> comparator  = Comparator.comparingDouble(MediaType::getQFactor)
+                .thenComparing(Comparator.comparing(MediaType::toString));
+
+        prioritized.sort(comparator);
+
+        return prioritized;
+    }
+
+    /**
+     * 🤝 Compute the intersection of two media type lists, respecting priority.
+     *
+     * <p>Both lists are first prioritized via {@link #prioritize(List)}. Then, for each
+     * item in the first list, a compatible item in the second list (per
+     * {@link MediaType#compatible(MediaType)}) adds that media type to the result.</p>
+     *
+     * <p><b>Note:</b> A match contributes the entry from <em>listA</em>.</p>
+     *
+     * @param listA the first list of media types
+     * @param listB the second list of media types
+     * @return a new list containing compatible media types from {@code listA}
+     */
+    public static List<MediaType> intersect(List<MediaType> listA, List<MediaType> listB) {
+        List<MediaType> result = new ArrayList<>();
+
+        listA = prioritize(listA);
+        listB = prioritize(listB);
+
+        for (int i = 0; i < listA.size(); i++) {
+            for (int j = i + 1; j < listB.size(); j++) {
+                if (listA.get(i).compatible(listB.get(j))) {
+                    result.add(listA.get(i));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * ➖ Compute the multiset difference between two media type lists.
+     *
+     * <p>Returns all elements from both lists minus their {@link #intersect(List, List) intersection}.
+     * The result preserves duplicates only to the extent they exist outside the intersection.</p>
+     *
+     * @param listA the first list
+     * @param listB the second list
+     * @return a new list representing {@code (listA ∪ listB) \ intersect(listA, listB)}
+     */
+    public static List<MediaType> difference(List<MediaType> listA, List<MediaType> listB) {
+        List<MediaType> result = new ArrayList<>(listA.size() + listB.size());
+
+        result.addAll(listA);
+        result.addAll(listB);
+
+        result.removeAll(intersect(listA, listB));
+
+        return result;
+    }
+
 
 }

@@ -1,6 +1,7 @@
 package org.jmouse.web.annotation;
 
-import org.jmouse.web.request.http.HttpMethod;
+import org.jmouse.web.http.request.RequestRoute;
+import org.jmouse.web.http.request.http.HttpMethod;
 
 import java.lang.annotation.*;
 
@@ -27,7 +28,7 @@ import java.lang.annotation.*;
  *
  * @see Header
  * @see QueryParameter
- * @see org.jmouse.web.request.RequestRoute
+ * @see RequestRoute
  * @see org.jmouse.mvc.Route
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)

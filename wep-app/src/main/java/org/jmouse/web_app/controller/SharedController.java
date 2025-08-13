@@ -7,10 +7,11 @@ import org.jmouse.web.annotation.Controller;
 import org.jmouse.web.annotation.ExceptionHandler;
 import org.jmouse.web.annotation.GetMapping;
 import org.jmouse.web.annotation.PostMapping;
-import org.jmouse.web.request.http.HttpHeader;
-import org.jmouse.web.request.multipart.Disposition;
-import org.jmouse.web.request.multipart.MultipartFile;
-import org.jmouse.web.request.multipart.MultipartWebRequest;
+import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.http.request.http.HttpHeader;
+import org.jmouse.web.http.request.multipart.Disposition;
+import org.jmouse.web.http.request.multipart.MultipartFile;
+import org.jmouse.web.http.request.multipart.MultipartWebRequest;
 
 import java.io.IOException;
 import java.util.List;
@@ -75,7 +76,7 @@ public class SharedController {
     }
 
     @PostMapping(requestPath = "/shared/postRequest", produces = "image/jpeg")
-    public byte[] postRequest(HttpServletRequest request, HttpServletResponse response){
+    public byte[] postRequest(HttpServletRequest request, HttpServletResponse response, WebBeanContext context){
 
         if (request instanceof MultipartWebRequest multipartWebRequest) {
             MultipartFile file = multipartWebRequest.getFirstFile("file");

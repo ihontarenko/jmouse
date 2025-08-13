@@ -3,9 +3,12 @@ package org.jmouse.mvc.adapter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.mvc.*;
+import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.method.HandlerMethod;
+import org.jmouse.web.method.HandlerMethodContext;
 import org.jmouse.web.method.HandlerMethodInvocation;
-import org.jmouse.web.request.RequestContext;
+import org.jmouse.web.method.ReturnValueProcessor;
+import org.jmouse.web.http.request.RequestContext;
 
 /**
  * 🎬 HandlerAdapter implementation for controllers with annotated handler methods.
@@ -17,6 +20,8 @@ import org.jmouse.web.request.RequestContext;
  * @author ihontarenko@gmail.com
  */
 public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
+
+    private ReturnValueProcessor returnValueProcessor;
 
     /**
      * Handles the HTTP request by invoking the handler method.
@@ -48,5 +53,10 @@ public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
     @Override
     public boolean supportsHandler(MappedHandler handler) {
         return handler.handler() instanceof HandlerMethod;
+    }
+
+    @Override
+    public void doInitialize(WebBeanContext context) {
+        returnValueProcessor = WebBeanContext.getLocalBeans(ReturnValueProcessor.class, context).getFirst();
     }
 }

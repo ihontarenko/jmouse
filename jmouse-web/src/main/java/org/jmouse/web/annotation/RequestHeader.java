@@ -1,7 +1,7 @@
 package org.jmouse.web.annotation;
 
 import org.jmouse.core.reflection.annotation.MapTo;
-import org.jmouse.web.request.http.HttpHeader;
+import org.jmouse.web.http.request.http.HttpHeader;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

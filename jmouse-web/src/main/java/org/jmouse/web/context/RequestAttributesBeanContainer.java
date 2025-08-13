@@ -2,9 +2,9 @@ package org.jmouse.web.context;
 
 import org.jmouse.beans.BeanContainer;
 import org.jmouse.beans.BeanScope;
-import org.jmouse.web.request.RequestAttributes;
-import org.jmouse.web.request.RequestAttributesHolder;
-import org.jmouse.web.request.SessionAttributesHolder;
+import org.jmouse.web.http.request.RequestAttributes;
+import org.jmouse.web.http.request.RequestAttributesHolder;
+import org.jmouse.web.http.request.SessionAttributesHolder;
 import org.jmouse.web.servlet.RequestContextListener;
 
 /**

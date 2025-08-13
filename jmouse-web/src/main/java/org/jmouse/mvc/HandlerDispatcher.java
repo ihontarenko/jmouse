@@ -9,8 +9,10 @@ import org.jmouse.core.reflection.ReflectionException;
 import org.jmouse.util.Sorter;
 import org.jmouse.web.ExceptionResolver;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.request.ExceptionHolder;
-import org.jmouse.web.request.RequestContext;
+import org.jmouse.web.method.ReturnValueHandler;
+import org.jmouse.web.method.ReturnValueProcessor;
+import org.jmouse.web.http.request.ExceptionHolder;
+import org.jmouse.web.http.request.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +62,7 @@ public class HandlerDispatcher implements InitializingBean {
      * Initializes return value handlers
      */
     private void initReturnValueHandlers(WebBeanContext context) {
-        List<ReturnValueHandler> returnValueHandlers = WebBeanContext.getLocalBeans(
-                ReturnValueHandler.class, context);
+        List<ReturnValueHandler> returnValueHandlers = context.getBeans(ReturnValueHandler.class);
 
         if (returnValueHandlers.isEmpty()) {
             returnValueHandlers = frameworkProperties.createFactories(ReturnValueHandler.class);
@@ -77,8 +78,7 @@ public class HandlerDispatcher implements InitializingBean {
      * Initializes handler mappings from the given context or fallback factory mechanism.
      */
     private void initHandlerMappings(WebBeanContext context) {
-        List<HandlerMapping> handlerMappings = WebBeanContext.getLocalBeans(
-                HandlerMapping.class, context);
+        List<HandlerMapping> handlerMappings = context.getBeans(HandlerMapping.class);
 
         if (handlerMappings.isEmpty()) {
             handlerMappings = frameworkProperties.createFactories(HandlerMapping.class);
@@ -94,8 +94,7 @@ public class HandlerDispatcher implements InitializingBean {
      * Initializes exception resolvers from the context or fallback factory.
      */
     private void initExceptionResolver(WebBeanContext context) {
-        List<ExceptionResolver> exceptionResolvers = WebBeanContext.getLocalBeans(
-                ExceptionResolver.class, context);
+        List<ExceptionResolver> exceptionResolvers = context.getBeans(ExceptionResolver.class);
 
         if (exceptionResolvers.isEmpty()) {
             exceptionResolvers = frameworkProperties.createFactories(ExceptionResolver.class);

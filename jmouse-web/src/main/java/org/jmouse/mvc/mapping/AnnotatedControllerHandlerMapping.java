@@ -11,7 +11,7 @@ import org.jmouse.web.annotation.QueryParameter;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.method.HandlerMethod;
 import org.jmouse.web.method.MethodParameter;
-import org.jmouse.web.request.http.HttpHeader;
+import org.jmouse.web.http.request.http.HttpHeader;
 
 import java.lang.reflect.Method;
 import java.util.Collection;

@@ -5,8 +5,8 @@ import org.jmouse.mvc.*;
 import org.jmouse.web.method.AbstractArgumentResolver;
 import org.jmouse.web.method.ArgumentResolver;
 import org.jmouse.web.method.MethodParameter;
-import org.jmouse.web.request.ExceptionHolder;
-import org.jmouse.web.request.RequestContext;
+import org.jmouse.web.http.request.ExceptionHolder;
+import org.jmouse.web.http.request.RequestContext;
 
 /**
  * ⚠️ Resolves method parameters of type {@link Exception} in handler or exception handler methods.

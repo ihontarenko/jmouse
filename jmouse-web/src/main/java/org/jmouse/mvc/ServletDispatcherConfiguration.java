@@ -7,7 +7,7 @@ import org.jmouse.web.servlet.filter.RequestWrapperFilterRegistration;
 import org.jmouse.web.servlet.filter.SessionServletFilterRegistration;
 import org.jmouse.util.SingletonSupplier;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.request.multipart.MultipartProperties;
+import org.jmouse.web.http.request.multipart.MultipartProperties;
 import org.jmouse.web.servlet.RequestContextListener;
 import org.jmouse.web.servlet.SessionConfigurationInitializer;
 import org.jmouse.web.servlet.SessionProperties;

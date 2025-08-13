@@ -12,7 +12,7 @@ import java.util.Map;
  * <p>Implemented by rendering engines (e.g. view engines, JSP renderers, or static views)
  * to generate the final response based on the model data.</p>
  *
- * <p>Used internally by {@code org.jmouse.mvc.FrameworkDispatcher} and {@code org.jmouse.mvc.ReturnValueHandler}.</p>
+ * <p>Used internally by {@code org.jmouse.mvc.FrameworkDispatcher} and {@code org.jmouse.web.method.ReturnValueHandler}.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @since 1.0

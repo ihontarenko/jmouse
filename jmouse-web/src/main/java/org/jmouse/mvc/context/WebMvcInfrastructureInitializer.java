@@ -1,16 +1,23 @@
 package org.jmouse.mvc.context;
 
+import org.jmouse.beans.BeanScanner;
 import org.jmouse.beans.ScannerBeanContextInitializer;
+import org.jmouse.core.Bits;
 import org.jmouse.core.reflection.ClassFinder;
 import org.jmouse.mvc.*;
 import org.jmouse.web.ViewResolver;
 import org.jmouse.web.method.ArgumentResolver;
 import org.jmouse.web.ExceptionResolver;
+import org.jmouse.web.method.ReturnValueHandler;
+import org.jmouse.web.method.ReturnValueProcessor;
 import org.jmouse.web.method.converter.HttpMessageConverter;
 import org.jmouse.web.method.converter.MessageConverterManager;
 import org.jmouse.mvc.routing.MappingRegistry;
 
+import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 🛠 Initializes core Web MVC infrastructure components.
@@ -34,32 +41,87 @@ import java.util.ArrayList;
  */
 public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializer {
 
+    // ── flag constants (short is enough for 10 bits) ──────────────────────────
+    public static final short HANDLER_MAPPING        = 1;        // 0x0001
+    public static final short HANDLER_ADAPTER        = 1 << 1;   // 0x0002
+    public static final short ARGUMENT_RESOLVER      = 1 << 2;   // 0x0004
+    public static final short RETURN_VALUE_HANDLER   = 1 << 3;   // 0x0008
+    public static final short RETURN_VALUE_PROCESSOR = 1 << 4;   // 0x0010
+    public static final short MESSAGE_CONVERTER      = 1 << 5;   // 0x0020
+    public static final short MESSAGE_MANAGER        = 1 << 6;   // 0x0040
+    public static final short VIEW_RESOLVER          = 1 << 7;   // 0x0080
+    public static final short EXCEPTION_RESOLVER     = 1 << 8;   // 0x0100
+    public static final short ROUTING_REGISTRY       = 1 << 9;   // 0x0200
+
+    private static final Map<Short, BeanScanner<AnnotatedElement>> REGISTRATIONS = new HashMap<>(16);
+
+    private final Bits mask;
+
+    static {
+        REGISTRATIONS.put(HANDLER_MAPPING, types
+                -> new ArrayList<>(ClassFinder.findImplementations(HandlerMapping.class, types)));
+        REGISTRATIONS.put(HANDLER_ADAPTER, types
+                -> new ArrayList<>(ClassFinder.findImplementations(HandlerAdapter.class, types)));
+        REGISTRATIONS.put(ARGUMENT_RESOLVER, types
+                -> new ArrayList<>(ClassFinder.findImplementations(ArgumentResolver.class, types)));
+        REGISTRATIONS.put(RETURN_VALUE_HANDLER, types
+                -> new ArrayList<>(ClassFinder.findImplementations(ReturnValueHandler.class, types)));
+        REGISTRATIONS.put(RETURN_VALUE_PROCESSOR, types
+                -> new ArrayList<>(ClassFinder.findExactlyClasses(ReturnValueProcessor.class, types)));
+        REGISTRATIONS.put(MESSAGE_CONVERTER, types
+                -> new ArrayList<>(ClassFinder.findImplementations(HttpMessageConverter.class, types)));
+        REGISTRATIONS.put(MESSAGE_MANAGER, types
+                -> new ArrayList<>(ClassFinder.findExactlyClasses(MessageConverterManager.class, types)));
+        REGISTRATIONS.put(VIEW_RESOLVER, types
+                -> new ArrayList<>(ClassFinder.findImplementations(ViewResolver.class, types)));
+        REGISTRATIONS.put(EXCEPTION_RESOLVER, types
+                -> new ArrayList<>(ClassFinder.findImplementations(ExceptionResolver.class, types)));
+        REGISTRATIONS.put(ROUTING_REGISTRY, types
+                -> new ArrayList<>(ClassFinder.findExactlyClasses(MappingRegistry.class, types)));
+    }
+
     /**
-     * 📦 Creates a new initializer for the given base packages.
-     *
-     * @param basePackages packages to scan for MVC infrastructure components
+     * 📦 Default: enable all component groups.
      */
     public WebMvcInfrastructureInitializer(Class<?>... basePackages) {
-        super(basePackages);
-
-        addScanner(types -> new ArrayList<>(
-                ClassFinder.findImplementations(HandlerMapping.class, types)));
-        addScanner(types -> new ArrayList<>(
-                ClassFinder.findImplementations(ReturnValueHandler.class, types)));
-        addScanner(types -> new ArrayList<>(
-                ClassFinder.findImplementations(HttpMessageConverter.class, types)));
-        addScanner(types -> new ArrayList<>(
-                ClassFinder.findExactlyClasses(MessageConverterManager.class, types)));
-        addScanner(types -> new ArrayList<>(
-                ClassFinder.findImplementations(HandlerAdapter.class, types)));
-        addScanner(types -> new ArrayList<>(
-                ClassFinder.findImplementations(ArgumentResolver.class, types)));
-        addScanner(types -> new ArrayList<>(
-                ClassFinder.findImplementations(ViewResolver.class, types)));
-        addScanner(types -> new ArrayList<>(
-                ClassFinder.findImplementations(ExceptionResolver.class, types)));
-        addScanner(types -> new ArrayList<>(
-                ClassFinder.findExactlyClasses(MappingRegistry.class, types)));
+        this(Bits.of(
+                HANDLER_MAPPING,
+                HANDLER_ADAPTER,
+                ARGUMENT_RESOLVER,
+                RETURN_VALUE_HANDLER,
+                RETURN_VALUE_PROCESSOR,
+                MESSAGE_CONVERTER,
+                MESSAGE_MANAGER,
+                VIEW_RESOLVER,
+                EXCEPTION_RESOLVER,
+                ROUTING_REGISTRY
+        ), basePackages);
     }
+
+    /**
+     * 📦 Custom flags via {@link Bits}.
+     */
+    public WebMvcInfrastructureInitializer(Bits flags, Class<?>... basePackages) {
+        super(basePackages);
+        // empty -> no scanners
+        this.mask = (flags != null) ? flags : Bits.of();
+        registerSelectedScanners();
+    }
+
+    /**
+     * 📦 Convenience: pass a precomputed numeric mask (union of flags).
+     */
+    public WebMvcInfrastructureInitializer(long mask, Class<?>... basePackages) {
+        this(Bits.of(mask), basePackages);
+    }
+
+    private void registerSelectedScanners() {
+        for (Map.Entry<Short, BeanScanner<AnnotatedElement>> e : REGISTRATIONS.entrySet()) {
+            if (mask.has(e.getKey())) {
+                addScanner(e.getValue());
+            }
+        }
+    }
+
 }
 

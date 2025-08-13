@@ -1,5 +1,7 @@
 package org.jmouse.web.annotation;
 
+import org.jmouse.web.http.request.http.HttpHeader;
+
 /**
  * 📬 Annotation for mapping a route based on a specific HTTP header and its value.
  *
@@ -14,7 +16,7 @@ package org.jmouse.web.annotation;
  *
  * 🧩 Often used in combination with other mapping annotations.
  *
- * @see org.jmouse.web.request.http.HttpHeader
+ * @see HttpHeader
  * @see org.jmouse.mvc.Route
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)

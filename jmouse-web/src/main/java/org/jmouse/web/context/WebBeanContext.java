@@ -25,7 +25,7 @@ public interface WebBeanContext extends ApplicationBeanContext {
     /**
      * 🌍 Name of root web context.
      */
-    String DEFAULT_ROOT_WEB_CONTEXT_NAME = "rootContext";
+    String DEFAULT_ROOT_WEB_CONTEXT_NAME = "ROOT-CONTEXT";
 
     /**
      * 🧩 Name of child web context.

@@ -7,7 +7,9 @@ import org.jmouse.beans.InitializingBeanSupport;
 import org.jmouse.util.Sorter;
 import org.jmouse.web.method.ArgumentResolver;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.request.RequestContext;
+import org.jmouse.web.method.ReturnValueHandler;
+import org.jmouse.web.method.ReturnValueProcessor;
+import org.jmouse.web.http.request.RequestContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +52,7 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
 
         doHandle(request, response, handler, outcome);
 
+        // todo: get rid of return handler here
         if (outcome.isUnhandled()) {
             getReturnValueProcessor().process(outcome, context);
         }
