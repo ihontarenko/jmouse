@@ -1,7 +1,7 @@
 package org.jmouse.mvc.context;
 
 import org.jmouse.beans.ScannerBeanContextInitializer;
-import org.jmouse.mvc.mapping.annotation.Controller;
+import org.jmouse.web.annotation.Controller;
 import org.jmouse.core.reflection.ClassFinder;
 
 import java.util.ArrayList;

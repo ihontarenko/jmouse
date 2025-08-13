@@ -3,7 +3,9 @@ package org.jmouse.mvc.adapter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.mvc.*;
-import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.method.HandlerMethod;
+import org.jmouse.web.method.HandlerMethodInvocation;
+import org.jmouse.web.request.RequestContext;
 
 /**
  * 🎬 HandlerAdapter implementation for controllers with annotated handler methods.

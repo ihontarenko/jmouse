@@ -2,7 +2,7 @@ package org.jmouse.mvc;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
-import org.jmouse.mvc.converter.HttpOutputMessage;
+import org.jmouse.web.method.converter.HttpOutputMessage;
 import org.jmouse.web.request.Headers;
 
 import java.io.IOException;

@@ -7,8 +7,10 @@ import org.jmouse.beans.InitializingBean;
 import org.jmouse.context.FrameworkFactories;
 import org.jmouse.core.reflection.ReflectionException;
 import org.jmouse.util.Sorter;
+import org.jmouse.web.ExceptionResolver;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.ExceptionHolder;
+import org.jmouse.web.request.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,9 +131,9 @@ public class HandlerDispatcher implements InitializingBean {
      */
     public void dispatch(HttpServletRequest request, HttpServletResponse response) {
         Exception         dispatchException = null;
-        MappedHandler     handler           = null;
-        RequestContext    requestContext    = new RequestContext(request, response);
-        InvocationOutcome outcome           = null;
+        MappedHandler     handler        = null;
+        RequestContext    requestContext = new RequestContext(request, response);
+        InvocationOutcome outcome        = null;
 
         try {
             Handler handlerContainer = getMappedHandler(request);

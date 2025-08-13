@@ -2,7 +2,7 @@ package app.api;
 
 import org.jmouse.mvc.Model;
 import org.jmouse.mvc.NotFoundException;
-import org.jmouse.mvc.mapping.annotation.*;
+import org.jmouse.web.annotation.*;
 import org.jmouse.web.request.http.HttpMethod;
 
 @Controller

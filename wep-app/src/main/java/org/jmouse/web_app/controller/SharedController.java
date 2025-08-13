@@ -2,12 +2,11 @@ package org.jmouse.web_app.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.core.MediaType;
 import org.jmouse.mvc.Model;
-import org.jmouse.mvc.mapping.annotation.Controller;
-import org.jmouse.mvc.mapping.annotation.ExceptionHandler;
-import org.jmouse.mvc.mapping.annotation.GetMapping;
-import org.jmouse.mvc.mapping.annotation.PostMapping;
+import org.jmouse.web.annotation.Controller;
+import org.jmouse.web.annotation.ExceptionHandler;
+import org.jmouse.web.annotation.GetMapping;
+import org.jmouse.web.annotation.PostMapping;
 import org.jmouse.web.request.http.HttpHeader;
 import org.jmouse.web.request.multipart.Disposition;
 import org.jmouse.web.request.multipart.MultipartFile;

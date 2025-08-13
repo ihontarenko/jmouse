@@ -2,9 +2,9 @@ package org.jmouse.mvc;
 
 import org.jmouse.beans.annotation.*;
 import org.jmouse.context.*;
-import org.jmouse.mvc.filter.MultipartRequestFilterRegistration;
-import org.jmouse.mvc.filter.RequestWrapperFilterRegistration;
-import org.jmouse.mvc.filter.SessionServletFilterRegistration;
+import org.jmouse.web.servlet.filter.MultipartRequestFilterRegistration;
+import org.jmouse.web.servlet.filter.RequestWrapperFilterRegistration;
+import org.jmouse.web.servlet.filter.SessionServletFilterRegistration;
 import org.jmouse.util.SingletonSupplier;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.request.multipart.MultipartProperties;

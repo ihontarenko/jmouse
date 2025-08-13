@@ -4,8 +4,13 @@ import org.jmouse.core.MediaType;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.mvc.*;
-import org.jmouse.mvc.mapping.annotation.*;
+import org.jmouse.web.annotation.Controller;
+import org.jmouse.web.annotation.Header;
+import org.jmouse.web.annotation.Mapping;
+import org.jmouse.web.annotation.QueryParameter;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.method.HandlerMethod;
+import org.jmouse.web.method.MethodParameter;
 import org.jmouse.web.request.http.HttpHeader;
 
 import java.lang.reflect.Method;

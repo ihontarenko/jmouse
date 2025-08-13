@@ -3,7 +3,7 @@ package org.jmouse.mvc.mapping;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.mvc.AbstractHandlerPathMapping;
-import org.jmouse.mvc.MethodParameter;
+import org.jmouse.web.method.MethodParameter;
 import org.jmouse.mvc.adapter.ControllerMethod;
 import org.jmouse.web.context.WebBeanContext;
 

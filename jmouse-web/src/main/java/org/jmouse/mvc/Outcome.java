@@ -1,6 +1,6 @@
 package org.jmouse.mvc;
 
-import org.jmouse.web.request.Headers;
+import org.jmouse.web.method.MethodParameter;
 import org.jmouse.web.request.http.HttpStatus;
 
 /**
@@ -25,9 +25,9 @@ public class Outcome implements InvocationOutcome {
 
     private final Model           model   = new DefaultModel();
     private       Object          returnValue;
-    private       HttpStatus      httpStatus;
-    private       MethodParameter returnType;
-    private       ExecutionState  state   = ExecutionState.UNHANDLED;
+    private HttpStatus      httpStatus;
+    private MethodParameter returnType;
+    private ExecutionState  state   = ExecutionState.UNHANDLED;
 
     /**
      * Constructs a new result wrapping the given return value.

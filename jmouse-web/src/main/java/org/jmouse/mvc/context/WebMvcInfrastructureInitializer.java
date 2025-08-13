@@ -3,8 +3,11 @@ package org.jmouse.mvc.context;
 import org.jmouse.beans.ScannerBeanContextInitializer;
 import org.jmouse.core.reflection.ClassFinder;
 import org.jmouse.mvc.*;
-import org.jmouse.mvc.converter.HttpMessageConverter;
-import org.jmouse.mvc.converter.MessageConverterManager;
+import org.jmouse.web.ViewResolver;
+import org.jmouse.web.method.ArgumentResolver;
+import org.jmouse.web.ExceptionResolver;
+import org.jmouse.web.method.converter.HttpMessageConverter;
+import org.jmouse.web.method.converter.MessageConverterManager;
 import org.jmouse.mvc.routing.MappingRegistry;
 
 import java.util.ArrayList;

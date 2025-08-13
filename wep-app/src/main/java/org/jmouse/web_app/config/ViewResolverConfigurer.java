@@ -6,8 +6,8 @@ import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.extension.Function;
 import org.jmouse.el.renderable.Engine;
 import org.jmouse.mvc.BeanConfigurer;
-import org.jmouse.mvc.ViewResolver;
-import org.jmouse.mvc.view.internal.InternalViewResolver;
+import org.jmouse.web.ViewResolver;
+import org.jmouse.web.view.internal.InternalViewResolver;
 
 @Bean
 public class ViewResolverConfigurer implements BeanConfigurer<ViewResolver> {
