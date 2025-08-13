@@ -19,6 +19,7 @@ import org.jmouse.util.Sorter;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -125,6 +126,11 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * The parent {@link BeanContext}, if any, for hierarchical context resolution.
      */
     private BeanContext parent;
+
+    /**
+     * Child {@link BeanContext}s keyed by parent context ID.
+     */
+    private final Map<String, BeanContext> nested = new ConcurrentHashMap<>(4);
 
     /**
      * Factory responsible for managing {@link BeanDefinition}s.
@@ -837,6 +843,46 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     public void addBeanPostProcessor(BeanPostProcessor processor) {
         LOGGER.info("Register new post-processor '{}'", getShortName(processor.getClass()));
         this.processors.add(processor);
+    }
+
+    /**
+     * 🔗 Registers a child {@link BeanContext} under the given parent ID.
+     *
+     * @param parentId       identifier of the parent context
+     * @param currentContext child context to associate with the parent
+     */
+    @Override
+    public void setChildContext(String parentId, BeanContext currentContext) {
+        Objects.requireNonNull(parentId, "parentId must not be null");
+        if (currentContext == null) {
+            // treat null as removal
+            nested.remove(parentId);
+        } else {
+            nested.put(parentId, currentContext);
+        }
+    }
+
+    /**
+     * 🔎 Retrieves the child {@link BeanContext} associated with the given parent ID.
+     *
+     * @param parentId identifier of the parent context
+     * @return the associated child context, or {@code null} if none exists
+     */
+    @Override
+    public BeanContext getChildContext(String parentId) {
+        Objects.requireNonNull(parentId, "parentId must not be null");
+        return nested.get(parentId);
+    }
+
+    /**
+     * ❓ Checks whether a child {@link BeanContext} is registered for the given parent ID.
+     *
+     * @param parentId identifier of the parent context
+     * @return {@code true} if a child context exists, {@code false} otherwise
+     */
+    @Override
+    public boolean hasChildContext(String parentId) {
+        return nested.containsKey(parentId);
     }
 
     /**

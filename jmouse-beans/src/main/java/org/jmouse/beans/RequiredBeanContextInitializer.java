@@ -37,18 +37,30 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
      */
     @Override
     public void initialize(BeanContext context) {
+        // Ensure internal containers for bean instances are initialized.
         initializeRequiredBeanInstanceContainers(context);
 
+        // Register core defaults for bean creation and resolution.
         registerDefaultBeanFactory(context);
         registerDefaultBeanDefinitionFactory(context);
         registerDefaultBeanNameResolver(context);
         registerDefaultPostProcessors(context);
 
-        // Self-referencing registration
+        // Expose the context itself as a bean (self-reference) and prefer it for injection.
         LOGGER.info("Self referencing: Bean type '{}' -> Bean bean '{}'",
                     getShortName(BeanContext.class), getShortName(context.getClass()));
         context.registerBean(context.getContextId(), context);
         context.getDefinition(context.getContextId()).setPrimary(true);
+
+        if (context.getParentContext() != null) {
+            BeanContext parent = context.getParentContext();
+            // Link child to parent and vise versa
+            parent.setChildContext(context.getContextId(), context);
+            // If a parent exists, demote its self-bean so autowiring prefers the current context.
+            parent.getDefinition(parent.getContextId()).setPrimary(false);
+        }
+
+        // Register proxy factory that creates annotation-driven proxies for the scanned base classes.
         context.registerBean(ProxyFactory.class, new AnnotationProxyFactory(context.getBaseClasses()));
     }
 

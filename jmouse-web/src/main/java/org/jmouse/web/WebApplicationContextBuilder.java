@@ -45,12 +45,11 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
     );
     private final List<BeanContextInitializer> initializers = new ArrayList<>();
     private final Bits                         userScanBits = Bits.of(
-            WebMvcInfrastructureInitializer.HANDLER_MAPPING,
-            WebMvcInfrastructureInitializer.HANDLER_ADAPTER,
-            WebMvcInfrastructureInitializer.ARGUMENT_RESOLVER,
-            WebMvcInfrastructureInitializer.RETURN_VALUE_HANDLER,
-            WebMvcInfrastructureInitializer.RETURN_VALUE_PROCESSOR,
-            WebMvcInfrastructureInitializer.ROUTING_REGISTRY
+            HANDLER_ADAPTER,
+            ARGUMENT_RESOLVER,
+            RETURN_VALUE_HANDLER,
+            RETURN_VALUE_PROCESSOR,
+            EXCEPTION_RESOLVER
     );
 
     private String                   contextId;
@@ -170,17 +169,14 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
      */
     @Override
     public WebBeanContext build() {
-        WebBeanContext context = factory.createContext(contextId, baseClasses.toArray(Class<?>[]::new));
+        WebBeanContext context = factory.createContext(contextId, parent, baseClasses.toArray(Class<?>[]::new));
 
-        context.setParentContext(parent);
         context.setContextId(contextId);
 
         if (useDefault) {
             context.addInitializer(new BeanScanAnnotatedContextInitializer());
             context.addInitializer(new ApplicationContextBeansScanner());
-            if (parent != null) {
-                context.addInitializer(new StartupApplicationContextInitializer(parent.getEnvironment()));
-            }
+            context.addInitializer(new StartupApplicationContextInitializer(context.getEnvironment()));
         }
 
         if (useWebMvc) {
@@ -199,7 +195,11 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
             new WebMvcInfrastructureInitializer(userScanBits).initialize(context);
             new WebMvcInfrastructureInitializer(Bits.of(
                     ROUTING_REGISTRY,
-                    RETURN_VALUE_PROCESSOR
+                    RETURN_VALUE_PROCESSOR,
+                    HANDLER_MAPPING,
+                    HANDLER_ADAPTER,
+                    EXCEPTION_RESOLVER,
+                    ARGUMENT_RESOLVER
             ), coreClasses.toArray(Class<?>[]::new)).initialize(context);
         }
 

@@ -164,8 +164,8 @@ public interface WebBeanContext extends ApplicationBeanContext {
      * @param consumer       the consumer to handle found methods and their owning bean
      * @param context        the current web context
      */
-    static void selectMethods(Class<? extends Annotation> annotationType,
-            BiConsumer<Collection<Method>, Object> consumer, WebBeanContext context) {
+    static void methodsOfAnnotatedClasses(Class<? extends Annotation> annotationType,
+                                          BiConsumer<Collection<Method>, Object> consumer, WebBeanContext context) {
         for (String beanName : context.getBeanNames(Object.class)) {
             if (context.isLocalBean(beanName)) {
                 BeanDefinition definition = context.getDefinition(beanName);

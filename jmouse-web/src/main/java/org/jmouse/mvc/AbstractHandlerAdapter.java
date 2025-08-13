@@ -31,8 +31,9 @@ import java.util.List;
  */
 public abstract class AbstractHandlerAdapter implements HandlerAdapter, InitializingBeanSupport<WebBeanContext> {
 
-    private List<ArgumentResolver>   argumentResolvers   = new ArrayList<>();
-    private List<ReturnValueHandler> returnValueHandlers = new ArrayList<>();
+    private       List<ArgumentResolver>   argumentResolvers   = new ArrayList<>();
+    private final List<ReturnValueHandler> returnValueHandlers = new ArrayList<>();
+    private       ReturnValueProcessor     returnValueProcessor;
 
     /**
      * 🧩 Handles the request by delegating to the actual handler, capturing the result,
@@ -54,40 +55,10 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
 
         // todo: get rid of return handler here
         if (outcome.isUnhandled()) {
-            getReturnValueProcessor().process(outcome, context);
+            returnValueProcessor.process(outcome, context);
         }
 
         return outcome;
-    }
-
-    /**
-     * 🧮 Returns a {@link ReturnValueProcessor} composed from the available handlers.
-     * Handlers are sorted before being wrapped in the processor.
-     *
-     * @return a new processor instance
-     */
-    public ReturnValueProcessor getReturnValueProcessor() {
-        List<ReturnValueHandler> returnValueHandlers = new ArrayList<>(getReturnValueHandlers());
-        Sorter.sort(returnValueHandlers);
-        return new ReturnValueProcessor(returnValueHandlers);
-    }
-
-    /**
-     * 🔄 Returns the current list of {@link ReturnValueHandler}s.
-     *
-     * @return list of return value handlers
-     */
-    public List<ReturnValueHandler> getReturnValueHandlers() {
-        return returnValueHandlers;
-    }
-
-    /**
-     * 🛠️ Replaces the return value handlers.
-     *
-     * @param returnValueHandlers new handlers
-     */
-    public void setReturnValueHandlers(List<ReturnValueHandler> returnValueHandlers) {
-        this.returnValueHandlers = returnValueHandlers;
     }
 
     /**
@@ -134,8 +105,9 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
         Sorter.sort(returnValueHandlers);
         Sorter.sort(argumentResolvers);
 
-        setReturnValueHandlers(List.copyOf(returnValueHandlers));
         setArgumentResolvers(List.copyOf(argumentResolvers));
+
+        returnValueProcessor = context.getBean(ReturnValueProcessor.class);
 
         doInitialize(context);
     }

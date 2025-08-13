@@ -86,10 +86,10 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
      */
     @Override
     protected void doInitialize(WebBeanContext context) {
-        WebBeanContext.selectMethods(Controller.class, this::initializeMethods, context);
+        WebBeanContext.methodsOfAnnotatedClasses(Controller.class, this::initializeMethods, context);
 
         List<ArgumentResolver> argumentResolvers = new ArrayList<>(
-                WebBeanContext.getLocalBeans(ArgumentResolver.class, context)
+                context.getBeans(ArgumentResolver.class)
         );
 
         Sorter.sort(argumentResolvers);

@@ -68,8 +68,8 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
 
         WebBeanContext context = createContextInstance(contextId, baseClasses.toArray(Class<?>[]::new));
 
-        context.refresh(); // Triggers pre-initialization lifecycle
         context.setParentContext(rootContext);
+        context.refresh(); // Triggers pre-initialization lifecycle
 
         return context;
     }

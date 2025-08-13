@@ -56,8 +56,7 @@ public class ReturnValueProcessor implements InitializingBeanSupport<WebBeanCont
 
     @Override
     public void initialize(WebBeanContext context) {
-        List<ReturnValueHandler> returnValueHandlers = new ArrayList<>(WebBeanContext.getLocalBeans(
-                ReturnValueHandler.class, context));
+        List<ReturnValueHandler> returnValueHandlers = new ArrayList<>(context.getBeans(ReturnValueHandler.class));
         Sorter.sort(returnValueHandlers);
         handlers = List.copyOf(returnValueHandlers);
     }

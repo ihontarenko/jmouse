@@ -26,12 +26,6 @@ public class DemoWebApplication {
         return new TomcatWebServerFactory() {};
     }
 
-    @Bean
-    public ControllerMethodRegistration registration() {
-        return new ControllerMethodRegistration(Route.GET("/app"), (request, response)
-                -> response.getWriter().write("web_app"));
-    }
-
     @Bean(proxied = true)
     public ServletRegistrationBean<?> apiDispatcher(WebBeanContext rootContext, WebContextBuilder builder) {
         WebBeanContext context = builder.name("api-ctx")

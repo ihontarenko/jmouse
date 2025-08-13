@@ -36,7 +36,7 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
      */
     @Override
     protected void doInitialize(WebBeanContext context) {
-        WebBeanContext.selectMethods(Controller.class, this::initializeMethods, context);
+        WebBeanContext.methodsOfAnnotatedClasses(Controller.class, this::initializeMethods, context);
     }
 
     /**

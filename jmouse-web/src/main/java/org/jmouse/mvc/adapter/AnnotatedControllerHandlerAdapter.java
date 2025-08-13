@@ -21,8 +21,6 @@ import org.jmouse.web.http.request.RequestContext;
  */
 public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
 
-    private ReturnValueProcessor returnValueProcessor;
-
     /**
      * Handles the HTTP request by invoking the handler method.
      *
@@ -53,10 +51,5 @@ public class AnnotatedControllerHandlerAdapter extends AbstractHandlerAdapter {
     @Override
     public boolean supportsHandler(MappedHandler handler) {
         return handler.handler() instanceof HandlerMethod;
-    }
-
-    @Override
-    public void doInitialize(WebBeanContext context) {
-        returnValueProcessor = WebBeanContext.getLocalBeans(ReturnValueProcessor.class, context).getFirst();
     }
 }

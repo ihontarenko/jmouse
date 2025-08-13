@@ -180,6 +180,30 @@ public interface BeanContext extends BeanContainer, BeanContainerRegistry,
     BeanContext getParentContext();
 
     /**
+     * 🔗 Registers a child {@link BeanContext} under the given parent ID.
+     *
+     * @param parentId       identifier of the parent context
+     * @param currentContext child context to associate with the parent
+     */
+    void setChildContext(String parentId, BeanContext currentContext);
+
+    /**
+     * 🔎 Retrieves the child {@link BeanContext} associated with the given parent ID.
+     *
+     * @param parentId identifier of the parent context
+     * @return the associated child context, or {@code null} if none exists
+     */
+    BeanContext getChildContext(String parentId);
+
+    /**
+     * ❓ Checks whether a child {@link BeanContext} is registered for the given parent ID.
+     *
+     * @param parentId identifier of the parent context
+     * @return {@code true} if a child context exists, {@code false} otherwise
+     */
+    boolean hasChildContext(String parentId);
+
+    /**
      * Gets the unique identifier of this context.
      *
      * @return the context ID as a {@link String}.
