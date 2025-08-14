@@ -1,7 +1,7 @@
 package org.jmouse.mvc;
 
 import org.jmouse.core.MethodParameter;
-import org.jmouse.web.http.request.http.HttpStatus;
+import org.jmouse.web.http.HttpStatus;
 
 /**
  * 🧩 Execution result returned from a {@link HandlerAdapter}.

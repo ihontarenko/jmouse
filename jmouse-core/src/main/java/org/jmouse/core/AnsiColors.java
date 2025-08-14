@@ -137,17 +137,38 @@ public enum AnsiColors {
         return value;
     }
 
+    /**
+     * 🎨 Replaces placeholders in the string with ANSI color codes and formats it.
+     *
+     * @param string     the string containing color placeholders
+     * @param arguments  arguments to substitute via {@link String#formatted(Object...)}
+     * @return colored and formatted string
+     */
     public static String colorize(String string, Object... arguments) {
         return REPLACER.replace(string, placeholderResolver()).formatted(arguments);
     }
 
+    /**
+     * 🔍 Returns a resolver for replacing placeholders with ANSI codes.
+     */
     private static PlaceholderResolver placeholderResolver() {
         return AnsiColors::resolve;
     }
 
+    /**
+     * 🎯 Resolves a placeholder to the corresponding ANSI code.
+     *
+     * <p>Allows multiple colors separated by the <code>|</code> character.</p>
+     *
+     * @param string        color name(s)
+     * @param defaultValue  default value if the color is not found
+     * @return ANSI code(s) as a single string
+     */
     private static String resolve(String string, String defaultValue) {
         return Streamable.of(string.split("\\|"))
-                .map(AnsiColors::valueOf).map(AnsiColors::getValue).stream().collect(Collectors.joining());
+                .map(AnsiColors::valueOf).map(AnsiColors::getValue)
+                .stream()
+                .collect(Collectors.joining());
     }
 
 }

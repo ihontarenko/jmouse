@@ -1,7 +1,7 @@
 package org.jmouse.web.http.request;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.web.http.request.http.HttpMethod;
+import org.jmouse.web.http.HttpMethod;
 
 /**
  * 🌐 Abstraction over a web request.

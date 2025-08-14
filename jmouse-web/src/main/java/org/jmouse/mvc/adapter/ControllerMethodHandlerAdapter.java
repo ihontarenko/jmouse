@@ -3,7 +3,7 @@ package org.jmouse.mvc.adapter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.mvc.*;
-import org.jmouse.web.http.request.http.HttpStatus;
+import org.jmouse.web.http.HttpStatus;
 
 import java.io.IOException;
 

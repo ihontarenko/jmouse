@@ -162,6 +162,7 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
     @Override
     public WebBeanContext build() {
         WebBeanContext context = factory.createContext(contextId, parent, baseClasses.toArray(Class<?>[]::new));
+        boolean        isRoot  = (parent == null);
 
         context.setContextId(contextId);
 
@@ -171,54 +172,38 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
             context.addInitializer(new StartupApplicationContextInitializer(context.getEnvironment()));
         }
 
-        if (useWebMvc) {
-            context.addInitializer(new WebMvcControllersInitializer());
-        }
-
         for (BeanContextInitializer initializer : initializers) {
             context.addInitializer(initializer);
         }
 
-        customizer.accept(context);
 
-        context.refresh();
 
         if (useWebMvc) {
-
-            Bits userOnlyScanning = Bits.of(
-                    // containers
-                    ROUTING_REGISTRY,
-                    RETURN_VALUE_PROCESSOR,
-                    // strategies
-                    RETURN_VALUE_HANDLER,
-                    EXCEPTION_RESOLVER,
-                    HANDLER_MAPPING,
-                    HANDLER_ADAPTER,
-                    ARGUMENT_RESOLVER
-            );
-
-            Bits userCoreScanning = Bits.of(
-                    // strategies
-                    EXCEPTION_RESOLVER,
-                    HANDLER_MAPPING,
-                    HANDLER_ADAPTER,
-                    ARGUMENT_RESOLVER
-            );
-
-            // add for root because it should be exist only in root context
-            if (context.getParentContext() == null) {
-                userCoreScanning.add(MESSAGE_MANAGER);
-                userCoreScanning.add(MESSAGE_CONVERTER);
-                userOnlyScanning.add(MESSAGE_MANAGER);
-                userOnlyScanning.add(MESSAGE_CONVERTER);
+            if (!isRoot) {
+                // scan only in user classes
+                new WebMvcInfrastructureInitializer(Bits.of()).initialize(context);
+                // scan only in user+core classes
+                new WebMvcInfrastructureInitializer(Bits.of(
+                        HANDLER_MAPPING,
+                        HANDLER_ADAPTER,
+                        RETURN_VALUE_HANDLER,
+                        ARGUMENT_RESOLVER,
+                        EXCEPTION_RESOLVER,
+                        ROUTING_MAPPING,
+                        EXCEPTION_MAPPING
+                ), coreClasses.toArray(Class<?>[]::new)).initialize(context);
+            } else {
+                context.addInitializer(new WebMvcInfrastructureInitializer());
             }
 
-            // scan only in user classes
-            new WebMvcInfrastructureInitializer().initialize(context);
-            // scan only in user+core classes
-            new WebMvcInfrastructureInitializer(userCoreScanning, coreClasses.toArray(Class<?>[]::new))
-                    .initialize(context);
+            context.addInitializer(new WebMvcControllersInitializer());
         }
+
+        if (customizer != null) {
+            customizer.accept(context);
+        }
+
+        context.refresh();
 
         return context;
     }

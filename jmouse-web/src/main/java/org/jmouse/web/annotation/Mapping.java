@@ -1,7 +1,7 @@
 package org.jmouse.web.annotation;
 
 import org.jmouse.web.http.request.RequestRoute;
-import org.jmouse.web.http.request.http.HttpMethod;
+import org.jmouse.web.http.HttpMethod;
 
 import java.lang.annotation.*;
 

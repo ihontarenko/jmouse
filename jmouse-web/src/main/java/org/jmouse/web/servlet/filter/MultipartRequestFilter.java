@@ -18,7 +18,7 @@ public class MultipartRequestFilter implements Filter {
         ServletRequest wrapped = request;
 
         if (request instanceof HttpServletRequest httpServletRequest && multipartResolver.isMultipart(httpServletRequest)) {
-            wrapped = multipartResolver.resolveMultipart(httpServletRequest);
+            wrapped = multipartResolver.wrapRequest(httpServletRequest);
         }
 
         chain.doFilter(wrapped, response);

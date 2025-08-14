@@ -63,4 +63,9 @@ public class ThreadLocalBeanContainer implements BeanContainer {
     public boolean supports(Scope scope) {
         return ThreadLocalScope.THREAD_LOCAL_SCOPE.equals(scope);
     }
+
+    @Override
+    public String toString() {
+        return "ThreadLocal Beans: " + threadLocalBeans.get().size();
+    }
 }

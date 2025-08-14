@@ -19,7 +19,7 @@ import org.jmouse.core.Streamable;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.request.Headers;
 import org.jmouse.web.http.request.RequestAttributesHolder;
-import org.jmouse.web.http.request.http.HttpHeader;
+import org.jmouse.web.http.HttpHeader;
 
 import java.io.IOException;
 import java.util.ArrayList;

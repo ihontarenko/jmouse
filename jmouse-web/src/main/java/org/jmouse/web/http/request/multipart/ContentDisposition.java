@@ -16,7 +16,7 @@ import static java.nio.charset.StandardCharsets.*;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 
 /**
- * 📦 Represents a {@code Content-Disposition} header.
+ * 📦 Represents a {@code Content-ContentDisposition} header.
  * <p>
  * Encapsulates metadata such as disposition type, field name,
  * file name, charset, file size, and optional timestamps
@@ -24,7 +24,7 @@ import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
  *
  * @see <a href="https://tools.ietf.org/html/rfc6266">RFC 6266</a>
  *
- * @param type             Disposition type (e.g. {@code form-data}, {@code attachment})
+ * @param type             ContentDisposition type (e.g. {@code form-data}, {@code attachment})
  * @param name             Field name (for form-data)
  * @param filename         Associated file name
  * @param charset          Charset used for file name encoding
@@ -33,7 +33,7 @@ import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
  * @param modificationDate File modification date
  * @param readDate         File last access date
  */
-public record Disposition(
+public record ContentDisposition(
         String type,
         String name,
         String filename,
@@ -44,8 +44,18 @@ public record Disposition(
         ZonedDateTime readDate
 ) {
 
+    public static final String NAME_ATTRIBUTE              = "name";
+    public static final String SIZE_ATTRIBUTE              = "size";
+    public static final String FILENAME_RFC5987_ATTRIBUTE  = "filename*";
+    public static final String FILENAME_RFC2047_ATTRIBUTE  = "filename";
+    public static final String CREATION_DATE_ATTRIBUTE     = "creation-date";
+    public static final String MODIFICATION_DATE_ATTRIBUTE = "modification-date";
+    public static final String READ_DATE_ATTRIBUTE         = "read-date";
+    public static final String Q_ENCODING                  = "Q";
+    public static final String B_ENCODING                  = "B";
+
     /**
-     * 📝 Builds the {@code Content-Disposition} header string.
+     * 📝 Builds the {@code Content-ContentDisposition} header string.
      *
      * @return properly formatted header value
      */
@@ -127,22 +137,22 @@ public record Disposition(
      * @param disposition existing disposition to copy
      * @return builder with copied values
      */
-    public static Builder modify(Disposition disposition) {
+    public static Builder modify(ContentDisposition disposition) {
         return new Builder(disposition);
     }
 
     /**
-     * 📥 Parse a {@code Content-Disposition} header value.
+     * 📥 Parse a {@code Content-ContentDisposition} header value.
      *
      * @param content raw header value
-     * @return parsed {@link Disposition}
+     * @return parsed {@link ContentDisposition}
      */
-    public static Disposition parse(String content) {
+    public static ContentDisposition parse(String content) {
         return new Parser(content).parse();
     }
 
     /**
-     * 📜 Parses a {@code Content-Disposition} header value into a {@link Disposition} object.
+     * 📜 Parses a {@code Content-ContentDisposition} header value into a {@link ContentDisposition} object.
      * <p>
      * Supports parsing of attributes such as {@code name}, {@code filename}, {@code filename*},
      * {@code size}, {@code creation-date}, {@code modification-date}, and {@code read-date}.
@@ -153,7 +163,7 @@ public record Disposition(
     public static class Parser {
 
         /**
-         * The raw {@code Content-Disposition} header value.
+         * The raw {@code Content-ContentDisposition} header value.
          */
         private final String content;
 
@@ -167,7 +177,7 @@ public record Disposition(
         }
 
         /**
-         * Parses the {@code Content-Disposition} header into a {@link Disposition} object.
+         * Parses the {@code Content-ContentDisposition} header into a {@link ContentDisposition} object.
          * <ul>
          *     <li>Extracts the disposition type (e.g., {@code form-data}, {@code attachment}).</li>
          *     <li>Parses parameters such as {@code name}, {@code filename}, and {@code size}.</li>
@@ -175,11 +185,11 @@ public record Disposition(
          *     <li>Parses date attributes using {@code RFC_1123_DATE_TIME} format.</li>
          * </ul>
          *
-         * @return the parsed {@link Disposition} object
+         * @return the parsed {@link ContentDisposition} object
          * @throws IllegalArgumentException if the header contains an unsupported encoding
          *                                  or unknown attribute
          */
-        public Disposition parse() {
+        public ContentDisposition parse() {
             List<String> collection = tokenize(content);
 
             String        type             = collection.getFirst();
@@ -200,11 +210,11 @@ public record Disposition(
                     String value     = MimeParser.unquote(token.substring(equalIndex + 1)).trim();
 
                     switch (attribute) {
-                        case "name": {
+                        case NAME_ATTRIBUTE: {
                             name = value;
                             break;
                         }
-                        case "filename*": {
+                        case FILENAME_RFC5987_ATTRIBUTE: {
                             int index1 = value.indexOf('\'');
                             int index2 = value.indexOf('\'', index1 + 1);
 
@@ -223,9 +233,9 @@ public record Disposition(
 
                             break;
                         }
-                        case "filename": {
+                        case FILENAME_RFC2047_ATTRIBUTE: {
 
-                            if (value.startsWith("=?")) {
+                            if (value.startsWith("=?") && value.endsWith("?=")) {
                                 List<String> parts = Arrays.asList(value.split("\\?"));
 
                                 if (parts.getFirst().equals("=") && parts.getLast().equals("=")) {
@@ -235,8 +245,8 @@ public record Disposition(
 
                                     charset = Charset.forName(parameters.getFirst());
                                     filename = switch (encoding) {
-                                        case "Q" -> Codec.decodeRFC2047(encoded, charset);
-                                        case "B" -> Codec.decodeBase64(encoded, charset);
+                                        case Q_ENCODING -> Codec.decodeRFC2047(encoded, charset);
+                                        case B_ENCODING -> Codec.decodeBase64(encoded, charset);
                                         default -> throw new IllegalArgumentException(
                                                 "UNSUPPORTED ENCODING: " + encoding);
                                     };
@@ -249,23 +259,23 @@ public record Disposition(
 
                             break;
                         }
-                        case "size": {
+                        case SIZE_ATTRIBUTE: {
                             size = Bytes.ofBytes(Long.parseLong(value));
                             break;
                         }
-                        case "creation-date": {
+                        case CREATION_DATE_ATTRIBUTE: {
                             try {
                                 creationDate = ZonedDateTime.parse(value, RFC_1123_DATE_TIME);
                             } catch (DateTimeParseException ignore) {}
                             break;
                         }
-                        case "modification-date": {
+                        case MODIFICATION_DATE_ATTRIBUTE: {
                             try {
                                 modificationDate = ZonedDateTime.parse(value, RFC_1123_DATE_TIME);
                             } catch (DateTimeParseException ignore) {}
                             break;
                         }
-                        case "read-date": {
+                        case READ_DATE_ATTRIBUTE: {
                             try {
                                 readDate = ZonedDateTime.parse(value, RFC_1123_DATE_TIME);
                             } catch (DateTimeParseException ignore) {}
@@ -273,17 +283,17 @@ public record Disposition(
                         }
                         default: {
                             throw new IllegalArgumentException(
-                                    "CONTENT DISPOSITION IS CORRUPTED! UNKNOWN ATTRIBUTE: " + attribute);
+                                    "CONTENT-DISPOSITION IS CORRUPTED! UNKNOWN ATTRIBUTE: " + attribute);
                         }
                     }
                 }
             }
 
-            return new Disposition(type, name, filename, charset, size, creationDate, modificationDate, readDate);
+            return new ContentDisposition(type, name, filename, charset, size, creationDate, modificationDate, readDate);
         }
 
         /**
-         * Splits a {@code Content-Disposition} header value into individual tokens.
+         * Splits a {@code Content-ContentDisposition} header value into individual tokens.
          * <p>
          * Handles quoted strings, escaped quotes, and preserves parameter integrity.
          * The first element is typically the disposition type, followed by key-value pairs.
@@ -337,7 +347,7 @@ public record Disposition(
     /**
      * 🔐 Utility class for encoding and decoding header values according to
      * RFC 5987, RFC 2047, and related formats used in HTTP headers
-     * such as {@code Content-Disposition}.
+     * such as {@code Content-ContentDisposition}.
      */
     public static class Codec {
 
@@ -586,7 +596,7 @@ public record Disposition(
     }
 
     /**
-     * 🛠️ Builder for creating and modifying {@link Disposition} instances.
+     * 🛠️ Builder for creating and modifying {@link ContentDisposition} instances.
      * <p>
      * Allows fluent configuration of all disposition attributes.
      */
@@ -609,11 +619,11 @@ public record Disposition(
         }
 
         /**
-         * 🔄 Creates a builder initialized from an existing {@link Disposition}.
+         * 🔄 Creates a builder initialized from an existing {@link ContentDisposition}.
          *
          * @param disposition source disposition to copy values from, may be {@code null}.
          */
-        public Builder(Disposition disposition) {
+        public Builder(ContentDisposition disposition) {
             if (disposition != null) {
                 this.type = disposition.type();
                 this.name = disposition.name();
@@ -715,12 +725,12 @@ public record Disposition(
         }
 
         /**
-         * ✅ Builds the {@link Disposition} instance.
+         * ✅ Builds the {@link ContentDisposition} instance.
          *
-         * @return a new {@link Disposition} with configured values.
+         * @return a new {@link ContentDisposition} with configured values.
          */
-        public Disposition build() {
-            return new Disposition(
+        public ContentDisposition build() {
+            return new ContentDisposition(
                     type,
                     name,
                     filename,

@@ -57,6 +57,28 @@ public class RequestAttributesHolder {
     }
 
     /**
+     * 📦 Retrieve an attribute from the current {@link RequestAttributes}.
+     *
+     * @param name the attribute name
+     * @return the attribute value, or {@code null} if not present
+     * @throws IllegalStateException if no request attributes are bound
+     */
+    public static Object getAttribute(String name) {
+        return getRequestAttributes().getAttribute(name);
+    }
+
+    /**
+     * 📥 Store an attribute in the current {@link RequestAttributes}.
+     *
+     * @param name  the attribute name
+     * @param value the attribute value
+     * @throws IllegalStateException if no request attributes are bound
+     */
+    public static void setAttribute(String name, Object value) {
+        getRequestAttributes().setAttribute(name, value);
+    }
+
+    /**
      * 🔍 Get the {@link RequestPath} from thread-local or fallback to attributes.
      *
      * @return parsed request path or {@code null} if not set

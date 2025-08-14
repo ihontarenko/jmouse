@@ -7,14 +7,19 @@ import org.jmouse.web.http.request.RequestAttributesHolder;
 
 public interface MultipartResolver {
 
-    HttpServletRequest resolveMultipart(HttpServletRequest request);
+    HttpServletRequest wrapRequest(HttpServletRequest request);
 
     default boolean isMultipart(HttpServletRequest request) {
-        Headers   headers     = RequestAttributesHolder.getRequestHeaders().headers();
-        MediaType contentType = headers.getContentType();
+        Headers   headers = RequestAttributesHolder.getRequestHeaders().headers();
+        MediaType contentType;
 
-        if (contentType != null) {
+        if (headers != null && (contentType = headers.getContentType()) != null) {
             return contentType.compatible(MediaType.MULTIPART_FORM_DATA);
+        } else {
+            String rawContentType = request.getContentType();
+            if (rawContentType != null) {
+                return MediaType.forString(rawContentType).compatible(MediaType.MULTIPART_FORM_DATA);
+            }
         }
 
         return false;

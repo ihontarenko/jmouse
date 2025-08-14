@@ -6,6 +6,7 @@ import org.jmouse.core.Bits;
 import org.jmouse.core.reflection.ClassFinder;
 import org.jmouse.mvc.*;
 import org.jmouse.web.ViewResolver;
+import org.jmouse.web.exception.ExceptionMappingRegistry;
 import org.jmouse.web.method.ArgumentResolver;
 import org.jmouse.web.ExceptionResolver;
 import org.jmouse.web.method.ReturnValueHandler;
@@ -51,7 +52,8 @@ public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializ
     public static final short MESSAGE_MANAGER        = 1 << 6;   // 0x0040
     public static final short VIEW_RESOLVER          = 1 << 7;   // 0x0080
     public static final short EXCEPTION_RESOLVER     = 1 << 8;   // 0x0100
-    public static final short ROUTING_REGISTRY       = 1 << 9;   // 0x0200
+    public static final short ROUTING_MAPPING        = 1 << 9;   // 0x0200
+    public static final short EXCEPTION_MAPPING      = 1 << 10;  // 0x0400
 
     private static final Map<Short, BeanScanner<AnnotatedElement>> REGISTRATIONS = new HashMap<>(16);
 
@@ -76,8 +78,10 @@ public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializ
                 -> new ArrayList<>(ClassFinder.findImplementations(ViewResolver.class, types)));
         REGISTRATIONS.put(EXCEPTION_RESOLVER, types
                 -> new ArrayList<>(ClassFinder.findImplementations(ExceptionResolver.class, types)));
-        REGISTRATIONS.put(ROUTING_REGISTRY, types
+        REGISTRATIONS.put(ROUTING_MAPPING, types
                 -> new ArrayList<>(ClassFinder.findExactlyClasses(MappingRegistry.class, types)));
+        REGISTRATIONS.put(EXCEPTION_MAPPING, types
+                -> new ArrayList<>(ClassFinder.findExactlyClasses(ExceptionMappingRegistry.class, types)));
     }
 
     /**
@@ -94,7 +98,8 @@ public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializ
                 MESSAGE_MANAGER,
                 VIEW_RESOLVER,
                 EXCEPTION_RESOLVER,
-                ROUTING_REGISTRY
+                ROUTING_MAPPING,
+                EXCEPTION_MAPPING
         ), basePackages);
     }
 

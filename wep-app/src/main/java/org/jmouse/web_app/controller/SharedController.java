@@ -8,8 +8,8 @@ import org.jmouse.web.annotation.ExceptionHandler;
 import org.jmouse.web.annotation.GetMapping;
 import org.jmouse.web.annotation.PostMapping;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.http.request.http.HttpHeader;
-import org.jmouse.web.http.request.multipart.Disposition;
+import org.jmouse.web.http.HttpHeader;
+import org.jmouse.web.http.request.multipart.ContentDisposition;
 import org.jmouse.web.http.request.multipart.MultipartFile;
 import org.jmouse.web.http.request.multipart.MultipartWebRequest;
 
@@ -82,7 +82,7 @@ public class SharedController {
             MultipartFile file = multipartWebRequest.getFirstFile("file");
 
             try {
-                response.setHeader(HttpHeader.CONTENT_DISPOSITION.value(), Disposition.create()
+                response.setHeader(HttpHeader.CONTENT_DISPOSITION.value(), ContentDisposition.create()
                         .type("inline").filename("uploaded.jpg").build().toString());
                 return file.getBytes();
             } catch (IOException e) {

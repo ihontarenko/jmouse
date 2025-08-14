@@ -34,22 +34,15 @@ import java.util.*;
  */
 public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver {
 
-    /** Set of exception types this resolver can handle. */
-    private final Set<Class<? extends Throwable>> supportedExceptions;
-
-    /** Map of exception types to their corresponding handler methods. */
-    private final Map<Class<? extends Throwable>, ExceptionHandlerMethod> exceptionMappings;
+    private ExceptionMappingRegistry exceptionMappings;
 
     /** Resolvers for handler method arguments. */
     private List<ArgumentResolver> argumentResolvers;
 
     /**
-     * Creates a new resolver with empty exception mappings.
+     * Creates a new resolver.
      */
-    public ExceptionHandlerExceptionResolver() {
-        this.supportedExceptions = new HashSet<>();
-        this.exceptionMappings = new HashMap<>();
-    }
+    public ExceptionHandlerExceptionResolver() { }
 
     /**
      * Returns whether this resolver supports the given exception.
@@ -59,12 +52,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
      */
     @Override
     public boolean supportsException(Throwable exception) {
-        for (Class<? extends Throwable> supportedException : supportedExceptions) {
-            if (supportedException.equals(exception.getClass())) {
-                return true;
-            }
-        }
-        return false;
+        return exceptionMappings.supportsException(exception);
     }
 
     /**
@@ -75,8 +63,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
      * @param method        the handler method
      */
     public void addExceptionMapping(Class<? extends Throwable> exceptionType, Object bean, Method method) {
-        supportedExceptions.add(exceptionType);
-        exceptionMappings.put(exceptionType, new ExceptionHandlerMethod(exceptionType, bean, method));
+        exceptionMappings.addExceptionMapping(exceptionType, bean, method);
     }
 
     /**
@@ -87,8 +74,6 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
      */
     @Override
     protected void doInitialize(WebBeanContext context) {
-        WebBeanContext.methodsOfAnnotatedClasses(Controller.class, this::initializeMethods, context);
-
         List<ArgumentResolver> argumentResolvers = new ArrayList<>(
                 context.getBeans(ArgumentResolver.class)
         );
@@ -96,6 +81,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
         Sorter.sort(argumentResolvers);
 
         this.argumentResolvers = List.copyOf(argumentResolvers);
+        this.exceptionMappings = context.getBean(ExceptionMappingRegistry.class);
+
+        WebBeanContext.methodsOfAnnotatedClasses(Controller.class, this::initializeMethods, context);
     }
 
     /**
@@ -151,6 +139,6 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
      * @return the mapped handler method, or {@code null} if not registered
      */
     protected ExceptionHandlerMethod getExceptionHandler(Class<? extends Throwable> exceptionType) {
-        return exceptionMappings.get(exceptionType);
+        return exceptionMappings.getExceptionHandler(exceptionType);
     }
 }

@@ -3,8 +3,8 @@ package org.jmouse.web_app.controller;
 import org.jmouse.mvc.HandlerMappingException;
 import org.jmouse.mvc.Model;
 import org.jmouse.web.annotation.*;
-import org.jmouse.web.http.request.http.HttpHeader;
-import org.jmouse.web.http.request.http.HttpMethod;
+import org.jmouse.web.http.HttpHeader;
+import org.jmouse.web.http.HttpMethod;
 
 @Controller
 public class IndexController {

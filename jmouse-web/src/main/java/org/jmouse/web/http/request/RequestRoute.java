@@ -2,7 +2,7 @@ package org.jmouse.web.http.request;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.MediaType;
-import org.jmouse.web.http.request.http.HttpMethod;
+import org.jmouse.web.http.HttpMethod;
 
 import java.util.Set;
 

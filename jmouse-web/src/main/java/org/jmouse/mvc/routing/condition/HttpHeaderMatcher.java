@@ -2,7 +2,7 @@ package org.jmouse.mvc.routing.condition;
 
 import org.jmouse.mvc.routing.MappingMatcher;
 import org.jmouse.web.http.request.RequestRoute;
-import org.jmouse.web.http.request.http.HttpHeader;
+import org.jmouse.web.http.HttpHeader;
 
 /**
  * 📡 Matches a specific HTTP header and its expected value.

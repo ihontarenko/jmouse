@@ -3,7 +3,7 @@ package org.jmouse.web.http.request;
 import org.jmouse.core.MediaType;
 import org.jmouse.core.MimeParser;
 import org.jmouse.core.Streamable;
-import org.jmouse.web.http.request.http.HttpHeader;
+import org.jmouse.web.http.HttpHeader;
 
 import java.util.*;
 

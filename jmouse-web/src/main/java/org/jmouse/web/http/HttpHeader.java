@@ -1,4 +1,4 @@
-package org.jmouse.web.http.request.http;
+package org.jmouse.web.http;
 
 /**
  * Common HTTP header names 💡
@@ -62,7 +62,7 @@ public enum HttpHeader {
     CONTENT_LANGUAGE("Content-Language"),
     CONTENT_LENGTH("Content-Length"),
     CONTENT_LOCATION("Content-Location"),
-    CONTENT_DISPOSITION("Content-Disposition"),
+    CONTENT_DISPOSITION("Content-ContentDisposition"),
     CONTENT_MD5("Content-MD5"),
     CONTENT_RANGE("Content-Range"),
     CONTENT_TYPE("Content-Type"),

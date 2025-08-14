@@ -1,4 +1,4 @@
-package org.jmouse.web.http.request.http;
+package org.jmouse.web.http;
 
 public enum HttpMethod {
 

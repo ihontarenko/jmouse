@@ -27,6 +27,7 @@ public class RequestAttributesBeanContainer implements BeanContainer {
     public static final String BEAN_NAMES_PREFIX = RequestAttributesBeanContainer.class.getName() + ".BEAN:";
 
     private final BeanScope scope;
+    private       int       counter = 0;
 
     public RequestAttributesBeanContainer(BeanScope scope) {
         this.scope = scope;
@@ -60,6 +61,7 @@ public class RequestAttributesBeanContainer implements BeanContainer {
     @Override
     public void registerBean(String name, Object bean) {
         getRequestAttributes().setAttribute(getResolvedName(name), bean);
+        counter++;
     }
 
     /**
@@ -108,4 +110,10 @@ public class RequestAttributesBeanContainer implements BeanContainer {
 
         return attributes;
     }
+
+    @Override
+    public String toString() {
+        return scope + " Beans: " + counter;
+    }
+
 }

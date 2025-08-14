@@ -5,8 +5,8 @@ import org.jmouse.core.MediaType;
 import org.jmouse.mvc.InvocationOutcome;
 import org.jmouse.web.http.request.RequestContext;
 import org.jmouse.core.Priority;
-import org.jmouse.web.http.request.http.HttpHeader;
-import org.jmouse.web.http.request.http.HttpStatus;
+import org.jmouse.web.http.HttpHeader;
+import org.jmouse.web.http.HttpStatus;
 
 /**
  * 🟦 Handles `null` return values from controller methods.

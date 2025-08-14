@@ -2,7 +2,7 @@ package org.jmouse.web.http.request;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
-import org.jmouse.web.http.request.http.HttpMethod;
+import org.jmouse.web.http.HttpMethod;
 
 /**
  * 🛡️ Wrapper around {@link HttpServletRequest} implementing {@link WebRequest}.

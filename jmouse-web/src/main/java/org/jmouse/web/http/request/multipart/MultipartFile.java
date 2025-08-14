@@ -9,7 +9,7 @@ import java.io.InputStream;
 /**
  * 📦 Represents an uploaded multipart file.
  *
- * <p>Provides access to file metadata ({@link Disposition}), the underlying servlet {@link Part},
+ * <p>Provides access to file metadata ({@link ContentDisposition}), the underlying servlet {@link Part},
  * and helper methods to read file content in different forms.</p>
  *
  * @author Ivan
@@ -17,11 +17,11 @@ import java.io.InputStream;
 public interface MultipartFile {
 
     /**
-     * 🏷 Get the {@link Disposition} describing this file.
+     * 🏷 Get the {@link ContentDisposition} describing this file.
      *
      * @return file disposition metadata
      */
-    Disposition disposition();
+    ContentDisposition disposition();
 
     /**
      * ⚙ Get the raw servlet {@link Part} for advanced control.

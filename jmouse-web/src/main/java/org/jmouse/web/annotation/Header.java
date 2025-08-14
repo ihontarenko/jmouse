@@ -1,6 +1,6 @@
 package org.jmouse.web.annotation;
 
-import org.jmouse.web.http.request.http.HttpHeader;
+import org.jmouse.web.http.HttpHeader;
 
 /**
  * 📬 Annotation for mapping a route based on a specific HTTP header and its value.
