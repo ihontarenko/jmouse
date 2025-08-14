@@ -98,7 +98,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
             RouteMatch    match         = route.pathPattern().parse(requestRoute.requestPath().path());
             MappingResult mappingResult = MappingResult.of(match, route);
 
-            mappedHandler = new RouteMappedHandler(handler, mappingResult, getMethodParameter(handler));
+            mappedHandler = new RouteMappedHandler(handler, mappingResult, getReturnParameter(handler));
 
             request.setAttribute(ROUTE_MATCH_ATTRIBUTE, match);
 
@@ -118,7 +118,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      * @param handler the handler object containing the controller method
      * @return a {@link MethodParameter} describing the target method parameter
      */
-    abstract protected MethodParameter getMethodParameter(H handler);
+    abstract protected MethodParameter getReturnParameter(H handler);
 
     /**
      * 🥇 Selects the most specific and applicable {@link MappingCriteria}

@@ -31,12 +31,12 @@ public class RequestContextArgumentResolver extends AbstractArgumentResolver {
 
     @Override
     public Object resolveArgument(MethodParameter parameter, RequestContext requestContext,
-                                  MappingResult mappingResult, InvocationOutcome invocationResult) {
-        Class<?> returnType = parameter.getParameterType();
+                                  MappingResult mappingResult) {
+        Class<?> parameterType = parameter.getParameterType();
 
-        if (returnType == HttpServletRequest.class) {
+        if (parameterType == HttpServletRequest.class) {
             return requestContext.request();
-        } else if (returnType == HttpServletResponse.class) {
+        } else if (parameterType == HttpServletResponse.class) {
             return requestContext.response();
         }
 

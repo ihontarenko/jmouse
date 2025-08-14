@@ -41,12 +41,11 @@ public class PathVariableArgumentResolver extends AbstractArgumentResolver {
      * @param methodParameter the method parameter
      * @param requestContext   the current web request context (includes headers, session, etc.)
      * @param mappingResult the current mapping result with route match info
-     * @param invocationResult the result container of the handler
      * @return the converted argument value, or null if not found
      */
     @Override
     public Object resolveArgument(MethodParameter methodParameter, RequestContext requestContext,
-            MappingResult mappingResult, InvocationOutcome invocationResult) {
+            MappingResult mappingResult) {
         Parameter    parameter     = methodParameter.getParameter();
         PathVariable pathVariable  = parameter.getAnnotation(PathVariable.class);
         RouteMatch   match         = mappingResult.match();

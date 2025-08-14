@@ -16,28 +16,29 @@ import java.io.IOException;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class ControllerMethodHandlerAdapter extends AbstractHandlerAdapter {
+public class ControllerMethodHandlerAdapter implements HandlerAdapter {
 
     /**
      * 🛠 Handles the request by invoking {@link ControllerMethod}.
      *
      * <ul>
      *   <li>Ensures default content type if not set</li>
-     *   <li>Sets {@link HttpStatus} to {@link InvocationOutcome}</li>
      *   <li>Flushes the response buffer</li>
      * </ul>
      *
      * @throws HandlerAdapterException in case of I/O failure
      */
     @Override
-    protected void doHandle(HttpServletRequest request, HttpServletResponse response,
-                            MappedHandler mappedHandler, InvocationOutcome outcome) {
+    public MVCResult handle(HttpServletRequest request, HttpServletResponse response,
+                                        MappedHandler mappedHandler) {
         try {
             ((ControllerMethod) mappedHandler.handler()).handle(request, response);
         } catch (IOException e) {
-            outcome.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.getCode());
             throw new HandlerAdapterException("Handler failed during execution.", e);
         }
+
+        return null;
     }
 
     /**

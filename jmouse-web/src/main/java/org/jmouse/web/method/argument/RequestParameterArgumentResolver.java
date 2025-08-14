@@ -43,12 +43,11 @@ public class RequestParameterArgumentResolver extends AbstractArgumentResolver {
      * @param parameter        the method parameter to resolve
      * @param requestContext   the current request context, providing access to the HTTP request
      * @param mappingResult    the resolved route mapping (unused here)
-     * @param invocationResult the current invocation outcome (unused here)
      * @return the converted parameter value, or {@code null} if the request parameter is missing
      */
     @Override
     public Object resolveArgument(MethodParameter parameter, RequestContext requestContext,
-                                  MappingResult mappingResult, InvocationOutcome invocationResult) {
+                                  MappingResult mappingResult) {
         Object           value            = null;
         RequestParameter requestParameter = parameter.getParameter().getAnnotation(RequestParameter.class);
 

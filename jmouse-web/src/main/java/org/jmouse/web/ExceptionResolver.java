@@ -1,6 +1,6 @@
 package org.jmouse.web;
 
-import org.jmouse.mvc.InvocationOutcome;
+import org.jmouse.mvc.MVCResult;
 import org.jmouse.mvc.MappedHandler;
 import org.jmouse.web.http.request.RequestContext;
 
@@ -31,5 +31,5 @@ public interface ExceptionResolver {
      * @param mappedHandler  the handler that was executing when the exception occurred
      * @param exception      the exception to resolve
      */
-    InvocationOutcome resolveException(RequestContext requestContext, MappedHandler mappedHandler, Exception exception);
+    MVCResult resolveException(RequestContext requestContext, MappedHandler mappedHandler, Exception exception);
 }

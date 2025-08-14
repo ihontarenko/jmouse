@@ -40,7 +40,7 @@ public interface MappedHandler {
      *
      * @return method parameter information or {@code null} if not applicable
      */
-    default MethodParameter methodParameter() {
+    default MethodParameter returnParameter() {
         return null;
     }
 

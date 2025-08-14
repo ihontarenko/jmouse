@@ -7,6 +7,9 @@ import org.jmouse.web.context.WebContextException;
 
 public interface RequestAttributes {
 
+    String MVC_RESULT_ATTRIBUTE     = RequestAttributes.class.getName() + ".MVC_RESULT";
+    String PRODUCES_TYPES_ATTRIBUTE = RequestAttributes.class.getName() + ".PRODUCES_TYPES";
+
     /**
      * Constant representing the request scope.
      */

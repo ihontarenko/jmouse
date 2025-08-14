@@ -58,7 +58,7 @@ public class ExceptionArgumentResolver extends AbstractArgumentResolver {
     @Override
     @SuppressWarnings("all")
     public Object resolveArgument(MethodParameter parameter, RequestContext requestContext,
-                                  MappingResult mappingResult, InvocationOutcome invocationResult) {
+                                  MappingResult mappingResult) {
         Exception exception = null;
         Exception candicate = getException(requestContext.request());
 

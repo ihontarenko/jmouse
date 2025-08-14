@@ -1,7 +1,7 @@
 package org.jmouse.web.method;
 
 import org.jmouse.beans.InitializingBeanSupport;
-import org.jmouse.mvc.InvocationOutcome;
+import org.jmouse.mvc.MVCResult;
 import org.jmouse.core.Sorter;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.request.RequestContext;
@@ -41,14 +41,11 @@ public class ReturnValueProcessor implements InitializingBeanSupport<WebBeanCont
 
     /**
      * 🚚 Processes the return value using a matching {@link ReturnValueHandler}.
-     *
-     * @param outcome the invocation result to be processed
-     * @param requestContext current request/response context
      */
-    public void process(InvocationOutcome outcome, RequestContext requestContext) {
+    public void process(MVCResult result, RequestContext requestContext) {
         for (ReturnValueHandler handler : handlers) {
-            if (handler.supportsReturnType(outcome)) {
-                handler.handleReturnValue(outcome, requestContext);
+            if (handler.supportsReturnType(result)) {
+                handler.handleReturnValue(result, requestContext);
                 return;
             }
         }

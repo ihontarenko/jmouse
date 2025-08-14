@@ -71,32 +71,26 @@ public class ViewResolverReturnValueHandler extends AbstractReturnValueHandler {
      * </ul>
      *
      * <p>If a view name is resolved, it's rendered via the configured {@link ViewResolver}.
-     *
-     * @param outcome         the return value and model container
-     * @param requestContext  current request/response context
      */
     @Override
-    protected void doReturnValueHandle(InvocationOutcome outcome, RequestContext requestContext) {
-        MethodParameter returnType = outcome.getReturnParameter();
-        Optional<MergedAnnotation> optional   = ofAnnotatedElement(
-                returnType.getAnnotatedElement()).get(ViewMapping.class);
-
-        String              viewName = null;
-        HttpServletResponse response = requestContext.response();
+    protected void doReturnValueHandle(MVCResult result, RequestContext requestContext) {
+        MethodParameter            returnType = result.getReturnType();
+        Optional<MergedAnnotation> optional   = ofAnnotatedElement(returnType.getAnnotatedElement()).get(
+                ViewMapping.class);
+        String                     viewName   = null;
+        HttpServletResponse        response   = requestContext.response();
 
         if (optional.isPresent()) {
             ViewMapping mapping = optional.get().synthesize();
             viewName = mapping.name();
-        } else if (outcome.getReturnValue() instanceof String name && name.startsWith(VIEW_PREFIX)) {
+        } else if (result.getReturnValue() instanceof String name && name.startsWith(VIEW_PREFIX)) {
             viewName = name.substring(VIEW_PREFIX.length());
         }
 
         if (viewName != null && !viewName.isBlank()) {
             try {
                 View view = viewResolver.resolveView(viewName);
-                view.render(outcome.getModel().getAttributes(), requestContext.request(), response);
-                outcome.setState(ExecutionState.HANDLED);
-
+                view.render(result.getModel().getAttributes(), requestContext.request(), response);
                 response.setContentType(view.getContentType().getStringType());
             } catch (Exception e) {
                 throw new NotFoundException("Rendering failed: " + e.getMessage(), e);
@@ -112,15 +106,15 @@ public class ViewResolverReturnValueHandler extends AbstractReturnValueHandler {
      * <p>This includes methods annotated with {@link ViewMapping}
      * or returning a {@code String} starting with {@code "view:"}.
      *
-     * @param outcome    the actual method result
+     * @param result    the actual method result
      * @return {@code true} if handled by this strategy
      */
     @Override
-    public boolean supportsReturnType(InvocationOutcome outcome) {
-        MethodParameter            returnType  = outcome.getReturnParameter();
+    public boolean supportsReturnType(MVCResult result) {
+        Object                     returnValue = result.getReturnValue();
+        MethodParameter            returnType  = result.getReturnType();
         Optional<MergedAnnotation> optional    = ofAnnotatedElement(returnType.getAnnotatedElement())
                 .get(ViewMapping.class);
-        Object                     returnValue = outcome.getReturnValue();
 
         if (optional.isPresent()) {
             return true;

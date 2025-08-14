@@ -23,7 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *     }
  *
  *     @Override
- *     public void postHandle(HttpServletRequest req, HttpServletResponse res, Object handler, HandlerResult result) {
+ *     public void postHandle(HttpServletRequest req, HttpServletResponse res, Object handler, MVCResult result) {
  *         System.out.println("Handler returned: " + result.status());
  *     }
  * }
@@ -31,7 +31,7 @@ import jakarta.servlet.http.HttpServletResponse;
  *
  * <p>Interceptors are typically configured in the {@code WebConfigurer} and executed in declared order.</p>
  *
- * @see HandlerResult
+ * @see MVCResult
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
@@ -47,7 +47,7 @@ public interface HandlerInterceptor {
      */
     default boolean preHandle(
             HttpServletRequest request, HttpServletResponse response, Object handler) {
-        return false; // Default: block execution unless overridden
+        return false;
     }
 
     /**
@@ -59,7 +59,6 @@ public interface HandlerInterceptor {
      * @param result   the result returned from the handler, may be {@code null}
      */
     default void postHandle(
-            HttpServletRequest request, HttpServletResponse response, Object handler, InvocationOutcome result) {
-        // No-op by default
+            HttpServletRequest request, HttpServletResponse response, Object handler, MVCResult result) {
     }
 }

@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBeanSupport;
 import org.jmouse.core.Sorter;
-import org.jmouse.web.method.ArgumentResolver;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.method.ReturnValueHandler;
 import org.jmouse.web.method.ReturnValueProcessor;
@@ -24,16 +23,14 @@ import java.util.List;
  *   <li>Integrating with Spring-like bean lifecycle</li>
  * </ul>
  *
- * <p>Concrete subclasses should implement {@link #doHandle} and {@link #doInitialize}.</p>
+ * <p>Concrete subclasses should implement {@link #doInvokeHandler} and {@link #doInitialize}.</p>
  *
  * @author Ivan Hontarenko
  * @since 1.0
  */
-public abstract class AbstractHandlerAdapter implements HandlerAdapter, InitializingBeanSupport<WebBeanContext> {
+public abstract class AbstractHandlerMethodAdapter implements HandlerAdapter, InitializingBeanSupport<WebBeanContext> {
 
-    private       List<ArgumentResolver>   argumentResolvers   = new ArrayList<>();
-    private final List<ReturnValueHandler> returnValueHandlers = new ArrayList<>();
-    private       ReturnValueProcessor     returnValueProcessor;
+    private ReturnValueProcessor returnValueProcessor;
 
     /**
      * 🧩 Handles the request by delegating to the actual handler, capturing the result,
@@ -45,38 +42,13 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
      * @return MvcContainer with execution metadata and return value
      */
     @Override
-    public InvocationOutcome handle(HttpServletRequest request, HttpServletResponse response, MappedHandler handler) {
-        InvocationOutcome outcome = new Outcome(null);
-        RequestContext    context = new RequestContext(request, response);
+    public MVCResult handle(HttpServletRequest request, HttpServletResponse response, MappedHandler handler) {
+        RequestContext    context   = new RequestContext(request, response);
+        MVCResult         result    = doInvokeHandler(request, response, handler);
 
-        outcome.setReturnParameter(handler.methodParameter());
+        returnValueProcessor.process(result, context);
 
-        doHandle(request, response, handler, outcome);
-
-        // todo: get rid of return handler here
-        if (outcome.isUnhandled()) {
-            returnValueProcessor.process(outcome, context);
-        }
-
-        return outcome;
-    }
-
-    /**
-     * 🧩 Returns the list of {@link ArgumentResolver}s used for method argument binding.
-     *
-     * @return configured argument resolvers
-     */
-    public List<ArgumentResolver> getArgumentResolvers() {
-        return argumentResolvers;
-    }
-
-    /**
-     * 🧷 Replaces the current {@link ArgumentResolver}s.
-     *
-     * @param argumentResolvers new resolvers to apply
-     */
-    public void setArgumentResolvers(List<ArgumentResolver> argumentResolvers) {
-        this.argumentResolvers = argumentResolvers;
+        return result;
     }
 
     /**
@@ -99,13 +71,8 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
     public void initialize(WebBeanContext context) {
         List<ReturnValueHandler> returnValueHandlers = new ArrayList<>(
                 WebBeanContext.getLocalBeans(ReturnValueHandler.class, context));
-        List<ArgumentResolver>   argumentResolvers   = new ArrayList<>(
-                WebBeanContext.getLocalBeans(ArgumentResolver.class, context));
 
         Sorter.sort(returnValueHandlers);
-        Sorter.sort(argumentResolvers);
-
-        setArgumentResolvers(List.copyOf(argumentResolvers));
 
         returnValueProcessor = context.getBean(ReturnValueProcessor.class);
 
@@ -115,6 +82,7 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter, Initiali
     /**
      * 🔧 Subclasses must implement the handler invocation logic.
      */
-    protected abstract void doHandle(HttpServletRequest request, HttpServletResponse response, MappedHandler mappedHandler, InvocationOutcome result);
+    protected abstract MVCResult doInvokeHandler(
+            HttpServletRequest request, HttpServletResponse response, MappedHandler mappedHandler);
 
 }

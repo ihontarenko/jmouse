@@ -14,9 +14,6 @@ import org.jmouse.core.MethodParameter;
  * Object actualHandler = mapped.handler();
  * }</pre>
  *
- * @param handler     the actual handler to be executed
- * @param mappingResult  the result of route pattern matching
- *
  * @see Route
  * @see RouteMatch
  * @see MappedHandler
@@ -24,6 +21,6 @@ import org.jmouse.core.MethodParameter;
  * ✍️ Author: Ivan Hontarenko (Mr. Jerry Mouse)
  * 📧 Email: ihontarenko@gmail.com
  */
-public record RouteMappedHandler(Object handler, MappingResult mappingResult, MethodParameter methodParameter)
+public record RouteMappedHandler(Object handler, MappingResult mappingResult, MethodParameter returnParameter)
         implements MappedHandler {
 }

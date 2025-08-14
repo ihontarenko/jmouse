@@ -70,7 +70,7 @@ public class ControllerMethodMapping extends AbstractHandlerPathMapping<Controll
      * @return the predefined {@code MethodParameter}
      */
     @Override
-    protected MethodParameter getMethodParameter(ControllerMethod handler) {
+    protected MethodParameter getReturnParameter(ControllerMethod handler) {
         return METHOD_PARAMETER;
     }
 }

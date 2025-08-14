@@ -2,7 +2,6 @@ package org.jmouse.web.method.argument;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanContextAware;
-import org.jmouse.mvc.InvocationOutcome;
 import org.jmouse.mvc.MappingResult;
 import org.jmouse.web.http.request.RequestContext;
 import org.jmouse.web.method.AbstractArgumentResolver;
@@ -21,8 +20,7 @@ public class WebBeanContextArgumentResolver extends AbstractArgumentResolver imp
     public Object resolveArgument(
             MethodParameter parameter,
             RequestContext requestContext,
-            MappingResult mappingResult,
-            InvocationOutcome invocationResult
+            MappingResult mappingResult
     ) {
         return getBeanContext();
     }

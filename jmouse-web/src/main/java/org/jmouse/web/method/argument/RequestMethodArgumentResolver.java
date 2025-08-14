@@ -20,8 +20,7 @@ public class RequestMethodArgumentResolver extends AbstractArgumentResolver {
     public Object resolveArgument(
             MethodParameter parameter,
             RequestContext requestContext,
-            MappingResult mappingResult,
-            InvocationOutcome invocationResult
+            MappingResult mappingResult
     ) {
         HttpServletRequest request = requestContext.request();
 

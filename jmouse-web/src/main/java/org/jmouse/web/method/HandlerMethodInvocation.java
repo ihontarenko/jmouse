@@ -5,7 +5,6 @@ import org.jmouse.core.reflection.Reflections;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.mvc.ArgumentResolverException;
-import org.jmouse.mvc.InvocationOutcome;
 import org.jmouse.mvc.MappingResult;
 import org.jmouse.web.annotation.MethodDescription;
 import org.jmouse.web.http.request.RequestContext;
@@ -29,7 +28,7 @@ import java.util.Optional;
  * }</pre>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
- * @autho ihontarenko@gmail.com
+ * @author ihontarenko@gmail.com
  */
 public class HandlerMethodInvocation {
 
@@ -39,18 +38,15 @@ public class HandlerMethodInvocation {
     private final List<ArgumentResolver> argumentResolvers;
     private final MappingResult          mappingResult;
     private final AnnotationRepository   annotationRepository;
-    private final InvocationOutcome      invocationResult;
 
     public HandlerMethodInvocation(
             HandlerMethodContext handlerContext,
             MappingResult mappingResult,
-            InvocationOutcome outcome,
             List<ArgumentResolver> resolvers
     ) {
         this.handlerContext = handlerContext;
         this.mappingResult = mappingResult;
         this.annotationRepository = AnnotationRepository.ofAnnotatedElement(getHandlerMethod().getMethod());
-        this.invocationResult = outcome;
         this.argumentResolvers = resolvers;
     }
 
@@ -79,15 +75,15 @@ public class HandlerMethodInvocation {
      * @throws RuntimeException if the method cannot be invoked
      */
     public Object invoke() {
-        HandlerMethod         handlerMethod = handlerContext.handlerMethod();
-        List<MethodParameter> parameters    = handlerMethod.getParameters();
-        Object[]              arguments     = new Object[parameters.size()];
-        Method         method         = handlerMethod.getMethod();
-        RequestContext requestContext = handlerContext.requestContext();
+        HandlerMethod         handlerMethod  = handlerContext.handlerMethod();
+        List<MethodParameter> parameters     = handlerMethod.getParameters();
+        Object[]              arguments      = new Object[parameters.size()];
+        Method                method         = handlerMethod.getMethod();
+        RequestContext        requestContext = handlerContext.requestContext();
 
         for (MethodParameter parameter : parameters) {
             Object resolved = getArgumentResolver(parameter)
-                    .resolveArgument(parameter, requestContext, mappingResult, invocationResult);
+                    .resolveArgument(parameter, requestContext, mappingResult);
             arguments[parameter.getParameterIndex()] = resolved;
         }
 

@@ -18,7 +18,7 @@ import java.util.List;
  * Handler execution = new Handler(handler);
  * execution.addInterceptor(new LoggingInterceptor());
  * if (execution.preHandle(request, response)) {
- *     HandlerResult result = adapter.handle(request, response, handler);
+ *     MVCResult result = adapter.handle(request, response, handler);
  *     execution.postHandle(request, response, result);
  * }
  * }</pre>
@@ -103,7 +103,7 @@ public final class Handler {
      * @param response the current HTTP response
      * @param result   the handler's response
      */
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, InvocationOutcome result) {
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, MVCResult result) {
         for (HandlerInterceptor interceptor : getInterceptors()) {
             interceptor.postHandle(request, response, getHandler(), result);
         }

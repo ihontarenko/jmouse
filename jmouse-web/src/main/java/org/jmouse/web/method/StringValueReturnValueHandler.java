@@ -1,7 +1,7 @@
 package org.jmouse.web.method;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.mvc.InvocationOutcome;
+import org.jmouse.mvc.MVCResult;
 import org.jmouse.web.http.request.RequestContext;
 import org.jmouse.core.Priority;
 
@@ -11,7 +11,7 @@ import java.io.IOException;
 public class StringValueReturnValueHandler extends AbstractReturnValueHandler {
 
     @Override
-    protected void doReturnValueHandle(InvocationOutcome result, RequestContext requestContext) {
+    protected void doReturnValueHandle(MVCResult result, RequestContext requestContext) {
         String              returnValue     = (String) result.getReturnValue();
         HttpServletResponse servletResponse = requestContext.response();
 
@@ -23,8 +23,8 @@ public class StringValueReturnValueHandler extends AbstractReturnValueHandler {
     }
 
     @Override
-    public boolean supportsReturnType(InvocationOutcome outcome) {
-        return outcome.getReturnValue() instanceof String;
+    public boolean supportsReturnType(MVCResult result) {
+        return result.getReturnValue() instanceof String;
     }
 
 }

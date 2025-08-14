@@ -2,7 +2,7 @@ package org.jmouse.web;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
-import org.jmouse.mvc.InvocationOutcome;
+import org.jmouse.mvc.MVCResult;
 import org.jmouse.mvc.MappedHandler;
 import org.jmouse.web.http.request.RequestContext;
 import org.jmouse.web.context.WebBeanContext;
@@ -47,7 +47,7 @@ public abstract class AbstractExceptionResolver
      * @param exception      the exception thrown
      */
     @Override
-    public InvocationOutcome resolveException(RequestContext requestContext, MappedHandler mappedHandler, Exception exception) {
+    public MVCResult resolveException(RequestContext requestContext, MappedHandler mappedHandler, Exception exception) {
         return doExceptionResolve(requestContext, mappedHandler, exception);
     }
 
@@ -85,6 +85,6 @@ public abstract class AbstractExceptionResolver
      * @param mappedHandler  the matched handler
      * @param exception      the thrown exception
      */
-    protected abstract InvocationOutcome doExceptionResolve(
+    protected abstract MVCResult doExceptionResolve(
             RequestContext requestContext, MappedHandler mappedHandler, Exception exception);
 }

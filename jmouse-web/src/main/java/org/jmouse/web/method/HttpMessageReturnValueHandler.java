@@ -2,11 +2,12 @@ package org.jmouse.web.method;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
-import org.jmouse.core.MethodParameter;
 import org.jmouse.core.MimeParser;
+import org.jmouse.core.Streamable;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
-import org.jmouse.mvc.InvocationOutcome;
+import org.jmouse.mvc.MVCResult;
+import org.jmouse.mvc.MappedHandler;
 import org.jmouse.web.http.request.RequestContext;
 import org.jmouse.web.method.converter.WebHttpServletResponse;
 import org.jmouse.web.method.converter.HttpMessageConverter;
@@ -15,13 +16,13 @@ import org.jmouse.web.method.converter.MessageConverterManager;
 import org.jmouse.web.method.converter.UnsuitableException;
 import org.jmouse.web.annotation.Mapping;
 import org.jmouse.core.Priority;
-import org.jmouse.core.Streamable;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.request.Headers;
 import org.jmouse.web.http.request.RequestAttributesHolder;
 import org.jmouse.web.http.HttpHeader;
 
 import java.io.IOException;
+import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -62,18 +63,18 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
      * Handles the given controller method return value by selecting an appropriate
      * {@link HttpMessageConverter} and writing the converted output to the HTTP response.
      *
-     * @param outcome        the invocation outcome, containing the return value and method metadata
+     * @param result        the invocation result, containing the return value and method metadata
      * @param requestContext the current request context
      * @throws UnsuitableException if no compatible message converter is found
      */
     @Override
-    protected void doReturnValueHandle(InvocationOutcome outcome, RequestContext requestContext) {
-        Object                       returnValue      = outcome.getReturnValue();
+    protected void doReturnValueHandle(MVCResult result, RequestContext requestContext) {
+        Object                       returnValue      = result.getReturnValue();
         HttpServletResponse          servletResponse  = requestContext.response();
         HttpMessageConverter<Object> messageConverter = null;
         Headers                      incomingHeaders  = RequestAttributesHolder.getRequestHeaders().headers();
         MediaType                    contentType      = null;
-        List<MediaType>              acceptance       = getProduces(outcome.getReturnParameter());
+        List<MediaType>              acceptance       = getProduces(result.getMappedHandler());
 
         // Fallback to Accept header if no explicit 'produces' declaration
         if (acceptance.isEmpty()) {
@@ -107,7 +108,7 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
         outputHeaders.setHeader(HttpHeader.X_JMOUSE_DEBUG, "DEBUG MESSAGE!");
 
         try {
-            messageConverter.write(returnValue, outcome.getReturnParameter().getReturnType(), httpMessage);
+            messageConverter.write(returnValue, result.getReturnType().getReturnType(), httpMessage);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -116,34 +117,39 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
     /**
      * Checks whether this handler supports the given return type.
      *
-     * @param outcome the invocation outcome to check
+     * @param result the invocation result to check
      * @return {@code true} if the return value is non-null and not {@code void}, otherwise {@code false}
      */
     @Override
-    public boolean supportsReturnType(InvocationOutcome outcome) {
-        return outcome.getReturnValue() != null && !outcome.getReturnParameter().getReturnType().equals(void.class);
+    public boolean supportsReturnType(MVCResult result) {
+        return result.getReturnType() != null && !result.getReturnType().getReturnType().equals(void.class);
     }
 
     /**
      * Retrieves the list of media types declared via {@link Mapping#produces()} on the given method parameter.
      *
-     * @param parameter the method parameter to inspect
+     * @param mappedHandler the method parameter to inspect
      * @return a list of produced media types, or an empty list if none declared
      */
-    protected List<MediaType> getProduces(MethodParameter parameter) {
-        List<MediaType>            acceptance = new ArrayList<>();
-        Optional<MergedAnnotation> annotation = AnnotationRepository
-                .ofAnnotatedElement(parameter.getAnnotatedElement())
-                .get(Mapping.class);
+    protected List<MediaType> getProduces(MappedHandler mappedHandler) {
+        List<MediaType>  acceptance = new ArrayList<>();
+        AnnotatedElement element    = null;
+
+        if (mappedHandler.handler() instanceof HandlerMethod handlerMethod) {
+            element = handlerMethod.getMethod();
+        }
+
+        if (element == null) {
+            return acceptance;
+        }
+
+        Optional<MergedAnnotation> annotation = AnnotationRepository.ofAnnotatedElement(element).get(Mapping.class);
 
         if (annotation.isPresent()) {
             Mapping  mapping  = annotation.get().synthesize();
             String[] produces = mapping.produces();
             if (produces != null && produces.length > 0) {
-                acceptance = Streamable.of(produces)
-                        .map(MimeParser::parseMimeType)
-                        .map(MediaType::new)
-                        .toList();
+                acceptance = Streamable.of(produces).map(MimeParser::parseMimeType).map(MediaType::new).toList();
             }
         }
 

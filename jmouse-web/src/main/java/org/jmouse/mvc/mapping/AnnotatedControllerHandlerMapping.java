@@ -106,7 +106,7 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
      * @return a {@link MethodParameter} representing the method's return type
      */
     @Override
-    protected MethodParameter getMethodParameter(HandlerMethod handler) {
+    protected MethodParameter getReturnParameter(HandlerMethod handler) {
         return MethodParameter.forMethod(handler.getMethod(), -1);
     }
 }

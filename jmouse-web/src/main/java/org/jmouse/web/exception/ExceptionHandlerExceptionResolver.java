@@ -112,24 +112,24 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
      * @param requestContext the request context
      * @param mappedHandler  the original mapped handler
      * @param exception      the thrown exception
-     * @return an {@link InvocationOutcome} containing the handler method result
+     * @return an {@link MVCResult} containing the handler method result
      */
     @Override
-    protected InvocationOutcome doExceptionResolve(
+    protected MVCResult doExceptionResolve(
             RequestContext requestContext, MappedHandler mappedHandler, Exception exception) {
-        InvocationOutcome outcome       = new Outcome(null);
-        HandlerMethod     handlerMethod = getExceptionHandler(exception.getClass());
-        MappingResult     mappingResult = mappedHandler == null ? null : mappedHandler.mappingResult();
+        HandlerMethod handlerMethod = getExceptionHandler(exception.getClass());
+        MappingResult mappingResult = mappedHandler == null ? null : mappedHandler.mappingResult();
+        MVCResult     mvcResult     = null;
 
         if (handlerMethod != null) {
             HandlerMethodContext    context    = new HandlerMethodContext(requestContext, handlerMethod);
-            HandlerMethodInvocation invocation = new HandlerMethodInvocation(context, mappingResult,
-                    outcome, argumentResolvers);
-            outcome.setReturnValue(invocation.invoke());
-            outcome.setReturnParameter(MethodParameter.forMethod(handlerMethod.getMethod(), -1));
+            HandlerMethodInvocation invocation = new HandlerMethodInvocation(context, mappingResult, argumentResolvers);
+            MethodParameter         returnType = MethodParameter.forMethod(handlerMethod.getMethod(), -1);
+
+            mvcResult = new MVCResult(invocation.invoke(), returnType, mappedHandler);
         }
 
-        return outcome;
+        return mvcResult;
     }
 
     /**

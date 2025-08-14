@@ -176,8 +176,6 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
             context.addInitializer(initializer);
         }
 
-
-
         if (useWebMvc) {
             if (!isRoot) {
                 // scan only in user classes

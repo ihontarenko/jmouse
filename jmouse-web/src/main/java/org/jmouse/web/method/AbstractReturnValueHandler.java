@@ -2,7 +2,7 @@ package org.jmouse.web.method;
 
 import org.jmouse.beans.InitializingBean;
 import org.jmouse.beans.InitializingBeanSupport;
-import org.jmouse.mvc.InvocationOutcome;
+import org.jmouse.mvc.MVCResult;
 import org.jmouse.web.http.request.RequestContext;
 import org.jmouse.web.context.WebBeanContext;
 
@@ -12,30 +12,17 @@ import org.jmouse.web.context.WebBeanContext;
  * <p>Provides lifecycle integration via {@link InitializingBean}
  * and delegates return value processing to subclasses.
  *
- * <p>Typical usage:
- * <pre>{@code
- * public class JsonReturnValueHandler extends AbstractReturnValueHandler {
- *     protected void doReturnValueHandle(MethodParameter returnType, InvocationOutcome result, RequestContext ctx) {
- *         // Serialize result to JSON and write to response
- *     }
- *
- *     protected void doInitialize(WebBeanContext context) {
- *         // Load ObjectMapper, etc.
- *     }
- * }
- * }</pre>
- *
  * @author Ivan Hontarenko
  * @author ihontarenko@gmail.com
  */
 public abstract class AbstractReturnValueHandler implements ReturnValueHandler, InitializingBeanSupport<WebBeanContext> {
 
     /**
-     * 🔁 Delegates to {@link #doReturnValueHandle(InvocationOutcome, RequestContext)}.
+     * 🔁 Delegates to {@link #doReturnValueHandle(MVCResult, RequestContext)}.
      */
     @Override
-    public void handleReturnValue(InvocationOutcome outcome, RequestContext requestContext) {
-        doReturnValueHandle(outcome, requestContext);
+    public void handleReturnValue(MVCResult result, RequestContext requestContext) {
+        doReturnValueHandle(result, requestContext);
     }
 
     /**
@@ -44,5 +31,5 @@ public abstract class AbstractReturnValueHandler implements ReturnValueHandler, 
      * @param result          actual return value + metadata
      * @param requestContext  request-specific state
      */
-    protected abstract void doReturnValueHandle(InvocationOutcome result, RequestContext requestContext);
+    protected abstract void doReturnValueHandle(MVCResult result, RequestContext requestContext);
 }

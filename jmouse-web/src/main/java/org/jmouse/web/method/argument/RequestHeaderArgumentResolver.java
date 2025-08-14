@@ -23,8 +23,7 @@ public class RequestHeaderArgumentResolver extends AbstractArgumentResolver {
     public Object resolveArgument(
             MethodParameter parameter,
             RequestContext requestContext,
-            MappingResult mappingResult,
-            InvocationOutcome invocationResult
+            MappingResult mappingResult
     ) {
         Optional<MergedAnnotation> optional = AnnotationRepository.ofAnnotatedElement(parameter.getParameter())
                 .get(RequestHeader.class);
