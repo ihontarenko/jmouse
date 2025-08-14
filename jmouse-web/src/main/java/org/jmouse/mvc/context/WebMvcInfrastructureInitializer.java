@@ -14,6 +14,7 @@ import org.jmouse.web.method.ReturnValueProcessor;
 import org.jmouse.web.method.converter.HttpMessageConverter;
 import org.jmouse.web.method.converter.MessageConverterManager;
 import org.jmouse.mvc.routing.MappingRegistry;
+import org.jmouse.web.negotiation.MediaTypeLookup;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializ
     public static final short EXCEPTION_RESOLVER     = 1 << 8;   // 0x0100
     public static final short ROUTING_MAPPING        = 1 << 9;   // 0x0200
     public static final short EXCEPTION_MAPPING      = 1 << 10;  // 0x0400
+    public static final short MEDIA_TYPE_LOOKUP      = 1 << 11;  // 0x0800
 
     private static final Map<Short, BeanScanner<AnnotatedElement>> REGISTRATIONS = new HashMap<>(16);
 
@@ -82,6 +84,8 @@ public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializ
                 -> new ArrayList<>(ClassFinder.findExactlyClasses(MappingRegistry.class, types)));
         REGISTRATIONS.put(EXCEPTION_MAPPING, types
                 -> new ArrayList<>(ClassFinder.findExactlyClasses(ExceptionMappingRegistry.class, types)));
+        REGISTRATIONS.put(MEDIA_TYPE_LOOKUP, types
+                -> new ArrayList<>(ClassFinder.findImplementations(MediaTypeLookup.class, types)));
     }
 
     /**
@@ -99,7 +103,8 @@ public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializ
                 VIEW_RESOLVER,
                 EXCEPTION_RESOLVER,
                 ROUTING_MAPPING,
-                EXCEPTION_MAPPING
+                EXCEPTION_MAPPING,
+                MEDIA_TYPE_LOOKUP
         ), basePackages);
     }
 

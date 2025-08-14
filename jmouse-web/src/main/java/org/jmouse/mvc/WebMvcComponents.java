@@ -3,6 +3,7 @@ package org.jmouse.mvc;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.mvc.routing.MappingRegistry;
+import org.jmouse.web.negotiation.MediaTypeManager;
 
 /**
  * 🧩 Defines core MVC beans for the jMouse framework.
@@ -15,14 +16,14 @@ import org.jmouse.mvc.routing.MappingRegistry;
 @BeanFactories
 public class WebMvcComponents {
 
-    /**
-     * 🚦 Creates the registry for MVC interceptors.
-     *
-     * @return a new {@link HandlerInterceptorRegistry}
-     */
     @Bean
     public HandlerInterceptorRegistry handlerInterceptorRegistry() {
         return new HandlerInterceptorRegistry();
+    }
+
+    @Bean
+    public MediaTypeManager mediaTypeManager() {
+        return new MediaTypeManager();
     }
 
 }

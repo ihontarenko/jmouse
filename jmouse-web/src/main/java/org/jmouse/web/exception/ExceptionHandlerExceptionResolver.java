@@ -8,6 +8,8 @@ import org.jmouse.web.annotation.Controller;
 import org.jmouse.web.annotation.ExceptionHandler;
 import org.jmouse.core.Sorter;
 import org.jmouse.web.AbstractExceptionResolver;
+import org.jmouse.web.http.request.RequestAttributes;
+import org.jmouse.web.http.request.RequestAttributesHolder;
 import org.jmouse.web.method.*;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.request.RequestContext;
@@ -126,7 +128,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
             HandlerMethodInvocation invocation = new HandlerMethodInvocation(context, mappingResult, argumentResolvers);
             MethodParameter         returnType = MethodParameter.forMethod(handlerMethod.getMethod(), -1);
 
-            mvcResult = new MVCResult(invocation.invoke(), returnType, mappedHandler);
+            mvcResult = new MVCResult(null, returnType, mappedHandler);
+            RequestAttributesHolder.setAttribute(RequestAttributes.MVC_RESULT_ATTRIBUTE, mvcResult);
+            mvcResult.setReturnValue(invocation.invoke());
         }
 
         return mvcResult;

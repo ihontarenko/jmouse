@@ -20,13 +20,11 @@ import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.request.Headers;
 import org.jmouse.web.http.request.RequestAttributesHolder;
 import org.jmouse.web.http.HttpHeader;
+import org.jmouse.web.negotiation.MediaTypeManager;
 
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * 📡 Handles controller return values by converting them into HTTP responses using {@link HttpMessageConverter}s.
@@ -46,9 +44,8 @@ import java.util.Optional;
 @Priority(500)
 public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
 
-    /** The manager responsible for locating the appropriate {@link HttpMessageConverter}. */
     private MessageConverterManager converterManager;
-
+    private MediaTypeManager        mediaTypeManager;
     /**
      * Initializes this handler by retrieving the {@link MessageConverterManager} from the application context.
      *
@@ -57,6 +54,7 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
     @Override
     public void doInitialize(WebBeanContext context) {
         converterManager = context.getBean(MessageConverterManager.class);
+        mediaTypeManager = context.getBean(MediaTypeManager.class);
     }
 
     /**
@@ -74,6 +72,9 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
         HttpMessageConverter<Object> messageConverter = null;
         Headers                      incomingHeaders  = RequestAttributesHolder.getRequestHeaders().headers();
         MediaType                    contentType      = null;
+
+        Collection<MediaType> mediaTypes = mediaTypeManager.lookupOnRequest(requestContext.request());
+
         List<MediaType>              acceptance       = getProduces(result.getMappedHandler());
 
         // Fallback to Accept header if no explicit 'produces' declaration
