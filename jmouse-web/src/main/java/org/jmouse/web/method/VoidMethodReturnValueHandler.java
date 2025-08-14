@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
 import org.jmouse.mvc.InvocationOutcome;
 import org.jmouse.web.http.request.RequestContext;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 import org.jmouse.web.http.request.http.HttpHeader;
 import org.jmouse.web.http.request.http.HttpStatus;
 

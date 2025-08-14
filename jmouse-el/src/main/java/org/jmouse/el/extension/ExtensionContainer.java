@@ -4,7 +4,7 @@ import org.jmouse.core.bind.AttributeResolver;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.parser.Parser;
-import org.jmouse.util.Sorter;
+import org.jmouse.core.Sorter;
 
 import java.util.List;
 

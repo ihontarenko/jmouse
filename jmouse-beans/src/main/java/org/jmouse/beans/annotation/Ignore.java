@@ -4,7 +4,7 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.conditions.BeanCondition;
 import org.jmouse.beans.conditions.BeanRegistrationCondition;
 import org.jmouse.beans.conditions.ConditionalMetadata;
-import org.jmouse.util.IgnoreReasonGenerator;
+import org.jmouse.core.IgnoreReasonGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

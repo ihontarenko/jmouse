@@ -10,14 +10,14 @@ import org.jmouse.web.annotation.Mapping;
 import org.jmouse.web.annotation.QueryParameter;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.method.HandlerMethod;
-import org.jmouse.web.method.MethodParameter;
+import org.jmouse.core.MethodParameter;
 import org.jmouse.web.http.request.http.HttpHeader;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Optional;
 
-import static org.jmouse.util.Streamable.of;
+import static org.jmouse.core.Streamable.of;
 
 /**
  * 📌 Detects controller beans and registers their annotated handler methods.

@@ -4,7 +4,7 @@ import org.jmouse.beans.BeanScanner;
 import org.jmouse.beans.annotation.BeanImport;
 import org.jmouse.core.reflection.ClassFinder;
 import org.jmouse.core.reflection.Reflections;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;

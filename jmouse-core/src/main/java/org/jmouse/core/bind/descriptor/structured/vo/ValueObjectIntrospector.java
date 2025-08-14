@@ -2,7 +2,7 @@ package org.jmouse.core.bind.descriptor.structured.vo;
 
 import org.jmouse.core.bind.descriptor.*;
 import org.jmouse.core.reflection.JavaType;
-import org.jmouse.util.Streamable;
+import org.jmouse.core.Streamable;
 
 import java.lang.reflect.RecordComponent;
 import java.util.*;

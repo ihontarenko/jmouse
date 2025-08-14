@@ -1,6 +1,6 @@
 package org.jmouse.core.graph;
 
-import org.jmouse.util.Visitor;
+import org.jmouse.core.Visitor;
 
 import java.util.*;
 

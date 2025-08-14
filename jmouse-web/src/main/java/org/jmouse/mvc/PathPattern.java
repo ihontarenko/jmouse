@@ -1,7 +1,7 @@
 package org.jmouse.mvc;
 
-import org.jmouse.util.PlaceholderReplacer;
-import org.jmouse.util.StandardPlaceholderReplacer;
+import org.jmouse.core.PlaceholderReplacer;
+import org.jmouse.core.StandardPlaceholderReplacer;
 
 import java.util.*;
 import java.util.regex.Matcher;

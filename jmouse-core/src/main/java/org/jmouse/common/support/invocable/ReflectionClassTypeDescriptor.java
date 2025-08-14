@@ -5,7 +5,7 @@ import org.jmouse.core.reflection.FieldMatchers;
 import org.jmouse.core.reflection.FieldFinder;
 import org.jmouse.core.reflection.MemberFinder;
 import org.jmouse.core.reflection.MethodFinder;
-import org.jmouse.util.helper.Strings;
+import org.jmouse.util.Strings;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

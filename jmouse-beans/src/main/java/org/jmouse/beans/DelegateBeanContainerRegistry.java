@@ -1,6 +1,6 @@
 package org.jmouse.beans;
 
-import org.jmouse.util.Delegate;
+import org.jmouse.core.Delegate;
 
 /**
  * A {@link BeanContainerRegistry} implementation that delegates all operations to another registry.

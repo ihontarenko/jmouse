@@ -3,7 +3,7 @@ package org.jmouse.mvc;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
-import org.jmouse.util.Sorter;
+import org.jmouse.core.Sorter;
 import org.jmouse.web.context.WebBeanContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

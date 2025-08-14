@@ -3,14 +3,12 @@ package org.jmouse.testing_ground.templates;
 import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.extension.Lambda;
 import org.jmouse.el.extension.MethodImporter;
 import org.jmouse.el.extension.calculator.MathematicCalculator;
-import org.jmouse.el.extension.i18nExtension;
 import org.jmouse.testing_ground.binder.dto.Status;
 import org.jmouse.testing_ground.binder.dto.User;
 import org.jmouse.testing_ground.binder.dto.UserStatus;
-import org.jmouse.util.helper.Strings;
+import org.jmouse.util.Strings;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

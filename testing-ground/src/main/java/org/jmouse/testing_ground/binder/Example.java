@@ -4,7 +4,7 @@ import org.jmouse.core.bind.*;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
 import org.jmouse.testing_ground.binder.dto.*;
-import org.jmouse.util.Setter;
+import org.jmouse.core.Setter;
 
 import java.util.ArrayList;
 import java.util.HashMap;

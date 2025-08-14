@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.reflection.Reflections;
-import org.jmouse.util.Sorter;
+import org.jmouse.core.Sorter;
 import org.jmouse.web.initializer.WebApplicationInitializer;
 
 import java.lang.reflect.Constructor;

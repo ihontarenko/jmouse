@@ -4,8 +4,8 @@ import org.jmouse.core.bind.descriptor.AbstractDescriptor;
 import org.jmouse.core.bind.descriptor.ClassTypeDescriptor;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
-import org.jmouse.util.Getter;
-import org.jmouse.util.Setter;
+import org.jmouse.core.Getter;
+import org.jmouse.core.Setter;
 
 import java.util.Map;
 

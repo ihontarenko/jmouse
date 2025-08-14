@@ -4,8 +4,6 @@ import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.StringSource;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.ScopedChain;
-import org.jmouse.el.extension.ExtensionContainer;
-import org.jmouse.el.extension.Lambda;
 import org.jmouse.el.lexer.TokenizableSource;
 import org.jmouse.el.node.ExpressionNode;
 import org.jmouse.el.node.Node;
@@ -16,7 +14,7 @@ import org.jmouse.el.node.expression.literal.StringLiteralNode;
 import org.jmouse.el.renderable.evaluation.LoopVariables;
 import org.jmouse.el.renderable.node.*;
 import org.jmouse.el.renderable.node.sub.ConditionBranch;
-import org.jmouse.util.helper.Iterables;
+import org.jmouse.util.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

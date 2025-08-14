@@ -3,7 +3,7 @@ package org.jmouse.el.node;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.jmouse.util.helper.Strings.underscored;
+import static org.jmouse.util.Strings.underscored;
 
 /**
  * An abstract implementation of the {@link Node} interface, providing

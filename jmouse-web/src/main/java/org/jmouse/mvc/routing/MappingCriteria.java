@@ -3,7 +3,7 @@ package org.jmouse.mvc.routing;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.mvc.Route;
 import org.jmouse.mvc.routing.condition.*;
-import org.jmouse.util.Streamable;
+import org.jmouse.core.Streamable;
 import org.jmouse.web.http.request.RequestRoute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

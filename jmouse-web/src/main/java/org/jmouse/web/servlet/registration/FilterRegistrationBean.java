@@ -5,7 +5,7 @@ import jakarta.servlet.Filter;
 import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletContext;
 import org.jmouse.beans.annotation.Ignore;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 import java.util.*;
 

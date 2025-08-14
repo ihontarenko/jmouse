@@ -2,7 +2,7 @@ package org.jmouse.el.lexer.recognizer;
 
 import org.jmouse.el.lexer.RawToken;
 import org.jmouse.el.lexer.Token;
-import org.jmouse.util.Sorter;
+import org.jmouse.core.Sorter;
 
 import java.util.ArrayList;
 import java.util.Iterator;

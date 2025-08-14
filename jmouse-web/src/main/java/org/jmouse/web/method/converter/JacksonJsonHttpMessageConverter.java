@@ -2,7 +2,7 @@ package org.jmouse.web.method.converter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jmouse.core.MediaType;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 import java.io.IOException;
 import java.util.List;

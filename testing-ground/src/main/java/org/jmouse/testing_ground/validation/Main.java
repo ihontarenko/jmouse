@@ -2,13 +2,12 @@ package org.jmouse.testing_ground.validation;
 
 import org.jmouse.core.i18n.StandardMessageSourceBundle;
 import org.jmouse.testing_ground.i18n.MessageExample;
-import org.jmouse.util.Getter;
+import org.jmouse.core.Getter;
 import org.jmouse.validator.Errors;
 import org.jmouse.validator.FieldError;
 import org.jmouse.validator.ObjectError;
 import org.jmouse.validator.Validator;
 
-import java.math.BigDecimal;
 import java.util.Locale;
 import java.util.Map;
 

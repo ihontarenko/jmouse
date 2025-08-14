@@ -3,7 +3,7 @@ package org.jmouse.beans.scanner;
 import org.jmouse.beans.BeanScanner;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.core.reflection.ClassFinder;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;

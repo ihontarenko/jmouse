@@ -2,7 +2,7 @@ package org.jmouse.web.method;
 
 import org.jmouse.beans.InitializingBeanSupport;
 import org.jmouse.mvc.InvocationOutcome;
-import org.jmouse.util.Sorter;
+import org.jmouse.core.Sorter;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.request.RequestContext;
 

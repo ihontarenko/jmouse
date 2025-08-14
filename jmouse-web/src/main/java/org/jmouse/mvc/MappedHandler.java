@@ -1,6 +1,6 @@
 package org.jmouse.mvc;
 
-import org.jmouse.web.method.MethodParameter;
+import org.jmouse.core.MethodParameter;
 
 /**
  * 🔍 Represents a resolved handler along with its route mapping metadata.

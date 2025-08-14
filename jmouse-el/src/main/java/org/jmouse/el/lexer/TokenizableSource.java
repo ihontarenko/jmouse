@@ -1,6 +1,6 @@
 package org.jmouse.el.lexer;
 
-import org.jmouse.util.Streamable;
+import org.jmouse.core.Streamable;
 
 /**
  * Represents a tokenizable character sequence that allows type extraction and iteration.

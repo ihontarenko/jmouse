@@ -4,7 +4,7 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
-import org.jmouse.util.Streamable;
+import org.jmouse.core.Streamable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

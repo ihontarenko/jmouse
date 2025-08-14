@@ -2,7 +2,7 @@ package org.jmouse.mvc;
 
 import jakarta.servlet.Filter;
 import org.jmouse.beans.annotation.Ignore;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 import org.jmouse.web.servlet.DelegatingBeanFilter;
 import org.jmouse.web.servlet.registration.FilterRegistrationBean;
 

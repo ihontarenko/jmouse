@@ -4,7 +4,7 @@ import jakarta.xml.bind.*;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import org.jmouse.core.MediaType;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 import java.io.IOException;
 import java.util.List;

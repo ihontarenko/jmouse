@@ -3,7 +3,7 @@ package org.jmouse.web.method;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.mvc.InvocationOutcome;
 import org.jmouse.web.http.request.RequestContext;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 import java.io.IOException;
 

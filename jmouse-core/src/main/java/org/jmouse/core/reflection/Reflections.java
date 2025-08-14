@@ -1,9 +1,6 @@
 package org.jmouse.core.reflection;
 
 import org.jmouse.core.reflection.annotation.AnnotationData;
-import org.jmouse.core.reflection.annotation.AnnotationFinder;
-import org.jmouse.core.reflection.annotation.AnnotationMatcher;
-import org.jmouse.util.Streamable;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -21,8 +18,8 @@ import static org.jmouse.core.reflection.MethodMatchers.hasParameterTypes;
 import static org.jmouse.core.reflection.MethodMatchers.isAbstract;
 import static org.jmouse.core.reflection.annotation.AnnotationFinder.findAll;
 import static org.jmouse.core.reflection.annotation.AnnotationMatcher.isAnnotation;
-import static org.jmouse.util.Streamable.of;
-import static org.jmouse.util.helper.Strings.uncapitalize;
+import static org.jmouse.core.Streamable.of;
+import static org.jmouse.util.Strings.uncapitalize;
 
 /**
  * A utility class providing various reflection-based methods for working with classes, fields, methods, and constructors.

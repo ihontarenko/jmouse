@@ -16,7 +16,7 @@ import org.jmouse.beans.processor.InjectDependencyBeanPostProcessor;
 import org.jmouse.beans.processor.ProxyBeanPostProcessor;
 import org.jmouse.core.proxy.AnnotationProxyFactory;
 import org.jmouse.core.proxy.ProxyFactory;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.jmouse.core.reflection.Reflections.getShortName;

@@ -1,6 +1,6 @@
 package org.jmouse.core.env;
 
-import org.jmouse.util.Ordered;
+import org.jmouse.core.Ordered;
 
 import java.util.Objects;
 

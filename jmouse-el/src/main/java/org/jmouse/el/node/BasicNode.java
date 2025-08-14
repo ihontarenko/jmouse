@@ -2,7 +2,7 @@ package org.jmouse.el.node;
 
 import org.jmouse.el.lexer.Token;
 
-import static org.jmouse.util.helper.Strings.underscored;
+import static org.jmouse.util.Strings.underscored;
 
 /**
  * Represents a basic implementation of a {@link Node} with an associated {@link Token}.

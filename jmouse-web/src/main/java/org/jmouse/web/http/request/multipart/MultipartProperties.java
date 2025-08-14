@@ -3,7 +3,7 @@ package org.jmouse.web.http.request.multipart;
 import jakarta.servlet.MultipartConfigElement;
 import org.jmouse.context.BeanProperties;
 import org.jmouse.core.Bytes;
-import org.jmouse.util.AttributeMapper;
+import org.jmouse.core.AttributeMapper;
 
 @BeanProperties("jmouse.web.server.multipart")
 public class MultipartProperties {

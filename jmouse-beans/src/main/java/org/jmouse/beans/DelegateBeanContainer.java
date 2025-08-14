@@ -1,6 +1,6 @@
 package org.jmouse.beans;
 
-import org.jmouse.util.Delegate;
+import org.jmouse.core.Delegate;
 
 /**
  * A bean container implementation that delegates all operations to another {@link BeanContainer}.

@@ -1,8 +1,8 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.util.Exceptions;
-import org.jmouse.util.Streamable;
-import org.jmouse.util.helper.Arrays;
+import org.jmouse.core.Exceptions;
+import org.jmouse.core.Streamable;
+import org.jmouse.util.Arrays;
 
 import java.util.HashMap;
 import java.util.Iterator;

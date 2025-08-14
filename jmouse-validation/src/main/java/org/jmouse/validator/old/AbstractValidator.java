@@ -1,8 +1,8 @@
 package org.jmouse.validator.old;
 
-import org.jmouse.util.helper.Strings;
+import org.jmouse.util.Strings;
 
-import static org.jmouse.util.helper.Strings.underscored;
+import static org.jmouse.util.Strings.underscored;
 
 abstract public class AbstractValidator implements Validator {
 

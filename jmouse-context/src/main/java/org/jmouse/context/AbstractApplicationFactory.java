@@ -4,11 +4,11 @@ import org.jmouse.core.env.*;
 import org.jmouse.core.io.CompositeResourceLoader;
 import org.jmouse.core.io.PatternMatcherResourceLoader;
 import org.jmouse.core.io.Resource;
-import org.jmouse.util.helper.Strings;
+import org.jmouse.util.Strings;
 
 import java.nio.file.FileSystems;
 
-import static org.jmouse.util.helper.Files.removeExtension;
+import static org.jmouse.util.Files.removeExtension;
 
 /**
  * Abstract base class for implementing {@link ApplicationFactory}.

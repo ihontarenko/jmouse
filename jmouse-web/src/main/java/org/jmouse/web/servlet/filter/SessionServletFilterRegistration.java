@@ -1,7 +1,7 @@
 package org.jmouse.web.servlet.filter;
 
 import org.jmouse.beans.annotation.Bean;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 import org.jmouse.mvc.DelegatingBeanFilterRegistration;
 
 /**

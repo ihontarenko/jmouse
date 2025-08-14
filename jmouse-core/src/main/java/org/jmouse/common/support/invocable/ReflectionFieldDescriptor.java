@@ -1,10 +1,10 @@
 package org.jmouse.common.support.invocable;
 
-import org.jmouse.util.helper.Strings;
+import org.jmouse.util.Strings;
 
 import java.lang.reflect.Field;
 
-import static org.jmouse.util.helper.Strings.underscored;
+import static org.jmouse.util.Strings.underscored;
 
 public class ReflectionFieldDescriptor implements FieldDescriptor {
 

@@ -1,20 +1,14 @@
 package org.jmouse.testing_ground.templates;
 
-import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.PropertyPath;
-import org.jmouse.core.bind.accessor.JavaBeanAccessor;
-import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanDescriptor;
-import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.evaluation.ExpressionLanguageValuesResolver;
 import org.jmouse.el.evaluation.ReflectionClassPropertyResolver;
 import org.jmouse.el.extension.MethodImporter;
 import org.jmouse.el.renderable.*;
-import org.jmouse.el.renderable.evaluation.LoopVariables;
 import org.jmouse.el.renderable.loader.ClasspathLoader;
 import org.jmouse.el.renderable.loader.TemplateLoader;
 import org.jmouse.testing_ground.binder.dto.Book;
-import org.jmouse.util.helper.Strings;
+import org.jmouse.util.Strings;
 
 import java.util.ArrayList;
 import java.util.HashMap;

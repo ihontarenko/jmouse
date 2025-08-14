@@ -1,7 +1,7 @@
 package org.jmouse.core.i18n;
 
-import org.jmouse.util.Charset;
-import org.jmouse.util.Sorter;
+import org.jmouse.core.Charset;
+import org.jmouse.core.Sorter;
 
 import java.text.MessageFormat;
 import java.util.*;

@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;

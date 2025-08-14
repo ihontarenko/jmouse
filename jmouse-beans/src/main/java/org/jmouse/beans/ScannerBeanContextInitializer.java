@@ -2,9 +2,9 @@ package org.jmouse.beans;
 
 import org.jmouse.beans.annotation.SuppressException;
 import org.jmouse.beans.definition.BeanDefinitionFactory;
-import org.jmouse.util.Priority;
-import org.jmouse.util.Sorter;
-import org.jmouse.util.helper.Arrays;
+import org.jmouse.core.Priority;
+import org.jmouse.core.Sorter;
+import org.jmouse.util.Arrays;
 import org.slf4j.Logger;
 
 import java.lang.reflect.AnnotatedElement;

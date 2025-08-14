@@ -4,9 +4,9 @@ import org.jmouse.core.bind.descriptor.AnnotationDescriptor;
 import org.jmouse.core.bind.descriptor.MethodDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.reflection.TypeInformation;
-import org.jmouse.util.Factory;
-import org.jmouse.util.Priority;
-import org.jmouse.util.Setter;
+import org.jmouse.core.Factory;
+import org.jmouse.core.Priority;
+import org.jmouse.core.Setter;
 
 /**
  * Binder for Java records, enabling their instantiation and property binding from a data source.

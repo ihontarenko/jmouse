@@ -1,7 +1,7 @@
 package org.jmouse.el.extension.calculator;
 
 import org.jmouse.el.extension.Calculator;
-import org.jmouse.util.helper.Arrays;
+import org.jmouse.util.Arrays;
 
 import java.util.function.BinaryOperator;
 

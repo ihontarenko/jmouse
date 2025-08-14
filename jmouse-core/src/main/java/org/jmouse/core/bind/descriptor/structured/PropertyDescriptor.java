@@ -5,10 +5,9 @@ import org.jmouse.core.bind.LazyPropertyAccess;
 import org.jmouse.core.bind.PropertyAccessor;
 import org.jmouse.core.bind.descriptor.ClassTypeDescriptor;
 import org.jmouse.core.bind.descriptor.MethodDescriptor;
-import org.jmouse.util.Getter;
-import org.jmouse.util.Setter;
+import org.jmouse.core.Getter;
+import org.jmouse.core.Setter;
 
-import java.lang.reflect.Modifier;
 import java.util.function.Supplier;
 
 /**

@@ -1,15 +1,13 @@
 package org.jmouse.web.initializer;
 
 import org.jmouse.beans.BeanContext;
-import org.jmouse.util.Sorter;
+import org.jmouse.core.Sorter;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.servlet.RequestContextListener;
 import org.jmouse.web.servlet.SessionConfigurationInitializer;
 import org.jmouse.web.servlet.WebBeanContextListener;
-import org.jmouse.web.servlet.registration.FilterRegistrationBean;
 import org.jmouse.web.servlet.registration.RegistrationBean;
 import org.jmouse.web.servlet.registration.ServletListenerRegistrationBean;
-import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
 import java.util.ArrayList;
 import java.util.Collection;

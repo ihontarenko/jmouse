@@ -2,6 +2,7 @@ package org.jmouse.web.method;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
+import org.jmouse.core.MethodParameter;
 import org.jmouse.core.MimeParser;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
@@ -13,8 +14,8 @@ import org.jmouse.web.method.converter.HttpOutputMessage;
 import org.jmouse.web.method.converter.MessageConverterManager;
 import org.jmouse.web.method.converter.UnsuitableException;
 import org.jmouse.web.annotation.Mapping;
-import org.jmouse.util.Priority;
-import org.jmouse.util.Streamable;
+import org.jmouse.core.Priority;
+import org.jmouse.core.Streamable;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.request.Headers;
 import org.jmouse.web.http.request.RequestAttributesHolder;

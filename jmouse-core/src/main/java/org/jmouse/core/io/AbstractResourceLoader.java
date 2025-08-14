@@ -1,7 +1,7 @@
 package org.jmouse.core.io;
 
 import static org.jmouse.core.reflection.Reflections.getShortName;
-import static org.jmouse.util.helper.Files.extractProtocol;
+import static org.jmouse.util.Files.extractProtocol;
 
 abstract public class AbstractResourceLoader implements ResourceLoader {
 

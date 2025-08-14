@@ -1,6 +1,6 @@
 package org.jmouse.core.reflection;
 
-import org.jmouse.util.helper.Arrays;
+import org.jmouse.util.Arrays;
 
 import java.lang.reflect.*;
 import java.util.*;

@@ -1,7 +1,7 @@
 package org.jmouse.core.bind;
 
 import org.jmouse.core.reflection.JavaType;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;

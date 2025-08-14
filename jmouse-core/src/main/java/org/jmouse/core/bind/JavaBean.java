@@ -2,8 +2,8 @@ package org.jmouse.core.bind;
 
 import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
 import org.jmouse.core.reflection.JavaType;
-import org.jmouse.util.CachedSupplier;
-import org.jmouse.util.Factory;
+import org.jmouse.core.CachedSupplier;
+import org.jmouse.core.Factory;
 
 import java.lang.reflect.Constructor;
 import java.util.function.Supplier;

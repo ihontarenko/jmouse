@@ -3,7 +3,6 @@ package org.jmouse.el.extension.filter;
 import org.jmouse.core.reflection.ClassTypeInspector;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
-import org.jmouse.util.helper.Iterables;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;

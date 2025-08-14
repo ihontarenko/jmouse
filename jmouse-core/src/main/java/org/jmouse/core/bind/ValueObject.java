@@ -1,17 +1,15 @@
 package org.jmouse.core.bind;
 
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
-import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectIntrospector;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.Reflections;
-import org.jmouse.util.CachedSupplier;
-import org.jmouse.util.Factory;
-import org.jmouse.util.helper.Arrays;
+import org.jmouse.core.CachedSupplier;
+import org.jmouse.core.Factory;
+import org.jmouse.util.Arrays;
 
 import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
-import java.util.function.Supplier;
 
 import static org.jmouse.core.reflection.JavaType.forClass;
 import static org.jmouse.core.reflection.Reflections.*;

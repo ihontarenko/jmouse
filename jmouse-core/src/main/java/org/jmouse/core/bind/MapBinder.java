@@ -2,7 +2,7 @@ package org.jmouse.core.bind;
 
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.TypeInformation;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

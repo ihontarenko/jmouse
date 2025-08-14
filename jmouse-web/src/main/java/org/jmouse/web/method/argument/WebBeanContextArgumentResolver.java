@@ -6,7 +6,7 @@ import org.jmouse.mvc.InvocationOutcome;
 import org.jmouse.mvc.MappingResult;
 import org.jmouse.web.http.request.RequestContext;
 import org.jmouse.web.method.AbstractArgumentResolver;
-import org.jmouse.web.method.MethodParameter;
+import org.jmouse.core.MethodParameter;
 
 public class WebBeanContextArgumentResolver extends AbstractArgumentResolver implements BeanContextAware {
 

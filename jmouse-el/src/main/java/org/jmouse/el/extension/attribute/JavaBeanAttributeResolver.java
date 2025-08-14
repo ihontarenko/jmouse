@@ -3,9 +3,8 @@ package org.jmouse.el.extension.attribute;
 import org.jmouse.core.bind.AttributeResolver;
 import org.jmouse.core.bind.descriptor.Describer;
 import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanDescriptor;
-import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
 import org.jmouse.core.reflection.TypeInformation;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

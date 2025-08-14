@@ -1,6 +1,6 @@
 package org.jmouse.core.i18n;
 
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 import java.io.IOException;
 import java.io.InputStream;

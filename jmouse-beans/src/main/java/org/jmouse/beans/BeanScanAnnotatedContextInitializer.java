@@ -3,8 +3,8 @@ package org.jmouse.beans;
 import org.jmouse.beans.annotation.BeanScan;
 import org.jmouse.core.reflection.ClassFinder;
 import org.jmouse.core.reflection.Reflections;
-import org.jmouse.util.Priority;
-import org.jmouse.util.helper.Arrays;
+import org.jmouse.core.Priority;
+import org.jmouse.util.Arrays;
 
 /**
  * 🔁 Initializes the context with additional scan targets from {@link BeanScan}.

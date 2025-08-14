@@ -7,7 +7,6 @@ import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContainer;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.parser.TagParserContainer;
-import org.jmouse.util.Sorter;
 
 import java.util.ArrayList;
 import java.util.List;

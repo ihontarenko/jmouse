@@ -4,8 +4,8 @@ import org.jmouse.core.bind.descriptor.AbstractIntrospector;
 import org.jmouse.core.bind.descriptor.ClassTypeDescriptor;
 import org.jmouse.core.bind.descriptor.MethodDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyData;
-import org.jmouse.util.Getter;
-import org.jmouse.util.Setter;
+import org.jmouse.core.Getter;
+import org.jmouse.core.Setter;
 
 /**
  * Introspector for JavaBean properties, allowing analysis and metadata extraction.

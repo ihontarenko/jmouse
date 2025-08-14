@@ -41,22 +41,14 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
     private final WebApplicationFactory        factory;
     private final Set<Class<?>>                baseClasses  = new HashSet<>();
     private final Set<Class<?>>                coreClasses  = new HashSet<>(
-            Set.of(jMouseWebMvcRoot.class, jMouseWebRoot.class)
-    );
+            Set.of(jMouseWebMvcRoot.class, jMouseWebRoot.class));
     private final List<BeanContextInitializer> initializers = new ArrayList<>();
-    private final Bits                         userScanBits = Bits.of(
-            HANDLER_ADAPTER,
-            ARGUMENT_RESOLVER,
-            RETURN_VALUE_HANDLER,
-            RETURN_VALUE_PROCESSOR,
-            EXCEPTION_RESOLVER
-    );
-
-    private String                   contextId;
-    private WebBeanContext           parent;
-    private boolean                  useDefault = false;
-    private boolean                  useWebMvc  = false;
-    private Consumer<WebBeanContext> customizer = ctx -> {};
+    private       String                       contextId;
+    private       WebBeanContext               parent;
+    private       boolean                      useDefault   = false;
+    private       boolean                      useWebMvc    = false;
+    private       Consumer<WebBeanContext>     customizer   = ctx -> {
+    };
 
     /**
      * 🧱 Constructs a new builder with the provided factory.
@@ -192,15 +184,40 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
         context.refresh();
 
         if (useWebMvc) {
-            new WebMvcInfrastructureInitializer(userScanBits).initialize(context);
-            new WebMvcInfrastructureInitializer(Bits.of(
+
+            Bits userOnlyScanning = Bits.of(
+                    // containers
                     ROUTING_REGISTRY,
                     RETURN_VALUE_PROCESSOR,
+                    // strategies
+                    RETURN_VALUE_HANDLER,
+                    EXCEPTION_RESOLVER,
                     HANDLER_MAPPING,
                     HANDLER_ADAPTER,
-                    EXCEPTION_RESOLVER,
                     ARGUMENT_RESOLVER
-            ), coreClasses.toArray(Class<?>[]::new)).initialize(context);
+            );
+
+            Bits userCoreScanning = Bits.of(
+                    // strategies
+                    EXCEPTION_RESOLVER,
+                    HANDLER_MAPPING,
+                    HANDLER_ADAPTER,
+                    ARGUMENT_RESOLVER
+            );
+
+            // add for root because it should be exist only in root context
+            if (context.getParentContext() == null) {
+                userCoreScanning.add(MESSAGE_MANAGER);
+                userCoreScanning.add(MESSAGE_CONVERTER);
+                userOnlyScanning.add(MESSAGE_MANAGER);
+                userOnlyScanning.add(MESSAGE_CONVERTER);
+            }
+
+            // scan only in user classes
+            new WebMvcInfrastructureInitializer().initialize(context);
+            // scan only in user+core classes
+            new WebMvcInfrastructureInitializer(userCoreScanning, coreClasses.toArray(Class<?>[]::new))
+                    .initialize(context);
         }
 
         return context;

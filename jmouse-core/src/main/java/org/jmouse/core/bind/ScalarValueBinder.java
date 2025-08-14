@@ -2,7 +2,7 @@ package org.jmouse.core.bind;
 
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.core.reflection.TypeInformation;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 /**
  * A binder responsible for binding scalar values such as {@link String}, {@link Number}, {@link Boolean}, and {@link Character}.

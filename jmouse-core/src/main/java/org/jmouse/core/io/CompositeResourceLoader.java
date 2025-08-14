@@ -1,7 +1,7 @@
 package org.jmouse.core.io;
 
 import org.jmouse.core.matcher.Matcher;
-import org.jmouse.util.helper.Files;
+import org.jmouse.util.Files;
 
 import java.util.ArrayList;
 import java.util.Collection;

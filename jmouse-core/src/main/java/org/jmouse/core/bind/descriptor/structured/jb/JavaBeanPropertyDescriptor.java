@@ -8,8 +8,8 @@ import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyData;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.reflection.JavaType;
-import org.jmouse.util.Getter;
-import org.jmouse.util.Setter;
+import org.jmouse.core.Getter;
+import org.jmouse.core.Setter;
 
 /**
  * Represents a descriptor for a JavaBean property, providing metadata about its getter, setter,

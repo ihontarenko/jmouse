@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static org.jmouse.util.Charset.UTF_8;
+import static org.jmouse.core.Charset.UTF_8;
 
 /**
  * Extension of {@link MimeType} that adds support for the HTTP "q" (quality) parameter.

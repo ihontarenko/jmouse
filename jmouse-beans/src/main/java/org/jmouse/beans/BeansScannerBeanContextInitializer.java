@@ -3,7 +3,7 @@ package org.jmouse.beans;
 import org.jmouse.beans.scanner.BeanAnnotatedClassesBeanScanner;
 import org.jmouse.beans.scanner.BeanFactoriesAnnotatedClassBeanScanner;
 import org.jmouse.beans.scanner.BeanImportAnnotatedClassBeanScanner;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 /**
  * 🧪 Initializes bean context by scanning common bean annotations.

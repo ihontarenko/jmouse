@@ -6,8 +6,8 @@ import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.reflection.JavaType;
 import org.jmouse.mvc.BeanConfigurer;
-import org.jmouse.util.Priority;
-import org.jmouse.util.Sorter;
+import org.jmouse.core.Priority;
+import org.jmouse.core.Sorter;
 import org.jmouse.context.ApplicationConfigurer;
 import org.jmouse.web.context.WebBeanContext;
 

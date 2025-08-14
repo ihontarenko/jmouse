@@ -1,5 +1,6 @@
 package org.jmouse.web.method;
 
+import org.jmouse.core.MethodParameter;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
@@ -78,9 +79,9 @@ public class HandlerMethodInvocation {
      * @throws RuntimeException if the method cannot be invoked
      */
     public Object invoke() {
-        HandlerMethod         handlerMethod  = handlerContext.handlerMethod();
-        List<MethodParameter> parameters     = handlerMethod.getParameters();
-        Object[]              arguments      = new Object[parameters.size()];
+        HandlerMethod         handlerMethod = handlerContext.handlerMethod();
+        List<MethodParameter> parameters    = handlerMethod.getParameters();
+        Object[]              arguments     = new Object[parameters.size()];
         Method         method         = handlerMethod.getMethod();
         RequestContext requestContext = handlerContext.requestContext();
 

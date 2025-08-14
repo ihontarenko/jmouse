@@ -1,11 +1,11 @@
 package org.jmouse.el.extension;
 
-import org.jmouse.util.Values;
+import org.jmouse.core.Values;
 
 /**
  * Represents a collection of arguments for an expression or function.
  * <p>
- * This interface extends {@link org.jmouse.util.Values} to provide an iterable container of argument values.
+ * This interface extends {@link Values} to provide an iterable container of argument values.
  * It offers utility methods to access arguments by index, retrieve the first or last argument,
  * and check whether the collection is empty.
  * </p>

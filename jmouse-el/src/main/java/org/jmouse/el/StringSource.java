@@ -2,7 +2,7 @@ package org.jmouse.el;
 
 import org.jmouse.el.lexer.Token.Type;
 import org.jmouse.el.lexer.TokenizableSource;
-import org.jmouse.util.Exceptions;
+import org.jmouse.core.Exceptions;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -10,7 +10,7 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import static org.jmouse.util.helper.Arrays.expand;
+import static org.jmouse.util.Arrays.expand;
 
 /**
  * Represents a tokenized string, allowing efficient access to tokenized segments.

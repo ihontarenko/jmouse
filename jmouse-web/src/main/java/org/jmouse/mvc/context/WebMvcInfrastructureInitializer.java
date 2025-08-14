@@ -103,7 +103,6 @@ public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializ
      */
     public WebMvcInfrastructureInitializer(Bits flags, Class<?>... basePackages) {
         super(basePackages);
-        // empty -> no scanners
         this.mask = (flags != null) ? flags : Bits.of();
         registerSelectedScanners();
     }
@@ -116,11 +115,8 @@ public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializ
     }
 
     private void registerSelectedScanners() {
-        for (Map.Entry<Short, BeanScanner<AnnotatedElement>> e : REGISTRATIONS.entrySet()) {
-            if (mask.has(e.getKey())) {
-                addScanner(e.getValue());
-            }
-        }
+        REGISTRATIONS.entrySet().stream()
+                .filter(e -> mask.has(e.getKey())).map(Map.Entry::getValue).forEach(this::addScanner);
     }
 
 }

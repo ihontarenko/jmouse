@@ -3,8 +3,8 @@ package org.jmouse.web.servlet.registration;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import org.jmouse.core.reflection.Reflections;
-import org.jmouse.util.Ordered;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Ordered;
+import org.jmouse.core.Priority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

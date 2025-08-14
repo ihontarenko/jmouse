@@ -1,6 +1,6 @@
 package org.jmouse.core.i18n;
 
-import org.jmouse.util.Charset;
+import org.jmouse.core.Charset;
 
 import java.util.Locale;
 

@@ -13,7 +13,7 @@ import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.mvc.context.WebMvcControllersInitializer;
 import org.jmouse.mvc.context.WebMvcInfrastructureInitializer;
 import org.jmouse.mvc.jMouseWebMvcRoot;
-import org.jmouse.util.StandardPlaceholderReplacer;
+import org.jmouse.core.StandardPlaceholderReplacer;
 import org.jmouse.web.context.WebApplicationBeanContext;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.initializer.context.StartupApplicationContextInitializer;

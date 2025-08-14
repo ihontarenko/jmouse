@@ -1,8 +1,8 @@
 package org.jmouse.core.bind;
 
 import org.jmouse.core.convert.Conversion;
-import org.jmouse.util.CyclicReferenceDetector;
-import org.jmouse.util.DefaultCyclicReferenceDetector;
+import org.jmouse.core.CyclicReferenceDetector;
+import org.jmouse.core.DefaultCyclicReferenceDetector;
 
 import java.util.function.Supplier;
 

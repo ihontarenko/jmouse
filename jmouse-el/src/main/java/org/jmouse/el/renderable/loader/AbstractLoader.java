@@ -1,6 +1,6 @@
 package org.jmouse.el.renderable.loader;
 
-import org.jmouse.util.Charset;
+import org.jmouse.core.Charset;
 
 abstract public class AbstractLoader<T> implements TemplateLoader<T> {
 

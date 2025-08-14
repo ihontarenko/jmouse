@@ -2,7 +2,7 @@ package org.jmouse.web.method.converter;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 import java.io.IOException;
 import java.io.InputStream;

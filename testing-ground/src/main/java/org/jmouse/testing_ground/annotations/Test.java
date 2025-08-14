@@ -5,7 +5,7 @@ import org.jmouse.core.reflection.annotation.AnnotationData;
 import org.jmouse.core.reflection.annotation.AnnotationScanner;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.mvc.ServletDispatcherConfiguration;
-import org.jmouse.util.Streamable;
+import org.jmouse.core.Streamable;
 
 import java.util.List;
 import java.util.Optional;

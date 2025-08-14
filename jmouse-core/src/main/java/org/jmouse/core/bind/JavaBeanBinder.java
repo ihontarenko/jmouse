@@ -3,9 +3,9 @@ package org.jmouse.core.bind;
 import org.jmouse.core.bind.descriptor.MethodDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.reflection.JavaType;
-import org.jmouse.util.Factory;
-import org.jmouse.util.Priority;
-import org.jmouse.util.helper.Strings;
+import org.jmouse.core.Factory;
+import org.jmouse.core.Priority;
+import org.jmouse.util.Strings;
 
 import java.lang.reflect.Method;
 import java.util.function.Supplier;

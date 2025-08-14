@@ -1,6 +1,6 @@
 package org.jmouse.common.support.invocable;
 
-import org.jmouse.util.helper.Strings;
+import org.jmouse.util.Strings;
 
 public class Example {
 

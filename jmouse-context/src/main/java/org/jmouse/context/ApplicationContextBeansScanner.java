@@ -1,7 +1,7 @@
 package org.jmouse.context;
 
 import org.jmouse.beans.BeansScannerBeanContextInitializer;
-import org.jmouse.util.Priority;
+import org.jmouse.core.Priority;
 
 /**
  * 🔍 Extends the base BeansScannerBeanContextInitializer to add

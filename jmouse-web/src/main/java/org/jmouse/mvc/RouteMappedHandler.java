@@ -1,6 +1,6 @@
 package org.jmouse.mvc;
 
-import org.jmouse.web.method.MethodParameter;
+import org.jmouse.core.MethodParameter;
 
 /**
  * 🧭 A {@link MappedHandler} that encapsulates a route match, the associated route,

@@ -1,6 +1,6 @@
 package org.jmouse.el.lexer.recognizer;
 
-import org.jmouse.util.Ordered;
+import org.jmouse.core.Ordered;
 
 import java.util.Optional;
 

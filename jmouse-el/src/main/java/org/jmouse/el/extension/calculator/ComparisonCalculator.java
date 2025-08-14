@@ -1,13 +1,13 @@
 package org.jmouse.el.extension.calculator;
 
 import org.jmouse.el.extension.Calculator;
-import org.jmouse.util.AnyComparator;
+import org.jmouse.core.AnyComparator;
 
 import java.util.function.BiPredicate;
 
 /**
  * Performs comparison operations such as {@code >, <, >=, <=, ==, !=}.
- * This calculator ensures type safety and null handling using {@link org.jmouse.util.AnyComparator}.
+ * This calculator ensures type safety and null handling using {@link AnyComparator}.
  *
  * <p>Example usage:</p>
  * <pre>{@code

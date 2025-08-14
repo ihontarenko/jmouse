@@ -1,7 +1,7 @@
 package org.jmouse.core.reflection.annotation;
 
 import org.jmouse.core.matcher.Matcher;
-import org.jmouse.util.Streamable;
+import org.jmouse.core.Streamable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;

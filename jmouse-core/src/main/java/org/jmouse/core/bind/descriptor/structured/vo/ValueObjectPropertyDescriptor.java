@@ -6,8 +6,8 @@ import org.jmouse.core.bind.descriptor.MethodDescriptor;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyData;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
-import org.jmouse.util.Getter;
-import org.jmouse.util.Setter;
+import org.jmouse.core.Getter;
+import org.jmouse.core.Setter;
 
 public class ValueObjectPropertyDescriptor<T>
         extends AbstractDescriptor<T, PropertyData<T>, ValueObjectPropertyIntrospector<T>>
