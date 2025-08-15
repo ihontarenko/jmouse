@@ -136,7 +136,7 @@ public class Bytes implements Comparable<Bytes> {
      *
      * @return size in bytes
      */
-    public long toBytes() {
+    public long getBytes() {
         return bytes;
     }
 
@@ -145,7 +145,7 @@ public class Bytes implements Comparable<Bytes> {
      *
      * @return size in kilobytes
      */
-    public long toKilobytes() {
+    public long getKilobytes() {
         return bytes / BYTES_KB;
     }
 
@@ -154,7 +154,7 @@ public class Bytes implements Comparable<Bytes> {
      *
      * @return size in megabytes
      */
-    public long toMegabytes() {
+    public long getMegabytes() {
         return bytes / BYTES_MB;
     }
 

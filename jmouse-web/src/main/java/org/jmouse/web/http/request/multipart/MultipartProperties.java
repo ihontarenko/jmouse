@@ -63,15 +63,15 @@ public class MultipartProperties {
                 .accept(factory::setLocation);
         mapper.get(this::getMaxFileSize)
                 .whenNonNull()
-                .as(Bytes::toBytes)
+                .as(Bytes::getBytes)
                 .accept(factory::setMaxFileSize);
         mapper.get(this::getFileSizeThreshold)
                 .whenNonNull()
-                .as(Bytes::toBytes)
+                .as(Bytes::getBytes)
                 .accept(factory::setFileSizeThreshold);
         mapper.get(this::getMaxRequestSize)
                 .whenNonNull()
-                .as(Bytes::toBytes)
+                .as(Bytes::getBytes)
                 .accept(factory::setMaxRequestSize);
 
         return factory.createMultipartConfig();

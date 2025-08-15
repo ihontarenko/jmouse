@@ -47,7 +47,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
     /** ✅ Check if type is writable for the given media type. */
     @Override
     public boolean isWritable(Class<?> clazz, MediaType mediaType) {
-        if (!supportsType(clazz)) {
+        if (clazz != null && !supportsType(clazz)) {
             return false;
         }
 

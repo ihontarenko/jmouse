@@ -89,7 +89,7 @@ public record ContentDisposition(
 
         if (this.size != null) {
             builder.append("; size=");
-            builder.append(this.size.toBytes());
+            builder.append(this.size.getBytes());
         }
 
         if (this.creationDate != null) {

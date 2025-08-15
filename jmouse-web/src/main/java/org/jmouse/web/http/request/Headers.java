@@ -108,7 +108,7 @@ public final class Headers {
             }
         }
 
-        return 0L;
+        return -1L;
     }
 
     /**
