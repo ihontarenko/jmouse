@@ -68,6 +68,16 @@ public class RequestAttributesHolder {
     }
 
     /**
+     * 📦 Remove an attribute from the current {@link RequestAttributes}.
+     *
+     * @param name the attribute name
+     * @throws IllegalStateException if no request attributes are bound
+     */
+    public static void removeAttribute(String name) {
+        getRequestAttributes().removeAttribute(name);
+    }
+
+    /**
      * 📥 Store an attribute in the current {@link RequestAttributes}.
      *
      * @param name  the attribute name

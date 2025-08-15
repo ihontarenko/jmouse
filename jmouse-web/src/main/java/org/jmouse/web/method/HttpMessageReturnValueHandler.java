@@ -6,6 +6,7 @@ import org.jmouse.core.MimeParser;
 import org.jmouse.core.Streamable;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
+import org.jmouse.mvc.HandlerMapping;
 import org.jmouse.mvc.MVCResult;
 import org.jmouse.mvc.MappedHandler;
 import org.jmouse.web.http.request.RequestContext;
@@ -75,6 +76,8 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
 
         Collection<MediaType> mediaTypes = mediaTypeManager.lookupOnRequest(requestContext.request());
 
+        Set<MediaType> producible = (Set<MediaType>) RequestAttributesHolder.getAttribute(HandlerMapping.ROUTE_PRODUCIBLE_ATTRIBUTE);
+
         List<MediaType>              acceptance       = getProduces(result.getMappedHandler());
 
         // Fallback to Accept header if no explicit 'produces' declaration
@@ -141,6 +144,8 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
         }
 
         if (element == null) {
+            //RequestAttributesHolder.getAttribute()
+
             return acceptance;
         }
 

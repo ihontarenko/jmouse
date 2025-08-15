@@ -17,7 +17,7 @@ public class WebConfig {
     @Bean
     public ControllerMethodRegistration errorRegistration() {
         return new ControllerMethodRegistration(Route.GET("/error"), (request, response) -> {
-            throw new NotFoundException("Not found");
+            throw new NotFoundException("Test error page with NOT FOUND error!");
         });
     }
 

@@ -5,7 +5,7 @@ import org.jmouse.core.MediaType;
 
 import java.util.List;
 
-public class QueryParameterLookup extends ExtensionMapMediaTypeLookup {
+public class QueryParameterLookup extends MapppedMediaTypeLookup {
 
     private String parameterName = "format";
 

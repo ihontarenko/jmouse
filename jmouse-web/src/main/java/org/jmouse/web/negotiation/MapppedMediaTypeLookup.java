@@ -5,11 +5,11 @@ import org.jmouse.core.MediaType;
 import java.util.HashMap;
 import java.util.Map;
 
-abstract public class ExtensionMapMediaTypeLookup implements MediaTypeLookup {
+abstract public class MapppedMediaTypeLookup implements MediaTypeLookup {
 
     private final Map<String, MediaType> mapping = new HashMap<>();
 
-    public ExtensionMapMediaTypeLookup() {
+    public MapppedMediaTypeLookup() {
 
     }
 
