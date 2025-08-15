@@ -47,6 +47,17 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
     /** ✅ Check if type is writable for the given media type. */
     @Override
     public boolean isWritable(Class<?> clazz, MediaType mediaType) {
+        return isApplicable(clazz, mediaType);
+    }
+
+    /** ✅ Check if type is readable for the given media type. */
+    @Override
+    public boolean isReadable(Class<?> clazz, MediaType mediaType) {
+        return isApplicable(clazz, mediaType);
+    }
+
+    /** ✅ Check if type is readable or writable for the given media type and class type. */
+    private boolean isApplicable(Class<?> clazz, MediaType mediaType) {
         if (clazz != null && !supportsType(clazz)) {
             return false;
         }
@@ -61,25 +72,6 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
             }
         }
 
-        return false;
-    }
-
-    /** ✅ Check if type is readable for the given media type. */
-    @Override
-    public boolean isReadable(Class<?> clazz, MediaType mediaType) {
-        if (!supportsType(clazz)) {
-            return false;
-        }
-
-        if (mediaType == null) {
-            return true;
-        }
-
-        for (MediaType supportedMediaType : supportedMediaTypes) {
-            if (supportedMediaType.includes(mediaType)) {
-                return true;
-            }
-        }
         return false;
     }
 
