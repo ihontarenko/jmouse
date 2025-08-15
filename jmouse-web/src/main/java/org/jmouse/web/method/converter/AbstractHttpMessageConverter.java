@@ -51,8 +51,12 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
             return false;
         }
 
+        if (mediaType == null) {
+            return true;
+        }
+
         for (MediaType supportedMediaType : supportedMediaTypes) {
-            if (mediaType == null || supportedMediaType.includes(mediaType)) {
+            if (supportedMediaType.includes(mediaType)) {
                 return true;
             }
         }
@@ -66,8 +70,13 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
         if (!supportsType(clazz)) {
             return false;
         }
+
+        if (mediaType == null) {
+            return true;
+        }
+
         for (MediaType supportedMediaType : supportedMediaTypes) {
-            if (mediaType == null || supportedMediaType.includes(mediaType)) {
+            if (supportedMediaType.includes(mediaType)) {
                 return true;
             }
         }

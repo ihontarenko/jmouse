@@ -15,34 +15,6 @@ public class JacksonJsonHttpMessageConverter extends AbstractJacksonHttpMessageC
         super(MediaType.APPLICATION_JSON);
     }
 
-    public JacksonJsonHttpMessageConverter(ObjectMapper objectMapper) {
-        super(List.of(
-                MediaType.APPLICATION_JSON
-        ));
-    }
-
-    @Override
-    public boolean isWritable(Class<?> clazz, MediaType mediaType) {
-        boolean isWritable = super.isWritable(clazz, mediaType);
-
-        if (!isWritable) {
-            return false;
-        }
-
-        ObjectMapper objectMapper = getObjectMapper(mediaType);
-
-        if (objectMapper == null) {
-            return false;
-        }
-
-        AtomicReference<Throwable> atomicReference = new AtomicReference<>();
-        if (!objectMapper.canSerialize(clazz, atomicReference)) {
-            return false;
-        }
-
-        return isWritable;
-    }
-
     @Override
     public void doWrite(Object data, Class<?> type, HttpOutputMessage outputMessage) throws IOException, UnwritableException {
         outputMessage.getHeaders().setContentType(MediaType.APPLICATION_JSON);
@@ -51,7 +23,7 @@ public class JacksonJsonHttpMessageConverter extends AbstractJacksonHttpMessageC
     }
 
     @Override
-    public Object doRead(Class<? extends Object> clazz, HttpInputMessage inputMessage) throws IOException {
+    public Object doRead(Class<?> clazz, HttpInputMessage inputMessage) throws IOException {
         ObjectMapper objectMapper =  getObjectMapper(inputMessage.getHeaders().getContentType());
         return objectMapper.readValue(inputMessage.getInputStream(), clazz);
     }

@@ -2,11 +2,9 @@ package org.jmouse.web_app.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jmouse.core.Bytes;
 import org.jmouse.mvc.Model;
-import org.jmouse.web.annotation.Controller;
-import org.jmouse.web.annotation.ExceptionHandler;
-import org.jmouse.web.annotation.GetMapping;
-import org.jmouse.web.annotation.PostMapping;
+import org.jmouse.web.annotation.*;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.request.multipart.ContentDisposition;
@@ -40,9 +38,10 @@ public class SharedController {
         throw new RuntimeException("RuntimeException");
     }
 
-    @ExceptionHandler(IllegalStateException.class)
-    public String illegalStateExceptionHandler(Model model, IllegalStateException e) {
+    @ExceptionHandler({IllegalStateException.class, ArithmeticException.class})
+    public String illegalStateExceptionHandler(Model model, Exception e) {
         model.addAttribute("message", e.getMessage());
+        model.addAttribute("stackTrace", e.getStackTrace());
         return "view:index/error";
     }
 
@@ -96,6 +95,16 @@ public class SharedController {
     @GetMapping(requestPath = "/shared/mapData")
     public Map<String, Object> mapData() {
         return Map.of("text", "Hello World!", "IDs", List.of(1, 2, 3));
+    }
+
+    @GetMapping(requestPath = "/shared/mapData.{format:json|xml|yaml}")
+    public Map<String, Object> mapDataPath(@PathVariable("format") String format) {
+        return Map.of("text", "Hello World!", "IDs", List.of(1, 2, 3), "format", format);
+    }
+
+    @GetMapping(requestPath = "/shared/getBytes/{bytes}")
+    public Bytes getBytes(@PathVariable("bytes") String bytes) {
+        return Bytes.parse(bytes);
     }
 
 }

@@ -79,11 +79,6 @@ public class StartupApplicationContextInitializer implements BeanContextInitiali
         }
     }
 
-    public static void main(String[] args) {
-        JavaType.forClass(QueryParameterLookupConfigurer.class).toHierarchyString(1);
-        JavaType.forClass(PathVariableLookupConfigurer.class).toHierarchyString(1);
-    }
-
     /**
      * 💡 Applies a single {@link BeanConfigurer} to all beans of the matching type.
      *

@@ -205,7 +205,7 @@ public class Bytes implements Comparable<Bytes> {
      * Enumeration of supported storage units.
      */
     public enum Unit {
-        B("B", BYTES_KB),
+        B("B", 1L),
         KB("KB", BYTES_KB),
         MB("MB", BYTES_MB),
         GB("GB", BYTES_GB),
@@ -246,12 +246,14 @@ public class Bytes implements Comparable<Bytes> {
          */
         public static Unit forSuffix(String suffix) {
             Unit unit = null;
+
             for (Unit candidate : values()) {
                 if (candidate.getSuffix().equals(suffix)) {
                     unit = candidate;
                     break;
                 }
             }
+
             return unit;
         }
     }

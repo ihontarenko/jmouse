@@ -5,6 +5,7 @@ import org.jmouse.core.MediaType;
 import org.jmouse.web.context.WebBeanContext;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 📦 Base {@link AbstractHttpMessageConverter} for JSON processing with Jackson.
@@ -79,13 +80,36 @@ public abstract class AbstractJacksonHttpMessageConverter<T> extends AbstractHtt
      */
     public ObjectMapper getObjectMapper(MediaType mediaType) {
         JacksonObjectMapperRegistration registration = getObjectMapperRegistration(mediaType);
-        ObjectMapper objectMapper = null;
+        ObjectMapper                    objectMapper = null;
 
         if (registration != null) {
             objectMapper = registration.objectMapper();
         }
 
         return objectMapper;
+    }
+
+    /** ✅ Check if type is writable for the given media type. */
+    @Override
+    public boolean isWritable(Class<?> clazz, MediaType mediaType) {
+        boolean isWritable = super.isWritable(clazz, mediaType);
+
+        if (!isWritable) {
+            return false;
+        }
+
+        ObjectMapper objectMapper = getObjectMapper(mediaType);
+
+        if (objectMapper == null) {
+            return false;
+        }
+
+        AtomicReference<Throwable> atomicReference = new AtomicReference<>();
+        if (!objectMapper.canSerialize(clazz, atomicReference)) {
+            return false;
+        }
+
+        return isWritable;
     }
 
     /** Always supports any class type. */

@@ -11,40 +11,8 @@ import java.util.concurrent.atomic.AtomicReference;
 @Priority(Integer.MIN_VALUE + 100000)
 public class JacksonYamlHttpMessageConverter extends AbstractJacksonHttpMessageConverter<Object> {
 
-    private final ObjectMapper objectMapper;
-
     public JacksonYamlHttpMessageConverter() {
         super(MediaType.APPLICATION_YAML);
-        this.objectMapper = new ObjectMapper();
-    }
-
-    public JacksonYamlHttpMessageConverter(ObjectMapper objectMapper) {
-        super(List.of(
-                MediaType.APPLICATION_YAML
-        ));
-        this.objectMapper = objectMapper;
-    }
-
-    @Override
-    public boolean isWritable(Class<?> clazz, MediaType mediaType) {
-        boolean isWritable = super.isWritable(clazz, mediaType);
-
-        if (!isWritable) {
-            return false;
-        }
-
-        ObjectMapper objectMapper = getObjectMapper(mediaType);
-
-        if (objectMapper == null) {
-            return false;
-        }
-
-        AtomicReference<Throwable> atomicReference = new AtomicReference<>();
-        if (!objectMapper.canSerialize(clazz, atomicReference)) {
-            return false;
-        }
-
-        return isWritable;
     }
 
     @Override
@@ -56,7 +24,7 @@ public class JacksonYamlHttpMessageConverter extends AbstractJacksonHttpMessageC
 
     @Override
     public Object doRead(Class<? extends Object> clazz, HttpInputMessage inputMessage) throws IOException {
-        return objectMapper.readValue(inputMessage.getInputStream(), clazz);
+        return getObjectMapper(inputMessage.getHeaders().getContentType()).readValue(inputMessage.getInputStream(), clazz);
     }
 
 }

@@ -22,9 +22,44 @@ import java.util.function.*;
 public class JavaType implements ClassTypeInspector {
 
     /**
+     * 🗄️ Cache key for storing {@link JavaType} instances with their resolution context.
+     *
+     * <p>This record serves as a composite key for the internal {@code JavaType} cache,
+     * pairing the underlying {@link Type} with its {@link JavaType parent} context.
+     * This ensures that the same {@link Type} can be resolved differently
+     * depending on the context in which it appears, avoiding incorrect
+     * type resolution caused by global, context-less caching.</p>
+     *
+     * <h4>Usage</h4>
+     * <pre>{@code
+     * Map<TypeCache, JavaType> cache = new HashMap<>();
+     * cache.put(TypeCache.of(type, parent), javaType);
+     * }</pre>
+     *
+     * @param type   the underlying {@link Type} to cache
+     * @param parent the parent {@link JavaType} that defines the resolution context
+     *
+     * @see JavaType
+     * @see Type
+     */
+    record TypeCache(Type type, JavaType parent) {
+
+        /**
+         * Factory method for creating a new {@link TypeCache} instance.
+         *
+         * @param type   the {@link Type} to cache
+         * @param parent the resolution context for this type
+         * @return a new {@link TypeCache} instance
+         */
+        static TypeCache of(Type type, JavaType parent) {
+            return new TypeCache(type, parent);
+        }
+    }
+
+    /**
      * A cache for storing resolved {@link JavaType} instances to avoid redundant resolution.
      */
-    private static final Map<Type, JavaType> CACHE = new HashMap<>();
+    private static final Map<TypeCache, JavaType> CACHE = new HashMap<>();
 
     /**
      * A constant representing a "no type" scenario.
@@ -34,7 +69,7 @@ public class JavaType implements ClassTypeInspector {
     /**
      * A constant representing an empty array of {@link JavaType}.
      */
-    private static final JavaType[] EMPTY_TYPE_ARRAY = {NONE_TYPE};
+    private static final JavaType[] EMPTY_TYPE_ARRAY = new JavaType[0];
 
     /**
      * The parent {@link JavaType} in the type hierarchy.
@@ -152,11 +187,12 @@ public class JavaType implements ClassTypeInspector {
      * @return a {@link JavaType} instance
      */
     public static JavaType forType(Type type, JavaType parent) {
-        JavaType instance = CACHE.get(type);
+        TypeCache typeCache = TypeCache.of(type, parent);
+        JavaType  instance  = CACHE.get(typeCache);
 
         if (instance == null) {
             instance = new JavaType(type, parent);
-            CACHE.put(type, instance);
+            CACHE.put(typeCache, instance);
         }
 
         return instance;
