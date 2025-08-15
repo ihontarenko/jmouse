@@ -93,4 +93,9 @@ public class SharedController {
         return new ResponseModel(Map.of("text", "Hello World!", "IDs", List.of(1, 2, 3))).toString().getBytes();
     }
 
+    @GetMapping(requestPath = "/shared/mapData")
+    public Map<String, Object> mapData() {
+        return Map.of("text", "Hello World!", "IDs", List.of(1, 2, 3));
+    }
+
 }

@@ -1,9 +1,6 @@
 package org.jmouse.core;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.jmouse.core.Charset.UTF_8;
 
@@ -19,6 +16,7 @@ public class MediaType extends MimeType {
     private double qFactor;
 
     public static final MediaType ALL;
+    public static final MediaType ALL_APPLICATION;
     public static final MediaType APPLICATION_ATOM_XML;
     public static final MediaType APPLICATION_JSON;
     public static final MediaType JSON; // alias
@@ -44,6 +42,7 @@ public class MediaType extends MimeType {
     public static final MediaType IMAGE_PNG;
 
     public static final String ALL_VALUE;
+    public static final String ALL_APPLICATION_VALUE;
 
     public static final String APPLICATION_ATOM_XML_VALUE;
     public static final String APPLICATION_JSON_VALUE;
@@ -70,6 +69,10 @@ public class MediaType extends MimeType {
         // Wildcard
         ALL = new MediaType("*", "*");
         ALL_VALUE = ALL.toString();
+
+        // Wildcard
+        ALL_APPLICATION = new MediaType("application", "*");
+        ALL_APPLICATION_VALUE = ALL_APPLICATION.toString();
 
         // application/*
         APPLICATION_ATOM_XML = new MediaType("application", "atom+xml");
@@ -210,6 +213,77 @@ public class MediaType extends MimeType {
     }
 
     /**
+     * 🎯 Copy the quality factor ({@code q}) parameter from {@code source} into this media type.
+     *
+     * <p>If {@code source} contains a {@code q} parameter, returns a <b>new</b> {@link MediaType}
+     * with the same type/subtype as this instance and the {@code q} copied from {@code source}.
+     * If {@code q} is absent or {@code source} is {@code null}, returns {@code this} unchanged.</p>
+     *
+     * <ul>
+     *   <li>Overwrites existing {@code q} on this instance.</li>
+     *   <li>Does not validate the {@code q} value (caller ensures it is within {@code [0.0, 1.0]}).</li>
+     * </ul>
+     *
+     * @param source media type to take the {@code q} value from (may be {@code null})
+     * @return a new {@link MediaType} with the copied {@code q}, or {@code this} if not present
+     */
+    public MediaType copyQFactor(MediaType source) {
+        return copyParameter(source, PARAMETER_NAME_QUALITY_FACTOR);
+    }
+
+    /**
+     * 🔤 Copy the {@code charset} parameter from {@code source} into this media type.
+     *
+     * <p>If {@code source} contains a {@code charset} parameter, returns a <b>new</b> {@link MediaType}
+     * with the same type/subtype as this instance and the {@code charset} copied from {@code source}.
+     * If {@code charset} is absent or {@code source} is {@code null}, returns {@code this} unchanged.</p>
+     *
+     * <ul>
+     *   <li>Overwrites existing {@code charset} on this instance.</li>
+     *   <li>No validation of the charset name is performed here.</li>
+     * </ul>
+     *
+     * @param source media type to take the {@code charset} from (may be {@code null})
+     * @return a new {@link MediaType} with the copied {@code charset}, or {@code this} if not present
+     */
+    public MediaType copyCharset(MediaType source) {
+        return copyParameter(source, PARAMETER_NAME_CHARSET);
+    }
+
+    /**
+     * 📥 Copy an arbitrary parameter from {@code source} into this media type.
+     *
+     * <p>If {@code source} contains the given {@code parameter}, returns a <b>new</b> {@link MediaType}
+     * with the same type/subtype as this instance and that parameter set to the source's value.
+     * Otherwise (no such parameter or {@code source == null}) returns {@code this} unchanged.</p>
+     *
+     * <ul>
+     *   <li>Overwrites the parameter if it already exists on this instance.</li>
+     *   <li>Returns an immutable copy (this instance remains unchanged).</li>
+     *   <li>No validation of the parameter value is performed.</li>
+     * </ul>
+     *
+     * @param source    media type to read the parameter from (may be {@code null})
+     * @param parameter parameter name to copy (must not be {@code null})
+     * @return a new {@link MediaType} with the copied parameter, or {@code this} if absent
+     */
+    public MediaType copyParameter(MediaType source, String parameter) {
+        if (source == null) {
+            return this;
+        }
+
+        String charset = source.getParameter(parameter);
+
+        if (charset != null) {
+            Map<String, String> parameters = new LinkedHashMap<>(this.getParameters());
+            parameters.put(parameter, charset);
+            return new MediaType(this.getType(), this.getSubType(), parameters);
+        }
+
+        return this;
+    }
+
+    /**
      * Parse or retrieve a MediaType from cache, including quality parameter.
      *
      * @param type raw media type string
@@ -249,7 +323,7 @@ public class MediaType extends MimeType {
      *
      * <p>Both lists are first prioritized via {@link #prioritize(List)}. Then, for each
      * item in the first list, a compatible item in the second list (per
-     * {@link MediaType#compatible(MediaType)}) adds that media type to the result.</p>
+     * {@link MimeType#includes(MediaType)}) adds that media type to the result.</p>
      *
      * <p><b>Note:</b> A match contributes the entry from <em>listA</em>.</p>
      *
@@ -258,20 +332,20 @@ public class MediaType extends MimeType {
      * @return a new list containing compatible media types from {@code listA}
      */
     public static List<MediaType> intersect(List<MediaType> listA, List<MediaType> listB) {
-        List<MediaType> result = new ArrayList<>();
+        Set<MediaType> result = new LinkedHashSet<>();
 
         listA = prioritize(listA);
         listB = prioritize(listB);
 
-        for (int i = 0; i < listA.size(); i++) {
-            for (int j = i + 1; j < listB.size(); j++) {
-                if (listA.get(i).compatible(listB.get(j))) {
-                    result.add(listA.get(i));
+        for (MediaType typeA : listA) {
+            for (MediaType typeB : listB) {
+                if (typeB.compatible(typeA)) {
+                    result.add(new MediaType(MediaType.getMoreSpecific(typeA, typeB)));
                 }
             }
         }
 
-        return result;
+        return List.copyOf(result);
     }
 
     /**
@@ -285,15 +359,14 @@ public class MediaType extends MimeType {
      * @return a new list representing {@code (listA ∪ listB) \ intersect(listA, listB)}
      */
     public static List<MediaType> difference(List<MediaType> listA, List<MediaType> listB) {
-        List<MediaType> result = new ArrayList<>(listA.size() + listB.size());
+        Set<MediaType> result = new LinkedHashSet<>(listA.size() + listB.size());
 
         result.addAll(listA);
         result.addAll(listB);
 
-        result.removeAll(intersect(listA, listB));
+        intersect(listA, listB).forEach(result::remove);
 
-        return result;
+        return List.copyOf(result);
     }
-
 
 }

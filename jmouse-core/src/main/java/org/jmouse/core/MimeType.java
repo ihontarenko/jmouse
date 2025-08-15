@@ -12,15 +12,18 @@ import java.util.Map;
  */
 public class MimeType {
 
-    /** Wildcard for any type. */
+    /** ✳️ Wildcard for any primary type. */
     public static final String WILDCARD_TYPE = "*";
-    /** Prefix for wildcard subtype patterns (e.g., "*+xml"). */
+    /** ✳️ Wildcard prefix for suffix patterns (e.g., {@code *+xml}). */
     public static final String WILDCARD_PREFIX_TYPE = "*+";
-    /** Separator between subtype prefix and suffix. */
+    /** ➕ Separator between subtype prefix and suffix (before/after {@code +}). */
     public static final String PREFIX_SEPARATOR = "+";
-    /** Parameter name for character set. */
+    /** 🔤 Standard parameter key for character set. */
     public static final String PARAMETER_NAME_CHARSET = "charset";
-    /** Cache for parsed MimeType instances by string representation. */
+    /**
+     * 🗂️ Cache of parsed {@link MimeType} by raw string.
+     * <p>Note: simple {@link HashMap} – not thread-safe.</p>
+     */
     public static final Map<String, MimeType> CACHE = new HashMap<>();
 
     private final Map<String, String> parameters;
@@ -195,6 +198,78 @@ public class MimeType {
     }
 
     /**
+     * ⚖️ Specificity ordering helper.
+     *
+     * <p>Returns {@code true} if {@code this} is less specific than {@code that}.
+     * Comparison rules:
+     * <ol>
+     *   <li>Wildcard type is less specific than concrete type.</li>
+     *   <li>With same type, wildcard (or suffix-wildcard) subtype is less specific.</li>
+     *   <li>If both type &amp; subtype equal, fewer parameters is less specific.</li>
+     * </ol>
+     * </p>
+     *
+     * @param that other mime type
+     * @return {@code true} if {@code this} is less specific
+     */
+    public boolean isLowerPriority(MimeType that) {
+        boolean thisWildcard    = this.isWildcardType();
+        boolean thisSubWildcard = this.isWildcardSubType();
+        boolean thatWildcard    = that.isWildcardType();
+        boolean thatSubWildcard = that.isWildcardSubType();
+
+        if (thisWildcard && !thatWildcard) {
+            return true;
+        } else if (!thisWildcard && thatWildcard) {
+            return false;
+        } else {
+            if (thisSubWildcard && !thatSubWildcard) {
+                return true;
+            } else if (!thisSubWildcard && thatSubWildcard) {
+                return false;
+            } else if (getType().equals(that.getType()) && getSubType().equals(that.getSubType())) {
+                int thisParameterCount = this.parameters.size();
+                int thatParameterCount = that.parameters.size();
+                return thatParameterCount > thisParameterCount;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * ⚖️ Inverse of {@link #isLowerPriority(MimeType)}.
+     *
+     * @param that other mime type
+     * @return {@code true} if {@code this} is more specific than {@code that}
+     */
+    public boolean isHigherPriority(MimeType that) {
+        return that.isLowerPriority(this);
+    }
+
+    /**
+     * ⚖️ Returns the more specific of two MIME types (null-safe, with tie-break).
+     *
+     * <p>Specificity rules are defined by {@link MimeType#isMoreSpecific(MimeType)}.
+     * Tie-breakers:
+     * <ol>
+     *   <li>Greater parameter count ⇒ more specific.</li>
+     *   <li>If still equal, returns {@code typeA} to keep selection stable.</li>
+     * </ol>
+     * </p>
+     *
+     * @param typeA the first MIME type (may be {@code null})
+     * @param typeB the second MIME type (may be {@code null})
+     * @return the chosen MIME type, or {@code null} if both are {@code null}
+     */
+    public static MimeType getMoreSpecific(MimeType typeA, MimeType typeB) {
+        if (typeA == null) return typeB;
+        if (typeB == null) return typeA;
+
+        return typeA.isHigherPriority(typeB) ? typeA : typeB;
+    }
+
+    /**
      * Get a parameter value.
      *
      * @param name parameter name
@@ -230,6 +305,25 @@ public class MimeType {
         }
 
         return toStringValue;
+    }
+
+    /**
+     * Equality is case-insensitive for type/subtype and considers parameters.
+     */
+    @Override
+    public boolean equals(Object other) {
+        return (this == other || (other instanceof MimeType that &&
+                this.type.equalsIgnoreCase(that.type) &&
+                this.subtype.equalsIgnoreCase(that.subtype) &&
+                parameters.equals(that.parameters)));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = this.type.hashCode();
+        result = 31 * result + this.subtype.hashCode();
+        result = 31 * result + this.parameters.hashCode();
+        return result;
     }
 
     /**

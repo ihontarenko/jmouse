@@ -9,6 +9,8 @@ import org.jmouse.mvc.BeanConfigurer;
 import org.jmouse.core.Priority;
 import org.jmouse.core.Sorter;
 import org.jmouse.context.ApplicationConfigurer;
+import org.jmouse.mvc.negotiation.PathVariableLookupConfigurer;
+import org.jmouse.mvc.negotiation.QueryParameterLookupConfigurer;
 import org.jmouse.web.context.WebBeanContext;
 
 import java.util.ArrayList;
@@ -75,6 +77,11 @@ public class StartupApplicationContextInitializer implements BeanContextInitiali
                 handleBeanConfigurer(context, (BeanConfigurer<Object>) beanConfigurer, type.getClassType());
             }
         }
+    }
+
+    public static void main(String[] args) {
+        JavaType.forClass(QueryParameterLookupConfigurer.class).toHierarchyString(1);
+        JavaType.forClass(PathVariableLookupConfigurer.class).toHierarchyString(1);
     }
 
     /**

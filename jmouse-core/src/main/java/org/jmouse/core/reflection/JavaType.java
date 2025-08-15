@@ -328,8 +328,8 @@ public class JavaType implements ClassTypeInspector {
                 yield variable;
             }
             case WildcardType wildcardType -> {
-                // extends - upper bounds
-                // super - lower bounds
+                // extends  - upper bounds
+                // super    - lower bounds
                 JavaType wildcard = NONE_TYPE;
 
                 if (Arrays.notEmpty(wildcardType.getUpperBounds())) {

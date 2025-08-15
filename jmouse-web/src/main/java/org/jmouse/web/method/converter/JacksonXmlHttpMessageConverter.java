@@ -33,9 +33,4 @@ public class JacksonXmlHttpMessageConverter extends AbstractHttpMessageConverter
         return xmlMapper.readValue(inputMessage.getInputStream(), clazz);
     }
 
-    @Override
-    public List<MediaType> getSupportedMediaTypes() {
-        return List.of(MediaType.APPLICATION_XML);
-    }
-
 }

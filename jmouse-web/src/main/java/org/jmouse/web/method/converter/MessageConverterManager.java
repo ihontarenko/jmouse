@@ -55,6 +55,25 @@ public class MessageConverterManager implements InitializingBean {
     }
 
     /**
+     * 📋 Returns the list of supported media types.
+     *
+     * @return supported {@link MediaType}s
+     */
+    public List<MediaType> getSupportedMediaTypes() {
+        List<MediaType> mediaTypes = new ArrayList<>();
+
+        for (HttpMessageConverter<?> messageConverter : converters) {
+            mediaTypes.addAll(messageConverter.getSupportedMediaTypes());
+        }
+
+        if (!mediaTypes.isEmpty()) {
+            mediaTypes = mediaTypes.stream().distinct().toList();
+        }
+
+        return mediaTypes;
+    }
+
+    /**
      * 🔄 Loads all {@link HttpMessageConverter} beans from the context,
      * sorts them by priority, and registers them internally.
      *

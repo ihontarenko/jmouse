@@ -33,6 +33,7 @@ abstract public class PredefinedConversion extends StandardConversion {
         // custom converters
         registerConverter(String.class, Class.class, new PredefinedConversion.StringToClassConverter());
         registerConverter(new StringToBytesConverter());
+        registerConverter(new StringToMediaTypeConverter());
     }
 
     @SuppressWarnings({"rawtypes"})

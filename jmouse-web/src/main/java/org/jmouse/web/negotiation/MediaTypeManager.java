@@ -60,11 +60,11 @@ public class MediaTypeManager implements LookupRegistry, InitializingBeanSupport
      * @param request the HTTP request
      * @return a collection of media types; may be empty but never {@code null}
      */
-    public Collection<MediaType> lookupOnRequest(HttpServletRequest request) {
-        Collection<MediaType> types = new ArrayList<>();
+    public List<MediaType> lookupOnRequest(HttpServletRequest request) {
+        List<MediaType> types = new ArrayList<>();
 
         for (MediaTypeLookup lookup : getLookups()) {
-            Collection<MediaType> candidates = lookup.lookup(request);
+            List<MediaType> candidates = lookup.lookup(request);
             if (candidates != null && !candidates.isEmpty()) {
                 types = candidates;
                 break;

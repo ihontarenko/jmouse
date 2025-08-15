@@ -1,14 +1,10 @@
 package org.jmouse.web.method;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
-import org.jmouse.core.MimeParser;
-import org.jmouse.core.Streamable;
-import org.jmouse.core.reflection.annotation.AnnotationRepository;
-import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.mvc.HandlerMapping;
 import org.jmouse.mvc.MVCResult;
-import org.jmouse.mvc.MappedHandler;
 import org.jmouse.web.http.request.RequestContext;
 import org.jmouse.web.method.converter.WebHttpServletResponse;
 import org.jmouse.web.method.converter.HttpMessageConverter;
@@ -19,12 +15,10 @@ import org.jmouse.web.annotation.Mapping;
 import org.jmouse.core.Priority;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.request.Headers;
-import org.jmouse.web.http.request.RequestAttributesHolder;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.negotiation.MediaTypeManager;
 
 import java.io.IOException;
-import java.lang.reflect.AnnotatedElement;
 import java.util.*;
 
 /**
@@ -68,41 +62,32 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
      */
     @Override
     protected void doReturnValueHandle(MVCResult result, RequestContext requestContext) {
-        Object                       returnValue      = result.getReturnValue();
-        HttpServletResponse          servletResponse  = requestContext.response();
+        Object              returnValue     = result.getReturnValue();
+        HttpServletResponse servletResponse = requestContext.response();
+        MediaType           contentType     = null;
+
+        // requested media-types
+        List<MediaType> acceptableTypes = getAcceptableMediaTypes(requestContext.request());
+        // applicable media-types
+        List<MediaType> producibleTypes = getProducibleMediaTypes(requestContext.request());
+        // compatible media-types
+        List<MediaType> compatibleTypes = getCompatibleMediaTypes(acceptableTypes, producibleTypes);
+
         HttpMessageConverter<Object> messageConverter = null;
-        Headers                      incomingHeaders  = RequestAttributesHolder.getRequestHeaders().headers();
-        MediaType                    contentType      = null;
-
-        Collection<MediaType> mediaTypes = mediaTypeManager.lookupOnRequest(requestContext.request());
-
-        Set<MediaType> producible = (Set<MediaType>) RequestAttributesHolder.getAttribute(HandlerMapping.ROUTE_PRODUCIBLE_ATTRIBUTE);
-
-        List<MediaType>              acceptance       = getProduces(result.getMappedHandler());
-
-        // Fallback to Accept header if no explicit 'produces' declaration
-        if (acceptance.isEmpty()) {
-            acceptance = incomingHeaders.getAccept();
-        }
-
-        // Sort by quality factor (q)
-        acceptance = new ArrayList<>(acceptance);
-        acceptance.sort(Comparator.comparingDouble(MediaType::getQFactor));
-        acceptance = acceptance.reversed();
 
         // Select the first matching converter
-        if (!acceptance.isEmpty()) {
-            for (MediaType acceptType : acceptance) {
-                messageConverter = converterManager.getMessageConverter(returnValue, acceptType.toString());
+        if (!compatibleTypes.isEmpty()) {
+            for (MediaType mediaType : compatibleTypes) {
+                messageConverter = converterManager.getMessageConverter(returnValue, mediaType.toString());
                 if (messageConverter != null) {
-                    contentType = acceptType;
+                    contentType = mediaType;
                     break;
                 }
             }
         }
 
         if (messageConverter == null) {
-            throw new UnsuitableException("No suitable converter found for: " + acceptance);
+            throw new UnsuitableException("No suitable converter found for: " + acceptableTypes);
         }
 
         HttpOutputMessage httpMessage   = new WebHttpServletResponse(servletResponse);
@@ -129,36 +114,40 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
         return result.getReturnType() != null && !result.getReturnType().getReturnType().equals(void.class);
     }
 
-    /**
-     * Retrieves the list of media types declared via {@link Mapping#produces()} on the given method parameter.
-     *
-     * @param mappedHandler the method parameter to inspect
-     * @return a list of produced media types, or an empty list if none declared
-     */
-    protected List<MediaType> getProduces(MappedHandler mappedHandler) {
-        List<MediaType>  acceptance = new ArrayList<>();
-        AnnotatedElement element    = null;
+    @SuppressWarnings("unchecked")
+    protected List<MediaType> getProducibleMediaTypes(HttpServletRequest request) {
+        List<MediaType> result = new ArrayList<>();
 
-        if (mappedHandler.handler() instanceof HandlerMethod handlerMethod) {
-            element = handlerMethod.getMethod();
+        if (request.getAttribute(HandlerMapping.ROUTE_PRODUCIBLE_ATTRIBUTE) instanceof Set<?> producible) {
+            result = (List<MediaType>) List.copyOf(producible);
         }
 
-        if (element == null) {
-            //RequestAttributesHolder.getAttribute()
-
-            return acceptance;
+        if (result.isEmpty()) {
+            result = converterManager.getSupportedMediaTypes();
         }
 
-        Optional<MergedAnnotation> annotation = AnnotationRepository.ofAnnotatedElement(element).get(Mapping.class);
+        return Collections.unmodifiableList(result);
+    }
 
-        if (annotation.isPresent()) {
-            Mapping  mapping  = annotation.get().synthesize();
-            String[] produces = mapping.produces();
-            if (produces != null && produces.length > 0) {
-                acceptance = Streamable.of(produces).map(MimeParser::parseMimeType).map(MediaType::new).toList();
+    protected List<MediaType> getAcceptableMediaTypes(HttpServletRequest request) {
+        return mediaTypeManager.lookupOnRequest(request);
+    }
+
+    protected List<MediaType> getCompatibleMediaTypes(List<MediaType> acceptableTypes, List<MediaType> producibleTypes) {
+        Set<MediaType> compatibleTypes = new HashSet<>();
+
+        for (MediaType requestedType : acceptableTypes) {
+            for (MediaType producibleType : producibleTypes) {
+                if (producibleType.compatible(requestedType)) {
+                    producibleType = producibleType.copyQFactor(requestedType);
+                    producibleType = producibleType.copyCharset(requestedType);
+                    MediaType compatibleType = new MediaType(MediaType.getMoreSpecific(producibleType, requestedType));
+                    compatibleTypes.add(compatibleType);
+                }
             }
         }
 
-        return acceptance;
+        return List.copyOf(compatibleTypes);
     }
+
 }
