@@ -26,8 +26,8 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
      * ⚙️ Create a converter with a single supported media type.
      * @param supportedMediaType the media type
      */
-    protected AbstractHttpMessageConverter(MediaType supportedMediaType) {
-        this.supportedMediaTypes = Collections.singletonList(supportedMediaType);
+    protected AbstractHttpMessageConverter(MediaType... supportedMediaType) {
+        this.supportedMediaTypes = List.of(supportedMediaType);
     }
 
     /**

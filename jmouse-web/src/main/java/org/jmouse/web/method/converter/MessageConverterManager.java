@@ -45,13 +45,16 @@ public class MessageConverterManager implements InitializingBean {
      */
     @SuppressWarnings("unchecked")
     public <T> HttpMessageConverter<T> getMessageConverter(T value, String contentType) {
+        HttpMessageConverter<T> messageConverter = null;
+
         for (HttpMessageConverter<?> converter : converters) {
             if (converter.isWritable(value.getClass(), MediaType.forString(contentType))) {
-                return (HttpMessageConverter<T>) converter;
+                messageConverter = (HttpMessageConverter<T>) converter;
+                break;
             }
         }
 
-        return null;
+        return messageConverter;
     }
 
     /**

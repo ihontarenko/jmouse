@@ -37,17 +37,17 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 
     @Override
     protected boolean supportsType(Class<?> clazz) {
-        return String.class == clazz;
+        return true;
     }
 
     @Override
     public boolean isWritable(Class<?> clazz, MediaType mediaType) {
-        return super.isWritable(null, mediaType) && conversion.hasConverter(clazz, String.class);
+        return super.isWritable(clazz, mediaType) && conversion.hasConverter(clazz, String.class);
     }
 
     @Override
     public boolean isReadable(Class<?> clazz, MediaType mediaType) {
-        return conversion.hasConverter(String.class, clazz);
+        return super.isReadable(clazz, mediaType) && conversion.hasConverter(String.class, clazz);
     }
 
     @Override
