@@ -27,7 +27,7 @@ public class DemoWebApplication {
     @Bean(proxied = true)
     public ServletRegistrationBean<?> apiDispatcher(WebBeanContext rootContext, WebContextBuilder builder) {
         WebBeanContext context = builder.name("api-ctx")
-                .baseClasses(WebConfig.class).parent(rootContext)
+                .userClasses(WebConfig.class).parent(rootContext)
                 .useWebMvc().useDefault()
                 .build();
 

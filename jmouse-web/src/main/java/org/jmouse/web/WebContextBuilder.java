@@ -40,7 +40,7 @@ public interface WebContextBuilder {
      * @param baseClasses classes whose packages will be scanned
      * @return this builder
      */
-    WebContextBuilder baseClasses(Class<?>... baseClasses);
+    WebContextBuilder userClasses(Class<?>... baseClasses);
 
     /**
      * 🧱 Add framework/root classes as scan roots.

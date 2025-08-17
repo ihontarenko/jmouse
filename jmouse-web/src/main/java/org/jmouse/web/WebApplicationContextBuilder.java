@@ -9,7 +9,6 @@ import org.jmouse.context.ApplicationContextBeansScanner;
 import org.jmouse.core.Bits;
 import org.jmouse.web.mvc.context.WebMvcControllersInitializer;
 import org.jmouse.web.mvc.context.WebMvcInfrastructureInitializer;
-import org.jmouse.web.mvc.jMouseWebMvcRoot;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.initializer.context.StartupApplicationContextInitializer;
 
@@ -39,9 +38,8 @@ import static org.jmouse.web.mvc.context.WebMvcInfrastructureInitializer.*;
 public class WebApplicationContextBuilder implements WebContextBuilder {
 
     private final WebApplicationFactory        factory;
-    private final Set<Class<?>>                baseClasses  = new HashSet<>();
-    private final Set<Class<?>>                coreClasses  = new HashSet<>(
-            Set.of(jMouseWebMvcRoot.class, jMouseWebRoot.class));
+    private final Set<Class<?>>                userClasses  = new HashSet<>();
+    private final Set<Class<?>>                coreClasses  = new HashSet<>(Set.of(getClass()));
     private final List<BeanContextInitializer> initializers = new ArrayList<>();
     private       String                       contextId;
     private       WebBeanContext               parent;
@@ -79,8 +77,8 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
      * @return this builder
      */
     @Override
-    public WebContextBuilder baseClasses(Class<?>... baseClasses) {
-        this.baseClasses.addAll(List.of(baseClasses));
+    public WebContextBuilder userClasses(Class<?>... baseClasses) {
+        this.userClasses.addAll(List.of(baseClasses));
         return this;
     }
 
@@ -161,7 +159,7 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
      */
     @Override
     public WebBeanContext build() {
-        WebBeanContext context = factory.createContext(contextId, parent, baseClasses.toArray(Class<?>[]::new));
+        WebBeanContext context = factory.createContext(contextId, parent, userClasses.toArray(Class<?>[]::new));
         boolean        isRoot  = (parent == null);
 
         context.setContextId(contextId);

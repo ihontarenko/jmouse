@@ -12,7 +12,6 @@ import org.jmouse.core.io.ResourceLoader;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.web.mvc.context.WebMvcControllersInitializer;
 import org.jmouse.web.mvc.context.WebMvcInfrastructureInitializer;
-import org.jmouse.web.mvc.jMouseWebMvcRoot;
 import org.jmouse.core.StandardPlaceholderReplacer;
 import org.jmouse.web.context.WebApplicationBeanContext;
 import org.jmouse.web.context.WebBeanContext;

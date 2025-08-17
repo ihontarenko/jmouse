@@ -1,4 +1,4 @@
-package org.jmouse.web.exception;
+package org.jmouse.web.mvc.exception;
 
 import org.jmouse.web.mvc.method.ExceptionHandlerMethod;
 

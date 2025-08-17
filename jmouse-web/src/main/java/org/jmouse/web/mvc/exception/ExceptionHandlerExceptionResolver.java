@@ -1,4 +1,4 @@
-package org.jmouse.web.exception;
+package org.jmouse.web.mvc.exception;
 
 import org.jmouse.core.MethodParameter;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
@@ -6,7 +6,7 @@ import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.jmouse.web.annotation.Controller;
 import org.jmouse.web.annotation.ExceptionHandler;
 import org.jmouse.core.Sorter;
-import org.jmouse.web.AbstractExceptionResolver;
+import org.jmouse.web.mvc.AbstractExceptionResolver;
 import org.jmouse.web.http.request.RequestAttributes;
 import org.jmouse.web.http.request.RequestAttributesHolder;
 import org.jmouse.web.context.WebBeanContext;

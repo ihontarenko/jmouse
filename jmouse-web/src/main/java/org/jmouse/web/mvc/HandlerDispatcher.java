@@ -7,7 +7,6 @@ import org.jmouse.beans.InitializingBean;
 import org.jmouse.context.FrameworkFactories;
 import org.jmouse.core.reflection.ReflectionException;
 import org.jmouse.core.Sorter;
-import org.jmouse.web.ExceptionResolver;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.mvc.method.ReturnValueHandler;
 import org.jmouse.web.mvc.method.ReturnValueProcessor;
