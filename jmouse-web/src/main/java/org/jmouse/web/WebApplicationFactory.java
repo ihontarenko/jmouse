@@ -81,7 +81,7 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
      */
     @Override
     public WebBeanContext createRootContext() {
-        WebBeanContext context = createContext(WebBeanContext.DEFAULT_ROOT_WEB_CONTEXT_NAME, jMouseWebRoot.class, jMouseWebMvcRoot.class);
+        WebBeanContext context = createContext(WebBeanContext.DEFAULT_ROOT_WEB_CONTEXT_NAME, getClass());
 
         context.registerBean(Environment.class, createDefaultEnvironment());
         context.registerBean(ApplicationFactory.class, this);
@@ -116,7 +116,7 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
         context.refresh(); // Re-run initialization after initializers added
 
         // Initializes MVC-specific infrastructure
-        new WebMvcInfrastructureInitializer(jMouseWebMvcRoot.class).initialize(context);
+        new WebMvcInfrastructureInitializer().initialize(context);
 
         return context;
     }

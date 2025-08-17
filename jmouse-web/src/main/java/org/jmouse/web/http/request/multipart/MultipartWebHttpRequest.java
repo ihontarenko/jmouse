@@ -1,11 +1,11 @@
 package org.jmouse.web.http.request.multipart;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
+import org.jmouse.core.matcher.Matcher;
+import org.jmouse.core.matcher.TextMatchers;
 import org.jmouse.web.http.HttpHeader;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -20,6 +20,9 @@ public class MultipartWebHttpRequest extends AbstractMultipartWebHttpRequest {
 
     /** Set of additional parameter names extracted from multipart parts. */
     private Set<String> parameterNames;
+
+    private static final Matcher<String> EXCEPTION_MATCHER = TextMatchers.containsAny(
+            "exceed", "large", "length", "size");
 
     /**
      * 🆕 Create a new multipart request wrapper.
@@ -93,7 +96,7 @@ public class MultipartWebHttpRequest extends AbstractMultipartWebHttpRequest {
 
             setMultipartFiles(files);
 
-        } catch (IOException | ServletException e) {
+        } catch (Throwable e) {
             throw new MultipartRequestException("FAILED TO INITIALIZE MULTIPART-REQUEST!", e);
         }
     }

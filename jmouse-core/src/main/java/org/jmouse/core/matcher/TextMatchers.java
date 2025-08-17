@@ -2,6 +2,8 @@ package org.jmouse.core.matcher;
 
 import org.jmouse.core.matcher.ant.AntMatcher;
 
+import java.util.stream.Stream;
+
 /**
  * A utility class that provides matchers for strings. These matchers can check if a string contains
  * a substring, equals another string, starts with a prefix, or ends with a suffix.
@@ -35,6 +37,10 @@ public class TextMatchers {
      */
     public static Matcher<String> contains(String substring) {
         return new TextContainsMatcher(substring);
+    }
+
+    public static Matcher<String> containsAny(String... substring) {
+        return new TextContainsAnyMatcher(substring);
     }
 
     /**
@@ -96,6 +102,26 @@ public class TextMatchers {
         @Override
         public String toString() {
             return "CONTAINS [ %s ]".formatted(substring);
+        }
+    }
+
+    private record TextContainsAnyMatcher(String[] substrings, Matcher<String> matcher) implements Matcher<String> {
+
+        public TextContainsAnyMatcher(String... substrings) {
+            this(substrings, Stream.of(substrings)
+                    .map(TextMatchers::contains)
+                    .reduce(Matcher::or)
+                    .orElse(Matcher.constant(true)));
+        }
+
+        @Override
+        public boolean matches(String item) {
+            return item != null && matcher.matches(item);
+        }
+
+        @Override
+        public String toString() {
+            return "CONTAINS ANY [ %s ]".formatted(matcher);
         }
     }
 
