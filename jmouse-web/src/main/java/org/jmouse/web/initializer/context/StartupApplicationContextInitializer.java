@@ -5,12 +5,10 @@ import org.jmouse.beans.BeanContextInitializer;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.reflection.JavaType;
-import org.jmouse.mvc.BeanConfigurer;
+import org.jmouse.web.mvc.BeanConfigurer;
 import org.jmouse.core.Priority;
 import org.jmouse.core.Sorter;
 import org.jmouse.context.ApplicationConfigurer;
-import org.jmouse.mvc.negotiation.PathVariableLookupConfigurer;
-import org.jmouse.mvc.negotiation.QueryParameterLookupConfigurer;
 import org.jmouse.web.context.WebBeanContext;
 
 import java.util.ArrayList;

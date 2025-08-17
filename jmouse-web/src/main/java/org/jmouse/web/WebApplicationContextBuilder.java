@@ -7,9 +7,9 @@ import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.context.ApplicationContextBeansScanner;
 import org.jmouse.core.Bits;
-import org.jmouse.mvc.context.WebMvcControllersInitializer;
-import org.jmouse.mvc.context.WebMvcInfrastructureInitializer;
-import org.jmouse.mvc.jMouseWebMvcRoot;
+import org.jmouse.web.mvc.context.WebMvcControllersInitializer;
+import org.jmouse.web.mvc.context.WebMvcInfrastructureInitializer;
+import org.jmouse.web.mvc.jMouseWebMvcRoot;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.initializer.context.StartupApplicationContextInitializer;
 
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import static org.jmouse.mvc.context.WebMvcInfrastructureInitializer.*;
+import static org.jmouse.web.mvc.context.WebMvcInfrastructureInitializer.*;
 
 /**
  * 🔧 Builder for creating and customizing {@link WebBeanContext} instances.

@@ -1,8 +1,8 @@
 package org.jmouse.web.negotiation;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.mvc.HandlerMapping;
-import org.jmouse.mvc.RouteMatch;
+import org.jmouse.web.mvc.HandlerMapping;
+import org.jmouse.web.mvc.RouteMatch;
 
 import static org.jmouse.web.http.request.RequestAttributesHolder.getAttribute;
 

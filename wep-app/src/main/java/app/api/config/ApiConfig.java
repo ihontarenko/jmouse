@@ -2,8 +2,8 @@ package app.api.config;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
-import org.jmouse.mvc.Route;
-import org.jmouse.mvc.mapping.ControllerMethodRegistration;
+import org.jmouse.web.mvc.Route;
+import org.jmouse.web.mvc.mapping.ControllerMethodRegistration;
 
 @BeanFactories
 public class ApiConfig {

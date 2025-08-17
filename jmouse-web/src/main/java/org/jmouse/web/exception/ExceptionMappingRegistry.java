@@ -1,6 +1,6 @@
 package org.jmouse.web.exception;
 
-import org.jmouse.web.method.ExceptionHandlerMethod;
+import org.jmouse.web.mvc.method.ExceptionHandlerMethod;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;

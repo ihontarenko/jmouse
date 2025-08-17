@@ -1,7 +1,7 @@
 package app.api;
 
-import org.jmouse.mvc.Model;
-import org.jmouse.mvc.NotFoundException;
+import org.jmouse.web.mvc.Model;
+import org.jmouse.web.mvc.NotFoundException;
 import org.jmouse.web.annotation.*;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.HttpMethod;

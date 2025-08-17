@@ -5,9 +5,9 @@ import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.BeanScan;
 import org.jmouse.core.MediaType;
-import org.jmouse.mvc.NotFoundException;
-import org.jmouse.mvc.Route;
-import org.jmouse.mvc.mapping.ControllerMethodRegistration;
+import org.jmouse.web.mvc.NotFoundException;
+import org.jmouse.web.mvc.Route;
+import org.jmouse.web.mvc.mapping.ControllerMethodRegistration;
 import org.jmouse.web.http.HttpHeader;
 
 @BeanFactories

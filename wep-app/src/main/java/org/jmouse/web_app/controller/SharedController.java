@@ -3,7 +3,7 @@ package org.jmouse.web_app.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.Bytes;
-import org.jmouse.mvc.Model;
+import org.jmouse.web.mvc.Model;
 import org.jmouse.web.annotation.*;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.HttpHeader;

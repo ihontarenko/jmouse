@@ -1,6 +1,7 @@
 package org.jmouse.web.annotation;
 
 import org.jmouse.web.http.request.RequestRoute;
+import org.jmouse.web.mvc.Route;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -20,7 +21,7 @@ import java.lang.annotation.RetentionPolicy;
  * 🧩 Can be used alongside other conditions like {@link Header}, etc.
  *
  * @see RequestRoute
- * @see org.jmouse.mvc.Route
+ * @see Route
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com

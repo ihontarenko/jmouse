@@ -4,7 +4,7 @@ import org.jmouse.beans.conditions.BeanCondition;
 import org.jmouse.core.reflection.annotation.AnnotationData;
 import org.jmouse.core.reflection.annotation.AnnotationScanner;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
-import org.jmouse.mvc.ServletDispatcherConfiguration;
+import org.jmouse.web.mvc.ServletDispatcherConfiguration;
 import org.jmouse.core.Streamable;
 
 import java.util.List;

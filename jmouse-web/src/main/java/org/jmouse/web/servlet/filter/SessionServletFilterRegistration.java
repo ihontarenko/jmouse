@@ -2,7 +2,7 @@ package org.jmouse.web.servlet.filter;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.core.Priority;
-import org.jmouse.mvc.DelegatingBeanFilterRegistration;
+import org.jmouse.web.mvc.DelegatingBeanFilterRegistration;
 
 /**
  * 🔐 Registers the {@link SessionServletFilter} as a delegating filter

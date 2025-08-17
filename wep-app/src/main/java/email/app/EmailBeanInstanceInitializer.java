@@ -1,7 +1,7 @@
 package email.app;
 
 import org.jmouse.beans.annotation.Bean;
-import org.jmouse.mvc.BeanConfigurer;
+import org.jmouse.web.mvc.BeanConfigurer;
 
 @Bean
 public class EmailBeanInstanceInitializer implements BeanConfigurer<EmailCfg> {

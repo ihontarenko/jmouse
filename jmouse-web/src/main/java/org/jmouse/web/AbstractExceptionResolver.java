@@ -2,8 +2,8 @@ package org.jmouse.web;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
-import org.jmouse.mvc.MVCResult;
-import org.jmouse.mvc.MappedHandler;
+import org.jmouse.web.mvc.MVCResult;
+import org.jmouse.web.mvc.MappedHandler;
 import org.jmouse.web.http.request.RequestContext;
 import org.jmouse.web.context.WebBeanContext;
 

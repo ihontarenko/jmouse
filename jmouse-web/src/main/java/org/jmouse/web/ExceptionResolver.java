@@ -1,7 +1,7 @@
 package org.jmouse.web;
 
-import org.jmouse.mvc.MVCResult;
-import org.jmouse.mvc.MappedHandler;
+import org.jmouse.web.mvc.MVCResult;
+import org.jmouse.web.mvc.MappedHandler;
 import org.jmouse.web.http.request.RequestContext;
 
 /**

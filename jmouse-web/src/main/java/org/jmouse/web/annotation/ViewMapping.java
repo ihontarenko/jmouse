@@ -1,8 +1,8 @@
 package org.jmouse.web.annotation;
 
 import org.jmouse.core.reflection.annotation.MapTo;
-import org.jmouse.web.ViewResolver;
-import org.jmouse.web.method.ViewResolverReturnValueHandler;
+import org.jmouse.web.mvc.ViewResolver;
+import org.jmouse.web.mvc.method.ViewResolverReturnValueHandler;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
