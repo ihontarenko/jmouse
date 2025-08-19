@@ -46,7 +46,8 @@ abstract public class AbstractApplicationFactory<T extends ApplicationBeanContex
 
         // Load application properties from predefined locations
         loadApplicationProperties("classpath:package.properties", environment);
-        loadApplicationProperties("classpath:jmouse-application.properties", environment);
+//        loadApplicationProperties("classpath:jmouse-application.properties", environment);
+        loadApplicationProperties("classpath:*/jmouse*.properties", environment);
 
         return environment;
     }

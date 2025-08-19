@@ -69,6 +69,9 @@ public enum HttpHeader {
     EXPIRES("Expires"),
     LAST_MODIFIED("Last-Modified"),
 
+    // --- Security / Firewalls
+    X_FIREWALL_REASON("X-Firewall-Reason"),
+
     // --- Custom / common headers ---
     ORIGIN("Origin"),
     ACCESS_CONTROL_ALLOW_ORIGIN("Access-Control-Allow-Origin"),
@@ -78,6 +81,7 @@ public enum HttpHeader {
     ACCESS_CONTROL_MAX_AGE("Access-Control-Max-Age"),
     ACCESS_CONTROL_REQUEST_HEADERS("Access-Control-Request-Headers"),
     ACCESS_CONTROL_REQUEST_METHOD("Access-Control-Request-Method"),
+    X_REAL_IP("X-Real-IP"),
     X_FORWARDED_FOR("X-Forwarded-For"),
     X_FORWARDED_PROTO("X-Forwarded-Proto"),
     X_REQUESTED_WITH("X-Requested-With"),

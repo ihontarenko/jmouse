@@ -3,7 +3,7 @@ package org.jmouse.web.servlet.filter;
 import org.jmouse.web.mvc.DelegatingBeanFilterRegistration;
 import org.jmouse.core.Priority;
 
-@Priority(-9999)
+@Priority(-9000)
 public class MultipartRequestFilterRegistration extends DelegatingBeanFilterRegistration {
 
     public MultipartRequestFilterRegistration() {

@@ -107,4 +107,9 @@ public class SharedController {
         return Bytes.parse(bytes);
     }
 
+    @GetMapping(requestPath = "/shared/userModel/{name}")
+    public UserModel userModel(@PathVariable("name") String name) {
+        return new UserModel(name, "passwd!");
+    }
+
 }

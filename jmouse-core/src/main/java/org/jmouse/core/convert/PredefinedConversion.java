@@ -36,6 +36,8 @@ abstract public class PredefinedConversion extends StandardConversion {
         registerConverter(new BytesToStringConverter());
         registerConverter(new StringToMediaTypeConverter());
         registerConverter(new MediaTypeToStringConverter());
+        registerConverter(new StringToCIDRConverter());
+        registerConverter(new CIDRToStringConverter());
     }
 
     @SuppressWarnings({"rawtypes"})

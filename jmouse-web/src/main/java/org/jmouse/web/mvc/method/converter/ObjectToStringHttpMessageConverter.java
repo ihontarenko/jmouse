@@ -12,7 +12,8 @@ import java.nio.charset.StandardCharsets;
 
 public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
-    private Conversion conversion;
+    private Conversion                   conversion;
+    private HttpMessageConverter<String> messageConverter;
 
     protected ObjectToStringHttpMessageConverter() {
         super(MediaType.TEXT_PLAIN);
@@ -20,19 +21,15 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 
     @Override
     @SuppressWarnings("unchecked")
-    protected void doWrite(Object data, Class<?> type, HttpOutputMessage outputMessage) throws IOException {
+    protected void doWrite(Object data, Class<?> type, HttpOutputMessage message) throws IOException {
         Class<Object> sourceType = (Class<Object>) type;
         String        converted  = conversion.convert(data, sourceType, String.class);
-        outputMessage.getOutputStream().write(converted.getBytes(StandardCharsets.UTF_8));
+        messageConverter.write(converted, type, message);
     }
 
     @Override
     protected Object doRead(Class<?> clazz, HttpInputMessage message) throws IOException {
-        Headers     headers       = message.getHeaders();
-        long        contentLength = headers.getContentLength();
-        InputStream stream        = message.getInputStream();
-        byte[]      bytes         = contentLength > 0 ? stream.readNBytes((int) contentLength) : stream.readAllBytes();
-        return conversion.convert(new String(bytes, getCharset(headers.getContentType())), clazz);
+        return conversion.convert(messageConverter.read(String.class, message), clazz);
     }
 
     @Override
@@ -53,14 +50,7 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
     @Override
     public void doInitialize(WebBeanContext context) {
         conversion = context.getBean(Conversion.class);
-    }
-
-    private Charset getCharset(MediaType mediaType) {
-        if (mediaType != null) {
-            return mediaType.getCharset();
-        }
-
-        return StandardCharsets.UTF_8;
+        messageConverter = context.getBean(StringHttpMessageConverter.class);
     }
 
 }

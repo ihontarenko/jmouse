@@ -1,7 +1,11 @@
 package org.jmouse.web.http.request;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpMethod;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * 🌐 Abstraction over a web request.
@@ -14,6 +18,9 @@ import org.jmouse.web.http.HttpMethod;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  */
 public interface WebRequest extends RequestAttributes {
+
+    String WEB_REQUEST_HEADERS_ATTRIBUTE   = "WEB_REQUEST_HEADERS_ATTRIBUTE";
+    String WEB_REQUEST_CLIENT_IP_ATTRIBUTE = "WEB_REQUEST_CLIENT_IP_ATTRIBUTE";
 
     /**
      * 🔍 Get the native servlet request.
@@ -28,5 +35,56 @@ public interface WebRequest extends RequestAttributes {
      * @return the HTTP method as {@link HttpMethod}
      */
     HttpMethod getHttpMethod();
+
+    default Headers getHeaders() {
+        Headers headers = (Headers) getRequest().getAttribute(WEB_REQUEST_HEADERS_ATTRIBUTE);
+
+        if (headers == null) {
+            RequestHeaders requestHeaders = RequestAttributesHolder.getRequestHeaders();
+            headers = requestHeaders.headers();
+            getRequest().setAttribute(WEB_REQUEST_HEADERS_ATTRIBUTE, headers);
+        }
+
+        return headers;
+    }
+
+    default InetAddress getClientIp() {
+        InetAddress clientIp = (InetAddress) getRequest().getAttribute(WEB_REQUEST_CLIENT_IP_ATTRIBUTE);;
+
+        if (clientIp == null) {
+            Headers headers       = getHeaders();
+            String  xForwardedFor = (String) headers.getHeader(HttpHeader.X_FORWARDED_FOR);
+
+            if (xForwardedFor != null) {
+                String ip    = xForwardedFor;
+                int    comma = xForwardedFor.indexOf(',');
+
+                if (comma != -1) {
+                    ip = xForwardedFor.substring(0, comma);
+                }
+
+                try {
+                    clientIp = InetAddress.getByName(ip.trim());
+                } catch (UnknownHostException ignored) {}
+            }
+
+            if (clientIp == null) {
+                String xRealIp       = (String) getHeaders().getHeader(HttpHeader.X_REAL_IP);
+                String remoteAddress = getRequest().getRemoteAddr();
+
+                if (xRealIp != null) {
+                    remoteAddress = xRealIp;
+                }
+
+                try {
+                    clientIp = InetAddress.getByName(remoteAddress.trim());
+                } catch (UnknownHostException ignored) {}
+            }
+
+            getRequest().setAttribute(WEB_REQUEST_CLIENT_IP_ATTRIBUTE, clientIp);
+        }
+
+        return clientIp;
+    }
 
 }
