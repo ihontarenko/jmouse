@@ -66,7 +66,8 @@ abstract public class AbstractBinder implements ObjectBinder {
         );
 
         // Scalar or object binding logic
-        if (descriptor.isScalar() || descriptor.isClass() || descriptor.isEnum() || isConvertible) {
+        if (descriptor.isScalar() || descriptor.isClass() || descriptor.isEnum()
+                || (isConvertible && !descriptor.isCollection())) {
             Object result = value.asObject();
 
             // If the value is scalar, convert it to the target type

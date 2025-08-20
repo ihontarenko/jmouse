@@ -30,14 +30,23 @@ abstract public class PredefinedConversion extends StandardConversion {
             registerConverter(converter);
         }
 
-        // custom converters
+        // javaClass-to-string and vice versa
         registerConverter(String.class, Class.class, new PredefinedConversion.StringToClassConverter());
+        // bytes-to-string and vice versa
         registerConverter(new StringToBytesConverter());
         registerConverter(new BytesToStringConverter());
+        // mediaType-to-string and vice versa
         registerConverter(new StringToMediaTypeConverter());
         registerConverter(new MediaTypeToStringConverter());
+        // cidr-to-string and vice versa
         registerConverter(new StringToCIDRConverter());
         registerConverter(new CIDRToStringConverter());
+        // enum country and vice versa
+        registerConverter(new StringToCountryConverter());
+        registerConverter(new CountryToStringConverter());
+        // string-pattern and vice versa
+        registerConverter(new StringToPatternConverter());
+        registerConverter(new PatternToStringConverter());
     }
 
     @SuppressWarnings({"rawtypes"})

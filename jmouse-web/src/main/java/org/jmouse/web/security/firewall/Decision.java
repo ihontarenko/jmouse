@@ -10,6 +10,10 @@ public record Decision(Action action, HttpStatus httpStatus, String reason) {
         return action != Action.ALLOW;
     }
 
+    public boolean isBlocked() {
+        return !isNotAllowed();
+    }
+
     public static Decision allow() {
         return new Decision(Action.ALLOW, OK, OK.getText());
     }

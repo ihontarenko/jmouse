@@ -58,7 +58,7 @@ public class MapBinder extends AbstractBinder {
             // Get the map from the bindable instance
             @SuppressWarnings({"unchecked"})
             Map<Object, Object> map     = (Map<Object, Object>) getMap(bindable);
-            JavaType            mapType = bindable.getType();
+            JavaType            mapType = bindable.getType().locate(Map.class);
             TypeInformation     vi      = TypeInformation.forJavaType(mapType.getLast());
             TypeInformation     ki      = TypeInformation.forJavaType(mapType.getFirst());
 
