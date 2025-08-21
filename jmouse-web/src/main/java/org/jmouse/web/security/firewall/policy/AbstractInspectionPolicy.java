@@ -8,6 +8,7 @@ import org.jmouse.web.security.firewall.FirewallPolicy;
 import org.jmouse.web.security.firewall.InspectionPolicies;
 
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
@@ -18,7 +19,7 @@ import static java.util.Objects.requireNonNull;
  * <p>Collects {@link InspectionRule}s from {@link InspectionPolicies.InspectionGroup}
  * and applies them against request values extracted from {@link EvaluationInput}.</p>
  *
- * <p>❗ Extending classes should only override {@link #extractValues(EvaluationInput)}
+ * <p>❗ Extending classes should only override {@link #requestValues(EvaluationInput)}
  * if they want to inspect a different set of request sources.</p>
  */
 public abstract class AbstractInspectionPolicy implements FirewallPolicy {
@@ -53,7 +54,7 @@ public abstract class AbstractInspectionPolicy implements FirewallPolicy {
 
         // regex rules
         for (Map.Entry<String, Pattern> e : group.getExpression().entrySet()) {
-            assembled.add(InspectionRule.regex(e.getKey(), e.getValue()));
+            assembled.add(InspectionRule.regularExpression(e.getKey(), e.getValue()));
         }
 
         this.rules = Collections.unmodifiableList(assembled);
@@ -68,14 +69,13 @@ public abstract class AbstractInspectionPolicy implements FirewallPolicy {
      */
     @Override
     public final Decision apply(EvaluationInput input) {
-        final Map<String, Set<String>> bySource = extractValues(input);
+        final Map<String, Set<String>> values = requestValues(input);
 
-        if (bySource == null || bySource.isEmpty()) {
+        if (values == null || values.isEmpty()) {
             return Decision.allow();
         }
 
-        for (Map.Entry<String, Set<String>> source : bySource.entrySet()) {
-            final String sourceKey = source.getKey();
+        for (Map.Entry<String, Set<String>> source : values.entrySet()) {
             for (String raw : source.getValue()) {
                 final String value = normalize(raw);
 
@@ -86,11 +86,12 @@ public abstract class AbstractInspectionPolicy implements FirewallPolicy {
                 for (InspectionRule rule : rules) {
                     if (rule.test(value)) {
                         return Decision.block(blockStatus, "BLOCKED BY %s[%s]; SOURCE=%s"
-                                .formatted(policyName, rule.id(), sourceKey));
+                                .formatted(policyName, rule.id(), source.getKey()));
                     }
                 }
             }
         }
+
         return Decision.allow();
     }
 
@@ -101,7 +102,7 @@ public abstract class AbstractInspectionPolicy implements FirewallPolicy {
      * @param input evaluation input
      * @return map of source → values
      */
-    protected Map<String, Set<String>> extractValues(EvaluationInput input) {
+    protected Map<String, Set<String>> requestValues(EvaluationInput input) {
         return RequestValues.defaults().getStringMap(input.requestContext().request());
     }
 
@@ -127,15 +128,11 @@ public abstract class AbstractInspectionPolicy implements FirewallPolicy {
         return trimmed.length() > MAX_VALUE_LENGTH ? trimmed.substring(0, MAX_VALUE_LENGTH) : trimmed;
     }
 
-    // ---------------------------------------------------------------------
-    // Rule abstraction
-    // ---------------------------------------------------------------------
-
     /**
      * Represents a single inspection rule.
      * <p>Implemented as sealed interface with type-safe subtypes.</p>
      */
-    public sealed interface InspectionRule permits AbstractInspectionPolicy.ContainsRule, RegularExpressionRule {
+    public sealed interface InspectionRule permits ContainsRule, RegularExpressionRule {
 
         /**
          * Factory: case-insensitive "contains".
@@ -154,7 +151,7 @@ public abstract class AbstractInspectionPolicy implements FirewallPolicy {
         /**
          * Factory: regex pattern.
          */
-        static InspectionRule regex(String id, Pattern pattern) {
+        static InspectionRule regularExpression(String id, Pattern pattern) {
             return new RegularExpressionRule(id, pattern);
         }
 
@@ -170,55 +167,25 @@ public abstract class AbstractInspectionPolicy implements FirewallPolicy {
     }
 
     /**
-     * "Contains" inspection rule.
-     * <p>Checks whether a string contains a given substring.</p>
-     */
-    static final class ContainsRule implements InspectionRule {
-        private final String  id;
-        private final String  needle;
-        private final boolean ignoreCase;
-
-        ContainsRule(String id, String needle, boolean ignoreCase) {
-            this.id = requireNonNull(id);
-            this.needle = requireNonNull(needle);
-            this.ignoreCase = ignoreCase;
+         * "Contains" inspection rule.
+         * <p>Checks whether a string contains a given substring.</p>
+         */
+        record ContainsRule(String id, String needle, boolean ignoreCase) implements InspectionRule {
+            @Override
+            public boolean test(String value) {
+                return ignoreCase ? value.toLowerCase(Locale.ROOT)
+                        .contains(needle.toLowerCase(Locale.ROOT)) : value.contains(needle);
+            }
         }
-
-        @Override
-        public String id() {
-            return id;
-        }
-
-        @Override
-        public boolean test(String value) {
-            if (value == null) return false;
-            return ignoreCase ? value.toLowerCase(Locale.ROOT)
-                    .contains(needle.toLowerCase(Locale.ROOT)) : value.contains(needle);
-        }
-    }
 
     /**
-     * Regular expression inspection rule.
-     * <p>Uses a pre-compiled {@link Pattern} and matches with {@link java.util.regex.Matcher#find()}.</p>
-     */
-    static final class RegularExpressionRule implements InspectionRule {
-
-        private final String  id;
-        private final Pattern pattern;
-
-        RegularExpressionRule(String id, Pattern pattern) {
-            this.id = requireNonNull(id);
-            this.pattern = requireNonNull(pattern);
+         * Regular expression inspection rule.
+         * <p>Uses a pre-compiled {@link Pattern} and matches with {@link Matcher#find()}.</p>
+         */
+        record RegularExpressionRule(String id, Pattern pattern) implements InspectionRule {
+            @Override
+            public boolean test(String value) {
+                return value != null && pattern.matcher(value).find();
+            }
         }
-
-        @Override
-        public String id() {
-            return id;
-        }
-
-        @Override
-        public boolean test(String value) {
-            return value != null && pattern.matcher(value).find();
-        }
-    }
 }

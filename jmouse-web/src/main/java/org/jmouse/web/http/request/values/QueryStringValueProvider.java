@@ -2,6 +2,7 @@ package org.jmouse.web.http.request.values;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.Collections;
 import java.util.Set;
 
 public class QueryStringValueProvider implements RequestValueProvider {
@@ -13,7 +14,13 @@ public class QueryStringValueProvider implements RequestValueProvider {
 
     @Override
     public Set<String> getRequestValues(HttpServletRequest request) {
-        return Set.of(request.getQueryString());
+        String queryString = request.getQueryString();
+
+        if (queryString == null) {
+            queryString = "";
+        }
+
+        return Set.of(queryString);
     }
 
 }

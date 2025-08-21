@@ -59,8 +59,8 @@ public class FirewallBeanConfiguration {
      * <pre>{@code
      * jmouse.web.servlet.firewall.token-bucket.capacity=50
      * jmouse.web.servlet.firewall.token-bucket.refill-per-sec=10
-     * jmouse.web.servlet.firewall.untrusted-browser=.*curl|wget.*
-     * jmouse.web.servlet.firewall.inspection.xss=.*<script>.*
+     * jmouse.web.servlet.firewall.untrustedBrowser[0]=sqlmap
+     * jmouse.web.servlet.firewall.inspectionPolicy[xss][expression][svg_tag]=(?i)<\\s*svg\\b
      * }</pre>
      */
     @BeanProperties("jmouse.web.servlet.firewall")
