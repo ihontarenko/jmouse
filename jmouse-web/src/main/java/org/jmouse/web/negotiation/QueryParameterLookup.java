@@ -1,6 +1,7 @@
 package org.jmouse.web.negotiation;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jmouse.core.Priority;
 
 /**
  * 🔎 Query-parameter based media type resolver.
@@ -31,6 +32,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author Ivan Hontarenko
  * @see MappedMediaTypeLookup
  */
+@Priority(Integer.MIN_VALUE + 1000)
 public class QueryParameterLookup extends MappedMediaTypeLookup {
 
     /** Creates a lookup using the default parameter name {@code "format"}. */

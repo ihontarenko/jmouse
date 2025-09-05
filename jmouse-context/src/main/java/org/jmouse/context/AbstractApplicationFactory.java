@@ -49,6 +49,9 @@ abstract public class AbstractApplicationFactory<T extends ApplicationBeanContex
 //        loadApplicationProperties("classpath:jmouse-application.properties", environment);
         loadApplicationProperties("classpath:*/jmouse*.properties", environment);
 
+        // will fails
+//        loadApplicationProperties("classpath:*/jmouse*.yaml", environment);
+
         return environment;
     }
 
@@ -63,14 +66,27 @@ abstract public class AbstractApplicationFactory<T extends ApplicationBeanContex
      */
     protected void loadApplicationProperties(String location, Environment environment) {
         int counter = 0;
-
         for (Resource resource : resourceLoader.findResources(location)) {
-            // Extract filename and remove extension for naming the property source
-            String name = Strings.suffix(resource.getName(), FileSystems.getDefault().getSeparator(), true, 1);
-            String formatted = "%s[%d]".formatted(removeExtension(name), counter++);
-
-            // Add the resource as a property source
-            environment.addPropertySource(new ResourcePropertySource(formatted, resource));
+            loadApplicationProperties(resource, environment, counter++);
         }
+    }
+
+    /**
+     * Loads application properties from a single resource and registers it as a property source. 📦
+     * <p>
+     * Property-source name is derived from the resource filename (without extension)
+     * and suffixed with the index: {@code <basename>[number]}.
+     * </p>
+     *
+     * @param resource    the properties resource (e.g., .properties, .yml, .yaml)
+     * @param environment target environment where the property source will be added
+     * @param number      index used to disambiguate property-source names
+     */
+    protected void loadApplicationProperties(Resource resource, Environment environment, int number) {
+        // Extract filename and remove extension for naming the property source
+        String name = Strings.suffix(resource.getName(), FileSystems.getDefault().getSeparator(), true, 1);
+        String formatted = "%s[%d]".formatted(removeExtension(name), number);
+        // Add the resource as a property source
+        environment.addPropertySource(new ResourcePropertySource(formatted, resource));
     }
 }

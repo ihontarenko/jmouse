@@ -1,6 +1,8 @@
 package org.jmouse.core.env;
 
 import org.jmouse.core.io.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -13,6 +15,8 @@ import java.util.Properties;
  * </p>
  */
 public class ResourcePropertySource extends JavaPropertiesPropertySource {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(ResourcePropertySource.class);
 
     /**
      * Creates a new {@code ResourcePropertySource} with the given name and resource.
@@ -35,8 +39,8 @@ public class ResourcePropertySource extends JavaPropertiesPropertySource {
 
         try {
             properties.load(resource.getReader());
-        } catch (IOException ignore) {
-            // Ignored: Properties will remain empty if loading fails
+        } catch (IOException e) {
+            LOGGER.error("Unable to load properties from: {}", resource, e);
         }
 
         return properties;

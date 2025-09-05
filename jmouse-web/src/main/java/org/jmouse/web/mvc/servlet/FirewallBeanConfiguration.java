@@ -18,7 +18,7 @@ import java.util.List;
  *   <li>📂 {@link PathTraversalPolicy}</li>
  *   <li>⏱️ {@link RequestLimitPolicy}</li>
  *   <li>💉 {@link SqlInjectionPolicy}</li>
- *   <li>🖊️ {@link XssPolicy}</li>
+ *   <li>🖊️ {@link XssInjectionPolicy}</li>
  *   <li>🕵️ {@link SuspiciousUserAgentPolicy}</li>
  * </ul>
  *
@@ -46,7 +46,7 @@ public class FirewallBeanConfiguration {
                 new PathTraversalPolicy(),
                 new RequestLimitPolicy(properties.getRateLimit(), properties.getTrustedProxy()),
                 new SqlInjectionPolicy(inspection.getInjection(), HttpStatus.NOT_ACCEPTABLE),
-                new XssPolicy(inspection.getXss(), HttpStatus.NOT_ACCEPTABLE),
+                new XssInjectionPolicy(inspection.getXss(), HttpStatus.NOT_ACCEPTABLE),
                 new SuspiciousUserAgentPolicy(properties.getUntrustedBrowser())
         ));
     }

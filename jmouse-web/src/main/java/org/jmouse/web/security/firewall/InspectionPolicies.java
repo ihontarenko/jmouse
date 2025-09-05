@@ -1,5 +1,7 @@
 package org.jmouse.web.security.firewall;
 
+import org.jmouse.web.security.firewall.policy.XssInjectionPolicy;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -28,7 +30,7 @@ import java.util.regex.Pattern;
  *
  * @see org.jmouse.web.security.firewall.policy.AbstractInspectionPolicy
  * @see org.jmouse.web.security.firewall.policy.SqlInjectionPolicy
- * @see org.jmouse.web.security.firewall.policy.XssPolicy
+ * @see XssInjectionPolicy
  */
 public class InspectionPolicies {
 

@@ -20,6 +20,8 @@ public class MimeType {
     public static final String PREFIX_SEPARATOR = "+";
     /** 🔤 Standard parameter key for character set. */
     public static final String PARAMETER_NAME_CHARSET = "charset";
+    /** 🐞 Standard parameter key for debug set. */
+    public static final String PARAMETER_NAME_DEBUG = "x";
     /**
      * 🗂️ Cache of parsed {@link MimeType} by raw string.
      * <p>Note: simple {@link HashMap} – not thread-safe.</p>

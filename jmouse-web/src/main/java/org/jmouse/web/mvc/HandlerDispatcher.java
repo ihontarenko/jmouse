@@ -8,6 +8,8 @@ import org.jmouse.context.FrameworkFactories;
 import org.jmouse.core.reflection.ReflectionException;
 import org.jmouse.core.Sorter;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.http.request.multipart.MultipartResolver;
+import org.jmouse.web.http.request.multipart.SimpleMultipartResolver;
 import org.jmouse.web.mvc.method.ReturnValueHandler;
 import org.jmouse.web.mvc.method.ReturnValueProcessor;
 import org.jmouse.web.http.request.ExceptionHolder;
@@ -56,6 +58,13 @@ public class HandlerDispatcher implements InitializingBean {
      * List of available {@link ReturnValueHandler}s to handle return value
      */
     private List<ReturnValueHandler> returnValueHandlers;
+
+    /**
+     * 📂 Multipart resolver to handle file upload requests.
+     *
+     * <p>Defaults to {@link SimpleMultipartResolver}.</p>
+     */
+    private final MultipartResolver multipartResolver = new SimpleMultipartResolver();
 
     /**
      * Initializes return value handlers
@@ -130,9 +139,10 @@ public class HandlerDispatcher implements InitializingBean {
     public void dispatch(HttpServletRequest request, HttpServletResponse response) {
         Exception      dispatchException = null;
         MappedHandler  handler           = null;
-        RequestContext requestContext    = new RequestContext(request, response);
 
         try {
+            request = performMultipart(request);
+
             Handler handlerContainer = getMappedHandler(request);
 
             if (handlerContainer != null) {
@@ -152,11 +162,13 @@ public class HandlerDispatcher implements InitializingBean {
 
         try {
             if (dispatchException != null) {
+                RequestContext requestContext = new RequestContext(request, response);
+
                 ExceptionHolder.setException(request, dispatchException);
                 MVCResult exceptionResult = processHandlerException(requestContext, handler, dispatchException);
 
                 if (handler != null && exceptionResult.getReturnValue() == null) {
-                     exceptionResult.setReturnType(handler.returnParameter());
+                    exceptionResult.setReturnType(handler.returnParameter());
                 }
 
                 new ReturnValueProcessor(returnValueHandlers).process(exceptionResult, requestContext);
@@ -247,6 +259,28 @@ public class HandlerDispatcher implements InitializingBean {
         }
 
         throw exception;
+    }
+
+    /**
+     * 📂 Wrap request into a multipart-capable request if needed.
+     *
+     * <ul>
+     *   <li>Checks whether the request is multipart via {@link MultipartResolver}.</li>
+     *   <li>If yes — delegates to {@link MultipartResolver#wrapRequest}.</li>
+     *   <li>Otherwise returns the original request.</li>
+     * </ul>
+     *
+     * @param request incoming HTTP request
+     * @return multipart-enabled request or the original one
+     */
+    protected HttpServletRequest performMultipart(HttpServletRequest request) {
+        HttpServletRequest multipartRequest = request;
+
+        if (multipartResolver.isMultipart(request)) {
+            multipartRequest = multipartResolver.wrapRequest(request);
+        }
+
+        return multipartRequest;
     }
 
     /**

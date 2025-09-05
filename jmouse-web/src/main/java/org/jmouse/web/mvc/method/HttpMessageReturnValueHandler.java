@@ -104,16 +104,27 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
     }
 
     /**
-     * Checks whether this handler supports the given return type.
+     * ✅ Checks whether this handler supports the given return type.
      *
      * @param result the invocation result to check
-     * @return {@code true} if the return value is non-null and not {@code void}, otherwise {@code false}
+     * @return {@code true} if return type is not {@code void} and not {@code null}
      */
     @Override
     public boolean supportsReturnType(MVCResult result) {
         return result.getReturnType() != null && !result.getReturnType().getReturnType().equals(void.class);
     }
 
+    /**
+     * 📦 Resolve producible media types for the current request.
+     *
+     * <ul>
+     *   <li>Reads {@link HandlerMapping#ROUTE_PRODUCIBLE_ATTRIBUTE} if present.</li>
+     *   <li>Falls back to all supported media types of {@code converterManager}.</li>
+     * </ul>
+     *
+     * @param request current HTTP request
+     * @return immutable list of producible media types
+     */
     @SuppressWarnings("unchecked")
     protected List<MediaType> getProducibleMediaTypes(HttpServletRequest request) {
         List<MediaType> result = new ArrayList<>();
@@ -129,10 +140,32 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
         return Collections.unmodifiableList(result);
     }
 
+    /**
+     * 📡 Resolve acceptable media types declared by the client.
+     *
+     * <p>Delegates to {@code mediaTypeManager} to parse the request.</p>
+     *
+     * @param request current HTTP request
+     * @return immutable list of acceptable media types
+     */
     protected List<MediaType> getAcceptableMediaTypes(HttpServletRequest request) {
         return mediaTypeManager.lookupOnRequest(request);
     }
 
+    /**
+     * 🔗 Compute compatible media types between what client accepts
+     * and what the server can produce.
+     *
+     * <ul>
+     *   <li>Checks compatibility for each pair (acceptable vs. producible).</li>
+     *   <li>Copies quality factor (q) and charset where applicable.</li>
+     *   <li>Chooses the more specific type when resolving overlap.</li>
+     * </ul>
+     *
+     * @param acceptableTypes  list of client-accepted types
+     * @param producibleTypes  list of server-producible types
+     * @return immutable list of compatible media types
+     */
     protected List<MediaType> getCompatibleMediaTypes(List<MediaType> acceptableTypes, List<MediaType> producibleTypes) {
         Set<MediaType> compatibleTypes = new HashSet<>();
 

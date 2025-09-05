@@ -29,7 +29,7 @@ import org.jmouse.web.security.firewall.InspectionPolicies;
  * @see AbstractInspectionPolicy
  * @see InspectionPolicies
  */
-public class XssPolicy extends AbstractInspectionPolicy {
+public class XssInjectionPolicy extends AbstractInspectionPolicy {
 
     /**
      * Creates an XSS detection policy with the given inspection group and status.
@@ -37,7 +37,7 @@ public class XssPolicy extends AbstractInspectionPolicy {
      * @param group  inspection rules for XSS detection (contains & regex patterns)
      * @param status HTTP status code to return when blocking the request
      */
-    public XssPolicy(InspectionPolicies.InspectionGroup group, HttpStatus status) {
+    public XssInjectionPolicy(InspectionPolicies.InspectionGroup group, HttpStatus status) {
         super(group, status, "XSS ATTACK");
     }
 

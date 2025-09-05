@@ -22,7 +22,7 @@ public class MultipartWebHttpRequest extends AbstractMultipartWebHttpRequest {
     private Set<String> parameterNames;
 
     private static final Matcher<String> EXCEPTION_MATCHER = TextMatchers.containsAny(
-            "exceed", "large", "length", "size");
+            "exceed", "large", "length", "size", "maximum");
 
     /**
      * 🆕 Create a new multipart request wrapper.
@@ -97,6 +97,10 @@ public class MultipartWebHttpRequest extends AbstractMultipartWebHttpRequest {
             setMultipartFiles(files);
 
         } catch (Throwable e) {
+            if (EXCEPTION_MATCHER.matches(e.getMessage())) {
+                throw new UploadLimitExceededException("MAXIMUM UPLOAD LIMIT EXCEEDED", e.getCause());
+            }
+
             throw new MultipartRequestException("FAILED TO INITIALIZE MULTIPART-REQUEST!", e);
         }
     }

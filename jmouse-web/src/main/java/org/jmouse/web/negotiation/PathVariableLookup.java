@@ -1,6 +1,7 @@
 package org.jmouse.web.negotiation;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jmouse.core.Priority;
 import org.jmouse.web.mvc.HandlerMapping;
 import org.jmouse.web.mvc.RouteMatch;
 
@@ -31,6 +32,7 @@ import static org.jmouse.web.http.request.RequestAttributesHolder.getAttribute;
  * @see HandlerMapping#ROUTE_MATCH_ATTRIBUTE
  * @see RouteMatch
  */
+@Priority(Integer.MIN_VALUE + 2000)
 public class PathVariableLookup extends MappedMediaTypeLookup {
 
     /** Creates a lookup using the default variable name {@code "format"}. */

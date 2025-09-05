@@ -1,6 +1,5 @@
 package org.jmouse.web.mvc.method.converter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jmouse.core.MediaType;
 import org.jmouse.core.Priority;
 
@@ -15,14 +14,12 @@ public class JacksonYamlHttpMessageConverter extends AbstractJacksonHttpMessageC
 
     @Override
     public void doWrite(Object data, Class<?> type, HttpOutputMessage outputMessage) throws IOException, UnwritableException {
-        outputMessage.getHeaders().setContentType(MediaType.APPLICATION_YAML);
-        ObjectMapper objectMapper =  getObjectMapper(outputMessage.getHeaders().getContentType());
-        objectMapper.writeValue(outputMessage.getOutputStream(), data);
+        getObjectMapper(outputMessage).writeValue(outputMessage.getOutputStream(), data);
     }
 
     @Override
     public Object doRead(Class<? extends Object> clazz, HttpInputMessage inputMessage) throws IOException {
-        return getObjectMapper(inputMessage.getHeaders().getContentType()).readValue(inputMessage.getInputStream(), clazz);
+        return getObjectMapper(inputMessage).readValue(inputMessage.getInputStream(), clazz);
     }
 
 }

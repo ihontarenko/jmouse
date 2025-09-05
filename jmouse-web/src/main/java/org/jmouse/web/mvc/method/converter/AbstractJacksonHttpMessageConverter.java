@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jmouse.core.MediaType;
 import org.jmouse.web.context.WebBeanContext;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -87,6 +88,10 @@ public abstract class AbstractJacksonHttpMessageConverter<T> extends AbstractHtt
         }
 
         return objectMapper;
+    }
+
+    public ObjectMapper getObjectMapper(HttpMessage httpMessage) throws IOException {
+        return getObjectMapper(httpMessage.getHeaders().getContentType());
     }
 
     /** ✅ Check if type is writable for the given media type. */

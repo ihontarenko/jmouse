@@ -3,6 +3,7 @@ package org.jmouse.web_app.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.Bytes;
+import org.jmouse.web.http.request.multipart.UploadLimitExceededException;
 import org.jmouse.web.mvc.Model;
 import org.jmouse.web.annotation.*;
 import org.jmouse.web.context.WebBeanContext;
@@ -52,6 +53,11 @@ public class SharedController {
     @ExceptionHandler(UnsupportedOperationException.class)
     public Map<String, String> unsupportedOperationExceptionHandler(Exception e) {
         return Map.of("error", e.getMessage());
+    }
+
+    @ExceptionHandler(UploadLimitExceededException.class)
+    public Map<String, String> uploadLimitExceededExceptionHandler(Exception e) {
+        return Map.of("error", e.getMessage(), "cause", e.getCause().getMessage());
     }
 
     @ExceptionHandler(RuntimeException.class)

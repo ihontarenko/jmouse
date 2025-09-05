@@ -1,12 +1,21 @@
 package org.jmouse.web.http;
 
 import java.net.URLDecoder;
+import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-final public class URINormalizer {
+final public class HttpNormalizer {
 
-    private URINormalizer() {}
+    public static final Pattern P_CNTRL = Pattern.compile(".*\\p{Cntrl}+.*");
+
+    private HttpNormalizer() {}
+
+    public static class Options {
+
+        private boolean doubleDecoded = false;
+
+    }
 
     public static String normalize(String uri, boolean doubleDecode) {
         String normalized = uri;
@@ -19,7 +28,7 @@ final public class URINormalizer {
             normalized = normalized.replace('\\', '/');
             normalized = normalized.replaceAll("/+", "/");
 
-            if (normalized.matches(".*\\p{Cntrl}+.*")) {
+            if (P_CNTRL.matcher(normalized).matches()) {
                 return null;
             }
 
@@ -41,6 +50,14 @@ final public class URINormalizer {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static String normalizeQuery(String queryString) {
+        String normalized = queryString;
+
+
+
+        return normalized;
     }
 
 }

@@ -16,16 +16,19 @@ public class IndexController {
 
     @GetMapping(
             requestPath = "/demo/{id}",
-            queryParameters = {@QueryParameter(name = "lang", value = "uk")},
-            headers = {@Header(name = "X-TEXT", value = "HELLO")}
+            queryParameters = {
+                    @QueryParameter(name = "lang", value = "uk")
+            }
     )
     @MethodDescription("Demo Endpoint!")
     @ViewMapping("index/demo")
-    public String demo(@PathVariable("id") Long id, Model model,
-                       @RequestHeader(HttpHeader.USER_AGENT) String userAgent,
-                       @RequestMethod HttpMethod method,
-                       @RequestParameter("lang") String lang,
-                       @RequestParameter("externalId") Long externalId) {
+    public String demo(
+            @PathVariable("id") Long id, Model model,
+           @RequestHeader(HttpHeader.USER_AGENT) String userAgent,
+           @RequestMethod HttpMethod method,
+           @RequestParameter("lang") String lang,
+           @RequestParameter("externalId") Long externalId
+    ) {
         model.addAttribute("ID", id);
         model.addAttribute("userAgent", userAgent);
         model.addAttribute("method", method);
@@ -39,7 +42,9 @@ public class IndexController {
     }
 
     @ExceptionHandler(HandlerMappingException.class)
-    public String exceptionHandler() {
+    public String exceptionHandler(Model model, Exception e) {
+        model.addAttribute("message", e.getMessage());
+        model.addAttribute("stackTrace", e.getStackTrace());
         return "view:index/error";
     }
 

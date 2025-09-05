@@ -8,6 +8,7 @@ import org.jmouse.context.conversion.ContextConversion;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.env.Environment;
 import org.jmouse.core.io.CompositeResourceLoader;
+import org.jmouse.core.io.Resource;
 import org.jmouse.core.io.ResourceLoader;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.web.mvc.context.WebMvcControllersInitializer;

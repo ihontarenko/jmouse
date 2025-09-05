@@ -6,11 +6,13 @@ import org.jmouse.web.security.firewall.Decision;
 import org.jmouse.web.security.firewall.EvaluationInput;
 import org.jmouse.web.security.firewall.FirewallPolicy;
 import org.jmouse.web.security.firewall.InspectionPolicies;
+import org.jmouse.web.security.firewall.policy.inspection.InspectionRule;
 
+import java.net.URLDecoder;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -119,73 +121,17 @@ public abstract class AbstractInspectionPolicy implements FirewallPolicy {
             return null;
         }
 
-        final String trimmed = string.trim();
+        String trimmed = string.trim();
 
         if (trimmed.isEmpty()) {
             return null;
         }
 
+        if (trimmed.contains("%")) {
+            trimmed = URLDecoder.decode(trimmed, UTF_8);
+        }
+
         return trimmed.length() > MAX_VALUE_LENGTH ? trimmed.substring(0, MAX_VALUE_LENGTH) : trimmed;
     }
 
-    /**
-     * Represents a single inspection rule.
-     * <p>Implemented as sealed interface with type-safe subtypes.</p>
-     */
-    public sealed interface InspectionRule permits ContainsRule, RegularExpressionRule {
-
-        /**
-         * Factory: case-insensitive "contains".
-         */
-        static InspectionRule containsIgnoreCase(String id, String needle) {
-            return new ContainsRule(id, needle, true);
-        }
-
-        /**
-         * Factory: case-sensitive "contains".
-         */
-        static InspectionRule contains(String id, String needle) {
-            return new ContainsRule(id, needle, false);
-        }
-
-        /**
-         * Factory: regex pattern.
-         */
-        static InspectionRule regularExpression(String id, Pattern pattern) {
-            return new RegularExpressionRule(id, pattern);
-        }
-
-        /**
-         * Identifier for logging/debugging.
-         */
-        String id();
-
-        /**
-         * Evaluates the rule against a given value.
-         */
-        boolean test(String value);
-    }
-
-    /**
-         * "Contains" inspection rule.
-         * <p>Checks whether a string contains a given substring.</p>
-         */
-        record ContainsRule(String id, String needle, boolean ignoreCase) implements InspectionRule {
-            @Override
-            public boolean test(String value) {
-                return ignoreCase ? value.toLowerCase(Locale.ROOT)
-                        .contains(needle.toLowerCase(Locale.ROOT)) : value.contains(needle);
-            }
-        }
-
-    /**
-         * Regular expression inspection rule.
-         * <p>Uses a pre-compiled {@link Pattern} and matches with {@link Matcher#find()}.</p>
-         */
-        record RegularExpressionRule(String id, Pattern pattern) implements InspectionRule {
-            @Override
-            public boolean test(String value) {
-                return value != null && pattern.matcher(value).find();
-            }
-        }
 }

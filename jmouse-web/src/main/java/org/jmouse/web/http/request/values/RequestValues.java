@@ -1,10 +1,9 @@
 package org.jmouse.web.http.request.values;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jmouse.web.http.HttpHeader;
 
 import java.util.*;
-
-import static org.jmouse.web.http.HttpHeader.*;
 
 public class RequestValues {
 
@@ -31,7 +30,7 @@ public class RequestValues {
     public static RequestValues defaults() {
         return new RequestValues(
                 new HeaderValueProvider(
-                        X_FORWARDED_FOR, X_FORWARDED_PROTO
+                        HttpHeader.values()
                 ),
                 new QueryStringValueProvider(),
                 new RequestPathValueProvider()

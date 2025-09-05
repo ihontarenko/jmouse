@@ -3,10 +3,12 @@ package org.jmouse.web.negotiation;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.InitializingBeanSupport;
 import org.jmouse.core.MediaType;
+import org.jmouse.core.Sorter;
 import org.jmouse.web.context.WebBeanContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,7 +40,7 @@ public class MediaTypeManager implements LookupRegistry, InitializingBeanSupport
      */
     @Override
     public List<MediaTypeLookup> getLookups() {
-        return strategies;
+        return Collections.unmodifiableList(strategies);
     }
 
     /**
@@ -62,6 +64,8 @@ public class MediaTypeManager implements LookupRegistry, InitializingBeanSupport
      */
     public List<MediaType> lookupOnRequest(HttpServletRequest request) {
         List<MediaType> types = new ArrayList<>();
+
+        Sorter.sort(strategies);
 
         for (MediaTypeLookup lookup : getLookups()) {
             List<MediaType> candidates = lookup.lookup(request);

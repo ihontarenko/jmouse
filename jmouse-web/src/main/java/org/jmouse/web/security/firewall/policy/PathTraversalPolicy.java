@@ -1,6 +1,6 @@
 package org.jmouse.web.security.firewall.policy;
 
-import org.jmouse.web.http.URINormalizer;
+import org.jmouse.web.http.HttpNormalizer;
 import org.jmouse.web.security.firewall.Decision;
 import org.jmouse.web.security.firewall.EvaluationInput;
 import org.jmouse.web.security.firewall.FirewallPolicy;
@@ -22,7 +22,7 @@ import org.jmouse.web.security.firewall.FirewallPolicy;
  *   <li>Otherwise → allow the request.</li>
  * </ul>
  *
- * @see URINormalizer
+ * @see HttpNormalizer
  * @see FirewallPolicy
  */
 public class PathTraversalPolicy implements FirewallPolicy {
@@ -40,7 +40,7 @@ public class PathTraversalPolicy implements FirewallPolicy {
     @Override
     public Decision apply(EvaluationInput input) {
         String requestURI = input.requestContext().request().getRequestURI();
-        String normalized = URINormalizer.normalize(requestURI, true);
+        String normalized = HttpNormalizer.normalize(requestURI, true);
 
         if (normalized == null) {
             return Decision.block(400, "INVALID PATH");
