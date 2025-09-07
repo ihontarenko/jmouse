@@ -410,6 +410,9 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
             instance = initializeBean(instance, definition);
 
             return instance;
+        } catch (Exception exception) {
+            throw new BeanInitializationException("Bean '%s' initialization failed!".formatted(
+                    definition.getBeanName()), exception);
         } finally {
             referenceDetector.remove(definition::getBeanName);
         }

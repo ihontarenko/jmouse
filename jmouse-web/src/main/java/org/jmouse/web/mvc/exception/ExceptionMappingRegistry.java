@@ -40,6 +40,14 @@ public class ExceptionMappingRegistry {
      * @param method        the method that handles the exception
      */
     public void addExceptionMapping(Class<? extends Throwable> exceptionType, Object bean, Method method) {
+        ExceptionHandlerMethod previous = getExceptionHandler(exceptionType);
+
+        if (previous != null) {
+//            throw new IllegalStateException(
+//                    "AMBIGUOUS MAPPING! Cannot register exception handler for type %s there is already exists!"
+//                            .formatted(exceptionType));
+        }
+
         supportedExceptions.add(exceptionType);
         exceptionMappings.put(exceptionType, new ExceptionHandlerMethod(exceptionType, bean, method));
     }

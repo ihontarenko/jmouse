@@ -106,10 +106,13 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
      * @return resolved {@link Charset}, defaults to UTF-8
      */
     private Charset getCharset(MediaType mediaType) {
-        if (mediaType != null) {
-            return mediaType.getCharset();
+        Charset charset = StandardCharsets.UTF_8;
+
+        if (mediaType != null && mediaType.getCharset() != null) {
+            charset = mediaType.getCharset();
         }
-        return StandardCharsets.UTF_8;
+
+        return charset;
     }
 
 }

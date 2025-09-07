@@ -36,16 +36,16 @@ public class IndexController {
         return "view:index/demo";
     }
 
-    @GetMapping(requestPath = "/welcome/{id}")
-    public String hello(Class<?> type, @PathVariable("aaa") String name, @RequestParameter("lang") String lang) {
-        return "index/demo";
+    @GetMapping(requestPath = "/welcome/{id}", produces = {"text/plain"})
+    public String hello() {
+        return getClass().getSimpleName();
     }
 
     @ExceptionHandler(HandlerMappingException.class)
     public String exceptionHandler(Model model, Exception e) {
         model.addAttribute("message", e.getMessage());
         model.addAttribute("stackTrace", e.getStackTrace());
-        return "view:index/error";
+        return "view:jmouse/error";
     }
 
 }

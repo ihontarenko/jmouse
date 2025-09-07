@@ -138,6 +138,20 @@ public final class Headers {
         setHeader(HttpHeader.ACCEPT, String.join(",", Streamable.of(accept).map(MediaType::toString)));
     }
 
+    public Object getAcceptLanguage() {
+        String value = (String) headers.get(HttpHeader.ACCEPT_LANGUAGE);
+
+        if (value != null) {
+            List<Locale.LanguageRange> ranges = Locale.LanguageRange.parse(value);
+
+            if (!ranges.isEmpty()) {
+                ranges.getFirst().getRange();
+            }
+        }
+
+        return null;
+    }
+
     /**
      * 🔐 Gets Authorization header.
      */

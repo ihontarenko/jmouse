@@ -1,0 +1,10 @@
+{% extends "jmouse" %}
+{% block "mainContent" %}
+<h1>Error Page</h1>
+<h3 style="color: darkred; font-weight: bold">Exception: {{ message }}</h3>
+<ul>
+        {% for item in stackTrace %}
+                <li>{{ loop.index0 }} - {{ item.fileName}}:{{ item.lineNumber }} {{ item.className }}#{{ item.methodName }}</li>
+        {% endfor %}
+</ul>
+{% endblock %}

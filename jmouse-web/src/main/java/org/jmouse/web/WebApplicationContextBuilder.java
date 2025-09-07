@@ -186,7 +186,8 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
                         ARGUMENT_RESOLVER,
                         EXCEPTION_RESOLVER,
                         ROUTING_MAPPING,
-                        EXCEPTION_MAPPING
+                        EXCEPTION_MAPPING,
+                        HANDLER_DISPATCHER
                 ), coreClasses.toArray(Class<?>[]::new)).initialize(context);
             } else {
                 context.addInitializer(new WebMvcInfrastructureInitializer());

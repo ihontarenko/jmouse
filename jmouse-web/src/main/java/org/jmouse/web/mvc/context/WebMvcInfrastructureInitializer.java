@@ -4,16 +4,13 @@ import org.jmouse.beans.BeanScanner;
 import org.jmouse.beans.ScannerBeanContextInitializer;
 import org.jmouse.core.Bits;
 import org.jmouse.core.reflection.ClassFinder;
-import org.jmouse.web.mvc.ViewResolver;
+import org.jmouse.web.mvc.*;
 import org.jmouse.web.mvc.exception.ExceptionMappingRegistry;
 import org.jmouse.web.mvc.method.ArgumentResolver;
-import org.jmouse.web.mvc.ExceptionResolver;
 import org.jmouse.web.mvc.method.ReturnValueHandler;
 import org.jmouse.web.mvc.method.ReturnValueProcessor;
 import org.jmouse.web.mvc.method.converter.HttpMessageConverter;
 import org.jmouse.web.mvc.method.converter.MessageConverterManager;
-import org.jmouse.web.mvc.HandlerAdapter;
-import org.jmouse.web.mvc.HandlerMapping;
 import org.jmouse.web.mvc.routing.MappingRegistry;
 import org.jmouse.web.negotiation.MediaTypeLookup;
 
@@ -57,6 +54,7 @@ public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializ
     public static final short ROUTING_MAPPING        = 1 << 9;   // 0x0200
     public static final short EXCEPTION_MAPPING      = 1 << 10;  // 0x0400
     public static final short MEDIA_TYPE_LOOKUP      = 1 << 11;  // 0x0800
+    public static final short HANDLER_DISPATCHER     = 1 << 12;  // 0x1000
 
     private static final Map<Short, BeanScanner<AnnotatedElement>> REGISTRATIONS = new HashMap<>(16);
 
@@ -87,6 +85,8 @@ public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializ
                 -> new ArrayList<>(ClassFinder.findExactlyClasses(ExceptionMappingRegistry.class, types)));
         REGISTRATIONS.put(MEDIA_TYPE_LOOKUP, types
                 -> new ArrayList<>(ClassFinder.findImplementations(MediaTypeLookup.class, types)));
+        REGISTRATIONS.put(HANDLER_DISPATCHER, types
+                -> new ArrayList<>(ClassFinder.findExactlyClasses(HandlerDispatcher.class, types)));
     }
 
     /**
@@ -105,7 +105,8 @@ public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializ
                 EXCEPTION_RESOLVER,
                 ROUTING_MAPPING,
                 EXCEPTION_MAPPING,
-                MEDIA_TYPE_LOOKUP
+                MEDIA_TYPE_LOOKUP,
+                HANDLER_DISPATCHER
         ), basePackages);
     }
 

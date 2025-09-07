@@ -34,7 +34,7 @@ public class FrameworkDispatcher extends ServletDispatcher {
     /**
      * 🧭 Core handler dispatcher responsible for request routing and execution.
      */
-    private final HandlerDispatcher dispatcher = new HandlerDispatcher();
+    private HandlerDispatcher dispatcher;
 
     /**
      * Creates an uninitialized dispatcher.
@@ -72,7 +72,7 @@ public class FrameworkDispatcher extends ServletDispatcher {
      */
     @Override
     protected void doInitialize(WebBeanContext context) {
-        dispatcher.initialize(context);
+        dispatcher = context.getBean(HandlerDispatcher.class);
     }
 
     /**

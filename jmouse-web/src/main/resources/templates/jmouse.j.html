@@ -1,92 +1,374 @@
-<!DOCTYPE html>
-<html lang="uk">
+<!doctype html>
+<html lang="en" data-page="${pageKind:error}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>jMouse - {% block "pageTitle" %}Default{% endblock %}</title>
+    <meta name="color-scheme" content="light dark"/>
+    <link rel="icon"
+          href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111'/%3E%3Cpath d='M20 45c0-7 6-13 13-13s13 6 13 13v3c0 1.7-1.3 3-3 3H23c-1.7 0-3-1.3-3-3v-3Z' fill='%23fff'/%3E%3Cpath d='M33 12c7 0 13 6 13 13v3H20v-3c0-7 6-13 13-13Z' fill='%23a855f7'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='monospace' font-size='12' fill='%23111'%3EjM%3C/text%3E%3C/svg%3E"/>
     <style>
+        /* ---------------------------------------------
+           jMouse Minimal Brand Styles (no framework)
+           — clean, modern, accessible, easily themeable
+           --------------------------------------------- */
+        :root {
+            --jm-bg: #0b0b0c; /* page background (dark default) */
+            --jm-surface: #121214; /* cards / panels */
+            --jm-text: #e7e7ea; /* primary text */
+            --jm-text-dim: #b1b1b7; /* secondary text */
+            --jm-accent: #a855f7; /* brand violet */
+            --jm-accent-2: #22d3ee; /* brand cyan */
+            --jm-danger: #ef4444; /* error red */
+            --jm-ok: #22c55e; /* success green */
+            --jm-border: #26262b; /* borders */
+            --jm-code: #0d0d10; /* code bg */
+            --jm-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            --jm-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            --jm-radius: 16px;
+            --jm-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+            --jm-space: 16px;
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --jm-bg: #fafafa;
+                --jm-surface: #ffffff;
+                --jm-text: #0e0e12;
+                --jm-text-dim: #4d4d57;
+                --jm-border: #e8e8ef;
+                --jm-code: #f6f6fb;
+                --jm-shadow: 0 10px 30px rgba(2, 6, 23, .08);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
         body {
-            background-color: #f8f9fa;
+            margin: 0;
+            background: radial-gradient(1200px 600px at 80% -100px, color-mix(in oklab, var(--jm-accent) 18%, transparent), transparent), var(--jm-bg);
+            color: var(--jm-text);
+            font-family: var(--jm-sans);
+            line-height: 1.55;
+            letter-spacing: .2px;
         }
 
-        .main-container {
-            max-width: 960px;
-            margin: auto;
-            background-color: #fff;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+        /* Layout */
+        .wrap {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: calc(var(--jm-space) * 2) var(--jm-space) 80px;
         }
 
-        .navbar-brand i {
-            margin-right: 0.5rem;
+        header.brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 18px 0 10px;
+        }
+
+        .logo {
+            width: 36px;
+            height: 36px;
+            display: inline-grid;
+            place-items: center;
+            border-radius: 12px;
+            background: linear-gradient(155deg, var(--jm-accent), var(--jm-accent-2));
+            box-shadow: var(--jm-shadow);
+        }
+
+        .logo svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .wordmark {
+            font-weight: 800;
+            letter-spacing: .4px;
+            font-size: 18px;
+        }
+
+        .subtle {
+            color: var(--jm-text-dim);
+        }
+
+        .surface {
+            background: var(--jm-surface);
+            border: 1px solid var(--jm-border);
+            border-radius: var(--jm-radius);
+            box-shadow: var(--jm-shadow);
+        }
+
+        .hero {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 1fr auto;
+            align-items: end;
+            padding: 24px;
+        }
+
+        .title {
+            font-size: clamp(24px, 3.2vw, 36px);
+            margin: 0;
+            letter-spacing: .3px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: color-mix(in oklab, var(--jm-accent) 14%, transparent);
+            border: 1px solid var(--jm-border);
+            font: 500 12px/1 var(--jm-sans);
+        }
+
+        .pill b {
+            font-family: var(--jm-mono);
+        }
+
+        .grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: 1fr;
+            margin-top: 14px;
+        }
+
+        @media (min-width: 900px) {
+            .grid {
+                grid-template-columns: 1.2fr .8fr;
+            }
+        }
+
+        .card {
+            padding: 18px;
+        }
+
+        .mono {
+            font-family: var(--jm-mono);
+            font-size: 13px;
+        }
+
+        .kv {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            gap: 8px 12px;
+        }
+
+        .kv b {
+            color: var(--jm-text-dim);
+            font-weight: 600;
+        }
+
+        details {
+            background: var(--jm-code);
+            border-radius: 12px;
+            border: 1px dashed var(--jm-border);
+            padding: 12px 14px;
+        }
+
+        details[open] {
+            border-style: solid;
+        }
+
+        summary {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        pre {
+            margin: 0;
+            overflow: auto;
+        }
+
+        code {
+            font-family: var(--jm-mono);
+        }
+
+        /* Badges / states */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: 1px solid var(--jm-border);
+        }
+
+        .-err {
+            color: #fff;
+            background: color-mix(in oklab, var(--jm-danger) 25%, transparent);
+        }
+
+        .-ok {
+            background: color-mix(in oklab, var(--jm-ok) 20%, transparent);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--jm-border);
+            background: linear-gradient(180deg, color-mix(in oklab, var(--jm-accent) 14%, transparent), transparent);
+            color: var(--jm-text);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--jm-shadow);
         }
 
         footer {
-            background-color: #f1f3f5;
+            margin-top: 30px;
+            color: var(--jm-text-dim);
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
         }
 
-        .navbar-text small {
-            color: #ccc;
+        /* Utility */
+        .row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .muted {
+            color: var(--jm-text-dim);
+        }
+
+        .right {
+            justify-content: flex-end;
         }
     </style>
 </head>
 <body>
+<div class="wrap">
+    <!-- Brand header -->
+    <header class="brand">
+      <span class="logo" aria-hidden="true">
+        <!-- Simple inline mark: stylized "mouse" + jM monogram -->
+        <svg viewBox="0 0 24 24" role="img" aria-label="jMouse logo">
+          <defs>
+            <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="white"/>
+              <stop offset="1" stop-color="#f0f0ff"/>
+            </linearGradient>
+          </defs>
+          <path d="M12 2c4.4 0 8 3.6 8 8v2H4V10c0-4.4 3.6-8 8-8Z" fill="url(#g)"/>
+          <rect x="5" y="12" width="14" height="9" rx="4.5" fill="white"/>
+          <text x="12" y="16.2" text-anchor="middle" font-family="var(--jm-mono)" font-size="7" fill="#0b0b0c">jM</text>
+        </svg>
+      </span>
+        <div class="wordmark">${frameworkName:jMouse}</div>
+        <div class="subtle">${frameworkVersion:1.0}</div>
+    </header>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="#">
-            <i class="bi bi-terminal"></i> {{ uname }}
-        </a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#">
-                        <i class="bi bi-gear-fill"></i> {{ servlet }}
-                    </a>
-                </li>
+    <!-- HERO / Title -->
+    <section class="surface hero">
+        <h1 class="title">{% block "pageTitle" %}Default{% endblock %}</h1>
+        <div class="row right">
+            <span class="pill"><span>HTTP</span> <b>${statusCode:500}</b></span>
+            <span class="pill"><span>Method</span> <b>${method:GET}</b></span>
+        </div>
+        <div class="subtle" id="message">${message:No mapping found for this request.}</div>
+    </section>
+
+    <!-- Main content -->
+    <div class="grid">
+        <!-- Left: details -->
+        <section class="surface card">
+            <div class="row" style="justify-content: space-between; align-items:center;">
+                <div class="badge -err">${error:No Mapping} • ${path:/demo/333}</div>
+                <a class="btn" href="${home:/}">Go Home</a>
+            </div>
+
+            <h3>Request</h3>
+            <div class="kv mono">
+                <b>Path</b>
+                <div>${path:/demo/333}?${query:lang=uk}</div>
+                <b>Timestamp</b>
+                <div>${timestamp:2025-09-07T03:15:47Z}</div>
+                <b>Request ID</b>
+                <div>${requestId:9c0c3e}</div>
+                <b>Client</b>
+                <div>${clientIp:127.0.0.1}</div>
+                <b>User Agent</b>
+                <div class="muted">${ua:Chrome/139 (Windows 10 x64)}</div>
+                <b>Locale</b>
+                <div>${locale:uk-UA}</div>
+            </div>
+
+            <h3>Stack Trace</h3>
+            <details>
+                <summary>Show technical details</summary>
+                <pre class="mono"><code id="trace">code block</code></pre>
+            </details>
+
+            {% block "mainContent" %}{% endblock %}
+
+        </section>
+
+        <!-- Right: helpful actions -->
+        <aside class="surface card">
+            <h3>What you can try</h3>
+            <ul>
+                <li>Check the route mapping for <code class="mono">${path:/demo/333}</code>.</li>
+                <li>Verify controller annotations and HTTP method.</li>
+                <li>Inspect filters and interceptors for early exits.</li>
             </ul>
-            <span class="navbar-text">
-                <i class="bi bi-clock-history"></i> <small>{{ dt.now.nanoSeconds }}</small>
-            </span>
-        </div>
-    </div>
-</nav>
 
-<div class="main-container">
-    <h2 class="mb-3"><i class="bi bi-box-seam"></i> {{ title }}</h2>
-    <p class="text-muted">{{ description }}</p>
+            <h3>Quick Links</h3>
+            <div class="row">
+                <a class="btn" href="${docs:/_jmouse/docs}">Framework Docs</a>
+                <a class="btn" href="${health:/_jmouse/health}">Health</a>
+                <a class="btn" href="${mappings:/_jmouse/mappings}">Mappings</a>
+            </div>
 
-    <div id="content" class="mt-4">
-        {{ content }}
-        {% block 'main' %}{% endblock %}
-        <div class="mt-4">
-            <div class="alert alert-info" role="alert">
-                <i class="bi bi-lightning-charge-fill text-primary"></i>
-                Request Scoped: <strong>{{ randomString_requestScoped }}</strong>
+            <h3>Environment</h3>
+            <div class="kv mono">
+                <b>App</b>
+                <div>${appName:jmouse-demo}</div>
+                <b>Profile</b>
+                <div>${profile:dev}</div>
+                <b>Node</b>
+                <div>${hostname:localhost}</div>
+                <b>Java</b>
+                <div>${java:21}</div>
             </div>
-            <div class="alert alert-warning" role="alert">
-                <i class="bi bi-shield-lock-fill text-warning"></i>
-                Session Scoped: <strong>{{ randomString_sessionScoped }}</strong>
-            </div>
-        </div>
+        </aside>
     </div>
+
+    <footer>
+        <div>© 2025 jMouse • <span class="muted">${build:build-abc123}</span></div>
+        <div class="muted">Rendered in ${renderMs:6}ms</div>
+    </footer>
 </div>
 
-<footer class="footer mt-5 py-3">
-    <div class="container text-center">
-        <span class="text-muted">
-            <i class="bi bi-c-circle"></i> {{ footer }}
-        </span>
-    </div>
-</footer>
+<script>
+    // Small UX helpers: copy trace, focus navigation, and a safe theme toggle hook
+    (function () {
+        const details = document.querySelector('details');
+        if (location.hash === '#trace') details?.setAttribute('open', '');
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        // Example: Hook to let the framework fill dynamic data post-load if needed
+        // window.__JM_INJECT__ && window.__JM_INJECT__({ statusCode: 500, ... })
+    })();
+</script>
+
 </body>
 </html>

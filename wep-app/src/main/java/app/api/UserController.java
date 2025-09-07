@@ -1,5 +1,6 @@
 package app.api;
 
+import org.jmouse.core.MediaType;
 import org.jmouse.web.mvc.Model;
 import org.jmouse.web.mvc.NotFoundException;
 import org.jmouse.web.annotation.*;
@@ -26,6 +27,11 @@ public class UserController {
         model.addAttribute("message", e.getMessage());
         model.addAttribute("stackTrace", e.getStackTrace());
         return "view:index/error";
+    }
+
+    @GetMapping(requestPath = "/welcome/{id}", produces = {"text/plain"})
+    public String hello() {
+        return getClass().getSimpleName();
     }
 
 
