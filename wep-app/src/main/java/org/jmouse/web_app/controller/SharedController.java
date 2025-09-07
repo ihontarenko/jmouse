@@ -52,7 +52,7 @@ public class SharedController {
 
     @ExceptionHandler(UnsupportedOperationException.class)
     public Map<String, String> unsupportedOperationExceptionHandler(Exception e) {
-        return Map.of("error", e.getMessage());
+        return Map.of("unsupportedOperationException", e.getMessage());
     }
 
     @ExceptionHandler(UploadLimitExceededException.class)

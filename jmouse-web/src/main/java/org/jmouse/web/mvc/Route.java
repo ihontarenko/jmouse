@@ -70,6 +70,16 @@ public final class Route {
     }
 
     /**
+     * 📥 Creates a HEAD route for the given path.
+     *
+     * @param path the route path pattern (e.g. "/users")
+     * @return new {@code Route} instance with HEAD method
+     */
+    public static Route HEAD(String path) {
+        return route().HEAD(path).build();
+    }
+
+    /**
      * 📤 Creates a POST route for the given path.
      *
      * @param path the route path pattern (e.g. "/submit")
@@ -215,6 +225,13 @@ public final class Route {
          */
         public Builder GET(String path) {
             return method(HttpMethod.GET).path(path);
+        }
+
+        /**
+         * Shortcut for {@code method(HttpMethod.HEAD).path(path)}
+         */
+        public Builder HEAD(String path) {
+            return method(HttpMethod.HEAD).path(path);
         }
 
         /**

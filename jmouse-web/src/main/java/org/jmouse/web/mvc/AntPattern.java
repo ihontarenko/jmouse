@@ -73,6 +73,10 @@ public class AntPattern implements RoutePath {
         return Kind.ANT;
     }
 
+    public AntMatcher getAntMatcher() {
+        return antMatcher;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof AntPattern that)) {

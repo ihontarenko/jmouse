@@ -1,0 +1,870 @@
+# ------------------------------------------------------------
+# jMouse mime.types
+# Format: <mime-type><spaces><ext1> <ext2> ...
+# Notes:
+# - This is an extended, modern mapping inspired by common server mime.types
+# - Safe choices for fonts, images, audio/video, web assets, archives, docs
+# - Prefer canonical types where possible
+# ------------------------------------------------------------
+
+# ---- Text / Markup ----------------------------------------------------------
+text/plain                       txt text conf log properties prop def list in
+text/html                        html htm shtml
+application/xhtml+xml            xhtml
+text/css                         css
+text/csv                         csv
+text/tab-separated-values        tsv
+text/markdown                    md markdown mkd mkdn
+text/x-markdown                  md.txt
+text/cache-manifest              appcache manifest
+text/calendar                    ics ifb ical
+text/vcard                       vcf vcard
+text/x-vcalendar                 vcs
+text/xml                         xml xsl
+application/xml                  xmlx
+application/xml-dtd              dtd
+application/json                 json map topojson
+application/ld+json              jsonld
+application/manifest+json        webmanifest
+application/schema+json          schema.json
+application/x-ndjson             ndjson jsonl
+application/toml                 toml
+application/yaml                 yaml yml
+text/yaml                        yaml yml
+text/x-ini                       ini
+text/x-java-properties           properties
+text/x-diff                      diff patch
+text/x-asm                       s asm
+text/x-c                         c h
+text/x-c++                       cc cpp cxx hpp hxx
+text/x-java-source               java
+text/x-python                    py pyw
+text/x-shellscript               sh bash zsh ksh
+text/x-scss                      scss
+text/x-less                      less
+text/vtt                         vtt
+application/x-httpd-php          php phtml php3 php4 php5 phps
+application/x-httpd-cgi          cgi
+application/x-perl               pl pm
+application/x-ruby               rb erb
+application/x-lua                lua
+application/x-sql                sql
+
+# ---- JavaScript / WebAssembly ----------------------------------------------
+application/javascript           js mjs
+application/ecmascript           es es6
+application/wasm                 wasm
+
+# ---- Images ---------------------------------------------------------------
+image/apng                       apng
+image/avif                       avif
+image/bmp                        bmp dib
+image/gif                        gif
+image/heic                       heic
+image/heif                       heif
+image/jpeg                       jpeg jpg jpe
+image/jxl                        jxl
+image/png                        png
+image/svg+xml                    svg svgz
+image/tiff                       tif tiff
+image/webp                       webp
+image/x-icon                     ico cur
+image/x-icns                     icns
+image/x-ms-bmp                   bmp
+image/ktx2                       ktx2
+
+# ---- 3D / Models -----------------------------------------------------------
+model/gltf+json                  gltf
+model/gltf-binary                glb
+model/obj                        obj
+model/mtl                        mtl
+model/stl                        stl
+model/vrml                       wrl vrml
+model/3mf                        3mf
+model/vnd.collada+xml            dae
+
+# ---- Fonts ---------------------------------------------------------------
+font/otf                         otf
+font/ttf                         ttf
+font/collection                  ttc
+font/woff                        woff
+font/woff2                       woff2
+application/vnd.ms-fontobject    eot
+application/x-font-ttf           ttf
+application/x-font-opentype      otf
+application/x-font-woff          woff
+application/x-font-woff2         woff2
+
+# ---- Audio ---------------------------------------------------------------
+audio/aac                        aac
+audio/ac3                        ac3
+audio/amr                        amr
+audio/flac                       flac
+audio/midi                       mid midi kar rmi
+audio/mp4                        m4a f4a
+audio/mpeg                       mp3 mp2 mpga
+audio/ogg                        ogg oga spx
+audio/opus                       opus
+audio/wav                        wav
+audio/x-wav                      wav
+audio/webm                       weba
+audio/x-aiff                     aif aiff aifc
+audio/3gpp                       3gp
+audio/3gpp2                      3g2
+audio/x-matroska                 mka
+audio/x-mpegurl                  m3u
+application/vnd.apple.mpegurl    m3u8
+
+# ---- Video ---------------------------------------------------------------
+video/3gpp                       3gp 3gpp
+video/3gpp2                      3g2 3gp2
+video/avi                        avi
+video/mp2t                       ts
+video/mp4                        mp4 m4v f4v
+video/mpeg                       mpeg mpg mpe
+video/ogg                        ogv
+video/quicktime                  mov qt
+video/webm                       webm
+video/x-flv                      flv
+video/x-matroska                 mkv mk3d mks
+video/x-ms-asf                   asf asx
+video/x-ms-wmv                   wmv
+video/x-msvideo                  avi
+application/x-mpegURL            m3u8
+
+# ---- Archives / Compression ----------------------------------------------
+application/zip                  zip
+application/x-7z-compressed      7z
+application/x-apple-diskimage    dmg
+application/x-archive            ar
+application/x-bzip               bz
+application/x-bzip2              bz2 boz
+application/gzip                 gz
+application/x-gzip               gz
+application/x-lzip               lz
+application/x-lzma               lzma
+application/x-lz4                lz4
+application/x-rar-compressed     rar
+application/x-tar                tar
+application/x-xar                xar
+application/x-xz                 xz
+application/zstd                 zst zstd
+application/x-br                 br
+application/x-compress           Z
+application/x-cpio               cpio
+application/x-shar               shar
+
+# ---- Documents / Office / Publishing -------------------------------------
+application/pdf                  pdf
+application/postscript           ps eps ai
+application/rtf                  rtf
+application/msword               doc dot
+application/vnd.openxmlformats-officedocument.wordprocessingml.document   docx
+application/vnd.openxmlformats-officedocument.wordprocessingml.template   dotx
+application/vnd.ms-excel         xls xlt xlm xla xlc xlv xlb
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet         xlsx
+application/vnd.openxmlformats-officedocument.spreadsheetml.template      xltx
+application/vnd.ms-powerpoint    ppt pps pot
+application/vnd.openxmlformats-officedocument.presentationml.presentation pptx
+application/vnd.openxmlformats-officedocument.presentationml.template     potx
+application/vnd.openxmlformats-officedocument.presentationml.slideshow    ppsx
+application/vnd.ms-project       mpp mpt
+application/vnd.visio            vsd vst vss vsw vdx
+application/vnd.ms-outlook       msg
+application/vnd.apple.keynote    key
+application/vnd.apple.pages      pages
+application/vnd.apple.numbers    numbers
+application/epub+zip             epub
+application/x-mobipocket-ebook   prc mobi azw azw3
+application/vnd.amazon.ebook     azw
+application/x-msaccess           mdb
+application/msaccess             accdb
+
+# ---- Data / Scientific / GIS ---------------------------------------------
+application/geo+json             geojson
+application/gpx+xml              gpx
+application/vnd.google-earth.kml+xml  kml
+application/vnd.google-earth.kmz      kmz
+application/vnd.mapbox-vector-tile    mvt
+application/x-protobuf           pbf proto pb
+application/avro                 avro
+application/vnd.apache.parquet   parquet
+application/vnd.apache.arrow.file  arrow
+application/vnd.apache.arrow.stream arrows
+application/vnd.apache.orc       orc
+application/netcdf               nc
+application/x-hdf                hdf hdf4
+application/x-hdf5               h5 hdf5
+application/octet-stream         bin lha lzh dat binpkg
+
+# ---- Certificates / Crypto / Keys ----------------------------------------
+application/pkcs8                p8
+application/pkcs10               p10
+application/pkix-cert            cer der
+application/x-x509-ca-cert       crt der cer
+application/x-pem-file           pem key pub
+application/pkcs12               p12 pfx
+application/pkcs7-mime           p7m p7c
+application/pkcs7-signature      p7s
+application/x-java-keystore      jks keystore
+application/x-java-truststore    jts
+application/x-pkcs7-certreqresp  p7r
+application/x-pkcs12             p12 pfx
+
+# ---- Feeds / Sitemaps ----------------------------------------------------
+application/atom+xml             atom
+application/rss+xml              rss
+application/xml                  sitemap sitemap.xml
+
+# ---- Web / App Meta ------------------------------------------------------
+text/uri-list                    url webloc
+application/x-web-app-manifest+json webapp
+application/x-chrome-extension   crx
+application/x-xpinstall          xpi
+application/webbundle            wbn
+application/x-ms-application     application
+
+# ---- Code / Packages -----------------------------------------------------
+application/java-archive         jar war ear
+application/vnd.android.package-archive apk
+application/x-apple-pkg          pkg
+application/x-msdownload         exe msi msp msm
+application/x-dosexec            exe com bat cmd
+application/x-mach-binary        macho
+application/x-elf                elf so
+application/x-object             o
+application/x-sharedlib          so dylib
+application/x-python-bytecode    pyc pyo
+application/x-rpm                rpm
+application/x-deb                deb udeb
+application/x-iso9660-image      iso img
+application/x-virtualbox-vdi     vdi
+application/x-vhd                vhd vhdx
+application/x-vmdk               vmdk
+
+# ---- Emails / Calendars --------------------------------------------------
+message/rfc822                   eml mime
+application/mbox                 mbox
+text/calendar                    ics ifb ical
+
+# ---- Graphics / Design ---------------------------------------------------
+application/illustrator          ai
+application/vnd.adobe.photoshop  psd
+image/vnd.adobe.photoshop        psd
+application/x-sketch             sketch
+application/x-fig                fig
+image/x-xcf                      xcf
+
+# ---- Logs / Misc ---------------------------------------------------------
+application/x-yaml               yaml yml
+application/x-properties         properties
+application/x-sqlite3            sqlite sqlite3 db
+application/x-plist              plist
+application/x-ios-crashlog       crash
+application/x-gtar               gtar
+application/x-tex                tex
+application/x-tex-tfm            tfm
+application/x-bibtex             bib
+application/x-latex              latex
+application/x-dvi                dvi
+
+# ---- CAD / CAM / 3D / EDA --------------------------------------------------
+model/step                       step stp
+model/step+xml                   stpx
+model/step+zip                   stpz
+model/iges                       iges igs
+model/stl                        stl
+application/sla                  stl
+model/3mf                        3mf
+model/vnd.usd                    usd usda usdc
+model/vnd.usd+zip                usdz
+model/fbx                        fbx
+image/vnd.dxf                    dxf
+application/vnd.cad-cam          cam
+application/x-eagle              brd sch lbr
+application/x-kicad-pcb          kicad_pcb
+application/x-kicad-schematic    kicad_sch sch
+application/x-kicad-project      kicad_pro kicad_prl
+application/x-gerber             gbr ger xln drl
+application/x-excellon           xln drl
+application/x-gcode              gcode nc tap
+
+# ---- Medical / Scientific Imaging ------------------------------------------
+application/dicom                dcm
+image/dicom+rle                  drle
+application/nifti                nii
+application/nifti-gzip           nii.gz
+image/fits                       fits
+application/fits                 fits
+
+# ---- Geospatial / GIS (more) -----------------------------------------------
+image/tiff                       tif tiff geotiff
+application/geopackage+sqlite    gpkg
+application/x-esri-shape         shp shx dbf prj cpg qpj
+application/vnd.google-earth.kmz kmz
+application/vnd.google-earth.kml+xml kml
+application/vnd.mapbox-mbtiles   mbtiles
+
+# ---- Archives / Comic Books (more) -----------------------------------------
+application/x-cbr                cbr
+application/x-cbz                cbz
+application/x-cbt                cbt
+application/x-cb7                cb7
+application/x-apple-diskimage    dmg
+application/vnd.ms-cab-compressed cab
+application/x-brotli             br
+
+# ---- Office (macro-enabled, modern variants) --------------------------------
+application/vnd.ms-word.document.macroEnabled.12           docm
+application/vnd.ms-word.template.macroEnabled.12           dotm
+application/vnd.ms-excel.sheet.macroEnabled.12             xlsm
+application/vnd.ms-excel.template.macroEnabled.12          xltm
+application/vnd.ms-excel.addin.macroEnabled.12             xlam
+application/vnd.ms-powerpoint.presentation.macroEnabled.12 pptm
+application/vnd.ms-powerpoint.slideshow.macroEnabled.12    ppsm
+application/vnd.ms-powerpoint.template.macroEnabled.12     potm
+application/vnd.openxmlformats-officedocument.presentationml.slide sldx
+application/vnd.visio                                 vsd vst vss vsw vdx
+application/vnd.ms-visio.drawing                       vsdx
+application/vnd.ms-visio.template                      vtx vstm vssx vssm
+application/onenote                                    one onetoc2
+
+# ---- Developer: Code / Packages / Notebooks --------------------------------
+application/typescript           ts tsx
+text/jsx                         jsx
+application/graphql              graphql gql
+application/x-ipynb+json         ipynb
+application/x-brotli             br
+application/x-bittorrent         torrent
+application/x-iso9660-image      iso img
+application/x-npm-tarball        tgz # (npm packages)
+application/x-pear               pear
+application/x-rust-crate         crate
+application/x-godot-resource     tscn tres
+application/x-unity-package      unitypackage
+application/x-unreal-asset       uasset umap
+application/x-unreal-pak         pak
+application/x-proguard-mapping   mapping
+
+# ---- Subtitles / Captioning -------------------------------------------------
+application/x-subrip             srt
+text/x-ssa                       ssa ass
+text/vtt                         vtt
+
+# ---- Data / DB files (more) ------------------------------------------------
+application/x-feather            feather
+application/x-parquet            parquet
+application/x-orc                orc
+application/x-sas7bdat           sas7bdat
+application/x-stata              dta
+application/x-spss-sav           sav
+application/x-sqlite3            sqlite sqlite3 db
+application/vnd.ms-access        mdb accdb
+application/x-hdf                hdf hdf4
+application/x-hdf5               h5 hdf5
+
+# ---- Images (more/legacy) ---------------------------------------------------
+image/x-tga                      tga icb vda vst
+image/x-dds                      dds
+image/x-exr                      exr
+image/x-portable-pixmap          ppm
+image/x-portable-graymap         pgm
+image/x-portable-bitmap          pbm
+image/x-xbitmap                  xbm
+image/x-bpg                      bpg
+image/jp2                        jp2 j2k jpf jpm
+image/vnd.djvu                   djvu djv
+image/x-basis                    basis
+
+# ---- Audio (more) -----------------------------------------------------------
+audio/x-m4a                      m4a
+audio/x-realaudio                ra ram
+audio/x-ms-wma                   wma
+audio/x-caf                      caf
+audio/x-musepack                 mpc mp+
+audio/x-tta                      tta
+audio/x-wv                       wv
+
+# ---- Video (more) -----------------------------------------------------------
+video/x-matroska                 mkv mk3d mks
+video/x-msvideo                  avi
+video/x-ms-wmv                   wmv
+video/x-theora+ogg               ogv
+video/x-ogm+ogg                  ogm
+video/x-m4v                      m4v
+video/x-divx                     divx
+video/x-dv                       dv dif
+video/x-f4v                      f4v
+
+# ---- Fonts (extra aliases) --------------------------------------------------
+application/x-font-ttf           ttf
+application/x-font-opentype      otf
+application/x-font-woff          woff
+application/x-font-woff2         woff2
+font/collection                  ttc
+
+# ---- Logs / Config / Misc (more) -------------------------------------------
+text/x-yaml                      yaml yml
+text/x-toml                      toml
+text/x-properties                properties
+text/x-plantuml                  puml plantuml
+text/x-mermaid                   mmd mermaid
+text/x-dockerfile                dockerfile
+text/x-nginx-conf                nginxconf
+text/x-httpd-php                 php phtml
+text/x-powershell                ps1 psm1
+text/x-asm                       asm s
+text/x-makefile                  mk makefile
+text/x-cmake                     cmake
+text/x-gradle                    gradle
+text/x-kotlin                    kt kts
+text/x-go                        go
+text/x-rustsrc                   rs
+text/x-swift                     swift
+text/x-r                         r R
+text/x-matlab                    m
+text/x-latex                     tex
+text/x-bibtex                    bib
+application/x-tex                tex
+application/x-dvi                dvi
+application/x-apple-plist        plist
+application/x-ini                ini
+application/x-env                env
+
+# ---- Security / Certificates (more) ----------------------------------------
+application/x-pem-file           pem crt key cer pub
+application/pkix-cert            der cer
+application/pkcs8                p8
+application/pkcs10               p10 csr
+application/pkcs12               p12 pfx
+application/pkcs7-mime           p7m p7c
+application/pkcs7-signature      p7s
+application/x-java-keystore      jks
+application/x-java-truststore    jts
+
+# ---- Web Meta / Packaging (more) -------------------------------------------
+application/webmanifest          webmanifest
+application/x-web-bundle         wbn
+application/x-xpinstall          xpi
+application/x-chrome-extension   crx
+application/vnd.android.package-archive apk
+application/vnd.apple.installer+xml mpkg
+application/vnd.apple.mpegurl    m3u8
+application/vnd.apple.keynote    key
+application/vnd.apple.pages      pages
+application/vnd.apple.numbers    numbers
+
+# ---- Game / Assets ----------------------------------------------------------
+application/x-ktx                ktx
+image/ktx2                       ktx2
+application/x-basis-universal    basis
+application/x-locres             locres
+application/x-asset-bundle       ab
+
+# ---- Scripting / Templating -------------------------------------------------
+text/x-handlebars                hbs mustache
+text/x-nunjucks                  njk nunj
+text/x-liquid                    liquid
+text/x-ejs                       ejs
+text/x-pug                       pug jade
+text/x-velocity                  vm
+text/x-freemarker                ftl
+text/x-jinja2                    j2 jinja jinja2
+
+# ---- Misc binaries ----------------------------------------------------------
+application/octet-stream         bin dat rlib
+application/x-apple-systemprofiler spx
+application/x-core               core
+application/x-dwarf              dSYM
+application/x-apple-dsym         dsym
+
+# ---- OpenDocument / LibreOffice -------------------------------------------
+application/vnd.oasis.opendocument.text                       odt
+application/vnd.oasis.opendocument.spreadsheet                ods
+application/vnd.oasis.opendocument.presentation               odp
+application/vnd.oasis.opendocument.graphics                   odg
+application/vnd.oasis.opendocument.chart                      odc
+application/vnd.oasis.opendocument.formula                    odf
+application/vnd.oasis.opendocument.database                   odb
+application/vnd.oasis.opendocument.text-template              ott
+application/vnd.oasis.opendocument.spreadsheet-template       ots
+application/vnd.oasis.opendocument.presentation-template      otp
+application/vnd.oasis.opendocument.graphics-template          otg
+
+# ---- RAW Photo -------------------------------------------------------------
+image/x-adobe-dng                                              dng
+image/x-canon-cr2                                              cr2
+image/x-canon-cr3                                              cr3
+image/x-nikon-nef                                              nef
+image/x-sony-arw                                               arw
+image/x-fujifilm-raf                                           raf
+image/x-olympus-orf                                            orf
+image/x-panasonic-rw2                                          rw2
+image/x-pentax-pef                                             pef
+image/x-sigma-x3f                                              x3f
+image/x-minolta-mrw                                            mrw
+image/x-samsung-srw                                            srw
+image/x-sony-sr2                                               sr2
+image/x-epson-erf                                              erf
+image/x-kodak-dcr                                              dcr
+
+# ---- Trackers / DAW projects ----------------------------------------------
+audio/x-mod                                                    mod
+audio/x-it                                                     it
+audio/x-s3m                                                    s3m
+audio/x-xm                                                     xm
+audio/x-impulse-tracker                                        it
+audio/x-soundfont                                              sf2
+text/x-sfz                                                     sfz
+application/x-ableton-live                                     als
+application/x-flstudio                                         flp
+text/x-reaper-project                                          rpp
+application/x-logic-pro                                        logicx
+application/x-cubase-project                                   cpr
+application/x-pro-tools-session                                ptx
+application/x-audacity-project                                 aup aup3
+
+# ---- Point clouds / LiDAR / 3D scans --------------------------------------
+application/vnd.las                                            las
+application/vnd.laszip                                         laz
+application/x-e57                                              e57
+application/ply                                                ply
+application/vnd.pcd                                            pcd
+
+# ---- CAD vendor-specific ---------------------------------------------------
+image/vnd.dwg                                                  dwg
+application/x-dwt                                              dwt
+application/x-solidworks-part                                  sldprt
+application/x-solidworks-assembly                              sldasm
+application/x-inventor-part                                    ipt
+application/x-inventor-assembly                                iam
+application/x-catia-part                                       catpart
+application/x-catia-assembly                                   catproduct
+application/x-siemens-nx                                       prt
+application/x-fusion360                                        f3d
+application/x-sketchup                                         skp
+model/3ds                                                      3ds
+application/x-autodesk-maya                                    ma mb
+application/x-rhino                                            3dm
+application/x-bim-revit                                        rvt rfa rft
+application/x-ifc                                              ifc ifczip
+
+# ---- Game / DCC assets -----------------------------------------------------
+application/x-blender                                          blend
+application/x-substance-archive                                sbsar
+application/x-unity-prefab                                     prefab
+application/x-unity-scene                                      unity
+application/x-unreal-project                                   uproject uplugin
+application/x-godot-pack                                       pck
+application/x-godot-import                                     import
+
+# ---- Networking / Logs / Traces -------------------------------------------
+application/vnd.tcpdump.pcap                                   pcap cap
+application/x-pcapng                                           pcapng
+application/sarif+json                                         sarif
+application/json                                                har
+text/x-log                                                     log
+application/x-strace                                           strace
+
+# ---- Web / Dev extras ------------------------------------------------------
+application/source-map                                         map
+text/asciidoc                                                  adoc asciidoc
+text/x-rst                                                     rst
+application/mathml+xml                                         mml
+text/x-glsl                                                    glsl vert frag geom tesc tese comp
+application/x-spirv                                            spv
+application/x-binary-diff                                      bsdiff
+application/x-http-archive                                     har
+
+# ---- Packages / Repos ------------------------------------------------------
+application/x-npm-tarball                                      tgz
+application/x-python-wheel+zip                                 whl
+application/x-rubygems                                         gem
+application/x-nuget                                            nupkg snupkg
+application/vsix                                                vsix
+application/x-conda+zip                                        conda
+application/x-android-app-bundle                               aab
+application/x-ipa                                              ipa
+application/x-msixbundle                                       msixbundle
+application/x-msix                                             msix
+application/appx                                               appx
+application/x-helm-chart                                       tgz prov
+
+# ---- Container / Cloud -----------------------------------------------------
+application/vnd.docker.image.rootfs.diff.tar.gzip              tar.gz
+application/vnd.oci.image.manifest.v1+json                     json
+application/vnd.oci.image.index.v1+json                        json
+application/vnd.oci.image.config.v1+json                       json
+
+# ---- Firmware / Embedded ---------------------------------------------------
+application/x-intel-hex                                        hex ihex
+application/x-uf2                                              uf2
+application/x-dfu                                              dfu
+application/x-bin-firmware                                     bin img
+application/x-apple-ipsw                                       ipsw
+application/x-apple-mobileconfig                               mobileconfig
+application/x-esp32-binary                                     bin
+
+# ---- Security / PGP / SSH --------------------------------------------------
+application/pgp-encrypted                                      gpg pgp
+application/pgp-keys                                           asc key
+application/pgp-signature                                      sig asc
+text/x-ssh-config                                              sshconfig
+text/x-ssh-known-hosts                                         known_hosts
+application/x-ssh-public-key                                   pub
+application/x-ssh-private-key                                  pem
+
+# ---- More Images / Graphics ------------------------------------------------
+image/x-hdr                                                     hdr
+image/x-pfm                                                     pfm
+image/x-ktx                                                     ktx
+image/x-qoi                                                     qoi
+image/x-canon-crw                                               crw
+image/x-sai                                                     sai
+
+# ---- More Audio / Music production -----------------------------------------
+audio/x-aiff                                                    aif aiff aifc
+audio/x-itunes-xml                                             itl
+audio/x-flac                                                    flac
+audio/x-smaf                                                    mmf
+audio/x-ringtone                                                rtttl rng mng
+
+# ---- Maps / Tiles / GIS sidecars ------------------------------------------
+text/plain                                                     tfw jgw pgw sgw wld prj cpg qpj
+
+# ---- Data science / Analytics extras --------------------------------------
+application/x-feather                                           feather
+application/x-hdf5                                              h5 hdf5
+application/x-npz                                               npz
+application/x-npy                                               npy
+text/x-rscript                                                  r
+application/x-sas7bdat                                          sas7bdat
+application/x-spss-sav                                          sav
+
+# ---- Misc system / binaries ------------------------------------------------
+application/x-apple-diskimage                                   dmg sparsebundle
+application/x-binary                                            bin
+application/x-core                                              core dmp
+application/x-ms-shortcut                                       lnk
+application/x-apk-keystore                                      keystore jks
+
+# ---- Sitemaps / Feeds aliases ---------------------------------------------
+application/xml                                                  opml atom xml sitemap
+application/rss+xml                                              rss
+application/atom+xml                                             atom
+
+# ---- More Configs / IaC ----------------------------------------------------
+text/x-docker-compose                                            yml yaml
+text/x-ignore                                                    gitignore dockerignore npmignore
+text/x-properties                                                properties props
+text/x-env                                                       env dotenv
+
+# ---- Misc archives / installers -------------------------------------------
+application/x-apple-pkg                                         pkg
+application/x-iso9660-image                                     iso img
+application/x-archlinux-package                                 pkg.tar.zst
+application/x-snap                                               snap
+
+# ---- Legacy / Compatibility aliases ---------------------------------------
+application/x-javascript                                         js
+text/javascript                                                  js
+image/pjpeg                                                      jpg jpeg
+image/x-png                                                      png
+
+# ---- Office (more variants) -----------------------------------------------
+application/vnd.ms-excel.sheet.binary.macroEnabled.12          xlsb
+application/vnd.ms-powerpoint.addin.macroEnabled.12            ppam
+application/vnd.openxmlformats-officedocument.presentationml.slide sldx
+application/vnd.ms-publisher                                     pub
+application/x-iwork-keynote-sffkey                               key
+application/x-iwork-pages-sffpages                               pages
+application/x-iwork-numbers-sffnumbers                           numbers
+application/x-fictionbook+xml                                    fb2
+
+# ---- Certificates / PKI (more) --------------------------------------------
+application/pkix-crl                                             crl
+application/x-x509-user-cert                                     crt cer der
+application/x-x509-ca-cert                                       crt cer der
+application/pkcs7-mime                                           p7m p7c
+application/pkcs7-signature                                      p7s
+
+# ---- Genomics / Bioinformatics --------------------------------------------
+text/x-fasta                                                     fa fna fas fasta
+text/x-fastq                                                     fq fastq
+application/x-bam                                                bam bai
+application/x-sam                                                sam
+application/x-bcf                                                bcf
+text/x-vcf                                                       vcf
+text/x-bed                                                       bed
+text/x-gff                                                       gff gff3
+text/x-bedgraph                                                  bedgraph
+application/x-bigwig                                             bw
+application/x-bigbed                                             bb
+
+# ---- Chemistry -------------------------------------------------------------
+chemical/x-mdl-molfile                                           mol
+chemical/x-mdl-sdfile                                            sdf sd
+chemical/x-pdb                                                   pdb ent
+chemical/x-xyz                                                   xyz
+chemical/x-cml                                                   cml
+
+# ---- Observability / Metrics / Profiling -------------------------------
+application/openmetrics-text                                     prom
+text/plain                                                       prometheus
+application/x-profiling-trace                                    cpuprofile heapprofile
+application/x-perf-data                                          perf
+application/x-nettrace                                           nettrace
+
+# ---- Programming languages (text/* or text/x-*) ---------------------------
+text/x-java-source                                               java
+text/x-kotlin                                                    kt kts
+text/x-scala                                                     scala sc
+text/x-groovy                                                    groovy gvy gradle
+text/x-csrc                                                      c
+text/x-c++src                                                    cc cpp cxx hpp hxx
+text/x-objc                                                      m
+text/x-objc++                                                    mm
+text/x-csharp                                                    cs
+text/x-fsharp                                                    fs fsx
+text/x-go                                                        go
+text/x-rustsrc                                                   rs
+text/x-haskell                                                   hs
+text/x-swift                                                     swift
+text/x-dart                                                      dart
+text/x-erlang                                                    erl hrl
+text/x-elixir                                                    ex exs
+text/x-clojure                                                   clj cljs cljc edn
+text/x-lisp                                                      lisp cl el
+text/x-julia                                                     jl
+text/x-typescript                                                ts tsx
+text/x-graphql                                                   gql graphql
+text/x-protobuf                                                  proto
+text/x-thrift                                                    thrift
+text/x-sql                                                       sql ddl dml
+text/x-ini                                                       ini
+text/x-toml                                                      toml
+text/x-yaml                                                      yml yaml
+text/x-properties                                                properties props
+text/x-makefile                                                  mk makefile
+text/x-cmake                                                     cmake
+text/x-dockerfile                                                dockerfile
+text/x-ninja                                                     ninja
+
+# ---- Notebooks / Docs for DS ----------------------------------------------
+application/x-ipynb+json                                         ipynb
+text/x-rmarkdown                                                 rmd
+text/x-jupyter-notebook                                          ipynb
+
+# ---- Game engines / assets (more) -----------------------------------------
+application/x-unity-meta                                         meta
+application/x-unity-material                                     mat
+application/x-unreal-animation                                   uanim
+application/x-unreal-skeletalmesh                                uasset
+application/x-godot-shader                                       gdshader
+application/x-godot-scene                                        tscn scn
+application/x-cryengine-resource                                 cry
+
+# ---- CAD / EDA (more vendors) ---------------------------------------------
+application/x-altium-designer                                    PcbDoc SchDoc PrjPCB PrjPcbStructure
+application/x-mentor-pads                                        p pcb asc
+application/x-orcad                                              brd opj mnl
+application/x-ansys                                              wbp db
+application/x-ptc-creo                                           prt asm drw
+application/x-archicad                                           pln pla bpn
+
+# ---- Archives / Compression (more) -----------------------------------------
+application/x-snappy                                             snappy
+application/x-zpaq                                               zpaq
+application/x-lzop                                               lzo
+application/x-zoo                                                zoo
+application/x-arj                                                arj
+application/x-apple-partial-download                             download
+
+# ---- Images (camera/graphics extras) ---------------------------------------
+image/x-raw-canon                                                crw
+image/x-raw-olympus                                              orf
+image/x-raw-sony                                                 arw sr2
+image/x-raw-nikon                                                nef nrw
+image/x-raw-panasonic                                            rw2
+image/x-raw-pentax                                               pef
+image/x-raw-kodak                                                dcr k25 kdc
+image/x-raw-adobe                                                dng
+image/x-exr                                                      exr
+image/x-dds                                                      dds
+image/x-hdr                                                      hdr
+image/x-icns                                                     icns
+
+# ---- Audio (DAW / trackers extras) ----------------------------------------
+audio/x-sf2                                                      sf2
+audio/x-sfz                                                      sfz
+audio/x-fl-studio                                                flp
+audio/x-ableton-live                                             als
+audio/x-audacity-project                                         aup aup3
+audio/x-opus                                                     opus
+
+# ---- Video (extras) --------------------------------------------------------
+video/x-matroska                                                 mkv mk3d mks
+video/x-theora                                                   ogv
+video/x-ogm                                                      ogm
+
+# ---- DB / Storage ----------------------------------------------------------
+application/x-sqlite3                                            sqlite sqlite3 db
+application/vnd.ms-access                                        mdb accdb
+application/x-leveldb                                            ldb sst
+application/x-rocksdb                                            sst
+application/x-redis-dump                                         rdb
+application/x-mongodb-bson                                       bson
+application/x-hdf5                                               h5 hdf5
+application/x-parquet                                            parquet
+application/x-orc                                                orc
+
+# ---- Maps / GIS sidecars (world files, proj) -------------------------------
+text/plain                                                       prj qpj cpg tfw jgw pgw wld
+
+# ---- Mobile / Apple / Android ---------------------------------------------
+application/x-ipa                                                ipa
+application/x-android-app-bundle                                 aab
+application/x-android-fastboot-image                             img
+application/x-android-dtb                                        dtb
+application/x-apple-ipsw                                         ipsw
+application/x-apple-plist                                        plist
+
+# ---- Config / Infra as Code (extras) ---------------------------------------
+text/x-kubernetes                                                k8s.yaml k8s.yml
+text/x-helm                                                      values.yaml values.yml
+text/x-terraform                                                 tf tfvars
+text/x-ansible                                                   yml yaml
+text/x-systemd-unit                                              service socket timer target mount automount path
+
+# ---- Logs / Traces ---------------------------------------------------------
+application/x-ndjson                                             ndjson jsonl
+text/x-log                                                       log out err
+application/x-ziplog                                             ziplog
+
+# ---- Scripting / Templates -------------------------------------------------
+text/x-handlebars                                                hbs mustache
+text/x-nunjucks                                                  njk nunj
+text/x-liquid                                                    liquid
+text/x-ejs                                                       ejs
+text/x-pug                                                       pug jade
+text/x-velocity                                                  vm
+text/x-freemarker                                                ftl
+text/x-jinja2                                                    j2 jinja jinja2
+text/x-dot                                                       dot jst
+
+# ---- Misc system -----------------------------------------------------------
+application/x-powershell                                        ps1 psm1
+application/x-shellscript                                       sh bash zsh ksh
+application/x-apache-conf                                       conf htaccess
+application/x-nginx-conf                                        conf
+
+# ---- Legacy / Compatibility aliases (more) ---------------------------------
+application/x-tar                                                tar
+application/x-gtar                                               gtar
+application/x-7z-compressed                                      7z
+application/x-rar-compressed                                     rar
+application/x-gzip                                               gz
+application/gzip                                                 gz
+application/x-bzip2                                              bz2
+application/x-xz                                                 xz
+application/zstd                                                 zst zstd
