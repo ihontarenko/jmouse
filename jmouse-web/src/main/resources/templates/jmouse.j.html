@@ -1,374 +1,299 @@
 <!doctype html>
-<html lang="en" data-page="${pageKind:error}">
+<html lang="en" data-page="error">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>jMouse - {% block "pageTitle" %}Default{% endblock %}</title>
+    <title>jMouse · Error</title>
     <meta name="color-scheme" content="light dark"/>
-    <link rel="icon"
-          href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111'/%3E%3Cpath d='M20 45c0-7 6-13 13-13s13 6 13 13v3c0 1.7-1.3 3-3 3H23c-1.7 0-3-1.3-3-3v-3Z' fill='%23fff'/%3E%3Cpath d='M33 12c7 0 13 6 13 13v3H20v-3c0-7 6-13 13-13Z' fill='%23a855f7'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='monospace' font-size='12' fill='%23111'%3EjM%3C/text%3E%3C/svg%3E"/>
     <style>
-        /* ---------------------------------------------
-           jMouse Minimal Brand Styles (no framework)
-           — clean, modern, accessible, easily themeable
-           --------------------------------------------- */
         :root {
-            --jm-bg: #0b0b0c; /* page background (dark default) */
-            --jm-surface: #121214; /* cards / panels */
-            --jm-text: #e7e7ea; /* primary text */
-            --jm-text-dim: #b1b1b7; /* secondary text */
-            --jm-accent: #a855f7; /* brand violet */
-            --jm-accent-2: #22d3ee; /* brand cyan */
-            --jm-danger: #ef4444; /* error red */
-            --jm-ok: #22c55e; /* success green */
-            --jm-border: #26262b; /* borders */
-            --jm-code: #0d0d10; /* code bg */
-            --jm-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            --jm-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
-            --jm-radius: 16px;
-            --jm-shadow: 0 10px 30px rgba(0, 0, 0, .35);
-            --jm-space: 16px;
+            --bg: #0b0c0f; /* dark base */
+            --surface: #111319; /* card */
+            --text: #e8eaf2; /* primary */
+            --muted: #a7adbb; /* secondary */
+            --accent: #8b5cf6; /* violet */
+            --accent-2: #06b6d4; /* cyan */
+            --danger: #ef4444; /* red */
+            --border: #1e2230; /* border */
+            --radius: 18px;
+            --shadow: 0 12px 40px rgba(0, 0, 0, .45);
+            --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New";
         }
 
         @media (prefers-color-scheme: light) {
             :root {
-                --jm-bg: #fafafa;
-                --jm-surface: #ffffff;
-                --jm-text: #0e0e12;
-                --jm-text-dim: #4d4d57;
-                --jm-border: #e8e8ef;
-                --jm-code: #f6f6fb;
-                --jm-shadow: 0 10px 30px rgba(2, 6, 23, .08);
+                --bg: #f8f9fb;
+                --surface: #ffffff;
+                --text: #0b0c0f;
+                --muted: #586072;
+                --border: #e6e9f0;
+                --shadow: 0 12px 40px rgba(2, 6, 23, .08);
             }
         }
 
         * {
-            box-sizing: border-box;
+            box-sizing: border-box
         }
 
         html, body {
-            height: 100%;
+            height: 100%
         }
 
         body {
             margin: 0;
-            background: radial-gradient(1200px 600px at 80% -100px, color-mix(in oklab, var(--jm-accent) 18%, transparent), transparent), var(--jm-bg);
-            color: var(--jm-text);
-            font-family: var(--jm-sans);
-            line-height: 1.55;
-            letter-spacing: .2px;
+            background: radial-gradient(60% 120% at 120% -10%, color-mix(in oklab, var(--accent) 18%, transparent), transparent),
+            linear-gradient(180deg, color-mix(in oklab, var(--accent-2) 12%, transparent), transparent 30%), var(--bg);
+            color: var(--text);
+            font-family: var(--sans);
         }
 
-        /* Layout */
-        .wrap {
-            max-width: 1080px;
-            margin: 0 auto;
-            padding: calc(var(--jm-space) * 2) var(--jm-space) 80px;
+        .container {
+            min-height: 100dvh;
+            display: grid;
+            place-items: center;
+            padding: 24px
         }
 
-        header.brand {
+        /* Card */
+        .card {
+            position: relative;
+            max-width: 960px;
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden
+        }
+
+        .card:before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            z-index: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(120deg, var(--accent), var(--accent-2));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude
+        }
+
+        header {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 18px 0 10px;
+            gap: 12px;
+            padding: 18px 18px 0
         }
 
-        .logo {
-            width: 36px;
-            height: 36px;
-            display: inline-grid;
+        .mark {
+            width: 30px;
+            height: 30px;
+            border-radius: 10px;
+            display: grid;
             place-items: center;
-            border-radius: 12px;
-            background: linear-gradient(155deg, var(--jm-accent), var(--jm-accent-2));
-            box-shadow: var(--jm-shadow);
-        }
-
-        .logo svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .wordmark {
+            background: linear-gradient(160deg, var(--accent), var(--accent-2));
+            color: white;
             font-weight: 800;
-            letter-spacing: .4px;
-            font-size: 18px;
+            letter-spacing: .2px
         }
 
-        .subtle {
-            color: var(--jm-text-dim);
+        .brand {
+            font-weight: 800
         }
 
-        .surface {
-            background: var(--jm-surface);
-            border: 1px solid var(--jm-border);
-            border-radius: var(--jm-radius);
-            box-shadow: var(--jm-shadow);
+        .ver {
+            color: var(--muted);
+            font-size: 13px
         }
 
         .hero {
-            display: grid;
-            gap: 10px;
-            grid-template-columns: 1fr auto;
-            align-items: end;
             padding: 24px;
+            display: grid;
+            gap: 10px
+        }
+
+        .status {
+            font-size: clamp(48px, 12vw, 96px);
+            line-height: 1;
+            font-weight: 900;
+            background: linear-gradient(120deg, var(--text), color-mix(in oklab, var(--accent) 40%, var(--text)));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
 
         .title {
-            font-size: clamp(24px, 3.2vw, 36px);
             margin: 0;
-            letter-spacing: .3px;
+            font-size: clamp(18px, 3vw, 28px)
         }
 
-        .pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: color-mix(in oklab, var(--jm-accent) 14%, transparent);
-            border: 1px solid var(--jm-border);
-            font: 500 12px/1 var(--jm-sans);
-        }
-
-        .pill b {
-            font-family: var(--jm-mono);
+        .subtitle {
+            color: var(--muted)
         }
 
         .grid {
             display: grid;
             gap: 16px;
-            grid-template-columns: 1fr;
-            margin-top: 14px;
+            padding: 0 18px 18px
         }
 
         @media (min-width: 900px) {
             .grid {
-                grid-template-columns: 1.2fr .8fr;
+                grid-template-columns: 1.1fr .9fr
             }
         }
 
-        .card {
-            padding: 18px;
-        }
-
-        .mono {
-            font-family: var(--jm-mono);
-            font-size: 13px;
+        .panel {
+            background: color-mix(in oklab, var(--surface) 92%, transparent);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px
         }
 
         .kv {
             display: grid;
-            grid-template-columns: 160px 1fr;
+            grid-template-columns:150px 1fr;
             gap: 8px 12px;
+            font-family: var(--mono);
+            font-size: 13px
         }
 
         .kv b {
-            color: var(--jm-text-dim);
-            font-weight: 600;
+            color: var(--muted);
+            font-weight: 600
+        }
+
+        .mono {
+            font-family: var(--mono);
+            font-size: 13px
         }
 
         details {
-            background: var(--jm-code);
+            border: 1px dashed var(--border);
             border-radius: 12px;
-            border: 1px dashed var(--jm-border);
-            padding: 12px 14px;
+            background: color-mix(in oklab, var(--surface) 88%, transparent);
+            padding: 12px
         }
 
         details[open] {
-            border-style: solid;
+            border-style: solid
         }
 
         summary {
-            cursor: pointer;
-            user-select: none;
+            cursor: pointer
         }
 
         pre {
             margin: 0;
-            overflow: auto;
+            overflow: auto
         }
 
-        code {
-            font-family: var(--jm-mono);
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap
         }
 
-        /* Badges / states */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 10px;
-            border-radius: 10px;
-            border: 1px solid var(--jm-border);
-        }
-
-        .-err {
-            color: #fff;
-            background: color-mix(in oklab, var(--jm-danger) 25%, transparent);
-        }
-
-        .-ok {
-            background: color-mix(in oklab, var(--jm-ok) 20%, transparent);
-        }
-
-        /* Buttons */
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             padding: 10px 14px;
             border-radius: 12px;
-            border: 1px solid var(--jm-border);
-            background: linear-gradient(180deg, color-mix(in oklab, var(--jm-accent) 14%, transparent), transparent);
-            color: var(--jm-text);
+            border: 1px solid var(--border);
             text-decoration: none;
+            color: var(--text);
             font-weight: 600;
+            background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 12%, transparent), transparent)
         }
 
         .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--jm-shadow);
+            transform: translateY(-1px)
         }
 
         footer {
-            margin-top: 30px;
-            color: var(--jm-text-dim);
-            font-size: 13px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 10px;
-        }
-
-        /* Utility */
-        .row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .muted {
-            color: var(--jm-text-dim);
-        }
-
-        .right {
-            justify-content: flex-end;
+            padding: 14px 18px;
+            color: var(--muted);
+            font-size: 13px;
+            border-top: 1px solid var(--border)
         }
     </style>
 </head>
 <body>
-<div class="wrap">
-    <!-- Brand header -->
-    <header class="brand">
-      <span class="logo" aria-hidden="true">
-        <!-- Simple inline mark: stylized "mouse" + jM monogram -->
-        <svg viewBox="0 0 24 24" role="img" aria-label="jMouse logo">
-          <defs>
-            <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0" stop-color="white"/>
-              <stop offset="1" stop-color="#f0f0ff"/>
-            </linearGradient>
-          </defs>
-          <path d="M12 2c4.4 0 8 3.6 8 8v2H4V10c0-4.4 3.6-8 8-8Z" fill="url(#g)"/>
-          <rect x="5" y="12" width="14" height="9" rx="4.5" fill="white"/>
-          <text x="12" y="16.2" text-anchor="middle" font-family="var(--jm-mono)" font-size="7" fill="#0b0b0c">jM</text>
-        </svg>
-      </span>
-        <div class="wordmark">${frameworkName:jMouse}</div>
-        <div class="subtle">${frameworkVersion:1.0}</div>
-    </header>
+<div class="container">
+    <article class="card" role="alert" aria-live="polite">
+        <header>
+            <div class="mark" aria-hidden="true">jM</div>
+            <div class="brand">jMouse</div>
+            <div class="ver">v1.0</div>
+        </header>
 
-    <!-- HERO / Title -->
-    <section class="surface hero">
-        <h1 class="title">{% block "pageTitle" %}Default{% endblock %}</h1>
-        <div class="row right">
-            <span class="pill"><span>HTTP</span> <b>${statusCode:500}</b></span>
-            <span class="pill"><span>Method</span> <b>${method:GET}</b></span>
-        </div>
-        <div class="subtle" id="message">${message:No mapping found for this request.}</div>
-    </section>
-
-    <!-- Main content -->
-    <div class="grid">
-        <!-- Left: details -->
-        <section class="surface card">
-            <div class="row" style="justify-content: space-between; align-items:center;">
-                <div class="badge -err">${error:No Mapping} • ${path:/demo/333}</div>
-                <a class="btn" href="${home:/}">Go Home</a>
+        <section class="hero">
+            <div class="status">404</div>
+            <h1 class="title">No mapping found</h1>
+            <p class="subtitle">The requested URL could not be matched by any route.</p>
+            <div class="actions">
+                <a class="btn" href="/">Go home</a>
+                <a class="btn" href="/_jmouse/mappings">View mappings</a>
+                <a class="btn" href="/_jmouse/health">Health</a>
             </div>
-
-            <h3>Request</h3>
-            <div class="kv mono">
-                <b>Path</b>
-                <div>${path:/demo/333}?${query:lang=uk}</div>
-                <b>Timestamp</b>
-                <div>${timestamp:2025-09-07T03:15:47Z}</div>
-                <b>Request ID</b>
-                <div>${requestId:9c0c3e}</div>
-                <b>Client</b>
-                <div>${clientIp:127.0.0.1}</div>
-                <b>User Agent</b>
-                <div class="muted">${ua:Chrome/139 (Windows 10 x64)}</div>
-                <b>Locale</b>
-                <div>${locale:uk-UA}</div>
-            </div>
-
-            <h3>Stack Trace</h3>
-            <details>
-                <summary>Show technical details</summary>
-                <pre class="mono"><code id="trace">code block</code></pre>
-            </details>
-
-            {% block "mainContent" %}{% endblock %}
-
         </section>
 
-        <!-- Right: helpful actions -->
-        <aside class="surface card">
-            <h3>What you can try</h3>
-            <ul>
-                <li>Check the route mapping for <code class="mono">${path:/demo/333}</code>.</li>
-                <li>Verify controller annotations and HTTP method.</li>
-                <li>Inspect filters and interceptors for early exits.</li>
-            </ul>
+        <div class="grid">
+            <section class="panel">
+                <h3>Request</h3>
+                <div class="kv">
+                    <b>Path</b>
+                    <div>/demo/333?lang=uk</div>
+                    <b>Method</b>
+                    <div>GET</div>
+                    <b>Status</b>
+                    <div>404</div>
+                    <b>Request ID</b>
+                    <div>9c0c3e</div>
+                    <b>Timestamp</b>
+                    <div>2025‑09‑07T03:15:47Z</div>
+                    <b>Client</b>
+                    <div>127.0.0.1</div>
+                    <b>User Agent</b>
+                    <div class="mono">Chrome/139 (Windows 10 x64)</div>
+                    <b>Locale</b>
+                    <div>uk‑UA</div>
+                </div>
 
-            <h3>Quick Links</h3>
-            <div class="row">
-                <a class="btn" href="${docs:/_jmouse/docs}">Framework Docs</a>
-                <a class="btn" href="${health:/_jmouse/health}">Health</a>
-                <a class="btn" href="${mappings:/_jmouse/mappings}">Mappings</a>
-            </div>
+                {% block "mainContent" %}{% endblock %}
 
-            <h3>Environment</h3>
-            <div class="kv mono">
-                <b>App</b>
-                <div>${appName:jmouse-demo}</div>
-                <b>Profile</b>
-                <div>${profile:dev}</div>
-                <b>Node</b>
-                <div>${hostname:localhost}</div>
-                <b>Java</b>
-                <div>${java:21}</div>
-            </div>
-        </aside>
-    </div>
+            </section>
 
-    <footer>
-        <div>© 2025 jMouse • <span class="muted">${build:build-abc123}</span></div>
-        <div class="muted">Rendered in ${renderMs:6}ms</div>
-    </footer>
+            <aside class="panel">
+                <h3>Diagnostics</h3>
+                <details>
+                    <summary>Stack trace</summary>
+                    <pre class="mono"><code>org.jmouse.web.mvc.HandlerDispatcher#getMappedHandler
+org.jmouse.web.mvc.HandlerDispatcher#dispatch
+...
+jakarta.servlet.http.HttpServlet#service
+            </code></pre>
+                </details>
+                <h4>Hints</h4>
+                <ul>
+                    <li>Check controller annotations for the path.</li>
+                    <li>Verify HTTP method mapping.</li>
+                    <li>Inspect interceptors/filters for early exit.</li>
+                </ul>
+            </aside>
+        </div>
+
+        <footer>
+            <div>© 2025 jMouse • build-abc123</div>
+            <div>Rendered in 6ms</div>
+        </footer>
+    </article>
 </div>
-
-<script>
-    // Small UX helpers: copy trace, focus navigation, and a safe theme toggle hook
-    (function () {
-        const details = document.querySelector('details');
-        if (location.hash === '#trace') details?.setAttribute('open', '');
-
-        // Example: Hook to let the framework fill dynamic data post-load if needed
-        // window.__JM_INJECT__ && window.__JM_INJECT__({ statusCode: 500, ... })
-    })();
-</script>
-
 </body>
 </html>

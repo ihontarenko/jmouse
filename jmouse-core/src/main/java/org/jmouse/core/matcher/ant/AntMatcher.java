@@ -192,4 +192,17 @@ final public class AntMatcher implements Matcher<String> {
         patterns.forEach(joiner::add);
         return joiner.toString();
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof AntMatcher that)) {
+            return false;
+        }
+        return Objects.equals(patterns, that.patterns);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(patterns);
+    }
 }

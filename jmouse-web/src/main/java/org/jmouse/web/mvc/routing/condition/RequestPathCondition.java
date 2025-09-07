@@ -1,6 +1,6 @@
 package org.jmouse.web.mvc.routing.condition;
 
-import org.jmouse.web.mvc.PathPattern;
+import org.jmouse.web.mvc.RoutePath;
 import org.jmouse.web.mvc.routing.MappingMatcher;
 import org.jmouse.web.http.request.RequestRoute;
 
@@ -8,7 +8,7 @@ import org.jmouse.web.http.request.RequestRoute;
  * 🛣️ Path-based condition for matching routes.
  *
  * <p>Used to match incoming requests by comparing the request path
- * to a predefined {@link PathPattern}.</p>
+ * to a predefined {@link RoutePath}.</p>
  *
  * <p><b>Example usage:</b></p>
  * <pre>{@code
@@ -23,26 +23,26 @@ import org.jmouse.web.http.request.RequestRoute;
  */
 public class RequestPathCondition implements MappingMatcher {
 
-    private final PathPattern pathPattern;
+    private final RoutePath routePath;
 
     /**
      * Constructs a new path condition with the given pattern.
      *
-     * @param pathPattern the pattern to match against request paths
+     * @param routePath the pattern to match against request paths
      */
-    public RequestPathCondition(PathPattern pathPattern) {
-        this.pathPattern = pathPattern;
+    public RequestPathCondition(RoutePath routePath) {
+        this.routePath = routePath;
     }
 
     /**
-     * Checks whether the request path matches the stored {@link PathPattern}.
+     * Checks whether the request path matches the stored {@link RoutePath}.
      *
      * @param requestRoute the current HTTP request route
      * @return {@code true} if the request path matches; {@code false} otherwise
      */
     @Override
     public boolean matches(RequestRoute requestRoute) {
-        return pathPattern.matches(requestRoute.requestPath().path());
+        return routePath.matches(requestRoute.requestPath().path());
     }
 
     /**
@@ -58,11 +58,11 @@ public class RequestPathCondition implements MappingMatcher {
         if (!(other instanceof RequestPathCondition condition)) {
             return 0;
         }
-        return pathPattern.getPattern().compareTo(condition.pathPattern.getPattern());
+        return routePath.raw().compareTo(condition.routePath.raw());
     }
 
     @Override
     public String toString() {
-        return "RequestPathCondition: %s".formatted(pathPattern);
+        return "RequestPathCondition: %s".formatted(routePath);
     }
 }

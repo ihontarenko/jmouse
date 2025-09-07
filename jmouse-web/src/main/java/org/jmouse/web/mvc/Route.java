@@ -28,7 +28,7 @@ import java.util.*;
 public final class Route {
 
     private final HttpMethod          method;
-    private final PathPattern         path;
+    private final RoutePath           path;
     private final Map<String, Object> queryParameters;
     private final Set<MediaType>      consumes;
     private final Set<MediaType>      produces;
@@ -36,7 +36,7 @@ public final class Route {
 
     private Route(Builder builder) {
         this.method = builder.method;
-        this.path = new PathPattern(builder.path);
+        this.path = RoutePathFactory.createRoutePath(builder.path);
         this.queryParameters = Map.copyOf(builder.queryParameters);
         this.consumes = Set.copyOf(builder.consumes);
         this.produces = Set.copyOf(builder.produces);
@@ -126,7 +126,7 @@ public final class Route {
     /**
      * @return Parsed path pattern with variables and constraints
      */
-    public PathPattern pathPattern() {
+    public RoutePath pathPattern() {
         return path;
     }
 
@@ -182,7 +182,7 @@ public final class Route {
     @Override
     public String toString() {
         return "Route[" +
-                method + " " + (path.getPattern()) +
+                method + " " + (path == null ? "(Unknown)" : path.raw()) +
                 (queryParameters.isEmpty() ? "" : ", queryParameters=" + queryParameters) +
                 (consumes.isEmpty() ? "" : ", consumes=" + consumes) +
                 (produces.isEmpty() ? "" : ", produces=" + produces) +

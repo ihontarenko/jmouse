@@ -1,14 +1,9 @@
 package org.jmouse.beans;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SingletonBeanContainer implements BeanContainer {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SingletonBeanContainer.class);
 
     /**
      * A mapping of bean names to their instantiated bean instances.
@@ -44,8 +39,6 @@ public class SingletonBeanContainer implements BeanContainer {
         }
 
         instances.put(name, bean);
-
-        LOGGER.info("Bean '{}' registered as SINGLETON", name);
     }
 
     /**

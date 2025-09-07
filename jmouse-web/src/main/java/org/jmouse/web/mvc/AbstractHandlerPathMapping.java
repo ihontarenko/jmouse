@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * 🧭 Abstract base class for route-based handler mappings.
  * <p>
- * Matches incoming HTTP requests against {@link PathPattern} routes and provides
+ * Matches incoming HTTP requests against {@link RoutePath} routes and provides
  * the matching handler of type {@code H}.
  *
  * <p>Usage example:
@@ -26,7 +26,7 @@ import java.util.List;
  *
  * <p>Supports:
  * <ul>
- *   <li>Typed route matching via {@link PathPattern} and {@link RouteMatch}</li>
+ *   <li>Typed route matching via {@link RoutePath} and {@link RouteMatch}</li>
  *   <li>Dynamic handler registration via {@link #addHandlerMapping(Route, Object)}</li>
  *   <li>Request-scoped route resolution with {@link #getMappedHandler(HttpServletRequest)}</li>
  *   <li>Interceptor support via {@link HandlerInterceptorRegistry}</li>
@@ -95,7 +95,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
             }
 
             Route         route         = winner.getRoute();
-            RouteMatch    match         = route.pathPattern().parse(requestRoute.requestPath().path());
+            RouteMatch    match         = route.pathPattern().match(requestRoute.requestPath().path());
             MappingResult mappingResult = MappingResult.of(match, route);
 
             mappedHandler = new RouteMappedHandler(handler, mappingResult, getReturnParameter(handler));

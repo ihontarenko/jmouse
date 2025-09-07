@@ -50,13 +50,13 @@ public abstract class AbstractInspectionPolicy implements FirewallPolicy {
         final List<InspectionRule> assembled = new ArrayList<>();
 
         // contains rules
-        for (Map.Entry<String, String> e : group.getContains().entrySet()) {
-            assembled.add(InspectionRule.containsIgnoreCase(e.getKey(), e.getValue()));
+        for (Map.Entry<String, String> entry : group.getContains().entrySet()) {
+            assembled.add(InspectionRule.containsIgnoreCase(entry.getKey(), entry.getValue()));
         }
 
         // regex rules
-        for (Map.Entry<String, Pattern> e : group.getExpression().entrySet()) {
-            assembled.add(InspectionRule.regularExpression(e.getKey(), e.getValue()));
+        for (Map.Entry<String, Pattern> entry : group.getExpression().entrySet()) {
+            assembled.add(InspectionRule.regularExpression(entry.getKey(), entry.getValue()));
         }
 
         this.rules = Collections.unmodifiableList(assembled);

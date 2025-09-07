@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public final class PathPattern {
+public final class PathPattern implements RoutePath {
 
     /** 🔠 Type name for boolean params */
     public static final String BOOLEAN_NAME = "boolean";
@@ -69,7 +69,8 @@ public final class PathPattern {
         this.expression = compile(pattern);
     }
 
-    public String getPattern() {
+    @Override
+    public String raw() {
         return pattern;
     }
 
@@ -79,7 +80,8 @@ public final class PathPattern {
      * @param input URI path, e.g., {@code /user/42/status/ACTIVE}
      * @return {@link RouteMatch} with extracted values
      */
-    public RouteMatch parse(String input) {
+    @Override
+    public RouteMatch match(String input) {
         Matcher             matcher   = expression.matcher(input);
         Map<String, Object> variables = new LinkedHashMap<>(8);
 
@@ -100,12 +102,18 @@ public final class PathPattern {
         return new RouteMatch(input, variables);
     }
 
+    @Override
+    public Kind kind() {
+        return Kind.TEMPLATE;
+    }
+
     /**
      * 🔍 Checks if the input matches the compiled pattern.
      *
      * @param input input URI
      * @return true if matched
      */
+    @Override
     public boolean matches(String input) {
         return expression.matcher(input).matches();
     }
@@ -134,7 +142,9 @@ public final class PathPattern {
      * 🧠 Infers parameter type by placeholder pattern.
      */
     private Parameter.Type getParameterType(String pattern) {
-        if (pattern == null) pattern = MATCH_ALL;
+        if (pattern == null) {
+            pattern = MATCH_ALL;
+        }
 
         return switch (pattern) {
             case INT_NAME                   -> new Parameter.Type(Integer.class, pattern, MATCH_INT);
