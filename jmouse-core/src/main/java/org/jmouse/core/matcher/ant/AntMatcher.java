@@ -186,6 +186,10 @@ final public class AntMatcher implements Matcher<String> {
         return segment.equals(pattern);
     }
 
+    public static AntMatcher of(String pattern) {
+        return new AntMatcher(pattern);
+    }
+
     @Override
     public String toString() {
         StringJoiner joiner = new StringJoiner(token, "AntMatcher[ ", " ]");

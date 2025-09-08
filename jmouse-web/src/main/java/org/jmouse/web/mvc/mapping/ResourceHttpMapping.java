@@ -13,7 +13,7 @@ import org.jmouse.web.mvc.resource.ResourceRegistration;
  * <p>Registers HEAD/GET routes for ant-style URL patterns and keeps
  * associated {@link ResourceRegistration} handlers.</p>
  */
-public class StaticResourceMapping extends AbstractHandlerPathMapping<ResourceRegistration> {
+public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceRegistration> {
 
     /**
      * ➕ Register a static resource resolver for the given ant patterns.

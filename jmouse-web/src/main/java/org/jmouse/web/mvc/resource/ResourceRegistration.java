@@ -9,7 +9,7 @@ import java.util.List;
 public class ResourceRegistration {
 
     private final List<String>              locations    = new ArrayList();
-    private final List<AntMatcher>          matchers    = new ArrayList();
+    private final List<AntMatcher>          matchers     = new ArrayList();
     private final List<ResourceTransformer> transformers = new ArrayList();
     private final List<ResourceResolver>    resolvers    = new ArrayList();
 
