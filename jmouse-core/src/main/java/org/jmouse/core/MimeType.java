@@ -12,16 +12,26 @@ import java.util.Map;
  */
 public class MimeType {
 
-    /** ✳️ Wildcard for any primary type. */
-    public static final String WILDCARD_TYPE = "*";
-    /** ✳️ Wildcard prefix for suffix patterns (e.g., {@code *+xml}). */
-    public static final String WILDCARD_PREFIX_TYPE = "*+";
-    /** ➕ Separator between subtype prefix and suffix (before/after {@code +}). */
-    public static final String PREFIX_SEPARATOR = "+";
-    /** 🔤 Standard parameter key for character set. */
+    /**
+     * ✳️ Wildcard for any primary type.
+     */
+    public static final String WILDCARD_TYPE          = "*";
+    /**
+     * ✳️ Wildcard prefix for suffix patterns (e.g., {@code *+xml}).
+     */
+    public static final String WILDCARD_PREFIX_TYPE   = "*+";
+    /**
+     * ➕ Separator between subtype prefix and suffix (before/after {@code +}).
+     */
+    public static final String PREFIX_SEPARATOR       = "+";
+    /**
+     * 🔤 Standard parameter key for character set.
+     */
     public static final String PARAMETER_NAME_CHARSET = "charset";
-    /** 🐞 Standard parameter key for debug set. */
-    public static final String PARAMETER_NAME_DEBUG = "x";
+    /**
+     * 🐞 Standard parameter key for debug set.
+     */
+    public static final String PARAMETER_NAME_DEBUG   = "x-debug";
     /**
      * 🗂️ Cache of parsed {@link MimeType} by raw string.
      * <p>Note: simple {@link HashMap} – not thread-safe.</p>

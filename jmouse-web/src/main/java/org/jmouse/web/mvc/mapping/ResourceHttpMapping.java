@@ -5,6 +5,8 @@ import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.mvc.AbstractHandlerPathMapping;
 import org.jmouse.web.mvc.AntPattern;
 import org.jmouse.web.mvc.Route;
+import org.jmouse.web.mvc.RoutePath;
+import org.jmouse.web.mvc.resource.ResourceHandlerRegistry;
 import org.jmouse.web.mvc.resource.ResourceRegistration;
 
 /**
@@ -39,7 +41,7 @@ public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceRegi
 
             if (routeA.pathPattern() instanceof AntPattern patternA
                     && routeB.pathPattern() instanceof AntPattern patternB) {
-                registration.addAntMatchers(patternA.getAntMatcher(), patternB.getAntMatcher());
+                // registration.addRoutePaths(patternA.getAntMatcher(), patternB.getAntMatcher());
             }
         }
 
@@ -53,7 +55,13 @@ public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceRegi
      */
     @Override
     protected void doInitialize(WebBeanContext context) {
+        ResourceHandlerRegistry registry = context.getBean(ResourceHandlerRegistry.class);
 
+        for (ResourceRegistration registration : registry.getRegistrations()) {
+            for (String pattern : registration.getPatterns()) {
+                System.out.println(pattern);
+            }
+        }
     }
 
     /**

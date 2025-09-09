@@ -8,7 +8,7 @@ import org.jmouse.web.mvc.Model;
 import org.jmouse.web.annotation.*;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.request.multipart.ContentDisposition;
+import org.jmouse.web.http.request.ContentDisposition;
 import org.jmouse.web.http.request.multipart.MultipartFile;
 import org.jmouse.web.http.request.multipart.MultipartWebRequest;
 

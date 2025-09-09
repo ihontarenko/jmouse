@@ -4,9 +4,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.chain.Chain;
 import org.jmouse.core.chain.Outcome;
 import org.jmouse.core.io.Resource;
+import org.jmouse.core.matcher.ant.AntMatcher;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 🏷️ Resource resolver that applies {@link VersionStrategy} rules.
@@ -17,15 +18,10 @@ import java.util.List;
  */
 public class VersionalResourceResolver extends AbstractResourceResolver {
 
-    /** 📋 Registered version strategies. */
-    private final List<VersionStrategy> strategies = new LinkedList<>();
-
     /**
-     * 🏗️ Create resolver with a default strategy ({@code /v1/** → v1}).
+     * 📋 Registered version strategies.
      */
-    public VersionalResourceResolver() {
-        this.strategies.add(new FixedVersionStrategy("/v1/**", "v1"));
-    }
+    private final Map<AntMatcher, VersionStrategy> strategies = new LinkedHashMap<>();
 
     /**
      * 🔎 Attempt to resolve a resource with version support.
@@ -75,17 +71,46 @@ public class VersionalResourceResolver extends AbstractResourceResolver {
     }
 
     /**
-     * 🔍 Find first matching version strategy for a given path.
+     * ➕ Register a version strategy for a specific matcher.
+     *
+     * @param matcher  ant-style matcher
+     * @param strategy strategy to apply for matching paths
+     */
+    public VersionalResourceResolver addStrategy(AntMatcher matcher, VersionStrategy strategy) {
+        strategies.put(matcher, strategy);
+        return this;
+    }
+
+    /**
+     * ➕ Register a version strategy for one or more ant-style patterns.
+     *
+     * @param strategy strategy to apply
+     * @param patterns ant-style patterns (e.g. {@code /v1/**}, {@code /static/**})
+     */
+    public VersionalResourceResolver addStrategy(VersionStrategy strategy, String... patterns) {
+        for (String pattern : patterns) {
+            addStrategy(AntMatcher.of(pattern), strategy);
+        }
+        return this;
+    }
+
+    /**
+     * 🔍 Find the first matching version strategy for a given path.
      *
      * @param requestPath incoming path
      * @return matching strategy or {@code null} if none found
      */
     private VersionStrategy findStrategy(String requestPath) {
-        for (VersionStrategy versionStrategy : strategies) {
-            if (versionStrategy.isSupports(requestPath)) {
-                return versionStrategy;
+        VersionStrategy strategy = null;
+
+        for (var entry : strategies.entrySet()) {
+            if (entry.getKey().matches(requestPath)) {
+                strategy = entry.getValue();
+                break;
             }
         }
-        return null;
+
+        return strategy;
     }
+
 }

@@ -5,12 +5,37 @@ import org.jmouse.core.MediaType;
 import org.jmouse.web.http.request.Headers;
 import org.jmouse.web.http.request.RequestAttributesHolder;
 
+/**
+ * 📂 Strategy for resolving multipart requests.
+ *
+ * <p>Responsible for detecting multipart content and wrapping
+ * {@link HttpServletRequest} into a multipart-capable request.</p>
+ */
 public interface MultipartResolver {
 
+    /**
+     * 🔄 Wrap the given request into a multipart-capable request.
+     *
+     * @param request original servlet request
+     * @return wrapped request with multipart support
+     */
     HttpServletRequest wrapRequest(HttpServletRequest request);
 
+    /**
+     * ✅ Check whether the given request is a multipart request.
+     *
+     * <p>Detection logic:</p>
+     * <ul>
+     *   <li>Uses {@link RequestAttributesHolder} headers if available</li>
+     *   <li>Falls back to raw {@link HttpServletRequest#getContentType()}</li>
+     *   <li>Checks compatibility with {@code multipart/form-data}</li>
+     * </ul>
+     *
+     * @param request servlet request
+     * @return {@code true} if request is multipart
+     */
     default boolean isMultipart(HttpServletRequest request) {
-        Headers   headers = RequestAttributesHolder.getRequestHeaders().headers();
+        Headers headers = RequestAttributesHolder.getRequestHeaders().headers();
         MediaType contentType;
 
         if (headers != null && (contentType = headers.getContentType()) != null) {
@@ -24,5 +49,4 @@ public interface MultipartResolver {
 
         return false;
     }
-
 }

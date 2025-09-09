@@ -1,7 +1,6 @@
 package org.jmouse.web.mvc.resource;
 
 import org.jmouse.core.io.Resource;
-import org.jmouse.core.matcher.ant.AntMatcher;
 import org.jmouse.web.http.request.PathQuery;
 
 import java.util.Objects;
@@ -22,22 +21,9 @@ public class FixedVersionStrategy extends AbstractVersionStrategy {
     /**
      * 🏗️ Create a new strategy with an ant pattern string.
      *
-     * @param pattern ant-style pattern expression
      * @param version fixed version to apply
      */
-    public FixedVersionStrategy(String pattern, String version) {
-        super(pattern);
-        this.version = version;
-    }
-
-    /**
-     * 🏗️ Create a new strategy with an ant matcher.
-     *
-     * @param matcher precompiled {@link AntMatcher}
-     * @param version fixed version to apply
-     */
-    public FixedVersionStrategy(AntMatcher matcher, String version) {
-        super(matcher);
+    public FixedVersionStrategy(String version) {
         this.version = version;
     }
 
@@ -66,7 +52,7 @@ public class FixedVersionStrategy extends AbstractVersionStrategy {
      */
     @Override
     public PathVersion getVersion(String requestPath) {
-        if (requestPath == null || !isSupports(requestPath)) {
+        if (requestPath == null) {
             return null;
         }
 

@@ -1,4 +1,4 @@
-package org.jmouse.web.http.request.multipart;
+package org.jmouse.web.http.request;
 
 import org.jmouse.core.Bytes;
 import org.jmouse.core.MimeParser;
