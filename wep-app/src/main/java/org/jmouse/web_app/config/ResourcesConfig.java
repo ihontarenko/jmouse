@@ -10,7 +10,7 @@ public class ResourcesConfig implements BeanConfigurer<ResourceHttpMapping> {
     @Override
     public void configure(ResourceHttpMapping mapping) {
         mapping.addResourceResolver("/assets/{filepath:.+}")
-                .addResourceLocations("classpath:static/", "local:C:\\Users\\Ivan_Hontarenko\\Git\\");
+                .addResourceLocations("classpath:static/", "file:/C:/Users/Ivan_Hontarenko/Git/");
     }
 
 }

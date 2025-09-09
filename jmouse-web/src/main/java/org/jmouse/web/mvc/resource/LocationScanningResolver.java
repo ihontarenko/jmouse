@@ -31,7 +31,7 @@ public class LocationScanningResolver extends AbstractResourceResolver {
     }
 
     private Resource getResource(String filepath, Resource root) {
-        String   path     = root.getResourceName() + filepath;
+        String   path     = root.getName() + filepath;
         Resource resource = null;
 
         try {

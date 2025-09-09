@@ -3,6 +3,7 @@ package org.jmouse.core.io;
 import org.jmouse.core.matcher.Matcher;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -76,7 +77,7 @@ public class FileSystemResourceLoader extends AbstractResourceLoader {
         ensureSupportedProtocol(location);
 
         try {
-            resource = createResource(Paths.get(removeProtocol(location)));
+            resource = createResource(toPath(location));
         } catch (InvalidPathException exception) {
             throw new ResourceLoaderException("Failed to load filesystem resource", exception);
         }
@@ -91,7 +92,7 @@ public class FileSystemResourceLoader extends AbstractResourceLoader {
      */
     @Override
     public List<String> supportedProtocols() {
-        return List.of(Resource.LOCAL_PROTOCOL);
+        return List.of(Resource.LOCAL_PROTOCOL, Resource.FILE_PROTOCOL);
     }
 
     /**
@@ -102,6 +103,29 @@ public class FileSystemResourceLoader extends AbstractResourceLoader {
      */
     public Resource createResource(Path path) {
         return new FileSystemResource(path);
+    }
+
+    /**
+     * 🔄 Convert a string location into a {@link Path}.
+     *
+     * <ul>
+     *   <li>If location starts with {@code file:} → resolve via {@link URI}</li>
+     *   <li>Otherwise → strip protocol prefix and resolve directly</li>
+     * </ul>
+     *
+     * @param location string location (file URI or plain path)
+     * @return resolved {@link Path}
+     * @throws IllegalArgumentException if the location cannot be parsed
+     */
+    public static Path toPath(String location) {
+        try {
+            if (location.startsWith("file:")) {
+                return Paths.get(URI.create(location));
+            }
+            return Paths.get(removeProtocol(location));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid Path/URI: " + location, e);
+        }
     }
 
 }

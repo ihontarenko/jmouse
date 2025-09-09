@@ -138,18 +138,29 @@ public final class Headers {
         setHeader(HttpHeader.ACCEPT, String.join(",", Streamable.of(accept).map(MediaType::toString)));
     }
 
-    public Object getAcceptLanguage() {
-        String value = (String) headers.get(HttpHeader.ACCEPT_LANGUAGE);
+    /**
+     * 🏷️ Get the current {@code ETag} header value.
+     *
+     * @return entity tag string or {@code null} if not set
+     */
+    public String getETag() {
+        return (String) getHeader(HttpHeader.ETAG);
+    }
 
-        if (value != null) {
-            List<Locale.LanguageRange> ranges = Locale.LanguageRange.parse(value);
-
-            if (!ranges.isEmpty()) {
-                ranges.getFirst().getRange();
-            }
+    /**
+     * 🏷️ Set the {@code ETag} header value.
+     *
+     * <ul>
+     *   <li>Must be enclosed in quotes, e.g. {@code "abc123"}</li>
+     *   <li>Or prefixed with {@code W/} for weak validators, e.g. {@code W/"xyz"}</li>
+     * </ul>
+     *
+     * @param etag entity tag value
+     */
+    public void setETag(String etag) {
+        if ((etag.startsWith("\"") || etag.startsWith("W/")) && etag.endsWith("\"")) {
+            setHeader(HttpHeader.ETAG, etag);
         }
-
-        return null;
     }
 
     /**

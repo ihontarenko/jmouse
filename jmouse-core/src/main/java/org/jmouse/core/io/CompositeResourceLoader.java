@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static org.jmouse.core.io.Resource.FILE_PROTOCOL;
 import static org.jmouse.core.io.Resource.LOCAL_PROTOCOL;
 
 /**
@@ -72,7 +73,7 @@ public class CompositeResourceLoader implements PatternMatcherResourceLoader, Re
      */
     @Override
     public ResourceLoader getRequiredResourceLoader(String location) {
-        String protocol = Files.extractProtocol(location, LOCAL_PROTOCOL);
+        String protocol = Files.extractProtocol(location, FILE_PROTOCOL);
 
         if (!supports(protocol)) {
             throw new ResourceLoaderException(

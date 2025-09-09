@@ -6,16 +6,43 @@ import org.jmouse.core.chain.Outcome;
 import org.jmouse.core.io.Resource;
 import org.jmouse.web.http.HttpNormalizer;
 
+/**
+ * 🧹 Resource resolver that normalizes incoming request paths.
+ *
+ * <ul>
+ *   <li>Normalizes path using {@link HttpNormalizer}</li>
+ *   <li>Replaces underscores ({@code _}) with slashes ({@code /})</li>
+ *   <li>Blocks suspicious paths containing {@code ..}</li>
+ *   <li>Delegates with updated {@link ResourceQuery} if normalization changed the path</li>
+ * </ul>
+ */
 public class PathNormalizationResolver extends AbstractResourceResolver {
 
+    /**
+     * 🔎 Normalize and sanitize resource path before continuing resolution.
+     *
+     * @param context       current HTTP request
+     * @param resourceQuery resource query with raw path + locations
+     * @param next          next chain element
+     * @return outcome with:
+     *         <ul>
+     *           <li>{@link Outcome#done(Object)} — if path is invalid</li>
+     *           <li>{@link Outcome#next()} — if unchanged, let chain continue</li>
+     *           <li>delegated {@link ResourceQuery} — if path was normalized</li>
+     *         </ul>
+     */
     @Override
     public Outcome<Resource> handle(
-            HttpServletRequest context, ResourceQuery resourceQuery, Chain<HttpServletRequest, ResourceQuery, Resource> next) {
+            HttpServletRequest context,
+            ResourceQuery resourceQuery,
+            Chain<HttpServletRequest, ResourceQuery, Resource> next) {
+
         String requestPath = resourceQuery.path();
         String path        = HttpNormalizer.normalize(requestPath, false);
 
-        // todo: temporary
-        path = path.replace('_', '/');
+        if (path != null) {
+            path = path.replace('_', '/');
+        }
 
         if (path == null || path.contains("..")) {
             return Outcome.done(null);
@@ -27,5 +54,4 @@ public class PathNormalizationResolver extends AbstractResourceResolver {
 
         return Outcome.next();
     }
-
 }

@@ -4,13 +4,13 @@ import org.jmouse.core.io.Resource;
 
 public interface VersionStrategy {
 
-    VersionPath getVersion(String path);
+    PathVersion getVersion(String path);
 
     String removeVersion(String path, String version);
 
-    String putVersion(VersionPath versionPath);
+    String putVersion(PathVersion versionPath);
 
-    VersionPath generateVersion(Resource resource);
+    PathVersion generateVersion(Resource resource);
 
     boolean isSupports(String requestPath);
 

@@ -11,12 +11,6 @@ final public class HttpNormalizer {
 
     private HttpNormalizer() {}
 
-    public static class Options {
-
-        private boolean doubleDecoded = false;
-
-    }
-
     public static String normalize(String uri, boolean doubleDecode) {
         String normalized = uri;
 
@@ -50,14 +44,6 @@ final public class HttpNormalizer {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    public static String normalizeQuery(String queryString) {
-        String normalized = queryString;
-
-
-
-        return normalized;
     }
 
 }

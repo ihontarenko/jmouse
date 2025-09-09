@@ -12,12 +12,7 @@ import java.util.Objects;
  * <p>Prepends a fixed version segment to resource paths
  * (e.g. {@code /v1/js/app.js}).</p>
  */
-public class FixedVersionStrategy implements VersionStrategy {
-
-    /**
-     * 🔎 Ant matcher for supported resource paths.
-     */
-    private final AntMatcher matcher;
+public class FixedVersionStrategy extends AbstractVersionStrategy {
 
     /**
      * 🏷️ Fixed version identifier.
@@ -27,11 +22,12 @@ public class FixedVersionStrategy implements VersionStrategy {
     /**
      * 🏗️ Create a new strategy with an ant pattern string.
      *
-     * @param matcher ant-style matcher expression
+     * @param pattern ant-style pattern expression
      * @param version fixed version to apply
      */
-    public FixedVersionStrategy(String matcher, String version) {
-        this(new AntMatcher(matcher), version);
+    public FixedVersionStrategy(String pattern, String version) {
+        super(pattern);
+        this.version = version;
     }
 
     /**
@@ -41,7 +37,7 @@ public class FixedVersionStrategy implements VersionStrategy {
      * @param version fixed version to apply
      */
     public FixedVersionStrategy(AntMatcher matcher, String version) {
-        this.matcher = matcher;
+        super(matcher);
         this.version = version;
     }
 
@@ -66,10 +62,10 @@ public class FixedVersionStrategy implements VersionStrategy {
      * 🔍 Extract versioned path information from a request.
      *
      * @param requestPath incoming path
-     * @return {@link VersionPath} if matches and versioned, else {@code null}
+     * @return {@link PathVersion} if matches and versioned, else {@code null}
      */
     @Override
-    public VersionPath getVersion(String requestPath) {
+    public PathVersion getVersion(String requestPath) {
         if (requestPath == null || !isSupports(requestPath)) {
             return null;
         }
@@ -86,7 +82,7 @@ public class FixedVersionStrategy implements VersionStrategy {
 
         String simple = noLead.substring(prefix.length());
 
-        return new VersionPath(simple, version);
+        return new PathVersion(simple, version);
     }
 
     /**
@@ -123,7 +119,7 @@ public class FixedVersionStrategy implements VersionStrategy {
      * @return versioned path with query string preserved
      */
     @Override
-    public String putVersion(VersionPath versionPath) {
+    public String putVersion(PathVersion versionPath) {
         String    simple      = versionPath.simple();
         String    version     = sanitizeVersion(Objects.requireNonNullElse(versionPath.version(), this.version));
         PathQuery pathQuery   = PathQuery.ofPath(simple);
@@ -142,18 +138,8 @@ public class FixedVersionStrategy implements VersionStrategy {
      * @throws UnsupportedOperationException always
      */
     @Override
-    public VersionPath generateVersion(Resource resource) {
+    public PathVersion generateVersion(Resource resource) {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * ✅ Check if this strategy applies to a request path.
-     *
-     * @param requestPath candidate path
-     * @return {@code true} if matches pattern
-     */
-    @Override
-    public boolean isSupports(String requestPath) {
-        return matcher.matches(requestPath);
-    }
 }
