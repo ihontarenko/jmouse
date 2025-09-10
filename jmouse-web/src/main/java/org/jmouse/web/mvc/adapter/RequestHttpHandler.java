@@ -12,9 +12,9 @@ import java.io.IOException;
  * the {@link HttpServletRequest} and {@link HttpServletResponse} and writes the response manually.
  *
  * <pre>{@code
- * ControllerMethod method = (rq, rs) -> {
+ * RequestHttpHandler method = (rq, rs) -> {
  *     rs.setContentType("text/plain");
- *     rs.getWriter().write("Hello from ControllerMethod!");
+ *     rs.getWriter().write("Hello from RequestHttpHandler!");
  * };
  * }</pre>
  *
@@ -22,7 +22,7 @@ import java.io.IOException;
  * @author ihontarenko@gmail.com
  */
 @FunctionalInterface
-public interface ControllerMethod {
+public interface RequestHttpHandler {
     /**
      * Handles the incoming request and writes the response.
      *

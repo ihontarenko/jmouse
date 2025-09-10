@@ -10,11 +10,16 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 🏷️ Resource resolver that applies {@link VersionStrategy} rules.
- *
- * <p>Supports versioned resource URLs (e.g. {@code /v1/js/app.js})
- * by stripping version prefix, delegating resolution, and wrapping
- * the result into a {@link VersionalResource} with an {@code ETag}.</p>
+ * 🧩 Resolves versioned static resource paths using pluggable strategies.
+ * Examples:
+ * <ul>
+ *  <li> Content-hash in filename:   {@code /app-<hash>.js}  → strip to {@code /app.js}, validate by hashing content </li>
+ *  <li> Fixed prefix segment:       {@code /v123/app.js}    → strip {@code /v123/}, accept only that fixed version </li>
+ *  <li> Query parameter (?v=...):   {@code /app.js?v=123}   → keep path, validate by policy </li>
+ * </ul>
+ * <p>Chain contract:
+ *  <li> If a strategy extracts a version and the underlying resource is found+valid → Done(resource) </li>
+ *  <li> If strategy doesn't apply or validation fails → Outcome.next() (let others try)</li> </p>
  */
 public class VersionalResourceResolver extends AbstractResourceResolver {
 

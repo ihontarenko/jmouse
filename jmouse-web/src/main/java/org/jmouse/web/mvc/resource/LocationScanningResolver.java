@@ -3,16 +3,11 @@ package org.jmouse.web.mvc.resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.chain.Chain;
 import org.jmouse.core.chain.Outcome;
-import org.jmouse.core.io.PatternMatcherResourceLoader;
 import org.jmouse.core.io.Resource;
 
 public class LocationScanningResolver extends AbstractResourceResolver {
 
-    private final PatternMatcherResourceLoader loader;
-
-    public LocationScanningResolver(PatternMatcherResourceLoader loader) {
-        this.loader = loader;
-    }
+    public LocationScanningResolver() { }
 
     @Override
     public Outcome<Resource> handle(HttpServletRequest context, ResourceQuery resourceQuery,
@@ -21,7 +16,6 @@ public class LocationScanningResolver extends AbstractResourceResolver {
 
         for (Resource location : resourceQuery.locations()) {
             Resource resource = getResource(clearPath, location);
-
             if (resource != null) {
                 return Outcome.done(resource);
             }
@@ -31,14 +25,13 @@ public class LocationScanningResolver extends AbstractResourceResolver {
     }
 
     private Resource getResource(String filepath, Resource root) {
-        String   path     = root.getName() + filepath;
-        Resource resource = null;
+        Resource resource = root.merge(filepath);
 
-        try {
-            resource = loader.getResource(path);
-        } catch (Exception ignored) {}
+        if (resource.isReadable()) {
+            return resource;
+        }
 
-        return resource;
+        return null;
     }
 
 }

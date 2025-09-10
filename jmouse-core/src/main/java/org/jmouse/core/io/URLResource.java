@@ -3,6 +3,7 @@ package org.jmouse.core.io;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -108,6 +109,27 @@ public class URLResource extends AbstractResource {
     @Override
     public String getResourceName() {
         return "URL";
+    }
+
+    /**
+     * 🔗 Resolve a new resource relative to this one.
+     *
+     * @param relativePath relative path from this resource
+     * @return merged resource reference
+     */
+    @Override
+    public Resource merge(String relativePath) {
+        if (relativePath.startsWith("/")) {
+            relativePath = relativePath.substring(1);
+        }
+
+        String newPath = getURL().toString() + "/" + relativePath;
+
+        try {
+            return new URLResource(Resource.toURL(newPath));
+        } catch (MalformedURLException exception) {
+            throw new ResourceException(this, exception);
+        }
     }
 
     /**

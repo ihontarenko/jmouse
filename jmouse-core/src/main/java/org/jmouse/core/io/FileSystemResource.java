@@ -19,12 +19,14 @@ import java.nio.file.Path;
 public class FileSystemResource extends AbstractResource implements WritableResource {
 
     private final Path path;
+    private final File file;
 
     /**
      * Constructs a new {@link FileSystemResource} for the given file system path.
      */
     public FileSystemResource(Path path) {
         this.path = path;
+        this.file = path.toFile();
     }
 
     /**
@@ -40,7 +42,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
      */
     @Override
     public long getSize() {
-        return path.toFile().length();
+        return file.length();
     }
 
     /**
@@ -56,7 +58,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
      */
     @Override
     public File getFile() {
-        return path.toFile();
+        return file;
     }
 
     /**
@@ -97,6 +99,14 @@ public class FileSystemResource extends AbstractResource implements WritableReso
     @Override
     public OutputStream getOutputStream() throws IOException {
         return Files.newOutputStream(path);
+    }
+
+    /**
+     * 🔗 Resolve a new resource relative to this one.
+     */
+    @Override
+    public Resource merge(String relativePath) {
+        return new FileSystemResource(path.resolve(relativePath));
     }
 
     /**

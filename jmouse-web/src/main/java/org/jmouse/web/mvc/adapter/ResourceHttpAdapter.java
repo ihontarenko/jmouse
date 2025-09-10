@@ -32,7 +32,7 @@ public class ResourceHttpAdapter implements HandlerAdapter, InitializingBeanSupp
         ResourceResolverChain chain = new SimpleResourceResolverChain(List.of(
                 new PathNormalizationResolver(),
                 new VersionalResourceResolver(),
-                new LocationScanningResolver(loader)
+                new LocationScanningResolver()
         ));
 
         RouteMatch           match        = handler.mappingResult().match();
@@ -43,7 +43,9 @@ public class ResourceHttpAdapter implements HandlerAdapter, InitializingBeanSupp
                     .map(loader::getResource).toList();
             Resource resource = chain.resolve(request, new ResourceQuery(filepath, locations));
 
-            System.out.println(resource);
+            resource.isReadable();
+
+            System.out.println(resource.asString());
         }
 
         return null;

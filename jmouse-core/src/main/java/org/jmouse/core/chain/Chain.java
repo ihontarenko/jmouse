@@ -121,7 +121,7 @@ public interface Chain<C, I, R> {
             Chain<C, I, R>                        chain    = Chain.empty(fallback);
 
             while (iterator.hasPrevious()) {
-                Link<C, I, R> link = iterator.previous();
+                Link<C, I, R>  link = iterator.previous();
                 Chain<C, I, R> next = chain;
 
                 chain = (context, input) -> {

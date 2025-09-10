@@ -4,11 +4,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.web.mvc.AbstractHandlerPathMapping;
 import org.jmouse.core.MethodParameter;
-import org.jmouse.web.mvc.adapter.ControllerMethod;
+import org.jmouse.web.mvc.adapter.RequestHttpHandler;
 import org.jmouse.web.context.WebBeanContext;
 
 /**
- * 🧠 Maps {@link ControllerMethod} instances based on registered {@link ControllerMethodRegistration}.
+ * 🧠 Maps {@link RequestHttpHandler} instances based on registered {@link RequestHttpHandlerRegistration}.
  *
  * <p>Used to associate lambda-based handlers with route patterns at runtime.
  * Scans all local {@code FunctionalRouteRegistration} beans during initialization.
@@ -27,37 +27,37 @@ import org.jmouse.web.context.WebBeanContext;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class ControllerMethodMapping extends AbstractHandlerPathMapping<ControllerMethod> {
+public class RequestHttpHandlerMapping extends AbstractHandlerPathMapping<RequestHttpHandler> {
 
     public static final MethodParameter METHOD_PARAMETER = MethodParameter.forMethod(
-            -1, ControllerMethod.class, "handle", HttpServletRequest.class, HttpServletResponse.class);
+            -1, RequestHttpHandler.class, "handle", HttpServletRequest.class, HttpServletResponse.class);
 
     /**
-     * Initializes this mapping by scanning all {@link ControllerMethodRegistration}
+     * Initializes this mapping by scanning all {@link RequestHttpHandlerRegistration}
      * beans in the current {@link WebBeanContext} and registering them.
      *
      * @param context current web application context
      */
     @Override
     protected void doInitialize(WebBeanContext context) {
-        for (ControllerMethodRegistration registration : WebBeanContext.getLocalBeans(
-                ControllerMethodRegistration.class, context)) {
+        for (RequestHttpHandlerRegistration registration : WebBeanContext.getLocalBeans(
+                RequestHttpHandlerRegistration.class, context)) {
             addHandlerMapping(registration.route(), registration.controllerMethod());
         }
     }
 
     /**
-     * ✅ Determines whether the given mapped handler is a {@link ControllerMethod}.
+     * ✅ Determines whether the given mapped handler is a {@link RequestHttpHandler}.
      *
      * <p>Used to check if this adapter or handler processor supports the
      * specified mapped handler during dispatching.
      *
      * @param mapped the handler object to inspect
-     * @return {@code true} if the handler is a {@link ControllerMethod}, {@code false} otherwise
+     * @return {@code true} if the handler is a {@link RequestHttpHandler}, {@code false} otherwise
      */
     @Override
     public boolean supportsMappedHandler(Object mapped) {
-        return mapped instanceof ControllerMethod;
+        return mapped instanceof RequestHttpHandler;
     }
 
     /**
@@ -70,7 +70,7 @@ public class ControllerMethodMapping extends AbstractHandlerPathMapping<Controll
      * @return the predefined {@code MethodParameter}
      */
     @Override
-    protected MethodParameter getReturnParameter(ControllerMethod handler) {
+    protected MethodParameter getReturnParameter(RequestHttpHandler handler) {
         return METHOD_PARAMETER;
     }
 }

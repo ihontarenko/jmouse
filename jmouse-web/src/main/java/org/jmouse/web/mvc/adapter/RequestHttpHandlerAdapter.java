@@ -11,18 +11,18 @@ import org.jmouse.web.mvc.MappedHandler;
 import java.io.IOException;
 
 /**
- * 🧩 HandlerAdapter for {@link ControllerMethod}.
+ * 🧩 HandlerAdapter for {@link RequestHttpHandler}.
  *
- * <p>Executes {@link ControllerMethod#handle(HttpServletRequest, HttpServletResponse)}
+ * <p>Executes {@link RequestHttpHandler#handle(HttpServletRequest, HttpServletResponse)}
  * and manages basic response logic.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class ControllerMethodHandlerAdapter implements HandlerAdapter {
+public class RequestHttpHandlerAdapter implements HandlerAdapter {
 
     /**
-     * 🛠 Handles the request by invoking {@link ControllerMethod}.
+     * 🛠 Handles the request by invoking {@link RequestHttpHandler}.
      *
      * <ul>
      *   <li>Ensures default content type if not set</li>
@@ -35,7 +35,7 @@ public class ControllerMethodHandlerAdapter implements HandlerAdapter {
     public MVCResult handle(HttpServletRequest request, HttpServletResponse response,
                             MappedHandler mappedHandler) {
         try {
-            ((ControllerMethod) mappedHandler.handler()).handle(request, response);
+            ((RequestHttpHandler) mappedHandler.handler()).handle(request, response);
         } catch (IOException e) {
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.getCode());
             throw new HandlerAdapterException("Handler failed during execution.", e);
@@ -45,13 +45,13 @@ public class ControllerMethodHandlerAdapter implements HandlerAdapter {
     }
 
     /**
-     * ✅ Checks if the handler is a {@link ControllerMethod}.
+     * ✅ Checks if the handler is a {@link RequestHttpHandler}.
      *
      * @param handler mapped handler
      * @return {@code true} if supported
      */
     @Override
     public boolean supportsHandler(MappedHandler handler) {
-        return handler.handler() instanceof ControllerMethod;
+        return handler.handler() instanceof RequestHttpHandler;
     }
 }

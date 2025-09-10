@@ -84,6 +84,17 @@ public class VersionalResource implements HttpResource {
         return delegate.getResourceName();
     }
 
+    /**
+     * 🔗 Resolve a new resource relative to this one.
+     *
+     * @param relativePath relative path from this resource
+     * @return merged resource reference
+     */
+    @Override
+    public Resource merge(String relativePath) {
+        return delegate.merge(relativePath);
+    }
+
     /** @return delegate reader */
     @Override
     public Reader getReader() {

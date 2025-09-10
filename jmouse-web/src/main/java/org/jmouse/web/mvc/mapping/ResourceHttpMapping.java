@@ -18,48 +18,16 @@ import org.jmouse.web.mvc.resource.ResourceRegistration;
 public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceRegistration> {
 
     /**
-     * ➕ Register a static resource resolver for the given ant patterns.
-     *
-     * <ul>
-     *   <li>Creates a single {@link ResourceRegistration}.</li>
-     *   <li>Binds both {@code HEAD} and {@code GET} routes for each pattern.</li>
-     *   <li>Collects underlying Ant matchers for fast checks.</li>
-     * </ul>
-     *
-     * @param patterns ant-style URL patterns (e.g. {@code /assets/**}, {@code /img/*.png})
-     * @return configured {@link ResourceRegistration}
-     */
-    public ResourceRegistration addResourceResolver(String... patterns) {
-        ResourceRegistration registration = new ResourceRegistration();
-
-        for (String pattern : patterns) {
-            Route routeA = Route.HEAD(pattern);
-            Route routeB = Route.GET(pattern);
-
-            addHandlerMapping(routeA, registration);
-            addHandlerMapping(routeB, registration);
-
-            if (routeA.pathPattern() instanceof AntPattern patternA
-                    && routeB.pathPattern() instanceof AntPattern patternB) {
-                // registration.addRoutePaths(patternA.getAntMatcher(), patternB.getAntMatcher());
-            }
-        }
-
-        return registration;
-    }
-
-    /**
      * ⚙️ Initialize mapping infrastructure and dependencies.
      *
      * @param context active {@link WebBeanContext}
      */
     @Override
     protected void doInitialize(WebBeanContext context) {
-        ResourceHandlerRegistry registry = context.getBean(ResourceHandlerRegistry.class);
-
-        for (ResourceRegistration registration : registry.getRegistrations()) {
+        for (ResourceRegistration registration : context.getBean(ResourceHandlerRegistry.class).getRegistrations()) {
             for (String pattern : registration.getPatterns()) {
-                System.out.println(pattern);
+                addHandlerMapping(Route.GET(pattern), registration);
+                addHandlerMapping(Route.HEAD(pattern), registration);
             }
         }
     }

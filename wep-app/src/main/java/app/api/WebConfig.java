@@ -7,7 +7,7 @@ import org.jmouse.beans.annotation.BeanScan;
 import org.jmouse.core.MediaType;
 import org.jmouse.web.mvc.NotFoundException;
 import org.jmouse.web.mvc.Route;
-import org.jmouse.web.mvc.mapping.ControllerMethodRegistration;
+import org.jmouse.web.mvc.mapping.RequestHttpHandlerRegistration;
 import org.jmouse.web.http.HttpHeader;
 
 @BeanFactories
@@ -15,14 +15,14 @@ import org.jmouse.web.http.HttpHeader;
 public class WebConfig {
 
     @Bean
-    public ControllerMethodRegistration errorRegistration() {
-        return new ControllerMethodRegistration(Route.GET("/error"), (request, response) -> {
+    public RequestHttpHandlerRegistration errorRegistration() {
+        return new RequestHttpHandlerRegistration(Route.GET("/error"), (request, response) -> {
             throw new NotFoundException("Test error page with NOT FOUND error!");
         });
     }
 
     @Bean
-    public ControllerMethodRegistration route8Registration() {
+    public RequestHttpHandlerRegistration route8Registration() {
         Route route = Route.route()
                 .GET("/index")
                 .produces(MediaType.TEXT_HTML)
@@ -30,7 +30,7 @@ public class WebConfig {
                 .queryParameter("lang", "uk")
                 .build();
 
-        return new ControllerMethodRegistration(route, (request, response)
+        return new RequestHttpHandlerRegistration(route, (request, response)
                 -> response.getWriter().write("[{'name':'Route 8'}]"));
     }
 
