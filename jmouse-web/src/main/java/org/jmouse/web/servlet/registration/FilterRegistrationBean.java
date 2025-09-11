@@ -69,7 +69,7 @@ public class FilterRegistrationBean<F extends Filter>
 
     /**
      * Configure the given {@link FilterRegistration.Dynamic} with async support, init parameters,
-     * and URL pattern/dispatcher type mappings.
+     * and URL matched/dispatcher type mappings.
      *
      * @param dynamic the {@link FilterRegistration.Dynamic} to configure; never {@code null}
      */
@@ -111,7 +111,7 @@ public class FilterRegistrationBean<F extends Filter>
 
     /**
      * Replace the configured URL patterns for filter mapping.
-     * If not set, the default pattern {@code "/*"} will be used.
+     * If not set, the default matched {@code "/*"} will be used.
      *
      * @param mappings the URL patterns to map the filter to; must not be {@code null}
      */

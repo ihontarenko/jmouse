@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 🐜 Ant-style route pattern implementation.
+ * 🐜 Ant-style route matched implementation.
  *
  * <p>Examples:
  * <ul>
@@ -26,7 +26,7 @@ public class AntPattern implements RoutePath {
     private final AntMatcher antMatcher;
 
     /**
-     * 🏗️ Create a new ant path pattern.
+     * 🏗️ Create a new ant path matched.
      *
      * @param path ant-style path expression
      */
@@ -44,7 +44,7 @@ public class AntPattern implements RoutePath {
     }
 
     /**
-     * ✅ Check if given path matches this pattern.
+     * ✅ Check if given path matches this matched.
      *
      * @param path request path
      * @return {@code true} if matches
@@ -64,7 +64,7 @@ public class AntPattern implements RoutePath {
      */
     @Override
     public RouteMatch match(String path) {
-        return new RouteMatch(path, Map.of());
+        return new RouteMatch(path, extractPath(path), Map.of());
     }
 
     /**
@@ -78,7 +78,8 @@ public class AntPattern implements RoutePath {
     @Override
     public String extractPath(String path) {
         List<Element> elements   = RoutePath.split(path);
-        int           nonLiteral = dynamicIndex(elements);
+        List<Element> patterns   = RoutePath.split(this.path);
+        int           nonLiteral = dynamicIndex(patterns);
 
         if (nonLiteral == -1 || nonLiteral == elements.size() - 1) {
             return "";
@@ -87,18 +88,12 @@ public class AntPattern implements RoutePath {
         return RoutePath.joinElements(elements, nonLiteral);
     }
 
-    public static void main(String[] args) {
-        AntPattern antPattern = new AntPattern("/assets/**");
-
-        System.out.println(antPattern.extractPath("/assets/css/jmouse.css"));
-    }
-
     public AntMatcher getAntMatcher() {
         return antMatcher;
     }
 
     /**
-     * Index of the first non-literal (pattern-based) segment in the PATTERN.
+     * Index of the first non-literal (matched-based) segment in the PATTERN.
      */
     private static int dynamicIndex(List<Element> patternElements) {
         int index = 0;

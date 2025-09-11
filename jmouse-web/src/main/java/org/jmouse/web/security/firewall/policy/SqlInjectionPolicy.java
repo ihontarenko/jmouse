@@ -15,7 +15,7 @@ import org.jmouse.web.security.firewall.InspectionPolicies;
  *   <li>Uses configured {@link InspectionPolicies.InspectionGroup} to detect SQL injection attempts.</li>
  *   <li>Supports both <b>contains checks</b> (e.g., dangerous keywords like {@code '--'} or {@code '/*'})
  *       and <b>regex expressions</b> (e.g., {@code (?i)union\s+select}, {@code or 1=1}).</li>
- *   <li>If a suspicious SQL pattern is detected → request is blocked with the given {@link HttpStatus}
+ *   <li>If a suspicious SQL matched is detected → request is blocked with the given {@link HttpStatus}
  *       and reason {@code "SQL INJECTION"}.</li>
  * </ul>
  *

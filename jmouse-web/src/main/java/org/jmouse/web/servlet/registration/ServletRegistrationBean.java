@@ -26,7 +26,7 @@ public class ServletRegistrationBean<S extends Servlet>
         extends AbstractDynamicRegistrationBean<ServletRegistration.Dynamic> {
 
     /**
-     * Default URL pattern if no mappings are provided.
+     * Default URL matched if no mappings are provided.
      */
     public static final  String[] DEFAULT_MAPPINGS            = {"/*"};
     public static final  String   SERVLET_MAPPINGS_ATTRIBUTE  = ServletRegistrationBean.class.getName() + ".SERVLET_MAPPINGS";
@@ -137,7 +137,7 @@ public class ServletRegistrationBean<S extends Servlet>
     }
 
     /**
-     * Return the configured URL pattern mappings.
+     * Return the configured URL matched mappings.
      *
      * @return a set of URL patterns (never {@code null})
      */
@@ -146,7 +146,7 @@ public class ServletRegistrationBean<S extends Servlet>
     }
 
     /**
-     * Replace the current URL pattern mappings with the given set.
+     * Replace the current URL matched mappings with the given set.
      *
      * @param mappings the new URL patterns; must not be {@code null}
      */

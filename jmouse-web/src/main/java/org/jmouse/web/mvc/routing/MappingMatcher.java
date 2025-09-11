@@ -5,7 +5,7 @@ import org.jmouse.web.http.request.RequestRoute;
 
 /**
  * 🎯 Defines a contract for matching a {@link RequestRoute} against
- * specific mapping conditions, such as HTTP method, path pattern,
+ * specific mapping conditions, such as HTTP method, path matched,
  * headers, or media types.
  * <p>
  * Implementations evaluate whether the request matches and

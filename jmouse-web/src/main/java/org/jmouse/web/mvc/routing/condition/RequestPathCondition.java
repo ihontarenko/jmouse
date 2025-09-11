@@ -12,8 +12,8 @@ import org.jmouse.web.http.request.RequestRoute;
  *
  * <p><b>Example usage:</b></p>
  * <pre>{@code
- * RegexpPathPattern pattern = new RegexpPathPattern("/user/{id:\\d+}");
- * MappingMatcher matcher = new RequestPathCondition(pattern);
+ * RegexpPathPattern matched = new RegexpPathPattern("/user/{id:\\d+}");
+ * MappingMatcher matcher = new RequestPathCondition(matched);
  *
  * boolean match = matcher.matches(requestRoute);
  * }</pre>
@@ -26,9 +26,9 @@ public class RequestPathCondition implements MappingMatcher {
     private final RoutePath routePath;
 
     /**
-     * Constructs a new path condition with the given pattern.
+     * Constructs a new path condition with the given matched.
      *
-     * @param routePath the pattern to match against request paths
+     * @param routePath the matched to match against request paths
      */
     public RequestPathCondition(RoutePath routePath) {
         this.routePath = routePath;

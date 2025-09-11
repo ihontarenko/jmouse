@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 import static java.util.Objects.requireNonNull;
 
 /**
- * 🧭 Minimal route pattern implementation that plugs into {@link RoutePath}.
+ * 🧭 Minimal route matched implementation that plugs into {@link RoutePath}.
  *
  * <p>Supported syntax:</p>
  * <ul>
@@ -35,7 +35,7 @@ public class SimplePathPattern implements RoutePath {
     }
 
     /**
-     * @return raw pattern string as defined by user
+     * @return raw matched string as defined by user
      */
     @Override
     public String raw() {
@@ -43,7 +43,7 @@ public class SimplePathPattern implements RoutePath {
     }
 
     /**
-     * ✅ Check if the given path matches this pattern.
+     * ✅ Check if the given path matches this matched.
      */
     @Override
     public boolean matches(String path) {
@@ -59,7 +59,7 @@ public class SimplePathPattern implements RoutePath {
     }
 
     /**
-     * @return pattern kind marker
+     * @return matched kind marker
      */
     @Override
     public Kind kind() {
@@ -99,7 +99,7 @@ public class SimplePathPattern implements RoutePath {
     }
 
     /**
-     * 📥 Parse a raw pattern string into {@link SimplePathPattern}.
+     * 📥 Parse a raw matched string into {@link SimplePathPattern}.
      */
     public static RoutePath parse(String pattern) {
         return new Parser().parse(pattern);
@@ -160,7 +160,7 @@ public class SimplePathPattern implements RoutePath {
             extracted = RoutePath.joinElements(elements, nonLiteralIndex);
         }
 
-        return new RouteMatch(extracted, variables);
+        return new RouteMatch(path, extracted, variables);
     }
 
     private static void bindMatrixVariables(String name, Element element, Map<String, Object> variables) {
@@ -197,7 +197,7 @@ public class SimplePathPattern implements RoutePath {
     public static final class Parser {
 
         /**
-         * Parse a raw pattern into {@link SimplePathPattern}.
+         * Parse a raw matched into {@link SimplePathPattern}.
          */
         public SimplePathPattern parse(String pattern) {
             PathContainer container = SimplePathContainer.parse(pattern);
@@ -271,7 +271,7 @@ public class SimplePathPattern implements RoutePath {
     }
 
     /**
-     * 🔹 Segment types for pattern matching.
+     * 🔹 Segment types for matched matching.
      */
     sealed interface PathSegment permits
             PathSegment.Literal,

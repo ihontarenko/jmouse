@@ -41,7 +41,7 @@ import java.lang.annotation.*;
 public @interface Mapping {
 
     /**
-     * 📍 Path pattern for the mapping (e.g. {@code /users/{id}}).
+     * 📍 Path matched for the mapping (e.g. {@code /users/{id}}).
      */
     String path() default "";
 

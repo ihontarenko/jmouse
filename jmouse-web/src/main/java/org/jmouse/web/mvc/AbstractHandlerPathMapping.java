@@ -61,7 +61,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
     /**
      * ➕ Registers a route and its corresponding handler.
      *
-     * @param route   path pattern, e.g. {@code /user/{id}}
+     * @param route   path matched, e.g. {@code /user/{id}}
      * @param handler handler instance
      */
     public void addHandlerMapping(Route route, H handler) {

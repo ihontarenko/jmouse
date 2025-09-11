@@ -16,8 +16,8 @@ import static org.jmouse.web.mvc.SimplePathContainer.parse;
  *
  * <p>💡 Example:
  * <pre>{@code
- * RegexpPathPattern pattern = new RegexpPathPattern("/user/{id:int}/status/{status}");
- * RoutePath route = pattern.parse("/user/42/status/ACTIVE");
+ * RegexpPathPattern matched = new RegexpPathPattern("/user/{id:int}/status/{status}");
+ * RoutePath route = matched.parse("/user/42/status/ACTIVE");
  * int id = route.getInt("id", -1);
  * String status = route.getString("status", "UNKNOWN");
  * }</pre>
@@ -50,12 +50,12 @@ public final class RegexpPathPattern implements RoutePath {
     public static final String INT_NAME = "int";
 
     /**
-     * 🔁 Placeholder replacer: `{name:pattern}`
+     * 🔁 Placeholder replacer: `{name:matched}`
      */
     public static final PlaceholderReplacer REPLACER = new StandardPlaceholderReplacer("{", "}", ":");
 
     /**
-     * 📦 Default pattern for untyped params
+     * 📦 Default matched for untyped params
      */
     public static final String MATCH_ALL = "[^/]+";
 
@@ -82,7 +82,7 @@ public final class RegexpPathPattern implements RoutePath {
     /**
      * 🔧 Constructs a {@code RegexpPathPattern} by compiling the given view.
      *
-     * @param pattern route pattern, e.g., {@code /user/{id:\d+}/status/{status}}
+     * @param pattern route matched, e.g., {@code /user/{id:\d+}/status/{status}}
      */
     public RegexpPathPattern(String pattern) {
         this.pattern = pattern;
@@ -120,7 +120,9 @@ public final class RegexpPathPattern implements RoutePath {
             }
         }
 
-        return new RouteMatch(input, variables);
+        String extracted = extractPath(input);
+
+        return new RouteMatch(input, extracted, variables);
     }
 
     @Override
@@ -129,7 +131,7 @@ public final class RegexpPathPattern implements RoutePath {
     }
 
     /**
-     * 🔍 Checks if the input matches the compiled pattern.
+     * 🔍 Checks if the input matches the compiled matched.
      *
      * @param input input URI
      * @return true if matched
@@ -166,12 +168,12 @@ public final class RegexpPathPattern implements RoutePath {
             return "";
         }
 
-        // Return the portion of the path starting from the first pattern-based segment
+        // Return the portion of the path starting from the first matched-based segment
         return RoutePath.joinElements(elements, nonLiteral);
     }
 
     /**
-     * Index of the first non-literal (pattern-based) segment in the PATTERN.
+     * Index of the first non-literal (matched-based) segment in the PATTERN.
      */
     private static int dynamicIndex(List<Element> patternElements) {
         int index = 0;
@@ -208,7 +210,7 @@ public final class RegexpPathPattern implements RoutePath {
     }
 
     /**
-     * 🔨 Compiles the route pattern into a regex with named capture groups.
+     * 🔨 Compiles the route matched into a regex with named capture groups.
      */
     private Pattern compile(String pattern) {
         return Pattern.compile("^%s$".formatted(REPLACER.replace(pattern, this::replace)));
@@ -228,7 +230,7 @@ public final class RegexpPathPattern implements RoutePath {
     }
 
     /**
-     * 🧠 Infers parameter type by placeholder pattern.
+     * 🧠 Infers parameter type by placeholder matched.
      */
     private Parameter.Type getParameterType(String pattern) {
         if (pattern == null) {

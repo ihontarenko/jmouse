@@ -10,7 +10,7 @@ import java.util.*;
 /**
  * 🧭 Immutable route definition used for mapping requests to handlers.
  * <p>
- * Supports HTTP method, path pattern, media types, headers, and query constraints.
+ * Supports HTTP method, path matched, media types, headers, and query constraints.
  *
  * <p>Example usage:
  * <pre>{@code
@@ -47,7 +47,7 @@ public final class Route {
      * 🔧 Creates a basic route instance with method and path.
      *
      * @param method the HTTP method (e.g. GET, POST)
-     * @param path   the route path pattern (e.g. "/users/{id}")
+     * @param path   the route path matched (e.g. "/users/{id}")
      * @return new {@code Route} instance
      *
      * <p><b>Example:</b></p>
@@ -62,7 +62,7 @@ public final class Route {
     /**
      * 📥 Creates a GET route for the given path.
      *
-     * @param path the route path pattern (e.g. "/users")
+     * @param path the route path matched (e.g. "/users")
      * @return new {@code Route} instance with GET method
      */
     public static Route GET(String path) {
@@ -72,7 +72,7 @@ public final class Route {
     /**
      * 📥 Creates a HEAD route for the given path.
      *
-     * @param path the route path pattern (e.g. "/users")
+     * @param path the route path matched (e.g. "/users")
      * @return new {@code Route} instance with HEAD method
      */
     public static Route HEAD(String path) {
@@ -82,7 +82,7 @@ public final class Route {
     /**
      * 📤 Creates a POST route for the given path.
      *
-     * @param path the route path pattern (e.g. "/submit")
+     * @param path the route path matched (e.g. "/submit")
      * @return new {@code Route} instance with POST method
      */
     public static Route POST(String path) {
@@ -92,7 +92,7 @@ public final class Route {
     /**
      * ✏️ Creates a PUT route for the given path.
      *
-     * @param path the route path pattern (e.g. "/resource/{id}")
+     * @param path the route path matched (e.g. "/resource/{id}")
      * @return new {@code Route} instance with PUT method
      */
     public static Route PUT(String path) {
@@ -102,7 +102,7 @@ public final class Route {
     /**
      * 🔄 Creates a PATCH route for the given path.
      *
-     * @param path the route path pattern (e.g. "/data/{id}")
+     * @param path the route path matched (e.g. "/data/{id}")
      * @return new {@code Route} instance with PATCH method
      */
     public static Route PATCH(String path) {
@@ -112,7 +112,7 @@ public final class Route {
     /**
      * ❌ Creates a DELETE route for the given path.
      *
-     * @param path the route path pattern (e.g. "/users/{id}")
+     * @param path the route path matched (e.g. "/users/{id}")
      * @return new {@code Route} instance with DELETE method
      */
     public static Route DELETE(String path) {
@@ -134,7 +134,7 @@ public final class Route {
     }
 
     /**
-     * @return Parsed path pattern with variables and constraints
+     * @return Parsed path matched with variables and constraints
      */
     public RoutePath pathPattern() {
         return path;
@@ -263,7 +263,7 @@ public final class Route {
         }
 
         /**
-         * Sets the path pattern, e.g. {@code /user/{id:int}}.
+         * Sets the path matched, e.g. {@code /user/{id:int}}.
          */
         public Builder path(String path) {
             this.path = path;

@@ -30,7 +30,7 @@ import java.io.IOException;
  * </filter>
  * <filter-mapping>
  *   <filter-name>sessionFilter</filter-name>
- *   <url-pattern>/*</url-pattern>
+ *   <url-matched>/*</url-matched>
  * </filter-mapping>
  * }</pre>
  *

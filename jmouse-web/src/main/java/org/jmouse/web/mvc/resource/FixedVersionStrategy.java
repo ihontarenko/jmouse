@@ -19,7 +19,7 @@ public class FixedVersionStrategy extends AbstractVersionStrategy {
     private final String version;
 
     /**
-     * 🏗️ Create a new strategy with an ant pattern string.
+     * 🏗️ Create a new strategy with an ant matched string.
      *
      * @param version fixed version to apply
      */

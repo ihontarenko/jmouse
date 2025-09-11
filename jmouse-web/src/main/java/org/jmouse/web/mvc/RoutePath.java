@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 🛣️ Abstraction for a route path pattern.
+ * 🛣️ Abstraction for a route path matched.
  *
  * <p>Represents different kinds of path patterns such as:</p>
  * <ul>
@@ -17,14 +17,14 @@ import java.util.Map;
 public interface RoutePath {
 
     /**
-     * 📜 Get the original (raw) pattern string.
+     * 📜 Get the original (raw) matched string.
      *
-     * @return raw pattern (e.g. {@code "/users/{id:int}"}, {@code "/assets/**"})
+     * @return raw matched (e.g. {@code "/users/{id:int}"}, {@code "/assets/**"})
      */
     String raw();
 
     /**
-     * ⚡ Fast check if the given path matches this pattern.
+     * ⚡ Fast check if the given path matches this matched.
      *
      * @param path request path
      * @return {@code true} if matches
@@ -40,7 +40,7 @@ public interface RoutePath {
     RouteMatch match(String path);
 
     /**
-     * 🏷️ Get the kind of this route pattern.
+     * 🏷️ Get the kind of this route matched.
      *
      * @return {@link Kind} enum value
      */
@@ -106,7 +106,7 @@ public interface RoutePath {
      */
     enum Kind {
         /**
-         * 🐜 Ant-style pattern.
+         * 🐜 Ant-style matched.
          */
         ANT,
         /**

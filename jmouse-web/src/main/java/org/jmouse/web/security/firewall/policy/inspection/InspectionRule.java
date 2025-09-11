@@ -24,7 +24,7 @@ public sealed interface InspectionRule
     }
 
     /**
-     * Factory: regex pattern.
+     * Factory: regex matched.
      */
     static InspectionRule regularExpression(String id, Pattern pattern) {
         return new RegularExpressionRule(id, pattern);

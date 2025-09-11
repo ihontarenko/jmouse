@@ -13,7 +13,7 @@ public class ResourcesConfig implements BeanConfigurer<ResourceHandlerRegistry> 
 
     @Override
     public void configure(ResourceHandlerRegistry registry) {
-        registry.registerHandler("/assets/{filepath:.+}")
+        registry.registerHandler("/assets/{*filepath}")
                 .addResourceLocations("classpath:static/", "file:/C:/Users/Ivan_Hontarenko/Git/")
                 .setCacheControl(CacheControl.empty().cachePublic())
                 .getChainRegistration()

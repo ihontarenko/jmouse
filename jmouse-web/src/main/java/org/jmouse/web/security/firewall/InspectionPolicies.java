@@ -67,7 +67,7 @@ public class InspectionPolicies {
      */
     public static class InspectionGroup {
 
-        /** Regex-based inspection rules (key = name, value = compiled pattern). */
+        /** Regex-based inspection rules (key = name, value = compiled matched). */
         private Map<String, Pattern> expression = new LinkedHashMap<>();
 
         /** Substring-based inspection rules (key = name, value = substring to detect). */
