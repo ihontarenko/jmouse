@@ -9,26 +9,31 @@ import org.jmouse.core.io.PatternMatcherResourceLoader;
 import org.jmouse.core.io.Resource;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.request.CacheControl;
-import org.jmouse.web.mvc.HandlerMapping;
-import org.jmouse.web.mvc.RouteMatch;
+import org.jmouse.web.mvc.*;
 import org.jmouse.web.mvc.adapter.RequestHttpHandler;
+import org.jmouse.web.mvc.method.converter.*;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ResourceHttpHandler implements RequestHttpHandler {
 
     private final ResourceRegistration         registration;
-    private final PatternMatcherResourceLoader loader;
-    private final MediaTypeFactory             factory;
+    private final PatternMatcherResourceLoader resourceLoader;
+    private final MessageConverterManager      messageConverterManager;
+    private final MediaTypeFactory             mediaTypeFactory;
 
-    public ResourceHttpHandler(ResourceRegistration registration, PatternMatcherResourceLoader loader, MediaTypeFactory factory) {
+    public ResourceHttpHandler(
+            ResourceRegistration registration,
+            PatternMatcherResourceLoader resourceLoader,
+            MessageConverterManager messageConverterManager,
+            MediaTypeFactory mediaTypeFactory
+    ) {
         this.registration = registration;
-        this.loader = loader;
-        this.factory = factory;
+        this.resourceLoader = resourceLoader;
+        this.messageConverterManager = messageConverterManager;
+        this.mediaTypeFactory = mediaTypeFactory;
     }
 
     /**
@@ -46,16 +51,25 @@ public class ResourceHttpHandler implements RequestHttpHandler {
 
         if (resource != null && resource.isReadable()) {
             writeHeaders(response, resource);
+            writeMessage(response, resource);
+        }
+    }
 
-            InputStream  input  = resource.getInputStream();
-            OutputStream output = response.getOutputStream();
+    private void writeMessage(HttpServletResponse response, Resource resource) {
+        HttpOutputMessage              httpMessage      = new WebHttpServletResponse(response);
+        HttpMessageConverter<Resource> messageConverter = messageConverterManager.getMessageConverter(resource, null);
 
-            input.transferTo(output);
+        if (messageConverter != null) {
+            try {
+                messageConverter.write(resource, resource.getClass(), httpMessage);
+            } catch (IOException e) {
+                throw new UnwritableException("Could not write HTTP message", e);
+            }
         }
     }
 
     private void writeHeaders(HttpServletResponse response, Resource resource) {
-        MediaType mediaType = factory.getMediaType(resource.getName());
+        MediaType mediaType = mediaTypeFactory.getMediaType(resource.getName());
 
         response.setContentType(mediaType.toString());
 
@@ -96,7 +110,7 @@ public class ResourceHttpHandler implements RequestHttpHandler {
         List<Resource> resources = List.of();
 
         if (locations != null && !locations.isEmpty()) {
-            resources = Streamable.of(registration.getLocations()).map(loader::getResource).toList();
+            resources = Streamable.of(registration.getLocations()).map(resourceLoader::getResource).toList();
         }
 
         return resources;

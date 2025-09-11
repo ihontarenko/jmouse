@@ -5,12 +5,13 @@ import org.jmouse.core.MethodParameter;
 import org.jmouse.core.io.PatternMatcherResourceLoader;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.mvc.AbstractHandlerPathMapping;
-import org.jmouse.web.mvc.AntPattern;
-import org.jmouse.web.mvc.Route;
-import org.jmouse.web.mvc.RoutePath;
+import org.jmouse.web.mvc.method.converter.MessageConverterManager;
 import org.jmouse.web.mvc.resource.ResourceHandlerRegistry;
 import org.jmouse.web.mvc.resource.ResourceHttpHandler;
 import org.jmouse.web.mvc.resource.ResourceRegistration;
+
+import static org.jmouse.web.mvc.Route.GET;
+import static org.jmouse.web.mvc.Route.HEAD;
 
 /**
  * 🧷 Path mapping for serving static resources.
@@ -27,14 +28,16 @@ public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceHttp
      */
     @Override
     protected void doInitialize(WebBeanContext context) {
-        PatternMatcherResourceLoader loader  = context.getBean(PatternMatcherResourceLoader.class);
-        MediaTypeFactory             factory = context.getBean(MediaTypeFactory.class);
+        PatternMatcherResourceLoader resourceLoader          = context.getBean(PatternMatcherResourceLoader.class);
+        MediaTypeFactory             mediaTypeFactory        = context.getBean(MediaTypeFactory.class);
+        MessageConverterManager      messageConverterManager = context.getBean(MessageConverterManager.class);
 
         for (ResourceRegistration registration : context.getBean(ResourceHandlerRegistry.class).getRegistrations()) {
-            ResourceHttpHandler handler = new ResourceHttpHandler(registration, loader, factory);
+            ResourceHttpHandler handler = new ResourceHttpHandler(
+                    registration, resourceLoader, messageConverterManager, mediaTypeFactory);
             for (String pattern : registration.getPatterns()) {
-                addHandlerMapping(Route.GET(pattern), handler);
-                addHandlerMapping(Route.HEAD(pattern), handler);
+                addHandlerMapping(GET(pattern), handler);
+                addHandlerMapping(HEAD(pattern), handler);
             }
         }
     }

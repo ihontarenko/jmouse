@@ -32,10 +32,8 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
      * 🏗️ Create a converter for binary resources.
      *
      * <p>Currently initializes with default {@code application/octet-stream} support.</p>
-     *
-     * @param supportedMediaType optional media types (currently ignored)
      */
-    public ResourceHttpMessageConverter(MediaType... supportedMediaType) {
+    public ResourceHttpMessageConverter() {
         super(MediaType.APPLICATION_OCTET_STREAM);
     }
 
@@ -56,11 +54,11 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
                 OutputStream output = message.getOutputStream();
                 input.transferTo(output);
                 output.flush();
-            } catch (Exception ignore) {
-
+            } catch (Exception exception) {
+                throw new ResourceException(resource, exception);
             }
-        } catch (ResourceException ignore) {
-
+        } catch (ResourceException exception) {
+            throw new UnwritableException(exception);
         }
     }
 
