@@ -15,7 +15,7 @@ import java.util.List;
 public class ResourceHttpHandler implements RequestHttpHandler {
 
     private final ResourceRegistration         registration;
-    private   final     PatternMatcherResourceLoader loader;
+    private final PatternMatcherResourceLoader loader;
 
     public ResourceHttpHandler(ResourceRegistration registration, PatternMatcherResourceLoader loader) {
         this.registration = registration;
