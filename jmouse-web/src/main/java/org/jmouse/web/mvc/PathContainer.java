@@ -1,5 +1,7 @@
 package org.jmouse.web.mvc;
 
+import org.jmouse.core.Streamable;
+
 import java.util.List;
 import java.util.Map;
 
@@ -23,8 +25,22 @@ public interface PathContainer {
 
     /**
      * 📚 Return all path elements (separators + segments).
+     *
+     * @return immutable list of all {@link Element}s
      */
     List<Element> elements();
+
+    /**
+     * 🎯 Return all path elements of the given type.
+     *
+     * <p>Convenience method to filter {@link #elements()} by class.</p>
+     *
+     * @param elementType target element subtype (e.g. {@link Separator}, {@link PathElement})
+     * @return list of elements of the specified type (may be empty)
+     */
+    default List<Element> elements(Class<? extends Element> elementType) {
+        return Streamable.of(elements()).filter(elementType::isInstance).toList();
+    }
 
     /**
      * ✂️ Return a sublist of elements.

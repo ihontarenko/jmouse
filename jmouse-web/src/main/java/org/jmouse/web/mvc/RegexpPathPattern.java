@@ -2,10 +2,13 @@ package org.jmouse.web.mvc;
 
 import org.jmouse.core.PlaceholderReplacer;
 import org.jmouse.core.StandardPlaceholderReplacer;
+import org.jmouse.web.mvc.PathContainer.Element;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.jmouse.web.mvc.SimplePathContainer.parse;
 
 /**
  * 🧭 Parses path patterns like <code>/user/{id:\d+}/status/{status}</code> into regular expressions
@@ -13,7 +16,7 @@ import java.util.regex.Pattern;
  *
  * <p>💡 Example:
  * <pre>{@code
- * PathPattern pattern = new PathPattern("/user/{id:int}/status/{status}");
+ * RegexpPathPattern pattern = new RegexpPathPattern("/user/{id:int}/status/{status}");
  * RoutePath route = pattern.parse("/user/42/status/ACTIVE");
  * int id = route.getInt("id", -1);
  * String status = route.getString("status", "UNKNOWN");
@@ -29,7 +32,7 @@ import java.util.regex.Pattern;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public final class PathPattern implements RoutePath {
+public final class RegexpPathPattern implements RoutePath {
 
     /**
      * 🔠 Type name for boolean params
@@ -73,18 +76,18 @@ public final class PathPattern implements RoutePath {
 
     private final String          pattern;
     private final Pattern         expression;
-    private final PathContainer   container;
+    private final List<Element>   elements;
     private final List<Parameter> parameters = new ArrayList<>();
 
     /**
-     * 🔧 Constructs a {@code PathPattern} by compiling the given view.
+     * 🔧 Constructs a {@code RegexpPathPattern} by compiling the given view.
      *
      * @param pattern route pattern, e.g., {@code /user/{id:\d+}/status/{status}}
      */
-    public PathPattern(String pattern) {
+    public RegexpPathPattern(String pattern) {
         this.pattern = pattern;
         this.expression = compile(pattern);
-        this.container = SimplePathContainer.parse(pattern);
+        this.elements = RoutePath.split(pattern);
     }
 
     @Override
@@ -147,7 +150,43 @@ public final class PathPattern implements RoutePath {
      */
     @Override
     public String extractPath(String path) {
-        return "";
+        // Normalize request into path-elements
+        List<Element> elements = RoutePath.split(path);
+
+        if (elements.isEmpty()) {
+            return "";
+        }
+
+        // Determine the first dynamic segment in the PATTERN
+        List<Element> patterns   = getElements();
+        int           nonLiteral = dynamicIndex(patterns);
+
+        // If no dynamic part, or path is shorter than the literal prefix — nothing to extract
+        if (nonLiteral < 0 || elements.size() <= nonLiteral) {
+            return "";
+        }
+
+        // Return the portion of the path starting from the first pattern-based segment
+        return RoutePath.joinElements(elements, nonLiteral);
+    }
+
+    /**
+     * Index of the first non-literal (pattern-based) segment in the PATTERN.
+     */
+    private static int dynamicIndex(List<Element> patternElements) {
+        int index = 0;
+
+        for (Element element : patternElements) {
+            String segment = element.value();
+
+            if ((segment.indexOf('{') >= 0 && segment.indexOf('}') > segment.indexOf('{'))) {
+                return index;
+            }
+
+            index++;
+        }
+
+        return -1;
     }
 
     /**
@@ -164,8 +203,8 @@ public final class PathPattern implements RoutePath {
         return match(path).variables();
     }
 
-    public PathContainer getContainer() {
-        return container;
+    public List<Element> getElements() {
+        return elements;
     }
 
     /**
@@ -208,7 +247,7 @@ public final class PathPattern implements RoutePath {
         if (object == null || getClass() != object.getClass())
             return false;
 
-        return Objects.equals(pattern, ((PathPattern) object).pattern);
+        return Objects.equals(pattern, ((RegexpPathPattern) object).pattern);
     }
 
     @Override

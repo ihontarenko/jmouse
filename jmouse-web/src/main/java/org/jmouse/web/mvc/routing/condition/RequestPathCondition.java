@@ -12,7 +12,7 @@ import org.jmouse.web.http.request.RequestRoute;
  *
  * <p><b>Example usage:</b></p>
  * <pre>{@code
- * PathPattern pattern = new PathPattern("/user/{id:\\d+}");
+ * RegexpPathPattern pattern = new RegexpPathPattern("/user/{id:\\d+}");
  * MappingMatcher matcher = new RequestPathCondition(pattern);
  *
  * boolean match = matcher.matches(requestRoute);

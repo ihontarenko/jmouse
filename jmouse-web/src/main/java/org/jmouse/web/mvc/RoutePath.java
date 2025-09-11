@@ -1,5 +1,6 @@
 package org.jmouse.web.mvc;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -70,6 +71,37 @@ public interface RoutePath {
     }
 
     /**
+     * 🧩 Split a raw path string into {@link org.jmouse.web.mvc.PathContainer.PathElement}s.
+     */
+    static List<PathContainer.Element> split(String path) {
+        return SimplePathContainer.parse(path).elements(PathContainer.PathElement.class);
+    }
+
+    /**
+     * 🔗 Join elements back into a string from a given offset.
+     */
+    static String joinElements(List<PathContainer.Element> elements, int offset) {
+        int           length  = elements.size();
+        StringBuilder builder = new StringBuilder();
+
+        if (offset >= length) {
+            return "";
+        }
+
+        for (int index = offset; index < length; index++) {
+            PathContainer.Element element = elements.get(index);
+
+            if (!builder.isEmpty()) {
+                builder.append('/');
+            }
+
+            builder.append(element.value());
+        }
+
+        return builder.toString();
+    }
+
+    /**
      * 📌 Supported kinds of route patterns.
      */
     enum Kind {
@@ -80,6 +112,10 @@ public interface RoutePath {
         /**
          * 📑 Template with placeholders.
          */
-        TEMPLATE
+        TEMPLATE,
+        /**
+         * 📑 Simple template with placeholders and wildcards.
+         */
+        COMBINED
     }
 }

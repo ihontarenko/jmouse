@@ -6,7 +6,7 @@ package org.jmouse.web.mvc;
  * <p>Chooses appropriate implementation based on path expression:</p>
  * <ul>
  *   <li>🟢 {@link AntPattern} — for ant-style wildcards (e.g. {@code /assets/**})</li>
- *   <li>🟢 {@link PathPattern} — for URI templates with variables (e.g. {@code /users/{id}})</li>
+ *   <li>🟢 {@link RegexpPathPattern} — for URI templates with variables (e.g. {@code /users/{id}})</li>
  * </ul>
  */
 public final class RoutePathFactory {
@@ -24,8 +24,10 @@ public final class RoutePathFactory {
     public static RoutePath createRoutePath(String path) {
         RoutePath routePath = new AntPattern(path);
 
-        if (path.contains("{") && path.contains("}")) {
-            routePath = new PathPattern(path);
+        if (path.contains("{*")) {
+            routePath = SimplePathPattern.parse(path);
+        } else if (path.contains("{") && path.contains("}")) {
+            routePath = new RegexpPathPattern(path);
         }
 
         return routePath;

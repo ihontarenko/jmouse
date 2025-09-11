@@ -1,7 +1,9 @@
 package org.jmouse.web.mvc;
 
 import org.jmouse.core.matcher.ant.AntMatcher;
+import org.jmouse.web.mvc.PathContainer.Element;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -75,11 +77,45 @@ public class AntPattern implements RoutePath {
 
     @Override
     public String extractPath(String path) {
-        return "";
+        List<Element> elements   = RoutePath.split(path);
+        int           nonLiteral = dynamicIndex(elements);
+
+        if (nonLiteral == -1 || nonLiteral == elements.size() - 1) {
+            return "";
+        }
+
+        return RoutePath.joinElements(elements, nonLiteral);
+    }
+
+    public static void main(String[] args) {
+        AntPattern antPattern = new AntPattern("/assets/**");
+
+        System.out.println(antPattern.extractPath("/assets/css/jmouse.css"));
     }
 
     public AntMatcher getAntMatcher() {
         return antMatcher;
+    }
+
+    /**
+     * Index of the first non-literal (pattern-based) segment in the PATTERN.
+     */
+    private static int dynamicIndex(List<Element> patternElements) {
+        int index = 0;
+
+        for (Element element : patternElements) {
+            String segment = element.value();
+
+            if (segment.contains(AntMatcher.ANY_MULTI_SEGMENT)
+                    || segment.contains(AntMatcher.ANY_CHARACTER)
+                    || segment.contains(AntMatcher.ANY_SINGLE_SEGMENT)) {
+                return index;
+            }
+
+            index++;
+        }
+
+        return -1;
     }
 
     @Override

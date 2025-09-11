@@ -50,10 +50,6 @@ public class SimplePathContainer implements PathContainer {
         this.elements = elements;
     }
 
-    public static void main(String[] args) {
-        SimplePathContainer.parse("/user/search/q;name=j;strategy=startsWith/");
-    }
-
     /**
      * 📥 Parse using default options ({@link Options#defaults()}).
      *
