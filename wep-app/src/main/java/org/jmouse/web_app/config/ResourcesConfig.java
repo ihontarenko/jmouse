@@ -4,6 +4,7 @@ import org.jmouse.beans.annotation.Bean;
 import org.jmouse.web.http.request.CacheControl;
 import org.jmouse.web.mvc.BeanConfigurer;
 import org.jmouse.web.mvc.resource.FixedVersionStrategy;
+import org.jmouse.web.mvc.resource.PathNormalizationResolver;
 import org.jmouse.web.mvc.resource.ResourceHandlerRegistry;
 import org.jmouse.web.mvc.resource.VersionalResourceResolver;
 
@@ -16,7 +17,7 @@ public class ResourcesConfig implements BeanConfigurer<ResourceHandlerRegistry> 
                 .addResourceLocations("classpath:static/", "file:/C:/Users/Ivan_Hontarenko/Git/")
                 .setCacheControl(CacheControl.empty().cachePublic())
                 .getChainRegistration()
-                .addResolvers(new VersionalResourceResolver().addStrategy(
+                .addResolvers(new PathNormalizationResolver(), new VersionalResourceResolver().addStrategy(
                         new FixedVersionStrategy("v1"), "/**"
                 ));
         registry.registerHandler("/static/**")

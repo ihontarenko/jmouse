@@ -1,15 +1,16 @@
-package org.jmouse.web.http;
+package org.jmouse.util;
 
-import java.net.URLDecoder;
+import org.jmouse.core.URIType;
+
 import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-final public class HttpNormalizer {
+final public class PathHelper {
 
     public static final Pattern P_CNTRL = Pattern.compile(".*\\p{Cntrl}+.*");
 
-    private HttpNormalizer() {}
+    private PathHelper() {}
 
     public static String normalize(String uri, boolean doubleDecode) {
         String normalized = uri;
@@ -26,12 +27,10 @@ final public class HttpNormalizer {
                 return null;
             }
 
+            // RFC-safe decode (never turns %2F into '/')
+            normalized = URIType.PATH.normalize(normalized, UTF_8);
             if (doubleDecode) {
-                normalized = URLDecoder.decode(normalized, UTF_8);
-                // if %XX present
-                if (normalized.contains("%")) {
-                    normalized = URLDecoder.decode(normalized, UTF_8);
-                }
+                normalized = URIType.PATH.normalize(normalized, UTF_8);
             }
 
             if (!normalized.startsWith("/")) {

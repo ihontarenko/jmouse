@@ -1,21 +1,23 @@
 package org.jmouse.web.mvc.mapping;
 
 import org.jmouse.core.MethodParameter;
+import org.jmouse.core.io.PatternMatcherResourceLoader;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.mvc.AbstractHandlerPathMapping;
 import org.jmouse.web.mvc.AntPattern;
 import org.jmouse.web.mvc.Route;
 import org.jmouse.web.mvc.RoutePath;
 import org.jmouse.web.mvc.resource.ResourceHandlerRegistry;
+import org.jmouse.web.mvc.resource.ResourceHttpHandler;
 import org.jmouse.web.mvc.resource.ResourceRegistration;
 
 /**
  * 🧷 Path mapping for serving static resources.
  *
  * <p>Registers HEAD/GET routes for ant-style URL patterns and keeps
- * associated {@link ResourceRegistration} handlers.</p>
+ * associated {@link ResourceHttpHandler} handlers.</p>
  */
-public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceRegistration> {
+public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceHttpHandler> {
 
     /**
      * ⚙️ Initialize mapping infrastructure and dependencies.
@@ -24,10 +26,14 @@ public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceRegi
      */
     @Override
     protected void doInitialize(WebBeanContext context) {
+        PatternMatcherResourceLoader loader = context.getBean(PatternMatcherResourceLoader.class);
+
         for (ResourceRegistration registration : context.getBean(ResourceHandlerRegistry.class).getRegistrations()) {
+            ResourceHttpHandler handler = new ResourceHttpHandler(registration, loader);
+
             for (String pattern : registration.getPatterns()) {
-                addHandlerMapping(Route.GET(pattern), registration);
-                addHandlerMapping(Route.HEAD(pattern), registration);
+                addHandlerMapping(Route.GET(pattern), handler);
+                addHandlerMapping(Route.HEAD(pattern), handler);
             }
         }
     }
@@ -40,7 +46,7 @@ public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceRegi
      */
     @Override
     public boolean supportsMappedHandler(Object mapped) {
-        return mapped instanceof ResourceRegistration;
+        return mapped instanceof ResourceHttpHandler;
     }
 
     /**
@@ -53,7 +59,8 @@ public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceRegi
      * @throws UnsupportedOperationException if not implemented yet
      */
     @Override
-    protected MethodParameter getReturnParameter(ResourceRegistration handler) {
+    protected MethodParameter getReturnParameter(ResourceHttpHandler handler) {
         return null;
     }
+
 }

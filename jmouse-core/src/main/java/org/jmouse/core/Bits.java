@@ -71,6 +71,53 @@ public final class Bits {
     }
 
     /**
+     * 🧮 Build a {@code Bits} covering a continuous range of bits.
+     * <p>
+     * Example: {@code ofRange(2, 5)} produces a mask covering
+     * bit positions 2, 3, 4, 5.
+     * </p>
+     *
+     * @param min lowest bit index (inclusive, 0-based)
+     * @param max highest bit index (inclusive, 0-based)
+     * @return new {@code Bits} containing all bits from {@code min} to {@code max}
+     * @throws IllegalArgumentException if {@code min > max} or indices are negative
+     */
+    public static Bits ofRange(int min, int max) {
+        if (min < 0 || max < 0) {
+            throw new IllegalArgumentException("Bit indices must be non-negative");
+        }
+        if (min > max) {
+            throw new IllegalArgumentException("min cannot be greater than max");
+        }
+
+        long mask = 0L;
+
+        for (int i = min; i <= max; i++) {
+            mask |= (1L << i);
+        }
+
+        return new Bits(mask);
+    }
+
+    /**
+     * Build a {@code Bits} from the OR of provided flag values.
+     *
+     * @param flags flag constants (each should be one-hot, e.g. {@code 1L << n})
+     * @return new {@code Bits} containing the union of {@code flags}
+     */
+    public static Bits of(long... flags) {
+        long mask = 0L;
+
+        if (flags != null) {
+            for (long flag : flags) {
+                mask |= flag;
+            }
+        }
+
+        return new Bits(mask);
+    }
+
+    /**
      * OR current mask with the given flag value.
      */
     public void add(Number value) {
@@ -110,12 +157,16 @@ public final class Bits {
         return this.mask == 0L;
     }
 
-    /** Reset mask to zero. */
+    /**
+     * Reset mask to zero.
+     */
     public void clear() {
         this.mask = 0L;
     }
 
-    /** @return number of set bits (population count). */
+    /**
+     * @return number of set bits (population count).
+     */
     public int count() {
         return Long.bitCount(this.mask);
     }
@@ -142,41 +193,30 @@ public final class Bits {
         return this;
     }
 
-    /** Bitwise AND with another {@code Bits}. Mutates this mask. */
+    /**
+     * Bitwise AND with another {@code Bits}. Mutates this mask.
+     */
     public void and(Bits other) {
         this.mask &= other.mask;
     }
 
-    /** Bitwise XOR with another {@code Bits}. Mutates this mask. */
+    /**
+     * Bitwise XOR with another {@code Bits}. Mutates this mask.
+     */
     public void xor(Bits other) {
         this.mask ^= other.mask;
     }
 
-    /** Bitwise NOT (invert all 64 bits). Mutates this mask. */
+    /**
+     * Bitwise NOT (invert all 64 bits). Mutates this mask.
+     */
     public void not() {
         this.mask = ~this.mask;
     }
 
-    /**
-     * Build a {@code Bits} from the OR of provided flag values.
-     *
-     * @param flags flag constants (each should be one-hot, e.g. {@code 1L << n})
-     * @return new {@code Bits} containing the union of {@code flags}
-     */
-    public static Bits of(long... flags) {
-        long m = 0L;
-
-        if (flags != null) {
-            for (long f : flags) m |= f;
-        }
-
-        return new Bits(m);
-    }
-
     @Override
     public boolean equals(Object object) {
-        if (!(object instanceof Bits bits))
-            return false;
+        if (!(object instanceof Bits bits)) return false;
 
         return mask == bits.mask;
     }
@@ -184,5 +224,10 @@ public final class Bits {
     @Override
     public int hashCode() {
         return Objects.hashCode(mask);
+    }
+
+    @Override
+    public String toString() {
+        return "Bits[%s]".formatted(Long.toBinaryString(mask));
     }
 }

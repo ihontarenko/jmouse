@@ -42,7 +42,7 @@ public class RequestHttpHandlerMapping extends AbstractHandlerPathMapping<Reques
     protected void doInitialize(WebBeanContext context) {
         for (RequestHttpHandlerRegistration registration : WebBeanContext.getLocalBeans(
                 RequestHttpHandlerRegistration.class, context)) {
-            addHandlerMapping(registration.route(), registration.controllerMethod());
+            addHandlerMapping(registration.route(), registration.handler());
         }
     }
 

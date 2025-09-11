@@ -4,13 +4,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.chain.Chain;
 import org.jmouse.core.chain.Outcome;
 import org.jmouse.core.io.Resource;
-import org.jmouse.web.http.HttpNormalizer;
+import org.jmouse.util.PathHelper;
 
 /**
  * 🧹 Resource resolver that normalizes incoming request paths.
  *
  * <ul>
- *   <li>Normalizes path using {@link HttpNormalizer}</li>
+ *   <li>Normalizes path using {@link PathHelper}</li>
  *   <li>Replaces underscores ({@code _}) with slashes ({@code /})</li>
  *   <li>Blocks suspicious paths containing {@code ..}</li>
  *   <li>Delegates with updated {@link ResourceQuery} if normalization changed the path</li>
@@ -38,7 +38,7 @@ public class PathNormalizationResolver extends AbstractResourceResolver {
             Chain<HttpServletRequest, ResourceQuery, Resource> next) {
 
         String requestPath = resourceQuery.path();
-        String path        = HttpNormalizer.normalize(requestPath, false);
+        String path        = PathHelper.normalize(requestPath, false);
 
         if (path != null) {
             path = path.replace('_', '/');

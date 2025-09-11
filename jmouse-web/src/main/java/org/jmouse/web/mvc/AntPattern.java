@@ -73,6 +73,11 @@ public class AntPattern implements RoutePath {
         return Kind.ANT;
     }
 
+    @Override
+    public String extractPath(String path) {
+        return "";
+    }
+
     public AntMatcher getAntMatcher() {
         return antMatcher;
     }

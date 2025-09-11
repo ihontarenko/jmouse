@@ -31,32 +31,49 @@ import java.util.regex.Pattern;
  */
 public final class PathPattern implements RoutePath {
 
-    /** 🔠 Type name for boolean params */
+    /**
+     * 🔠 Type name for boolean params
+     */
     public static final String BOOLEAN_NAME = "boolean";
 
-    /** 🔠 Type name for boolean params (alias) */
+    /**
+     * 🔠 Type name for boolean params (alias)
+     */
     public static final String BOOL_NAME = "bool";
 
-    /** 🔢 Type name for integer params */
+    /**
+     * 🔢 Type name for integer params
+     */
     public static final String INT_NAME = "int";
 
-    /** 🔁 Placeholder replacer: `{name:pattern}` */
+    /**
+     * 🔁 Placeholder replacer: `{name:pattern}`
+     */
     public static final PlaceholderReplacer REPLACER = new StandardPlaceholderReplacer("{", "}", ":");
 
-    /** 📦 Default pattern for untyped params */
+    /**
+     * 📦 Default pattern for untyped params
+     */
     public static final String MATCH_ALL = "[^/]+";
 
-    /** ✅ Pattern for boolean values */
+    /**
+     * ✅ Pattern for boolean values
+     */
     public static final String MATCH_BOOLEAN = "true|false";
 
-    /** 🔢 Pattern for integers */
+    /**
+     * 🔢 Pattern for integers
+     */
     public static final String MATCH_INT = "\\d+";
 
-    /** 🔢 Type name for custom regexp */
+    /**
+     * 🔢 Type name for custom regexp
+     */
     public static final String CUSTOM_NAME = "custom";
 
     private final String          pattern;
     private final Pattern         expression;
+    private final PathContainer   container;
     private final List<Parameter> parameters = new ArrayList<>();
 
     /**
@@ -67,6 +84,7 @@ public final class PathPattern implements RoutePath {
     public PathPattern(String pattern) {
         this.pattern = pattern;
         this.expression = compile(pattern);
+        this.container = SimplePathContainer.parse(pattern);
     }
 
     @Override
@@ -116,6 +134,38 @@ public final class PathPattern implements RoutePath {
     @Override
     public boolean matches(String input) {
         return expression.matcher(input).matches();
+    }
+
+    /**
+     * ✂️ Extract the static or simplified path representation.
+     *
+     * <p>The exact behavior depends on the {@link RoutePath} implementation
+     * (e.g. stripping wildcards, normalizing templates).</p>
+     *
+     * @param path request path
+     * @return simplified or extracted path
+     */
+    @Override
+    public String extractPath(String path) {
+        return "";
+    }
+
+    /**
+     * 🔑 Extract template variables from the given path.
+     *
+     * <p>Default implementation returns an empty map. Implementations
+     * may override to provide actual variable extraction.</p>
+     *
+     * @param path request path
+     * @return map of variable names to values (never {@code null})
+     */
+    @Override
+    public Map<String, Object> extractVariables(String path) {
+        return match(path).variables();
+    }
+
+    public PathContainer getContainer() {
+        return container;
     }
 
     /**
