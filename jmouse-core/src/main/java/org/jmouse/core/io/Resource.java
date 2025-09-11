@@ -37,8 +37,32 @@ public interface Resource extends ReadableResource {
 
     /**
      * 🏷️ Get the name of this resource (filename or identifier).
+     *
+     * <p>Implementations may return a logical identifier (e.g. {@code "BYTE_ARRAY"},
+     * {@code "INPUT_STREAM"}) or the actual filename depending on resource type.</p>
+     *
+     * @return display name of the resource (never {@code null})
      */
     String getName();
+
+    /**
+     * 📄 Convenience method to return the underlying file's name.
+     *
+     * <p>If this resource is file-based, returns {@link java.io.File#getName()}.
+     * Otherwise returns {@code null}.</p>
+     *
+     * @return filename if file-based, otherwise {@code null}
+     */
+    default String getFilename() {
+        String filename = null;
+
+        try {
+            filename = getFile().getName();
+        } catch (IOException ignore) { }
+
+        return filename;
+    }
+
 
     /**
      * ✅ Check if the resource exists.
@@ -81,7 +105,24 @@ public interface Resource extends ReadableResource {
     /**
      * 📏 Get the size of the resource in bytes.
      */
-    long getSize();
+    default long getSize() {
+        long size = 0;
+
+        try {
+            try (InputStream stream = getInputStream()) {
+                byte[] buffer = new byte[256];
+                int    read;
+
+                while ((read = stream.read(buffer)) != -1) {
+                    size += read;
+                }
+
+                return size;
+            }
+        } catch (IOException ignore) { }
+
+        return size;
+    }
 
     /**
      * 🔗 Get the {@link URI} of this resource.

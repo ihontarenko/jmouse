@@ -85,8 +85,8 @@ public interface Chain<C, I, R> {
      */
     final class Builder<C, I, R> {
 
-        private final List<Link<C, I, R>> links = new ArrayList<>();
-        private BiFunction<C, I, R> fallback = (c, i) -> null;
+        private final List<Link<C, I, R>> links    = new ArrayList<>();
+        private       BiFunction<C, I, R> fallback = (c, i) -> null;
 
         /**
          * ➕ Add a link to the chain.

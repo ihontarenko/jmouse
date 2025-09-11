@@ -3,6 +3,7 @@ package org.jmouse.web.mvc;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.core.MediaType;
+import org.jmouse.core.MediaTypeFactory;
 import org.jmouse.web.mvc.resource.ResourceHandlerRegistry;
 import org.jmouse.web.negotiation.FallbackMediaTypeLookup;
 import org.jmouse.web.negotiation.MediaTypeManager;
@@ -51,11 +52,27 @@ public class WebMvcComponents {
 
     /**
      * 📑 Manager for request/response media type negotiation.
+     *
+     * <p>Combines {@link org.jmouse.web.negotiation.MediaTypeLookup}
+     * strategies (e.g. {@code Accept} header, fallback) to determine
+     * the most appropriate {@link org.jmouse.core.MediaType}.</p>
      */
     @Bean
     public MediaTypeManager mediaTypeManager() {
         return new MediaTypeManager();
     }
+
+    /**
+     * 🏭 Factory for resolving {@link org.jmouse.core.MediaType} by file extension.
+     *
+     * <p>Loads mappings from {@code mime.types} and provides quick lookup
+     * for resource-based type resolution (e.g. {@code .png → image/png}).</p>
+     */
+    @Bean
+    public MediaTypeFactory mediaTypeFactory() {
+        return new MediaTypeFactory();
+    }
+
 
     /**
      * 🪶 Configures the {@link FallbackMediaTypeLookup}.

@@ -48,6 +48,10 @@ public class PathNormalizationResolver extends AbstractResourceResolver {
             return Outcome.done(null);
         }
 
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+
         if (!path.equals(requestPath)) {
             return next.proceed(context, new ResourceQuery(path, resourceQuery.locations()));
         }

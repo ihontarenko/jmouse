@@ -81,7 +81,7 @@ public class AntPattern implements RoutePath {
         List<Element> patterns   = RoutePath.split(this.path);
         int           nonLiteral = dynamicIndex(patterns);
 
-        if (nonLiteral == -1 || nonLiteral == elements.size() - 1) {
+        if (nonLiteral == -1 || nonLiteral > elements.size() - 1) {
             return "";
         }
 

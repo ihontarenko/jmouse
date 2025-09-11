@@ -130,6 +130,33 @@ public class ResourceRegistration {
         return this;
     }
 
+    /**
+     * 📆 Return configured cache period in seconds (if any).
+     *
+     * @return cache period, or {@code null} if not set
+     */
+    public Integer getCachePeriod() {
+        return cachePeriod;
+    }
+
+    /**
+     * 📋 Return configured {@link CacheControl} directives (if any).
+     *
+     * @return cache control, or {@code null} if not set
+     */
+    public CacheControl getCacheControl() {
+        return cacheControl;
+    }
+
+    /**
+     * ⏱️ Whether {@code Last-Modified} header support is enabled.
+     *
+     * @return {@code true} if enabled
+     */
+    public boolean isUseLastModified() {
+        return useLastModified;
+    }
+
     @Override
     public String toString() {
         return "RESOURCE_REGISTRATION %s: %s".formatted(patterns, locations);

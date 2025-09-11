@@ -33,10 +33,6 @@ final public class PathHelper {
                 normalized = URIType.PATH.normalize(normalized, UTF_8);
             }
 
-            if (!normalized.startsWith("/")) {
-                normalized = "/" + normalized;
-            }
-
             normalized = normalized.replace("/./", "/");
 
             return normalized;

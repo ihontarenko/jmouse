@@ -101,11 +101,10 @@ public final class Headers {
             return number.longValue();
         }
 
-        if (value instanceof String str) {
+        if (value instanceof String string) {
             try {
-                return Long.parseLong(str);
-            } catch (NumberFormatException ignored) {
-            }
+                return Long.parseLong(string);
+            } catch (NumberFormatException ignored) {}
         }
 
         return -1L;
@@ -117,6 +116,49 @@ public final class Headers {
     public void setContentLength(long length) {
         setHeader(HttpHeader.CONTENT_LENGTH, length);
     }
+
+    /**
+     * 📎 Set the {@code Content-Disposition} header as raw string.
+     *
+     * <p>Example: {@code "inline"}, {@code "attachment; filename=\"file.txt\""}.</p>
+     *
+     * @param disposition disposition header value
+     */
+    public void setContentDisposition(String disposition) {
+        setHeader(HttpHeader.CONTENT_DISPOSITION, disposition);
+    }
+
+    /**
+     * 📎 Set the {@code Content-Disposition} header from a typed object.
+     *
+     * @param disposition typed {@link ContentDisposition}
+     */
+    public void setContentDisposition(ContentDisposition disposition) {
+        setContentDisposition(disposition.toString());
+    }
+
+    /**
+     * 📎 Get the {@code Content-Disposition} header as a typed object.
+     *
+     * <p>If stored as a {@link String}, it will be parsed and replaced with a
+     * cached {@link ContentDisposition} instance.</p>
+     *
+     * @return parsed {@link ContentDisposition} or {@code null} if not present
+     */
+    public ContentDisposition getContentDisposition() {
+        Object value = headers.get(HttpHeader.CONTENT_DISPOSITION);
+        ContentDisposition disposition = null;
+
+        if (value instanceof ContentDisposition) {
+            disposition = (ContentDisposition) value;
+        } else if (value instanceof String string) {
+            disposition = ContentDisposition.parse(string);
+            setContentDisposition(disposition);
+        }
+
+        return disposition;
+    }
+
 
     /**
      * 🎯 Typed getter for Accept header.

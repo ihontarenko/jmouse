@@ -1,5 +1,6 @@
 package org.jmouse.web.mvc.mapping;
 
+import org.jmouse.core.MediaTypeFactory;
 import org.jmouse.core.MethodParameter;
 import org.jmouse.core.io.PatternMatcherResourceLoader;
 import org.jmouse.web.context.WebBeanContext;
@@ -26,11 +27,11 @@ public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceHttp
      */
     @Override
     protected void doInitialize(WebBeanContext context) {
-        PatternMatcherResourceLoader loader = context.getBean(PatternMatcherResourceLoader.class);
+        PatternMatcherResourceLoader loader  = context.getBean(PatternMatcherResourceLoader.class);
+        MediaTypeFactory             factory = context.getBean(MediaTypeFactory.class);
 
         for (ResourceRegistration registration : context.getBean(ResourceHandlerRegistry.class).getRegistrations()) {
-            ResourceHttpHandler handler = new ResourceHttpHandler(registration, loader);
-
+            ResourceHttpHandler handler = new ResourceHttpHandler(registration, loader, factory);
             for (String pattern : registration.getPatterns()) {
                 addHandlerMapping(Route.GET(pattern), handler);
                 addHandlerMapping(Route.HEAD(pattern), handler);
