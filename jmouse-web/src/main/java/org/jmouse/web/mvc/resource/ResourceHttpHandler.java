@@ -9,6 +9,7 @@ import org.jmouse.core.io.PatternMatcherResourceLoader;
 import org.jmouse.core.io.Resource;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.request.CacheControl;
+import org.jmouse.web.http.request.Headers;
 import org.jmouse.web.mvc.*;
 import org.jmouse.web.mvc.adapter.RequestHttpHandler;
 import org.jmouse.web.mvc.method.converter.*;
@@ -17,13 +18,50 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 🗂️ HTTP handler for serving static {@link Resource}s.
+ *
+ * <p>Resolution pipeline:</p>
+ * <ol>
+ *   <li>Build a {@link ResourceResolverChain} from the registration</li>
+ *   <li>Create a {@link ResourceQuery} (extracted path + locations)</li>
+ *   <li>Resolve a {@link Resource} via the chain</li>
+ *   <li>Write HTTP headers and stream the resource via a matching {@link HttpMessageConverter}</li>
+ * </ol>
+ *
+ * <p>Caching:</p>
+ * <ul>
+ *   <li>Supports both fixed {@code cachePeriod} and custom {@link CacheControl}</li>
+ *   <li>Adds {@code Accept-Ranges: bytes} and {@code Content-Length}</li>
+ * </ul>
+ */
 public class ResourceHttpHandler implements RequestHttpHandler {
 
+    /**
+     * 📋 Registration containing patterns, locations, chain and cache settings.
+     */
     private final ResourceRegistration         registration;
+    /**
+     * 🔎 Loader to resolve location strings into {@link Resource}s (classpath/file, etc.).
+     */
     private final PatternMatcherResourceLoader resourceLoader;
+    /**
+     * 🔁 Finds an {@link HttpMessageConverter} that can write the resolved resource.
+     */
     private final MessageConverterManager      messageConverterManager;
+    /**
+     * 🏭 Determines response {@link MediaType} based on resource name/extension.
+     */
     private final MediaTypeFactory             mediaTypeFactory;
 
+    /**
+     * 🏗️ Create a new resource HTTP handler.
+     *
+     * @param registration            resource handler registration
+     * @param resourceLoader          loader for resolving base locations
+     * @param messageConverterManager manager for HTTP message converters
+     * @param mediaTypeFactory        factory for media type lookups
+     */
     public ResourceHttpHandler(
             ResourceRegistration registration,
             PatternMatcherResourceLoader resourceLoader,
@@ -37,11 +75,26 @@ public class ResourceHttpHandler implements RequestHttpHandler {
     }
 
     /**
-     * Handles the incoming request and writes the response.
+     * 📂 Get the associated {@link ResourceRegistration}.
+     *
+     * <p>Provides access to handler-specific configuration such as
+     * resource locations, cache settings, and URL patterns.</p>
+     *
+     * @return the resource handler registration metadata
+     */
+    public ResourceRegistration getRegistration() {
+        return registration;
+    }
+
+    /**
+     * 🚚 Handle the incoming request and write the static resource response.
+     *
+     * <p>Resolves a resource from configured locations via the resolver chain.
+     * If found and readable, writes headers and streams the content.</p>
      *
      * @param request  current HTTP request
      * @param response current HTTP response
-     * @throws IOException in case of I/O errors
+     * @throws IOException in case of I/O errors while writing the response
      */
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -50,14 +103,25 @@ public class ResourceHttpHandler implements RequestHttpHandler {
         Resource              resource = chain.resolve(request, query);
 
         if (resource != null && resource.isReadable()) {
-            writeHeaders(response, resource);
-            writeMessage(response, resource);
+            HttpOutputMessage httpMessage = new WebHttpServletResponse(response);
+            writeHeaders(httpMessage, resource);
+            writeMessage(httpMessage, resource);
         }
     }
 
-    private void writeMessage(HttpServletResponse response, Resource resource) {
-        HttpOutputMessage              httpMessage      = new WebHttpServletResponse(response);
-        HttpMessageConverter<Resource> messageConverter = messageConverterManager.getMessageConverter(resource, null);
+    /**
+     * 📤 Write the resolved {@link Resource} body using a suitable converter.
+     *
+     * <p>Chooses a {@link HttpMessageConverter} via {@link MessageConverterManager}
+     * and delegates the actual streaming. Errors during write are wrapped into
+     * {@link UnwritableException}.</p>
+     *
+     * @param httpMessage HTTP output message
+     * @param resource resolved resource to write
+     */
+    private void writeMessage(HttpOutputMessage httpMessage, Resource resource) {
+        HttpMessageConverter<Resource> messageConverter = messageConverterManager
+                .getMessageConverter(resource, null);
 
         if (messageConverter != null) {
             try {
@@ -68,17 +132,32 @@ public class ResourceHttpHandler implements RequestHttpHandler {
         }
     }
 
-    private void writeHeaders(HttpServletResponse response, Resource resource) {
+    /**
+     * 🧾 Compute and set HTTP headers for the response.
+     *
+     * <ul>
+     *   <li>Sets {@code Content-Type} from {@link MediaTypeFactory}</li>
+     *   <li>Copies headers from {@link HttpResource}, if applicable</li>
+     *   <li>Sets {@code Accept-Ranges: bytes}</li>
+     *   <li>Applies {@link CacheControl} or {@code cachePeriod} (also sets {@code Expires})</li>
+     *   <li>Sets {@code Content-Length} from resource size</li>
+     * </ul>
+     *
+     * @param httpMessage HTTP output message
+     * @param resource resolved resource
+     */
+    private void writeHeaders(HttpOutputMessage httpMessage, Resource resource) {
+        Headers   headers   = httpMessage.getHeaders();
         MediaType mediaType = mediaTypeFactory.getMediaType(resource.getName());
 
-        response.setContentType(mediaType.toString());
+        headers.setContentType(mediaType);
 
         if (resource instanceof HttpResource httpResource) {
             httpResource.getHeaders().asMap().forEach(
-                    (httpHeader, value) -> response.setHeader(httpHeader.value(), String.valueOf(value)));
+                    (httpHeader, value) -> headers.setHeader(httpHeader, String.valueOf(value)));
         }
 
-        response.setHeader(HttpHeader.ACCEPT_RANGES.value(), "bytes");
+        headers.setHeader(HttpHeader.ACCEPT_RANGES, "bytes");
 
         CacheControl cacheControl = registration.getCacheControl();
         Integer      seconds      = registration.getCachePeriod();
@@ -86,16 +165,25 @@ public class ResourceHttpHandler implements RequestHttpHandler {
         if (seconds != null) {
             cacheControl = CacheControl.empty()
                     .maxAge(registration.getCachePeriod(), TimeUnit.SECONDS).mustRevalidate();
-            response.setDateHeader(HttpHeader.EXPIRES.value(), System.currentTimeMillis() + seconds * 1000L);
+            headers.setHeader(HttpHeader.EXPIRES, System.currentTimeMillis() + seconds * 1000L);
         }
 
         if (cacheControl != null) {
-            response.setHeader(HttpHeader.CACHE_CONTROL.value(), cacheControl.toHeaderValue());
+            headers.setHeader(HttpHeader.CACHE_CONTROL, cacheControl.toHeaderValue());
         }
 
-        response.setHeader(HttpHeader.CONTENT_LENGTH.value(), String.valueOf(resource.getSize()));
+        headers.setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(resource.getSize()));
     }
 
+    /**
+     * 🗺️ Extract the resource path from the current route match.
+     *
+     * <p>Uses {@link HandlerMapping#ROUTE_MATCH_ATTRIBUTE} to obtain the portion
+     * of the request path that should be resolved against configured locations.</p>
+     *
+     * @param request current request
+     * @return extracted resource path or empty string if not available
+     */
     private String getResourcePath(HttpServletRequest request) {
         String resourcePath = "";
 
@@ -106,7 +194,13 @@ public class ResourceHttpHandler implements RequestHttpHandler {
         return resourcePath;
     }
 
-    private List<Resource> getResourceLocations(List<String> locations) {
+    /**
+     * 📍 Convert registration locations into concrete {@link Resource} bases.
+     *
+     * @param locations list of location strings (classpath/file/etc.)
+     * @return resolved resource bases (may be empty)
+     */
+    public List<Resource> getResourceLocations(List<String> locations) {
         List<Resource> resources = List.of();
 
         if (locations != null && !locations.isEmpty()) {
@@ -116,12 +210,35 @@ public class ResourceHttpHandler implements RequestHttpHandler {
         return resources;
     }
 
-    private ResourceResolverChain getResolverChain(List<ResourceResolver> resolvers) {
-        return new SimpleResourceResolverChain(registration.getChainRegistration().getResolvers());
+    /**
+     * ⛓️ Build a {@link ResourceResolverChain} from registered resolvers.
+     *
+     * @param resolvers configured resolvers in order
+     * @return chain to use for resolution
+     */
+    public ResourceResolverChain getResolverChain(List<ResourceResolver> resolvers) {
+        return new SimpleResourceResolverChain(resolvers);
     }
 
-    private ResourceQuery getResourceQuery(HttpServletRequest request, List<String> locations) {
-        return new ResourceQuery(getResourcePath(request), getResourceLocations(locations));
+    /**
+     * 📨 Create a {@link ResourceQuery} for the current request.
+     *
+     * @param relativePath current relative path
+     * @param locations configured base locations
+     * @return query holding extracted path and resolved base resources
+     */
+    public ResourceQuery getResourceQuery(String relativePath, List<String> locations) {
+        return new ResourceQuery(relativePath, getResourceLocations(locations));
     }
 
+    /**
+     * 📨 Create a {@link ResourceQuery} for the current request.
+     *
+     * @param request   current request
+     * @param locations configured base locations
+     * @return query holding extracted path and resolved base resources
+     */
+    public ResourceQuery getResourceQuery(HttpServletRequest request, List<String> locations) {
+        return getResourceQuery(getResourcePath(request), locations);
+    }
 }

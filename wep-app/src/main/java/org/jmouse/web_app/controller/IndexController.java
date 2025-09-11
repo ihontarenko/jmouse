@@ -1,13 +1,22 @@
 package org.jmouse.web_app.controller;
 
+import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.web.mvc.HandlerMappingException;
 import org.jmouse.web.mvc.Model;
 import org.jmouse.web.annotation.*;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpMethod;
+import org.jmouse.web.mvc.resource.ResourceUrlResolver;
 
 @Controller
 public class IndexController {
+
+    private ResourceUrlResolver resourceUrlResolver;
+
+    @BeanConstructor
+    public IndexController(ResourceUrlResolver resourceUrlResolver) {
+        this.resourceUrlResolver = resourceUrlResolver;
+    }
 
     @Mapping(path = "/users/{id}", httpMethod = HttpMethod.GET)
     public String index() {
@@ -38,7 +47,7 @@ public class IndexController {
 
     @GetMapping(requestPath = "/welcome/{id}", produces = {"text/plain"})
     public String hello() {
-        return getClass().getSimpleName();
+        return resourceUrlResolver.lookupResourceUrl("/assets/css/jmouse.css");
     }
 
     @ExceptionHandler(HandlerMappingException.class)

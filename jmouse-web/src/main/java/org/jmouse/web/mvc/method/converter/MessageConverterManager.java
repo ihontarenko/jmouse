@@ -48,7 +48,8 @@ public class MessageConverterManager implements InitializingBean {
         HttpMessageConverter<T> messageConverter = null;
 
         for (HttpMessageConverter<?> converter : converters) {
-            if (converter.isWritable(value.getClass(), MediaType.forString(contentType))) {
+            Class<?> valueType = value != null ? value.getClass() : null;
+            if (converter.isWritable(valueType, MediaType.forString(contentType))) {
                 messageConverter = (HttpMessageConverter<T>) converter;
                 break;
             }

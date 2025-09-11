@@ -5,6 +5,7 @@ import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.core.MediaType;
 import org.jmouse.core.MediaTypeFactory;
 import org.jmouse.web.mvc.resource.ResourceHandlerRegistry;
+import org.jmouse.web.mvc.resource.ResourceUrlResolver;
 import org.jmouse.web.negotiation.FallbackMediaTypeLookup;
 import org.jmouse.web.negotiation.MediaTypeManager;
 
@@ -35,7 +36,22 @@ import static org.jmouse.core.Charset.UTF_8;
 public class WebMvcComponents {
 
     /**
+     * 🔗 Resolver that rewrites resource URLs (e.g. appending versioning).
+     *
+     * @return a new {@link ResourceUrlResolver} bean
+     */
+    @Bean
+    public ResourceUrlResolver resourceUrlResolver() {
+        return new ResourceUrlResolver();
+    }
+
+    /**
      * 📂 Registry of static resource handlers.
+     *
+     * <p>Allows mapping URL paths (e.g. {@code /static/**})
+     * to physical locations (classpath or filesystem).</p>
+     *
+     * @return {@link ResourceHandlerRegistry} bean
      */
     @Bean
     public ResourceHandlerRegistry resourceHandlerConfiguration() {
@@ -44,6 +60,11 @@ public class WebMvcComponents {
 
     /**
      * 🛡️ Registry of handler interceptors.
+     *
+     * <p>Stores MVC interceptors that can apply cross-cutting
+     * behavior (e.g. logging, auth, metrics) around handler execution.</p>
+     *
+     * @return {@link HandlerInterceptorRegistry} bean
      */
     @Bean
     public HandlerInterceptorRegistry handlerInterceptorRegistry() {
@@ -55,7 +76,9 @@ public class WebMvcComponents {
      *
      * <p>Combines {@link org.jmouse.web.negotiation.MediaTypeLookup}
      * strategies (e.g. {@code Accept} header, fallback) to determine
-     * the most appropriate {@link org.jmouse.core.MediaType}.</p>
+     * the most appropriate {@link MediaType}.</p>
+     *
+     * @return {@link MediaTypeManager} bean
      */
     @Bean
     public MediaTypeManager mediaTypeManager() {
@@ -63,31 +86,36 @@ public class WebMvcComponents {
     }
 
     /**
-     * 🏭 Factory for resolving {@link org.jmouse.core.MediaType} by file extension.
+     * 🏭 Factory for resolving {@link MediaType} by file extension.
      *
      * <p>Loads mappings from {@code mime.types} and provides quick lookup
      * for resource-based type resolution (e.g. {@code .png → image/png}).</p>
+     *
+     * @return {@link MediaTypeFactory} bean
      */
     @Bean
     public MediaTypeFactory mediaTypeFactory() {
         return new MediaTypeFactory();
     }
 
-
     /**
      * 🪶 Configures the {@link FallbackMediaTypeLookup}.
      *
-     * <p>Sets a default fallback media type
-     * {@code application/xml; charset=UTF-8; debug=fallback}.</p>
+     * <p>Provides a default fallback media type
+     * {@code application/xml; charset=UTF-8; x-debug=fallback}.</p>
      */
     @Bean
     public static class ConfigureFallbackLookup implements BeanConfigurer<FallbackMediaTypeLookup> {
 
-        /**
-         * 🔧 Debug parameter used in fallback media type.
-         */
+        /** 🔧 Debug parameter used in fallback media type. */
         public static final String DEBUG_PARAMETER_VALUE = "fallback";
 
+        /**
+         * ⚙️ Customize the given {@link FallbackMediaTypeLookup}
+         * with a predefined {@link MediaType}.
+         *
+         * @param fallback the fallback lookup to configure
+         */
         @Override
         public void configure(FallbackMediaTypeLookup fallback) {
             Map<String, String> parameters = Map.of(
@@ -97,5 +125,4 @@ public class WebMvcComponents {
             fallback.setFallback(new MediaType("application", "xml", parameters));
         }
     }
-    
 }
