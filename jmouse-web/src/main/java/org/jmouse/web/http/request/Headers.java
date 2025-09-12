@@ -111,11 +111,57 @@ public final class Headers {
     }
 
     /**
-     * 📏 Sets Content-Length header.
+     * 📏 Set the {@code Content-Length} header.
+     *
+     * @param length length of the response body in bytes
      */
     public void setContentLength(long length) {
         setHeader(HttpHeader.CONTENT_LENGTH, length);
     }
+
+    /**
+     * 📐 Set the {@code Range} header using a list of {@link Range} objects.
+     *
+     * @param range list of byte ranges
+     */
+    public void setRange(List<Range> range) {
+        setHeader(HttpHeader.RANGE, range);
+    }
+
+    /**
+     * 📐 Set the {@code Range} header using a raw header string.
+     *
+     * <p>Example: {@code "bytes=0-499,1000-1499"}</p>
+     *
+     * @param range raw header string
+     */
+    public void setRange(String range) {
+        setRange(Range.parseRanges(range));
+    }
+
+    /**
+     * 📥 Get the parsed {@code Range} header.
+     *
+     * <p>If the header is stored as a {@link String}, it will be parsed
+     * and cached as a {@code List<Range>}.</p>
+     *
+     * @return list of {@link Range} objects, never {@code null}
+     */
+    @SuppressWarnings("unchecked")
+    public List<Range> getRange() {
+        Object      value  = headers.get(HttpHeader.RANGE);
+        List<Range> ranges = List.of();
+
+        if (value instanceof List) {
+            ranges = (List<Range>) value;
+        } else if (value instanceof String string) {
+            ranges = Range.parseRanges(string);
+            setRange(ranges);
+        }
+
+        return ranges;
+    }
+
 
     /**
      * 📎 Set the {@code Content-Disposition} header as raw string.

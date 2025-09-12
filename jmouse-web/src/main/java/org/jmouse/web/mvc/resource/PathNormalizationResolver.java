@@ -64,10 +64,7 @@ public class PathNormalizationResolver extends AbstractResourceResolver {
         @Override
         public Outcome<String> handle(
                 String relativePath, UrlComposerContext context, Chain<String, UrlComposerContext, String> next) {
-
             String newPath = PathHelper.normalize(relativePath, false);
-
-            newPath = newPath.replace('/', '_');
 
             return next.proceed(newPath, context);
         }
