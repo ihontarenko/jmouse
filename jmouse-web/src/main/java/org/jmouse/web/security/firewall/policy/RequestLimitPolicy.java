@@ -1,6 +1,7 @@
 package org.jmouse.web.security.firewall.policy;
 
 import org.jmouse.core.net.CIDR;
+import org.jmouse.web.http.HttpStatus;
 import org.jmouse.web.http.request.WebRequest;
 import org.jmouse.web.security.TokenBucket;
 import org.jmouse.web.security.firewall.Decision;
@@ -100,7 +101,7 @@ public final class RequestLimitPolicy implements FirewallPolicy {
             );
 
             if (!tokenBucket.tryAcquire()) {
-                return Decision.challenge(429, "TOO MANY REQUESTS");
+                return Decision.challenge(HttpStatus.TOO_MANY_REQUESTS, "TOO MANY REQUESTS");
             }
         }
 

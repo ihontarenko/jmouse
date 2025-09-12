@@ -2,12 +2,10 @@ package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.context.BeanConditionIfProperty;
-import org.jmouse.web.annotation.Controller;
-import org.jmouse.web.annotation.ExceptionHandler;
-import org.jmouse.web.annotation.RequestHeader;
-import org.jmouse.web.annotation.RequestMethod;
+import org.jmouse.web.annotation.*;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpMethod;
+import org.jmouse.web.http.HttpStatus;
 import org.jmouse.web.http.request.QueryParameters;
 import org.jmouse.web.http.request.RequestAttributesHolder;
 import org.jmouse.web.http.request.RequestPath;
@@ -44,19 +42,27 @@ public class FrameworkController {
      * @param model     MVC model to populate with error details
      * @return logical view name for error rendering
      */
-    @ExceptionHandler(HandlerMappingException.class)
+    @ExceptionHandler({
+            HandlerMappingException.class,
+            HandlerAdapterException.class
+    })
     public String exceptionHandler(
             @RequestHeader(HttpHeader.USER_AGENT) String userAgent,
+            @StatusCode HttpStatus status,
             @RequestMethod HttpMethod method,
             HttpServletResponse response,
             Exception exception,
             Model model
     ) {
+        response.setStatus(HttpStatus.NOT_FOUND.getCode());
+
         RequestPath     requestPath     = RequestAttributesHolder.getRequestPath();
         QueryParameters queryParameters = RequestAttributesHolder.getQueryParameters();
+        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
 
         model.addAttribute("userAgent", userAgent);
-        model.addAttribute("statusCode", response.getStatus());
+        model.addAttribute("httpStatus", httpStatus);
+        model.addAttribute("statusCode", httpStatus.getCode());
         model.addAttribute("requestMethod", method);
         model.addAttribute("requestPath", requestPath.path());
         model.addAttribute("queryString", queryParameters.toString());

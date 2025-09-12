@@ -411,7 +411,11 @@ public class RendererVisitor implements NodeVisitor {
         } else {
             // Evaluate the function node and convert the result to a String.
             Object evaluated = node.evaluate(context);
-            content.append(conversion.convert(evaluated, String.class));
+
+            if (evaluated != null) {
+                content.append(conversion.convert(evaluated, String.class));
+            }
+
             LOGGER.info("{} '{}' evaluated", context.getValue(node.getName()) != null ? "Lambda" : "Function", name);
         }
     }

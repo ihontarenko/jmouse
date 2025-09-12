@@ -47,14 +47,7 @@ public class IndexController {
 
     @GetMapping(requestPath = "/welcome/{id}", produces = {"text/plain"})
     public String hello() {
-        return resourceUrlResolver.lookupResourceUrl("/assets/html/index.html");
-    }
-
-    @ExceptionHandler(HandlerMappingException.class)
-    public String exceptionHandler(Model model, Exception e) {
-        model.addAttribute("message", e.getMessage());
-        model.addAttribute("stackTrace", e.getStackTrace());
-        return "view:jmouse/error";
+        return resourceUrlResolver.lookupResourceUrl("/icon/favicon.ico");
     }
 
 }

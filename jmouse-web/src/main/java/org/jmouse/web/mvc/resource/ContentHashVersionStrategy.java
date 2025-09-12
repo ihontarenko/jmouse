@@ -1,9 +1,7 @@
 package org.jmouse.web.mvc.resource;
 
-import org.jmouse.core.io.Resource;
 import org.jmouse.web.http.request.PathQuery;
 
-import java.io.InputStream;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,7 +21,7 @@ import static org.jmouse.util.StringHelper.*;
  * <p>Supports extracting, inserting, removing, validating, and generating
  * hash-based versions for static resources.</p>
  */
-public final class ContentHashVersionStrategy implements VersionStrategy {
+public final class ContentHashVersionStrategy extends AbstractVersionStrategy {
 
     /**
      * Regex pattern for matching file names with hash suffix.
@@ -33,24 +31,24 @@ public final class ContentHashVersionStrategy implements VersionStrategy {
             "^(?<path>.*/)?(?<version>[A-Fa-f0-9]{6,64})/(?<name>[^/]+?)(?<suffix>(?:\\\\.[^./]+)*)$");
 
     /**
-     * Hash algorithm (e.g., MD5, SHA-1, SHA-256).
-     */
-    private final String algorithm;
-
-    /**
-     * Expected hex string length (e.g., 32 for MD5, 40 for SHA-1, 64 for SHA-256).
-     */
-    private final int hexLength;
-
-    /**
-     * 🏗️ Create a new strategy for the given algorithm and hash length.
+     * 🏗️ Create a new strategy with the given algorithm and hash length.
      *
-     * @param algorithm digest algorithm name (see {@link java.security.MessageDigest})
-     * @param hexLength expected hex length, or {@code 0} for no normalization
+     * @param algorithm digest algorithm name (e.g. {@code MD5}, {@code SHA-1}, {@code SHA-256})
+     * @param hexLength expected hex length (e.g. 32 for MD5, 40 for SHA-1, 64 for SHA-256),
+     *                  or {@code 0} to disable normalization
      */
     public ContentHashVersionStrategy(String algorithm, int hexLength) {
-        this.algorithm = requireNonNull(algorithm);
-        this.hexLength = Math.max(6, Math.min(hexLength, 64));
+        super(algorithm, hexLength);
+    }
+
+    /**
+     * ⚙️ Create a new strategy using default algorithm and length.
+     *
+     * <p>Defaults to {@code SHA-256} with a 64-character hex digest
+     * (see {@link #DEFAULT_ALGORITHM} and {@link #DEFAULT_LENGTH}).</p>
+     */
+    public ContentHashVersionStrategy() {
+        this(DEFAULT_ALGORITHM, DEFAULT_LENGTH);
     }
 
     /**
@@ -74,10 +72,7 @@ public final class ContentHashVersionStrategy implements VersionStrategy {
         String base    = (path != null ? path : "") + name + suffix;
 
         // normalize to expected length
-        if (hexLength > 0 && version.length() != hexLength) {
-            version = version.substring(0, hexLength);
-        }
-        version = toLength(version, hexLength);
+        version = toLength(version, length);
 
         return new PathVersion(base, version.toLowerCase(Locale.ROOT));
     }
@@ -139,38 +134,5 @@ public final class ContentHashVersionStrategy implements VersionStrategy {
         return "%s/%s%s%s".formatted(head, version, tail, query);
     }
 
-    /**
-     * ⚡ Generate a version string from resource content using hash digest.
-     *
-     * @param resource the resource to analyze
-     * @return hex string truncated/padded to configured {@code hexLength}
-     * @throws IllegalStateException if digest computation fails
-     */
-    @Override
-    public String generateVersion(Resource resource) {
-        try (InputStream input = resource.getInputStream()) {
-            String version = hex(digest(input, algorithm)).toLowerCase(Locale.ROOT);
-            return toLength(version, hexLength);
-        } catch (Exception exception) {
-            throw new IllegalStateException("Failed to compute %s for resource: %s".formatted(algorithm, resource),
-                                            exception);
-        }
-    }
 
-    /**
-     * ✅ Validate whether the given version matches the resource content.
-     *
-     * @param resource the resource to check
-     * @param version  extracted version string
-     * @return {@code true} if content hash starts with the version string
-     */
-    @Override
-    public boolean validateVersion(Resource resource, String version) {
-        try (InputStream stream = resource.getInputStream()) {
-            String versionHash = hex(digest(stream, algorithm));
-            return versionHash.startsWith(version.toLowerCase(Locale.ROOT));
-        } catch (Exception exception) {
-            return false;
-        }
-    }
 }

@@ -79,7 +79,7 @@ public class VersionalResourceResolver extends AbstractResourceResolver {
             }
         }
 
-        return Outcome.next();
+        return Outcome.done(null);
     }
 
     /**

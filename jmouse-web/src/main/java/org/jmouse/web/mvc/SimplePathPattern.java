@@ -27,7 +27,7 @@ import static java.util.Objects.requireNonNull;
 public class SimplePathPattern implements RoutePath {
 
     private final String            raw;
-    private final List<PathSegment> parts; // without leading/trailing separators
+    private final List<PathSegment> parts;
 
     private SimplePathPattern(String raw, List<PathSegment> parts) {
         this.raw = requireNonNull(raw);
@@ -440,7 +440,6 @@ public class SimplePathPattern implements RoutePath {
 
         }
 
-
         /**
          * 🌌 Capture all remaining segments (must be last).
          */
@@ -483,6 +482,21 @@ public class SimplePathPattern implements RoutePath {
                 builder.append(character);
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        for (PathSegment part : parts) {
+            builder
+                    .append(part.getClass().getSimpleName())
+                    .append("[")
+                    .append(part)
+                    .append("]/");
+        }
+
+        return builder.toString();
     }
 
 }

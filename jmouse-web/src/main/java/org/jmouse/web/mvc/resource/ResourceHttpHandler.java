@@ -186,9 +186,14 @@ public class ResourceHttpHandler implements RequestHttpHandler {
      */
     private String getResourcePath(HttpServletRequest request) {
         String resourcePath = "";
+        String queryString  = request.getQueryString();
 
         if (request.getAttribute(HandlerMapping.ROUTE_MATCH_ATTRIBUTE) instanceof RouteMatch match) {
             resourcePath = match.extracted();
+        }
+
+        if (!resourcePath.isEmpty() && queryString != null && !queryString.isEmpty()) {
+            resourcePath += "?" + queryString;
         }
 
         return resourcePath;

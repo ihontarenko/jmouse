@@ -11,7 +11,7 @@ import java.util.Objects;
  * <p>Prepends a fixed version segment to resource paths
  * (e.g. {@code /v1/js/app.js}).</p>
  */
-public class FixedVersionStrategy extends AbstractVersionStrategy {
+public class FixedVersionStrategy implements VersionStrategy {
 
     /**
      * 🏷️ Fixed version identifier.
@@ -109,7 +109,7 @@ public class FixedVersionStrategy extends AbstractVersionStrategy {
         String    simple      = versionPath.simple();
         String    version     = sanitizeVersion(Objects.requireNonNullElse(versionPath.version(), this.version));
         PathQuery pathQuery   = PathQuery.ofPath(simple);
-        String    result      = (simple.startsWith("/") ? "" : "/") + version + "/" + simple;
+        String    result      = version + "/" + simple;
         String    queryString = pathQuery.query();
 
         result = result.replaceAll("/{2,}", "/");

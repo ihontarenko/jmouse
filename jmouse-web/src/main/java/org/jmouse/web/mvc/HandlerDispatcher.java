@@ -156,8 +156,8 @@ public class HandlerDispatcher implements InitializingBean {
             }
         } catch (ReflectionException reflectionException) {
             dispatchException = (Exception) reflectionException.getCause();
-        } catch (Exception e) {
-            dispatchException = e;
+        } catch (Exception exception) {
+            dispatchException = exception;
         }
 
         try {

@@ -44,10 +44,6 @@ public class PathNormalizationResolver extends AbstractResourceResolver {
         String requestPath = resourceQuery.path();
         String path        = PathHelper.normalize(requestPath, false);
 
-        if (path != null) {
-            path = path.replace('_', '/');
-        }
-
         if (path == null || path.contains("..")) {
             return Outcome.done(null);
         }
