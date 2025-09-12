@@ -3,7 +3,7 @@ package org.jmouse.core.io;
 public class ResourceException extends RuntimeException {
 
     public ResourceException(Resource resource, Throwable cause) {
-        super(resource.getResourceName(), cause);
+        super(resource.getName(), cause);
     }
 
     public ResourceException(Resource resource) {

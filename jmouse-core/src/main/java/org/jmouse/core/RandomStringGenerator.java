@@ -5,88 +5,102 @@ import java.util.stream.Collectors;
 
 /**
  * 🎲 Abstract base class for generating random alphanumeric strings.
- * <p>
- * Provides both secure and non-secure implementations via static factory methods.
- * Designed for generating IDs, tokens, and temporary access keys.
- * </p>
+ *
+ * <p>Defines the template for generating random strings using
+ * a pluggable {@link Random} source. Provides both secure and
+ * non-secure variants via concrete subclasses.</p>
+ *
+ * <p>💡 Typical use cases: IDs, tokens, session keys, and
+ * temporary access codes.</p>
  *
  * <pre>{@code
- * String id = RandomStringGenerator.simple();           // Non-secure random
- * String token = RandomStringGenerator.secure(32);      // Secure random, length 32
+ * String id    = RandomStringGenerator.simple();       // Non-secure, default length (16)
+ * String token = RandomStringGenerator.secure(32);     // Secure, length 32
  * }</pre>
  *
- * @author Ivan Hontarenko
+ * @author Ivan
  */
-abstract public class RandomStringGenerator extends AbstractStringIdGenerator {
+public abstract class RandomStringGenerator extends AbstractStringIdGenerator {
 
-    private static final int    DEFAULT_LENGTH = 16;
-    private static final String CHARACTERS     = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    /**
+     * 📏 Default string length.
+     */
+    private static final int DEFAULT_LENGTH = 16;
 
+    /**
+     * 🔤 Allowed characters (A–Z, a–z, 0–9).
+     */
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    /**
+     * 📐 Desired length of the generated string.
+     */
     private final int length;
 
     /**
-     * 🧱 Creates a new random string generator with the given length.
+     * 🧱 Create a new random string generator with the given length.
      *
-     * @param length 📏 Desired length of the generated string
+     * @param length desired length of the generated string
      */
     protected RandomStringGenerator(int length) {
         this.length = length;
     }
 
     /**
-     * ⚡ Generates a non-secure random alphanumeric string of specified length.
+     * ⚡ Generate a non-secure random string of the specified length.
      *
-     * @param length 📏 Length of the string to generate
-     * @return 🔤 Generated string
+     * @param length length of the string
+     * @return generated string
      */
     public static String simple(int length) {
         return new SimpleRandomStringGenerator(length).generate();
     }
 
     /**
-     * ⚡ Generates a non-secure random alphanumeric string with default length (16).
+     * ⚡ Generate a non-secure random string with default length ({@value #DEFAULT_LENGTH}).
      *
-     * @return 🔤 Generated string
+     * @return generated string
      */
     public static String simple() {
         return simple(DEFAULT_LENGTH);
     }
 
     /**
-     * 🔐 Generates a secure random alphanumeric string of specified length.
+     * 🔐 Generate a secure random string of the specified length.
      *
-     * @param length 📏 Length of the string to generate
-     * @return 🔤 Generated secure string
+     * @param length length of the string
+     * @return generated secure string
      */
     public static String secure(int length) {
         return new SecureRandomStringGenerator(length).generate();
     }
 
     /**
-     * 🔐 Generates a secure random alphanumeric string with default length (16).
+     * 🔐 Generate a secure random string with default length ({@value #DEFAULT_LENGTH}).
      *
-     * @return 🔤 Generated secure string
+     * @return generated secure string
      */
     public static String secure() {
         return secure(DEFAULT_LENGTH);
     }
 
     /**
-     * 🧪 Generates a random alphanumeric string using the provided {@link Random} implementation.
+     * 🧪 Generate a random alphanumeric string using this generator’s {@link Random}.
      *
-     * @return 🔤 Generated string
+     * @return generated string
      */
     @Override
     public String generate() {
-        return getRandom().ints(length, 0, CHARACTERS.length())
-                .mapToObj(CHARACTERS::charAt).map(Object::toString).collect(Collectors.joining());
+        return getRandom().ints(length, 0, CHARACTERS.length()).mapToObj(CHARACTERS::charAt).map(Object::toString).collect(Collectors.joining());
     }
 
     /**
-     * 🎛️ Provides the random generator to be used for string generation.
+     * 🎛️ Provide the {@link Random} implementation to be used.
      *
-     * @return 🎲 A {@link Random} instance (e.g., {@code new Random()} or {@code new SecureRandom()})
+     * <p>Implemented by subclasses, e.g. {@link java.util.Random} or
+     * {@link java.security.SecureRandom}.</p>
+     *
+     * @return random generator
      */
-    abstract protected Random getRandom();
-
+    protected abstract Random getRandom();
 }

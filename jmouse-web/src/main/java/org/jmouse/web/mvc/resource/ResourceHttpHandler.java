@@ -7,14 +7,18 @@ import org.jmouse.core.MediaTypeFactory;
 import org.jmouse.core.Streamable;
 import org.jmouse.core.io.PatternMatcherResourceLoader;
 import org.jmouse.core.io.Resource;
+import org.jmouse.core.io.ResourceSegment;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.request.CacheControl;
 import org.jmouse.web.http.request.Headers;
+import org.jmouse.web.http.request.Range;
+import org.jmouse.web.http.request.WebHttpRequest;
 import org.jmouse.web.mvc.*;
 import org.jmouse.web.mvc.adapter.RequestHttpHandler;
 import org.jmouse.web.mvc.method.converter.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -101,11 +105,16 @@ public class ResourceHttpHandler implements RequestHttpHandler {
         ResourceResolverChain chain    = getResolverChain(registration.getChainRegistration().getResolvers());
         ResourceQuery         query    = getResourceQuery(request, registration.getLocations());
         Resource              resource = chain.resolve(request, query);
+        List<Range>           ranges   = null;
+
+        if (request instanceof WebHttpRequest webHttpRequest) {
+            ranges = webHttpRequest.getHeaders().getRange();
+        }
 
         if (resource != null && resource.isReadable()) {
-            HttpOutputMessage httpMessage = new WebHttpServletResponse(response);
+            HttpOutputMessage httpMessage = new ServletResponseHttpOutputMessage(response);
             writeHeaders(httpMessage, resource);
-            writeMessage(httpMessage, resource);
+            writeMessage(httpMessage, resource, ranges);
         }
     }
 
@@ -119,13 +128,26 @@ public class ResourceHttpHandler implements RequestHttpHandler {
      * @param httpMessage HTTP output message
      * @param resource resolved resource to write
      */
-    private void writeMessage(HttpOutputMessage httpMessage, Resource resource) {
-        HttpMessageConverter<Resource> messageConverter = messageConverterManager
-                .getMessageConverter(resource, null);
+    private void writeMessage(HttpOutputMessage httpMessage, Resource resource, List<Range> ranges) {
+        Object                       writable         = resource;
+        HttpMessageConverter<Object> messageConverter = messageConverterManager.getMessageConverter(writable, null);
+
+        if (ranges != null && !ranges.isEmpty()) {
+            List<ResourceSegment> segments = getResourceSegments(ranges, resource);
+
+            if (segments != null && !segments.isEmpty()) {
+                messageConverter = messageConverterManager
+                        .getMessageConverter(segments.getFirst(), null);
+
+                if (messageConverter != null) {
+                    writable = segments;
+                }
+            }
+        }
 
         if (messageConverter != null) {
             try {
-                messageConverter.write(resource, resource.getClass(), httpMessage);
+                messageConverter.write(writable, writable.getClass(), httpMessage);
             } catch (IOException e) {
                 throw new UnwritableException("Could not write HTTP message", e);
             }
@@ -173,6 +195,16 @@ public class ResourceHttpHandler implements RequestHttpHandler {
         }
 
         headers.setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(resource.getSize()));
+    }
+
+    private List<ResourceSegment> getResourceSegments(List<Range> ranges, Resource resource) {
+        List<ResourceSegment> segments = new ArrayList<>();
+
+        if (ranges != null) {
+            segments = ResourceRange.toSegments(ranges, resource);
+        }
+
+        return segments;
     }
 
     /**

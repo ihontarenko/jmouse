@@ -9,13 +9,15 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 /**
- * 🌐 Adapter that bridges {@link HttpServletResponse} with
- * {@link HttpOutputMessage}.
+ * 🌐 Adapter that bridges {@link HttpServletResponse} with {@link HttpOutputMessage}.
  *
- * <p>Buffers headers until first write, then flushes them
- * into the underlying servlet response.</p>
+ * <p>Acts as a wrapper around the servlet response, buffering headers
+ * until the first body write. This ensures headers can be manipulated
+ * consistently before being committed.</p>
+ *
+ * <p>💡 Commonly used by message converters when serializing responses.</p>
  */
-public class WebHttpServletResponse implements HttpOutputMessage {
+public class ServletResponseHttpOutputMessage implements HttpOutputMessage {
 
     /**
      * 🎯 Target servlet response.
@@ -28,25 +30,25 @@ public class WebHttpServletResponse implements HttpOutputMessage {
     private final Headers headers;
 
     /**
-     * 🚦 Ensures headers are written only once.
+     * 🚦 Guard to ensure headers are written only once.
      */
     private boolean headersWritten = false;
 
     /**
-     * 🏗️ Create wrapper for {@link HttpServletResponse}.
+     * 🏗️ Create a new wrapper for {@link HttpServletResponse}.
      *
      * @param response target servlet response
      */
-    public WebHttpServletResponse(HttpServletResponse response) {
+    public ServletResponseHttpOutputMessage(HttpServletResponse response) {
         this.response = response;
         this.headers = new Headers();
     }
 
     /**
-     * ✍️ Get output stream, flushing headers first if not already sent.
+     * ✍️ Get the response output stream, flushing headers first if not already sent.
      *
      * @return servlet response output stream
-     * @throws IOException if output stream cannot be accessed
+     * @throws IOException if output stream cannot be obtained
      */
     @Override
     public OutputStream getOutputStream() throws IOException {
@@ -55,9 +57,9 @@ public class WebHttpServletResponse implements HttpOutputMessage {
     }
 
     /**
-     * 📥 Access local header collection.
+     * 📥 Access the buffered headers.
      *
-     * @return headers to be written before body
+     * @return header collection to be applied on first write
      */
     @Override
     public Headers getHeaders() {
@@ -65,11 +67,12 @@ public class WebHttpServletResponse implements HttpOutputMessage {
     }
 
     /**
-     * 📡 Write headers into servlet response (only once).
+     * 📡 Write headers into the servlet response (only once).
      *
      * <ul>
      *   <li>Applies all custom headers.</li>
-     *   <li>Resolves {@code Content-Type} and charset.</li>
+     *   <li>Resolves and sets {@code Content-Type}.</li>
+     *   <li>Sets response character encoding if provided.</li>
      * </ul>
      */
     protected void writeHeaders() {
@@ -89,4 +92,12 @@ public class WebHttpServletResponse implements HttpOutputMessage {
         }
     }
 
+    /**
+     * 🎯 Access the underlying {@link HttpServletResponse}.
+     *
+     * @return raw servlet response
+     */
+    public HttpServletResponse getResponse() {
+        return response;
+    }
 }

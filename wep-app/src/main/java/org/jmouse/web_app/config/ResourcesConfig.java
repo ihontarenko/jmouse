@@ -23,6 +23,12 @@ public class ResourcesConfig implements BeanConfigurer<ResourceHandlerRegistry> 
                 .addStrategy(new FixedVersionStrategy(properties.getIconPrefix()), "/icon/**")
                 .addStrategy(new ContentHashVersionStrategy("SHA-256", 16), "/assets/**");
 
+        registry.registerHandler("/laptop/{*filepath}")
+                .addResourceLocations("file:/C:/Users/Ivan_Hontarenko/Media")
+                .setCacheControl(CacheControl.empty().cachePublic())
+                .getChainRegistration()
+                .addResolvers(new PathNormalizationResolver(), new LocationScanningResolver());
+
         registry.registerHandler("/assets/{*filepath}")
                 .addResourceLocations("classpath:static/", "file:/C:/Users/Ivan_Hontarenko/Git/")
                 .setCacheControl(CacheControl.empty().cachePublic())

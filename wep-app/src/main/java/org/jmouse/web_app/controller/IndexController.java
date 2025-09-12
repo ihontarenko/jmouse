@@ -23,6 +23,11 @@ public class IndexController {
         return "index/home";
     }
 
+    @Mapping(path = "/video", httpMethod = HttpMethod.GET)
+    public String video() {
+        return "view:jmouse/video";
+    }
+
     @GetMapping(
             requestPath = "/demo/{id}",
             queryParameters = {
