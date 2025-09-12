@@ -12,12 +12,12 @@ import static java.util.Objects.requireNonNull;
 import static org.jmouse.util.StringHelper.*;
 
 /**
- * 📦 Content-hash versioning strategy: file name contains "-{hex}" before extension.
+ * 📦 Content-hash versioning strategy: file name contains "/{hex}/app.js" before extension.
  *
  * <p>Examples:</p>
  * <ul>
- *   <li>{@code app-0123abcd.js}</li>
- *   <li>{@code styles-9f8e7d6c.min.css}</li>
+ *   <li>{@code assets/1fc92ffa/app.js}</li>
+ *   <li>{@code assets/9f8e7d6c/styles.min.css}</li>
  * </ul>
  *
  * <p>Supports extracting, inserting, removing, validating, and generating
@@ -30,7 +30,7 @@ public final class ContentHashVersionStrategy implements VersionStrategy {
      * <pre>{@code path/name-{hex}[.<suffix>...]}</pre>
      */
     private static final Pattern NAME_WITH_HASH = Pattern.compile(
-            "^(?<path>.*/)?(?<name>[^/]+?)-(?<version>[A-Fa-f0-9]{6,64})(?<suffix>(?:\\.[^./]+)*)$");
+            "^(?<path>.*/)?(?<version>[A-Fa-f0-9]{6,64})/(?<name>[^/]+?)(?<suffix>(?:\\\\.[^./]+)*)$");
 
     /**
      * Hash algorithm (e.g., MD5, SHA-1, SHA-256).
@@ -50,7 +50,7 @@ public final class ContentHashVersionStrategy implements VersionStrategy {
      */
     public ContentHashVersionStrategy(String algorithm, int hexLength) {
         this.algorithm = requireNonNull(algorithm);
-        this.hexLength = hexLength;
+        this.hexLength = Math.max(6, Math.min(hexLength, 64));
     }
 
     /**
@@ -85,52 +85,31 @@ public final class ContentHashVersionStrategy implements VersionStrategy {
     /**
      * ✂️ Remove a version suffix from the given path.
      *
-     * @param resourcePath resource path that may contain version
+     * @param path resource path that may contain version
      * @param version      version string to remove
      * @return path without version part, or unchanged if no match
      */
     @Override
-    public String removeVersion(String resourcePath, String version) {
-        if (resourcePath == null || version == null || version.isEmpty()) {
-            return resourcePath;
+    public String removeVersion(String path, String version) {
+        if (path == null || version == null || version.isEmpty()) {
+            return path;
         }
 
-        PathQuery pathQuery = PathQuery.ofPath(resourcePath);
+        PathQuery pathQuery = PathQuery.ofPath(path);
         String    pure      = pathQuery.path();
         String    query     = pathQuery.query();
-        int       slash     = pure.lastIndexOf('/');
-        int       dot       = pure.indexOf('.', Math.max(0, slash + 1));
+        int       index     = pure.indexOf(version);
 
-        if (dot < 0) {
-            // no suffix — remove trailing "-{version}" if present
-            String suffix = "-" + version.toLowerCase(Locale.ROOT);
-
-            if (pure.toLowerCase(Locale.ROOT).endsWith(suffix)) {
-                return pure.substring(0, pure.length() - suffix.length()) + query;
-            }
-
-            return resourcePath;
+        if (index < 0) {
+            return path;
         }
 
-        String head  = pure.substring(0, dot); // .../name[-ver]
-        String tail  = pure.substring(dot);    // ".min.js"
-        String lower = head.toLowerCase(Locale.ROOT);
-        String mark  = "-" + version.toLowerCase(Locale.ROOT);
+        String after  = pure.substring(0, pure.indexOf(version));
+        String before = pure.substring(pure.indexOf(version) + version.length() + 1);
 
-        if (lower.endsWith(mark)) {
-            return head.substring(0, head.length() - mark.length()) + tail + query;
-        }
+        query = (query == null ? "" : "?%s".formatted(query));
 
-        // try prefix match if version length differs
-        int idx = lower.lastIndexOf('-');
-        if (idx >= 0 && dot > idx + 1) {
-            String maybe = lower.substring(idx + 1);
-            if (maybe.startsWith(version.toLowerCase(Locale.ROOT))) {
-                return head.substring(0, idx) + tail + query;
-            }
-        }
-
-        return resourcePath;
+        return "%s%s%s".formatted(after, before, query);
     }
 
     /**
@@ -151,18 +130,13 @@ public final class ContentHashVersionStrategy implements VersionStrategy {
         PathQuery pathQuery = PathQuery.ofPath(resourcePath);
         String    pure      = pathQuery.path();
         String    query     = pathQuery.query();
+        int       slash     = pure.lastIndexOf('/');
+        String    head      = pure.substring(0, slash);
+        String    tail      = pure.substring(slash);
 
-        int slash = pure.lastIndexOf('/');
-        int dot   = pure.indexOf('.', Math.max(0, slash + 1));
+        query = (query == null ? "" : "?%s".formatted(query));
 
-        if (dot < 0) {
-            return pure + "-" + version + query;
-        }
-
-        String head = pure.substring(0, dot);
-        String tail = pure.substring(dot);
-
-        return head + "-" + version + tail + query;
+        return "%s/%s%s%s".formatted(head, version, tail, query);
     }
 
     /**

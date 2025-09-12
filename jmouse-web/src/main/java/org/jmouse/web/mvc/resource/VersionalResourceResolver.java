@@ -5,6 +5,7 @@ import org.jmouse.core.chain.Chain;
 import org.jmouse.core.chain.Outcome;
 import org.jmouse.core.io.Resource;
 import org.jmouse.core.matcher.ant.AntMatcher;
+import org.jmouse.web.http.request.RequestPath;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -51,24 +52,28 @@ public class VersionalResourceResolver extends AbstractResourceResolver {
      */
     @Override
     public Outcome<Resource> handle(
-            HttpServletRequest context,
-            ResourceQuery query,
-            Chain<HttpServletRequest, ResourceQuery, Resource> next
-    ) {
+            HttpServletRequest context, ResourceQuery query, Chain<HttpServletRequest, ResourceQuery, Resource> next) {
         String          requestPath = query.path();
-        VersionStrategy strategy    = findStrategy(requestPath);
+        VersionStrategy strategy    = findStrategy(RequestPath.ofRequest(context).path());
 
         if (strategy != null) {
             PathVersion path = strategy.getVersion(requestPath);
             if (path != null) {
                 String        version  = path.version();
-                String        cleared  = strategy.removeVersion(requestPath, version);
-                ResourceQuery newQuery = new ResourceQuery(cleared, query.locations());
+                String        pure     = strategy.removeVersion(requestPath, version);
+                ResourceQuery newQuery = new ResourceQuery(pure, query.locations());
 
                 if (next.proceed(context, newQuery) instanceof Outcome.Done<Resource>(Resource resource)) {
                     if (resource == null) {
-                        throw new ResourceNotFoundException("Resource '%s' not found".formatted(cleared));
+                        throw new ResourceNotFoundException(
+                                "Resource '%s' not found".formatted(pure));
                     }
+
+                    if (!strategy.validateVersion(resource, version)) {
+                        throw new ResourceValidationFailedException(
+                                "Resource '%s' version '%s' is not valid".formatted(requestPath, version));
+                    }
+
                     return Outcome.done(new VersionalResource(resource, version));
                 }
             }
@@ -150,7 +155,7 @@ public class VersionalResourceResolver extends AbstractResourceResolver {
         public Outcome<String> handle(
                 String relativePath, UrlComposerContext context, Chain<String, UrlComposerContext, String> next) {
             VersionalResourceResolver resolver = VersionalResourceResolver.this;
-            VersionStrategy           strategy = resolver.findStrategy(relativePath);
+            VersionStrategy           strategy = resolver.findStrategy(context.requestPath());
 
             if (strategy == null) {
                 return Outcome.next();

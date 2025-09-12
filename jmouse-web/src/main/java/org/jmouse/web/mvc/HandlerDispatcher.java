@@ -192,7 +192,7 @@ public class HandlerDispatcher implements InitializingBean {
             }
         }
 
-        throw new HandlerMappingException("NO HANDLER FOUND! [%s]".formatted(handler));
+        throw new HandlerMappingException("NO HANDLER FOUND!");
     }
 
     /**
@@ -210,7 +210,7 @@ public class HandlerDispatcher implements InitializingBean {
             }
         }
 
-        throw new HandlerMappingException("NO MAPPING FOUND! [%s].".formatted(request.getPathInfo()));
+        throw new HandlerMappingException("NO MAPPING FOUND!");
     }
 
     /**

@@ -1,10 +1,24 @@
-{% extends "jmouse" %}
+{% extends "jmouse-internal" %}
 {% block "mainContent" %}
-<h1>Error Page</h1>
-<h3 style="color: darkred; font-weight: bold">Exception: {{ message }}</h3>
-<ul>
-        {% for item in stackTrace %}
-                <li>{{ loop.index0 }} - {{ item.fileName}}:{{ item.lineNumber }} {{ item.className }}#{{ item.methodName }}</li>
-        {% endfor %}
-</ul>
+<h1>Error {{ statusCode }}</h1>
+
+<p class="muted">{{ message }}</p>
+
+<h3>Request Info</h3>
+<p class="mono">
+    <b>Request Path:</b> {{ requestPath }}<br>
+    <b>Query String:</b> {{ queryString }}<br>
+    <b>Method:</b> {{ requestMethod }}<br>
+    <b>Timestamp:</b> {{ timestamp }}<br>
+    <b>User-Agent:</b> {{ userAgent }}<br>
+</p>
+
+<h3>Stack Trace</h3>
+
+<pre class="mono">
+{% for item in stackTrace %}
+{{ item }}
+{% endfor %}
+</pre>
+
 {% endblock %}

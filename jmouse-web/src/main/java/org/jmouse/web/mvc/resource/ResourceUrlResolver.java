@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class ResourceUrlResolver implements InitializingBeanSupport<WebBeanContext> {
 
-    private Map<RoutePath, ResourceHttpHandler> mappings = new LinkedHashMap<>();
+    private final Map<RoutePath, ResourceHttpHandler> mappings = new LinkedHashMap<>();
 
     public String lookupResourceUrl(String path) {
         ResourceHttpHandler handler     = null;
@@ -27,18 +27,17 @@ public class ResourceUrlResolver implements InitializingBeanSupport<WebBeanConte
 
         if (handler != null && matchedPath != null) {
             String                relativePath = matchedPath.extractPath(path);
+            String                pathMapping  = path.substring(0, path.indexOf(relativePath));
             ResourceRegistration  registration = handler.getRegistration();
             ResourceQuery         query        = handler.getResourceQuery(relativePath, registration.getLocations());
             ResourceResolverChain chain        = handler.getResolverChain(
                     registration.getChainRegistration().getResolvers());
 
-            String resolvedURL = chain.compose(relativePath, new UrlComposerContext(null, query.locations()));
+            String resolvedPath = chain.compose(relativePath, new UrlComposerContext(path, null, query.locations()));
 
-            if (resolvedURL != null) {
-                System.out.println(resolvedURL);
+            if (resolvedPath != null) {
+                return pathMapping + resolvedPath;
             }
-
-            System.out.println(chain);
         }
 
         return null;

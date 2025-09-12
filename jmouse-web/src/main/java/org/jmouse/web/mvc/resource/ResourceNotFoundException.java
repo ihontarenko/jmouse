@@ -1,6 +1,6 @@
 package org.jmouse.web.mvc.resource;
 
-public class ResourceNotFoundException extends RuntimeException {
+public class ResourceNotFoundException extends HttpResourceException {
 
     public ResourceNotFoundException(String message) {
         super(message);

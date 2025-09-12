@@ -47,7 +47,7 @@ public class IndexController {
 
     @GetMapping(requestPath = "/welcome/{id}", produces = {"text/plain"})
     public String hello() {
-        return resourceUrlResolver.lookupResourceUrl("/assets/css/jmouse.css");
+        return resourceUrlResolver.lookupResourceUrl("/assets/html/index.html");
     }
 
     @ExceptionHandler(HandlerMappingException.class)
