@@ -194,7 +194,9 @@ public class ResourceHttpHandler implements RequestHttpHandler {
             headers.setHeader(HttpHeader.CACHE_CONTROL, cacheControl.toHeaderValue());
         }
 
-        headers.setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(resource.getSize()));
+        if (headers.getRange() == null) {
+            headers.setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(resource.getSize()));
+        }
     }
 
     private List<ResourceSegment> getResourceSegments(List<Range> ranges, Resource resource) {

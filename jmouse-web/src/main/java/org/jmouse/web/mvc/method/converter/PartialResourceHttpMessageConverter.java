@@ -146,11 +146,13 @@ public class PartialResourceHttpMessageConverter extends AbstractHttpMessageConv
                 String    filename    = segment.getResource().getFilename();
                 MediaType contentType = getMediaType(filename);
 
-                // Validate indices
                 if (start < 0 || start >= length || end < start) {
                     headers.setHeader(HttpHeader.CONTENT_RANGE, "bytes */%d".formatted(length));
+                    headers.setContentLength(0);
                     if (message instanceof ServletResponseHttpOutputMessage response) {
                         response.getResponse().setStatus(HttpStatus.RANGE_NOT_SATISFIABLE.getCode());
+                        response.writeHeaders();
+                        response.getResponse().flushBuffer();
                     }
                     return;
                 }

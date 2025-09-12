@@ -75,7 +75,7 @@ public class ServletResponseHttpOutputMessage implements HttpOutputMessage {
      *   <li>Sets response character encoding if provided.</li>
      * </ul>
      */
-    protected void writeHeaders() {
+    public void writeHeaders() {
         if (!headersWritten) {
             headersWritten = true;
 
