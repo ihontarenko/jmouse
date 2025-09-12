@@ -32,6 +32,12 @@ public class ResourceUrlResolver implements InitializingBeanSupport<WebBeanConte
             ResourceResolverChain chain        = handler.getResolverChain(
                     registration.getChainRegistration().getResolvers());
 
+            String resolvedURL = chain.compose(relativePath, new UrlComposerContext(null, query.locations()));
+
+            if (resolvedURL != null) {
+                System.out.println(resolvedURL);
+            }
+
             System.out.println(chain);
         }
 

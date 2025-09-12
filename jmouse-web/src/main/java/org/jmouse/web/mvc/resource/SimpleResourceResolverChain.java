@@ -16,17 +16,35 @@ import java.util.List;
 public class SimpleResourceResolverChain implements ResourceResolverChain {
 
     /**
-     * 🔗 Underlying delegate chain of resolvers.
+     * 🔗 Chain of {@link ResourceResolver}s for resource resolution.
+     *
+     * <p>Executes each resolver in order until one produces a
+     * {@link org.jmouse.core.chain.Outcome.Done} with a {@link Resource}.</p>
      */
     private final Chain<HttpServletRequest, ResourceQuery, Resource> delegate;
 
     /**
+     * 🎼 Chain of {@link ResourceComposer}s for resource composition.
+     *
+     * <p>Transforms resolved resources (e.g. add version, rewrite URL)
+     * into a final {@link String} path.</p>
+     */
+    private final Chain<String, UrlComposerContext, String> composer;
+
+    /**
      * 🏗️ Create a new resolver chain.
+     *
+     * <p>Builds two parallel chains:</p>
+     * <ul>
+     *   <li>🔗 {@code delegate} — executes the {@link ResourceResolver}s step by step</li>
+     *   <li>🎼 {@code composer} — applies each resolver’s {@link ResourceComposer}</li>
+     * </ul>
      *
      * @param resolvers ordered list of {@link ResourceResolver}s to apply
      */
     public SimpleResourceResolverChain(List<? extends ResourceResolver> resolvers) {
-        this.delegate = Chain.of(resolvers);
+        this.delegate = Chain.of(resolvers, false);
+        this.composer = Chain.of(resolvers.stream().map(ResourceResolver::getComposer).toList(), true);
     }
 
     /**
@@ -39,6 +57,27 @@ public class SimpleResourceResolverChain implements ResourceResolverChain {
     @Override
     public Outcome<Resource> proceed(HttpServletRequest request, ResourceQuery resourceQuery) {
         return delegate.proceed(request, resourceQuery);
+    }
+
+    /**
+     * 🎼 Apply the composition chain to a resolved {@link Resource}.
+     *
+     * <p>Each resolver’s {@link ResourceComposer} may transform the
+     * resource path (e.g. add versioning, rewrite URL, etc.).</p>
+     *
+     * @param relative      the relative path to compose final resource URL
+     * @param context       the query context context
+     * @return the composed resource path, or {@code null} if no composer produced a value
+     */
+    @Override
+    public String compose(String relative, UrlComposerContext context) {
+        Outcome<String> outcome = composer.proceed(relative, context);
+
+        if (outcome instanceof Outcome.Done<String>(String value)) {
+            return value;
+        }
+
+        return null;
     }
 
     /**

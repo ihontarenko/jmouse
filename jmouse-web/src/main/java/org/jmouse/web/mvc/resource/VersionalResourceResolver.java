@@ -28,6 +28,11 @@ public class VersionalResourceResolver extends AbstractResourceResolver {
      */
     private final Map<AntMatcher, VersionStrategy> strategies = new LinkedHashMap<>();
 
+    public VersionalResourceResolver() {
+        super(null);
+        setComposer(new Composer());
+    }
+
     /**
      * 🔎 Attempt to resolve a resource with version support.
      *
@@ -50,18 +55,15 @@ public class VersionalResourceResolver extends AbstractResourceResolver {
             ResourceQuery query,
             Chain<HttpServletRequest, ResourceQuery, Resource> next
     ) {
-        ResourceQuery   newQuery    = query;
         String          requestPath = query.path();
         VersionStrategy strategy    = findStrategy(requestPath);
 
         if (strategy != null) {
             PathVersion path = strategy.getVersion(requestPath);
-
             if (path != null) {
-                String version = path.version();
-                String cleared = strategy.removeVersion(requestPath, version);
-
-                newQuery = new ResourceQuery(cleared, query.locations());
+                String        version  = path.version();
+                String        cleared  = strategy.removeVersion(requestPath, version);
+                ResourceQuery newQuery = new ResourceQuery(cleared, query.locations());
 
                 if (next.proceed(context, newQuery) instanceof Outcome.Done<Resource>(Resource resource)) {
                     if (resource == null) {
@@ -117,5 +119,56 @@ public class VersionalResourceResolver extends AbstractResourceResolver {
 
         return strategy;
     }
+
+    /**
+     * 🧱 URL composer: injects a version segment/token into outgoing resource URLs.
+     *
+     * <p>Flow:</p>
+     * <ul>
+     *   <li>Find a matching {@link VersionStrategy} for the path.</li>
+     *   <li>If the path is already versioned for that strategy &mdash; return it unchanged.</li>
+     *   <li>Otherwise attempt {@link VersionStrategy#putVersion(PathVersion)}:
+     *     <ul>
+     *       <li>For {@link ContentHashVersionStrategy} compute the hash from the resolved {@link Resource} (if available).</li>
+     *       <li>For fixed strategies the strategy supplies its own version segment.</li>
+     *     </ul>
+     *   </li>
+     *   <li>If the strategy cannot generate a version (e.g. hashing needs a resource that is not resolvable) &mdash; delegate to {@code next}.</li>
+     * </ul>
+     */
+    public class Composer implements ResourceComposer {
+
+        /**
+         * Compose a versioned URL for the given relative path or delegate further down the chain.
+         *
+         * @param relativePath path relative to the static mount (may include a query string)
+         * @param context      composer context (provides access to the current resolver and optional resource resolution)
+         * @param next         next composer in the chain
+         * @return {@link Outcome#done(Object)} with a versioned URL string, or {@link Outcome#next()} to continue the chain
+         */
+        @Override
+        public Outcome<String> handle(
+                String relativePath, UrlComposerContext context, Chain<String, UrlComposerContext, String> next) {
+            VersionalResourceResolver resolver = VersionalResourceResolver.this;
+            VersionStrategy           strategy = resolver.findStrategy(relativePath);
+
+            if (strategy == null) {
+                return Outcome.next();
+            }
+
+            // Already versioned for this strategy? Keep as-is.
+            PathVersion existing = strategy.getVersion(relativePath);
+
+            if (existing != null) {
+                return Outcome.done(relativePath);
+            }
+
+            String version = strategy.generateVersion(context.resource());
+            String with    = strategy.putVersion(new PathVersion(relativePath, version));
+
+            return Outcome.done(with);
+        }
+    }
+
 
 }

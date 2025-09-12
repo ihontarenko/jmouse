@@ -10,13 +10,16 @@ public class ResourcesConfig implements BeanConfigurer<ResourceHandlerRegistry> 
 
     @Override
     public void configure(ResourceHandlerRegistry registry) {
+        VersionalResourceResolver resolver = new VersionalResourceResolver()
+                .addStrategy(new FixedVersionStrategy("v2025.09"), "/static/**")
+                .addStrategy(new ContentHashVersionStrategy("SHA-256", 16), "/assets/**");
+
         registry.registerHandler("/assets/{*filepath}")
                 .addResourceLocations("classpath:static/", "file:/C:/Users/Ivan_Hontarenko/Git/")
                 .setCacheControl(CacheControl.empty().cachePublic())
                 .getChainRegistration()
-                .addResolvers(new PathNormalizationResolver(), new VersionalResourceResolver().addStrategy(
-                        new FixedVersionStrategy("v1"), "/**"
-                ), new LocationScanningResolver());
+                .addResolvers(new PathNormalizationResolver(), resolver, new LocationScanningResolver());
+
         registry.registerHandler("/static/**")
                 .addResourceLocations("classpath:HTML/")
                 .setCachePeriod(3344411)

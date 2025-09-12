@@ -18,6 +18,10 @@ import org.jmouse.util.PathHelper;
  */
 public class PathNormalizationResolver extends AbstractResourceResolver {
 
+    public PathNormalizationResolver() {
+        super(new Composer());
+    }
+
     /**
      * 🔎 Normalize and sanitize resource path before continuing resolution.
      *
@@ -25,11 +29,11 @@ public class PathNormalizationResolver extends AbstractResourceResolver {
      * @param resourceQuery resource query with raw path + locations
      * @param next          next chain element
      * @return outcome with:
-     *         <ul>
-     *           <li>{@link Outcome#done(Object)} — if path is invalid</li>
-     *           <li>{@link Outcome#next()} — if unchanged, let chain continue</li>
-     *           <li>delegated {@link ResourceQuery} — if path was normalized</li>
-     *         </ul>
+     * <ul>
+     *   <li>{@link Outcome#done(Object)} — if path is invalid</li>
+     *   <li>{@link Outcome#next()} — if unchanged, let chain continue</li>
+     *   <li>delegated {@link ResourceQuery} — if path was normalized</li>
+     * </ul>
      */
     @Override
     public Outcome<Resource> handle(
@@ -58,4 +62,20 @@ public class PathNormalizationResolver extends AbstractResourceResolver {
 
         return Outcome.next();
     }
+
+    public static class Composer implements ResourceComposer {
+
+        @Override
+        public Outcome<String> handle(
+                String relativePath, UrlComposerContext context, Chain<String, UrlComposerContext, String> next) {
+
+            String newPath = PathHelper.normalize(relativePath, false);
+
+            newPath = newPath.replace('/', '_');
+
+            return next.proceed(newPath, context);
+        }
+
+    }
+
 }

@@ -47,10 +47,10 @@ public interface Chain<C, I, R> {
      * @param links ordered list of links
      * @return composed chain
      */
-    static <C, I, R> Chain<C, I, R> of(List<? extends Link<C, I, R>> links) {
+    static <C, I, R> Chain<C, I, R> of(List<? extends Link<C, I, R>> links, boolean reverse) {
         Builder<C, I, R> builder = builder();
         links.forEach(builder::add);
-        return builder.build();
+        return builder.reversed(reverse).build();
     }
 
     /**
@@ -87,6 +87,7 @@ public interface Chain<C, I, R> {
 
         private final List<Link<C, I, R>> links    = new ArrayList<>();
         private       BiFunction<C, I, R> fallback = (c, i) -> null;
+        private       boolean             reversed = false;
 
         /**
          * ➕ Add a link to the chain.
@@ -111,17 +112,31 @@ public interface Chain<C, I, R> {
         }
 
         /**
+         * 🔄 Configure whether the chain should be executed in reverse order.
+         *
+         * <p>By default, resolvers/handlers are applied in the order they were registered.
+         * Setting this flag to {@code true} will invert the execution sequence.</p>
+         *
+         * @param reversed {@code true} to run the chain in reverse
+         * @return this builder
+         */
+        public Builder<C, I, R> reversed(boolean reversed) {
+            this.reversed = reversed;
+            return this;
+        }
+
+        /**
          * ✅ Build the chain in reverse order of insertion,
          * so that the first added link executes first.
          *
          * @return composed chain
          */
         public Chain<C, I, R> build() {
-            ListIterator<? extends Link<C, I, R>> iterator = links.listIterator(links.size());
+            ListIterator<? extends Link<C, I, R>> iterator = links.listIterator(reversed ? 0 : links.size());
             Chain<C, I, R>                        chain    = Chain.empty(fallback);
 
-            while (iterator.hasPrevious()) {
-                Link<C, I, R>  link = iterator.previous();
+            while (reversed ? iterator.hasNext() : iterator.hasPrevious()) {
+                Link<C, I, R>  link = reversed ? iterator.next() : iterator.previous();
                 Chain<C, I, R> next = chain;
 
                 chain = (context, input) -> {

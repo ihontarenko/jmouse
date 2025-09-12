@@ -33,4 +33,21 @@ public interface ResourceResolver extends Link<HttpServletRequest, ResourceQuery
     ) {
         return handle(request, resourceQuery, next);
     }
+
+    /**
+     * 🎼 Return the {@link ResourceComposer} associated with this resolver.
+     *
+     * <p>By default, returns {@link NoopComposer#INSTANCE}, meaning
+     * no additional composition (e.g. URL rewriting, versioning) is applied.</p>
+     *
+     * <p>Resolvers may override this method to provide custom
+     * post-processing of resolved resources.</p>
+     *
+     * @return the composer, never {@code null}
+     */
+    default ResourceComposer getComposer() {
+        return NoopComposer.INSTANCE;
+    }
+
+
 }

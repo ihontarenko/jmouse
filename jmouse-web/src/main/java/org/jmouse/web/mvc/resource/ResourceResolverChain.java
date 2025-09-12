@@ -22,4 +22,17 @@ public interface ResourceResolverChain extends Chain<HttpServletRequest, Resourc
     default Resource resolve(HttpServletRequest request, ResourceQuery resourceQuery) {
         return run(request, resourceQuery);
     }
+
+    /**
+     * 🎼 Apply the composition chain to a resolved {@link Resource}.
+     *
+     * <p>Each resolver’s {@link ResourceComposer} may transform the
+     * resource path (e.g. add versioning, rewrite URL, etc.).</p>
+     *
+     * @param relative      the relative path to compose final resource URL
+     * @param context       the query context
+     * @return the composed resource path, or {@code null} if no composer produced a value
+     */
+    String compose(String relative, UrlComposerContext context);
+
 }

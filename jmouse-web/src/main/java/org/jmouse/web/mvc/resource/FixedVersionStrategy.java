@@ -124,8 +124,22 @@ public class FixedVersionStrategy extends AbstractVersionStrategy {
      * @throws UnsupportedOperationException always
      */
     @Override
-    public PathVersion generateVersion(Resource resource) {
-        throw new UnsupportedOperationException();
+    public String generateVersion(Resource resource) {
+        return version;
     }
 
+    /**
+     * ✅ Validate whether the given version matches the provided resource.
+     *
+     * <p>Implementations may check checksum, timestamp, hash,
+     * or other resource metadata to ensure the version is correct.</p>
+     *
+     * @param resource the resource to verify
+     * @param version  the extracted version string
+     * @return {@code true} if version is valid for the resource, {@code false} otherwise
+     */
+    @Override
+    public boolean validateVersion(Resource resource, String version) {
+        return version.startsWith(this.version);
+    }
 }

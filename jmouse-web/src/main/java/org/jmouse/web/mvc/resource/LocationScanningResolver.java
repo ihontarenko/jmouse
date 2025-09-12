@@ -5,33 +5,66 @@ import org.jmouse.core.chain.Chain;
 import org.jmouse.core.chain.Outcome;
 import org.jmouse.core.io.Resource;
 
+import java.util.List;
+
 public class LocationScanningResolver extends AbstractResourceResolver {
 
-    public LocationScanningResolver() { }
+    public LocationScanningResolver() {
+        super(null);
+        setComposer(new Composer());
+    }
 
     @Override
     public Outcome<Resource> handle(HttpServletRequest context, ResourceQuery resourceQuery,
                           Chain<HttpServletRequest, ResourceQuery, Resource> next) {
-        String clearPath = resourceQuery.path();
+        String   relativePath = resourceQuery.path();
+        Resource resource     = getResource(relativePath, resourceQuery.locations());
 
-        for (Resource location : resourceQuery.locations()) {
-            Resource resource = getResource(clearPath, location);
-            if (resource != null) {
-                return Outcome.done(resource);
-            }
+        if (resource != null) {
+            return Outcome.done(resource);
         }
 
         return Outcome.done(null);
     }
 
-    private Resource getResource(String filepath, Resource root) {
-        Resource resource = root.merge(filepath);
+    private Resource getResource(String relativePath, List<? extends Resource> locations) {
+        Resource resource = null;
+
+        for (Resource location : locations) {
+            Resource candidate = getResource(relativePath, location);
+            if (candidate != null) {
+                resource = candidate;
+                break;
+            }
+        }
+
+        return resource;
+    }
+
+    private Resource getResource(String relativePath, Resource root) {
+        Resource resource = root.merge(relativePath);
 
         if (resource.isReadable()) {
             return resource;
         }
 
         return null;
+    }
+
+    public class Composer implements ResourceComposer {
+
+        @Override
+        public Outcome<String> handle(
+                String relativePath, UrlComposerContext context, Chain<String, UrlComposerContext, String> next) {
+            Resource resource = LocationScanningResolver.this.getResource(relativePath, context.locations());
+
+            if (resource != null && resource.isReadable()) {
+                return next.proceed(relativePath, new UrlComposerContext(resource, context.locations()));
+            }
+
+            return Outcome.done(null);
+        }
+
     }
 
 }
