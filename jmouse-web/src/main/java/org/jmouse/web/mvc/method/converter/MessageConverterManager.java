@@ -35,21 +35,49 @@ public class MessageConverterManager implements InitializingBean {
     }
 
     /**
-     * 🔍 Finds a suitable {@link HttpMessageConverter} to write the given value
-     * with the specified content type.
+     * 🔍 Find a suitable {@link HttpMessageConverter} for the given value.
+     *
+     * <p>Delegates to {@link #getMessageConverter(Class, String)} by inferring
+     * the value type from the actual runtime class of the object.</p>
+     *
+     * <h3>Resolution steps:</h3>
+     * <ol>
+     *   <li>Detects the value type (or {@code null} if value is {@code null}).</li>
+     *   <li>Iterates over registered converters in order.</li>
+     *   <li>Checks each converter with {@link HttpMessageConverter#isWritable(Class, org.jmouse.core.MediaType)}.</li>
+     *   <li>Returns the first compatible converter found.</li>
+     * </ol>
+     *
+     * <p>⚠️ If no converter is found, {@code null} is returned. In such cases,
+     * callers are expected to handle this gracefully or raise an
+     * {@link UnsuitableException}.</p>
      *
      * @param <T>         the value type
-     * @param value       the object to write
-     * @param contentType the media type as a string
-     * @return a compatible {@link HttpMessageConverter} for writing
-     * @throws UnsuitableException if no suitable converter is found
+     * @param value       the object to be written (may be {@code null})
+     * @param contentType the desired media type as a string
+     * @return a matching {@link HttpMessageConverter}, or {@code null} if none found
      */
     @SuppressWarnings("unchecked")
     public <T> HttpMessageConverter<T> getMessageConverter(T value, String contentType) {
+        return getMessageConverter(value != null ? value.getClass() : null, contentType);
+    }
+
+    /**
+     * 🎯 Find a suitable {@link HttpMessageConverter} for the given type and media type.
+     *
+     * <p>Iterates through all configured converters and returns the first one
+     * that reports itself as writable for the given combination.</p>
+     *
+     * @param <T>        the expected value type
+     * @param valueType  the runtime class of the value (may be {@code null})
+     * @param contentType the target media type as a string (never {@code null})
+     * @return a matching {@link HttpMessageConverter}, or {@code null} if none found
+     */
+    @SuppressWarnings("unchecked")
+    public <T> HttpMessageConverter<T> getMessageConverter(Class<?> valueType, String contentType) {
         HttpMessageConverter<T> messageConverter = null;
 
         for (HttpMessageConverter<?> converter : converters) {
-            Class<?> valueType = value != null ? value.getClass() : null;
             if (converter.isWritable(valueType, MediaType.forString(contentType))) {
                 messageConverter = (HttpMessageConverter<T>) converter;
                 break;
@@ -58,6 +86,7 @@ public class MessageConverterManager implements InitializingBean {
 
         return messageConverter;
     }
+
 
     /**
      * 📋 Returns the list of supported media types.

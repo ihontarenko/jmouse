@@ -8,6 +8,8 @@ import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.mvc.resource.ResourceUrlResolver;
 
+import java.util.List;
+
 @Controller
 public class IndexController {
 

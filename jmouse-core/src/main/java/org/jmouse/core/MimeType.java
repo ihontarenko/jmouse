@@ -82,10 +82,19 @@ public class MimeType {
      *
      * @param other the MimeType to clone
      */
-    public MimeType(MimeType other) {
-        this(other.getType(), other.getSubType(), other.getParameters());
+    public MimeType(MimeType other, Map<String, String> parameters) {
+        this(other.getType(), other.getSubType(), parameters);
         this.toStringValue = other.toStringValue;
         this.charset = other.charset;
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param other the MimeType to clone
+     */
+    public MimeType(MimeType other) {
+        this(other, other.getParameters());
     }
 
     /**

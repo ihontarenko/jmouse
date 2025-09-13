@@ -169,6 +169,15 @@ public class MediaType extends MimeType {
      *
      * @param other the MimeType instance to copy
      */
+    public MediaType(MimeType other, Map<String, String> parameters) {
+        super(other, parameters);
+    }
+
+    /**
+     * Copy constructor from generic MimeType; copies any parsed 'q' parameter.
+     *
+     * @param other the MimeType instance to copy
+     */
     public MediaType(MimeType other) {
         super(other);
     }
