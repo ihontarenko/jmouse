@@ -158,21 +158,21 @@ public class PartialResourceHttpMessageConverter extends AbstractHttpMessageConv
 
                 end = Math.min(end, length - 1);
 
-                write(output, null, true);
+                write(output, null, true); // \r\n
                 write(output, "--" + boundary, false);
-                write(output, null, true);
+                write(output, null, true); // \r\n
 
                 write(output, "Content-Type: %s".formatted(contentType.toString()), false);
                 write(output, null, true);
                 write(output, "Content-Range: bytes %d-%d/%d".formatted(start, end, length), false);
-                write(output, null, true);
-                write(output, null, true);
+                write(output, null, true); // \r\n
+                write(output, null, true); // \r\n
 
                 try (InputStream input = segment.getResource().getInputStream()) {
                     StreamHelper.copy(input, output, start, end);
                 }
 
-                write(output, null, true);
+                write(output, null, true); // \r\n
             }
 
             write(output, "--" + boundary + "--", false);
