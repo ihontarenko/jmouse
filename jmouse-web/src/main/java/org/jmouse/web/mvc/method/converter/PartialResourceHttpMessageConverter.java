@@ -1,5 +1,6 @@
 package org.jmouse.web.mvc.method.converter;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
 import org.jmouse.core.MediaTypeHelper;
 import org.jmouse.core.StreamHelper;
@@ -8,6 +9,7 @@ import org.jmouse.core.io.ResourceSegment;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpStatus;
 import org.jmouse.web.http.request.Headers;
+import org.jmouse.web.http.response.HeadersBuffer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,7 +83,7 @@ public class PartialResourceHttpMessageConverter extends AbstractHttpMessageConv
         }
 
         // If we are writing ranges, force 206 status
-        if (message instanceof ServletResponseHttpOutputMessage response) {
+        if (message instanceof ServletHttpOutputMessage response) {
             response.getResponse().setStatus(HttpStatus.PARTIAL_CONTENT.getCode());
         }
 
@@ -110,6 +112,10 @@ public class PartialResourceHttpMessageConverter extends AbstractHttpMessageConv
         long     rangeLength = segment.getTotal();
         long     end         = start + rangeLength - 1;
 
+        if (!validatePositions(start, end, length, message)) {
+            return;
+        }
+
         MediaType contentType = getMediaType(resource.getFilename());
         Headers   headers     = message.getHeaders();
 
@@ -136,6 +142,10 @@ public class PartialResourceHttpMessageConverter extends AbstractHttpMessageConv
 
         writeHeaders(headers, mediaType);
 
+        if (!validateSegments(segments, message)) {
+            return;
+        }
+
         try (OutputStream output = message.getOutputStream()) {
             for (ResourceSegment segment : segments) {
                 long start       = segment.getPosition();
@@ -145,17 +155,6 @@ public class PartialResourceHttpMessageConverter extends AbstractHttpMessageConv
 
                 String    filename    = segment.getResource().getFilename();
                 MediaType contentType = getMediaType(filename);
-
-                if (start < 0 || start >= length || end < start) {
-                    headers.setHeader(HttpHeader.CONTENT_RANGE, "bytes */%d".formatted(length));
-                    headers.setContentLength(0);
-                    if (message instanceof ServletResponseHttpOutputMessage response) {
-                        response.getResponse().setStatus(HttpStatus.RANGE_NOT_SATISFIABLE.getCode());
-                        response.writeHeaders();
-                        response.getResponse().flushBuffer();
-                    }
-                    return;
-                }
 
                 end = Math.min(end, length - 1);
 
@@ -176,6 +175,95 @@ public class PartialResourceHttpMessageConverter extends AbstractHttpMessageConv
 
             write(output, "--" + boundary + "--", false);
         }
+    }
+
+    /**
+     * ✅ Validate a list of {@link ResourceSegment} instances against their underlying resource lengths.
+     *
+     * <p>This method iterates over all segments and ensures that each segment's
+     * <code>start</code> and <code>end</code> byte positions fall within the valid
+     * range of the resource.</p>
+     *
+     * <p>If any segment is invalid:</p>
+     * <ul>
+     *   <li>Delegates to {@link #validatePositions(long, long, long, HttpOutputMessage)} to
+     *       prepare a <code>416 Range Not Satisfiable</code> response.</li>
+     *   <li>Stops further validation (early exit).</li>
+     * </ul>
+     *
+     * @param segments list of resource segments to validate
+     * @param message  HTTP output message adapter (used to set headers/status on error)
+     * @return {@code true} if all segments are valid; {@code false} if at least one segment is invalid
+     * @throws IOException if committing the error response fails
+     */
+    private boolean validateSegments(List<ResourceSegment> segments, HttpOutputMessage message) throws IOException {
+        boolean valid = true;
+
+        for (ResourceSegment segment : segments) {
+            long start       = segment.getPosition();
+            long rangeLength = segment.getTotal();
+            long end         = start + rangeLength - 1;
+            long length      = segment.getResource().getSize();
+
+            if (!validatePositions(start, end, length, message)) {
+                valid = false;
+                break;
+            }
+        }
+
+        return valid;
+    }
+
+    /**
+     * ✅ Validate computed byte positions against the resource length and, if invalid,
+     * prepares a proper 416 (Range Not Satisfiable) response.
+     *
+     * <p>On invalid range this method:</p>
+     * <ul>
+     *   <li>Sets <code>Content-Range: bytes &#42;/{length}</code></li>
+     *   <li>Sets <code>Content-Length: 0</code></li>
+     *   <li>Writes buffered headers into the servlet response</li>
+     *   <li>Commits the response via <code>flushBuffer()</code> without opening the body stream</li>
+     * </ul>
+     *
+     * <p>Note: The last valid byte index is <code>length - 1</code>. This method treats
+     * <code>end >= length</code> as invalid.</p>
+     *
+     * @param start   inclusive start byte index (0-based) or -1 for suffix
+     * @param end     inclusive end byte index, or -1 for open-ended
+     * @param length  total resource length in bytes
+     * @param message HTTP output message adapter
+     * @return {@code true} if positions are valid and writing may proceed; {@code false} otherwise
+     * @throws IOException if committing the response fails
+     */
+    private boolean validatePositions(long start, long end, long length, HttpOutputMessage message) throws IOException {
+        boolean valid = true;
+
+        // Invalid when: negative start, start beyond EOF, inverted range, or end beyond last valid index
+        if (start < 0 || end < start || end >= length) {
+            Headers headers = message.getHeaders();
+
+            headers.setHeader(HttpHeader.CONTENT_RANGE, "bytes */%d".formatted(length));
+            headers.setContentLength(0);
+            headers.setHeader(HttpHeader.X_JMOUSE_DEBUG, "POSITIONS CORRUPTED; START: %d; END: %d; LENGTH: %d;"
+                    .formatted(start, end, length));
+
+            if (message instanceof ServletHttpOutputMessage responseMessage) {
+                HttpServletResponse response = responseMessage.getResponse();
+                HeadersBuffer       buffer   = responseMessage.getHeadersBuffer();
+
+                response.setStatus(HttpStatus.RANGE_NOT_SATISFIABLE.getCode());
+
+                if ((!responseMessage.isWritten() && !response.isCommitted()) || buffer.cleanup(response)) {
+                    responseMessage.writeHeaders();
+                    response.flushBuffer();
+                }
+            }
+
+            valid = false;
+        }
+
+        return valid;
     }
 
     /**

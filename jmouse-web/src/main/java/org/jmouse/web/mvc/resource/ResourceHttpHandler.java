@@ -112,7 +112,7 @@ public class ResourceHttpHandler implements RequestHttpHandler {
         }
 
         if (resource != null && resource.isReadable()) {
-            HttpOutputMessage httpMessage = new ServletResponseHttpOutputMessage(response);
+            HttpOutputMessage httpMessage = new ServletHttpOutputMessage(response);
             writeHeaders(httpMessage, resource);
             writeMessage(httpMessage, resource, ranges);
         }

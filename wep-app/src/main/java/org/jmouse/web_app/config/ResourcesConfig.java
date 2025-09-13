@@ -27,7 +27,12 @@ public class ResourcesConfig implements BeanConfigurer<ResourceHandlerRegistry> 
                 .addResourceLocations("file:/C:/Users/Ivan_Hontarenko/Media")
                 .setCacheControl(CacheControl.empty().cachePublic())
                 .getChainRegistration()
-                .addResolvers(new PathNormalizationResolver(), new LocationScanningResolver());
+                .addResolvers(
+                        new PathNormalizationResolver(),
+                        new VersionalResourceResolver()
+                                .addStrategy(new QueryParameterVersionStrategy("v"), "/laptop/**"),
+                        new LocationScanningResolver()
+                );
 
         registry.registerHandler("/assets/{*filepath}")
                 .addResourceLocations("classpath:static/", "file:/C:/Users/Ivan_Hontarenko/Git/")

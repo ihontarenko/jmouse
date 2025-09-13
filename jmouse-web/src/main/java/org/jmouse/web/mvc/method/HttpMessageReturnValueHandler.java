@@ -6,7 +6,7 @@ import org.jmouse.core.MediaType;
 import org.jmouse.web.mvc.HandlerMapping;
 import org.jmouse.web.mvc.MVCResult;
 import org.jmouse.web.http.request.RequestContext;
-import org.jmouse.web.mvc.method.converter.ServletResponseHttpOutputMessage;
+import org.jmouse.web.mvc.method.converter.ServletHttpOutputMessage;
 import org.jmouse.web.mvc.method.converter.HttpMessageConverter;
 import org.jmouse.web.mvc.method.converter.HttpOutputMessage;
 import org.jmouse.web.mvc.method.converter.MessageConverterManager;
@@ -90,7 +90,7 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
             throw new UnsuitableException("No suitable converter found for: " + acceptableTypes);
         }
 
-        HttpOutputMessage httpMessage   = new ServletResponseHttpOutputMessage(servletResponse);
+        HttpOutputMessage httpMessage   = new ServletHttpOutputMessage(servletResponse);
         Headers           outputHeaders = httpMessage.getHeaders();
 
         outputHeaders.setContentType(contentType);
