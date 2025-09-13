@@ -162,8 +162,10 @@ public class PartialResourceHttpMessageConverter extends AbstractHttpMessageConv
                 write(output, "--" + boundary, false);
                 write(output, null, true);
 
-                write(output, "Content-Type: %s".formatted(contentType.toString()), true);
-                write(output, "Content-Range: bytes %d-%d/%d".formatted(start, end, length), true);
+                write(output, "Content-Type: %s".formatted(contentType.toString()), false);
+                write(output, null, true);
+                write(output, "Content-Range: bytes %d-%d/%d".formatted(start, end, length), false);
+                write(output, null, true);
                 write(output, null, true);
 
                 try (InputStream input = segment.getResource().getInputStream()) {
