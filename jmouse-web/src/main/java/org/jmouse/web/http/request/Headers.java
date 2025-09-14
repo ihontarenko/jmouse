@@ -4,6 +4,8 @@ import org.jmouse.core.MediaType;
 import org.jmouse.core.MimeParser;
 import org.jmouse.core.Streamable;
 import org.jmouse.web.http.HttpHeader;
+import org.jmouse.web.http.HttpMethod;
+import org.jmouse.web.http.HttpStatus;
 
 import java.util.*;
 
@@ -27,19 +29,93 @@ import java.util.*;
 public final class Headers {
 
     private final Map<HttpHeader, Object> headers = new HashMap<>();
+    /**
+     * 🏷️ Optional HTTP status associated with this header set.
+     * <p>
+     * Typically used for buffered responses before committing to the client.
+     * </p>
+     */
+    private HttpStatus status = null;
 
     /**
-     * ➕ Adds or replaces a header.
+     * 🧭 Optional HTTP method associated with this header set.
+     * <p>
+     * Useful when representing request metadata alongside headers.
+     * </p>
+     */
+    private HttpMethod method = null;
+
+    /**
+     * 📡 Returns the buffered HTTP status code.
+     *
+     * <p>May be {@code null} if no status has been set yet.</p>
+     */
+    public HttpStatus getStatus() {
+        return status;
+    }
+
+    /**
+     * 📝 Sets the HTTP status code to buffer alongside headers.
+     *
+     * <p>This does not immediately commit the status to the client;
+     * it is applied when headers are written to the response.</p>
+     */
+    public void setStatus(HttpStatus status) {
+        this.status = status;
+    }
+
+    /**
+     * 🧭 Returns the HTTP method associated with this header set.
+     *
+     * <p>May be {@code null} if not explicitly assigned.</p>
+     */
+    public HttpMethod getMethod() {
+        return method;
+    }
+
+    /**
+     * 📝 Sets the HTTP method to buffer alongside headers.
+     *
+     * <p>Primarily useful in request handling scenarios where
+     * the method is tracked together with headers.</p>
+     */
+    public void setMethod(HttpMethod method) {
+        this.method = method;
+    }
+
+    /**
+     * ➕ Add or replace a header in this collection.
+     *
+     * <p>If a header with the same name already exists, its value
+     * will be overwritten with the provided {@code value}.</p>
+     *
+     * @param header the {@link HttpHeader} key (never {@code null})
+     * @param value  the header value (may be a {@link String}, {@link Number},
+     *               {@link java.util.List}, etc.)
      */
     public void setHeader(HttpHeader header, Object value) {
         headers.put(header, value);
     }
 
     /**
-     * 📥 Gets a header value.
+     * 📥 Retrieve the value of a header.
+     *
+     * @param header the {@link HttpHeader} to look up
+     * @return the associated value, or {@code null} if not present
      */
     public Object getHeader(HttpHeader header) {
         return headers.get(header);
+    }
+
+    /**
+     * ❌ Remove a header from this collection.
+     *
+     * @param header the {@link HttpHeader} to remove
+     * @return the previous value associated with the header,
+     *         or {@code null} if none was present
+     */
+    public Object removeHeader(HttpHeader header) {
+        return headers.remove(header);
     }
 
     /**

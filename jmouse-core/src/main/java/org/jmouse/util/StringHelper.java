@@ -81,4 +81,23 @@ public class StringHelper {
         return newString;
     }
 
+    public static boolean isQuoted(String value) {
+        return value.length() >= 2 && (
+                value.charAt(0) == '"' && value.charAt(value.length() - 1) == '"'
+                        || value.charAt(0) == '\'' && value.charAt(value.length() - 1) == '\''
+        );
+    }
+
+    public static String ensureQuoted(String value) {
+        return isQuoted(value) ? value : quote(value);
+    }
+
+    public static String quote(String etag) {
+        return "\"" + unquote(etag) + "\"";
+    }
+
+    public static String unquote(String value) {
+        return !isQuoted(value) ? value : value.substring(1, value.length() - 1);
+    }
+
 }
