@@ -141,7 +141,6 @@ public class PartialResourceHttpMessageConverter extends AbstractHttpMessageConv
         MediaType mediaType = getMultipartContentType(boundary);
 
         writeHeaders(headers, mediaType);
-//        writeDefaultHeaders();
 
         if (!validateSegments(segments, message)) {
             return;

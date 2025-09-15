@@ -158,7 +158,6 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
             if (segments != null && !segments.isEmpty()) {
                 messageConverter = messageConverterManager
                         .getMessageConverter(segments.getFirst(), null);
-
                 if (messageConverter != null) {
                     writable = segments;
                 }
@@ -167,9 +166,9 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
             if (messageConverter instanceof AbstractHttpMessageConverter<Object> httpMessageConverter) {
                 MediaType mediaType = mediaTypeFactory.getMediaType(resource.getName());
                 httpMessageConverter.writeDefaultHeaders(httpMessage, writable, mediaType);
-                try {
-                    httpMessage.getOutputStream();
-                } catch (IOException ignore) { }
+                if (httpMessage instanceof ServletHttpOutputMessage servletHttpOutputMessage) {
+                    servletHttpOutputMessage.writeHeaders();
+                }
             }
             return;
         }
