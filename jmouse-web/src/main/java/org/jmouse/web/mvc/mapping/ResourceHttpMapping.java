@@ -5,13 +5,13 @@ import org.jmouse.core.MethodParameter;
 import org.jmouse.core.io.PatternMatcherResourceLoader;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.mvc.AbstractHandlerPathMapping;
+import org.jmouse.web.mvc.Route;
 import org.jmouse.web.mvc.method.converter.MessageConverterManager;
 import org.jmouse.web.mvc.resource.ResourceHandlerRegistry;
 import org.jmouse.web.mvc.resource.ResourceHttpHandler;
 import org.jmouse.web.mvc.resource.ResourceRegistration;
 
-import static org.jmouse.web.mvc.Route.GET;
-import static org.jmouse.web.mvc.Route.HEAD;
+import static org.jmouse.web.mvc.Route.*;
 
 /**
  * 🧷 Path mapping for serving static resources.
@@ -37,6 +37,7 @@ public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceHttp
                     registration, resourceLoader, messageConverterManager, mediaTypeFactory);
             for (String pattern : registration.getPatterns()) {
                 addHandlerMapping(GET(pattern), handler);
+                addHandlerMapping(OPTIONS(pattern), handler);
                 addHandlerMapping(HEAD(pattern), handler);
             }
         }

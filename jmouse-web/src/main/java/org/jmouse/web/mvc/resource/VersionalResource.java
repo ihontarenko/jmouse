@@ -17,10 +17,14 @@ import java.net.URL;
  */
 public class VersionalResource implements HttpResource {
 
-    /** 🎯 Underlying resource being wrapped. */
+    /**
+     * 🎯 Underlying resource being wrapped.
+     */
     private final Resource delegate;
 
-    /** 🏷️ Fixed version identifier. */
+    /**
+     * 🏷️ Fixed version identifier.
+     */
     private final String version;
 
     /**
@@ -48,37 +52,57 @@ public class VersionalResource implements HttpResource {
         return headers;
     }
 
-    /** @return delegate resource name */
+    /**
+     * @return delegate resource name
+     */
     @Override
     public String getName() {
         return delegate.getName();
     }
 
-    /** @return delegate size in bytes */
+    /**
+     * @return delegate size in bytes
+     */
     @Override
-    public long getSize() {
-        return delegate.getSize();
+    public long getLength() {
+        return delegate.getLength();
     }
 
-    /** @return delegate URL */
+    /**
+     * ⏱️ Get the last-modified timestamp of this resource, if available.
+     */
+    @Override
+    public long getLastModified() {
+        return delegate.getLastModified();
+    }
+
+    /**
+     * @return delegate URL
+     */
     @Override
     public URL getURL() {
         return delegate.getURL();
     }
 
-    /** @return {@code true} if delegate is a file resource */
+    /**
+     * @return {@code true} if delegate is a file resource
+     */
     @Override
     public boolean isFile() {
         return delegate.isFile();
     }
 
-    /** @return delegate file handle */
+    /**
+     * @return delegate file handle
+     */
     @Override
     public File getFile() throws IOException {
         return delegate.getFile();
     }
 
-    /** @return delegate logical resource name */
+    /**
+     * @return delegate logical resource name
+     */
     @Override
     public String getResourceName() {
         return delegate.getResourceName();
@@ -95,13 +119,17 @@ public class VersionalResource implements HttpResource {
         return delegate.merge(relativePath);
     }
 
-    /** @return delegate reader */
+    /**
+     * @return delegate reader
+     */
     @Override
     public Reader getReader() {
         return delegate.getReader();
     }
 
-    /** @return delegate input stream */
+    /**
+     * @return delegate input stream
+     */
     @Override
     public InputStream getInputStream() throws IOException {
         return delegate.getInputStream();

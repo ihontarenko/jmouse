@@ -99,7 +99,7 @@ public final class ETag {
      * @param headerValue raw header string (may be {@code null}/blank)
      * @return list of parsed ETags (possibly empty)
      */
-    public static List<ETag> parseList(String headerValue) {
+    public static List<ETag> parseAll(String headerValue) {
         List<ETag> eTags = new ArrayList<>();
 
         if (headerValue == null || headerValue.isBlank()) {

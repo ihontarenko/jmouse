@@ -2,6 +2,7 @@ package org.jmouse.web.http.request;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.web.http.HttpHeader;
+import org.jmouse.web.http.HttpMethod;
 
 import java.util.Enumeration;
 
@@ -33,6 +34,8 @@ public record RequestHeaders(Headers headers) {
     public static RequestHeaders ofRequest(HttpServletRequest request) {
         Enumeration<String> headerNames = request.getHeaderNames();
         Headers             headers     = new Headers();
+
+        headers.setMethod(HttpMethod.ofName(request.getMethod()));
 
         while (headerNames.hasMoreElements()) {
             String     headerName = headerNames.nextElement();

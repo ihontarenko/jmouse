@@ -107,7 +107,7 @@ public class PartialResourceHttpMessageConverter extends AbstractHttpMessageConv
      */
     private void writeSingleSegment(HttpOutputMessage message, ResourceSegment segment) throws IOException {
         Resource resource    = segment.getResource();
-        long     length      = resource.getSize();
+        long     length      = resource.getLength();
         long     start       = segment.getPosition();
         long     rangeLength = segment.getTotal();
         long     end         = start + rangeLength - 1;
@@ -141,6 +141,7 @@ public class PartialResourceHttpMessageConverter extends AbstractHttpMessageConv
         MediaType mediaType = getMultipartContentType(boundary);
 
         writeHeaders(headers, mediaType);
+//        writeDefaultHeaders();
 
         if (!validateSegments(segments, message)) {
             return;
@@ -151,7 +152,7 @@ public class PartialResourceHttpMessageConverter extends AbstractHttpMessageConv
                 long start       = segment.getPosition();
                 long rangeLength = segment.getTotal();
                 long end         = start + rangeLength - 1;
-                long length      = segment.getResource().getSize();
+                long length      = segment.getResource().getLength();
 
                 String    filename    = segment.getResource().getFilename();
                 MediaType contentType = getMediaType(filename);
@@ -205,7 +206,7 @@ public class PartialResourceHttpMessageConverter extends AbstractHttpMessageConv
             long start       = segment.getPosition();
             long rangeLength = segment.getTotal();
             long end         = start + rangeLength - 1;
-            long length      = segment.getResource().getSize();
+            long length      = segment.getResource().getLength();
 
             if (!validatePositions(start, end, length, message)) {
                 valid = false;

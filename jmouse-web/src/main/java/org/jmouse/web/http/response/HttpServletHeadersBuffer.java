@@ -2,6 +2,7 @@ package org.jmouse.web.http.response;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
+import org.jmouse.web.http.HttpStatus;
 import org.jmouse.web.http.request.Headers;
 
 import java.nio.charset.Charset;
@@ -71,6 +72,11 @@ public class HttpServletHeadersBuffer implements HeadersBuffer {
     public void write(HttpServletResponse response) {
         if (!isWritten()) {
             written = true;
+
+            // buffered status code is prioritized
+            if (headers.getStatus() != null && headers.getStatus().getCode() != response.getStatus()) {
+                response.setStatus(headers.getStatus().getCode());
+            }
 
             headers.asMap().forEach((headerName, headerValue) -> {
                 if (headerValue instanceof List<?> collection) {

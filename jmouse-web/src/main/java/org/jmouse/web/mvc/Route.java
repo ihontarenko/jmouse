@@ -80,6 +80,16 @@ public final class Route {
     }
 
     /**
+     * 📥 Creates a OPTIONS route for the given path.
+     *
+     * @param path the route path matched (e.g. "/users")
+     * @return new {@code Route} instance with OPTIONS method
+     */
+    public static Route OPTIONS(String path) {
+        return route().OPTIONS(path).build();
+    }
+
+    /**
      * 📤 Creates a POST route for the given path.
      *
      * @param path the route path matched (e.g. "/submit")
@@ -260,6 +270,13 @@ public final class Route {
          */
         public Builder PATCH(String path) {
             return method(HttpMethod.PATCH).path(path);
+        }
+
+        /**
+         * Shortcut for {@code method(HttpMethod.OPTIONS).path(path)}
+         */
+        public Builder OPTIONS(String path) {
+            return method(HttpMethod.OPTIONS).path(path);
         }
 
         /**

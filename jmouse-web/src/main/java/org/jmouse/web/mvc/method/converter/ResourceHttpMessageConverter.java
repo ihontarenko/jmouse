@@ -10,6 +10,8 @@ import org.jmouse.web.http.request.Headers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 📦 {@link HttpMessageConverter} for {@link Resource} bodies.
@@ -51,6 +53,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
     protected void doWrite(Resource resource, Class<?> type, HttpOutputMessage message) throws IOException {
         try {
             try (InputStream input = resource.getInputStream()) {
+                writeDefaultHeaders(message, resource, message.getHeaders().getContentType());
                 OutputStream output = message.getOutputStream();
                 input.transferTo(output);
                 output.flush();
@@ -93,7 +96,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
                 }
 
                 @Override
-                public long getSize() {
+                public long getLength() {
                     return headers.getContentLength();
                 }
 
@@ -108,6 +111,28 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
         } else {
             throw new UnreadableException("Unsupported resource: %s".formatted(clazz));
         }
+    }
+
+    /**
+     * 📏 Compute the {@code Content-Length} for the given value and media type.
+     */
+    @Override
+    public Long getContentLength(Resource writable, MediaType contentType) {
+        long length = -1L;
+
+        if (writable != null) {
+            length = writable.getLength();
+        }
+
+        return length;
+    }
+
+    /**
+     * 🔤 Default character set used when the selected {@link MediaType} has no charset.
+     */
+    @Override
+    public Charset getDefaultCharset() {
+        return StandardCharsets.UTF_8;
     }
 
     /**

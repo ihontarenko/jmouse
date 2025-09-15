@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
  *   <li>Adds {@code Accept-Ranges: bytes} and {@code Content-Length}</li>
  * </ul>
  */
-public class ResourceHttpHandler implements RequestHttpHandler {
+public class ResourceHttpHandler extends WebResponder implements RequestHttpHandler {
 
     /**
      * 📋 Registration containing patterns, locations, chain and cache settings.
@@ -100,17 +100,34 @@ public class ResourceHttpHandler implements RequestHttpHandler {
      */
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        ResourceResolverChain chain    = getResolverChain(registration.getChainRegistration().getResolvers());
-        ResourceQuery         query    = getResourceQuery(request, registration.getLocations());
-        Resource              resource = chain.resolve(request, query);
+        ResourceResolverChain chain           = getResolverChain(registration.getChainRegistration().getResolvers());
+        ResourceQuery         query           = getResourceQuery(request, registration.getLocations());
+        Resource              resource        = chain.resolve(request, query);
+        Headers               requestHeaders  = RequestAttributesHolder.getRequestHeaders().headers();
+        HttpMethod            httpMethod      = requestHeaders.getMethod();
+        Headers               responseHeaders = getHeaders();
 
-        if (request instanceof WebRequest webRequest && webRequest.getHttpMethod() == HttpMethod.OPTIONS) {
-            // todo: handle allow methods
+        if (maybeHandleOptions(httpMethod, response)) {
+            return;
         }
 
+        checkRequest(httpMethod, false);
+
         if (resource != null && resource.isReadable()) {
-            HttpOutputMessage httpMessage = new ServletHttpOutputMessage(response);
-            writeHeaders(httpMessage, resource);
+            HttpExchangeSupport exchangeSupport = new HttpExchangeSupport(requestHeaders, responseHeaders);
+            if (exchangeSupport.checkNotModified(null, resource.getLastModified())) {
+                prepareResponse();
+                return;
+            }
+
+            HttpOutputMessage httpMessage    = new ServletHttpOutputMessage(response);
+            Headers           messageHeaders = httpMessage.getHeaders();
+
+            // Handler/Responder writes caching, vary, allow headers into buffer
+            writeHeaders(messageHeaders, resource);
+            // Flush buffered headers into actual HttpServletResponse
+            writeHeaders(response);
+            // Finally, write the body and converter's headers
             writeMessage(httpMessage, resource, request);
         }
     }
@@ -150,6 +167,9 @@ public class ResourceHttpHandler implements RequestHttpHandler {
             if (messageConverter instanceof AbstractHttpMessageConverter<Object> httpMessageConverter) {
                 MediaType mediaType = mediaTypeFactory.getMediaType(resource.getName());
                 httpMessageConverter.writeDefaultHeaders(httpMessage, writable, mediaType);
+                try {
+                    httpMessage.getOutputStream();
+                } catch (IOException ignore) { }
             }
             return;
         }
@@ -174,11 +194,10 @@ public class ResourceHttpHandler implements RequestHttpHandler {
      *   <li>Sets {@code Content-Length} from resource size</li>
      * </ul>
      *
-     * @param httpMessage HTTP output message
+     * @param headers buffered output headers
      * @param resource resolved resource
      */
-    private void writeHeaders(HttpOutputMessage httpMessage, Resource resource) {
-        Headers   headers   = httpMessage.getHeaders();
+    private void writeHeaders(Headers headers, Resource resource) {
         MediaType mediaType = mediaTypeFactory.getMediaType(resource.getName());
 
         headers.setContentType(mediaType);
@@ -190,21 +209,8 @@ public class ResourceHttpHandler implements RequestHttpHandler {
 
         headers.setHeader(HttpHeader.ACCEPT_RANGES, "bytes");
 
-        CacheControl cacheControl = registration.getCacheControl();
-        Integer      seconds      = registration.getCachePeriod();
-
-        if (seconds != null) {
-            cacheControl = CacheControl.empty()
-                    .maxAge(registration.getCachePeriod(), TimeUnit.SECONDS).mustRevalidate();
-            headers.setHeader(HttpHeader.EXPIRES, System.currentTimeMillis() + seconds * 1000L);
-        }
-
-        if (cacheControl != null) {
-            headers.setHeader(HttpHeader.CACHE_CONTROL, cacheControl.toHeaderValue());
-        }
-
         if (headers.getRange() == null) {
-            headers.setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(resource.getSize()));
+            headers.setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(resource.getLength()));
         }
     }
 

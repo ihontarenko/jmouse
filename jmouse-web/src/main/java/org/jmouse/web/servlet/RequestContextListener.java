@@ -47,7 +47,7 @@ public class RequestContextListener implements ServletRequestListener {
             attach(servletRequest, RequestAttributesHolder::setQueryParameters,
                    RequestAttributesHolder.getRequestRoute().queryParameters(), QueryParameters.QUERY_PARAMETERS_ATTRIBUTE);
             attach(servletRequest, RequestAttributesHolder::setRequestHeaders,
-                   new RequestHeaders(RequestAttributesHolder.getRequestRoute().headers()), RequestHeaders.REQUEST_HEADERS_ATTRIBUTE);
+                   RequestHeaders.ofRequest(servletRequest), RequestHeaders.REQUEST_HEADERS_ATTRIBUTE);
 
             // Set core request attributes (used as fallback context container)
             RequestAttributesHolder.setRequestAttributes(
@@ -82,7 +82,7 @@ public class RequestContextListener implements ServletRequestListener {
         if (object != null) {
             request.setAttribute(attributeKey, object);
             attacher.accept(object);
-            LOGGER.info("🔗 Attached [{}] to request with key [{}]", object.getClass().getSimpleName(), attributeKey);
+            LOGGER.debug("🔗 Attached [{}] to request with key [{}]", object.getClass().getSimpleName(), attributeKey);
         }
     }
 
@@ -91,6 +91,6 @@ public class RequestContextListener implements ServletRequestListener {
      */
     private <T> void remove(Runnable remover, Class<T> type) {
         remover.run();
-        LOGGER.info("❌ Removed thread-local [{}]", type.getSimpleName());
+        LOGGER.debug("❌ Removed thread-local [{}]", type.getSimpleName());
     }
 }

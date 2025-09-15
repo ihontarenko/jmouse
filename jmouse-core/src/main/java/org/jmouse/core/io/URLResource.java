@@ -45,11 +45,32 @@ public class URLResource extends AbstractResource {
      * </p>
      */
     @Override
-    public long getSize() {
+    public long getLength() {
         try (InputStream stream = getInputStream()) {
             return stream.available();
         } catch (IOException e) {
             throw new RuntimeException("Failed to get size of resource: %s".formatted(getName()), e);
+        }
+    }
+
+    /**
+     * ⏱️ Get the last-modified timestamp of this resource, if available.
+     *
+     * <p>Typically expressed as the number of milliseconds since the
+     * epoch (January 1, 1970 UTC). Implementations may return {@code 0}
+     * if the last modification time cannot be determined.</p>
+     *
+     * @return last modified time in epoch milliseconds, or {@code 0} if unavailable
+     */
+    @Override
+    public long getLastModified() {
+        try {
+            var connection = url.openConnection();
+            connection.setUseCaches(false);
+            return connection.getLastModified();
+        } catch (IOException e) {
+            // RFC allows to return 0 when unknown/unavailable
+            return 0;
         }
     }
 

@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 
 /**
@@ -41,8 +42,26 @@ public class FileSystemResource extends AbstractResource implements WritableReso
      * Returns the size of the file in bytes.
      */
     @Override
-    public long getSize() {
+    public long getLength() {
         return file.length();
+    }
+
+    /**
+     * ⏱️ Get the last-modified timestamp of this resource, if available.
+     *
+     * <p>Typically expressed as the number of milliseconds since the
+     * epoch (January 1, 1970 UTC). Implementations may return {@code 0}
+     * if the last modification time cannot be determined.</p>
+     *
+     * @return last modified time in epoch milliseconds, or {@code 0} if unavailable
+     */
+    @Override
+    public long getLastModified() {
+        try {
+            return Files.getLastModifiedTime(this.path).toMillis();
+        } catch (IOException exception) {
+            return -1;
+        }
     }
 
     /**

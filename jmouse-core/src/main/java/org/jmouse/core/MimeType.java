@@ -42,6 +42,7 @@ public class MimeType {
     private final String              type;
     private final String              subtype;
     private       String              toStringValue;
+    private       int                 hashCode;
     private       Charset             charset;
 
     /**
@@ -318,10 +319,11 @@ public class MimeType {
     public String toString() {
         String value = toStringValue;
 
-        if (value == null) {
+        if (value == null || hashCode != hashCode()) {
             StringBuilder builder = new StringBuilder();
             toString(builder);
             value = builder.toString();
+            hashCode = hashCode();
             toStringValue = value;
         }
 

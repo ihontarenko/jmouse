@@ -39,14 +39,14 @@ public class ByteArrayResource extends AbstractResource {
      */
     @Override
     public String getName() {
-        return "%s[%d]".formatted(getResourceName(), getSize());
+        return "%s[%d]".formatted(getResourceName(), getLength());
     }
 
     /**
      * @return size of the byte array in bytes
      */
     @Override
-    public long getSize() {
+    public long getLength() {
         return array.length;
     }
 

@@ -187,7 +187,7 @@ public class StandardConversion implements Conversion {
                     throw new ConverterNotFound(classPair);
                 }
 
-                LOGGER.info("Conversion transitions: {}", transitions);
+                LOGGER.debug("Conversion transitions: {}", transitions);
 
                 Object intermediate = source;
 
@@ -197,7 +197,7 @@ public class StandardConversion implements Conversion {
 
                 converted = (R) intermediate;
             } else {
-                LOGGER.info("Converter: {}", classPair);
+                LOGGER.debug("Converter: {}", classPair);
                 converted = converter.convert(source, targetType);
             }
 

@@ -55,6 +55,6 @@ public class ResourceRange {
      * @return content length in bytes
      */
     public static long getContentLength(Resource resource) {
-        return resource.getSize();
+        return resource.getLength();
     }
 }

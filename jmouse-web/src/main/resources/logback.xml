@@ -11,4 +11,6 @@
 
     <logger name="org.jmouse.el" level="info"/>
     <logger name="org.jmouse.core.convert" level="info"/>
+    <logger name="org.jmouse.web.mvc.routing" level="info"/>
+    <logger name="org.jmouse.web.servlet" level="info"/>
 </configuration>

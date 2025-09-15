@@ -29,7 +29,7 @@ import java.io.InputStream;
 public class InputStreamResource extends AbstractResource {
 
     private final InputStream stream;
-    private boolean read = false;
+    private       boolean     read = false;
 
     /**
      * 🏗️ Create a new resource backed by the given stream.
@@ -45,7 +45,7 @@ public class InputStreamResource extends AbstractResource {
      */
     @Override
     public String getName() {
-        return "%s[%d]".formatted(getResourceName(), getSize());
+        return "%s[%d]".formatted(getResourceName(), getLength());
     }
 
     /**

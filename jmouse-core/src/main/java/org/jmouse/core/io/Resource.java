@@ -18,21 +18,37 @@ import java.net.URL;
  */
 public interface Resource extends ReadableResource {
 
-    /** ❓ Unknown resource protocol. */
+    /**
+     * ❓ Unknown resource protocol.
+     */
     String UNKNOWN_PROTOCOL   = "unknown";
-    /** 📚 Java module runtime protocol. */
+    /**
+     * 📚 Java module runtime protocol.
+     */
     String JRT_PROTOCOL       = "jrt";
-    /** 📂 Classpath protocol. */
+    /**
+     * 📂 Classpath protocol.
+     */
     String CLASSPATH_PROTOCOL = "classpath";
-    /** 🎁 JAR protocol. */
+    /**
+     * 🎁 JAR protocol.
+     */
     String JAR_PROTOCOL       = "jar";
-    /** 📄 File system protocol. */
+    /**
+     * 📄 File system protocol.
+     */
     String FILE_PROTOCOL      = "file";
-    /** 🌐 HTTPS protocol. */
+    /**
+     * 🌐 HTTPS protocol.
+     */
     String HTTPS_PROTOCOL     = "https";
-    /** 🌐 HTTP protocol. */
+    /**
+     * 🌐 HTTP protocol.
+     */
     String HTTP_PROTOCOL      = "http";
-    /** 💻 Local protocol (custom use). */
+    /**
+     * 💻 Local protocol (custom use).
+     */
     String LOCAL_PROTOCOL     = "local";
 
     /**
@@ -104,8 +120,18 @@ public interface Resource extends ReadableResource {
 
     /**
      * 📏 Get the size of the resource in bytes.
+     *
+     * <p>Default implementation falls back to fully reading the
+     * {@link InputStream} if no direct size information is available.
+     * This can be expensive for large resources.</p>
+     *
+     * <p>Implementations are encouraged to override this method and
+     * provide a faster metadata-based lookup (e.g. {@code File.length()},
+     * {@code JarEntry#getSize()}, {@code URLConnection#getContentLengthLong()}).</p>
+     *
+     * @return content length in bytes, or {@code 0} if unknown/unavailable
      */
-    default long getSize() {
+    default long getLength() {
         long size = 0;
 
         try {
@@ -122,6 +148,19 @@ public interface Resource extends ReadableResource {
         } catch (IOException ignore) { }
 
         return size;
+    }
+
+    /**
+     * ⏱️ Get the last-modified timestamp of this resource, if available.
+     *
+     * <p>Typically expressed as the number of milliseconds since the
+     * epoch (January 1, 1970 UTC). Implementations may return {@code 0}
+     * if the last modification time cannot be determined.</p>
+     *
+     * @return last modified time in epoch milliseconds, or {@code 0} if unavailable
+     */
+    default long getLastModified() {
+        return 0;
     }
 
     /**
