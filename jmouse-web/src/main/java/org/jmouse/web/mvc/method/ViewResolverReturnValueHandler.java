@@ -112,19 +112,24 @@ public class ViewResolverReturnValueHandler extends AbstractReturnValueHandler {
      */
     @Override
     public boolean supportsReturnType(MVCResult result) {
-        Object                     returnValue = result.getReturnValue();
-        MethodParameter            returnType  = result.getReturnType();
-        Optional<MergedAnnotation> optional    = ofAnnotatedElement(returnType.getAnnotatedElement())
-                .get(ViewMapping.class);
+        Object          returnValue = result.getReturnValue();
+        MethodParameter returnType  = result.getReturnType();
 
-        if (optional.isPresent()) {
-            return true;
+        if (returnType != null) {
+            Optional<MergedAnnotation> optional = ofAnnotatedElement(
+                    returnType.getAnnotatedElement()).get(ViewMapping.class);
+
+            if (optional.isPresent()) {
+                return true;
+            }
+
+            if (returnValue instanceof String viewName) {
+                return viewName.startsWith(VIEW_PREFIX);
+            }
+
+            return returnValue instanceof View;
         }
 
-        if (returnValue instanceof String viewName) {
-            return viewName.startsWith(VIEW_PREFIX);
-        }
-
-        return returnValue instanceof View;
+        return false;
     }
 }

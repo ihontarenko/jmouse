@@ -1,13 +1,5 @@
 package org.jmouse.web.http.request;
 
-import org.jmouse.web.http.HttpMethod;
-
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Set;
-
-import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
-
 /**
  * 🧩 Thin adapter that mirrors Spring's ServletWebRequest "conditional" behavior
  * but works with jMouse Headers/HeadersBuffer.
@@ -18,9 +10,6 @@ import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
  * - write validators (ETag/Last-Modified) into response headers buffer
  */
 public final class HttpExchangeSupport {
-
-    private static final DateTimeFormatter HTTP_DATE = RFC_1123_DATE_TIME.withZone(ZoneId.of("GMT"));
-    private static final Set<HttpMethod>   SAFE      = Set.of(HttpMethod.GET, HttpMethod.HEAD);
 
     private final Headers requestHeaders;
     private final Headers responseHeaders;

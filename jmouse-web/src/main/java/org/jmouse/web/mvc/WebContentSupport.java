@@ -54,7 +54,19 @@ public abstract class WebContentSupport {
         getHeaders().clear();
     }
 
+    /**
+     * Attempts to remove headers from the target {@link HttpServletResponse}
+     * (when it is not yet committed) and/or clear buffered headers.
+     * <p>This is a best-effort cleanup; behavior depends on the underlying
+     * {@link HttpServletHeadersBuffer} implementation.</p>
+     *
+     * @param response target servlet response
+     * @return {@code true} if any cleanup action was performed; {@code false} otherwise
+     * @see HttpServletHeadersBuffer
+     * @see jakarta.servlet.http.HttpServletResponse
+     */
     public boolean cleanupHeaders(HttpServletResponse response) {
+        cleanupHeaders();
         return new HttpServletHeadersBuffer(getHeaders()).cleanup(response);
     }
 

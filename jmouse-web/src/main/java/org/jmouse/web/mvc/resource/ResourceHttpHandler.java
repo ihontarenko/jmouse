@@ -14,11 +14,12 @@ import org.jmouse.web.http.request.*;
 import org.jmouse.web.mvc.*;
 import org.jmouse.web.mvc.adapter.RequestHttpHandler;
 import org.jmouse.web.mvc.method.converter.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 🗂️ HTTP handler for serving static {@link Resource}s.
@@ -38,6 +39,8 @@ import java.util.concurrent.TimeUnit;
  * </ul>
  */
 public class ResourceHttpHandler extends WebResponder implements RequestHttpHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceHttpHandler.class);
 
     /**
      * 📋 Registration containing patterns, locations, chain and cache settings.
@@ -111,7 +114,14 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
         HttpMethod            httpMethod      = requestHeaders.getMethod();
         Headers               responseHeaders = getHeaders();
 
-        cleanupHeaders();
+        if (!cleanupHeaders(response)) {
+            LOGGER.error("Unable to remove headers from response headers");
+        }
+
+        if (resource == null || !resource.isReadable()) {
+            RequestPath requestPath = RequestAttributesHolder.getRequestPath();
+            throw new ResourceNotFoundException("RESOURCE NOT FOUND! URI: " + requestPath.path());
+        }
 
         if (maybeHandleOptions(httpMethod, response)) {
             return;
@@ -119,25 +129,23 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
 
         checkRequest(httpMethod, false);
 
-        if (resource != null && resource.isReadable()) {
-            HttpExchangeSupport exchangeSupport = new HttpExchangeSupport(requestHeaders, responseHeaders);
-            long                lastModified    = isUseLastModified() ? resource.getLastModified() : -1;
-            boolean             notModified     = exchangeSupport.checkNotModified(null, lastModified);
+        HttpExchangeSupport exchangeSupport = new HttpExchangeSupport(requestHeaders, responseHeaders);
+        long                lastModified    = isUseLastModified() ? resource.getLastModified() : -1;
+        boolean             notModified     = exchangeSupport.checkNotModified(null, lastModified);
 
-            prepareResponse();
+        prepareResponse();
 
-            HttpOutputMessage httpMessage    = new ServletHttpOutputMessage(response);
-            Headers           messageHeaders = httpMessage.getHeaders();
+        HttpOutputMessage httpMessage    = new ServletHttpOutputMessage(response);
+        Headers           messageHeaders = httpMessage.getHeaders();
 
-            // Handler/Responder writes caching, vary, allow headers into buffer
-            writeHeaders(messageHeaders, resource);
-            // Flush buffered headers into actual HttpServletResponse
-            writeHeaders(response);
+        // Handler/Responder writes caching, vary, allow headers into buffer
+        writeHeaders(messageHeaders, resource);
+        // Flush buffered headers into actual HttpServletResponse
+        writeHeaders(response);
 
-            if (!notModified) {
-                // Finally, write the body and converter's headers
-                writeMessage(httpMessage, resource, request);
-            }
+        if (!notModified) {
+            // Finally, write the body and converter's headers
+            writeMessage(httpMessage, resource, request);
         }
     }
 
