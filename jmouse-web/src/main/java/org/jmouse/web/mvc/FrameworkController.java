@@ -44,7 +44,8 @@ public class FrameworkController {
      */
     @ExceptionHandler({
             HandlerMappingException.class,
-            HandlerAdapterException.class
+            HandlerAdapterException.class,
+            IllegalStateException.class
     })
     public String exceptionHandler(
             @RequestHeader(HttpHeader.USER_AGENT) String userAgent,
@@ -54,11 +55,16 @@ public class FrameworkController {
             Exception exception,
             Model model
     ) {
-        response.setStatus(HttpStatus.NOT_FOUND.getCode());
+        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+
+        if (exception instanceof HandlerMappingException || exception instanceof HandlerAdapterException) {
+            httpStatus = HttpStatus.NOT_FOUND;
+        }
+
+        response.setStatus(httpStatus.getCode());
 
         RequestPath     requestPath     = RequestAttributesHolder.getRequestPath();
         QueryParameters queryParameters = RequestAttributesHolder.getQueryParameters();
-        HttpStatus httpStatus = HttpStatus.NOT_FOUND;
 
         model.addAttribute("userAgent", userAgent);
         model.addAttribute("httpStatus", httpStatus);

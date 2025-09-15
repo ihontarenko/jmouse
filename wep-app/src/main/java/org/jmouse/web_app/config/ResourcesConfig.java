@@ -2,7 +2,11 @@ package org.jmouse.web_app.config;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanConstructor;
+import org.jmouse.web.http.HttpHeader;
+import org.jmouse.web.http.HttpMethod;
+import org.jmouse.web.http.request.Allow;
 import org.jmouse.web.http.request.CacheControl;
+import org.jmouse.web.http.request.Vary;
 import org.jmouse.web.mvc.BeanConfigurer;
 import org.jmouse.web.mvc.resource.*;
 
@@ -67,6 +71,9 @@ public class ResourcesConfig implements BeanConfigurer<ResourceHandlerRegistry> 
         registry.registerHandler("/static/**")
                 .addResourceLocations("classpath:HTML/")
                 .setCachePeriod(3344411)
+                .setUseLastModified(true)
+                .setVary(Vary.of(HttpHeader.ACCEPT_LANGUAGE))
+                .setAllow(Allow.of(HttpMethod.GET, HttpMethod.HEAD))
                 .getChainRegistration()
                 .addResolvers(
                         new PathNormalizationResolver(),

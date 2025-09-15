@@ -55,6 +55,10 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
      * 🏭 Determines response {@link MediaType} based on resource name/extension.
      */
     private final MediaTypeFactory             mediaTypeFactory;
+    /**
+     * ⏱️ Whether to send {@code Last-Modified} header.
+     */
+    private boolean useLastModified = true;
 
     /**
      * 🏗️ Create a new resource HTTP handler.
@@ -107,6 +111,8 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
         HttpMethod            httpMethod      = requestHeaders.getMethod();
         Headers               responseHeaders = getHeaders();
 
+        cleanupHeaders();
+
         if (maybeHandleOptions(httpMethod, response)) {
             return;
         }
@@ -115,10 +121,10 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
 
         if (resource != null && resource.isReadable()) {
             HttpExchangeSupport exchangeSupport = new HttpExchangeSupport(requestHeaders, responseHeaders);
-            if (exchangeSupport.checkNotModified(null, resource.getLastModified())) {
-                prepareResponse();
-                return;
-            }
+            long                lastModified    = isUseLastModified() ? resource.getLastModified() : -1;
+            boolean             notModified     = exchangeSupport.checkNotModified(null, lastModified);
+
+            prepareResponse();
 
             HttpOutputMessage httpMessage    = new ServletHttpOutputMessage(response);
             Headers           messageHeaders = httpMessage.getHeaders();
@@ -127,8 +133,11 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
             writeHeaders(messageHeaders, resource);
             // Flush buffered headers into actual HttpServletResponse
             writeHeaders(response);
-            // Finally, write the body and converter's headers
-            writeMessage(httpMessage, resource, request);
+
+            if (!notModified) {
+                // Finally, write the body and converter's headers
+                writeMessage(httpMessage, resource, request);
+            }
         }
     }
 
@@ -294,4 +303,23 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
     public ResourceQuery getResourceQuery(HttpServletRequest request, List<String> locations) {
         return getResourceQuery(getResourcePath(request), locations);
     }
+
+    /**
+     * ⏱️ Enable or disable {@code Last-Modified} header support.
+     *
+     * @param useLastModified whether to send {@code Last-Modified}
+     */
+    public void setUseLastModified(boolean useLastModified) {
+        this.useLastModified = useLastModified;
+    }
+
+    /**
+     * ⏱️ Whether {@code Last-Modified} header support is enabled.
+     *
+     * @return {@code true} if enabled
+     */
+    public boolean isUseLastModified() {
+        return useLastModified;
+    }
+
 }

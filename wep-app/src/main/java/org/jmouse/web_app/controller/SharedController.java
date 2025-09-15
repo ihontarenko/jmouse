@@ -39,13 +39,6 @@ public class SharedController {
         throw new RuntimeException("RuntimeException");
     }
 
-    @ExceptionHandler({IllegalStateException.class, ArithmeticException.class})
-    public String illegalStateExceptionHandler(Model model, Exception e) {
-        model.addAttribute("message", e.getMessage());
-        model.addAttribute("stackTrace", e.getStackTrace());
-        return "view:index/error";
-    }
-
     @ExceptionHandler(IOException.class) public String handleIO(IOException ex) {
         return "IOException";
     }

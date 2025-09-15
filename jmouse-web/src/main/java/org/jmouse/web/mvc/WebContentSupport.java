@@ -33,13 +33,29 @@ public abstract class WebContentSupport {
         new HttpServletHeadersBuffer(getHeaders()).write(response);
     }
 
-
     /**
-     * Returns the {@link Headers} view from the internal buffer.
+     * Returns a live, mutable view of the buffered HTTP headers.
+     * <p>Changes to the returned instance affect what will be emitted
+     * when headers are eventually written to the response.</p>
      *
-     * @return modifiable headers collection
+     * @return modifiable headers collection (never {@code null})
      */
     public Headers getHeaders() {
         return headers;
     }
+
+    /**
+     * Clears all currently buffered headers.
+     * <p>Use to discard previously staged values before composing a new response.
+     * This does <em>not</em> remove headers that may have already been written to
+     * the underlying {@code HttpServletResponse}.</p>
+     */
+    public void cleanupHeaders() {
+        getHeaders().clear();
+    }
+
+    public boolean cleanupHeaders(HttpServletResponse response) {
+        return new HttpServletHeadersBuffer(getHeaders()).cleanup(response);
+    }
+
 }

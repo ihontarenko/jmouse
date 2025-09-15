@@ -1,6 +1,8 @@
 package org.jmouse.web.mvc.resource;
 
+import org.jmouse.web.http.request.Allow;
 import org.jmouse.web.http.request.CacheControl;
+import org.jmouse.web.http.request.Vary;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,9 +52,26 @@ public class ResourceRegistration {
     private CacheControl cacheControl;
 
     /**
-     * ⏱️ Whether to send {@code Last-Modified} header.
+     * Controls emission of the {@code Last-Modified} header when a valid timestamp is available.
+     * <p>Default: {@code true}. Typically relevant for safe methods (GET/HEAD) and 200/304 flows.</p>
      */
     private boolean useLastModified = true;
+
+    /**
+     * Preconfigured {@code Vary} policy applied by {@link ResourceHttpHandler#prepareResponse()}.
+     * <p>Use {@link Vary#empty()} to suppress emission; {@code null} means “no configured policy”.</p>
+     *
+     * @see org.jmouse.web.http.HttpHeader#VARY
+     */
+    private Vary vary = Vary.empty();
+
+    /**
+     * Model used to render the {@code Allow} header (e.g., for {@code OPTIONS} responses).
+     * <p>Usually computed from the supported methods; use {@link Allow#empty()} to emit nothing.</p>
+     *
+     * @see org.jmouse.web.http.HttpHeader#ALLOW
+     */
+    private Allow allow = Allow.empty();
 
     /**
      * ➕ Add URL patterns to this registration.
@@ -156,6 +175,55 @@ public class ResourceRegistration {
     public boolean isUseLastModified() {
         return useLastModified;
     }
+
+    /**
+     * Returns the configured {@link Vary} header model.
+     *
+     * @return current {@code Vary} configuration, or {@code null} if none
+     * @see org.jmouse.web.http.HttpHeader#VARY
+     */
+    public Vary getVary() {
+        return vary;
+    }
+
+    /**
+     * Sets the {@link Vary} header values to apply.
+     * <p>Passing {@code null} clears the configuration. If the value is empty,
+     * the {@code Vary} header will not be emitted.</p>
+     *
+     * @param vary the {@code Vary} configuration to use, or {@code null} to clear
+     * @return this registration
+     * @see org.jmouse.web.http.HttpHeader#VARY
+     */
+    public ResourceRegistration setVary(Vary vary) {
+        this.vary = vary;
+        return this;
+    }
+
+    /**
+     * Returns the {@link Allow} model used to render the {@code Allow} header.
+     *
+     * @return current {@code Allow} configuration; may be {@code null}
+     * @see org.jmouse.web.http.HttpHeader#ALLOW
+     */
+    public Allow getAllow() {
+        return allow;
+    }
+
+    /**
+     * Sets the {@link Allow} model used to render the {@code Allow} header.
+     * <p>Callers are responsible for providing a value consistent with the
+     * actually supported methods (e.g., including {@code OPTIONS} when applicable).</p>
+     *
+     * @param allow the {@code Allow} configuration to use; may be {@code null}
+     * @return this registration
+     * @see org.jmouse.web.http.HttpHeader#ALLOW
+     */
+    public ResourceRegistration setAllow(Allow allow) {
+        this.allow = allow;
+        return this;
+    }
+
 
     @Override
     public String toString() {

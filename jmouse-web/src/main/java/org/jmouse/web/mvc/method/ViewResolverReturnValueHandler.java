@@ -91,8 +91,8 @@ public class ViewResolverReturnValueHandler extends AbstractReturnValueHandler {
         if (viewName != null && !viewName.isBlank()) {
             try {
                 View view = viewResolver.resolveView(viewName);
+                response.setContentType(view.getContentType().toString());
                 view.render(result.getModel().getAttributes(), requestContext.request(), response);
-                response.setContentType(view.getContentType().getStringType());
             } catch (Exception e) {
                 throw new NotFoundException("Rendering failed: " + e.getMessage(), e);
             }

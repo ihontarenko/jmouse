@@ -132,18 +132,31 @@ public final class Allow {
     }
 
     /**
-     * Render to a header-line value (e.g. {@code "GET, POST"}).
+     * Renders the allowed methods as a single HTTP header-line value,
+     * e.g. {@code "GET, POST"}.
      *
-     * @return string representation for HTTP header
+     * <p><em>Note:</em> If no methods are present, this returns an empty string.
+     * Callers should avoid emitting an {@code Allow} header with an empty value.</p>
+     *
+     * @return comma-separated list of HTTP methods, or an empty string if none
+     * @see org.jmouse.web.http.HttpHeader#ALLOW
      */
     public String toHeaderValue() {
         if (allow.isEmpty()) {
             return "";
         }
-
         StringJoiner joiner = new StringJoiner(", ");
         allow.stream().map(HttpMethod::name).forEach(joiner::add);
         return joiner.toString();
+    }
+
+    /**
+     * Returns the allowed methods as an array for programmatic checks.
+     *
+     * @return array of allowed {@link HttpMethod}; never {@code null}
+     */
+    public HttpMethod[] toSupportedMethods() {
+        return allow.toArray(new HttpMethod[0]);
     }
 
     @Override

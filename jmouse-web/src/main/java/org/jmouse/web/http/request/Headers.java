@@ -141,9 +141,11 @@ public final class Headers {
     }
 
     /**
-     * 🧹 Clears all headers.
+     * 🧹 Clears all headers, status and http-method.
      */
     public void clear() {
+        status = null;
+        method = null;
         headers.clear();
     }
 

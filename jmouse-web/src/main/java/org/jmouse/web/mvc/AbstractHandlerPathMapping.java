@@ -104,7 +104,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
             request.setAttribute(ROUTE_PRODUCIBLE_ATTRIBUTE, route.produces());
 
             LOGGER.info(AnsiColors.colorize(
-                    "✅🔥 ${YELLOW_BOLD_BRIGHT}MATCHED:${RESET} ${CYAN_BOLD_BRIGHT}%s${RESET}", match));
+                    "✅🔥 ${BLUE_BOLD_BRIGHT}MATCHED:${RESET} ${GREEN_BOLD_BRIGHT}%s${RESET}", match));
         } else {
             LOGGER.info(AnsiColors.colorize(
                     "❌\uD83E\uDD7A ${RED_BOLD_BRIGHT}UNMATCHED:${RESET} ${YELLOW_BOLD_BRIGHT}%s${RESET}", requestRoute));

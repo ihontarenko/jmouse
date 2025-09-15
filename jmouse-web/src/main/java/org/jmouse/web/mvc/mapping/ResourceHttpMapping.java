@@ -35,6 +35,12 @@ public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceHttp
         for (ResourceRegistration registration : context.getBean(ResourceHandlerRegistry.class).getRegistrations()) {
             ResourceHttpHandler handler = new ResourceHttpHandler(
                     registration, resourceLoader, messageConverterManager, mediaTypeFactory);
+
+            handler.setCacheControl(registration.getCacheControl());
+            handler.setCacheSeconds(registration.getCachePeriod() == null ? -1 : registration.getCachePeriod());
+            handler.setVary(registration.getVary());
+            handler.setSupportedMethods(registration.getAllow().toSupportedMethods());
+
             for (String pattern : registration.getPatterns()) {
                 addHandlerMapping(GET(pattern), handler);
                 addHandlerMapping(OPTIONS(pattern), handler);

@@ -179,11 +179,11 @@ public abstract class WebResponder extends WebContentSupport {
      * @throws IllegalStateException if the method is unsupported or session is required but absent
      */
     protected final void checkRequest(HttpMethod method, boolean sessionExists) throws IllegalStateException {
-        if (this.supported != null && !this.supported.contains(method)) {
+        if (!getAllow().isEmpty() && !getAllow().contains(method)) {
             throw new IllegalStateException(
                     "HTTP method not supported: %s (Allow: %s)".formatted(method, allow.toHeaderValue()));
         }
-        if (this.requireSession && !sessionExists) {
+        if (isRequireSession() && !sessionExists) {
             throw new IllegalStateException("Pre-existing session required but none found");
         }
     }
@@ -215,9 +215,8 @@ public abstract class WebResponder extends WebContentSupport {
             }
         }
 
-        Vary vary = getVary();
-        if (vary != null && !vary.isEmpty()) {
-            vary.writeTo(headers);
+        if (getVary() != null && !getVary().isEmpty()) {
+            getVary().writeTo(headers);
         }
     }
 

@@ -107,4 +107,17 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
         messageConverter = context.getBean(StringHttpMessageConverter.class);
     }
 
+    /**
+     * 🎯 Determine a default {@link MediaType} for the given value.
+     *
+     * <p>By default, returns the first entry from {@link #getSupportedMediaTypes()}
+     * if present; otherwise {@code null}.</p>
+     *
+     * @param writable the object to be written (may be ignored by default)
+     * @return a default media type, or {@code null} if none
+     */
+    @Override
+    public MediaType getDefaultContentType(Object writable) {
+        return MediaType.TEXT_PLAIN;
+    }
 }
