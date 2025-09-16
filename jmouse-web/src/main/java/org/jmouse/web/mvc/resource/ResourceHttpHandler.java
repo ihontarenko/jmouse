@@ -46,22 +46,38 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
      * 📋 Registration containing patterns, locations, chain and cache settings.
      */
     private final ResourceRegistration         registration;
+
     /**
      * 🔎 Loader to resolve location strings into {@link Resource}s (classpath/file, etc.).
      */
     private final PatternMatcherResourceLoader resourceLoader;
+
     /**
      * 🔁 Finds an {@link HttpMessageConverter} that can write the resolved resource.
      */
     private final MessageConverterManager      messageConverterManager;
+
     /**
      * 🏭 Determines response {@link MediaType} based on resource name/extension.
      */
     private final MediaTypeFactory             mediaTypeFactory;
+
     /**
-     * ⏱️ Whether to send {@code Last-Modified} header.
+     * Controls emission of the {@code Last-Modified} response header when a valid timestamp is available.
+     * <p>Default: {@code true}.</p>
      */
-    private boolean useLastModified = true;
+    private boolean useLastModified = false;
+
+    /**
+     * Strategy used to compute entity tags (ETag).
+     *
+     * <p>If {@code null}, ETag generation is disabled. Provide a custom implementation
+     * for strong ETags (e.g., hashing the actual representation bytes) or rely on
+     * the default length/mtime-based approach for weak ETags.</p>
+     *
+     * @see org.jmouse.web.http.request.ETag
+     */
+    private ETagGenerator generator;
 
     /**
      * 🏗️ Create a new resource HTTP handler.
@@ -114,13 +130,9 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
         HttpMethod            httpMethod      = requestHeaders.getMethod();
         Headers               responseHeaders = getHeaders();
 
-        if (!cleanupHeaders(response)) {
-            LOGGER.error("Unable to remove headers from response headers");
-        }
-
         if (resource == null || !resource.isReadable()) {
-            RequestPath requestPath = RequestAttributesHolder.getRequestPath();
-            throw new ResourceNotFoundException("RESOURCE NOT FOUND! URI: " + requestPath.path());
+            throw new ResourceNotFoundException(
+                    "RESOURCE NOT FOUND! URI: " + RequestAttributesHolder.getRequestPath().path());
         }
 
         if (maybeHandleOptions(httpMethod, response)) {
@@ -129,24 +141,30 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
 
         checkRequest(httpMethod, false);
 
+        ETag                etag            = getGeneratedETag(resource);
         HttpExchangeSupport exchangeSupport = new HttpExchangeSupport(requestHeaders, responseHeaders);
-        long                lastModified    = isUseLastModified() ? resource.getLastModified() : -1;
-        boolean             notModified     = exchangeSupport.checkNotModified(null, lastModified);
+        long                modified        = isUseLastModified() ? resource.getLastModified() : -1;
+        boolean             notModified     = exchangeSupport.checkNotModified(etag, modified);
 
         prepareResponse();
+
+        if (notModified) {
+            if (etag != null) {
+                responseHeaders.setETag(etag.toHeaderValue());
+            }
+            writeHeaders(response);
+            return;
+        }
 
         HttpOutputMessage httpMessage    = new ServletHttpOutputMessage(response);
         Headers           messageHeaders = httpMessage.getHeaders();
 
-        // Handler/Responder writes caching, vary, allow headers into buffer
-        writeHeaders(messageHeaders, resource);
         // Flush buffered headers into actual HttpServletResponse
         writeHeaders(response);
-
-        if (!notModified) {
-            // Finally, write the body and converter's headers
-            writeMessage(httpMessage, resource, request);
-        }
+        // Handler/Responder writes caching, vary, allow headers into buffer
+        writeHeaders(messageHeaders, resource);
+        // Finally, write the body and converter's headers
+        writeMessage(httpMessage, resource, request);
     }
 
     /**
@@ -230,6 +248,16 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
         }
     }
 
+    /**
+     * Resolves HTTP byte ranges into concrete {@link ResourceSegment}s.
+     *
+     * <p>Returns an empty list when {@code ranges} is {@code null} or empty. Never returns {@code null}.
+     * Callers may treat an empty list as “no range requested” (serve full body).</p>
+     *
+     * @param ranges   parsed byte ranges from the request; may be {@code null}
+     * @param resource target resource used to clamp/validate ranges
+     * @return list of resolved segments (possibly empty)
+     */
     private List<ResourceSegment> getResourceSegments(List<Range> ranges, Resource resource) {
         List<ResourceSegment> segments = new ArrayList<>();
 
@@ -238,6 +266,20 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
         }
 
         return segments;
+    }
+
+    /**
+     * Computes an {@link ETag} for the given resource using the configured {@link ETagGenerator}.
+     *
+     * <p>Returns {@code null} if no generator is configured. The seed format is
+     * {@code "length:lastModified"} (see {@link ETagGenerator#seed(long, long)}).</p>
+     *
+     * @param resource the resource to describe
+     * @return generated ETag or {@code null} if generation is disabled
+     */
+    private ETag getGeneratedETag(Resource resource) {
+        String seed = resource.getLength() + ":" + resource.getLastModified();
+        return generator == null ? null : generator.generate(seed);
     }
 
     /**
@@ -328,6 +370,27 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
      */
     public boolean isUseLastModified() {
         return useLastModified;
+    }
+
+    /**
+     * Returns the configured ETag generator strategy, if any.
+     *
+     * @return the {@link ETagGenerator} in use, or {@code null} if ETag generation is disabled
+     * @see org.jmouse.web.http.request.ETag
+     */
+    public ETagGenerator getGenerator() {
+        return generator;
+    }
+
+    /**
+     * Sets the ETag generator strategy.
+     * <p>Pass {@code null} to disable ETag generation.</p>
+     *
+     * @param generator the {@link ETagGenerator} to use, or {@code null} to disable
+     * @see org.jmouse.web.http.request.ETag
+     */
+    public void setGenerator(ETagGenerator generator) {
+        this.generator = generator;
     }
 
 }

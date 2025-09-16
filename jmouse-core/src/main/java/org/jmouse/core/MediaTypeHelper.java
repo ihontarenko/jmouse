@@ -24,7 +24,7 @@ public final class MediaTypeHelper {
     /**
      * 🏷️ Title prefix for generated boundaries.
      */
-    private static final String TITLE = "jMouse";
+    public static final String TITLE = "jMouse";
 
     /**
      * 🚫 Utility class: prevent instantiation.

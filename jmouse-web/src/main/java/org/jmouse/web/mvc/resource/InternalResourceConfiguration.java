@@ -7,6 +7,7 @@ import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.http.request.Allow;
 import org.jmouse.web.http.request.Vary;
+import org.jmouse.web.mvc.ETagGenerator;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -72,6 +73,13 @@ public class InternalResourceConfiguration implements InitializingBeanSupport<We
                         getVersionalResourceResolver(),
                         new LocationScanningResolver()
                 );
+        registry.registerHandler("/jmouse/{*path}")
+                .addResourceLocations("classpath:META-INF/resources/public/")
+                .setCachePeriod(60 * 60 * 24 * 365)
+                .setUseLastModified(true)
+                .setEtagGenerator(new ETagGenerator(true))
+                .getChainRegistration()
+                .addResolvers(new PathNormalizationResolver(), new LocationScanningResolver());
     }
 
     /**

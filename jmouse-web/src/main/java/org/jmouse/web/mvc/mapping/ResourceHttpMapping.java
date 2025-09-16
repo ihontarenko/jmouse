@@ -50,6 +50,8 @@ public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceHttp
             handler.setCacheSeconds(registration.getCachePeriod() == null ? -1 : registration.getCachePeriod());
             handler.setVary(registration.getVary());
             handler.setSupportedMethods(registration.getAllow().toSupportedMethods());
+            handler.setUseLastModified(registration.isUseLastModified());
+            handler.setGenerator(registration.getEtagGenerator());
 
             for (String pattern : registration.getPatterns()) {
                 addHandlerMapping(GET(pattern), handler);

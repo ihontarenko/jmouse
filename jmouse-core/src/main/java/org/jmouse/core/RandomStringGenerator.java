@@ -91,7 +91,11 @@ public abstract class RandomStringGenerator extends AbstractStringIdGenerator {
      */
     @Override
     public String generate() {
-        return getRandom().ints(length, 0, CHARACTERS.length()).mapToObj(CHARACTERS::charAt).map(Object::toString).collect(Collectors.joining());
+        return getRandom()
+                .ints(length, 0, CHARACTERS.length())
+                .mapToObj(CHARACTERS::charAt)
+                .map(Object::toString)
+                .collect(Collectors.joining());
     }
 
     /**

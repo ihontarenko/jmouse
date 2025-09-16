@@ -3,6 +3,7 @@ package org.jmouse.web.mvc.resource;
 import org.jmouse.web.http.request.Allow;
 import org.jmouse.web.http.request.CacheControl;
 import org.jmouse.web.http.request.Vary;
+import org.jmouse.web.mvc.ETagGenerator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,6 +57,17 @@ public class ResourceRegistration {
      * <p>Default: {@code true}. Typically relevant for safe methods (GET/HEAD) and 200/304 flows.</p>
      */
     private boolean useLastModified = true;
+
+    /**
+     * Strategy used to compute entity tags (ETag).
+     *
+     * <p>If {@code null}, ETag generation is disabled. Provide a custom implementation
+     * for strong ETags (e.g., hashing the actual representation bytes) or rely on
+     * the default length/mtime-based approach for weak ETags.</p>
+     *
+     * @see org.jmouse.web.http.request.ETag
+     */
+    private ETagGenerator etagGenerator;
 
     /**
      * Preconfigured {@code Vary} policy applied by {@link ResourceHttpHandler#prepareResponse()}.
@@ -224,6 +236,28 @@ public class ResourceRegistration {
         return this;
     }
 
+    /**
+     * Returns the configured ETag generator strategy, if any.
+     *
+     * @return the {@link ETagGenerator} in use, or {@code null} if ETag generation is disabled
+     * @see org.jmouse.web.http.request.ETag
+     */
+    public ETagGenerator getEtagGenerator() {
+        return etagGenerator;
+    }
+
+    /**
+     * Sets the ETag generator strategy.
+     * <p>Pass {@code null} to disable ETag generation.</p>
+     *
+     * @param etagGenerator the {@link ETagGenerator} to use, or {@code null} to disable
+     * @return this registration
+     * @see org.jmouse.web.http.request.ETag
+     */
+    public ResourceRegistration setEtagGenerator(ETagGenerator etagGenerator) {
+        this.etagGenerator = etagGenerator;
+        return this;
+    }
 
     @Override
     public String toString() {
