@@ -22,7 +22,7 @@ public class ResourcesConfig implements BeanConfigurer<ResourceHandlerRegistry> 
 
     @Override
     public void configure(ResourceHandlerRegistry registry) {
-        VersionalResourceResolver resolver = new VersionalResourceResolver()
+        /*VersionalResourceResolver resolver = new VersionalResourceResolver()
                 .addStrategy(new FixedVersionStrategy("v2025.09"), "/static/**")
                 .addStrategy(new FixedVersionStrategy(properties.getIconPrefix()), "/icon/**")
                 .addStrategy(new ContentHashVersionStrategy("SHA-256", 16), "/assets/**");
@@ -80,7 +80,7 @@ public class ResourcesConfig implements BeanConfigurer<ResourceHandlerRegistry> 
                         new VersionalResourceResolver()
                                 .addStrategy(new ContentHashVersionStrategy("SHA-256", 16), "/static/**"),
                         new LocationScanningResolver()
-                );
+                );*/
     }
 
 }

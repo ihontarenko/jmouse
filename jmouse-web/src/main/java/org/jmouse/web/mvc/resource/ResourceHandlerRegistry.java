@@ -11,7 +11,9 @@ import java.util.List;
  */
 public class ResourceHandlerRegistry {
 
-    /** 📋 Registered resource handler entries. */
+    /**
+     * 📋 Registered resource handler entries.
+     */
     private final List<ResourceRegistration> registrations = new LinkedList<>();
 
     /**

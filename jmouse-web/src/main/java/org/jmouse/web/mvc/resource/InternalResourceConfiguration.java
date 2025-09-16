@@ -34,7 +34,6 @@ public class InternalResourceConfiguration implements InitializingBeanSupport<We
             DateTimeFormatter.ofPattern("yyyy.MM").withZone(ZoneId.systemDefault());
 
     private static String currentYearMonthVersion() {
-        // e.g. "v2025.09"
         return "v" + YYYY_MM.format(Instant.now());
     }
 
@@ -63,9 +62,10 @@ public class InternalResourceConfiguration implements InitializingBeanSupport<We
     @Override
     public void doInitialize(WebBeanContext context) {
         registry.registerHandler("/public/{*path}")
+                .addResourceLocations("classpath:public/")
                 .setAllow(Allow.of(HttpMethod.GET, HttpMethod.HEAD))
                 .setVary(Vary.of(HttpHeader.ACCEPT_LANGUAGE, HttpHeader.ACCEPT_CHARSET))
-                .addPatterns("classpath:public/")
+                .setCachePeriod(60 * 60 * 24 * 365)
                 .getChainRegistration()
                 .addResolvers(
                         new PathNormalizationResolver(),

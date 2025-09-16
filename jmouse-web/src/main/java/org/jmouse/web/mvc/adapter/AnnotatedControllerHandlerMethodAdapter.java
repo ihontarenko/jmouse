@@ -47,6 +47,8 @@ public class AnnotatedControllerHandlerMethodAdapter extends AbstractHandlerMeth
         HandlerMethod  handlerMethod  = (HandlerMethod) mappedHandler.handler();
         MappingResult  mappingResult  = mappedHandler.mappingResult();
         RequestContext requestContext = new RequestContext(request, response);
+
+        // Prepare invocation context
         HandlerMethodInvocation invocation     = new HandlerMethodInvocation(
                 new HandlerMethodContext(requestContext, handlerMethod), mappingResult, argumentResolvers);
         MVCResult               mvcResult      = new MVCResult(
