@@ -91,7 +91,25 @@ public enum HttpHeader {
 
     X_HTTP_METHOD_OVERRIDE("X-HTTP-Method-Override"),
     X_TEXT("X-Text"),
-    X_JMOUSE_DEBUG("X-jMouse-Debug");
+    X_JMOUSE_DEBUG("X-jMouse-Debug"),
+
+    // --- Client Hints (UA-CH) ---
+    SEC_CH_UA("sec-ch-ua"),
+    SEC_CH_UA_MOBILE("sec-ch-ua-mobile"),
+    SEC_CH_UA_PLATFORM("sec-ch-ua-platform"),
+    SEC_CH_UA_PLATFORM_VERSION("sec-ch-ua-platform-version"),
+    SEC_CH_UA_FULL_VERSION("sec-ch-ua-full-version"),
+    SEC_CH_UA_FULL_VERSION_LIST("sec-ch-ua-full-version-list"),
+    SEC_CH_UA_ARCH("sec-ch-ua-arch"),
+    SEC_CH_UA_MODEL("sec-ch-ua-model"),
+    SEC_CH_UA_BITNESS("sec-ch-ua-bitness"),
+    SEC_CH_UA_WOW64("sec-ch-ua-wow64"),
+
+    // --- Fetch Metadata ---
+    SEC_FETCH_DEST("sec-fetch-dest"),
+    SEC_FETCH_MODE("sec-fetch-mode"),
+    SEC_FETCH_SITE("sec-fetch-site"),
+    SEC_FETCH_USER("sec-fetch-user");
 
     private final String value;
 

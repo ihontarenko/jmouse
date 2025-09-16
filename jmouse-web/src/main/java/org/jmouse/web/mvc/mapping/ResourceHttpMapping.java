@@ -7,9 +7,12 @@ import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.mvc.AbstractHandlerPathMapping;
 import org.jmouse.web.mvc.Route;
 import org.jmouse.web.mvc.method.converter.MessageConverterManager;
+import org.jmouse.web.mvc.resource.InternalResourceConfiguration;
 import org.jmouse.web.mvc.resource.ResourceHandlerRegistry;
 import org.jmouse.web.mvc.resource.ResourceHttpHandler;
 import org.jmouse.web.mvc.resource.ResourceRegistration;
+
+import java.util.List;
 
 import static org.jmouse.web.mvc.Route.*;
 
@@ -31,8 +34,15 @@ public class ResourceHttpMapping extends AbstractHandlerPathMapping<ResourceHttp
         PatternMatcherResourceLoader resourceLoader          = context.getBean(PatternMatcherResourceLoader.class);
         MediaTypeFactory             mediaTypeFactory        = context.getBean(MediaTypeFactory.class);
         MessageConverterManager      messageConverterManager = context.getBean(MessageConverterManager.class);
+        ResourceHandlerRegistry      handlerRegistry         = context.getBean(ResourceHandlerRegistry.class);
+        List<ResourceRegistration>   registrations           = handlerRegistry.getRegistrations();
 
-        for (ResourceRegistration registration : context.getBean(ResourceHandlerRegistry.class).getRegistrations()) {
+        if (registrations == null || registrations.isEmpty()) {
+            InternalResourceConfiguration internalConfiguration = context.getBean(InternalResourceConfiguration.class);
+            registrations = internalConfiguration.getDefaultRegistrations();
+        }
+
+        for (ResourceRegistration registration : registrations) {
             ResourceHttpHandler handler = new ResourceHttpHandler(
                     registration, resourceLoader, messageConverterManager, mediaTypeFactory);
 
