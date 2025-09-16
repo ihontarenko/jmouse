@@ -148,22 +148,16 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
 
         prepareResponse();
 
+        writeHeaders(response);
+
         if (notModified) {
-            if (etag != null) {
-                responseHeaders.setETag(etag.toHeaderValue());
-            }
-            writeHeaders(response);
             return;
         }
 
         HttpOutputMessage httpMessage    = new ServletHttpOutputMessage(response);
         Headers           messageHeaders = httpMessage.getHeaders();
 
-        // Flush buffered headers into actual HttpServletResponse
-        writeHeaders(response);
-        // Handler/Responder writes caching, vary, allow headers into buffer
         writeHeaders(messageHeaders, resource);
-        // Finally, write the body and converter's headers
         writeMessage(httpMessage, resource, request);
     }
 

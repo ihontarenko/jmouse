@@ -62,8 +62,8 @@ public class InternalResourceConfiguration implements InitializingBeanSupport<We
      */
     @Override
     public void doInitialize(WebBeanContext context) {
-        registry.registerHandler("/public/{*path}")
-                .addResourceLocations("classpath:public/")
+        registry.registerHandler("/internal/assets/{*path}")
+                .addResourceLocations("classpath:public/assets/")
                 .setAllow(Allow.of(HttpMethod.GET, HttpMethod.HEAD))
                 .setVary(Vary.of(HttpHeader.ACCEPT_LANGUAGE, HttpHeader.ACCEPT_CHARSET))
                 .setCachePeriod(60 * 60 * 24 * 365)
@@ -73,7 +73,7 @@ public class InternalResourceConfiguration implements InitializingBeanSupport<We
                         getVersionalResourceResolver(),
                         new LocationScanningResolver()
                 );
-        registry.registerHandler("/jmouse/{*path}")
+        registry.registerHandler("/jmouse-public/{*path}")
                 .addResourceLocations("classpath:META-INF/resources/public/")
                 .setCachePeriod(60 * 60 * 24 * 365)
                 .setUseLastModified(true)
@@ -108,6 +108,6 @@ public class InternalResourceConfiguration implements InitializingBeanSupport<We
     private VersionalResourceResolver getVersionalResourceResolver() {
         return new VersionalResourceResolver()
                 .addStrategy(new FixedVersionStrategy(currentYearMonthVersion()), "/public/html/**")
-                .addStrategy(new ContentHashVersionStrategy("SHA-256", 8), "/public/assets/**");
+                .addStrategy(new ContentHashVersionStrategy("SHA-256", 8), "/internal/assets/**");
     }
 }

@@ -87,7 +87,7 @@ public final class ConditionalRequest {
             responseHeaders.setHeader(HttpHeader.LAST_MODIFIED, toHttpDate(lastModifiedSeconds));
         }
 
-        // --- If-Match / If-Unmodified-Since (preconditions for unsafe methods)
+        // --- If-Match
         final String ifMatchRaw = header(requestHeaders, HttpHeader.IF_MATCH);
         if (ifMatchRaw != null) {
             final IfMatch ifMatch     = IfMatch.parse(ifMatchRaw);
@@ -98,6 +98,7 @@ public final class ConditionalRequest {
             }
         }
 
+        // --- If-Unmodified-Since (only when If-Match is absent)
         final String ifUnmodifiedSinceRaw = header(requestHeaders, HttpHeader.IF_UNMODIFIED_SINCE);
         if (ifUnmodifiedSinceRaw != null && lastModifiedSeconds > 0) {
             long ifUnmodifiedSinceSeconds = toHttpSeconds(ifUnmodifiedSinceRaw);

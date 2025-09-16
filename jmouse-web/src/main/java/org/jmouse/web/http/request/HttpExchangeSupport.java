@@ -49,17 +49,14 @@ public final class HttpExchangeSupport {
 
         if (result == PreconditionResult.NOT_MODIFIED_304) {
             this.notModified = true;
-            // For GET/HEAD Spring also re-writes validators; we already wrote them in evaluate()
             return true;
         }
 
         if (result == PreconditionResult.PRECONDITION_FAILED_412) {
             this.notModified = true;
-            // body not allowed
             return true;
         }
 
-        // PROCEED_200: for safe methods advertise validators if known (done in evaluate()).
         return false;
     }
 
