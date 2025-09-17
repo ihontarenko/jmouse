@@ -28,7 +28,8 @@ import java.util.List;
  * @author Ivan Hontarenko
  * @since 1.0
  */
-public abstract class AbstractHandlerMethodAdapter implements HandlerAdapter, InitializingBeanSupport<WebBeanContext> {
+public abstract class AbstractHandlerMethodAdapter extends HandlerMethodWebResponder
+        implements HandlerAdapter, InitializingBeanSupport<WebBeanContext> {
 
     private ReturnValueProcessor returnValueProcessor;
 
@@ -43,12 +44,17 @@ public abstract class AbstractHandlerMethodAdapter implements HandlerAdapter, In
      */
     @Override
     public MVCResult handle(HttpServletRequest request, HttpServletResponse response, MappedHandler handler) {
-        RequestContext    context   = new RequestContext(request, response);
-        MVCResult         result    = doInvokeHandler(request, response, handler);
+        try {
+            RequestContext    context   = new RequestContext(request, response);
+            MVCResult         result    = doInvokeHandler(request, response, handler);
 
-        returnValueProcessor.process(result, context);
+            beforeResponse();
+            returnValueProcessor.process(result, context);
 
-        return result;
+            return result;
+        } finally {
+            afterResponse();
+        }
     }
 
     /**

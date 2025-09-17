@@ -34,12 +34,12 @@ import java.util.Set;
  */
 public abstract class WebResponder extends WebContentSupport {
 
-    private Set<HttpMethod> supported;      // null → unrestricted (except TRACE)
-    private boolean         requireSession; // hook; enforce in your code if needed
-    private CacheControl    cacheControl;   // preferred
-    private int             cacheSeconds = -1; // fallback
-    private Vary            vary;           // optional
-    private Allow           allow;          // computed
+    private Set<HttpMethod> supported;
+    private boolean         requireSession;
+    private CacheControl    cacheControl;
+    private int             cacheSeconds = -1;
+    private Vary            vary;
+    private Allow           allow;
 
     /**
      * Creates a responder allowing GET, HEAD, and POST by default.
@@ -171,6 +171,14 @@ public abstract class WebResponder extends WebContentSupport {
         return false;
     }
 
+    protected boolean maybeHandleHead(HttpMethod method, HttpServletResponse response) {
+        if (method == HttpMethod.HEAD) {
+            prepareResponse();
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Validates the request against supported methods and session requirements.
      *
@@ -180,8 +188,7 @@ public abstract class WebResponder extends WebContentSupport {
      */
     protected final void checkRequest(HttpMethod method, boolean sessionExists) throws IllegalStateException {
         if (!getAllow().isEmpty() && !getAllow().contains(method)) {
-            throw new IllegalStateException(
-                    "HTTP method not supported: %s (Allow: %s)".formatted(method, allow.toHeaderValue()));
+            throw new IllegalStateException("HTTP method not supported: %s (Allow: %s)".formatted(method, allow.toHeaderValue()));
         }
         if (isRequireSession() && !sessionExists) {
             throw new IllegalStateException("Pre-existing session required but none found");

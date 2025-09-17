@@ -1,6 +1,7 @@
 package org.jmouse.web.mvc.routing;
 
 import org.jmouse.core.matcher.Matcher;
+import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.mvc.Route;
 import org.jmouse.core.Streamable;
 import org.jmouse.web.http.request.RequestRoute;
@@ -8,10 +9,7 @@ import org.jmouse.web.mvc.routing.condition.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * 🧭 Converts a {@link Route} into a list of {@link MappingMatcher} conditions
@@ -54,7 +52,14 @@ public class MappingCriteria implements MappingMatcher {
      */
     private void createMatchers(Route route) {
         matchers.add(new RequestPathCondition(route.pathPattern()));
-        matchers.add(new HttpMethodCondition(route.httpMethod()));
+
+        Set<HttpMethod> httpMethods = new HashSet<>(Set.of(route.httpMethod()));
+
+        if (httpMethods.contains(HttpMethod.GET)) {
+            httpMethods.add(HttpMethod.HEAD);
+        }
+
+        matchers.add(new HttpMethodCondition(httpMethods.toArray(HttpMethod[]::new)));
 
         if (!route.consumes().isEmpty()) {
             matchers.add(new ConsumesMatcher(route.consumes()));
@@ -108,6 +113,28 @@ public class MappingCriteria implements MappingMatcher {
      */
     public List<Matcher<RequestRoute>> getMatchers() {
         return List.copyOf(matchers);
+    }
+
+    /**
+     * Looks up a matcher by type and returns the last one that is assignable to the given class.
+     *
+     * <p>Scans matchers in iteration order and keeps the most recent match; if none is found,
+     * returns {@code null}.</p>
+     *
+     * @param type the matcher subtype to look for (must not be {@code null})
+     * @param <T>  the matcher subtype
+     * @return the last matcher of the given type, or {@code null} if absent
+     */
+    public <T extends Matcher<RequestRoute>> T getMatcher(Class<T> type) {
+        T matcher = null;
+
+        for (Matcher<RequestRoute> candidate : getMatchers()) {
+            if (type.isInstance(candidate)) {
+                matcher = type.cast(candidate);
+            }
+        }
+
+        return matcher;
     }
 
     /**

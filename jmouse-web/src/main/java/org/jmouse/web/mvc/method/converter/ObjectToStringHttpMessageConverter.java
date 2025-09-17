@@ -14,10 +14,14 @@ import java.io.IOException;
  */
 public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
-    /** 🔧 Conversion service used for type transformations. */
+    /**
+     * 🔧 Conversion service used for type transformations.
+     */
     private Conversion conversion;
 
-    /** 📝 Delegate converter for handling String I/O. */
+    /**
+     * 📝 Delegate converter for handling String I/O.
+     */
     private HttpMessageConverter<String> messageConverter;
 
     /**

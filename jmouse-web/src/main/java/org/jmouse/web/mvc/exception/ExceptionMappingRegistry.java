@@ -18,10 +18,14 @@ import java.util.Set;
  */
 public class ExceptionMappingRegistry {
 
-    /** 📂 Set of exception types this registry can handle. */
+    /**
+     * 📂 Set of exception types this registry can handle.
+     */
     private final Set<Class<? extends Throwable>> supportedExceptions;
 
-    /** 🗂 Map of exception types to their corresponding handler method metadata. */
+    /**
+     * 🗂 Map of exception types to their corresponding handler method metadata.
+     */
     private final Map<Class<? extends Throwable>, ExceptionHandlerMethod> exceptionMappings;
 
     /**
@@ -43,9 +47,9 @@ public class ExceptionMappingRegistry {
         ExceptionHandlerMethod previous = getExceptionHandler(exceptionType);
 
         if (previous != null) {
-//            throw new IllegalStateException(
-//                    "AMBIGUOUS MAPPING! Cannot register exception handler for type %s there is already exists!"
-//                            .formatted(exceptionType));
+            throw new IllegalStateException(
+                    "AMBIGUOUS MAPPING! Cannot register exception handler for type %s there is already exists!"
+                            .formatted(exceptionType));
         }
 
         supportedExceptions.add(exceptionType);

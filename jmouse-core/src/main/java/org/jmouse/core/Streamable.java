@@ -122,6 +122,35 @@ public interface Streamable<T> extends Iterable<T>, Supplier<Stream<T>> {
     }
 
     /**
+     * 🔗 Concatenates the string representation of the elements, separated by the given delimiter.
+     *
+     * <p>Each element is converted via {@link String#valueOf(Object)} (so {@code null} becomes {@code "null"}).</p>
+     *
+     * @param delimiter separator between elements (e.g., {@code ", "})
+     * @return joined string
+     * @see java.util.stream.Collectors#joining(CharSequence)
+     */
+    default String joining(String delimiter) {
+        return map(String::valueOf).stream().collect(Collectors.joining(delimiter));
+    }
+
+    /**
+     * 🔗 Concatenates the string representation of the elements with a delimiter, and wraps
+     * the result with a prefix and suffix.
+     *
+     * <p>Each element is converted via {@link String#valueOf(Object)} (so {@code null} becomes {@code "null"}).</p>
+     *
+     * @param delimiter separator between elements (e.g., {@code ", "})
+     * @param prefix    string to add at the beginning (e.g., {@code "["})
+     * @param suffix    string to add at the end (e.g., {@code "]"})
+     * @return joined string with prefix/suffix
+     * @see java.util.stream.Collectors#joining(CharSequence, CharSequence, CharSequence)
+     */
+    default String joining(String delimiter, String prefix, String suffix) {
+        return map(String::valueOf).stream().collect(Collectors.joining(delimiter, prefix, suffix));
+    }
+
+    /**
      * ☕ Stream supplier override.
      */
     @Override

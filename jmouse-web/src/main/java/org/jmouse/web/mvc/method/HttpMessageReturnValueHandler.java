@@ -3,6 +3,7 @@ package org.jmouse.web.mvc.method;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
+import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.mvc.HandlerMapping;
 import org.jmouse.web.mvc.MVCResult;
 import org.jmouse.web.http.request.RequestContext;
@@ -92,11 +93,18 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
 
         HttpOutputMessage httpMessage   = new ServletHttpOutputMessage(servletResponse);
         Headers           outputHeaders = httpMessage.getHeaders();
+        boolean           isHead        = HttpMethod.HEAD.matches(requestContext.request().getMethod());
 
         outputHeaders.setContentType(contentType);
-        outputHeaders.setHeader(HttpHeader.X_JMOUSE_DEBUG, "DEBUG MESSAGE!");
+        outputHeaders.setHeader(HttpHeader.X_JMOUSE_DEBUG, "Content-Type: %s; Converter: %s;".formatted(
+                contentType, messageConverter.getClass().getName()));
 
         try {
+            if (isHead) {
+                messageConverter.writeDefaultHeaders(httpMessage, returnValue, contentType);
+                httpMessage.getOutputStream();
+                return;
+            }
             messageConverter.write(returnValue, result.getReturnType().getReturnType(), httpMessage);
         } catch (IOException e) {
             throw new RuntimeException(e);

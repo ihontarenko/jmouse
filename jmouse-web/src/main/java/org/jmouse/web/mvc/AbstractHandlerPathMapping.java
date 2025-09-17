@@ -1,6 +1,9 @@
 package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jmouse.core.Streamable;
+import org.jmouse.web.http.HttpMethod;
+import org.jmouse.web.mvc.mapping.RequestHttpHandlerMapping;
 import org.jmouse.web.mvc.routing.MappingRegistration;
 import org.jmouse.web.mvc.routing.MappingRegistry;
 import org.jmouse.web.mvc.routing.MappingCriteria;
@@ -8,9 +11,16 @@ import org.jmouse.core.AnsiColors;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.core.MethodParameter;
 import org.jmouse.web.http.request.RequestRoute;
+import org.jmouse.web.mvc.routing.condition.HttpMethodCondition;
+import org.jmouse.web.mvc.routing.condition.RequestPathCondition;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.jmouse.core.Streamable.of;
 
 /**
  * 🧭 Abstract base class for route-based handler mappings.
@@ -82,35 +92,69 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      * @return {@link MappedHandler} with parsed route and handler, or {@code null} if no match found
      */
     public MappedHandler getMappedHandler(HttpServletRequest request) {
-        RequestRoute    requestRoute  = RequestRoute.ofRequest(request);
-        MappedHandler   mappedHandler = null;
-        MappingCriteria winner        = getWinner(requestRoute);
+        RequestRoute    requestRoute = RequestRoute.ofRequest(request);
+        MappingCriteria winner       = getWinner(requestRoute);
 
-        if (winner != null) {
-            MappingRegistration<H> registration = mappingRegistry.getRegistration(winner);
-            H                      handler      = registration.handler();
+        if (winner == null) {
+            Set<HttpMethod> methods = getAllowedMethods(requestRoute);
 
-            if (!supportsMappedHandler(handler)) {
-                return null;
+            if (!methods.isEmpty()) {
+                if (HttpMethod.OPTIONS.matches(requestRoute.method())) {
+                    methods.add(HttpMethod.OPTIONS);
+                    return getOptionsHttpRequestHandler(methods);
+                }
+
+                throw new MethodNotAllowedException(
+                        methods, "HTTP method '%s' for path '%s' is disallowed. Allowed only '%s'.".formatted(
+                                requestRoute.method(), requestRoute.requestPath().path(), of(methods).joining(", ")));
             }
 
-            Route         route         = winner.getRoute();
-            RouteMatch    match         = route.pathPattern().match(requestRoute.requestPath().path());
-            MappingResult mappingResult = MappingResult.of(match, route);
-
-            mappedHandler = new RouteMappedHandler(handler, mappingResult, getReturnParameter(handler));
-
-            request.setAttribute(ROUTE_MATCH_ATTRIBUTE, match);
-            request.setAttribute(ROUTE_PRODUCIBLE_ATTRIBUTE, route.produces());
-
-            LOGGER.info(AnsiColors.colorize(
-                    "✅🔥 ${BLUE_BOLD_BRIGHT}MATCHED:${RESET} ${GREEN_BOLD_BRIGHT}%s${RESET}", match));
-        } else {
             LOGGER.info(AnsiColors.colorize(
                     "❌\uD83E\uDD7A ${RED_BOLD_BRIGHT}UNMATCHED:${RESET} ${YELLOW_BOLD_BRIGHT}%s${RESET}", requestRoute));
+
+            return null;
         }
 
+        MappingRegistration<H> registration = mappingRegistry.getRegistration(winner);
+        H                      handler      = registration.handler();
+
+        if (!supportsMappedHandler(handler)) {
+            return null;
+        }
+
+        Route         route         = winner.getRoute();
+        RouteMatch    match         = route.pathPattern().match(requestRoute.requestPath().path());
+        MappingResult mappingResult = MappingResult.of(match, route);
+        MappedHandler mappedHandler = new RouteMappedHandler(handler, mappingResult, getReturnParameter(handler));
+
+        request.setAttribute(ROUTE_MATCH_ATTRIBUTE, match);
+        request.setAttribute(ROUTE_PRODUCIBLE_ATTRIBUTE, route.produces());
+
+        LOGGER.info(AnsiColors.colorize(
+                "✅🔥 ${BLUE_BOLD_BRIGHT}MATCHED:${RESET} ${GREEN_BOLD_BRIGHT}%s${RESET}", match));
+
         return mappedHandler;
+    }
+
+    private MappedHandler getOptionsHttpRequestHandler(Set<HttpMethod> allowedMethods) {
+        OptionsRequestHttpHandler handler = new OptionsRequestHttpHandler(allowedMethods);
+        return new RouteMappedHandler(handler, MappingResult.EMPTY, RequestHttpHandlerMapping.METHOD_PARAMETER);
+    }
+
+    private Set<HttpMethod> getAllowedMethods(RequestRoute requestRoute) {
+        Set<HttpMethod> methods = new LinkedHashSet<>();
+
+        for (MappingCriteria criterion : getRequestPathMappings(requestRoute)) {
+            HttpMethodCondition methodCondition = criterion.getMatcher(HttpMethodCondition.class);
+            if (methodCondition != null) {
+                methods.addAll(methodCondition.getMethods());
+            }
+        }
+
+        methods.add(HttpMethod.OPTIONS);
+        methods.remove(HttpMethod.TRACE);
+
+        return methods;
     }
 
     /**
@@ -128,15 +172,16 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      * 🥇 Selects the most specific and applicable {@link MappingCriteria}
      * that matches the incoming {@link RequestRoute}.
      *
-     * This method:
+     * <p>Algorithm:</p>
      * <ul>
-     *     <li>Filters all matching criteria</li>
-     *     <li>Sorts them by specificity (using {@code compare()})</li>
-     *     <li>Returns the most specific match</li>
+     *   <li>Filter all criteria that {@link MappingCriteria#matches(RequestRoute) match} the request</li>
+     *   <li>Sort by specificity using {@code compare(a, b, route)} (most specific first)</li>
+     *   <li>Return the top candidate</li>
      * </ul>
      *
-     * @param requestRoute parsed request route from incoming HTTP request
+     * @param requestRoute parsed request route from the incoming HTTP request
      * @return best matching {@link MappingCriteria}, or {@code null} if none matched
+     * @see MappingCriteria#matches(RequestRoute)
      */
     private MappingCriteria getWinner(RequestRoute requestRoute) {
         List<MappingCriteria> candidates = new ArrayList<>();
@@ -147,11 +192,37 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
             }
         }
 
-        candidates.sort((a, b)
-                -> -1 * a.compare(b, requestRoute));
+        // Most specific first (note the negation to reverse natural order)
+        candidates.sort((a, b) -> -1 * a.compare(b, requestRoute));
 
         return candidates.isEmpty() ? null : candidates.getFirst();
     }
+
+    /**
+     * 🧭 Returns mappings whose {@link RequestPathCondition} matches the request path.
+     *
+     * <p>Use this to pre-filter by path only (e.g., for diagnostics or to distinguish
+     * 404 vs 405), without evaluating other conditions like method, headers, etc.</p>
+     *
+     * <p>The returned list preserves registration order and is not sorted by specificity.</p>
+     *
+     * @param requestRoute parsed request route from the incoming HTTP request
+     * @return list of path-matching {@link MappingCriteria} (possibly empty, never {@code null})
+     * @see RequestPathCondition#matches(RequestRoute)
+     */
+    private List<MappingCriteria> getRequestPathMappings(RequestRoute requestRoute) {
+        List<MappingCriteria> candidates = new ArrayList<>();
+
+        for (MappingCriteria mapping : mappingRegistry.getMappingCriteria()) {
+            RequestPathCondition pathCondition = mapping.getMatcher(RequestPathCondition.class);
+            if (pathCondition.matches(requestRoute)) {
+                candidates.add(mapping);
+            }
+        }
+
+        return candidates;
+    }
+
 
     /**
      * 🧱 Returns all registered {@link HandlerInterceptor}s to be applied

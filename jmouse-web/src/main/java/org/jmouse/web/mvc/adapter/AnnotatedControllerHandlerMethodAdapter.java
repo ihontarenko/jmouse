@@ -5,8 +5,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MethodParameter;
 import org.jmouse.core.Sorter;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.http.request.RequestAttributes;
 import org.jmouse.web.http.request.RequestAttributesHolder;
+import org.jmouse.web.http.request.WebRequest;
 import org.jmouse.web.mvc.method.ArgumentResolver;
 import org.jmouse.web.mvc.method.HandlerMethod;
 import org.jmouse.web.mvc.method.HandlerMethodContext;
@@ -19,6 +21,8 @@ import org.jmouse.web.mvc.MappingResult;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.jmouse.core.MethodParameter.forMethod;
 
 /**
  * 🎬 HandlerAdapter implementation for controllers with annotated handler methods.
@@ -48,15 +52,27 @@ public class AnnotatedControllerHandlerMethodAdapter extends AbstractHandlerMeth
         MappingResult  mappingResult  = mappedHandler.mappingResult();
         RequestContext requestContext = new RequestContext(request, response);
 
+        setSupportedMethods(mappingResult.route().httpMethod());
+
+        if (requestContext.request() instanceof WebRequest webRequest) {
+            HttpMethod httpMethod = webRequest.getHttpMethod();
+
+            if (maybeHandleOptions(httpMethod, response)) {
+                return new MVCResult(null, forMethod(handlerMethod.getMethod(), -1), mappedHandler);
+            }
+
+            checkRequest(httpMethod, false);
+        }
+
         // Prepare invocation context
-        HandlerMethodInvocation invocation     = new HandlerMethodInvocation(
+        HandlerMethodInvocation methodInvocation = new HandlerMethodInvocation(
                 new HandlerMethodContext(requestContext, handlerMethod), mappingResult, argumentResolvers);
-        MVCResult               mvcResult      = new MVCResult(
-                null, MethodParameter.forMethod(handlerMethod.getMethod(), -1), mappedHandler);
+        MVCResult               mvcResult        = new MVCResult(
+                null, forMethod(handlerMethod.getMethod(), -1), mappedHandler);
 
         RequestAttributesHolder.setAttribute(RequestAttributes.MVC_RESULT_ATTRIBUTE, mvcResult);
 
-        Object returnValue = invocation.invoke();
+        Object returnValue = methodInvocation.invoke();
 
         mvcResult.setReturnValue(returnValue);
 

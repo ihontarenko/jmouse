@@ -2,7 +2,6 @@ package org.jmouse.web.mvc.servlet;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.ServletRequest;
@@ -20,7 +19,6 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HexFormat;
-import java.util.List;
 
 /**
  * 🌊 Shallow ETag filter: wraps the response, buffers body, computes ETag, and
@@ -35,9 +33,7 @@ import java.util.List;
  *   <li>Computes ETag as hex of SHA-256(body).</li>
  * </ul>
  */
-public class ShallowEtagHeaderFilter implements Filter {
-
-
+public class ShallowETagHeaderFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

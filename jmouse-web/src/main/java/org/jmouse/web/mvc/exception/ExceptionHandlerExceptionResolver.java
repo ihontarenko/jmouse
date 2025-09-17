@@ -40,7 +40,9 @@ public class ExceptionHandlerExceptionResolver extends AbstractExceptionResolver
 
     private ExceptionMappingRegistry exceptionMappings;
 
-    /** Resolvers for handler method arguments. */
+    /**
+     * Resolvers for handler method arguments.
+     */
     private List<ArgumentResolver> argumentResolvers;
 
     /**
