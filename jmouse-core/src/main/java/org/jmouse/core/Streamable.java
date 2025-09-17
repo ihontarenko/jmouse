@@ -107,6 +107,13 @@ public interface Streamable<T> extends Iterable<T>, Supplier<Stream<T>> {
     }
 
     /**
+     * 🧩 Collects to typed array.
+     */
+    default T[] toArray(IntFunction<T[]> generator) {
+        return stream().toArray(generator);
+    }
+
+    /**
      * 🗺️ Collects to map with key/value mappers.
      */
     default <K, V> Map<K, V> toMap(Function<? super T, ? extends K> keyMapper,

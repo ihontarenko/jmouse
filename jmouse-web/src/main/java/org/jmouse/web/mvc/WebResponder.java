@@ -83,7 +83,7 @@ public abstract class WebResponder extends WebContentSupport {
      */
     public final void setSupportedMethods(HttpMethod... methods) {
         boolean isAllowMethodPresent = methods != null && methods.length > 0;
-        this.supported = isAllowMethodPresent ? new LinkedHashSet<>(List.of(methods)) : null;
+        supported = isAllowMethodPresent ? new LinkedHashSet<>(List.of(methods)) : null;
         configureAllowValues();
     }
 

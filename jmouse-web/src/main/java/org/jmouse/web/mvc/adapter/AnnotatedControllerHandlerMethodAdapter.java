@@ -51,18 +51,10 @@ public class AnnotatedControllerHandlerMethodAdapter extends AbstractHandlerMeth
         HandlerMethod  handlerMethod  = (HandlerMethod) mappedHandler.handler();
         MappingResult  mappingResult  = mappedHandler.mappingResult();
         RequestContext requestContext = new RequestContext(request, response);
+        HttpMethod     httpMethod     = mappingResult.route().httpMethod();
 
-        setSupportedMethods(mappingResult.route().httpMethod());
-
-        if (requestContext.request() instanceof WebRequest webRequest) {
-            HttpMethod httpMethod = webRequest.getHttpMethod();
-
-            if (maybeHandleOptions(httpMethod, response)) {
-                return new MVCResult(null, forMethod(handlerMethod.getMethod(), -1), mappedHandler);
-            }
-
-            checkRequest(httpMethod, false);
-        }
+        setSupportedMethods(httpMethod);
+        checkRequest(httpMethod, false);
 
         // Prepare invocation context
         HandlerMethodInvocation methodInvocation = new HandlerMethodInvocation(

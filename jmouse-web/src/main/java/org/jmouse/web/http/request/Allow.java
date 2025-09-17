@@ -132,6 +132,78 @@ public final class Allow {
     }
 
     /**
+     * ➗ Intersection of two Allow sets.
+     *
+     * <p>Rules:</p>
+     * <ul>
+     *   <li>ANY ∩ ANY = ANY</li>
+     *   <li>ANY ∩ X = X</li>
+     *   <li>X ∩ ANY = X</li>
+     *   <li>X ∩ Y = X ∩ Y (set intersection)</li>
+     * </ul>
+     *
+     * @param that the other Allow
+     * @return intersection result
+     */
+    public Allow intersect(Allow that) {
+        if (this.isAny() && that.isAny()) {
+            return any();
+        }
+
+        if (this.isAny()) {
+            return of(that.allow);
+        }
+
+        if (that.isAny()) {
+            return of(this.allow);
+        }
+
+        Set<HttpMethod> intersect = new HashSet<>();
+
+        for (HttpMethod httpMethod : allow) {
+            if (that.contains(httpMethod)) {
+                intersect.add(httpMethod);
+            }
+        }
+
+        return of(intersect);
+    }
+
+    /**
+     * ➖ Set difference (this \ that).
+     *
+     * <p>Rules:</p>
+     * <ul>
+     *   <li>ANY \ ANY = ∅</li>
+     *   <li>X \ ANY = ∅</li>
+     *   <li>ANY \ X = ALL \ X (use the HttpMethod universe)</li>
+     *   <li>X \ Y = standard set difference</li>
+     * </ul>
+     *
+     * @param that the other Allow
+     * @return difference result
+     */
+    public Allow difference(Allow that) {
+        if (this.isAny() || that.isAny()) {
+            return empty(); // X \ ANY = ∅
+        }
+
+        if (this.isAny()) {
+            Set<HttpMethod> universe = EnumSet.allOf(HttpMethod.class);
+            universe.removeAll(that.allow);
+            return of(universe);
+        }
+
+        Set<HttpMethod> difference = new HashSet<>(this.allow);
+
+        for (HttpMethod method : that.allow) {
+            difference.remove(method);
+        }
+
+        return of(difference);
+    }
+
+    /**
      * Renders the allowed methods as a single HTTP header-line value,
      * e.g. {@code "GET, POST"}.
      *

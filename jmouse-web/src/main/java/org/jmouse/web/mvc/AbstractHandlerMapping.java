@@ -5,6 +5,7 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
 import org.jmouse.core.Sorter;
 import org.jmouse.web.context.WebBeanContext;
+import org.jmouse.web.mvc.cors.CorsConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

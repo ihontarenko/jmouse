@@ -96,8 +96,8 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
         boolean           isHead        = HttpMethod.HEAD.matches(requestContext.request().getMethod());
 
         outputHeaders.setContentType(contentType);
-        outputHeaders.setHeader(HttpHeader.X_JMOUSE_DEBUG, "Content-Type: %s; Converter: %s;".formatted(
-                contentType, messageConverter.getClass().getName()));
+        outputHeaders.setHeader(HttpHeader.X_JMOUSE_DEBUG, "Compatible-Type: %s; Converter: %s;".formatted(
+                contentType, messageConverter.getClass().getSimpleName()));
 
         try {
             if (isHead) {

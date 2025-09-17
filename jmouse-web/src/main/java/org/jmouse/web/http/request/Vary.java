@@ -2,6 +2,7 @@ package org.jmouse.web.http.request;
 
 import org.jmouse.util.StringHelper;
 import org.jmouse.web.http.HttpHeader;
+import org.jmouse.web.http.HttpMethod;
 
 import java.util.*;
 
@@ -125,6 +126,16 @@ public final class Vary {
     }
 
     /**
+     * Check if this set headers the given header.
+     *
+     * @param header header to test
+     * @return {@code true} if contained
+     */
+    public boolean contains(HttpHeader header) {
+        return headers.contains(header);
+    }
+
+    /**
      * 🔗 Merge with another {@code Vary}.
      *
      * <p>Union of header names; wildcard dominates.</p>
@@ -147,7 +158,80 @@ public final class Vary {
 
         List<HttpHeader> headers = new ArrayList<>(this.headers);
         headers.addAll(that.headers);
+
         return of(headers);
+    }
+
+    /**
+     * ➗ Intersection of two Allow sets.
+     *
+     * <p>Rules:</p>
+     * <ul>
+     *   <li>ANY ∩ ANY = ANY</li>
+     *   <li>ANY ∩ X = X</li>
+     *   <li>X ∩ ANY = X</li>
+     *   <li>X ∩ Y = X ∩ Y (set intersection)</li>
+     * </ul>
+     *
+     * @param that the other Allow
+     * @return intersection result
+     */
+    public Vary intersect(Vary that) {
+        if (this.isWildcard() && that.isWildcard()) {
+            return any();
+        }
+
+        if (this.isWildcard()) {
+            return of(that.headers);
+        }
+
+        if (that.isWildcard()) {
+            return of(this.headers);
+        }
+
+        Set<HttpHeader> intersect = new HashSet<>();
+
+        for (HttpHeader httpHeader : headers) {
+            if (that.contains(httpHeader)) {
+                intersect.add(httpHeader);
+            }
+        }
+
+        return of(List.copyOf(intersect));
+    }
+
+    /**
+     * ➖ Set difference (this \ that).
+     *
+     * <p>Rules:</p>
+     * <ul>
+     *   <li>ANY \ ANY = ∅</li>
+     *   <li>X \ ANY = ∅</li>
+     *   <li>ANY \ X = ALL \ X (use the HttpMethod universe)</li>
+     *   <li>X \ Y = standard set difference</li>
+     * </ul>
+     *
+     * @param that the other Allow
+     * @return difference result
+     */
+    public Vary difference(Vary that) {
+        if (this.isWildcard() && that.isWildcard()) {
+            return empty(); // X \ ANY = ∅
+        }
+
+        if (this.isWildcard()) {
+            Set<HttpHeader> universe = EnumSet.allOf(HttpHeader.class);
+            that.headers.forEach(universe::remove);
+            return of(List.copyOf(universe));
+        }
+
+        Set<HttpHeader> difference = new HashSet<>(this.headers);
+
+        for (HttpHeader header : that.headers) {
+            difference.remove(header);
+        }
+
+        return of(List.copyOf(difference));
     }
 
     /**
