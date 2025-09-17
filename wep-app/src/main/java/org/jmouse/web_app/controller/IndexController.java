@@ -54,7 +54,12 @@ public class IndexController {
 
     @GetMapping(requestPath = "/welcome/{id}", produces = {"text/plain"})
     public String hello() {
-        return resourceUrlResolver.lookupResourceUrl("/icon/favicon.ico");
+        return resourceUrlResolver.lookupResourceUrl("/internal/assets/icon/favicon.ico");
+    }
+
+    @Mapping(httpMethod = HttpMethod.DELETE, path = "/welcome/{id}", produces = {"text/plain"})
+    public String hello2() {
+        return resourceUrlResolver.lookupResourceUrl("/internal/assets/icon/favicon.ico");
     }
 
 }

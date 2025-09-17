@@ -17,6 +17,9 @@ import java.util.List;
  */
 public final class MethodParameter {
 
+    public static final MethodParameter VOID_METHOD_PARAMETER = MethodParameter.forMethod(
+            -1, Runnable.class, "run");
+
     private final int        parameterIndex;
     private       Parameter  parameter;
     private final Executable executable;

@@ -1,10 +1,10 @@
 package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.jmouse.core.MethodParameter;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpStatus;
 import org.jmouse.web.http.request.RequestContext;
-import org.jmouse.web.mvc.mapping.RequestHttpHandlerMapping;
 
 import static org.jmouse.web.http.request.Allow.of;
 
@@ -47,6 +47,6 @@ public class MethodNotAllowedExceptionResolver implements ExceptionResolver {
             response.setStatus(HttpStatus.METHOD_NOT_ALLOWED.getCode());
             response.setHeader(HttpHeader.ALLOW.value(), of(notAllowedException.getAllowedMethods()).toHeaderValue());
         }
-        return new MVCResult(null, RequestHttpHandlerMapping.METHOD_PARAMETER, mappedHandler);
+        return new MVCResult(null, MethodParameter.VOID_METHOD_PARAMETER, mappedHandler);
     }
 }

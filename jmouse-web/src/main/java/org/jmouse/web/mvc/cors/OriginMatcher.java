@@ -62,7 +62,7 @@ class OriginMatcher implements Matcher<String> {
      */
     @Override
     public boolean matches(String origin) {
-        if (origin == null || origin.equals(WebCorsProcessor.MATCH_ALL)) {
+        if (origin == null || origin.equals(WebCorsProcessor.WILDCARD)) {
             return true;
         }
 
@@ -107,7 +107,7 @@ class OriginMatcher implements Matcher<String> {
             String expression = "\\Q%s\\E".formatted(value).replace("*", "\\E.*\\Q");
 
             if (ports != null) {
-                if (WebCorsProcessor.MATCH_ALL.equals(ports)) {
+                if (WebCorsProcessor.WILDCARD.equals(ports)) {
                     expression += "(:\\d+)?";
                 } else {
                     String portsExpression = Arrays.stream(ports.split(","))
