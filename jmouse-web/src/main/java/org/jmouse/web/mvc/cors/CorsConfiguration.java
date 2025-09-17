@@ -166,6 +166,21 @@ public class CorsConfiguration {
         return this;
     }
 
+    /**
+     * Enables support for Private Network Access (PNA) preflights.
+     *
+     * <p>When enabled and a preflight includes
+     * {@code Access-Control-Request-Private-Network:true}, the processor responds with
+     * {@code Access-Control-Allow-Private-Network:true}. Has no effect on non-preflight requests.</p>
+     *
+     * <p><strong>Note:</strong> This header pair is experimental and primarily implemented by
+     * Chromium-based browsers; behavior may evolve.</p>
+     *
+     * @param privateNetwork whether to allow private network access
+     * @return this config (for chaining)
+     * @see org.jmouse.web.http.HttpHeader#ACCESS_CONTROL_REQUEST_PRIVATE_NETWORK
+     * @see org.jmouse.web.http.HttpHeader#ACCESS_CONTROL_ALLOW_PRIVATE_NETWORK
+     */
     public CorsConfiguration allowPrivateNetwork(boolean privateNetwork) {
         this.allowPrivateNetwork = privateNetwork;
         return this;
@@ -217,6 +232,9 @@ public class CorsConfiguration {
         return allowCredentials;
     }
 
+    /**
+     * @return whether private network is allowed
+     */
     public boolean isAllowPrivateNetwork() {
         return allowPrivateNetwork;
     }
@@ -227,4 +245,20 @@ public class CorsConfiguration {
     public long getMaxAge() {
         return maxAge;
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "🌐 CORS[origins=%s, methods=%s, headers=%s, expose=%s, credentials=%s, private=%s, maxAge=%ss]",
+                allowedOrigins.isEmpty() ? "-" : allowedOrigins,
+                allowedMethods.isEmpty() ? "-" : allowedMethods,
+                allowedHeaders.isEmpty() ? "-" : allowedHeaders,
+                exposedHeaders.isEmpty() ? "-" : exposedHeaders,
+                allowCredentials,
+                allowPrivateNetwork,
+                maxAge
+        );
+    }
+
+
 }

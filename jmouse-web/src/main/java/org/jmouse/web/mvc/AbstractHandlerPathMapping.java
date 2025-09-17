@@ -2,6 +2,7 @@ package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.web.http.HttpMethod;
+import org.jmouse.web.mvc.cors.CorsConfiguration;
 import org.jmouse.web.mvc.mapping.RequestHttpHandlerMapping;
 import org.jmouse.web.mvc.routing.MappingRegistration;
 import org.jmouse.web.mvc.routing.MappingRegistry;
@@ -75,6 +76,10 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
     public void addHandlerMapping(Route route, H handler) {
         MappingRegistration<H> registration = new MappingRegistration<>(new MappingCriteria(route), handler);
         mappingRegistry.register(registration.criteria(), registration);
+        CorsConfiguration corsConfiguration = getCorsProvider().getCorsConfiguration(null, handler);
+        if (corsConfiguration != null) {
+            getCorsMappingRegistry().addMapping(route.pathPattern(), corsConfiguration);
+        }
     }
 
     /**

@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 📦 Registry of CORS configurations keyed by {@link AntPattern}.
+ * 📦 Registry of CORS configurations keyed by {@link RoutePath}.
  *
  * <p>Preserves insertion order (via {@link LinkedHashMap}). Not thread-safe.</p>
  *
@@ -19,7 +19,10 @@ import java.util.Map;
  *         .allowedMethods("GET", "POST");
  * }</pre>
  *
- * @see AntPattern
+ * @see RoutePath
+ * @see org.jmouse.web.mvc.AntPattern
+ * @see org.jmouse.web.mvc.RegexpPathPattern
+ * @see org.jmouse.web.mvc.SimplePathPattern
  * @see CorsConfiguration
  */
 public class CorsMappingRegistry {
@@ -27,7 +30,7 @@ public class CorsMappingRegistry {
     /**
      * Route pattern → CORS configuration.
      */
-    private final Map<AntPattern, CorsConfiguration> mappings = new LinkedHashMap<>();
+    private final Map<RoutePath, CorsConfiguration> mappings = new LinkedHashMap<>();
 
     /**
      * Registers a single {@link CorsConfiguration} instance for all given patterns.
@@ -48,19 +51,21 @@ public class CorsMappingRegistry {
     }
 
     /**
-     * Registers the given {@link CorsConfiguration} for an {@link AntPattern}.
+     * Registers the given {@link CorsConfiguration} for an {@link RoutePath}.
      *
      * @param antPattern    route pattern
      * @param configuration CORS configuration to associate
      * @throws IllegalStateException if the pattern is already registered
      */
-    public void addMapping(AntPattern antPattern, CorsConfiguration configuration) {
+    public void addMapping(RoutePath antPattern, CorsConfiguration configuration) {
         CorsConfiguration previous = mappings.get(antPattern);
+
         if (previous != null) {
             throw new IllegalStateException(
                     "AMBIGUOUS MAPPING! Cannot register CORS configuration for route '%s' there is already exists!".formatted(
                             antPattern));
         }
+
         mappings.put(antPattern, configuration);
     }
 
@@ -72,7 +77,7 @@ public class CorsMappingRegistry {
      *
      * @return map of {@link AntPattern} to {@link CorsConfiguration}
      */
-    public Map<AntPattern, CorsConfiguration> getMappings() {
+    public Map<RoutePath, CorsConfiguration> getMappings() {
         return mappings;
     }
 
@@ -85,7 +90,7 @@ public class CorsMappingRegistry {
     public CorsConfiguration lookup(String path) {
         CorsConfiguration configuration = null;
 
-        for (Map.Entry<AntPattern, CorsConfiguration> entry : getMappings().entrySet()) {
+        for (Map.Entry<RoutePath, CorsConfiguration> entry : getMappings().entrySet()) {
             RoutePath routePath = entry.getKey();
             if (routePath.matches(path)) {
                 configuration = entry.getValue();
@@ -102,7 +107,7 @@ public class CorsMappingRegistry {
      * @param path request path to test (e.g., {@code "/api/users"})
      * @return {@code true} if at least one mapping matches; {@code false} otherwise
      */
-    public boolean isAnyCorsFor(String path) {
+    public boolean hasMapping(String path) {
         return mappings.keySet().stream().anyMatch(p -> p.matches(path));
     }
 }

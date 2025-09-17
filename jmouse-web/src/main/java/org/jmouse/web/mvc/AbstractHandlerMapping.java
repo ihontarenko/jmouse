@@ -5,8 +5,11 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
 import org.jmouse.core.Sorter;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.mvc.cors.CorsConfiguration;
-import org.jmouse.web.mvc.cors.CorsProcessor;
+import org.jmouse.web.http.request.Headers;
+import org.jmouse.web.http.request.RequestAttributesHolder;
+import org.jmouse.web.http.request.RequestPath;
+import org.jmouse.web.http.response.HttpServletHeadersBuffer;
+import org.jmouse.web.mvc.cors.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +36,20 @@ public abstract class AbstractHandlerMapping implements HandlerMapping, Initiali
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractHandlerMapping.class);
 
-    private CorsProcessor corsProcessor;
+    /**
+     * Registry of path-based CORS mappings (expected to be provided via DI)
+     */
+    private CorsMappingRegistry corsMappingRegistry;
+
+    /**
+     * Resolves CORS policy from annotations (e.g., @CorsMapping)
+     */
+    private final CorsConfigurationProvider corsProvider = new AnnotationCorsConfigurationProvider();
+
+    /**
+     * Strategy that applies the resolved CORS policy to requests/responses
+     */
+    private final CorsProcessor corsProcessor = new WebCorsProcessor();
 
     /**
      * 🔎 Resolves the handler for the current request and attaches interceptors.
@@ -52,12 +68,62 @@ public abstract class AbstractHandlerMapping implements HandlerMapping, Initiali
         Handler                  container    = new Handler(handler);
         List<HandlerInterceptor> interceptors = new ArrayList<>(getHandlerInterceptors());
 
+        if (Cors.isCorsRequest(request)) {
+            RequestPath requestPath = RequestAttributesHolder.getRequestPath();
+            String path = requestPath.path();
+            if (getCorsMappingRegistry().hasMapping(path)) {
+                CorsConfiguration corsConfiguration = getCorsMappingRegistry().lookup(path);
+
+                if (Cors.isPreflight(request)) {
+                    Headers responseHeaders = new Headers();
+                    Headers requestHeaders = RequestAttributesHolder.getRequestRoute().headers();
+                    getCorsProcessor().handleRequest(corsConfiguration, requestHeaders, responseHeaders, true);
+
+                    return null;
+                }
+
+                System.out.println(corsConfiguration);
+            }
+        }
+
         if (!interceptors.isEmpty()) {
             Sorter.sort(interceptors);
             interceptors.forEach(container::addInterceptor);
         }
 
         return container;
+    }
+
+    /**
+     * Returns the active provider that resolves CORS configuration
+     * (e.g., from {@link CorsMapping} annotations).
+     *
+     * @return non-null CORS configuration provider
+     * @see AnnotationCorsConfigurationProvider
+     */
+    public CorsConfigurationProvider getCorsProvider() {
+        return corsProvider;
+    }
+
+    /**
+     * Returns the CORS processor strategy responsible for emitting
+     * {@code Access-Control-*} headers.
+     *
+     * @return non-null CORS processor
+     * @see WebCorsProcessor
+     */
+    public CorsProcessor getCorsProcessor() {
+        return corsProcessor;
+    }
+
+    /**
+     * Returns the registry of path-based CORS mappings.
+     *
+     * @return the registry instance, or {@code null} if not configured/injected
+     * @see CorsMappingRegistry
+     */
+    public CorsMappingRegistry getCorsMappingRegistry() {
+        return corsMappingRegistry;
     }
 
     /**
@@ -76,8 +142,8 @@ public abstract class AbstractHandlerMapping implements HandlerMapping, Initiali
      * @param context current web bean context
      */
     protected void initialize(WebBeanContext context) {
+        corsMappingRegistry = context.getBean(CorsMappingRegistry.class);
         doInitialize(context);
-        corsProcessor = context.getBean(CorsProcessor.class);
     }
 
     /**

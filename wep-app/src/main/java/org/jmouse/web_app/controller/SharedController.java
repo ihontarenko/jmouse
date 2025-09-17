@@ -3,6 +3,7 @@ package org.jmouse.web_app.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.Bytes;
+import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.http.request.multipart.UploadLimitExceededException;
 import org.jmouse.web.mvc.Model;
 import org.jmouse.web.annotation.*;
@@ -11,11 +12,17 @@ import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.request.ContentDisposition;
 import org.jmouse.web.http.request.multipart.MultipartFile;
 import org.jmouse.web.http.request.multipart.MultipartWebRequest;
+import org.jmouse.web.mvc.cors.CorsMapping;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+@CorsMapping(allowedHeaders = {
+        HttpHeader.CONTENT_TYPE,
+        HttpHeader.AUTHORIZATION,
+        HttpHeader.X_TEXT
+})
 @Controller
 public class SharedController {
 
@@ -106,6 +113,21 @@ public class SharedController {
         return Bytes.parse(bytes);
     }
 
+    @CorsMapping(
+            origins = {
+                    "https://*.youtube.com",
+                    "https://*.example.org:[80,443]"
+            },
+            methods = {
+                    HttpMethod.GET,
+                    HttpMethod.POST
+            },
+            exposedHeaders = {
+                    HttpHeader.CONTENT_LENGTH
+            },
+            allowCredentials = true,
+            maxAge = 3600
+    )
     @GetMapping(requestPath = "/shared/{format}/bytes/{bytes}")
     public Bytes bytes(@PathVariable("bytes") String bytes) {
         return Bytes.parse(bytes);
