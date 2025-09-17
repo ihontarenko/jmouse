@@ -78,7 +78,6 @@ public abstract class AbstractHandlerMapping implements HandlerMapping, Initiali
                     Headers responseHeaders = new Headers();
                     Headers requestHeaders = RequestAttributesHolder.getRequestRoute().headers();
                     getCorsProcessor().handleRequest(corsConfiguration, requestHeaders, responseHeaders, true);
-
                     return null;
                 }
 
