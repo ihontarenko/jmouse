@@ -6,6 +6,7 @@ import org.jmouse.beans.InitializingBean;
 import org.jmouse.core.Sorter;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.mvc.cors.CorsConfiguration;
+import org.jmouse.web.mvc.cors.CorsProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,8 @@ import java.util.List;
 public abstract class AbstractHandlerMapping implements HandlerMapping, InitializingBean {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractHandlerMapping.class);
+
+    private CorsProcessor corsProcessor;
 
     /**
      * 🔎 Resolves the handler for the current request and attaches interceptors.
@@ -74,6 +77,7 @@ public abstract class AbstractHandlerMapping implements HandlerMapping, Initiali
      */
     protected void initialize(WebBeanContext context) {
         doInitialize(context);
+        corsProcessor = context.getBean(CorsProcessor.class);
     }
 
     /**

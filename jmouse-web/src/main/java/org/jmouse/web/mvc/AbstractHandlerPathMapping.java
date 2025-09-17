@@ -134,11 +134,35 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
         return mappedHandler;
     }
 
+    /**
+     * Builds a special mapped handler that serves automatic {@code OPTIONS} for the resource.
+     *
+     * <p>The handler is expected to emit {@code 204 No Content} with an {@code Allow} header
+     * derived from {@code allowedMethods}.</p>
+     *
+     * @param allowedMethods methods to advertise in {@code Allow}
+     * @return mapped handler for {@code OPTIONS}
+     */
     private MappedHandler getOptionsHttpRequestHandler(Set<HttpMethod> allowedMethods) {
         OptionsRequestHttpHandler handler = new OptionsRequestHttpHandler(allowedMethods);
         return new RouteMappedHandler(handler, MappingResult.EMPTY, RequestHttpHandlerMapping.METHOD_PARAMETER);
     }
 
+    /**
+     * Computes the set of allowed methods for the given request path.
+     *
+     * <p>Algorithm:</p>
+     * <ul>
+     *   <li>Collect all {@link MappingCriteria} whose {@link RequestPathCondition} matches the path.</li>
+     *   <li>Union all explicit method sets from mappings that do restrict methods.</li>
+     *   <li>Always add {@code OPTIONS}; never include {@code TRACE}.</li>
+     * </ul>
+     *
+     * <p>Result is insertion-ordered (via {@link java.util.LinkedHashSet}).</p>
+     *
+     * @param requestRoute parsed route (only the path is used here)
+     * @return allowed methods to expose in {@code Allow}
+     */
     private Set<HttpMethod> getAllowedMethods(RequestRoute requestRoute) {
         Set<HttpMethod> methods = new LinkedHashSet<>();
 

@@ -107,6 +107,27 @@ public final class Allow {
     }
 
     /**
+     * ➕ Return a new {@code Allow} with additional method names.
+     *
+     * @param more methods to add
+     * @return new allow instance
+     */
+    public Allow with(HttpMethod... more) {
+        if (isAny()) {
+            return this;
+        }
+
+        if (more == null || more.length == 0) {
+            return this;
+        }
+
+        List<HttpMethod> allow = new ArrayList<>(this.allow);
+        Collections.addAll(allow, more);
+
+        return of(allow);
+    }
+
+    /**
      * 🔗 Merge with another {@code Allow}.
      *
      * <p>Union of method sets; "any" dominates.</p>

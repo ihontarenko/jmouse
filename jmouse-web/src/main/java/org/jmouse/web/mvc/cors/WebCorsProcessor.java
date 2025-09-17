@@ -22,10 +22,6 @@ public class WebCorsProcessor implements CorsProcessor {
     public static final String HEADERS_ARE_NOT_ALLOWED = "CORS: requested headers are not allowed";
     public static final String ORIGIN_NOT_ALLOWED      = "CORS: Origin not allowed!";
 
-    private static boolean isOriginAllowed(String origin, Set<String> allowed) {
-        return allowed.contains("*") || allowed.contains(origin);
-    }
-
     private static boolean reject(Headers responseHeaders, String message) {
         responseHeaders.setStatus(HttpStatus.FORBIDDEN);
         responseHeaders.setHeader(HttpHeader.X_JMOUSE_DEBUG, requireNonNullElse(message, INVALID_CORS_REQUEST));
@@ -60,22 +56,68 @@ public class WebCorsProcessor implements CorsProcessor {
 
         HttpMethod httpMethod = getHttpMethod(requestHeaders, preflight);
         if (!checkHttpMethod(httpMethod, configuration)) {
-            return reject(responseHeaders, "CORS: method '" + httpMethod + "' is not allowed");
+            return reject(responseHeaders, METHOD_IS_NOT_ALLOWED);
         }
 
         List<HttpHeader> accessHeaders = getRequestHeaders(requestHeaders, preflight);
-        if (!checkRequestHeaders(accessHeaders, configuration)) {
-            return reject(responseHeaders, "CORS: headers '" + accessHeaders + "' are not allowed");
+        if (preflight && !checkRequestHeaders(accessHeaders, configuration)) {
+            return reject(responseHeaders, HEADERS_ARE_NOT_ALLOWED);
         }
 
-        responseHeaders.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, origin);
+        Set<String> allowedOrigins   = configuration.getAllowedOrigins();
+        boolean     allowCredentials = configuration.isAllowCredentials();
+        boolean     isAnyOrigin      = allowedOrigins != null && allowedOrigins.contains(MATCH_ALL);
+        String      allowOriginValue = (allowCredentials && isAnyOrigin) ? origin : (isAnyOrigin ? "*" : origin);
 
-        if (preflight) {
-            responseHeaders.setHeader(ACCESS_CONTROL_ALLOW_METHODS, configuration.getAllowedMethods());
+        responseHeaders.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, allowOriginValue);
+
+        if (allowCredentials) {
+            responseHeaders.setHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, Boolean.TRUE.toString());
         }
 
         if (preflight) {
+            // Allow-Methods
+            Allow allowMethods = getAllowedMethods(configuration.getAllowedMethods(), httpMethod);
+            responseHeaders.setHeader(ACCESS_CONTROL_ALLOW_METHODS, allowMethods.toHeaderValue());
 
+            // Allow-Headers
+            Set<HttpHeader>  allowedHeaders   = configuration.getAllowedHeaders();
+            List<HttpHeader> requestedHeaders = getRequestHeaders(requestHeaders, true);
+            Vary             requestedVary    = Vary.of(requestedHeaders);
+
+            if ((allowedHeaders == null || allowedHeaders.isEmpty()) && !requestedVary.isEmpty()) {
+                responseHeaders.setHeader(ACCESS_CONTROL_ALLOW_HEADERS, requestedVary.toHeaderValue());
+            } else {
+                Vary allowedVary = Vary.of(allowedHeaders);
+                Vary grantedVary = allowedVary.intersect(requestedVary);
+                if (!grantedVary.isEmpty()) {
+                    responseHeaders.setHeader(ACCESS_CONTROL_ALLOW_HEADERS, grantedVary.toHeaderValue());
+                }
+            }
+
+            // Max-Age
+            if (configuration.getMaxAge() > 0) {
+                responseHeaders.setHeader(ACCESS_CONTROL_MAX_AGE, String.valueOf(configuration.getMaxAge()));
+            }
+
+            // Private-Network
+            if (configuration.isAllowPrivateNetwork()) {
+                boolean privateNetwork = Boolean.getBoolean(
+                        (String) requestHeaders.getHeader(ACCESS_CONTROL_REQUEST_PRIVATE_NETWORK));
+                if (privateNetwork) {
+                    responseHeaders.setHeader(ACCESS_CONTROL_REQUEST_PRIVATE_NETWORK, "true");
+                }
+            }
+
+            responseHeaders.setStatus(HttpStatus.NO_CONTENT);
+
+            return false;
+        }
+
+        // Exposed-Headers
+        Vary exposedVary = Vary.of(configuration.getExposedHeaders());
+        if (!exposedVary.isEmpty()) {
+            responseHeaders.setHeader(ACCESS_CONTROL_EXPOSE_HEADERS, exposedVary.toHeaderValue());
         }
 
         return true;
@@ -115,16 +157,6 @@ public class WebCorsProcessor implements CorsProcessor {
         return true;
     }
 
-    public boolean validateAllowCredentials(CorsConfiguration configuration) {
-        return !configuration.isAllowCredentials() || configuration.getAllowedOrigins() == null || !configuration.getAllowedOrigins()
-                .contains(MATCH_ALL);
-    }
-
-    public boolean validateAllowPrivateNetwork(CorsConfiguration configuration) {
-        return !configuration.isAllowPrivateNetwork() || configuration.getAllowedOrigins() == null || !configuration.getAllowedOrigins()
-                .contains(MATCH_ALL);
-    }
-
     private HttpMethod getHttpMethod(Headers requestHeaders, boolean preflight) {
         HttpMethod httpMethod = requestHeaders.getMethod();
 
@@ -145,6 +177,16 @@ public class WebCorsProcessor implements CorsProcessor {
         }
 
         return headers;
+    }
+
+    private Allow getAllowedMethods(Set<HttpMethod> allowedMethods, HttpMethod fallback) {
+        Allow allow = Allow.of(allowedMethods);
+
+        if (allow.isEmpty()) {
+            allow = allow.with(fallback);
+        }
+
+        return allow;
     }
 
 }

@@ -58,12 +58,12 @@ public final class Vary {
     }
 
     /**
-     * Create from a list of header names. Deduplicates while preserving order.
+     * Create from a Collection of header names. Deduplicates while preserving order.
      *
      * @param headers header names
      * @return vary instance
      */
-    public static Vary of(List<HttpHeader> headers) {
+    public static Vary of(Collection<HttpHeader> headers) {
         if (headers == null || headers.isEmpty()) {
             return empty();
         }

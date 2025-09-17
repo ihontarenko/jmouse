@@ -82,6 +82,7 @@ public enum HttpHeader {
     ACCESS_CONTROL_MAX_AGE("Access-Control-Max-Age"),
     ACCESS_CONTROL_REQUEST_HEADERS("Access-Control-Request-Headers"),
     ACCESS_CONTROL_REQUEST_METHOD("Access-Control-Request-Method"),
+    ACCESS_CONTROL_REQUEST_PRIVATE_NETWORK("Access-Control-Request-Private-Network"),
     X_REAL_IP("X-Real-IP"),
     X_FORWARDED_FOR("X-Forwarded-For"),
     X_FORWARDED_PROTO("X-Forwarded-Proto"),
