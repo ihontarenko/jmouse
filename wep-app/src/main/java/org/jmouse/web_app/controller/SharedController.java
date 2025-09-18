@@ -108,28 +108,31 @@ public class SharedController {
         return Map.of("text", "Hello World!", "IDs", List.of(1, 2, 3), "format", format);
     }
 
-    @GetMapping(requestPath = "/shared/getBytes/{bytes}")
-    public Bytes getBytes(@PathVariable("bytes") String bytes) {
+    @CorsMapping(
+            origins = {"https://*.youtube.com"},
+            methods = {HttpMethod.GET, HttpMethod.POST},
+            exposedHeaders = {HttpHeader.CONTENT_LENGTH},
+            allowCredentials = true,
+            maxAge = 3600
+    )
+    @GetMapping(
+            requestPath = "/shared/{format}/bytes/{bytes}"
+    )
+    public Bytes bytesA(@PathVariable("bytes") String bytes) {
         return Bytes.parse(bytes);
     }
 
     @CorsMapping(
-            origins = {
-                    "https://*.youtube.com",
-                    "https://*.example.org:[80,443]"
-            },
-            methods = {
-                    HttpMethod.GET,
-                    HttpMethod.POST
-            },
-            exposedHeaders = {
-                    HttpHeader.CONTENT_LENGTH
-            },
+            origins = {"megogo.net"},
+            methods = {HttpMethod.GET, HttpMethod.POST},
+            exposedHeaders = {HttpHeader.CONTENT_LENGTH},
             allowCredentials = true,
             maxAge = 3600
     )
-    @GetMapping(requestPath = "/shared/{format}/bytes/{bytes}")
-    public Bytes bytes(@PathVariable("bytes") String bytes) {
+    @GetMapping(
+            requestPath = "/shared/{format}/bytes/{bytes}/megogo"
+    )
+    public Bytes bytesB(@PathVariable("bytes") String bytes) {
         return Bytes.parse(bytes);
     }
 

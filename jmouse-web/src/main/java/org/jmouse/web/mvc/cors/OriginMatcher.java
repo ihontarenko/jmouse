@@ -2,6 +2,8 @@ package org.jmouse.web.mvc.cors;
 
 import org.jmouse.core.matcher.Matcher;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -66,6 +68,8 @@ class OriginMatcher implements Matcher<String> {
             return true;
         }
 
+        origin = toHostPort(origin);
+
         for (String allowedOrigin : allowedOrigins) {
             if (allowedOrigin.equalsIgnoreCase(origin)) {
                 return true;
@@ -123,5 +127,16 @@ class OriginMatcher implements Matcher<String> {
         }
 
         return patterns;
+    }
+
+    private String toHostPort(String origin) {
+        try {
+            URI    uri  = new URI(origin);
+            String host = uri.getHost();
+            int    port = uri.getPort();
+            return port == -1 ? host : host + ":" + port;
+        } catch (URISyntaxException e) {
+            return origin;
+        }
     }
 }

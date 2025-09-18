@@ -26,7 +26,9 @@ import static org.jmouse.web.http.HttpStatus.NO_CONTENT;
  */
 public class OptionsRequestHttpHandler implements RequestHttpHandler {
 
-    /** Methods to advertise in the {@code Allow} header. */
+    /**
+     * Methods to advertise in the {@code Allow} header.
+     */
     private final Set<HttpMethod> allowedMethods;
 
     /**
@@ -52,5 +54,10 @@ public class OptionsRequestHttpHandler implements RequestHttpHandler {
         response.setStatus(NO_CONTENT.getCode());
         response.setHeader(ALLOW.value(), joined);
         response.setHeader(X_JMOUSE_DEBUG.value(), "OPTIONS Request: Allowed request-methods [" + joined + "]");
+    }
+
+    @Override
+    public String toString() {
+        return "OPTIONS_REQUEST_HTTP_HANDLER";
     }
 }

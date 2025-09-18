@@ -32,9 +32,9 @@ public class WebCorsProcessor implements CorsProcessor {
      * Debug messages (set in {@code X-JMouse-Debug}).
      */
     public static final String INVALID_CORS_REQUEST     = "Invalid CORS request!";
-    public static final String METHOD_IS_NOT_ALLOWED    = "CORS: requested method is not allowed";
-    public static final String HEADERS_ARE_NOT_ALLOWED  = "CORS: requested headers are not allowed";
-    public static final String ORIGIN_NOT_ALLOWED       = "CORS: Origin not allowed!";
+    public static final String METHOD_IS_NOT_ALLOWED    = "CORS: requested method [%s] is not allowed";
+    public static final String HEADERS_ARE_NOT_ALLOWED  = "CORS: requested headers [%s] are not allowed";
+    public static final String ORIGIN_NOT_ALLOWED       = "CORS: Origin '%s' not allowed!";
     public static final String PREFLIGHT_REQUEST_PASSED = "CORS: Preflight request passed!";
 
     /**
@@ -64,11 +64,11 @@ public class WebCorsProcessor implements CorsProcessor {
                 .toHeaderValue());
 
         if (!Cors.isCorsRequest(requestHeaders)) {
-            return true; // not a CORS request → nothing to do
+            return true;
         }
 
         if (responseHeaders.getHeader(ACCESS_CONTROL_ALLOW_ORIGIN) != null) {
-            return true; // already processed upstream
+            return true;
         }
 
         return doHandleRequest(configuration, requestHeaders, responseHeaders, preflight);
@@ -94,17 +94,19 @@ public class WebCorsProcessor implements CorsProcessor {
         String          origin        = (String) requestHeaders.getHeader(ORIGIN);
 
         if (!checkOrigin(origin, originMatcher)) {
-            return reject(responseHeaders, ORIGIN_NOT_ALLOWED);
+            return reject(responseHeaders, ORIGIN_NOT_ALLOWED.formatted(origin));
         }
 
         HttpMethod httpMethod = getHttpMethod(requestHeaders, preflight);
         if (!checkHttpMethod(httpMethod, configuration)) {
-            return reject(responseHeaders, METHOD_IS_NOT_ALLOWED);
+            return reject(responseHeaders, METHOD_IS_NOT_ALLOWED.formatted(httpMethod));
         }
 
         List<HttpHeader> accessHeaders = getRequestHeaders(requestHeaders, preflight);
         if (preflight && !checkRequestHeaders(accessHeaders, configuration)) {
-            return reject(responseHeaders, HEADERS_ARE_NOT_ALLOWED);
+            return reject(responseHeaders, HEADERS_ARE_NOT_ALLOWED.formatted(
+                    Vary.of(accessHeaders).toHeaderValue()
+            ));
         }
 
         // Allow-Origin (+ credentials echo rule)

@@ -59,6 +59,21 @@ public final class Handler {
     }
 
     /**
+     * Inserts a {@link HandlerInterceptor} at the given position in the execution chain.
+     *
+     * <p>Index is zero-based. Existing elements at and after {@code position} are shifted to the right.
+     * The final order determines interceptor execution order in the chain.</p>
+     *
+     * @param position   zero-based insertion index (from {@code 0} to current size)
+     * @param interceptor the interceptor to insert
+     * @throws IndexOutOfBoundsException if {@code position} is out of range ({@code position < 0 || position > size()})
+     * @see HandlerInterceptor
+     */
+    public void addInterceptor(int position, HandlerInterceptor interceptor) {
+        this.interceptors.add(position, interceptor);
+    }
+
+    /**
      * Returns the current handler associated with this execution context.
      *
      * @return the handler object
