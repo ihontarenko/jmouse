@@ -13,6 +13,42 @@ public class MediaType extends MimeType {
     /** Parameter name for the quality factor (0.0 to 1.0). */
     public static final String PARAMETER_NAME_QUALITY_FACTOR = "q";
 
+    /**
+     * Ordering rules:
+     * <ol>
+     *   <li>Concrete type beats the wildcard type.</li>
+     *   <li>Concrete subtype beats wildcard subtype or suffix-wildcard.</li>
+     *   <li>If same type+subtype, more parameters → higher specificity.</li>
+     *   <li>Tie-break by lexicographic string form.</li>
+     * </ol>
+     */
+    public static final Comparator<MimeType> SPECIFICITY_COMPARATOR = (a, b) -> {
+        if (a == b) {
+            return 0;
+        }
+
+        if (a == null) {
+            return 1;
+        }
+
+        if (b == null) {
+            return -1;
+        }
+
+        boolean aLower = a.isLowerPriority(b);
+        boolean bLower = b.isLowerPriority(a);
+
+        if (aLower && !bLower) {
+            return 1;
+        }
+
+        if (bLower && !aLower) {
+            return -1;
+        }
+
+        return a.toString().compareTo(b.toString());
+    };
+
     private double qFactor;
 
     public static final MediaType ALL;
@@ -309,6 +345,36 @@ public class MediaType extends MimeType {
     }
 
     /**
+     * 📊 Sorts the given list of media types by specificity (“fullness”), descending.
+     *
+     * <p>Ordering rules:</p>
+     * <ol>
+     *   <li>Concrete type beats wildcard "*".</li>
+     *   <li>Concrete subtype beats "*" or "*+suffix".</li>
+     *   <li>If same type+subtype, more parameters → higher specificity.</li>
+     *   <li>Stable tie-break by lexicographic string form.</li>
+     * </ol>
+     *
+     * @param mediaTypes the list to sort (modified in place)
+     */
+    public static void sortBySpecificity(List<? extends MimeType> mediaTypes) {
+        mediaTypes.sort(SPECIFICITY_COMPARATOR);
+    }
+
+    /**
+     * 📊 Returns a new list sorted by specificity (“fullness”), descending.
+     *
+     * @param mediaTypes the input collection
+     * @param <T>        media type subtype
+     * @return new list, sorted by specificity
+     */
+    public static <T extends MimeType> List<T> prioritizeBySpecificity(Collection<T> mediaTypes) {
+        ArrayList<T> prioritized = new ArrayList<>(mediaTypes);
+        prioritized.sort(SPECIFICITY_COMPARATOR);
+        return prioritized;
+    }
+
+    /**
      * 📊 Sort media types by preference.
      *
      * <p>Orders the list by ascending <em>q-factor</em> (quality value), then by
@@ -317,7 +383,7 @@ public class MediaType extends MimeType {
      * @param mediaTypes the list of media types to sort (not modified)
      * @return a new list containing the same items in prioritized order
      */
-    public static List<MediaType> prioritize(List<MediaType> mediaTypes) {
+    public static List<MediaType> prioritizeByQFactor(List<MediaType> mediaTypes) {
         List<MediaType>       prioritized = new ArrayList<>(mediaTypes);
         Comparator<MediaType> comparator  = Comparator.comparingDouble(MediaType::getQFactor)
                 .thenComparing(Comparator.comparing(MediaType::toString));
@@ -330,7 +396,7 @@ public class MediaType extends MimeType {
     /**
      * 🤝 Compute the intersection of two media type lists, respecting priority.
      *
-     * <p>Both lists are first prioritized via {@link #prioritize(List)}. Then, for each
+     * <p>Both lists are first prioritized via {@link #prioritizeByQFactor(List)}. Then, for each
      * item in the first list, a compatible item in the second list (per
      * {@link MimeType#includes(MediaType)}) adds that media type to the result.</p>
      *
@@ -343,8 +409,8 @@ public class MediaType extends MimeType {
     public static List<MediaType> intersect(List<MediaType> listA, List<MediaType> listB) {
         Set<MediaType> result = new LinkedHashSet<>();
 
-        listA = prioritize(listA);
-        listB = prioritize(listB);
+        listA = prioritizeByQFactor(listA);
+        listB = prioritizeByQFactor(listB);
 
         for (MediaType typeA : listA) {
             for (MediaType typeB : listB) {

@@ -70,7 +70,7 @@ public class MediaTypeManager implements LookupRegistry, InitializingBeanSupport
         for (MediaTypeLookup lookup : getLookups()) {
             List<MediaType> candidates = lookup.lookup(request);
             if (candidates != null && !candidates.isEmpty()) {
-                types = candidates;
+                types.addAll(candidates);
                 break;
             }
         }

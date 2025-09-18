@@ -157,7 +157,13 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
      * @return immutable list of acceptable media types
      */
     protected List<MediaType> getAcceptableMediaTypes(HttpServletRequest request) {
-        return mediaTypeManager.lookupOnRequest(request);
+        List<MediaType> acceptableTypes = mediaTypeManager.lookupOnRequest(request);
+
+        if (!acceptableTypes.isEmpty()) {
+            MediaType.sortBySpecificity(acceptableTypes);
+        }
+
+        return acceptableTypes;
     }
 
     /**
@@ -176,6 +182,9 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
      */
     protected List<MediaType> getCompatibleMediaTypes(List<MediaType> acceptableTypes, List<MediaType> producibleTypes) {
         Set<MediaType> compatibleTypes = new HashSet<>();
+
+        producibleTypes = new ArrayList<>(producibleTypes);
+        MediaType.sortBySpecificity(producibleTypes);
 
         for (MediaType requestedType : acceptableTypes) {
             for (MediaType producibleType : producibleTypes) {

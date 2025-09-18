@@ -29,6 +29,7 @@ import java.util.*;
 public final class Headers {
 
     private final Map<HttpHeader, Object> headers = new HashMap<>();
+
     /**
      * 🏷️ Optional HTTP status associated with this header set.
      * <p>

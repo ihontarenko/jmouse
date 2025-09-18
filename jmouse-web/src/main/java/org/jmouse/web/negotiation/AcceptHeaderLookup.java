@@ -19,7 +19,7 @@ import java.util.List;
  * <p>Registered with the highest priority, so it is
  * evaluated before other strategies.</p>
  */
-@Priority(Integer.MIN_VALUE)
+@Priority(Integer.MIN_VALUE + 4000)
 public class AcceptHeaderLookup implements MediaTypeLookup {
 
     /**
