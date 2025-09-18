@@ -1,4 +1,4 @@
-package org.jmouse.web.security;
+package org.jmouse.core.limits;
 
 /**
  * 🪣 A simple rate limiter based on the <b>Token Bucket</b> algorithm.
@@ -69,10 +69,10 @@ public class TokenBucket {
      * @param rps   the desired average refill rate (tokens per second).
      * @param burst the maximum burst capacity; actual {@code capacity = max(burst, rps)}.
      *
-     *              <p>
-     *              📌 Tip: If unsure about {@code burst}, pick 2–3× the {@code rps}
-     *              to allow short bursts without sustained overload.
-     *              </p>
+     * <p>
+     *  📌 Tip: If unsure about {@code burst}, pick 2–3× the {@code rps}
+     *  to allow short bursts without sustained overload.
+     * </p>
      */
     public TokenBucket(double rps, double burst) {
         this.capacity = Math.max(burst, rps);
