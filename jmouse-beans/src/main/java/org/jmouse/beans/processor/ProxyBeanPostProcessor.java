@@ -1,11 +1,11 @@
 package org.jmouse.beans.processor;
 
+import org.jmouse.core.proxy.UnsupportedProxyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.core.proxy.ProxyFactory;
-import org.jmouse.core.reflection.Reflections;
 
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
@@ -41,14 +41,13 @@ public class ProxyBeanPostProcessor implements BeanPostProcessor {
 
         if (definition.isProxied()) {
             ProxyFactory proxyFactory = context.getBean(ProxyFactory.class);
-            Class<?>[]   ifaces       = Reflections.getClassInterfaces(bean.getClass());
-            if (ifaces.length > 0) {
-                LOGGER.info("Proxied bean '{}' of type '{}'",
-                        definition.getBeanName(), getShortName(definition.getBeanClass()));
+            try {
                 proxy = proxyFactory.createProxy(bean);
-            } else {
-                LOGGER.error("Bean '{}' cannot be proxied with JDK Proxy. Ensure the bean implements an interface.",
-                        definition.getBeanName());
+                LOGGER.info("Proxied bean '{}' of type '{}'",
+                            definition.getBeanName(), getShortName(definition.getBeanClass()));
+            } catch (UnsupportedProxyException e) {
+                LOGGER.error("Enable to create proxy for bean '{}' of type '{}'. Reason: '{}'",
+                            definition.getBeanName(), getShortName(definition.getBeanClass()), e.getMessage());
             }
         }
 

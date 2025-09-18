@@ -2,7 +2,6 @@ package org.jmouse.core.proxy;
 
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.proxy.annotation.ProxyMethodInterceptor;
-import org.jmouse.core.proxy.jdk.JdkProxy;
 import org.jmouse.core.reflection.ClassMatchers;
 
 import java.util.ArrayList;
@@ -11,59 +10,77 @@ import java.util.List;
 import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
 
 /**
- * DirectAccess implementation of the {@link ProxyFactory} interface. Uses the JDK dynamic proxy
- * mechanism ({@link JdkProxy}) to create proxies and applies only those {@link MethodInterceptor}s
- * whose associated annotation {@link ProxyMethodInterceptor} matches the target class.
+ * 🏭 Default implementation of {@link ProxyFactory}.
  *
- * <p>Usage binder:
- * <pre>{@code
- * // Create a new factory with some interceptors
- * ProxyFactory factory = new DefaultProxyFactory(new LoggingInterceptor(), new SecurityInterceptor());
- * // Create a proxy instance (for binder, MyService is your original class)
- * InternalService proxyService = factory.createProxy(serviceInstance);
- * }</pre>
+ * <p>Delegates proxy creation to a chain of {@link ProxyEngine}s
+ * (ByteBuddy first, then JDK dynamic proxies).
+ * Interceptors are matched against target classes via
+ * {@link ProxyMethodInterceptor} metadata.</p>
+ *
+ * <h3>Features</h3>
+ * <ul>
+ *   <li>⚡ Supports both class-based proxies (ByteBuddy) and interface-based proxies (JDK).</li>
+ *   <li>🧩 Filters interceptors using declared preferred types.</li>
+ *   <li>📋 Keeps an internal registry of added {@link MethodInterceptor}s.</li>
+ * </ul>
  */
 public class DefaultProxyFactory implements ProxyFactory {
 
     private final List<MethodInterceptor> interceptors = new ArrayList<>();
 
     /**
-     * Constructs a {@code DefaultProxyFactory} with the specified array of
-     * {@link MethodInterceptor}s. Each provided interceptor will be evaluated and potentially
-     * applied when creating a proxy context.
+     * 🚀 Engines used for proxy creation (order matters).
+     * <ul>
+     *   <li>{@link ByteBuddyProxyEngine} – class-based proxies</li>
+     *   <li>{@link JdkProxyEngine} – interface-based proxies</li>
+     * </ul>
+     */
+    private final List<ProxyEngine> engines = List.of(
+            new ByteBuddyProxyEngine(),
+            new JdkProxyEngine()
+    );
+
+    /**
+     * 🏗️ Construct a factory with predefined interceptors.
      *
-     * @param interceptors one or more {@link MethodInterceptor}s to be added
+     * @param interceptors initial interceptors to register
      */
     public DefaultProxyFactory(MethodInterceptor... interceptors) {
         this.interceptors.addAll(List.of(interceptors));
     }
 
     /**
-     * Creates a proxy for the specified structured using the default JDK proxy mechanism.
-     * The proxy is configured with the interceptors that match the target class.
+     * ✨ Create a proxy for the given target.
      *
-     * @param <T>    the type of the created proxy
-     * @param object the original structured to be proxied
-     * @return a JDK-based proxy instance of the specified structured
-     * @see #createProxyContext(Object, ClassLoader)
+     * <p>Builds a {@link ProxyContext}, finds the first engine that
+     * {@link ProxyEngine#supports(ProxyContext) supports} it, and
+     * delegates to that engine.</p>
+     *
+     * @param object target instance
+     * @return proxy wrapping the target
+     * @throws UnsupportedProxyException if no engine can handle the target
      */
     @Override
     @SuppressWarnings({"unchecked"})
     public <T> T createProxy(Object object) {
-        // Uses default JDK proxy mechanism
-        return (T) new JdkProxy(createProxyContext(object, object.getClass().getClassLoader())).getProxy();
+        ProxyContext proxyContext = createProxyContext(object, object.getClass().getClassLoader());
+
+        for (ProxyEngine engine : engines) {
+            if (engine.supports(proxyContext)) {
+                return (T) engine.createProxy(proxyContext);
+            }
+        }
+
+        throw new UnsupportedProxyException(
+                "No proxy engine can handle target: " + proxyContext.getTargetClass().getName() +
+                        ". Provide interfaces (JDK) or use non-final class (ByteBuddy).");
     }
 
     /**
-     * Creates a {@link ProxyContext} for the specified structured and class loader. This method
-     * determines which {@link MethodInterceptor}s should be applied by checking the
-     * {@link ProxyMethodInterceptor#value() value} of each interceptor's annotation against
-     * the target class. Only interceptors whose preferred class is a supertype of the target
-     * class are added to the proxy context.
+     * 🏗️ Build a {@link ProxyContext} and attach matching interceptors.
      *
-     * @param object      the original structured to be proxied
-     * @param classLoader the class loader to define the proxy class
-     * @return a new {@link ProxyContext} instance populated with matching interceptors
+     * <p>Interceptors are matched if their {@link ProxyMethodInterceptor}
+     * annotation declares a type assignable from the target class.</p>
      */
     @Override
     public ProxyContext createProxyContext(Object object, ClassLoader classLoader) {
@@ -71,7 +88,7 @@ public class DefaultProxyFactory implements ProxyFactory {
         Matcher<Class<?>> classMatcher = ClassMatchers.isSubtype(proxyContext.getTargetClass());
 
         for (MethodInterceptor interceptor : interceptors) {
-            Class<?>[] preferredClasses = (Class<?>[]) getAnnotationValue(
+            Class<?>[] preferredClasses = getAnnotationValue(
                     interceptor.getClass(), ProxyMethodInterceptor.class, ProxyMethodInterceptor::value);
 
             if (preferredClasses == null) {
@@ -90,10 +107,9 @@ public class DefaultProxyFactory implements ProxyFactory {
     }
 
     /**
-     * Adds a {@link MethodInterceptor} to this factory. The interceptor will be considered
-     * for future proxy creations, and will be applied if it matches the target class.
+     * ➕ Add a new interceptor to this factory.
      *
-     * @param interceptor the interceptor to add
+     * @param interceptor interceptor to register
      */
     @Override
     public void addInterceptor(MethodInterceptor interceptor) {
@@ -101,15 +117,13 @@ public class DefaultProxyFactory implements ProxyFactory {
     }
 
     /**
-     * Retrieves the list of all currently registered {@link MethodInterceptor}s. The returned
-     * list is a copy, so modifying it does not affect the actual interceptor list maintained
-     * by this factory.
+     * 📋 Get all registered interceptors.
      *
-     * @return an unmodifiable copy of the registered interceptors
+     * <p>Returns an immutable copy of the list, so external modifications
+     * do not affect the factory’s state.</p>
      */
     @Override
     public List<MethodInterceptor> getInterceptors() {
         return List.copyOf(interceptors);
     }
-
 }

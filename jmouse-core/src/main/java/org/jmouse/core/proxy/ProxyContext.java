@@ -21,6 +21,7 @@ public class ProxyContext {
     private final List<Class<?>>          interfaces;
     private final List<MethodInterceptor> interceptors = new ArrayList<>();
     private final boolean                 hasHashCode;
+    private final boolean                 hasToString;
     private final boolean                 hasEquals;
     private final ClassLoader             classLoader;
 
@@ -38,6 +39,7 @@ public class ProxyContext {
         this.interfaces = List.of(Reflections.getClassInterfaces(targetClass));
         this.hasEquals = Reflections.hasMethod(targetClass, "equals");
         this.hasHashCode = Reflections.hasMethod(targetClass, "hashCode");
+        this.hasToString = Reflections.hasMethod(targetClass, "toString");
     }
 
     /**
@@ -102,6 +104,15 @@ public class ProxyContext {
      * @return {@code true} if the target class has a {@code hashCode} method, otherwise {@code false}.
      */
     public boolean hasHashCode() {
+        return hasHashCode;
+    }
+
+    /**
+     * Determines whether the target class has an overridden {@code toString} method.
+     *
+     * @return {@code true} if the target class has a {@code toString} method, otherwise {@code false}.
+     */
+    public boolean hasToString() {
         return hasHashCode;
     }
 

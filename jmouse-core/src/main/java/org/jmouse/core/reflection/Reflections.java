@@ -366,10 +366,6 @@ abstract public class Reflections {
      */
     public static Object invokeMethod(Object object, Method method, Object... arguments) {
         try {
-            if (Proxy.isProxyClass(object.getClass())) {
-                return Proxy.getInvocationHandler(object).invoke(object, method, arguments);
-            }
-
             method.setAccessible(true);
             return method.invoke(object, arguments);
         } catch (Throwable e) {

@@ -41,6 +41,8 @@
         <maven-gpg.version>3.0.1</maven-gpg.version>
         <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
         <jmouse.version>1.0.0-Beta</jmouse.version>
+        <bytebuddy.version>1.17.6</bytebuddy.version>
+        <objenesis.version>3.3</objenesis.version>
         <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
         <jakarta-validation.version>3.1.1</jakarta-validation.version>
         <jackson.version>2.17.1</jackson.version>
@@ -89,6 +91,19 @@
                 <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-web</artifactId>
                 <version>${jmouse.version}</version>
+            </dependency>
+            <!-- Proxy -->
+            <!-- Byte Buddy -->
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${bytebuddy.version}</version>
+            </dependency>
+            <!-- Objenesis -->
+            <dependency>
+                <groupId>org.objenesis</groupId>
+                <artifactId>objenesis</artifactId>
+                <version>${objenesis.version}</version>
             </dependency>
             <!-- Jakarta -->
             <dependency>

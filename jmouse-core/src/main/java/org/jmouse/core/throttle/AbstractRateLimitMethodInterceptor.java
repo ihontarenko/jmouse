@@ -73,19 +73,31 @@ public abstract class AbstractRateLimitMethodInterceptor implements MethodInterc
      */
     @Override
     public void before(ProxyContext context, Method method, Object[] arguments) {
-        RateLimit              annotation = resolveAnnotation(method, context.getTarget().getClass());
-        RateLimitConfiguration config     = toConfiguration(annotation);
-        BucketKey              key        = keyOf(config, context.getTarget(), method, arguments);
-        RateLimiter            limiter    = buckets.computeIfAbsent(
-                key, k -> RateLimiter.smooth(config.max(), config.periodNanos()));
+        if (isSupportedType(context.getTargetClass()) && isSupportedMethod(method)) {
+            RateLimit              annotation = resolveAnnotation(method, context.getTarget().getClass());
+            RateLimitConfiguration config     = toConfiguration(annotation);
+            BucketKey              key        = keyOf(config, context.getTarget(), method, arguments);
+            RateLimiter            limiter    = buckets.computeIfAbsent(
+                    key, k -> RateLimiter.smooth(config.max(), config.periodNanos()));
 
-        if (!limiter.tryAcquire()) {
-            String name  = config.name().isBlank() ? "" : ("[%s] ".formatted(config.name()));
-            String where = Reflections.getMethodName(method);
-            throw new RateLimitExceededException(
-                    "Rate limit %s exceeded for %s (max %d per %d %s)".formatted(
-                            name, where, config.max(), config.amount(), config.per().name()), config);
+            if (!limiter.tryAcquire()) {
+                String name  = config.name().isBlank() ? "" : ("[%s] ".formatted(config.name()));
+                String where = Reflections.getMethodName(method);
+                throw new RateLimitExceededException(
+                        "Rate limit %s exceeded for %s (max %d per %d %s)".formatted(
+                                name, where, config.max(), config.amount(), config.per().name()), config);
+            }
         }
+    }
+
+    private boolean isSupportedType(Class<?> type) {
+        return RateLimited.class.isAssignableFrom(type)
+                || type.isAnnotationPresent(RateLimitEnable.class)
+                || type.isAnnotationPresent(RateLimit.class);
+    }
+
+    private boolean isSupportedMethod(Method method) {
+        return method.isAnnotationPresent(RateLimit.class);
     }
 
     /**

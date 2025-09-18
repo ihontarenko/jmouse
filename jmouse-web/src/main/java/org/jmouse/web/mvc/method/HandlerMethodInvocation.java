@@ -1,6 +1,7 @@
 package org.jmouse.web.mvc.method;
 
 import org.jmouse.core.MethodParameter;
+import org.jmouse.core.proxy.ProxyHelper;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
@@ -94,7 +95,23 @@ public class HandlerMethodInvocation {
             MethodDescription.LOGGER.info("Endpoint Information: {}", description.value());
         }
 
-        return Reflections.invokeMethod(handlerMethod.getBean(), method, arguments);
+        return invokeMethod(handlerMethod.getBean(), method, arguments);
+    }
+
+    /**
+     * ⚡ Delegate the reflective method invocation.
+     *
+     * <p>Uses {@link ProxyHelper#invoke(Object, Method, Object[])} to transparently
+     * handle both plain targets and proxy objects.</p>
+     *
+     * @param object    target bean (possibly proxied)
+     * @param method    reflected method to call
+     * @param arguments resolved arguments to pass
+     * @return return value from the invocation
+     * @throws HandlerMethodInvocationException if invocation fails at runtime
+     */
+    private Object invokeMethod(Object object, Method method, Object[] arguments) {
+        return ProxyHelper.invoke(object, method, arguments);
     }
 
     /**

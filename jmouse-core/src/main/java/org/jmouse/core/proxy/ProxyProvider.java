@@ -1,6 +1,6 @@
 package org.jmouse.core.proxy;
 
-public interface Proxy {
+public interface ProxyProvider {
 
     <T> T getProxy();
 

@@ -64,6 +64,16 @@ public class ClassMatchers {
     }
 
     /**
+     * Creates a matcher that checks if a class is final.
+     *
+     * @return a matcher that checks if the class is final
+     * @see Modifier#FINAL
+     */
+    public static Matcher<Class<?>> isFinal() {
+        return withModifier(Modifier.FINAL);
+    }
+
+    /**
      * Creates a matcher that checks if a class is interface.
      *
      * @return a matcher that checks if the class is interface.

@@ -26,7 +26,7 @@ public enum HttpStatus implements HttpStatusCode {
     FOUND("Found", 302, HttpStatusType.REDIRECTION),
     SEE_OTHER("See Other", 303, HttpStatusType.REDIRECTION),
     NOT_MODIFIED("Not Modified", 304, HttpStatusType.REDIRECTION),
-    USE_PROXY("Use Proxy", 305, HttpStatusType.REDIRECTION),
+    USE_PROXY("Use ProxyProvider", 305, HttpStatusType.REDIRECTION),
     TEMPORARY_REDIRECT("Temporary Redirect", 307, HttpStatusType.REDIRECTION),
     PERMANENT_REDIRECT("Permanent Redirect", 308, HttpStatusType.REDIRECTION),
 
@@ -37,7 +37,7 @@ public enum HttpStatus implements HttpStatusCode {
     NOT_FOUND("Not Found", 404, HttpStatusType.CLIENT_ERROR),
     METHOD_NOT_ALLOWED("Method Not Allowed", 405, HttpStatusType.CLIENT_ERROR),
     NOT_ACCEPTABLE("Not Acceptable", 406, HttpStatusType.CLIENT_ERROR),
-    PROXY_AUTHENTICATION_REQUIRED("Proxy Authentication Required", 407, HttpStatusType.CLIENT_ERROR),
+    PROXY_AUTHENTICATION_REQUIRED("ProxyProvider Authentication Required", 407, HttpStatusType.CLIENT_ERROR),
     REQUEST_TIMEOUT("Request Timeout", 408, HttpStatusType.CLIENT_ERROR),
     CONFLICT("Conflict", 409, HttpStatusType.CLIENT_ERROR),
     GONE("Gone", 410, HttpStatusType.CLIENT_ERROR),

@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.annotation.ProxiedBean;
 import org.jmouse.core.Bytes;
 import org.jmouse.core.throttle.RateLimit;
+import org.jmouse.core.throttle.RateLimitEnable;
 import org.jmouse.core.throttle.RateLimited;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.http.request.multipart.UploadLimitExceededException;
@@ -30,7 +31,8 @@ import static org.jmouse.core.throttle.RateLimit.Scope.METHOD;
 })
 @Controller
 @ProxiedBean
-public class SharedController implements RateLimited {
+@RateLimitEnable
+public class SharedController {
 
     @GetMapping(requestPath = "/shared/illegalStateException")
     public String illegalStateException() {

@@ -77,6 +77,7 @@ public interface PropertyResolver {
      * @return the converted property value
      * @throws PropertyNotFoundException if the property is not found
      */
+    @SuppressWarnings("unchecked")
     default <T> T getRequiredProperty(String name, Class<? super T> targetType) {
         T value = getProperty(name, (Class<T>) targetType);
 

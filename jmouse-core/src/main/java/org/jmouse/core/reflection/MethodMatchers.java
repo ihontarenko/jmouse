@@ -25,6 +25,7 @@ public class MethodMatchers {
 
     public static final String GETTER_GET_PREFIX = "get";
     public static final String GETTER_IS_PREFIX  = "is";
+    public static final String GETTER_TO_PREFIX  = "to";
     public static final String SETTER_PREFIX     = "set";
 
     /**
