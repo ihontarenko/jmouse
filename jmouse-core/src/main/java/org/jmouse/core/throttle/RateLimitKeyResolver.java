@@ -1,4 +1,4 @@
-package org.jmouse.core.limits;
+package org.jmouse.core.throttle;
 
 import java.lang.reflect.Method;
 

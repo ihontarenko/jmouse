@@ -19,7 +19,7 @@ import java.util.Objects;
  *   <li>Use {@code spread32/spread64} before masking for better low-bit quality.</li>
  * </ul>
  */
-public final class HashMix {
+public final class Hash {
 
     /**
      * φ32 ≈ 2^32 / φ (Knuth multiplicative hashing constant).
@@ -31,7 +31,7 @@ public final class HashMix {
      */
     public static final long PHI64 = 0x9e3779b97f4a7c15L;
 
-    private HashMix() {
+    private Hash() {
     }
 
     /**
@@ -182,6 +182,7 @@ public final class HashMix {
             indices[index] = index64(mixed64, tableSize);
             mixed64 += PHI64; // golden stride
         }
+
         return indices;
     }
 

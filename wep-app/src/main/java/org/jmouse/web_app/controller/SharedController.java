@@ -2,10 +2,12 @@ package org.jmouse.web_app.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jmouse.beans.annotation.ProxiedBean;
 import org.jmouse.core.Bytes;
+import org.jmouse.core.throttle.RateLimit;
+import org.jmouse.core.throttle.RateLimited;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.http.request.multipart.UploadLimitExceededException;
-import org.jmouse.web.mvc.Model;
 import org.jmouse.web.annotation.*;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.HttpHeader;
@@ -15,8 +17,11 @@ import org.jmouse.web.http.request.multipart.MultipartWebRequest;
 import org.jmouse.web.mvc.cors.CorsMapping;
 
 import java.io.IOException;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+
+import static org.jmouse.core.throttle.RateLimit.Scope.METHOD;
 
 @CorsMapping(allowedHeaders = {
         HttpHeader.CONTENT_TYPE,
@@ -24,7 +29,8 @@ import java.util.Map;
         HttpHeader.X_TEXT
 })
 @Controller
-public class SharedController {
+@ProxiedBean
+public class SharedController implements RateLimited {
 
     @GetMapping(requestPath = "/shared/illegalStateException")
     public String illegalStateException() {
@@ -132,6 +138,7 @@ public class SharedController {
     @GetMapping(
             requestPath = "/shared/{format}/bytes/{bytes}/megogo"
     )
+    @RateLimit(name = "megogo call", max = 1, per = ChronoUnit.SECONDS, amount = 2, scope = METHOD)
     public Bytes bytesB(@PathVariable("bytes") String bytes) {
         return Bytes.parse(bytes);
     }

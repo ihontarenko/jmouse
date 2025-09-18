@@ -70,6 +70,10 @@ class OriginMatcher implements Matcher<String> {
 
         origin = toHostPort(origin);
 
+        if (origin == null) {
+            return false;
+        }
+
         for (String allowedOrigin : allowedOrigins) {
             if (allowedOrigin.equalsIgnoreCase(origin)) {
                 return true;

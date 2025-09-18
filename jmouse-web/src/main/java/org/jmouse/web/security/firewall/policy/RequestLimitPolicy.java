@@ -1,9 +1,9 @@
 package org.jmouse.web.security.firewall.policy;
 
 import org.jmouse.core.net.CIDR;
+import org.jmouse.core.throttle.RateLimiter;
 import org.jmouse.web.http.HttpStatus;
 import org.jmouse.web.http.request.WebRequest;
-import org.jmouse.core.limits.TokenBucket;
 import org.jmouse.web.security.firewall.Decision;
 import org.jmouse.web.security.firewall.EvaluationInput;
 import org.jmouse.web.security.firewall.FirewallPolicy;
@@ -17,13 +17,13 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 🚦 Firewall policy that enforces request <b>rate limiting</b>.
  *
- * <p>This policy applies a {@link TokenBucket} algorithm to limit the number of
+ * <p>This policy applies a {@link RateLimiter} algorithm to limit the number of
  * requests per client IP within a defined time window. It helps prevent abuse,
  * brute-force attacks, and denial-of-service scenarios by throttling excessive traffic.</p>
  *
  * <h3>Key features</h3>
  * <ul>
- *   <li>Each client IP is tracked using its own {@link TokenBucket}.</li>
+ *   <li>Each client IP is tracked using its own {@link RateLimiter}.</li>
  *   <li>Rate limits are defined by {@link RateLimitProperties}:
  *     <ul>
  *       <li>{@code refillRate} → requests per second</li>
@@ -51,19 +51,25 @@ import java.util.concurrent.ConcurrentHashMap;
  * </pre>
  *
  * @see FirewallPolicy
- * @see TokenBucket
+ * @see RateLimiter
  * @see RateLimitProperties
  */
 public final class RequestLimitPolicy implements FirewallPolicy {
 
-    /** Configured rate limit properties (refill rate and burst size). */
+    /**
+     * Configured rate limit properties (refill rate and burst size).
+     */
     private final RateLimitProperties properties;
 
-    /** List of CIDR ranges representing trusted proxies. */
+    /**
+     * List of CIDR ranges representing trusted proxies.
+     */
     private final List<CIDR> trustedProxies;
 
-    /** Per-client IP token buckets. */
-    private final Map<String, TokenBucket> windows = new ConcurrentHashMap<>();
+    /**
+     * Per-client IP token buckets.
+     */
+    private final Map<String, RateLimiter> windows = new ConcurrentHashMap<>();
 
     /**
      * Creates a new request rate limiting policy.
@@ -92,15 +98,12 @@ public final class RequestLimitPolicy implements FirewallPolicy {
         }
 
         if (clientIp != null /* && isTrustedProxy(clientIp) */) {
-            int refillRate = properties.refillRate();
-            int burst = properties.burst();
+            int         refillRate = properties.refillRate();
+            int         burst      = properties.burst();
+            RateLimiter limiter    = windows.computeIfAbsent(clientIp.getHostAddress(), k
+                    -> RateLimiter.fixed(refillRate, burst));
 
-            TokenBucket tokenBucket = windows.computeIfAbsent(
-                    clientIp.getHostAddress(),
-                    k -> new TokenBucket(refillRate, burst)
-            );
-
-            if (!tokenBucket.tryAcquire()) {
+            if (!limiter.tryAcquire()) {
                 return Decision.challenge(HttpStatus.TOO_MANY_REQUESTS, "TOO MANY REQUESTS");
             }
         }

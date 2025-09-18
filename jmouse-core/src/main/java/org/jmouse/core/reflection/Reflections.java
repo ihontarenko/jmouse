@@ -1,5 +1,6 @@
 package org.jmouse.core.reflection;
 
+import org.jmouse.core.Streamable;
 import org.jmouse.core.reflection.annotation.AnnotationData;
 
 import java.beans.BeanInfo;
@@ -365,6 +366,10 @@ abstract public class Reflections {
      */
     public static Object invokeMethod(Object object, Method method, Object... arguments) {
         try {
+            if (Proxy.isProxyClass(object.getClass())) {
+                return Proxy.getInvocationHandler(object).invoke(object, method, arguments);
+            }
+
             method.setAccessible(true);
             return method.invoke(object, arguments);
         } catch (Throwable e) {
@@ -619,6 +624,13 @@ abstract public class Reflections {
      */
     public static String getMethodName(Executable executable) {
         return "%s#%s".formatted(executable.getDeclaringClass().getSimpleName(), executable.getName());
+    }
+
+    public static String getMethodSignature(Method method) {
+        return "%s(%s)".formatted(
+                getMethodName(method),
+                Streamable.of(method.getParameterTypes()).map(Class::getSimpleName).joining(", ")
+        );
     }
 
     public static String getPropertyName(Method method, String prefix) {

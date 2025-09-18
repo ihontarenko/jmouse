@@ -1,10 +1,7 @@
 package org.jmouse.beans.definition.strategy;
 
 import org.jmouse.beans.BeanContext;
-import org.jmouse.beans.annotation.AggregatedBeans;
-import org.jmouse.beans.annotation.Bean;
-import org.jmouse.beans.annotation.PrimaryBean;
-import org.jmouse.beans.annotation.Qualifier;
+import org.jmouse.beans.annotation.*;
 import org.jmouse.beans.definition.AggregatedBeansDependency;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDependency;
@@ -93,6 +90,10 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
             definition.setProxied(Reflections.getAnnotationValue(element, Bean.class, Bean::proxied));
             definition.setScope(Reflections.getAnnotationValue(element, Bean.class, Bean::scope));
             definition.setPrimary(element.isAnnotationPresent(PrimaryBean.class));
+        }
+
+        if (!definition.isProxied()) {
+            definition.setProxied(element.isAnnotationPresent(ProxiedBean.class));
         }
     }
 

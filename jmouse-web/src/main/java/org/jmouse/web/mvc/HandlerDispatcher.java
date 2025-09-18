@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
 import org.jmouse.context.FrameworkFactories;
+import org.jmouse.core.proxy.ProxyInvocationException;
 import org.jmouse.core.reflection.ReflectionException;
 import org.jmouse.core.Sorter;
 import org.jmouse.web.context.WebBeanContext;
@@ -154,8 +155,8 @@ public class HandlerDispatcher implements InitializingBean {
                     handlerContainer.postHandle(request, response, result);
                 }
             }
-        } catch (ReflectionException reflectionException) {
-            dispatchException = (Exception) reflectionException.getCause();
+        } catch (ReflectionException | ProxyInvocationException wrapped) {
+            dispatchException = (Exception) wrapped.getCause();
         } catch (Exception exception) {
             dispatchException = exception;
         }
@@ -173,8 +174,8 @@ public class HandlerDispatcher implements InitializingBean {
 
                 new ReturnValueProcessor(returnValueHandlers).process(exceptionResult, requestContext);
             }
-        } catch (Exception e) {
-            LOGGER.error("HANDLER DISPATCHER FAILED!", e);
+        } catch (Exception exception) {
+            LOGGER.error("HANDLER DISPATCHER FAILED!", exception);
         }
     }
 
