@@ -9,14 +9,6 @@ import java.util.*;
  * into a more convenient structure.
  * </p>
  *
- * <pre>{@code
- * Map<String, String[]> raw = request.getParameterMap();
- * QueryParameters query = QueryParameters.ofMap(raw);
- *
- * String id = query.getFirst("id");
- * List<String> tags = query.getAll("tag");
- * }</pre>
- *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @since 1.0
  */

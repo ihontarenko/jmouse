@@ -14,7 +14,7 @@ import java.util.Objects;
  * It also provides utility methods to determine if the target class implements
  * specific methods like {@code equals} or {@code hashCode}.
  */
-public class ProxyContext {
+public class ProxyContext implements ProxyProvider {
 
     private final Object                  target;
     private final Class<?>                targetClass;
@@ -24,6 +24,7 @@ public class ProxyContext {
     private final boolean                 hasToString;
     private final boolean                 hasEquals;
     private final ClassLoader             classLoader;
+    private Object proxy;
 
     /**
      * Constructs a {@code ProxyConfig} for the given target structured.
@@ -113,7 +114,7 @@ public class ProxyContext {
      * @return {@code true} if the target class has a {@code toString} method, otherwise {@code false}.
      */
     public boolean hasToString() {
-        return hasHashCode;
+        return hasToString;
     }
 
     /**
@@ -124,4 +125,26 @@ public class ProxyContext {
     public boolean hasEquals() {
         return hasEquals;
     }
+
+    /**
+     * 🔧 Assign the generated proxy instance.
+     *
+     * @param proxy proxy object created by the engine
+     */
+    public void setProxy(Object proxy) {
+        this.proxy = proxy;
+    }
+
+    /**
+     * 🎭 Return the generated proxy instance.
+     *
+     * @param <T> expected type of the proxy
+     * @return proxy object cast to the requested type
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T getProxy() {
+        return (T) proxy;
+    }
+
 }

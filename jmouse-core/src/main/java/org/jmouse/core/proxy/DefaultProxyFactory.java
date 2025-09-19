@@ -67,7 +67,9 @@ public class DefaultProxyFactory implements ProxyFactory {
 
         for (ProxyEngine engine : engines) {
             if (engine.supports(proxyContext)) {
-                return (T) engine.createProxy(proxyContext);
+                T proxy = (T) engine.createProxy(proxyContext);
+                proxyContext.setProxy(proxy);
+                return proxy;
             }
         }
 

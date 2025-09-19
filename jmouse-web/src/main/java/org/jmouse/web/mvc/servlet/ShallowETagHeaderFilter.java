@@ -3,148 +3,64 @@ package org.jmouse.web.mvc.servlet;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
-import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpServletResponseWrapper;
+import org.jmouse.beans.annotation.Bean;
+import org.jmouse.core.IdGenerator;
+import org.jmouse.core.Sha256HashGenerator;
+import org.jmouse.web.http.HttpHeader;
+import org.jmouse.web.http.HttpStatus;
+import org.jmouse.web.http.request.ETag;
 import org.jmouse.web.http.request.IfNoneMatch;
+import org.jmouse.web.servlet.BufferingResponseWrapper;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.HexFormat;
 
-/**
- * 🌊 Shallow ETag filter: wraps the response, buffers body, computes ETag, and
- * applies 304 if {@code If-None-Match} matches.
- *
- * <p>Lightweight alternative to domain-based ETag generation.</p>
- *
- * <p>Features:</p>
- * <ul>
- *   <li>Supports multiple alternative filter names (aliases) for registration.</li>
- *   <li>Skips buffering on committed response or error status.</li>
- *   <li>Computes ETag as hex of SHA-256(body).</li>
- * </ul>
- */
+@Bean
 public class ShallowETagHeaderFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        if (!(request instanceof HttpServletRequest httpReq) ||
-                !(response instanceof HttpServletResponse httpRes)) {
+        if (!(request instanceof HttpServletRequest servletRequest)
+                || !(response instanceof HttpServletResponse servletResponse)) {
             chain.doFilter(request, response);
             return;
         }
 
-        // Wrap response to buffer body
-        BufferingResponseWrapper wrapper = new BufferingResponseWrapper(httpRes);
+        BufferingResponseWrapper wrapper = new BufferingResponseWrapper(servletResponse);
 
         chain.doFilter(request, wrapper);
 
-        if (httpRes.isCommitted() || httpRes.getStatus() >= 300) {
-            // skip if already committed or error/redirect
-            wrapper.flushToOriginal();
+        HttpStatus httpStatus = HttpStatus.ofCode(servletResponse.getStatus());
+
+        if (servletResponse.isCommitted() || httpStatus.is3xx()) {
+            wrapper.flushInternal();
             return;
         }
 
-        byte[] body = wrapper.getBody();
-        String etag = "\"" + sha256Hex(body) + "\"";
+        byte[]                      byteArray = wrapper.getByteArray();
+        IdGenerator<String, String> generator = new Sha256HashGenerator();
+        String                      hash      = generator.generate(new String(byteArray, StandardCharsets.UTF_8));
+        ETag                        etag      = ETag.strong(hash);
 
-        IfNoneMatch noneMatch = IfNoneMatch.parse(httpReq.getHeader("If-None-Match")).toNoneMatch();
+        IfNoneMatch noneMatch = IfNoneMatch.parse(servletRequest.getHeader(
+                HttpHeader.IF_NONE_MATCH.toString()
+        )).toNoneMatch();
 
-        String ifNoneMatch = httpReq.getHeader("If-None-Match");
-        if (ifNoneMatch != null && ifNoneMatch.contains(etag)) {
-            httpRes.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-            httpRes.setHeader("ETag", etag);
+        servletResponse.setHeader(HttpHeader.ETAG.value(), etag.toHeaderValue());
+
+        if (noneMatch.matches(etag, false, false)) {
+            servletResponse.setStatus(HttpStatus.NOT_MODIFIED.getCode());
             return;
         }
 
-        httpRes.setHeader("ETag", etag);
-        wrapper.flushToOriginal();
+        wrapper.flushInternal();
     }
 
-    @Override
-    public void destroy() {
-        // no-op
-    }
-
-    // --------------------- Helpers ---------------------
-
-    private static String sha256Hex(byte[] body) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(body);
-            return HexFormat.of().formatHex(hash);
-        } catch (Exception e) {
-            throw new IllegalStateException("SHA-256 not available", e);
-        }
-    }
-
-    /** Response wrapper that tees output into a byte buffer. */
-    private static class BufferingResponseWrapper extends HttpServletResponseWrapper {
-        private final ByteArrayOutputStream copy = new ByteArrayOutputStream();
-        private ServletOutputStream teeStream;
-        private PrintWriter teeWriter;
-
-        BufferingResponseWrapper(HttpServletResponse response) {
-            super(response);
-        }
-
-        @Override
-        public ServletOutputStream getOutputStream() throws IOException {
-            if (teeStream == null) {
-                teeStream = new ServletOutputStream() {
-                    private final ServletOutputStream original = BufferingResponseWrapper.super.getOutputStream();
-                    @Override public boolean isReady() { return original.isReady(); }
-                    @Override public void setWriteListener(WriteListener listener) { original.setWriteListener(listener); }
-                    @Override public void write(int b) throws IOException {
-                        copy.write(b);
-                        original.write(b);
-                    }
-                };
-            }
-            return teeStream;
-        }
-
-        @Override
-        public PrintWriter getWriter() throws IOException {
-            if (teeWriter == null) {
-                teeWriter = new PrintWriter(new OutputStreamWriter(copy, StandardCharsets.UTF_8), true) {
-                    private final PrintWriter original = BufferingResponseWrapper.super.getWriter();
-                    @Override public void write(char[] buf, int off, int len) {
-                        super.write(buf, off, len);
-                        original.write(buf, off, len);
-                    }
-                    @Override public void write(String s, int off, int len) {
-                        super.write(s, off, len);
-                        original.write(s, off, len);
-                    }
-                    @Override public void flush() {
-                        super.flush();
-                        original.flush();
-                    }
-                };
-            }
-            return teeWriter;
-        }
-
-        byte[] getBody() {
-            return copy.toByteArray();
-        }
-
-        void flushToOriginal() throws IOException {
-            if (teeWriter != null) teeWriter.flush();
-            if (teeStream != null) teeStream.flush();
-        }
-    }
 }
 

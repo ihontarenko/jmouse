@@ -48,6 +48,11 @@ public interface WebBeanContext extends ApplicationBeanContext {
     String CURRENT_REQUEST = WebBeanContext.class.getName() + ".CURRENT_REQUEST";
 
     /**
+     * 🔗 Servlet attribute key to bind response to context.
+     */
+    String CURRENT_RESPONSE = WebBeanContext.class.getName() + ".CURRENT_RESPONSE";
+
+    /**
      * 🔧 Attach {@link ServletContext}.
      *
      * @param servletContext current servlet context

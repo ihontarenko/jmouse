@@ -3,7 +3,7 @@ package org.jmouse.web.mvc;
 import org.jmouse.beans.annotation.*;
 import org.jmouse.context.*;
 import org.jmouse.web.mvc.servlet.FirewallRequestFilterRegistration;
-import org.jmouse.web.servlet.filter.MultipartRequestFilterRegistration;
+import org.jmouse.web.mvc.servlet.ShallowETagHeaderFilterRegistration;
 import org.jmouse.web.servlet.filter.RequestWrapperFilterRegistration;
 import org.jmouse.web.servlet.filter.SessionServletFilterRegistration;
 import org.jmouse.core.SingletonSupplier;
@@ -75,6 +75,11 @@ public class ServletDispatcherConfiguration {
     @Bean
     public FirewallRequestFilterRegistration firewallRequestFilterRegistration() {
         return new FirewallRequestFilterRegistration();
+    }
+
+    @Bean
+    public ShallowETagHeaderFilterRegistration shallowETagHeaderFilterRegistration() {
+        return new ShallowETagHeaderFilterRegistration();
     }
 
 }

@@ -30,7 +30,9 @@ import java.util.List;
  */
 public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
 
-    /** 📦 Application entry classes (annotated configs, bootstraps, etc.). */
+    /**
+     * 📦 Application entry classes (annotated configs, bootstraps, etc.).
+     */
     private final Class<?>[] applicationClasses;
 
     /**

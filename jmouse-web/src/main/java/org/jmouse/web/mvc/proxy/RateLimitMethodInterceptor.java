@@ -29,15 +29,13 @@ import java.lang.reflect.Method;
 @ProxyMethodInterceptor({Object.class})
 public final class RateLimitMethodInterceptor extends AbstractRateLimitMethodInterceptor {
 
-
     @Override
     public void before(ProxyContext context, Method method, Object[] arguments) {
         try {
             super.before(context, method, arguments);
         } catch (RateLimitExceededException exceededException) {
-            // todo: build messages
-            RateLimitConfiguration configuration = exceededException.getRateLimitConfiguration();
             throw new TooManyRequestsException(exceededException.getMessage());
         }
     }
+
 }

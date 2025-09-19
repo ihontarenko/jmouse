@@ -178,8 +178,10 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
             }
         }
 
-        methods.add(HttpMethod.OPTIONS);
-        methods.remove(HttpMethod.TRACE);
+        if (!methods.isEmpty()) {
+            methods.add(HttpMethod.OPTIONS);
+            methods.remove(HttpMethod.TRACE);
+        }
 
         return methods;
     }

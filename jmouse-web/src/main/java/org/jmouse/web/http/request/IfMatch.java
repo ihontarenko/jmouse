@@ -194,6 +194,7 @@ public class IfMatch {
         }
 
         Set<ETag> unique = new LinkedHashSet<>(collection);
+
         return List.copyOf(unique);
     }
 
