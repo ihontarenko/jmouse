@@ -5,10 +5,7 @@ import org.jmouse.context.BeanConditionIfProperty;
 import org.jmouse.web.annotation.*;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpStatus;
-import org.jmouse.web.http.request.Headers;
-import org.jmouse.web.http.request.QueryParameters;
-import org.jmouse.web.http.request.RequestAttributesHolder;
-import org.jmouse.web.http.request.RequestPath;
+import org.jmouse.web.http.request.*;
 import org.jmouse.web.mvc.resource.ResourceNotFoundException;
 import org.jmouse.web.mvc.resource.ResourceValidationFailedException;
 
@@ -33,6 +30,24 @@ import java.util.Map;
 @Controller
 @BeanConditionIfProperty(name = "jmouse.mvc.frameworkController.enabled", value = "true")
 public class FrameworkController {
+
+    /**
+     * 🚦 Handle {@code 429 Too Many Requests}.
+     *
+     * <p>Catches {@link TooManyRequestsException} and builds
+     * an error response with status {@link HttpStatus#TOO_MANY_REQUESTS}.</p>
+     *
+     * @param response  HTTP servlet response to update with status code
+     * @param exception the thrown exception (rate-limit violation)
+     * @param model     MVC model for rendering error view
+     * @return generated response view name or body
+     */
+    @ExceptionHandler({
+            TooManyRequestsException.class
+    })
+    public String handle429(HttpServletResponse response, Exception exception, Model model) {
+        return getGeneratedResponse(model, HttpStatus.TOO_MANY_REQUESTS, exception, response);
+    }
 
     /**
      * Handles resolution/dispatching errors and renders {@code 404 Not Found}.
@@ -82,8 +97,9 @@ public class FrameworkController {
     @ExceptionHandler({
             IllegalStateException.class
     })
-    public String handle500(HttpServletResponse response, Exception exception, Model model) {
-        return getGeneratedResponse(model, HttpStatus.INTERNAL_SERVER_ERROR, exception, response);
+    public Map<String, Object> handle500(HttpServletResponse response, Exception exception, Model model) {
+        getGeneratedResponse(model, HttpStatus.INTERNAL_SERVER_ERROR, exception, response);
+        return new HashMap<>(model.getAttributes());
     }
 
     /**

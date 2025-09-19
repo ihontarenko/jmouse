@@ -1,7 +1,11 @@
-package org.jmouse.web.proxy;
+package org.jmouse.web.mvc.proxy;
 
+import org.jmouse.core.proxy.ProxyContext;
 import org.jmouse.core.throttle.*;
 import org.jmouse.core.proxy.annotation.ProxyMethodInterceptor;
+import org.jmouse.web.mvc.TooManyRequestsException;
+
+import java.lang.reflect.Method;
 
 /**
  * 🚦 Concrete interceptor binding {@link AbstractRateLimitMethodInterceptor}
@@ -24,4 +28,16 @@ import org.jmouse.core.proxy.annotation.ProxyMethodInterceptor;
  */
 @ProxyMethodInterceptor({Object.class})
 public final class RateLimitMethodInterceptor extends AbstractRateLimitMethodInterceptor {
+
+
+    @Override
+    public void before(ProxyContext context, Method method, Object[] arguments) {
+        try {
+            super.before(context, method, arguments);
+        } catch (RateLimitExceededException exceededException) {
+            // todo: build messages
+            RateLimitConfiguration configuration = exceededException.getRateLimitConfiguration();
+            throw new TooManyRequestsException(exceededException.getMessage());
+        }
+    }
 }

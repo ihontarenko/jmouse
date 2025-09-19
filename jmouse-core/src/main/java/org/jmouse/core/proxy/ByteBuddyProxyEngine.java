@@ -18,6 +18,7 @@ import java.lang.reflect.Method;
 
 import static net.bytebuddy.implementation.MethodDelegation.to;
 import static net.bytebuddy.matcher.ElementMatchers.*;
+import static org.jmouse.core.proxy.ProxyInvoke.invokeCore;
 
 /**
  * 🧬 {@link ProxyEngine} implementation using ByteBuddy.
@@ -62,7 +63,7 @@ public class ByteBuddyProxyEngine implements ProxyEngine {
     /**
      * 📦 Hidden field to store {@link ProxyContext}.
      */
-    public static final String FIELD_CONTEXT = "$context";
+    public static final String FIELD_CONTEXT = "$proxyContext";
 
     /**
      * 🏷️ Engine identifier.
@@ -123,17 +124,16 @@ public class ByteBuddyProxyEngine implements ProxyEngine {
                                     .and(not(named(INTERNAL_INVOKE)))
                     )
                     .intercept(to(new Dispatcher(context)))
-
+                    // --- build
                     .make()
                     .load(context.getClassLoader())
                     .getLoaded();
 
-            Object            proxy             = ObjenesisHelper.newInstance(proxyClass);
-            InvocationHandler invocationHandler = (t, m, a)
-                    -> ProxyInvoke.invokeCore(ENGINE_NAME, context, t, m, a);
+            Object            proxy   = ObjenesisHelper.newInstance(proxyClass);
+            InvocationHandler handler = (t, m, a) -> invokeCore(ENGINE_NAME, context, t, m, a);
 
             Reflections.setFieldValue(proxy, FIELD_CONTEXT, context);
-            Reflections.setFieldValue(proxy, INVOCATION_HANDLER, invocationHandler);
+            Reflections.setFieldValue(proxy, INVOCATION_HANDLER, handler);
 
             return proxy;
 
@@ -180,7 +180,7 @@ public class ByteBuddyProxyEngine implements ProxyEngine {
          */
         @RuntimeType
         public Object intercept(@This Object proxy, @Origin Method method, @AllArguments Object[] arguments) {
-            return ProxyInvoke.invokeCore(ENGINE_NAME, context, proxy, method, arguments);
+            return invokeCore(ENGINE_NAME, context, proxy, method, arguments);
         }
 
         /**

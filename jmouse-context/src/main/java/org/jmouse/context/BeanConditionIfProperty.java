@@ -68,7 +68,7 @@ public @interface BeanConditionIfProperty {
                     LOGGER.info("✅ Condition passed: property '{}' is {} '{}'",
                                 annotation.name(), annotation.operator(), value);
                 } else {
-                    LOGGER.info("⛔ Condition failed: property '{}' does not {} '{}'",
+                    LOGGER.warn("⛔ Condition failed: property '{}' does not {} '{}'",
                                  annotation.name(), annotation.operator(), annotation.value());
                 }
             }

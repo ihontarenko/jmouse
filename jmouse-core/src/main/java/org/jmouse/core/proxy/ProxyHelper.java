@@ -36,8 +36,6 @@ public final class ProxyHelper {
         return (isJdkProxy(type) || isCglibProxy(type) || isByteBuddyProxy(type));
     }
 
-    // --- JDK proxies ---
-
     /**
      * 🔎 Check if candidate is a JDK dynamic proxy.
      */
@@ -51,8 +49,6 @@ public final class ProxyHelper {
     public static boolean isJdkProxy(Class<?> type) {
         return type != null && Proxy.isProxyClass(type);
     }
-
-    // --- CGLIB proxies ---
 
     /**
      * 🔎 Check if candidate is a CGLIB proxy.
@@ -69,8 +65,6 @@ public final class ProxyHelper {
         String name = type.getName();
         return name.contains("$$EnhancerByCGLIB$$") || name.contains("$$");
     }
-
-    // --- ByteBuddy proxies ---
 
     /**
      * 🔎 Check if candidate is a ByteBuddy proxy.
@@ -109,7 +103,7 @@ public final class ProxyHelper {
         try {
             if (isJdkProxy(runtime)) {
                 return Proxy.getInvocationHandler(proxy).invoke(proxy, method, arguments);
-            } else if (proxy instanceof InterceptableProxy interceptable) {
+            } else if (isByteBuddyProxy(proxy) && proxy instanceof InterceptableProxy interceptable) {
                 return interceptable.internalInvoke(method, arguments);
             }
         } catch (Throwable exception) {

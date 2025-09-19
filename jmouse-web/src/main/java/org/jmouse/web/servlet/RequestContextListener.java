@@ -54,7 +54,7 @@ public class RequestContextListener implements ServletRequestListener {
                     RequestAttributes.of(BeanScope.REQUEST, servletRequest)
             );
 
-            LOGGER.info("✅ Initialized request context for [{}]", servletRequest.getRequestURI());
+            LOGGER.debug("✅ Initialized request context for [{}]", servletRequest.getRequestURI());
         }
     }
 
@@ -71,7 +71,7 @@ public class RequestContextListener implements ServletRequestListener {
         remove(RequestAttributesHolder::removeRequestRoute, RequestRoute.class);
         remove(RequestAttributesHolder::removeRequestHeaders, RequestHeaders.class);
 
-        LOGGER.info("🧹 Cleaned up request context for [{}]",
+        LOGGER.debug("🧹 Cleaned up request context for [{}]",
                 ((HttpServletRequest) event.getServletRequest()).getRequestURI());
     }
 

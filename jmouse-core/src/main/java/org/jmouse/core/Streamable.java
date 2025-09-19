@@ -114,6 +114,13 @@ public interface Streamable<T> extends Iterable<T>, Supplier<Stream<T>> {
     }
 
     /**
+     * 🧩 Collects to object array.
+     */
+    default Object[] toArray() {
+        return stream().toArray(Object[]::new);
+    }
+
+    /**
      * 🗺️ Collects to map with key/value mappers.
      */
     default <K, V> Map<K, V> toMap(Function<? super T, ? extends K> keyMapper,
@@ -126,6 +133,13 @@ public interface Streamable<T> extends Iterable<T>, Supplier<Stream<T>> {
      */
     default <K> Map<K, T> toMap(Function<? super T, ? extends K> keyMapper) {
         return toMap(keyMapper, Function.identity());
+    }
+
+    /**
+     * 🗺️ Collects to map with key toString mapper and identity values.
+     */
+    default Map<String, T> toStringMap() {
+        return toMap(Object::toString, Function.identity());
     }
 
     /**
