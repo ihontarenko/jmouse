@@ -137,14 +137,14 @@ public class IfMatch {
      *
      * @param current   current resource {@link ETag} (nullable)
      * @param allowWeak whether weak comparison is acceptable
-     * @param exists    whether the resource exists
+     * @param allowAny    whether the resource exists
      * @return {@code true} if the precondition is satisfied
      * @see ETag#strongEquals(ETag)
      * @see ETag#weakEquals(ETag)
      */
-    public boolean matches(ETag current, boolean allowWeak, boolean exists) {
+    public boolean matches(ETag current, boolean allowWeak, boolean allowAny) {
         if (any) {
-            return exists;
+            return allowAny;
         }
 
         if (current == null || eTags.isEmpty()) {

@@ -41,6 +41,7 @@
         <maven-gpg.version>3.0.1</maven-gpg.version>
         <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
         <jmouse.version>1.0.0-Beta</jmouse.version>
+        <asm.version>9.7.1</asm.version>
         <bytebuddy.version>1.17.6</bytebuddy.version>
         <objenesis.version>3.3</objenesis.version>
         <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
@@ -93,6 +94,17 @@
                 <version>${jmouse.version}</version>
             </dependency>
             <!-- Proxy -->
+            <!-- CGLIB Dependencies -->
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm</artifactId>
+                <version>${asm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-commons</artifactId>
+                <version>${asm.version}</version>
+            </dependency>
             <!-- Byte Buddy -->
             <dependency>
                 <groupId>net.bytebuddy</groupId>

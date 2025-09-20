@@ -70,6 +70,7 @@
 
     <modules>
         <module>jmouse-dependencies</module>
+        <module>jmouse-vendor</module>
         <module>jmouse-core</module>
         <module>jmouse-el</module>
         <module>jmouse-expression</module>

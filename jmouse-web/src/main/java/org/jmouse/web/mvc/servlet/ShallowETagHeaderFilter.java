@@ -14,14 +14,43 @@ import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpStatus;
 import org.jmouse.web.http.request.ETag;
 import org.jmouse.web.http.request.IfNoneMatch;
-import org.jmouse.web.servlet.BufferingResponseWrapper;
+import org.jmouse.web.mvc.ETagGenerator;
+import org.jmouse.web.servlet.BufferingOnlyResponseWrapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * 🧩 Servlet {@link Filter} that computes and adds a shallow <b>ETag</b> for 2xx responses.
+ *
+ * <p>Flow:</p>
+ * <ol>
+ *   <li>📦 Buffer the downstream response.</li>
+ *   <li>🧮 Compute an ETag from the response content (shallow = payload-based hash).</li>
+ *   <li>🔁 Compare against {@code If-None-Match}; return <b>304 Not Modified</b> on match.</li>
+ *   <li>📤 Otherwise, write the buffered body and ETag header.</li>
+ * </ol>
+ *
+ * <p>Notes:</p>
+ * <ul>
+ *   <li>✔️ Applies only to successful (2xx) responses that are not yet committed.</li>
+ *   <li>🧰 Uses {@link BufferingOnlyResponseWrapper} to capture the body.</li>
+ *   <li>🔖 Sets {@code ETag} header for client/proxy caching.</li>
+ * </ul>
+ */
 @Bean
 public class ShallowETagHeaderFilter implements Filter {
 
+    /**
+     * ⚙️ Buffer downstream output, compute shallow ETag, and handle conditional GET logic.
+     *
+     * <p>If the response is non-2xx or already committed → pass-through (flush buffer).
+     * Otherwise → set {@code ETag} and emit <b>304</b> when {@code If-None-Match} matches;
+     * else write the buffered body.</p>
+     *
+     * @throws IOException      on I/O errors
+     * @throws ServletException on filter chain errors
+     */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
@@ -32,21 +61,20 @@ public class ShallowETagHeaderFilter implements Filter {
             return;
         }
 
-        BufferingResponseWrapper wrapper = new BufferingResponseWrapper(servletResponse);
+        BufferingOnlyResponseWrapper wrapper = new BufferingOnlyResponseWrapper(servletResponse);
 
         chain.doFilter(request, wrapper);
 
         HttpStatus httpStatus = HttpStatus.ofCode(servletResponse.getStatus());
 
-        if (servletResponse.isCommitted() || httpStatus.is3xx()) {
-            wrapper.flushInternal();
+        if (servletResponse.isCommitted() || !httpStatus.is2xx()) {
+            wrapper.writeToResponse();
             return;
         }
 
-        byte[]                      byteArray = wrapper.getByteArray();
-        IdGenerator<String, String> generator = new Sha256HashGenerator();
-        String                      hash      = generator.generate(new String(byteArray, StandardCharsets.UTF_8));
-        ETag                        etag      = ETag.strong(hash);
+        byte[]                    byteArray = wrapper.getByteArray();
+        IdGenerator<ETag, String> generator = new ETagGenerator(true);
+        ETag                      etag      = generator.generate(new String(byteArray, StandardCharsets.UTF_8));
 
         IfNoneMatch noneMatch = IfNoneMatch.parse(servletRequest.getHeader(
                 HttpHeader.IF_NONE_MATCH.toString()
@@ -54,13 +82,11 @@ public class ShallowETagHeaderFilter implements Filter {
 
         servletResponse.setHeader(HttpHeader.ETAG.value(), etag.toHeaderValue());
 
-        if (noneMatch.matches(etag, false, false)) {
+        if (noneMatch.matches(etag, true, true)) {
             servletResponse.setStatus(HttpStatus.NOT_MODIFIED.getCode());
             return;
         }
 
-        wrapper.flushInternal();
+        wrapper.writeToResponse();
     }
-
 }
-

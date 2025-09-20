@@ -381,6 +381,66 @@ public class MethodMatchers {
         return new CopyConstructorMatcher();
     }
 
+    /**
+     * 📝 Matcher for {@code toString()} methods.
+     *
+     * @return matcher that matches {@code toString()} (zero params)
+     */
+    public static Matcher<Executable> isToString() {
+        return nameEquals("toString").and(hasParameterCount(0));
+    }
+
+    /**
+     * 🤝 Matcher for {@code equals(Object)} methods.
+     *
+     * @return matcher that matches {@code equals(Object)}
+     */
+    public static Matcher<Executable> isEquals() {
+        return nameEquals("equals").and(hasParameterCount(1)).and(hasParameterTypes(Object.class));
+    }
+
+    /**
+     * 🔢 Matcher for {@code hashCode()} methods.
+     *
+     * @return matcher that matches {@code hashCode()} (zero params)
+     */
+    public static Matcher<Executable> isHashCode() {
+        return nameEquals("hashCode").and(hasParameterCount(0));
+    }
+
+    /**
+     * 📦 Matcher for any core {@link Object} method:
+     * <ul>
+     *   <li>{@code equals(Object)}</li>
+     *   <li>{@code hashCode()}</li>
+     *   <li>{@code toString()}</li>
+     * </ul>
+     *
+     * @return matcher that matches {@code equals}, {@code hashCode}, or {@code toString}
+     */
+    public static Matcher<Executable> isObjectMethod() {
+        return Matcher.logicalAnd(isEquals().or(isToString()).or(isHashCode()), isDeclaringClass(Object.class));
+    }
+
+    /**
+     * 🏷️ Matcher for executables declared in a specific class.
+     *
+     * <p>Matches when the {@link Executable#getDeclaringClass()} is exactly
+     * the given {@code type} (no subclass/superclass checks).</p>
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * Matcher<Executable> declaredHere = MethodMatchers.isDeclaringClass(MyService.class);
+     * boolean ok = declaredHere.matches(MyService.class.getDeclaredMethod("doWork"));
+     * }</pre>
+     *
+     * @param type the declaring class to match against
+     * @return matcher that checks if an executable is declared in {@code type}
+     */
+    public static Matcher<Executable> isDeclaringClass(Class<?> type) {
+        return method -> type == method.getDeclaringClass();
+    }
+
     private record CopyConstructorMatcher() implements Matcher<Constructor<?>> {
         @Override
         public boolean matches(Constructor<?> constructor) {
