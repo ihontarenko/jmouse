@@ -22,6 +22,21 @@ public class ResourcesConfig implements BeanConfigurer<ResourceHandlerRegistry> 
 
     @Override
     public void configure(ResourceHandlerRegistry registry) {
+//        VersionalResourceResolver resolver = new VersionalResourceResolver()
+//                .addStrategy(new FixedVersionStrategy("v2025.09"), "/static/**")
+//                .addStrategy(new FixedVersionStrategy(properties.getIconPrefix()), "/icon/**")
+//                .addStrategy(new ContentHashVersionStrategy("SHA-256", 16), "/assets/**");
+//
+//        registry.registerHandler("/laptop/{*filepath}")
+//                .addResourceLocations("file:/C:/Users/Ivan_Hontarenko/Media")
+//                .setCacheControl(CacheControl.empty().cachePublic())
+//                .getChainRegistration()
+//                .addResolvers(
+//                        new PathNormalizationResolver(),
+//                        new VersionalResourceResolver()
+//                                .addStrategy(new QueryParameterVersionStrategy("v"), "/laptop/**"),
+//                        new LocationScanningResolver()
+//                );
         /*VersionalResourceResolver resolver = new VersionalResourceResolver()
                 .addStrategy(new FixedVersionStrategy("v2025.09"), "/static/**")
                 .addStrategy(new FixedVersionStrategy(properties.getIconPrefix()), "/icon/**")

@@ -64,6 +64,24 @@ public interface Matcher<T> {
     }
 
     /**
+     * 🎯 Narrow the type of this matcher.
+     *
+     * <p>Useful when a matcher is defined for a supertype but needs to be
+     * applied to a subtype without casts.</p>
+     *
+     * <pre>{@code
+     * Matcher<Executable> any = ...;
+     * Matcher<Method> methodsOnly = any.narrow();
+     * }</pre>
+     *
+     * @param <S> narrowed subtype
+     * @return the same matcher but typed to {@code S}
+     */
+    default <S extends T> Matcher<S> narrow() {
+        return this::matches;
+    }
+
+    /**
      * Combines two matchers using the logical AND operator.
      * Both matchers must return true for the final result to be true.
      *
