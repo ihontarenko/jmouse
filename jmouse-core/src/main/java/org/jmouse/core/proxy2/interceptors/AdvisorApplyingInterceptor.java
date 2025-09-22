@@ -1,36 +1,38 @@
 package org.jmouse.core.proxy2.interceptors;
 
-import org.jmouse.core.proxy2.api.Advisor;
+import org.jmouse.core.proxy2.aop.AdvisorChainFactory;
+import org.jmouse.core.proxy2.aop.RuntimePointcut;
 import org.jmouse.core.proxy2.api.InvocationPipeline;
 import org.jmouse.core.proxy2.api.MethodInterceptor;
 import org.jmouse.core.proxy2.api.MethodInvocation;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.reflect.Method;
 
 public class AdvisorApplyingInterceptor implements MethodInterceptor {
 
-    private final List<Advisor> advisors;
+    private final AdvisorChainFactory chains;
 
-    AdvisorApplyingInterceptor(List<Advisor> advisors) {
-        this.advisors = advisors;
+    public AdvisorApplyingInterceptor(AdvisorChainFactory factory) {
+        this.chains = factory;
     }
 
     @Override
-    public Object invoke(MethodInvocation inv) throws Throwable {
-        List<MethodInterceptor> chain = new ArrayList<>();
+    public Object invoke(MethodInvocation invocation) throws Throwable {
+        Method   method     = invocation.getMethod();
+        Class<?> targetType = invocation.getTarget() != null ? invocation.getTarget().getClass() : invocation.getProxy().getClass();
 
-        for (var a : advisors) {
-            if (a.pointcut().classMatches(inv.getTarget().getClass())
-                    && a.pointcut().methodMatcher().matches(inv.getMethod())) {
-                chain.add(a.interceptor());
+        AdvisorChainFactory.CompiledChain chain = chains.chainFor(targetType, method);
+
+        // runtime guard: if any EL/guard present — verify
+        for (RuntimePointcut runtimePointcut : chain.pointcuts()) {
+            if (!runtimePointcut.runtimeAccept(invocation.getProxy(), invocation.getTarget(), method, invocation.getArguments())) {
+                // guard failed -> skip advisors fully
+                return invocation.proceed();
             }
         }
 
-        InvocationPipeline.Terminal terminal = MethodInvocation::proceed;
-        MethodInterceptor           pipeline = InvocationPipeline.assemble(chain, terminal);
-
-        return pipeline.invoke(inv);
+        // assemble inner pipeline (no terminal—return to outer cursor via proceed())
+        var inner = InvocationPipeline.assemble(chain.interceptors(), invocation1 -> );
+        return inner.invoke(invocation);
     }
-
 }

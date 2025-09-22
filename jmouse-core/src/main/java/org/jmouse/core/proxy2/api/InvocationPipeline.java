@@ -9,7 +9,7 @@ import java.util.List;
  */
 public final class InvocationPipeline {
 
-    public static MethodInterceptor assemble(List<MethodInterceptor> interceptors, Terminal terminal) {
+    public static MethodInterceptor assemble(List<? extends MethodInterceptor> interceptors, Terminal terminal) {
         return new Chained(interceptors, terminal);
     }
 
@@ -17,7 +17,7 @@ public final class InvocationPipeline {
         Object call(MethodInvocation invocation) throws Throwable;
     }
 
-    public record Chained(List<MethodInterceptor> list, Terminal terminal) implements MethodInterceptor {
+    public record Chained(List<? extends MethodInterceptor> list, Terminal terminal) implements MethodInterceptor {
 
         @Override
         public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -27,10 +27,10 @@ public final class InvocationPipeline {
         private static final class Cursor implements MethodInvocation {
 
             private final MethodInvocation            base;
-            private final Iterator<MethodInterceptor> iterator;
+            private final Iterator<? extends MethodInterceptor> iterator;
             private final Terminal                    terminal;
 
-            Cursor(MethodInvocation base, Iterator<MethodInterceptor> iterator, Terminal terminal) {
+            Cursor(MethodInvocation base, Iterator<? extends MethodInterceptor> iterator, Terminal terminal) {
                 this.base = base;
                 this.iterator = iterator;
                 this.terminal = terminal;
