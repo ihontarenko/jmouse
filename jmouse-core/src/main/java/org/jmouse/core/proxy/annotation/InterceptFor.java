@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface ProxyMethodInterceptor {
+public @interface InterceptFor {
 
     /**
      * The target classes for which this interceptor should be applied.

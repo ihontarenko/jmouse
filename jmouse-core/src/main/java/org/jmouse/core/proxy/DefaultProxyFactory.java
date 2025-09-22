@@ -1,7 +1,7 @@
 package org.jmouse.core.proxy;
 
 import org.jmouse.core.matcher.Matcher;
-import org.jmouse.core.proxy.annotation.ProxyMethodInterceptor;
+import org.jmouse.core.proxy.annotation.InterceptFor;
 import org.jmouse.core.reflection.ClassMatchers;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
  * <p>Delegates proxy creation to a chain of {@link ProxyEngine}s
  * (ByteBuddy first, then JDK dynamic proxies).
  * Interceptors are matched against target classes via
- * {@link ProxyMethodInterceptor} metadata.</p>
+ * {@link InterceptFor} metadata.</p>
  *
  * <h3>Features</h3>
  * <ul>
@@ -81,7 +81,7 @@ public class DefaultProxyFactory implements ProxyFactory {
     /**
      * 🏗️ Build a {@link ProxyContext} and attach matching interceptors.
      *
-     * <p>Interceptors are matched if their {@link ProxyMethodInterceptor}
+     * <p>Interceptors are matched if their {@link InterceptFor}
      * annotation declares a type assignable from the target class.</p>
      */
     @Override
@@ -91,7 +91,7 @@ public class DefaultProxyFactory implements ProxyFactory {
 
         for (MethodInterceptor interceptor : interceptors) {
             Class<?>[] preferredClasses = getAnnotationValue(
-                    interceptor.getClass(), ProxyMethodInterceptor.class, ProxyMethodInterceptor::value);
+                    interceptor.getClass(), InterceptFor.class, InterceptFor::value);
 
             if (preferredClasses == null) {
                 continue;
