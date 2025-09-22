@@ -95,6 +95,23 @@ public class MethodMatchers {
     }
 
     /**
+     * 📦 Matcher for <b>package-private</b> (default visibility) methods or constructors.
+     *
+     * <p>Equivalent to: not private, not protected, not public.</p>
+     *
+     * @return matcher that checks if an {@link Executable} has package-private visibility
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * Matcher<Executable> ppMatcher = MethodMatchers.isPackagePrivate();
+     * boolean ok = ppMatcher.matches(MyClass.class.getDeclaredMethod("internalMethod"));
+     * }</pre>
+     */
+    public static Matcher<Executable> isPackagePrivate() {
+        return isPrivate().not().and(isProtected().not()).and(isPublic().not());
+    }
+
+    /**
      * Creates a matcher that checks if a method or constructor is static.
      *
      * @return a matcher that checks if the method or constructor is static

@@ -24,6 +24,7 @@ public class Iterables {
         // Prevent instantiation of this utility class.
     }
 
+    @SuppressWarnings("unchecked")
     public static Iterable<?> toIterable(final Object object) {
         Iterable<?>        iterable = null;
         ClassTypeInspector type     = TypeInformation.forInstance(object);
