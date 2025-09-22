@@ -1,6 +1,5 @@
 package org.jmouse.core.proxy.old;
 
-import org.jmouse.core.proxy.ProxyContext;
 import org.jmouse.core.proxy.ProxyEngine;
 
 /**

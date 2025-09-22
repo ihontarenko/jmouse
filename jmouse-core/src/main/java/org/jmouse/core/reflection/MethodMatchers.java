@@ -28,12 +28,16 @@ public class MethodMatchers {
     public static final String GETTER_TO_PREFIX  = "to";
     public static final String SETTER_PREFIX     = "set";
 
-    // Executable -> Method
+    /**
+     * Adapt a matcher over {@link Executable} to one over {@link Method}.
+     */
     public static Matcher<Method> asMethod(Matcher<? super Executable> matcher) {
-        return matcher::matches;
+        return matcher.narrow();
     }
 
-    // Executable -> Constructor<?>
+    /**
+     * Adapt a matcher over {@link Executable} to one over {@link Constructor}.
+     */
     public static Matcher<Constructor<?>> asConstructor(Matcher<? super Executable> matcher) {
         return matcher::matches;
     }

@@ -1,49 +1,55 @@
 package org.jmouse.core.proxy;
 
-import java.util.List;
-
 /**
- * A factory interface for creating proxies and corresponding {@link ProxyContext}
- * instances. Implementations of this interface can generate proxy objects for
- * various use cases, such as method interception or custom behavior injection.
+ * 🏭 Factory interface for creating proxies and their {@link ProxyDefinition}.
+ *
+ * <p>Provides high-level entrypoints for building proxied objects,
+ * with optional interception and custom behaviors.</p>
  */
 public interface ProxyFactory {
 
     /**
-     * Creates a proxy for the specified structured.
+     * ✨ Create a proxy for the given instance using default definition building.
      *
-     * @param <T>   the type of the created proxy
-     * @param object the original structured to be proxied
-     * @return a proxy instance of the specified structured
+     * <p>Delegates to {@link #createProxyDefinition(Object)} and then to
+     * {@link #createProxy(ProxyDefinition)}.</p>
+     *
+     * @param <T>      expected proxy type
+     * @param instance target object to proxy
+     * @return proxy wrapping {@code instance}
      */
-    <T> T createProxy(Object object);
+    default <T> T createProxy(Object instance) {
+        return createProxy(createProxyDefinition(instance));
+    }
 
+    /**
+     * 🧬 Create a proxy using an explicit {@link ProxyDefinition}.
+     *
+     * @param definition proxy definition
+     * @param <T>        proxy type
+     * @return generated proxy
+     */
     <T> T createProxy(ProxyDefinition<T> definition);
 
     /**
-     * Creates a {@link ProxyContext} for the specified structured and class loader.
+     * 📦 Build a {@link ProxyDefinition} from a raw target instance.
      *
-     * @param object      the original structured to be proxied
-     * @param classLoader the class loader to define the proxy class
-     * @return a new {@link ProxyContext} instance
+     * <p>This definition will typically contain target class, interceptors,
+     * class loader, and other metadata needed for proxy creation.</p>
+     *
+     * @param instance target object
+     * @param <T>      inferred type
+     * @return proxy definition
      */
-    ProxyContext createProxyContext(Object object, ClassLoader classLoader);
+    <T> ProxyDefinition<T> createProxyDefinition(Object instance);
 
     /**
-     * Adds a {@link MethodInterceptor} to this factory, which will be invoked
-     * during method calls on the proxy structured. Multiple interceptors can be added,
-     * and each will be applied in the order they were registered.
+     * ➕ Register a global {@link MethodInterceptor}.
      *
-     * @param interceptor the interceptor to add
+     * <p>Interceptors added here will be applied to all proxies created
+     * by this factory (depending on matching rules).</p>
+     *
+     * @param interceptor interceptor to add
      */
     void addInterceptor(MethodInterceptor interceptor);
-
-    /**
-     * Retrieves the list of all currently registered {@link MethodInterceptor}s.
-     * Implementations may return an unmodifiable list or a direct reference, so
-     * modifications may or may not affect the actual interceptor list.
-     *
-     * @return a list of registered interceptors
-     */
-    List<MethodInterceptor> getInterceptors();
 }

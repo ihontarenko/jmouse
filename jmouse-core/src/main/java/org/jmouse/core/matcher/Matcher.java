@@ -18,6 +18,10 @@ public interface Matcher<T> {
      */
     boolean matches(T item);
 
+    default <S extends T> Matcher<S> asType(Matcher<T> matcher, Class<S> type) {
+        return matcher::matches;
+    }
+
     /**
      * Combines this matcher with another matcher using the logical AND operator.
      * Both matchers must return true for the final result to be true.

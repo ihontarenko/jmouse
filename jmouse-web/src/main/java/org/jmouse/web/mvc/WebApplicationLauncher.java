@@ -1,7 +1,6 @@
 package org.jmouse.web.mvc;
 
 import org.jmouse.beans.BeanScanAnnotatedContextInitializer;
-import org.jmouse.beans.ProxyFactoryContextInitializer;
 import org.jmouse.context.ApplicationContextBeansScanner;
 import org.jmouse.context.ApplicationFactory;
 import org.jmouse.web.WebLauncher;
@@ -63,7 +62,6 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
         WebBeanContext context = factory.createRootContext();
 
         context.addInitializer(new BeanScanAnnotatedContextInitializer());
-        context.addInitializer(new ProxyFactoryContextInitializer());
         context.addInitializer(new ApplicationContextBeansScanner());
         context.addInitializer(new StartupApplicationContextInitializer(context.getEnvironment()));
         context.addInitializer(new WebMvcControllersInitializer());

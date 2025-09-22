@@ -19,7 +19,7 @@ import java.lang.reflect.Method;
 
 import static net.bytebuddy.implementation.MethodDelegation.to;
 import static net.bytebuddy.matcher.ElementMatchers.*;
-import static org.jmouse.core.proxy.ProxyInvoke.invokeCore;
+import static org.jmouse.core.proxy.old.ProxyInvoke.invokeCore;
 
 /**
  * 🧬 {@link ProxyEngine} implementation using ByteBuddy.

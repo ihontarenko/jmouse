@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.jmouse.core.proxy.MethodInterceptor;
 import org.jmouse.core.proxy.MethodInvocation;
 import org.jmouse.core.proxy.MethodInvocationDecorator;
-import org.jmouse.core.proxy.ProxyContext;
+import org.jmouse.core.proxy.old.ProxyContext;
 import org.jmouse.core.proxy.Intercept;
 import org.jmouse.core.reflection.Reflections;
 

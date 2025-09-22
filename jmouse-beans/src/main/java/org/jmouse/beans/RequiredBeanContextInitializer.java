@@ -14,8 +14,6 @@ import org.jmouse.beans.naming.DefaultBeanNameResolver;
 import org.jmouse.beans.processor.BeanContextAwareBeanPostProcessor;
 import org.jmouse.beans.processor.InjectDependencyBeanPostProcessor;
 import org.jmouse.beans.processor.ProxyBeanPostProcessor;
-import org.jmouse.core.proxy.AnnotationProxyFactory;
-import org.jmouse.core.proxy.ProxyFactory;
 import org.jmouse.core.Priority;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -59,9 +57,6 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
             // If a parent exists, demote its self-bean so autowiring prefers the current context.
             parent.getDefinition(parent.getContextId()).setPrimary(false);
         }
-
-        // Register proxy factory that creates annotation-driven proxies for the scanned base classes.
-        context.registerBean(ProxyFactory.class, new AnnotationProxyFactory(context.getBaseClasses()));
     }
 
     /**

@@ -85,7 +85,10 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * This list contains instances of initializers that will be executed during context setup.
      */
     private final List<BeanContextInitializer> initializers = new ArrayList<>(
-            List.of(new RequiredBeanContextInitializer())
+            List.of(
+                    new RequiredBeanContextInitializer(),
+                    new ProxyFactoryContextInitializer()
+            )
     );
 
     /**

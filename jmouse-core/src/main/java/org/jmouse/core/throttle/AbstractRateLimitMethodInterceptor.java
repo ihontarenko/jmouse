@@ -1,7 +1,7 @@
 package org.jmouse.core.throttle;
 
 import org.jmouse.core.proxy.MethodInterceptor;
-import org.jmouse.core.proxy.ProxyContext;
+import org.jmouse.core.proxy.old.ProxyContext;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.util.TimeHelper;
 

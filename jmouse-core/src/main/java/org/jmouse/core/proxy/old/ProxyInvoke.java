@@ -1,5 +1,6 @@
-package org.jmouse.core.proxy;
+package org.jmouse.core.proxy.old;
 
+import org.jmouse.core.proxy.*;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Method;

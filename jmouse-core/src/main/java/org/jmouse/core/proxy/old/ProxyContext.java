@@ -1,5 +1,7 @@
-package org.jmouse.core.proxy;
+package org.jmouse.core.proxy.old;
 
+import org.jmouse.core.proxy.MethodInterceptor;
+import org.jmouse.core.proxy.ProxyProvider;
 import org.jmouse.core.reflection.Reflections;
 
 import java.util.ArrayList;

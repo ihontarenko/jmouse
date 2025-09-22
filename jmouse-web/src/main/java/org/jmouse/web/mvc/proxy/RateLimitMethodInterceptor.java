@@ -1,6 +1,6 @@
 package org.jmouse.web.mvc.proxy;
 
-import org.jmouse.core.proxy.ProxyContext;
+import org.jmouse.core.proxy.old.ProxyContext;
 import org.jmouse.core.throttle.*;
 import org.jmouse.core.proxy.Intercept;
 import org.jmouse.web.mvc.TooManyRequestsException;

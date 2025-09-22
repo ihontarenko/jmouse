@@ -1,7 +1,7 @@
 package org.jmouse.validator.old;
 
 import org.jmouse.common.mapping.mapper.ObjectFieldMapper;
-import org.jmouse.core.proxy.AnnotationProxyFactory;
+import org.jmouse.core.proxy.DefaultProxyFactory;
 import org.jmouse.validator.old.constraint.NonEmptyValidator;
 import org.jmouse.validator.old.constraint.NotNullValidator;
 import org.jmouse.validator.old.constraint.NumberRangeValidator;
@@ -15,7 +15,7 @@ import java.util.Map;
 public class ValidatorConstraintFactory {
 
     public static final ValidatorConstraintFactory BASIC_FACTORY = new ValidatorConstraintFactory();
-    public static final ProxyFactory               PROXY_FACTORY = new AnnotationProxyFactory();
+    public static final ProxyFactory               PROXY_FACTORY = new DefaultProxyFactory();
 
     static {
         // add validator instances
