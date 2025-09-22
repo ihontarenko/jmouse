@@ -6,7 +6,7 @@ import org.jmouse.core.proxy.MethodInterceptor;
 import org.jmouse.core.proxy.MethodInvocation;
 import org.jmouse.core.proxy.MethodInvocationDecorator;
 import org.jmouse.core.proxy.ProxyContext;
-import org.jmouse.core.proxy.annotation.InterceptFor;
+import org.jmouse.core.proxy.Intercept;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Method;
@@ -14,14 +14,14 @@ import java.lang.reflect.Method;
 /**
  * A parser logging interceptor that logs method calls before and after their invocation,
  * as well as during the invocation process. This interceptor is annotated with
- * {@link InterceptFor @ProxyMethodInterceptor} to indicate that it can be
+ * {@link Intercept @ProxyMethodInterceptor} to indicate that it can be
  * automatically discovered and applied by a compatible proxy factory.
  *
  * @see MethodInterceptor
- * @see InterceptFor
+ * @see Intercept
  * @see MethodInvocation
  */
-@InterceptFor({Object.class})
+@Intercept({Object.class})
 public class GlobalLoggingMethodInterceptor implements MethodInterceptor {
 
     private static final Logger LOGGER    = LoggerFactory.getLogger(GlobalLoggingMethodInterceptor.class);

@@ -95,7 +95,7 @@ public final class ProxyInvoke {
             return false;
         }
 
-        ProxyContext contextB = ProxyIntrospection.tryExtractContext(that);
+        ProxyContext contextB = null; // ProxyIntrospection.tryExtractContext(that);
         if (contextB == null) {
             return false;
         }

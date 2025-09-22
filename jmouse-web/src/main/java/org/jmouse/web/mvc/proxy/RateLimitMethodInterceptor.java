@@ -2,7 +2,7 @@ package org.jmouse.web.mvc.proxy;
 
 import org.jmouse.core.proxy.ProxyContext;
 import org.jmouse.core.throttle.*;
-import org.jmouse.core.proxy.annotation.InterceptFor;
+import org.jmouse.core.proxy.Intercept;
 import org.jmouse.web.mvc.TooManyRequestsException;
 
 import java.lang.reflect.Method;
@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
  * 🚦 Concrete interceptor binding {@link AbstractRateLimitMethodInterceptor}
  * to beans marked with {@link RateLimited}.
  *
- * <p>Activated by the {@link InterceptFor} annotation:
+ * <p>Activated by the {@link Intercept} annotation:
  * any bean implementing {@code RateLimited} will have its methods
  * wrapped with TinyLFU/Token-Bucket style rate limiting logic.</p>
  *
@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
  * @see RateLimitEnable
  * @see RateLimit
  */
-@InterceptFor({Object.class})
+@Intercept({Object.class})
 public final class RateLimitMethodInterceptor extends AbstractRateLimitMethodInterceptor {
 
     @Override

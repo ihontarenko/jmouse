@@ -28,6 +28,8 @@ public final class ProxyDefinition<T> {
         Class<T> type = (Class<T>) instance.getClass();
         return builder(type)
                 .classLoader(type.getClassLoader())
+                .mixins(Mixins.of(instance))
+                .policy(InterceptionPolicy.defaultPolicy())
                 .instanceProvider(InstanceProvider.singleton(instance))
                 .build();
     }

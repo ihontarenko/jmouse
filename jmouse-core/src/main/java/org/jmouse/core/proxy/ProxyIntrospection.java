@@ -5,21 +5,21 @@ import java.lang.reflect.Proxy;
 
 public interface ProxyIntrospection {
 
-    ProxyContext getProxyContext();
+    ProxyDefinition<?> getProxyDefinition();
 
-    static ProxyContext tryExtractContext(Object object) {
+    static ProxyDefinition<?> tryExtractContext(Object object) {
         if (object == null) {
             return null;
         }
 
         if (object instanceof ProxyIntrospection introspection) {
-            return introspection.getProxyContext();
+            return introspection.getProxyDefinition();
         }
 
         if (Proxy.isProxyClass(object.getClass())) {
             InvocationHandler invocationHandler = Proxy.getInvocationHandler(object);
             if (invocationHandler instanceof ProxyIntrospection introspection) {
-                return introspection.getProxyContext();
+                return introspection.getProxyDefinition();
             }
         }
 

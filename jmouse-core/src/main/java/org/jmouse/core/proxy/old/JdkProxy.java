@@ -1,11 +1,10 @@
-package org.jmouse.core.proxy;
+package org.jmouse.core.proxy.old;
 
-import org.jmouse.core.reflection.Reflections;
+import org.jmouse.core.proxy.*;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.List;
 
 import static java.lang.reflect.Proxy.*;
 
@@ -55,7 +54,7 @@ public class JdkProxy implements InvocationHandler, ProxyProvider, ProxyIntrospe
     }
 
     @Override
-    public ProxyContext getProxyContext() {
+    public ProxyDefinition<?> getProxyDefinition() {
         return proxyContext;
     }
 

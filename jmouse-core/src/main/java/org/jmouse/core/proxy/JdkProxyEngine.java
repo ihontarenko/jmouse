@@ -1,43 +1,54 @@
 package org.jmouse.core.proxy;
 
-/**
- * 🪞 {@link ProxyEngine} based on JDK dynamic proxies.
- *
- * <p>Generates proxies for targets that expose at least one interface.
- * Delegates proxy creation to {@link JdkProxy}.</p>
- *
- * <h3>Features</h3>
- * <ul>
- *   <li>✅ Supports only interface-based proxying.</li>
- *   <li>⚡ Lightweight and built into the JDK (no external deps).</li>
- *   <li>🚫 Cannot proxy concrete classes (use ByteBuddy instead).</li>
- * </ul>
- */
-public class JdkProxyEngine implements ProxyEngine {
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-    public static final String ENGINE_NAME = "JDK";
+public final class JdkProxyEngine implements ProxyEngine {
 
-    /**
-     * 🏗️ Create a JDK dynamic proxy for the given context.
-     */
     @Override
-    public Object createProxy(ProxyContext context) {
-        return new JdkProxy(context).getProxy();
+    public boolean supports(ProxyDefinition<?> definition) {
+        return definition.targetClass().isInterface() || !definition.extraInterfaces().isEmpty();
     }
 
     /**
-     * ✅ Supports targets with at least one interface.
-     */
-    @Override
-    public boolean supports(ProxyContext context) {
-        return !context.getInterfaces().isEmpty();
-    }
-
-    /**
-     * 🏷️ Engine name.
+     * 🏷️ Name of this proxy engine (e.g. "JDK", "CGLIB").
+     *
+     * @return unique engine name
      */
     @Override
     public String name() {
-        return ENGINE_NAME;
+        return "JDK_PROXY";
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T createProxy(ProxyDefinition<T> definition) {
+        Set<Class<?>> interfaces = new LinkedHashSet<>();
+
+        if (definition.targetClass().isInterface()) {
+            interfaces.add(definition.targetClass());
+        }
+
+        interfaces.addAll(Arrays.asList(definition.targetClass().getInterfaces()));
+        interfaces.addAll(definition.extraInterfaces());
+        interfaces.addAll(definition.mixins().implementations().keySet());
+
+        if (interfaces.isEmpty()) {
+            interfaces.add(Marker.class);
+        }
+
+        ProxyDispatcher   dispatcher = new CommonProxyDispatcher(definition);
+        InvocationHandler invocation = new JdkInvocationHandler(dispatcher, definition);
+
+        Object proxy = Proxy.newProxyInstance(
+                definition.classLoader(), interfaces.toArray(Class[]::new), invocation);
+
+        return (T) proxy;
+    }
+
+    /** Marker when no user-facing interfaces exist. */
+    public interface Marker {}
 }

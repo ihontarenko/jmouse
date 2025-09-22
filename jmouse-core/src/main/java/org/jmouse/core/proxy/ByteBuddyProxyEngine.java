@@ -13,182 +13,121 @@ import org.jmouse.core.reflection.ClassMatchers;
 import org.jmouse.core.reflection.Reflections;
 import org.objenesis.ObjenesisHelper;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 import static net.bytebuddy.implementation.MethodDelegation.to;
 import static net.bytebuddy.matcher.ElementMatchers.*;
-import static org.jmouse.core.proxy.ProxyInvoke.invokeCore;
 
-/**
- * 🧬 {@link ProxyEngine} implementation using ByteBuddy.
- *
- * <p>Generates subclass-based proxies for non-final concrete classes,
- * routing all virtual methods through the framework’s invocation pipeline.</p>
- *
- * <h3>Features</h3>
- * <ul>
- *   <li>⚡ Subclass proxying (no interfaces required).</li>
- *   <li>📦 Exposes {@link ProxyContext} via {@link ProxyIntrospection}.</li>
- *   <li>🪝 Provides {@link InterceptableProxy} entrypoint
- *       ({@link #INTERNAL_INVOKE}).</li>
- *   <li>♻️ Delegates method calls into {@link ProxyInvoke#invokeCore(String, ProxyContext, Object, Method, Object[])}.</li>
- *   <li>🧠 Fallbacks for {@code equals}/{@code hashCode}/{@code toString}.</li>
- * </ul>
- *
- * <h3>Limitations</h3>
- * <ul>
- *   <li>🚫 Cannot proxy interfaces (use {@link org.jmouse.core.proxy.JdkProxyEngine}).</li>
- *   <li>🚫 Cannot proxy final classes or final methods.</li>
- *   <li>🚫 Ignores bridge/synthetic methods and helper API methods.</li>
- * </ul>
- */
-public class ByteBuddyProxyEngine implements ProxyEngine {
+public final class ByteBuddyProxyEngine implements ProxyEngine {
 
     /**
      * 🛡️ Matcher excluding final classes.
      */
     public static final Matcher<Class<?>> NON_FINAL = Matcher.not(ClassMatchers.isFinal());
-
     /**
-     * 🔒 Internal dispatch method (must match {@link InterceptableProxy}).
+     * Hidden field to store ProxyDispatcher.
      */
-    public static final String INTERNAL_INVOKE = "internalInvoke";
-
+    private static final String DISPATCHER            = "$dispatcher";
     /**
-     * 🧷 Hidden field for JDK-style {@link InvocationHandler}.
+     * Hidden field to store ProxyDefinition for introspection.
      */
-    public static final String INVOCATION_HANDLER = "$jdkInvocationHandler";
-
+    private static final String DEFINITION            = "$definition";
     /**
-     * 📦 Hidden field to store {@link ProxyContext}.
+     * InterceptableProxy entrypoint.
      */
-    public static final String FIELD_CONTEXT = "$proxyContext";
-
+    private static final String INTERNAL_INVOKE       = "internalInvoke";
     /**
-     * 🏷️ Engine identifier.
+     * ProxyIntrospection accessor name.
      */
-    public static final String ENGINE_NAME = "BYTE_BUDDY";
+    private static final String GET_DEFINITION_METHOD = "getProxyDefinition";
+
+    @Override
+    public boolean supports(ProxyDefinition<?> definition) {
+        return NON_FINAL.matches(definition.targetClass());
+    }
 
     /**
-     * 🔗 Method name exposing context (must match {@link ProxyIntrospection}).
-     */
-    public static final String GET_PROXY_CONTEXT_METHOD = "getProxyContext";
-
-    /**
-     * 🏗️ Create a ByteBuddy-generated proxy for the given {@link ProxyContext}.
+     * 🏷️ Name of this proxy engine (e.g. "JDK", "CGLIB").
      *
-     * <p>Steps:</p>
-     * <ol>
-     *   <li>Subclass target class + implement interfaces.</li>
-     *   <li>Expose context field + accessor via {@link ProxyIntrospection}.</li>
-     *   <li>Expose internal {@link InterceptableProxy} entrypoint.</li>
-     *   <li>Route all eligible methods into {@link Dispatcher}.</li>
-     *   <li>Instantiate proxy via {@link ObjenesisHelper} (no constructor call).</li>
-     * </ol>
-     *
-     * @throws ProxyInvocationException if proxy generation fails
+     * @return unique engine name
      */
     @Override
-    public Object createProxy(ProxyContext context) {
+    public String name() {
+        return "BYTE_BUDDY";
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T createProxy(ProxyDefinition<T> definition) {
+        ProxyDispatcher dispatcher = new CommonProxyDispatcher(definition);
+
         try {
             Class<?> proxyClass = new ByteBuddy()
-                    .subclass(context.getTargetClass())
-                    // --- internal entrypoint mimicking JDK InvocationHandler
+                    .subclass(definition.targetClass())
+
+                    // === InterceptableProxy: internalInvoke(Method,Object[]) ===
                     .implement(InterceptableProxy.class)
-                    .defineField(INVOCATION_HANDLER, InvocationHandler.class, Visibility.PRIVATE)
+                    .defineField(DISPATCHER, ProxyDispatcher.class, Visibility.PRIVATE)
                     .defineMethod(INTERNAL_INVOKE, Object.class, Visibility.PUBLIC)
                     .withParameters(Method.class, Object[].class)
-                    .intercept(MethodCall.invoke(
-                            InvocationHandler.class.getMethod("invoke", Object.class, Method.class, Object[].class))
-                                       .onField(INVOCATION_HANDLER)
-                                       .withThis()
-                                       .withArgument(0)
-                                       .withArgument(1))
-                    // --- expose ProxyContext
+                    .intercept(
+                            // internalInvoke(m, args) -> this.$dispatcher.invoke(this, m, args)
+                            MethodCall.invoke(ProxyDispatcher.class
+                                                      .getMethod("invoke", Object.class, Method.class, Object[].class))
+                                    .onField(DISPATCHER)
+                                    .withThis()
+                                    .withArgument(0)
+                                    .withArgument(1)
+                    )
+
+                    // === ProxyIntrospection: getProxyDefinition() ===
                     .implement(ProxyIntrospection.class)
-                    .defineField(FIELD_CONTEXT, ProxyContext.class, Visibility.PRIVATE)
-                    .defineMethod(GET_PROXY_CONTEXT_METHOD, ProxyContext.class, Visibility.PUBLIC)
-                    .intercept(FieldAccessor.ofField(FIELD_CONTEXT))
-                    // --- route regular instance methods to Dispatcher
+                    .defineField(DEFINITION, ProxyDefinition.class, Visibility.PRIVATE)
+                    .defineMethod(GET_DEFINITION_METHOD, ProxyDefinition.class, Visibility.PUBLIC)
+                    .intercept(FieldAccessor.ofField(DEFINITION))
+
+                    // === Route normal instance methods to Handler (reads $dispatcher field) ===
                     .method(isVirtual()
                                     .and(not(isFinalizer()))
                                     .and(not(isFinal()))
                                     .and(not(isStatic()))
                                     .and(not(isBridge()))
                                     .and(not(isSynthetic()))
-                                    // exclude helper APIs
+                                    .and(not(isDeclaredBy(Object.class)))
                                     .and(not(isDeclaredBy(ProxyIntrospection.class)))
                                     .and(not(isDeclaredBy(InterceptableProxy.class)))
-                                    .and(not(named(GET_PROXY_CONTEXT_METHOD)))
-                                    .and(not(named(INTERNAL_INVOKE)))
-                    )
-                    .intercept(to(new Dispatcher(context)))
-                    // --- build
+                                    .and(not(named(GET_DEFINITION_METHOD)))
+                                    .and(not(named(INTERNAL_INVOKE))))
+                    .intercept(to(new Handler(dispatcher)))
                     .make()
-                    .load(context.getClassLoader())
+                    .load(definition.classLoader())
                     .getLoaded();
 
-            Object            proxy   = ObjenesisHelper.newInstance(proxyClass);
-            InvocationHandler handler = (t, m, a) -> invokeCore(ENGINE_NAME, context, t, m, a);
+            Object proxy = ObjenesisHelper.newInstance(proxyClass);
 
-            Reflections.setFieldValue(proxy, FIELD_CONTEXT, context);
-            Reflections.setFieldValue(proxy, INVOCATION_HANDLER, handler);
+            Reflections.setFieldValue(proxy, DEFINITION, definition);
+            Reflections.setFieldValue(proxy, DISPATCHER, dispatcher);
 
-            return proxy;
+            return (T) proxy;
 
         } catch (Exception e) {
-            throw new ProxyInvocationException("ByteBuddy proxy creation failed: " + e.getMessage(), e);
+            throw new IllegalStateException("ByteBuddy proxy creation failed: " + e.getMessage(), e);
         }
     }
 
-    /**
-     * ✅ Supports non-interface, non-final classes without extra interfaces.
-     */
-    @Override
-    public boolean supports(ProxyContext context) {
-        Class<?> type = context.getTargetClass();
-        return !type.isInterface() && context.getInterfaces().isEmpty() && NON_FINAL.matches(type);
-    }
+    /** Small bridge that calls into ProxyDispatcher stored on the instance. */
+    public static final class Handler {
 
-    /**
-     * 🏷️ Engine name ("BYTE_BUDDY").
-     */
-    @Override
-    public String name() {
-        return ENGINE_NAME;
-    }
+        private final ProxyDispatcher dispatcher;
 
-    /**
-     * 🛣️ Delegation bridge from generated proxy to interceptor chain.
-     *
-     * <p>All routed methods land here, which delegates to
-     * {@link ProxyInvoke#invokeCore(String, ProxyContext, Object, Method, Object[])}.</p>
-     */
-    public static final class Dispatcher {
-        private final ProxyContext context;
-
-        /**
-         * 🏗️ Bind dispatcher to a specific proxy context.
-         */
-        public Dispatcher(ProxyContext context) {
-            this.context = context;
+        public Handler(ProxyDispatcher dispatcher) {
+            this.dispatcher = dispatcher;
         }
 
-        /**
-         * 🔁 Intercept a method call and run the unified pipeline.
-         */
         @RuntimeType
-        public Object intercept(@This Object proxy, @Origin Method method, @AllArguments Object[] arguments) {
-            return invokeCore(ENGINE_NAME, context, proxy, method, arguments);
+        public Object intercept(@This Object proxy, @Origin Method method, @AllArguments Object[] arguments) throws Throwable {
+            return dispatcher.invoke(proxy, method, arguments);
         }
 
-        /**
-         * 🧾 Human-readable descriptor for debugging/logs.
-         */
-        @Override
-        public String toString() {
-            return "BYTE-BUDDY PROXY [%s]".formatted(context.getTargetClass());
-        }
     }
 }

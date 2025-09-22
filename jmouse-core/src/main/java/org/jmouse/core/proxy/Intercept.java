@@ -1,7 +1,4 @@
-package org.jmouse.core.proxy.annotation;
-
-import org.jmouse.core.proxy.AnnotationProxyFactory;
-import org.jmouse.core.proxy.MethodInterceptor;
+package org.jmouse.core.proxy;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,14 +8,14 @@ import java.lang.annotation.Target;
 /**
  * Annotation to mark a class as a method interceptor for specific target classes.
  * <p>
- * Classes annotated with {@code @ProxyMethodInterceptor} should implement the {@link MethodInterceptor}
+ * Classes annotated with {@code @Intercept} should implement the {@link MethodInterceptor}
  * interface. These interceptors can be automatically discovered and applied to proxies
  * created by {@link AnnotationProxyFactory}.
  * </p>
  *
  * <p>Usage:</p>
  * <pre>{@code
- * @ProxyMethodInterceptor({UserUservice.class})
+ * @Intercept({UserUservice.class})
  * public class LoggingInterceptor implements MethodInterceptor {
  *     @Override
  *     public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -36,7 +33,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface InterceptFor {
+public @interface Intercept {
 
     /**
      * The target classes for which this interceptor should be applied.

@@ -56,13 +56,6 @@ public interface MethodInvocation {
     int getOrdinal();
 
     /**
-     * Retrieves the proxy configuration associated with the invocation.
-     *
-     * @return the {@link ProxyContext} structured containing proxy-related descriptor.
-     */
-    ProxyContext getProxyContext();
-
-    /**
      * Retrieves the proxy instance on which the method is being invoked.
      *
      * @return the proxy instance.

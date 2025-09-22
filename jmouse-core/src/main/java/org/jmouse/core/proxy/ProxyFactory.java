@@ -18,6 +18,8 @@ public interface ProxyFactory {
      */
     <T> T createProxy(Object object);
 
+    <T> T createProxy(ProxyDefinition<T> definition);
+
     /**
      * Creates a {@link ProxyContext} for the specified structured and class loader.
      *

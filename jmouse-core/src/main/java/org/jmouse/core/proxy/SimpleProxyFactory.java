@@ -1,7 +1,8 @@
 package org.jmouse.core.proxy;
 
 import org.jmouse.core.matcher.Matcher;
-import org.jmouse.core.proxy.annotation.InterceptFor;
+import org.jmouse.core.proxy.old.ByteBuddyProxyEngine;
+import org.jmouse.core.proxy.old.JdkProxyEngine;
 import org.jmouse.core.reflection.ClassMatchers;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
  * <p>Delegates proxy creation to a chain of {@link ProxyEngine}s
  * (ByteBuddy first, then JDK dynamic proxies).
  * Interceptors are matched against target classes via
- * {@link InterceptFor} metadata.</p>
+ * {@link Intercept} metadata.</p>
  *
  * <h3>Features</h3>
  * <ul>
@@ -24,7 +25,7 @@ import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
  *   <li>📋 Keeps an internal registry of added {@link MethodInterceptor}s.</li>
  * </ul>
  */
-public class DefaultProxyFactory implements ProxyFactory {
+public class SimpleProxyFactory extends AbstractProxyFactory {
 
     private final List<MethodInterceptor> interceptors = new ArrayList<>();
 
@@ -45,7 +46,7 @@ public class DefaultProxyFactory implements ProxyFactory {
      *
      * @param interceptors initial interceptors to register
      */
-    public DefaultProxyFactory(MethodInterceptor... interceptors) {
+    public SimpleProxyFactory(MethodInterceptor... interceptors) {
         this.interceptors.addAll(List.of(interceptors));
     }
 
@@ -78,34 +79,14 @@ public class DefaultProxyFactory implements ProxyFactory {
                         ". Provide interfaces (JDK) or use non-final class (ByteBuddy).");
     }
 
-    /**
-     * 🏗️ Build a {@link ProxyContext} and attach matching interceptors.
-     *
-     * <p>Interceptors are matched if their {@link InterceptFor}
-     * annotation declares a type assignable from the target class.</p>
-     */
     @Override
-    public ProxyContext createProxyContext(Object object, ClassLoader classLoader) {
-        ProxyContext      proxyContext = new ProxyContext(object, classLoader);
-        Matcher<Class<?>> classMatcher = ClassMatchers.isSubtype(proxyContext.getTargetClass());
+    public <T> T createProxy(ProxyDefinition<T> definition) {
 
-        for (MethodInterceptor interceptor : interceptors) {
-            Class<?>[] preferredClasses = getAnnotationValue(
-                    interceptor.getClass(), InterceptFor.class, InterceptFor::value);
-
-            if (preferredClasses == null) {
-                continue;
-            }
-
-            for (Class<?> preferredClass : preferredClasses) {
-                if (classMatcher.matches(preferredClass)) {
-                    proxyContext.addInterceptor(interceptor);
-                    break;
-                }
+        for (ProxyEngine engine : engines) {
+            if (engine.supports(definition)) {
+                return engine.createProxy(definition);
             }
         }
-
-        return proxyContext;
     }
 
     /**
