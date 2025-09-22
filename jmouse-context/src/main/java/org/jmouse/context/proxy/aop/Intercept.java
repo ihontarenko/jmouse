@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface ProxyAdvice {
+public @interface Intercept {
 
     /**
      * Lower = higher priority (exec earlier).
@@ -18,9 +18,4 @@ public @interface ProxyAdvice {
      * Reference to named pointcut (from @ProxyPointcut(name=...)).
      */
     String pointcut() default "";
-
-    /**
-     * Inline expression if you don't want naming. Ignored if 'pointcut' is set.
-     */
-    String expression() default "";
 }

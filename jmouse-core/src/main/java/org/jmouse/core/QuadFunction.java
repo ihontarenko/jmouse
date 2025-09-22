@@ -1,4 +1,4 @@
-package org.jmouse.context.proxy;
+package org.jmouse.core;
 
 import java.util.function.Function;
 

@@ -1,8 +1,5 @@
-package org.jmouse.context.proxy.interceptors;
+package org.jmouse.context.proxy.aop;
 
-import org.jmouse.context.proxy.aop.AdvisorChainFactory;
-import org.jmouse.context.proxy.aop.Pointcut;
-import org.jmouse.context.proxy.aop.RuntimeMatcher;
 import org.jmouse.context.proxy.api.InvocationPipeline;
 import org.jmouse.context.proxy.api.MethodInterceptor;
 import org.jmouse.context.proxy.api.MethodInvocation;

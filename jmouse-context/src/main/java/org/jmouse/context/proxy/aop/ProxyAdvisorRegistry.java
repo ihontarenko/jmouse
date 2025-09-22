@@ -55,8 +55,8 @@ public final class ProxyAdvisorRegistry {
             }
         }
 
-        for (Class<?> type : ClassFinder.findAnnotatedClasses(ProxyAdvice.class, baseTypes)) {
-            ProxyAdvice       annotation   = type.getAnnotation(ProxyAdvice.class);
+        for (Class<?> type : ClassFinder.findAnnotatedClasses(Intercept.class, baseTypes)) {
+            Intercept         annotation   = type.getAnnotation(Intercept.class);
             MethodInterceptor interceptor  = instantiate(type);
             String            pointcutName = annotation.pointcut();
 

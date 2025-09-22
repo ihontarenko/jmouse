@@ -3,6 +3,7 @@ package org.jmouse.context.proxy.api;
 import java.util.*;
 
 public final class ProxyFactory {
+
     private final List<ProxyEngine> engines = new ArrayList<>();
 
     public ProxyFactory register(ProxyEngine engine) {
@@ -10,12 +11,13 @@ public final class ProxyFactory {
         return this;
     }
 
-    public <T> T create(ProxyDefinition<T> def) {
-        for (ProxyEngine e : engines) {
-            if (e.supports(def)) {
-                return e.createProxy(def);
+    public <T> T create(ProxyDefinition<T> definition) {
+        for (ProxyEngine engine : engines) {
+            if (engine.supports(definition)) {
+                return engine.createProxy(definition);
             }
         }
-        throw new IllegalStateException("No ProxyEngine supports: " + def);
+
+        throw new IllegalStateException("NO PROXY ENGINE SUPPORTS: " + definition);
     }
 }

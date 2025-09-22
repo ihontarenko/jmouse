@@ -73,6 +73,7 @@ public class Expressions {
         el.compile("[1, 2, 3, 4, 5]|map(i -> i * 2)").evaluate(context);
 
         el.compile("1 + (2 * 2) | int > 5 and 4 < 5 - 2 / 3");
+        el.compile("1 + (2 * 2) | int > 5 and 4 < 5 - 2 / 3");
         el.evaluate("22 / 7");
         el.evaluate("2 .. 22 / 2");
         el.evaluate("'a' .. strings[0]", context);

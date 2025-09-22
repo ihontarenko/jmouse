@@ -29,7 +29,7 @@ public final class InvocationPipeline {
             private final MethodInvocation                      base;
             private final Iterator<? extends MethodInterceptor> iterator;
             private final Terminal                              terminal;
-            private int ordinal = 0;
+            private       int                                   ordinal = 0;
 
             Cursor(MethodInvocation base, Iterator<? extends MethodInterceptor> iterator, Terminal terminal) {
                 this.base = base;

@@ -6,20 +6,20 @@ import java.util.List;
 public final class ProxyDefinition<T> {
 
     private final Class<T>                targetClass;
-    private final TargetProvider<T>       targetProvider;
+    private final ClassLoader             classLoader;
+    private final InstanceProvider<T>     instanceProvider;
     private final List<MethodInterceptor> interceptors;
     private final List<Class<?>>          extraInterfaces;
     private final Mixins                  mixins;
-    private final ProxyOptions            options;
     private final InterceptionPolicy      policy;
 
     private ProxyDefinition(Builder<T> builder) {
         this.targetClass = builder.targetClass;
-        this.targetProvider = builder.targetProvider;
+        this.classLoader = builder.classLoader;
+        this.instanceProvider = builder.instanceProvider;
         this.interceptors = List.copyOf(builder.interceptors);
         this.extraInterfaces = List.copyOf(builder.extraInterfaces);
         this.mixins = builder.mixins;
-        this.options = builder.options;
         this.policy = builder.policy;
     }
 
@@ -31,8 +31,12 @@ public final class ProxyDefinition<T> {
         return targetClass;
     }
 
-    public TargetProvider<T> target() {
-        return targetProvider;
+    public ClassLoader classLoader() {
+        return classLoader;
+    }
+
+    public InstanceProvider<T> instanceProvider() {
+        return instanceProvider;
     }
 
     public List<MethodInterceptor> chain() {
@@ -47,10 +51,6 @@ public final class ProxyDefinition<T> {
         return mixins;
     }
 
-    public ProxyOptions options() {
-        return options;
-    }
-
     public InterceptionPolicy policy() {
         return policy;
     }
@@ -58,19 +58,24 @@ public final class ProxyDefinition<T> {
     public static final class Builder<T> {
 
         private final Class<T>                targetClass;
-        private final List<MethodInterceptor> interceptors    = new ArrayList<>();
-        private final List<Class<?>>          extraInterfaces = new ArrayList<>();
-        private       TargetProvider<T>       targetProvider  = TargetProvider.singleton(null);
-        private       Mixins                  mixins          = Mixins.empty();
-        private       ProxyOptions            options         = ProxyOptions.defaults();
-        private       InterceptionPolicy      policy          = InterceptionPolicy.defaultPolicy();
+        private final List<MethodInterceptor> interceptors     = new ArrayList<>();
+        private final List<Class<?>>          extraInterfaces  = new ArrayList<>();
+        private       ClassLoader             classLoader;
+        private       InstanceProvider<T>     instanceProvider = InstanceProvider.singleton(null);
+        private       Mixins                  mixins           = Mixins.empty();
+        private       InterceptionPolicy      policy           = InterceptionPolicy.defaultPolicy();
 
         public Builder(Class<T> targetClass) {
             this.targetClass = targetClass;
         }
 
-        public Builder<T> target(TargetProvider<T> targetProvider) {
-            this.targetProvider = targetProvider;
+        public Builder<T> instanceProvider(InstanceProvider<T> instanceProvider) {
+            this.instanceProvider = instanceProvider;
+            return this;
+        }
+
+        public Builder<T> classLoader(ClassLoader classLoader) {
+            this.classLoader = classLoader;
             return this;
         }
 
@@ -91,11 +96,6 @@ public final class ProxyDefinition<T> {
 
         public Builder<T> mixins(Mixins mixins) {
             this.mixins = mixins;
-            return this;
-        }
-
-        public Builder<T> options(ProxyOptions options) {
-            this.options = options;
             return this;
         }
 
