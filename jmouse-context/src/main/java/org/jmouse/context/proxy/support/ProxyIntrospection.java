@@ -9,7 +9,7 @@ public interface ProxyIntrospection {
 
     ProxyDefinition<?> getProxyDefinition();
 
-    static ProxyDefinition<?> tryExtractContext(Object object) {
+    static ProxyDefinition<?> tryExtractDefinition(Object object) {
         if (object == null) {
             return null;
         }

@@ -7,22 +7,54 @@ import org.jmouse.core.reflection.MethodMatchers;
 import java.lang.reflect.Method;
 
 /**
- * Default proxy dispatcher used by any engine (JDK/ByteBuddy/...).
- * Builds pipeline once, then uses it for every call.
+ * 🎭 General-purpose proxy dispatcher.
+ *
+ * <p>Acts as the central dispatcher for proxy method calls. Used by any proxy engine
+ * (JDK, ByteBuddy, etc.). Builds a reusable interceptor pipeline once, and re-applies
+ * it for each subsequent invocation.</p>
+ *
+ * <ul>
+ *   <li>Delegates calls to {@link InvocationPipeline} for AOP chain execution</li>
+ *   <li>Handles {@code Object} methods (toString, hashCode, equals) directly</li>
+ *   <li>Falls back to real target instance or mixin override when needed</li>
+ * </ul>
  */
 public final class GeneralProxyDispatcher implements ProxyDispatcher {
 
-    private static final Matcher<Method> IS_OBJECT_METHOD =
-            MethodMatchers.asMethod(MethodMatchers.isObjectMethod());
+    /**
+     * ✅ Matcher for {@code Object} methods (toString, hashCode, equals).
+     */
+    private static final Matcher<Method> IS_OBJECT_METHOD = MethodMatchers.asMethod(MethodMatchers.isObjectMethod());
 
     private final ProxyDefinition<?> definition;
     private final MethodInterceptor  pipeline;
 
+    /**
+     * Constructs a dispatcher for the given proxy definition.
+     *
+     * @param definition proxy definition containing chain, mixins, and policies
+     */
     public GeneralProxyDispatcher(ProxyDefinition<?> definition) {
         this.definition = definition;
-        this.pipeline   = InvocationPipeline.assemble(definition.chain(), this::invokeTerminal);
+        this.pipeline = InvocationPipeline.assemble(definition.chain(), this::invokeTerminal);
     }
 
+    /**
+     * Dispatches a method invocation to the proxy pipeline.
+     *
+     * <p>Steps:</p>
+     * <ol>
+     *   <li>If method is from {@code Object}, handle directly</li>
+     *   <li>If policy denies interception, invoke target instance directly</li>
+     *   <li>Otherwise, pass through interceptor pipeline</li>
+     * </ol>
+     *
+     * @param proxy     proxy instance
+     * @param method    method being called
+     * @param arguments arguments of the call (may be {@code null})
+     * @return result of invocation
+     * @throws Throwable if the target or interceptors throw
+     */
     @Override
     public Object invoke(Object proxy, Method method, Object[] arguments) throws Throwable {
         arguments = (arguments == null) ? new Object[0] : arguments;
@@ -31,7 +63,7 @@ public final class GeneralProxyDispatcher implements ProxyDispatcher {
             return switch (method.getName()) {
                 case "toString" -> ("Proxy(" + definition.targetClass().getName() + ")");
                 case "hashCode" -> System.identityHashCode(proxy);
-                case "equals"   -> proxy == arguments[0];
+                case "equals" -> proxy == arguments[0];
                 default -> null;
             };
         }
@@ -43,6 +75,14 @@ public final class GeneralProxyDispatcher implements ProxyDispatcher {
         return pipeline.invoke(getMethodInvocation(proxy, method, arguments));
     }
 
+    /**
+     * Creates a {@link MethodInvocation} wrapper for pipeline processing.
+     *
+     * @param proxy  proxy instance
+     * @param method invoked method
+     * @param args   arguments
+     * @return invocation wrapper
+     */
     private MethodInvocation getMethodInvocation(Object proxy, Method method, Object[] args) {
         return new MethodInvocation() {
             @Override
@@ -77,7 +117,17 @@ public final class GeneralProxyDispatcher implements ProxyDispatcher {
         };
     }
 
-    /** Outer terminal: real target call (or mixin override). */
+    /**
+     * 🔚 Terminal invocation: invokes the real target or mixin override.
+     *
+     * <p>Checks if a mixin provides an implementation for the declaring class
+     * of the method. If yes, delegates to mixin. Otherwise, falls back to
+     * the underlying target instance.</p>
+     *
+     * @param invocation method invocation wrapper
+     * @return result of the real call
+     * @throws Throwable if target throws
+     */
     private Object invokeTerminal(MethodInvocation invocation) throws Throwable {
         Method method = invocation.getMethod();
         Object mixin  = definition.mixins().implementationFor(method.getDeclaringClass());
