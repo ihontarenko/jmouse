@@ -20,7 +20,7 @@ public class SecureRandomStringGenerator extends RandomStringGenerator {
      *
      * @param length number of random characters to generate
      */
-    protected SecureRandomStringGenerator(int length) {
+    public SecureRandomStringGenerator(int length) {
         super(length);
     }
 

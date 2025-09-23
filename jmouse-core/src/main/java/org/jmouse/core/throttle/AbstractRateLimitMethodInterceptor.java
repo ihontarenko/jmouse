@@ -1,5 +1,6 @@
 package org.jmouse.core.throttle;
 
+import org.jmouse.core.proxy.InvocationContext;
 import org.jmouse.core.proxy.MethodInterceptor;
 import org.jmouse.core.proxy.old.ProxyContext;
 import org.jmouse.core.reflection.Reflections;
@@ -72,7 +73,7 @@ public abstract class AbstractRateLimitMethodInterceptor implements MethodInterc
      * @throws RateLimitExceededException if limit exceeded
      */
     @Override
-    public void before(ProxyContext context, Method method, Object[] arguments) {
+    public void before(InvocationContext context, Method method, Object[] arguments) {
         if (isSupportedType(context.getTargetClass()) && isSupportedMethod(method)) {
             RateLimit              annotation = resolveAnnotation(method, context.getTarget().getClass());
             RateLimitConfiguration config     = toConfiguration(annotation);

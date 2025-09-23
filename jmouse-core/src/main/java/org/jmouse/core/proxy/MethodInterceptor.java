@@ -1,7 +1,5 @@
 package org.jmouse.core.proxy;
 
-import org.jmouse.core.proxy.old.ProxyContext;
-
 import java.lang.reflect.Method;
 
 /**
@@ -51,7 +49,7 @@ public interface MethodInterceptor {
      * @param method    the method being invoked
      * @param arguments the arguments passed to the method
      */
-    default void before(ProxyContext context, Method method, Object[] arguments) {
+    default void before(InvocationContext context, Method method, Object[] arguments) {
         // no-op
     }
 
@@ -75,7 +73,7 @@ public interface MethodInterceptor {
      * @param arguments the arguments passed to the method
      * @param result    the result returned by the method (may be {@code null})
      */
-    default void after(ProxyContext context, Method method, Object[] arguments, Object result) {
+    default void after(InvocationContext context, Method method, Object[] arguments, Object result) {
         // no-op
     }
 

@@ -1,12 +1,8 @@
 package org.jmouse.beans.proxy;
 
+import org.jmouse.core.proxy.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jmouse.core.proxy.MethodInterceptor;
-import org.jmouse.core.proxy.MethodInvocation;
-import org.jmouse.core.proxy.MethodInvocationDecorator;
-import org.jmouse.core.proxy.old.ProxyContext;
-import org.jmouse.core.proxy.Intercept;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Method;
@@ -35,7 +31,7 @@ public class GlobalLoggingMethodInterceptor implements MethodInterceptor {
      * @param arguments the arguments passed to the method
      */
     @Override
-    public void before(ProxyContext context, Method method, Object[] arguments) {
+    public void before(InvocationContext context, Method method, Object[] arguments) {
         LOGGER.info(SEPARATOR);
         LOGGER.info("Before: {}", Reflections.getMethodName(method));
     }
@@ -69,7 +65,7 @@ public class GlobalLoggingMethodInterceptor implements MethodInterceptor {
      * @param result    the result returned by the method (may be {@code null})
      */
     @Override
-    public void after(ProxyContext context, Method method, Object[] arguments, Object result) {
+    public void after(InvocationContext context, Method method, Object[] arguments, Object result) {
         LOGGER.info(SEPARATOR);
         LOGGER.info("After: {}", Reflections.getMethodName(method));
         LOGGER.info("Result: {}", result);
