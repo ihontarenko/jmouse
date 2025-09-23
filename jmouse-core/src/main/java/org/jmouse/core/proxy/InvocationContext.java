@@ -9,45 +9,47 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Immutable call-scoped context shared across interceptors in the pipeline.
- * <p>
- * Provides:
+ * 📦 Immutable call-scoped context shared across all interceptors in a pipeline.
+ *
+ * <p>Captures essential details of a single proxy method invocation:</p>
  * <ul>
- *   <li>Stable call id & timestamps</li>
- *   <li>References to proxy/target/method/args</li>
- *   <li>Ordinal (position) of current interceptor</li>
- *   <li>Mutable attribute bag for cross-interceptor data exchange</li>
+ *   <li>🆔 Stable call identifier ({@link #callId})</li>
+ *   <li>⏱️ Start timestamps ({@link #nanoStart}, {@link #wallStart})</li>
+ *   <li>🔗 References to proxy, target, method, and arguments</li>
+ *   <li>📊 Interceptor ordinal (via pipeline cursor)</li>
+ *   <li>🗂️ Mutable attribute bag for cross-interceptor data exchange</li>
  * </ul>
+ *
+ * <p>Instances are <b>immutable</b> except for the {@link #attributes} map,
+ * which is thread-safe and intended for interceptor cooperation.</p>
  */
 public record InvocationContext(
-        /** Proxy instance (JDK/ByteBuddy). May be same as target for direct calls. */
         Object proxy,
-        /** Target (real) instance to invoke. */
         Object target,
-        /** Method being invoked. */
         Method method,
-        /** Arguments snapshot (defensive, non-null). */
         Object[] arguments,
-        /** Monotonic start time (nanoTime) captured at the moment of creating the context. */
-        long startedAtNanos,
-        /** Wall-clock timestamp when the context was created. */
-        Instant startedAt,
-        /** Stable correlation id for this call (useful for logs/tracing). */
+        long nanoStart,
+        Instant wallStart,
         String callId,
-        /** Current interceptor ordinal (0..n-1). Updated per step via {@link #withOrdinal(int)}. */
-        int ordinal,
-        /** Mutable attribute bag to share data between interceptors. */
         Map<String, Object> attributes) {
-    // --- Builders / factories -------------------------------------------------
 
-    public final static IdGenerator<String, String> ID_GENERATOR = new SecureRandomStringGenerator(16);
+    /**
+     * Default generator for call IDs (16-char secure random).
+     */
+    public static final IdGenerator<String, String> ID_GENERATOR = new SecureRandomStringGenerator(16);
 
+    /**
+     * @return a fresh {@link Builder} for constructing contexts
+     */
     public static Builder builder() {
         return new Builder();
     }
 
     /**
-     * Quick factory from a MethodInvocation (proxy/target/method/args).
+     * Factory shortcut to build a context from a {@link MethodInvocation}.
+     *
+     * @param invocation base invocation (proxy/target/method/args)
+     * @return a new context initialized with invocation data
      */
     public static InvocationContext forInvocation(MethodInvocation invocation) {
         return builder()
@@ -58,41 +60,73 @@ public record InvocationContext(
                 .build();
     }
 
-    // --- "with-*" helpers to keep record immutable ----------------------------
-
-    public InvocationContext withOrdinal(int newOrdinal) {
-        return new InvocationContext(
-                proxy, target, method, arguments, startedAtNanos, startedAt, callId, newOrdinal, attributes);
-    }
-
     /**
-     * Returns current argument array (non-null). If you need to replace arguments,
-     * do it at {@link MethodInvocation} level (via a wrapper) before proceed().
+     * Returns the arguments array (never {@code null}).
+     * <p><b>Note:</b> arguments are cloned at construction time for immutability.
+     * To replace arguments dynamically, use a {@link MethodInvocation} wrapper
+     * before calling {@code proceed()}.</p>
      */
+    @Override
     public Object[] arguments() {
         return arguments;
     }
 
+    /**
+     * Retrieves an attribute from the context.
+     *
+     * @param key attribute key
+     * @return value or {@code null} if missing
+     */
     public Object getAttribute(String key) {
         return attributes.get(key);
     }
 
+    /**
+     * Retrieves an attribute with type safety.
+     *
+     * @param key  attribute key
+     * @param type expected type
+     * @param <T>  type parameter
+     * @return casted value, or {@code null} if missing or type mismatch
+     */
     public <T> T getAttribute(String key, Class<T> type) {
         Object value = attributes.get(key);
         return (type.isInstance(value)) ? type.cast(value) : null;
     }
 
+    /**
+     * Adds or replaces an attribute in the context.
+     *
+     * @param key   attribute key
+     * @param value attribute value (may be {@code null})
+     * @return this same context (for chaining)
+     */
     public InvocationContext setAttribute(String key, Object value) {
         attributes.put(key, value);
         return this;
     }
 
+    /**
+     * Removes an attribute from the context.
+     *
+     * @param key attribute key
+     * @return previous value or {@code null}
+     */
     public Object removeAttribute(String key) {
         return attributes.remove(key);
     }
 
-    // --- Builder --------------------------------------------------------------
-
+    /**
+     * Builder for {@link InvocationContext}.
+     *
+     * <p>Ensures defaults:
+     * <ul>
+     *   <li>Arguments → empty array if null</li>
+     *   <li>Call ID → generated if not set</li>
+     *   <li>Timestamps → captured at build time if not set</li>
+     *   <li>Attributes → {@link ConcurrentHashMap} if not provided</li>
+     * </ul>
+     */
     public static final class Builder {
 
         private Object              proxy;
@@ -100,9 +134,8 @@ public record InvocationContext(
         private Method              method;
         private Object[]            arguments;
         private String              callId;
-        private Long                startedAtNanos;
-        private Instant             startedAt;
-        private Integer             ordinal;
+        private Long                nanoStart;
+        private Instant             wallStart;
         private Map<String, Object> attributes;
 
         public Builder proxy(Object proxy) {
@@ -131,17 +164,12 @@ public record InvocationContext(
         }
 
         public Builder startedAtNanos(long nanos) {
-            this.startedAtNanos = nanos;
+            this.nanoStart = nanos;
             return this;
         }
 
         public Builder startedAt(Instant startedAt) {
-            this.startedAt = startedAt;
-            return this;
-        }
-
-        public Builder ordinal(int ordinal) {
-            this.ordinal = ordinal;
+            this.wallStart = startedAt;
             return this;
         }
 
@@ -150,16 +178,20 @@ public record InvocationContext(
             return this;
         }
 
+        /**
+         * Builds a new immutable {@link InvocationContext}.
+         *
+         * @return fully initialized context
+         */
         public InvocationContext build() {
-            long    nowNanos = (startedAtNanos != null) ? startedAtNanos : System.nanoTime();
-            Instant now      = (startedAt != null) ? startedAt : Instant.now();
+            long    nowNanos = (nanoStart != null) ? nanoStart : System.nanoTime();
+            Instant now      = (wallStart != null) ? wallStart : Instant.now();
             String  id       = (callId != null) ? callId : ID_GENERATOR.generate();
-            int     ord      = (ordinal != null) ? ordinal : 0;
 
             Map<String, Object> bag       = (attributes != null) ? attributes : new ConcurrentHashMap<>();
             Object[]            arguments = (this.arguments == null) ? new Object[0] : this.arguments.clone();
 
-            return new InvocationContext(proxy, target, method, arguments, nowNanos, now, id, ord, bag);
+            return new InvocationContext(proxy, target, method, arguments, nowNanos, now, id, bag);
         }
     }
 }

@@ -1,7 +1,5 @@
 package org.jmouse.core.proxy;
 
-import org.jmouse.core.proxy.old.ProxyContext;
-
 import java.lang.reflect.Method;
 import java.util.Optional;
 
@@ -55,11 +53,6 @@ public class MethodInvocationDecorator implements MethodInvocation {
     @Override
     public int getOrdinal() {
         return delegate.getOrdinal();
-    }
-
-    @Override
-    public ProxyContext getProxyContext() {
-        return delegate.getProxyContext();
     }
 
     @Override

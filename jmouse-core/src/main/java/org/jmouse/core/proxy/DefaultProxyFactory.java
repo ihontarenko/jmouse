@@ -1,8 +1,6 @@
 package org.jmouse.core.proxy;
 
 import org.jmouse.core.Streamable;
-import org.jmouse.core.proxy.old.ByteBuddyProxyEngine;
-import org.jmouse.core.proxy.old.JdkProxyEngine;
 
 import java.util.List;
 

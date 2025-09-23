@@ -10,10 +10,10 @@ import java.lang.reflect.Method;
  *
  * <p>Typical usage involves three steps:
  * <ul>
- *   <li>{@link #before(ProxyContext, Method, Object[])} – called before the actual method invocation.</li>
+ *   <li>{@link #before(InvocationContext, Method, Object[])} – called before the actual method invocation.</li>
  *   <li>{@link #invoke(MethodInvocation)} – contains the parser interception logic and eventually calls
  *       {@link MethodInvocation#proceed()} to invoke the target method.</li>
- *   <li>{@link #after(ProxyContext, Method, Object[], Object)} – called after the method invocation,
+ *   <li>{@link #after(InvocationContext, Method, Object[], Object)} – called after the method invocation,
  *       receiving the result of the method call (or a thrown exception, if applicable).</li>
  * </ul>
  *
@@ -45,7 +45,7 @@ public interface MethodInterceptor {
     /**
      * Called before the target method is invoked.
      *
-     * @param context   the {@link ProxyContext} containing information about the proxy
+     * @param context   the {@link InvocationContext} containing information about the proxy
      * @param method    the method being invoked
      * @param arguments the arguments passed to the method
      */
@@ -68,13 +68,30 @@ public interface MethodInterceptor {
     /**
      * Called after the target method is invoked.
      *
-     * @param context   the {@link ProxyContext} containing information about the proxy
+     * @param context   the {@link InvocationContext} containing information about the proxy
      * @param method    the method that was invoked
      * @param arguments the arguments passed to the method
      * @param result    the result returned by the method (may be {@code null})
      */
     default void after(InvocationContext context, Method method, Object[] arguments, Object result) {
         // no-op
+    }
+
+    /**
+     * 🚨 Called if the target method throws an exception.
+     *
+     * <p>The interceptor may handle the error (e.g., log, recover, fallback)
+     * and decide whether the exception should propagate further.</p>
+     *
+     * @param context   the proxy invocation context
+     * @param method    the method being invoked
+     * @param arguments the arguments passed to the method
+     * @param throwable the thrown exception
+     * @return {@code true} if the error is considered handled and should not propagate,
+     *         {@code false} if it should be rethrown
+     */
+    default boolean error(InvocationContext context, Method method, Object[] arguments, Throwable throwable) {
+        return true;
     }
 
 }

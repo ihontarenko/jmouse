@@ -14,7 +14,7 @@ public final class JdkProxyEngine implements ProxyEngine {
     }
 
     /**
-     * 🏷️ Name of this proxy engine (e.g. "JDK", "CGLIB").
+     * 🏷️ Name of this proxy engine (e.g. "JDK_PROXY", "BYTE_BUDDY").
      *
      * @return unique engine name
      */
