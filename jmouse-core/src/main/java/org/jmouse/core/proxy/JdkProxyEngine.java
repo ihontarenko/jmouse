@@ -14,13 +14,13 @@ public final class JdkProxyEngine implements ProxyEngine {
     }
 
     /**
-     * 🏷️ Name of this proxy engine (e.g. "JDK_PROXY", "BYTE_BUDDY").
+     * 🏷️ Name of this proxy engine (e.g. "JDK", "ByteBuddy").
      *
      * @return unique engine name
      */
     @Override
     public String name() {
-        return "JDK_PROXY";
+        return "JDK";
     }
 
     @SuppressWarnings("unchecked")
@@ -40,7 +40,7 @@ public final class JdkProxyEngine implements ProxyEngine {
             interfaces.add(Marker.class);
         }
 
-        ProxyDispatcher   dispatcher = new CommonProxyDispatcher(definition);
+        ProxyDispatcher   dispatcher = new CommonProxyDispatcher(this, definition);
         InvocationHandler invocation = new JdkInvocationHandler(dispatcher, definition);
 
         Object proxy = Proxy.newProxyInstance(

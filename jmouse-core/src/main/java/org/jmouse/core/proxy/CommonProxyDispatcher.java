@@ -29,6 +29,7 @@ public final class CommonProxyDispatcher implements ProxyDispatcher {
      */
     private static final Matcher<Method> IS_OBJECT_METHOD = MethodMatchers.asMethod(MethodMatchers.isObjectMethod());
 
+    private final ProxyEngine        engine;
     private final ProxyDefinition<?> definition;
     private final MethodInterceptor  pipeline;
 
@@ -37,7 +38,8 @@ public final class CommonProxyDispatcher implements ProxyDispatcher {
      *
      * @param definition proxy definition containing chain, mixins, and policies
      */
-    public CommonProxyDispatcher(ProxyDefinition<?> definition) {
+    public CommonProxyDispatcher(ProxyEngine engine, ProxyDefinition<?> definition) {
+        this.engine = engine;
         this.definition = definition;
         this.pipeline = InvocationPipeline.assemble(definition.chain(), this::invokeTerminal);
     }
@@ -64,7 +66,7 @@ public final class CommonProxyDispatcher implements ProxyDispatcher {
 
         if (IS_OBJECT_METHOD.matches(method)) {
             return switch (method.getName()) {
-                case "toString" -> ("Proxy(" + definition.targetClass().getName() + ")");
+                case "toString" -> ("jMouseProxy_" + engine.name() + "(" + definition.targetClass().getName() + ")");
                 case "hashCode" -> System.identityHashCode(proxy);
                 case "equals" -> proxy == arguments[0];
                 default -> null;

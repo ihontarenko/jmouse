@@ -1,6 +1,7 @@
 package org.jmouse.core.proxy;
 
 import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.NamingStrategy;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.implementation.MethodCall;
@@ -53,19 +54,20 @@ public final class ByteBuddyProxyEngine implements ProxyEngine {
      */
     @Override
     public String name() {
-        return "BYTE_BUDDY";
+        return "ByteBuddy";
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T createProxy(ProxyDefinition<T> definition) {
-        ProxyDispatcher dispatcher = new CommonProxyDispatcher(definition);
+        ProxyDispatcher dispatcher = new CommonProxyDispatcher(this, definition);
 
         try {
             Class<?> proxyClass = new ByteBuddy()
+                    .with(new NamingStrategy.SuffixingRandom("BB"))
                     .subclass(definition.targetClass())
 
-                    // === InterceptableProxy: internalInvoke(Method,Object[]) ===
+                    // === InterceptableProxy: internalInvoke(Method, Object[]) ===
                     .implement(InterceptableProxy.class)
                     .defineField(DISPATCHER, ProxyDispatcher.class, Visibility.PRIVATE)
                     .defineMethod(INTERNAL_INVOKE, Object.class, Visibility.PUBLIC)
@@ -93,7 +95,7 @@ public final class ByteBuddyProxyEngine implements ProxyEngine {
                                     .and(not(isStatic()))
                                     .and(not(isBridge()))
                                     .and(not(isSynthetic()))
-                                    .and(not(isDeclaredBy(Object.class)))
+//                                    .and(not(isDeclaredBy(Object.class)))
                                     .and(not(isDeclaredBy(ProxyIntrospection.class)))
                                     .and(not(isDeclaredBy(InterceptableProxy.class)))
                                     .and(not(named(GET_DEFINITION_METHOD)))
