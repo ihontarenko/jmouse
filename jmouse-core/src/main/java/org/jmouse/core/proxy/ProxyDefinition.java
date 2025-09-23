@@ -23,17 +23,6 @@ public final class ProxyDefinition<T> {
         this.policy = builder.policy;
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> ProxyDefinition<T> createDefault(T instance) {
-        Class<T> type = (Class<T>) instance.getClass();
-        return builder(type)
-                .classLoader(type.getClassLoader())
-                .mixins(Mixins.of(instance))
-                .policy(InterceptionPolicy.defaultPolicy())
-                .instanceProvider(InstanceProvider.singleton(instance))
-                .build();
-    }
-
     public static <T> Builder<T> builder(Class<T> targetClass) {
         return new Builder<>(targetClass);
     }
@@ -100,8 +89,8 @@ public final class ProxyDefinition<T> {
             return this;
         }
 
-        public Builder<T> addInterface(Class<?> iface) {
-            this.extraInterfaces.add(iface);
+        public Builder<T> addInterfaces(Class<?>... ifaces) {
+            this.extraInterfaces.addAll(List.of(ifaces));
             return this;
         }
 

@@ -18,8 +18,8 @@ public interface Matcher<T> {
      */
     boolean matches(T item);
 
-    default <S extends T> Matcher<S> asType(Matcher<T> matcher, Class<S> type) {
-        return matcher::matches;
+    static  <T, U> Matcher<U> asType(Matcher<T> matcher, Class<T> type) {
+        return item -> matcher.matches((T) item);
     }
 
     /**

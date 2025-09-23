@@ -43,8 +43,8 @@ public class ProxyBeanPostProcessor implements BeanPostProcessor {
             ProxyFactory proxyFactory = context.getBean(ProxyFactory.class);
             try {
                 proxy = proxyFactory.createProxy(bean);
-                LOGGER.info("Proxied bean '{}' of type '{}'",
-                            definition.getBeanName(), getShortName(definition.getBeanClass()));
+                LOGGER.info("Proxied bean '{}' of type '{}'. Proxy class '{}'",
+                            definition.getBeanName(), getShortName(definition.getBeanClass()), proxy.getClass());
             } catch (UnsupportedProxyException e) {
                 LOGGER.error("Enable to create proxy for bean '{}' of type '{}'. Reason: '{}'",
                             definition.getBeanName(), getShortName(definition.getBeanClass()), e.getMessage());

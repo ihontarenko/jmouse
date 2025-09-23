@@ -1,5 +1,7 @@
 package org.jmouse.core.proxy;
 
+import org.jmouse.core.reflection.Reflections;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,11 +46,24 @@ public record Mixins(Map<Class<?>, Object> implementations) {
     public static Mixins of(Object instance) {
         Map<Class<?>, Object> implementations = new HashMap<>();
 
-        for (Class<?> iface : instance.getClass().getInterfaces()) {
+        for (Class<?> iface : Reflections.getClassInterfaces(instance.getClass())) {
             implementations.put(iface, instance);
         }
 
         return new Mixins(implementations);
+    }
+
+    /**
+     * 📑 Returns all proxy interfaces registered in this definition.
+     *
+     * <p>Equivalent to the keys of the internal implementation map.
+     * These interfaces are exposed on the generated proxy and may
+     * be backed by either the primary target or mixin delegates.</p>
+     *
+     * @return array of interface types (never {@code null}, may be empty)
+     */
+    public Class<?>[] interfaces() {
+        return implementations.keySet().toArray(Class<?>[]::new);
     }
 
     /**

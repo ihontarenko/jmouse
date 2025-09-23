@@ -710,12 +710,12 @@ abstract public class Reflections {
      * used in those interfaces
      * @throws NullPointerException if {@code type} is null
      *
-     *                              <p><b>Example usage:</b></p>
-     *                              <pre>{@code
-     *                              class MyClass implements Comparable<MyClass> {}
-     *                              Map<Class<?>, List<Class<?>>> result = Reflections.getInterfacesParameterizedTypes(MyClass.class);
-     *                              System.out.println(result); // Output: {interface java.lang.Comparable=[class MyClass]}
-     *                              }</pre>
+     * <p><b>Example usage:</b></p>
+     *  <pre>{@code
+     *  class MyClass implements Comparable<MyClass> {}
+     *  Map<Class<?>, List<Class<?>>> result = Reflections.getInterfacesParameterizedTypes(MyClass.class);
+     *  System.out.println(result); // Output: {interface java.lang.Comparable=[class MyClass]}
+     * }</pre>
      */
     public static Map<Class<?>, List<Class<?>>> getInterfacesParameterizedTypes(Class<?> type) {
         Map<Class<?>, List<Class<?>>> parameterizedTypes = new HashMap<>();
@@ -812,12 +812,12 @@ abstract public class Reflections {
      * @return a list of parameterized types if present; otherwise, an empty {@code List}
      * @throws NullPointerException if {@code type} or {@code iface} is null
      *
-     *                              <p><b>Example usage:</b></p>
-     *                              <pre>{@code
-     *                              class MyClass implements Comparable<MyClass> {}
-     *                              List<Class<?>> result = Reflections.getInterfacesParameterizedTypes(MyClass.class, Comparable.class);
-     *                              System.out.println(result); // Output: [class MyClass]
-     *                              }</pre>
+     * <p><b>Example usage:</b></p>
+     *  <pre>{@code
+     *  class MyClass implements Comparable<MyClass> {}
+     *  List<Class<?>> result = Reflections.getInterfacesParameterizedTypes(MyClass.class, Comparable.class);
+     *  System.out.println(result); // Output: [class MyClass]
+     * }</pre>
      */
     public static List<Class<?>> getInterfacesParameterizedTypes(Class<?> type, Class<?> iface) {
         return getInterfacesParameterizedTypes(type).getOrDefault(iface, Collections.emptyList());
@@ -832,12 +832,12 @@ abstract public class Reflections {
      * @return the parameterized type if present; otherwise {@code null}
      * @throws NullPointerException if {@code type} or {@code iface} is null
      *
-     *                              <p><b>Example usage:</b></p>
-     *                              <pre>{@code
-     *                              class MyClass implements Comparable<MyClass> {}
-     *                              Class<?> paramType = Reflections.getInterfacesParameterizedType(MyClass.class, Comparable.class, 0);
-     *                              System.out.println(paramType); // Output: class MyClass
-     *                              }</pre>
+     *  <p><b>Example usage:</b></p>
+     *      <pre>{@code
+     *      class MyClass implements Comparable<MyClass> {}
+     *      Class<?> paramType = Reflections.getInterfacesParameterizedType(MyClass.class, Comparable.class, 0);
+     *      System.out.println(paramType); // Output: class MyClass
+     *  }</pre>
      */
     public static Class<?> getInterfacesParameterizedType(Class<?> type, Class<?> iface, int index) {
         List<Class<?>> classes = getInterfacesParameterizedTypes(type, iface);
@@ -858,12 +858,12 @@ abstract public class Reflections {
      * @throws NullPointerException if {@code type} is null
      * @throws ClassCastException   if the type cannot be converted to a class
      *
-     *                              <p><b>Example usage:</b></p>
-     *                              <pre>{@code
-     *                              ParameterizedType paramType = (ParameterizedType) SomeClass.class.getGenericSuperclass();
-     *                              Class<?> clazz = Reflections.toClass(paramType.getActualTypeArguments()[0]);
-     *                              System.out.println(clazz);
-     *                              }</pre>
+     * <p><b>Example usage:</b></p>
+     *      <pre>{@code
+     *      ParameterizedType paramType = (ParameterizedType) SomeClass.class.getGenericSuperclass();
+     *      Class<?> clazz = Reflections.toClass(paramType.getActualTypeArguments()[0]);
+     *      System.out.println(clazz);
+     * }</pre>
      */
     public static Class<?> toClass(Type type) {
         Class<?> clazz;

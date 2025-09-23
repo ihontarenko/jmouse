@@ -33,6 +33,6 @@ public class ProxyFactoryContextInitializer implements BeanContextInitializer {
         context.registerBean(ProxyFactory.class, new DefaultProxyFactory(registry));
 
         // Scanning and registering
-        new InterceptorRegistrar(registry).register();
+        new InterceptorRegistrar(registry).register(context.getBaseClasses());
     }
 }

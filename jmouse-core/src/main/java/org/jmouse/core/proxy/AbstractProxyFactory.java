@@ -43,16 +43,16 @@ public abstract class AbstractProxyFactory implements ProxyFactory {
     @SuppressWarnings("unchecked")
     public <T> ProxyDefinition<T> createProxyDefinition(Object instance) {
         Class<T>            type             = (Class<T>) instance.getClass();
-        InterceptorRegistry registry         = this.registry;
         InstanceProvider<T> instanceProvider = InstanceProvider.singleton((T) instance);
+        Mixins              mixins           = Mixins.of(instance);
 
         ProxyDefinition.Builder<T> builder = ProxyDefinition.builder(type)
                 .classLoader(type.getClassLoader())
-                .mixins(Mixins.of(instance))
+                .mixins(mixins)
+                .addInterfaces(mixins.interfaces())
                 .policy(InterceptionPolicy.defaultPolicy())
+                .interceptAll(registry.select(type))
                 .instanceProvider(instanceProvider);
-
-        builder.interceptAll(registry.select(type));
 
         return builder.build();
     }

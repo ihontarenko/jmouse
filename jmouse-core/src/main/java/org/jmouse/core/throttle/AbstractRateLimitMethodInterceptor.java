@@ -2,7 +2,6 @@ package org.jmouse.core.throttle;
 
 import org.jmouse.core.proxy.InvocationContext;
 import org.jmouse.core.proxy.MethodInterceptor;
-import org.jmouse.core.proxy.old.ProxyContext;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.util.TimeHelper;
 
@@ -74,10 +73,10 @@ public abstract class AbstractRateLimitMethodInterceptor implements MethodInterc
      */
     @Override
     public void before(InvocationContext context, Method method, Object[] arguments) {
-        if (isSupportedType(context.getTargetClass()) && isSupportedMethod(method)) {
-            RateLimit              annotation = resolveAnnotation(method, context.getTarget().getClass());
+        if (isSupportedType(context.target().getClass()) && isSupportedMethod(method)) {
+            RateLimit              annotation = resolveAnnotation(method, context.target().getClass());
             RateLimitConfiguration config     = toConfiguration(annotation);
-            BucketKey              key        = keyOf(config, context.getTarget(), method, arguments);
+            BucketKey              key        = keyOf(config, context.target(), method, arguments);
             RateLimiter            limiter    = buckets.computeIfAbsent(
                     key, k -> RateLimiter.smooth(config.max(), config.periodNanos()));
 

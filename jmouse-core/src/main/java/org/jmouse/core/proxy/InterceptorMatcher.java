@@ -36,7 +36,7 @@ public interface InterceptorMatcher extends Matcher<Class<?>> {
      * @return matcher that accepts any class
      */
     static InterceptorMatcher any() {
-        return (InterceptorMatcher) Matcher.<Class<?>>constant(true);
+        return Matcher.<Class<?>>constant(true)::matches;
     }
 
     /**
@@ -45,7 +45,7 @@ public interface InterceptorMatcher extends Matcher<Class<?>> {
      * @return matcher that rejects all classes
      */
     static InterceptorMatcher none() {
-        return (InterceptorMatcher) Matcher.<Class<?>>constant(false);
+        return Matcher.<Class<?>>constant(false)::matches;
     }
 
     /**
@@ -58,12 +58,12 @@ public interface InterceptorMatcher extends Matcher<Class<?>> {
      * @return matcher that accepts only the given classes
      */
     static InterceptorMatcher forClasses(Class<?>... classes) {
-        InterceptorMatcher matcher = none();
+        Matcher<Class<?>> matcher = none();
 
         for (Class<?> clazz : classes) {
-            matcher = (InterceptorMatcher) matcher.or(ClassMatchers.isSame(clazz));
+            matcher = matcher.or(ClassMatchers.isSupertype(clazz));
         }
 
-        return matcher;
+        return matcher::matches;
     }
 }

@@ -25,8 +25,8 @@ import java.util.List;
 public class DefaultProxyFactory extends AbstractProxyFactory {
 
     private final List<ProxyEngine> engines = List.of(
-            new ByteBuddyProxyEngine(),
-            new JdkProxyEngine()
+            new JdkProxyEngine(),
+            new ByteBuddyProxyEngine()
     );
 
     /**
