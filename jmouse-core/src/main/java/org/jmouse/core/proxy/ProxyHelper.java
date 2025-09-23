@@ -1,5 +1,6 @@
 package org.jmouse.core.proxy;
 
+import org.jmouse.core.WrappedException;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Method;
@@ -107,7 +108,7 @@ public final class ProxyHelper {
                 return interceptable.internalInvoke(method, arguments);
             }
         } catch (Throwable exception) {
-            throw new IllegalStateException("Failed to invoke proxy method: " + method, exception);
+            throw new WrappedException(exception);
         }
 
         return Reflections.invokeMethod(proxy, method, arguments);

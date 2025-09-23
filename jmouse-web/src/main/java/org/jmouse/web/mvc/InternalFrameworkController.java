@@ -29,7 +29,7 @@ import java.util.Map;
  */
 @Controller
 @BeanConditionIfProperty(name = "jmouse.mvc.frameworkController.enabled", value = "true")
-public class FrameworkController {
+public class InternalFrameworkController {
 
     /**
      * 🚦 Handle {@code 429 Too Many Requests}.
