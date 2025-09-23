@@ -183,4 +183,16 @@ public final class ProxyDefinition<T> {
             return new ProxyDefinition<>(this);
         }
     }
+
+    @Override
+    public String toString() {
+        return "PROXY_DEFINITION:[" +
+                "targetClass: " + targetClass +
+                "; classLoader: " + classLoader +
+                "; instanceProvider: " + instanceProvider +
+                "; interceptors: " + interceptors.size() +
+                "; extraInterfaces: " + extraInterfaces.size() +
+                "; mixins: " + mixins.interfaces().length +
+                ']';
+    }
 }
