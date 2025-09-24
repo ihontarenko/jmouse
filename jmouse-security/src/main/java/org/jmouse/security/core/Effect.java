@@ -1,4 +1,4 @@
-package org.jmouse.security.core.policy;
+package org.jmouse.security.core;
 
 public enum Effect {
     PERMIT, DENY, ABSTAIN

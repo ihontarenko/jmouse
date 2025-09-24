@@ -1,16 +1,16 @@
 package org.jmouse.web.security.authenticator;
 
+import org.jmouse.core.chain.Chain;
+import org.jmouse.core.chain.Outcome;
+import org.jmouse.security.core.Attributes;
 import org.jmouse.security.core.Envelope;
-import org.jmouse.security.core.Subject;
-import org.jmouse.security.core.id.Authenticator;
-
-import java.util.Optional;
+import org.jmouse.security.core.Authenticator;
 
 public class BasicAuthenticator implements Authenticator {
 
     @Override
-    public Optional<Subject> authenticate(Envelope envelope) throws Exception {
-        return Optional.empty();
+    public Outcome<Result> handle(Attributes attributes, Envelope envelope, Chain<Attributes, Envelope, Result> next) {
+        return Outcome.done(null);
     }
 
 }

@@ -81,14 +81,38 @@ public interface Chain<C, I, R> {
         throw new IllegalStateException("Chain terminated without a final result");
     }
 
+    /**
+     * ▶️ Execute chain and return value if {@link Outcome.Done},
+     * or {@code null} otherwise.
+     *
+     * @param context execution context
+     * @param input   input payload
+     * @return result or {@code null}
+     */
     default R perform(C context, I input) {
         return (proceed(context, input) instanceof Outcome.Done<R>(R value)) ? value : null;
     }
 
+    /**
+     * 🎲 Run chain safely and wrap result in {@link Optional}.
+     *
+     * @param context execution context
+     * @param input   input payload
+     * @return optional result
+     */
     default Optional<R> tryRun(C context, I input) {
         return Optional.ofNullable(perform(context, input));
     }
 
+    /**
+     * 🛟 Add a fallback value if chain continues without result.
+     *
+     * <p>If chain ends with {@link Outcome.Continue}, the fallback
+     * function is invoked and wrapped as {@link Outcome.Done}.</p>
+     *
+     * @param fallback producer for default value
+     * @return new chain with fallback
+     */
     default Chain<C, I, R> withFallback(BiFunction<C, I, R> fallback) {
         Chain<C, I, R> self = this;
         return (context, input) -> {
@@ -98,14 +122,34 @@ public interface Chain<C, I, R> {
         };
     }
 
+    /**
+     * ⛓️ Compose sequential chains.
+     *
+     * <p>If this chain continues, delegates to the {@code after} chain.
+     * Otherwise propagates current outcome.</p>
+     *
+     * @param after next chain
+     * @return composed chain
+     */
     default Chain<C, I, R> then(Chain<C, I, R> after) {
         Chain<C, I, R> self = this;
         return (context, input) -> {
             Outcome<R> outcome = self.proceed(context, input);
-            return (outcome instanceof Outcome.Continue<R>) ? after.proceed(context, input) : outcome;
+            return (outcome instanceof Outcome.Continue<R>)
+                    ? after.proceed(context, input) : outcome;
         };
     }
 
+    /**
+     * 🏗️ Create a chain from a single link with fallback.
+     *
+     * @param link     processing link
+     * @param fallback default producer if not handled
+     * @param <C>      context type
+     * @param <I>      input type
+     * @param <R>      result type
+     * @return constructed chain
+     */
     static <C, I, R> Chain<C, I, R> of(Link<C, I, R> link, BiFunction<C, I, R> fallback) {
         return Chain.<C, I, R>builder().add(link).withFallback(fallback).toChain();
     }

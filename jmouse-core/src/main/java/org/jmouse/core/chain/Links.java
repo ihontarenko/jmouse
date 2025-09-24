@@ -29,6 +29,11 @@ public final class Links {
         };
     }
 
+    public static <C, I, R> Link<C, I, R> enrich(Function<I, I> mutator) {
+        return (context, input, next)
+                -> next.proceed(context, mutator.apply(input));
+    }
+
     /**
      * 🏁 Side-effect hook that runs after chain completion.
      *

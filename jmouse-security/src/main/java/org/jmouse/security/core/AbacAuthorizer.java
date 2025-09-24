@@ -1,8 +1,6 @@
 package org.jmouse.security.core;
 
-import org.jmouse.security.core.policy.Decision;
-import org.jmouse.security.core.policy.Authorizer;
-
+import java.security.Principal;
 import java.util.List;
 
 public class AbacAuthorizer implements Authorizer {
@@ -16,12 +14,13 @@ public class AbacAuthorizer implements Authorizer {
     @Override
     public Decision evaluate(Envelope envelope) {
         for (Predicate rule : rules) {
-            if (rule.test(envelope)) {
-                return Decision.permit();
+            if (rule.test(envelope) && envelope.attributes().get("principal") instanceof Principal principal) {
+                // no principal here
+                return Decision.permit(principal);
             }
         }
 
-        return Decision.abstain();
+        return Decision.deny("abac deny", "DENY!");
     }
 
     public interface Predicate {

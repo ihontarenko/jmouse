@@ -1,8 +1,7 @@
-package org.jmouse.security.core.pipeline;
+package org.jmouse.security.core;
 
 import org.jmouse.core.chain.Chain;
 import org.jmouse.core.chain.Outcome;
-import org.jmouse.security.core.Envelope;
 
 public class Pipelines {
 

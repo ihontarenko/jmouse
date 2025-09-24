@@ -1,10 +1,4 @@
-package org.jmouse.security.core.pipeline;
-
-import org.jmouse.security.core.Attributes;
-import org.jmouse.security.core.Envelope;
-import org.jmouse.security.core.policy.Decision;
-import org.jmouse.security.core.policy.Effect;
-import org.jmouse.security.core.policy.Authorizer;
+package org.jmouse.security.core;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,10 +9,10 @@ import java.util.Map;
  */
 public class PolicyValve implements Valve {
 
-    private final List<Authorizer> guards;
+    private final List<Authorizer> authorizers;
 
-    public PolicyValve(List<Authorizer> guards) {
-        this.guards = guards;
+    public PolicyValve(List<Authorizer> authorizers) {
+        this.authorizers = authorizers;
     }
 
     @Override
@@ -27,7 +21,7 @@ public class PolicyValve implements Valve {
         Map<String, Object> advice      = new LinkedHashMap<>();
         Map<String, Object> obligations = new LinkedHashMap<>();
 
-        for (Authorizer guard : guards) {
+        for (Authorizer guard : authorizers) {
             Decision decision = guard.evaluate(envelope);
 
             if (decision == null || decision.effect() == Effect.ABSTAIN) {
