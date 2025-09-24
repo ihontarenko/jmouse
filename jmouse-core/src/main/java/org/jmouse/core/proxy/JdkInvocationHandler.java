@@ -7,12 +7,12 @@ import java.lang.reflect.Method;
  * 📦 JDK dynamic-proxy {@link InvocationHandler} implementation.
  *
  * <p>Acts as the glue between the JDK proxy mechanism and the framework’s
- * {@link ProxyDispatcher} abstraction. All method calls on the generated proxy
+ * {@link InvocationDispatcher} abstraction. All method calls on the generated proxy
  * are routed to the dispatcher for interception and pipeline execution.</p>
  *
  * <h3>Responsibilities</h3>
  * <ul>
- *   <li>Delegate all calls to {@link ProxyDispatcher#invoke(Object, Method, Object[])}</li>
+ *   <li>Delegate all calls to {@link InvocationDispatcher#invoke(Object, Method, Object[])}</li>
  *   <li>Expose {@link ProxyDefinition} via {@link ProxyIntrospection}</li>
  * </ul>
  *
@@ -20,8 +20,8 @@ import java.lang.reflect.Method;
  */
 public class JdkInvocationHandler implements InvocationHandler, ProxyIntrospection {
 
-    private final ProxyDispatcher    dispatcher;
-    private final ProxyDefinition<?> definition;
+    private final InvocationDispatcher dispatcher;
+    private final ProxyDefinition<?>   definition;
 
     /**
      * Creates a new JDK invocation handler.
@@ -29,7 +29,7 @@ public class JdkInvocationHandler implements InvocationHandler, ProxyIntrospecti
      * @param dispatcher dispatcher handling proxy calls
      * @param definition definition of the proxy being managed
      */
-    public JdkInvocationHandler(ProxyDispatcher dispatcher, ProxyDefinition<?> definition) {
+    public JdkInvocationHandler(InvocationDispatcher dispatcher, ProxyDefinition<?> definition) {
         this.dispatcher = dispatcher;
         this.definition = definition;
     }

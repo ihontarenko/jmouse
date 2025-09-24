@@ -1,0 +1,45 @@
+- name: admin-only
+  target:
+    resource.type: "http.route"
+    resource.pattern: "/admin/**"
+    action: "HTTP(GET|POST|PUT|DELETE)"
+  condition: "s.hasRole(auth,'ADMIN')"
+  effect: "PERMIT"
+
+- name: tenant-match
+  target: {
+    resource.type: "http.route"
+  }
+  condition: "(a.tenant ?? '') == (auth.claims.tenant ?? '')"
+  effect: "PERMIT"
+
+- name: per-user-rate
+  target: {
+    resource.type: "http.route",
+    resource.pattern: "/otp/send"
+  }
+  # 10 per 60s using EL function bound to limiter
+  condition: "rate.limit('otp:' ~ principal.id, 60, 10)"
+  effect: "PERMIT"
+
+- name: default-deny
+  effect: "DENY"
+
+- name: mask-email
+  target: { 
+    resource.type: "method", 
+    resource.id: "EmployeeController#find" 
+  }
+  condition: "true"
+  effect: "PERMIT"
+  obligations:
+    maskFields: ["email"]
+    
+- name: hr-abac
+  target: {
+    resource.type: "http.route",
+    resource.pattern: "/employees/**",
+    action: "HTTP(GET)"
+  }
+  condition: "s.hasRole(auth,'HR') && (attrs.emp.department == auth.claims.department)"
+  effect: "PERMIT"

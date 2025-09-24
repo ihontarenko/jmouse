@@ -1,0 +1,13 @@
+package org.jmouse.web.security.pipeline;
+
+import jakarta.servlet.http.HttpServletRequest;
+import org.jmouse.security.core.*;
+
+public final class HttpEnvelopeFactory {
+
+    public static Envelope ofHttpRequest(HttpServletRequest request, Resource resource, Operation operation) {
+        return new SecurityEnvelope(
+                Subjects.anonymous(), resource, operation, Attributes.mutable(), new HttpCarrier(request));
+    }
+
+}

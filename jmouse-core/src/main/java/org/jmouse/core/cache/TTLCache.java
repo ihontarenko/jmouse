@@ -43,10 +43,10 @@ public class TTLCache<K, V> implements Map<K, V>, BasicCache<K, V> {
     /**
      * Creates a new cache with the given TTL in milliseconds.
      *
-     * @param timeToLiveMillis entry lifetime in milliseconds
+     * @param ttl entry lifetime in milliseconds
      */
-    public TTLCache(long timeToLiveMillis) {
-        this.ttl = timeToLiveMillis * 1_000_000L;
+    public TTLCache(long ttl) {
+        this.ttl = ttl * 1_000_000L;
     }
 
     /**

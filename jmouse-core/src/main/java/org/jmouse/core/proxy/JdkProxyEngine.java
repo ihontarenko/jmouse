@@ -40,8 +40,8 @@ public final class JdkProxyEngine implements ProxyEngine {
             interfaces.add(Marker.class);
         }
 
-        ProxyDispatcher   dispatcher = new CommonProxyDispatcher(this, definition);
-        InvocationHandler invocation = new JdkInvocationHandler(dispatcher, definition);
+        InvocationDispatcher dispatcher = new ProxyDispatcher(this, definition);
+        InvocationHandler    invocation = new JdkInvocationHandler(dispatcher, definition);
 
         Object proxy = Proxy.newProxyInstance(
                 definition.classLoader(), interfaces.toArray(Class[]::new), invocation);
@@ -49,6 +49,9 @@ public final class JdkProxyEngine implements ProxyEngine {
         return (T) proxy;
     }
 
-    /** Marker when no user-facing interfaces exist. */
-    public interface Marker {}
+    /**
+     * Marker when no user-facing interfaces exist.
+     */
+    public interface Marker {
+    }
 }

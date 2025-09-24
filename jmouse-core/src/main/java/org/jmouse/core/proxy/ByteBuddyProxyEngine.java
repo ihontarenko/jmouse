@@ -26,7 +26,7 @@ public final class ByteBuddyProxyEngine implements ProxyEngine {
      */
     public static final Matcher<Class<?>> NON_FINAL = Matcher.not(ClassMatchers.isFinal());
     /**
-     * Hidden field to store ProxyDispatcher.
+     * Hidden field to store InvocationDispatcher.
      */
     private static final String DISPATCHER            = "$dispatcher";
     /**
@@ -60,7 +60,7 @@ public final class ByteBuddyProxyEngine implements ProxyEngine {
     @SuppressWarnings("unchecked")
     @Override
     public <T> T createProxy(ProxyDefinition<T> definition) {
-        ProxyDispatcher dispatcher = new CommonProxyDispatcher(this, definition);
+        InvocationDispatcher dispatcher = new ProxyDispatcher(this, definition);
 
         try {
             Class<?> proxyClass = new ByteBuddy()
@@ -69,12 +69,12 @@ public final class ByteBuddyProxyEngine implements ProxyEngine {
 
                     // === InterceptableProxy: internalInvoke(Method, Object[]) ===
                     .implement(InterceptableProxy.class)
-                    .defineField(DISPATCHER, ProxyDispatcher.class, Visibility.PRIVATE)
+                    .defineField(DISPATCHER, InvocationDispatcher.class, Visibility.PRIVATE)
                     .defineMethod(INTERNAL_INVOKE, Object.class, Visibility.PUBLIC)
                     .withParameters(Method.class, Object[].class)
                     .intercept(
                             // internalInvoke(m, args) -> this.$dispatcher.invoke(this, m, args)
-                            MethodCall.invoke(ProxyDispatcher.class
+                            MethodCall.invoke(InvocationDispatcher.class
                                                       .getMethod("invoke", Object.class, Method.class, Object[].class))
                                     .onField(DISPATCHER)
                                     .withThis()
@@ -117,12 +117,12 @@ public final class ByteBuddyProxyEngine implements ProxyEngine {
         }
     }
 
-    /** Small bridge that calls into ProxyDispatcher stored on the instance. */
+    /** Small bridge that calls into InvocationDispatcher stored on the instance. */
     public static final class Handler {
 
-        private final ProxyDispatcher dispatcher;
+        private final InvocationDispatcher dispatcher;
 
-        public Handler(ProxyDispatcher dispatcher) {
+        public Handler(InvocationDispatcher dispatcher) {
             this.dispatcher = dispatcher;
         }
 
