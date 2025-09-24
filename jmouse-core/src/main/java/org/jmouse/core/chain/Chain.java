@@ -3,6 +3,7 @@ package org.jmouse.core.chain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 /**
@@ -50,7 +51,7 @@ public interface Chain<C, I, R> {
     static <C, I, R> Chain<C, I, R> of(List<? extends Link<C, I, R>> links, boolean reverse) {
         Builder<C, I, R> builder = builder();
         links.forEach(builder::add);
-        return builder.reversed(reverse).build();
+        return builder.reversed(reverse).toChain();
     }
 
     /**
@@ -78,6 +79,35 @@ public interface Chain<C, I, R> {
         }
 
         throw new IllegalStateException("Chain terminated without a final result");
+    }
+
+    default R perform(C context, I input) {
+        return (proceed(context, input) instanceof Outcome.Done<R>(R value)) ? value : null;
+    }
+
+    default Optional<R> tryRun(C context, I input) {
+        return Optional.ofNullable(perform(context, input));
+    }
+
+    default Chain<C, I, R> withFallback(BiFunction<C, I, R> fallback) {
+        Chain<C, I, R> self = this;
+        return (context, input) -> {
+            Outcome<R> outcome = self.proceed(context, input);
+            return (outcome instanceof Outcome.Continue<R>)
+                    ? Outcome.done(fallback.apply(context, input)) : outcome;
+        };
+    }
+
+    default Chain<C, I, R> then(Chain<C, I, R> after) {
+        Chain<C, I, R> self = this;
+        return (context, input) -> {
+            Outcome<R> outcome = self.proceed(context, input);
+            return (outcome instanceof Outcome.Continue<R>) ? after.proceed(context, input) : outcome;
+        };
+    }
+
+    static <C, I, R> Chain<C, I, R> of(Link<C, I, R> link, BiFunction<C, I, R> fallback) {
+        return Chain.<C, I, R>builder().add(link).withFallback(fallback).toChain();
     }
 
     /**
@@ -123,7 +153,73 @@ public interface Chain<C, I, R> {
         public Builder<C, I, R> reversed(boolean reversed) {
             this.reversed = reversed;
             return this;
+        }        /**
+         * ⬆️ Add link to the beginning of the chain.
+         *
+         * @param link link to add
+         * @return this builder
+         */
+        public Builder<C, I, R> addFirst(Link<C, I, R> link) {
+            links.addFirst(link);
+            return this;
         }
+
+        /**
+         * ⬇️ Add link to the end of the chain.
+         *
+         * @param link link to add
+         * @return this builder
+         */
+        public Builder<C, I, R> addLast(Link<C, I, R> link) {
+            links.addLast(link);
+            return this;
+        }
+
+        /**
+         * 📦 Add a batch of links to the chain.
+         *
+         * @param more list of links
+         * @return this builder
+         */
+        public Builder<C, I, R> addAll(List<? extends Link<C, I, R>> more) {
+            links.addAll(more);
+            return this;
+        }
+
+        /**
+         * 🌀 Wrap the chain with an outer link.
+         *
+         * <p>Alias for {@link #addFirst(Link)}.</p>
+         *
+         * @param around outer link
+         * @return this builder
+         */
+        public Builder<C, I, R> wrap(Link<C, I, R> around) {
+            return addFirst(around);
+        }
+
+        /**
+         * 🛡️ Build a chain with guaranteed finalization.
+         *
+         * <p>Ensures that {@code finite} link is always invoked
+         * after execution, even if exceptions occur.</p>
+         *
+         * @param finite finalization link (safe guard)
+         * @return safe chain instance
+         */
+        public Chain<C, I, R> toSafeChain(Link<C, I, R> finite) {
+            Chain<C, I, R> core = toChain();
+            return (context, input) -> {
+                try {
+                    return core.proceed(context, input);
+                } finally {
+                    try {
+                        finite.handle(context, input, Chain.empty((c, i) -> null));
+                    } catch (Throwable ignore) {}
+                }
+            };
+        }
+
 
         /**
          * ✅ Build the chain in reverse order of insertion,
@@ -131,7 +227,7 @@ public interface Chain<C, I, R> {
          *
          * @return composed chain
          */
-        public Chain<C, I, R> build() {
+        public Chain<C, I, R> toChain() {
             ListIterator<? extends Link<C, I, R>> iterator = links.listIterator(reversed ? 0 : links.size());
             Chain<C, I, R>                        chain    = Chain.empty(fallback);
 
