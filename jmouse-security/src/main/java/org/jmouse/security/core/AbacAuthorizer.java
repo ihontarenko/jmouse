@@ -1,16 +1,15 @@
-package org.jmouse.web.security.guard;
+package org.jmouse.security.core;
 
-import org.jmouse.security.core.Envelope;
 import org.jmouse.security.core.policy.Decision;
-import org.jmouse.security.core.policy.Guard;
+import org.jmouse.security.core.policy.Authorizer;
 
 import java.util.List;
 
-public class AbacGuard implements Guard {
+public class AbacAuthorizer implements Authorizer {
 
     private final List<Predicate> rules;
 
-    public AbacGuard(List<Predicate> rules) {
+    public AbacAuthorizer(List<Predicate> rules) {
         this.rules = rules;
     }
 

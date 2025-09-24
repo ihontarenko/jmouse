@@ -1,5 +1,7 @@
 package org.jmouse.security.core.pipeline;
 
+import org.jmouse.core.chain.Chain;
+import org.jmouse.core.chain.Outcome;
 import org.jmouse.security.core.Envelope;
 import org.jmouse.security.core.Subject;
 import org.jmouse.security.core.id.Authenticator;
@@ -7,7 +9,7 @@ import org.jmouse.security.core.id.Authenticator;
 import java.util.List;
 import java.util.Optional;
 
-public final class IdentityValve implements Valve {
+public final class IdentityValve implements Valve<Void> {
 
     private final List<Authenticator> chain;
 
@@ -16,21 +18,26 @@ public final class IdentityValve implements Valve {
     }
 
     @Override
-    public Step handle(Envelope envelope, ValveChain next) throws Exception {
+    public Outcome<Step> handle(Void unused, Envelope envelope, Chain<Void, Envelope, Step> next) {
         Subject subject = null;
 
         for (Authenticator authenticator : chain) {
-            Optional<Subject> optional = authenticator.authenticate(envelope);
+            Optional<Subject> optional = null;
+            try {
+                optional = authenticator.authenticate(envelope);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             if (optional.isPresent()) {
                 subject = optional.get();
             }
         }
 
         if (subject != null) {
-            next.next(envelope.withSubject(subject));
+            envelope = envelope.withSubject(subject);
         }
 
-        return next.next(envelope);
+        return Outcome.done(next.perform(unused, envelope));
     }
 
 }

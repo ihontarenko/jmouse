@@ -4,7 +4,7 @@ import org.jmouse.security.core.Attributes;
 import org.jmouse.security.core.Envelope;
 import org.jmouse.security.core.policy.Decision;
 import org.jmouse.security.core.policy.Effect;
-import org.jmouse.security.core.policy.Guard;
+import org.jmouse.security.core.policy.Authorizer;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,19 +15,19 @@ import java.util.Map;
  */
 public class PolicyValve implements Valve {
 
-    private final List<Guard> guards;
+    private final List<Authorizer> guards;
 
-    public PolicyValve(List<Guard> guards) {
+    public PolicyValve(List<Authorizer> guards) {
         this.guards = guards;
     }
 
     @Override
-    public Step handle(Envelope envelope, ValveChain next) throws Exception {
+    public Step proceed(Envelope envelope, ValveChain next) throws Exception {
         boolean             anyPermit   = false;
         Map<String, Object> advice      = new LinkedHashMap<>();
         Map<String, Object> obligations = new LinkedHashMap<>();
 
-        for (Guard guard : guards) {
+        for (Authorizer guard : guards) {
             Decision decision = guard.evaluate(envelope);
 
             if (decision == null || decision.effect() == Effect.ABSTAIN) {
