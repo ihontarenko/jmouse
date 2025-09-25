@@ -1,4 +1,6 @@
-package org.jmouse.security;
+package org.jmouse.security.context;
+
+import org.jmouse.security.Subject;
 
 import java.util.Map;
 
@@ -7,7 +9,7 @@ import java.util.Map;
  */
 public interface SecurityContext {
 
-    static SecurityContext of(Subject subject, Map<String, Object> details) {
+    static SecurityContext of(Subject subject, Map<Object, Object> details) {
         return new DefaultSecurityContext(
                 subject, (details == null) ? Map.of() : Map.copyOf(details));
     }
