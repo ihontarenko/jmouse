@@ -71,6 +71,8 @@ public enum HttpHeader {
 
     // --- Security / Firewalls
     X_FIREWALL_REASON("X-Firewall-Reason"),
+    X_SECURITY_REASON("X-Security-Reason"),
+    STRICT_TRANSPORT_SECURITY("Strict-Transport-Security"),
 
     // --- Custom / common headers ---
     ORIGIN("Origin"),
