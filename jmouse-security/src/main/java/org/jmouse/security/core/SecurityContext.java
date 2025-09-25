@@ -1,9 +1,17 @@
 package org.jmouse.security.core;
 
+import org.jmouse.security.SecurityContextHolder;
+
 /**
  * 📦 Holds the current Authentication for the execution.
  */
 public interface SecurityContext {
+
+    static SecurityContext ofAuthentication(Authentication authentication) {
+        SecurityContext context = SecurityContextHolder.getContext();
+        context.setAuthentication(authentication);
+        return context;
+    }
 
     Authentication getAuthentication();
 
