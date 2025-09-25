@@ -29,6 +29,18 @@ public final class Links {
         };
     }
 
+    /**
+     * 🧬 Mutate input before delegating.
+     *
+     * <p>Applies a {@code mutator} function to the input and passes
+     * the transformed value to the next link in the chain.</p>
+     *
+     * @param mutator function that transforms input
+     * @param <C>     context type
+     * @param <I>     input type
+     * @param <R>     result type
+     * @return link that enriches the input
+     */
     public static <C, I, R> Link<C, I, R> enrich(Function<I, I> mutator) {
         return (context, input, next)
                 -> next.proceed(context, mutator.apply(input));

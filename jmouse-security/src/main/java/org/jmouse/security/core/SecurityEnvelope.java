@@ -1,8 +1,12 @@
 package org.jmouse.security.core;
 
 public record SecurityEnvelope(
-        Subject subject, Resource resource, Operation operation, Attributes attributes, CredentialCarrier carrier)
-        implements Envelope {
+        Subject subject,
+        Resource resource,
+        Operation operation,
+        Attributes attributes,
+        CredentialCarrier carrier
+) implements Envelope {
 
     @Override
     public Envelope withAttributes(Attributes attributes) {

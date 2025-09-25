@@ -1,16 +1,15 @@
 package org.jmouse.web.security.authenticator;
 
+import org.jmouse.core.chain.Chain;
+import org.jmouse.security.core.Attributes;
 import org.jmouse.security.core.Envelope;
-import org.jmouse.security.core.Subject;
 import org.jmouse.security.core.Authenticator;
-
-import java.util.Optional;
 
 public class BearerJwtAuthenticator implements Authenticator {
 
     @Override
-    public Optional<Subject> authenticate(Envelope envelope) throws Exception {
-        return Optional.empty();
+    public Result authenticate(Attributes attributes, Envelope envelope, Chain<Attributes, Envelope, Result> next) {
+        return null;
     }
 
 }

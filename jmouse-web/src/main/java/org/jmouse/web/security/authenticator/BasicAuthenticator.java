@@ -1,16 +1,18 @@
 package org.jmouse.web.security.authenticator;
 
 import org.jmouse.core.chain.Chain;
-import org.jmouse.core.chain.Outcome;
 import org.jmouse.security.core.Attributes;
+import org.jmouse.security.core.CredentialCarrier;
 import org.jmouse.security.core.Envelope;
 import org.jmouse.security.core.Authenticator;
 
 public class BasicAuthenticator implements Authenticator {
 
     @Override
-    public Outcome<Result> handle(Attributes attributes, Envelope envelope, Chain<Attributes, Envelope, Result> next) {
-        return Outcome.done(null);
+    public Result authenticate(Attributes attributes, Envelope envelope, Chain<Attributes, Envelope, Result> next) {
+        CredentialCarrier carrier = envelope.carrier();
+
+        return null;
     }
 
 }

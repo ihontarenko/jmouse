@@ -16,7 +16,7 @@ public class PolicyValve implements Valve {
     }
 
     @Override
-    public Step proceed(Envelope envelope, ValveChain next) throws Exception {
+    public Decision proceed(Envelope envelope, ValveChain next) throws Exception {
         boolean             anyPermit   = false;
         Map<String, Object> advice      = new LinkedHashMap<>();
         Map<String, Object> obligations = new LinkedHashMap<>();
