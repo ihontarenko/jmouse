@@ -9,12 +9,12 @@ public record SecurityEnvelope(
 ) implements Envelope {
 
     @Override
-    public Envelope withAttributes(Attributes attributes) {
+    public Envelope with(Attributes attributes) {
         return new SecurityEnvelope(subject, resource, operation, attributes, carrier);
     }
 
     @Override
-    public Envelope withSubject(Subject subject) {
+    public Envelope with(Subject subject) {
         return new SecurityEnvelope(subject, resource, operation, attributes, carrier);
     }
 

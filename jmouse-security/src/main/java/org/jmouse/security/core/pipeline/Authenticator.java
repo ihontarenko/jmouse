@@ -1,8 +1,11 @@
-package org.jmouse.security.core;
+package org.jmouse.security.core.pipeline;
 
 import org.jmouse.core.chain.Chain;
 import org.jmouse.core.chain.Link;
 import org.jmouse.core.chain.Outcome;
+import org.jmouse.security.core.Attributes;
+import org.jmouse.security.core.Envelope;
+import org.jmouse.security.core.Subject;
 
 import java.util.Map;
 

@@ -3,7 +3,7 @@ package org.jmouse.web.security.authenticator;
 import org.jmouse.core.chain.Chain;
 import org.jmouse.security.core.Attributes;
 import org.jmouse.security.core.Envelope;
-import org.jmouse.security.core.Authenticator;
+import org.jmouse.security.core.pipeline.Authenticator;
 
 public class BearerJwtAuthenticator implements Authenticator {
 

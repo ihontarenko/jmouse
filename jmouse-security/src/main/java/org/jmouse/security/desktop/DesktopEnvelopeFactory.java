@@ -11,7 +11,7 @@ public final class DesktopEnvelopeFactory {
         Resource   resource   = SecurityResource.of(methodId, "method", Map.of("arguments", args.keySet()));
         Operation  operation  = SecurityOperation.of("INVOKE", Map.of("argumentsCount", args.size()));
 
-        environment.forEach(attributes::put);
+        environment.forEach(attributes::set);
 
         return new SecurityEnvelope(Subjects.anonymous(), resource, operation, attributes, new LocalCarrier());
     }

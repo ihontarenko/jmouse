@@ -3,9 +3,8 @@ package org.jmouse.security.core.pipeline;
 import org.jmouse.core.chain.Chain;
 import org.jmouse.security.core.Decision;
 import org.jmouse.security.core.Envelope;
-import org.jmouse.security.core.Pipeline;
 
-public class Egress extends Pipeline<Egress> {
+public class Egress extends Pipeline<Egress, EgressLink> {
 
     public Egress(Chain<Egress, Envelope, Decision> delegate) {
         super(delegate);

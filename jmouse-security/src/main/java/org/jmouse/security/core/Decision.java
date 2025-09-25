@@ -17,8 +17,8 @@ public interface Decision {
         return new Default(Effect.CHALLENGE, null, "challenge", message, Map.of("scheme", scheme, "realm", realm));
     }
 
-    static Decision custom(Effect e, String code, String message, Map<String, Object> meta) {
-        return new Default(e, null, code, message, meta);
+    static Decision custom(Effect effect, String code, String message, Map<String, Object> meta) {
+        return new Default(effect, null, code, message, meta);
     }
 
     Effect effect();
