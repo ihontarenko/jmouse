@@ -1,7 +1,7 @@
 package org.jmouse.web.security.pipeline;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.security.core.*;
+import org.jmouse.security.*;
 
 public final class HttpEnvelopeFactory {
 

@@ -1,6 +1,6 @@
 package org.jmouse.security.desktop;
 
-import org.jmouse.security.core.*;
+import org.jmouse.security.*;
 
 import java.util.Map;
 

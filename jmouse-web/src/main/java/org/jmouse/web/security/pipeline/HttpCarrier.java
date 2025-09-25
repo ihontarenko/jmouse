@@ -1,7 +1,7 @@
 package org.jmouse.web.security.pipeline;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.security.core.CredentialCarrier;
+import org.jmouse.security.CredentialCarrier;
 
 import java.util.Map;
 
