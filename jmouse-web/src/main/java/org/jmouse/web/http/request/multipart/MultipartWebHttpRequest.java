@@ -88,7 +88,7 @@ public class MultipartWebHttpRequest extends AbstractMultipartWebHttpRequest {
 
                 if (disposition.filename() != null) {
                     files.computeIfAbsent(disposition.name(), k -> new ArrayList<>())
-                            .add(new SimpleMultipartFile(disposition, part));
+                            .add(new UploadedFile(disposition, part));
                     continue;
                 }
 
