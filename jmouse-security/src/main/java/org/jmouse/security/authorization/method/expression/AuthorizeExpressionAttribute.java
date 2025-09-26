@@ -1,19 +1,20 @@
 package org.jmouse.security.authorization.method.expression;
 
+import org.jmouse.el.node.Expression;
 import org.jmouse.security.authorization.method.deny.MethodAuthorizationDeniedHandler;
 
-public final class PreAuthorizeExpressionAttribute implements ExpressionAttribute {
+public final class AuthorizeExpressionAttribute implements ExpressionAttribute {
 
-    private final String                           expression;
+    private final Expression                       expression;
     private final MethodAuthorizationDeniedHandler handler;
 
-    public PreAuthorizeExpressionAttribute(String expression, MethodAuthorizationDeniedHandler handler) {
+    public AuthorizeExpressionAttribute(Expression expression, MethodAuthorizationDeniedHandler handler) {
         this.expression = expression;
         this.handler = handler;
     }
 
     @Override
-    public String expression() {
+    public Expression getExpression() {
         return expression;
     }
 

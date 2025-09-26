@@ -1,11 +1,9 @@
 package org.jmouse.security.authorization.method.expression;
 
+import org.jmouse.el.node.Expression;
+
 public interface ExpressionAttribute {
 
-    ExpressionAttribute NULL_ATTRIBUTE = () -> null;
-
-    String expression();
-
-
+    Expression getExpression();
 
 }

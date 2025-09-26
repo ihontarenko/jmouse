@@ -24,6 +24,7 @@ public interface MethodAuthorizationAttribute {
                     POST_AUTHORIZE;
             };
         }
+
     }
 
     final class Default implements MethodAuthorizationAttribute {
