@@ -61,4 +61,31 @@ public interface MethodInvocation {
      * @return the proxy instance.
      */
     Object getProxy();
+
+    /**
+     * 🎯 Retrieves the return value produced by the invocation.
+     *
+     * <p>By default, always returns {@code null}.
+     * Concrete implementations may override this to provide
+     * the actual method result.</p>
+     *
+     * @return the method return value, or {@code null} if not set
+     */
+    default Object getReturnValue() {
+        return null;
+    }
+
+    /**
+     * 📝 Sets the return value for this invocation.
+     *
+     * <p>Default implementation is a NO-OP. Override in order
+     * to allow interceptors or frameworks to change the result
+     * of the target method.</p>
+     *
+     * @param returnValue the new return value (may be {@code null})
+     */
+    default void setReturnValue(Object returnValue) {
+        // NO-OP
+    }
+
 }

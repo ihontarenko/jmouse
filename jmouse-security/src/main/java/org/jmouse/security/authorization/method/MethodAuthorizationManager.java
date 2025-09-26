@@ -3,10 +3,9 @@ package org.jmouse.security.authorization.method;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.security.authorization.AuthorizationDecision;
 import org.jmouse.security.authorization.AuthorizationManager;
-import org.jmouse.security.authorization.method.expression.MethodExpressionHandler;
+import org.jmouse.security.authorization.method.expression.ExpressionHandler;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.core.Authority;
-import org.jmouse.security.core.SecurityEnvelope;
 import org.jmouse.security.core.method.MethodEnvelope;
 
 import java.lang.reflect.Method;
@@ -17,9 +16,9 @@ import java.util.stream.Collectors;
 public final class MethodAuthorizationManager implements AuthorizationManager<Method> {
 
     private final MethodAuthorizationRegistry registry;
-    private final MethodExpressionHandler     expressionHandler;
+    private final ExpressionHandler           expressionHandler;
 
-    public MethodAuthorizationManager(MethodAuthorizationRegistry registry, MethodExpressionHandler handler) {
+    public MethodAuthorizationManager(MethodAuthorizationRegistry registry, ExpressionHandler handler) {
         this.registry = registry;
         this.expressionHandler = handler;
     }

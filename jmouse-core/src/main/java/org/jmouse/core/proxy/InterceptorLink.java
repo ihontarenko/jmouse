@@ -48,6 +48,16 @@ public final class InterceptorLink implements Link<InvocationContext, MethodInvo
             }
 
             @Override
+            public Object getReturnValue() {
+                return base.getReturnValue();
+            }
+
+            @Override
+            public void setReturnValue(Object returnValue) {
+                base.setReturnValue(returnValue);
+            }
+
+            @Override
             public Object proceed() throws Throwable {
                 try {
                     Outcome<Object> outcome = next.proceed(context, base);
@@ -69,6 +79,7 @@ public final class InterceptorLink implements Link<InvocationContext, MethodInvo
         try {
             interceptor.before(context, base.getMethod(), base.getArguments());
             result = interceptor.invoke(bridge);
+            bridge.setReturnValue(result);
             return Outcome.done(result);
         } catch (Throwable exception) {
             Throwable throwable = exception;

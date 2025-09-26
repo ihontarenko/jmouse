@@ -92,11 +92,6 @@ public final class ProxyDispatcher implements InvocationDispatcher {
     private MethodInvocation getMethodInvocation(Object proxy, Method method, Object[] arguments) {
         return new MethodInvocation() {
             @Override
-            public Object getProxy() {
-                return proxy;
-            }
-
-            @Override
             public Object getTarget() {
                 return definition.instanceProvider().get();
             }
@@ -120,6 +115,22 @@ public final class ProxyDispatcher implements InvocationDispatcher {
             public Object proceed() throws Throwable {
                 return invokeTerminal(this);
             }
+
+            @Override
+            public Object getProxy() {
+                return proxy;
+            }
+
+            @Override
+            public Object getReturnValue() {
+                return null;
+            }
+
+            @Override
+            public void setReturnValue(Object returnValue) {
+
+            }
+
         };
     }
 
