@@ -5,11 +5,11 @@ import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.Expression;
 import org.jmouse.security.core.Authentication;
 
-abstract public class AbstractMethodExpressionHandler<T> implements ExpressionHandler<T> {
+abstract public class AbstractSecurityMethodExpressionHandler<T> implements ExpressionHandler<T> {
 
     private final ExpressionLanguage language;
 
-    protected AbstractMethodExpressionHandler(ExpressionLanguage language) {
+    protected AbstractSecurityMethodExpressionHandler(ExpressionLanguage language) {
         this.language = language;
     }
 

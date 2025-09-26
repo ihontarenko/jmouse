@@ -58,6 +58,11 @@ public final class InterceptorLink implements Link<InvocationContext, MethodInvo
             }
 
             @Override
+            public String toString() {
+                return "anonymous [%s] : %s".formatted(InterceptorLink.this.toString(), base.toString());
+            }
+
+            @Override
             public Object proceed() throws Throwable {
                 try {
                     Outcome<Object> outcome = next.proceed(context, base);
@@ -101,5 +106,10 @@ public final class InterceptorLink implements Link<InvocationContext, MethodInvo
                 interceptor.after(context, base.getMethod(), base.getArguments(), result);
             } catch (Throwable ignored) { }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "InterceptorLink[%d] : %s".formatted(ordinal, interceptor.getClass().getSimpleName());
     }
 }

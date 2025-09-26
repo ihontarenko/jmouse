@@ -1,6 +1,7 @@
 package org.jmouse.web.mvc.proxy;
 
 import org.jmouse.core.proxy.InvocationContext;
+import org.jmouse.core.proxy.MethodInvocation;
 import org.jmouse.core.throttle.*;
 import org.jmouse.core.proxy.Intercept;
 import org.jmouse.web.mvc.TooManyRequestsException;
@@ -38,4 +39,9 @@ public final class RateLimitMethodInterceptor extends AbstractRateLimitMethodInt
         }
     }
 
+    @Override
+    public void after(InvocationContext context, Method method, Object[] arguments, Object result) {
+        MethodInvocation invocation = context.invocation();
+        System.out.println("invocation.getReturnValue() : " + invocation.getReturnValue());
+    }
 }

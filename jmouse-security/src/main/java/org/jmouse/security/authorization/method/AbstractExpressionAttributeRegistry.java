@@ -1,5 +1,6 @@
 package org.jmouse.security.authorization.method;
 
+import org.jmouse.core.proxy.MethodInvocation;
 import org.jmouse.core.reflection.annotation.Annotations;
 
 import java.lang.annotation.Annotation;
@@ -17,13 +18,21 @@ public abstract class AbstractExpressionAttributeRegistry<T extends ExpressionAt
         return cache.computeIfAbsent(new Key(method, targetClass), k -> resolveAttribute(method, targetClass));
     }
 
-    protected final <A extends Annotation> Function<AnnotatedElement, A> findUniqueAnnotation(Class<A> type) {
+    public final T getAttribute(Method method) {
+        return getAttribute(method, getClass(method, null));
+    }
+
+    public final T getAttribute(MethodInvocation method) {
+        return getAttribute(method.getMethod(), getClass(method.getMethod(), method.getTarget().getClass()));
+    }
+
+    protected <A extends Annotation> Function<AnnotatedElement, A> findUniqueAnnotation(Class<A> type) {
         return Annotations.findUniqueAnnotation(type);
     }
 
     protected abstract T resolveAttribute(Method method, Class<?> targetClass);
 
-    protected static Class<?> targetClass(Method method, Class<?> targetClass) {
+    protected static Class<?> getClass(Method method, Class<?> targetClass) {
         return (targetClass != null) ? targetClass : method.getDeclaringClass();
     }
 

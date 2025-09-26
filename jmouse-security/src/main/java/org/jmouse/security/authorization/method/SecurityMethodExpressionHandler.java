@@ -6,9 +6,11 @@ import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.Expression;
 import org.jmouse.security.core.Authentication;
 
-public class DefaultMethodExpressionHandler extends AbstractMethodExpressionHandler<MethodInvocation> {
+public class SecurityMethodExpressionHandler
+        extends AbstractSecurityMethodExpressionHandler<MethodInvocation>
+        implements MethodExpressionHandler<MethodInvocation> {
 
-    protected DefaultMethodExpressionHandler(ExpressionLanguage language) {
+    protected SecurityMethodExpressionHandler(ExpressionLanguage language) {
         super(language);
     }
 

@@ -2,6 +2,7 @@ package org.jmouse.core.proxy;
 
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.reflection.MethodMatchers;
+import org.jmouse.core.reflection.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,6 +92,9 @@ public final class ProxyDispatcher implements InvocationDispatcher {
      */
     private MethodInvocation getMethodInvocation(Object proxy, Method method, Object[] arguments) {
         return new MethodInvocation() {
+
+            private Object returnValue;
+
             @Override
             public Object getTarget() {
                 return definition.instanceProvider().get();
@@ -123,14 +127,19 @@ public final class ProxyDispatcher implements InvocationDispatcher {
 
             @Override
             public Object getReturnValue() {
-                return null;
+                return returnValue;
             }
 
             @Override
             public void setReturnValue(Object returnValue) {
-
+                this.returnValue = returnValue;
             }
 
+            @Override
+            public String toString() {
+                return "anonymous [%s] : %s".formatted(
+                        ProxyDispatcher.this.engine.name(), Reflections.getMethodName(method));
+            }
         };
     }
 

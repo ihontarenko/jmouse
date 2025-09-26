@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * which is thread-safe and intended for interceptor cooperation.</p>
  */
 public record InvocationContext(
+        MethodInvocation invocation,
         Object proxy,
         Object target,
         Method method,
@@ -53,6 +54,7 @@ public record InvocationContext(
      */
     public static InvocationContext forInvocation(MethodInvocation invocation) {
         return builder()
+                .invocation(invocation)
                 .proxy(invocation.getProxy())
                 .target(invocation.getTarget())
                 .method(invocation.getMethod())
@@ -129,6 +131,7 @@ public record InvocationContext(
      */
     public static final class Builder {
 
+        private MethodInvocation    invocation;
         private Object              proxy;
         private Object              target;
         private Method              method;
@@ -137,6 +140,11 @@ public record InvocationContext(
         private Long                nanoStart;
         private Instant             wallStart;
         private Map<String, Object> attributes;
+
+        public Builder invocation(MethodInvocation invocation) {
+            this.invocation = invocation;
+            return this;
+        }
 
         public Builder proxy(Object proxy) {
             this.proxy = proxy;
@@ -191,7 +199,7 @@ public record InvocationContext(
             Map<String, Object> bag       = (attributes != null) ? attributes : new ConcurrentHashMap<>();
             Object[]            arguments = (this.arguments == null) ? new Object[0] : this.arguments.clone();
 
-            return new InvocationContext(proxy, target, method, arguments, nowNanos, now, id, bag);
+            return new InvocationContext(invocation, proxy, target, method, arguments, nowNanos, now, id, bag);
         }
     }
 }
