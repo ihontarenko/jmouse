@@ -1,7 +1,7 @@
 package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.NodeVisitor;
@@ -22,7 +22,7 @@ import org.jmouse.el.renderable.NodeVisitor;
 public class CacheNode extends AbstractNode {
 
     /** The expression whose evaluated value is used as the cache key. */
-    private ExpressionNode key;
+    private Expression key;
 
     /** The block of content to be cached under the computed key. */
     private Node content;
@@ -32,7 +32,7 @@ public class CacheNode extends AbstractNode {
      *
      * @return the cache key expression
      */
-    public ExpressionNode getKey() {
+    public Expression getKey() {
         return key;
     }
 
@@ -41,7 +41,7 @@ public class CacheNode extends AbstractNode {
      *
      * @param key the cache key expression to set
      */
-    public void setKey(ExpressionNode key) {
+    public void setKey(Expression key) {
         this.key = key;
     }
 

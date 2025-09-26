@@ -3,7 +3,7 @@ package org.jmouse.el.renderable.parser.tag;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.CursorMatcher;
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.ParserContext;
@@ -72,7 +72,7 @@ public class ForParser implements TagParser {
         cursor.ensure(T_IN);
 
         // Parse the iterable expression.
-        node.setIterable((ExpressionNode) context.getParser(ExpressionParser.class).parse(cursor, context));
+        node.setIterable((Expression) context.getParser(ExpressionParser.class).parse(cursor, context));
 
         // Expect closing tag for the opening for statement.
         cursor.ensure(T_CLOSE_EXPRESSION);

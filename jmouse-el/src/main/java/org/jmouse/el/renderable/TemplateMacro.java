@@ -2,7 +2,7 @@ package org.jmouse.el.renderable;
 
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.ScopedChain;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.node.expression.FunctionNode;
 import org.jmouse.el.renderable.node.MacroNode;
@@ -11,8 +11,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -31,8 +29,8 @@ public record TemplateMacro(String name, MacroNode node, String source) implemen
     @Override
     public void evaluate(Visitor visitor, FunctionNode node, EvaluationContext context) {
         // Retrieve the arguments expression from the function node invocation.
-        ExpressionNode parameters = node.getArguments();
-        MacroNode      macro      = node();
+        Expression parameters = node.getArguments();
+        MacroNode  macro      = node();
         // Get the current scope chain.
         ScopedChain chain = context.getScopedChain();
 
@@ -51,7 +49,7 @@ public record TemplateMacro(String name, MacroNode node, String source) implemen
                 String key = keys.get(i);
                 if (values.size() > i) {
                     arguments.put(key, values.get(i));
-                } else if (macro.getDefaultValue(key) instanceof ExpressionNode defaultValue) {
+                } else if (macro.getDefaultValue(key) instanceof Expression defaultValue) {
                     arguments.put(key, defaultValue.evaluate(context));
                 } else {
                     arguments.put(key, null);

@@ -8,7 +8,7 @@ import org.jmouse.el.evaluation.EvaluationContext;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public interface ExpressionNode extends Node {
+public interface Expression extends Node {
 
     /**
      * 🏗️ Evaluates the expression within the given context.

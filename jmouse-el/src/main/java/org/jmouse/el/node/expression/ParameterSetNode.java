@@ -1,14 +1,12 @@
 package org.jmouse.el.node.expression;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.AbstractExpressionNode;
-import org.jmouse.el.node.Node;
+import org.jmouse.el.node.AbstractExpression;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class ParameterSetNode extends AbstractExpressionNode {
+public class ParameterSetNode extends AbstractExpression {
 
     public List<ParameterNode> getSet() {
         return getChildren(ParameterNode.class);

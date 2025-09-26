@@ -1,7 +1,7 @@
 package org.jmouse.el.renderable.parser.tag;
 
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.ParserContext;
@@ -22,7 +22,7 @@ public class SetParser implements TagParser {
 
         cursor.ensure(T_EQ);
 
-        ExpressionNode value = (ExpressionNode) context.getParser(ExpressionParser.class).parse(cursor, context);
+        Expression value = (Expression) context.getParser(ExpressionParser.class).parse(cursor, context);
         setNode.setValue(value);
 
         return setNode;

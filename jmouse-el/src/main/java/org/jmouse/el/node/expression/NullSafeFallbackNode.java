@@ -1,8 +1,8 @@
 package org.jmouse.el.node.expression;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.AbstractExpressionNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.AbstractExpression;
+import org.jmouse.el.node.Expression;
 
 /**
  * Represents a null-coalescing expression in the view language.
@@ -18,24 +18,24 @@ import org.jmouse.el.node.ExpressionNode;
  * </pre>
  * </p>
  */
-public class NullSafeFallbackNode extends AbstractExpressionNode {
+public class NullSafeFallbackNode extends AbstractExpression {
 
     /**
      * The expression whose result may be null.
      */
-    private ExpressionNode nullable;
+    private Expression nullable;
 
     /**
      * The expression to evaluate if {@code nullable} returns null.
      */
-    private ExpressionNode otherwise;
+    private Expression otherwise;
 
     /**
      * Returns the nullable expression.
      *
      * @return the expression that may yield null
      */
-    public ExpressionNode getNullable() {
+    public Expression getNullable() {
         return nullable;
     }
 
@@ -44,7 +44,7 @@ public class NullSafeFallbackNode extends AbstractExpressionNode {
      *
      * @param nullable the expression to evaluate first
      */
-    public void setNullable(ExpressionNode nullable) {
+    public void setNullable(Expression nullable) {
         this.nullable = nullable;
     }
 
@@ -53,7 +53,7 @@ public class NullSafeFallbackNode extends AbstractExpressionNode {
      *
      * @return the expression evaluated if {@code nullable} is null
      */
-    public ExpressionNode getOtherwise() {
+    public Expression getOtherwise() {
         return otherwise;
     }
 
@@ -62,7 +62,7 @@ public class NullSafeFallbackNode extends AbstractExpressionNode {
      *
      * @param otherwise the expression to evaluate when {@code nullable} is null
      */
-    public void setOtherwise(ExpressionNode otherwise) {
+    public void setOtherwise(Expression otherwise) {
         this.otherwise = otherwise;
     }
 

@@ -1,7 +1,7 @@
 package org.jmouse.el.node.expression;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.AbstractExpressionNode;
+import org.jmouse.el.node.AbstractExpression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.Visitor;
 
@@ -15,7 +15,7 @@ import java.util.Map;
  * and evaluates to a {@link Map} containing the computed keys and values.
  * </p>
  */
-public class MapNode extends AbstractExpressionNode {
+public class MapNode extends AbstractExpression {
 
     /**
      * Evaluates this map node by iterating over its child nodes and collecting key-value pairs.

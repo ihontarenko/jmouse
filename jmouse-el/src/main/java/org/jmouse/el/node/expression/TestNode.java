@@ -5,19 +5,19 @@ import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.extension.Test;
-import org.jmouse.el.node.AbstractExpressionNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.AbstractExpression;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Visitor;
 
 /**
  * Represents a test expression node in the expression language.
  */
-public class TestNode extends AbstractExpressionNode {
+public class TestNode extends AbstractExpression {
 
-    private final String         name;
-    private       ExpressionNode arguments;
-    private       ExpressionNode left;
-    private       boolean        negated;
+    private final String     name;
+    private       Expression arguments;
+    private       Expression left;
+    private       boolean    negated;
 
     /**
      * Constructs a new TestNode with the specified test name.
@@ -40,18 +40,18 @@ public class TestNode extends AbstractExpressionNode {
     /**
      * Returns the expression node representing the arguments for the test.
      *
-     * @return the arguments ExpressionNode, or {@code null} if none are provided
+     * @return the arguments Expression, or {@code null} if none are provided
      */
-    public ExpressionNode getArguments() {
+    public Expression getArguments() {
         return arguments;
     }
 
     /**
      * Sets the expression node representing the arguments for the test.
      *
-     * @param arguments the arguments ExpressionNode to set
+     * @param arguments the arguments Expression to set
      */
-    public void setArguments(ExpressionNode arguments) {
+    public void setArguments(Expression arguments) {
         this.arguments = arguments;
     }
 
@@ -76,18 +76,18 @@ public class TestNode extends AbstractExpressionNode {
     /**
      * Returns the left-hand expression node whose evaluated value is the subject of the test.
      *
-     * @return the left ExpressionNode
+     * @return the left Expression
      */
-    public ExpressionNode getLeft() {
+    public Expression getLeft() {
         return left;
     }
 
     /**
      * Sets the left-hand expression node whose evaluated value is the subject of the test.
      *
-     * @param left the left ExpressionNode to set
+     * @param left the left Expression to set
      */
-    public void setLeft(ExpressionNode left) {
+    public void setLeft(Expression left) {
         this.left = left;
     }
 

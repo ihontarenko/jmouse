@@ -1,7 +1,7 @@
 package org.jmouse.el.node.expression;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.AbstractExpressionNode;
+import org.jmouse.el.node.AbstractExpression;
 import org.jmouse.el.node.Visitor;
 
 /**
@@ -13,7 +13,7 @@ import org.jmouse.el.node.Visitor;
  *
  * @param <T> the type of the literal value
  */
-abstract public class LiteralNode<T> extends AbstractExpressionNode {
+abstract public class LiteralNode<T> extends AbstractExpression {
 
     private final T value;
 

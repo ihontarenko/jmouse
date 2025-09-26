@@ -6,7 +6,7 @@ import org.jmouse.el.extension.CoreExtension;
 import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.extension.StandardExtensionContainer;
 import org.jmouse.el.lexer.*;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.parser.DefaultParserContext;
 import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.ParserContext;
@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * 🔎 Engine for parsing, compiling, caching, and evaluating expressions.
  * <p>
- * Manages a lexer, parser, and cache for {@link ExpressionNode} instances, as well as
+ * Manages a lexer, parser, and cache for {@link Expression} instances, as well as
  * an {@link ExtensionContainer} for custom functions, operators, and filters.
  * </p>
  */
@@ -26,9 +26,9 @@ public class ExpressionLanguage {
 
     private final ParserContext                    context;
     private final Lexer                            lexer;
-    private final ExpressionParser                 parser;
-    private final Cache<Cache.Key, ExpressionNode> cache;
-    private final ExtensionContainer               extensions;
+    private final ExpressionParser             parser;
+    private final Cache<Cache.Key, Expression> cache;
+    private final ExtensionContainer           extensions;
 
     /**
      * Constructs a new ExpressionLanguage with default extensions, lexer, parser context, and cache.
@@ -68,22 +68,22 @@ public class ExpressionLanguage {
     }
 
     /**
-     * Compiles the given expression string into an AST ({@link ExpressionNode}),
+     * Compiles the given expression string into an AST ({@link Expression}),
      * using a cache to avoid repeated parsing.
      *
      * @param expression the expression to compile
-     * @return the compiled {@link ExpressionNode}
+     * @return the compiled {@link Expression}
      */
-    public ExpressionNode compile(String expression) {
-        Cache.Key      key    = Cache.Key.forObject(expression);
-        ExpressionNode cached = cache.get(key);
+    public Expression compile(String expression) {
+        Cache.Key  key    = Cache.Key.forObject(expression);
+        Expression cached = cache.get(key);
 
         if (cached == null) {
             TokenizableSource source =
                     new StringSource("EXPRESSION(" + expression + ")", expression);
             TokenCursor cursor = lexer.tokenize(source);
             cursor.currentIf(BasicToken.T_SOL);
-            cached = (ExpressionNode) parser.parse(cursor, context);
+            cached = (Expression) parser.parse(cursor, context);
             cache.put(key, cached);
         }
 

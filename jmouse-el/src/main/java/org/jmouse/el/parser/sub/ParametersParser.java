@@ -3,7 +3,7 @@ package org.jmouse.el.parser.sub;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.ParameterNode;
 import org.jmouse.el.node.expression.ParameterSetNode;
@@ -25,7 +25,7 @@ public class ParametersParser implements Parser {
             parameter.setName(token.value());
 
             if (cursor.currentIf(BasicToken.T_COLON)) {
-                parameter.setDefaultValue((ExpressionNode) parser.parse(cursor, context));
+                parameter.setDefaultValue((Expression) parser.parse(cursor, context));
             }
 
             parameters.add(parameter);

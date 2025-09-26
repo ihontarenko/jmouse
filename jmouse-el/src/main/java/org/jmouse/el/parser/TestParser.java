@@ -2,7 +2,7 @@ package org.jmouse.el.parser;
 
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.TestNode;
 import org.jmouse.el.parser.sub.ArgumentsParser;
@@ -34,7 +34,7 @@ public class TestParser implements Parser {
 
         if (cursor.isCurrent(BasicToken.T_OPEN_PAREN)) {
             context.setOptions(ParserOptions.withNextParser(ArgumentsParser.class));
-            test.setArguments((ExpressionNode) context.getParser(ParenthesesParser.class).parse(cursor, context));
+            test.setArguments((Expression) context.getParser(ParenthesesParser.class).parse(cursor, context));
             context.clearOptions();
         }
 

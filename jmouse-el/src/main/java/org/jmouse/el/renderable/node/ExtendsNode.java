@@ -1,7 +1,7 @@
 package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.NodeVisitor;
 
@@ -15,14 +15,14 @@ import org.jmouse.el.renderable.NodeVisitor;
  */
 public class ExtendsNode extends AbstractNode {
 
-    private ExpressionNode path;
+    private Expression path;
 
     /**
      * Returns the expression node that evaluates to the parent view name.
      *
      * @return the parent expression node
      */
-    public ExpressionNode getPath() {
+    public Expression getPath() {
         return path;
     }
 
@@ -31,7 +31,7 @@ public class ExtendsNode extends AbstractNode {
      *
      * @param path the parent expression node
      */
-    public void setPath(ExpressionNode path) {
+    public void setPath(Expression path) {
         this.path = path;
     }
 

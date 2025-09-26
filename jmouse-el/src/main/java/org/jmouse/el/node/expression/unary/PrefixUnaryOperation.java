@@ -3,7 +3,7 @@ package org.jmouse.el.node.expression.unary;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Operator;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.expression.PropertyNode;
 import org.jmouse.el.node.expression.UnaryOperation;
 
@@ -27,7 +27,7 @@ public class PrefixUnaryOperation extends UnaryOperation {
      * @param operand  the operand tag (e.g., a variable)
      * @param operator the prefix operator (e.g., {@code ++}, {@code --})
      */
-    public PrefixUnaryOperation(ExpressionNode operand, Operator operator) {
+    public PrefixUnaryOperation(Expression operand, Operator operator) {
         super(operand, operator);
     }
 

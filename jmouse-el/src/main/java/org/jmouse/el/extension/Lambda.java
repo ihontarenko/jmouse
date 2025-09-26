@@ -2,11 +2,9 @@ package org.jmouse.el.extension;
 
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.ScopedChain;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 
 import java.util.*;
-
-import static java.util.Objects.requireNonNullElseGet;
 
 /**
  * Represents a user-defined lambda function with named parameters, default values,
@@ -27,14 +25,14 @@ public final class Lambda implements Function {
 
     private final List<String>        parameters    = new ArrayList<>();
     private final Map<String, Object> defaultValues = new HashMap<>();
-    private final ExpressionNode      body;
+    private final Expression          body;
     private       String              name;
 
     /**
      * Constructs a new Lambda with the given expression node as its body.
      * @param body the AST node representing the function body to evaluate when invoked
      */
-    public Lambda(ExpressionNode body) {
+    public Lambda(Expression body) {
         this.body = body;
     }
 

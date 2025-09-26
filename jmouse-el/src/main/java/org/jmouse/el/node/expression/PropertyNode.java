@@ -1,7 +1,7 @@
 package org.jmouse.el.node.expression;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.AbstractExpressionNode;
+import org.jmouse.el.node.AbstractExpression;
 import org.jmouse.el.node.Visitor;
 
 /**
@@ -11,7 +11,7 @@ import org.jmouse.el.node.Visitor;
  * When evaluated, it delegates to the context's {@code getValue} method using the stored property path.
  * </p>
  */
-public class PropertyNode extends AbstractExpressionNode {
+public class PropertyNode extends AbstractExpression {
 
     private final String path;
 

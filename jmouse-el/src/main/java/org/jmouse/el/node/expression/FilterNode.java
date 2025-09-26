@@ -6,8 +6,8 @@ import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.EvaluationException;
 import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.extension.Filter;
-import org.jmouse.el.node.AbstractExpressionNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.AbstractExpression;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Visitor;
 
 /**
@@ -17,11 +17,11 @@ import org.jmouse.el.node.Visitor;
  * Optional arguments for the filter can be provided.
  * </p>
  */
-public class FilterNode extends AbstractExpressionNode {
+public class FilterNode extends AbstractExpression {
 
-    private final String         name;
-    private       ExpressionNode left;
-    private       ExpressionNode arguments;
+    private final String     name;
+    private       Expression left;
+    private       Expression arguments;
 
     /**
      * Constructs a new FilterNode with the specified filter name.
@@ -46,7 +46,7 @@ public class FilterNode extends AbstractExpressionNode {
      *
      * @return the arguments expression node, or {@code null} if none is set
      */
-    public ExpressionNode getArguments() {
+    public Expression getArguments() {
         return arguments;
     }
 
@@ -55,7 +55,7 @@ public class FilterNode extends AbstractExpressionNode {
      *
      * @param arguments the arguments expression node to set
      */
-    public void setArguments(ExpressionNode arguments) {
+    public void setArguments(Expression arguments) {
         this.arguments = arguments;
     }
 
@@ -64,7 +64,7 @@ public class FilterNode extends AbstractExpressionNode {
      *
      * @return the left expression node
      */
-    public ExpressionNode getLeft() {
+    public Expression getLeft() {
         return left;
     }
 
@@ -73,7 +73,7 @@ public class FilterNode extends AbstractExpressionNode {
      *
      * @param left the left expression node to set
      */
-    public void setLeft(ExpressionNode left) {
+    public void setLeft(Expression left) {
         this.left = left;
     }
 

@@ -3,7 +3,7 @@ package org.jmouse.el.renderable.parser;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.*;
 import org.jmouse.el.renderable.EmptyNode;
@@ -50,7 +50,7 @@ public class RootParser implements Parser {
             // Print expression: {{ expression }}
             cursor.ensure(T_OPEN_PRINT);
 
-            if (context.getParser(ExpressionParser.class).parse(cursor, context) instanceof ExpressionNode expression) {
+            if (context.getParser(ExpressionParser.class).parse(cursor, context) instanceof Expression expression) {
                 parent.add(new PrintNode(expression));
             }
 

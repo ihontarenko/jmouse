@@ -5,8 +5,8 @@ import org.jmouse.el.evaluation.EvaluationException;
 import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.extension.Function;
 import org.jmouse.el.extension.Lambda;
-import org.jmouse.el.node.AbstractExpressionNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.AbstractExpression;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Visitor;
 
 /**
@@ -16,10 +16,10 @@ import org.jmouse.el.node.Visitor;
  * and then executes the function with those arguments in the given evaluation context.
  * </p>
  */
-public class FunctionNode extends AbstractExpressionNode {
+public class FunctionNode extends AbstractExpression {
 
-    private final String         name;
-    private       ExpressionNode arguments;
+    private final String     name;
+    private       Expression arguments;
 
     /**
      * Constructs a FunctionNode with the specified function name.
@@ -44,7 +44,7 @@ public class FunctionNode extends AbstractExpressionNode {
      *
      * @return the arguments node, or {@code null} if no arguments are provided
      */
-    public ExpressionNode getArguments() {
+    public Expression getArguments() {
         return arguments;
     }
 
@@ -53,7 +53,7 @@ public class FunctionNode extends AbstractExpressionNode {
      *
      * @param arguments the arguments node to set
      */
-    public void setArguments(ExpressionNode arguments) {
+    public void setArguments(Expression arguments) {
         this.arguments = arguments;
     }
 

@@ -1,8 +1,8 @@
 package org.jmouse.el.node.expression;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.AbstractExpressionNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.AbstractExpression;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.Visitor;
 
@@ -17,7 +17,7 @@ import java.util.List;
  * or operators in the expression language.
  * </p>
  */
-public class ArgumentsNode extends AbstractExpressionNode {
+public class ArgumentsNode extends AbstractExpression {
 
     /**
      * Evaluates the arguments node.
@@ -33,7 +33,7 @@ public class ArgumentsNode extends AbstractExpressionNode {
         List<Object> compiled = new ArrayList<>();
 
         for (Node child : getChildren()) {
-            if (child instanceof ExpressionNode expression) {
+            if (child instanceof Expression expression) {
                 compiled.add(expression.evaluate(context));
             }
         }

@@ -5,7 +5,7 @@ import org.jmouse.el.StringSource;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.ScopedChain;
 import org.jmouse.el.lexer.TokenizableSource;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.FilterNode;
 import org.jmouse.el.node.expression.FunctionNode;
@@ -94,7 +94,7 @@ public class RendererVisitor implements NodeVisitor {
      */
     @Override
     public void visit(PrintNode printNode) {
-        ExpressionNode expression = printNode.getExpression();
+        Expression expression = printNode.getExpression();
 
         if (expression instanceof FunctionNode) {
             expression.accept(this);
@@ -148,8 +148,8 @@ public class RendererVisitor implements NodeVisitor {
      */
     @Override
     public void visit(DoNode doNode) {
-        ExpressionNode expression = doNode.getExpression();
-        Object         evaluated  = expression.evaluate(context);
+        Expression expression = doNode.getExpression();
+        Object     evaluated  = expression.evaluate(context);
         LOGGER.info("Do: {}; Result: {}", expression, evaluated);
     }
 
@@ -315,8 +315,8 @@ public class RendererVisitor implements NodeVisitor {
 
         for (ConditionBranch branch : ifNode.getBranches()) {
             // If "when" is null, the branch represents the "else" clause.
-            ExpressionNode when      = branch.getWhen();
-            Node           then      = branch.getThen();
+            Expression when = branch.getWhen();
+            Node       then = branch.getThen();
             boolean        satisfied = when == null;
 
             if (when != null) {

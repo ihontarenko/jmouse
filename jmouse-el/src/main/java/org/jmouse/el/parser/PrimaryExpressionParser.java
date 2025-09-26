@@ -4,7 +4,7 @@ import org.jmouse.el.CursorMatcher;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.unary.PostfixUnaryOperation;
 import org.jmouse.el.node.expression.unary.PrefixUnaryOperation;
@@ -31,7 +31,7 @@ public class PrimaryExpressionParser implements Parser {
         } else if (cursor.isCurrent(T_DECREMENT, T_INCREMENT)) {
             Token token = cursor.peek();
             cursor.next();
-            left = new PrefixUnaryOperation((ExpressionNode) parse(cursor, context), context.getOperator(token.type()));
+            left = new PrefixUnaryOperation((Expression) parse(cursor, context), context.getOperator(token.type()));
         } else if (cursor.matchesSequence(T_IDENTIFIER)) {
             left = context.getParser(PropertyParser.class).parse(cursor, context);
         } else if (cursor.isCurrent(T_OPEN_BRACKET)) {
@@ -45,7 +45,7 @@ public class PrimaryExpressionParser implements Parser {
         }
 
         if (cursor.isCurrent(T_DECREMENT, T_INCREMENT)) {
-            left = new PostfixUnaryOperation((ExpressionNode) left, context.getOperator(cursor.peek().type()));
+            left = new PostfixUnaryOperation((Expression) left, context.getOperator(cursor.peek().type()));
             cursor.next();
         }
 

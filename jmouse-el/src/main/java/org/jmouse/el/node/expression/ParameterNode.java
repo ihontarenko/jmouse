@@ -1,18 +1,18 @@
 package org.jmouse.el.node.expression;
 
-import org.jmouse.el.node.AbstractExpressionNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.AbstractExpression;
+import org.jmouse.el.node.Expression;
 
-public class ParameterNode extends AbstractExpressionNode {
+public class ParameterNode extends AbstractExpression {
 
-    private String         name;
-    private ExpressionNode defaultValue;
+    private String     name;
+    private Expression defaultValue;
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setDefaultValue(ExpressionNode defaultValue) {
+    public void setDefaultValue(Expression defaultValue) {
         this.defaultValue = defaultValue;
     }
 
@@ -20,7 +20,7 @@ public class ParameterNode extends AbstractExpressionNode {
         return name;
     }
 
-    public ExpressionNode getDefaultValue() {
+    public Expression getDefaultValue() {
         return defaultValue;
     }
 

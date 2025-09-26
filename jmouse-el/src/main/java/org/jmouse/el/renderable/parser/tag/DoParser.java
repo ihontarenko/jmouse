@@ -1,7 +1,7 @@
 package org.jmouse.el.renderable.parser.tag;
 
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.ParserContext;
@@ -17,7 +17,7 @@ public class DoParser implements TagParser {
 
         Node expression = context.getParser(ExpressionParser.class).parse(cursor, context);
 
-        return new DoNode((ExpressionNode) expression);
+        return new DoNode((Expression) expression);
     }
 
     @Override

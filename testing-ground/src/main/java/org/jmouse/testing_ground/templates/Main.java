@@ -8,7 +8,7 @@ import org.jmouse.el.evaluation.ScopedChain;
 import org.jmouse.el.lexer.recognizer.CompositeRecognizer;
 import org.jmouse.el.lexer.recognizer.EnumTokenRecognizer;
 import org.jmouse.el.lexer.recognizer.Recognizer;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.renderable.TemplateCoreExtension;
 import org.jmouse.el.lexer.*;
 import org.jmouse.el.parser.DefaultParserContext;
@@ -129,7 +129,7 @@ public class Main {
         scopedChain.setValue("user", List.of(Map.of("name", "Root!", "active", true, "level", 333, "book", book)));
         scopedChain.setValue("cnt", 10D);
 
-        if (compiled instanceof ExpressionNode expressionNode) {
+        if (compiled instanceof Expression expressionNode) {
             Object value = expressionNode.evaluate(evaluationContext);
             System.out.println(STR."value: \{value}");
         }

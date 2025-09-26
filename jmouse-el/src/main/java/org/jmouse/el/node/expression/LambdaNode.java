@@ -2,13 +2,13 @@ package org.jmouse.el.node.expression;
 
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Lambda;
-import org.jmouse.el.node.AbstractExpressionNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.AbstractExpression;
+import org.jmouse.el.node.Expression;
 
-public class LambdaNode extends AbstractExpressionNode {
+public class LambdaNode extends AbstractExpression {
 
     private ParameterSetNode parameters;
-    private ExpressionNode   body;
+    private Expression       body;
 
     public ParameterSetNode getParameters() {
         return parameters;
@@ -18,11 +18,11 @@ public class LambdaNode extends AbstractExpressionNode {
         this.parameters = parameters;
     }
 
-    public ExpressionNode getBody() {
+    public Expression getBody() {
         return body;
     }
 
-    public void setBody(ExpressionNode body) {
+    public void setBody(Expression body) {
         this.body = body;
     }
 

@@ -4,7 +4,7 @@ import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.CursorMatcher;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.Parser;
@@ -92,14 +92,14 @@ public class IfParser implements TagParser {
      */
     private void parseBranch(TokenCursor cursor, Token.Type tagToken, IfNode ifNode, ParserContext context) {
         TemplateParser templateParser   = (TemplateParser) context.getParser(TemplateParser.class);
-        Parser         expressionParser = context.getParser(ExpressionParser.class);
-        ExpressionNode condition        = null;
+        Parser     expressionParser = context.getParser(ExpressionParser.class);
+        Expression condition        = null;
 
         // Consume the branch tag (if, else-if or else).
         cursor.ensure(tagToken);
         // Parse the condition expression.
         if (T_ELSE != tagToken) {
-            condition = (ExpressionNode) expressionParser.parse(cursor, context);
+            condition = (Expression) expressionParser.parse(cursor, context);
         }
         // Ensure closing of the condition expression.
         cursor.ensure(T_CLOSE_EXPRESSION);

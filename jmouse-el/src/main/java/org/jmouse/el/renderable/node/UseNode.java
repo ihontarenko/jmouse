@@ -2,23 +2,23 @@ package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.node.AbstractNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.node.expression.NameSetNode;
 import org.jmouse.el.renderable.NodeVisitor;
 
 public class UseNode extends AbstractNode {
 
-    private ExpressionNode path;
-    private Token.Type     type;
-    private NameSetNode    names;
-    private ExpressionNode alias;
+    private Expression  path;
+    private Token.Type  type;
+    private NameSetNode names;
+    private Expression  alias;
 
-    public ExpressionNode getPath() {
+    public Expression getPath() {
         return path;
     }
 
-    public void setPath(ExpressionNode path) {
+    public void setPath(Expression path) {
         this.path = path;
     }
 
@@ -30,11 +30,11 @@ public class UseNode extends AbstractNode {
         this.names = names;
     }
 
-    public ExpressionNode getAlias() {
+    public Expression getAlias() {
         return alias;
     }
 
-    public void setAlias(ExpressionNode alias) {
+    public void setAlias(Expression alias) {
         this.alias = alias;
     }
 

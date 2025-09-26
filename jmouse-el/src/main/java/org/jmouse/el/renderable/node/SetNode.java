@@ -1,14 +1,14 @@
 package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.NodeVisitor;
 
 public class SetNode extends AbstractNode {
 
-    private String         variable;
-    private ExpressionNode value;
+    private String     variable;
+    private Expression value;
 
     public String getVariable() {
         return variable;
@@ -18,11 +18,11 @@ public class SetNode extends AbstractNode {
         this.variable = variable;
     }
 
-    public ExpressionNode getValue() {
+    public Expression getValue() {
         return value;
     }
 
-    public void setValue(ExpressionNode value) {
+    public void setValue(Expression value) {
         this.value = value;
     }
 

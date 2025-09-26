@@ -3,7 +3,7 @@ package org.jmouse.el.renderable.parser.tag;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.CursorMatcher;
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.MapNode;
 import org.jmouse.el.parser.LiteralParser;
@@ -50,7 +50,7 @@ public class EmbedParser implements TagParser {
         cursor.ensure(TemplateToken.T_EMBED);
 
         // Parse the source expression for the embed path.
-        ExpressionNode path = (ExpressionNode) context.getParser(LiteralParser.class).parse(cursor, context);
+        Expression path = (Expression) context.getParser(LiteralParser.class).parse(cursor, context);
 
         // Optionally parse the 'with' clause containing additional variables.
         if (cursor.currentIf(T_WITH)) {

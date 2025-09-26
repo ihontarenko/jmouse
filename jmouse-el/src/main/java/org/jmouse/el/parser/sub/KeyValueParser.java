@@ -2,7 +2,7 @@ package org.jmouse.el.parser.sub;
 
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.KeyValueNode;
 import org.jmouse.el.node.expression.MapNode;
@@ -35,12 +35,12 @@ public class KeyValueParser implements Parser {
             KeyValueNode kv = new KeyValueNode();
 
             Node key = parser.parse(cursor, context);
-            kv.setKey((ExpressionNode) key);
+            kv.setKey((Expression) key);
 
             cursor.ensure(BasicToken.T_COLON);
 
             Node value = parser.parse(cursor, context);
-            kv.setValue((ExpressionNode) value);
+            kv.setValue((Expression) value);
 
             parent.add(kv);
         } while (cursor.isCurrent(BasicToken.T_COMMA) && cursor.next() != null);

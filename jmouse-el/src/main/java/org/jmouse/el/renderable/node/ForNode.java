@@ -1,7 +1,7 @@
 package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.NodeVisitor;
@@ -24,7 +24,7 @@ public class ForNode extends AbstractNode {
     /**
      * The expression that evaluates to an iterable collection.
      */
-    private ExpressionNode iterable;
+    private Expression iterable;
 
     /**
      * The body of the loop, rendered for each element in the iterable.
@@ -59,7 +59,7 @@ public class ForNode extends AbstractNode {
      *
      * @return the expression that evaluates to the iterable
      */
-    public ExpressionNode getIterable() {
+    public Expression getIterable() {
         return iterable;
     }
 
@@ -68,7 +68,7 @@ public class ForNode extends AbstractNode {
      *
      * @param iterable the expression to set as the iterable
      */
-    public void setIterable(ExpressionNode iterable) {
+    public void setIterable(Expression iterable) {
         this.iterable = iterable;
     }
 

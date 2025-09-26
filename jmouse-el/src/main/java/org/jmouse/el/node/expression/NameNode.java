@@ -1,9 +1,9 @@
 package org.jmouse.el.node.expression;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.AbstractExpressionNode;
+import org.jmouse.el.node.AbstractExpression;
 
-public class NameNode extends AbstractExpressionNode {
+public class NameNode extends AbstractExpression {
 
     private String name;
     private String alias;

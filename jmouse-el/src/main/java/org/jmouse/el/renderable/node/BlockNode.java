@@ -1,22 +1,22 @@
 package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.NodeVisitor;
 
 public class BlockNode extends AbstractNode {
 
-    private ExpressionNode name;
-    private Node           body;
+    private Expression name;
+    private Node       body;
     private boolean override = false;
 
-    public ExpressionNode getName() {
+    public Expression getName() {
         return name;
     }
 
-    public void setName(ExpressionNode name) {
+    public void setName(Expression name) {
         this.name = name;
     }
 

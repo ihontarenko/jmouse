@@ -7,5 +7,5 @@ import org.jmouse.security.core.Authentication;
  */
 @FunctionalInterface
 public interface AuthorizationManager<T> {
-    AuthorizationDecision check(Authentication envelope, T target);
+    AuthorizationDecision check(Authentication authentication, T target);
 }

@@ -1,8 +1,8 @@
 package org.jmouse.el.node.expression;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.AbstractExpressionNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.AbstractExpression;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Visitor;
 
 import java.util.AbstractMap;
@@ -14,17 +14,17 @@ import java.util.AbstractMap;
  * (using {@link AbstractMap.SimpleEntry}). It is typically used within map literal expressions.
  * </p>
  */
-public class KeyValueNode extends AbstractExpressionNode {
+public class KeyValueNode extends AbstractExpression {
 
-    private ExpressionNode key;
-    private ExpressionNode value;
+    private Expression key;
+    private Expression value;
 
     /**
      * Returns the expression representing the value.
      *
      * @return the value expression node
      */
-    public ExpressionNode getValue() {
+    public Expression getValue() {
         return value;
     }
 
@@ -33,7 +33,7 @@ public class KeyValueNode extends AbstractExpressionNode {
      *
      * @param value the value expression node to set
      */
-    public void setValue(ExpressionNode value) {
+    public void setValue(Expression value) {
         this.value = value;
     }
 
@@ -42,7 +42,7 @@ public class KeyValueNode extends AbstractExpressionNode {
      *
      * @return the key expression node
      */
-    public ExpressionNode getKey() {
+    public Expression getKey() {
         return key;
     }
 
@@ -51,7 +51,7 @@ public class KeyValueNode extends AbstractExpressionNode {
      *
      * @param key the key expression node to set
      */
-    public void setKey(ExpressionNode key) {
+    public void setKey(Expression key) {
         this.key = key;
     }
 

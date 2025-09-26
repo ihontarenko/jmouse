@@ -81,7 +81,7 @@ public class TemplateSplitter implements Splitter<List<RawToken>, TokenizableSou
                 tokens.add(new RawToken(open, source.getLineNumber(startOffset), startOffset, OPEN_TAG));
 
                 // Tokenize the tag content using ExpressionSplitter.
-                LOGGER.info("Inner ExpressionNode: '{}'", expression);
+                LOGGER.info("Inner Expression: '{}'", expression);
                 int innerIndex  = startIndex + open.length();
                 int innerOffset = offset + innerIndex;
                 tokens.addAll(splitter.split(source, innerOffset, innerOffset + expression.length()));

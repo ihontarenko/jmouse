@@ -2,8 +2,8 @@ package org.jmouse.el.node.expression;
 
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.AbstractExpressionNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.AbstractExpression;
+import org.jmouse.el.node.Expression;
 
 /**
  * Represents a ternary (conditional) expression in the view language.
@@ -19,72 +19,72 @@ import org.jmouse.el.node.ExpressionNode;
  * </pre>
  * </p>
  */
-public class TernaryNode extends AbstractExpressionNode {
+public class TernaryNode extends AbstractExpression {
 
     /**
      * The condition expression to evaluate first.
      */
-    private ExpressionNode condition;
+    private Expression condition;
     /**
      * The expression to evaluate if the condition is true.
      */
-    private ExpressionNode thenBranch;
+    private Expression thenBranch;
     /**
      * The expression to evaluate if the condition is false.
      */
-    private ExpressionNode elseBranch;
+    private Expression elseBranch;
 
     /**
      * Returns the condition expression.
      *
-     * @return the condition {@link ExpressionNode}
+     * @return the condition {@link Expression}
      */
-    public ExpressionNode getCondition() {
+    public Expression getCondition() {
         return condition;
     }
 
     /**
      * Sets the condition expression.
      *
-     * @param condition the condition {@link ExpressionNode} to set
+     * @param condition the condition {@link Expression} to set
      */
-    public void setCondition(ExpressionNode condition) {
+    public void setCondition(Expression condition) {
         this.condition = condition;
     }
 
     /**
      * Returns the 'then' branch expression.
      *
-     * @return the {@link ExpressionNode} for the true case
+     * @return the {@link Expression} for the true case
      */
-    public ExpressionNode getThenBranch() {
+    public Expression getThenBranch() {
         return thenBranch;
     }
 
     /**
      * Sets the 'then' branch expression.
      *
-     * @param thenBranch the {@link ExpressionNode} to evaluate if the condition is true
+     * @param thenBranch the {@link Expression} to evaluate if the condition is true
      */
-    public void setThenBranch(ExpressionNode thenBranch) {
+    public void setThenBranch(Expression thenBranch) {
         this.thenBranch = thenBranch;
     }
 
     /**
      * Returns the 'else' branch expression.
      *
-     * @return the {@link ExpressionNode} for the false case
+     * @return the {@link Expression} for the false case
      */
-    public ExpressionNode getElseBranch() {
+    public Expression getElseBranch() {
         return elseBranch;
     }
 
     /**
      * Sets the 'else' branch expression.
      *
-     * @param elseBranch the {@link ExpressionNode} to evaluate if the condition is false
+     * @param elseBranch the {@link Expression} to evaluate if the condition is false
      */
-    public void setElseBranch(ExpressionNode elseBranch) {
+    public void setElseBranch(Expression elseBranch) {
         this.elseBranch = elseBranch;
     }
 

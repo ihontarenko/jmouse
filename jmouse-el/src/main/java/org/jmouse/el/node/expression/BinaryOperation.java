@@ -4,8 +4,8 @@ import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Operator;
 import org.jmouse.el.extension.operator.ComparisonOperator;
-import org.jmouse.el.node.AbstractExpressionNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.AbstractExpression;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Visitor;
 
 /**
@@ -17,12 +17,12 @@ import org.jmouse.el.node.Visitor;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class BinaryOperation extends AbstractExpressionNode {
+public class BinaryOperation extends AbstractExpression {
 
     /**
      * The left-hand side tag of the binary operation.
      */
-    private final ExpressionNode left;
+    private final Expression left;
 
     /**
      * The operator used in the binary operation.
@@ -32,7 +32,7 @@ public class BinaryOperation extends AbstractExpressionNode {
     /**
      * The right-hand side tag of the binary operation.
      */
-    private final ExpressionNode right;
+    private final Expression right;
 
     /**
      * Constructs a {@code BinaryOperation} with the specified left-hand side tag,
@@ -42,7 +42,7 @@ public class BinaryOperation extends AbstractExpressionNode {
      * @param operator the operator used in the binary operation
      * @param right    the right-hand side tag of the binary operation
      */
-    public BinaryOperation(ExpressionNode left, Operator operator, ExpressionNode right) {
+    public BinaryOperation(Expression left, Operator operator, Expression right) {
         this.left = left;
         this.operator = operator;
         this.right = right;
@@ -53,7 +53,7 @@ public class BinaryOperation extends AbstractExpressionNode {
      *
      * @return the left-hand side tag
      */
-    public ExpressionNode getLeft() {
+    public Expression getLeft() {
         return left;
     }
 
@@ -62,7 +62,7 @@ public class BinaryOperation extends AbstractExpressionNode {
      *
      * @return the right-hand side tag
      */
-    public ExpressionNode getRight() {
+    public Expression getRight() {
         return right;
     }
 

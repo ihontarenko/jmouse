@@ -1,7 +1,7 @@
 package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.NodeVisitor;
@@ -12,8 +12,8 @@ import java.util.Map;
 
 public class MacroNode extends AbstractNode {
 
-    private final Map<String, ExpressionNode> defaultValues = new HashMap<>();
-    private       String                      name;
+    private final Map<String, Expression> defaultValues = new HashMap<>();
+    private       String                  name;
     private       List<String>                arguments;
     private       Node                        body;
 
@@ -41,11 +41,11 @@ public class MacroNode extends AbstractNode {
         this.body = body;
     }
 
-    public ExpressionNode getDefaultValue(String name) {
+    public Expression getDefaultValue(String name) {
         return defaultValues.get(name);
     }
 
-    public void setDefaultValues(Map<String, ExpressionNode> defaultValues) {
+    public void setDefaultValues(Map<String, Expression> defaultValues) {
         this.defaultValues.putAll(defaultValues);
     }
 

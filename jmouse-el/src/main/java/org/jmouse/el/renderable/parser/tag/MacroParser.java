@@ -4,7 +4,7 @@ import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.CursorMatcher;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.ParameterNode;
 import org.jmouse.el.node.expression.ParameterSetNode;
@@ -52,8 +52,8 @@ public class MacroParser implements TagParser {
         TemplateParser              templateParser = (TemplateParser) context.getParser(TemplateParser.class);
         Token                       name           = cursor.ensure(T_IDENTIFIER);
         MacroNode                   macro          = new MacroNode();
-        List<String>                names          = new ArrayList<>();
-        Map<String, ExpressionNode> defaults       = new HashMap<>();
+        List<String>            names    = new ArrayList<>();
+        Map<String, Expression> defaults = new HashMap<>();
 
         macro.setName(name.value());
 
@@ -64,7 +64,7 @@ public class MacroParser implements TagParser {
             if (context.getParser(ParametersParser.class)
                     .parse(cursor, context) instanceof ParameterSetNode parameters) {
                 for (ParameterNode parameter : parameters.getSet()) {
-                    ExpressionNode defaultValue = parameter.getDefaultValue();
+                    Expression defaultValue = parameter.getDefaultValue();
                     names.add(parameter.getName());
                     if (defaultValue != null) {
                         defaults.put(parameter.getName(), defaultValue);

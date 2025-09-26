@@ -3,7 +3,7 @@ package org.jmouse.el.renderable.parser.tag;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.CursorMatcher;
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.LiteralParser;
 import org.jmouse.el.parser.ParserContext;
@@ -43,7 +43,7 @@ public class BlockParser implements TagParser {
         // Consume '{% block %}'
         cursor.ensure(T_BLOCK);
         // Parse the block name (literal expression)
-        ExpressionNode name = (ExpressionNode)
+        Expression name = (Expression)
                 context.getParser(LiteralParser.class).parse(cursor, context);
 
         // Consume 'override' keyword if any

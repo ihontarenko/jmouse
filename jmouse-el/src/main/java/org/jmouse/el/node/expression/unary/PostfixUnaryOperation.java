@@ -3,12 +3,9 @@ package org.jmouse.el.node.expression.unary;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Operator;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.expression.PropertyNode;
 import org.jmouse.el.node.expression.UnaryOperation;
-
-import static org.jmouse.el.extension.operator.UnaryOperator.DECREMENT;
-import static org.jmouse.el.extension.operator.UnaryOperator.INCREMENT;
 
 /**
  * Represents a postfix unary operation in the Abstract Syntax Tree (AST).
@@ -27,7 +24,7 @@ public class PostfixUnaryOperation extends UnaryOperation {
      * @param operand  the operand tag (e.g., a variable)
      * @param operator the postfix operator (e.g., {@code ++}, {@code --})
      */
-    public PostfixUnaryOperation(ExpressionNode operand, Operator operator) {
+    public PostfixUnaryOperation(Expression operand, Operator operator) {
         super(operand, operator);
     }
 

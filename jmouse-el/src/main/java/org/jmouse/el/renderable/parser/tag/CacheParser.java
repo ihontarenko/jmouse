@@ -3,7 +3,7 @@ package org.jmouse.el.renderable.parser.tag;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.CursorMatcher;
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.ParserContext;
@@ -46,7 +46,7 @@ public class CacheParser implements TagParser {
         Matcher<TokenCursor> matcher = CursorMatcher.sequence(T_OPEN_EXPRESSION, T_END_CACHE);
 
         // Parse the key expression
-        ExpressionNode key = (ExpressionNode) context.getParser(ExpressionParser.class).parse(cursor, context);
+        Expression key = (Expression) context.getParser(ExpressionParser.class).parse(cursor, context);
         cache.setKey(key);
 
         // Consume closing '%}'

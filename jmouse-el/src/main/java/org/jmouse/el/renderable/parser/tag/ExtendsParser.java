@@ -1,7 +1,7 @@
 package org.jmouse.el.renderable.parser.tag;
 
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.parser.LiteralParser;
 import org.jmouse.el.parser.ParserContext;
@@ -16,7 +16,7 @@ public class ExtendsParser implements TagParser {
         cursor.ensure(TemplateToken.T_EXTENDS);
 
         ExtendsNode    node  = new ExtendsNode();
-        ExpressionNode value = (ExpressionNode) context.getParser(LiteralParser.class)
+        Expression value = (Expression) context.getParser(LiteralParser.class)
                 .parse(cursor, context);
 
         node.setPath(value);

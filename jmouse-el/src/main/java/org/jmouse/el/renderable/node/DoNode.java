@@ -1,26 +1,26 @@
 package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.NodeVisitor;
 
 public class DoNode extends AbstractNode {
 
-    ExpressionNode expression;
+    Expression expression;
 
     /**
      * Constructs an {@code AbstractNode} with no parent.
      */
-    public DoNode(ExpressionNode expression) {
+    public DoNode(Expression expression) {
         this.expression = expression;
     }
 
-    public ExpressionNode getExpression() {
+    public Expression getExpression() {
         return expression;
     }
 
-    public void setExpression(ExpressionNode expression) {
+    public void setExpression(Expression expression) {
         this.expression = expression;
     }
 

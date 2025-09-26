@@ -1,19 +1,19 @@
 package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.NodeVisitor;
 
 public class PrintNode extends AbstractNode {
 
-    private final ExpressionNode expression;
+    private final Expression expression;
 
-    public PrintNode(ExpressionNode expression) {
+    public PrintNode(Expression expression) {
         this.expression = expression;
     }
 
-    public ExpressionNode getExpression() {
+    public Expression getExpression() {
         return expression;
     }
 

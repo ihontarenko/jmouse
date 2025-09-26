@@ -1,19 +1,19 @@
 package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.NodeVisitor;
 
 public class IncludeNode extends AbstractNode {
 
-    private final ExpressionNode path;
+    private final Expression path;
 
-    public IncludeNode(ExpressionNode path) {
+    public IncludeNode(Expression path) {
         this.path = path;
     }
 
-    public ExpressionNode getPath() {
+    public Expression getPath() {
         return path;
     }
 

@@ -3,7 +3,7 @@ package org.jmouse.el.renderable.parser.tag;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.LiteralNode;
 import org.jmouse.el.node.expression.NameSetNode;
@@ -43,7 +43,7 @@ public class UseParser implements TagParser {
         cursor.ensure(T_USE);
 
         // Parse the path expression to the other view
-        ExpressionNode path = (ExpressionNode) context.getParser(ExpressionParser.class).parse(cursor, context);
+        Expression path = (Expression) context.getParser(ExpressionParser.class).parse(cursor, context);
 
         // Consume 'get' keyword
         cursor.ensure(T_GET);

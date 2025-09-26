@@ -1,30 +1,30 @@
 package org.jmouse.el.renderable.node;
 
 import org.jmouse.el.node.AbstractNode;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.Visitor;
 import org.jmouse.el.renderable.NodeVisitor;
 
 public class EmbedNode extends AbstractNode {
 
-    private ExpressionNode path;
-    private ExpressionNode with;
-    private Node           body;
+    private Expression path;
+    private Expression with;
+    private Node       body;
 
-    public ExpressionNode getPath() {
+    public Expression getPath() {
         return path;
     }
 
-    public void setPath(ExpressionNode path) {
+    public void setPath(Expression path) {
         this.path = path;
     }
 
-    public ExpressionNode getWith() {
+    public Expression getWith() {
         return with;
     }
 
-    public void setWith(ExpressionNode with) {
+    public void setWith(Expression with) {
         this.with = with;
     }
 

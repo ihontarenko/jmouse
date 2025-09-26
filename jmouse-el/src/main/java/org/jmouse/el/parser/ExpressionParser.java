@@ -1,7 +1,7 @@
 package org.jmouse.el.parser;
 
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.TernaryNode;
 
@@ -19,15 +19,15 @@ public class ExpressionParser implements Parser {
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
         OperatorParser operatorParser = (OperatorParser) context.getParser(OperatorParser.class);
-        ExpressionNode left           = (ExpressionNode) operatorParser.parse(cursor, context);
+        Expression     left           = (Expression) operatorParser.parse(cursor, context);
 
         // ternary conditional “? trueExpression : falseExpression”
         if (cursor.currentIf(T_QUESTION)) {
             TernaryNode ternary = new TernaryNode();
             ternary.setCondition(left);
-            ternary.setThenBranch((ExpressionNode) parse(cursor, context));
+            ternary.setThenBranch((Expression) parse(cursor, context));
             cursor.ensure(T_COLON);
-            ternary.setElseBranch((ExpressionNode) parse(cursor, context));
+            ternary.setElseBranch((Expression) parse(cursor, context));
             left = ternary;
         }
 

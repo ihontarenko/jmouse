@@ -6,7 +6,7 @@ import org.jmouse.el.extension.operator.NullCoalesceOperator;
 import org.jmouse.el.extension.operator.TestOperator;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.node.ExpressionNode;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.BinaryOperation;
 import org.jmouse.el.node.expression.FilterNode;
@@ -43,8 +43,8 @@ public class OperatorParser implements Parser {
      * @param precedence the current precedence level
      * @return the parsed expression node
      */
-    private ExpressionNode parseExpression(TokenCursor cursor, ParserContext context, int precedence) {
-        ExpressionNode left = parsePrimaryExpression(cursor, context);
+    private Expression parseExpression(TokenCursor cursor, ParserContext context, int precedence) {
+        Expression left = parsePrimaryExpression(cursor, context);
 
         while (cursor.hasNext()) {
             Token    token    = cursor.peek();
@@ -65,7 +65,7 @@ public class OperatorParser implements Parser {
                 case NullCoalesceOperator.NULL_COALESCE -> {
                     NullSafeFallbackNode node = new NullSafeFallbackNode();
                     node.setNullable(left);
-                    node.setOtherwise((ExpressionNode) parse(cursor, context));
+                    node.setOtherwise((Expression) parse(cursor, context));
                     left = node;
                 }
                 case FilterOperator.FILTER -> {
@@ -77,7 +77,7 @@ public class OperatorParser implements Parser {
                     }
                 }
                 default -> {
-                    ExpressionNode right = parseExpression(cursor, context, operator.getPrecedence() + 1);
+                    Expression right = parseExpression(cursor, context, operator.getPrecedence() + 1);
                     left = new BinaryOperation(left, operator, right);
                 }
             }
@@ -93,9 +93,9 @@ public class OperatorParser implements Parser {
      * @param context the parser context
      * @return the parsed primary expression node
      */
-    private ExpressionNode parsePrimaryExpression(TokenCursor cursor, ParserContext context) {
+    private Expression parsePrimaryExpression(TokenCursor cursor, ParserContext context) {
         PrimaryExpressionParser parser = (PrimaryExpressionParser) context.getParser(PrimaryExpressionParser.class);
-        ExpressionNode          left   = (ExpressionNode) parser.parse(cursor, context);
+        Expression              left   = (Expression) parser.parse(cursor, context);
 
         // Implicit multiplication: e.g., 2(3 + 4) becomes 2 * (3 + 4)
         if (cursor.isCurrent(T_OPEN_PAREN)) {

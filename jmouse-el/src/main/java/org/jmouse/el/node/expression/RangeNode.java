@@ -1,12 +1,12 @@
 package org.jmouse.el.node.expression;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.AbstractExpressionNode;
+import org.jmouse.el.node.AbstractExpression;
 
 import java.util.Iterator;
 import java.util.stream.IntStream;
 
-public class RangeNode extends AbstractExpressionNode {
+public class RangeNode extends AbstractExpression {
 
     private int               start;
     private int               end;
