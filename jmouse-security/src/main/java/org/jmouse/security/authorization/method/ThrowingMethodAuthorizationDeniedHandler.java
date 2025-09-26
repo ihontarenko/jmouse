@@ -1,4 +1,4 @@
-package org.jmouse.security.authorization.method.deny;
+package org.jmouse.security.authorization.method;
 
 import org.jmouse.security.authorization.AccessDeniedException;
 import org.jmouse.security.authorization.AuthorizationDecision;

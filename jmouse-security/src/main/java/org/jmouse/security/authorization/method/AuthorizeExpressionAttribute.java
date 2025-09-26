@@ -1,7 +1,6 @@
-package org.jmouse.security.authorization.method.expression;
+package org.jmouse.security.authorization.method;
 
 import org.jmouse.el.node.Expression;
-import org.jmouse.security.authorization.method.deny.MethodAuthorizationDeniedHandler;
 
 public final class AuthorizeExpressionAttribute implements ExpressionAttribute {
 

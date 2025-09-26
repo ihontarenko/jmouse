@@ -1,4 +1,4 @@
-package org.jmouse.security.authorization.method.expression;
+package org.jmouse.security.authorization.method;
 
 public class AuthorizeExpressionAttributeRegistry extends AbstractExpressionAttributeRegistry {
 }
