@@ -1,4 +1,4 @@
-package org.jmouse.security.authorization;
+package org.jmouse.security.authorization.voting;
 
 public enum AccessDecisionStrategy {
     AFFIRMATIVE,

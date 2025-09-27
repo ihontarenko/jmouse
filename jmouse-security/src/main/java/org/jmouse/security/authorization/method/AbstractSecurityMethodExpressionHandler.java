@@ -2,7 +2,6 @@ package org.jmouse.security.authorization.method;
 
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.Expression;
 import org.jmouse.security.core.Authentication;
 
 abstract public class AbstractSecurityMethodExpressionHandler<T> implements ExpressionHandler<T> {
@@ -23,11 +22,6 @@ abstract public class AbstractSecurityMethodExpressionHandler<T> implements Expr
         EvaluationContext evaluationContext = getExpressionLanguage().newContext();
         complementEvaluationContext(authentication, invocation, evaluationContext);
         return evaluationContext;
-    }
-
-    @Override
-    public boolean evaluate(Expression expression, EvaluationContext context) {
-        return false;
     }
 
     abstract protected void complementEvaluationContext(
