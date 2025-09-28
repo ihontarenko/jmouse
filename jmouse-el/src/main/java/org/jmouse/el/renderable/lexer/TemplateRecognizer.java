@@ -23,7 +23,7 @@ public class TemplateRecognizer extends CompositeRecognizer {
     }
 
     @Override
-    public int getOrder() {
+    public int order() {
         return -10;
     }
 
@@ -35,7 +35,7 @@ public class TemplateRecognizer extends CompositeRecognizer {
         }
 
         @Override
-        public int getOrder() {
+        public int order() {
             return 10;
         }
 

@@ -32,7 +32,7 @@ public class CompositeRecognizer implements Recognizer<Token.Type, RawToken> {
     }
 
     @Override
-    public int getOrder() {
+    public int order() {
         return 0;
     }
 

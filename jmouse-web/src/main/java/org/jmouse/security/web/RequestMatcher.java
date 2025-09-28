@@ -14,6 +14,10 @@ import java.util.Set;
 
 public interface RequestMatcher extends Matcher<HttpServletRequest> {
 
+    static RequestMatcher any() {
+        return request -> true;
+    }
+
     static RequestMatcher pathPattern(String pattern) {
         return new PathPatternRequestMatcher(pattern);
     }

@@ -59,7 +59,7 @@ abstract public class AbstractPropertySource<T> implements PropertySource<T>, Or
      * @return the order value
      */
     @Override
-    public int getOrder() {
+    public int order() {
         return order;
     }
 

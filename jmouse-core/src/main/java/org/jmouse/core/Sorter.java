@@ -20,7 +20,7 @@ public final class Sorter {
 
     /**
      * A comparator that first compares objects by priority (annotation or
-     * {@link Ordered#getOrder()}) and then, if priorities are equal, by their hash codes.
+     * {@link Ordered#order()}) and then, if priorities are equal, by their hash codes.
      */
     public static final PriorityComparator PRIORITY_COMPARATOR = new PriorityComparator();
 
@@ -67,7 +67,7 @@ public final class Sorter {
                 if (object instanceof Class<?> klass) {
                     order = getAnnotationValue(klass, Priority.class, Priority::value);
                 } else if (object instanceof Ordered ordered) {
-                    order = ordered.getOrder();
+                    order = ordered.order();
                 } else {
                     Integer priority = getAnnotationValue(object.getClass(), Priority.class, Priority::value);
                     order = requireNonNullElse(priority, order);

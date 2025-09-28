@@ -50,7 +50,7 @@ public class ServletListenerRegistrationBean<L extends EventListener> extends Ab
     @Override
     public String toString() {
         return "ServletListenerRegistrationBean[%d]['%s', implementation=%s]".formatted(
-                getOrder(), getDescription(), listener.getClass().getSimpleName());
+                order(), getDescription(), listener.getClass().getSimpleName());
     }
 
 }

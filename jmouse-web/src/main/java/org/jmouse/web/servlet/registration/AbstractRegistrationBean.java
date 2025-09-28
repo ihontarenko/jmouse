@@ -106,7 +106,7 @@ abstract public class AbstractRegistrationBean implements RegistrationBean, WebA
      * Determine the order of this registration relative to others.
      * <p>
      * A lower value indicates higher priority.  If the parent
-     * interface {@link RegistrationBean#getOrder()} returns a non-zero
+     * interface {@link RegistrationBean#order()} returns a non-zero
      * value, that value will be used unless this instance’s own order
      * has been explicitly set to match.
      * </p>
@@ -114,9 +114,9 @@ abstract public class AbstractRegistrationBean implements RegistrationBean, WebA
      * @return the order value (lower =&gt; higher priority)
      */
     @Override
-    public int getOrder() {
+    public int order() {
         int order       = this.order;
-        int parentOrder = RegistrationBean.super.getOrder();
+        int parentOrder = RegistrationBean.super.order();
 
         if (parentOrder != 0 && order != parentOrder) {
             order = parentOrder;

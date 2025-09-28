@@ -197,13 +197,13 @@ public class ServletRegistrationBean<S extends Servlet>
      * @return the order value (lower =&gt; higher priority)
      */
     @Override
-    public int getOrder() {
+    public int order() {
         return -1000 + getLoadOnStartup();
     }
 
     @Override
     public String toString() {
         return "ServletRegistrationBean[%d][name='%s', servlet=%s, mappings=%s, loadOnStartup=%d]".formatted(
-                getOrder(), getServletName(), servlet.getClass().getSimpleName(), mappings, loadOnStartup);
+                order(), getServletName(), servlet.getClass().getSimpleName(), mappings, loadOnStartup);
     }
 }

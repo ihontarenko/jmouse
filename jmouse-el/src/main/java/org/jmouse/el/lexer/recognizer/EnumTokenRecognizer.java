@@ -40,7 +40,7 @@ public class EnumTokenRecognizer<T extends Enum<T> & Token.Type> extends EnumFin
      * @return the recognition order value
      */
     @Override
-    public int getOrder() {
+    public int order() {
         return order;
     }
 

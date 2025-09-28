@@ -27,7 +27,7 @@ public interface RegistrationBean extends Ordered {
      * Order of this registration; lower values have higher priority.
      */
     @Override
-    default int getOrder() {
+    default int order() {
         Integer order = Reflections.getAnnotationValue(getClass(), Priority.class, Priority::value);
 
         if (order == null) {

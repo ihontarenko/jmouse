@@ -2,7 +2,7 @@ package org.jmouse.core;
 
 /**
  * A functional interface representing an entity with an order or priority.
- * Implementations can specify their relative order by overriding the {@link #getOrder()} method.
+ * Implementations can specify their relative order by overriding the {@link #order()} method.
  */
 @FunctionalInterface
 public interface Ordered {
@@ -13,7 +13,7 @@ public interface Ordered {
      *
      * @return the order value
      */
-    int getOrder();
+    int order();
 
     /**
      * Sets the order or priority of this structured.
