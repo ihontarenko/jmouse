@@ -2,7 +2,7 @@ package email.app;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
-import org.jmouse.web.mvc.Route;
+import org.jmouse.web.match.Route;
 import org.jmouse.web.mvc.mapping.RequestHttpHandlerRegistration;
 
 @BeanFactories

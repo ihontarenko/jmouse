@@ -105,6 +105,7 @@ public interface Matcher<T> {
      * @return a new matcher that represents the logical AND of the set of matchers
      */
     @SafeVarargs
+    @SuppressWarnings("unchecked")
     static <T> Matcher<T> logicalAnd(Matcher<? super T>... matchers) {
         return (Matcher<T>) Arrays.stream(matchers).reduce(Matcher.constant(true), Matcher::logicalAnd);
     }
@@ -129,6 +130,7 @@ public interface Matcher<T> {
      * @return a new matcher that represents the logical OR of the set of matchers
      */
     @SafeVarargs
+    @SuppressWarnings("unchecked")
     static <T> Matcher<T> logicalOr(Matcher<? super T>... matchers) {
         return (Matcher<T>) Arrays.stream(matchers).reduce(Matcher.constant(false), Matcher::logicalOr);
     }

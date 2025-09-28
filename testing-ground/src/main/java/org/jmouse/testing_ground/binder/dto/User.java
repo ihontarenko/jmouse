@@ -29,6 +29,10 @@ public class User {
 
     }
 
+    public boolean hasName(String prefix) {
+        return getName().startsWith(prefix);
+    }
+
     public List<Address> getAddress() {
         return address;
     }

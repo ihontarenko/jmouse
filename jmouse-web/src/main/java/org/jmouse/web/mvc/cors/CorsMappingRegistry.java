@@ -1,13 +1,15 @@
 package org.jmouse.web.mvc.cors;
 
-import org.jmouse.web.mvc.AntPattern;
-import org.jmouse.web.mvc.RoutePath;
+import org.jmouse.web.match.RegexpPathPattern;
+import org.jmouse.web.match.SimplePathPattern;
+import org.jmouse.web.match.AntPattern;
+import org.jmouse.web.match.PathPattern;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 📦 Registry of CORS configurations keyed by {@link RoutePath}.
+ * 📦 Registry of CORS configurations keyed by {@link PathPattern}.
  *
  * <p>Preserves insertion order (via {@link LinkedHashMap}). Not thread-safe.</p>
  *
@@ -19,10 +21,10 @@ import java.util.Map;
  *         .allowedMethods("GET", "POST");
  * }</pre>
  *
- * @see RoutePath
- * @see org.jmouse.web.mvc.AntPattern
- * @see org.jmouse.web.mvc.RegexpPathPattern
- * @see org.jmouse.web.mvc.SimplePathPattern
+ * @see PathPattern
+ * @see AntPattern
+ * @see RegexpPathPattern
+ * @see SimplePathPattern
  * @see CorsConfiguration
  */
 public class CorsMappingRegistry {
@@ -30,7 +32,7 @@ public class CorsMappingRegistry {
     /**
      * Route pattern → CORS configuration.
      */
-    private final Map<RoutePath, CorsConfiguration> mappings = new LinkedHashMap<>();
+    private final Map<PathPattern, CorsConfiguration> mappings = new LinkedHashMap<>();
 
     /**
      * Registers a single {@link CorsConfiguration} instance for all given patterns.
@@ -51,13 +53,13 @@ public class CorsMappingRegistry {
     }
 
     /**
-     * Registers the given {@link CorsConfiguration} for an {@link RoutePath}.
+     * Registers the given {@link CorsConfiguration} for an {@link PathPattern}.
      *
      * @param antPattern    route pattern
      * @param configuration CORS configuration to associate
      * @throws IllegalStateException if the pattern is already registered
      */
-    public void addMapping(RoutePath antPattern, CorsConfiguration configuration) {
+    public void addMapping(PathPattern antPattern, CorsConfiguration configuration) {
         CorsConfiguration previous = mappings.get(antPattern);
 
         if (previous != null) {
@@ -77,7 +79,7 @@ public class CorsMappingRegistry {
      *
      * @return map of {@link AntPattern} to {@link CorsConfiguration}
      */
-    public Map<RoutePath, CorsConfiguration> getMappings() {
+    public Map<PathPattern, CorsConfiguration> getMappings() {
         return mappings;
     }
 
@@ -90,8 +92,8 @@ public class CorsMappingRegistry {
     public CorsConfiguration lookup(String path) {
         CorsConfiguration configuration = null;
 
-        for (Map.Entry<RoutePath, CorsConfiguration> entry : getMappings().entrySet()) {
-            RoutePath routePath = entry.getKey();
+        for (Map.Entry<PathPattern, CorsConfiguration> entry : getMappings().entrySet()) {
+            PathPattern routePath = entry.getKey();
             if (routePath.matches(path)) {
                 configuration = entry.getValue();
                 break;

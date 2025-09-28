@@ -37,7 +37,13 @@ public class RequestAttributesHolder {
      * @return request attributes or {@code null} if not set
      */
     public static RequestAttributes getRequestAttributes() {
-        return ATTRIBUTES_THREAD_LOCAL.get();
+        RequestAttributes attributes = ATTRIBUTES_THREAD_LOCAL.get();
+
+        if (attributes == null) {
+            throw new IllegalStateException("NO SERVLET-REQUEST AVAILABLE!");
+        }
+
+        return attributes;
     }
 
     /**

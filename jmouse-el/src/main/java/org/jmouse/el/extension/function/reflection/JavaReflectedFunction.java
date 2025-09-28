@@ -14,49 +14,60 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * A {@link Function} implementation that invokes one or more Java methods reflectively.
- * <p>
- * This class holds a list of {@link Method} instances under a common name and, when executed,
- * selects the appropriate method based on the runtime argument types. It then invokes the
- * matching method reflectively and returns its result.
- * </p>
+ * 🔭 Reflectively-backed EL function (overload-aware).
+ *
+ * <p>Holds multiple Java {@link Method}s under a single function name and picks the best
+ * match at runtime using soft parameter-type matching (boxing, assignability, etc.).</p>
+ *
+ * <h3>Notes</h3>
+ * <ul>
+ *   <li>🧩 Overloads are resolved via {@link MethodMatchers#hasSoftParameterTypes(Class[])}.</li>
+ *   <li>⚙️ Invokes instance or static methods depending on whether {@code instance} is provided.</li>
+ *   <li>🚫 {@code null} arguments cannot be typed and will not match without additional typing hints.</li>
+ * </ul>
  */
 public class JavaReflectedFunction implements Function {
 
     /**
-     * The name of the function as exposed to the view language.
+     * 🏷️ Function name as exposed to the expression language.
      */
     private final String name;
 
     /**
-     * The list of Java methods that implement this function under different signatures.
+     * 🔁 Candidate Java methods implementing this function (possibly overloaded).
      */
     private final List<Method> methods;
 
     /**
-     * Constructs a new JavaReflectedFunction.
-     *
-     * @param name    the name by which this function is referenced in templates
-     * @param methods the list of {@link Method} instances that can be invoked
+     * 🧱 Target instance for invocation (nullable).
+     * <p>If {@code null}, matched methods are invoked as static.</p>
      */
-    public JavaReflectedFunction(String name, List<Method> methods) {
+    private final Object instance;
+
+    /**
+     * 🏗️ Creates a new reflective function wrapper.
+     *
+     * @param instance target instance for invocation; {@code null} for static methods
+     * @param name     the function name referenced in expressions
+     * @param methods  candidate Java methods (overloads allowed)
+     */
+    public JavaReflectedFunction(Object instance, String name, List<Method> methods) {
+        this.instance = instance;
         this.name = name;
         this.methods = methods;
     }
 
     /**
-     * Executes the function by matching the runtime argument types against the available methods.
-     * <p>
-     * The runtime classes of the provided {@link Arguments} are used to select a matching method
-     * via {@link MethodMatchers#hasSoftParameterTypes(Class[]) MethodMatchers.hasSoftParameterTypes}.
-     * If no matching method is found, a {@link FunctionNotFoundException} is thrown.
-     * Otherwise, the selected method is invoked reflectively using {@link Reflections#invokeMethod}.
-     * </p>
+     * 🚀 Executes by selecting the first method whose parameters softly match runtime argument types.
      *
-     * @param arguments the arguments passed from the view, in evaluation order
-     * @param context   the evaluation context (provides conversion, scope, etc.)
-     * @return the result of the reflective method invocation
-     * @throws FunctionNotFoundException if no matching method signature is found
+     * <p>Runtime classes of {@link Arguments} are collected and checked against candidates using
+     * {@link MethodMatchers#hasSoftParameterTypes(Class[])}. On success, the method is invoked via
+     * {@link Reflections#invokeMethod(Object, Method, Object...)} and its result is returned.</p>
+     *
+     * @param arguments arguments from the expression (evaluation order)
+     * @param context   evaluation context (conversion, scopes, etc.)
+     * @return the reflective invocation result (may be {@code null})
+     * @throws FunctionNotFoundException if no overload matches the runtime types
      */
     @Override
     public Object execute(Arguments arguments, EvaluationContext context) {
@@ -77,19 +88,20 @@ public class JavaReflectedFunction implements Function {
 
         if (method == null) {
             throw new FunctionNotFoundException(
-                    "Function %s%s not found".formatted(name, Arrays.toString(types)
-                            .replace('[', '(').replace(']', ')'))
+                    "Function %s%s not found".formatted(
+                            name, Arrays.toString(types).replace('[', '(').replace(']', ')')
+                    )
             );
         }
 
         // Invoke the matched method reflectively (static invocation if target is null)
-        return Reflections.invokeMethod(null, method, arguments.toList().toArray(Object[]::new));
+        return Reflections.invokeMethod(instance, method, arguments.toList().toArray(Object[]::new));
     }
 
     /**
-     * Returns the name of this function as used in view expressions.
+     * 🏷️ Returns the function's public name (as used in expressions).
      *
-     * @return the function name
+     * @return function name
      */
     @Override
     public String getName() {

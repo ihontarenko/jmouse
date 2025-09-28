@@ -1,5 +1,8 @@
 package org.jmouse.web.mvc;
 
+import org.jmouse.web.match.Route;
+import org.jmouse.web.match.RouteMatch;
+
 public interface MappingResult {
 
     MappingResult EMPTY = new Default(null, null);

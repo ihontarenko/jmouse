@@ -2,17 +2,20 @@ package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.web.http.HttpMethod;
+import org.jmouse.web.match.PathPattern;
+import org.jmouse.web.match.Route;
+import org.jmouse.web.match.RouteMatch;
 import org.jmouse.web.mvc.cors.CorsConfiguration;
 import org.jmouse.web.mvc.mapping.RequestHttpHandlerMapping;
-import org.jmouse.web.mvc.routing.MappingRegistration;
-import org.jmouse.web.mvc.routing.MappingRegistry;
-import org.jmouse.web.mvc.routing.MappingCriteria;
+import org.jmouse.web.match.routing.MappingRegistration;
+import org.jmouse.web.match.routing.MappingRegistry;
+import org.jmouse.web.match.routing.MappingCriteria;
 import org.jmouse.core.AnsiColors;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.core.MethodParameter;
 import org.jmouse.web.http.request.RequestRoute;
-import org.jmouse.web.mvc.routing.condition.HttpMethodCondition;
-import org.jmouse.web.mvc.routing.condition.RequestPathCondition;
+import org.jmouse.web.match.routing.condition.HttpMethodMatcher;
+import org.jmouse.web.match.routing.condition.RequestPathMatcher;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -24,7 +27,7 @@ import static org.jmouse.core.Streamable.of;
 /**
  * 🧭 Abstract base class for route-based handler mappings.
  * <p>
- * Matches incoming HTTP requests against {@link RoutePath} routes and provides
+ * Matches incoming HTTP requests against {@link PathPattern} routes and provides
  * the matching handler of type {@code H}.
  *
  * <p>Usage example:
@@ -35,7 +38,7 @@ import static org.jmouse.core.Streamable.of;
  *
  * <p>Supports:
  * <ul>
- *   <li>Typed route matching via {@link RoutePath} and {@link RouteMatch}</li>
+ *   <li>Typed route matching via {@link PathPattern} and {@link RouteMatch}</li>
  *   <li>Dynamic handler registration via {@link #addHandlerMapping(Route, Object)}</li>
  *   <li>Request-scoped route resolution with {@link #getMappedHandler(HttpServletRequest)}</li>
  *   <li>Interceptor support via {@link HandlerInterceptorRegistry}</li>
@@ -158,7 +161,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      *
      * <p>Algorithm:</p>
      * <ul>
-     *   <li>Collect all {@link MappingCriteria} whose {@link RequestPathCondition} matches the path.</li>
+     *   <li>Collect all {@link MappingCriteria} whose {@link RequestPathMatcher} matches the path.</li>
      *   <li>Union all explicit method sets from mappings that do restrict methods.</li>
      *   <li>Always add {@code OPTIONS}; never include {@code TRACE}.</li>
      * </ul>
@@ -172,7 +175,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
         Set<HttpMethod> methods = new LinkedHashSet<>();
 
         for (MappingCriteria criterion : getRequestPathMappings(requestRoute)) {
-            HttpMethodCondition methodCondition = criterion.getMatcher(HttpMethodCondition.class);
+            HttpMethodMatcher methodCondition = criterion.getMatcher(HttpMethodMatcher.class);
             if (methodCondition != null) {
                 methods.addAll(methodCondition.getMethods());
             }
@@ -228,7 +231,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
     }
 
     /**
-     * 🧭 Returns mappings whose {@link RequestPathCondition} matches the request path.
+     * 🧭 Returns mappings whose {@link RequestPathMatcher} matches the request path.
      *
      * <p>Use this to pre-filter by path only (e.g., for diagnostics or to distinguish
      * 404 vs 405), without evaluating other conditions like method, headers, etc.</p>
@@ -237,13 +240,13 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      *
      * @param requestRoute parsed request route from the incoming HTTP request
      * @return list of path-matching {@link MappingCriteria} (possibly empty, never {@code null})
-     * @see RequestPathCondition#matches(RequestRoute)
+     * @see RequestPathMatcher#matches(RequestRoute)
      */
     private List<MappingCriteria> getRequestPathMappings(RequestRoute requestRoute) {
         List<MappingCriteria> candidates = new ArrayList<>();
 
         for (MappingCriteria mapping : mappingRegistry.getMappingCriteria()) {
-            RequestPathCondition pathCondition = mapping.getMatcher(RequestPathCondition.class);
+            RequestPathMatcher pathCondition = mapping.getMatcher(RequestPathMatcher.class);
             if (pathCondition.matches(requestRoute)) {
                 candidates.add(mapping);
             }

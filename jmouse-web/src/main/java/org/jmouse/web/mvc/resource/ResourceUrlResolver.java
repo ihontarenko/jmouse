@@ -2,9 +2,9 @@ package org.jmouse.web.mvc.resource;
 
 import org.jmouse.beans.InitializingBeanSupport;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.mvc.RoutePath;
+import org.jmouse.web.match.PathPattern;
 import org.jmouse.web.mvc.mapping.ResourceHttpMapping;
-import org.jmouse.web.mvc.routing.MappingRegistration;
+import org.jmouse.web.match.routing.MappingRegistration;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * 🌐 Resolves resource URLs by applying registered {@link ResourceHttpHandler}s.
  *
- * <p>Iterates over configured {@link RoutePath} mappings to find
+ * <p>Iterates over configured {@link PathPattern} mappings to find
  * a handler capable of rewriting or versioning the requested URL.</p>
  *
  * <p>💡 Typically used in views (via {@code jMouseAsset()} EL function)
@@ -21,14 +21,14 @@ import java.util.Map;
 public class ResourceUrlResolver implements InitializingBeanSupport<WebBeanContext> {
 
     /** 📌 Map of route paths to their corresponding resource handlers. */
-    private final Map<RoutePath, ResourceHttpHandler> mappings = new LinkedHashMap<>();
+    private final Map<PathPattern, ResourceHttpHandler> mappings = new LinkedHashMap<>();
 
     /**
      * 🔍 Look up a processed resource URL for the given raw path.
      *
      * <p>Steps:</p>
      * <ol>
-     *   <li>Find matching {@link RoutePath}</li>
+     *   <li>Find matching {@link PathPattern}</li>
      *   <li>Extract relative path from the match</li>
      *   <li>Build a {@link ResourceQuery} and resolver chain</li>
      *   <li>Compose the final URL via {@link ResourceResolverChain#compose}</li>
@@ -39,9 +39,9 @@ public class ResourceUrlResolver implements InitializingBeanSupport<WebBeanConte
      */
     public String lookupResourceUrl(String path) {
         ResourceHttpHandler handler = null;
-        RoutePath           matched = null;
+        PathPattern         matched = null;
 
-        for (Map.Entry<RoutePath, ResourceHttpHandler> entry : mappings.entrySet()) {
+        for (Map.Entry<PathPattern, ResourceHttpHandler> entry : mappings.entrySet()) {
             if (entry.getKey().matches(path)) {
                 handler = entry.getValue();
                 matched = entry.getKey();
@@ -79,7 +79,7 @@ public class ResourceUrlResolver implements InitializingBeanSupport<WebBeanConte
         ResourceHttpMapping resourceHttpMapping = context.getBean(ResourceHttpMapping.class);
         for (MappingRegistration<?> registration : resourceHttpMapping.getMappingRegistry().getRegistrations()) {
             if (registration.handler() instanceof ResourceHttpHandler resourceHttpHandler) {
-                RoutePath routePath = registration.criteria().getRoute().pathPattern();
+                PathPattern routePath = registration.criteria().getRoute().pathPattern();
                 mappings.put(routePath, resourceHttpHandler);
             }
         }

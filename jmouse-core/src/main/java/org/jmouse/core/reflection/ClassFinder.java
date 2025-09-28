@@ -93,6 +93,23 @@ public interface ClassFinder {
     }
 
     /**
+     * 🧬 Finds all classes that are <i>deeply</i> annotated with the given annotation type.
+     *
+     * <p>Performs a <b>composed</b> (deep) check via the annotation repository: scans the class,
+     * applicable superclasses (per {@link java.lang.annotation.Inherited}), and meta-annotations
+     * recursively.</p>
+     *
+     * @param annotation  the annotation type to look for (must not be {@code null})
+     * @param baseClasses scan scope anchors (e.g., marker types or roots) used by the underlying scanner
+     * @return a collection of matching classes (order unspecified)
+     * @see ClassMatchers#isDeepAnnotatedWith(Class)
+     * @see #findAnnotatedClasses(Class, Class[])
+     */
+    static Collection<Class<?>> findDeepAnnotatedClasses(Class<? extends Annotation> annotation, Class<?>... baseClasses) {
+        return findAll(ClassMatchers.isDeepAnnotatedWith(annotation), baseClasses);
+    }
+
+    /**
      * Finds all enum classes.
      *
      * @param baseClasses the base classes to scan

@@ -11,7 +11,7 @@ import org.jmouse.web.mvc.method.ReturnValueHandler;
 import org.jmouse.web.mvc.method.ReturnValueProcessor;
 import org.jmouse.web.mvc.method.converter.HttpMessageConverter;
 import org.jmouse.web.mvc.method.converter.MessageConverterManager;
-import org.jmouse.web.mvc.routing.MappingRegistry;
+import org.jmouse.web.match.routing.MappingRegistry;
 import org.jmouse.web.negotiation.MediaTypeLookup;
 
 import java.lang.reflect.AnnotatedElement;

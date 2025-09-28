@@ -44,17 +44,29 @@ public record RequestRoute(
      * @return route-compatible wrapper
      */
     public static RequestRoute ofRequest(HttpServletRequest request) {
-        RequestPath    requestPath    = RequestAttributesHolder.getRequestPath();
-        RequestHeaders requestHeaders = RequestHeaders.ofRequest(request);
-        Headers        headers        = requestHeaders.headers();
+        RequestRoute requestRoute = null;
 
-        return new RequestRoute(
-                HttpMethod.ofName(request.getMethod()),
-                requestPath,
-                QueryParameters.ofMap(request.getParameterMap()),
-                headers,
-                headers.getContentType(),
-                Set.copyOf(headers.getAccept())
-        );
+        if (request.getAttribute(REQUEST_ROUTE_ATTRIBUTE) instanceof RequestRoute cached) {
+            requestRoute = cached;
+        }
+
+        if (requestRoute == null) {
+            RequestPath    requestPath    = RequestAttributesHolder.getRequestPath();
+            RequestHeaders requestHeaders = RequestHeaders.ofRequest(request);
+            Headers        headers        = requestHeaders.headers();
+
+            requestRoute = new RequestRoute(
+                    HttpMethod.ofName(request.getMethod()),
+                    requestPath,
+                    QueryParameters.ofMap(request.getParameterMap()),
+                    headers,
+                    headers.getContentType(),
+                    Set.copyOf(headers.getAccept())
+            );
+
+            request.setAttribute(REQUEST_ROUTE_ATTRIBUTE, requestRoute);
+        }
+
+        return requestRoute;
     }
 }

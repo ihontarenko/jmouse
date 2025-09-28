@@ -5,6 +5,7 @@ import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.MethodImporter;
 import org.jmouse.el.extension.calculator.MathematicCalculator;
+import org.jmouse.testing_ground.binder.dto.Book;
 import org.jmouse.testing_ground.binder.dto.Status;
 import org.jmouse.testing_ground.binder.dto.User;
 import org.jmouse.testing_ground.binder.dto.UserStatus;
@@ -14,6 +15,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 public class Expressions {
@@ -40,7 +42,7 @@ public class Expressions {
 
         BigDecimal decimal = toInt.andThen(toLong.andThen(BigDecimal::new)).apply("123");
 
-        MethodImporter.importMethod(Strings.class, context.getExtensions());
+        MethodImporter.importMethod(Strings.class, context);
 
         context.setValue("test", 256);
         context.setValue("time", System.currentTimeMillis());
@@ -120,6 +122,17 @@ public class Expressions {
 
         EvaluationContext ctx = el.newContext();
         ctx.setValue("user", user2);
+
+        user2.setBooks(Set.of(
+                new Book() {{
+                    setAuthor("John");
+                }}
+        ));
+
+        MethodImporter.importMethod(user2, User.class, "u", ctx);
+
+        el.evaluate("u:getBooks() | map(b -> b.author | upper) | list", ctx);
+
         el.evaluate("set('username', user.name)", ctx);
 
         el.evaluate("set('result', isEmpty(''))", context);
@@ -140,8 +153,8 @@ public class Expressions {
         context.setValue("name", "Ivan");
 
         el.evaluate("x * 7", context);
-        el.evaluate("name * 3", context);
-        el.evaluate("name + 3", context);
+        el.evaluate("username * 3", context);
+        el.evaluate("username + 3", ctx);
 
         List<String> names = new ArrayList<>();
 

@@ -2,6 +2,7 @@ package org.jmouse.core.reflection;
 
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.matcher.TextMatchers;
+import org.jmouse.core.reflection.annotation.AnnotationRepository;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -131,6 +132,18 @@ public class ClassMatchers {
      */
     public static Matcher<Class<?>> isAnnotatedWith(Class<? extends Annotation> annotation) {
         return new AnnotatedClassMatcher(annotation);
+    }
+
+    /**
+     * 🧬 Creates a matcher that performs a deep annotation check:
+     * scans the class, and meta-annotations recursively.
+     *
+     * @param annotation the annotation type to look for (must not be {@code null})
+     * @return a matcher that evaluates to {@code true} if the annotation is found by deep inspection
+     * @see #isAnnotatedWith(Class)
+     */
+    public static Matcher<Class<?>> isDeepAnnotatedWith(Class<? extends Annotation> annotation) {
+        return new DeepAnnotatedClassMatcher(annotation);
     }
 
     /**
@@ -336,6 +349,14 @@ public class ClassMatchers {
         @Override
         public boolean matches(Class<?> clazz) {
             return clazz.isAnnotationPresent(annotation);
+        }
+    }
+
+    private record DeepAnnotatedClassMatcher(Class<? extends Annotation> annotation) implements Matcher<Class<?>> {
+        @Override
+        public boolean matches(Class<?> clazz) {
+            return AnnotationRepository.ofAnnotatedElement(clazz)
+                    .get(annotation).isPresent();
         }
     }
 

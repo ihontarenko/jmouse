@@ -18,7 +18,7 @@ public class PrimaryExpressionParser implements Parser {
         Node left = null;
 
         // parse left expression
-        if (cursor.matchesSequence(T_IDENTIFIER, BasicToken.T_OPEN_PAREN)) {
+        if (CursorMatcher.function().matches(cursor)) {
             left = context.getParser(FunctionParser.class).parse(cursor, context);
         } if (CursorMatcher.lambda().matches(cursor)) {
             left = context.getParser(LambdaParser.class).parse(cursor, context);

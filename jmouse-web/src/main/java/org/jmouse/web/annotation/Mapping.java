@@ -2,7 +2,7 @@ package org.jmouse.web.annotation;
 
 import org.jmouse.web.http.request.RequestRoute;
 import org.jmouse.web.http.HttpMethod;
-import org.jmouse.web.mvc.Route;
+import org.jmouse.web.match.Route;
 
 import java.lang.annotation.*;
 

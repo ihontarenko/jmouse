@@ -1,5 +1,9 @@
 package org.jmouse.web.mvc;
 
+import org.jmouse.web.match.PathPattern;
+import org.jmouse.web.match.RouteMatch;
+import org.jmouse.web.match.SimplePathPattern;
+
 import java.util.Map;
 
 /**
@@ -51,10 +55,10 @@ public final class SimplePathPatternSmoke {
     }
 
     private static void demo(String pattern, String path) {
-        RoutePath pp = SimplePathPattern.parse(pattern);
+        PathPattern         pp   = SimplePathPattern.parse(pattern);
         Map<String, Object> vars = pp.extractVariables(path);
-        String extracted = pp.extractPath(path);
-        RouteMatch match = pp.match(path);
+        String     extracted = pp.extractPath(path);
+        RouteMatch match     = pp.match(path);
         System.out.printf("%-34s ~ %-46s => %s : %s%n", pattern, path, vars, extracted);
         System.out.println("  match: " + (match == null ? "null" : match));
     }

@@ -5,7 +5,6 @@ import org.jmouse.core.MethodParameter;
 import org.jmouse.core.io.PatternMatcherResourceLoader;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.mvc.AbstractHandlerPathMapping;
-import org.jmouse.web.mvc.Route;
 import org.jmouse.web.mvc.method.converter.MessageConverterManager;
 import org.jmouse.web.mvc.resource.InternalResourceConfiguration;
 import org.jmouse.web.mvc.resource.ResourceHandlerRegistry;
@@ -14,7 +13,7 @@ import org.jmouse.web.mvc.resource.ResourceRegistration;
 
 import java.util.List;
 
-import static org.jmouse.web.mvc.Route.*;
+import static org.jmouse.web.match.Route.*;
 
 /**
  * 🧷 Path mapping for serving static resources.

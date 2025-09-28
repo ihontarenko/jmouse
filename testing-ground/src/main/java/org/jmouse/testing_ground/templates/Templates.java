@@ -32,7 +32,7 @@ public class Templates {
         Renderer          renderer = new TemplateRenderer(engine);
         EvaluationContext context  = template.newContext();
 
-        MethodImporter.importMethod(Strings.class, context.getExtensions());
+        MethodImporter.importMethod(Strings.class, context);
 
         context.setValue("book", getBook("Stephen King", "The Shining"));
         context.setValue("books", getBookList());

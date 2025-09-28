@@ -3,7 +3,7 @@ package org.jmouse.web.negotiation;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.Priority;
 import org.jmouse.web.mvc.HandlerMapping;
-import org.jmouse.web.mvc.RouteMatch;
+import org.jmouse.web.match.RouteMatch;
 
 import static org.jmouse.web.http.request.RequestAttributesHolder.getAttribute;
 

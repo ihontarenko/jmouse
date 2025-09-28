@@ -5,7 +5,7 @@ import org.jmouse.web.mvc.method.AbstractArgumentResolver;
 import org.jmouse.core.MethodParameter;
 import org.jmouse.web.http.request.RequestContext;
 import org.jmouse.web.mvc.MappingResult;
-import org.jmouse.web.mvc.RouteMatch;
+import org.jmouse.web.match.RouteMatch;
 
 import java.lang.reflect.Parameter;
 

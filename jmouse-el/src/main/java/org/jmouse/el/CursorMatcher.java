@@ -19,6 +19,10 @@ public class CursorMatcher {
         return new LambdaMatcher();
     }
 
+    public static Matcher<TokenCursor> function() {
+        return new FunctionMatcher();
+    }
+
     public static Matcher<TokenCursor> sequence(Token.Type... types) {
         return new SequnceMatcher(types);
     }
@@ -42,6 +46,16 @@ public class CursorMatcher {
         public boolean matches(TokenCursor cursor) {
             return cursor.isCurrent(T_NUMERIC, T_STRING, T_TRUE, T_FALSE, T_NULL,
                                     T_BYTE, T_SHORT, T_CHARACTER, T_INT, T_LONG, T_FLOAT, T_DOUBLE);
+        }
+
+    }
+
+    record FunctionMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            return cursor.matchesSequence(T_IDENTIFIER, BasicToken.T_OPEN_PAREN)
+                    || cursor.matchesSequence(T_IDENTIFIER, T_COLON, T_IDENTIFIER, BasicToken.T_OPEN_PAREN);
         }
 
     }
