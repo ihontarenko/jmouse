@@ -1,22 +1,20 @@
 package org.jmouse.security.web.config;
 
-import jakarta.servlet.Filter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.authorization.AuthorizationManager;
 import org.jmouse.security.web.AuthorizationFilter;
 import org.jmouse.security.web.OrderedFilter;
 
-public final class AuthorizeHttpRequestsConfigurer implements SecurityConfigurer<HttpSecurity> {
+public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder<B>> implements SecurityConfigurer<B> {
     private AuthorizationManager<HttpServletRequest> authorizationManager;
 
-    public AuthorizeHttpRequestsConfigurer rules(AuthorizationManager<HttpServletRequest> manager) {
+    public AuthorizeHttpRequestsConfigurer<B> rules(AuthorizationManager<HttpServletRequest> manager) {
         this.authorizationManager = manager;
         return this;
     }
 
     @Override
-    public void configure(HttpSecurity http) {
-        Filter filter = new AuthorizationFilter(authorizationManager);
-        http.addFilter(new OrderedFilter(filter, 200));
+    public void configure(B builder) {
+        builder.addFilter(new OrderedFilter(new AuthorizationFilter(authorizationManager), 200));
     }
 }

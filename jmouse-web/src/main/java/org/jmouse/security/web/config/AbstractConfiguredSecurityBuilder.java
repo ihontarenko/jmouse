@@ -2,17 +2,18 @@ package org.jmouse.security.web.config;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractConfiguredSecurityBuilder<T, B>>
         extends AbstractSecurityBuilder<T> {
 
-    private final java.util.List<SecurityConfigurer<B>> configurers = new ArrayList<>();
-    private final java.util.Map<Class<?>, Object>       shared      = new HashMap<>();
+    private final List<SecurityConfigurer<B>> configurers = new ArrayList<>();
+    private final Map<Class<?>, Object>       shared      = new HashMap<>();
 
-    @SuppressWarnings("unchecked")
-    public <C extends SecurityConfigurer<B>> B apply(C configurer) {
+    public <C extends SecurityConfigurer<B>> C apply(C configurer) {
         this.configurers.add(configurer);
-        return (B) this;
+        return configurer;
     }
 
     public <U> void setSharedObject(Class<U> type, U object) {

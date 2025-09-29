@@ -26,7 +26,7 @@ public class StandardConversion implements Conversion {
 
     private final Map<ClassPair, GenericConverter<?, ?>> converters = new ConcurrentHashMap<>();
     private final TypeNormalizer                         normalizer = new TypeNormalizer.EnumTypeNormalizer();
-    private final Graph<Class<?>>                        graph      = new MapListGraph<>();
+    private final Graph<Class<?>>                        graph      = new DirectedMapGraph<>();
     private final PathFinder<Class<?>>                   pathFinder = new BFSPathFinder<>();
 
     /**

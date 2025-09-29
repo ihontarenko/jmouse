@@ -2,6 +2,7 @@ package org.jmouse.security.web.config;
 
 import jakarta.servlet.Filter;
 import org.jmouse.core.Sorter;
+import org.jmouse.security.authorization.Accepter;
 import org.jmouse.security.web.DefaultSecurityFilterChain;
 import org.jmouse.security.web.RequestMatcher;
 
@@ -32,7 +33,13 @@ public final class HttpSecurity
         return this;
     }
 
-    public <C extends SecurityConfigurer<HttpSecurity>> HttpSecurity with(C configurer) {
+    @Override
+    public HttpSecurity authorizeHttpRequests(Accepter<AuthorizeHttpRequestsConfigurer<HttpSecurity>> accepter) {
+        accepter.accept(with(new AuthorizeHttpRequestsConfigurer<>()));
+        return this;
+    }
+
+    public <C extends SecurityConfigurer<HttpSecurity>> C with(C configurer) {
         return apply(configurer);
     }
 
@@ -41,9 +48,8 @@ public final class HttpSecurity
         initializeConfigurers();
         configureConfigurers();
 
-        filters.sort(Sorter.PRIORITY_COMPARATOR);
-        List<Filter> sorted = new ArrayList<>(filters.size());
-        sorted.addAll(filters);
+        List<Filter> sorted = new ArrayList<>(filters);
+        sorted.sort(Sorter.PRIORITY_COMPARATOR);
 
         return new DefaultSecurityFilterChain(this.matcher, sorted);
     }

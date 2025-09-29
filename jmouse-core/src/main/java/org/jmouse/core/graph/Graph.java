@@ -1,7 +1,9 @@
 package org.jmouse.core.graph;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A generic interface representing a directed graph structure where nodes of type {@code T}
@@ -17,10 +19,10 @@ public interface Graph<T> {
      * exist in the graph, the behavior depends on the implementation (it might add the missing nodes
      * automatically or require them to be added beforehand).
      *
-     * @param from the source node of the edge
-     * @param to   the destination node of the edge
+     * @param a the source node of the edge
+     * @param b   the destination node of the edge
      */
-    void addEdge(T from, T to);
+    void addEdge(T a, T b);
 
     /**
      * Adds a new node to the graph. If the node already exists, the behavior depends on the
@@ -30,7 +32,7 @@ public interface Graph<T> {
      * @return a list containing the added node(s); depending on the implementation, this could
      *         return the existing node or a list of nodes that were added as a result of this operation
      */
-    List<T> addNode(T node);
+    Set<T> addNode(T node);
 
     /**
      * Retrieves a list of neighboring nodes directly connected from the specified node.
@@ -40,7 +42,7 @@ public interface Graph<T> {
      * @return a {@link List} of neighboring nodes; if the node has no neighbors, returns an empty list
      * @throws IllegalArgumentException if the node does not exist in the graph
      */
-    List<T> getNeighbors(T node);
+    Set<T> getNeighbors(T node);
 
     /**
      * Checks if the graph contains the specified node.
@@ -58,12 +60,13 @@ public interface Graph<T> {
      * (A, B), (B, C), (C, D).</p>
      *
      * @param <T> the type of the nodes in the list and edges
-     * @param nodes the list of nodes to be converted into edges
+     * @param collection the list of nodes to be converted into edges
      * @return a list of {@link Edge} objects connecting consecutive nodes
      */
-    static <T> List<Edge<T>> toEdges(List<T> nodes) {
-        List<Edge<T>> edges = new ArrayList<>();
-        int           n     = nodes.size() - 1;
+    static <T> Set<Edge<T>> toEdges(Collection<T> collection) {
+        Set<Edge<T>> edges = new HashSet<>();
+        int          n     = collection.size() - 1;
+        List<T>      nodes = List.copyOf(collection);
 
         for (int i = 0; i < n; i++) {
             edges.add(new Edge<>(nodes.get(i), nodes.get(i + 1)));

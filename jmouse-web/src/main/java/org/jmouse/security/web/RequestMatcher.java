@@ -38,15 +38,6 @@ public interface RequestMatcher extends Matcher<HttpServletRequest> {
         return new HttpMethodRequestMatcher(Set.of(httpMethods));
     }
 
-    static void main(String[] args) {
-        pathPattern("/**").or(
-                pathPattern("*")
-                        .and(header("X-Requested-With", "XMLHttpRequest").not().and(
-                                httpMethod("GET").and(header("Accept", "*/*"))
-                        ))
-        );
-    }
-
     default MatchResult match(HttpServletRequest request) {
         MatchResult result = MatchResult.no();
 
