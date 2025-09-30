@@ -19,11 +19,15 @@ public class AuthorizationCriterion<T, C> {
     private       boolean              negate = false;
 
     public AuthorizationCriterion(
-            MappingApplier<T, C> applier, T owner, List<RequestMatcher> matchers, ContextVariables<C> variables) {
-        this.owner = owner;
-        this.matchers = matchers;
+            MappingApplier<T, C> applier,
+            T owner,
+            List<RequestMatcher> matchers,
+            ContextVariables<C> variables
+    ) {
         this.applier = applier;
+        this.owner = owner;
         this.variables = variables;
+        this.matchers = matchers;
     }
 
     public AuthorizationCriterion<T, C> not() {
@@ -72,18 +76,15 @@ public class AuthorizationCriterion<T, C> {
         public T equalTo(Function<Authentication, String> extractor) {
             return access((authentication, context) -> {
                 String  expected  = (authentication == null) ? null : extractor.apply(authentication);
-                String  actual    = variables.getValue(context, variable);
-                boolean satisfied = expected != null && expected.equals(actual);
-                return satisfied ? AccessResult.PERMIT : AccessResult.DENY;
+                return (expected != null && expected.equals(variables.getValue(context, variable)))
+                        ? AccessResult.PERMIT : AccessResult.DENY;
             });
         }
 
         public T equalToValue(String expected) {
-            return access((authentication, context) -> {
-                String  actual    = variables.getValue(context, variable);
-                boolean satisfied = expected != null && expected.equals(actual);
-                return satisfied ? AccessResult.PERMIT : AccessResult.DENY;
-            });
+            return access((authentication, context)
+                    -> expected != null && expected.equals(variables.getValue(context, variable))
+                        ? AccessResult.PERMIT : AccessResult.DENY);
         }
     }
 

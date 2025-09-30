@@ -1,5 +1,6 @@
 package org.jmouse.security.web.config.configurer;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.authorization.AuthorityPolicyAuthorizationManager;
 import org.jmouse.security.authorization.AuthorizationManager;
 import org.jmouse.security.core.access.RoleHierarchy;
@@ -17,13 +18,9 @@ import java.util.List;
 
 public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder<B>> implements SecurityConfigurer<B> {
 
-    private final Registry registry = new Registry();
-
-    private final Builder       mappings      = new Builder();
+    private final Registry      registry      = new Registry();
     private       RoleHierarchy roleHierarchy = RoleHierarchy.none();
     private       String        rolePrefix    = "ROLE_";
-
-    private List<RequestMatcher> requestMatchers;
 
     public RoleHierarchy getRoleHierarchy() {
         return roleHierarchy;
@@ -43,26 +40,16 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
         return this;
     }
 
-    public AuthorizationCriterion<AuthorizeHttpRequestsConfigurer<B>, RequestSecurityContext> requestMatchers(RequestMatcher... matchers) {
-        requestMatchers = List.of(matchers);
-        return new AuthorizationCriterion<>(
-                this::applyAuthorizationManager, this, requestMatchers, this::getContextVariable);
-    }
-
-    public AuthorizationCriterion<AuthorizeHttpRequestsConfigurer<B>, RequestSecurityContext> anyRequest() {
-        return requestMatchers(RequestMatcher.any());
-    }
-
     public void addMapping(
             List<RequestMatcher> requestMatchers, AuthorizationManager<RequestSecurityContext> manager, boolean negate) {
-        for (RequestMatcher requestMatcher : requestMatchers) {
-            registry.addMapping();
-        }
+        registry.addMapping(requestMatchers, manager, negate);
     }
 
     @Override
-    public void configure(B builder) {
-        builder.addFilter(new OrderedFilter(new AuthorizationFilter(mappings.build()), 200));
+    public void configure(B http) {
+        http.addFilter(new OrderedFilter(new AuthorizationFilter(
+                registry.createAuthorizationManager()
+        ), 200));
     }
 
     private String getContextVariable(RequestSecurityContext context, String name) {
@@ -75,40 +62,57 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
             AuthorizeHttpRequestsConfigurer<B> owner,
             List<RequestMatcher> matchers,
             AuthorizationManager<RequestSecurityContext> manager,
-            boolean negate
-    ) {
+            boolean negate) {
         var effective = negate ? AuthorityPolicyAuthorizationManager.not(manager) : manager;
-
-        for (RequestMatcher requestMatcher : matchers) {
-            mappings.addMapping(requestMatcher, effective);
-        }
-
+        addMapping(matchers, effective, negate);
         return owner;
     }
 
     final class Registry extends AbstractRequestMatcherRegistry<AuthorizationCriterion<AuthorizeHttpRequestsConfigurer<B>, RequestSecurityContext>> {
 
-        private final Builder builder = new Builder();
-        private List<RequestMatcher> pending;
+        private final Builder              builder = new Builder();
+        private       List<RequestMatcher> pending;
 
-        private void ensureNoPending() {
+        private void ensurePendingIsEmpty() {
+            if (this.pending != null) {
+                throw new IllegalStateException(
+                        "An incomplete mapping was found for " + this.pending
+                                + ". Complete it with a terminal rule, e.g. .permitAll()/.hasRole(...)/.access(...)."
+                );
+            }
+        }
 
+        private void ensureBuilderNotEmpty() {
+            if (this.builder.isEmpty()) {
+                throw new IllegalStateException(
+                        "At least one mapping is required (e.g. authorizeHttpRequests().anyRequest().authenticated())"
+                );
+            }
+        }
+
+        public AuthorizationManager<HttpServletRequest> createAuthorizationManager() {
+            ensureBuilderNotEmpty();
+            ensurePendingIsEmpty();
+            return this.builder.build();
         }
 
         public void addMapping(
                 List<RequestMatcher> requestMatchers, AuthorizationManager<RequestSecurityContext> manager, boolean negate) {
-            AuthorizeHttpRequestsConfigurer<B>           outer     = AuthorizeHttpRequestsConfigurer.this;
             AuthorizationManager<RequestSecurityContext> effective = negate
                     ? AuthorityPolicyAuthorizationManager.not(manager) : manager;
 
             for (RequestMatcher requestMatcher : requestMatchers) {
                 builder.addMapping(requestMatcher, effective);
             }
+
+            this.pending = null;
         }
 
         @Override
         protected AuthorizationCriterion<AuthorizeHttpRequestsConfigurer<B>, RequestSecurityContext> applyMatchers(
                 List<RequestMatcher> requestMatchers) {
+            ensurePendingIsEmpty();
+            this.pending = requestMatchers;
             AuthorizeHttpRequestsConfigurer<B> outer = AuthorizeHttpRequestsConfigurer.this;
             return new AuthorizationCriterion<>(
                     outer::applyAuthorizationManager, outer, requestMatchers, outer::getContextVariable);
