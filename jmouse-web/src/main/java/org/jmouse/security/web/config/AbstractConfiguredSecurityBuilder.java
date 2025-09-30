@@ -1,5 +1,7 @@
 package org.jmouse.security.web.config;
 
+import org.jmouse.context.ApplicationBeanContext;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +23,12 @@ public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractCon
     }
 
     @SuppressWarnings("unchecked")
-    public <U> U getSharedObject(Class<T> type) {
+    public <U> U getSharedObject(Class<U> type) {
         return (U) shared.get(type);
+    }
+
+    public ApplicationBeanContext getBeanContext() {
+        return getSharedObject(ApplicationBeanContext.class);
     }
 
     @SuppressWarnings("unchecked")

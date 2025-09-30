@@ -1,4 +1,4 @@
-package org.jmouse.security.authorization;
+package org.jmouse.security.web.config;
 
 /**
  * 🪝 Single-argument action.
@@ -9,12 +9,12 @@ package org.jmouse.security.authorization;
  * @param <T> the input type
  */
 @FunctionalInterface
-public interface Accepter<T> {
+public interface Customizer<T> {
 
     /**
      * 🎯 Performs this operation on the given instance.
      *
      * @param instance the input value (may be {@code null} if the implementation allows)
      */
-    void accept(T instance);
+    void customize(T instance);
 }

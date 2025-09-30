@@ -63,6 +63,15 @@ public class Expressions {
         context.setValue("data", List.of(1, 2, 3));
         context.setValue("strings", List.of("ZZ", "YY"));
 
+        el.compile("""
+                           pipeline {
+                             [1,2,3,4,5]
+                             | filter(n -> n is odd)
+                             | map(n -> n*10)
+                             | join(',')
+                           }
+                           """);
+
         el.evaluate("['John', 'Kratos', 'Jarvis'] | filter(s -> s is starts('K')) | first");
 
         el.evaluate("set('a', [1, 2f, 3d, 44c, 5])", context);

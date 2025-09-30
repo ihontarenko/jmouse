@@ -2,9 +2,6 @@ package org.jmouse.security.authorization;
 
 import java.util.Map;
 
-/**
- * ✅/⛔ Result of an authorization check (with optional details).
- */
 public interface AccessResult {
 
     AccessResult DENY   = new Deny("ACCESS DENY!", Map.of());

@@ -171,4 +171,42 @@ public interface RoleHierarchy {
         }
     }
 
+    class Builder {
+
+        private final Map<Authority, Set<Authority>> hierarchy = new HashMap<>();
+
+        public Implies authority(String authority) {
+            return new Implies(Authority.of(authority));
+        }
+
+        public Implies authority(Authority authority) {
+            return new Implies(authority);
+        }
+
+        public RoleHierarchy build() {
+            return new Authorities(hierarchy);
+        }
+
+        public class Implies {
+
+            private final Authority parent;
+
+            public Implies(Authority parent) {
+                this.parent = parent;
+            }
+
+            public Builder implies(String... authorities) {
+                return implies(Streamable.of(authorities).map(Authority::of).toArray(Authority[]::new));
+            }
+
+            public Builder implies(Authority... authorities) {
+                Set<Authority> implied = Builder.this.hierarchy.computeIfAbsent(parent, __ -> new HashSet<>());
+                Streamable.of(authorities).forEach(implied::add);
+                return Builder.this;
+            }
+
+        }
+
+    }
+
 }
