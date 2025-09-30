@@ -5,6 +5,7 @@ import org.jmouse.core.Sorter;
 import org.jmouse.security.web.DefaultSecurityFilterChain;
 import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.config.*;
+import org.jmouse.security.web.config.configurer.AnonymousConfigurer;
 import org.jmouse.security.web.config.configurer.AuthorizeHttpRequestsConfigurer;
 
 import java.util.ArrayList;
@@ -34,12 +35,17 @@ public final class HttpSecurity
         return this;
     }
 
-    public HttpSecurity authorizeHttpRequests(Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>> customizer) {
-        customizer.customize(with(new AuthorizeHttpRequestsConfigurer<>()));
+    public HttpSecurity anonymous(Customizer<AnonymousConfigurer<HttpSecurity>> customizer) {
+        customizer.customize(attach(new AnonymousConfigurer<>()));
         return this;
     }
 
-    public <C extends SecurityConfigurer<HttpSecurity>> C with(C configurer) {
+    public HttpSecurity authorizeHttpRequests(Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.Registry> customizer) {
+        customizer.customize(attach(new AuthorizeHttpRequestsConfigurer<>()).getRegistry());
+        return this;
+    }
+
+    public <C extends SecurityConfigurer<HttpSecurity>> C attach(C configurer) {
         return apply(configurer);
     }
 

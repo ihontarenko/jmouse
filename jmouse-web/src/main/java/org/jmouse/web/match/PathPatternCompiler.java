@@ -22,7 +22,7 @@ public final class PathPatternCompiler {
      * @return matching {@link PathPattern} implementation
      */
     public static PathPattern compile(String path) {
-        if (path.contains("{*")) {
+        if (path.contains("{*") || (path.contains("{") && path.contains("**"))) {
             return SimplePathPattern.parse(path);
         } else if (path.contains("{") && path.contains("}")) {
             return new RegexpPathPattern(path);

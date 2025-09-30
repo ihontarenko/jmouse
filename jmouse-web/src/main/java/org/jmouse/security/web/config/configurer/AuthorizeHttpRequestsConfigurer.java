@@ -8,11 +8,8 @@ import org.jmouse.security.web.AuthorizationFilter;
 import org.jmouse.security.web.RequestSecurityContext;
 import org.jmouse.security.web.OrderedFilter;
 import org.jmouse.security.web.RequestMatcher;
-import org.jmouse.security.web.config.AbstractRequestMatcherRegistry;
-import org.jmouse.security.web.config.AuthorizationCriterion;
+import org.jmouse.security.web.config.*;
 import org.jmouse.security.web.access.DelegatingAuthorizationManager.Builder;
-import org.jmouse.security.web.config.HttpSecurityBuilder;
-import org.jmouse.security.web.config.SecurityConfigurer;
 
 import java.util.List;
 
@@ -28,6 +25,10 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
 
     public String getRolePrefix() {
         return rolePrefix;
+    }
+
+    public Registry getRegistry() {
+        return registry;
     }
 
     public AuthorizeHttpRequestsConfigurer<B> roleHierarchy(RoleHierarchy hierarchy) {
@@ -46,6 +47,13 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
     }
 
     @Override
+    public void initialize(B builder) throws Exception {
+        if (builder instanceof AbstractConfiguredSecurityBuilder<?, ?> securityBuilder) {
+            securityBuilder.getBeanContext();
+        }
+    }
+
+    @Override
     public void configure(B http) {
         http.addFilter(new OrderedFilter(new AuthorizationFilter(
                 registry.createAuthorizationManager()
@@ -58,8 +66,8 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
         );
     }
 
-    private AuthorizeHttpRequestsConfigurer<B> applyAuthorizationManager(
-            AuthorizeHttpRequestsConfigurer<B> owner,
+    private AuthorizeHttpRequestsConfigurer<B>.Registry applyAuthorizationManager(
+            AuthorizeHttpRequestsConfigurer<B>.Registry owner,
             List<RequestMatcher> matchers,
             AuthorizationManager<RequestSecurityContext> manager,
             boolean negate) {
@@ -68,12 +76,12 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
         return owner;
     }
 
-    final class Registry extends AbstractRequestMatcherRegistry<AuthorizationCriterion<AuthorizeHttpRequestsConfigurer<B>, RequestSecurityContext>> {
+    final public class Registry extends AbstractRequestMatcherRegistry<AuthorizationCriterion<AuthorizeHttpRequestsConfigurer<B>.Registry, RequestSecurityContext>> {
 
         private final Builder              builder = new Builder();
         private       List<RequestMatcher> pending;
 
-        private void ensurePendingIsEmpty() {
+        private void validatePending() {
             if (this.pending != null) {
                 throw new IllegalStateException(
                         "An incomplete mapping was found for " + this.pending
@@ -82,7 +90,7 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
             }
         }
 
-        private void ensureBuilderNotEmpty() {
+        private void validateBuilder() {
             if (this.builder.isEmpty()) {
                 throw new IllegalStateException(
                         "At least one mapping is required (e.g. authorizeHttpRequests().anyRequest().authenticated())"
@@ -91,8 +99,8 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
         }
 
         public AuthorizationManager<HttpServletRequest> createAuthorizationManager() {
-            ensureBuilderNotEmpty();
-            ensurePendingIsEmpty();
+            validateBuilder();
+            validatePending();
             return this.builder.build();
         }
 
@@ -109,13 +117,13 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
         }
 
         @Override
-        protected AuthorizationCriterion<AuthorizeHttpRequestsConfigurer<B>, RequestSecurityContext> applyMatchers(
+        protected AuthorizationCriterion<AuthorizeHttpRequestsConfigurer<B>.Registry, RequestSecurityContext> applyMatchers(
                 List<RequestMatcher> requestMatchers) {
-            ensurePendingIsEmpty();
+            validatePending();
             this.pending = requestMatchers;
             AuthorizeHttpRequestsConfigurer<B> outer = AuthorizeHttpRequestsConfigurer.this;
             return new AuthorizationCriterion<>(
-                    outer::applyAuthorizationManager, outer, requestMatchers, outer::getContextVariable);
+                    outer::applyAuthorizationManager, outer.getRegistry(), requestMatchers, outer::getContextVariable);
         }
 
     }
