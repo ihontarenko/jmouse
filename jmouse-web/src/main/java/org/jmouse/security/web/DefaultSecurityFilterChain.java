@@ -12,7 +12,7 @@ public final class DefaultSecurityFilterChain {
 
     public DefaultSecurityFilterChain(RequestMatcher requestMatcher, List<Filter> filters) {
         this.requestMatcher = requestMatcher;
-        this.filters = java.util.List.copyOf(filters);
+        this.filters = List.copyOf(filters);
     }
 
     public boolean matches(HttpServletRequest request) {

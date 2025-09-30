@@ -5,7 +5,7 @@ import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorizationManager;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.web.MatchResult;
-import org.jmouse.security.web.EnrichedRequestContext;
+import org.jmouse.security.web.RequestSecurityContext;
 import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.match.RequestMatcherEntry;
 
@@ -14,11 +14,11 @@ import java.util.List;
 
 public class DelegatingAuthorizationManager implements AuthorizationManager<HttpServletRequest> {
 
-    private final List<RequestMatcherEntry<AuthorizationManager<EnrichedRequestContext>>> mappings;
+    private final List<RequestMatcherEntry<AuthorizationManager<RequestSecurityContext>>> mappings;
     private final AuthorizationManager<HttpServletRequest>                                defaultManager;
 
     private DelegatingAuthorizationManager(
-            List<RequestMatcherEntry<AuthorizationManager<EnrichedRequestContext>>> entries,
+            List<RequestMatcherEntry<AuthorizationManager<RequestSecurityContext>>> entries,
             AuthorizationManager<HttpServletRequest> defaultManager
     ) {
         this.mappings = List.copyOf(entries);
@@ -32,8 +32,8 @@ public class DelegatingAuthorizationManager implements AuthorizationManager<Http
             RequestMatcher matcher = mapping.matcher();
             MatchResult    match   = matcher.match(request);
             if (match.matches()) {
-                AuthorizationManager<EnrichedRequestContext> authorizationManager = mapping.entry();
-                EnrichedRequestContext                       context              = new EnrichedRequestContext(request, match);
+                AuthorizationManager<RequestSecurityContext> authorizationManager = mapping.entry();
+                RequestSecurityContext                       context              = new RequestSecurityContext(request, match);
                 return authorizationManager.check(authentication, context);
             }
         }
@@ -47,11 +47,11 @@ public class DelegatingAuthorizationManager implements AuthorizationManager<Http
 
     public static final class Builder {
 
-        private final List<RequestMatcherEntry<AuthorizationManager<EnrichedRequestContext>>> entries
+        private final List<RequestMatcherEntry<AuthorizationManager<RequestSecurityContext>>> entries
                 = new ArrayList<>();
         private       AuthorizationManager<HttpServletRequest>                                defaultManager;
 
-        public Builder addMapping(RequestMatcher matcher, AuthorizationManager<EnrichedRequestContext> manager) {
+        public Builder addMapping(RequestMatcher matcher, AuthorizationManager<RequestSecurityContext> manager) {
             entries.add(new RequestMatcherEntry<>(matcher, manager));
             return this;
         }

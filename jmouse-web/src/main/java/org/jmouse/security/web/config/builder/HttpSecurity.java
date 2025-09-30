@@ -1,9 +1,11 @@
-package org.jmouse.security.web.config;
+package org.jmouse.security.web.config.builder;
 
 import jakarta.servlet.Filter;
 import org.jmouse.core.Sorter;
 import org.jmouse.security.web.DefaultSecurityFilterChain;
 import org.jmouse.security.web.RequestMatcher;
+import org.jmouse.security.web.config.*;
+import org.jmouse.security.web.config.configurer.AuthorizeHttpRequestsConfigurer;
 
 import java.util.ArrayList;
 import java.util.List;
