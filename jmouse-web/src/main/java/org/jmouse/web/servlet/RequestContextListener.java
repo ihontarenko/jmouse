@@ -51,7 +51,7 @@ public class RequestContextListener implements ServletRequestListener {
 
             // Set core request attributes (used as fallback context container)
             RequestAttributesHolder.setRequestAttributes(
-                    RequestAttributes.of(BeanScope.REQUEST, servletRequest)
+                    RequestAttributes.ofRequest(BeanScope.REQUEST, servletRequest)
             );
 
             LOGGER.debug("✅ Initialized request context for [{}]", servletRequest.getRequestURI());

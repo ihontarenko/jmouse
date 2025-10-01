@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.web.http.HttpStatus;
 
-public class NoopHttp401SuccessHandler implements AuthenticationFailureHandler {
+public class NoopHttp401FailureHandler implements AuthenticationFailureHandler {
 
     @Override
     public void onFailure(HttpServletRequest request, HttpServletResponse response, Exception exception) {

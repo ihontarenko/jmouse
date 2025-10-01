@@ -43,12 +43,46 @@ public interface RequestAttributes {
      */
     void removeAttribute(String name);
 
-    static RequestAttributes of(Scope scope, HttpServletRequest request) {
+    /**
+     * 🏗️ Factory method to create {@link RequestAttributes} for the given {@link Scope}.
+     *
+     * <p>Supported scopes:</p>
+     * <ul>
+     *   <li>📨 {@code REQUEST} → wraps into {@link WebHttpRequest}</li>
+     *   <li>🗝️ {@code SESSION} → wraps into {@link WebHttpSession}</li>
+     * </ul>
+     *
+     * @param scope   target scope (REQUEST or SESSION)
+     * @param request current HTTP request
+     * @return appropriate {@link RequestAttributes} implementation
+     * @throws WebContextException if scope is unsupported
+     */
+    static RequestAttributes ofRequest(Scope scope, HttpServletRequest request) {
+        return ofRequest(scope, request, false);
+    }
+
+    /**
+     * 🏗️ Factory method to create {@link RequestAttributes} with session creation control.
+     *
+     * <p>Supported scopes:</p>
+     * <ul>
+     *   <li>📨 {@code REQUEST} → wraps into {@link WebHttpRequest}</li>
+     *   <li>🗝️ {@code SESSION} → wraps into {@link WebHttpSession} (may allow session creation)</li>
+     * </ul>
+     *
+     * @param scope                target scope (REQUEST or SESSION)
+     * @param request              current HTTP request
+     * @param allowSessionCreation whether creating new sessions is allowed
+     * @return appropriate {@link RequestAttributes} implementation
+     * @throws WebContextException if scope is unsupported
+     */
+    static RequestAttributes ofRequest(Scope scope, HttpServletRequest request, boolean allowSessionCreation) {
         return switch (scope.id()) {
             case REQUEST -> new WebHttpRequest(request);
-            case SESSION -> new WebHttpSession(request);
+            case SESSION -> new WebHttpSession(request, allowSessionCreation);
             default -> throw new WebContextException(
                     "Unsupported scope ID '%s' type. Available only REQUEST and SESSION".formatted(scope.id()));
         };
     }
+
 }

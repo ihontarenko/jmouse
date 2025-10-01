@@ -61,7 +61,7 @@ public class SessionServletFilter implements Filter {
         if (rq instanceof HttpServletRequest request) {
             // 📦 Store session attributes bound to the current request
             SessionAttributesHolder.setRequestAttributes(
-                    RequestAttributes.of(BeanScope.SESSION, request)
+                    RequestAttributes.ofRequest(BeanScope.SESSION, request)
             );
         }
 

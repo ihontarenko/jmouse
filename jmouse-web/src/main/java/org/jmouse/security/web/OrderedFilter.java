@@ -6,9 +6,15 @@ import org.jmouse.core.Ordered;
 import java.io.IOException;
 
 public record OrderedFilter(Filter filter, int order) implements Filter, Ordered {
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         filter.doFilter(request, response, chain);
+    }
+
+    @Override
+    public String toString() {
+        return "OrderedFilter[%s][%s]".formatted(order, filter.getClass().getSimpleName());
     }
 }

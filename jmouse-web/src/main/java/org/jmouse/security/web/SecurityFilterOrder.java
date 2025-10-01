@@ -2,6 +2,7 @@ package org.jmouse.security.web;
 
 import jakarta.servlet.Filter;
 import org.jmouse.context.BeanProperties;
+import org.jmouse.security.web.access.ExceptionTranslationFilter;
 import org.jmouse.security.web.authentication.AnonymousAuthenticationFilter;
 import org.jmouse.security.web.authentication.UserIdentityAuthenticationFilter;
 import org.jmouse.security.web.authentication.LogoutAuthenticationFilter;
@@ -19,8 +20,8 @@ import java.util.Map;
  *   <li>150 ➡️ {@link UserIdentityAuthenticationFilter} login mechanisms</li>
  *   <li>170 ➡️ {@link LogoutAuthenticationFilter} logout mechanisms</li></li>
  *   <li>180 ➡️ {@link AnonymousAuthenticationFilter} Anonymous authentication</li>
+ *   <li>180 ➡️ {@link ExceptionTranslationFilter} Exception translation</li>
  *   <li>200 ➡️ {@link AuthorizationFilter}</li>
- *   <li>900 ➡️ Other post-filters (optional)</li>
  * </ul>
  *
  * ⚙️ Stores filters as a {@link Map} of class name → order index.
@@ -36,6 +37,7 @@ public class SecurityFilterOrder {
         setOrder(UserIdentityAuthenticationFilter.class, 150);
         setOrder(LogoutAuthenticationFilter.class, 170);
         setOrder(AnonymousAuthenticationFilter.class, 180);
+        setOrder(ExceptionTranslationFilter.class, 190);
         setOrder(AuthorizationFilter.class, 200);
     }
 

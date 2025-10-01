@@ -6,17 +6,10 @@ import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.authentication.AuthenticationFailureHandler;
 import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
-import org.jmouse.security.web.authentication.UserIdentityAuthenticationFilter;
+import org.jmouse.security.web.authentication.BasicAuthenticationFilter;
 import org.jmouse.security.web.config.HttpSecurityBuilder;
 
-public class FormLoginConfigurer<B extends HttpSecurityBuilder<B>> extends AbstractAuthenticationConfigurer<B> {
-
-    private String loginUrl = "/login";
-
-    public FormLoginConfigurer<B> loginProcessingUrl(String url) {
-        this.loginUrl = url;
-        return this;
-    }
+public class HttpBasicConfigurer<B extends HttpSecurityBuilder<B>> extends AbstractAuthenticationConfigurer<B> {
 
     @Override
     protected Filter buildFilter(
@@ -24,8 +17,7 @@ public class FormLoginConfigurer<B extends HttpSecurityBuilder<B>> extends Abstr
             AuthenticationSuccessHandler successHandler,
             AuthenticationFailureHandler failureHandler
     ) {
-        return new UserIdentityAuthenticationFilter(
-                authenticationManager, repository, matcher, successHandler, failureHandler);
+        return new BasicAuthenticationFilter(authenticationManager, repository, matcher, successHandler, failureHandler);
     }
 
 }

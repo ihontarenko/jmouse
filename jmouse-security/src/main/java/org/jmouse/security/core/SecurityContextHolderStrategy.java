@@ -8,4 +8,6 @@ public interface SecurityContextHolderStrategy {
 
     void clearContext();
 
+    SecurityContext newContext();
+
 }

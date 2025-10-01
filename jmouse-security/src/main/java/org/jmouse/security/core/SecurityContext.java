@@ -7,6 +7,10 @@ import org.jmouse.security.SecurityContextHolder;
  */
 public interface SecurityContext {
 
+    static SecurityContext empty() {
+        return ofAuthentication(null);
+    }
+
     static SecurityContext ofAuthentication(Authentication authentication) {
         SecurityContext context = SecurityContextHolder.getContext();
         context.setAuthentication(authentication);

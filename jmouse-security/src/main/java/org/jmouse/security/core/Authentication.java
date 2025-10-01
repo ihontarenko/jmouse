@@ -1,5 +1,7 @@
 package org.jmouse.security.core;
 
+import org.jmouse.security.authentication.AuthenticationLevel;
+
 import java.security.Principal;
 import java.util.Collection;
 
@@ -17,5 +19,9 @@ public interface Authentication extends Principal {
     void setAuthenticated(boolean authenticated);
 
     Object getPrincipal();
+
+    default AuthenticationLevel level() {
+        return AuthenticationLevel.ANONYMOUS;
+    }
 
 }

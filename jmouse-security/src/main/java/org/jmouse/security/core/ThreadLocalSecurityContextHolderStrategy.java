@@ -2,7 +2,7 @@ package org.jmouse.security.core;
 
 public class ThreadLocalSecurityContextHolderStrategy implements SecurityContextHolderStrategy {
 
-    private static final ThreadLocal<SecurityContext> HOLDER = ThreadLocal.withInitial(SecurityContext.Context::new);
+    private static final ThreadLocal<SecurityContext> HOLDER = ThreadLocal.withInitial(SecurityContext::empty);
 
     @Override
     public SecurityContext getContext() {
@@ -17,6 +17,11 @@ public class ThreadLocalSecurityContextHolderStrategy implements SecurityContext
     @Override
     public void clearContext() {
         HOLDER.remove();
+    }
+
+    @Override
+    public SecurityContext newContext() {
+        return new SecurityContext.Context();
     }
 
 }

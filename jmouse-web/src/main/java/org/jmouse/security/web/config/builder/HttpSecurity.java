@@ -3,7 +3,9 @@ package org.jmouse.security.web.config.builder;
 import jakarta.servlet.Filter;
 import org.jmouse.core.Sorter;
 import org.jmouse.security.web.DefaultSecurityFilterChain;
+import org.jmouse.security.web.OrderedFilter;
 import org.jmouse.security.web.RequestMatcher;
+import org.jmouse.security.web.SecurityFilterOrder;
 import org.jmouse.security.web.config.*;
 import org.jmouse.security.web.config.configurer.AnonymousConfigurer;
 import org.jmouse.security.web.config.configurer.AuthorizeHttpRequestsConfigurer;
@@ -19,9 +21,21 @@ public final class HttpSecurity
     private final List<Filter>   filters = new ArrayList<>();
     private       RequestMatcher matcher = RequestMatcher.any();
 
+    public HttpSecurity() {
+        setSharedObject(SecurityFilterOrder.class, new SecurityFilterOrder());
+    }
+
     @Override
     public HttpSecurity addFilter(Filter filter) {
-        this.filters.add(filter);
+        Filter ordered = filter;
+
+        if (!(ordered instanceof OrderedFilter)) {
+            SecurityFilterOrder orders = getSharedObject(SharedAttributes.SECURITY_FILTER_ORDER);
+            ordered = new OrderedFilter(ordered, orders.getOrder(filter.getClass()));
+        }
+
+        this.filters.add(ordered);
+
         return this;
     }
 

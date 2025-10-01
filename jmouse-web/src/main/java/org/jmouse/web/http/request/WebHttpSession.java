@@ -23,12 +23,28 @@ import java.util.Map;
 public class WebHttpSession extends WebHttpRequest implements WebSession {
 
     /**
-     * Creates a session facade bound to the given request.
+     * 🚦 Flag indicating if new sessions may be created when absent.
+     */
+    private final boolean allowSessionCreation;
+
+    /**
+     * 🏗️ Construct a wrapper for the given request (no session creation).
      *
-     * @param request current HTTP servlet request
+     * @param request underlying HTTP request
      */
     public WebHttpSession(HttpServletRequest request) {
+        this(request, false);
+    }
+
+    /**
+     * 🏗️ Construct a wrapper for the given request with session creation control.
+     *
+     * @param request              underlying HTTP request
+     * @param allowSessionCreation whether creating a new session is allowed
+     */
+    public WebHttpSession(HttpServletRequest request, boolean allowSessionCreation) {
         super(request);
+        this.allowSessionCreation = allowSessionCreation;
     }
 
     /**
@@ -42,7 +58,7 @@ public class WebHttpSession extends WebHttpRequest implements WebSession {
         HttpSession session = getCurrentSession();
 
         if (session == null) {
-            session = getRequest().getSession(true);
+            session = getRequest().getSession(allowSessionCreation);
         }
 
         if (session == null) {
