@@ -13,6 +13,10 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
 
     List<Filter> getFilters();
 
-    H securityMatcher(RequestMatcher matcher);
+    <U> void setSharedObject(Class<U> type, U object);
+
+    <U> U getSharedObject(Class<U> type);
+
+    H securityChainMatcher(RequestMatcher matcher);
 
 }

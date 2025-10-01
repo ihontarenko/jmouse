@@ -1,6 +1,7 @@
 package org.jmouse.security.authorization;
 
 import org.jmouse.core.Streamable;
+import org.jmouse.security.authentication.AnonymousAuthentication;
 import org.jmouse.security.core.Authentication;
 
 import java.util.Collection;
@@ -29,6 +30,11 @@ public final class AuthorityPolicyAuthorizationManager<T> implements Authorizati
     public static <T> AuthorizationManager<T> not(AuthorizationManager<T> delegate) {
         return (Authentication authentication, T t) -> delegate.check(authentication, t)
                 .isGranted() ? AccessResult.DENY : AccessResult.PERMIT;
+    }
+
+    public static <T> AuthorizationManager<T> anonymous() {
+        return (authentication, c) -> (authentication instanceof AnonymousAuthentication)
+                ? AccessResult.PERMIT : AccessResult.DENY;
     }
 
     public static <T> AuthorizationManager<T> authenticated() {

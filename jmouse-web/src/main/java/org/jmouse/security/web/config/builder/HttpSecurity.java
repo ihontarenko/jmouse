@@ -7,6 +7,7 @@ import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.config.*;
 import org.jmouse.security.web.config.configurer.AnonymousConfigurer;
 import org.jmouse.security.web.config.configurer.AuthorizeHttpRequestsConfigurer;
+import org.jmouse.security.web.config.configurer.ExceptionHandlingConfigurer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,7 @@ public final class HttpSecurity
     }
 
     @Override
-    public HttpSecurity securityMatcher(RequestMatcher matcher) {
+    public HttpSecurity securityChainMatcher(RequestMatcher matcher) {
         this.matcher = matcher;
         return this;
     }
@@ -42,6 +43,11 @@ public final class HttpSecurity
 
     public HttpSecurity authorizeHttpRequests(Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.Registry> customizer) {
         customizer.customize(attach(new AuthorizeHttpRequestsConfigurer<>()).getRegistry());
+        return this;
+    }
+
+    public HttpSecurity exceptionHandling(Customizer<ExceptionHandlingConfigurer<HttpSecurity>> c) {
+        c.customize(attach(new ExceptionHandlingConfigurer<>()));
         return this;
     }
 
