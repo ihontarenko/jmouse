@@ -5,7 +5,7 @@ import org.jmouse.security.core.SecurityContextRepository;
 import org.jmouse.security.web.OrderedFilter;
 import org.jmouse.security.web.config.HttpSecurityBuilder;
 import org.jmouse.security.web.config.SecurityConfigurer;
-import org.jmouse.security.web.context.SecurityContextHolderFilter;
+import org.jmouse.security.web.context.SecurityContextPersistenceFilter;
 
 public class SecurityContextPersistenceConfigurer<B extends HttpSecurityBuilder<B>> implements SecurityConfigurer<B> {
 
@@ -15,7 +15,7 @@ public class SecurityContextPersistenceConfigurer<B extends HttpSecurityBuilder<
         if (repo == null) repo = new InMemorySecurityContextRepository(); // або session-based
 
         http.addFilter(new OrderedFilter(
-                new SecurityContextHolderFilter(repo), 50)); // дуже рано
+                new SecurityContextPersistenceFilter(repo), 50)); // дуже рано
     }
 
 }
