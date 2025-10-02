@@ -1,4 +1,4 @@
-package org.jmouse.security.web.config.configurer;
+package org.jmouse.security.web.configuration.configurer;
 
 import jakarta.servlet.Filter;
 import org.jmouse.security.authentication.AuthenticationManager;
@@ -8,9 +8,9 @@ import org.jmouse.security.web.authentication.AuthenticationFailureHandler;
 import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
 import org.jmouse.security.web.authentication.NoopHttp200SuccessHandler;
 import org.jmouse.security.web.authentication.NoopHttp401FailureHandler;
-import org.jmouse.security.web.config.HttpSecurityBuilder;
-import org.jmouse.security.web.config.SecurityConfigurer;
-import org.jmouse.security.web.config.SharedAttributes;
+import org.jmouse.security.web.configuration.HttpSecurityBuilder;
+import org.jmouse.security.web.configuration.SecurityConfigurer;
+import org.jmouse.security.web.configuration.SharedAttributes;
 import org.jmouse.security.web.context.SecurityContextRepository;
 
 import static java.util.Objects.requireNonNull;

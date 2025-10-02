@@ -1,4 +1,4 @@
-package org.jmouse.security.web.config;
+package org.jmouse.security.web.configuration;
 
 import org.jmouse.context.ApplicationBeanContext;
 

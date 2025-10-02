@@ -1,4 +1,4 @@
-package org.jmouse.security.web.config.configurer;
+package org.jmouse.security.web.configuration.configurer;
 
 import jakarta.servlet.Filter;
 import org.jmouse.security.authentication.AuthenticationManager;
@@ -7,7 +7,7 @@ import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.authentication.AuthenticationFailureHandler;
 import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
 import org.jmouse.security.web.authentication.BasicAuthenticationFilter;
-import org.jmouse.security.web.config.HttpSecurityBuilder;
+import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 
 public class HttpBasicConfigurer<B extends HttpSecurityBuilder<B>> extends AbstractAuthenticationConfigurer<B> {
 

@@ -1,4 +1,4 @@
-package org.jmouse.security.web.config.builder;
+package org.jmouse.security.web.configuration.builder;
 
 import jakarta.servlet.Filter;
 import org.jmouse.core.Sorter;
@@ -6,11 +6,8 @@ import org.jmouse.security.web.DefaultSecurityFilterChain;
 import org.jmouse.security.web.OrderedFilter;
 import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.SecurityFilterOrder;
-import org.jmouse.security.web.config.*;
-import org.jmouse.security.web.config.configurer.AnonymousConfigurer;
-import org.jmouse.security.web.config.configurer.AuthorizeHttpRequestsConfigurer;
-import org.jmouse.security.web.config.configurer.ExceptionHandlingConfigurer;
-import org.jmouse.security.web.config.configurer.SecurityContextPersistenceConfigurer;
+import org.jmouse.security.web.configuration.*;
+import org.jmouse.security.web.configuration.configurer.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,8 +48,13 @@ public final class HttpSecurity
         return this;
     }
 
-    public HttpSecurity contextPersistence(Customizer<SecurityContextPersistenceConfigurer<HttpSecurity>> customizer) {
-        customizer.customize(attach(new SecurityContextPersistenceConfigurer<>()));
+    public HttpSecurity securityContext(Customizer<SecurityContextConfigurer<HttpSecurity>> customizer) {
+        customizer.customize(attach(new SecurityContextConfigurer<>()));
+        return this;
+    }
+
+    public HttpSecurity sessionManagement(Customizer<SessionManagementConfigurer<HttpSecurity>> customizer) {
+        customizer.customize(attach(new SessionManagementConfigurer<>()));
         return this;
     }
 

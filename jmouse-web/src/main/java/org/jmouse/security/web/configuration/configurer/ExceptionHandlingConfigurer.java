@@ -1,12 +1,12 @@
-package org.jmouse.security.web.config.configurer;
+package org.jmouse.security.web.configuration.configurer;
 
 import org.jmouse.security.web.AccessDeniedHandler;
 import org.jmouse.security.web.AuthenticationEntryPoint;
 import org.jmouse.security.web.OrderedFilter;
 import org.jmouse.security.web.access.ExceptionTranslationFilter;
-import org.jmouse.security.web.config.HttpSecurityBuilder;
-import org.jmouse.security.web.config.SecurityConfigurer;
-import org.jmouse.security.web.config.SharedAttributes;
+import org.jmouse.security.web.configuration.HttpSecurityBuilder;
+import org.jmouse.security.web.configuration.SecurityConfigurer;
+import org.jmouse.security.web.configuration.SharedAttributes;
 import org.jmouse.web.http.HttpStatus;
 
 public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>> implements SecurityConfigurer<B> {

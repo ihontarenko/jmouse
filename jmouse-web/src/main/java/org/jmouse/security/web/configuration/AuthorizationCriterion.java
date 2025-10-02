@@ -1,4 +1,4 @@
-package org.jmouse.security.web.config;
+package org.jmouse.security.web.configuration;
 
 import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorityPolicyAuthorizationManager;

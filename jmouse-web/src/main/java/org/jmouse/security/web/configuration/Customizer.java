@@ -1,4 +1,4 @@
-package org.jmouse.security.web.config;
+package org.jmouse.security.web.configuration;
 
 /**
  * 🪝 Single-argument action.

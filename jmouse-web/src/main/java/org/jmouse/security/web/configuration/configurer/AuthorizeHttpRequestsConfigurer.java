@@ -1,4 +1,4 @@
-package org.jmouse.security.web.config.configurer;
+package org.jmouse.security.web.configuration.configurer;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.authorization.AuthorityPolicyAuthorizationManager;
@@ -8,7 +8,7 @@ import org.jmouse.security.web.AuthorizationFilter;
 import org.jmouse.security.web.RequestSecurityContext;
 import org.jmouse.security.web.OrderedFilter;
 import org.jmouse.security.web.RequestMatcher;
-import org.jmouse.security.web.config.*;
+import org.jmouse.security.web.configuration.*;
 import org.jmouse.security.web.access.DelegatingAuthorizationManager.Builder;
 
 import java.util.List;

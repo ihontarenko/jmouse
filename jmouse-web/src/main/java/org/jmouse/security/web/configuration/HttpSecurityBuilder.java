@@ -1,4 +1,4 @@
-package org.jmouse.security.web.config;
+package org.jmouse.security.web.configuration;
 
 import jakarta.servlet.Filter;
 import org.jmouse.security.web.DefaultSecurityFilterChain;
