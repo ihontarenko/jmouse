@@ -11,6 +11,13 @@ import org.jmouse.security.web.context.SecurityContextPersistenceFilter;
 
 public class SecurityContextPersistenceConfigurer<B extends HttpSecurityBuilder<B>> implements SecurityConfigurer<B> {
 
+    private boolean allowRewrite = true;
+
+    public SecurityContextPersistenceConfigurer<B> allowRewrite(boolean allowRewrite) {
+        this.allowRewrite = allowRewrite;
+        return this;
+    }
+
     @Override
     public void configure(B http) {
         SecurityContextRepository repository = http.getSharedObject(SecurityContextRepository.class);
@@ -29,7 +36,7 @@ public class SecurityContextPersistenceConfigurer<B extends HttpSecurityBuilder<
 
         SecurityContextHolder.setContextHolderStrategy(strategy);
 
-        http.addFilter(new SecurityContextPersistenceFilter(repository));
+        http.addFilter(new SecurityContextPersistenceFilter(repository, allowRewrite));
     }
 
 }

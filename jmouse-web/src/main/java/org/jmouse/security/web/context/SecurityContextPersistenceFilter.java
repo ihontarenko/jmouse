@@ -2,6 +2,7 @@ package org.jmouse.security.web.context;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.core.SecurityContext;
 import org.jmouse.web.http.request.RequestContext;
@@ -13,9 +14,11 @@ import java.io.IOException;
 public class SecurityContextPersistenceFilter implements BeanFilter {
 
     private final SecurityContextRepository repository;
+    private final boolean                   allowRewrite;
 
-    public SecurityContextPersistenceFilter(SecurityContextRepository repository) {
+    public SecurityContextPersistenceFilter(SecurityContextRepository repository, boolean allowRewrite) {
         this.repository = repository;
+        this.allowRewrite = allowRewrite;
     }
 
     @Override
@@ -27,8 +30,11 @@ public class SecurityContextPersistenceFilter implements BeanFilter {
         SecurityContextHolder.setContext(current != null ? current : SecurityContext.empty());
 
         try {
-            RequestContext newRequestContext = keeper.toRequestContext();
-            chain.doFilter(newRequestContext.request(), newRequestContext.response());
+            RequestContext             newRequestContext = keeper.toRequestContext();
+            HttpServletResponseWrapper wrappedResponse   = new SessionPersistenceResponseWrapper(
+                    keeper.response(), repository, keeper, allowRewrite);
+
+            chain.doFilter(newRequestContext.request(), wrappedResponse);
         } finally {
             SecurityContext contextAfter = SecurityContextHolder.getContext();
 
