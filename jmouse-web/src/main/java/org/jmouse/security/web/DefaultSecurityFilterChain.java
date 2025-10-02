@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
-public final class DefaultSecurityFilterChain {
+public final class DefaultSecurityFilterChain implements SecurityFilterChain {
 
     private final RequestMatcher requestMatcher;
     private final List<Filter>   filters;
@@ -15,10 +15,12 @@ public final class DefaultSecurityFilterChain {
         this.filters = List.copyOf(filters);
     }
 
+    @Override
     public boolean matches(HttpServletRequest request) {
         return requestMatcher.matches(request);
     }
 
+    @Override
     public List<Filter> getFilters() {
         return filters;
     }

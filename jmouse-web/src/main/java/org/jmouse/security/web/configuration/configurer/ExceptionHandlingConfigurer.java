@@ -4,12 +4,13 @@ import org.jmouse.security.web.AccessDeniedHandler;
 import org.jmouse.security.web.AuthenticationEntryPoint;
 import org.jmouse.security.web.OrderedFilter;
 import org.jmouse.security.web.access.ExceptionTranslationFilter;
+import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
-import org.jmouse.security.web.configuration.SecurityConfigurer;
 import org.jmouse.security.web.configuration.SharedAttributes;
 import org.jmouse.web.http.HttpStatus;
 
-public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>> implements SecurityConfigurer<B> {
+public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>>
+        extends HttpSecurityConfigurer<ExceptionHandlingConfigurer<B>, B> {
 
     private AuthenticationEntryPoint entryPoint;
     private AccessDeniedHandler      deniedHandler;

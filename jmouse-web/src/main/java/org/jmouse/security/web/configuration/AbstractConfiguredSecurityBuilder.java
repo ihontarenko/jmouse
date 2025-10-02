@@ -1,6 +1,9 @@
 package org.jmouse.security.web.configuration;
 
+import org.jmouse.beans.BeanProvider;
 import org.jmouse.context.ApplicationBeanContext;
+import org.jmouse.core.Streamable;
+import org.jmouse.security.web.SecurityFilterChain;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,14 +11,36 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractConfiguredSecurityBuilder<T, B>>
-        extends AbstractSecurityBuilder<T> {
+        extends AbstractSecurityBuilder<T> implements BeanProvider {
 
-    private final List<SecurityConfigurer<B>> configurers = new ArrayList<>();
-    private final Map<Class<?>, Object>       shared      = new HashMap<>();
+    private final List<SecurityConfigurer<T, B>> configurers = new ArrayList<>();
+    private final Map<Class<?>, Object>          shared      = new HashMap<>();
 
-    public <C extends SecurityConfigurer<B>> C apply(C configurer) {
-        this.configurers.add(configurer);
+    public <C extends SecurityConfigurer<T, B>> C apply(C configurer) {
+        addConfigurer(configurer);
         return configurer;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <C extends ConfigurerAdapter<T, B>> C apply(C configurer) {
+        addConfigurer(configurer);
+        configurer.setBuilder((B) this);
+        configurer.setBeanProvider(this);
+        return configurer;
+    }
+
+    public <C extends SecurityConfigurer<T, B>> void addConfigurer(C configurer) {
+        this.configurers.add(configurer);
+    }
+
+    public <C extends SecurityConfigurer<T, B>> void removeConfigurer(Class<C> type) {
+        this.configurers.removeIf(type::isInstance);
+    }
+
+    @SuppressWarnings({"unchecked", "OptionalGetWithoutIsPresent"})
+    public <C extends SecurityConfigurer<T, B>> C getConfigurer(Class<C> type) {
+        return (C) Streamable.of(this.configurers)
+                .filter(type::isInstance).findFirst().get();
     }
 
     public <U> void setSharedObject(Class<U> type, U object) {
@@ -31,16 +56,21 @@ public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractCon
         return getSharedObject(ApplicationBeanContext.class);
     }
 
+    @Override
+    public <U> U getBean(Class<U> beanClass) {
+        return getBeanContext().getBean(beanClass);
+    }
+
     @SuppressWarnings("unchecked")
     protected final void initializeConfigurers() throws Exception {
-        for (SecurityConfigurer<B> configurer : configurers) {
+        for (SecurityConfigurer<T, B> configurer : configurers) {
             configurer.initialize((B) this);
         }
     }
 
     @SuppressWarnings("unchecked")
     protected final void configureConfigurers() throws Exception {
-        for (SecurityConfigurer<B> configurer : configurers) {
+        for (SecurityConfigurer<T, B> configurer : configurers) {
             configurer.configure((B) this);
         }
     }

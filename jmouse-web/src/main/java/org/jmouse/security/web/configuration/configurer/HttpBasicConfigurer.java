@@ -9,10 +9,11 @@ import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
 import org.jmouse.security.web.authentication.BasicAuthenticationFilter;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 
-public class HttpBasicConfigurer<B extends HttpSecurityBuilder<B>> extends AbstractAuthenticationConfigurer<B> {
+public class HttpBasicConfigurer<B extends HttpSecurityBuilder<B>>
+        extends AbstractAuthenticationConfigurer<B, HttpBasicConfigurer<B>> {
 
     @Override
-    protected Filter buildFilter(
+    protected Filter doBuildFilter(
             AuthenticationManager authenticationManager, SecurityContextRepository repository, RequestMatcher matcher,
             AuthenticationSuccessHandler successHandler,
             AuthenticationFailureHandler failureHandler

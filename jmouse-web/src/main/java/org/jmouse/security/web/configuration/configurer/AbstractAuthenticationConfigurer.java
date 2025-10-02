@@ -9,7 +9,7 @@ import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
 import org.jmouse.security.web.authentication.NoopHttp200SuccessHandler;
 import org.jmouse.security.web.authentication.NoopHttp401FailureHandler;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
-import org.jmouse.security.web.configuration.SecurityConfigurer;
+import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
 import org.jmouse.security.web.configuration.SharedAttributes;
 import org.jmouse.security.web.context.SecurityContextRepository;
 
@@ -27,8 +27,9 @@ import static java.util.Objects.requireNonNull;
  *   <li>Build and register an {@link OrderedFilter}</li>
  * </ul>
  */
-public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBuilder<B>>
-        implements SecurityConfigurer<B> {
+@SuppressWarnings("unchecked")
+public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBuilder<B>, C extends AbstractAuthenticationConfigurer<B, C>>
+        extends HttpSecurityConfigurer<C, B> {
 
     private RequestMatcher               matcher;
     private AuthenticationSuccessHandler successHandler;
@@ -37,32 +38,32 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
     /**
      * Set a request matcher (e.g. path pattern) that triggers this authn flow.
      */
-    public AbstractAuthenticationConfigurer<B> requestMatcher(RequestMatcher m) {
+    public C requestMatcher(RequestMatcher m) {
         this.matcher = requireNonNull(m);
-        return this;
+        return (C) this;
     }
 
     /**
      * Shortcut for common case when matcher is a path pattern.
      */
-    public AbstractAuthenticationConfigurer<B> loginProcessingUrl(String url) {
+    public C loginProcessingUrl(String url) {
         return requestMatcher(RequestMatcher.pathPattern(requireNonNull(url)));
     }
 
     /**
      * Provide a custom success handler (falls back to shared/defaults).
      */
-    public AbstractAuthenticationConfigurer<B> successHandler(AuthenticationSuccessHandler h) {
+    public C successHandler(AuthenticationSuccessHandler h) {
         this.successHandler = requireNonNull(h);
-        return this;
+        return (C) this;
     }
 
     /**
      * Provide a custom failure handler (falls back to shared/defaults).
      */
-    public AbstractAuthenticationConfigurer<B> failureHandler(AuthenticationFailureHandler h) {
+    public C failureHandler(AuthenticationFailureHandler h) {
         this.failureHandler = requireNonNull(h);
-        return this;
+        return (C) this;
     }
 
     @Override
@@ -80,14 +81,14 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
         http.setSharedObject(SharedAttributes.SUCCESS_HANDLER, successHandler);
         http.setSharedObject(SharedAttributes.FAILURE_HANDLER, failureHandler);
 
-        var filter = buildFilter(authenticationManager, repository, m, successHandler, failureHandler);
+        var filter = doBuildFilter(authenticationManager, repository, m, successHandler, failureHandler);
         http.addFilter(filter);
     }
 
     /**
      * Build the concrete authentication filter for this configurer.
      */
-    protected abstract Filter buildFilter(AuthenticationManager authenticationManager, SecurityContextRepository repository, RequestMatcher matcher, AuthenticationSuccessHandler successHandler, AuthenticationFailureHandler failureHandler);
+    protected abstract Filter doBuildFilter(AuthenticationManager authenticationManager, SecurityContextRepository repository, RequestMatcher matcher, AuthenticationSuccessHandler successHandler, AuthenticationFailureHandler failureHandler);
 
     /**
      * Default: Noop 200 on success; override in subclasses if desired.

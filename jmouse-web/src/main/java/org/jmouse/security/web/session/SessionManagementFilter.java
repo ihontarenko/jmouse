@@ -14,10 +14,10 @@ import java.io.IOException;
 
 public final class SessionManagementFilter implements BeanFilter {
 
-    private final SessionAuthenticationStrategy sessionAuthentication;
-    private final InvalidSessionStrategy        invalidSession;
+    private final SessionAuthenticateHandler sessionAuthentication;
+    private final SessionInvalidHandler      invalidSession;
 
-    public SessionManagementFilter(SessionAuthenticationStrategy sessionAuthentication, InvalidSessionStrategy invalidSession) {
+    public SessionManagementFilter(SessionAuthenticateHandler sessionAuthentication, SessionInvalidHandler invalidSession) {
         this.sessionAuthentication = sessionAuthentication;
         this.invalidSession = invalidSession;
     }

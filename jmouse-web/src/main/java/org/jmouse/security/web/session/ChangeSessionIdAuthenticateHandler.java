@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.web.http.request.RequestContextKeeper;
 
-public class ChangeSessionIdAuthenticationStrategy implements SessionAuthenticationStrategy {
+public class ChangeSessionIdAuthenticateHandler implements SessionAuthenticateHandler {
 
     @Override
     public void onAuthentication(Authentication authentication, RequestContextKeeper keeper) {

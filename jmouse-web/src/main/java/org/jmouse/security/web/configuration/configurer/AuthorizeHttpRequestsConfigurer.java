@@ -13,7 +13,8 @@ import org.jmouse.security.web.access.DelegatingAuthorizationManager.Builder;
 
 import java.util.List;
 
-public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder<B>> implements SecurityConfigurer<B> {
+public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder<B>>
+        extends HttpSecurityConfigurer<AuthorizeHttpRequestsConfigurer<B>, B> {
 
     private final Registry      registry      = new Registry();
     private       RoleHierarchy roleHierarchy = RoleHierarchy.none();

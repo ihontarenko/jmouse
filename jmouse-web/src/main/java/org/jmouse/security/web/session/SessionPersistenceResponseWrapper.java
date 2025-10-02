@@ -12,25 +12,11 @@ public class SessionPersistenceResponseWrapper extends OnCommitResponseWrapper {
 
     private final SecurityContextRepository repository;
     private final RequestContextKeeper      keeper;
-    private final boolean                   allowRewrite;
 
-    public SessionPersistenceResponseWrapper(
-            SecurityContextRepository repository, RequestContextKeeper keeper, boolean allowRewrite
-    ) {
+    public SessionPersistenceResponseWrapper(SecurityContextRepository repository, RequestContextKeeper keeper) {
         super(keeper.response());
         this.repository = repository;
         this.keeper = keeper;
-        this.allowRewrite = allowRewrite;
-    }
-
-    @Override
-    public String encodeRedirectURL(String url) {
-        return allowRewrite ? super.encodeRedirectURL(url) : url;
-    }
-
-    @Override
-    public String encodeURL(String url) {
-        return allowRewrite ? super.encodeURL(url) : url;
     }
 
     @Override

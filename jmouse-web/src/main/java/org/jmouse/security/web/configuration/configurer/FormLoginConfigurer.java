@@ -9,7 +9,8 @@ import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
 import org.jmouse.security.web.authentication.UserIdentityAuthenticationFilter;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 
-public class FormLoginConfigurer<B extends HttpSecurityBuilder<B>> extends AbstractAuthenticationConfigurer<B> {
+public class FormLoginConfigurer<B extends HttpSecurityBuilder<B>>
+        extends AbstractAuthenticationConfigurer<B, FormLoginConfigurer<B>> {
 
     private String loginUrl = "/login";
 
@@ -19,7 +20,7 @@ public class FormLoginConfigurer<B extends HttpSecurityBuilder<B>> extends Abstr
     }
 
     @Override
-    protected Filter buildFilter(
+    protected Filter doBuildFilter(
             AuthenticationManager authenticationManager, SecurityContextRepository repository, RequestMatcher matcher,
             AuthenticationSuccessHandler successHandler,
             AuthenticationFailureHandler failureHandler

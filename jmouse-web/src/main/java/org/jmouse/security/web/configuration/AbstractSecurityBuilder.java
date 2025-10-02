@@ -10,7 +10,7 @@ public abstract class AbstractSecurityBuilder<T> implements SecurityBuilder<T> {
             built = true;
             return doBuild();
         }
-        throw new IllegalStateException("This object has already been built");
+        throw new IllegalStateException("THIS OBJECT HAS ALREADY BEEN BUILT!");
     }
 
     protected abstract T doBuild() throws Exception;

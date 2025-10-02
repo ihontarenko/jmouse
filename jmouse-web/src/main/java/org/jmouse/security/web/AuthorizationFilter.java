@@ -6,6 +6,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.authorization.AuthorizationManager;
+import org.jmouse.web.http.request.RequestContext;
 import org.jmouse.web.servlet.filter.BeanFilter;
 
 import java.io.IOException;
@@ -18,10 +19,16 @@ public class AuthorizationFilter implements BeanFilter {
         this.authorizationManager = authorizationManager;
     }
 
+    /**
+     * ⚡ Implement filter logic with type-safe {@link RequestContext}.
+     *
+     * @param requestContext wrapper around HTTP request/response
+     * @param chain          filter chain to continue processing
+     */
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+    public void doFilterInternal(RequestContext requestContext, FilterChain chain)
             throws IOException, ServletException {
-        chain.doFilter(request, response);
+        chain.doFilter(requestContext.request(), requestContext.response());
     }
 
 }

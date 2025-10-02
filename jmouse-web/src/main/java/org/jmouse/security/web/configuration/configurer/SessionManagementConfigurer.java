@@ -1,24 +1,28 @@
 package org.jmouse.security.web.configuration.configurer;
 
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
-import org.jmouse.security.web.configuration.SecurityConfigurer;
+import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
 import org.jmouse.security.web.context.HttpSessionSecurityContextRepository;
 import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.security.web.request.RequestAttributeSecurityContextRepository;
 import org.jmouse.security.web.session.*;
 
 public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
-        implements SecurityConfigurer<B> {
+        extends HttpSecurityConfigurer<SessionManagementConfigurer<B>, B> {
 
     private SessionCreationPolicy policy     = SessionCreationPolicy.IF_REQUIRED;
     private boolean               urlRewrite = false;
 
-    private SessionAuthenticationStrategy sessionAuthentication;
-    private InvalidSessionStrategy        invalidSession;
+    private SessionAuthenticateHandler sessionAuthentication;
+    private SessionInvalidHandler      sessionInvalidHandler;
 
-    public SessionManagementConfigurer<B> sessionCreationPolicy(SessionCreationPolicy policy) {
-        this.policy = (policy != null) ? policy : SessionCreationPolicy.IF_REQUIRED;
+    public SessionManagementConfigurer<B> policy(SessionCreationPolicy policy) {
+        this.policy = policy;
         return this;
+    }
+
+    public SessionCreationPolicyConfigurer policy() {
+        return new SessionCreationPolicyConfigurer();
     }
 
     public SessionManagementConfigurer<B> urlRewrite(boolean urlRewrite) {
@@ -34,20 +38,20 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
         return urlRewrite(false);
     }
 
-    public SessionManagementConfigurer<B> sessionAuthenticationStrategy(SessionAuthenticationStrategy strategy) {
+    public SessionManagementConfigurer<B> sessionAuthenticationStrategy(SessionAuthenticateHandler strategy) {
         this.sessionAuthentication = strategy;
         return this;
     }
 
-    public SessionManagementConfigurer<B> invalidSessionStrategy(InvalidSessionStrategy strategy) {
-        this.invalidSession = strategy;
+    public SessionManagementConfigurer<B> invalidSessionStrategy(SessionInvalidHandler strategy) {
+        this.sessionInvalidHandler = strategy;
         return this;
     }
 
     @Override
     public void configure(B http) {
         http.setSharedObject(SessionSettings.class, new SessionSettings(
-                policy, urlRewrite, sessionAuthentication, invalidSession));
+                policy, urlRewrite, sessionAuthentication, sessionInvalidHandler));
 
         SecurityContextRepository existing = http.getSharedObject(SecurityContextRepository.class);
 
@@ -64,9 +68,30 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
             http.addFilter(new ForceEagerSessionCreationFilter());
         }
 
-        SessionAuthenticationStrategy strategy =
-                (this.sessionAuthentication != null) ? this.sessionAuthentication : new ChangeSessionIdAuthenticationStrategy();
+        SessionAuthenticateHandler strategy =
+                (this.sessionAuthentication != null) ? this.sessionAuthentication : new ChangeSessionIdAuthenticateHandler();
 
-        http.addFilter(new SessionManagementFilter(strategy, this.invalidSession));
+        http.addFilter(new SessionManagementFilter(strategy, this.sessionInvalidHandler));
     }
+
+    public final class SessionCreationPolicyConfigurer {
+
+        public SessionManagementConfigurer<B> stateless() {
+            return SessionManagementConfigurer.this.policy(SessionCreationPolicy.STATELESS);
+        }
+
+        public SessionManagementConfigurer<B> always() {
+            return SessionManagementConfigurer.this.policy(SessionCreationPolicy.ALWAYS);
+        }
+
+        public SessionManagementConfigurer<B> ifPresent() {
+            return SessionManagementConfigurer.this.policy(SessionCreationPolicy.IF_PRESENT);
+        }
+
+        public SessionManagementConfigurer<B> isRequired() {
+            return SessionManagementConfigurer.this.policy(SessionCreationPolicy.IF_REQUIRED);
+        }
+
+    }
+
 }

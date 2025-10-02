@@ -2,18 +2,14 @@ package org.jmouse.security.web.configuration.builder;
 
 import jakarta.servlet.Filter;
 import org.jmouse.core.Sorter;
-import org.jmouse.security.web.DefaultSecurityFilterChain;
-import org.jmouse.security.web.OrderedFilter;
-import org.jmouse.security.web.RequestMatcher;
-import org.jmouse.security.web.SecurityFilterOrder;
+import org.jmouse.security.web.*;
 import org.jmouse.security.web.configuration.*;
 import org.jmouse.security.web.configuration.configurer.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class HttpSecurity
-        extends AbstractConfiguredSecurityBuilder<DefaultSecurityFilterChain, HttpSecurity>
+public final class HttpSecurity extends AbstractConfiguredSecurityBuilder<SecurityFilterChain, HttpSecurity>
         implements HttpSecurityBuilder<HttpSecurity> {
 
     private final List<Filter>   filters = new ArrayList<>();
@@ -43,7 +39,7 @@ public final class HttpSecurity
     }
 
     @Override
-    public HttpSecurity securityChainMatcher(RequestMatcher matcher) {
+    public HttpSecurity chainMatcher(RequestMatcher matcher) {
         this.matcher = matcher;
         return this;
     }
@@ -73,7 +69,7 @@ public final class HttpSecurity
         return this;
     }
 
-    public <C extends SecurityConfigurer<HttpSecurity>> C attach(C configurer) {
+    public <C extends ConfigurerAdapter<SecurityFilterChain, HttpSecurity>> C attach(C configurer) {
         return apply(configurer);
     }
 

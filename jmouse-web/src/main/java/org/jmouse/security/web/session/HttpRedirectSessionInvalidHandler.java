@@ -4,11 +4,11 @@ import org.jmouse.web.http.request.RequestContextKeeper;
 
 import java.io.IOException;
 
-public class HttpRedirectInvalidSessionStrategy implements InvalidSessionStrategy {
+public class HttpRedirectSessionInvalidHandler implements SessionInvalidHandler {
 
     private final String location;
 
-    public HttpRedirectInvalidSessionStrategy(String location) {
+    public HttpRedirectSessionInvalidHandler(String location) {
         this.location = location;
     }
 

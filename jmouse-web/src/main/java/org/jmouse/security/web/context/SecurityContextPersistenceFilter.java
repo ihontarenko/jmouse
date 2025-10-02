@@ -15,27 +15,23 @@ import java.io.IOException;
 public class SecurityContextPersistenceFilter implements BeanFilter {
 
     private final SecurityContextRepository repository;
-    private final boolean                   allowRewrite;
 
-    public SecurityContextPersistenceFilter(SecurityContextRepository repository, boolean allowRewrite) {
+    public SecurityContextPersistenceFilter(SecurityContextRepository repository) {
         this.repository = repository;
-        this.allowRewrite = allowRewrite;
     }
 
     @Override
     public void doFilterInternal(RequestContext requestContext, FilterChain chain)
             throws IOException, ServletException {
-        RequestContextKeeper keeper  = RequestContextKeeper.ofRequestContext(requestContext);
-        SecurityContext      current = repository.load(keeper);
+        RequestContextKeeper       keeper  = RequestContextKeeper.ofRequestContext(requestContext);
+        SecurityContext            current = repository.load(keeper);
+        HttpServletResponseWrapper wrapper = new SessionPersistenceResponseWrapper(repository, keeper);
 
         SecurityContextHolder.setContext(current != null ? current : SecurityContext.empty());
 
-        HttpServletResponseWrapper wrappedResponse   = new SessionPersistenceResponseWrapper(
-                repository, keeper, allowRewrite);
-
         try {
             RequestContext newRequestContext = keeper.toRequestContext();
-            chain.doFilter(newRequestContext.request(), wrappedResponse);
+            chain.doFilter(newRequestContext.request(), wrapper);
         } finally {
             SecurityContext contextAfter = SecurityContextHolder.getContext();
 

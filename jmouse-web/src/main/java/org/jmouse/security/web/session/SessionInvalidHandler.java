@@ -4,6 +4,6 @@ import org.jmouse.web.http.request.RequestContextKeeper;
 
 import java.io.IOException;
 
-public interface InvalidSessionStrategy {
+public interface SessionInvalidHandler {
     void onInvalidSession(RequestContextKeeper keeper) throws IOException;
 }

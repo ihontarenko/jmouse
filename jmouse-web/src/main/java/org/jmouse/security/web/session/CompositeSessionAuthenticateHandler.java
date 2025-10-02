@@ -5,11 +5,11 @@ import org.jmouse.web.http.request.RequestContextKeeper;
 
 import java.util.List;
 
-public class CompositeSessionAuthenticationStrategy implements SessionAuthenticationStrategy{
+public class CompositeSessionAuthenticateHandler implements SessionAuthenticateHandler {
 
-    private final List<SessionAuthenticationStrategy> delegates;
+    private final List<SessionAuthenticateHandler> delegates;
 
-    public CompositeSessionAuthenticationStrategy(SessionAuthenticationStrategy... delegates) {
+    public CompositeSessionAuthenticateHandler(SessionAuthenticateHandler... delegates) {
         this.delegates = List.of(delegates);
     }
 

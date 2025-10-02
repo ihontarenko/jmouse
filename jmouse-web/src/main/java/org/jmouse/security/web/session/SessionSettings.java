@@ -1,20 +1,18 @@
 package org.jmouse.security.web.session;
 
-import static org.jmouse.security.web.session.SessionCreationPolicy.IF_REQUIRED;
-
 public final class SessionSettings {
 
     private final SessionCreationPolicy policy;
     private final boolean               urlRewriting;
 
-    private final SessionAuthenticationStrategy sessionAuthStrategy;
-    private final InvalidSessionStrategy invalidSessionStrategy;
+    private final SessionAuthenticateHandler sessionAuthStrategy;
+    private final SessionInvalidHandler      invalidSessionStrategy;
 
     public SessionSettings(
             SessionCreationPolicy policy,
             boolean urlRewriting,
-            SessionAuthenticationStrategy sessionAuthStrategy,
-            InvalidSessionStrategy invalidSessionStrategy
+            SessionAuthenticateHandler sessionAuthStrategy,
+            SessionInvalidHandler invalidSessionStrategy
     ) {
         this.urlRewriting = urlRewriting;
         this.policy = (policy != null) ? policy : SessionCreationPolicy.IF_REQUIRED;
@@ -34,11 +32,11 @@ public final class SessionSettings {
         return urlRewriting;
     }
 
-    public SessionAuthenticationStrategy sessionAuthStrategy() {
+    public SessionAuthenticateHandler sessionAuthStrategy() {
         return sessionAuthStrategy;
     }
 
-    public InvalidSessionStrategy invalidSessionStrategy() {
+    public SessionInvalidHandler invalidSessionStrategy() {
         return invalidSessionStrategy;
     }
 }
