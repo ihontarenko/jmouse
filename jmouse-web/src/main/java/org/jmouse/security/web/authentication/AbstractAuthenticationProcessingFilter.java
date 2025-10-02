@@ -10,6 +10,7 @@ import org.jmouse.security.core.SecurityContext;
 import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.web.http.request.RequestContext;
+import org.jmouse.web.http.request.RequestContextKeeper;
 import org.jmouse.web.servlet.filter.BeanFilter;
 
 import java.io.IOException;
@@ -17,8 +18,8 @@ import java.io.IOException;
 public abstract class AbstractAuthenticationProcessingFilter implements BeanFilter {
 
     protected final SecurityContextRepository contextRepository;
-    protected final AuthenticationManager     authenticationManager;
     protected final RequestMatcher            requestMatcher;
+    protected final AuthenticationManager     authenticationManager;
 
     protected AuthenticationSuccessHandler successHandler;
     protected AuthenticationFailureHandler failureHandler;
@@ -49,13 +50,15 @@ public abstract class AbstractAuthenticationProcessingFilter implements BeanFilt
         }
 
         try {
-            Authentication  authentication  = tryAuthenticate(request);
-            Authentication  result          = authenticationManager.authenticate(authentication);
-            SecurityContext securityContext = SecurityContext.ofAuthentication(result);
+            Authentication       authentication  = tryAuthenticate(request);
+            Authentication       result          = authenticationManager.authenticate(authentication);
+            SecurityContext      securityContext = SecurityContext.ofAuthentication(result);
+            RequestContextKeeper keeper          = RequestContextKeeper.ofRequestContext(requestContext);
 
             SecurityContextHolder.setContext(securityContext);
-            contextRepository.save(securityContext);
-            successHandler.onSuccess(request, response);
+
+            contextRepository.save(securityContext, keeper);
+            successHandler.onSuccess(keeper.request(), keeper.response());
         } catch (Exception exception) {
             SecurityContextHolder.clearContext();
             failureHandler.onFailure(request, response, exception);

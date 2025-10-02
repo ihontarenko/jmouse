@@ -27,6 +27,10 @@ final public class SecurityContextHolder {
         CONTEXT_HOLDER_STRATEGY.clearContext();
     }
 
+    public static SecurityContext newContext() {
+        return CONTEXT_HOLDER_STRATEGY.newContext();
+    }
+
     public static SecurityContextHolderStrategy getContextHolderStrategy() {
         return CONTEXT_HOLDER_STRATEGY;
     }

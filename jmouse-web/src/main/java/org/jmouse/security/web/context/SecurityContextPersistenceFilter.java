@@ -2,8 +2,6 @@ package org.jmouse.security.web.context;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.core.SecurityContext;
 import org.jmouse.web.http.request.RequestContext;
@@ -23,14 +21,8 @@ public class SecurityContextPersistenceFilter implements BeanFilter {
     @Override
     public void doFilterInternal(RequestContext requestContext, FilterChain chain)
             throws IOException, ServletException {
-        HttpServletRequest  request  = requestContext.request();
-        HttpServletResponse response = requestContext.response();
-
-        RequestContextKeeper keeper = RequestContextKeeper.ofRequestContext(requestContext);
-
-        keeper.toRequestContext();
-
-        SecurityContext     current  = repository.load(requestContext);
+        RequestContextKeeper keeper  = RequestContextKeeper.ofRequestContext(requestContext);
+        SecurityContext      current = repository.load(keeper);
 
         SecurityContextHolder.setContext(current != null ? current : SecurityContext.empty());
 
@@ -38,12 +30,12 @@ public class SecurityContextPersistenceFilter implements BeanFilter {
             RequestContext newRequestContext = keeper.toRequestContext();
             chain.doFilter(newRequestContext.request(), newRequestContext.response());
         } finally {
-            SecurityContext after = SecurityContextHolder.getContext();
+            SecurityContext contextAfter = SecurityContextHolder.getContext();
 
-            if (after != null && after.getAuthentication() != null) {
-                repository.save(after);
+            if (contextAfter != null && contextAfter.getAuthentication() != null) {
+                repository.save(contextAfter, keeper);
             } else {
-                repository.clear(after);
+                repository.clear(contextAfter, keeper);
             }
 
             SecurityContextHolder.clearContext();

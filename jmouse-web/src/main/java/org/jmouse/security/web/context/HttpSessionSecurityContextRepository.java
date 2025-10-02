@@ -2,15 +2,15 @@ package org.jmouse.security.web.context;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import org.jmouse.beans.BeanScope;
 import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.authentication.AuthenticationInspector;
 import org.jmouse.security.core.*;
-import org.jmouse.web.http.request.RequestContext;
+import org.jmouse.web.http.request.RequestContextKeeper;
 import org.jmouse.web.http.request.WebHttpSession;
 
 import java.util.Objects;
 
+import static org.jmouse.beans.BeanScope.SESSION;
 import static org.jmouse.web.http.request.RequestAttributes.ofRequest;
 
 public class HttpSessionSecurityContextRepository implements SecurityContextRepository, AuthenticationInspector {
@@ -40,21 +40,21 @@ public class HttpSessionSecurityContextRepository implements SecurityContextRepo
     }
 
     @Override
-    public SecurityContext load(RequestContext requestContext) {
-        //  WIP
-        HttpSession session = request.getSession(false);
-        SecurityContext ctx = readFromSession(session);
+    public SecurityContext load(RequestContextKeeper keeper) {
+        HttpServletRequest request = keeper.request();
+        HttpSession        session = request.getSession(false);
+        SecurityContext    context = readFromSession(session);
 
-        if (ctx == null) {
-            ctx = SecurityContextHolder.createEmptyContext();
+        if (context == null) {
+            context = SecurityContextHolder.newContext();
         }
 
-        return ctx;
+        return context;
     }
 
     @Override
-    public void save(SecurityContext context, RequestContext requestContext) {
-        if (!(ofRequest(BeanScope.SESSION, requestContext.request(), allowSessionCreation) instanceof WebHttpSession httpSession)) {
+    public void save(SecurityContext context, RequestContextKeeper keeper) {
+        if (!(ofRequest(SESSION, keeper.request(), allowSessionCreation) instanceof WebHttpSession httpSession)) {
             return;
         }
 
@@ -74,17 +74,17 @@ public class HttpSessionSecurityContextRepository implements SecurityContextRepo
     }
 
     @Override
-    public void clear(SecurityContext context, RequestContext requestContext) {
-        //  WIP
-        HttpSession existing = request.getSession(false);
-        if (existing != null) {
-            existing.removeAttribute(sessionKey);
+    public void clear(SecurityContext context, RequestContextKeeper keeper) {
+        HttpServletRequest request = keeper.request();
+        HttpSession        session = request.getSession(false);
+        if (session != null) {
+            session.removeAttribute(sessionKey);
         }
     }
 
     @Override
-    public boolean contains(SecurityContext context, RequestContext requestContext) {
-        HttpServletRequest request = requestContext.request();
+    public boolean contains(SecurityContext context, RequestContextKeeper keeper) {
+        HttpServletRequest request = keeper.request();
         HttpSession        session = request.getSession(false);
         return session != null && session.getAttribute(sessionKey) instanceof SecurityContext;
     }
@@ -105,7 +105,6 @@ public class HttpSessionSecurityContextRepository implements SecurityContextRepo
         if (context == null || context.getAuthentication() == null) {
             return true;
         }
-
         return Objects.equals(emptyPrototype, context);
     }
 }

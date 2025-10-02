@@ -2,27 +2,27 @@ package org.jmouse.security.web.context;
 
 import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.core.SecurityContext;
-import org.jmouse.web.http.request.RequestContext;
+import org.jmouse.web.http.request.RequestContextKeeper;
 
 public class InMemorySecurityContextRepository implements SecurityContextRepository {
 
     @Override
-    public SecurityContext load(RequestContext requestContext) {
+    public SecurityContext load(RequestContextKeeper keeper) {
         return SecurityContextHolder.getContext();
     }
 
     @Override
-    public void save(SecurityContext context, RequestContext requestContext) {
+    public void save(SecurityContext context, RequestContextKeeper keeper) {
         SecurityContextHolder.setContext(context);
     }
 
     @Override
-    public void clear(SecurityContext context, RequestContext requestContext) {
+    public void clear(SecurityContext context, RequestContextKeeper keeper) {
         SecurityContextHolder.clearContext();
     }
 
     @Override
-    public boolean contains(SecurityContext context, RequestContext requestContext) {
+    public boolean contains(SecurityContext context, RequestContextKeeper keeper) {
         return context.getAuthentication() != null;
     }
 
