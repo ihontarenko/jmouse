@@ -1,23 +1,23 @@
-package org.jmouse.security.web.context;
+package org.jmouse.security.web.session;
 
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.core.SecurityContext;
+import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.web.http.request.RequestContextKeeper;
+import org.jmouse.web.servlet.OnCommitResponseWrapper;
 
 import java.io.IOException;
 
-public class SessionPersistenceResponseWrapper extends HttpServletResponseWrapper {
+public class SessionPersistenceResponseWrapper extends OnCommitResponseWrapper {
 
     private final SecurityContextRepository repository;
-    private final RequestContextKeeper keeper;
-    private final boolean              allowRewrite;
+    private final RequestContextKeeper      keeper;
+    private final boolean                   allowRewrite;
 
     public SessionPersistenceResponseWrapper(
-            HttpServletResponse response, SecurityContextRepository repository, RequestContextKeeper keeper,
-            boolean allowRewrite) {
-        super(response);
+            SecurityContextRepository repository, RequestContextKeeper keeper, boolean allowRewrite
+    ) {
+        super(keeper.response());
         this.repository = repository;
         this.keeper = keeper;
         this.allowRewrite = allowRewrite;
@@ -31,6 +31,11 @@ public class SessionPersistenceResponseWrapper extends HttpServletResponseWrappe
     @Override
     public String encodeURL(String url) {
         return allowRewrite ? super.encodeURL(url) : url;
+    }
+
+    @Override
+    protected void onBeforeCommit() {
+        persistSecurityContext();
     }
 
     @Override

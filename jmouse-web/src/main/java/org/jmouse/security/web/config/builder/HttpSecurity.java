@@ -10,6 +10,7 @@ import org.jmouse.security.web.config.*;
 import org.jmouse.security.web.config.configurer.AnonymousConfigurer;
 import org.jmouse.security.web.config.configurer.AuthorizeHttpRequestsConfigurer;
 import org.jmouse.security.web.config.configurer.ExceptionHandlingConfigurer;
+import org.jmouse.security.web.config.configurer.SecurityContextPersistenceConfigurer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,11 @@ public final class HttpSecurity
     @Override
     public HttpSecurity securityChainMatcher(RequestMatcher matcher) {
         this.matcher = matcher;
+        return this;
+    }
+
+    public HttpSecurity contextPersistence(Customizer<SecurityContextPersistenceConfigurer<HttpSecurity>> customizer) {
+        customizer.customize(attach(new SecurityContextPersistenceConfigurer<>()));
         return this;
     }
 

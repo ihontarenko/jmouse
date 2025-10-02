@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.core.SecurityContext;
+import org.jmouse.security.web.session.SessionPersistenceResponseWrapper;
 import org.jmouse.web.http.request.RequestContext;
 import org.jmouse.web.http.request.RequestContextKeeper;
 import org.jmouse.web.servlet.filter.BeanFilter;
@@ -29,11 +30,11 @@ public class SecurityContextPersistenceFilter implements BeanFilter {
 
         SecurityContextHolder.setContext(current != null ? current : SecurityContext.empty());
 
-        try {
-            RequestContext             newRequestContext = keeper.toRequestContext();
-            HttpServletResponseWrapper wrappedResponse   = new SessionPersistenceResponseWrapper(
-                    keeper.response(), repository, keeper, allowRewrite);
+        HttpServletResponseWrapper wrappedResponse   = new SessionPersistenceResponseWrapper(
+                repository, keeper, allowRewrite);
 
+        try {
+            RequestContext newRequestContext = keeper.toRequestContext();
             chain.doFilter(newRequestContext.request(), wrappedResponse);
         } finally {
             SecurityContext contextAfter = SecurityContextHolder.getContext();
