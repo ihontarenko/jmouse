@@ -19,6 +19,10 @@ public interface SessionRegistry {
         getSessionInformation(sessionId).ifPresent(SessionInformation::expireSession);
     }
 
+    default boolean isExpired(String sessionId) {
+        return getSessionInformation(sessionId).map(SessionInformation::isExpired).orElse(false);
+    }
+
     default Optional<Object> getPrincipal(String sessionId) {
         return getSessionInformation(sessionId).map(SessionInformation::principal);
     }

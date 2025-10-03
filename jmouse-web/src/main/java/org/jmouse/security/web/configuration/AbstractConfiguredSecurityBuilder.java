@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractConfiguredSecurityBuilder<T, B>>
         extends AbstractSecurityBuilder<T> implements BeanProvider {
@@ -56,13 +57,21 @@ public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractCon
         return getSharedObject(ApplicationBeanContext.class);
     }
 
-    public <U> U getObject(Class<U> type) {
+    public <U> U getObject(Class<U> type, Supplier<U> defaultObject) {
         U instance = getSharedObject(type);
 
         if (instance == null) {
             try {
                 instance = getBean(type);
             } catch (BeanNotFoundException ignored) { }
+
+            if (instance == null && defaultObject != null) {
+                instance = defaultObject.get();
+            }
+        }
+
+        if (instance != null) {
+            setSharedObject(type, instance);
         }
 
         return instance;

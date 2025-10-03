@@ -58,6 +58,7 @@ public enum HttpStatus implements HttpStatusCode {
     PRECONDITION_REQUIRED("Precondition Required", 428, HttpStatusType.CLIENT_ERROR),
     TOO_MANY_REQUESTS("Too Many Requests", 429, HttpStatusType.CLIENT_ERROR),
     REQUEST_HEADER_FIELDS_TOO_LARGE("Request Header Fields Too Large", 431, HttpStatusType.CLIENT_ERROR),
+    LOGIN_TIME_OUT("Login Time-out", 440, HttpStatusType.CLIENT_ERROR),
     UNAVAILABLE_FOR_LEGAL_REASONS("Unavailable For Legal Reasons", 451, HttpStatusType.CLIENT_ERROR),
 
     INTERNAL_SERVER_ERROR("Internal Server Error", 500, HttpStatusType.SERVER_ERROR),

@@ -7,6 +7,10 @@ import org.jmouse.security.web.context.HttpSessionSecurityContextRepository;
 import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.security.web.request.RequestAttributeSecurityContextRepository;
 import org.jmouse.security.web.session.*;
+import org.jmouse.web.http.HttpStatus;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
         extends HttpSecurityConfigurer<SessionManagementConfigurer<B>, B> {
@@ -61,13 +65,13 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
         http.setSharedObject(SessionSettings.class, new SessionSettings(
                 policy, rewrite, sessionAuthentication, sessionInvalidHandler));
 
-        SecurityContextRepository existing = http.getSharedObject(SecurityContextRepository.class);
-
-        if (existing == null) {
-            SecurityContextRepository repository = switch (policy) {
+        SecurityContextRepository repository = http.getSharedObject(SecurityContextRepository.class);
+        if (repository == null) {
+            repository = switch (policy) {
                 case STATELESS -> new RequestAttributeSecurityContextRepository();
                 case IF_PRESENT, IF_REQUIRED, ALWAYS ->
-                        new HttpSessionSecurityContextRepository().allowSessionCreation(policy.isAllowCreate());
+                        new HttpSessionSecurityContextRepository()
+                                .allowSessionCreation(policy.isAllowCreate());
             };
             http.setSharedObject(SecurityContextRepository.class, repository);
         }
@@ -88,7 +92,7 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
 
         // If concurrency configured -> decorate with concurrency auth handler
         if (maximumSessions != null && policy != SessionCreationPolicy.STATELESS) {
-            SessionAuthenticateHandler sessionControl = new SessionControlAuthenticateHandler(
+            SessionAuthenticateHandler sessionControl = new SessionExpirationAuthenticateHandler(
                     maximumSessions, sessionRegistry
             );
             strategy = new CompositeSessionAuthenticateHandler(
@@ -103,27 +107,49 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
         http.addFilter(new SessionManagementFilter(strategy, this.sessionInvalidHandler));
 
         if (maximumSessions != null && policy != SessionCreationPolicy.STATELESS) {
-
+            SessionInvalidHandler invalid = (this.sessionInvalidHandler != null)
+                    ? this.sessionInvalidHandler
+                    : new HttpStatusInvalidSessionHandler(HttpStatus.LOGIN_TIME_OUT);
+            http.addFilter(new SessionControlFilter(sessionRegistry, invalid));
         }
     }
 
     private SessionAuthenticateHandler autoDetectStrategy(SessionRegistry registry) {
-        if (policy == SessionCreationPolicy.STATELESS) {
+        List<SessionAuthenticateHandler> chain = new ArrayList<>();
+
+        chain.add(new NullAuthenticatedSessionStrategy());
+
+        if (!policy.isStateless()) {
+            chain.add(new ChangeSessionIdAuthenticateHandler());
+            if (registry != null) {
+                chain.add(new RegisterNewSessionAuthenticateHandler(registry));
+            }
+        }
+
+        return compose(chain);
+    }
+
+    private List<SessionAuthenticateHandler> sessionControlChain(SessionRegistry registry, int maxSessions) {
+        List<SessionAuthenticateHandler> chain = new ArrayList<>();
+        chain.add(new ChangeSessionIdAuthenticateHandler());
+        chain.add(new SessionExpirationAuthenticateHandler(maxSessions, registry)); // твій клас
+        chain.add(new RegisterNewSessionAuthenticateHandler(registry));
+        return chain;
+    }
+
+    private SessionAuthenticateHandler compose(List<SessionAuthenticateHandler> chain) {
+        if (chain.isEmpty()) {
             return new NullAuthenticatedSessionStrategy();
         }
 
-        if (registry != null) {
-            return new CompositeSessionAuthenticateHandler(
-                    new ChangeSessionIdAuthenticateHandler(),
-                    new RegisterNewSessionAuthenticateHandler(registry)
-            );
+        if (chain.size() == 1) {
+            return chain.getFirst();
         }
 
-        return new ChangeSessionIdAuthenticateHandler();
+        return new CompositeSessionAuthenticateHandler(chain.toArray(SessionAuthenticateHandler[]::new));
     }
 
     public final class URLRewriteConfigurer {
-
         public SessionManagementConfigurer<B> enable() {
             return SessionManagementConfigurer.this.rewrite(true);
         }
@@ -131,11 +157,9 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
         public SessionManagementConfigurer<B> disable() {
             return SessionManagementConfigurer.this.rewrite(false);
         }
-
     }
 
     public final class SessionCreationPolicyConfigurer {
-
         public SessionManagementConfigurer<B> stateless() {
             return SessionManagementConfigurer.this.policy(SessionCreationPolicy.STATELESS);
         }
@@ -151,7 +175,6 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
         public SessionManagementConfigurer<B> isRequired() {
             return SessionManagementConfigurer.this.policy(SessionCreationPolicy.IF_REQUIRED);
         }
-
     }
 
 }

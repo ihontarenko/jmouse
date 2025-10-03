@@ -5,9 +5,14 @@ import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.SecurityFilterChain;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
         extends SecurityBuilder<SecurityFilterChain> {
+
+    default <U> U getObject(Class<U> type) {
+        return getObject(type, () -> null);
+    }
 
     H addFilter(Filter filter);
 
@@ -17,7 +22,7 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
 
     <U> U getSharedObject(Class<U> type);
 
-    <U> U getObject(Class<U> type);
+    <U> U getObject(Class<U> type, Supplier<U> defaultObject);
 
     <C extends SecurityConfigurer<SecurityFilterChain, H>> void removeConfigurer(Class<C> type);
 

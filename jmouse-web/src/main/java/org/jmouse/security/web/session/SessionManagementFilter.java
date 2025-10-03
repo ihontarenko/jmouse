@@ -15,21 +15,22 @@ import java.io.IOException;
 public final class SessionManagementFilter implements BeanFilter {
 
     private final SessionAuthenticateHandler sessionAuthentication;
-    private final SessionInvalidHandler      invalidSession;
+    private final SessionInvalidHandler      invalidSessionHandler;
 
-    public SessionManagementFilter(SessionAuthenticateHandler sessionAuthentication, SessionInvalidHandler invalidSession) {
+    public SessionManagementFilter(
+            SessionAuthenticateHandler sessionAuthentication, SessionInvalidHandler invalidSessionHandler) {
         this.sessionAuthentication = sessionAuthentication;
-        this.invalidSession = invalidSession;
+        this.invalidSessionHandler = invalidSessionHandler;
     }
 
     @Override
-    public void doFilterInternal(RequestContext requestContext, FilterChain chain) throws IOException,
-                                                                                          ServletException {
+    public void doFilterInternal(RequestContext requestContext, FilterChain chain)
+            throws IOException, ServletException {
         RequestContextKeeper keeper  = RequestContextKeeper.ofRequestContext(requestContext);
         HttpServletRequest   request = requestContext.request();
 
-        if (invalidSession != null && request.isRequestedSessionIdFromCookie() && !request.isRequestedSessionIdValid()) {
-            invalidSession.onInvalidSession(keeper);
+        if (invalidSessionHandler != null && request.isRequestedSessionIdFromCookie() && !request.isRequestedSessionIdValid()) {
+            invalidSessionHandler.onInvalidSession(keeper);
             return;
         }
 
