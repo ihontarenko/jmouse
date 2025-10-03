@@ -6,5 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public interface AuthenticationEntryPoint {
-    void initiate(HttpServletRequest request, HttpServletResponse response, Exception exception) throws IOException;
+    void initiate(HttpServletRequest request, HttpServletResponse response, Exception exception)
+            throws IOException;
 }

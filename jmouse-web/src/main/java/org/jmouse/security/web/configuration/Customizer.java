@@ -1,5 +1,7 @@
 package org.jmouse.security.web.configuration;
 
+import java.util.function.Function;
+
 /**
  * 🪝 Single-argument action.
  *
@@ -17,4 +19,9 @@ public interface Customizer<T> {
      * @param instance the input value (may be {@code null} if the implementation allows)
      */
     void customize(T instance);
+
+    default Customizer<T> defaults() {
+        return t -> {};
+    }
+
 }
