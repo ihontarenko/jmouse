@@ -1,5 +1,6 @@
 package org.jmouse.security.web.configuration.configurer;
 
+import org.jmouse.security.core.session.SessionRegistry;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
 import org.jmouse.security.web.context.HttpSessionSecurityContextRepository;
@@ -10,14 +11,25 @@ import org.jmouse.security.web.session.*;
 public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
         extends HttpSecurityConfigurer<SessionManagementConfigurer<B>, B> {
 
-    private SessionCreationPolicy policy     = SessionCreationPolicy.IF_REQUIRED;
-    private boolean               urlRewrite = false;
-
+    private boolean                    rewrite = false;
+    private SessionCreationPolicy      policy  = SessionCreationPolicy.IF_REQUIRED;
     private SessionAuthenticateHandler sessionAuthentication;
     private SessionInvalidHandler      sessionInvalidHandler;
+    private SessionRegistry            sessionRegistry;
+    private Integer                    maximumSessions;
 
     public SessionManagementConfigurer<B> policy(SessionCreationPolicy policy) {
         this.policy = policy;
+        return this;
+    }
+
+    public SessionManagementConfigurer<B> sessionRegistry(SessionRegistry registry) {
+        this.sessionRegistry = registry;
+        return this;
+    }
+
+    public SessionManagementConfigurer<B> maximumSessions(int maximumSessions) {
+        this.maximumSessions = maximumSessions;
         return this;
     }
 
@@ -25,17 +37,13 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
         return new SessionCreationPolicyConfigurer();
     }
 
-    public SessionManagementConfigurer<B> urlRewrite(boolean urlRewrite) {
-        this.urlRewrite = urlRewrite;
+    public SessionManagementConfigurer<B> rewrite(boolean rewrite) {
+        this.rewrite = rewrite;
         return this;
     }
 
-    public SessionManagementConfigurer<B> enableUrlRewrite() {
-        return urlRewrite(true);
-    }
-
-    public SessionManagementConfigurer<B> disableUrlRewrite() {
-        return urlRewrite(false);
+    public URLRewriteConfigurer rewrite() {
+        return new URLRewriteConfigurer();
     }
 
     public SessionManagementConfigurer<B> sessionAuthenticationStrategy(SessionAuthenticateHandler strategy) {
@@ -51,15 +59,15 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
     @Override
     public void configure(B http) {
         http.setSharedObject(SessionSettings.class, new SessionSettings(
-                policy, urlRewrite, sessionAuthentication, sessionInvalidHandler));
+                policy, rewrite, sessionAuthentication, sessionInvalidHandler));
 
         SecurityContextRepository existing = http.getSharedObject(SecurityContextRepository.class);
 
         if (existing == null) {
             SecurityContextRepository repository = switch (policy) {
                 case STATELESS -> new RequestAttributeSecurityContextRepository();
-                case IF_PRESENT, IF_REQUIRED, ALWAYS -> new HttpSessionSecurityContextRepository()
-                        .allowSessionCreation(policy.isAllowCreate());
+                case IF_PRESENT, IF_REQUIRED, ALWAYS ->
+                        new HttpSessionSecurityContextRepository().allowSessionCreation(policy.isAllowCreate());
             };
             http.setSharedObject(SecurityContextRepository.class, repository);
         }
@@ -68,10 +76,62 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
             http.addFilter(new ForceEagerSessionCreationFilter());
         }
 
+        if (rewrite) {
+            http.addFilter(new DisableURLEncodingFilter());
+        }
+
+        // 🔹 Build session-auth strategy (existing resolve + concurrency)
         SessionAuthenticateHandler strategy =
-                (this.sessionAuthentication != null) ? this.sessionAuthentication : new ChangeSessionIdAuthenticateHandler();
+                (this.sessionAuthentication != null)
+                        ? this.sessionAuthentication
+                        : autoDetectStrategy(sessionRegistry);
+
+        // If concurrency configured -> decorate with concurrency auth handler
+        if (maximumSessions != null && policy != SessionCreationPolicy.STATELESS) {
+            SessionAuthenticateHandler sessionControl = new SessionControlAuthenticateHandler(
+                    maximumSessions, sessionRegistry
+            );
+            strategy = new CompositeSessionAuthenticateHandler(
+                    new ChangeSessionIdAuthenticateHandler(),
+                    (sessionRegistry != null
+                            ? new RegisterNewSessionAuthenticateHandler(sessionRegistry)
+                            : new NullAuthenticatedSessionStrategy()),
+                    sessionControl
+            );
+        }
 
         http.addFilter(new SessionManagementFilter(strategy, this.sessionInvalidHandler));
+
+        if (maximumSessions != null && policy != SessionCreationPolicy.STATELESS) {
+
+        }
+    }
+
+    private SessionAuthenticateHandler autoDetectStrategy(SessionRegistry registry) {
+        if (policy == SessionCreationPolicy.STATELESS) {
+            return new NullAuthenticatedSessionStrategy();
+        }
+
+        if (registry != null) {
+            return new CompositeSessionAuthenticateHandler(
+                    new ChangeSessionIdAuthenticateHandler(),
+                    new RegisterNewSessionAuthenticateHandler(registry)
+            );
+        }
+
+        return new ChangeSessionIdAuthenticateHandler();
+    }
+
+    public final class URLRewriteConfigurer {
+
+        public SessionManagementConfigurer<B> enable() {
+            return SessionManagementConfigurer.this.rewrite(true);
+        }
+
+        public SessionManagementConfigurer<B> disable() {
+            return SessionManagementConfigurer.this.rewrite(false);
+        }
+
     }
 
     public final class SessionCreationPolicyConfigurer {

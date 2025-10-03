@@ -17,6 +17,8 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
 
     <U> U getSharedObject(Class<U> type);
 
+    <U> U getObject(Class<U> type);
+
     <C extends SecurityConfigurer<SecurityFilterChain, H>> void removeConfigurer(Class<C> type);
 
     <C extends SecurityConfigurer<SecurityFilterChain, H>> C getConfigurer(Class<C> type);

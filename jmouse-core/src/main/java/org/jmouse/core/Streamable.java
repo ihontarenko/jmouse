@@ -72,6 +72,26 @@ public interface Streamable<T> extends Iterable<T>, Supplier<Stream<T>> {
     }
 
     /**
+     * 🚫 Skip {@code null} elements in the stream.
+     *
+     * @return new {@link Streamable} with only non-null elements
+     */
+    default Streamable<T> skipNulls() {
+        return of(() -> stream().filter(Objects::nonNull));
+    }
+
+    /**
+     * 🚫 Skip blank (empty or whitespace-only) strings.
+     *
+     * <p>⚠️ Non-strings are converted via {@link String#valueOf(Object)}.</p>
+     *
+     * @return new {@link Streamable} of non-blank strings
+     */
+    default Streamable<String> skipBlank() {
+        return skipNulls().map(String::valueOf).filter(s -> !s.isBlank());
+    }
+
+    /**
      * 🧮 Reduces values.
      */
     default T reduce(T identity, BinaryOperator<T> accumulator) {
@@ -93,17 +113,41 @@ public interface Streamable<T> extends Iterable<T>, Supplier<Stream<T>> {
     }
 
     /**
-     * 📋 Collects to list.
+     * 📋 Collect all elements into a {@link List}.
+     *
+     * @return list of all elements
      */
     default List<T> toList() {
         return stream().collect(Collectors.toList());
     }
 
     /**
-     * 🧩 Collects to set.
+     * 📋 Collect filtered elements into a {@link List}.
+     *
+     * @param predicate filter applied before collecting
+     * @return list of matching elements
+     */
+    default List<T> toList(Predicate<? super T> predicate) {
+        return of(() -> stream().filter(predicate)).toList();
+    }
+
+    /**
+     * 🧩 Collect all elements into a {@link Set}.
+     *
+     * @return set of all elements
      */
     default Set<T> toSet() {
         return stream().collect(Collectors.toSet());
+    }
+
+    /**
+     * 🧩 Collect filtered elements into a {@link Set}.
+     *
+     * @param predicate filter applied before collecting
+     * @return set of matching elements
+     */
+    default Set<T> toSet(Predicate<? super T> predicate) {
+        return of(() -> stream().filter(predicate)).toSet();
     }
 
     /**
@@ -123,8 +167,10 @@ public interface Streamable<T> extends Iterable<T>, Supplier<Stream<T>> {
     /**
      * 🗺️ Collects to map with key/value mappers.
      */
-    default <K, V> Map<K, V> toMap(Function<? super T, ? extends K> keyMapper,
-                                   Function<? super T, ? extends V> valueMapper) {
+    default <K, V> Map<K, V> toMap(
+            Function<? super T, ? extends K> keyMapper,
+            Function<? super T, ? extends V> valueMapper
+    ) {
         return stream().collect(Collectors.toMap(keyMapper, valueMapper));
     }
 
@@ -177,6 +223,19 @@ public interface Streamable<T> extends Iterable<T>, Supplier<Stream<T>> {
     @Override
     default Stream<T> get() {
         return stream();
+    }
+
+    class Support {
+
+        @SuppressWarnings("unchecked")
+        static <T> Optional<T> toOptional(Object value) {
+            if (value instanceof Optional) {
+                return (Optional<T>) value;
+            } else {
+                return Optional.ofNullable((T)value);
+            }
+        }
+
     }
 
     /**
