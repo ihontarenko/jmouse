@@ -50,9 +50,9 @@ public abstract class AbstractAuthenticationProcessingFilter implements BeanFilt
         }
 
         try {
-            Authentication       authentication  = tryAuthenticate(request);
-            Authentication       result          = authenticationManager.authenticate(authentication);
-            SecurityContext      securityContext = SecurityContext.ofAuthentication(result);
+            Authentication       before          = tryAuthenticate(request);
+            Authentication       after           = authenticationManager.authenticate(before);
+            SecurityContext      securityContext = SecurityContext.ofAuthentication(after);
             RequestContextKeeper keeper          = RequestContextKeeper.ofRequestContext(requestContext);
 
             SecurityContextHolder.setContext(securityContext);

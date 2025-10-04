@@ -5,7 +5,7 @@ import org.jmouse.security.core.Authentication;
 /**
  * 🛂 Checks a specific type of credentials and returns Authentication if successful.
  */
-public interface AuthenticationProvider {
+public interface AuthenticationResolver {
 
     boolean supports(Class<?> authenticationType);
 

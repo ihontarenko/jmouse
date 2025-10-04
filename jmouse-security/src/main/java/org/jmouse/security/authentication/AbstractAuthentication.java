@@ -5,17 +5,25 @@ import org.jmouse.security.core.Authority;
 
 import java.security.Principal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
-public class AbstractAuthentication implements Authentication {
+abstract public class AbstractAuthentication implements Authentication {
 
     protected boolean               authenticated = false;
     protected Object                principal;
     protected Collection<Authority> authorities;
     protected Object                credentials;
 
-    public AbstractAuthentication(Collection<Authority> authorities) {
+    public AbstractAuthentication(Object principal, Object credentials, Collection<? extends Authority> authorities) {
+        this.principal = principal;
         this.authorities = List.copyOf(authorities);
+        this.credentials = credentials;
+        setAuthenticated(true);
+    }
+
+    public AbstractAuthentication(Object principal, Object credentials) {
+        this(principal, credentials, Collections.emptyList());
     }
 
     @Override

@@ -69,6 +69,16 @@ public final class HttpSecurity extends AbstractConfiguredSecurityBuilder<Securi
         return this;
     }
 
+    public HttpSecurity submitForm(Customizer<SubmitFormConfigurer<HttpSecurity>> customizer) {
+        customizer.customize(attach(new SubmitFormConfigurer<>()));
+        return this;
+    }
+
+    public HttpSecurity basic(Customizer<HttpBasicConfigurer<HttpSecurity>> customizer) {
+        customizer.customize(attach(new HttpBasicConfigurer<>()));
+        return this;
+    }
+
     public <C extends ConfigurerAdapter<SecurityFilterChain, HttpSecurity>> C attach(C configurer) {
         return apply(configurer);
     }

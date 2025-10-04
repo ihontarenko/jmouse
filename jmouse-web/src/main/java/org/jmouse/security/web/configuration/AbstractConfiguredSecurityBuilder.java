@@ -2,8 +2,8 @@ package org.jmouse.security.web.configuration;
 
 import org.jmouse.beans.BeanNotFoundException;
 import org.jmouse.beans.BeanProvider;
-import org.jmouse.context.ApplicationBeanContext;
 import org.jmouse.core.Streamable;
+import org.jmouse.web.context.WebBeanContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,8 +53,8 @@ public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractCon
         return (U) shared.get(type);
     }
 
-    public ApplicationBeanContext getBeanContext() {
-        return getSharedObject(ApplicationBeanContext.class);
+    public WebBeanContext getBeanContext() {
+        return getSharedObject(WebBeanContext.class);
     }
 
     public <U> U getObject(Class<U> type, Supplier<U> defaultObject) {

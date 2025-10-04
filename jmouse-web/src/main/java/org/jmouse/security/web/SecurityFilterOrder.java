@@ -4,7 +4,7 @@ import jakarta.servlet.Filter;
 import org.jmouse.context.BeanProperties;
 import org.jmouse.security.web.access.ExceptionTranslationFilter;
 import org.jmouse.security.web.authentication.AnonymousAuthenticationFilter;
-import org.jmouse.security.web.authentication.UserIdentityAuthenticationFilter;
+import org.jmouse.security.web.authentication.identity.SubmitFormRequestAuthenticationFilter;
 import org.jmouse.security.web.authentication.LogoutAuthenticationFilter;
 import org.jmouse.security.web.context.SecurityContextPersistenceFilter;
 
@@ -17,7 +17,7 @@ import java.util.Map;
  * <p>Typical order (Spring-inspired):</p>
  * <ul>
  *   <li>050 ➡️ {@link SecurityContextPersistenceFilter}</li>
- *   <li>150 ➡️ {@link UserIdentityAuthenticationFilter} login mechanisms</li>
+ *   <li>150 ➡️ {@link SubmitFormRequestAuthenticationFilter} login mechanisms</li>
  *   <li>170 ➡️ {@link LogoutAuthenticationFilter} logout mechanisms</li></li>
  *   <li>180 ➡️ {@link AnonymousAuthenticationFilter} Anonymous authentication</li>
  *   <li>180 ➡️ {@link ExceptionTranslationFilter} Exception translation</li>
@@ -34,7 +34,7 @@ public class SecurityFilterOrder {
 
     {
         setOrder(SecurityContextPersistenceFilter.class, 50);
-        setOrder(UserIdentityAuthenticationFilter.class, 150);
+        setOrder(SubmitFormRequestAuthenticationFilter.class, 150);
         setOrder(LogoutAuthenticationFilter.class, 170);
         setOrder(AnonymousAuthenticationFilter.class, 180);
         setOrder(ExceptionTranslationFilter.class, 190);

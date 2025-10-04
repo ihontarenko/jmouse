@@ -11,6 +11,4 @@ public interface PermissionEvaluator {
 
     boolean hasPermission(Authentication authentication, Object id, String targetType, String permission);
 
-
-
 }

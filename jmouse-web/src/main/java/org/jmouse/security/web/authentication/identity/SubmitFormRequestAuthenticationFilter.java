@@ -1,12 +1,14 @@
-package org.jmouse.security.web.authentication;
+package org.jmouse.security.web.authentication.identity;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.core.Authentication;
+import org.jmouse.security.web.authentication.*;
+import org.jmouse.security.web.authentication.www.BasicAuthenticationProvider;
 import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.security.web.RequestMatcher;
 
-public class UserIdentityAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+public class SubmitFormRequestAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     public static final String JMOUSE_USER_IDENTITY_USERNAME = "username";
     public static final String JMOUSE_USER_IDENTITY_PASSWORD = "password";
@@ -14,7 +16,9 @@ public class UserIdentityAuthenticationFilter extends AbstractAuthenticationProc
     private String usernameParameter = JMOUSE_USER_IDENTITY_USERNAME;
     private String passwordParameter = JMOUSE_USER_IDENTITY_PASSWORD;
 
-    public UserIdentityAuthenticationFilter(
+    private AuthenticationProvider authenticationProvider = new BasicAuthenticationProvider();
+
+    public SubmitFormRequestAuthenticationFilter(
             AuthenticationManager authenticationManager, SecurityContextRepository contextRepository,
             RequestMatcher requestMatcher,
             AuthenticationSuccessHandler successHandler, AuthenticationFailureHandler failureHandler
@@ -22,7 +26,7 @@ public class UserIdentityAuthenticationFilter extends AbstractAuthenticationProc
         super(authenticationManager, contextRepository, requestMatcher, successHandler, failureHandler);
     }
 
-    public UserIdentityAuthenticationFilter(
+    public SubmitFormRequestAuthenticationFilter(
             AuthenticationManager authenticationManager, SecurityContextRepository contextRepository,
             RequestMatcher requestMatcher
     ) {
@@ -31,10 +35,7 @@ public class UserIdentityAuthenticationFilter extends AbstractAuthenticationProc
 
     @Override
     protected Authentication tryAuthenticate(HttpServletRequest request) throws Exception {
-        String username = request.getParameter(getUsernameParameter());
-        String password = request.getParameter(getPasswordParameter());
-
-        return null;
+        return getAuthenticationManager().authenticate(authenticationProvider.provide(request));
     }
 
     public String getUsernameParameter() {
@@ -51,5 +52,13 @@ public class UserIdentityAuthenticationFilter extends AbstractAuthenticationProc
 
     public void setPasswordParameter(String passwordParameter) {
         this.passwordParameter = passwordParameter;
+    }
+
+    public AuthenticationProvider getAuthenticationProvider() {
+        return authenticationProvider;
+    }
+
+    public void setAuthenticationProvider(AuthenticationProvider authenticationProvider) {
+        this.authenticationProvider = authenticationProvider;
     }
 }

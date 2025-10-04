@@ -2,7 +2,9 @@ package org.jmouse.security.authentication;
 
 import org.jmouse.security.core.Authentication;
 
-public class UserIdentityAuthenticationToken extends AbstractUserIdentityAuthenticationProvider {
+public class UserIdentityAuthenticationResolver extends AbstractUserIdentityAuthenticationResolver {
+
+
 
     @Override
     public boolean supports(Class<?> authenticationType) {

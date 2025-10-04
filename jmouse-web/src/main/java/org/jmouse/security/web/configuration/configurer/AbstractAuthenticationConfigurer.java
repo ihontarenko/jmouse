@@ -46,7 +46,7 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
     /**
      * Shortcut for common case when matcher is a path pattern.
      */
-    public C loginProcessingUrl(String url) {
+    public C processingUrl(String url) {
         return requestMatcher(RequestMatcher.pathPattern(requireNonNull(url)));
     }
 
