@@ -1,6 +1,9 @@
 package org.jmouse.security.web.configuration.configurer;
 
 import jakarta.servlet.Filter;
+import jakarta.servlet.http.HttpServletRequest;
+import org.jmouse.core.Streamable;
+import org.jmouse.core.matcher.Matcher;
 import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.web.OrderedFilter;
 import org.jmouse.security.web.RequestMatcher;
@@ -12,46 +15,75 @@ import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
 import org.jmouse.security.web.configuration.SharedAttributes;
 import org.jmouse.security.web.context.SecurityContextRepository;
+import org.jmouse.web.http.HttpMethod;
 
 import static java.util.Objects.requireNonNull;
 
 /**
- * 🔧 Base configurer for username/password style authentication with
- * shared handler resolution and a single filter registration.
+ * 🔧 AbstractAuthenticationConfigurer
+ * <p>
+ * Base configurer for username/password-style authentication with shared handler resolution
+ * and a single filter registration.
  *
  * <p>Responsibilities:</p>
  * <ul>
- *   <li>Resolve {@code AuthenticationManager} & {@code SecurityContextRepository} from shared objects</li>
- *   <li>Resolve success/failure handlers (own → shared → defaults)</li>
- *   <li>Expose fluent setters for handlers and matcher</li>
- *   <li>Build and register an {@link OrderedFilter}</li>
+ *   <li>🔑 Resolve {@link AuthenticationManager} &amp; {@link SecurityContextRepository} from shared objects</li>
+ *   <li>🧭 Resolve success/failure handlers (own → shared → defaults)</li>
+ *   <li>🧱 Provide fluent setters for request matcher and handlers</li>
+ *   <li>🏗️ Build and register an {@link OrderedFilter}</li>
  * </ul>
+ *
+ * @param <B> the concrete {@link HttpSecurityBuilder} type
+ * @param <C> the concrete configurer type (for fluent API)
  */
 @SuppressWarnings("unchecked")
 public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBuilder<B>, C extends AbstractAuthenticationConfigurer<B, C>>
         extends HttpSecurityConfigurer<C, B> {
 
-    private RequestMatcher               matcher;
+    private RequestMatcher               requestMatcher;
     private AuthenticationSuccessHandler successHandler;
     private AuthenticationFailureHandler failureHandler;
 
     /**
-     * Set a request matcher (e.g. path pattern) that triggers this authn flow.
+     * 🧭 Set a request matcher (e.g., path pattern) that triggers this auth flow.
+     *
+     * @param requestMatcher matcher to activate authentication
+     * @return this configurer
      */
-    public C requestMatcher(RequestMatcher m) {
-        this.matcher = requireNonNull(m);
+    public C requestMatcher(RequestMatcher requestMatcher) {
+        this.requestMatcher = requireNonNull(requestMatcher);
         return (C) this;
     }
 
     /**
-     * Shortcut for common case when matcher is a path pattern.
+     * 🧭 Convenience for one or more path patterns (OR-ed together).
+     *
+     * @param patterns path patterns to match
+     * @return this configurer
      */
-    public C processingUrl(String url) {
-        return requestMatcher(RequestMatcher.pathPattern(requireNonNull(url)));
+    public C requestMatcher(String... patterns) {
+        Matcher<HttpServletRequest> requestMatcher = Streamable.of(patterns)
+                .map(RequestMatcher::pathPattern)
+                .map(Matcher::narrow)
+                .reduce(Matcher.constant(false), Matcher::logicalOr);
+        this.requestMatcher = requestMatcher::matches;
+        return (C) this;
     }
 
     /**
-     * Provide a custom success handler (falls back to shared/defaults).
+     * 🛣️ Shortcut builder when matcher is a path pattern with HTTP method.
+     *
+     * @return processing URL configurer
+     */
+    public ProcessingURLConfigurer processing() {
+        return new ProcessingURLConfigurer();
+    }
+
+    /**
+     * ✅ Provide a custom success handler (falls back to shared/defaults).
+     *
+     * @param h success handler
+     * @return this configurer
      */
     public C successHandler(AuthenticationSuccessHandler h) {
         this.successHandler = requireNonNull(h);
@@ -59,72 +91,142 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
     }
 
     /**
-     * Provide a custom failure handler (falls back to shared/defaults).
+     * ❌ Provide a custom failure handler (falls back to shared/defaults).
+     *
+     * @param h failure handler
+     * @return this configurer
      */
     public C failureHandler(AuthenticationFailureHandler h) {
         this.failureHandler = requireNonNull(h);
         return (C) this;
     }
 
+    /**
+     * 🔩 Template method: resolve shared objects/handlers, build and register the filter.
+     */
     @Override
     public final void configure(B http) {
         AuthenticationManager     authenticationManager = http.getSharedObject(SharedAttributes.AUTHENTICATION_MANAGER);
         SecurityContextRepository repository            = http.getSharedObject(SharedAttributes.CONTEXT_REPOSITORY);
 
-        RequestMatcher m = requireNonNull(resolveMatcher(),
-                                          "RequestMatcher must be set (use loginProcessingUrl(...) or requestMatcher(...))");
+        RequestMatcher requestMatcher = requireNonNull(resolveMatcher(),
+                "REQUEST-MATCHER must be set (use loginProcessingUrl(...) or requestMatcher(...))");
 
         AuthenticationSuccessHandler successHandler = resolveSuccessHandler(http);
         AuthenticationFailureHandler failureHandler = resolveFailureHandler(http);
 
-        // keep shared in sync so downstream configurers/filters can reuse unified handlers
+        // Keep shared in sync so downstream configurers/filters can reuse unified handlers
         http.setSharedObject(SharedAttributes.SUCCESS_HANDLER, successHandler);
         http.setSharedObject(SharedAttributes.FAILURE_HANDLER, failureHandler);
 
-        var filter = doBuildFilter(authenticationManager, repository, m, successHandler, failureHandler);
-        http.addFilter(filter);
+        http.addFilter(doBuildFilter(authenticationManager, repository, requestMatcher, successHandler, failureHandler));
     }
 
     /**
-     * Build the concrete authentication filter for this configurer.
+     * 🏗️ Build the concrete authentication filter for this configurer.
+     *
+     * @param authenticationManager auth manager to use
+     * @param repository            context repository to persist security context
+     * @param matcher               request matcher to trigger authentication
+     * @param successHandler        success handler
+     * @param failureHandler        failure handler
+     * @return a configured {@link Filter} (typically an {@link OrderedFilter})
      */
-    protected abstract Filter doBuildFilter(AuthenticationManager authenticationManager, SecurityContextRepository repository, RequestMatcher matcher, AuthenticationSuccessHandler successHandler, AuthenticationFailureHandler failureHandler);
+    protected abstract Filter doBuildFilter(
+            AuthenticationManager authenticationManager,
+            SecurityContextRepository repository, RequestMatcher matcher,
+            AuthenticationSuccessHandler successHandler,
+            AuthenticationFailureHandler failureHandler
+    );
 
     /**
-     * Default: Noop 200 on success; override in subclasses if desired.
+     * 🟢 Default success: no-op 200 OK (override if desired).
      */
     protected AuthenticationSuccessHandler defaultSuccessHandler() {
         return new NoopHttp200SuccessHandler();
     }
 
     /**
-     * Default: Noop 401 on failure; override in subclasses if desired.
+     * 🔴 Default failure: no-op 401 Unauthorized (override if desired).
      */
     protected AuthenticationFailureHandler defaultFailureHandler() {
         return new NoopHttp401FailureHandler();
     }
 
+    /**
+     * 🔎 Resolve the configured request matcher (must not be {@code null} at configure time).
+     */
     private RequestMatcher resolveMatcher() {
-        return this.matcher;
+        return this.requestMatcher;
     }
 
+    /**
+     * 🔎 Resolve success handler: own → shared → default.
+     */
     private AuthenticationSuccessHandler resolveSuccessHandler(B http) {
-        if (this.successHandler != null) {
-            return this.successHandler;
-        }
-
+        if (this.successHandler != null) return this.successHandler;
         AuthenticationSuccessHandler shared = http.getSharedObject(SharedAttributes.SUCCESS_HANDLER);
-
         return shared != null ? shared : defaultSuccessHandler();
     }
 
+    /**
+     * 🔎 Resolve failure handler: own → shared → default.
+     */
     private AuthenticationFailureHandler resolveFailureHandler(B http) {
-        if (this.failureHandler != null) {
-            return this.failureHandler;
+        if (this.failureHandler != null) return this.failureHandler;
+        AuthenticationFailureHandler shared = http.getSharedObject(SharedAttributes.FAILURE_HANDLER);
+        return shared != null ? shared : defaultFailureHandler();
+    }
+
+    /**
+     * 🛣️ Builder for common "processing URL + method" configuration.
+     */
+    public class ProcessingURLConfigurer {
+
+        private RequestMatcher requestMatcher;
+
+        /**
+         * 🧭 Define the form/action path pattern to match.
+         *
+         * @param url action or endpoint path pattern
+         * @return this builder
+         */
+        public ProcessingURLConfigurer formAction(String url) {
+            requestMatcher = RequestMatcher.pathPattern(url);
+            return this;
         }
 
-        AuthenticationFailureHandler shared = http.getSharedObject(SharedAttributes.FAILURE_HANDLER);
+        /**
+         * 🔁 Constrain the matcher to a specific HTTP method.
+         *
+         * <p>⚠️ Requires {@link #formAction(String)} to be called first,
+         * otherwise no base path matcher is defined.</p>
+         *
+         * @param httpMethod HTTP method to match (e.g. GET, POST)
+         * @return parent configurer
+         * @throws IllegalStateException if {@code formAction(...)} was not set
+         */
+        public C httpMethod(HttpMethod httpMethod) {
+            if (requestMatcher == null) {
+                throw new IllegalStateException("formAction(...) must be set before httpMethod(...)");
+            }
+            return AbstractAuthenticationConfigurer.this.requestMatcher(
+                    requestMatcher.and(RequestMatcher.httpMethod(httpMethod))::matches
+            );
+        }
 
-        return shared != null ? shared : defaultFailureHandler();
+        /**
+         * ⬆️ Shortcut for {@code GET}.
+         */
+        public C get() {
+            return httpMethod(HttpMethod.GET);
+        }
+
+        /**
+         * ⬇️ Shortcut for {@code POST}.
+         */
+        public C post() {
+            return httpMethod(HttpMethod.POST);
+        }
     }
 }

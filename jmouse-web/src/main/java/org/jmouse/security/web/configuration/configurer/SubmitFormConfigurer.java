@@ -17,8 +17,8 @@ public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
     private String loginUrl = "/login";
 
     private AuthenticationProvider authenticationProvider = new BasicAuthenticationProvider();
-    private       String                 usernameParameter;
-    private       String                 passwordParameter;
+    private String                 usernameParameter;
+    private String                 passwordParameter;
 
     public SubmitFormConfigurer<B> processingUrl(String url) {
         this.loginUrl = url;
