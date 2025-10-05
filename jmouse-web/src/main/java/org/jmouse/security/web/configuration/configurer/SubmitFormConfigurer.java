@@ -14,16 +14,9 @@ import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
         extends AbstractAuthenticationConfigurer<B, SubmitFormConfigurer<B>> {
 
-    private String loginUrl = "/login";
-
     private AuthenticationProvider authenticationProvider = new BasicAuthenticationProvider();
     private String                 usernameParameter;
     private String                 passwordParameter;
-
-    public SubmitFormConfigurer<B> processingUrl(String url) {
-        this.loginUrl = url;
-        return this;
-    }
 
     public SubmitFormConfigurer<B> usernamePassword(String usernameParameter, String passwordParameter) {
         return usernameParameter(usernameParameter).passwordParameter(passwordParameter);
@@ -46,7 +39,9 @@ public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
 
     @Override
     protected Filter doBuildFilter(
-            AuthenticationManager authenticationManager, SecurityContextRepository repository, RequestMatcher matcher,
+            AuthenticationManager authenticationManager,
+            SecurityContextRepository repository,
+            RequestMatcher matcher,
             AuthenticationSuccessHandler successHandler,
             AuthenticationFailureHandler failureHandler
     ) {
