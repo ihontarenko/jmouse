@@ -58,9 +58,6 @@ public class SessionAttributesHolder {
      */
     public static void setRequestAttributes(RequestAttributes attributes) {
         ATTRIBUTES_THREAD_LOCAL.set(attributes);
-        if (attributes instanceof WebSession servletSession) {
-            attributes.setAttribute(WebSession.SERVLET_SESSION_ATTRIBUTE, servletSession);
-        }
     }
 
     /**

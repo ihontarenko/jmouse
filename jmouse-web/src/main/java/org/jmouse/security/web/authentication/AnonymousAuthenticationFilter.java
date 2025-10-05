@@ -13,7 +13,7 @@ public class AnonymousAuthenticationFilter implements Filter {
         var securityContext = SecurityContextHolder.getContext();
 
         if (securityContext.getAuthentication() == null) {
-            securityContext.setAuthentication(new AnonymousAuthentication());
+            securityContext.setAuthentication(new AnonymousAuthentication(AnonymousAuthentication.ANONYMOUS));
         }
 
         chain.doFilter(request, response);

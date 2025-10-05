@@ -10,11 +10,15 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
-
         http.basic(b -> b.requestMatcher());
+        System.out.println("SecurityFilterChain");
+        return http.build();
+    }
 
-
-
+    @Bean
+    public SecurityFilterChain webResourcesFilterChain(HttpSecurity http) throws Exception {
+        http.basic(b -> b.requestMatcher());
+        System.out.println("SecurityFilterChain2");
         return http.build();
     }
 
