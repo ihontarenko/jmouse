@@ -10,7 +10,7 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
-        http.basic(b -> b.requestMatcher());
+        http.basic(b -> b.requestMatcher("/shared/**"));
         System.out.println("SecurityFilterChain");
         return http.build();
     }
