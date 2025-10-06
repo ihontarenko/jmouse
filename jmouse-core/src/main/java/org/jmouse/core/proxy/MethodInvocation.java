@@ -88,4 +88,9 @@ public interface MethodInvocation {
         // NO-OP
     }
 
+    default boolean isVoidMethod() {
+        Class<?> returnType = getMethod().getReturnType();
+        return returnType == void.class || returnType == Void.class;
+    }
+
 }

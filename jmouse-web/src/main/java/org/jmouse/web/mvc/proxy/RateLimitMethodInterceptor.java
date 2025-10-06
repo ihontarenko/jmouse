@@ -39,6 +39,19 @@ public final class RateLimitMethodInterceptor extends AbstractRateLimitMethodInt
         }
     }
 
+    /**
+     * The parser method that performs the actual interception logic. Implementations
+     * generally call {@link MethodInvocation#proceed()} to invoke the target method.
+     *
+     * @param invocation the {@link MethodInvocation} encapsulating the target method and its parameters
+     * @return the result of the method call
+     * @throws Throwable if an error occurs during the method invocation
+     */
+    @Override
+    public Object invoke(MethodInvocation invocation) throws Throwable {
+        return super.invoke(invocation);
+    }
+
     @Override
     public void after(InvocationContext context, Method method, Object[] arguments, Object result) {
         MethodInvocation invocation = context.invocation();

@@ -23,14 +23,14 @@ public class HttpSecurityConfiguration implements InitializingBeanSupport<WebBea
         return httpSecurity;
     }
 
-    @Bean
-    public FilterRegistrationBean<SecurityFilterChainDelegator> securityFilterRegistration(
-            SecurityFilterChainDelegator delegator) {
-        FilterRegistrationBean<SecurityFilterChainDelegator> registration = new FilterRegistrationBean<>(delegator);
-        registration.setOrder(-100500);
-        registration.addUrlPatterns("/*");
-        return registration;
-    }
+//    @Bean
+//    public FilterRegistrationBean<SecurityFilterChainDelegator> securityFilterRegistration(
+//            SecurityFilterChainDelegator delegator) {
+//        FilterRegistrationBean<SecurityFilterChainDelegator> registration = new FilterRegistrationBean<>(delegator);
+//        registration.setOrder(-100500);
+//        registration.addUrlPatterns("/*");
+//        return registration;
+//    }
 
     @Override
     public void initialize(WebBeanContext context) {

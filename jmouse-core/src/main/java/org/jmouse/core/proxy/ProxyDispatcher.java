@@ -94,6 +94,7 @@ public final class ProxyDispatcher implements InvocationDispatcher {
         return new MethodInvocation() {
 
             private Object returnValue;
+            // private Object[] arguments;
 
             @Override
             public Object getTarget() {
