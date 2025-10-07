@@ -2,14 +2,15 @@ package org.jmouse.security.authentication;
 
 import org.jmouse.security.core.Authentication;
 
+import java.util.ArrayList;
 import java.util.List;
 
 abstract public class AbstractAuthenticationManager implements AuthenticationManager {
 
-    protected final List<AuthenticationResolver> resolvers;
+    protected final List<AuthenticationResolver> resolvers = new ArrayList<>();
 
     public AbstractAuthenticationManager(List<AuthenticationResolver> resolvers) {
-        this.resolvers = List.copyOf(resolvers);
+        this.resolvers.addAll(resolvers);
     }
 
     @Override

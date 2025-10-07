@@ -31,14 +31,8 @@ public class BasicAuthenticationFilter extends AbstractAuthenticationProcessingF
     }
 
     @Override
-    protected Authentication tryAuthenticate(HttpServletRequest request) throws Exception {
-        Authentication credentials = authenticationProvider.provide(request);
-
-        if (credentials == null) {
-            return null;
-        }
-
-        return getAuthenticationManager().authenticate(credentials);
+    protected Authentication tryAuthenticate(HttpServletRequest request) {
+        return authenticationProvider.provide(request);
     }
 
 }

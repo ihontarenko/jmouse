@@ -250,6 +250,10 @@ public class WWWAuthenticate {
      */
     public static final class Bearer extends WWWAuthenticate {
 
+        public enum ErrorCode {
+            INVALID_TOKEN, INSUFFICIENT_SCOPE, INVALID_REQUEST
+        }
+
         /**
          * 🎯 Set {@code scope} parameter (space-delimited).
          */
@@ -261,29 +265,29 @@ public class WWWAuthenticate {
          * ❗ Set {@code error} parameter.
          * <p>Common values: {@code invalid_request}, {@code invalid_token}, {@code insufficient_scope}.</p>
          */
-        public Bearer error(String error) {
-            return (Bearer) parameter("error", error);
+        public Bearer error(ErrorCode errorCode) {
+            return (Bearer) parameter("error", errorCode.name().toLowerCase());
         }
 
         /**
          * Shortcut: {@code error=invalid_request}.
          */
         public Bearer invalidRequest() {
-            return error("invalid_request");
+            return error(ErrorCode.INVALID_REQUEST);
         }
 
         /**
          * Shortcut: {@code error=invalid_token}.
          */
         public Bearer invalidToken() {
-            return error("invalid_token");
+            return error(ErrorCode.INVALID_TOKEN);
         }
 
         /**
          * Shortcut: {@code error=insufficient_scope}.
          */
         public Bearer insufficientScope() {
-            return error("insufficient_scope");
+            return error(ErrorCode.INSUFFICIENT_SCOPE);
         }
 
         /**

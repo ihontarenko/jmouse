@@ -19,9 +19,11 @@ public class SubmitFormRequestAuthenticationFilter extends AbstractAuthenticatio
     private AuthenticationProvider authenticationProvider = new BasicAuthenticationProvider();
 
     public SubmitFormRequestAuthenticationFilter(
-            AuthenticationManager authenticationManager, SecurityContextRepository contextRepository,
+            AuthenticationManager authenticationManager,
+            SecurityContextRepository contextRepository,
             RequestMatcher requestMatcher,
-            AuthenticationSuccessHandler successHandler, AuthenticationFailureHandler failureHandler
+            AuthenticationSuccessHandler successHandler,
+            AuthenticationFailureHandler failureHandler
     ) {
         super(authenticationManager, contextRepository, requestMatcher, successHandler, failureHandler);
     }
@@ -35,7 +37,7 @@ public class SubmitFormRequestAuthenticationFilter extends AbstractAuthenticatio
 
     @Override
     protected Authentication tryAuthenticate(HttpServletRequest request) throws Exception {
-        return getAuthenticationManager().authenticate(authenticationProvider.provide(request));
+        return authenticationProvider.provide(request);
     }
 
     public String getUsernameParameter() {

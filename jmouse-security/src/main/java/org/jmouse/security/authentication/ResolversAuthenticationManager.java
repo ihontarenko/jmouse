@@ -2,9 +2,11 @@ package org.jmouse.security.authentication;
 
 import org.jmouse.security.core.Authentication;
 
+import java.util.Collection;
 import java.util.List;
 
-public class ResolversAuthenticationManager extends AbstractAuthenticationManager {
+public class ResolversAuthenticationManager extends AbstractAuthenticationManager
+        implements AuthenticationResolverRegistry {
 
     public ResolversAuthenticationManager(List<AuthenticationResolver> resolvers) {
         super(resolvers);
@@ -12,21 +14,17 @@ public class ResolversAuthenticationManager extends AbstractAuthenticationManage
 
     @Override
     public Authentication doAuthenticate(Authentication before) throws AuthenticationException {
-        Authentication after = null;
+        return resolveResolver(before.getClass()).authenticate(before);
+    }
 
-        for (AuthenticationResolver resolver : resolvers) {
-            if (resolver.supports(before.getClass())) {
-                if ((after = resolver.authenticate(before)) != null) {
-                    break;
-                }
-            }
-        }
+    @Override
+    public Collection<? extends AuthenticationResolver> getResolvers() {
+        return List.copyOf(resolvers);
+    }
 
-        if (after == null) {
-            throw new AuthenticationException("NO SUITABLE RESOLVER FOUND!");
-        }
-
-        return after;
+    @Override
+    public void addResolver(AuthenticationResolver resolver) {
+        resolvers.add(resolver);
     }
 
 }
