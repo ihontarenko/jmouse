@@ -4,21 +4,17 @@ import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.security.web.SecurityFilterChain;
 import org.jmouse.security.web.configuration.builder.HttpSecurity;
+import org.jmouse.web.http.HttpMethod;
 
 @BeanFactories
 public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
-        http.basic(b -> b.requestMatcher("/shared/**"));
-        System.out.println("SecurityFilterChain");
-        return http.build();
-    }
-
-    @Bean
-    public SecurityFilterChain webResourcesFilterChain(HttpSecurity http) throws Exception {
-        http.basic(b -> b.requestMatcher());
-        System.out.println("SecurityFilterChain2");
+        http.submitForm(form ->
+                form.usernameParameter("username").passwordParameter("password")
+                        .processing().formAction("/login").httpMethod(HttpMethod.POST)
+        );
         return http.build();
     }
 

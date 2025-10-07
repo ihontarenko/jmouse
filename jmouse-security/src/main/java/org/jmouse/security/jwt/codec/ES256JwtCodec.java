@@ -40,7 +40,7 @@ public final class ES256JwtCodec extends AbstractJwtCodec {
      * @param publicKey  public key for verification
      * @param privateKey private key for signing (nullable for verify-only)
      */
-    public ES256JwtCodec(Json json, PublicKey publicKey, PrivateKey privateKey) {
+    public ES256JwtCodec(AdapterJson json, PublicKey publicKey, PrivateKey privateKey) {
         super(json, Algorithm.ES256);
         this.publicKey = publicKey;
         this.privateKey = privateKey;
@@ -55,7 +55,7 @@ public final class ES256JwtCodec extends AbstractJwtCodec {
      * @param clock time source for validation
      * @param skew  allowed clock skew (seconds/millis as defined upstream)
      */
-    public ES256JwtCodec(Json json, PublicKey pub, PrivateKey priv, java.time.Clock clock, long skew) {
+    public ES256JwtCodec(AdapterJson json, PublicKey pub, PrivateKey priv, java.time.Clock clock, long skew) {
         super(json, Algorithm.ES256, clock, skew);
         this.publicKey = pub;
         this.privateKey = priv;

@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * 🧩 Jackson-based JsonMapper adapter.
  */
-public final class JacksonJsonMapper implements JwtCodec.Json {
+public final class JacksonJsonMapper implements JwtCodec.AdapterJson {
 
     private static final TypeReference<Map<String, Object>> MAP = new TypeReference<>() {};
 

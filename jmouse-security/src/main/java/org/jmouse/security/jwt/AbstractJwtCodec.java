@@ -15,24 +15,20 @@ public abstract class AbstractJwtCodec implements JwtCodec {
 
     public static final String JWT_TYPE = "JWT";
 
-    protected final Algorithm     algorithm;
-    protected final JwtCodec.Json json;
-    protected final Clock         clock;
+    protected final Algorithm   algorithm;
+    protected final Clock       clock;
+    protected final long        allowedSkewSeconds;
+    protected final AdapterJson adapter;
 
-    /**
-     * ⏱️ Allowed clock skew in seconds for exp/nbf checks.
-     */
-    protected final long      allowedSkewSeconds;
-
-    protected AbstractJwtCodec(JwtCodec.Json json, Algorithm algorithm) {
-        this(json, algorithm, Clock.systemUTC(), 60); // default skew 60s
+    protected AbstractJwtCodec(AdapterJson adapter, Algorithm algorithm) {
+        this(adapter, algorithm, Clock.systemUTC(), 60); // default skew 60s
     }
 
-    protected AbstractJwtCodec(JwtCodec.Json json, Algorithm algorithm, Clock clock, long skewSeconds) {
-        this.json = json;
+    protected AbstractJwtCodec(AdapterJson adapter, Algorithm algorithm, Clock clock, long skewSeconds) {
         this.algorithm = algorithm;
         this.clock = clock;
         this.allowedSkewSeconds = skewSeconds;
+        this.adapter = adapter;
     }
 
     @Override
@@ -50,8 +46,8 @@ public abstract class AbstractJwtCodec implements JwtCodec {
 
             String signingInput = parts[0] + "." + parts[1];
 
-            Map<String, Object> header = json.readObject(new String(headerBytes, UTF_8));
-            Map<String, Object> claims = json.readObject(new String(payloadBytes, UTF_8));
+            Map<String, Object> header = adapter.readObject(new String(headerBytes, UTF_8));
+            Map<String, Object> claims = adapter.readObject(new String(payloadBytes, UTF_8));
 
             // alg check
             String algorithm = String.valueOf(header.getOrDefault("alg", ""));
@@ -115,8 +111,8 @@ public abstract class AbstractJwtCodec implements JwtCodec {
                 claims.putIfAbsent("sub", jwt.subject());
             }
 
-            String headerJson  = json.writeObject(header);
-            String claimsJson  = json.writeObject(claims);
+            String headerJson  = adapter.writeObject(header);
+            String claimsJson  = adapter.writeObject(claims);
 
             String headerValue  = b64Encode(headerJson.getBytes(UTF_8));
             String payloadData  = b64Encode(claimsJson.getBytes(UTF_8));

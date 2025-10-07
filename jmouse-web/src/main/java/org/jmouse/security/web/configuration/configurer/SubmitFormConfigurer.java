@@ -3,7 +3,6 @@ package org.jmouse.security.web.configuration.configurer;
 import jakarta.servlet.Filter;
 import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.web.authentication.AuthenticationProvider;
-import org.jmouse.security.web.authentication.www.BasicAuthenticationProvider;
 import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.authentication.AuthenticationFailureHandler;
@@ -14,7 +13,7 @@ import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
         extends AbstractAuthenticationConfigurer<B, SubmitFormConfigurer<B>> {
 
-    private AuthenticationProvider authenticationProvider = new BasicAuthenticationProvider();
+    private AuthenticationProvider authenticationProvider;
     private String                 usernameParameter;
     private String                 passwordParameter;
 

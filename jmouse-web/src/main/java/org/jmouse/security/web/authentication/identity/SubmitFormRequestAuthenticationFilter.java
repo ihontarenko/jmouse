@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.web.authentication.*;
-import org.jmouse.security.web.authentication.www.BasicAuthenticationProvider;
 import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.security.web.RequestMatcher;
 
@@ -16,7 +15,7 @@ public class SubmitFormRequestAuthenticationFilter extends AbstractAuthenticatio
     private String usernameParameter = JMOUSE_USER_IDENTITY_USERNAME;
     private String passwordParameter = JMOUSE_USER_IDENTITY_PASSWORD;
 
-    private AuthenticationProvider authenticationProvider = new BasicAuthenticationProvider();
+    private AuthenticationProvider authenticationProvider;
 
     public SubmitFormRequestAuthenticationFilter(
             AuthenticationManager authenticationManager,
@@ -32,12 +31,23 @@ public class SubmitFormRequestAuthenticationFilter extends AbstractAuthenticatio
             AuthenticationManager authenticationManager, SecurityContextRepository contextRepository,
             RequestMatcher requestMatcher
     ) {
-        super(authenticationManager, contextRepository, requestMatcher, new NoopHttp200SuccessHandler(), new NoopHttp401FailureHandler());
+        this(authenticationManager, contextRepository, requestMatcher, new NoopHttp200SuccessHandler(), new NoopHttp401FailureHandler());
     }
 
     @Override
     protected Authentication tryAuthenticate(HttpServletRequest request) throws Exception {
-        return authenticationProvider.provide(request);
+        AuthenticationProvider provider = getAuthenticationProvider();
+
+        if (provider == null) {
+            provider = new SubmitFormRequestAuthenticationProvider(
+                    getUsernameParameter() == null
+                            ? JMOUSE_USER_IDENTITY_USERNAME : getUsernameParameter(),
+                    getPasswordParameter() == null
+                            ? JMOUSE_USER_IDENTITY_PASSWORD : getPasswordParameter()
+            );
+        }
+
+        return provider.provide(request);
     }
 
     public String getUsernameParameter() {

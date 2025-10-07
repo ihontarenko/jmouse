@@ -50,15 +50,26 @@ public abstract class AbstractAuthenticationProcessingFilter implements BeanFilt
         }
 
         try {
-            Authentication       before          = tryAuthenticate(request);
-            Authentication       after           = authenticationManager.authenticate(before);
-            SecurityContext      securityContext = SecurityContext.ofAuthentication(after);
-            RequestContextKeeper keeper          = RequestContextKeeper.ofRequestContext(requestContext);
+            Authentication before = tryAuthenticate(request);
 
-            SecurityContextHolder.setContext(securityContext);
+            if (before == null) {
+                chain.doFilter(request, response);
+                return;
+            }
 
-            contextRepository.save(securityContext, keeper);
-            successHandler.onSuccess(keeper.request(), keeper.response());
+            Authentication after = authenticationManager.authenticate(before);
+
+            if (after != null && after.isAuthenticated()) {
+                SecurityContext      securityContext = SecurityContext.ofAuthentication(after);
+                RequestContextKeeper keeper          = RequestContextKeeper.ofRequestContext(requestContext);
+
+                SecurityContextHolder.setContext(securityContext);
+
+                contextRepository.save(securityContext, keeper);
+                successHandler.onSuccess(keeper.request(), keeper.response());
+            }
+
+            chain.doFilter(request, response);
         } catch (Exception exception) {
             SecurityContextHolder.clearContext();
             failureHandler.onFailure(request, response, exception);

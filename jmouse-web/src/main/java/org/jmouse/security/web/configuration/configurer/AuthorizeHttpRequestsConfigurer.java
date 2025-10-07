@@ -72,7 +72,8 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
             List<RequestMatcher> matchers,
             AuthorizationManager<RequestSecurityContext> manager,
             boolean negate) {
-        var effective = negate ? AuthorityPolicyAuthorizationManager.not(manager) : manager;
+        AuthorizationManager<RequestSecurityContext> effective = negate
+                ? AuthorityPolicyAuthorizationManager.not(manager) : manager;
         addMapping(matchers, effective, negate);
         return owner;
     }
@@ -124,7 +125,11 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
             this.pending = requestMatchers;
             AuthorizeHttpRequestsConfigurer<B> outer = AuthorizeHttpRequestsConfigurer.this;
             return new AuthorizationCriterion<>(
-                    outer::applyAuthorizationManager, outer.getRegistry(), requestMatchers, outer::getContextVariable);
+                    outer::applyAuthorizationManager,
+                    outer.getRegistry(),
+                    requestMatchers,
+                    outer::getContextVariable
+            );
         }
 
     }

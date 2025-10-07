@@ -40,7 +40,7 @@ public final class EdDSAJwtCodec extends AbstractJwtCodec {
      * @param publicKey  public key for verification
      * @param privateKey private key for signing (nullable for verify-only)
      */
-    public EdDSAJwtCodec(Json json, PublicKey publicKey, PrivateKey privateKey) {
+    public EdDSAJwtCodec(AdapterJson json, PublicKey publicKey, PrivateKey privateKey) {
         super(json, Algorithm.EdDSA);
         this.publicKey = publicKey;
         this.privateKey = privateKey;
@@ -55,7 +55,7 @@ public final class EdDSAJwtCodec extends AbstractJwtCodec {
      * @param clock      time source for validation
      * @param skew       allowed clock skew
      */
-    public EdDSAJwtCodec(Json json, PublicKey publicKey, PrivateKey privateKey, Clock clock, long skew) {
+    public EdDSAJwtCodec(AdapterJson json, PublicKey publicKey, PrivateKey privateKey, Clock clock, long skew) {
         super(json, Algorithm.EdDSA, clock, skew);
         this.publicKey = publicKey;
         this.privateKey = privateKey;

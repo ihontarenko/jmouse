@@ -108,9 +108,12 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
     public final void configure(B http) {
         AuthenticationManager     authenticationManager = http.getSharedObject(SharedAttributes.AUTHENTICATION_MANAGER);
         SecurityContextRepository repository            = http.getSharedObject(SharedAttributes.CONTEXT_REPOSITORY);
+        RequestMatcher            matcher               = resolveMatcher();
 
-        RequestMatcher requestMatcher = requireNonNull(resolveMatcher(),
-                "REQUEST-MATCHER must be set (use loginProcessingUrl(...) or requestMatcher(...))");
+        if (matcher == null) {
+            throw new IllegalStateException(
+                    "REQUEST-MATCHER must be set (use loginProcessingUrl(...) or requestMatcher(...))");
+        }
 
         AuthenticationSuccessHandler successHandler = resolveSuccessHandler(http);
         AuthenticationFailureHandler failureHandler = resolveFailureHandler(http);

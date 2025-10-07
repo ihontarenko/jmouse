@@ -15,12 +15,12 @@ public final class HS256JwtCodec extends AbstractJwtCodec {
 
     private final byte[] secret;
 
-    public HS256JwtCodec(Json json, byte[] secret) {
+    public HS256JwtCodec(AdapterJson json, byte[] secret) {
         super(json, Algorithm.HS256);
         this.secret = secret.clone();
     }
 
-    public HS256JwtCodec(Json json, byte[] secret, Clock clock, long skewSeconds) {
+    public HS256JwtCodec(AdapterJson json, byte[] secret, Clock clock, long skewSeconds) {
         super(json, Algorithm.HS256, clock, skewSeconds);
         this.secret = secret.clone();
     }

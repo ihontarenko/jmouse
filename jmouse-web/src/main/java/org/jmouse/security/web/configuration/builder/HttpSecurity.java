@@ -5,6 +5,7 @@ import org.jmouse.core.Sorter;
 import org.jmouse.security.web.*;
 import org.jmouse.security.web.configuration.*;
 import org.jmouse.security.web.configuration.configurer.*;
+import org.jmouse.web.http.request.WWWAuthenticate;
 
 import java.util.ArrayList;
 import java.util.List;

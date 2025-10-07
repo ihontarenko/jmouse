@@ -17,13 +17,13 @@ public final class RS256JwtCodec extends AbstractJwtCodec {
     private final PublicKey  publicKey;
     private final PrivateKey privateKey;
 
-    public RS256JwtCodec(Json json, PublicKey publicKey, PrivateKey privateKey) {
+    public RS256JwtCodec(AdapterJson json, PublicKey publicKey, PrivateKey privateKey) {
         super(json, Algorithm.RS256);
         this.publicKey = publicKey;
         this.privateKey = privateKey;
     }
 
-    public RS256JwtCodec(Json json, PublicKey publicKey, PrivateKey privateKey, Clock clock, long skewSeconds) {
+    public RS256JwtCodec(AdapterJson json, PublicKey publicKey, PrivateKey privateKey, Clock clock, long skewSeconds) {
         super(json, Algorithm.RS256, clock, skewSeconds);
         this.publicKey = publicKey;
         this.privateKey = privateKey;

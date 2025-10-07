@@ -49,35 +49,35 @@ public final class JwtClaimsVerifier {
      * Accepts either a single string or a collection of strings; otherwise empty.
      */
     private static Set<String> extractAudience(Object value) {
-        if (value == null) return Set.of();
-
-        if (value instanceof String string) {
-            return Set.of(string);
-        }
-
-        if (value instanceof Collection<?> collection) {
-            Set<String> result = new LinkedHashSet<>(collection.size());
-            for (Object object : collection) {
-                if (object instanceof String string) {
-                    result.add(string);
+        return switch (value) {
+            case String string -> Set.of(string);
+            case Collection<?> collection -> {
+                Set<String> result = new LinkedHashSet<>(collection.size());
+                for (Object object : collection) {
+                    if (object instanceof String string) {
+                        result.add(string);
+                    }
                 }
+                yield result;
             }
-            return result;
-        }
-
-        return Set.of();
+            case null, default -> Set.of();
+        };
     }
 
     /**
      * 🧼 Normalize issuers by trimming a single trailing slash (if present).
      */
     private static Set<String> normalizeIssuers(Set<String> collection) {
-        if (collection == null || collection.isEmpty()) return Set.of();
+        if (collection == null || collection.isEmpty()) {
+            return Set.of();
+        }
 
         Set<String> result = new LinkedHashSet<>(collection.size());
+
         for (String issuer : collection) {
             result.add(normalizeIssuer(issuer));
         }
+
         return Set.copyOf(result);
     }
 

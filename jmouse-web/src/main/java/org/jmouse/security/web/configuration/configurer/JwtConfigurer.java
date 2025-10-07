@@ -1,10 +1,13 @@
 package org.jmouse.security.web.configuration.configurer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.Filter;
 import org.jmouse.security.authentication.AuthenticationManager;
-import org.jmouse.security.jwt.Jwt;
-import org.jmouse.security.jwt.JwtAuthorities;
+import org.jmouse.security.authentication.AuthenticationResolverRegistry;
+import org.jmouse.security.authentication.jwt.JwtTokenAuthenticationResolver;
 import org.jmouse.security.jwt.JwtCodec;
+import org.jmouse.security.jwt.codec.HS256JwtCodec;
+import org.jmouse.security.jwt.codec.RS256JwtCodec;
 import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.authentication.*;
 import org.jmouse.security.web.authentication.bearer.BearerTokenAuthenticationEntryPoint;
@@ -12,34 +15,30 @@ import org.jmouse.security.web.authentication.jwt.JwtAuthenticationFilter;
 import org.jmouse.security.web.configuration.Customizer;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.context.SecurityContextRepository;
+import org.jmouse.security.web.jwt.JacksonJsonMapper;
+import org.jmouse.web.http.request.WWWAuthenticate.Bearer.ErrorCode;
 
-import java.util.Collection;
-import java.util.function.Function;
+import java.time.Clock;
 
 public final class JwtConfigurer<B extends HttpSecurityBuilder<B>>
         extends AbstractAuthenticationConfigurer<B, JwtConfigurer<B>> {
 
-    private final AbstractRealmAuthenticationEntryPoint entryPoint  = new BearerTokenAuthenticationEntryPoint();
-    private       JwtCodec                              jwtCodec;
-    private       Function<Jwt, Collection<String>>     authorities = JwtAuthorities.scopeClaim();
+    private final AbstractRealmAuthenticationEntryPoint entryPoint           = new BearerTokenAuthenticationEntryPoint();
+    private final EntryPointConfigurer entryPointConfigurer = new EntryPointConfigurer();
+    private final CodecConfigurer      jwtCodecConfigurer   = new CodecConfigurer();
 
     public JwtConfigurer<B> entryPoint(Customizer<EntryPointConfigurer> customizer) {
-        customizer.customize(new EntryPointConfigurer());
+        customizer.customize(entryPointConfigurer);
         return JwtConfigurer.this;
     }
 
-    public JwtConfigurer<B> decoder(JwtCodec jwtCodec) {
-        this.jwtCodec = jwtCodec;
-        return this;
-    }
-
-    public JwtConfigurer<B> authorities(Function<Jwt, Collection<String>> function) {
-        this.authorities = function;
-        return this;
+    public JwtConfigurer<B> codec(Customizer<CodecConfigurer> customizer) {
+        customizer.customize(jwtCodecConfigurer);
+        return JwtConfigurer.this;
     }
 
     public JwtConfigurer<B> realm(String realm) {
-        entryPoint.setRealmName(realm);
+        entryPointConfigurer.realmName(realm);
         return this;
     }
 
@@ -51,22 +50,157 @@ public final class JwtConfigurer<B extends HttpSecurityBuilder<B>>
             AuthenticationSuccessHandler successHandler,
             AuthenticationFailureHandler failureHandler
     ) {
-
-        if (jwtCodec == null) {
-            throw new IllegalStateException("JwtCodec must be provided");
+        if (entryPoint instanceof BearerTokenAuthenticationEntryPoint bearerEntryPoint) {
+            bearerEntryPoint.setRealmName(entryPointConfigurer.realmName());
+            bearerEntryPoint.setErrorDescription(entryPointConfigurer.errorDescription());
+            bearerEntryPoint.setErrorCode(entryPointConfigurer.errorCode().name());
         }
 
-        AuthenticationFailureHandler          failure    = failureHandler != null
+        if (authenticationManager instanceof AuthenticationResolverRegistry resolverRegistry) {
+            JwtCodec codec = jwtCodecConfigurer.codec();
+
+            if (codec == null) {
+                throw new IllegalStateException("Required JWT codec not configured yet.");
+            }
+
+            resolverRegistry.addResolver(new JwtTokenAuthenticationResolver(
+                    jwtCodecConfigurer.codec()
+            ));
+        }
+
+        AuthenticationFailureHandler failure = failureHandler != null
                 ? failureHandler : entryPoint::initiate;
-        AuthenticationSuccessHandler          success    = successHandler != null
+        AuthenticationSuccessHandler success = successHandler != null
                 ? successHandler : new NoopHttp200SuccessHandler();
 
         return new JwtAuthenticationFilter(authenticationManager, repository, matcher, success, failure);
     }
 
-    public class EntryPointConfigurer {
+    public static class CodecConfigurer {
+
+        private JwtCodec             codec;
+        private JwtCodec.AdapterJson adapter = new JacksonJsonMapper(new ObjectMapper());
+
+        public JwtCodec codec() {
+            return codec;
+        }
+
+        public CodecConfigurer codec(JwtCodec jwtCodec) {
+            this.codec = jwtCodec;
+            return this;
+        }
+
+        public CodecConfigurer adapter(JwtCodec.AdapterJson adapterJson) {
+            this.adapter = adapterJson;
+            return this;
+        }
+
+        public CodecConfigurer hs256(Customizer<Hs256JwtCodecConfigurer> customizer) {
+            Hs256JwtCodecConfigurer configurer = new Hs256JwtCodecConfigurer();
+            customizer.customize(configurer);
+            this.codec = configurer.build();
+            return this;
+        }
+
+        public CodecConfigurer rs256(Customizer<Rs256JwtCodecConfigurer> customizer) {
+            Rs256JwtCodecConfigurer configurer = new Rs256JwtCodecConfigurer();
+            customizer.customize(configurer);
+//            this.codec = configurer.build();
+            return this;
+        }
+
+        public CodecConfigurer ed25519(Customizer<EdDSAJwtCodecConfigurer> customizer) {
+            EdDSAJwtCodecConfigurer configurer = new EdDSAJwtCodecConfigurer();
+            customizer.customize(configurer);
+//            this.codec = configurer.build();
+            return this;
+        }
+
+        public CodecConfigurer es256(Customizer<Es256JwtCodecConfigurer> customizer) {
+            Es256JwtCodecConfigurer configurer = new Es256JwtCodecConfigurer();
+            customizer.customize(configurer);
+//            this.codec = configurer.build();
+            return this;
+        }
+
+        public class Hs256JwtCodecConfigurer {
+
+            private byte[] secret;
+            private long   skew;
+            private Clock  clock;
+
+            public Hs256JwtCodecConfigurer secret(String secret) {
+                return secret(secret.getBytes());
+            }
+
+            public Hs256JwtCodecConfigurer secret(byte[] secret) {
+                this.secret = secret.clone();
+                return this;
+            }
+
+            public Hs256JwtCodecConfigurer skew(long skew) {
+                this.skew = skew;
+                return this;
+            }
+
+            public Hs256JwtCodecConfigurer clock(Clock clock) {
+                this.clock = clock;
+                return this;
+            }
+
+            public JwtCodec build() {
+                return new HS256JwtCodec(CodecConfigurer.this.adapter, secret, clock, skew);
+            }
+
+        }
+
+        public class Rs256JwtCodecConfigurer {
+            // todo: not implemented yet
+        }
+
+        public class EdDSAJwtCodecConfigurer {
+            // todo: not implemented yet
+        }
+
+        public class Es256JwtCodecConfigurer {
+            // todo: not implemented yet
+        }
+
+    }
 
 
+    public static class EntryPointConfigurer {
+
+        private String    realmName;
+        private String    errorDescription;
+        private ErrorCode errorCode;
+
+        public String realmName() {
+            return realmName;
+        }
+
+        public EntryPointConfigurer realmName(String realmName) {
+            this.realmName = realmName;
+            return this;
+        }
+
+        public String errorDescription() {
+            return errorDescription;
+        }
+
+        public EntryPointConfigurer errorDescription(String errorDescription) {
+            this.errorDescription = errorDescription;
+            return this;
+        }
+
+        public ErrorCode errorCode() {
+            return errorCode;
+        }
+
+        public EntryPointConfigurer errorCode(ErrorCode errorCode) {
+            this.errorCode = errorCode;
+            return this;
+        }
 
     }
 
