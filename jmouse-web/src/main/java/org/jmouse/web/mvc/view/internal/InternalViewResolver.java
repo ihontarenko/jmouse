@@ -41,9 +41,9 @@ import java.util.Map;
  */
 public class InternalViewResolver extends AbstractViewResolver {
 
-    private final Engine engine = new TemplateEngine();
-    private final Map<String, View> cache = new HashMap<>();
-    private final Renderer renderer;
+    private final Engine            engine = new TemplateEngine();
+    private final Map<String, View> cache  = new HashMap<>();
+    private final Renderer          renderer;
 
     /**
      * 🧱 Constructs a view resolver with a classpath loader and optional extensions.

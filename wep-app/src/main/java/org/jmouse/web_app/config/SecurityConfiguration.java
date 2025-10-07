@@ -13,7 +13,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
         http.submitForm(form ->
                 form.usernameParameter("username").passwordParameter("password")
-                        .processing().formAction("/login").httpMethod(HttpMethod.POST)
+                        .processing().formAction("/login")
         );
         return http.build();
     }

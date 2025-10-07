@@ -70,6 +70,10 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
         return (C) this;
     }
 
+    public C anyRequest() {
+        return requestMatcher(RequestMatcher.any());
+    }
+
     /**
      * 🛣️ Shortcut builder when matcher is a path pattern with HTTP method.
      *
@@ -112,7 +116,7 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
 
         if (matcher == null) {
             throw new IllegalStateException(
-                    "REQUEST-MATCHER must be set (use loginProcessingUrl(...) or requestMatcher(...))");
+                    "REQUEST-MATCHER must be set (use processing() or requestMatcher(...))");
         }
 
         AuthenticationSuccessHandler successHandler = resolveSuccessHandler(http);
