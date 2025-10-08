@@ -7,10 +7,9 @@ import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.authentication.ResolversAuthenticationManager;
 import org.jmouse.security.authentication.dao.DaoAuthenticationResolver;
-import org.jmouse.security.web.SecurityFilterChainDelegator;
+import org.jmouse.security.web.SecurityFilterChainDelegatorRegistration;
 import org.jmouse.security.web.configuration.builder.HttpSecurity;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.servlet.registration.FilterRegistrationBean;
 
 import java.util.List;
 
@@ -33,14 +32,10 @@ public class HttpSecurityConfiguration implements InitializingBeanSupport<WebBea
         return httpSecurity;
     }
 
-//    @Bean
-//    public FilterRegistrationBean<SecurityFilterChainDelegator> securityFilterRegistration(
-//            SecurityFilterChainDelegator delegator) {
-//        FilterRegistrationBean<SecurityFilterChainDelegator> registration = new FilterRegistrationBean<>(delegator);
-//        registration.setOrder(-100500);
-//        registration.addUrlPatterns("/*");
-//        return registration;
-//    }
+    @Bean
+    public SecurityFilterChainDelegatorRegistration securityFilterChainDelegatorRegistration() {
+        return new SecurityFilterChainDelegatorRegistration();
+    }
 
     @Override
     public void initialize(WebBeanContext context) {

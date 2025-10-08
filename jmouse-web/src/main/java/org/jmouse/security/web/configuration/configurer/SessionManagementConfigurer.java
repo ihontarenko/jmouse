@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
-        extends HttpSecurityConfigurer<SessionManagementConfigurer<B>, B> {
+        extends AbstractSecurityContextConfigurer<B> {
 
     private boolean                    rewrite = false;
     private SessionCreationPolicy      policy  = SessionCreationPolicy.IF_REQUIRED;
@@ -64,17 +64,6 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
     public void configure(B http) {
         http.setSharedObject(SessionSettings.class, new SessionSettings(
                 policy, rewrite, sessionAuthentication, sessionInvalidHandler));
-
-        SecurityContextRepository repository = http.getSharedObject(SecurityContextRepository.class);
-        if (repository == null) {
-            repository = switch (policy) {
-                case STATELESS -> new RequestAttributeSecurityContextRepository();
-                case IF_PRESENT, IF_REQUIRED, ALWAYS ->
-                        new HttpSessionSecurityContextRepository()
-                                .allowSessionCreation(policy.isAllowCreate());
-            };
-            http.setSharedObject(SecurityContextRepository.class, repository);
-        }
 
         if (policy.isForceEager()) {
             http.addFilter(new ForceEagerSessionCreationFilter());

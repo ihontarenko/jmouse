@@ -8,6 +8,7 @@ import org.jmouse.security.web.configuration.configurer.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public final class HttpSecurity
         extends AbstractConfiguredSecurityBuilder<SecurityFilterChain, HttpSecurity>
@@ -35,8 +36,35 @@ public final class HttpSecurity
     }
 
     @Override
+    public HttpSecurity addFilterAfter(Filter filter, Class<? extends Filter> afterFilter) {
+        return addFilterOfOffset(filter, 1, afterFilter);
+    }
+
+    @Override
+    public HttpSecurity addFilterBefore(Filter filter, Class<? extends Filter> beforeFilter) {
+        return addFilterOfOffset(filter, -1, beforeFilter);
+    }
+
+    private HttpSecurity addFilterOfOffset(Filter filter, int offset, Class<? extends Filter> registered) {
+        SecurityFilterOrder orders          = getSharedObject(SharedAttributes.SECURITY_FILTER_ORDER);
+        Filter              unwrappedFilter = filter;
+
+        if (filter instanceof OrderedFilter orderedFilter) {
+            unwrappedFilter = orderedFilter.filter();
+        }
+
+        int order = orders.getOrder(registered);
+
+        addFilter(new OrderedFilter(unwrappedFilter, order + offset));
+
+        return this;
+    }
+
+    @Override
     public List<Filter> getFilters() {
-        return this.filters;
+        List<Filter> filters = new ArrayList<>(Set.copyOf(this.filters));
+        filters.sort(Sorter.PRIORITY_COMPARATOR);
+        return filters;
     }
 
     @Override

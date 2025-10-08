@@ -16,6 +16,10 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
 
     H addFilter(Filter filter);
 
+    H addFilterAfter(Filter filter, Class<? extends Filter> afterFilter);
+
+    H addFilterBefore(Filter filter, Class<? extends Filter> beforeFilter);
+
     List<Filter> getFilters();
 
     <U> void setSharedObject(Class<U> type, U object);
