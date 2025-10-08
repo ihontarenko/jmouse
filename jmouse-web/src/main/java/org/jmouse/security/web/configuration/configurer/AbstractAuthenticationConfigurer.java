@@ -40,7 +40,7 @@ import static java.util.Objects.requireNonNull;
 public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBuilder<B>, C extends AbstractAuthenticationConfigurer<B, C>>
         extends HttpSecurityConfigurer<C, B> {
 
-    private RequestMatcher               requestMatcher;
+    private RequestMatcher               requestMatcher = RequestMatcher.any();
     private AuthenticationSuccessHandler successHandler;
     private AuthenticationFailureHandler failureHandler;
 
