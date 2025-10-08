@@ -4,12 +4,15 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jmouse.web.http.HttpStatus;
 import org.jmouse.web.http.request.RequestContext;
 import org.jmouse.web.mvc.View;
 import org.jmouse.web.servlet.filter.BeanFilter;
 import org.jmouse.security.web.RequestMatcher;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 import static org.jmouse.security.web.authentication.identity.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_PASSWORD;
@@ -30,10 +33,7 @@ public final class DefaultLoginPageGeneratingFilter implements BeanFilter {
     private final RequestMatcher requestMatcher;
 
     public DefaultLoginPageGeneratingFilter(
-            View view,
-            String action,
-            String usernameParameter,
-            String passwordParameter
+            View view, String action, String usernameParameter, String passwordParameter
     ) {
         this.requestMatcher = RequestMatcher.pathPattern(action);
         this.action = requireNonNull(action);
@@ -55,12 +55,21 @@ public final class DefaultLoginPageGeneratingFilter implements BeanFilter {
         boolean error  = request.getParameter("error")  != null;
         boolean logout = request.getParameter("logout") != null;
 
-        response.setStatus(HttpServletResponse.SC_OK);
+        response.setStatus(HttpStatus.OK.getCode());
         response.setContentType("text/html;charset=UTF-8");
-        response.getWriter().write(renderHtml(error, logout));
+
+        renderHtml(error, logout, requestContext);
     }
 
-    private String renderHtml(boolean error, boolean logout) {
-        return "form";
+    private void renderHtml(boolean error, boolean logout, RequestContext requestContext) {
+        Map<String, Object> model = new HashMap<>();
+
+        model.put("action", action);
+        model.put("usernameParameter", usernameParameter);
+        model.put("passwordParameter", passwordParameter);
+        model.put("isError", error);
+        model.put("isLogout", logout);
+
+        view.render(model, requestContext.request(), requestContext.response());
     }
 }

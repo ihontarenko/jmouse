@@ -13,6 +13,6 @@ public class DaoAuthenticationResolver extends AbstractUserIdentityAuthenticatio
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        return null;
+        return authentication;
     }
 }

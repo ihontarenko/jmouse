@@ -75,15 +75,6 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
     }
 
     /**
-     * 🛣️ Shortcut builder when matcher is a path pattern with HTTP method.
-     *
-     * @return processing URL configurer
-     */
-    public ProcessingURLConfigurer processing() {
-        return new ProcessingURLConfigurer();
-    }
-
-    /**
      * ✅ Provide a custom success handler (falls back to shared/defaults).
      *
      * @param h success handler
@@ -185,55 +176,4 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
         return shared != null ? shared : defaultFailureHandler();
     }
 
-    /**
-     * 🛣️ Builder for common "processing URL + method" configuration.
-     */
-    public class ProcessingURLConfigurer {
-
-        private RequestMatcher requestMatcher;
-
-        /**
-         * 🧭 Define the form/action path pattern to match.
-         *
-         * @param url action or endpoint path pattern
-         * @return this builder
-         */
-        public ProcessingURLConfigurer formAction(String url) {
-            requestMatcher = RequestMatcher.pathPattern(url);
-            return this;
-        }
-
-        /**
-         * 🔁 Constrain the matcher to a specific HTTP method.
-         *
-         * <p>⚠️ Requires {@link #formAction(String)} to be called first,
-         * otherwise no base path matcher is defined.</p>
-         *
-         * @param httpMethod HTTP method to match (e.g. GET, POST)
-         * @return parent configurer
-         * @throws IllegalStateException if {@code formAction(...)} was not set
-         */
-        public C httpMethod(HttpMethod httpMethod) {
-            if (requestMatcher == null) {
-                throw new IllegalStateException("formAction(...) must be set before httpMethod(...)");
-            }
-            return AbstractAuthenticationConfigurer.this.requestMatcher(
-                    requestMatcher.and(RequestMatcher.httpMethod(httpMethod))::matches
-            );
-        }
-
-        /**
-         * ⬆️ Shortcut for {@code GET}.
-         */
-        public C get() {
-            return httpMethod(HttpMethod.GET);
-        }
-
-        /**
-         * ⬇️ Shortcut for {@code POST}.
-         */
-        public C post() {
-            return httpMethod(HttpMethod.POST);
-        }
-    }
 }

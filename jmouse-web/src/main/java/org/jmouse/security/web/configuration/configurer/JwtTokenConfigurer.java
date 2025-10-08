@@ -7,7 +7,6 @@ import org.jmouse.security.authentication.AuthenticationResolverRegistry;
 import org.jmouse.security.authentication.jwt.JwtTokenAuthenticationResolver;
 import org.jmouse.security.jwt.JwtCodec;
 import org.jmouse.security.jwt.codec.HS256JwtCodec;
-import org.jmouse.security.jwt.codec.RS256JwtCodec;
 import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.authentication.*;
 import org.jmouse.security.web.authentication.bearer.BearerTokenAuthenticationEntryPoint;
@@ -20,24 +19,24 @@ import org.jmouse.web.http.request.WWWAuthenticate.Bearer.ErrorCode;
 
 import java.time.Clock;
 
-public final class JwtConfigurer<B extends HttpSecurityBuilder<B>>
-        extends AbstractAuthenticationConfigurer<B, JwtConfigurer<B>> {
+public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>>
+        extends AbstractAuthenticationConfigurer<B, JwtTokenConfigurer<B>> {
 
     private final AbstractRealmAuthenticationEntryPoint entryPoint           = new BearerTokenAuthenticationEntryPoint();
     private final EntryPointConfigurer entryPointConfigurer = new EntryPointConfigurer();
     private final CodecConfigurer      jwtCodecConfigurer   = new CodecConfigurer();
 
-    public JwtConfigurer<B> entryPoint(Customizer<EntryPointConfigurer> customizer) {
+    public JwtTokenConfigurer<B> entryPoint(Customizer<EntryPointConfigurer> customizer) {
         customizer.customize(entryPointConfigurer);
-        return JwtConfigurer.this;
+        return JwtTokenConfigurer.this;
     }
 
-    public JwtConfigurer<B> codec(Customizer<CodecConfigurer> customizer) {
+    public JwtTokenConfigurer<B> codec(Customizer<CodecConfigurer> customizer) {
         customizer.customize(jwtCodecConfigurer);
-        return JwtConfigurer.this;
+        return JwtTokenConfigurer.this;
     }
 
-    public JwtConfigurer<B> realm(String realm) {
+    public JwtTokenConfigurer<B> realm(String realm) {
         entryPointConfigurer.realmName(realm);
         return this;
     }

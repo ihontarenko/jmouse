@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.security.web.authentication.AuthenticationFailureHandler;
 import org.jmouse.web.http.HttpHeader;
+import org.jmouse.web.http.HttpStatus;
 
 import java.io.IOException;
 
@@ -28,10 +29,10 @@ public class FailureRedirectHandler implements AuthenticationFailureHandler {
             HttpServletRequest request, HttpServletResponse response, Exception failure
     ) throws IOException {
         if (use401ForAjax && XML_HTTP_REQUEST.equals(request.getHeader(HttpHeader.X_REQUESTED_WITH.value()))) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendError(HttpStatus.UNAUTHORIZED.getCode());
             return;
         }
-        response.sendRedirect(request.getContextPath() + loginPage + "?_=" + getClass().getName());
+        response.sendRedirect(request.getContextPath() + loginPage + "?_=" + getClass().getSimpleName());
     }
 
 }

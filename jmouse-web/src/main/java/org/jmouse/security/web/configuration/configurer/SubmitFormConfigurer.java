@@ -12,6 +12,7 @@ import org.jmouse.security.web.authentication.ui.FailureRedirectHandler;
 import org.jmouse.security.web.authentication.ui.SuccessRedirectHandler;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.context.SecurityContextRepository;
+import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.mvc.View;
 import org.jmouse.web.mvc.ViewResolver;
 import org.jmouse.web.mvc.view.internal.InternalView;
@@ -47,6 +48,10 @@ public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
     public SubmitFormConfigurer<B> passwordParameter(String passwordParameter) {
         this.passwordParameter = passwordParameter;
         return this;
+    }
+
+    public ProcessingURLConfigurer processing() {
+        return new ProcessingURLConfigurer();
     }
 
     public SubmitFormConfigurer<B> authenticationProvider(AuthenticationProvider authenticationProvider) {
@@ -94,6 +99,58 @@ public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
                 usernameParameter != null ? usernameParameter : JMOUSE_USER_IDENTITY_USERNAME,
                 passwordParameter != null ? passwordParameter : JMOUSE_USER_IDENTITY_PASSWORD
         ));
+    }
+
+    /**
+     * 🛣️ Builder for common "processing URL + method" configuration.
+     */
+    public class ProcessingURLConfigurer {
+
+        private RequestMatcher requestMatcher;
+
+        /**
+         * 🧭 Define the form/action path pattern to match.
+         *
+         * @param url action or endpoint path pattern
+         * @return this builder
+         */
+        public ProcessingURLConfigurer formAction(String url) {
+            requestMatcher = RequestMatcher.pathPattern(url);
+            return this;
+        }
+
+        /**
+         * 🔁 Constrain the matcher to a specific HTTP method.
+         *
+         * <p>⚠️ Requires {@link #formAction(String)} to be called first,
+         * otherwise no base path matcher is defined.</p>
+         *
+         * @param httpMethod HTTP method to match (e.g. GET, POST)
+         * @return parent configurer
+         * @throws IllegalStateException if {@code formAction(...)} was not set
+         */
+        public SubmitFormConfigurer<B> httpMethod(HttpMethod httpMethod) {
+            if (requestMatcher == null) {
+                throw new IllegalStateException("formAction(...) must be set before httpMethod(...)");
+            }
+            return SubmitFormConfigurer.this.requestMatcher(
+                    requestMatcher.and(RequestMatcher.httpMethod(httpMethod))::matches
+            );
+        }
+
+        /**
+         * ⬆️ Shortcut for {@code GET}.
+         */
+        public SubmitFormConfigurer<B> get() {
+            return httpMethod(HttpMethod.GET);
+        }
+
+        /**
+         * ⬇️ Shortcut for {@code POST}.
+         */
+        public SubmitFormConfigurer<B> post() {
+            return httpMethod(HttpMethod.POST);
+        }
     }
 
 }

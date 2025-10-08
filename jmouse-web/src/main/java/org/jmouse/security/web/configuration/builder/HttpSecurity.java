@@ -75,13 +75,13 @@ public final class HttpSecurity
         return this;
     }
 
-    public HttpSecurity basic(Customizer<HttpBasicConfigurer<HttpSecurity>> customizer) {
+    public HttpSecurity httpBasic(Customizer<HttpBasicConfigurer<HttpSecurity>> customizer) {
         customizer.customize(attach(new HttpBasicConfigurer<>()));
         return this;
     }
 
-    public HttpSecurity jwt(Customizer<JwtConfigurer<HttpSecurity>> customizer) {
-        customizer.customize(attach(new JwtConfigurer<>()));
+    public HttpSecurity jwt(Customizer<JwtTokenConfigurer<HttpSecurity>> customizer) {
+        customizer.customize(attach(new JwtTokenConfigurer<>()));
         return this;
     }
 

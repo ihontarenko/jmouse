@@ -311,8 +311,6 @@ public class RendererVisitor implements NodeVisitor {
      */
     @Override
     public void visit(IfNode ifNode) {
-        Conversion conversion = context.getConversion();
-
         for (ConditionBranch branch : ifNode.getBranches()) {
             // If "when" is null, the branch represents the "else" clause.
             Expression when = branch.getWhen();
@@ -321,7 +319,7 @@ public class RendererVisitor implements NodeVisitor {
 
             if (when != null) {
                 // Evaluate the condition and convert it to a Boolean.
-                satisfied = conversion.convert(when.evaluate(context), Boolean.class);
+                satisfied = Boolean.parseBoolean((String) when.evaluate(context));
             }
 
             // Process the "then" block if the condition is satisfied and a branch exists.

@@ -169,6 +169,10 @@ public class InitializerVisitor implements NodeVisitor {
         String     location   = conversion.convert(value, String.class);
         Template   parent     = template.getRegistry().getEngine().getTemplate(location);
 
+        if (template.getName().equals(location)) {
+
+        }
+
         LOGGER.info("Inherited parent view '{}' for view '{}'", location, template.getName());
 
         template.setParent(parent, context);

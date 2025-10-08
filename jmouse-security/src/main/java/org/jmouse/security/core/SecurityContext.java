@@ -12,7 +12,7 @@ public interface SecurityContext {
     }
 
     static SecurityContext ofAuthentication(Authentication authentication) {
-        SecurityContext context = SecurityContextHolder.getContext();
+        SecurityContext context = SecurityContextHolder.newContext();
         context.setAuthentication(authentication);
         return context;
     }

@@ -20,7 +20,7 @@ public interface Customizer<T> {
      */
     void customize(T instance);
 
-    default Customizer<T> defaults() {
+    static <T> Customizer<T> defaults() {
         return t -> {};
     }
 

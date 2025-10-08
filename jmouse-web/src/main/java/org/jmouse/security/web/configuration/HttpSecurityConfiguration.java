@@ -6,6 +6,7 @@ import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.authentication.ResolversAuthenticationManager;
+import org.jmouse.security.authentication.dao.DaoAuthenticationResolver;
 import org.jmouse.security.web.SecurityFilterChainDelegator;
 import org.jmouse.security.web.configuration.builder.HttpSecurity;
 import org.jmouse.web.context.WebBeanContext;
@@ -24,7 +25,9 @@ public class HttpSecurityConfiguration implements InitializingBeanSupport<WebBea
 
         httpSecurity.setSharedObject(WebBeanContext.class, context);
         httpSecurity.setSharedObject(AuthenticationManager.class, new ResolversAuthenticationManager(
-                List.of()
+                List.of(
+                        new DaoAuthenticationResolver()
+                )
         ));
 
         return httpSecurity;
