@@ -28,7 +28,8 @@ public class SubmitFormRequestAuthenticationFilter extends AbstractAuthenticatio
     }
 
     public SubmitFormRequestAuthenticationFilter(
-            AuthenticationManager authenticationManager, SecurityContextRepository contextRepository,
+            AuthenticationManager authenticationManager,
+            SecurityContextRepository contextRepository,
             RequestMatcher requestMatcher
     ) {
         this(authenticationManager, contextRepository, requestMatcher, new NoopHttp200SuccessHandler(), new NoopHttp401FailureHandler());

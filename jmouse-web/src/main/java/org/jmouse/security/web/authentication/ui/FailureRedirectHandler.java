@@ -9,10 +9,10 @@ import java.io.IOException;
 
 public class FailureRedirectHandler implements AuthenticationFailureHandler {
 
+    public static final String XML_HTTP_REQUEST = "XMLHttpRequest";
 
-    public static final String  XML_HTTP_REQUEST = "XMLHttpRequest";
-    private final       String  loginPage;
-    private final       boolean use401ForAjax;
+    private final String  loginPage;
+    private final boolean use401ForAjax;
 
     public FailureRedirectHandler(String loginPage) {
         this(loginPage, true);
@@ -24,12 +24,14 @@ public class FailureRedirectHandler implements AuthenticationFailureHandler {
     }
 
     @Override
-    public void onFailure(HttpServletRequest request, HttpServletResponse response, Exception failure) throws IOException {
+    public void onFailure(
+            HttpServletRequest request, HttpServletResponse response, Exception failure
+    ) throws IOException {
         if (use401ForAjax && XML_HTTP_REQUEST.equals(request.getHeader(HttpHeader.X_REQUESTED_WITH.value()))) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
-        response.sendRedirect(request.getContextPath() + loginPage + "?e");
+        response.sendRedirect(request.getContextPath() + loginPage + "?_=" + getClass().getName());
     }
 
 }

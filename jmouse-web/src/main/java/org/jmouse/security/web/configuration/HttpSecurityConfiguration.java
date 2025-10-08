@@ -4,10 +4,14 @@ import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.InitializingBeanSupport;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
+import org.jmouse.security.authentication.AuthenticationManager;
+import org.jmouse.security.authentication.ResolversAuthenticationManager;
 import org.jmouse.security.web.SecurityFilterChainDelegator;
 import org.jmouse.security.web.configuration.builder.HttpSecurity;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.servlet.registration.FilterRegistrationBean;
+
+import java.util.List;
 
 @BeanFactories
 public class HttpSecurityConfiguration implements InitializingBeanSupport<WebBeanContext> {
@@ -19,6 +23,9 @@ public class HttpSecurityConfiguration implements InitializingBeanSupport<WebBea
         HttpSecurity httpSecurity = new HttpSecurity();
 
         httpSecurity.setSharedObject(WebBeanContext.class, context);
+        httpSecurity.setSharedObject(AuthenticationManager.class, new ResolversAuthenticationManager(
+                List.of()
+        ));
 
         return httpSecurity;
     }

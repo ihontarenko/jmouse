@@ -51,9 +51,7 @@ public class SecurityFilterChainDelegator implements Filter {
         }
 
         @Override
-        public void doFilter(
-                ServletRequest request, ServletResponse response
-        ) throws IOException, ServletException {
+        public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
             if (index < filters.size()) {
                 Filter next = filters.get(index++);
                 next.doFilter(request, response, this);

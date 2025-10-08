@@ -10,6 +10,14 @@ public interface AuthenticationResolverRegistry {
 
     void addResolver(AuthenticationResolver resolver);
 
+    default boolean hasResolver(Class<? extends AuthenticationResolver> resolverType) {
+        return getResolvers().stream().anyMatch(resolverType::isInstance);
+    }
+
+    default boolean hasResolver(AuthenticationResolver resolver) {
+        return hasResolver(resolver.getClass());
+    }
+
     default AuthenticationResolver resolveResolver(Class<? extends Authentication> authenticationType) {
         AuthenticationResolver resolver = null;
 

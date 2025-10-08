@@ -63,9 +63,11 @@ public final class JwtConfigurer<B extends HttpSecurityBuilder<B>>
                 throw new IllegalStateException("Required JWT codec not configured yet.");
             }
 
-            resolverRegistry.addResolver(new JwtTokenAuthenticationResolver(
-                    jwtCodecConfigurer.codec()
-            ));
+            if (!resolverRegistry.hasResolver(JwtTokenAuthenticationResolver.class)) {
+                resolverRegistry.addResolver(new JwtTokenAuthenticationResolver(
+                        jwtCodecConfigurer.codec()
+                ));
+            }
         }
 
         AuthenticationFailureHandler failure = failureHandler != null

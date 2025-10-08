@@ -109,7 +109,7 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
      * 🔩 Template method: resolve shared objects/handlers, build and register the filter.
      */
     @Override
-    public final void configure(B http) {
+    public void configure(B http) {
         AuthenticationManager     authenticationManager = http.getSharedObject(SharedAttributes.AUTHENTICATION_MANAGER);
         SecurityContextRepository repository            = http.getSharedObject(SharedAttributes.CONTEXT_REPOSITORY);
         RequestMatcher            matcher               = resolveMatcher();
