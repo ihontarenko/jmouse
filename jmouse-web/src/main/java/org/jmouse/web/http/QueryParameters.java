@@ -1,5 +1,7 @@
 package org.jmouse.web.http;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.*;
 
 /**
@@ -17,16 +19,18 @@ public final class QueryParameters {
     public static final String QUERY_PARAMETERS_ATTRIBUTE = QueryParameters.class.getName() + ".QUERY_PARAMETERS";
 
     private final Map<String, List<String>> parameters;
+    private final QueryParser.QueryString   queryString;
 
     /**
      * Constructs a {@code QueryParameters} from raw {@code Map<String, String[]>}.
      *
      * @param source the original map of query parameters
      */
-    private QueryParameters(Map<String, String[]> source) {
+    private QueryParameters(Map<String, String[]> source, QueryParser.QueryString queryString) {
         parameters = new LinkedHashMap<>();
         source.forEach((parameter, values)
                 -> parameters.put(parameter, List.of(values)));
+        this.queryString = queryString;
     }
 
     /**
@@ -35,8 +39,12 @@ public final class QueryParameters {
      * @param source the raw parameter map (usually from servlet API)
      * @return a new {@code QueryParameters} instance
      */
-    public static QueryParameters ofMap(Map<String, String[]> source) {
-        return new QueryParameters(source);
+    public static QueryParameters ofRequest(HttpServletRequest request) {
+        return new QueryParameters(request.getParameterMap(), QueryParser.parse(request.getQueryString()));
+    }
+
+    public QueryParser.QueryString getQueryString() {
+        return queryString;
     }
 
     /**

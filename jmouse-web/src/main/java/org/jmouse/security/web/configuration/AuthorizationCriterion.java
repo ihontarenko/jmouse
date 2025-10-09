@@ -43,6 +43,14 @@ public class AuthorizationCriterion<T, C> {
         return access(AuthorityPolicyAuthorizationManager.denyAll());
     }
 
+    public T anonymous() {
+        return access(AuthorityPolicyAuthorizationManager.anonymous());
+    }
+
+    public T authenticated() {
+        return access(AuthorityPolicyAuthorizationManager.authenticated());
+    }
+
     public T hasAuthority(String authority) {
         return access(AuthorityPolicyAuthorizationManager.hasAuthority(authority));
     }

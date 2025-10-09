@@ -6,6 +6,8 @@ import org.jmouse.security.web.access.ExceptionTranslationFilter;
 import org.jmouse.security.web.authentication.AnonymousAuthenticationFilter;
 import org.jmouse.security.web.authentication.identity.SubmitFormRequestAuthenticationFilter;
 import org.jmouse.security.web.authentication.LogoutAuthenticationFilter;
+import org.jmouse.security.web.authentication.www.BasicAuthenticationFilter;
+import org.jmouse.security.web.authorization.AuthorizationFilter;
 import org.jmouse.security.web.context.SecurityContextPersistenceFilter;
 
 import java.util.LinkedHashMap;
@@ -34,6 +36,7 @@ public class SecurityFilterOrder {
 
     {
         setOrder(SecurityContextPersistenceFilter.class, 50);
+        setOrder(BasicAuthenticationFilter.class, 120);
         setOrder(SubmitFormRequestAuthenticationFilter.class, 150);
         setOrder(LogoutAuthenticationFilter.class, 170);
         setOrder(AnonymousAuthenticationFilter.class, 180);

@@ -57,7 +57,7 @@ public record RequestRoute(
             requestRoute = new RequestRoute(
                     HttpMethod.ofName(request.getMethod()),
                     requestPath,
-                    QueryParameters.ofMap(request.getParameterMap()),
+                    QueryParameters.ofRequest(request),
                     headers,
                     headers.getContentType(),
                     Set.copyOf(headers.getAccept())

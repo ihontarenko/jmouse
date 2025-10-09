@@ -3,9 +3,11 @@ package org.jmouse.security.web.authentication;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.security.web.AuthenticationEntryPoint;
+import org.jmouse.web.http.HeaderWriter;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpStatus;
 import org.jmouse.web.http.WWWAuthenticate;
+import org.jmouse.web.http.writers.WWWAuthenticateWriter;
 
 import java.io.IOException;
 
@@ -61,15 +63,9 @@ public abstract class AbstractRealmAuthenticationEntryPoint implements Authentic
     @Override
     public void initiate(HttpServletRequest request, HttpServletResponse response, Exception exception)
             throws IOException {
-        HttpHeader      httpHeader      = HttpHeader.WWW_AUTHENTICATE;
-        WWWAuthenticate wwwAuthenticate = getWWWAuthenticate();
-        HttpStatus      httpStatus      = HttpStatus.UNAUTHORIZED;
-
-        // 📢 Add challenge header
-        response.setHeader(httpHeader.value(), wwwAuthenticate.toHeaderValue());
-
-        // 🚫 Always respond with 401
-        response.sendError(httpStatus.getCode());
+        HeaderWriter headerWriter = new WWWAuthenticateWriter(getWWWAuthenticate());
+        headerWriter.writeHeaders(request, response);
+        response.sendError(HttpStatus.UNAUTHORIZED.getCode());
     }
 
     /**

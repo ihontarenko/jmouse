@@ -15,6 +15,10 @@ abstract public class AbstractRequestMatcherRegistry<C> {
         return applyMatchers(List.of(requestMatchers));
     }
 
+    public C anyRequest() {
+        return requestMatchers(RequestMatcher.any());
+    }
+
     public C dispatcherTypeMatchers(DispatcherType... dispatcherTypes) {
         List<RequestMatcher> requestMatchers = new ArrayList<>();
 

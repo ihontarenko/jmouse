@@ -9,7 +9,6 @@ import org.jmouse.security.web.configuration.builder.HttpSecurity;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.HttpMethod;
 
-import static org.jmouse.security.web.RequestMatcher.httpMethod;
 import static org.jmouse.security.web.RequestMatcher.pathPattern;
 
 @BeanFactories
@@ -26,16 +25,23 @@ public class SecurityConfiguration {
         http.submitForm(form -> form
                 .usernameParameter("username")
                 .passwordParameter("password")
-                .loginPage("/login-internal")
+                .loginPage("/login/index")
                 .processing()
-                    .formAction("/login")
+                    .formAction("/login/process")
                     .httpMethod(HttpMethod.POST)
-                .requestMatcher(pathPattern("/login").and(httpMethod(HttpMethod.POST)))
+                .requestMatcher(pathPattern("/login"))
         );
+
+        http.exceptionHandling(Customizer.noop());
 
         http.httpBasic(basic -> basic
                 .requestMatcher("/basic/**")
                 .enableChallengeOnFailure()
+        );
+
+        http.authorizeHttpRequests(a -> a
+                .requestMatchers(RequestMatcher.pathPattern("/login-internal/**")).permitAll()
+                .anyRequest().authenticated()
         );
 
         return http.build();

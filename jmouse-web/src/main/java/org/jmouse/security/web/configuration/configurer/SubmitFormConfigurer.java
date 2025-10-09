@@ -9,10 +9,13 @@ import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
 import org.jmouse.security.web.authentication.identity.SubmitFormRequestAuthenticationFilter;
 import org.jmouse.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
 import org.jmouse.security.web.authentication.ui.FailureRedirectHandler;
-import org.jmouse.security.web.authentication.ui.SuccessRedirectHandler;
+import org.jmouse.security.web.authentication.ui.SavedRequestAwareAuthenticationSuccessHandler;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
+import org.jmouse.security.web.configuration.SharedAttributes;
 import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.web.http.HttpMethod;
+import org.jmouse.web.http.cache.HttpSessionRequestCache;
+import org.jmouse.web.http.cache.RequestCache;
 import org.jmouse.web.mvc.View;
 import org.jmouse.web.mvc.ViewResolver;
 import org.jmouse.web.mvc.view.internal.InternalViewResolver;
@@ -26,9 +29,15 @@ public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
     public static final String DEFAULT_LOGIN_PAGE = "/login";
 
     private AuthenticationProvider authenticationProvider;
-    private String                 loginPage = DEFAULT_LOGIN_PAGE;
+    private String                 loginPage                = DEFAULT_LOGIN_PAGE;
     private String                 usernameParameter;
     private String                 passwordParameter;
+    private boolean                generateDefaultLoginPage = true;
+
+    public SubmitFormConfigurer<B> disableDefaultLoginPage() {
+        this.generateDefaultLoginPage = false;
+        return this;
+    }
 
     public SubmitFormConfigurer<B> loginPage(String loginPage) {
         this.loginPage = loginPage;
@@ -60,7 +69,13 @@ public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
 
     @Override
     protected AuthenticationSuccessHandler defaultSuccessHandler() {
-        return new SuccessRedirectHandler("/");
+        RequestCache requestCache = getBuilder().getSharedObject(SharedAttributes.REQUEST_CACHE);
+
+        if (requestCache == null) {
+            requestCache = new HttpSessionRequestCache();
+        }
+
+        return new SavedRequestAwareAuthenticationSuccessHandler(requestCache).defaultTargetUrl("/");
     }
 
     @Override
@@ -89,6 +104,10 @@ public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
     @Override
     public void configure(B http) {
         super.configure(http);
+
+        if (!generateDefaultLoginPage) {
+            return;
+        }
 
         ViewResolver viewResolver = http.getObject(InternalViewResolver.class);
         View         view         = viewResolver.resolveView("jmouse/login-form");

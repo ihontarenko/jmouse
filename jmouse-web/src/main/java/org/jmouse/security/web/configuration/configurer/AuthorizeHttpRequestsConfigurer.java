@@ -4,10 +4,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.authorization.AuthorityPolicyAuthorizationManager;
 import org.jmouse.security.authorization.AuthorizationManager;
 import org.jmouse.security.core.access.RoleHierarchy;
-import org.jmouse.security.web.AuthorizationFilter;
+import org.jmouse.security.web.authorization.AuthorizationFilter;
 import org.jmouse.security.web.RequestSecurityContext;
-import org.jmouse.security.web.OrderedFilter;
 import org.jmouse.security.web.RequestMatcher;
+import org.jmouse.security.web.access.ExceptionTranslationFilter;
 import org.jmouse.security.web.configuration.*;
 import org.jmouse.security.web.access.DelegatingAuthorizationManager.Builder;
 
@@ -56,9 +56,11 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
 
     @Override
     public void configure(B http) {
-        http.addFilter(new OrderedFilter(new AuthorizationFilter(
-                registry.createAuthorizationManager()
-        ), 200));
+        var entryPoint     = http.getSharedObject(SharedAttributes.ENTRY_POINT);
+        var deniedHandler  = http.getSharedObject(SharedAttributes.DENIED_HANDLER);
+
+        http.addFilterAfter(new AuthorizationFilter(
+                registry.createAuthorizationManager(), entryPoint, deniedHandler), ExceptionTranslationFilter.class);
     }
 
     private String getContextVariable(RequestSecurityContext context, String name) {

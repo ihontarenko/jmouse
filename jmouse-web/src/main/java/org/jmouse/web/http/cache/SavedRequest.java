@@ -1,78 +1,68 @@
 package org.jmouse.web.http.cache;
 
+import org.jmouse.web.http.Headers;
+import org.jmouse.web.http.HttpMethod;
+import org.jmouse.web.http.QueryParameters;
+import org.jmouse.web.http.RequestRoute;
+
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 📌 SavedRequest
- * <p>
+ *
  * Immutable snapshot of an HTTP request.
  *
  * <p>🧰 Use cases:</p>
  * <ul>
  *   <li>💾 Store the original request before redirecting to login</li>
  *   <li>🔑 Resume request flow after authentication (e.g. form login)</li>
- *   <li>📦 Serializable, safe to persist in {@code HttpSession}, Redis, etc.</li>
+ *   <li>📦 Serializable → safe to persist in {@code HttpSession}, Redis, etc.</li>
  * </ul>
  */
 public final class SavedRequest implements Serializable {
 
-    private final String                    requestURI;
-    private final String                    method;
-    private final String                    queryString;
-    private final Map<String, List<String>> headers;
+    /** 🛣️ Captured request route (method, path, query, headers). */
+    private final RequestRoute requestRoute;
 
     /**
-     * 🏗️ Create a new saved request.
+     * 🏗️ Create a new saved request from a {@link RequestRoute}.
      *
-     * @param method      HTTP method (e.g. GET, POST)
-     * @param requestURI  request path (excluding query string)
-     * @param queryString optional query string (may be {@code null})
-     * @param headers     request headers (may be {@code null}, replaced with empty map)
+     * @param requestRoute encapsulated route (never {@code null})
      */
-    public SavedRequest(String method, String requestURI, String queryString, Map<String, List<String>> headers) {
-        this.requestURI = requestURI;
-        this.method = method;
-        this.queryString = queryString;
-        this.headers = headers == null ? Map.of() : headers;
+    public SavedRequest(RequestRoute requestRoute) {
+        this.requestRoute = requestRoute;
     }
 
     /**
-     * @return HTTP method of the saved request.
+     * @return 🔨 HTTP method of the saved request (e.g. GET, POST).
      */
-    public String getMethod() {
-        return method;
+    public HttpMethod getMethod() {
+        return requestRoute.method();
     }
 
     /**
-     * @return request URI path (without query string).
+     * @return 📍 Request URI path (without query string).
      */
     public String getRequestURI() {
-        return requestURI;
+        return requestRoute.requestPath().path();
     }
 
     /**
-     * @return query string or {@code null} if none was present.
+     * @return ❓ Query parameters (may be empty but never {@code null}).
      */
-    public String getQueryString() {
-        return queryString;
+    public QueryParameters getQueryParameters() {
+        return requestRoute.queryParameters();
     }
 
     /**
-     * @return unmodifiable map of request headers.
+     * @return 📑 Immutable headers of the saved request.
      */
-    public Map<String, List<String>> getHeaders() {
-        return Collections.unmodifiableMap(headers);
+    public Headers getHeaders() {
+        return requestRoute.headers();
     }
 
-    /**
-     * 🔗 Build a redirect URL combining {@code requestURI} and {@code queryString}.
-     *
-     * @return full URL string (with query string if present)
-     */
     public String getRedirectUrl() {
-        return (queryString == null || queryString.isBlank()) ? requestURI : requestURI + "?" + queryString;
+        return getRequestURI() + "?" + getQueryParameters().getQueryString().toQueryString();
     }
+
 }

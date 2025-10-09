@@ -8,6 +8,7 @@ import org.jmouse.security.web.SecurityFilterOrder;
 import org.jmouse.security.web.authentication.AuthenticationFailureHandler;
 import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
 import org.jmouse.security.web.context.SecurityContextRepository;
+import org.jmouse.web.http.cache.RequestCache;
 
 public final class SharedAttributes {
 
@@ -19,5 +20,6 @@ public final class SharedAttributes {
     public static final Class<AuthenticationFailureHandler>  FAILURE_HANDLER                  = AuthenticationFailureHandler.class;
     public static final Class<SecurityFilterOrder>           SECURITY_FILTER_ORDER            = SecurityFilterOrder.class;
     public static final Class<SecurityContextHolderStrategy> SECURITY_CONTEXT_HOLDER_STRATEGY = SecurityContextHolderStrategy.class;
+    public static final Class<RequestCache>                  REQUEST_CACHE                    = RequestCache.class;
 
 }

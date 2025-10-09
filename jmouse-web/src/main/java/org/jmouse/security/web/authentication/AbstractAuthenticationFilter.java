@@ -69,6 +69,7 @@ public abstract class AbstractAuthenticationFilter implements BeanFilter {
 
                 if (continueChainBeforeSuccess) {
                     chain.doFilter(request, response);
+                    return;
                 }
 
                 successHandler.onSuccess(keeper.request(), keeper.response());
