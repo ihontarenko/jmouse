@@ -77,9 +77,4 @@ public class ServletDispatcherConfiguration {
         return new FirewallRequestFilterRegistration();
     }
 
-    @Bean
-    public SecurityFilterChainDelegatorRegistration securityFilterChainDelegatorRegistration() {
-        return new SecurityFilterChainDelegatorRegistration();
-    }
-
 }

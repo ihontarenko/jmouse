@@ -7,7 +7,7 @@ import org.jmouse.security.web.authentication.*;
 import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.security.web.RequestMatcher;
 
-public class SubmitFormRequestAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+public class SubmitFormRequestAuthenticationFilter extends AbstractAuthenticationFilter {
 
     public static final String JMOUSE_USER_IDENTITY_USERNAME = "username";
     public static final String JMOUSE_USER_IDENTITY_PASSWORD = "password";

@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.web.RequestMatcher;
-import org.jmouse.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.jmouse.security.web.authentication.AbstractAuthenticationFilter;
 import org.jmouse.security.web.authentication.AuthenticationFailureHandler;
 import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
 import org.jmouse.security.web.authentication.bearer.BearerTokenAuthenticationProvider;
@@ -13,7 +13,7 @@ import org.jmouse.security.web.context.SecurityContextRepository;
 /**
  * 🚪 Extracts Bearer token and delegates to AuthenticationManager.
  */
-public final class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+public final class JwtAuthenticationFilter extends AbstractAuthenticationFilter {
 
     private final BearerTokenAuthenticationProvider provider = new BearerTokenAuthenticationProvider();
 

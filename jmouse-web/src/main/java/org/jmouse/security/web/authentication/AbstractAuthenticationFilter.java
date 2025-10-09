@@ -15,16 +15,16 @@ import org.jmouse.web.servlet.filter.BeanFilter;
 
 import java.io.IOException;
 
-public abstract class AbstractAuthenticationProcessingFilter implements BeanFilter {
+public abstract class AbstractAuthenticationFilter implements BeanFilter {
 
-    protected final SecurityContextRepository contextRepository;
-    protected final RequestMatcher            requestMatcher;
-    protected final AuthenticationManager     authenticationManager;
+    protected final SecurityContextRepository    contextRepository;
+    protected final RequestMatcher               requestMatcher;
+    protected final AuthenticationManager        authenticationManager;
+    protected       AuthenticationSuccessHandler successHandler;
+    protected       AuthenticationFailureHandler failureHandler;
+    protected       boolean                      continueChainBeforeSuccess = false;
 
-    protected AuthenticationSuccessHandler successHandler;
-    protected AuthenticationFailureHandler failureHandler;
-
-    protected AbstractAuthenticationProcessingFilter(
+    protected AbstractAuthenticationFilter(
             AuthenticationManager authenticationManager, SecurityContextRepository contextRepository,
             RequestMatcher requestMatcher,
             AuthenticationSuccessHandler successHandler, AuthenticationFailureHandler failureHandler
@@ -66,14 +66,22 @@ public abstract class AbstractAuthenticationProcessingFilter implements BeanFilt
                 SecurityContextHolder.setContext(securityContext);
 
                 contextRepository.save(securityContext, keeper);
+
+                if (continueChainBeforeSuccess) {
+                    chain.doFilter(request, response);
+                }
+
                 successHandler.onSuccess(keeper.request(), keeper.response());
             }
 
-            chain.doFilter(request, response);
         } catch (Exception exception) {
             SecurityContextHolder.clearContext();
             failureHandler.onFailure(request, response, exception);
         }
+    }
+
+    public void setContinueChainBeforeSuccess(boolean flag) {
+        this.continueChainBeforeSuccess = flag;
     }
 
     public SecurityContextRepository getContextRepository() {

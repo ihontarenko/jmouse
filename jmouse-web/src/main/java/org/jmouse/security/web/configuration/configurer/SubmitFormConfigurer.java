@@ -15,7 +15,6 @@ import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.mvc.View;
 import org.jmouse.web.mvc.ViewResolver;
-import org.jmouse.web.mvc.view.internal.InternalView;
 import org.jmouse.web.mvc.view.internal.InternalViewResolver;
 
 import static org.jmouse.security.web.authentication.identity.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_PASSWORD;

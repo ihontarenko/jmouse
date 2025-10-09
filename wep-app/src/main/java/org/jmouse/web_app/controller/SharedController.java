@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.annotation.ProxiedBean;
 import org.jmouse.core.Bytes;
+import org.jmouse.core.MediaType;
 import org.jmouse.core.throttle.RateLimit;
 import org.jmouse.core.throttle.RateLimitEnable;
 import org.jmouse.core.throttle.RateLimited;
@@ -22,6 +23,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 
+import static org.jmouse.core.MediaType.TEXT_PLAIN_VALUE;
 import static org.jmouse.core.throttle.RateLimit.Scope.METHOD;
 
 @CorsMapping(allowedHeaders = {
@@ -148,6 +150,11 @@ public class SharedController {
     @GetMapping(requestPath = "/shared/userModel/{name}")
     public UserModel userModel(@PathVariable("name") String name) {
         return new UserModel(name, "passwd!");
+    }
+
+    @GetMapping(requestPath = "/", produces = {"text/plain"})
+    public String home() {
+        return "home";
     }
 
 }

@@ -7,15 +7,11 @@ import org.jmouse.core.matcher.Matcher;
 import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.web.OrderedFilter;
 import org.jmouse.security.web.RequestMatcher;
-import org.jmouse.security.web.authentication.AuthenticationFailureHandler;
-import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
-import org.jmouse.security.web.authentication.NoopHttp200SuccessHandler;
-import org.jmouse.security.web.authentication.NoopHttp401FailureHandler;
+import org.jmouse.security.web.authentication.*;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
 import org.jmouse.security.web.configuration.SharedAttributes;
 import org.jmouse.security.web.context.SecurityContextRepository;
-import org.jmouse.web.http.HttpMethod;
 
 import static java.util.Objects.requireNonNull;
 
@@ -40,9 +36,11 @@ import static java.util.Objects.requireNonNull;
 public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBuilder<B>, C extends AbstractAuthenticationConfigurer<B, C>>
         extends HttpSecurityConfigurer<C, B> {
 
-    private RequestMatcher               requestMatcher = RequestMatcher.any();
+    private boolean                      continueChainBeforeSuccess = false;
+    private RequestMatcher               requestMatcher             = RequestMatcher.any();
     private AuthenticationSuccessHandler successHandler;
     private AuthenticationFailureHandler failureHandler;
+
 
     /**
      * 🧭 Set a request matcher (e.g., path pattern) that triggers this auth flow.
@@ -50,8 +48,8 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
      * @param requestMatcher matcher to activate authentication
      * @return this configurer
      */
-    public C requestMatcher(RequestMatcher requestMatcher) {
-        this.requestMatcher = requireNonNull(requestMatcher);
+    public C requestMatcher(Matcher<HttpServletRequest> requestMatcher) {
+        this.requestMatcher = requireNonNull(requestMatcher)::matches;
         return (C) this;
     }
 
@@ -96,6 +94,11 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
         return (C) this;
     }
 
+    public C continueChainBeforeSuccess(boolean flag) {
+        this.continueChainBeforeSuccess = flag;
+        return (C) this;
+    }
+
     /**
      * 🔩 Template method: resolve shared objects/handlers, build and register the filter.
      */
@@ -117,7 +120,11 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
         http.setSharedObject(SharedAttributes.SUCCESS_HANDLER, successHandler);
         http.setSharedObject(SharedAttributes.FAILURE_HANDLER, failureHandler);
 
-        http.addFilter(doBuildFilter(authenticationManager, repository, requestMatcher, successHandler, failureHandler));
+        if (doBuildFilter(authenticationManager, repository, requestMatcher, successHandler, failureHandler)
+                instanceof AbstractAuthenticationFilter authenticationFilter) {
+            authenticationFilter.setContinueChainBeforeSuccess(continueChainBeforeSuccess);
+            http.addFilter(authenticationFilter);
+        }
     }
 
     /**
