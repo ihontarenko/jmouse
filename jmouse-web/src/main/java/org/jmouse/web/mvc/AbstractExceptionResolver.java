@@ -2,7 +2,7 @@ package org.jmouse.web.mvc;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
-import org.jmouse.web.http.request.RequestContext;
+import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.context.WebBeanContext;
 
 /**

@@ -4,10 +4,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.http.HttpStatus;
-import org.jmouse.web.http.request.Allow;
-import org.jmouse.web.http.request.CacheControl;
-import org.jmouse.web.http.request.Headers;
-import org.jmouse.web.http.request.Vary;
+import org.jmouse.web.http.Allow;
+import org.jmouse.web.http.CacheControl;
+import org.jmouse.web.http.Headers;
+import org.jmouse.web.http.Vary;
 
 import java.time.Duration;
 import java.util.EnumSet;

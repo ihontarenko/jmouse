@@ -2,11 +2,6 @@ package org.jmouse.web_app.config;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanConstructor;
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.HttpMethod;
-import org.jmouse.web.http.request.Allow;
-import org.jmouse.web.http.request.CacheControl;
-import org.jmouse.web.http.request.Vary;
 import org.jmouse.web.mvc.BeanConfigurer;
 import org.jmouse.web.mvc.resource.*;
 

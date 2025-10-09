@@ -6,7 +6,7 @@ import org.jmouse.core.MediaType;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.mvc.HandlerMapping;
 import org.jmouse.web.mvc.MVCResult;
-import org.jmouse.web.http.request.RequestContext;
+import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.mvc.method.converter.ServletHttpOutputMessage;
 import org.jmouse.web.mvc.method.converter.HttpMessageConverter;
 import org.jmouse.web.mvc.method.converter.HttpOutputMessage;
@@ -15,7 +15,7 @@ import org.jmouse.web.mvc.method.converter.UnsuitableException;
 import org.jmouse.web.annotation.Mapping;
 import org.jmouse.core.Priority;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.http.request.Headers;
+import org.jmouse.web.http.Headers;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.negotiation.MediaTypeManager;
 

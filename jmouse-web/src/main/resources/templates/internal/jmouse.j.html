@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en" data-page="error">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>jMouse · {% block "pageTitle" %}Home{% endblock %}</title>
+    <link rel="stylesheet" href="{{ jMouseAsset("/internal/assets/css/jmouse-internal.css") }}">
+    <link rel="icon" type="image/x-icon" href="{{ jMouseAsset("/internal/assets/icon/favicon.ico") }}" />
+</head>
+<body>
+    <div class="card">
+        {% block "mainContent" %}{% endblock %}
+        <footer>© 2025 - jMouse</footer>
+    </div>
+</body>
+</html>

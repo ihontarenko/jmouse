@@ -1,7 +1,7 @@
 package org.jmouse.web.match.routing;
 
 import org.jmouse.core.matcher.Matcher;
-import org.jmouse.web.http.request.RequestRoute;
+import org.jmouse.web.http.RequestRoute;
 
 /**
  * 🎯 Defines a contract for matching a {@link RequestRoute} against

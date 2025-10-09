@@ -4,8 +4,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.web.http.HttpStatus;
-import org.jmouse.web.http.request.RequestContext;
+import org.jmouse.core.MediaType;
+import org.jmouse.web.http.HeaderWriter;
+import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.mvc.View;
 import org.jmouse.web.servlet.filter.BeanFilter;
 import org.jmouse.security.web.RequestMatcher;
@@ -17,14 +18,9 @@ import java.util.Map;
 import static java.util.Objects.requireNonNull;
 import static org.jmouse.security.web.authentication.identity.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_PASSWORD;
 import static org.jmouse.security.web.authentication.identity.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_USERNAME;
+import static org.jmouse.web.http.HttpStatus.OK;
 
-/**
- * 🧩 DefaultLoginPageGeneratingFilter
- *
- * Auto-generates a minimal login page on GET {loginPageUrl}.
- * Posts credentials to {actionUrl}.
- */
-public final class DefaultLoginPageGeneratingFilter implements BeanFilter {
+public final class DefaultLoginPageGeneratingFilter implements BeanFilter, HeaderWriter {
 
     private final String         action;
     private final View           view;
@@ -55,16 +51,15 @@ public final class DefaultLoginPageGeneratingFilter implements BeanFilter {
         boolean error  = request.getParameter("error")  != null;
         boolean logout = request.getParameter("logout") != null;
 
-        response.setStatus(HttpStatus.OK.getCode());
-        response.setContentType("text/html;charset=UTF-8");
+        writeHeaders(requestContext);
 
-        renderHtml(error, logout, requestContext);
+        renderView(error, logout, requestContext);
     }
 
-    private void renderHtml(boolean error, boolean logout, RequestContext requestContext) {
+    private void renderView(boolean error, boolean logout, RequestContext requestContext) {
         Map<String, Object> model = new HashMap<>();
 
-        model.put("action", action);
+        model.put("submitAction", action);
         model.put("usernameParameter", usernameParameter);
         model.put("passwordParameter", passwordParameter);
         model.put("isError", error);
@@ -72,4 +67,11 @@ public final class DefaultLoginPageGeneratingFilter implements BeanFilter {
 
         view.render(model, requestContext.request(), requestContext.response());
     }
+
+    @Override
+    public void writeHeaders(HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(OK.getCode());
+        response.setContentType(MediaType.TEXT_HTML_VALUE);
+    }
+
 }

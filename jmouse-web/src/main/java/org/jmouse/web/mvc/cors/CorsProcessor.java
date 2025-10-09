@@ -1,6 +1,6 @@
 package org.jmouse.web.mvc.cors;
 
-import org.jmouse.web.http.request.Headers;
+import org.jmouse.web.http.Headers;
 
 /**
  * 🔐 Strategy for applying a CORS policy to an HTTP exchange.

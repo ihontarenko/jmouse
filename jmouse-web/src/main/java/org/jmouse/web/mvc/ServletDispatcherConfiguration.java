@@ -2,13 +2,12 @@ package org.jmouse.web.mvc;
 
 import org.jmouse.beans.annotation.*;
 import org.jmouse.context.*;
-import org.jmouse.security.web.SecurityFilterChainDelegatorRegistration;
 import org.jmouse.web.mvc.servlet.FirewallRequestFilterRegistration;
 import org.jmouse.web.servlet.filter.RequestWrapperFilterRegistration;
 import org.jmouse.web.servlet.filter.SessionServletFilterRegistration;
 import org.jmouse.core.SingletonSupplier;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.http.request.multipart.MultipartProperties;
+import org.jmouse.web.http.multipart.MultipartProperties;
 import org.jmouse.web.servlet.RequestContextListener;
 import org.jmouse.web.servlet.SessionConfigurationInitializer;
 import org.jmouse.web.servlet.SessionProperties;

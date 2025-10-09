@@ -1,14 +1,14 @@
 package org.jmouse.web.mvc.method.argument;
 
-import org.jmouse.web.http.request.RequestAttributes;
+import org.jmouse.web.http.RequestAttributes;
 import org.jmouse.web.mvc.method.AbstractArgumentResolver;
 import org.jmouse.core.MethodParameter;
-import org.jmouse.web.http.request.RequestContext;
+import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.mvc.MVCResult;
 import org.jmouse.web.mvc.MappingResult;
 import org.jmouse.web.mvc.Model;
 
-import static org.jmouse.web.http.request.RequestAttributesHolder.getAttribute;
+import static org.jmouse.web.http.RequestAttributesHolder.getAttribute;
 
 public class ModelArgumentResolver extends AbstractArgumentResolver {
 

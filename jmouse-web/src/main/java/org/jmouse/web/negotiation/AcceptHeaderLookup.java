@@ -6,8 +6,8 @@ import org.jmouse.core.MimeParser;
 import org.jmouse.core.Priority;
 import org.jmouse.core.Streamable;
 import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.request.RequestAttributesHolder;
-import org.jmouse.web.http.request.RequestHeaders;
+import org.jmouse.web.http.RequestAttributesHolder;
+import org.jmouse.web.http.RequestHeaders;
 
 import java.util.Collections;
 import java.util.List;

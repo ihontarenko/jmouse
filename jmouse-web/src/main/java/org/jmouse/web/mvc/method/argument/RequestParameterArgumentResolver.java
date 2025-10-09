@@ -3,7 +3,7 @@ package org.jmouse.web.mvc.method.argument;
 import org.jmouse.web.annotation.RequestParameter;
 import org.jmouse.web.mvc.method.AbstractArgumentResolver;
 import org.jmouse.core.MethodParameter;
-import org.jmouse.web.http.request.RequestContext;
+import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.mvc.MappingResult;
 
 /**

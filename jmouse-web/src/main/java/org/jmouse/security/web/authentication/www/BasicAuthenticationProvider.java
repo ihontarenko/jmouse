@@ -6,8 +6,8 @@ import org.jmouse.security.authentication.UsernamePasswordAuthentication;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.web.authentication.AbstractAuthenticationProvider;
 import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.request.Headers;
-import org.jmouse.web.http.request.RequestHeaders;
+import org.jmouse.web.http.Headers;
+import org.jmouse.web.http.RequestHeaders;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;

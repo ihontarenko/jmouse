@@ -9,11 +9,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.core.IdGenerator;
-import org.jmouse.core.Sha256HashGenerator;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpStatus;
-import org.jmouse.web.http.request.ETag;
-import org.jmouse.web.http.request.IfNoneMatch;
+import org.jmouse.web.http.ETag;
+import org.jmouse.web.http.IfNoneMatch;
 import org.jmouse.web.mvc.ETagGenerator;
 import org.jmouse.web.servlet.BufferingOnlyResponseWrapper;
 

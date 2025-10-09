@@ -2,7 +2,7 @@ package org.jmouse.web.match.routing.condition;
 
 import org.jmouse.web.match.PathPattern;
 import org.jmouse.web.match.routing.MappingMatcher;
-import org.jmouse.web.http.request.RequestRoute;
+import org.jmouse.web.http.RequestRoute;
 
 /**
  * 🛣️ Path-based condition for matching routes.

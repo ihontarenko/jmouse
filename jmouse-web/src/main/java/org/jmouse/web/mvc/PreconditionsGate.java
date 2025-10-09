@@ -1,10 +1,10 @@
 package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.web.http.request.ConditionalRequest;
-import org.jmouse.web.http.request.ETag;
-import org.jmouse.web.http.request.Headers;
-import org.jmouse.web.http.request.PreconditionResult;
+import org.jmouse.web.http.ConditionalRequest;
+import org.jmouse.web.http.ETag;
+import org.jmouse.web.http.Headers;
+import org.jmouse.web.http.PreconditionResult;
 import org.jmouse.web.http.response.HeadersBuffer;
 import org.jmouse.web.http.response.HttpServletHeadersBuffer;
 

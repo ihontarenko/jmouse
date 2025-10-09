@@ -30,17 +30,43 @@ public class TextMatchers {
     }
 
     /**
-     * Returns a matcher that checks if the given string contains the specified substring.
+     * 🔍 Creates a matcher that checks if a string contains the specified substring.
      *
-     * @param substring the substring to check for
-     * @return a matcher that returns true if the string contains the given substring
+     * @param substring the substring to search for
+     * @return a matcher that returns {@code true} if the string contains the substring
      */
     public static Matcher<String> contains(String substring) {
         return new TextContainsMatcher(substring);
     }
 
+    /**
+     * 🔎 Creates a matcher that checks if a string contains <em>any</em> of the specified substrings.
+     *
+     * @param substring one or more substrings to check for
+     * @return a matcher that returns {@code true} if the string contains at least one of the substrings
+     */
     public static Matcher<String> containsAny(String... substring) {
         return new TextContainsAnyMatcher(substring);
+    }
+
+    /**
+     * 📝 Creates a matcher that checks if a string is {@code null} or blank
+     * (empty or whitespace-only).
+     *
+     * @return a matcher that returns {@code true} if the string is blank
+     */
+    public static Matcher<String> blank() {
+        return (string) -> string == null || string.isBlank();
+    }
+
+    /**
+     * 🟢 Creates a matcher that checks if a string is non-blank
+     * (not {@code null}, not empty, and contains non-whitespace characters).
+     *
+     * @return a matcher that returns {@code true} if the string is not blank
+     */
+    public static Matcher<String> notBlank() {
+        return blank().not();
     }
 
     /**

@@ -15,7 +15,7 @@ import org.jmouse.security.web.configuration.Customizer;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.security.web.jwt.JacksonJsonMapper;
-import org.jmouse.web.http.request.WWWAuthenticate.Bearer.ErrorCode;
+import org.jmouse.web.http.WWWAuthenticate.Bearer.ErrorCode;
 
 import java.time.Clock;
 

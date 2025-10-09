@@ -1,7 +1,7 @@
 package org.jmouse.web.security.firewall;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.web.http.request.RequestContext;
+import org.jmouse.web.http.RequestContext;
 
 public record EvaluationInput(
         RequestContext requestContext

@@ -5,8 +5,8 @@ import org.jmouse.beans.annotation.Bean;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpMethod;
-import org.jmouse.web.http.request.Allow;
-import org.jmouse.web.http.request.Vary;
+import org.jmouse.web.http.Allow;
+import org.jmouse.web.http.Vary;
 import org.jmouse.web.mvc.ETagGenerator;
 
 import java.time.Instant;

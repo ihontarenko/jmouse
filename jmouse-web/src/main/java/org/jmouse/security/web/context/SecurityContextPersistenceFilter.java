@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.core.SecurityContext;
 import org.jmouse.security.web.session.SessionPersistenceResponseWrapper;
-import org.jmouse.web.http.request.RequestContext;
-import org.jmouse.web.http.request.RequestContextKeeper;
+import org.jmouse.web.http.RequestContext;
+import org.jmouse.web.http.RequestContextKeeper;
 import org.jmouse.web.servlet.filter.BeanFilter;
 
 import java.io.IOException;

@@ -5,7 +5,7 @@ import org.jmouse.core.Priority;
 import org.jmouse.web.mvc.HandlerMapping;
 import org.jmouse.web.match.RouteMatch;
 
-import static org.jmouse.web.http.request.RequestAttributesHolder.getAttribute;
+import static org.jmouse.web.http.RequestAttributesHolder.getAttribute;
 
 /**
  * 🧭 Path-variable based media type resolver.

@@ -1,7 +1,7 @@
 package org.jmouse.security.web.session;
 
 import org.jmouse.security.core.Authentication;
-import org.jmouse.web.http.request.RequestContextKeeper;
+import org.jmouse.web.http.RequestContextKeeper;
 
 public class NullAuthenticatedSessionStrategy implements SessionAuthenticateHandler {
     @Override

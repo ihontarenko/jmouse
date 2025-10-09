@@ -5,8 +5,8 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.annotation.Bean;
-import org.jmouse.web.http.request.RequestAttributes;
-import org.jmouse.web.http.request.SessionAttributesHolder;
+import org.jmouse.web.http.RequestAttributes;
+import org.jmouse.web.http.SessionAttributesHolder;
 
 import java.io.IOException;
 

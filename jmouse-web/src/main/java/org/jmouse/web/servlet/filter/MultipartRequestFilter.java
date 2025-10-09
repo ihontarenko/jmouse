@@ -3,8 +3,8 @@ package org.jmouse.web.servlet.filter;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.annotation.Bean;
-import org.jmouse.web.http.request.multipart.MultipartResolver;
-import org.jmouse.web.http.request.multipart.SimpleMultipartResolver;
+import org.jmouse.web.http.multipart.MultipartResolver;
+import org.jmouse.web.http.multipart.SimpleMultipartResolver;
 
 import java.io.IOException;
 

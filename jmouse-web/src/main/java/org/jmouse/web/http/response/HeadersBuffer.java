@@ -1,7 +1,7 @@
 package org.jmouse.web.http.response;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.web.http.request.Headers;
+import org.jmouse.web.http.Headers;
 
 /**
  * 📑 Contract for buffering and writing HTTP headers into a {@link HttpServletResponse}.

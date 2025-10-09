@@ -3,7 +3,7 @@ package org.jmouse.web.mvc;
 import org.jmouse.core.IdGenerator;
 import org.jmouse.core.Md5HashGenerator;
 import org.jmouse.core.MediaTypeHelper;
-import org.jmouse.web.http.request.ETag;
+import org.jmouse.web.http.ETag;
 
 /**
  * ETag generator based on content length and last-modified timestamp.

@@ -5,7 +5,7 @@ import org.jmouse.core.chain.Chain;
 import org.jmouse.core.chain.Outcome;
 import org.jmouse.core.io.Resource;
 import org.jmouse.core.matcher.ant.AntMatcher;
-import org.jmouse.web.http.request.RequestPath;
+import org.jmouse.web.http.RequestPath;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

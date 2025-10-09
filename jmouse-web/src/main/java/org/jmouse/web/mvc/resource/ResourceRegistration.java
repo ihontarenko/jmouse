@@ -1,8 +1,9 @@
 package org.jmouse.web.mvc.resource;
 
-import org.jmouse.web.http.request.Allow;
-import org.jmouse.web.http.request.CacheControl;
-import org.jmouse.web.http.request.Vary;
+import org.jmouse.web.http.Allow;
+import org.jmouse.web.http.CacheControl;
+import org.jmouse.web.http.ETag;
+import org.jmouse.web.http.Vary;
 import org.jmouse.web.mvc.ETagGenerator;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class ResourceRegistration {
      * for strong ETags (e.g., hashing the actual representation bytes) or rely on
      * the default length/mtime-based approach for weak ETags.</p>
      *
-     * @see org.jmouse.web.http.request.ETag
+     * @see ETag
      */
     private ETagGenerator etagGenerator;
 
@@ -240,7 +241,7 @@ public class ResourceRegistration {
      * Returns the configured ETag generator strategy, if any.
      *
      * @return the {@link ETagGenerator} in use, or {@code null} if ETag generation is disabled
-     * @see org.jmouse.web.http.request.ETag
+     * @see ETag
      */
     public ETagGenerator getEtagGenerator() {
         return etagGenerator;
@@ -252,7 +253,7 @@ public class ResourceRegistration {
      *
      * @param etagGenerator the {@link ETagGenerator} to use, or {@code null} to disable
      * @return this registration
-     * @see org.jmouse.web.http.request.ETag
+     * @see ETag
      */
     public ResourceRegistration setEtagGenerator(ETagGenerator etagGenerator) {
         this.etagGenerator = etagGenerator;

@@ -1,0 +1,71 @@
+package org.jmouse.web.http;
+
+import jakarta.servlet.http.HttpServletRequest;
+import org.jmouse.core.MediaType;
+
+import java.util.Set;
+
+/**
+ * 🛬 Represents an incoming HTTP request for routing and matching purposes.
+ *
+ * <p>Used to match against route conditions like path, method, headers or media types.</p>
+ *
+ * <pre>{@code
+ * RequestRoute route = RequestRoute.ofRequest(httpServletRequest);
+ * }</pre>
+ *
+ * @param requestPath path information from request (already parsed)
+ * @param method HTTP method (GET, POST, etc.)
+ * @param headers request headers (flattened view)
+ * @param contentType value of "Content-Type" header, if present
+ * @param accept set of accepted response types from "Accept" header
+ *
+ * @author Ivan Hontarenko (Mr. Jerry Mouse)
+ * @author ihontarenko@gmail.com
+ */
+public record RequestRoute(
+        HttpMethod method,
+        RequestPath requestPath,
+        QueryParameters queryParameters,
+        Headers headers,
+        MediaType contentType,
+        Set<MediaType> accept
+) {
+
+    public static final String REQUEST_ROUTE_ATTRIBUTE = RequestRoute.class.getName() + ".REQUEST_ROUTE";
+
+    /**
+     * 🏗️ Builds a {@code RequestRoute} from a {@link HttpServletRequest}.
+     *
+     * <p>Uses current {@link RequestAttributesHolder} to get parsed path.</p>
+     *
+     * @param request raw servlet request
+     * @return route-compatible wrapper
+     */
+    public static RequestRoute ofRequest(HttpServletRequest request) {
+        RequestRoute requestRoute = null;
+
+        if (request.getAttribute(REQUEST_ROUTE_ATTRIBUTE) instanceof RequestRoute cached) {
+            requestRoute = cached;
+        }
+
+        if (requestRoute == null) {
+            RequestPath    requestPath    = RequestAttributesHolder.getRequestPath();
+            RequestHeaders requestHeaders = RequestHeaders.ofRequest(request);
+            Headers        headers        = requestHeaders.headers();
+
+            requestRoute = new RequestRoute(
+                    HttpMethod.ofName(request.getMethod()),
+                    requestPath,
+                    QueryParameters.ofMap(request.getParameterMap()),
+                    headers,
+                    headers.getContentType(),
+                    Set.copyOf(headers.getAccept())
+            );
+
+            request.setAttribute(REQUEST_ROUTE_ATTRIBUTE, requestRoute);
+        }
+
+        return requestRoute;
+    }
+}

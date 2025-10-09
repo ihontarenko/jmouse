@@ -1,7 +1,7 @@
 package org.jmouse.web.security.firewall.policy;
 
 import org.jmouse.web.http.HttpStatus;
-import org.jmouse.web.http.request.WebRequest;
+import org.jmouse.web.http.WebRequest;
 import org.jmouse.web.security.firewall.Decision;
 import org.jmouse.web.security.firewall.EvaluationInput;
 import org.jmouse.web.security.firewall.FirewallPolicy;

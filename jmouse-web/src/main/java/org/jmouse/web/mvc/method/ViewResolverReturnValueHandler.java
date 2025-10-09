@@ -8,7 +8,7 @@ import org.jmouse.core.Priority;
 import org.jmouse.web.mvc.View;
 import org.jmouse.web.mvc.ViewResolver;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.http.request.RequestContext;
+import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.mvc.MVCResult;
 import org.jmouse.web.mvc.NotFoundException;
 

@@ -4,6 +4,7 @@ import jakarta.servlet.Filter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.Streamable;
 import org.jmouse.core.matcher.Matcher;
+import org.jmouse.core.matcher.TextMatchers;
 import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.web.OrderedFilter;
 import org.jmouse.security.web.RequestMatcher;
@@ -13,7 +14,11 @@ import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
 import org.jmouse.security.web.configuration.SharedAttributes;
 import org.jmouse.security.web.context.SecurityContextRepository;
 
+import java.util.Objects;
+
 import static java.util.Objects.requireNonNull;
+import static org.jmouse.core.matcher.Matcher.constant;
+import static org.jmouse.core.matcher.TextMatchers.notBlank;
 
 /**
  * 🔧 AbstractAuthenticationConfigurer
@@ -37,9 +42,9 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
         extends HttpSecurityConfigurer<C, B> {
 
     private boolean                      continueChainBeforeSuccess = false;
-    private RequestMatcher               requestMatcher             = RequestMatcher.any();
     private AuthenticationSuccessHandler successHandler;
     private AuthenticationFailureHandler failureHandler;
+    private RequestMatcher               requestMatcher             = RequestMatcher.any();
 
 
     /**
@@ -61,9 +66,11 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
      */
     public C requestMatcher(String... patterns) {
         Matcher<HttpServletRequest> requestMatcher = Streamable.of(patterns)
+                .filter(Objects::nonNull)
+                .filter(notBlank()::matches)
                 .map(RequestMatcher::pathPattern)
                 .map(Matcher::narrow)
-                .reduce(Matcher.constant(false), Matcher::logicalOr);
+                .reduce(constant(false), Matcher::logicalOr);
         this.requestMatcher = requestMatcher::matches;
         return (C) this;
     }

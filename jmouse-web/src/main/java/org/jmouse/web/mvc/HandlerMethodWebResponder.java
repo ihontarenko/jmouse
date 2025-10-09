@@ -1,13 +1,12 @@
 package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.web.http.HttpMethod;
-import org.jmouse.web.http.request.ETag;
-import org.jmouse.web.http.request.Headers;
+import org.jmouse.web.http.ETag;
+import org.jmouse.web.http.Headers;
 import org.jmouse.web.http.response.HttpServletHeadersBuffer;
 
-import static org.jmouse.web.http.request.ConditionalRequest.evaluate;
-import static org.jmouse.web.http.request.PreconditionResult.PROCEED_200;
+import static org.jmouse.web.http.ConditionalRequest.evaluate;
+import static org.jmouse.web.http.PreconditionResult.PROCEED_200;
 
 public class HandlerMethodWebResponder extends WebResponder {
 

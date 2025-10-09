@@ -3,8 +3,8 @@ package org.jmouse.web.mvc.cors;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpMethod;
-import org.jmouse.web.http.request.Headers;
-import org.jmouse.web.http.request.RequestAttributesHolder;
+import org.jmouse.web.http.Headers;
+import org.jmouse.web.http.RequestAttributesHolder;
 
 import java.util.HashSet;
 import java.util.Set;

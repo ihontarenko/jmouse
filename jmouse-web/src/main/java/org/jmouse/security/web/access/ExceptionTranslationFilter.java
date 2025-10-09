@@ -8,7 +8,7 @@ import org.jmouse.security.authentication.AuthenticationException;
 import org.jmouse.security.authorization.AccessDeniedException;
 import org.jmouse.security.web.AccessDeniedHandler;
 import org.jmouse.security.web.AuthenticationEntryPoint;
-import org.jmouse.web.http.request.RequestContext;
+import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.servlet.filter.BeanFilter;
 
 import java.io.IOException;

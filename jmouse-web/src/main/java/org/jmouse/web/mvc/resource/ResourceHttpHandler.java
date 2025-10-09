@@ -8,9 +8,7 @@ import org.jmouse.core.Streamable;
 import org.jmouse.core.io.PatternMatcherResourceLoader;
 import org.jmouse.core.io.Resource;
 import org.jmouse.core.io.ResourceSegment;
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.HttpMethod;
-import org.jmouse.web.http.request.*;
+import org.jmouse.web.http.*;
 import org.jmouse.web.match.RouteMatch;
 import org.jmouse.web.mvc.*;
 import org.jmouse.web.mvc.adapter.RequestHttpHandler;
@@ -76,7 +74,7 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
      * for strong ETags (e.g., hashing the actual representation bytes) or rely on
      * the default length/mtime-based approach for weak ETags.</p>
      *
-     * @see org.jmouse.web.http.request.ETag
+     * @see ETag
      */
     private ETagGenerator generator;
 
@@ -126,9 +124,9 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
     public void handle(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ResourceResolverChain chain           = getResolverChain(registration.getChainRegistration().getResolvers());
         ResourceQuery         query           = getResourceQuery(request, registration.getLocations());
-        Resource              resource        = chain.resolve(request, query);
-        Headers               requestHeaders  = RequestAttributesHolder.getRequestHeaders().headers();
-        HttpMethod            httpMethod      = requestHeaders.getMethod();
+        Resource   resource       = chain.resolve(request, query);
+        Headers    requestHeaders = RequestAttributesHolder.getRequestHeaders().headers();
+        HttpMethod httpMethod     = requestHeaders.getMethod();
         Headers               responseHeaders = getHeaders();
 
         if (resource == null || !resource.isReadable()) {
@@ -371,7 +369,7 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
      * Returns the configured ETag generator strategy, if any.
      *
      * @return the {@link ETagGenerator} in use, or {@code null} if ETag generation is disabled
-     * @see org.jmouse.web.http.request.ETag
+     * @see ETag
      */
     public ETagGenerator getGenerator() {
         return generator;
@@ -382,7 +380,7 @@ public class ResourceHttpHandler extends WebResponder implements RequestHttpHand
      * <p>Pass {@code null} to disable ETag generation.</p>
      *
      * @param generator the {@link ETagGenerator} to use, or {@code null} to disable
-     * @see org.jmouse.web.http.request.ETag
+     * @see ETag
      */
     public void setGenerator(ETagGenerator generator) {
         this.generator = generator;

@@ -3,8 +3,8 @@ package org.jmouse.web.negotiation;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.MediaType;
 import org.jmouse.core.Priority;
-import org.jmouse.web.http.request.Headers;
-import org.jmouse.web.http.request.RequestAttributesHolder;
+import org.jmouse.web.http.Headers;
+import org.jmouse.web.http.RequestAttributesHolder;
 
 import java.util.Collections;
 import java.util.List;

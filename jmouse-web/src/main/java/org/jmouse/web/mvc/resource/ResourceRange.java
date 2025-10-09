@@ -2,7 +2,7 @@ package org.jmouse.web.mvc.resource;
 
 import org.jmouse.core.io.Resource;
 import org.jmouse.core.io.ResourceSegment;
-import org.jmouse.web.http.request.Range;
+import org.jmouse.web.http.Range;
 
 import java.util.ArrayList;
 import java.util.List;

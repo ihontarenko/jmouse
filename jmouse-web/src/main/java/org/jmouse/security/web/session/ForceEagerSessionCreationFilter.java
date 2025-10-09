@@ -3,7 +3,7 @@ package org.jmouse.security.web.session;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.web.http.request.RequestContext;
+import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.servlet.filter.BeanFilter;
 
 import java.io.IOException;

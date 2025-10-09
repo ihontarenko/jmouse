@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.security.web.AuthenticationEntryPoint;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpStatus;
-import org.jmouse.web.http.request.WWWAuthenticate;
+import org.jmouse.web.http.WWWAuthenticate;
 
 import java.io.IOException;
 

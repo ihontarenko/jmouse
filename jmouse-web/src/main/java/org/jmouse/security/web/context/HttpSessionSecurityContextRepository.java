@@ -5,13 +5,13 @@ import jakarta.servlet.http.HttpSession;
 import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.authentication.AuthenticationInspector;
 import org.jmouse.security.core.*;
-import org.jmouse.web.http.request.RequestContextKeeper;
-import org.jmouse.web.http.request.WebHttpSession;
+import org.jmouse.web.http.RequestContextKeeper;
+import org.jmouse.web.http.WebHttpSession;
 
 import java.util.Objects;
 
 import static org.jmouse.beans.BeanScope.SESSION;
-import static org.jmouse.web.http.request.RequestAttributes.ofRequest;
+import static org.jmouse.web.http.RequestAttributes.ofRequest;
 
 public class HttpSessionSecurityContextRepository implements SecurityContextRepository, AuthenticationInspector {
 

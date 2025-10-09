@@ -1,7 +1,7 @@
 package org.jmouse.security.web.session;
 
 import org.jmouse.web.http.HttpStatus;
-import org.jmouse.web.http.request.RequestContextKeeper;
+import org.jmouse.web.http.RequestContextKeeper;
 
 import java.io.IOException;
 

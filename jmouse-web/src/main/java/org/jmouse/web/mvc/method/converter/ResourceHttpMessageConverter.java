@@ -5,7 +5,7 @@ import org.jmouse.core.io.ByteArrayResource;
 import org.jmouse.core.io.InputStreamResource;
 import org.jmouse.core.io.Resource;
 import org.jmouse.core.io.ResourceException;
-import org.jmouse.web.http.request.Headers;
+import org.jmouse.web.http.Headers;
 
 import java.io.IOException;
 import java.io.InputStream;

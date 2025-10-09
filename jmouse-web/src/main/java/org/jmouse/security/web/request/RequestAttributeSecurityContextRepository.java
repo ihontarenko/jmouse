@@ -5,7 +5,7 @@ import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.core.SecurityContext;
 import org.jmouse.security.core.SupplierDeferredSecurityContext;
 import org.jmouse.security.web.context.SecurityContextRepository;
-import org.jmouse.web.http.request.RequestContextKeeper;
+import org.jmouse.web.http.RequestContextKeeper;
 
 public class RequestAttributeSecurityContextRepository implements SecurityContextRepository {
 

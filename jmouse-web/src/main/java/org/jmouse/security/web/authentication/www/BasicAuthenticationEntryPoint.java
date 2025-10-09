@@ -1,7 +1,7 @@
 package org.jmouse.security.web.authentication.www;
 
 import org.jmouse.security.web.authentication.AbstractRealmAuthenticationEntryPoint;
-import org.jmouse.web.http.request.WWWAuthenticate;
+import org.jmouse.web.http.WWWAuthenticate;
 
 /**
  * 🔑 BasicAuthenticationEntryPoint

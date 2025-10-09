@@ -1,7 +1,7 @@
 package org.jmouse.web.mvc.method;
 
 import org.jmouse.web.mvc.MVCResult;
-import org.jmouse.web.http.request.RequestContext;
+import org.jmouse.web.http.RequestContext;
 
 /**
  * 🎯 Strategy for handling controller return values.

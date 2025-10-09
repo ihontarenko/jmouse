@@ -2,7 +2,7 @@ package org.jmouse.security.web.context;
 
 import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.core.SecurityContext;
-import org.jmouse.web.http.request.RequestContextKeeper;
+import org.jmouse.web.http.RequestContextKeeper;
 
 public class InMemorySecurityContextRepository implements SecurityContextRepository {
 

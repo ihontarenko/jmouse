@@ -2,8 +2,8 @@ package org.jmouse.web.mvc.cors;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.web.http.request.Headers;
-import org.jmouse.web.http.request.RequestAttributesHolder;
+import org.jmouse.web.http.Headers;
+import org.jmouse.web.http.RequestAttributesHolder;
 import org.jmouse.web.http.response.HttpServletHeadersBuffer;
 import org.jmouse.web.mvc.HandlerInterceptor;
 

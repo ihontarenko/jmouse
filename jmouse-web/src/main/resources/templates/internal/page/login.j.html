@@ -1,0 +1,102 @@
+{% extends "internal/jmouse" %}
+{% block "pageTitle" %}Sign in{% endblock %}
+{% block "mainContent" %}
+
+<section class="auth">
+    <header class="auth__header">
+        <div class="auth__brand">
+            <svg viewBox="0 0 24 24" aria-hidden="true" class="auth__logo">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M7 14c1.2-2.5 3.2-4 5-4s3.8 1.5 5 4" />
+                <circle cx="9.5" cy="10.5" r="1" />
+            </svg>
+            <div>
+                <h1 class="auth__title">Welcome to jMouse</h1>
+                <p class="auth__subtitle">Please sign in to continue</p>
+            </div>
+        </div>
+
+        {% if error %}
+            <div class="alert alert--danger" role="alert">
+                {{ error }}
+            </div>
+        {% endif %}
+    </header>
+
+    <form class="form form--stack" action="{{ action }}" method="post" novalidate>
+        {% if csrfToken %}
+            <input type="hidden" name="{{ csrfParameterName | default('_csrf') }}" value="{{ csrfToken }}">
+        {% endif %}
+
+        <div class="field">
+            <label class="label" for="login-username">Username</label>
+            <input
+                    class="input"
+                    id="login-username"
+                    type="text"
+                    name="{{ usernameParameter }}"
+                    autocomplete="username"
+                    required
+                    placeholder="your.name"
+            >
+            <small class="hint">Use your internal account</small>
+        </div>
+
+        <div class="field">
+            <div class="label-row">
+                <label class="label" for="login-password">Password</label>
+                <button class="text-btn" type="button" id="toggle-password" aria-controls="login-password" aria-pressed="false">
+                    Show
+                </button>
+            </div>
+            <input
+                    class="input"
+                    id="login-password"
+                    type="password"
+                    name="{{ passwordParameter }}"
+                    autocomplete="current-password"
+                    required
+                    placeholder="••••••••"
+            >
+        </div>
+
+        <!-- опціонально (можеш прибрати, якщо не треба) -->
+        <div class="field field--inline">
+            <label class="checkbox">
+                <input type="checkbox" name="remember-me" value="true">
+                <span>Remember me</span>
+            </label>
+            <a class="link-muted" href="/internal/forgot">Forgot password?</a>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn--primary" type="submit">Sign in</button>
+            <a class="btn btn--ghost" href="/">Back to site</a>
+        </div>
+
+        <p class="terms muted">
+            By continuing you agree to the internal usage policy.
+        </p>
+    </form>
+</section>
+
+<script>
+    (function () {
+        const button = document.getElementById('toggle-password');
+        const input = document.getElementById('login-password');
+
+        if (!button || !input) {
+            return;
+        }
+
+        button.addEventListener('click', function () {
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            button.setAttribute('aria-pressed', String(isPassword));
+            button.textContent = isPassword ? 'Hide' : 'Show';
+            input.focus();
+        });
+    })();
+</script>
+
+{% endblock %}

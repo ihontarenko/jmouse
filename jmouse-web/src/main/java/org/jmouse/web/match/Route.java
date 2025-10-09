@@ -1,7 +1,7 @@
 package org.jmouse.web.match;
 
 import org.jmouse.core.MediaType;
-import org.jmouse.web.http.request.Headers;
+import org.jmouse.web.http.Headers;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpMethod;
 

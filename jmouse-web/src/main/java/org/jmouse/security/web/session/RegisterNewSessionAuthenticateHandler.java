@@ -3,7 +3,7 @@ package org.jmouse.security.web.session;
 import jakarta.servlet.http.HttpSession;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.core.session.SessionRegistry;
-import org.jmouse.web.http.request.RequestContextKeeper;
+import org.jmouse.web.http.RequestContextKeeper;
 
 public class RegisterNewSessionAuthenticateHandler implements SessionAuthenticateHandler {
 

@@ -1,7 +1,7 @@
 package org.jmouse.web.mvc.method.converter;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.web.http.request.Headers;
+import org.jmouse.web.http.Headers;
 import org.jmouse.web.http.response.HeadersBuffer;
 import org.jmouse.web.http.response.HttpServletHeadersBuffer;
 

@@ -9,14 +9,19 @@ import org.jmouse.security.web.configuration.builder.HttpSecurity;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.HttpMethod;
 
+import static org.jmouse.security.web.RequestMatcher.httpMethod;
+import static org.jmouse.security.web.RequestMatcher.pathPattern;
+
 @BeanFactories
 public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain defaultFilterChain(HttpSecurity http, WebBeanContext context) throws Exception {
-        http.chainMatcher(RequestMatcher.pathPattern("/**"));
+        http.chainMatcher(pathPattern("/**"));
 
-        http.securityContext(Customizer.defaults());
+        http.setSharedObject(WebBeanContext.class, context);
+
+        http.securityContext(Customizer.noop());
 
         http.submitForm(form -> form
                 .usernameParameter("username")
@@ -25,11 +30,12 @@ public class SecurityConfiguration {
                 .processing()
                     .formAction("/login")
                     .httpMethod(HttpMethod.POST)
-                .requestMatcher(RequestMatcher.pathPattern("/login").and(RequestMatcher.httpMethod(HttpMethod.POST)))
+                .requestMatcher(pathPattern("/login").and(httpMethod(HttpMethod.POST)))
         );
 
         http.httpBasic(basic -> basic
                 .requestMatcher("/basic/**")
+                .enableChallengeOnFailure()
         );
 
         return http.build();

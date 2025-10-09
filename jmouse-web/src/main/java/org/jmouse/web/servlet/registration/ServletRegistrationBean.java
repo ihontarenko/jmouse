@@ -4,7 +4,7 @@ import jakarta.servlet.Servlet;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletRegistration;
 import org.jmouse.core.reflection.Reflections;
-import org.jmouse.web.http.request.multipart.MultipartProperties;
+import org.jmouse.web.http.multipart.MultipartProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

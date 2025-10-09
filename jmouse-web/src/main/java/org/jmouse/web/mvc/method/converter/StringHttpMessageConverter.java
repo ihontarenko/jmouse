@@ -1,7 +1,7 @@
 package org.jmouse.web.mvc.method.converter;
 
 import org.jmouse.core.MediaType;
-import org.jmouse.web.http.request.Headers;
+import org.jmouse.web.http.Headers;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -2,8 +2,7 @@ package org.jmouse.web.http.response;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
-import org.jmouse.web.http.HttpStatus;
-import org.jmouse.web.http.request.Headers;
+import org.jmouse.web.http.Headers;
 
 import java.nio.charset.Charset;
 import java.util.List;
