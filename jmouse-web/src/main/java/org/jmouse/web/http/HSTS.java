@@ -26,17 +26,21 @@ import java.util.concurrent.TimeUnit;
  * System.out.println(secure.toHeaderValue()); // max-age=31536000; include-subdomains; preload
  * }</pre>
  */
-public class HSTS {
+public class HSTS extends AbstractHeader {
 
     private Duration maxAge;
     private boolean  includeSubdomains = false;
     private boolean  preload           = false;
 
+    protected HSTS(HttpHeader httpHeader) {
+        super(httpHeader);
+    }
+
     /**
      * 🏗️ Create an empty HSTS policy (no directives).
      */
     public static HSTS empty() {
-        return new HSTS();
+        return new HSTS(HttpHeader.STRICT_TRANSPORT_SECURITY);
     }
 
     /**
@@ -48,14 +52,7 @@ public class HSTS {
      * @return secure HSTS configuration
      */
     public static HSTS recommended() {
-        return new HSTS().maxAge(Duration.ofDays(365)).includeSubdomains().preload();
-    }
-
-    /**
-     * 📑 The HTTP header name ({@code Strict-Transport-Security}).
-     */
-    public HttpHeader toHttpHeader() {
-        return HttpHeader.STRICT_TRANSPORT_SECURITY;
+        return empty().maxAge(Duration.ofDays(365)).includeSubdomains().preload();
     }
 
     /**
@@ -63,6 +60,7 @@ public class HSTS {
      *
      * @return header string like {@code max-age=31536000; include-subdomains}
      */
+    @Override
     public String toHeaderValue() {
         List<String> directives = new ArrayList<>();
 
@@ -80,8 +78,6 @@ public class HSTS {
 
         return String.join("; ", directives);
     }
-
-    // --- Fluent configuration ---
 
     /**
      * ⏳ Set max-age in given time unit.

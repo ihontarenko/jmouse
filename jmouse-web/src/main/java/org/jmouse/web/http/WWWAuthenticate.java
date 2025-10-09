@@ -47,7 +47,7 @@ import java.util.function.BiFunction;
  * // Multiple challenges are typically sent as separate header values by server framework
  * }</pre>
  */
-public class WWWAuthenticate {
+public class WWWAuthenticate extends AbstractHeader {
 
     /**
      * Standard auth scheme identifiers.
@@ -76,6 +76,7 @@ public class WWWAuthenticate {
     protected String              token68;
 
     private WWWAuthenticate() {
+        super(HttpHeader.WWW_AUTHENTICATE);
         parameters = new LinkedHashMap<>();
     }
 
@@ -160,6 +161,7 @@ public class WWWAuthenticate {
      * <p><b>Note:</b> Current output does not append {@code token68} to the value.
      * If you need {@code "<scheme> <token68>"} format for Negotiate/NTLM, extend rendering accordingly.</p>
      */
+    @Override
     public String toHeaderValue() {
         StringBuilder builder    = new StringBuilder(this.scheme);
         List<String>  directives = new ArrayList<>();
@@ -186,13 +188,6 @@ public class WWWAuthenticate {
      */
     private String keyValue(String key, String value, BiFunction<String, String, String> transformer) {
         return transformer.apply(key, value);
-    }
-
-    /**
-     * 🏷️ The HTTP header enum for this challenge.
-     */
-    public HttpHeader toHttpHeader() {
-        return HttpHeader.WWW_AUTHENTICATE;
     }
 
     // ---------- Mutators (fluent) ----------

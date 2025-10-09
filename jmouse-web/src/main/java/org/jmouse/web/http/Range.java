@@ -15,7 +15,7 @@ import java.util.List;
  *   <li>{@code -N} → suffix range of last N bytes</li>
  * </ul>
  */
-public class Range {
+public class Range extends AbstractHeader {
 
     private static final String BYTE_RANGE_PREFIX     = "bytes=";
     private static final String RANGES_SEPARATOR      = ",";
@@ -38,8 +38,9 @@ public class Range {
      * @param end   end position (inclusive), or -1
      */
     public Range(long start, long end) {
-        this.start = start;
+        super(HttpHeader.RANGE);
         this.end = end;
+        this.start = start;
     }
 
     /**
@@ -151,6 +152,7 @@ public class Range {
      *
      * @return header value string starting with {@code bytes=}
      */
+    @Override
     public String toHeaderValue() {
         return BYTE_RANGE_PREFIX + toStringRange();
     }

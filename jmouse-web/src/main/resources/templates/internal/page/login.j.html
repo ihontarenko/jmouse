@@ -23,7 +23,7 @@
         {% endif %}
     </header>
 
-    <form class="form form--stack" action="{{ action }}" method="post" novalidate>
+    <form class="form form--stack" action="{{ submitAction }}" method="post" novalidate>
         {% if csrfToken %}
             <input type="hidden" name="{{ csrfParameterName | default('_csrf') }}" value="{{ csrfToken }}">
         {% endif %}
