@@ -41,7 +41,7 @@ public class AuthorizationFilter implements BeanFilter {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         AccessResult   decision       = authorizationManager.check(authentication, request);
 
-cd jmo          if (decision != null && !decision.isGranted()) {
+        if (decision != null && !decision.isGranted()) {
             boolean unauthenticated = (authentication == null || !authentication.isAuthenticated());
             if (unauthenticated) {
                 throw new AuthenticationException("Full authentication is required to access this resource");
