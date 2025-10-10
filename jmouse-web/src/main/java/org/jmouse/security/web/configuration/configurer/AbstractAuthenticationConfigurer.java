@@ -9,12 +9,14 @@ import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.web.OrderedFilter;
 import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.authentication.*;
+import org.jmouse.security.web.authentication.ui.LoginUrlAuthenticationEntryPoint;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
 import org.jmouse.security.web.configuration.SharedAttributes;
 import org.jmouse.security.web.context.SecurityContextRepository;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 import static org.jmouse.core.matcher.Matcher.constant;
@@ -41,11 +43,18 @@ import static org.jmouse.core.matcher.TextMatchers.notBlank;
 public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBuilder<B>, C extends AbstractAuthenticationConfigurer<B, C>>
         extends HttpSecurityConfigurer<C, B> {
 
-    private boolean                      continueChainBeforeSuccess = false;
-    private AuthenticationSuccessHandler successHandler;
-    private AuthenticationFailureHandler failureHandler;
-    private RequestMatcher               requestMatcher             = RequestMatcher.any();
+    public static final String DEFAULT_LOGIN_PAGE = "/login";
 
+    protected String                       loginPage                  = DEFAULT_LOGIN_PAGE;
+    protected boolean                      continueChainBeforeSuccess = false;
+    protected AuthenticationSuccessHandler successHandler;
+    protected AuthenticationFailureHandler failureHandler;
+    protected RequestMatcher               requestMatcher             = RequestMatcher.any();
+
+    public C loginPage(String loginPage) {
+        this.loginPage = loginPage;
+        return (C) this;
+    }
 
     /**
      * 🧭 Set a request matcher (e.g., path pattern) that triggers this auth flow.
@@ -104,6 +113,27 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
     public C continueChainBeforeSuccess(boolean flag) {
         this.continueChainBeforeSuccess = flag;
         return (C) this;
+    }
+
+    /**
+     * 🔧 Initialization step.
+     * <br>
+     * Called once before the actual {@link #configure(B builder)} phase.
+     * Use this for setting defaults or preparing shared state.
+     *
+     * @param builder the security builder
+     * @throws Exception in case of setup errors
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public void initialize(B builder) throws Exception {
+        if (builder.getConfigurer(ExceptionHandlingConfigurer.class)
+                instanceof ExceptionHandlingConfigurer<?> exceptionHandlingConfigurer
+        ) {
+            exceptionHandlingConfigurer.authenticationEntryPoint(
+                    new LoginUrlAuthenticationEntryPoint(loginPage)
+            );
+        }
     }
 
     /**

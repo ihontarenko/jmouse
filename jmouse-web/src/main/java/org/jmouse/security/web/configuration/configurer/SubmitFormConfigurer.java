@@ -26,21 +26,13 @@ import static org.jmouse.security.web.authentication.identity.SubmitFormRequestA
 public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
         extends AbstractAuthenticationConfigurer<B, SubmitFormConfigurer<B>> {
 
-    public static final String DEFAULT_LOGIN_PAGE = "/login";
-
     private AuthenticationProvider authenticationProvider;
-    private String                 loginPage                = DEFAULT_LOGIN_PAGE;
+    private boolean                generateDefaultLoginPage = true;
     private String                 usernameParameter;
     private String                 passwordParameter;
-    private boolean                generateDefaultLoginPage = true;
 
     public SubmitFormConfigurer<B> disableDefaultLoginPage() {
         this.generateDefaultLoginPage = false;
-        return this;
-    }
-
-    public SubmitFormConfigurer<B> loginPage(String loginPage) {
-        this.loginPage = loginPage;
         return this;
     }
 

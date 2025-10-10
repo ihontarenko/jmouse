@@ -19,7 +19,6 @@ public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>>
 
     private RequestCache                 requestCache;
     private AuthenticationEntryPoint     entryPoint;
-    private AuthenticationSuccessHandler successHandler;
     private AccessDeniedHandler          deniedHandler;
 
     public ExceptionHandlingConfigurer<B> authenticationEntryPoint(AuthenticationEntryPoint entryPoint) {
@@ -34,11 +33,6 @@ public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>>
 
     public ExceptionHandlingConfigurer<B> requestCache(RequestCache requestCache) {
         this.requestCache = requestCache;
-        return this;
-    }
-
-    public ExceptionHandlingConfigurer<B> authenticationSuccessHandler(AuthenticationSuccessHandler successHandler) {
-        this.successHandler = successHandler;
         return this;
     }
 

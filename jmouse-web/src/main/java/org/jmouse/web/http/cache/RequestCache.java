@@ -5,18 +5,24 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * 🧭 RequestCache
- *
+ * <p>
  * Saves and restores the original HTTP request that triggered authentication.
  * Typical flow: save on entry point ➜ authenticate ➜ restore (redirect) after success.
  */
 public interface RequestCache {
 
-    /** Save current request details for later restoration. */
+    /**
+     * Save current request details for later restoration.
+     */
     void saveRequest(HttpServletRequest request, HttpServletResponse response);
 
-    /** Load previously saved request (or null if none). */
+    /**
+     * Load previously saved request (or null if none).
+     */
     SavedRequest getRequest(HttpServletRequest request, HttpServletResponse response);
 
-    /** Remove any saved request (idempotent). */
+    /**
+     * Remove any saved request (idempotent).
+     */
     void removeRequest(HttpServletRequest request, HttpServletResponse response);
 }

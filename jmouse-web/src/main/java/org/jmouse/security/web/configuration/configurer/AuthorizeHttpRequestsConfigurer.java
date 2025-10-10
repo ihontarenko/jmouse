@@ -56,11 +56,8 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
 
     @Override
     public void configure(B http) {
-        var entryPoint     = http.getSharedObject(SharedAttributes.ENTRY_POINT);
-        var deniedHandler  = http.getSharedObject(SharedAttributes.DENIED_HANDLER);
-
         http.addFilterAfter(new AuthorizationFilter(
-                registry.createAuthorizationManager(), entryPoint, deniedHandler), ExceptionTranslationFilter.class);
+                registry.createAuthorizationManager()), ExceptionTranslationFilter.class);
     }
 
     private String getContextVariable(RequestSecurityContext context, String name) {

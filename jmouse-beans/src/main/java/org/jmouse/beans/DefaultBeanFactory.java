@@ -107,7 +107,7 @@ public class DefaultBeanFactory implements BeanFactory, BeanInstantiationFactory
             instance = instantiationStrategy.create(definition, context);
 
             if (instance != null) {
-                LOGGER.debug("Bean instance (scope='{}', name='{}') created via: '{}' strategy",
+                LOGGER.debug("BEAN['{}'] '{}'; STRATEGY:'{}'",
                             definition.getScope(), definition.getBeanName(), getShortName(instantiationStrategy.getClass()));
             }
         }

@@ -29,6 +29,11 @@ public class HttpSecurityConfiguration implements InitializingBeanSupport<WebBea
                 )
         ));
 
+        httpSecurity
+                .securityContext(Customizer.noop())
+                .exceptionHandling(Customizer.noop())
+                .anonymous(Customizer.noop());
+
         return httpSecurity;
     }
 

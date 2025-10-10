@@ -21,4 +21,8 @@ public final class LoginUrlAuthenticationEntryPoint implements AuthenticationEnt
         }
     }
 
+    @Override
+    public String toString() {
+        return "ENTRY_POINT[LOGIN_URL] : '%s'".formatted(loginPage);
+    }
 }

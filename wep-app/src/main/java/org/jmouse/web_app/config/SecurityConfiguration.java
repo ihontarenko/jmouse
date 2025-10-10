@@ -32,12 +32,13 @@ public class SecurityConfiguration {
                 .requestMatcher(pathPattern("/login"))
         );
 
-        http.exceptionHandling(Customizer.noop());
+//        http.exceptionHandling(e -> e
+//                .authenticationEntryPoint());
 
-        http.httpBasic(basic -> basic
-                .requestMatcher("/basic/**")
-                .enableChallengeOnFailure()
-        );
+//        http.httpBasic(basic -> basic
+//                .requestMatcher("/basic/**")
+//                .enableChallengeOnFailure()
+//        );
 
         http.authorizeHttpRequests(a -> a
                 .requestMatchers(RequestMatcher.pathPattern("/login-internal/**")).permitAll()

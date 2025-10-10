@@ -5,10 +5,7 @@ import org.jmouse.beans.BeanProvider;
 import org.jmouse.core.Streamable;
 import org.jmouse.web.context.WebBeanContext;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**

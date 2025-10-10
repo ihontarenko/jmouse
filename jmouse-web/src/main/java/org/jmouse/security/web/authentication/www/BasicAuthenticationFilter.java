@@ -15,9 +15,11 @@ public class BasicAuthenticationFilter extends AbstractAuthenticationFilter {
     private AuthenticationProvider authenticationProvider = new BasicAuthenticationProvider();
 
     public BasicAuthenticationFilter(
-            AuthenticationManager authenticationManager, SecurityContextRepository contextRepository,
+            AuthenticationManager authenticationManager,
+            SecurityContextRepository contextRepository,
             RequestMatcher requestMatcher,
-            AuthenticationSuccessHandler successHandler, AuthenticationFailureHandler failureHandler
+            AuthenticationSuccessHandler successHandler,
+            AuthenticationFailureHandler failureHandler
     ) {
         super(authenticationManager, contextRepository, requestMatcher, successHandler, failureHandler);
     }

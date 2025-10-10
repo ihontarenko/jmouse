@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.authentication.AuthenticationException;
-import org.jmouse.security.authorization.AccessDeniedException;
+import org.jmouse.security.authorization.AuthorizationException;
 import org.jmouse.security.web.AccessDeniedHandler;
 import org.jmouse.security.web.AuthenticationEntryPoint;
 import org.jmouse.web.http.RequestContext;
@@ -17,7 +17,7 @@ import java.io.IOException;
 
 public class ExceptionTranslationFilter implements BeanFilter {
 
-    private final RequestCache requestCache;
+    private final RequestCache             requestCache;
     private final AuthenticationEntryPoint entryPoint;
     private final AccessDeniedHandler      deniedHandler;
 
@@ -44,7 +44,7 @@ public class ExceptionTranslationFilter implements BeanFilter {
 
         try {
             chain.doFilter(request, response);
-        } catch (AccessDeniedException accessDeniedException) {
+        } catch (AuthorizationException accessDeniedException) {
             deniedHandler.handle(request, response, accessDeniedException);
         } catch (AuthenticationException authenticationException) {
             SecurityContextHolder.clearContext();

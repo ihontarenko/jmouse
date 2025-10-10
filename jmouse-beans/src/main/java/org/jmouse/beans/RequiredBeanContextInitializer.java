@@ -101,13 +101,13 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
 
         DependencyResolver dependencyResolver = new DefaultDependencyResolver();
 
-        BeanInstantiationFactory instantiation = (BeanInstantiationFactory) factory;
-        instantiation.addStrategy(new ConstructorBeanInstantiationStrategy() {{
-            setDependencyResolver(dependencyResolver);
-        }});
-        instantiation.addStrategy(new MethodBeanInstantiationStrategy() {{
-            setDependencyResolver(dependencyResolver);
-        }});
+        BeanInstantiationFactory             instantiation               = (BeanInstantiationFactory) factory;
+        MethodBeanInstantiationStrategy      methodInstantiationStrategy = new MethodBeanInstantiationStrategy();
+        ConstructorBeanInstantiationStrategy constructorStrategy         = new ConstructorBeanInstantiationStrategy();
+        methodInstantiationStrategy.setDependencyResolver(dependencyResolver);
+        constructorStrategy.setDependencyResolver(dependencyResolver);
+        instantiation.addStrategy(constructorStrategy);
+        instantiation.addStrategy(methodInstantiationStrategy);
         instantiation.addStrategy(new ObjectFactoryBeanInstantiationStrategy());
 
         context.setBeanFactory(factory);
