@@ -41,7 +41,7 @@ public interface BeanFilter extends Filter, InitializingBeanSupport<WebBeanConte
             doFilterInternal(new RequestContext(httpRequest, httpResponse), chain);
             return;
         }
-        doFilter(request, response, chain);
+        chain.doFilter(request, response);
     }
 
     /**

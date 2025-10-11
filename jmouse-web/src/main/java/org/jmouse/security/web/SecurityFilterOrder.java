@@ -4,7 +4,7 @@ import jakarta.servlet.Filter;
 import org.jmouse.context.BeanProperties;
 import org.jmouse.security.web.access.ExceptionTranslationFilter;
 import org.jmouse.security.web.authentication.AnonymousAuthenticationFilter;
-import org.jmouse.security.web.authentication.identity.SubmitFormRequestAuthenticationFilter;
+import org.jmouse.security.web.authentication.form.SubmitFormRequestAuthenticationFilter;
 import org.jmouse.security.web.authentication.LogoutAuthenticationFilter;
 import org.jmouse.security.web.authentication.www.BasicAuthenticationFilter;
 import org.jmouse.security.web.authorization.AuthorizationFilter;

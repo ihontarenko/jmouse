@@ -1,4 +1,4 @@
-package org.jmouse.security.web.authentication.identity;
+package org.jmouse.security.web.authentication.form;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.authentication.UsernamePasswordAuthentication;

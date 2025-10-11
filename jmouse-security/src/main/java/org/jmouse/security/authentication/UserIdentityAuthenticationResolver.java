@@ -2,7 +2,7 @@ package org.jmouse.security.authentication;
 
 import org.jmouse.security.core.Authentication;
 
-public class UserIdentityAuthenticationResolver extends AbstractUserIdentityAuthenticationResolver {
+public class UserIdentityAuthenticationResolver extends AbstractAuthenticationResolver {
 
 
 

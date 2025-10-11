@@ -16,8 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
-import static org.jmouse.security.web.authentication.identity.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_PASSWORD;
-import static org.jmouse.security.web.authentication.identity.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_USERNAME;
+import static org.jmouse.security.web.authentication.form.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_PASSWORD;
+import static org.jmouse.security.web.authentication.form.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_USERNAME;
 import static org.jmouse.web.http.HttpStatus.OK;
 
 public final class DefaultLoginPageGeneratingFilter implements BeanFilter, HeaderWriter {

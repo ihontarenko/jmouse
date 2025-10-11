@@ -2,11 +2,14 @@ package org.jmouse.security.authorization;
 
 import org.jmouse.core.Streamable;
 import org.jmouse.security.authentication.AnonymousAuthentication;
+import org.jmouse.security.authentication.AuthenticationLevel;
 import org.jmouse.security.core.Authentication;
 
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.BiFunction;
+
+import static org.jmouse.security.authentication.AuthenticationLevel.ANONYMOUS;
 
 public final class AuthorityPolicyAuthorizationManager<T> implements AuthorizationManager<T> {
 
@@ -38,8 +41,9 @@ public final class AuthorityPolicyAuthorizationManager<T> implements Authorizati
     }
 
     public static <T> AuthorizationManager<T> authenticated() {
-        return (authentication, c) -> (authentication != null && authentication.isAuthenticated())
-                ? AccessResult.PERMIT : AccessResult.DENY;
+        return (authentication, c) ->
+                (authentication != null && authentication.isAuthenticated() && authentication.level() != ANONYMOUS)
+                        ? AccessResult.PERMIT : AccessResult.DENY;
     }
 
     public static <T> AuthorizationManager<T> of(

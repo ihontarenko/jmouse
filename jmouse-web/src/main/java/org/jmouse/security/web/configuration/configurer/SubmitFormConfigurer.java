@@ -6,7 +6,7 @@ import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.authentication.AuthenticationFailureHandler;
 import org.jmouse.security.web.authentication.AuthenticationProvider;
 import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
-import org.jmouse.security.web.authentication.identity.SubmitFormRequestAuthenticationFilter;
+import org.jmouse.security.web.authentication.form.SubmitFormRequestAuthenticationFilter;
 import org.jmouse.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
 import org.jmouse.security.web.authentication.ui.FailureRedirectHandler;
 import org.jmouse.security.web.authentication.ui.SavedRequestAwareAuthenticationSuccessHandler;
@@ -20,8 +20,8 @@ import org.jmouse.web.mvc.View;
 import org.jmouse.web.mvc.ViewResolver;
 import org.jmouse.web.mvc.view.internal.InternalViewResolver;
 
-import static org.jmouse.security.web.authentication.identity.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_PASSWORD;
-import static org.jmouse.security.web.authentication.identity.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_USERNAME;
+import static org.jmouse.security.web.authentication.form.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_PASSWORD;
+import static org.jmouse.security.web.authentication.form.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_USERNAME;
 
 public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
         extends AbstractAuthenticationConfigurer<B, SubmitFormConfigurer<B>> {

@@ -1,18 +1,7 @@
 package org.jmouse.security.authentication.dao;
 
-import org.jmouse.security.authentication.AbstractUserIdentityAuthenticationResolver;
-import org.jmouse.security.authentication.AuthenticationException;
-import org.jmouse.security.authentication.UsernamePasswordAuthentication;
-import org.jmouse.security.core.Authentication;
+import org.jmouse.security.authentication.AbstractUsernamePasswordAuthenticationResolver;
 
-public class DaoAuthenticationResolver extends AbstractUserIdentityAuthenticationResolver {
-    @Override
-    public boolean supports(Class<?> authenticationType) {
-        return UsernamePasswordAuthentication.class.isAssignableFrom(authenticationType);
-    }
+public class DaoAuthenticationResolver extends AbstractUsernamePasswordAuthenticationResolver {
 
-    @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        return authentication;
-    }
 }
