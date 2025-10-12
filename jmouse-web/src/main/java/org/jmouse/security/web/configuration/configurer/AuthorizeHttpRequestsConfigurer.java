@@ -60,13 +60,13 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
                 registry.createAuthorizationManager()), ExceptionTranslationFilter.class);
     }
 
-    private String getContextVariable(RequestSecurityContext context, String name) {
+    private String contextVariableGetter(RequestSecurityContext context, String name) {
         return String.valueOf(
                 context.match().variables().get(name)
         );
     }
 
-    private AuthorizeHttpRequestsConfigurer<B>.Registry applyAuthorizationManager(
+    private AuthorizeHttpRequestsConfigurer<B>.Registry applyMapping(
             AuthorizeHttpRequestsConfigurer<B>.Registry owner,
             List<RequestMatcher> matchers,
             AuthorizationManager<RequestSecurityContext> manager,
@@ -124,10 +124,10 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
             this.pending = requestMatchers;
             AuthorizeHttpRequestsConfigurer<B> outer = AuthorizeHttpRequestsConfigurer.this;
             return new AuthorizationCriterion<>(
-                    outer::applyAuthorizationManager,
+                    outer::applyMapping,
                     outer.getRegistry(),
                     requestMatchers,
-                    outer::getContextVariable
+                    outer::contextVariableGetter
             );
         }
 
