@@ -2,6 +2,9 @@ package org.jmouse.web_app.config;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
+import org.jmouse.security.core.UserPrincipal;
+import org.jmouse.security.core.UserPrincipalService;
+import org.jmouse.security.core.service.InMemoryUserPrincipalService;
 import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.SecurityFilterChain;
 import org.jmouse.security.web.configuration.Customizer;
@@ -15,7 +18,26 @@ import static org.jmouse.security.web.RequestMatcher.pathPattern;
 public class SecurityConfiguration {
 
     @Bean
-    public SecurityFilterChain defaultFilterChain(HttpSecurity http, WebBeanContext context) throws Exception {
+    public UserPrincipalService principalService() {
+        UserPrincipal user = UserPrincipal.User.builder()
+                .username("user")
+                .password("password")
+                .authority("ROLE_USER")
+                .enabled(true)
+                .build();
+
+        UserPrincipal admin = UserPrincipal.User.builder()
+                .username("admin")
+                .password("admin")
+                .authorities("ROLE_ADMIN", "ROLE_SUPER", "REBOOT")
+                .build();
+
+        return new InMemoryUserPrincipalService(user, admin);
+    }
+
+    @Bean
+    public SecurityFilterChain defaultFilterChain(
+            HttpSecurity http, WebBeanContext context, UserPrincipalService principalService) throws Exception {
         http.chainMatcher(pathPattern("/**"));
 
         http.setSharedObject(WebBeanContext.class, context);

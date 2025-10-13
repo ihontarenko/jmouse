@@ -1,12 +1,17 @@
 package org.jmouse.security.authentication;
 
-import org.jmouse.security.core.Authentication;
+import org.jmouse.security.core.UserPrincipalService;
 
 abstract public class AbstractUsernamePasswordAuthenticationResolver extends AbstractAuthenticationResolver {
 
-    @Override
-    protected Authentication doAuthenticate(Authentication authentication) throws AuthenticationException {
-        return null;
+    private UserPrincipalService principalService;
+
+    public UserPrincipalService getPrincipalService() {
+        return principalService;
+    }
+
+    public void setPrincipalService(UserPrincipalService principalService) {
+        this.principalService = principalService;
     }
 
     @Override

@@ -1,6 +1,8 @@
-package org.jmouse.security.authentication;
+package org.jmouse.security.core;
 
-public class BadCredentialsException extends RuntimeException {
+import org.jmouse.security.authentication.AuthenticationException;
+
+public class BadCredentialsException extends AuthenticationException {
 
     public BadCredentialsException(String message) {
         super(message);

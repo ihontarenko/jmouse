@@ -56,7 +56,7 @@ public final class Route {
      * }</pre>
      */
     public static Route of(HttpMethod method, String path) {
-        return route().method(method).path(path).build();
+        return route().method(method).path(path).toRoute();
     }
 
     /**
@@ -66,7 +66,7 @@ public final class Route {
      * @return new {@code Route} instance with GET method
      */
     public static Route GET(String path) {
-        return route().GET(path).build();
+        return route().GET(path).toRoute();
     }
 
     /**
@@ -76,7 +76,7 @@ public final class Route {
      * @return new {@code Route} instance with HEAD method
      */
     public static Route HEAD(String path) {
-        return route().HEAD(path).build();
+        return route().HEAD(path).toRoute();
     }
 
     /**
@@ -86,7 +86,7 @@ public final class Route {
      * @return new {@code Route} instance with OPTIONS method
      */
     public static Route OPTIONS(String path) {
-        return route().OPTIONS(path).build();
+        return route().OPTIONS(path).toRoute();
     }
 
     /**
@@ -96,7 +96,7 @@ public final class Route {
      * @return new {@code Route} instance with POST method
      */
     public static Route POST(String path) {
-        return route().POST(path).build();
+        return route().POST(path).toRoute();
     }
 
     /**
@@ -106,7 +106,7 @@ public final class Route {
      * @return new {@code Route} instance with PUT method
      */
     public static Route PUT(String path) {
-        return route().PUT(path).build();
+        return route().PUT(path).toRoute();
     }
 
     /**
@@ -116,7 +116,7 @@ public final class Route {
      * @return new {@code Route} instance with PATCH method
      */
     public static Route PATCH(String path) {
-        return route().PATCH(path).build();
+        return route().PATCH(path).toRoute();
     }
 
     /**
@@ -126,7 +126,7 @@ public final class Route {
      * @return new {@code Route} instance with DELETE method
      */
     public static Route DELETE(String path) {
-        return route().DELETE(path).build();
+        return route().DELETE(path).toRoute();
     }
 
     /**
@@ -176,6 +176,34 @@ public final class Route {
      */
     public Headers headers() {
         return headers;
+    }
+
+    /**
+     * 🔁 Creates a new {@link Builder} instance pre-populated with this route’s
+     * configuration.
+     * This allows cloning or modification of an existing route definition while
+     * preserving its method, path, headers, parameters, and content types.
+     *
+     * <p><b>Example:</b>
+     * <pre>{@code
+     * Route modified = existingRoute.toBuilder()
+     *     .path("/new/path")
+     *     .build();
+     * }</pre>
+     *
+     * @return a new {@link Builder} initialized with this route’s properties
+     */
+    public Builder toBuilder() {
+        Builder builder = route()
+                .method(httpMethod())
+                .path(pathPattern().raw());
+
+        queryParameters().forEach(builder::queryParameter);
+        headers().asMap().forEach(builder::header);
+        produces().forEach(builder::produces);
+        consumes().forEach(builder::consumes);
+
+        return builder;
     }
 
     @Override
@@ -324,7 +352,7 @@ public final class Route {
          *
          * @throws IllegalStateException if method or path is missing
          */
-        public Route build() {
+        public Route toRoute() {
             if (method == null || path == null) {
                 throw new IllegalStateException("Both method and path are required");
             }

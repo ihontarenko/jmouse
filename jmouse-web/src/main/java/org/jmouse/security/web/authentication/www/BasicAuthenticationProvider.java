@@ -1,7 +1,7 @@
 package org.jmouse.security.web.authentication.www;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.security.authentication.BadCredentialsException;
+import org.jmouse.security.core.BadCredentialsException;
 import org.jmouse.security.authentication.UsernamePasswordAuthentication;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.web.authentication.AbstractAuthenticationProvider;

@@ -81,7 +81,7 @@ public class AnnotatedControllerHandlerMapping extends AbstractHandlerPathMappin
             builder.queryParameter(queryParameter.name(), queryParameter.value());
         }
 
-        return builder.build();
+        return builder.toRoute();
     }
 
     /**

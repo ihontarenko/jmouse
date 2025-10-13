@@ -17,7 +17,9 @@ package org.jmouse.security.web.configuration;
  */
 public abstract class AbstractSecurityBuilder<T> implements SecurityBuilder<T> {
 
-    /** 🔒 Tracks if the builder has already produced an instance */
+    /**
+     * 🔒 Tracks if the builder has already produced an instance
+     */
     private boolean built = false;
 
     /**

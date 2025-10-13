@@ -28,7 +28,7 @@ public class WebConfig {
                 .produces(MediaType.TEXT_HTML)
                 .header(HttpHeader.ACCEPT_LANGUAGE, "uk")
                 .queryParameter("lang", "uk")
-                .build();
+                .toRoute();
 
         return new RequestHttpHandlerRegistration(route, (request, response)
                 -> response.getWriter().write("[{'name':'Route 8'}]"));

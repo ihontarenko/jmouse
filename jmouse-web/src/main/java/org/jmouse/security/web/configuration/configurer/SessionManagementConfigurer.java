@@ -2,10 +2,6 @@ package org.jmouse.security.web.configuration.configurer;
 
 import org.jmouse.security.core.session.SessionRegistry;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
-import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
-import org.jmouse.security.web.context.HttpSessionSecurityContextRepository;
-import org.jmouse.security.web.context.SecurityContextRepository;
-import org.jmouse.security.web.request.RequestAttributeSecurityContextRepository;
 import org.jmouse.security.web.session.*;
 import org.jmouse.web.http.HttpStatus;
 

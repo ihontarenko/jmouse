@@ -2,6 +2,7 @@ package org.jmouse.beans.instantiation;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanInstantiationException;
+import org.jmouse.beans.Beans;
 import org.jmouse.beans.definition.AggregatedBeansDependency;
 import org.jmouse.beans.definition.BeanDependency;
 import org.jmouse.core.matcher.Matcher;
@@ -9,7 +10,6 @@ import org.jmouse.core.reflection.ClassMatchers;
 import org.jmouse.core.reflection.JavaType;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -27,8 +27,9 @@ import java.util.Set;
  */
 public class DefaultDependencyResolver implements DependencyResolver {
 
-    private static final Matcher<Class<?>> IS_SET  = ClassMatchers.isSubtype(Set.class);
-    private static final Matcher<Class<?>> IS_LIST = ClassMatchers.isSubtype(List.class);
+    private static final Matcher<Class<?>> IS_BEANS = ClassMatchers.isSubtype(Beans.class);
+    private static final Matcher<Class<?>> IS_SET   = ClassMatchers.isSubtype(Set.class);
+    private static final Matcher<Class<?>> IS_LIST  = ClassMatchers.isSubtype(List.class);
 
     /**
      * {@inheritDoc}
@@ -48,13 +49,15 @@ public class DefaultDependencyResolver implements DependencyResolver {
 
         if (dependency instanceof AggregatedBeansDependency(JavaType javaType, String name, Object dependant)) {
             // Fetch all beans of the declared raw type
-            Collection<Object> beans = context.getBeans(getAggregatedType(javaType));
+            Collection<Object> beans = context.getBeans(resolveBeanType(javaType));
 
             // If the target type is a Set, wrap in HashSet to enforce uniqueness
             if (IS_SET.matches(javaType.getRawType())) {
                 resolved = Set.copyOf(beans);
             } else if (IS_LIST.matches(javaType.getRawType())) {
                 resolved = List.copyOf(beans);
+            } else if (IS_BEANS.matches(javaType.getRawType())) {
+                resolved = new Beans.HashSet<>(Set.copyOf(beans));
             } else {
                 throw new BeanInstantiationException(
                         "Unable resolve aggregated dependency. Dependant: (%s)".formatted(dependant));
@@ -67,7 +70,7 @@ public class DefaultDependencyResolver implements DependencyResolver {
         return resolved;
     }
 
-    private Class<Object> getAggregatedType(JavaType javaType) {
+    private Class<Object> resolveBeanType(JavaType javaType) {
         return javaType.getFirst().getRawType();
     }
 
