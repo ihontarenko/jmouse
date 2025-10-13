@@ -29,7 +29,8 @@ public record RequestRoute(
         QueryParameters queryParameters,
         Headers headers,
         MediaType contentType,
-        Set<MediaType> accept
+        Set<MediaType> accept,
+        HttpServletRequest request
 ) {
 
     public static final String REQUEST_ROUTE_ATTRIBUTE = RequestRoute.class.getName() + ".REQUEST_ROUTE";
@@ -60,7 +61,8 @@ public record RequestRoute(
                     QueryParameters.ofRequest(request),
                     headers,
                     headers.getContentType(),
-                    Set.copyOf(headers.getAccept())
+                    Set.copyOf(headers.getAccept()),
+                    request
             );
 
             request.setAttribute(REQUEST_ROUTE_ATTRIBUTE, requestRoute);

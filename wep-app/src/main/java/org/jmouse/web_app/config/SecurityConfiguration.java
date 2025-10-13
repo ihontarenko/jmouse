@@ -63,7 +63,7 @@ public class SecurityConfiguration {
 //        );
 
         http.authorizeHttpRequests(a -> a
-                .requestMatchers(RequestMatcher.pathPattern("/login-internal/**")).permitAll()
+                .requestMatchers(RequestMatcher.pathPattern("/login/**")).permitAll()
                 .anyRequest().authenticated()
         );
 

@@ -6,12 +6,15 @@ import org.jmouse.core.matcher.Matcher;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.http.RequestRoute;
+import org.jmouse.web.match.PathPattern;
 import org.jmouse.web.match.PathPatternCompiler;
 import org.jmouse.web.match.routing.condition.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+
+import static org.jmouse.core.Streamable.of;
 
 /**
  * 🧭 Represents a composite matcher used to evaluate whether a given
@@ -40,6 +43,36 @@ public class MatcherCriteria implements MappingMatcher {
     private final List<Matcher<RequestRoute>> matchers = new ArrayList<>();
 
     /**
+     * ✅ Creates a {@link MatcherCriteria} instance that always matches any route.
+     *
+     * <p>Internally registers an {@link AnyCondition} matcher, which unconditionally
+     * returns {@code true} for any {@link org.jmouse.web.http.RequestRoute}.</p>
+     *
+     * <p>Useful as a universal fallback or default route matcher.</p>
+     *
+     * @return a {@link MatcherCriteria} that matches all routes
+     * @see AnyCondition
+     */
+    public static MatcherCriteria any() {
+        return new MatcherCriteria().add(new AnyCondition());
+    }
+
+    /**
+     * 🚫 Creates a {@link MatcherCriteria} instance that never matches any route.
+     *
+     * <p>Internally registers a {@link NoneCondition} matcher, which always
+     * returns {@code false} for any {@link org.jmouse.web.http.RequestRoute}.</p>
+     *
+     * <p>Useful as a placeholder or for negative test conditions.</p>
+     *
+     * @return a {@link MatcherCriteria} that matches no routes
+     * @see NoneCondition
+     */
+    public static MatcherCriteria none() {
+        return new MatcherCriteria().add(new NoneCondition());
+    }
+
+    /**
      * 🔁 Replaces an existing matcher of the same type with the given one.
      * Ensures only one matcher of a specific class exists at a time.
      *
@@ -65,11 +98,34 @@ public class MatcherCriteria implements MappingMatcher {
     /**
      * 🧩 Registers a path pattern matcher.
      *
-     * @param path path expression (supports wildcards or templates)
+     * <p>Compiles the given raw path expression into a {@link PathPattern}
+     * and registers it as a matcher for incoming {@link RequestRoute}s.</p>
+     *
+     * <p>Supports standard template syntax such as:
+     * <pre>{@code
+     * /api/users/{id}
+     * /assets/**
+     * }</pre>
+     *
+     * @param path raw path expression (supports wildcards or templates)
      * @return this criteria instance for chaining
+     * @see #pathPattern(PathPattern)
      */
     public MatcherCriteria pathPattern(String path) {
-        return set(new RequestPathMatcher(PathPatternCompiler.compile(path)));
+        return pathPattern(PathPatternCompiler.compile(path));
+    }
+
+    /**
+     * 🧭 Registers a path pattern matcher using a precompiled {@link PathPattern}.
+     *
+     * <p>This overload is useful when patterns are pre-parsed or cached
+     * for efficiency, allowing reuse without recompilation.</p>
+     *
+     * @param pathPattern compiled {@link PathPattern} to match against
+     * @return this criteria instance for chaining
+     */
+    public MatcherCriteria pathPattern(PathPattern pathPattern) {
+        return set(new RequestPathMatcher(pathPattern));
     }
 
     /**
@@ -78,8 +134,8 @@ public class MatcherCriteria implements MappingMatcher {
      * @param method HTTP method name (e.g. "GET", "POST")
      * @return this criteria instance for chaining
      */
-    public MatcherCriteria httpMethod(String method) {
-        return httpMethod(HttpMethod.ofName(method));
+    public MatcherCriteria httpMethod(String... methods) {
+        return httpMethod(of(methods).map(HttpMethod::valueOf).toArray(HttpMethod[]::new));
     }
 
     /**
@@ -88,8 +144,8 @@ public class MatcherCriteria implements MappingMatcher {
      * @param method {@link HttpMethod} to match
      * @return this criteria instance for chaining
      */
-    public MatcherCriteria httpMethod(HttpMethod method) {
-        return add(new HttpMethodMatcher(method));
+    public MatcherCriteria httpMethod(HttpMethod... method) {
+        return set(new HttpMethodMatcher(method));
     }
 
     /**
@@ -193,7 +249,7 @@ public class MatcherCriteria implements MappingMatcher {
      */
     @Override
     public boolean matches(RequestRoute route) {
-        Optional<Matcher<RequestRoute>> matcher = Streamable.of(matchers)
+        Optional<Matcher<RequestRoute>> matcher = of(matchers)
                 .reduce(Matcher::logicalAnd);
 
         LOGGER.debug("MatcherCriteria: {} will be proceed!", matcher);
