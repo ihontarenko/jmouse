@@ -21,7 +21,7 @@ import java.util.Set;
  * @see RequestRoute
  * @see MappingMatcher
  */
-public class HttpMethodMatcher implements MappingMatcher {
+public class HttpMethodMatcher implements MappingMatcher<HttpMethod> {
 
     private final Set<HttpMethod> methods;
 
@@ -46,16 +46,15 @@ public class HttpMethodMatcher implements MappingMatcher {
     }
 
     @Override
-    public <R> R match(RequestRoute item) {
-        R result = null;
+    public HttpMethod match(RequestRoute item) {
+        HttpMethod matched = null;
 
         if (methods.contains(item.method())) {
-            return (R) item.method();
+            matched = item.method();
         }
 
-        return result;
+        return matched;
     }
-
 
     /**
      * 🔢 Compares specificity against another HTTP method condition.
@@ -91,4 +90,5 @@ public class HttpMethodMatcher implements MappingMatcher {
     public String toString() {
         return "HttpMethodCondition: %s".formatted(methods);
     }
+
 }

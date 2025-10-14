@@ -10,8 +10,6 @@ import java.util.Arrays;
 @SuppressWarnings({"unused"})
 public interface Matcher<T> {
 
-    Object EMPTY_MATCHED_RESULT = new Object();
-
     /**
      * Evaluates whether the given {@code item} matches the criteria defined by this matcher.
      *
@@ -91,32 +89,6 @@ public interface Matcher<T> {
      */
     default <S extends T> Matcher<S> narrow() {
         return this::matches;
-    }
-
-    /**
-     * 🧩 Evaluates this matcher and returns a standardized match result.
-     *
-     * <p>If the matcher condition succeeds, this method returns a special
-     * sentinel value {@code EMPTY_MATCHED_RESULT} cast to {@code R};
-     * otherwise, it returns {@code null}.</p>
-     *
-     * <p>This provides a uniform way to express “matched” vs “not matched”
-     * outcomes, especially in compositional or reflective matching scenarios
-     * where the actual match result type may vary.</p>
-     *
-     * <pre>{@code
-     * Matcher<String> nonEmpty = s -> !s.isEmpty();
-     * Object result = nonEmpty.match("hello");  // → EMPTY_MATCHED_RESULT
-     * Object miss   = nonEmpty.match("");       // → null
-     * }</pre>
-     *
-     * @param item the item to test against this matcher
-     * @param <R>  the type of the result (typically inferred)
-     * @return {@code EMPTY_MATCHED_RESULT} if matched; otherwise {@code null}
-     */
-    @SuppressWarnings("unchecked")
-    default <R> R match(T item) {
-        return matches(item) ? (R) EMPTY_MATCHED_RESULT : null;
     }
 
     /**

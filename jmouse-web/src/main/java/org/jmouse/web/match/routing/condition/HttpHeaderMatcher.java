@@ -16,7 +16,7 @@ import org.jmouse.web.http.HttpHeader;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class HttpHeaderMatcher implements MappingMatcher {
+public class HttpHeaderMatcher implements MappingMatcher<HttpHeader> {
 
     private final HttpHeader header;
     private final Object     requiredValue;
@@ -49,6 +49,18 @@ public class HttpHeaderMatcher implements MappingMatcher {
         return false;
     }
 
+    @Override
+    public HttpHeader match(RequestRoute value) {
+        HttpHeader httpHeader   = null;
+        Object     requestValue = value.headers().getHeader(header);
+
+        if (requestValue != null && requestValue.equals(requiredValue)) {
+            httpHeader = header;
+        }
+
+        return httpHeader;
+    }
+
     /**
      * 🔁 Compares two header matchers by header name for prioritization.
      *
@@ -67,4 +79,7 @@ public class HttpHeaderMatcher implements MappingMatcher {
     public String toString() {
         return "HttpHeaderMatcher: [%s: %s]".formatted(header, requiredValue);
     }
+
+
+
 }

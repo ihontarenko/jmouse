@@ -1,7 +1,8 @@
 package org.jmouse.web.match.routing;
 
 import org.jmouse.core.MediaType;
-import org.jmouse.core.Streamable;
+import org.jmouse.core.matcher.Match;
+import org.jmouse.core.matcher.MatchOp;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpMethod;
@@ -36,7 +37,7 @@ import static org.jmouse.core.Streamable.of;
  * @see RequestRoute
  * @see MappingMatcher
  */
-public class MatcherCriteria implements MappingMatcher {
+public class MatcherCriteria implements MappingMatcher<Match> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatcherCriteria.class);
 
@@ -258,6 +259,21 @@ public class MatcherCriteria implements MappingMatcher {
                 .matches(route);
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public Match match(RequestRoute value) {
+        Match mappingMatch = Ma;
+
+        for (Matcher<RequestRoute> matcher : matchers) {
+            if (matcher.matches(value) && matcher instanceof MappingMatcher<?> mappingMatcher) {
+                MatchOp<RequestRoute, Object> matchOp = (MatchOp<RequestRoute, Object>) mappingMatcher;
+                matchOp.match(value);
+            }
+        }
+
+        return mappingMatch;
+    }
+
     /**
      * ⚖️ Compares two {@link MappingMatcher} instances for ordering purposes.
      * Used to prioritize more specific matchers.
@@ -311,4 +327,5 @@ public class MatcherCriteria implements MappingMatcher {
     public String toString() {
         return "MatcherCriteria[" + matchers.size() + "]";
     }
+
 }

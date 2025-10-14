@@ -14,7 +14,18 @@ public class DispatcherTypeMatcher implements MappingMatcher {
 
     @Override
     public boolean matches(RequestRoute requestRoute) {
-        return requestRoute.request().getDispatcherType() == dispatcherType;
+        return match(requestRoute) != null;
+    }
+
+    @Override
+    public <R> R match(RequestRoute requestRoute) {
+        R result = null;
+
+        if (requestRoute.request().getDispatcherType() == dispatcherType) {
+            result = (R) dispatcherType;
+        }
+
+        return result;
     }
 
     @Override

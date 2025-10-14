@@ -1,5 +1,6 @@
 package org.jmouse.web.match.routing;
 
+import org.jmouse.core.matcher.MatchOp;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.web.http.RequestRoute;
 
@@ -14,7 +15,7 @@ import org.jmouse.web.http.RequestRoute;
  *
  * @author Ivan Hontarenko
  */
-public interface MappingMatcher extends Matcher<RequestRoute> {
+public interface MappingMatcher<R> extends Matcher<RequestRoute>, MatchOp<RequestRoute, R> {
 
     /**
      * Compares this matcher with another matcher to determine
@@ -25,6 +26,6 @@ public interface MappingMatcher extends Matcher<RequestRoute> {
      * @return a negative integer, zero, or a positive integer
      *         as this matcher is less specific, equal, or more specific
      */
-    int compare(MappingMatcher other, RequestRoute requestRoute);
+    int compare(MappingMatcher<R> other, RequestRoute requestRoute);
 
 }
