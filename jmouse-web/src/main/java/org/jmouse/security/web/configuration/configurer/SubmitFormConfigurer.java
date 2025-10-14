@@ -144,7 +144,7 @@ public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
                 throw new IllegalStateException("formAction(...) must be set before httpMethod(...)");
             }
             return SubmitFormConfigurer.this.requestMatcher(
-                    requestMatcher.and(RequestMatcher.httpMethod(httpMethod))::matches
+                    requestMatcher.and(RequestMatcher.httpMethod(httpMethod))
             );
         }
 

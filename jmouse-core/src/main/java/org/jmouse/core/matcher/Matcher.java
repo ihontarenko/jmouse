@@ -10,6 +10,8 @@ import java.util.Arrays;
 @SuppressWarnings({"unused"})
 public interface Matcher<T> {
 
+    Object EMPTY_MATCHED_RESULT = new Object();
+
     /**
      * Evaluates whether the given {@code item} matches the criteria defined by this matcher.
      *
@@ -17,10 +19,6 @@ public interface Matcher<T> {
      * @return {@code true} if the item matches the criteria, {@code false} otherwise
      */
     boolean matches(T item);
-
-    static  <T, U> Matcher<U> asType(Matcher<T> matcher, Class<T> type) {
-        return item -> matcher.matches((T) item);
-    }
 
     /**
      * Combines this matcher with another matcher using the logical AND operator.
@@ -59,30 +57,66 @@ public interface Matcher<T> {
     }
 
     /**
-     * Negates the result of this matcher using the logical NOT operator.
+     * 🚫 Negates the result of this matcher using the logical NOT operator.
      *
-     * @return a new matcher that represents the negation of this matcher
+     * <p>Creates a new {@link Matcher} that returns {@code true} only when
+     * the original matcher returns {@code false}.</p>
+     *
+     * <pre>{@code
+     * Matcher<String> notEmpty = s -> !s.isEmpty();
+     * Matcher<String> empty = notEmpty.not();
+     * }</pre>
+     *
+     * @return a new matcher that represents the logical negation of this matcher
      */
     default Matcher<T> not() {
         return not(this);
     }
 
     /**
-     * 🎯 Narrow the type of this matcher.
+     * 🎯 Narrows the type parameter of this matcher.
      *
-     * <p>Useful when a matcher is defined for a supertype but needs to be
-     * applied to a subtype without casts.</p>
+     * <p>Allows applying a general matcher (e.g. one for a supertype) to
+     * a more specific subtype without explicit casting.
+     * This is particularly useful when reusing generic matchers
+     * in strongly-typed contexts.</p>
      *
      * <pre>{@code
-     * Matcher<Executable> any = ...;
-     * Matcher<Method> methodsOnly = any.narrow();
+     * Matcher<Executable> anyExecutable = ...;
+     * Matcher<Method> methodsOnly = anyExecutable.narrow();
      * }</pre>
      *
      * @param <S> narrowed subtype
-     * @return the same matcher but typed to {@code S}
+     * @return the same matcher, but typed to {@code S}
      */
     default <S extends T> Matcher<S> narrow() {
         return this::matches;
+    }
+
+    /**
+     * 🧩 Evaluates this matcher and returns a standardized match result.
+     *
+     * <p>If the matcher condition succeeds, this method returns a special
+     * sentinel value {@code EMPTY_MATCHED_RESULT} cast to {@code R};
+     * otherwise, it returns {@code null}.</p>
+     *
+     * <p>This provides a uniform way to express “matched” vs “not matched”
+     * outcomes, especially in compositional or reflective matching scenarios
+     * where the actual match result type may vary.</p>
+     *
+     * <pre>{@code
+     * Matcher<String> nonEmpty = s -> !s.isEmpty();
+     * Object result = nonEmpty.match("hello");  // → EMPTY_MATCHED_RESULT
+     * Object miss   = nonEmpty.match("");       // → null
+     * }</pre>
+     *
+     * @param item the item to test against this matcher
+     * @param <R>  the type of the result (typically inferred)
+     * @return {@code EMPTY_MATCHED_RESULT} if matched; otherwise {@code null}
+     */
+    @SuppressWarnings("unchecked")
+    default <R> R match(T item) {
+        return matches(item) ? (R) EMPTY_MATCHED_RESULT : null;
     }
 
     /**

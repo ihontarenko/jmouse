@@ -45,6 +45,18 @@ public class HttpMethodMatcher implements MappingMatcher {
         return methods.contains(requestRoute.method());
     }
 
+    @Override
+    public <R> R match(RequestRoute item) {
+        R result = null;
+
+        if (methods.contains(item.method())) {
+            return (R) item.method();
+        }
+
+        return result;
+    }
+
+
     /**
      * 🔢 Compares specificity against another HTTP method condition.
      *

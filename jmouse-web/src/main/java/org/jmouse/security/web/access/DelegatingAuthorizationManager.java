@@ -8,6 +8,7 @@ import org.jmouse.security.web.MatchResult;
 import org.jmouse.security.web.RequestSecurityContext;
 import org.jmouse.security.web.match.RequestMatcherEntry;
 import org.jmouse.web.http.RequestRoute;
+import org.jmouse.web.match.RouteMatch;
 import org.jmouse.web.match.routing.MappingMatcher;
 
 import java.util.ArrayList;
@@ -28,18 +29,17 @@ public class DelegatingAuthorizationManager implements AuthorizationManager<Http
 
     @Override
     public AccessResult check(Authentication authentication, HttpServletRequest request) {
-
         RequestRoute requestRoute = RequestRoute.ofRequest(request);
-
-//        MappingCriteria mappingCriteria = new MappingCriteria(
-//                Route.GET("/aaa")
-//        );
 
         for (var mapping : mappings) {
             MappingMatcher matcher = mapping.matcher();
 //            MatchResult    match   = matcher.match(request);
             if (matcher.matches(requestRoute)) {
                 AuthorizationManager<RequestSecurityContext> authorizationManager = mapping.entry();
+                requestRoute.requestPath().path();
+
+
+
 //                RequestSecurityContext                       context              = new RequestSecurityContext(request, match);
 //                return authorizationManager.check(authentication, context);
 

@@ -5,7 +5,6 @@ import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.security.core.UserPrincipal;
 import org.jmouse.security.core.UserPrincipalService;
 import org.jmouse.security.core.service.InMemoryUserPrincipalService;
-import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.SecurityFilterChain;
 import org.jmouse.security.web.configuration.Customizer;
 import org.jmouse.security.web.configuration.builder.HttpSecurity;
@@ -40,10 +39,6 @@ public class SecurityConfiguration {
             HttpSecurity http, WebBeanContext context, UserPrincipalService principalService) throws Exception {
         http.chainMatcher(pathPattern("/**"));
 
-        http.setSharedObject(WebBeanContext.class, context);
-
-        http.securityContext(Customizer.noop());
-
         http.submitForm(form -> form
                 .usernameParameter("username")
                 .passwordParameter("password")
@@ -63,7 +58,7 @@ public class SecurityConfiguration {
 //        );
 
         http.authorizeHttpRequests(a -> a
-                .requestMatchers(c -> c.pathPattern("/login/**")).permitAll()
+                .requestPath("/login/**").permitAll()
                 .anyRequest().authenticated()
         );
 

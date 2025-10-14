@@ -131,7 +131,7 @@ public class MatcherCriteria implements MappingMatcher {
     /**
      * ⚙️ Registers an HTTP method matcher by name.
      *
-     * @param method HTTP method name (e.g. "GET", "POST")
+     * @param methods HTTP method names (e.g. "GET", "POST")
      * @return this criteria instance for chaining
      */
     public MatcherCriteria httpMethod(String... methods) {

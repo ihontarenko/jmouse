@@ -15,26 +15,26 @@ abstract public class AbstractRequestMatcherRegistry<T> {
 
     abstract protected T applyMatchers(List<MappingMatcher> requestMatchers);
 
-    public T requestMatchers(String pattern) {
-        return requestMatchers(c -> c.pathPattern(pattern));
+    public T requestPath(String pattern) {
+        return matcherCriteria(c -> c.pathPattern(pattern));
     }
 
-    public T requestMatchers(Customizer<MatcherCriteria> customizer) {
+    public T matcherCriteria(Customizer<MatcherCriteria> customizer) {
         MatcherCriteria mappingCriteria = new MatcherCriteria();
         customizer.customize(mappingCriteria);
-        return requestMatchers(mappingCriteria);
+        return matcherCriteria(mappingCriteria);
     }
 
-    public T requestMatchers(MappingMatcher... criteria) {
+    public T matcherCriteria(MappingMatcher... criteria) {
         return applyMatchers(of(criteria));
     }
 
     public T anyRequest() {
-        return requestMatchers(MatcherCriteria.any());
+        return matcherCriteria(MatcherCriteria.any());
     }
 
     public T noneRequest() {
-        return requestMatchers(MatcherCriteria.none());
+        return matcherCriteria(MatcherCriteria.none());
     }
 
     public T dispatcherTypeMatchers(DispatcherType... dispatcherTypes) {
