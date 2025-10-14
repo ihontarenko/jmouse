@@ -41,7 +41,7 @@ public class MatcherCriteria implements MappingMatcher<Match> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatcherCriteria.class);
 
-    private final List<Matcher<RequestRoute>> matchers = new ArrayList<>();
+    private final List<MappingMatcher<RequestRoute>> matchers = new ArrayList<>();
 
     /**
      * ✅ Creates a {@link MatcherCriteria} instance that always matches any route.
