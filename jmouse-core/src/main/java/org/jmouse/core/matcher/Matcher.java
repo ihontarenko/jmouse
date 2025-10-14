@@ -1,6 +1,7 @@
 package org.jmouse.core.matcher;
 
 import java.util.Arrays;
+
 /**
  * A generic interface for matching items of type {@code T} against certain conditions.
  * This interface supports chaining of matchers using logical operators such as AND, OR, XOR, and NOT.
