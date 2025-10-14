@@ -42,4 +42,10 @@ public class NoneCondition implements MappingMatcher {
     public boolean matches(RequestRoute item) {
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "NEVER MATCH";
+    }
+
 }

@@ -43,4 +43,9 @@ public class AnyCondition implements MappingMatcher {
     public boolean matches(RequestRoute item) {
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "ALWAYS MATCH";
+    }
 }

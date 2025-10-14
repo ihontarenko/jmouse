@@ -63,7 +63,7 @@ public class SecurityConfiguration {
 //        );
 
         http.authorizeHttpRequests(a -> a
-                .requestMatchers(RequestMatcher.pathPattern("/login/**")).permitAll()
+                .requestMatchers(c -> c.pathPattern("/login/**")).permitAll()
                 .anyRequest().authenticated()
         );
 

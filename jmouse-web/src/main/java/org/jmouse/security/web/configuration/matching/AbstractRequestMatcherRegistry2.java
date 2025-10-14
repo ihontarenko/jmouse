@@ -1,4 +1,4 @@
-package org.jmouse.security.web.configuration;
+package org.jmouse.security.web.configuration.matching;
 
 import jakarta.servlet.DispatcherType;
 import org.jmouse.security.web.RequestMatcher;
@@ -11,7 +11,7 @@ import static java.util.List.of;
 import static org.jmouse.security.web.RequestMatcher.any;
 import static org.jmouse.security.web.RequestMatcher.pathPattern;
 
-abstract public class AbstractRequestMatcherRegistry<C> {
+abstract public class AbstractRequestMatcherRegistry2<C> {
 
     abstract protected C applyMatchers(List<RequestMatcher> requestMatchers);
 

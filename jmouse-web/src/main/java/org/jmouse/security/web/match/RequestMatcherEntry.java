@@ -1,5 +1,5 @@
 package org.jmouse.security.web.match;
 
-import org.jmouse.security.web.RequestMatcher;
+import org.jmouse.web.match.routing.MappingMatcher;
 
-public record RequestMatcherEntry<E>(RequestMatcher matcher, E entry) {}
+public record RequestMatcherEntry<E>(MappingMatcher matcher, E entry) {}

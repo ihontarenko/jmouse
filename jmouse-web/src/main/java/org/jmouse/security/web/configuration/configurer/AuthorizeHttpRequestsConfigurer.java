@@ -6,10 +6,11 @@ import org.jmouse.security.authorization.AuthorizationManager;
 import org.jmouse.security.core.access.RoleHierarchy;
 import org.jmouse.security.web.authorization.AuthorizationFilter;
 import org.jmouse.security.web.RequestSecurityContext;
-import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.access.ExceptionTranslationFilter;
 import org.jmouse.security.web.configuration.*;
 import org.jmouse.security.web.access.DelegatingAuthorizationManager.Builder;
+import org.jmouse.security.web.configuration.matching.AbstractRequestMatcherRegistry;
+import org.jmouse.web.match.routing.MappingMatcher;
 
 import java.util.List;
 
@@ -43,7 +44,7 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
     }
 
     public void addMapping(
-            List<RequestMatcher> requestMatchers, AuthorizationManager<RequestSecurityContext> manager, boolean negate) {
+            List<MappingMatcher> requestMatchers, AuthorizationManager<RequestSecurityContext> manager, boolean negate) {
         registry.addMapping(requestMatchers, manager, negate);
     }
 
@@ -68,7 +69,7 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
 
     private AuthorizeHttpRequestsConfigurer<B>.Registry applyMapping(
             AuthorizeHttpRequestsConfigurer<B>.Registry owner,
-            List<RequestMatcher> matchers,
+            List<MappingMatcher> matchers,
             AuthorizationManager<RequestSecurityContext> manager,
             boolean negate) {
         AuthorizationManager<RequestSecurityContext> effective = negate
@@ -77,10 +78,10 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
         return owner;
     }
 
-    final public class Registry extends AbstractRequestMatcherRegistry<AuthorizationCriterion<AuthorizeHttpRequestsConfigurer<B>.Registry, RequestSecurityContext>> {
+    final public class Registry extends AbstractRequestMatcherRegistry<AuthorizationCriterion<Registry, RequestSecurityContext>> {
 
         private final Builder              builder = new Builder();
-        private       List<RequestMatcher> pending;
+        private       List<MappingMatcher> pending;
 
         private void validatePending() {
             if (this.pending != null) {
@@ -106,11 +107,11 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
         }
 
         public void addMapping(
-                List<RequestMatcher> requestMatchers, AuthorizationManager<RequestSecurityContext> manager, boolean negate) {
+                List<MappingMatcher> requestMatchers, AuthorizationManager<RequestSecurityContext> manager, boolean negate) {
             AuthorizationManager<RequestSecurityContext> effective = negate
                     ? AuthorityPolicyAuthorizationManager.not(manager) : manager;
 
-            for (RequestMatcher requestMatcher : requestMatchers) {
+            for (MappingMatcher requestMatcher : requestMatchers) {
                 builder.addMapping(requestMatcher, effective);
             }
 
@@ -119,7 +120,7 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
 
         @Override
         protected AuthorizationCriterion<AuthorizeHttpRequestsConfigurer<B>.Registry, RequestSecurityContext> applyMatchers(
-                List<RequestMatcher> requestMatchers) {
+                List<MappingMatcher> requestMatchers) {
             validatePending();
             this.pending = requestMatchers;
             AuthorizeHttpRequestsConfigurer<B> outer = AuthorizeHttpRequestsConfigurer.this;
