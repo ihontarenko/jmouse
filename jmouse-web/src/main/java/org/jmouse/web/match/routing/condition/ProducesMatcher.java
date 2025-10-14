@@ -1,82 +1,103 @@
 package org.jmouse.web.match.routing.condition;
 
 import org.jmouse.core.MediaType;
-import org.jmouse.web.match.routing.MappingMatcher;
+import org.jmouse.core.matcher.Match;
 import org.jmouse.web.http.RequestRoute;
+import org.jmouse.web.match.routing.MappingMatcher;
 
+import java.util.Iterator;
 import java.util.Set;
 
 /**
  * 🎯 Matches a request's <strong>Accept</strong> header against route's <strong>produces</strong> media types.
  *
- * <p>If the request doesn't declare any {@code Accept} header, the condition always matches.</p>
+ * <p>If the request doesn't declare any {@code Accept} header, the condition matches and
+ * selects an arbitrary producible (first in the set iteration order) as a default.</p>
  *
- * <p>Used internally to filter and prioritize routes based on content negotiation.</p>
- *
- * <p>Example: if a route declares {@code produces = [application/json]}, and
- * the client sends {@code Accept: application/json}, this matcher succeeds.</p>
- *
- * @author Ivan Hontarenko (Mr. Jerry Mouse)
+ * <p>Facets attached on hit:</p>
+ * <ul>
+ *   <li>{@code MediaType.class} – the negotiated producible type</li>
+ *   <li>{@code ProducesMatcher.ContentNegotiation.class} – {selected, qFactor}</li>
+ * </ul>
  */
-public class ProducesMatcher implements MappingMatcher {
+public final class ProducesMatcher implements MappingMatcher<RequestRoute> {
 
     private final Set<MediaType> producible;
 
-    /**
-     * @param producible media types that a route can produce (e.g. JSON, HTML)
-     */
     public ProducesMatcher(Set<MediaType> producible) {
         this.producible = producible;
     }
 
+    private static <T> T firstOf(Set<T> set) {
+        Iterator<T> it = set.iterator();
+        return it.hasNext() ? it.next() : null;
+    }
+
     /**
-     * 🔍 Checks if any of the request's accepted types match the route's producible types.
-     *
-     * @param requestRoute request metadata
-     * @return {@code true} if any {@code Accept} type matches a {@code produces} type, or if no {@code Accept} present
+     * Single source of truth.
      */
     @Override
-    public boolean matches(RequestRoute requestRoute) {
-        Set<MediaType> accepted = requestRoute.accept();
+    public Match apply(RequestRoute route) {
+        Set<MediaType> accepted = route.accept();
 
         if (accepted.isEmpty()) {
-            return true;
+            if (producible.isEmpty()) {
+                return Match.hit();
+            }
+
+            MediaType selected = firstOf(producible);
+
+            return Match.hit()
+                    .attach(MediaType.class, selected)
+                    .attach(ContentNegotiation.class, new ContentNegotiation(selected, 1.0d));
         }
 
-        for (MediaType acceptedType : accepted) {
-            for (MediaType producible : producible) {
-                if (producible.compatible(acceptedType)) {
-                    return true;
+        double    bestQFactor = -1.0d;
+        MediaType winner      = null;
+
+        for (MediaType p : producible) {
+            for (MediaType a : accepted) {
+                if (p.compatible(a)) {
+                    double q = a.getQFactor();
+                    if (q > bestQFactor) {
+                        bestQFactor = q;
+                        winner = p;
+                    }
                 }
             }
         }
 
-        return false;
+        if (winner != null) {
+            return Match.hit()
+                    .attach(MediaType.class, winner)
+                    .attach(ContentNegotiation.class, new ContentNegotiation(winner, bestQFactor));
+        }
+
+        return Match.miss();
     }
 
     /**
-     * ⚖️ Compares specificity between two {@code produces} conditions.
-     *
-     * <p>More specific means:</p>
-     * <ul>
-     *     <li>Higher q-factor match wins</li>
-     *     <li>If q-factors equal, narrower set wins (less general)</li>
-     * </ul>
-     *
-     * @param other matcher to compare with
-     * @param requestRoute request metadata
-     * @return comparison result (-1, 0, 1)
+     * Boolean façade backed by {@link #apply(RequestRoute)}.
      */
     @Override
-    public int compare(MappingMatcher other, RequestRoute requestRoute) {
+    public boolean matches(RequestRoute requestRoute) {
+        return apply(requestRoute).matched();
+    }
+
+    /**
+     * ⚖️ Specificity ordering:
+     * 1) higher q-factor wins
+     * 2) if equal, route with fewer producible types wins (narrower)
+     */
+    @Override
+    public int compare(MappingMatcher<?> other, RequestRoute route) {
         if (!(other instanceof ProducesMatcher that)) {
             return 0;
         }
 
-        double qFactorA = getGreaterQFactor(this.producible, requestRoute.accept());
-        double qFactorB = getGreaterQFactor(that.producible, requestRoute.accept());
-
-        int result = Double.compare(qFactorA, qFactorB);
+        double qA     = getGreaterQFactor(this.producible, route.accept());
+        double qB     = getGreaterQFactor(that.producible, route.accept());
+        int    result = Double.compare(qA, qB);
 
         if (result != 0) {
             return result;
@@ -86,25 +107,30 @@ public class ProducesMatcher implements MappingMatcher {
     }
 
     /**
-     * 🧮 Calculates highest quality (q-factor) match between producible and accepted types.
+     * Highest q among compatible pairs.
      */
     public double getGreaterQFactor(Set<MediaType> producibleTypes, Set<MediaType> acceptedTypes) {
-        double qFactor = 0.0D;
+        double factor = 0.0d;
 
-        for (MediaType producibleType : producibleTypes) {
-            for (MediaType acceptedType : acceptedTypes) {
-                if (producibleType.includes(acceptedType)) {
-                    qFactor = Math.max(qFactor, acceptedType.getQFactor());
+        for (MediaType produce : producibleTypes) {
+            for (MediaType accept : acceptedTypes) {
+                if (produce.compatible(accept)) {
+                    factor = Math.max(factor, accept.getQFactor());
                 }
             }
         }
 
-        return qFactor;
+        return factor;
     }
 
     @Override
     public String toString() {
-        return "ProducesMatcher: %s".formatted(producible);
+        return "ProducesMatcher: " + producible;
     }
 
+    /**
+     * Facet describing the negotiation outcome.
+     */
+    public record ContentNegotiation(MediaType selected, double qFactor) {
+    }
 }

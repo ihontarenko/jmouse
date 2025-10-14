@@ -1,51 +1,60 @@
 package org.jmouse.web.match.routing.condition;
 
+import org.jmouse.core.matcher.Match;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MappingMatcher;
 
 /**
- * ✅ A {@link MappingMatcher} implementation that always matches any route.
+ * ✅ A {@link MappingMatcher} that always matches any route.
  *
- * <p>Acts as a universal "match-all" condition — effectively bypassing
- * any selective filtering. Often used as a default or fallback matcher
- * when no specific conditions are required.</p>
+ * <p>Acts as a universal "match-all" condition — useful as a default/fallback
+ * where selective filtering is not required.</p>
  *
- * <p>✨ <b>Behavior:</b></p>
+ * <p><b>Behavior:</b></p>
  * <ul>
- *   <li>{@link #matches(RequestRoute)} always returns {@code true}.</li>
+ *   <li>{@link #apply(RequestRoute)} always returns {@link Match#hit()}.</li>
+ *   <li>{@link #matches(RequestRoute)} delegates to {@code apply(...).matched()} (always {@code true}).</li>
  *   <li>{@link #compare(MappingMatcher, RequestRoute)} always returns {@code 0}.</li>
  * </ul>
  *
  * @see NoneCondition
- * @see MappingMatcher
  */
-public class AnyCondition implements MappingMatcher {
+public final class AnyCondition implements MappingMatcher<RequestRoute> {
 
     /**
-     * ⚖️ Always returns {@code 0}, since this matcher has no priority rules.
-     *
-     * @param other        other matcher to compare with
-     * @param requestRoute current route context
-     * @return always {@code 0}
+     * Reusable singleton instance.
      */
-    @Override
-    public int compare(MappingMatcher other, RequestRoute requestRoute) {
-        return 0;
+    public static final AnyCondition INSTANCE = new AnyCondition();
+
+    private AnyCondition() {
     }
 
     /**
-     * ✅ Always returns {@code true}, indicating this matcher accepts all routes.
-     *
-     * @param item current request route
-     * @return always {@code true}
+     * Single source of truth: always a hit.
      */
     @Override
-    public boolean matches(RequestRoute item) {
-        return true;
+    public Match apply(RequestRoute route) {
+        return Match.hit();
+    }
+
+    /**
+     * Boolean façade.
+     */
+    @Override
+    public boolean matches(RequestRoute route) {
+        return apply(route).matched();
+    }
+
+    /**
+     * No ordering logic.
+     */
+    @Override
+    public int compare(MappingMatcher<?> other, RequestRoute route) {
+        return 0;
     }
 
     @Override
     public String toString() {
-        return "ALWAYS MATCH";
+        return "AnyCondition[ALWAYS MATCH]";
     }
 }

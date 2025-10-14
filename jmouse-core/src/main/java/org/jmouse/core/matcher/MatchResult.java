@@ -77,7 +77,8 @@ final class MatchResult implements Match {
         Map<Class<?>, Object> bag = new LinkedHashMap<>();
 
         for (Class<?> type : other.types()) {
-            other.get(type.asSubclass(Object.class)).ifPresent(value -> bag.put(type, value));
+            other.get(type.asSubclass(Object.class))
+                    .ifPresent(value -> bag.put(type, value));
         }
 
         return new MatchResult(true, Map.copyOf(bag));
@@ -108,6 +109,7 @@ final class MatchResult implements Match {
         }
 
         Object exact = bag.get(type);
+
         if (exact != null) {
             return Optional.of(type.cast(exact));
         }
@@ -145,6 +147,7 @@ final class MatchResult implements Match {
         }
 
         Class<Object> type = (Class<Object>) value.getClass();
+
         return attach(type, value);
     }
 

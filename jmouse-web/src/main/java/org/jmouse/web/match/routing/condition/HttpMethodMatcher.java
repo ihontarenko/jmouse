@@ -1,8 +1,9 @@
 package org.jmouse.web.match.routing.condition;
 
-import org.jmouse.web.match.routing.MappingMatcher;
-import org.jmouse.web.http.RequestRoute;
+import org.jmouse.core.matcher.Match;
 import org.jmouse.web.http.HttpMethod;
+import org.jmouse.web.http.RequestRoute;
+import org.jmouse.web.match.routing.MappingMatcher;
 
 import java.util.List;
 import java.util.Set;
@@ -10,85 +11,119 @@ import java.util.Set;
 /**
  * 📦 HTTP method matcher condition.
  *
- * <p>Restricts a route mapping to specific HTTP methods (e.g., GET, POST).
- * If constructed with an empty set of methods, this condition matches no requests.</p>
+ * <p>Restricts route mappings to specific {@link HttpMethod}s
+ * (e.g. {@code GET}, {@code POST}).
+ * If created with an empty method set, this matcher will never match any request.</p>
  *
- * <pre>{@code
- * new HttpMethodCondition(HttpMethod.GET, HttpMethod.POST)
- * }</pre>
+ * <p>✨ <b>Highlights:</b></p>
+ * <ul>
+ *   <li>Evaluates HTTP method equality via {@link RequestRoute#method()}.</li>
+ *   <li>Returns a {@link Match} carrying {@link HttpMethod} and
+ *       {@link AllowedMethods} facets on success.</li>
+ *   <li>Supports comparison based on method specificity
+ *       (fewer methods → more specific).</li>
+ * </ul>
  *
+ * @see MappingMatcher
  * @see HttpMethod
  * @see RequestRoute
- * @see MappingMatcher
  */
-public class HttpMethodMatcher implements MappingMatcher<HttpMethod> {
+public final class HttpMethodMatcher implements MappingMatcher<RequestRoute> {
 
     private final Set<HttpMethod> methods;
 
     /**
-     * Creates a condition that matches any of the given HTTP methods.
+     * 🧩 Creates a matcher that accepts any of the given HTTP methods.
      *
-     * @param methods HTTP methods to match (e.g., GET, POST). Null elements are not allowed.
+     * @param methods HTTP methods to match (e.g. {@code GET}, {@code POST});
+     *                must not contain {@code null} elements
      */
     public HttpMethodMatcher(HttpMethod... methods) {
         this.methods = Set.copyOf(List.of(methods));
     }
 
     /**
-     * ✅ Checks whether the request method is one of the allowed methods.
+     * 🎯 Core evaluation entrypoint.
      *
-     * @param requestRoute the current request route
-     * @return {@code true} if the request method is allowed; {@code false} otherwise
+     * <p>Determines whether the current {@link RequestRoute} method
+     * is among the allowed ones.
+     * On success, returns a {@link Match#hit()} populated with two facets:</p>
+     *
+     * <ul>
+     *   <li>{@link HttpMethod} — the matched method;</li>
+     *   <li>{@link AllowedMethods} — the full set of permitted methods.</li>
+     * </ul>
+     *
+     * @param route the current HTTP request route
+     * @return a {@link Match} containing contextual facets if matched, otherwise {@link Match#miss()}
      */
     @Override
-    public boolean matches(RequestRoute requestRoute) {
-        return methods.contains(requestRoute.method());
-    }
-
-    @Override
-    public HttpMethod match(RequestRoute item) {
-        HttpMethod matched = null;
-
-        if (methods.contains(item.method())) {
-            matched = item.method();
+    public Match apply(RequestRoute route) {
+        if (methods.isEmpty()) {
+            return Match.miss();
         }
 
-        return matched;
+        HttpMethod method = route.method();
+
+        if (methods.contains(method)) {
+            return Match.hit().attach(HttpMethod.class, method).attach(AllowedMethods.class, new AllowedMethods(methods));
+        }
+
+        return Match.miss();
     }
 
     /**
-     * 🔢 Compares specificity against another HTTP method condition.
+     * ✅ Boolean shortcut wrapper over {@link #apply(RequestRoute)}.
      *
-     * <p>A condition with fewer allowed methods is considered more specific.
-     * Non-{@code HttpMethodCondition} instances are treated as equally specific.</p>
-     *
-     * @param other        another matcher to compare with
-     * @param requestRoute the current request route (ignored)
-     * @return negative if this is more specific; positive if less specific; 0 if equal/unknown
+     * @param route the current HTTP route
+     * @return {@code true} if the request method is allowed
      */
     @Override
-    public int compare(MappingMatcher other, RequestRoute requestRoute) {
-        if (!(other instanceof HttpMethodMatcher condition)) {
+    public boolean matches(RequestRoute route) {
+        return apply(route).matched();
+    }
+
+    /**
+     * 🔢 Defines matcher specificity.
+     *
+     * <p>Fewer allowed methods → more specific.
+     * Returns a negative number if this instance is more specific.</p>
+     *
+     * @param other another matcher for comparison
+     * @param route current route context (ignored)
+     * @return comparison result (negative → more specific)
+     */
+    @Override
+    public int compare(MappingMatcher<?> other, RequestRoute route) {
+        if (!(other instanceof HttpMethodMatcher o)) {
             return 0;
         }
-        return Integer.compare(this.methods.size(), condition.methods.size());
+        return Integer.compare(this.methods.size(), o.methods.size());
     }
 
     /**
-     * Returns the allowed HTTP methods for this condition.
-     *
-     * @return an immutable set of allowed methods
+     * @return immutable set of allowed {@link HttpMethod}s
      */
     public Set<HttpMethod> getMethods() {
-        return Set.copyOf(methods);
+        return methods;
     }
 
     /**
-     * 📄 String representation for diagnostics.
+     * 🧾 Textual representation for debugging/logging.
      */
     @Override
     public String toString() {
-        return "HttpMethodCondition: %s".formatted(methods);
+        return "HttpMethodMatcher: " + methods;
     }
 
+    /**
+     * 📚 Facet representing all allowed methods for a successful match.
+     *
+     * <p>Attached to {@link Match} results to expose route metadata
+     * during post-processing, debugging, or auditing.</p>
+     *
+     * @param methods allowed HTTP methods
+     */
+    public record AllowedMethods(Set<HttpMethod> methods) {
+    }
 }

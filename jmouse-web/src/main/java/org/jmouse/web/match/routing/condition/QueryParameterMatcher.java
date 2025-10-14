@@ -1,31 +1,40 @@
 package org.jmouse.web.match.routing.condition;
 
-import org.jmouse.web.match.routing.MappingMatcher;
+import org.jmouse.core.matcher.Match;
 import org.jmouse.web.http.RequestRoute;
+import org.jmouse.web.match.routing.MappingMatcher;
+
+import java.util.Objects;
 
 /**
  * 🧭 Matches an HTTP query parameter to a required value.
+ *
  * <p>Used in {@code Route} definitions for fine-grained control over request routing.</p>
  *
+ * <p><b>Facets attached on hit:</b></p>
+ * <ul>
+ *   <li>{@code QueryParameterMatcher.Facet} – tuple of parameter {@code name} and matched {@code value}</li>
+ * </ul>
+ *
  * <pre>{@code
- * new QueryParameterMatcher("lang", "uk")
+ * MappingMatcher<RequestRoute> m = new QueryParameterMatcher("lang", "uk");
+ * Match match = m.apply(route);
+ * if (match.matched()) {
+ *     QueryParameterMatcher.Facet f = match.get(QueryParameterMatcher.Facet.class).orElseThrow();
+ *     // f.name() == "lang"; f.value() == "uk"
+ * }
  * }</pre>
- *
- * This matcher succeeds only if the specified query parameter exists and matches the expected value.
- *
- * @author Ivan Hontarenko (Mr. Jerry Mouse)
- * @author ihontarenko@gmail.com
+ * <p>
+ * This matcher succeeds only if the specified query parameter exists and equals the expected value.
  */
-public class QueryParameterMatcher implements MappingMatcher {
+public final class QueryParameterMatcher implements MappingMatcher<RequestRoute> {
 
     private final String parameterName;
     private final Object requiredValue;
 
     /**
-     * Creates a matcher for a specific query parameter and expected value.
-     *
-     * @param parameterName the name of the query parameter to check
-     * @param requiredValue the required value that must match the parameter value
+     * @param parameterName the query parameter to check (e.g., {@code "lang"})
+     * @param requiredValue the required value the parameter must equal (non-null)
      */
     public QueryParameterMatcher(String parameterName, Object requiredValue) {
         this.parameterName = parameterName;
@@ -33,33 +42,56 @@ public class QueryParameterMatcher implements MappingMatcher {
     }
 
     /**
-     * ✅ Returns {@code true} if the query parameter exists and equals the expected value.
-     *
-     * @param requestRoute the current request route
-     * @return {@code true} if the parameter matches, {@code false} otherwise
+     * Single source of truth: evaluate and attach facet on success.
      */
     @Override
-    public boolean matches(RequestRoute requestRoute) {
-        Object requestValue = requestRoute.queryParameters().getFirst(parameterName);
-        return requestValue != null && requestValue.equals(requiredValue);
+    public Match apply(RequestRoute route) {
+        Object requestValue = route.queryParameters().getFirst(parameterName);
+
+        if (requestValue != null && requestValue.equals(requiredValue)) {
+            return Match.hit().attach(Facet.class, new Facet(parameterName, requestValue));
+        }
+
+        return Match.miss();
     }
 
     /**
-     * 📊 Compares matchers by parameter name (lexicographically).
-     *
-     * @param other         another matcher
-     * @param requestRoute  the current request route (not used here)
-     * @return a comparison result for matcher ordering
+     * Boolean façade backed by {@link #apply(RequestRoute)}.
      */
     @Override
-    public int compare(MappingMatcher other, RequestRoute requestRoute) {
-        if (!(other instanceof QueryParameterMatcher condition))
+    public boolean matches(RequestRoute route) {
+        return apply(route).matched();
+    }
+
+    /**
+     * Compares matchers by parameter name (lexicographically).
+     * If names are equal, a matcher with a longer textual value is considered more specific.
+     */
+    @Override
+    public int compare(MappingMatcher<?> other, RequestRoute route) {
+        if (!(other instanceof QueryParameterMatcher parameterMatcher)) {
             return 0;
-        return parameterName.compareTo(condition.parameterName);
+        }
+
+        int result = this.parameterName.compareTo(parameterMatcher.parameterName);
+        if (result != 0) {
+            return result;
+        }
+
+        int thisLen = String.valueOf(this.requiredValue).length();
+        int thatLen = String.valueOf(parameterMatcher.requiredValue).length();
+
+        return Integer.compare(thisLen, thatLen);
     }
 
     @Override
     public String toString() {
-        return "QueryParameterMatcher: [%s=%s]".formatted(parameterName, requiredValue);
+        return "QueryParameterMatcher[" + parameterName + "=" + requiredValue + "]";
+    }
+
+    /**
+     * Facet carrying the matched parameter name and its value.
+     */
+    public record Facet(String name, Object value) {
     }
 }

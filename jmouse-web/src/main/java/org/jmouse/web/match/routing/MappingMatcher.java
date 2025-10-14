@@ -1,31 +1,34 @@
 package org.jmouse.web.match.routing;
 
+import org.jmouse.core.matcher.Match;
 import org.jmouse.core.matcher.MatchOp;
-import org.jmouse.core.matcher.Matcher;
-import org.jmouse.web.http.RequestRoute;
 
-/**
- * 🎯 Defines a contract for matching a {@link RequestRoute} against
- * specific mapping conditions, such as HTTP method, path matched,
- * headers, or media types.
- * <p>
- * Implementations evaluate whether the request matches and
- * provide a mechanism to compare specificity between matchers
- * relative to a given request.
- *
- * @author Ivan Hontarenko
- */
-public interface MappingMatcher<R> extends Matcher<RequestRoute>, MatchOp<RequestRoute, R> {
+public interface MappingMatcher<I> extends MatchOp<I, Match> {
 
     /**
-     * Compares this matcher with another matcher to determine
-     * their relative specificity or priority for the given request.
-     *
-     * @param other        another matcher to compare against
-     * @param requestRoute the current request route context
-     * @return a negative integer, zero, or a positive integer
-     *         as this matcher is less specific, equal, or more specific
+     * Core evaluation producing a {@link Match} with typed facets.
      */
-    int compare(MappingMatcher<R> other, RequestRoute requestRoute);
+    Match apply(I input);
 
+    /**
+     * Boolean view.
+     */
+    default boolean matches(I input) {
+        return apply(input).matched();
+    }
+
+    /**
+     * MatchOp compatibility: return the same {@link Match}.
+     */
+    @Override
+    default Match match(I input) {
+        return apply(input);
+    }
+
+    /**
+     * Optional: prioritization against another matcher within context.
+     */
+    default int compare(MappingMatcher<?> other, I context) {
+        return 0;
+    }
 }

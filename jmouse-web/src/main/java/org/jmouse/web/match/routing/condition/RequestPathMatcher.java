@@ -1,68 +1,115 @@
 package org.jmouse.web.match.routing.condition;
 
+import org.jmouse.core.matcher.Match;
+import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.PathPattern;
 import org.jmouse.web.match.routing.MappingMatcher;
-import org.jmouse.web.http.RequestRoute;
+
+import java.util.Objects;
 
 /**
  * 🛣️ Path-based condition for matching routes.
  *
- * <p>Used to match incoming requests by comparing the request path
- * to a predefined {@link PathPattern}.</p>
+ * <p>Evaluates an incoming request path against a predefined {@link PathPattern}.
+ * On hit, attaches useful facets so later stages can retrieve them by type.</p>
+ *
+ * <p><b>Facets attached on hit:</b></p>
+ * <ul>
+ *   <li>{@code PathPattern.class} – the pattern that matched</li>
+ *   <li>{@code RequestPathMatcher.MatchedPath.class} – tuple of {@code pattern} and concrete {@code path}</li>
+ * </ul>
  *
  * <p><b>Example usage:</b></p>
  * <pre>{@code
- * RegexpPathPattern matched = new RegexpPathPattern("/user/{id:\\d+}");
- * MappingMatcher matcher = new RequestPathCondition(matched);
+ * PathPattern pattern = new RegexpPathPattern("/user/{id:\\d+}");
+ * MappingMatcher<RequestRoute> matcher = new RequestPathMatcher(pattern);
  *
- * boolean match = matcher.matches(requestRoute);
+ * Match m = matcher.apply(requestRoute);
+ * if (m.matched()) {
+ *     RequestPathMatcher.MatchedPath mp = m.get(RequestPathMatcher.MatchedPath.class).orElseThrow();
+ *     // mp.pattern() -> "/user/{id:\\d+}"
+ *     // mp.path()    -> "/user/42"
+ * }
  * }</pre>
  *
- * @author Ivan Hontarenko (Mr. Jerry Mouse)
- * @author ihontarenko@gmail.com
+ * @author Ivan Hontarenko
  */
-public class RequestPathMatcher implements MappingMatcher {
+public final class RequestPathMatcher implements MappingMatcher<RequestRoute> {
 
     private final PathPattern routePath;
 
     /**
-     * Constructs a new path condition with the given matched.
+     * Constructs a new path condition with the given pattern.
      *
-     * @param routePath the matched to match against request paths
+     * @param routePath the pattern to match against request paths
      */
     public RequestPathMatcher(PathPattern routePath) {
         this.routePath = routePath;
     }
 
     /**
-     * Checks whether the request path matches the stored {@link PathPattern}.
-     *
-     * @param requestRoute the current HTTP request route
-     * @return {@code true} if the request path matches; {@code false} otherwise
+     * Single source of truth: returns a {@link Match} with facets on success.
      */
     @Override
-    public boolean matches(RequestRoute requestRoute) {
-        return routePath.matches(requestRoute.requestPath().path());
+    public Match apply(RequestRoute requestRoute) {
+        String path = requestRoute.requestPath().path();
+
+        if (routePath.matches(path)) {
+            return Match.hit()
+                    .attach(PathPattern.class, routePath)
+                    .attach(MatchedPath.class, new MatchedPath(routePath.raw(), path));
+        }
+
+        return Match.miss();
     }
 
     /**
-     * Compares specificity of this condition against another.
-     * Delegates to {@link String#compareTo(String)}.
-     *
-     * @param other         the other condition
-     * @param requestRoute  the request being matched
-     * @return comparison result: negative if this is more specific
+     * Boolean façade backed by {@link #apply(RequestRoute)}.
      */
     @Override
-    public int compare(MappingMatcher other, RequestRoute requestRoute) {
-        if (!(other instanceof RequestPathMatcher condition)) {
+    public boolean matches(RequestRoute requestRoute) {
+        return apply(requestRoute).matched();
+    }
+
+    /**
+     * Compares specificity of this matcher against another.
+     * <p>Default behavior falls back to lexicographic comparison of raw patterns.
+     * If equal lexicographically, the longer raw pattern is treated as more specific.</p>
+     *
+     * @param other        the other matcher to compare with
+     * @param requestRoute the current request (not used)
+     * @return negative if this is considered more specific; positive if less specific; 0 if equal/unknown
+     */
+    @Override
+    public int compare(MappingMatcher<?> other, RequestRoute requestRoute) {
+        if (!(other instanceof RequestPathMatcher matcher)) {
             return 0;
         }
-        return routePath.raw().compareTo(condition.routePath.raw());
+
+        int result = this.routePath.raw().compareTo(matcher.routePath.raw());
+
+        if (result != 0) {
+            return result;
+        }
+
+        return Integer.compare(matcher.routePath.raw().length(), this.routePath.raw().length());
+    }
+
+    /**
+     * Exposes the underlying pattern (immutable reference).
+     */
+    public PathPattern pattern() {
+        return routePath;
     }
 
     @Override
     public String toString() {
-        return "RequestPathCondition: %s".formatted(routePath);
+        return "RequestPathMatcher: " + routePath;
+    }
+
+    /**
+     * Facet: matched pair of pattern and actual request path.
+     */
+    public record MatchedPath(String pattern, String path) {
     }
 }

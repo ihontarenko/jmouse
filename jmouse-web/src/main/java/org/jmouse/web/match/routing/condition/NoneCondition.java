@@ -1,51 +1,58 @@
 package org.jmouse.web.match.routing.condition;
 
+import org.jmouse.core.matcher.Match;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MappingMatcher;
 
 /**
- * 🚫 A {@link MappingMatcher} implementation that never matches any route.
+ * 🚫 A {@link MappingMatcher} that never matches any route.
  *
- * <p>Acts as a "null-object" or placeholder matcher, useful for cases where
- * no real condition is defined but a non-null {@link MappingMatcher} instance
- * is still required (to simplify pipelines or comparisons).</p>
+ * <p>Acts as a Null Object / placeholder to simplify pipelines where a non-null matcher
+ * is required but no actual condition is defined.</p>
  *
- * <p>✨ <b>Behavior:</b></p>
+ * <p><b>Behavior:</b></p>
  * <ul>
- *   <li>{@link #matches(RequestRoute)} always returns {@code false}.</li>
+ *   <li>{@link #apply(RequestRoute)} always returns {@link Match#miss()}.</li>
+ *   <li>{@link #matches(RequestRoute)} delegates to {@code apply(...).matched()} (always false).</li>
  *   <li>{@link #compare(MappingMatcher, RequestRoute)} always returns {@code 0}.</li>
  * </ul>
- *
- * @see MappingMatcher
  */
-public class NoneCondition implements MappingMatcher {
+public final class NoneCondition implements MappingMatcher<RequestRoute> {
 
     /**
-     * ⚖️ Always returns {@code 0}, since this condition has no ordering logic.
-     *
-     * @param other        other matcher to compare with
-     * @param requestRoute current route context
-     * @return always {@code 0}
+     * Reusable singleton instance.
      */
-    @Override
-    public int compare(MappingMatcher other, RequestRoute requestRoute) {
-        return 0;
+    public static final NoneCondition INSTANCE = new NoneCondition();
+
+    private NoneCondition() {
     }
 
     /**
-     * ❌ Always returns {@code false}, meaning this condition never matches.
-     *
-     * @param item current request route
-     * @return always {@code false}
+     * Single source of truth: never matches.
      */
     @Override
-    public boolean matches(RequestRoute item) {
-        return false;
+    public Match apply(RequestRoute route) {
+        return Match.miss();
+    }
+
+    /**
+     * Boolean façade (always false).
+     */
+    @Override
+    public boolean matches(RequestRoute route) {
+        return apply(route).matched();
+    }
+
+    /**
+     * No ordering logic.
+     */
+    @Override
+    public int compare(MappingMatcher<?> other, RequestRoute route) {
+        return 0;
     }
 
     @Override
     public String toString() {
-        return "NEVER MATCH";
+        return "NoneCondition[NEVER MATCH]";
     }
-
 }
