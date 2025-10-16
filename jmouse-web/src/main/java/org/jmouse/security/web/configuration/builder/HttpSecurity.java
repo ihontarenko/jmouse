@@ -5,6 +5,9 @@ import org.jmouse.core.Sorter;
 import org.jmouse.security.web.*;
 import org.jmouse.security.web.configuration.*;
 import org.jmouse.security.web.configuration.configurer.*;
+import org.jmouse.web.http.RequestRoute;
+import org.jmouse.web.match.routing.MappingMatcher;
+import org.jmouse.web.match.routing.MatcherCriteria;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +17,8 @@ public final class HttpSecurity
         extends AbstractConfiguredSecurityBuilder<SecurityFilterChain, HttpSecurity>
         implements HttpSecurityBuilder<HttpSecurity> {
 
-    private final List<Filter>   filters = new ArrayList<>();
-    private       RequestMatcher matcher = RequestMatcher.any();
+    private final List<Filter>                 filters = new ArrayList<>();
+    private       MappingMatcher<RequestRoute> matcher = MatcherCriteria.any();
 
     public HttpSecurity() {
         setSharedObject(SecurityFilterOrder.class, new SecurityFilterOrder());
@@ -68,7 +71,9 @@ public final class HttpSecurity
     }
 
     @Override
-    public HttpSecurity chainMatcher(RequestMatcher matcher) {
+    public HttpSecurity chainMatcher(Customizer<MatcherCriteria> customizer) {
+        MatcherCriteria matcher = new MatcherCriteria();
+        customizer.customize(matcher);
         this.matcher = matcher;
         return this;
     }

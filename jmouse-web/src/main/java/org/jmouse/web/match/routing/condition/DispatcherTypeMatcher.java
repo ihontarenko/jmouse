@@ -5,6 +5,7 @@ import org.jmouse.core.matcher.Match;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MappingMatcher;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -18,13 +19,13 @@ import java.util.Objects;
  */
 public final class DispatcherTypeMatcher implements MappingMatcher<RequestRoute> {
 
-    private final DispatcherType dispatcherType;
+    private final DispatcherType[] dispatcherTypes;
 
     /**
-     * @param dispatcherType the dispatcher type to match against
+     * @param dispatcherTypes the dispatcher type to match against
      */
-    public DispatcherTypeMatcher(DispatcherType dispatcherType) {
-        this.dispatcherType = Objects.requireNonNull(dispatcherType, "dispatcherType");
+    public DispatcherTypeMatcher(DispatcherType... dispatcherTypes) {
+        this.dispatcherTypes = Objects.requireNonNull(dispatcherTypes, "dispatcherType");
     }
 
     /**
@@ -34,7 +35,7 @@ public final class DispatcherTypeMatcher implements MappingMatcher<RequestRoute>
     public Match apply(RequestRoute route) {
         DispatcherType actual = route.request().getDispatcherType();
 
-        if (actual == dispatcherType) {
+        if (List.of(dispatcherTypes).contains(actual)) {
             return Match.hit()
                     .attach(DispatcherType.class, actual)
                     .attach(Facet.class, new Facet(actual));
@@ -61,7 +62,7 @@ public final class DispatcherTypeMatcher implements MappingMatcher<RequestRoute>
 
     @Override
     public String toString() {
-        return "DispatcherTypeMatcher[" + dispatcherType + "]";
+        return "DispatcherTypeMatcher: " + List.of(dispatcherTypes);
     }
 
     /**

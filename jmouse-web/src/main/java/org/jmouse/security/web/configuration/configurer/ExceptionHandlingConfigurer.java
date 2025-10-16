@@ -8,6 +8,7 @@ import org.jmouse.security.web.authentication.ui.LoginUrlAuthenticationEntryPoin
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
 import org.jmouse.security.web.configuration.SharedAttributes;
+import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpStatus;
 import org.jmouse.web.http.cache.HttpSessionRequestCache;
 import org.jmouse.web.http.cache.RequestCache;
@@ -48,8 +49,10 @@ public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>>
         }
 
         if (deniedHandler == null) {
-            deniedHandler = (request, response, e)
-                    -> response.setStatus(HttpStatus.FORBIDDEN.getCode());
+            deniedHandler = (request, response, e) -> {
+                response.setStatus(HttpStatus.FORBIDDEN.getCode());
+                response.setHeader(HttpHeader.X_SECURITY_REASON.value(), e.getMessage());
+            };
         }
 
         http.setSharedObject(SharedAttributes.ENTRY_POINT, entryPoint);

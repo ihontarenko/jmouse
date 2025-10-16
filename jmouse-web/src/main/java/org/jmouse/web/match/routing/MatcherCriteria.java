@@ -37,7 +37,7 @@ import static org.jmouse.core.Streamable.of;
  * @see RequestRoute
  * @see MappingMatcher
  */
-public class MatcherCriteria implements MappingMatcher<Match> {
+public class MatcherCriteria implements MappingMatcher<RequestRoute> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MatcherCriteria.class);
 
@@ -55,7 +55,7 @@ public class MatcherCriteria implements MappingMatcher<Match> {
      * @see AnyCondition
      */
     public static MatcherCriteria any() {
-        return new MatcherCriteria().add(new AnyCondition());
+        return new MatcherCriteria().add(AnyCondition.INSTANCE);
     }
 
     /**
@@ -70,7 +70,7 @@ public class MatcherCriteria implements MappingMatcher<Match> {
      * @see NoneCondition
      */
     public static MatcherCriteria none() {
-        return new MatcherCriteria().add(new NoneCondition());
+        return new MatcherCriteria().add(NoneCondition.INSTANCE);
     }
 
     /**
@@ -80,7 +80,7 @@ public class MatcherCriteria implements MappingMatcher<Match> {
      * @param matcher matcher instance to register
      * @return this criteria instance for chaining
      */
-    public MatcherCriteria set(Matcher<RequestRoute> matcher) {
+    public MatcherCriteria set(MappingMatcher<RequestRoute> matcher) {
         matchers.removeIf(m -> matcher.getClass().isInstance(m));
         return add(matcher);
     }
@@ -91,7 +91,7 @@ public class MatcherCriteria implements MappingMatcher<Match> {
      * @param matcher matcher instance to add
      * @return this criteria instance for chaining
      */
-    public MatcherCriteria add(Matcher<RequestRoute> matcher) {
+    public MatcherCriteria add(MappingMatcher<RequestRoute> matcher) {
         matchers.add(matcher);
         return this;
     }
@@ -242,36 +242,19 @@ public class MatcherCriteria implements MappingMatcher<Match> {
         return getMatchers(type).getFirst();
     }
 
-    /**
-     * ✅ Evaluates this matcher chain against the provided {@link RequestRoute}.
-     *
-     * @param route current request route
-     * @return {@code true} if all matchers match; {@code false} otherwise
-     */
-    @Override
-    public boolean matches(RequestRoute route) {
-        Optional<Matcher<RequestRoute>> matcher = of(matchers)
-                .reduce(Matcher::logicalAnd);
-
-        LOGGER.debug("MatcherCriteria: {} will be proceed!", matcher);
-
-        return matcher.orElseGet(() -> Matcher.constant(true))
-                .matches(route);
-    }
-
     @Override
     @SuppressWarnings("unchecked")
-    public Match match(RequestRoute value) {
-        Match mappingMatch = Ma;
+    public Match apply(RequestRoute value) {
+        List<Match> matches = new ArrayList<>();
 
         for (Matcher<RequestRoute> matcher : matchers) {
-            if (matcher.matches(value) && matcher instanceof MappingMatcher<?> mappingMatcher) {
-                MatchOp<RequestRoute, Object> matchOp = (MatchOp<RequestRoute, Object>) mappingMatcher;
-                matchOp.match(value);
+            if (matcher instanceof MappingMatcher<?> mappingMatcher) {
+                MatchOp<RequestRoute, Match> matchOp = (MatchOp<RequestRoute, Match>) mappingMatcher;
+                matches.add(matchOp.match(value));
             }
         }
 
-        return mappingMatch;
+        return Match.and(matches.toArray(Match[]::new));
     }
 
     /**
@@ -283,7 +266,7 @@ public class MatcherCriteria implements MappingMatcher<Match> {
      * @return comparison result (-1, 0, 1)
      */
     @Override
-    public int compare(MappingMatcher other, RequestRoute requestRoute) {
+    public int compare(MappingMatcher<?> other, RequestRoute requestRoute) {
         if (other instanceof MatcherCriteria that) {
             int result = Integer.compare(this.matchers.size(), that.matchers.size());
             if (result != 0) {
@@ -291,8 +274,8 @@ public class MatcherCriteria implements MappingMatcher<Match> {
             }
 
             for (int i = 0; i < this.matchers.size(); i++) {
-                MappingMatcher matcherA = (MappingMatcher) this.matchers.get(i);
-                MappingMatcher matcherB = (MappingMatcher) that.matchers.get(i);
+                MappingMatcher<RequestRoute> matcherA = this.matchers.get(i);
+                MappingMatcher<RequestRoute> matcherB = that.matchers.get(i);
                 result = matcherA.compare(matcherB, requestRoute);
                 if (result != 0) {
                     return result;

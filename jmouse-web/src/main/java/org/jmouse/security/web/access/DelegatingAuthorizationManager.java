@@ -32,18 +32,10 @@ public class DelegatingAuthorizationManager implements AuthorizationManager<Http
         RequestRoute requestRoute = RequestRoute.ofRequest(request);
 
         for (var mapping : mappings) {
-            MappingMatcher matcher = mapping.matcher();
-//            MatchResult    match   = matcher.match(request);
+            MappingMatcher<RequestRoute> matcher = mapping.matcher();
             if (matcher.matches(requestRoute)) {
-                AuthorizationManager<RequestSecurityContext> authorizationManager = mapping.entry();
-                requestRoute.requestPath().path();
-
-
-
-//                RequestSecurityContext                       context              = new RequestSecurityContext(request, match);
-//                return authorizationManager.check(authentication, context);
-
-
+                RequestSecurityContext context = new RequestSecurityContext(request, matcher.match(requestRoute));
+                return mapping.entry().check(authentication, context);
             }
         }
 
@@ -60,7 +52,7 @@ public class DelegatingAuthorizationManager implements AuthorizationManager<Http
                 = new ArrayList<>();
         private       AuthorizationManager<HttpServletRequest>                                defaultManager;
 
-        public Builder addMapping(MappingMatcher matcher, AuthorizationManager<RequestSecurityContext> manager) {
+        public Builder addMapping(MappingMatcher<RequestRoute> matcher, AuthorizationManager<RequestSecurityContext> manager) {
             entries.add(new RequestMatcherEntry<>(matcher, manager));
             return this;
         }

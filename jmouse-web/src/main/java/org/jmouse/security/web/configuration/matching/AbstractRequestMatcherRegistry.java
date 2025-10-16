@@ -2,18 +2,18 @@ package org.jmouse.security.web.configuration.matching;
 
 import jakarta.servlet.DispatcherType;
 import org.jmouse.security.web.configuration.Customizer;
+import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MappingMatcher;
 import org.jmouse.web.match.routing.MatcherCriteria;
 import org.jmouse.web.match.routing.condition.DispatcherTypeMatcher;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.List.of;
 
 abstract public class AbstractRequestMatcherRegistry<T> {
 
-    abstract protected T applyMatchers(List<MappingMatcher> requestMatchers);
+    abstract protected T applyMatchers(List<MappingMatcher<RequestRoute>> requestMatchers);
 
     public T requestPath(String pattern) {
         return matcherCriteria(c -> c.pathPattern(pattern));
@@ -25,7 +25,8 @@ abstract public class AbstractRequestMatcherRegistry<T> {
         return matcherCriteria(mappingCriteria);
     }
 
-    public T matcherCriteria(MappingMatcher... criteria) {
+    @SafeVarargs
+    public final T matcherCriteria(MappingMatcher<RequestRoute>... criteria) {
         return applyMatchers(of(criteria));
     }
 
@@ -37,14 +38,8 @@ abstract public class AbstractRequestMatcherRegistry<T> {
         return matcherCriteria(MatcherCriteria.none());
     }
 
-    public T dispatcherTypeMatchers(DispatcherType... dispatcherTypes) {
-        List<MappingMatcher> requestMatchers = new ArrayList<>();
-
-        for (DispatcherType dispatcherType : dispatcherTypes) {
-            requestMatchers.add(new DispatcherTypeMatcher(dispatcherType));
-        }
-
-        return applyMatchers(requestMatchers);
+    public T dispatcherType(DispatcherType... dispatcherTypes) {
+        return matcherCriteria(c -> c.add(new DispatcherTypeMatcher(dispatcherTypes)));
     }
 
 }

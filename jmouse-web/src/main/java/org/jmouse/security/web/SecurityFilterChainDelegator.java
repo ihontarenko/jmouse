@@ -65,9 +65,17 @@ public class SecurityFilterChainDelegator implements Filter {
                 // Wrap filters into a virtual chain
                 Virtual virtual = new Virtual(chain, securityChain.getFilters());
 
-                LOGGER.info(colorize(
-                                "🛡️ ${BLUE_BOLD_BRIGHT}SECURITY${RESET} ➡️ CHAIN ➡️ [${GREEN_BOLD_BRIGHT}{}${RESET}] ➡️ URI: ${RED_BOLD_BRIGHT}{}${RESET}"),
-                        virtual, ((HttpServletRequest) request).getRequestURI());
+                LOGGER.info(colorize("\uD83D\uDEE1\uFE0F\uD83D\uDD10 ${BLUE_BOLD_BRIGHT}SECURITY${RESET} ➡️ URI: ${RED_BOLD_BRIGHT}{}${RESET}"),
+                        ((HttpServletRequest) request).getRequestURI());
+
+                for (Filter filter : securityChain.getFilters()) {
+                    Filter original = filter;
+                    if (filter instanceof OrderedFilter orderedFilter) {
+                        original = orderedFilter.filter();
+                    }
+                    LOGGER.info(colorize("➡️ ${BLUE_BOLD_BRIGHT}FILTER:${RESET} ${YELLOW_BOLD_BRIGHT}{}${RESET}"),
+                                original.getClass().getName());
+                }
 
                 virtual.doFilter(request, response);
                 return; // ✅ stop after first match

@@ -137,7 +137,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
         request.setAttribute(ROUTE_PRODUCIBLE_ATTRIBUTE, route.produces());
 
         LOGGER.info(AnsiColors.colorize(
-                "✅🔥 ${BLUE_BOLD_BRIGHT}MATCHED:${RESET} ${GREEN_BOLD_BRIGHT}%s${RESET}", match));
+                "✅🔥 ${BLUE_BOLD_BRIGHT}MATCHED:${RESET} ${GREEN_BOLD_BRIGHT}%s${RESET}", winner.match(requestRoute)));
 
         return mappedHandler;
     }
@@ -206,14 +206,14 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      *
      * <p>Algorithm:</p>
      * <ul>
-     *   <li>Filter all criteria that {@link MappingCriteria#matches(RequestRoute) match} the request</li>
+     *   <li>Filter all criteria that {@link MappingCriteria#matches(Object) match} the request</li>
      *   <li>Sort by specificity using {@code compare(a, b, route)} (most specific first)</li>
      *   <li>Return the top candidate</li>
      * </ul>
      *
      * @param requestRoute parsed request route from the incoming HTTP request
      * @return best matching {@link MappingCriteria}, or {@code null} if none matched
-     * @see MappingCriteria#matches(RequestRoute)
+     * @see MappingCriteria#matches(Object)
      */
     private MappingCriteria getWinner(RequestRoute requestRoute) {
         List<MappingCriteria> candidates = new ArrayList<>();

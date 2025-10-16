@@ -24,20 +24,20 @@ public class SecurityConfiguration {
                 .authority("ROLE_USER")
                 .enabled(true)
                 .build();
-
         UserPrincipal admin = UserPrincipal.User.builder()
                 .username("admin")
                 .password("admin")
                 .authorities("ROLE_ADMIN", "ROLE_SUPER", "REBOOT")
+                .enabled(true)
                 .build();
-
         return new InMemoryUserPrincipalService(user, admin);
     }
 
     @Bean
     public SecurityFilterChain defaultFilterChain(
-            HttpSecurity http, WebBeanContext context, UserPrincipalService principalService) throws Exception {
-        http.chainMatcher(pathPattern("/**"));
+            HttpSecurity http, UserPrincipalService principalService) throws Exception {
+
+        http.chainMatcher(matcher -> matcher.pathPattern("/**"));
 
         http.submitForm(form -> form
                 .usernameParameter("username")
@@ -59,6 +59,7 @@ public class SecurityConfiguration {
 
         http.authorizeHttpRequests(a -> a
                 .requestPath("/login/**").permitAll()
+                .requestPath("/shared/**").permitAll()
                 .anyRequest().authenticated()
         );
 

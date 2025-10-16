@@ -5,6 +5,7 @@ import org.jmouse.security.authorization.AuthorityPolicyAuthorizationManager;
 import org.jmouse.security.authorization.AuthorizationManager;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.web.access.MappingApplier;
+import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MappingMatcher;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.function.Function;
 
 public class AuthorizationCriterion<T, C> {
 
-    private final List<MappingMatcher> matchers;
+    private final List<MappingMatcher<RequestRoute>> matchers;
     private final T                    owner;
     private final MappingApplier<T, C> applier;
     private final ContextVariables<C>  variables;
@@ -21,7 +22,7 @@ public class AuthorizationCriterion<T, C> {
     public AuthorizationCriterion(
             MappingApplier<T, C> applier,
             T owner,
-            List<MappingMatcher> matchers,
+            List<MappingMatcher<RequestRoute>> matchers,
             ContextVariables<C> variables
     ) {
         this.applier = applier;

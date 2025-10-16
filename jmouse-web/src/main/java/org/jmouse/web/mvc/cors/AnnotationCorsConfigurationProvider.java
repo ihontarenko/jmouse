@@ -27,9 +27,13 @@ public class AnnotationCorsConfigurationProvider implements CorsConfigurationPro
      * Converts an annotation into a mutable {@link CorsConfiguration}.
      */
     private static CorsConfiguration toCorsConfiguration(CorsMapping annotation) {
-        return new CorsConfiguration().allowedOrigins(annotation.origins()).allowedMethods(annotation.methods())
-                .allowedHeaders(annotation.allowedHeaders()).exposedHeaders(annotation.exposedHeaders())
-                .allowCredentials(annotation.allowCredentials()).maxAge(annotation.maxAge());
+        return new CorsConfiguration()
+                .allowedOrigins(annotation.origins())
+                .allowedMethods(annotation.methods())
+                .allowedHeaders(annotation.allowedHeaders())
+                .exposedHeaders(annotation.exposedHeaders())
+                .allowCredentials(annotation.allowCredentials())
+                .maxAge(annotation.maxAge());
     }
 
     /**

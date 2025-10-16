@@ -3,6 +3,9 @@ package org.jmouse.security.web.configuration;
 import jakarta.servlet.Filter;
 import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.SecurityFilterChain;
+import org.jmouse.web.http.RequestRoute;
+import org.jmouse.web.match.routing.MappingMatcher;
+import org.jmouse.web.match.routing.MatcherCriteria;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +36,6 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
 
     <C extends SecurityConfigurer<SecurityFilterChain, H>> C getConfigurer(Class<C> type);
 
-    H chainMatcher(RequestMatcher matcher);
+    H chainMatcher(Customizer<MatcherCriteria> customizer);
 
 }
