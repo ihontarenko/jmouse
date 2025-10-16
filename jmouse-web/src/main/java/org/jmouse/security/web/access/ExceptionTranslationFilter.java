@@ -7,8 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.authentication.AuthenticationException;
 import org.jmouse.security.authorization.AuthorizationException;
-import org.jmouse.security.web.AccessDeniedHandler;
 import org.jmouse.security.web.AuthenticationEntryPoint;
+import org.jmouse.security.web.AuthorizationFailureHandler;
 import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.http.cache.RequestCache;
 import org.jmouse.web.servlet.filter.BeanFilter;
@@ -17,16 +17,14 @@ import java.io.IOException;
 
 public class ExceptionTranslationFilter implements BeanFilter {
 
-    private final RequestCache             requestCache;
-    private final AuthenticationEntryPoint entryPoint;
-    private final AccessDeniedHandler      deniedHandler;
+    private final RequestCache                requestCache;
+    private final AuthenticationEntryPoint    entryPoint;
+    private final AuthorizationFailureHandler failureHandler;
 
-    public ExceptionTranslationFilter(
-            RequestCache requestCache, AuthenticationEntryPoint entryPoint, AccessDeniedHandler deniedHandler
-    ) {
+    public ExceptionTranslationFilter(RequestCache requestCache, AuthenticationEntryPoint entryPoint, AuthorizationFailureHandler failureHandler) {
         this.requestCache = requestCache;
         this.entryPoint = entryPoint;
-        this.deniedHandler = deniedHandler;
+        this.failureHandler = failureHandler;
     }
 
     /**
@@ -36,24 +34,21 @@ public class ExceptionTranslationFilter implements BeanFilter {
      * @param chain          filter chain to continue processing
      */
     @Override
-    public void doFilterInternal(
-            RequestContext requestContext, FilterChain chain
-    ) throws IOException, ServletException {
+    public void doFilterInternal(RequestContext requestContext, FilterChain chain)
+            throws IOException, ServletException {
         HttpServletRequest  request  = requestContext.request();
         HttpServletResponse response = requestContext.response();
 
         try {
             chain.doFilter(request, response);
         } catch (AuthorizationException accessDeniedException) {
-            deniedHandler.handle(request, response, accessDeniedException);
+            failureHandler.handle(request, response, accessDeniedException);
         } catch (AuthenticationException authenticationException) {
             SecurityContextHolder.clearContext();
             if (requestCache != null) {
                 requestCache.saveRequest(request, response);
             }
             entryPoint.initiate(request, response, authenticationException);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
         }
     }
 

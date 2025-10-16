@@ -5,6 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-public interface AccessDeniedHandler {
+public interface AuthorizationFailureHandler {
     void handle(HttpServletRequest request, HttpServletResponse response, Exception exception) throws IOException;
 }

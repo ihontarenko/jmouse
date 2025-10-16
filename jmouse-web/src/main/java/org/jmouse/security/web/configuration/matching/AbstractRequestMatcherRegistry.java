@@ -19,17 +19,6 @@ abstract public class AbstractRequestMatcherRegistry<T> {
         return matcherCriteria(c -> c.pathPattern(pattern));
     }
 
-    public T matcherCriteria(Customizer<MatcherCriteria> customizer) {
-        MatcherCriteria mappingCriteria = new MatcherCriteria();
-        customizer.customize(mappingCriteria);
-        return matcherCriteria(mappingCriteria);
-    }
-
-    @SafeVarargs
-    public final T matcherCriteria(MappingMatcher<RequestRoute>... criteria) {
-        return applyMatchers(of(criteria));
-    }
-
     public T anyRequest() {
         return matcherCriteria(MatcherCriteria.any());
     }
@@ -40,6 +29,17 @@ abstract public class AbstractRequestMatcherRegistry<T> {
 
     public T dispatcherType(DispatcherType... dispatcherTypes) {
         return matcherCriteria(c -> c.add(new DispatcherTypeMatcher(dispatcherTypes)));
+    }
+
+    public T matcherCriteria(Customizer<MatcherCriteria> customizer) {
+        MatcherCriteria mappingCriteria = new MatcherCriteria();
+        customizer.customize(mappingCriteria);
+        return matcherCriteria(mappingCriteria);
+    }
+
+    @SafeVarargs
+    public final T matcherCriteria(MappingMatcher<RequestRoute>... criteria) {
+        return applyMatchers(of(criteria));
     }
 
 }

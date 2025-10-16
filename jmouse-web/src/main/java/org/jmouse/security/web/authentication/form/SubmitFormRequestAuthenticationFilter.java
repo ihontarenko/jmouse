@@ -5,7 +5,7 @@ import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.web.authentication.*;
 import org.jmouse.security.web.context.SecurityContextRepository;
-import org.jmouse.security.web.RequestMatcher;
+import org.jmouse.web.match.routing.MatcherCriteria;
 
 public class SubmitFormRequestAuthenticationFilter extends AbstractAuthenticationFilter {
 
@@ -20,19 +20,19 @@ public class SubmitFormRequestAuthenticationFilter extends AbstractAuthenticatio
     public SubmitFormRequestAuthenticationFilter(
             AuthenticationManager authenticationManager,
             SecurityContextRepository contextRepository,
-            RequestMatcher requestMatcher,
+            MatcherCriteria matcher,
             AuthenticationSuccessHandler successHandler,
             AuthenticationFailureHandler failureHandler
     ) {
-        super(authenticationManager, contextRepository, requestMatcher, successHandler, failureHandler);
+        super(authenticationManager, contextRepository, matcher, successHandler, failureHandler);
     }
 
     public SubmitFormRequestAuthenticationFilter(
             AuthenticationManager authenticationManager,
             SecurityContextRepository contextRepository,
-            RequestMatcher requestMatcher
+            MatcherCriteria matcherCriteria
     ) {
-        this(authenticationManager, contextRepository, requestMatcher, new NoopHttp200SuccessHandler(), new NoopHttp401FailureHandler());
+        this(authenticationManager, contextRepository, matcherCriteria, new NoopHttp200SuccessHandler(), new NoopHttp401FailureHandler());
     }
 
     @Override

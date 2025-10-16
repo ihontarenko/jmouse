@@ -1,25 +1,22 @@
 package org.jmouse.security.web.configuration.configurer;
 
 import jakarta.servlet.Filter;
-import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.Streamable;
-import org.jmouse.core.matcher.Matcher;
-import org.jmouse.core.matcher.TextMatchers;
 import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.web.OrderedFilter;
-import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.authentication.*;
 import org.jmouse.security.web.authentication.ui.LoginUrlAuthenticationEntryPoint;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
 import org.jmouse.security.web.configuration.SharedAttributes;
 import org.jmouse.security.web.context.SecurityContextRepository;
+import org.jmouse.web.http.RequestRoute;
+import org.jmouse.web.match.routing.MappingMatcher;
+import org.jmouse.web.match.routing.MatcherCriteria;
 
 import java.util.Objects;
-import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
-import static org.jmouse.core.matcher.Matcher.constant;
 import static org.jmouse.core.matcher.TextMatchers.notBlank;
 
 /**
@@ -49,7 +46,10 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
     protected boolean                      continueChainBeforeSuccess = false;
     protected AuthenticationSuccessHandler successHandler;
     protected AuthenticationFailureHandler failureHandler;
-    protected RequestMatcher               requestMatcher             = RequestMatcher.any();
+    protected MappingMatcher<RequestRoute> mappingMatcher = MatcherCriteria.any();
+
+    protected MappingMatcher<RequestRoute> processingUrl = MatcherCriteria.none();
+    protected MappingMatcher<RequestRoute> submitFormUrl = MatcherCriteria.none();
 
     public C loginPage(String loginPage) {
         this.loginPage = loginPage;
@@ -59,11 +59,11 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
     /**
      * 🧭 Set a request matcher (e.g., path pattern) that triggers this auth flow.
      *
-     * @param requestMatcher matcher to activate authentication
+     * @param mappingMatcher matcher to activate authentication
      * @return this configurer
      */
-    public C requestMatcher(Matcher<HttpServletRequest> requestMatcher) {
-        this.requestMatcher = requireNonNull(requestMatcher)::matches;
+    public C requestMatcher(MappingMatcher<RequestRoute> mappingMatcher) {
+        this.mappingMatcher = mappingMatcher;
         return (C) this;
     }
 
@@ -74,18 +74,15 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
      * @return this configurer
      */
     public C requestMatcher(String... patterns) {
-        Matcher<HttpServletRequest> requestMatcher = Streamable.of(patterns)
+        Streamable.of(patterns)
                 .filter(Objects::nonNull)
-                .filter(notBlank()::matches)
-                .map(RequestMatcher::pathPattern)
-                .map(Matcher::narrow)
-                .reduce(constant(false), Matcher::logicalOr);
-        this.requestMatcher = requestMatcher::matches;
+                .filter(notBlank()::matches);
+
         return (C) this;
     }
 
     public C anyRequest() {
-        return requestMatcher(RequestMatcher.any());
+        return requestMatcher(MatcherCriteria.any());
     }
 
     /**
@@ -143,11 +140,10 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
     public void configure(B http) {
         AuthenticationManager     authenticationManager = http.getSharedObject(SharedAttributes.AUTHENTICATION_MANAGER);
         SecurityContextRepository repository            = http.getSharedObject(SharedAttributes.CONTEXT_REPOSITORY);
-        RequestMatcher            matcher               = resolveMatcher();
+        MatcherCriteria           matcherCriteria       = resolveMatcher();
 
-        if (matcher == null) {
-            throw new IllegalStateException(
-                    "REQUEST-MATCHER must be set (use processing() or requestMatcher(...))");
+        if (matcherCriteria == null) {
+            throw new IllegalStateException("MATCHER-CRITERIA must be set (use processing() or requestMatcher(...))");
         }
 
         AuthenticationSuccessHandler successHandler = resolveSuccessHandler(http);
@@ -157,7 +153,7 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
         http.setSharedObject(SharedAttributes.SUCCESS_HANDLER, successHandler);
         http.setSharedObject(SharedAttributes.FAILURE_HANDLER, failureHandler);
 
-        if (doBuildFilter(authenticationManager, repository, requestMatcher, successHandler, failureHandler)
+        if (doBuildFilter(authenticationManager, repository, matcherCriteria, successHandler, failureHandler)
                 instanceof AbstractAuthenticationFilter authenticationFilter) {
             authenticationFilter.setContinueChainBeforeSuccess(continueChainBeforeSuccess);
             http.addFilter(authenticationFilter);
@@ -176,7 +172,7 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
      */
     protected abstract Filter doBuildFilter(
             AuthenticationManager authenticationManager,
-            SecurityContextRepository repository, RequestMatcher matcher,
+            SecurityContextRepository repository, MatcherCriteria matcher,
             AuthenticationSuccessHandler successHandler,
             AuthenticationFailureHandler failureHandler
     );
@@ -198,8 +194,8 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
     /**
      * 🔎 Resolve the configured request matcher (must not be {@code null} at configure time).
      */
-    private RequestMatcher resolveMatcher() {
-        return this.requestMatcher;
+    private MatcherCriteria resolveMatcher() {
+        return (MatcherCriteria) this.mappingMatcher;
     }
 
     /**
@@ -218,6 +214,12 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
         if (this.failureHandler != null) return this.failureHandler;
         AuthenticationFailureHandler shared = http.getSharedObject(SharedAttributes.FAILURE_HANDLER);
         return shared != null ? shared : defaultFailureHandler();
+    }
+
+    public static class RedirectHandlerConfigurer {
+
+
+
     }
 
 }

@@ -2,7 +2,6 @@ package org.jmouse.security.web.configuration.configurer;
 
 import jakarta.servlet.Filter;
 import org.jmouse.security.authentication.AuthenticationManager;
-import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.authentication.AuthenticationFailureHandler;
 import org.jmouse.security.web.authentication.AuthenticationProvider;
 import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
@@ -16,6 +15,7 @@ import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.http.cache.HttpSessionRequestCache;
 import org.jmouse.web.http.cache.RequestCache;
+import org.jmouse.web.match.routing.MatcherCriteria;
 import org.jmouse.web.mvc.View;
 import org.jmouse.web.mvc.ViewResolver;
 import org.jmouse.web.mvc.view.internal.InternalViewResolver;
@@ -79,7 +79,7 @@ public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
     protected Filter doBuildFilter(
             AuthenticationManager authenticationManager,
             SecurityContextRepository repository,
-            RequestMatcher matcher,
+            MatcherCriteria matcher,
             AuthenticationSuccessHandler successHandler,
             AuthenticationFailureHandler failureHandler
     ) {
@@ -116,7 +116,7 @@ public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
      */
     public class ProcessingURLConfigurer {
 
-        private RequestMatcher requestMatcher;
+        private final MatcherCriteria matcherCriteria = new MatcherCriteria();
 
         /**
          * 🧭 Define the form/action path pattern to match.
@@ -125,7 +125,7 @@ public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
          * @return this builder
          */
         public ProcessingURLConfigurer formAction(String url) {
-            requestMatcher = RequestMatcher.pathPattern(url);
+            matcherCriteria.pathPattern(url);
             return this;
         }
 
@@ -140,11 +140,12 @@ public class SubmitFormConfigurer<B extends HttpSecurityBuilder<B>>
          * @throws IllegalStateException if {@code formAction(...)} was not set
          */
         public SubmitFormConfigurer<B> httpMethod(HttpMethod httpMethod) {
-            if (requestMatcher == null) {
+            if (matcherCriteria.getMatchers().isEmpty()) {
                 throw new IllegalStateException("formAction(...) must be set before httpMethod(...)");
             }
+
             return SubmitFormConfigurer.this.requestMatcher(
-                    requestMatcher.and(RequestMatcher.httpMethod(httpMethod))
+                    matcherCriteria.httpMethod(httpMethod)
             );
         }
 

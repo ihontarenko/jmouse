@@ -1,9 +1,8 @@
 package org.jmouse.security.web.configuration.configurer;
 
-import org.jmouse.security.web.AccessDeniedHandler;
+import org.jmouse.security.web.AuthorizationFailureHandler;
 import org.jmouse.security.web.AuthenticationEntryPoint;
 import org.jmouse.security.web.access.ExceptionTranslationFilter;
-import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
 import org.jmouse.security.web.authentication.ui.LoginUrlAuthenticationEntryPoint;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
@@ -19,15 +18,15 @@ public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>>
     public static final String DEFAULT_LOGIN_URL = "/login";
 
     private RequestCache                 requestCache;
-    private AuthenticationEntryPoint     entryPoint;
-    private AccessDeniedHandler          deniedHandler;
+    private AuthenticationEntryPoint    entryPoint;
+    private AuthorizationFailureHandler deniedHandler;
 
     public ExceptionHandlingConfigurer<B> authenticationEntryPoint(AuthenticationEntryPoint entryPoint) {
         this.entryPoint = entryPoint;
         return this;
     }
 
-    public ExceptionHandlingConfigurer<B> accessDeniedHandler(AccessDeniedHandler deniedHandler) {
+    public ExceptionHandlingConfigurer<B> accessDeniedHandler(AuthorizationFailureHandler deniedHandler) {
         this.deniedHandler = deniedHandler;
         return this;
     }

@@ -7,18 +7,19 @@ import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.core.SecurityContext;
+import org.jmouse.security.web.SecurityFilter;
 import org.jmouse.security.web.context.SecurityContextRepository;
-import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.http.RequestContextKeeper;
-import org.jmouse.web.servlet.filter.BeanFilter;
+import org.jmouse.web.http.RequestRoute;
+import org.jmouse.web.match.routing.MatcherCriteria;
 
 import java.io.IOException;
 
-public abstract class AbstractAuthenticationFilter implements BeanFilter {
+public abstract class AbstractAuthenticationFilter implements SecurityFilter {
 
     protected final SecurityContextRepository    contextRepository;
-    protected final RequestMatcher               requestMatcher;
+    protected final MatcherCriteria              matcherCriteria;
     protected final AuthenticationManager        authenticationManager;
     protected       AuthenticationSuccessHandler successHandler;
     protected       AuthenticationFailureHandler failureHandler;
@@ -26,12 +27,12 @@ public abstract class AbstractAuthenticationFilter implements BeanFilter {
 
     protected AbstractAuthenticationFilter(
             AuthenticationManager authenticationManager, SecurityContextRepository contextRepository,
-            RequestMatcher requestMatcher,
+            MatcherCriteria matcherCriteria,
             AuthenticationSuccessHandler successHandler, AuthenticationFailureHandler failureHandler
     ) {
         this.contextRepository = contextRepository;
         this.authenticationManager = authenticationManager;
-        this.requestMatcher = requestMatcher;
+        this.matcherCriteria = matcherCriteria;
         this.successHandler = successHandler;
         this.failureHandler = failureHandler;
     }
@@ -41,10 +42,11 @@ public abstract class AbstractAuthenticationFilter implements BeanFilter {
     @Override
     public void doFilterInternal(RequestContext requestContext, FilterChain chain)
             throws IOException, ServletException {
-        HttpServletRequest  request  = requestContext.request();
-        HttpServletResponse response = requestContext.response();
+        HttpServletRequest  request      = requestContext.request();
+        RequestRoute        requestRoute = RequestRoute.ofRequest(request);
+        HttpServletResponse response     = requestContext.response();
 
-        if (!requestMatcher.matches(request)) {
+        if (!matcherCriteria.matches(requestRoute)) {
             chain.doFilter(request, response);
             return;
         }
@@ -93,8 +95,8 @@ public abstract class AbstractAuthenticationFilter implements BeanFilter {
         return authenticationManager;
     }
 
-    public RequestMatcher getRequestMatcher() {
-        return requestMatcher;
+    public MatcherCriteria getMatcherCriteria() {
+        return matcherCriteria;
     }
 
     public AuthenticationSuccessHandler getSuccessHandler() {
