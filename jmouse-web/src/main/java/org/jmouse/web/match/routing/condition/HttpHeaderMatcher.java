@@ -25,7 +25,7 @@ public final class HttpHeaderMatcher implements MappingMatcher<RequestRoute> {
         if (value != null && value.equals(requiredValue)) {
             return Match.hit()
                     .attach(HttpHeader.class, header)
-                    .attach(Object.class, value);
+                    .attach(Facet.class, new Facet(header, requiredValue));
         }
 
         return Match.miss();
@@ -43,4 +43,8 @@ public final class HttpHeaderMatcher implements MappingMatcher<RequestRoute> {
     public String toString() {
         return "HttpHeaderMatcher[" + header + "=" + requiredValue + "]";
     }
+
+    public record Facet(HttpHeader httpHeader, Object value) {
+    }
+
 }

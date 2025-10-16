@@ -16,7 +16,7 @@ import java.util.Set;
  * <p><b>Facets attached on hit:</b></p>
  * <ul>
  *   <li>{@code MediaType.class} – the request's content type (when present)</li>
- *   <li>{@code ConsumesMatcher.Facet} – tuple of {@code requestContentType} and the {@code matchedProducible}</li>
+ *   <li>{@code ConsumesMatcher.Facet} – tuple of {@code requestType} and the {@code matchedProducible}</li>
  *   <li>{@code ConsumesMatcher.AbsentContentType} – marker facet when the request has no content type</li>
  * </ul>
  *
@@ -27,7 +27,7 @@ import java.util.Set;
  * Match m = matcher.apply(route);
  * if (m.matched()) {
  *     m.get(ConsumesMatcher.Facet.class).ifPresent(f -> {
- *         // f.requestContentType(), f.acceptedType()
+ *         // f.requestType(), f.acceptedType()
  *     });
  * }
  * }</pre>
@@ -78,9 +78,10 @@ public final class ConsumesMatcher implements MappingMatcher<RequestRoute> {
      */
     @Override
     public int compare(MappingMatcher<?> other, RequestRoute route) {
-        if (!(other instanceof ConsumesMatcher o)) return 0;
-        // narrower wins
-        return Integer.compare(o.consumable.size(), this.consumable.size());
+        if (!(other instanceof ConsumesMatcher matcher)) {
+            return 0;
+        }
+        return Integer.compare(matcher.consumable.size(), this.consumable.size());
     }
 
     @Override
@@ -96,6 +97,6 @@ public final class ConsumesMatcher implements MappingMatcher<RequestRoute> {
     /**
      * Facet carrying negotiation outcome.
      */
-    public record Facet(MediaType requestContentType, MediaType acceptedType) {
+    public record Facet(MediaType requestType, MediaType acceptedType) {
     }
 }

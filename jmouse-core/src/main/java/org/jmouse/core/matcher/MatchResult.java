@@ -190,7 +190,7 @@ final class MatchResult implements Match {
         Map<Class<?>, Object> next = new LinkedHashMap<>(bag);
 
         for (Class<?> type : other.types()) {
-            other.get(type.asSubclass(Object.class)).ifPresent(v -> next.put(type, v));
+            other.get(type.asSubclass(Object.class)).ifPresent(value -> next.put(type, value));
         }
 
         return new MatchResult(true, Collections.unmodifiableMap(next));

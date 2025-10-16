@@ -3,6 +3,7 @@ package org.jmouse.web.match.routing.condition;
 import org.jmouse.core.matcher.Match;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.PathPattern;
+import org.jmouse.web.match.RouteMatch;
 import org.jmouse.web.match.routing.MappingMatcher;
 
 import java.util.Objects;
@@ -57,6 +58,7 @@ public final class RequestPathMatcher implements MappingMatcher<RequestRoute> {
         if (routePath.matches(path)) {
             return Match.hit()
                     .attach(PathPattern.class, routePath)
+                    .attach(RouteMatch.class, routePath.match(path))
                     .attach(MatchedPath.class, new MatchedPath(routePath.raw(), path));
         }
 

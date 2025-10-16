@@ -42,7 +42,6 @@ public interface Match {
      * @param matches the matches to combine
      * @return a new combined {@code Match}
      */
-    @SafeVarargs
     static Match and(Match... matches) {
         for (Match match : matches) {
             if (match.missed()) {
@@ -68,14 +67,13 @@ public interface Match {
      * @param matches the matches to evaluate in order
      * @return the first successful match or a miss
      */
-    @SafeVarargs
     static Match or(Match... matches) {
         Match   result   = null;
         boolean finished = false;
 
-        for (Match m : matches) {
-            if (m.matched()) {
-                result = MatchResult.copyOf(m);
+        for (Match match : matches) {
+            if (match.matched()) {
+                result = MatchResult.copyOf(match);
                 finished = true;
                 break;
             }

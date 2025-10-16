@@ -19,7 +19,7 @@ import java.util.Set;
  * <ul>
  *   <li>Evaluates HTTP method equality via {@link RequestRoute#method()}.</li>
  *   <li>Returns a {@link Match} carrying {@link HttpMethod} and
- *       {@link AllowedMethods} facets on success.</li>
+ *       {@link Facet} facets on success.</li>
  *   <li>Supports comparison based on method specificity
  *       (fewer methods → more specific).</li>
  * </ul>
@@ -51,7 +51,7 @@ public final class HttpMethodMatcher implements MappingMatcher<RequestRoute> {
      *
      * <ul>
      *   <li>{@link HttpMethod} — the matched method;</li>
-     *   <li>{@link AllowedMethods} — the full set of permitted methods.</li>
+     *   <li>{@link Facet} — the full set of permitted methods.</li>
      * </ul>
      *
      * @param route the current HTTP request route
@@ -66,7 +66,9 @@ public final class HttpMethodMatcher implements MappingMatcher<RequestRoute> {
         HttpMethod method = route.method();
 
         if (methods.contains(method)) {
-            return Match.hit().attach(HttpMethod.class, method).attach(AllowedMethods.class, new AllowedMethods(methods));
+            return Match.hit()
+                    .attach(HttpMethod.class, method)
+                    .attach(Facet.class, new Facet(methods));
         }
 
         return Match.miss();
@@ -95,10 +97,10 @@ public final class HttpMethodMatcher implements MappingMatcher<RequestRoute> {
      */
     @Override
     public int compare(MappingMatcher<?> other, RequestRoute route) {
-        if (!(other instanceof HttpMethodMatcher o)) {
+        if (!(other instanceof HttpMethodMatcher that)) {
             return 0;
         }
-        return Integer.compare(this.methods.size(), o.methods.size());
+        return Integer.compare(this.methods.size(), that.methods.size());
     }
 
     /**
@@ -124,6 +126,6 @@ public final class HttpMethodMatcher implements MappingMatcher<RequestRoute> {
      *
      * @param methods allowed HTTP methods
      */
-    public record AllowedMethods(Set<HttpMethod> methods) {
+    public record Facet(Set<HttpMethod> methods) {
     }
 }

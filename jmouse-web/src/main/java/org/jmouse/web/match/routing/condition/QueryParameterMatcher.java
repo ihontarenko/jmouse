@@ -49,7 +49,8 @@ public final class QueryParameterMatcher implements MappingMatcher<RequestRoute>
         Object requestValue = route.queryParameters().getFirst(parameterName);
 
         if (requestValue != null && requestValue.equals(requiredValue)) {
-            return Match.hit().attach(Facet.class, new Facet(parameterName, requestValue));
+            return Match.hit()
+                    .attach(Facet.class, new Facet(parameterName, requiredValue));
         }
 
         return Match.miss();
@@ -69,19 +70,19 @@ public final class QueryParameterMatcher implements MappingMatcher<RequestRoute>
      */
     @Override
     public int compare(MappingMatcher<?> other, RequestRoute route) {
-        if (!(other instanceof QueryParameterMatcher parameterMatcher)) {
+        if (!(other instanceof QueryParameterMatcher that)) {
             return 0;
         }
 
-        int result = this.parameterName.compareTo(parameterMatcher.parameterName);
+        int result = this.parameterName.compareTo(that.parameterName);
         if (result != 0) {
             return result;
         }
 
-        int thisLen = String.valueOf(this.requiredValue).length();
-        int thatLen = String.valueOf(parameterMatcher.requiredValue).length();
+        int thisLength = String.valueOf(this.requiredValue).length();
+        int thatLength = String.valueOf(that.requiredValue).length();
 
-        return Integer.compare(thisLen, thatLen);
+        return Integer.compare(thisLength, thatLength);
     }
 
     @Override

@@ -6,6 +6,7 @@ import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MappingMatcher;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -49,28 +50,25 @@ public final class ProducesMatcher implements MappingMatcher<RequestRoute> {
 
             return Match.hit()
                     .attach(MediaType.class, selected)
-                    .attach(ContentNegotiation.class, new ContentNegotiation(selected, 1.0d));
+                    .attach(ContentNegotiation.class, new ContentNegotiation(
+                            selected, 1.0d
+                    ));
         }
 
-        double    bestQFactor = -1.0d;
-        MediaType winner      = null;
+        double          qFactor     = -1.0d;
+        MediaType       winner      = null;
+        List<MediaType> intersected = MediaType.intersect(List.copyOf(producible), List.copyOf(accepted));
 
-        for (MediaType p : producible) {
-            for (MediaType a : accepted) {
-                if (p.compatible(a)) {
-                    double q = a.getQFactor();
-                    if (q > bestQFactor) {
-                        bestQFactor = q;
-                        winner = p;
-                    }
-                }
-            }
+        if (!intersected.isEmpty()) {
+            List<MediaType> prioritized = MediaType.prioritizeByQFactor(intersected);
+            winner = prioritized.getFirst();
+            qFactor = winner.getQFactor();
         }
 
         if (winner != null) {
             return Match.hit()
                     .attach(MediaType.class, winner)
-                    .attach(ContentNegotiation.class, new ContentNegotiation(winner, bestQFactor));
+                    .attach(ContentNegotiation.class, new ContentNegotiation(winner, qFactor));
         }
 
         return Match.miss();
