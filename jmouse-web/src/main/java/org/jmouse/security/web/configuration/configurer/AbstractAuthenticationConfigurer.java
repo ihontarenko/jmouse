@@ -6,6 +6,8 @@ import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.web.OrderedFilter;
 import org.jmouse.security.web.authentication.*;
 import org.jmouse.security.web.authentication.ui.LoginUrlAuthenticationEntryPoint;
+import org.jmouse.security.web.authentication.ui.SuccessRedirectHandler;
+import org.jmouse.security.web.configuration.Customizer;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
 import org.jmouse.security.web.configuration.SharedAttributes;
@@ -83,6 +85,12 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
 
     public C anyRequest() {
         return requestMatcher(MatcherCriteria.any());
+    }
+
+    public C redirect(Customizer<RedirectHandlerConfigurer> customizer) {
+        RedirectHandlerConfigurer configurer = new RedirectHandlerConfigurer();
+        customizer.customize(configurer);
+        return (C) this;
     }
 
     /**
@@ -216,9 +224,11 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
         return shared != null ? shared : defaultFailureHandler();
     }
 
-    public static class RedirectHandlerConfigurer {
+    public class RedirectHandlerConfigurer {
 
-
+        public void url(String redirectUrl) {
+            successHandler(new SuccessRedirectHandler(redirectUrl));
+        }
 
     }
 

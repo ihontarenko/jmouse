@@ -43,10 +43,11 @@ public class SecurityConfiguration {
                 .usernameParameter("username")
                 .passwordParameter("password")
                 .loginPage("/login/index")
+                .redirect(r -> r.url("/asd"))
                 .processing()
                     .formAction("/login/process")
                     .httpMethod(HttpMethod.POST)
-                .requestMatcher(pathPattern("/login"))
+//                .requestMatcher(r -> r.contentType())
         );
 
 //        http.exceptionHandling(e -> e
