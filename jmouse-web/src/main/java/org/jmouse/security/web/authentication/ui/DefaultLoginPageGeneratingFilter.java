@@ -7,9 +7,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MediaType;
 import org.jmouse.web.http.HeaderWriter;
 import org.jmouse.web.http.RequestContext;
+import org.jmouse.web.http.RequestRoute;
+import org.jmouse.web.match.routing.MatcherCriteria;
 import org.jmouse.web.mvc.View;
 import org.jmouse.web.servlet.filter.BeanFilter;
-import org.jmouse.security.web.RequestMatcher;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -25,14 +26,16 @@ public final class DefaultLoginPageGeneratingFilter implements BeanFilter, Heade
     private final String         action;
     private final View           view;
     private final String         usernameParameter;
-    private final String         passwordParameter;
-    private final RequestMatcher requestMatcher;
+    private final String          passwordParameter;
+    private final MatcherCriteria matcherCriteria;
 
     public DefaultLoginPageGeneratingFilter(
-            View view, String action, String usernameParameter, String passwordParameter
+            View view, String action,
+            String usernameParameter,
+            String passwordParameter
     ) {
-        this.requestMatcher = RequestMatcher.pathPattern(action);
         this.action = requireNonNull(action);
+        this.matcherCriteria = new MatcherCriteria().pathPattern(action);
         this.view = view;
         this.usernameParameter = (usernameParameter != null ? usernameParameter : JMOUSE_USER_IDENTITY_USERNAME);
         this.passwordParameter = (passwordParameter != null ? passwordParameter : JMOUSE_USER_IDENTITY_PASSWORD);
@@ -43,7 +46,7 @@ public final class DefaultLoginPageGeneratingFilter implements BeanFilter, Heade
         HttpServletRequest  request = requestContext.request();
         HttpServletResponse response = requestContext.response();
 
-        if (!requestMatcher.matches(request)) {
+        if (!matcherCriteria.matches(RequestRoute.ofRequest(request))) {
             chain.doFilter(request, response);
             return;
         }

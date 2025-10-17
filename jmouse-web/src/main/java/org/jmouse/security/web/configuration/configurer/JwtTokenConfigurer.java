@@ -7,7 +7,6 @@ import org.jmouse.security.authentication.AuthenticationResolverRegistry;
 import org.jmouse.security.authentication.jwt.JwtTokenAuthenticationResolver;
 import org.jmouse.security.jwt.JwtCodec;
 import org.jmouse.security.jwt.codec.HS256JwtCodec;
-import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.authentication.*;
 import org.jmouse.security.web.authentication.bearer.BearerTokenAuthenticationEntryPoint;
 import org.jmouse.security.web.authentication.jwt.JwtAuthenticationFilter;

@@ -8,7 +8,6 @@ import org.jmouse.security.web.authentication.AuthenticationFailureHandler;
 import org.jmouse.security.web.authentication.AuthenticationProvider;
 import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
 import org.jmouse.security.web.context.SecurityContextRepository;
-import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.web.match.routing.MatcherCriteria;
 
 public class BasicAuthenticationFilter extends AbstractAuthenticationFilter {

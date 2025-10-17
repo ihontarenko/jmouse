@@ -24,7 +24,7 @@ public class InferredType implements ClassTypeInspector {
     /**
      * 🗄️ Cache key for storing {@link InferredType} instances with their resolution context.
      *
-     * <p>This record serves as a composite key for the internal {@code JavaType} cache,
+     * <p>This record serves as a composite key for the internal {@code InferredType} cache,
      * pairing the underlying {@link Type} with its {@link InferredType parent} context.
      * This ensures that the same {@link Type} can be resolved differently
      * depending on the context in which it appears, avoiding incorrect
@@ -32,8 +32,8 @@ public class InferredType implements ClassTypeInspector {
      *
      * <h4>Usage</h4>
      * <pre>{@code
-     * Map<TypeCache, JavaType> cache = new HashMap<>();
-     * cache.put(TypeCache.of(type, parent), javaType);
+     * Map<TypeCache, InferredType> cache = new HashMap<>();
+     * cache.put(TypeCache.of(type, parent), InferredType);
      * }</pre>
      *
      * @param type   the underlying {@link Type} to cache
@@ -159,7 +159,7 @@ public class InferredType implements ClassTypeInspector {
      * @throws IllegalArgumentException if the number of provided generic arguments does not match the expected number
      */
     public static InferredType forParametrizedClass(Class<?> klass, Class<?>... generics) {
-        Type[] variables = klass.getTypeParameters();
+        TypeVariable<?>[] variables = klass.getTypeParameters();
 
         if (Arrays.notEmpty(generics) && variables.length != generics.length) {
             throw new IllegalArgumentException(
@@ -220,6 +220,14 @@ public class InferredType implements ClassTypeInspector {
      */
     public static InferredType forField(Field field) {
         return forType(field.getGenericType());
+    }
+
+    public static InferredType forField(Class<?> type, String name) {
+        try {
+            return forField(type.getDeclaredField(name));
+        } catch (NoSuchFieldException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     /**

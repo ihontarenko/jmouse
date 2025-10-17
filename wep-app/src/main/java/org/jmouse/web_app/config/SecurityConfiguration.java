@@ -6,12 +6,8 @@ import org.jmouse.security.core.UserPrincipal;
 import org.jmouse.security.core.UserPrincipalService;
 import org.jmouse.security.core.service.InMemoryUserPrincipalService;
 import org.jmouse.security.web.SecurityFilterChain;
-import org.jmouse.security.web.configuration.Customizer;
 import org.jmouse.security.web.configuration.builder.HttpSecurity;
-import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.HttpMethod;
-
-import static org.jmouse.security.web.RequestMatcher.pathPattern;
 
 @BeanFactories
 public class SecurityConfiguration {

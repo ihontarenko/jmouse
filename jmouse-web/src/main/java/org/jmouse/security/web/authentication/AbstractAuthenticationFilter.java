@@ -26,15 +26,17 @@ public abstract class AbstractAuthenticationFilter implements SecurityFilter {
     protected       boolean                      continueChainBeforeSuccess = false;
 
     protected AbstractAuthenticationFilter(
-            AuthenticationManager authenticationManager, SecurityContextRepository contextRepository,
+            AuthenticationManager authenticationManager,
+            SecurityContextRepository contextRepository,
             MatcherCriteria matcherCriteria,
-            AuthenticationSuccessHandler successHandler, AuthenticationFailureHandler failureHandler
+            AuthenticationSuccessHandler successHandler,
+            AuthenticationFailureHandler failureHandler
     ) {
         this.contextRepository = contextRepository;
         this.authenticationManager = authenticationManager;
-        this.matcherCriteria = matcherCriteria;
         this.successHandler = successHandler;
         this.failureHandler = failureHandler;
+        this.matcherCriteria = matcherCriteria;
     }
 
     protected abstract Authentication tryAuthenticate(HttpServletRequest request) throws Exception;

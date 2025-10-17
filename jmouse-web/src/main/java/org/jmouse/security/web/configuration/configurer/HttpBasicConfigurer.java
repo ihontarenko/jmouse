@@ -6,7 +6,6 @@ import org.jmouse.security.web.authentication.*;
 import org.jmouse.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.jmouse.security.web.authentication.www.BasicAuthenticationFilter;
 import org.jmouse.security.web.context.SecurityContextRepository;
-import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.web.match.routing.MatcherCriteria;
 

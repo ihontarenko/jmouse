@@ -1,14 +1,10 @@
 package org.jmouse.security.web.configuration;
 
 import jakarta.servlet.Filter;
-import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.SecurityFilterChain;
-import org.jmouse.web.http.RequestRoute;
-import org.jmouse.web.match.routing.MappingMatcher;
 import org.jmouse.web.match.routing.MatcherCriteria;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>

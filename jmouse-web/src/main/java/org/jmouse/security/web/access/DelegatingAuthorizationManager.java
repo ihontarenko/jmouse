@@ -4,11 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorizationManager;
 import org.jmouse.security.core.Authentication;
-import org.jmouse.security.web.MatchResult;
+import org.jmouse.security.web.RequestMatcherEntry;
 import org.jmouse.security.web.RequestSecurityContext;
-import org.jmouse.security.web.match.RequestMatcherEntry;
 import org.jmouse.web.http.RequestRoute;
-import org.jmouse.web.match.RouteMatch;
 import org.jmouse.web.match.routing.MappingMatcher;
 
 import java.util.ArrayList;
