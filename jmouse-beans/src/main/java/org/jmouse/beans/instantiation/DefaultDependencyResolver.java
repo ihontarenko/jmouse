@@ -7,7 +7,7 @@ import org.jmouse.beans.definition.AggregatedBeansDependency;
 import org.jmouse.beans.definition.BeanDependency;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.reflection.ClassMatchers;
-import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeInfer;
 
 import java.util.Collection;
 import java.util.List;
@@ -47,7 +47,7 @@ public class DefaultDependencyResolver implements DependencyResolver {
     public Object resolve(BeanDependency dependency, BeanContext context) {
         Object resolved;
 
-        if (dependency instanceof AggregatedBeansDependency(JavaType javaType, String name, Object dependant)) {
+        if (dependency instanceof AggregatedBeansDependency(TypeInfer javaType, String name, Object dependant)) {
             // Fetch all beans of the declared raw type
             Collection<Object> beans = context.getBeans(resolveBeanType(javaType));
 
@@ -70,7 +70,7 @@ public class DefaultDependencyResolver implements DependencyResolver {
         return resolved;
     }
 
-    private Class<Object> resolveBeanType(JavaType javaType) {
+    private Class<Object> resolveBeanType(TypeInfer javaType) {
         return javaType.getFirst().getRawType();
     }
 

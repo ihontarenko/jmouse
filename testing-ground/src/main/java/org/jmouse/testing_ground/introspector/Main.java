@@ -9,7 +9,7 @@ import org.jmouse.core.bind.descriptor.structured.map.MapDescriptor;
 import org.jmouse.core.bind.descriptor.structured.map.MapIntrospector;
 import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectIntrospector;
-import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeInfer;
 import org.jmouse.testing_ground.binder.dto.User;
 
 import java.util.HashMap;
@@ -18,7 +18,7 @@ import java.util.Map;
 public class Main {
 
     public static void main(String... arguments) {
-        ClassTypeIntrospector introspector = new ClassTypeIntrospector(JavaType.forClass(User.class));
+        ClassTypeIntrospector introspector = new ClassTypeIntrospector(TypeInfer.forClass(User.class));
         introspector.introspect();
         ClassTypeDescriptor descriptor = introspector.toDescriptor();
 

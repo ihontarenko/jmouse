@@ -1,7 +1,7 @@
 package org.jmouse.core.bind.descriptor;
 
 import org.jmouse.core.bind.descriptor.internal.ClassTypeData;
-import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeInfer;
 import org.jmouse.core.reflection.MethodFinder;
 
 import java.lang.reflect.Constructor;
@@ -26,10 +26,10 @@ import java.util.Collection;
 public class ClassTypeIntrospector extends AnnotatedElementIntrospector<ClassTypeData, ClassTypeIntrospector, Class<?>, ClassTypeDescriptor> {
 
     protected ClassTypeIntrospector(Class<?> type) {
-        this(JavaType.forClass(type));
+        this(TypeInfer.forClass(type));
     }
 
-    public ClassTypeIntrospector(JavaType type) {
+    public ClassTypeIntrospector(TypeInfer type) {
         super(type.getRawType());
         type(type);
     }
@@ -46,13 +46,13 @@ public class ClassTypeIntrospector extends AnnotatedElementIntrospector<ClassTyp
      * Initializes type information based on the target class.
      */
     public ClassTypeIntrospector type() {
-        return type(JavaType.forClass(container.getTarget()));
+        return type(TypeInfer.forClass(container.getTarget()));
     }
 
     /**
      * Sets explicit JavaType information.
      */
-    public ClassTypeIntrospector type(JavaType type) {
+    public ClassTypeIntrospector type(TypeInfer type) {
         container.setType(type);
         return self();
     }

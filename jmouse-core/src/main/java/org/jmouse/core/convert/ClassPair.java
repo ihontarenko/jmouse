@@ -1,6 +1,6 @@
 package org.jmouse.core.convert;
 
-import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeInfer;
 
 import java.util.Objects;
 
@@ -80,6 +80,6 @@ public record ClassPair(Class<?> classA, Class<?> classB) {
      */
     @Override
     public String toString() {
-        return "'%s' → '%s'".formatted(JavaType.forClass(classA), JavaType.forClass(classB));
+        return "'%s' → '%s'".formatted(TypeInfer.forClass(classA), TypeInfer.forClass(classB));
     }
 }

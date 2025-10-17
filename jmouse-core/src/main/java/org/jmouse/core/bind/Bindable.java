@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeInfer;
 import org.jmouse.core.reflection.TypeInformation;
 
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 /**
- * Represents a bindable value with an associated {@link JavaType}.
+ * Represents a bindable value with an associated {@link TypeInfer}.
  * <p>
  * This class allows deferred retrieval of values via a {@link Supplier}, making it useful
  * for dynamic type binding and lazy initialization.
@@ -20,16 +20,16 @@ import java.util.function.Supplier;
  */
 public final class Bindable<T> {
 
-    private final JavaType    type;
+    private final TypeInfer   type;
     private final Supplier<T> value;
 
     /**
      * Creates a new {@link Bindable} instance with a specified type and value supplier.
      *
-     * @param type  the {@link JavaType} representing the type of the value
+     * @param type  the {@link TypeInfer} representing the type of the value
      * @param value a {@link Supplier} providing the value
      */
-    public Bindable(JavaType type, Supplier<T> value) {
+    public Bindable(TypeInfer type, Supplier<T> value) {
         this.type = type;
         this.value = value;
     }
@@ -37,9 +37,9 @@ public final class Bindable<T> {
     /**
      * Creates a new {@link Bindable} instance with a specified type and a default {@code null} supplier.
      *
-     * @param type the {@link JavaType} representing the type of the value
+     * @param type the {@link TypeInfer} representing the type of the value
      */
-    public Bindable(JavaType type) {
+    public Bindable(TypeInfer type) {
         this(type, () -> null);
     }
 
@@ -49,7 +49,7 @@ public final class Bindable<T> {
      * @param rawType the class type to wrap
      */
     public Bindable(Class<T> rawType) {
-        this(JavaType.forClass(rawType));
+        this(TypeInfer.forClass(rawType));
     }
 
     /**
@@ -62,7 +62,7 @@ public final class Bindable<T> {
      * @return a {@link Bindable} representing a map with the given key-value types
      */
     public static <K, V> Bindable<Map<K, V>> ofMap(Class<K> keyType, Class<V> valueType) {
-        return of(JavaType.forParametrizedClass(Map.class, keyType, valueType));
+        return of(TypeInfer.forParametrizedClass(Map.class, keyType, valueType));
     }
 
     /**
@@ -73,7 +73,7 @@ public final class Bindable<T> {
      * @return a {@link Bindable} representing a list of the given element type
      */
     public static <V> Bindable<List<V>> ofList(Class<V> rawType) {
-        return of(JavaType.forParametrizedClass(List.class, rawType));
+        return of(TypeInfer.forParametrizedClass(List.class, rawType));
     }
 
     /**
@@ -84,18 +84,18 @@ public final class Bindable<T> {
      * @return a {@link Bindable} representing a set of the given element type
      */
     public static <V> Bindable<Set<V>> ofSet(Class<V> rawType) {
-        return of(JavaType.forParametrizedClass(Set.class, rawType));
+        return of(TypeInfer.forParametrizedClass(Set.class, rawType));
     }
 
 
     /**
-     * Creates a new {@link Bindable} instance from a {@link JavaType}.
+     * Creates a new {@link Bindable} instance from a {@link TypeInfer}.
      *
-     * @param type the {@link JavaType} to wrap
+     * @param type the {@link TypeInfer} to wrap
      * @param <T>  the expected type
      * @return a new {@link Bindable} instance
      */
-    public static <T> Bindable<T> of(JavaType type) {
+    public static <T> Bindable<T> of(TypeInfer type) {
         return new Bindable<>(type);
     }
 
@@ -107,7 +107,7 @@ public final class Bindable<T> {
      * @return a new {@link Bindable} instance
      */
     public static <T> Bindable<T> of(Class<T> type) {
-        return of(JavaType.forClass(type));
+        return of(TypeInfer.forClass(type));
     }
 
     /**
@@ -133,16 +133,16 @@ public final class Bindable<T> {
     }
 
     /**
-     * Retrieves the {@link JavaType} associated with this bindable value.
+     * Retrieves the {@link TypeInfer} associated with this bindable value.
      *
      * @return the type representation
      */
-    public JavaType getType() {
+    public TypeInfer getType() {
         return type;
     }
 
     /**
-     * Retrieves a {@link TypeInformation} for the underlying {@link JavaType}.
+     * Retrieves a {@link TypeInformation} for the underlying {@link TypeInfer}.
      * <p>
      * This allows for convenient type analysis and classification.
      * </p>

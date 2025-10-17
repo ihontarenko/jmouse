@@ -4,7 +4,6 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.InitializingBean;
 import org.jmouse.core.MediaType;
 import org.jmouse.core.Sorter;
-import org.jmouse.core.reflection.JavaType;
 import org.jmouse.web.context.WebBeanContext;
 
 import java.util.ArrayList;

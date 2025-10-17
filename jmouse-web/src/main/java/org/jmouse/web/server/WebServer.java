@@ -2,7 +2,7 @@ package org.jmouse.web.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeInfer;
 
 /**
  * A generic interface for managing a web server lifecycle and configuration.
@@ -62,8 +62,8 @@ public interface WebServer {
 
         LOGGER.info("Start configuring '{}' web-server", name());
 
-        JavaType javaType   = JavaType.forInstance(configurer);
-        Class<?> serverType = javaType.locate(Configurer.class).getFirst().getRawType();
+        TypeInfer javaType   = TypeInfer.forInstance(configurer);
+        Class<?>  serverType = javaType.locate(Configurer.class).getFirst().getRawType();
 
         LOGGER.info("Type of web-server '{}'", serverType);
 

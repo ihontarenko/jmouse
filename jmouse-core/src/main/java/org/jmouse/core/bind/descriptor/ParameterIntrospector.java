@@ -1,7 +1,7 @@
 package org.jmouse.core.bind.descriptor;
 
 import org.jmouse.core.bind.descriptor.internal.ParameterData;
-import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeInfer;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -21,7 +21,7 @@ public class ParameterIntrospector
     }
 
     public ParameterIntrospector type() {
-        ClassTypeIntrospector introspector = new ClassTypeIntrospector(JavaType.forParameter(container.getTarget()));
+        ClassTypeIntrospector introspector = new ClassTypeIntrospector(TypeInfer.forParameter(container.getTarget()));
         container.setType(introspector.name().annotations().toDescriptor());
         return self();
     }

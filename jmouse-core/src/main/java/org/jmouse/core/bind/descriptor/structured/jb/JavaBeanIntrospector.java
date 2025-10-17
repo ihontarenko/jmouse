@@ -6,7 +6,7 @@ import org.jmouse.core.bind.descriptor.ClassTypeIntrospector;
 import org.jmouse.core.bind.descriptor.MethodDescriptor;
 import org.jmouse.core.bind.descriptor.structured.ObjectData;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
-import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeInfer;
 
 import java.util.Map;
 
@@ -53,7 +53,7 @@ public class JavaBeanIntrospector<T>
      * @return this introspector instance for method chaining
      */
     public JavaBeanIntrospector<T> type(Class<T> type) {
-        ClassTypeIntrospector introspector = new ClassTypeIntrospector(JavaType.forClass(type));
+        ClassTypeIntrospector introspector = new ClassTypeIntrospector(TypeInfer.forClass(type));
         container.setType(introspector.introspect().toDescriptor());
         return self();
     }

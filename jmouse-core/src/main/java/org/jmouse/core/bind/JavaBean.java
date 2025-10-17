@@ -1,7 +1,7 @@
 package org.jmouse.core.bind;
 
 import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
-import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeInfer;
 import org.jmouse.core.CachedSupplier;
 import org.jmouse.core.Factory;
 
@@ -27,7 +27,7 @@ public final class JavaBean<T> extends Bean<T> {
      *
      * @param type the Java type of the structured
      */
-    public JavaBean(JavaType type) {
+    public JavaBean(TypeInfer type) {
         super(type, new JavaBeanIntrospector<T>(type.getRawType()).introspect().toDescriptor());
     }
 
@@ -37,7 +37,7 @@ public final class JavaBean<T> extends Bean<T> {
      * @param type the class of the structured
      */
     public JavaBean(Class<?> type) {
-        this(JavaType.forClass(type));
+        this(TypeInfer.forClass(type));
     }
 
     /**
@@ -58,7 +58,7 @@ public final class JavaBean<T> extends Bean<T> {
      * @param type the JavaType of the structured
      * @return a JavaBean instance
      */
-    public static <T> JavaBean<T> of(JavaType type) {
+    public static <T> JavaBean<T> of(TypeInfer type) {
         return new JavaBean<>(type);
     }
 

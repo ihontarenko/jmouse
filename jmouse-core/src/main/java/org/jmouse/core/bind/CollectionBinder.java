@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeInfer;
 import org.jmouse.core.reflection.TypeInformation;
 
 import java.util.Collection;
@@ -55,7 +55,7 @@ abstract public class CollectionBinder extends AbstractBinder {
             int index   = 0;
             int maxSize = 16; // todo: move this value to context
 
-            JavaType     elementType = bindable.getType().getFirst();
+            TypeInfer    elementType = bindable.getType().getFirst();
             PropertyPath zeroName    = root.append(INDEX_ZERO);
 
             if (accessor.navigate(zeroName).isNull() && accessor.navigate(root).isSimple()) {

@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeInfer;
 import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.core.Priority;
 
@@ -63,7 +63,7 @@ public class ScalarValueBinder extends AbstractBinder {
      */
     @Override
     public <T> boolean supports(Bindable<T> bindable) {
-        JavaType type = bindable.getType();
+        TypeInfer type = bindable.getType();
         return type.isScalar() || type.isEnum() || type.isClass();
     }
 }

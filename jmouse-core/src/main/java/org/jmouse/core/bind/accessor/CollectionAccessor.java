@@ -2,17 +2,14 @@ package org.jmouse.core.bind.accessor;
 
 import org.jmouse.core.bind.AbstractAccessor;
 import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.PropertyAccessor;
 import org.jmouse.core.bind.UnsupportedOperationException;
-import org.jmouse.core.bind.descriptor.structured.map.MapDescriptor;
-import org.jmouse.core.bind.descriptor.structured.map.MapIntrospector;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.jmouse.core.reflection.JavaType.forInstance;
+import static org.jmouse.core.reflection.TypeInfer.forInstance;
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**

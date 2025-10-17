@@ -6,7 +6,7 @@ import org.jmouse.beans.definition.AggregatedBeansDependency;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDependency;
 import org.jmouse.beans.definition.SimpleBeanDependency;
-import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeInfer;
 import org.jmouse.core.reflection.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,8 +67,8 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
      * @return a {@link BeanDependency} representing the parameter
      */
     protected BeanDependency createDependency(Parameter parameter) {
-        String   name     = Reflections.getAnnotationValue(parameter, Qualifier.class, Qualifier::value);
-        JavaType javaType = JavaType.forParameter(parameter);
+        String    name     = Reflections.getAnnotationValue(parameter, Qualifier.class, Qualifier::value);
+        TypeInfer javaType = TypeInfer.forParameter(parameter);
 
         if (Collection.class.isAssignableFrom(parameter.getType()) && parameter.isAnnotationPresent(
                 AggregatedBeans.class)) {

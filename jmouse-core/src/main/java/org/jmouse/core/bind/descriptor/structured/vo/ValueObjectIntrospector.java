@@ -1,7 +1,7 @@
 package org.jmouse.core.bind.descriptor.structured.vo;
 
 import org.jmouse.core.bind.descriptor.*;
-import org.jmouse.core.reflection.JavaType;
+import org.jmouse.core.reflection.TypeInfer;
 import org.jmouse.core.Streamable;
 
 import java.lang.reflect.RecordComponent;
@@ -16,7 +16,7 @@ public class ValueObjectIntrospector<T>
     }
 
     public ValueObjectIntrospector<T> type(Class<T> type) {
-        ClassTypeIntrospector introspector = new ClassTypeIntrospector(JavaType.forClass(type));
+        ClassTypeIntrospector introspector = new ClassTypeIntrospector(TypeInfer.forClass(type));
         container.setType(introspector.introspect().toDescriptor());
         return self();
     }
