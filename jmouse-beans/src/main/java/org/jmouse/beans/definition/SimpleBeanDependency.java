@@ -1,6 +1,6 @@
 package org.jmouse.beans.definition;
 
-import org.jmouse.core.reflection.TypeInfer;
+import org.jmouse.core.reflection.InferredType;
 
 /**
  * A simple implementation of the {@link BeanDependency} interface.
@@ -10,6 +10,6 @@ import org.jmouse.core.reflection.TypeInfer;
  * @param name the optional name of the dependency.
  * @param dependant the dependant object.
  */
-public record SimpleBeanDependency(TypeInfer javaType, String name, Object dependant) implements BeanDependency {
+public record SimpleBeanDependency(InferredType javaType, String name, Object dependant) implements BeanDependency {
 
 }

@@ -1,14 +1,13 @@
 package org.jmouse.security.web.configuration.configurer;
 
-import org.jmouse.security.web.AuthorizationFailureHandler;
 import org.jmouse.security.web.AuthenticationEntryPoint;
+import org.jmouse.security.web.AuthorizationFailureHandler;
 import org.jmouse.security.web.access.ExceptionTranslationFilter;
 import org.jmouse.security.web.authentication.ui.LoginUrlAuthenticationEntryPoint;
+import org.jmouse.security.web.authorization.ForbiddenAuthorizationFailureHandler;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
 import org.jmouse.security.web.configuration.SharedAttributes;
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.HttpStatus;
 import org.jmouse.web.http.cache.HttpSessionRequestCache;
 import org.jmouse.web.http.cache.RequestCache;
 
@@ -17,7 +16,7 @@ public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>>
 
     public static final String DEFAULT_LOGIN_URL = "/login";
 
-    private RequestCache                 requestCache;
+    private RequestCache                requestCache;
     private AuthenticationEntryPoint    entryPoint;
     private AuthorizationFailureHandler deniedHandler;
 
@@ -47,17 +46,24 @@ public class ExceptionHandlingConfigurer<B extends HttpSecurityBuilder<B>>
             entryPoint = new LoginUrlAuthenticationEntryPoint(DEFAULT_LOGIN_URL);
         }
 
-        if (deniedHandler == null) {
-            deniedHandler = (request, response, e) -> {
-                response.setStatus(HttpStatus.FORBIDDEN.getCode());
-                response.setHeader(HttpHeader.X_SECURITY_REASON.value(), e.getMessage());
-            };
-        }
-
         http.setSharedObject(SharedAttributes.ENTRY_POINT, entryPoint);
-        http.setSharedObject(SharedAttributes.DENIED_HANDLER, deniedHandler);
 
-        http.addFilter(new ExceptionTranslationFilter(requestCache, entryPoint, deniedHandler));
+        http.addFilter(new ExceptionTranslationFilter(
+                requestCache, entryPoint, resolveFailureHandler()));
+    }
+
+    private AuthorizationFailureHandler resolveFailureHandler() {
+        B                           builder = getBuilder();
+        AuthorizationFailureHandler handler = builder.getObject(AuthorizationFailureHandler.class);
+        if (handler == null) {
+            handler = deniedHandler == null ? defaultFailureHandler() : deniedHandler;
+        }
+        builder.setSharedObject(SharedAttributes.DENIED_HANDLER, handler);
+        return handler;
+    }
+
+    private AuthorizationFailureHandler defaultFailureHandler() {
+        return new ForbiddenAuthorizationFailureHandler();
     }
 
 }

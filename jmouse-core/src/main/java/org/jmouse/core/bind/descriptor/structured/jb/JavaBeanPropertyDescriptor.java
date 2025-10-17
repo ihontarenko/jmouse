@@ -7,7 +7,7 @@ import org.jmouse.core.bind.descriptor.MethodDescriptor;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyData;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
-import org.jmouse.core.reflection.TypeInfer;
+import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.Getter;
 import org.jmouse.core.Setter;
 
@@ -132,12 +132,12 @@ public class JavaBeanPropertyDescriptor<T>
         ClassTypeDescriptor type = container.getType();
 
         if (type == null) {
-            TypeInfer javaType = null;
+            InferredType javaType = null;
 
             if (isWritable()) {
-                javaType = TypeInfer.forParameter(getSetterMethod().unwrap(), 0);
+                javaType = InferredType.forParameter(getSetterMethod().unwrap(), 0);
             } else if (isReadable()) {
-                javaType = TypeInfer.forMethodReturnType(getGetterMethod().unwrap());
+                javaType = InferredType.forMethodReturnType(getGetterMethod().unwrap());
             }
 
             if (javaType != null) {

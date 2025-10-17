@@ -388,7 +388,7 @@ public class MediaType extends MimeType {
         Comparator<MediaType> comparator  = Comparator.comparingDouble(MediaType::getQFactor)
                 .thenComparing(Comparator.comparing(MediaType::toString));
 
-        prioritized.sort(comparator);
+        prioritized.sort(comparator.reversed());
 
         return prioritized;
     }
@@ -398,7 +398,7 @@ public class MediaType extends MimeType {
      *
      * <p>Both lists are first prioritized via {@link #prioritizeByQFactor(List)}. Then, for each
      * item in the first list, a compatible item in the second list (per
-     * {@link MimeType#includes(MediaType)}) adds that media type to the result.</p>
+     * {@link MimeType#includes(MimeType)}) adds that media type to the result.</p>
      *
      * <p><b>Note:</b> A match contributes the entry from <em>listA</em>.</p>
      *
@@ -434,14 +434,16 @@ public class MediaType extends MimeType {
      * @return a new list representing {@code (listA ∪ listB) \ intersect(listA, listB)}
      */
     public static List<MediaType> difference(List<MediaType> listA, List<MediaType> listB) {
-        Set<MediaType> result = new LinkedHashSet<>(listA.size() + listB.size());
+        List<MediaType> result = new ArrayList<>(listA.size() + listB.size());
 
         result.addAll(listA);
         result.addAll(listB);
 
-        intersect(listA, listB).forEach(result::remove);
+        List<MediaType> prioritized = prioritizeByQFactor(result);
 
-        return List.copyOf(result);
+        intersect(listA, listB).forEach(prioritized::remove);
+
+        return List.copyOf(prioritized);
     }
 
 }

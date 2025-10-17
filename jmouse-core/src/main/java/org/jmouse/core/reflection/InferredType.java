@@ -19,13 +19,13 @@ import java.util.function.*;
  *   <li>{@link GenericArrayType} - generic arrays</li>
  * </ul>
  */
-public class TypeInfer implements ClassTypeInspector {
+public class InferredType implements ClassTypeInspector {
 
     /**
-     * 🗄️ Cache key for storing {@link TypeInfer} instances with their resolution context.
+     * 🗄️ Cache key for storing {@link InferredType} instances with their resolution context.
      *
      * <p>This record serves as a composite key for the internal {@code JavaType} cache,
-     * pairing the underlying {@link Type} with its {@link TypeInfer parent} context.
+     * pairing the underlying {@link Type} with its {@link InferredType parent} context.
      * This ensures that the same {@link Type} can be resolved differently
      * depending on the context in which it appears, avoiding incorrect
      * type resolution caused by global, context-less caching.</p>
@@ -37,12 +37,12 @@ public class TypeInfer implements ClassTypeInspector {
      * }</pre>
      *
      * @param type   the underlying {@link Type} to cache
-     * @param parent the parent {@link TypeInfer} that defines the resolution context
+     * @param parent the parent {@link InferredType} that defines the resolution context
      *
-     * @see TypeInfer
+     * @see InferredType
      * @see Type
      */
-    record TypeCache(Type type, TypeInfer parent) {
+    record TypeCache(Type type, InferredType parent) {
 
         /**
          * Factory method for creating a new {@link TypeCache} instance.
@@ -51,68 +51,68 @@ public class TypeInfer implements ClassTypeInspector {
          * @param parent the resolution context for this type
          * @return a new {@link TypeCache} instance
          */
-        static TypeCache of(Type type, TypeInfer parent) {
+        static TypeCache of(Type type, InferredType parent) {
             return new TypeCache(type, parent);
         }
     }
 
     /**
-     * A cache for storing resolved {@link TypeInfer} instances to avoid redundant resolution.
+     * A cache for storing resolved {@link InferredType} instances to avoid redundant resolution.
      */
-    private static final Map<TypeCache, TypeInfer> CACHE = new HashMap<>();
+    private static final Map<TypeCache, InferredType> CACHE = new HashMap<>();
 
     /**
      * A constant representing a "no type" scenario.
      */
-    public static final TypeInfer NONE_TYPE = new TypeInfer(NoneType.INSTANCE);
+    public static final InferredType NONE_TYPE = new InferredType(NoneType.INSTANCE);
 
     /**
-     * A constant representing an empty array of {@link TypeInfer}.
+     * A constant representing an empty array of {@link InferredType}.
      */
-    private static final TypeInfer[] EMPTY_TYPE_ARRAY = new TypeInfer[0];
+    private static final InferredType[] EMPTY_TYPE_ARRAY = new InferredType[0];
 
     /**
-     * The parent {@link TypeInfer} in the type hierarchy.
+     * The parent {@link InferredType} in the type hierarchy.
      */
-    private final TypeInfer parent;
+    private final InferredType parent;
 
     /**
-     * The underlying {@link Type} represented by this {@link TypeInfer}.
+     * The underlying {@link Type} represented by this {@link InferredType}.
      */
     private final Type type;
 
     /**
-     * The resolved raw class for this {@link TypeInfer}.
+     * The resolved raw class for this {@link InferredType}.
      */
     private Class<?> rawType;
 
     /**
-     * Lazily resolved {@link TypeInfer} representing the superclass.
+     * Lazily resolved {@link InferredType} representing the superclass.
      */
-    private volatile TypeInfer superType;
+    private volatile InferredType superType;
 
     /**
-     * Lazily resolved array of {@link TypeInfer} instances representing interfaces.
+     * Lazily resolved array of {@link InferredType} instances representing interfaces.
      */
-    private volatile TypeInfer[] interfaces;
+    private volatile InferredType[] interfaces;
 
     /**
-     * An array of {@link TypeInfer} representing generic type arguments.
+     * An array of {@link InferredType} representing generic type arguments.
      */
-    private TypeInfer[] generics;
+    private InferredType[] generics;
 
     /**
-     * The cached hash code for this {@link TypeInfer}.
+     * The cached hash code for this {@link InferredType}.
      */
     private int hashCode;
 
     /**
-     * Constructs a new {@link TypeInfer} with a given type and optional parent context.
+     * Constructs a new {@link InferredType} with a given type and optional parent context.
      *
      * @param type   the {@link Type} to represent
-     * @param parent the parent {@link TypeInfer} in the hierarchy, or null if none
+     * @param parent the parent {@link InferredType} in the hierarchy, or null if none
      */
-    private TypeInfer(Type type, TypeInfer parent) {
+    private InferredType(Type type, InferredType parent) {
         this.type = type;
         this.parent = parent;
 
@@ -122,43 +122,43 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Constructs a new {@link TypeInfer} with a given type.
+     * Constructs a new {@link InferredType} with a given type.
      *
      * @param type the {@link Type} to represent
      */
-    private TypeInfer(Type type) {
+    private InferredType(Type type) {
         this(type, null);
     }
 
     /**
-     * Creates a {@link TypeInfer} instance from a {@link TypeReference}.
+     * Creates a {@link InferredType} instance from a {@link TypeReference}.
      *
      * @param type the {@link TypeReference} representing the desired type
-     * @return a {@link TypeInfer} instance corresponding to the given type reference
+     * @return a {@link InferredType} instance corresponding to the given type reference
      */
-    public static TypeInfer forTypeReference(TypeReference<?> type) {
+    public static InferredType forTypeReference(TypeReference<?> type) {
         return forType(type.getType());
     }
 
     /**
-     * Returns a {@link TypeInfer} instance for the given {@link Class}.
+     * Returns a {@link InferredType} instance for the given {@link Class}.
      *
      * @param klass the class to wrap
-     * @return a {@link TypeInfer} instance
+     * @return a {@link InferredType} instance
      */
-    public static TypeInfer forClass(Class<?> klass) {
+    public static InferredType forClass(Class<?> klass) {
         return forType(klass);
     }
 
     /**
-     * Returns a {@link TypeInfer} instance for a parameterized class with specified generic arguments.
+     * Returns a {@link InferredType} instance for a parameterized class with specified generic arguments.
      *
      * @param klass    the raw class type
      * @param generics the generic type arguments
-     * @return a {@link TypeInfer} instance representing the parameterized class
+     * @return a {@link InferredType} instance representing the parameterized class
      * @throws IllegalArgumentException if the number of provided generic arguments does not match the expected number
      */
-    public static TypeInfer forParametrizedClass(Class<?> klass, Class<?>... generics) {
+    public static InferredType forParametrizedClass(Class<?> klass, Class<?>... generics) {
         Type[] variables = klass.getTypeParameters();
 
         if (Arrays.notEmpty(generics) && variables.length != generics.length) {
@@ -170,28 +170,28 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Returns a {@link TypeInfer} instance for the given {@link Type}.
+     * Returns a {@link InferredType} instance for the given {@link Type}.
      *
      * @param type the type to wrap
-     * @return a {@link TypeInfer} instance
+     * @return a {@link InferredType} instance
      */
-    public static TypeInfer forType(Type type) {
+    public static InferredType forType(Type type) {
         return forType(type, null);
     }
 
     /**
-     * Returns a {@link TypeInfer} instance for the given {@link Type} and parent context.
+     * Returns a {@link InferredType} instance for the given {@link Type} and parent context.
      *
      * @param type   the type to wrap
-     * @param parent the parent {@link TypeInfer} in the hierarchy
-     * @return a {@link TypeInfer} instance
+     * @param parent the parent {@link InferredType} in the hierarchy
+     * @return a {@link InferredType} instance
      */
-    public static TypeInfer forType(Type type, TypeInfer parent) {
-        TypeCache typeCache = TypeCache.of(type, parent);
-        TypeInfer instance  = CACHE.get(typeCache);
+    public static InferredType forType(Type type, InferredType parent) {
+        TypeCache    typeCache = TypeCache.of(type, parent);
+        InferredType instance  = CACHE.get(typeCache);
 
         if (instance == null) {
-            instance = new TypeInfer(type, parent);
+            instance = new InferredType(type, parent);
             CACHE.put(typeCache, instance);
         }
 
@@ -199,52 +199,52 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Creates a {@link TypeInfer} for an instance of an structured.
+     * Creates a {@link InferredType} for an instance of an structured.
      *
      * @param object the structured instance
-     * @return a {@link TypeInfer} instance
+     * @return a {@link InferredType} instance
      */
-    public static TypeInfer forInstance(Object object) {
+    public static InferredType forInstance(Object object) {
         return (object instanceof Class<?> klass)
                 ? forType(klass)
                 : forType(object.getClass());
     }
 
     /**
-     * Creates a {@link TypeInfer} for the generic type of a {@link Field}.
+     * Creates a {@link InferredType} for the generic type of a {@link Field}.
      *
      * @param field the field whose type is to be resolved
-     * @return a {@link TypeInfer} instance for the field type
+     * @return a {@link InferredType} instance for the field type
      *
      * @see Field#getGenericType()
      */
-    public static TypeInfer forField(Field field) {
+    public static InferredType forField(Field field) {
         return forType(field.getGenericType());
     }
 
     /**
-     * Creates a {@link TypeInfer} for the return type of a {@link Method}.
+     * Creates a {@link InferredType} for the return type of a {@link Method}.
      *
      * @param method the method whose return type is to be resolved
-     * @return a {@link TypeInfer} instance for the return type
+     * @return a {@link InferredType} instance for the return type
      */
-    public static TypeInfer forMethodReturnType(Method method) {
+    public static InferredType forMethodReturnType(Method method) {
         return forType(method.getGenericReturnType());
     }
 
     /**
-     * Creates a {@link TypeInfer} for a specific exception type declared by a {@link Method}.
+     * Creates a {@link InferredType} for a specific exception type declared by a {@link Method}.
      * This executable retrieves the exception type at the specified index in the executable's
-     * declared exceptions and constructs a {@link TypeInfer} representation of it.
+     * declared exceptions and constructs a {@link InferredType} representation of it.
      * If the specified index is out of bounds, an {@link IllegalArgumentException} is thrown.
      *
      *
      * @param executable the executable whose exception type is to be resolved
      * @param index  the index of the exception type in the declared exceptions
-     * @return a {@link TypeInfer} instance representing the exception type
+     * @return a {@link InferredType} instance representing the exception type
      * @throws IllegalArgumentException if the specified index is out of bounds
      */
-    public static TypeInfer forExceptionType(Executable executable, int index) {
+    public static InferredType forExceptionType(Executable executable, int index) {
         Type[] parameters = executable.getGenericExceptionTypes();
 
         if (parameters.length > index) {
@@ -256,14 +256,14 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Creates a {@link TypeInfer} for a specific parameter of a given {@link Method}.
+     * Creates a {@link InferredType} for a specific parameter of a given {@link Method}.
      *
      * @param executable the executable whose parameter type is to be resolved
      * @param index  the index of the parameter (zero-based)
-     * @return a {@link TypeInfer} instance representing the parameter type at the given index
+     * @return a {@link InferredType} instance representing the parameter type at the given index
      * @throws IllegalArgumentException if the executable does not have a parameter at the specified index
      */
-    public static TypeInfer forParameter(Executable executable, int index) {
+    public static InferredType forParameter(Executable executable, int index) {
         Type[] parameters = executable.getGenericParameterTypes();
 
         if (parameters.length > index) {
@@ -275,20 +275,20 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Creates a {@link TypeInfer} for the given method or constructor parameter.
+     * Creates a {@link InferredType} for the given method or constructor parameter.
      * <p>
      * This method resolves the generic parameter type using {@link Parameter#getParameterizedType()}.
      * </p>
      *
      * @param parameter the parameter whose type is to be resolved
-     * @return a {@link TypeInfer} instance representing the parameter's type
+     * @return a {@link InferredType} instance representing the parameter's type
      */
-    public static TypeInfer forParameter(Parameter parameter) {
+    public static InferredType forParameter(Parameter parameter) {
         return forType(parameter.getParameterizedType());
     }
 
     /**
-     * Retrieves the raw {@link Class} for this {@link TypeInfer}.
+     * Retrieves the raw {@link Class} for this {@link InferredType}.
      *
      * @return the raw {@link Class}, or null if the type cannot be resolved
      */
@@ -297,7 +297,7 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Retrieves the underlying {@link Type} represented by this {@link TypeInfer}.
+     * Retrieves the underlying {@link Type} represented by this {@link InferredType}.
      *
      * @return the {@link Type} instance
      */
@@ -306,14 +306,14 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Resolves and returns the raw {@link Class} for this {@link TypeInfer}.
+     * Resolves and returns the raw {@link Class} for this {@link InferredType}.
      *
      * @return the resolved {@link Class}, or null if the type is {@link NoneType}
      * <p>
      * This method supports resolving raw types, arrays, and generic components by analyzing the underlying {@link Type}.
      * If the type is a {@link GenericArrayType}, its component type is recursively resolved.
      * @see GenericArrayType
-     * @see TypeInfer#getComponentType()
+     * @see InferredType#getComponentType()
      */
     public Class<?> resolveClass() {
         if (type == NoneType.INSTANCE) {
@@ -334,9 +334,9 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Resolves the type hierarchy and returns the {@link TypeInfer}.
+     * Resolves the type hierarchy and returns the {@link InferredType}.
      *
-     * @return the resolved {@link TypeInfer}, or {@link TypeInfer#NONE_TYPE} if unresolved
+     * @return the resolved {@link InferredType}, or {@link InferredType#NONE_TYPE} if unresolved
      * <p>
      * This method supports resolving various type categories, including:
      * <ul>
@@ -346,14 +346,17 @@ public class TypeInfer implements ClassTypeInspector {
      * </ul>
      * <p>
      * @see Type
-     * @see TypeInfer#NONE_TYPE
+     * @see InferredType#NONE_TYPE
      */
-    public TypeInfer resolveType() {
+    public InferredType resolveType() {
+
+        Infer.rawClassOf(this.type);
+
         return switch (this.type) {
             case ParameterizedType parameterizedType
                     -> forType(parameterizedType.getRawType());
             case TypeVariable<?> typeVariable -> {
-                TypeInfer variable = NONE_TYPE;
+                InferredType variable = NONE_TYPE;
 
                 if (parent != null) {
                     variable = parent.resolveVariable(typeVariable);
@@ -366,7 +369,7 @@ public class TypeInfer implements ClassTypeInspector {
             case WildcardType wildcardType -> {
                 // extends  - upper bounds
                 // super    - lower bounds
-                TypeInfer wildcard = NONE_TYPE;
+                InferredType wildcard = NONE_TYPE;
 
                 if (Arrays.notEmpty(wildcardType.getUpperBounds())) {
                     wildcard = forType(wildcardType.getUpperBounds()[0], parent);
@@ -384,15 +387,15 @@ public class TypeInfer implements ClassTypeInspector {
      * Resolves a type variable within the current context.
      *
      * @param variable the {@link TypeVariable} to resolve
-     * @return the resolved {@link TypeInfer}, or {@link TypeInfer#NONE_TYPE} if unresolved
+     * @return the resolved {@link InferredType}, or {@link InferredType#NONE_TYPE} if unresolved
      * <p>
      * This method evaluates the type parameters of the raw type and attempts to match the given {@link TypeVariable}.
-     * If the variable cannot be resolved in the current context, it defaults to {@link TypeInfer#NONE_TYPE}.
+     * If the variable cannot be resolved in the current context, it defaults to {@link InferredType#NONE_TYPE}.
      * @see TypeVariable
      */
-    public TypeInfer resolveVariable(TypeVariable<?> variable) {
-        TypeInfer type         = null;
-        String    expectedName = variable.getName();
+    public InferredType resolveVariable(TypeVariable<?> variable) {
+        InferredType type         = null;
+        String       expectedName = variable.getName();
 
         if (isParameterizedType()) {
             int counter = 0;
@@ -410,15 +413,15 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Retrieves the {@link TypeInfer} representing the component type of an array.
+     * Retrieves the {@link InferredType} representing the component type of an array.
      *
-     * @return the component {@link TypeInfer}, or {@link TypeInfer#NONE_TYPE} if not an array
+     * @return the component {@link InferredType}, or {@link InferredType#NONE_TYPE} if not an array
      * <p>
      * This method supports resolving both generic arrays (via {@link GenericArrayType}) and raw arrays.
      * @see GenericArrayType
      */
-    public TypeInfer getComponentType() {
-        TypeInfer type = NONE_TYPE;
+    public InferredType getComponentType() {
+        InferredType type = NONE_TYPE;
 
         if (this.type instanceof GenericArrayType arrayType) {
             type = forType(arrayType.getGenericComponentType());
@@ -430,17 +433,17 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Checks if this {@link TypeInfer} has been resolved.
+     * Checks if this {@link InferredType} has been resolved.
      *
      * @return true if resolved, false otherwise
-     * @see TypeInfer#isUnresolved()
+     * @see InferredType#isUnresolved()
      */
     public boolean isResolved() {
         return getRawType() != null;
     }
 
     /**
-     * Checks if this {@link TypeInfer} is unresolved.
+     * Checks if this {@link InferredType} is unresolved.
      *
      * @return true if unresolved, false otherwise
      */
@@ -459,21 +462,21 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Checks if this {@link TypeInfer} represents an array.
+     * Checks if this {@link InferredType} represents an array.
      *
      * @return true if it represents an array, false otherwise
      * <p>
      * This method handles both raw arrays (e.g., {@code int[]}) and generic array types
      * (e.g., {@code T[]}, where {@code T} is a type variable).
-     * @see TypeInfer#getComponentType()
-     * @see TypeInfer#isGenericArrayType()
+     * @see InferredType#getComponentType()
+     * @see InferredType#isGenericArrayType()
      */
     public boolean isArray() {
         return (type instanceof Class<?> clazz && clazz.isArray()) || isGenericArrayType();
     }
 
     /**
-     * Checks if this {@link TypeInfer} represents a parameterized type.
+     * Checks if this {@link InferredType} represents a parameterized type.
      *
      * @return true if it is a parameterized type, false otherwise
      * <p>
@@ -485,7 +488,7 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Checks if this {@link TypeInfer} represents a wildcard type.
+     * Checks if this {@link InferredType} represents a wildcard type.
      *
      * @return true if it is a wildcard type, false otherwise
      * <p>
@@ -497,7 +500,7 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Checks if this {@link TypeInfer} represents a generic array type.
+     * Checks if this {@link InferredType} represents a generic array type.
      *
      * @return true if it is a generic array type, false otherwise
      * <p>
@@ -509,7 +512,7 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Checks if this {@link TypeInfer} represents a raw type.
+     * Checks if this {@link InferredType} represents a raw type.
      *
      * @return true if it is a raw type, false otherwise
      * <p>
@@ -521,7 +524,7 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Checks if this {@link TypeInfer} represents a type variable.
+     * Checks if this {@link InferredType} represents a type variable.
      *
      * @return true if it is a type variable, false otherwise
      * <p>
@@ -537,13 +540,13 @@ public class TypeInfer implements ClassTypeInspector {
     /**
      * Resolves the superclass of the raw type.
      *
-     * @return the {@link TypeInfer} representing the superclass, or {@link TypeInfer#NONE_TYPE} if none exists
+     * @return the {@link InferredType} representing the superclass, or {@link InferredType#NONE_TYPE} if none exists
      * <p>
      * This method handles the resolution of generic superclasses if they exist and caches the result for efficiency.
      * @see Class#getGenericSuperclass()
      */
-    public TypeInfer getSuperType() {
-        TypeInfer superType = this.superType;
+    public InferredType getSuperType() {
+        InferredType superType = this.superType;
 
         if (superType == null) {
             superType = NONE_TYPE;
@@ -564,14 +567,14 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Retrieves the interfaces implemented by the raw type as an array of {@link TypeInfer}.
+     * Retrieves the interfaces implemented by the raw type as an array of {@link InferredType}.
      *
-     * @return an array of {@link TypeInfer} representing the interfaces
+     * @return an array of {@link InferredType} representing the interfaces
      * <p>
      * This method resolves generic interfaces implemented by the raw type and lazily caches the result.
      * @see Class#getGenericInterfaces()
      */
-    public TypeInfer[] getInterfaces() {
+    public InferredType[] getInterfaces() {
         Class<?> rawType = getRawType();
 
         if (rawType == null) {
@@ -579,8 +582,8 @@ public class TypeInfer implements ClassTypeInspector {
         }
 
         if (this.interfaces == null) {
-            Type[]      interfaces = rawType.getGenericInterfaces();
-            TypeInfer[] types      = new TypeInfer[interfaces.length];
+            Type[]         interfaces = rawType.getGenericInterfaces();
+            InferredType[] types      = new InferredType[interfaces.length];
 
             for (int i = 0; i < interfaces.length; i++) {
                 types[i] = forType(interfaces[i], this);
@@ -593,7 +596,7 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Retrieves the type parameters associated with this {@link TypeInfer}.
+     * Retrieves the type parameters associated with this {@link InferredType}.
      *
      * @return an array of {@link Type} representing the type parameters, or an empty array if none exist
      * <p>
@@ -630,25 +633,25 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Retrieves the generic type arguments of this {@link TypeInfer}.
+     * Retrieves the generic type arguments of this {@link InferredType}.
      *
-     * @return an array of {@link TypeInfer} representing the generics
+     * @return an array of {@link InferredType} representing the generics
      * <p>
      * This method resolves the generic type arguments based on the {@link Type} and the current context.
      * @see ParameterizedType#getActualTypeArguments()
      */
-    public TypeInfer[] getGenerics() {
-        TypeInfer[] generics = this.generics;
+    public InferredType[] getGenerics() {
+        InferredType[] generics = this.generics;
 
         if (Arrays.empty(generics)) {
             generics = EMPTY_TYPE_ARRAY;
 
             if (isParameterizedType() || isRawType()) {
-                Type[]      types = getTypeParameters();
-                TypeInfer[] array = new TypeInfer[types.length];
+                Type[]         types = getTypeParameters();
+                InferredType[] array = new InferredType[types.length];
 
                 for (int i = 0; i < types.length; i++) {
-                    TypeInfer type = forType(types[i], parent);
+                    InferredType type = forType(types[i], parent);
 
                     // if type is TypeVariable or WildcardType, but it don't resolve
                     if ((type.isTypeVariable() || type.isWildcardType()) && type.isResolved()) {
@@ -668,31 +671,31 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Retrieves a specific {@link TypeInfer} from the sequence of generics.
+     * Retrieves a specific {@link InferredType} from the sequence of generics.
      *
      * @param sequence the sequence of indexes representing the desired generic type
-     * @return the {@link TypeInfer} at the specified sequence, or {@link TypeInfer#NONE_TYPE} if not found
+     * @return the {@link InferredType} at the specified sequence, or {@link InferredType#NONE_TYPE} if not found
      * <p>
      * This method navigates through the generic type arguments to retrieve a nested generic type based on the provided sequence.
      * <ul>
-     *   <li>If the sequence is empty or null, it returns the first generic type or {@link TypeInfer#NONE_TYPE} if none exist.</li>
-     *   <li>If the sequence points to an invalid index, it returns {@link TypeInfer#NONE_TYPE}.</li>
+     *   <li>If the sequence is empty or null, it returns the first generic type or {@link InferredType#NONE_TYPE} if none exist.</li>
+     *   <li>If the sequence points to an invalid index, it returns {@link InferredType#NONE_TYPE}.</li>
      * </ul>
      * <p>
      *
-     * @see TypeInfer#getGenerics()
-     * @see TypeInfer#NONE_TYPE
+     * @see InferredType#getGenerics()
+     * @see InferredType#NONE_TYPE
      */
-    public TypeInfer getGeneric(int... sequence) {
-        TypeInfer[] types = getGenerics();
-        TypeInfer   generic;
+    public InferredType getGeneric(int... sequence) {
+        InferredType[] types = getGenerics();
+        InferredType   generic;
 
         if (sequence == null || sequence.length == 0) {
             generic = (types.length == 0) ? NONE_TYPE : types[0];
         } else {
             generic = this;
             for (int index : sequence) {
-                TypeInfer[] generics = generic.getGenerics();
+                InferredType[] generics = generic.getGenerics();
 
                 if (index < 0 || index >= generics.length) {
                     return NONE_TYPE;
@@ -708,127 +711,127 @@ public class TypeInfer implements ClassTypeInspector {
     /**
      * Retrieves the first generic type from the list of generics.
      *
-     * @return the first {@link TypeInfer} in the generics list, or {@link TypeInfer#NONE_TYPE} if no generics are present
+     * @return the first {@link InferredType} in the generics list, or {@link InferredType#NONE_TYPE} if no generics are present
      * <p>
      * This method is a shorthand for accessing the first generic type using {@link #getGeneric(int...)}.
      *
-     * @see TypeInfer#getGeneric(int...)
+     * @see InferredType#getGeneric(int...)
      */
-    public TypeInfer getFirst() {
+    public InferredType getFirst() {
         return getGeneric(0);
     }
 
     /**
      * Retrieves the last generic type from the list of generics.
      *
-     * @return the last {@link TypeInfer} in the generics list, or {@link TypeInfer#NONE_TYPE} if no generics are present
+     * @return the last {@link InferredType} in the generics list, or {@link InferredType#NONE_TYPE} if no generics are present
      * <p>
      * This method is a shorthand for accessing the last generic type using {@link #getGeneric(int...)}.
      *
-     * @see TypeInfer#getGeneric(int...)
-     * @see TypeInfer#getGenerics()
+     * @see InferredType#getGeneric(int...)
+     * @see InferredType#getGenerics()
      */
-    public TypeInfer getLast() {
+    public InferredType getLast() {
         return getGeneric(getGenerics().length - 1);
     }
 
     /**
      * Navigates the type hierarchy to locate {@link Map}-related classes or interfaces.
      *
-     * @return the matching {@link TypeInfer} for {@link Map}, or {@link TypeInfer#NONE_TYPE} if not found
-     * @see TypeInfer#locate(Class)
+     * @return the matching {@link InferredType} for {@link Map}, or {@link InferredType#NONE_TYPE} if not found
+     * @see InferredType#locate(Class)
      */
-    public TypeInfer toMap() {
+    public InferredType toMap() {
         return locate(Map.class);
     }
 
     /**
      * Navigates the type hierarchy to locate {@link List}-related classes or interfaces.
      *
-     * @return the matching {@link TypeInfer} for {@link List}, or {@link TypeInfer#NONE_TYPE} if not found
-     * @see TypeInfer#locate(Class)
+     * @return the matching {@link InferredType} for {@link List}, or {@link InferredType#NONE_TYPE} if not found
+     * @see InferredType#locate(Class)
      */
-    public TypeInfer toList() {
+    public InferredType toList() {
         return locate(List.class);
     }
 
     /**
      * Navigates the type hierarchy to locate {@link Set}-related classes or interfaces.
      *
-     * @return the matching {@link TypeInfer} for {@link Set}, or {@link TypeInfer#NONE_TYPE} if not found
-     * @see TypeInfer#locate(Class)
+     * @return the matching {@link InferredType} for {@link Set}, or {@link InferredType#NONE_TYPE} if not found
+     * @see InferredType#locate(Class)
      */
-    public TypeInfer toSet() {
+    public InferredType toSet() {
         return locate(Set.class);
     }
 
     /**
      * Navigates the type hierarchy to locate {@link Collection}-related classes or interfaces.
      *
-     * @return the matching {@link TypeInfer} for {@link Collection}, or {@link TypeInfer#NONE_TYPE} if not found
-     * @see TypeInfer#locate(Class)
+     * @return the matching {@link InferredType} for {@link Collection}, or {@link InferredType#NONE_TYPE} if not found
+     * @see InferredType#locate(Class)
      */
-    public TypeInfer toCollection() {
+    public InferredType toCollection() {
         return locate(Collection.class);
     }
 
     /**
      * Navigates the type hierarchy to locate {@link Function}-related classes or interfaces.
      *
-     * @return the matching {@link TypeInfer} for {@link Function}, or {@link TypeInfer#NONE_TYPE} if not found
-     * @see TypeInfer#locate(Class)
+     * @return the matching {@link InferredType} for {@link Function}, or {@link InferredType#NONE_TYPE} if not found
+     * @see InferredType#locate(Class)
      */
-    public TypeInfer toFunction() {
+    public InferredType toFunction() {
         return locate(Function.class);
     }
 
     /**
      * Navigates the type hierarchy to locate {@link BiFunction}-related classes or interfaces.
      *
-     * @return the matching {@link TypeInfer} for {@link BiFunction}, or {@link TypeInfer#NONE_TYPE} if not found
-     * @see TypeInfer#locate(Class)
+     * @return the matching {@link InferredType} for {@link BiFunction}, or {@link InferredType#NONE_TYPE} if not found
+     * @see InferredType#locate(Class)
      */
-    public TypeInfer toBiFunction() {
+    public InferredType toBiFunction() {
         return locate(BiFunction.class);
     }
 
     /**
      * Navigates the type hierarchy to locate {@link BiPredicate}-related classes or interfaces.
      *
-     * @return the matching {@link TypeInfer} for {@link BiPredicate}, or {@link TypeInfer#NONE_TYPE} if not found
-     * @see TypeInfer#locate(Class)
+     * @return the matching {@link InferredType} for {@link BiPredicate}, or {@link InferredType#NONE_TYPE} if not found
+     * @see InferredType#locate(Class)
      */
-    public TypeInfer toBiPredicate() {
+    public InferredType toBiPredicate() {
         return locate(BiPredicate.class);
     }
 
     /**
      * Navigates the type hierarchy to locate {@link Predicate}-related classes or interfaces.
      *
-     * @return the matching {@link TypeInfer} for {@link Predicate}, or {@link TypeInfer#NONE_TYPE} if not found
-     * @see TypeInfer#locate(Class)
+     * @return the matching {@link InferredType} for {@link Predicate}, or {@link InferredType#NONE_TYPE} if not found
+     * @see InferredType#locate(Class)
      */
-    public TypeInfer toPredicate() {
+    public InferredType toPredicate() {
         return locate(Predicate.class);
     }
 
     /**
      * Navigates the type hierarchy to locate {@link Supplier}-related classes or interfaces.
      *
-     * @return the matching {@link TypeInfer} for {@link Supplier}, or {@link TypeInfer#NONE_TYPE} if not found
-     * @see TypeInfer#locate(Class)
+     * @return the matching {@link InferredType} for {@link Supplier}, or {@link InferredType#NONE_TYPE} if not found
+     * @see InferredType#locate(Class)
      */
-    public TypeInfer toSupplier() {
+    public InferredType toSupplier() {
         return locate(Supplier.class);
     }
 
     /**
      * Navigates the type hierarchy to locate {@link Consumer}-related classes or interfaces.
      *
-     * @return the matching {@link TypeInfer} for {@link Consumer}, or {@link TypeInfer#NONE_TYPE} if not found
-     * @see TypeInfer#locate(Class)
+     * @return the matching {@link InferredType} for {@link Consumer}, or {@link InferredType#NONE_TYPE} if not found
+     * @see InferredType#locate(Class)
      */
-    public TypeInfer toConsumer() {
+    public InferredType toConsumer() {
         return locate(Consumer.class);
     }
 
@@ -837,7 +840,7 @@ public class TypeInfer implements ClassTypeInspector {
      * Navigates the type hierarchy to locate a specific {@link Class}.
      *
      * @param classType the class to navigate to
-     * @return the matching {@link TypeInfer}, or {@link TypeInfer#NONE_TYPE} if not found
+     * @return the matching {@link InferredType}, or {@link InferredType#NONE_TYPE} if not found
      * <p>
      * This method traverses the type hierarchy in the following order:
      * <ul>
@@ -846,11 +849,11 @@ public class TypeInfer implements ClassTypeInspector {
      *   <li>If not found in interfaces, it navigates to the superclass and continues the search.</li>
      * </ul>
      *
-     * @see TypeInfer#getInterfaces()
-     * @see TypeInfer#getSuperType()
+     * @see InferredType#getInterfaces()
+     * @see InferredType#getSuperType()
      */
-    public TypeInfer locate(Class<?> classType) {
-        TypeInfer targetType = NONE_TYPE;
+    public InferredType locate(Class<?> classType) {
+        InferredType targetType = NONE_TYPE;
 
         if (this != NONE_TYPE) {
             // If we haven't resolved the class or if we've found a direct match
@@ -858,7 +861,7 @@ public class TypeInfer implements ClassTypeInspector {
                 targetType = this;
             } else {
                 // Search interfaces
-                for (TypeInfer iface : getInterfaces()) {
+                for (InferredType iface : getInterfaces()) {
                     targetType = iface.locate(classType);
                     if (targetType != NONE_TYPE) {
                         break;
@@ -875,7 +878,7 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Converts the {@link TypeInfer} to a detailed representation of its hierarchy with indentation.
+     * Converts the {@link InferredType} to a detailed representation of its hierarchy with indentation.
      *
      * @param indent the initial indentation level
      * @return a string representation of the type hierarchy with proper indentation
@@ -884,20 +887,20 @@ public class TypeInfer implements ClassTypeInspector {
      * Indentation is used to represent the depth of the hierarchy, making the structure easy to read.
      * <p>
      *
-     * @see TypeInfer#getSuperType()
-     * @see TypeInfer#getInterfaces()
+     * @see InferredType#getSuperType()
+     * @see InferredType#getInterfaces()
      */
     public String toHierarchyString(int indent) {
         StringBuilder builder = new StringBuilder();
         builder.append(getName());
 
-        TypeInfer superType = getSuperType();
+        InferredType superType = getSuperType();
         if (superType != NONE_TYPE) {
             builder.append("\n").append("\t".repeat(indent)).append(" extends ")
                     .append(superType.toHierarchyString(indent + 1));
         }
 
-        for (TypeInfer iface : getInterfaces()) {
+        for (InferredType iface : getInterfaces()) {
             builder.append("\n").append("\t".repeat(indent)).append(" implements ")
                     .append(iface.toHierarchyString(indent + 1));
         }
@@ -906,7 +909,7 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Generates a string representation of this {@link TypeInfer}.
+     * Generates a string representation of this {@link InferredType}.
      *
      * @return a string representation of this type
      * <p>
@@ -916,7 +919,7 @@ public class TypeInfer implements ClassTypeInspector {
      *   <li>If the type is an unresolved type variable, it prefixes the type name with {@code !}.</li>
      *   <li>If the type is unknown, it returns {@code ?}.</li>
      * </ul>
-     * @see TypeInfer#getName()
+     * @see InferredType#getName()
      */
     @Override
     public String toString() {
@@ -951,12 +954,12 @@ public class TypeInfer implements ClassTypeInspector {
                 builder.append(Reflections.getShortName(getRawType()));
             }
 
-            TypeInfer[] generics = getGenerics();
+            InferredType[] generics = getGenerics();
 
             if (generics.length > 0) {
                 StringJoiner joiner = new StringJoiner(", ", "<", ">");
 
-                for (TypeInfer generic : generics) {
+                for (InferredType generic : generics) {
                     if (generic == this) {
                         joiner.add(Reflections.getShortName(getRawType()));
                     } else {
@@ -973,7 +976,7 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Retrieves the cached hash code for this {@link TypeInfer}.
+     * Retrieves the cached hash code for this {@link InferredType}.
      *
      * @return the hash code
      */
@@ -982,7 +985,7 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Sets the hash code for this {@link TypeInfer}.
+     * Sets the hash code for this {@link InferredType}.
      *
      * @param hashCode the hash code to set
      */
@@ -991,7 +994,7 @@ public class TypeInfer implements ClassTypeInspector {
     }
 
     /**
-     * Calculates the hash code for this {@link TypeInfer}.
+     * Calculates the hash code for this {@link InferredType}.
      *
      * @return the calculated hash code
      * <p>
@@ -1007,7 +1010,7 @@ public class TypeInfer implements ClassTypeInspector {
         boolean equals = false;
 
         if (object != null && getClass() == object.getClass()) {
-            TypeInfer that = (TypeInfer) object;
+            InferredType that = (InferredType) object;
             equals = Objects.equals(type, that.type);
         }
 
@@ -1022,7 +1025,7 @@ public class TypeInfer implements ClassTypeInspector {
     /**
      * Retrieves the current size of the cache.
      *
-     * @see TypeInfer#CACHE
+     * @see InferredType#CACHE
      */
     public static int getCacheSize() {
         return CACHE.size();
@@ -1064,7 +1067,7 @@ public class TypeInfer implements ClassTypeInspector {
     static class SyntheticType implements ParameterizedType {
 
         private final Class<?> rawType;
-        private final Type[] typeArguments;
+        private final Type[]   typeArguments;
 
         /**
          * Constructs a synthetic parameterized type with the specified raw type and type arguments.

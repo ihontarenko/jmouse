@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.reflection.TypeInfer;
+import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.core.Priority;
 
@@ -58,7 +58,7 @@ public class MapBinder extends AbstractBinder {
             // Get the map from the bindable instance
             @SuppressWarnings({"unchecked"})
             Map<Object, Object> map     = (Map<Object, Object>) getMap(bindable);
-            TypeInfer       mapType = bindable.getType().locate(Map.class);
+            InferredType    mapType = bindable.getType().locate(Map.class);
             TypeInformation vi      = TypeInformation.forJavaType(mapType.getLast());
             TypeInformation     ki      = TypeInformation.forJavaType(mapType.getFirst());
 

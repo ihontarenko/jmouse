@@ -3,7 +3,7 @@ package org.jmouse.core.bind.descriptor.internal;
 import org.jmouse.core.bind.descriptor.ConstructorDescriptor;
 import org.jmouse.core.bind.descriptor.FieldDescriptor;
 import org.jmouse.core.bind.descriptor.MethodDescriptor;
-import org.jmouse.core.reflection.TypeInfer;
+import org.jmouse.core.reflection.InferredType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,17 +15,17 @@ public class ClassTypeData extends AnnotatedElementData<Class<?>> {
     private final List<ConstructorDescriptor>   constructors = new ArrayList<>();
     private final Map<String, FieldDescriptor>  fields       = new HashMap<>();
     private final Map<String, MethodDescriptor> methods      = new HashMap<>();
-    private       TypeInfer                     type;
+    private       InferredType                  type;
 
     public ClassTypeData(Class<?> target) {
         super(target);
     }
 
-    public TypeInfer getType() {
+    public InferredType getType() {
         return type;
     }
 
-    public void setType(TypeInfer type) {
+    public void setType(InferredType type) {
         this.type = type;
     }
 

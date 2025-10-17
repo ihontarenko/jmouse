@@ -7,7 +7,7 @@ import org.jmouse.core.bind.descriptor.structured.ObjectData;
 
 import java.util.Map;
 
-import static org.jmouse.core.reflection.TypeInfer.forClass;
+import static org.jmouse.core.reflection.InferredType.forClass;
 
 /**
  * An introspector for analyzing {@link Map} structures.

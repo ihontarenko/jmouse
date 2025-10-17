@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.reflection.TypeInfer;
+import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.Priority;
 
 import java.lang.reflect.Array;
@@ -47,8 +47,8 @@ public class ArrayBinder extends CollectionBinder {
      */
     @Override
     public <T> BindResult<T> bind(PropertyPath root, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback) {
-        TypeInfer     elementType = bindable.getType().getComponentType();
-        TypeInfer     type        = TypeInfer.forParametrizedClass(List.class, elementType.getRawType());
+        InferredType  elementType = bindable.getType().getComponentType();
+        InferredType  type        = InferredType.forParametrizedClass(List.class, elementType.getRawType());
         BindResult<T> result      = super.bind(root, Bindable.of(type), accessor, callback);
 
         // resulted array object

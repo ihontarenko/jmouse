@@ -4,7 +4,7 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanContextInitializer;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.env.Environment;
-import org.jmouse.core.reflection.TypeInfer;
+import org.jmouse.core.reflection.InferredType;
 import org.jmouse.web.mvc.BeanConfigurer;
 import org.jmouse.core.Priority;
 import org.jmouse.core.Sorter;
@@ -70,7 +70,7 @@ public class StartupApplicationContextInitializer implements BeanContextInitiali
         if (!beanConfigurers.isEmpty()) {
             Sorter.sort(beanConfigurers);
             for (BeanConfigurer<?> beanConfigurer : beanConfigurers) {
-                TypeInfer type = TypeInfer.forInstance(beanConfigurer)
+                InferredType type = InferredType.forInstance(beanConfigurer)
                         .locate(BeanConfigurer.class).getFirst();
                 handleBeanConfigurer(context, (BeanConfigurer<Object>) beanConfigurer, type.getClassType());
             }

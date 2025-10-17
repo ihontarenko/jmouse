@@ -1,6 +1,6 @@
 package org.jmouse.beans.definition;
 
-import org.jmouse.core.reflection.TypeInfer;
+import org.jmouse.core.reflection.InferredType;
 
 /**
  * Represents a dependency required by a bean.
@@ -36,7 +36,7 @@ public interface BeanDependency {
      *
      * @return the class type of the dependency.
      */
-    TypeInfer javaType();
+    InferredType javaType();
 
     /**
      * Gets the name of the dependency.

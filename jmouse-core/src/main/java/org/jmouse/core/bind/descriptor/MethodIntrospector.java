@@ -1,7 +1,7 @@
 package org.jmouse.core.bind.descriptor;
 
 import org.jmouse.core.bind.descriptor.internal.MethodData;
-import org.jmouse.core.reflection.TypeInfer;
+import org.jmouse.core.reflection.InferredType;
 
 import java.lang.reflect.Method;
 
@@ -17,7 +17,7 @@ public class MethodIntrospector extends ExecutableIntrospector<MethodData, Metho
     }
 
     public MethodIntrospector returnType() {
-        TypeInfer returnType = TypeInfer.forMethodReturnType(container.getTarget());
+        InferredType returnType = InferredType.forMethodReturnType(container.getTarget());
         return returnType(new ClassTypeIntrospector(returnType).name().toDescriptor());
     }
 

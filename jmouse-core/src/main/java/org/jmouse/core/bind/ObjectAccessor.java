@@ -3,14 +3,14 @@ package org.jmouse.core.bind;
 import org.jmouse.core.bind.PropertyPath.Entries;
 import org.jmouse.core.bind.PropertyPath.Type;
 import org.jmouse.core.reflection.ClassTypeInspector;
-import org.jmouse.core.reflection.TypeInfer;
+import org.jmouse.core.reflection.InferredType;
 
 import java.util.*;
 import java.util.stream.IntStream;
 
 import static java.util.Objects.requireNonNullElseGet;
 import static java.util.stream.Collectors.toUnmodifiableSet;
-import static org.jmouse.core.reflection.TypeInfer.forInstance;
+import static org.jmouse.core.reflection.InferredType.forInstance;
 
 /**
  * Represents a data source abstraction that provides methods for accessing and transforming data.
@@ -396,8 +396,8 @@ public interface ObjectAccessor extends ClassTypeInspector {
      */
     @SuppressWarnings({"unchecked"})
     default <K, V> Map<K, V> asMap(Class<K> keyType, Class<V> valueType) {
-        Map<K, V> value = asType(Map.class);
-        TypeInfer type  = forInstance(value).toMap();
+        Map<K, V>    value = asType(Map.class);
+        InferredType type  = forInstance(value).toMap();
         verifyTypeCompatibility("#asMap(K, ?)", keyType, type.getFirst().getRawType());
         verifyTypeCompatibility("#asMap(?, V)", valueType, type.getLast().getRawType());
         return value;

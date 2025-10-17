@@ -34,7 +34,7 @@ public abstract class HashStringGenerator extends AbstractStringIdGenerator {
         try {
             this.messageDigest = MessageDigest.getInstance(algorithm);
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Algorithm '%s' not found".formatted(algorithm), e);
+            throw new IllegalStateException("Algorithm '%s' is unsupported!".formatted(algorithm), e);
         }
     }
 

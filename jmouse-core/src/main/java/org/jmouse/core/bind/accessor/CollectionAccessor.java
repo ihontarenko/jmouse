@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.jmouse.core.reflection.TypeInfer.forInstance;
+import static org.jmouse.core.reflection.InferredType.forInstance;
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**

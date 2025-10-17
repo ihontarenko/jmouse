@@ -5,14 +5,14 @@ import java.util.Objects;
 /**
  * Represents type descriptor and provides utility methods for type analysis.
  * <p>
- * This class wraps a {@link Class} and a corresponding {@link TypeInfer} to facilitate
+ * This class wraps a {@link Class} and a corresponding {@link InferredType} to facilitate
  * various type-checking operations commonly used in reflection-based processing.
  * </p>
  */
 public class TypeInformation implements ClassTypeInspector {
 
-    private final Class<?>  rawType;
-    private final TypeInfer type;
+    private final Class<?>     rawType;
+    private final InferredType type;
 
     /**
      * Constructs a {@link TypeInformation} from a raw {@link Class}.
@@ -21,15 +21,15 @@ public class TypeInformation implements ClassTypeInspector {
      */
     public TypeInformation(Class<?> rawType) {
         this.rawType = Objects.requireNonNullElse(rawType, Object.class);
-        this.type = TypeInfer.forType(this.rawType);
+        this.type = InferredType.forType(this.rawType);
     }
 
     /**
-     * Constructs a {@link TypeInformation} from a {@link TypeInfer}.
+     * Constructs a {@link TypeInformation} from a {@link InferredType}.
      *
-     * @param type the {@link TypeInfer} instance to be wrapped
+     * @param type the {@link InferredType} instance to be wrapped
      */
-    public TypeInformation(TypeInfer type) {
+    public TypeInformation(InferredType type) {
         this.type = type;
         this.rawType = Objects.requireNonNullElse(type.getRawType(), Object.class);
     }
@@ -45,12 +45,12 @@ public class TypeInformation implements ClassTypeInspector {
     }
 
     /**
-     * Creates a {@link TypeInformation} for a given {@link TypeInfer}.
+     * Creates a {@link TypeInformation} for a given {@link InferredType}.
      *
-     * @param type the {@link TypeInfer} instance to wrap
+     * @param type the {@link InferredType} instance to wrap
      * @return a new {@link TypeInformation} instance
      */
-    public static TypeInformation forJavaType(TypeInfer type) {
+    public static TypeInformation forJavaType(InferredType type) {
         return new TypeInformation(type);
     }
 
@@ -58,7 +58,7 @@ public class TypeInformation implements ClassTypeInspector {
      * Creates a {@link TypeInformation} for a given instance object.
      */
     public static TypeInformation forInstance(Object instance) {
-        return new TypeInformation(instance == null ? TypeInfer.NONE_TYPE : TypeInfer.forInstance(instance));
+        return new TypeInformation(instance == null ? InferredType.NONE_TYPE : InferredType.forInstance(instance));
     }
 
     /**
@@ -71,11 +71,11 @@ public class TypeInformation implements ClassTypeInspector {
     }
 
     /**
-     * Returns the wrapped {@link TypeInfer} instance.
+     * Returns the wrapped {@link InferredType} instance.
      *
      * @return the wrapped Java type
      */
-    public TypeInfer getType() {
+    public InferredType getType() {
         return type;
     }
 

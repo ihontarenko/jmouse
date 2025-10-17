@@ -6,5 +6,5 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public interface AuthorizationFailureHandler {
-    void handle(HttpServletRequest request, HttpServletResponse response, Exception exception) throws IOException;
+    void onFailure(HttpServletRequest request, HttpServletResponse response, Exception exception) throws IOException;
 }

@@ -9,6 +9,7 @@ import org.jmouse.security.web.authentication.AuthenticationProvider;
 import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
 import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.security.web.RequestMatcher;
+import org.jmouse.web.match.routing.MatcherCriteria;
 
 public class BasicAuthenticationFilter extends AbstractAuthenticationFilter {
 
@@ -17,11 +18,11 @@ public class BasicAuthenticationFilter extends AbstractAuthenticationFilter {
     public BasicAuthenticationFilter(
             AuthenticationManager authenticationManager,
             SecurityContextRepository contextRepository,
-            RequestMatcher requestMatcher,
+            MatcherCriteria matcherCriteria,
             AuthenticationSuccessHandler successHandler,
             AuthenticationFailureHandler failureHandler
     ) {
-        super(authenticationManager, contextRepository, requestMatcher, successHandler, failureHandler);
+        super(authenticationManager, contextRepository, matcherCriteria, successHandler, failureHandler);
     }
 
     public AuthenticationProvider getAuthenticationProvider() {

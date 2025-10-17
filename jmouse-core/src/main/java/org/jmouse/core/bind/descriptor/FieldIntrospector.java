@@ -1,7 +1,7 @@
 package org.jmouse.core.bind.descriptor;
 
 import org.jmouse.core.bind.descriptor.internal.FieldData;
-import org.jmouse.core.reflection.TypeInfer;
+import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Field;
@@ -50,7 +50,7 @@ public class FieldIntrospector extends AnnotatedElementIntrospector<FieldData, F
      * @return current introspector instance
      */
     public FieldIntrospector type() {
-        ClassTypeIntrospector introspector = new ClassTypeIntrospector(TypeInfer.forField(container.getTarget()));
+        ClassTypeIntrospector introspector = new ClassTypeIntrospector(InferredType.forField(container.getTarget()));
         container.setType(introspector.annotations().name().toDescriptor());
         return self();
     }

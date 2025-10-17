@@ -8,6 +8,7 @@ import org.jmouse.security.web.authentication.www.BasicAuthenticationFilter;
 import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.security.web.RequestMatcher;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
+import org.jmouse.web.match.routing.MatcherCriteria;
 
 public class HttpBasicConfigurer<B extends HttpSecurityBuilder<B>>
         extends AbstractAuthenticationConfigurer<B, HttpBasicConfigurer<B>> {
@@ -32,7 +33,9 @@ public class HttpBasicConfigurer<B extends HttpSecurityBuilder<B>>
 
     @Override
     protected Filter doBuildFilter(
-            AuthenticationManager authenticationManager, SecurityContextRepository repository, RequestMatcher matcher,
+            AuthenticationManager authenticationManager,
+            SecurityContextRepository repository,
+            MatcherCriteria matcherCriteria,
             AuthenticationSuccessHandler successHandler,
             AuthenticationFailureHandler failureHandler
     ) {
@@ -48,7 +51,7 @@ public class HttpBasicConfigurer<B extends HttpSecurityBuilder<B>>
             failure = entryPoint::initiate;
         }
 
-        return new BasicAuthenticationFilter(authenticationManager, repository, matcher, success, failure);
+        return new BasicAuthenticationFilter(authenticationManager, repository, matcherCriteria, success, failure);
     }
 
 }

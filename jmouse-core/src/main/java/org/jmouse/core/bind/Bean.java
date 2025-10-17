@@ -2,7 +2,7 @@ package org.jmouse.core.bind;
 
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
-import org.jmouse.core.reflection.TypeInfer;
+import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.Factory;
 
 import java.util.Collection;
@@ -24,14 +24,14 @@ abstract public class Bean<T> {
     /**
      * The Java type represented by this structured.
      */
-    protected final TypeInfer type;
+    protected final InferredType type;
 
     /**
      * Constructs a structured for the specified type.
      *
      * @param type the Java type this structured represents
      */
-    protected Bean(TypeInfer type, ObjectDescriptor<T> descriptor) {
+    protected Bean(InferredType type, ObjectDescriptor<T> descriptor) {
         this.type = type;
         this.descriptor = descriptor;
     }

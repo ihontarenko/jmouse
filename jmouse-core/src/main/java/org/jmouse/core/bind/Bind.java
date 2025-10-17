@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.reflection.TypeInfer;
+import org.jmouse.core.reflection.InferredType;
 
 import java.util.List;
 import java.util.Map;
@@ -106,14 +106,14 @@ public final class Bind {
     }
 
     /**
-     * Binds the value at the given path to the specified {@link TypeInfer}.
+     * Binds the value at the given path to the specified {@link InferredType}.
      *
      * @param path the property path
      * @param type the Java type
      * @param <T> the expected result type
      * @return the binding result
      */
-    public <T> BindResult<T> to(String path, TypeInfer type) {
+    public <T> BindResult<T> to(String path, InferredType type) {
         return to(path, Bindable.of(type));
     }
 
@@ -126,17 +126,17 @@ public final class Bind {
      * @return the binding result
      */
     public <T> BindResult<T> to(String path, Class<T> type) {
-        return to(path, TypeInfer.forClass(type));
+        return to(path, InferredType.forClass(type));
     }
 
     /**
-     * Binds a value to the specified {@link TypeInfer}.
+     * Binds a value to the specified {@link InferredType}.
      *
      * @param type the Java type
      * @param <T> the expected result type
      * @return the binding result
      */
-    public <T> BindResult<T> to(TypeInfer type) {
+    public <T> BindResult<T> to(InferredType type) {
         return to(Bindable.of(type));
     }
 
@@ -148,7 +148,7 @@ public final class Bind {
      * @return the binding result
      */
     public <T> BindResult<T> to(Class<T> type) {
-        return to(TypeInfer.forClass(type));
+        return to(InferredType.forClass(type));
     }
 
     /**

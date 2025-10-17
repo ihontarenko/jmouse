@@ -9,7 +9,7 @@ import org.jmouse.core.bind.descriptor.structured.map.MapIntrospector;
 
 import java.util.*;
 
-import static org.jmouse.core.reflection.TypeInfer.forInstance;
+import static org.jmouse.core.reflection.InferredType.forInstance;
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**

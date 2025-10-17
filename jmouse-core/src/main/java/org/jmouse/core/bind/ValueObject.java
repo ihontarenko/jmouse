@@ -2,7 +2,7 @@ package org.jmouse.core.bind;
 
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectIntrospector;
-import org.jmouse.core.reflection.TypeInfer;
+import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.core.CachedSupplier;
 import org.jmouse.core.Factory;
@@ -11,7 +11,7 @@ import org.jmouse.util.Arrays;
 import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 
-import static org.jmouse.core.reflection.TypeInfer.forClass;
+import static org.jmouse.core.reflection.InferredType.forClass;
 import static org.jmouse.core.reflection.Reflections.*;
 
 /**
@@ -81,9 +81,9 @@ final public class ValueObject<T extends Record> extends Bean<T> {
             }
 
             for (PropertyDescriptor<?> property : getProperties()) {
-                Object    value        = values.get(property);
-                TypeInfer propertyType = property.getType().getJavaType();
-                Class<?>  classType    = Arrays.boxType(propertyType.getRawType());
+                Object       value        = values.get(property);
+                InferredType propertyType = property.getType().getJavaType();
+                Class<?>     classType    = Arrays.boxType(propertyType.getRawType());
 
                 try {
                     arguments[index++] = classType.cast(value);

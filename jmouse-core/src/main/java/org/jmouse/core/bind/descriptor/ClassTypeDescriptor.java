@@ -2,7 +2,7 @@ package org.jmouse.core.bind.descriptor;
 
 import org.jmouse.core.bind.descriptor.internal.ClassTypeData;
 import org.jmouse.core.reflection.ClassTypeInspector;
-import org.jmouse.core.reflection.TypeInfer;
+import org.jmouse.core.reflection.InferredType;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,7 +14,7 @@ public class ClassTypeDescriptor extends AnnotatedElementDescriptor<Class<?>, Cl
         super(introspector, container);
     }
 
-    public TypeInfer getJavaType() {
+    public InferredType getJavaType() {
         return container.getType();
     }
 

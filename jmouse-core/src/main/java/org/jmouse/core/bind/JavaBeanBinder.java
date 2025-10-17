@@ -2,7 +2,7 @@ package org.jmouse.core.bind;
 
 import org.jmouse.core.bind.descriptor.MethodDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
-import org.jmouse.core.reflection.TypeInfer;
+import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.Factory;
 import org.jmouse.core.Priority;
 import org.jmouse.util.Strings;
@@ -52,8 +52,8 @@ public class JavaBeanBinder extends AbstractBinder {
      */
     @Override
     public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback) {
-        TypeInfer   type = bindable.getType();
-        JavaBean<T> bean = JavaBean.of(type);
+        InferredType type = bindable.getType();
+        JavaBean<T>  bean = JavaBean.of(type);
 
         // Obtain a factory that can create new instances of the class
         Factory<T> factory = bean.getFactory(bindable);
@@ -66,7 +66,7 @@ public class JavaBeanBinder extends AbstractBinder {
         // Iterate through all the properties of the JavaBean to map values
         for (PropertyDescriptor<T> property : bean.getProperties()) {
             PropertyPath     propertyName = PropertyPath.forPath(getPreferredName(property));
-            TypeInfer        propertyType = property.getType().getJavaType();
+            InferredType     propertyType = property.getType().getJavaType();
             Supplier<Object> value        = bean.getValue(property, factory);
 
             // Check if the property is writable then perform value binding for the property

@@ -9,6 +9,7 @@ import org.jmouse.security.web.authentication.AuthenticationFailureHandler;
 import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;
 import org.jmouse.security.web.authentication.bearer.BearerTokenAuthenticationProvider;
 import org.jmouse.security.web.context.SecurityContextRepository;
+import org.jmouse.web.match.routing.MatcherCriteria;
 
 /**
  * 🚪 Extracts Bearer token and delegates to AuthenticationManager.
@@ -20,11 +21,11 @@ public final class JwtAuthenticationFilter extends AbstractAuthenticationFilter 
     public JwtAuthenticationFilter(
             AuthenticationManager authenticationManager,
             SecurityContextRepository contextRepository,
-            RequestMatcher requestMatcher,
+            MatcherCriteria matcherCriteria,
             AuthenticationSuccessHandler successHandler,
             AuthenticationFailureHandler failureHandler
     ) {
-        super(authenticationManager, contextRepository, requestMatcher, successHandler, failureHandler);
+        super(authenticationManager, contextRepository, matcherCriteria, successHandler, failureHandler);
     }
 
     @Override

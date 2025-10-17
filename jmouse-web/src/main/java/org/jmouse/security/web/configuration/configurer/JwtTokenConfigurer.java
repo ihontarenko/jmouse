@@ -16,6 +16,7 @@ import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.security.web.jwt.JacksonJsonMapper;
 import org.jmouse.web.http.WWWAuthenticate.Bearer.ErrorCode;
+import org.jmouse.web.match.routing.MatcherCriteria;
 
 import java.time.Clock;
 
@@ -45,7 +46,7 @@ public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>>
     protected Filter doBuildFilter(
             AuthenticationManager authenticationManager,
             SecurityContextRepository repository,
-            RequestMatcher matcher,
+            MatcherCriteria matcherCriteria,
             AuthenticationSuccessHandler successHandler,
             AuthenticationFailureHandler failureHandler
     ) {
@@ -74,7 +75,7 @@ public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>>
         AuthenticationSuccessHandler success = successHandler != null
                 ? successHandler : new NoopHttp200SuccessHandler();
 
-        return new JwtAuthenticationFilter(authenticationManager, repository, matcher, success, failure);
+        return new JwtAuthenticationFilter(authenticationManager, repository, matcherCriteria, success, failure);
     }
 
     public static class CodecConfigurer {
