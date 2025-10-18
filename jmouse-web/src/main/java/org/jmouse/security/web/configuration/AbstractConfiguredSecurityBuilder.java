@@ -158,6 +158,42 @@ public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractCon
     }
 
     /**
+     * 🚀 Retrieves an object of the specified {@code type}, using the given {@code defaultObject} supplier if needed.
+     * 💥 Throws {@link IllegalStateException} if no instance can be resolved or supplied.
+     *
+     * @param type          target object type to retrieve
+     * @param defaultObject supplier providing a fallback instance (may return {@code null})
+     * @param <U>           generic object type
+     * @return resolved instance (never {@code null})
+     * @throws IllegalStateException if the object cannot be resolved
+     */
+    public <U> U getRequiredObject(Class<U> type, Supplier<U> defaultObject) {
+        U instance = getObject(type, defaultObject);
+
+        if (instance == null) {
+            throw new IllegalStateException(
+                    "❌ Required object of type '%s' could not be resolved."
+                            .formatted(type.getName())
+            );
+        }
+
+        return instance;
+    }
+
+    /**
+     * ⚙️ Retrieves an object of the specified {@code type}.
+     * 💥 Throws {@link IllegalStateException} if no instance can be resolved.
+     *
+     * @param type target object type to retrieve
+     * @param <U>  generic object type
+     * @return resolved instance (never {@code null})
+     * @throws IllegalStateException if the object cannot be resolved
+     */
+    public <U> U getRequiredObject(Class<U> type) {
+        return getRequiredObject(type, () -> null);
+    }
+
+    /**
      * 🫘 BeanProvider: delegate to {@link WebBeanContext}.
      *
      * @param beanClass type to resolve

@@ -1,9 +1,9 @@
 package org.jmouse.security.web.configuration;
 
-import org.jmouse.security.web.SecurityFilterChain;
+import org.jmouse.security.web.MatchableSecurityFilterChain;
 
 public class HttpSecurityConfigurer<T extends HttpSecurityConfigurer<T, B>, B extends HttpSecurityBuilder<B>>
-        extends ConfigurerAdapter<SecurityFilterChain, B> {
+        extends ConfigurerAdapter<MatchableSecurityFilterChain, B> {
 
     @SuppressWarnings("unchecked")
     public B disable() {

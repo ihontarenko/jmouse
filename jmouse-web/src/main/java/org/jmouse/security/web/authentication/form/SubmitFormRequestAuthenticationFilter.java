@@ -32,7 +32,8 @@ public class SubmitFormRequestAuthenticationFilter extends AbstractAuthenticatio
             SecurityContextRepository contextRepository,
             MatcherCriteria matcherCriteria
     ) {
-        this(authenticationManager, contextRepository, matcherCriteria, new NoopHttp200SuccessHandler(), new NoopHttp401FailureHandler());
+        this(authenticationManager, contextRepository, matcherCriteria,
+             new NoopHttp200SuccessHandler(), new NoopHttp401FailureHandler());
     }
 
     @Override

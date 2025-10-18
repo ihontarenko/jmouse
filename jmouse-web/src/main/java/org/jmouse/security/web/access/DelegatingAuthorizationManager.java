@@ -5,7 +5,7 @@ import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorizationManager;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.web.RequestMatcherEntry;
-import org.jmouse.security.web.RequestSecurityContext;
+import org.jmouse.security.web.RequestMatch;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MappingMatcher;
 
@@ -14,11 +14,11 @@ import java.util.List;
 
 public class DelegatingAuthorizationManager implements AuthorizationManager<HttpServletRequest> {
 
-    private final List<RequestMatcherEntry<AuthorizationManager<RequestSecurityContext>>> mappings;
-    private final AuthorizationManager<HttpServletRequest>                                defaultManager;
+    private final List<RequestMatcherEntry<AuthorizationManager<RequestMatch>>> mappings;
+    private final AuthorizationManager<HttpServletRequest>                      defaultManager;
 
     private DelegatingAuthorizationManager(
-            List<RequestMatcherEntry<AuthorizationManager<RequestSecurityContext>>> entries,
+            List<RequestMatcherEntry<AuthorizationManager<RequestMatch>>> entries,
             AuthorizationManager<HttpServletRequest> defaultManager
     ) {
         this.mappings = List.copyOf(entries);
@@ -32,7 +32,7 @@ public class DelegatingAuthorizationManager implements AuthorizationManager<Http
         for (var mapping : mappings) {
             MappingMatcher<RequestRoute> matcher = mapping.matcher();
             if (matcher.matches(requestRoute)) {
-                RequestSecurityContext context = new RequestSecurityContext(request, matcher.match(requestRoute));
+                RequestMatch context = new RequestMatch(request, matcher.match(requestRoute));
                 return mapping.entry().check(authentication, context);
             }
         }
@@ -46,11 +46,11 @@ public class DelegatingAuthorizationManager implements AuthorizationManager<Http
 
     public static final class Builder {
 
-        private final List<RequestMatcherEntry<AuthorizationManager<RequestSecurityContext>>> entries
+        private final List<RequestMatcherEntry<AuthorizationManager<RequestMatch>>> entries
                 = new ArrayList<>();
-        private       AuthorizationManager<HttpServletRequest>                                defaultManager;
+        private       AuthorizationManager<HttpServletRequest>                      defaultManager;
 
-        public Builder addMapping(MappingMatcher<RequestRoute> matcher, AuthorizationManager<RequestSecurityContext> manager) {
+        public Builder addMapping(MappingMatcher<RequestRoute> matcher, AuthorizationManager<RequestMatch> manager) {
             entries.add(new RequestMatcherEntry<>(matcher, manager));
             return this;
         }

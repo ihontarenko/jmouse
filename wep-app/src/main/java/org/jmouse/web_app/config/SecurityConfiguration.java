@@ -5,7 +5,7 @@ import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.security.core.UserPrincipal;
 import org.jmouse.security.core.UserPrincipalService;
 import org.jmouse.security.core.service.InMemoryUserPrincipalService;
-import org.jmouse.security.web.SecurityFilterChain;
+import org.jmouse.security.web.MatchableSecurityFilterChain;
 import org.jmouse.security.web.configuration.builder.HttpSecurity;
 import org.jmouse.web.http.HttpMethod;
 
@@ -30,20 +30,19 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain defaultFilterChain(
-            HttpSecurity http, UserPrincipalService principalService) throws Exception {
+    public MatchableSecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
 
         http.chainMatcher(matcher -> matcher.pathPattern("/**"));
+        http.principalService(principalService());
 
         http.submitForm(form -> form
                 .usernameParameter("username")
                 .passwordParameter("password")
                 .loginPage("/login/index")
-                .redirect(r -> r.url("/asd"))
                 .processing()
                     .formAction("/login/process")
                     .httpMethod(HttpMethod.POST)
-//                .requestMatcher(r -> r.contentType())
+                .redirect(r -> r.url("/asd"))
         );
 
 //        http.exceptionHandling(e -> e
@@ -54,7 +53,7 @@ public class SecurityConfiguration {
 //                .enableChallengeOnFailure()
 //        );
 
-        http.authorizeHttpRequests(a -> a
+        http.authorization(a -> a
                 .requestPath("/login/**").permitAll()
                 .requestPath("/shared/**").permitAll()
                 .anyRequest().authenticated()

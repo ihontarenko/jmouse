@@ -1,14 +1,14 @@
 package org.jmouse.security.web.configuration;
 
 import jakarta.servlet.Filter;
-import org.jmouse.security.web.SecurityFilterChain;
+import org.jmouse.security.web.MatchableSecurityFilterChain;
 import org.jmouse.web.match.routing.MatcherCriteria;
 
 import java.util.List;
 import java.util.function.Supplier;
 
 public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
-        extends SecurityBuilder<SecurityFilterChain> {
+        extends SecurityBuilder<MatchableSecurityFilterChain> {
 
     default <U> U getObject(Class<U> type) {
         return getObject(type, () -> null);
@@ -28,9 +28,9 @@ public interface HttpSecurityBuilder<H extends HttpSecurityBuilder<H>>
 
     <U> U getObject(Class<U> type, Supplier<U> defaultObject);
 
-    <C extends SecurityConfigurer<SecurityFilterChain, H>> void removeConfigurer(Class<C> type);
+    <C extends SecurityConfigurer<MatchableSecurityFilterChain, H>> void removeConfigurer(Class<C> type);
 
-    <C extends SecurityConfigurer<SecurityFilterChain, H>> C getConfigurer(Class<C> type);
+    <C extends SecurityConfigurer<MatchableSecurityFilterChain, H>> C getConfigurer(Class<C> type);
 
     H chainMatcher(Customizer<MatcherCriteria> customizer);
 

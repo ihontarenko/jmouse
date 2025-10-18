@@ -14,10 +14,10 @@ import java.util.function.Function;
 public class AuthorizationCriterion<T, C> {
 
     private final List<MappingMatcher<RequestRoute>> matchers;
-    private final T                    owner;
-    private final MappingApplier<T, C> applier;
-    private final ContextVariables<C>  variables;
-    private       boolean              negate = false;
+    private final T                                  owner;
+    private final MappingApplier<T, C>               applier;
+    private final ContextVariables<C>                variables;
+    private       boolean                            negate = false;
 
     public AuthorizationCriterion(
             MappingApplier<T, C> applier,

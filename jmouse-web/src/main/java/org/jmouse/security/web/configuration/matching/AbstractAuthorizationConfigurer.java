@@ -11,7 +11,7 @@ import java.util.List;
 
 import static java.util.List.of;
 
-abstract public class AbstractRequestMatcherRegistry<T> {
+abstract public class AbstractAuthorizationConfigurer<T> {
 
     abstract protected T applyMatchers(List<MappingMatcher<RequestRoute>> requestMatchers);
 

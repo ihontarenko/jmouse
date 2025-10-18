@@ -17,12 +17,12 @@ import static org.jmouse.core.AnsiColors.colorize;
 /**
  * 🛡️ SecurityFilterChainDelegator
  *
- * Delegates incoming requests to the first matching {@link SecurityFilterChain}.
+ * Delegates incoming requests to the first matching {@link MatchableSecurityFilterChain}.
  *
  * <p>Responsibilities:</p>
  * <ul>
- *   <li>🔍 Iterate over all configured {@link SecurityFilterChain}s</li>
- *   <li>✅ Select the first one whose {@link SecurityFilterChain#matches(HttpServletRequest)} returns true</li>
+ *   <li>🔍 Iterate over all configured {@link MatchableSecurityFilterChain}s</li>
+ *   <li>✅ Select the first one whose {@link MatchableSecurityFilterChain#matches(HttpServletRequest)} returns true</li>
  *   <li>🔗 Wrap its filters in a {@link Virtual} {@link FilterChain} for sequential execution</li>
  *   <li>📢 Log which chain matched and for which URI</li>
  * </ul>
@@ -37,7 +37,7 @@ public class SecurityFilterChainDelegator implements Filter {
     /**
      * 🔗 All registered security filter chains (aggregated from beans).
      */
-    private final List<SecurityFilterChain> chains;
+    private final List<MatchableSecurityFilterChain> chains;
 
     /**
      * 🏗️ Construct delegator with injected chains.
@@ -45,12 +45,12 @@ public class SecurityFilterChainDelegator implements Filter {
      * @param chains aggregated security filter chains
      */
     @BeanConstructor
-    public SecurityFilterChainDelegator(@AggregatedBeans List<SecurityFilterChain> chains) {
+    public SecurityFilterChainDelegator(@AggregatedBeans List<MatchableSecurityFilterChain> chains) {
         this.chains = chains;
     }
 
     /**
-     * 🔄 Delegates request to the first matching {@link SecurityFilterChain}.
+     * 🔄 Delegates request to the first matching {@link MatchableSecurityFilterChain}.
      *
      * @param request  incoming servlet request
      * @param response servlet response
@@ -60,7 +60,7 @@ public class SecurityFilterChainDelegator implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        for (SecurityFilterChain securityChain : chains) {
+        for (MatchableSecurityFilterChain securityChain : chains) {
             if (securityChain.matches((HttpServletRequest) request)) {
                 // Wrap filters into a virtual chain
                 Virtual virtual = new Virtual(chain, securityChain.getFilters());
@@ -87,7 +87,7 @@ public class SecurityFilterChainDelegator implements Filter {
     }
 
     /**
-     * 🔗 Virtual chain — executes the filters of a matched {@link SecurityFilterChain}
+     * 🔗 Virtual chain — executes the filters of a matched {@link MatchableSecurityFilterChain}
      * before delegating back to the outer application {@link FilterChain}.
      */
     private static final class Virtual implements FilterChain {

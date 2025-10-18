@@ -2,6 +2,7 @@ package org.jmouse.security.web.configuration.builder;
 
 import jakarta.servlet.Filter;
 import org.jmouse.core.Sorter;
+import org.jmouse.security.core.UserPrincipalService;
 import org.jmouse.security.web.*;
 import org.jmouse.security.web.configuration.*;
 import org.jmouse.security.web.configuration.configurer.*;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 public final class HttpSecurity
-        extends AbstractConfiguredSecurityBuilder<SecurityFilterChain, HttpSecurity>
+        extends AbstractConfiguredSecurityBuilder<MatchableSecurityFilterChain, HttpSecurity>
         implements HttpSecurityBuilder<HttpSecurity> {
 
     private final List<Filter>                 filters = new ArrayList<>();
@@ -78,6 +79,11 @@ public final class HttpSecurity
         return this;
     }
 
+    public HttpSecurity principalService(UserPrincipalService principalService) {
+        setSharedObject(UserPrincipalService.class, principalService);
+        return this;
+    }
+
     public HttpSecurity securityContext(Customizer<SecurityContextConfigurer<HttpSecurity>> customizer) {
         customizer.customize(attach(new SecurityContextConfigurer<>()));
         return this;
@@ -93,7 +99,12 @@ public final class HttpSecurity
         return this;
     }
 
-    public HttpSecurity authorizeHttpRequests(Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.Registry> customizer) {
+    public HttpSecurity authorizeHttpRequests(Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationConfigurer> customizer) {
+        customizer.customize(attach(new AuthorizeHttpRequestsConfigurer<>()).getRegistry());
+        return this;
+    }
+
+    public HttpSecurity authorization(Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationConfigurer> customizer) {
         customizer.customize(attach(new AuthorizeHttpRequestsConfigurer<>()).getRegistry());
         return this;
     }
@@ -118,18 +129,18 @@ public final class HttpSecurity
         return this;
     }
 
-    public <C extends ConfigurerAdapter<SecurityFilterChain, HttpSecurity>> C attach(C configurer) {
+    public <C extends ConfigurerAdapter<MatchableSecurityFilterChain, HttpSecurity>> C attach(C configurer) {
         return apply(configurer);
     }
 
     @Override
-    protected DefaultSecurityFilterChain doBuild() throws Exception {
+    protected SecurityFilterChain doBuild() throws Exception {
         initializeConfigurers();
         configureConfigurers();
 
         List<Filter> sorted = new ArrayList<>(filters);
         sorted.sort(Sorter.PRIORITY_COMPARATOR);
 
-        return new DefaultSecurityFilterChain(this.matcher, sorted);
+        return new SecurityFilterChain(this.matcher, sorted);
     }
 }

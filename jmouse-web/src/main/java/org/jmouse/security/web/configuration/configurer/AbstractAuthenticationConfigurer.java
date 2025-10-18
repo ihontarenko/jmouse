@@ -227,7 +227,7 @@ public abstract class AbstractAuthenticationConfigurer<B extends HttpSecurityBui
     public class RedirectHandlerConfigurer {
 
         public void url(String redirectUrl) {
-            successHandler(new SuccessRedirectHandler(redirectUrl));
+            AbstractAuthenticationConfigurer.this.successHandler(new SuccessRedirectHandler(redirectUrl));
         }
 
     }
