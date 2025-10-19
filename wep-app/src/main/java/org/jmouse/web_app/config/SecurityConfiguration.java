@@ -6,8 +6,12 @@ import org.jmouse.security.core.UserPrincipal;
 import org.jmouse.security.core.UserPrincipalService;
 import org.jmouse.security.core.service.InMemoryUserPrincipalService;
 import org.jmouse.security.web.MatchableSecurityFilterChain;
+import org.jmouse.security.web.configuration.Customizer;
 import org.jmouse.security.web.configuration.builder.HttpSecurity;
+import org.jmouse.security.web.configuration.configurer.AuthorizeHttpRequestsConfigurer;
 import org.jmouse.web.http.HttpMethod;
+import org.jmouse.web.match.Route;
+import org.jmouse.web.match.routing.MappingCriteria;
 
 @BeanFactories
 public class SecurityConfiguration {
@@ -35,31 +39,33 @@ public class SecurityConfiguration {
         http.chainMatcher(matcher -> matcher.pathPattern("/**"));
         http.principalService(principalService());
 
-        http.submitForm(form -> form
-                .usernameParameter("username")
-                .passwordParameter("password")
-                .loginPage("/login/index")
-                .processing()
-                    .formAction("/login/process")
-                    .httpMethod(HttpMethod.POST)
-                .redirect(r -> r.url("/asd"))
-        );
+        http.authorization(this::authorizationConfiguration);
 
-//        http.exceptionHandling(e -> e
-//                .authenticationEntryPoint());
-
-//        http.httpBasic(basic -> basic
-//                .requestMatcher("/basic/**")
-//                .enableChallengeOnFailure()
-//        );
-
-        http.authorization(a -> a
-                .requestPath("/login/**").permitAll()
-                .requestPath("/shared/**").permitAll()
-                .anyRequest().authenticated()
+        http.authentication(a -> a
+                .anonymous(Customizer.noop())
+                .submitForm(form -> form
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .loginPage("/login/index")
+                        .processing()
+                        .formAction("/login/process")
+                        .httpMethod(HttpMethod.POST)
+                        .redirect(r -> r.url("/asd"))
+                )
         );
 
         return http.build();
+    }
+
+    private void authorizationConfiguration(AuthorizeHttpRequestsConfigurer<?>.AuthorizationConfigurer configurer) {
+        configurer.matcherCriteria(
+                c -> c.pathPattern("/shared/**")
+        ).permitAll()
+        .mappingMatcher(
+                MappingCriteria.POST("/**"),
+                MappingCriteria.GET("/health/**")
+        ).permitAll()
+        .anyRequest().authenticated();
     }
 
 }

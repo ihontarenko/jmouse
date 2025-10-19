@@ -142,11 +142,11 @@ public class MatcherCriteria implements MappingMatcher<RequestRoute> {
     /**
      * ⚙️ Registers an HTTP method matcher.
      *
-     * @param method {@link HttpMethod} to match
+     * @param methods {@link HttpMethod}s to match
      * @return this criteria instance for chaining
      */
-    public MatcherCriteria httpMethod(HttpMethod... method) {
-        return set(new HttpMethodMatcher(method));
+    public MatcherCriteria httpMethod(HttpMethod... methods) {
+        return set(new HttpMethodMatcher(methods));
     }
 
     /**
@@ -200,6 +200,30 @@ public class MatcherCriteria implements MappingMatcher<RequestRoute> {
      */
     public MatcherCriteria produces(MediaType... mediaType) {
         return add(new ProducesMatcher(Set.of(mediaType)));
+    }
+
+    public static MatcherCriteria ANY(String pattern) {
+        return new MatcherCriteria().pathPattern(pattern).httpMethod(HttpMethod.values());
+    }
+
+    public static MatcherCriteria GET(String pattern) {
+        return new MatcherCriteria().pathPattern(pattern).httpMethod(HttpMethod.GET);
+    }
+
+    public static MatcherCriteria POST(String pattern) {
+        return new MatcherCriteria().pathPattern(pattern).httpMethod(HttpMethod.GET);
+    }
+
+    public static MatcherCriteria PUT(String pattern) {
+        return new MatcherCriteria().pathPattern(pattern).httpMethod(HttpMethod.PUT);
+    }
+
+    public static MatcherCriteria PATCH(String pattern) {
+        return new MatcherCriteria().pathPattern(pattern).httpMethod(HttpMethod.PATCH);
+    }
+
+    public static MatcherCriteria DELETE(String pattern) {
+        return new MatcherCriteria().pathPattern(pattern).httpMethod(HttpMethod.DELETE);
     }
 
     /**

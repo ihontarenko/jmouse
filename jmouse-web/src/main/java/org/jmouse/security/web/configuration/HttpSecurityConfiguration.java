@@ -65,8 +65,11 @@ public class HttpSecurityConfiguration implements InitializingBeanSupport<WebBea
 
         httpSecurity
                 .securityContext(Customizer.noop())
-                .exceptionHandling(Customizer.noop())
-                .anonymous(Customizer.noop());
+                .exceptionHandling(Customizer.noop());
+
+        httpSecurity.authentication(
+                a -> a.anonymous(Customizer.noop())
+        );
 
         return httpSecurity;
     }

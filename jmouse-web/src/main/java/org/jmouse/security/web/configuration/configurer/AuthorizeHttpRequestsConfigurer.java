@@ -22,9 +22,9 @@ import java.util.Map;
 public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder<B>>
         extends HttpSecurityConfigurer<AuthorizeHttpRequestsConfigurer<B>, B> {
 
-    private final AuthorizationConfigurer registry      = new AuthorizationConfigurer();
-    private       RoleHierarchy           roleHierarchy = RoleHierarchy.none();
-    private       String        rolePrefix    = "ROLE_";
+    private       RoleHierarchy           roleHierarchy           = RoleHierarchy.none();
+    private       String                  rolePrefix              = "ROLE_";
+    private final AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer();
 
     public RoleHierarchy getRoleHierarchy() {
         return roleHierarchy;
@@ -34,8 +34,8 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
         return rolePrefix;
     }
 
-    public AuthorizationConfigurer getRegistry() {
-        return registry;
+    public AuthorizationConfigurer getAuthorizationConfigurer() {
+        return authorizationConfigurer;
     }
 
     public AuthorizeHttpRequestsConfigurer<B> roleHierarchy(RoleHierarchy hierarchy) {
@@ -50,7 +50,7 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
 
     public void addMapping(
             List<MappingMatcher<RequestRoute>> requestMatchers, AuthorizationManager<RequestMatch> manager, boolean negate) {
-        registry.addMapping(requestMatchers, manager, negate);
+        authorizationConfigurer.addMapping(requestMatchers, manager, negate);
     }
 
     @Override
@@ -63,7 +63,7 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
     @Override
     public void configure(B http) {
         http.addFilterAfter(new AuthorizationFilter(
-                registry.createAuthorizationManager()), ExceptionTranslationFilter.class);
+                authorizationConfigurer.createAuthorizationManager()), ExceptionTranslationFilter.class);
     }
 
     private String contextVariableGetter(RequestMatch context, String name) {
@@ -114,15 +114,15 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
         }
 
         private void addMapping(
-                List<MappingMatcher<RequestRoute>> requestMatchers,
+                List<MappingMatcher<RequestRoute>> mappingMatchers,
                 AuthorizationManager<RequestMatch> manager,
                 boolean negate
         ) {
-            AuthorizationManager<RequestMatch> effective = negate
+            AuthorizationManager<RequestMatch> authorizationManager = negate
                     ? AuthorityPolicyAuthorizationManager.not(manager) : manager;
 
-            for (MappingMatcher<RequestRoute> requestMatcher : requestMatchers) {
-                builder.addMapping(requestMatcher, effective);
+            for (MappingMatcher<RequestRoute> mappingMatcher : mappingMatchers) {
+                builder.addMapping(mappingMatcher, authorizationManager);
             }
 
             this.pending = null;
@@ -136,7 +136,7 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
             AuthorizeHttpRequestsConfigurer<B> outer = AuthorizeHttpRequestsConfigurer.this;
             return new AuthorizationCriterion<>(
                     outer::applyMapping,
-                    outer.getRegistry(),
+                    this,
                     requestMatchers,
                     outer::contextVariableGetter
             );

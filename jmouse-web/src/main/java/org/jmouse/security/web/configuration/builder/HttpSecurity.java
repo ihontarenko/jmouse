@@ -94,38 +94,18 @@ public final class HttpSecurity
         return this;
     }
 
-    public HttpSecurity anonymous(Customizer<AnonymousConfigurer<HttpSecurity>> customizer) {
-        customizer.customize(attach(new AnonymousConfigurer<>()));
-        return this;
-    }
-
-    public HttpSecurity authorizeHttpRequests(Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationConfigurer> customizer) {
-        customizer.customize(attach(new AuthorizeHttpRequestsConfigurer<>()).getRegistry());
-        return this;
-    }
-
     public HttpSecurity authorization(Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationConfigurer> customizer) {
-        customizer.customize(attach(new AuthorizeHttpRequestsConfigurer<>()).getRegistry());
+        customizer.customize(attach(new AuthorizeHttpRequestsConfigurer<>()).getAuthorizationConfigurer());
+        return this;
+    }
+
+    public HttpSecurity authentication(Customizer<AuthenticationConfigurer<HttpSecurity>> customizer) {
+        customizer.customize(new AuthenticationConfigurer<>(this::attach));
         return this;
     }
 
     public HttpSecurity exceptionHandling(Customizer<ExceptionHandlingConfigurer<HttpSecurity>> c) {
         c.customize(attach(new ExceptionHandlingConfigurer<>()));
-        return this;
-    }
-
-    public HttpSecurity submitForm(Customizer<SubmitFormConfigurer<HttpSecurity>> customizer) {
-        customizer.customize(attach(new SubmitFormConfigurer<>()));
-        return this;
-    }
-
-    public HttpSecurity httpBasic(Customizer<HttpBasicConfigurer<HttpSecurity>> customizer) {
-        customizer.customize(attach(new HttpBasicConfigurer<>()));
-        return this;
-    }
-
-    public HttpSecurity jwt(Customizer<JwtTokenConfigurer<HttpSecurity>> customizer) {
-        customizer.customize(attach(new JwtTokenConfigurer<>()));
         return this;
     }
 
