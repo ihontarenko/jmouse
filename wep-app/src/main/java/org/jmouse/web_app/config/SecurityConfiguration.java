@@ -4,6 +4,7 @@ import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.security.core.UserPrincipal;
 import org.jmouse.security.core.UserPrincipalService;
+import org.jmouse.security.core.access.RoleHierarchy;
 import org.jmouse.security.core.service.InMemoryUserPrincipalService;
 import org.jmouse.security.web.MatchableSecurityFilterChain;
 import org.jmouse.security.web.configuration.Customizer;
@@ -12,6 +13,9 @@ import org.jmouse.security.web.configuration.configurer.AuthorizeHttpRequestsCon
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.match.Route;
 import org.jmouse.web.match.routing.MappingCriteria;
+
+import static org.jmouse.web.match.routing.MatcherCriteria.GET;
+import static org.jmouse.web.match.routing.MatcherCriteria.POST;
 
 @BeanFactories
 public class SecurityConfiguration {
@@ -58,14 +62,12 @@ public class SecurityConfiguration {
     }
 
     private void authorizationConfiguration(AuthorizeHttpRequestsConfigurer<?>.AuthorizationConfigurer configurer) {
-        configurer.matcherCriteria(
-                c -> c.pathPattern("/shared/**")
-        ).permitAll()
-        .mappingMatcher(
-                MappingCriteria.POST("/**"),
-                MappingCriteria.GET("/health/**")
-        ).permitAll()
-        .anyRequest().authenticated();
+        configurer
+                .matcherCriteria(c -> c.pathPattern("/shared/**")).permitAll()
+                .mappingMatcher(POST("/**"), GET("/health/**")).permitAll()
+                .anyRequest().authenticated()
+                .rolePrefix("R_")
+                .roleHierarchy(RoleHierarchy.parse("R_ADMIN > R_OWNER, R_USER"));
     }
 
 }

@@ -22,30 +22,10 @@ import java.util.Map;
 public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder<B>>
         extends HttpSecurityConfigurer<AuthorizeHttpRequestsConfigurer<B>, B> {
 
-    private       RoleHierarchy           roleHierarchy           = RoleHierarchy.none();
-    private       String                  rolePrefix              = "ROLE_";
     private final AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer();
-
-    public RoleHierarchy getRoleHierarchy() {
-        return roleHierarchy;
-    }
-
-    public String getRolePrefix() {
-        return rolePrefix;
-    }
 
     public AuthorizationConfigurer getAuthorizationConfigurer() {
         return authorizationConfigurer;
-    }
-
-    public AuthorizeHttpRequestsConfigurer<B> roleHierarchy(RoleHierarchy hierarchy) {
-        this.roleHierarchy = (hierarchy != null) ? hierarchy : RoleHierarchy.none();
-        return this;
-    }
-
-    public AuthorizeHttpRequestsConfigurer<B> rolePrefix(String prefix) {
-        this.rolePrefix = (prefix != null) ? prefix : "ROLE_";
-        return this;
     }
 
     public void addMapping(
@@ -87,8 +67,10 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
     final public class AuthorizationConfigurer
             extends AbstractAuthorizationConfigurer<AuthorizationCriterion<AuthorizationConfigurer, RequestMatch>> {
 
-        private final Builder                            builder = new Builder();
+        private final Builder                            builder       = new Builder();
         private       List<MappingMatcher<RequestRoute>> pending;
+        private       RoleHierarchy                      roleHierarchy = RoleHierarchy.none();
+        private       String                             rolePrefix    = "ROLE_";
 
         private void validatePending() {
             if (this.pending != null) {
@@ -140,6 +122,24 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
                     requestMatchers,
                     outer::contextVariableGetter
             );
+        }
+
+        public AuthorizationConfigurer roleHierarchy(RoleHierarchy hierarchy) {
+            this.roleHierarchy = (hierarchy != null) ? hierarchy : RoleHierarchy.none();
+            return this;
+        }
+
+        public AuthorizationConfigurer rolePrefix(String prefix) {
+            this.rolePrefix = (prefix != null) ? prefix : "ROLE_";
+            return this;
+        }
+
+        public RoleHierarchy getRoleHierarchy() {
+            return roleHierarchy;
+        }
+
+        public String getRolePrefix() {
+            return rolePrefix;
         }
 
     }
