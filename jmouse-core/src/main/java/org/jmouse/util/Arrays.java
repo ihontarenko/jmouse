@@ -1,5 +1,7 @@
 package org.jmouse.util;
 
+import org.jmouse.core.reflection.Reflections;
+
 import java.lang.reflect.Array;
 import java.util.HashSet;
 import java.util.Set;
@@ -271,14 +273,7 @@ public final class Arrays {
      * }</pre>
      */
     public static Class<?> boxType(Class<?> primitiveType) {
-        Class<?> boxedType = primitiveType;
-
-        if (primitiveType.isPrimitive()) {
-            Object array = Array.newInstance(primitiveType, 1);
-            boxedType = Array.get(array, 0).getClass();
-        }
-
-        return boxedType;
+        return Reflections.boxType(primitiveType);
     }
 
     /**

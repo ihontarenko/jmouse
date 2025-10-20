@@ -1,6 +1,12 @@
 package org.jmouse.core.proxy;
 
+import org.jmouse.core.reflection.Executables;
+import org.jmouse.util.Arrays;
+
 import java.lang.reflect.Method;
+import java.util.Optional;
+
+import static java.util.Arrays.stream;
 
 /**
  * Represents a method invocation on a proxy instance, allowing for method interception and custom behavior.
@@ -40,6 +46,12 @@ public interface MethodInvocation {
      * @return an array of {@link Object} representing the method arguments.
      */
     Object[] getArguments();
+
+    void setArgumentsUnsafe(Object[] arguments);
+
+    default void setArgument(int index, Object newValue) {
+        setArgumentsUnsafe(Executables.updateArgument(getMethod(), getArguments(), index, newValue));
+    }
 
     /**
      * Retrieves the target structured on which the method is being invoked.
@@ -88,9 +100,18 @@ public interface MethodInvocation {
         // NO-OP
     }
 
+    default Class<?> getReturnType() {
+        return getMethod().getReturnType();
+    }
+
+    @SuppressWarnings("unchecked")
+    default <T> Optional<T> getTypedArgument(Class<T> type) {
+        return (Optional<T>) stream(getArguments())
+                .filter(argument -> argument.getClass().isInstance(argument)).findFirst();
+    }
+
     default boolean isVoidMethod() {
-        Class<?> returnType = getMethod().getReturnType();
-        return returnType == void.class || returnType == Void.class;
+        return getReturnType() == void.class || getReturnType() == Void.class;
     }
 
 }

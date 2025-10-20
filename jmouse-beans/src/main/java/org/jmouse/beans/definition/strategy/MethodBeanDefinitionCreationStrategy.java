@@ -5,11 +5,15 @@ import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDefinitionFactory;
 import org.jmouse.beans.definition.MethodBeanDefinition;
 import org.jmouse.beans.naming.BeanNameResolver;
+import org.jmouse.core.Streamable;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.reflection.ClassMatchers;
+import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -34,7 +38,14 @@ public class MethodBeanDefinitionCreationStrategy extends AbstractBeanDefinition
         MethodBeanDefinition definition = new MethodBeanDefinition(name, method.getReturnType());
         definition.setFactoryMethod(method);
 
-        definition.setParametrizedTypes(Reflections.getParameterizedTypes(method.getGenericReturnType()));
+        InferredType   inferredType = InferredType.forMethodReturnType(method);
+        List<Class<?>> types        = new ArrayList<>();
+
+        for (InferredType generic : inferredType.getGenerics()) {
+            types.add(generic.getRawType());
+        }
+
+        definition.setParametrizedTypes(types);
 
         // If the method has parameters, create dependencies
         if (method.getParameterCount() != 0) {

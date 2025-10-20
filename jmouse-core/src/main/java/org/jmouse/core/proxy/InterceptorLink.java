@@ -43,6 +43,11 @@ public final class InterceptorLink implements Link<InvocationContext, MethodInvo
             }
 
             @Override
+            public void setArgumentsUnsafe(Object[] arguments) {
+                base.setArgumentsUnsafe(arguments);
+            }
+
+            @Override
             public int getOrdinal() {
                 return ordinal;
             }
@@ -104,7 +109,9 @@ public final class InterceptorLink implements Link<InvocationContext, MethodInvo
         } finally {
             try {
                 interceptor.after(context, base.getMethod(), base.getArguments(), result);
-            } catch (Throwable ignored) { }
+            } catch (Throwable throwable) {
+                interceptor.error(context, base.getMethod(), base.getArguments(), throwable);
+            }
         }
     }
 

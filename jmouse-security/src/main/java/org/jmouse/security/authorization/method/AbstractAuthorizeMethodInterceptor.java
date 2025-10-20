@@ -4,6 +4,4 @@ import org.jmouse.core.proxy.MethodInterceptor;
 
 public class AbstractAuthorizeMethodInterceptor implements MethodInterceptor {
 
-
-
 }

@@ -6,6 +6,7 @@ import org.jmouse.beans.annotation.ProxiedBean;
 import org.jmouse.core.Bytes;
 import org.jmouse.core.throttle.RateLimit;
 import org.jmouse.core.throttle.RateLimitEnable;
+import org.jmouse.security.core.access.Phase;
 import org.jmouse.security.core.access.annotation.Authorize;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.http.multipart.UploadLimitExceededException;
@@ -126,7 +127,7 @@ public class SharedController {
     @GetMapping(
             requestPath = "/shared/{format}/bytes/{bytes}"
     )
-    @Authorize(value = "_.bytes | length", phase = Authorize.Phase.PRE)
+    @Authorize("A[0] | length")
     public Bytes bytes(@PathVariable("bytes") String bytes) {
         return Bytes.parse(bytes);
     }

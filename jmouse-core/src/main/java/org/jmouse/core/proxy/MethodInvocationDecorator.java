@@ -41,6 +41,11 @@ public class MethodInvocationDecorator implements MethodInvocation {
     }
 
     @Override
+    public void setArgumentsUnsafe(Object[] arguments) {
+        this.delegate.setArgumentsUnsafe(arguments);
+    }
+
+    @Override
     public Method getMethod() {
         return delegate.getMethod();
     }

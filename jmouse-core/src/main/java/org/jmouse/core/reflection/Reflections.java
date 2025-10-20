@@ -53,6 +53,34 @@ abstract public class Reflections {
     );
 
     /**
+     * Converts a primitive type to its corresponding boxed (wrapper) type.
+     * <p>
+     * If the given class is a primitive type, this method returns the equivalent wrapper type.
+     * If the input is already a reference type, it is returned unchanged.
+     * </p>
+     *
+     * @param primitiveType the primitive class type to be boxed
+     * @return the corresponding boxed type, or the original class if it is not a primitive
+     * <p>
+     * Example:
+     * <pre>{@code
+     * box(int.class);    // Integer.class
+     * box(double.class); // Double.class
+     * box(String.class); // String.class (unchanged)
+     * }</pre>
+     */
+    public static Class<?> boxType(Class<?> primitiveType) {
+        Class<?> boxedType = primitiveType;
+
+        if (primitiveType.isPrimitive()) {
+            Object array = Array.newInstance(primitiveType, 1);
+            boxedType = Array.get(array, 0).getClass();
+        }
+
+        return boxedType;
+    }
+
+    /**
      * Extracts all static methods declared in the specified class.
      *
      * @param clazz the class to analyze

@@ -87,14 +87,15 @@ public final class ProxyDispatcher implements InvocationDispatcher {
      *
      * @param proxy  proxy instance
      * @param method invoked method
-     * @param arguments   arguments
+     * @param methodArguments   arguments
      * @return invocation wrapper
      */
-    private MethodInvocation getMethodInvocation(Object proxy, Method method, Object[] arguments) {
+    private MethodInvocation getMethodInvocation(Object proxy, Method method, Object[] methodArguments) {
+        final Object[] captured = methodArguments != null ? methodArguments.clone() : new Object[0];
         return new MethodInvocation() {
 
-            private Object returnValue;
-            // private Object[] arguments;
+            private Object   returnValue;
+            private Object[] arguments  = captured;
 
             @Override
             public Object getTarget() {
@@ -114,6 +115,11 @@ public final class ProxyDispatcher implements InvocationDispatcher {
             @Override
             public Object[] getArguments() {
                 return arguments;
+            }
+
+            @Override
+            public void setArgumentsUnsafe(Object[] arguments) {
+                this.arguments = arguments;
             }
 
             @Override
