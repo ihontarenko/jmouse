@@ -2,8 +2,8 @@ package org.jmouse.security.authorization;
 
 import org.jmouse.core.Streamable;
 import org.jmouse.security.authentication.AnonymousAuthentication;
-import org.jmouse.security.authentication.AuthenticationLevel;
 import org.jmouse.security.core.Authentication;
+import org.jmouse.security.core.access.RoleHierarchy;
 
 import java.util.Collection;
 import java.util.Set;
@@ -15,7 +15,7 @@ public final class AuthorityPolicyAuthorizationManager<T> implements Authorizati
 
     public static final String ROLE_PREFIX = "ROLE_";
 
-    private final AuthoritiesAuthorizationManager authorizationManager = new AuthoritiesAuthorizationManager();
+    private final AuthoritiesAuthorizationManager delegate = new AuthoritiesAuthorizationManager();
     private final Collection<String>              authorities;
 
     public AuthorityPolicyAuthorizationManager(Collection<String> authorities) {
@@ -23,11 +23,11 @@ public final class AuthorityPolicyAuthorizationManager<T> implements Authorizati
     }
 
     public static <T> AuthorizationManager<T> permitAll() {
-        return (authentication, target) -> AccessResult.PERMIT;
+        return (Authentication authentication, T t) -> AccessResult.PERMIT;
     }
 
     public static <T> AuthorizationManager<T> denyAll() {
-        return (authentication, target) -> AccessResult.DENY;
+        return (Authentication authentication, T t) -> AccessResult.DENY;
     }
 
     public static <T> AuthorizationManager<T> not(AuthorizationManager<T> delegate) {
@@ -36,12 +36,12 @@ public final class AuthorityPolicyAuthorizationManager<T> implements Authorizati
     }
 
     public static <T> AuthorizationManager<T> anonymous() {
-        return (authentication, c) -> (authentication instanceof AnonymousAuthentication)
+        return (Authentication authentication, T t) -> (authentication != null && authentication.level() == ANONYMOUS)
                 ? AccessResult.PERMIT : AccessResult.DENY;
     }
 
     public static <T> AuthorizationManager<T> authenticated() {
-        return (authentication, c) ->
+        return (Authentication authentication, T t) ->
                 (authentication != null && authentication.isAuthenticated() && authentication.level() != ANONYMOUS)
                         ? AccessResult.PERMIT : AccessResult.DENY;
     }
@@ -79,9 +79,13 @@ public final class AuthorityPolicyAuthorizationManager<T> implements Authorizati
         return Streamable.of(authorities).map(authority -> prefix + authority).toArray(String[]::new);
     }
 
+    public void setRoleHierarchy(RoleHierarchy roleHierarchy) {
+        this.delegate.setRoleHierarchy(roleHierarchy);
+    }
+
     @Override
     public AccessResult check(Authentication authentication, T target) {
-        return authorizationManager.check(authentication, authorities);
+        return delegate.check(authentication, authorities);
     }
 
 }

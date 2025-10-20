@@ -4,6 +4,7 @@ import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorityPolicyAuthorizationManager;
 import org.jmouse.security.authorization.AuthorizationManager;
 import org.jmouse.security.core.Authentication;
+import org.jmouse.security.core.access.RoleHierarchy;
 import org.jmouse.security.web.access.MappingApplier;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MappingMatcher;
@@ -11,27 +12,30 @@ import org.jmouse.web.match.routing.MappingMatcher;
 import java.util.List;
 import java.util.function.Function;
 
-public class AuthorizationCriterion<T, C> {
+public class AuthorizationAccessCriterion<T, C> {
 
     private final List<MappingMatcher<RequestRoute>> matchers;
     private final T                                  owner;
     private final MappingApplier<T, C>               applier;
+    private final RoleHierarchy                      roleHierarchy;
     private final ContextVariables<C>                variables;
     private       boolean                            negate = false;
 
-    public AuthorizationCriterion(
+    public AuthorizationAccessCriterion(
             MappingApplier<T, C> applier,
             T owner,
             List<MappingMatcher<RequestRoute>> matchers,
+            RoleHierarchy roleHierarchy,
             ContextVariables<C> variables
     ) {
         this.applier = applier;
         this.owner = owner;
+        this.roleHierarchy = roleHierarchy;
         this.variables = variables;
         this.matchers = matchers;
     }
 
-    public AuthorizationCriterion<T, C> not() {
+    public AuthorizationAccessCriterion<T, C> not() {
         this.negate = true;
         return this;
     }
@@ -72,8 +76,11 @@ public class AuthorizationCriterion<T, C> {
         return new AuthorizedVariable(variable);
     }
 
-    public T access(AuthorizationManager<C> manager) {
-        return applier.apply(owner, matchers, manager, negate);
+    public T access(AuthorizationManager<C> authorizationManager) {
+        if (authorizationManager instanceof AuthorityPolicyAuthorizationManager<?> authorityAuthorizationManager) {
+            authorityAuthorizationManager.setRoleHierarchy(roleHierarchy);
+        }
+        return applier.apply(owner, matchers, authorizationManager, negate);
     }
 
     public final class AuthorizedVariable {

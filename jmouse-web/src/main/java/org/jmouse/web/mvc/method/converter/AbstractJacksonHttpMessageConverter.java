@@ -18,8 +18,10 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public abstract class AbstractJacksonHttpMessageConverter<T> extends AbstractHttpMessageConverter<T> {
 
-    /** 🔗 Available {@link JacksonObjectMapperRegistration} beans. */
-    protected List<JacksonObjectMapperRegistration> mapperRegistrations;
+    /**
+     * 🔗 Available {@link JacksonObjectMapperResolver} bean.
+     */
+    protected JacksonObjectMapperResolver objectMapperResolver;
 
     /**
      * Create a converter supporting a single media type.
@@ -40,37 +42,19 @@ public abstract class AbstractJacksonHttpMessageConverter<T> extends AbstractHtt
     }
 
     /**
-     * @return all registered {@link JacksonObjectMapperRegistration} beans
+     * @return registered {@link JacksonObjectMapperResolver} bean
      */
-    public List<JacksonObjectMapperRegistration> getMapperRegistrations() {
-        return mapperRegistrations;
+    public JacksonObjectMapperResolver getObjectMapperResolver() {
+        return objectMapperResolver;
     }
 
     /**
-     * Set the list of registered {@link JacksonObjectMapperRegistration} beans.
+     * Resolver {@link JacksonObjectMapperResolver} that resolves jackson {@link ObjectMapper}.
      *
-     * @param mapperRegistrations the registrations to set
+     * @param objectMapperResolver the resolver to set
      */
-    public void setMapperRegistrations(List<JacksonObjectMapperRegistration> mapperRegistrations) {
-        this.mapperRegistrations = mapperRegistrations;
-    }
-
-    /**
-     * Find the {@link JacksonObjectMapperRegistration} for a given media type.
-     *
-     * @param mediaType the requested media type
-     * @return the matching registration, or {@code null} if not found
-     */
-    public JacksonObjectMapperRegistration getObjectMapperRegistration(MediaType mediaType) {
-        JacksonObjectMapperRegistration registration = null;
-
-        for (JacksonObjectMapperRegistration mapperRegistration : getMapperRegistrations()) {
-            if (mapperRegistration.isApplicable(mediaType)) {
-                registration = mapperRegistration;
-            }
-        }
-
-        return registration;
+    public void setObjectMapperResolver(JacksonObjectMapperResolver objectMapperResolver) {
+        this.objectMapperResolver = objectMapperResolver;
     }
 
     /**
@@ -80,7 +64,7 @@ public abstract class AbstractJacksonHttpMessageConverter<T> extends AbstractHtt
      * @return the configured {@link ObjectMapper}, or {@code null} if not found
      */
     public ObjectMapper getObjectMapper(MediaType mediaType) {
-        JacksonObjectMapperRegistration registration = getObjectMapperRegistration(mediaType);
+        JacksonObjectMapperRegistration registration = getObjectMapperResolver().getObjectMapperRegistration(mediaType);
         ObjectMapper                    objectMapper = null;
 
         if (registration != null) {
@@ -131,8 +115,8 @@ public abstract class AbstractJacksonHttpMessageConverter<T> extends AbstractHtt
      */
     @Override
     public void doInitialize(WebBeanContext context) {
-        setMapperRegistrations(
-                WebBeanContext.getLocalBeans(JacksonObjectMapperRegistration.class, context)
+        setObjectMapperResolver(
+                WebBeanContext.getLocalBeans(JacksonObjectMapperResolver.class, context).getFirst()
         );
     }
 }

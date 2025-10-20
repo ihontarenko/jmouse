@@ -92,7 +92,7 @@ public abstract class AbstractJwtCodec implements JwtCodec {
     @Override
     public final String encode(Jwt jwt) throws JwtValidationException {
         try {
-            Map<String, Object> header = new LinkedHashMap<>();
+            Map<String, Object> header = new LinkedHashMap<>(jwt.headers());
 
             header.put("alg", algorithm.name());
             header.put("typ", "JWT");

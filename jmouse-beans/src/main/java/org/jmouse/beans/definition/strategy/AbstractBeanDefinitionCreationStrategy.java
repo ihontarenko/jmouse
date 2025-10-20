@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Parameter;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -70,8 +69,7 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
         String       name     = Reflections.getAnnotationValue(parameter, Qualifier.class, Qualifier::value);
         InferredType javaType = InferredType.forParameter(parameter);
 
-        if (Collection.class.isAssignableFrom(parameter.getType()) && parameter.isAnnotationPresent(
-                AggregatedBeans.class)) {
+        if (parameter.isAnnotationPresent(AggregatedBeans.class)) {
             return new AggregatedBeansDependency(javaType, name, parameter);
         }
 

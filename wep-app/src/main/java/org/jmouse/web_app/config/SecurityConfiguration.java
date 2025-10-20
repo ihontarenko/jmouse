@@ -9,10 +9,8 @@ import org.jmouse.security.core.service.InMemoryUserPrincipalService;
 import org.jmouse.security.web.MatchableSecurityFilterChain;
 import org.jmouse.security.web.configuration.Customizer;
 import org.jmouse.security.web.configuration.builder.HttpSecurity;
-import org.jmouse.security.web.configuration.configurer.AuthorizeHttpRequestsConfigurer;
+import org.jmouse.security.web.configuration.configurer.AuthorizeRequestConfigurer;
 import org.jmouse.web.http.HttpMethod;
-import org.jmouse.web.match.Route;
-import org.jmouse.web.match.routing.MappingCriteria;
 
 import static org.jmouse.web.match.routing.MatcherCriteria.GET;
 import static org.jmouse.web.match.routing.MatcherCriteria.POST;
@@ -61,7 +59,7 @@ public class SecurityConfiguration {
         return http.build();
     }
 
-    private void authorizationConfiguration(AuthorizeHttpRequestsConfigurer<?>.AuthorizationConfigurer configurer) {
+    private void authorizationConfiguration(AuthorizeRequestConfigurer<?>.AuthorizationRequestMatchCriterion configurer) {
         configurer
                 .matcherCriteria(c -> c.pathPattern("/shared/**")).permitAll()
                 .mappingMatcher(POST("/**"), GET("/health/**")).permitAll()

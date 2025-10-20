@@ -10,7 +10,9 @@ import static org.jmouse.core.Charset.UTF_8;
  */
 public class MediaType extends MimeType {
 
-    /** Parameter name for the quality factor (0.0 to 1.0). */
+    /**
+     * Parameter name for the quality factor (0.0 to 1.0).
+     */
     public static final String PARAMETER_NAME_QUALITY_FACTOR = "q";
 
     /**
@@ -49,126 +51,65 @@ public class MediaType extends MimeType {
         return a.toString().compareTo(b.toString());
     };
 
+    public static final String UTF8 = "UTF-8";
+
+    public static final String ALL_VALUE                         = "*/*";
+    public static final String ALL_APPLICATION_VALUE             = "application/*";
+    public static final String APPLICATION_ATOM_XML_VALUE        = "application/atom+xml";
+    public static final String APPLICATION_JSON_VALUE            = "application/json";
+    public static final String APPLICATION_OCTET_STREAM_VALUE    = "application/octet-stream";
+    public static final String APPLICATION_PDF_VALUE             = "application/pdf";
+    public static final String APPLICATION_RSS_XML_VALUE         = "application/rss+xml";
+    public static final String APPLICATION_XHTML_XML_VALUE       = "application/xhtml+xml";
+    public static final String APPLICATION_XML_VALUE             = "application/xml";
+    public static final String APPLICATION_FORM_URLENCODED_VALUE = "application/x-www-form-urlencoded";
+    public static final String MULTIPART_FORM_DATA_VALUE         = "multipart/form-data";
+    public static final String APPLICATION_YAML_VALUE            = "application/yaml";
+
+    public static final String TEXT_PLAIN_VALUE        = "text/plain";
+    public static final String TEXT_HTML_VALUE         = "text/html";
+    public static final String TEXT_XML_VALUE          = "text/xml";
+    public static final String TEXT_EVENT_STREAM_VALUE = "text/event-stream";
+
+    public static final String IMAGE_GIF_VALUE  = "image/gif";
+    public static final String IMAGE_JPEG_VALUE = "image/jpeg";
+    public static final String IMAGE_PNG_VALUE  = "image/png";
+
+    public static final MediaType ALL                         = new MediaType("*", "*");
+    public static final MediaType ALL_APPLICATION             = new MediaType("application", "*");
+    public static final MediaType APPLICATION_ATOM_XML        = new MediaType("application", "atom+xml");
+    public static final MediaType APPLICATION_JSON            = new MediaType(
+            "application", "json", Map.of(PARAMETER_NAME_CHARSET, UTF8));
+    public static final MediaType JSON                        = APPLICATION_JSON;
+    public static final MediaType APPLICATION_OCTET_STREAM    = new MediaType("application", "octet-stream");
+    public static final MediaType APPLICATION_PDF             = new MediaType("application", "pdf");
+    public static final MediaType APPLICATION_RSS_XML         = new MediaType("application", "rss+xml");
+    public static final MediaType APPLICATION_XHTML_XML       = new MediaType(
+            "application", "xhtml+xml", Map.of(PARAMETER_NAME_CHARSET, UTF8));
+    public static final MediaType APPLICATION_XML             = new MediaType(
+            "application", "xml", Map.of(PARAMETER_NAME_CHARSET, UTF8));
+    public static final MediaType XML                         = APPLICATION_XML;
+    public static final MediaType APPLICATION_FORM_URLENCODED = new MediaType("application", "x-www-form-urlencoded");
+    public static final MediaType MULTIPART_FORM_DATA         = new MediaType("multipart", "form-data");
+    public static final MediaType APPLICATION_YAML            = new MediaType(
+            "application", "yaml", Map.of(PARAMETER_NAME_CHARSET, UTF8));
+
+    public static final MediaType TEXT_PLAIN        = new MediaType(
+            "text", "plain", Map.of(PARAMETER_NAME_CHARSET, UTF8));
+    public static final MediaType TEXT              = TEXT_PLAIN;
+    public static final MediaType TEXT_HTML         = new MediaType(
+            "text", "html", Map.of(PARAMETER_NAME_CHARSET, UTF8));
+    public static final MediaType HTML              = TEXT_HTML;
+    public static final MediaType TEXT_XML          = new MediaType(
+            "text", "xml", Map.of(PARAMETER_NAME_CHARSET, UTF8));
+    public static final MediaType TEXT_EVENT_STREAM = new MediaType(
+            "text", "event-stream", Map.of(PARAMETER_NAME_CHARSET, UTF8));
+
+    public static final MediaType IMAGE_GIF  = new MediaType("image", "gif");
+    public static final MediaType IMAGE_JPEG = new MediaType("image", "jpeg");
+    public static final MediaType IMAGE_PNG  = new MediaType("image", "png");
+
     private double qFactor;
-
-    public static final MediaType ALL;
-    public static final MediaType ALL_APPLICATION;
-    public static final MediaType APPLICATION_ATOM_XML;
-    public static final MediaType APPLICATION_JSON;
-    public static final MediaType JSON; // alias
-    public static final MediaType APPLICATION_OCTET_STREAM;
-    public static final MediaType APPLICATION_PDF;
-    public static final MediaType APPLICATION_RSS_XML;
-    public static final MediaType APPLICATION_XHTML_XML;
-    public static final MediaType APPLICATION_XML;
-    public static final MediaType XML; // alias
-    public static final MediaType APPLICATION_FORM_URLENCODED;
-    public static final MediaType MULTIPART_FORM_DATA;
-    public static final MediaType APPLICATION_YAML;
-
-    public static final MediaType TEXT_PLAIN;
-    public static final MediaType TEXT; // alias
-    public static final MediaType TEXT_HTML;
-    public static final MediaType HTML; // alias
-    public static final MediaType TEXT_XML;
-    public static final MediaType TEXT_EVENT_STREAM;
-
-    public static final MediaType IMAGE_GIF;
-    public static final MediaType IMAGE_JPEG;
-    public static final MediaType IMAGE_PNG;
-
-    public static final String ALL_VALUE;
-    public static final String ALL_APPLICATION_VALUE;
-
-    public static final String APPLICATION_ATOM_XML_VALUE;
-    public static final String APPLICATION_JSON_VALUE;
-    public static final String APPLICATION_OCTET_STREAM_VALUE;
-    public static final String APPLICATION_PDF_VALUE;
-    public static final String APPLICATION_RSS_XML_VALUE;
-    public static final String APPLICATION_XHTML_XML_VALUE;
-    public static final String APPLICATION_XML_VALUE;
-    public static final String APPLICATION_FORM_URLENCODED_VALUE;
-    public static final String MULTIPART_FORM_DATA_VALUE;
-
-    public static final String TEXT_PLAIN_VALUE;
-    public static final String TEXT_VALUE;
-    public static final String TEXT_HTML_VALUE;
-    public static final String HTML_VALUE;
-    public static final String TEXT_XML_VALUE;
-    public static final String TEXT_EVENT_STREAM_VALUE;
-
-    public static final String IMAGE_GIF_VALUE;
-    public static final String IMAGE_JPEG_VALUE;
-    public static final String IMAGE_PNG_VALUE;
-
-    static {
-        // Wildcard
-        ALL = new MediaType("*", "*");
-        ALL_VALUE = ALL.toString();
-
-        // Wildcard
-        ALL_APPLICATION = new MediaType("application", "*");
-        ALL_APPLICATION_VALUE = ALL_APPLICATION.toString();
-
-        // application/*
-        APPLICATION_ATOM_XML = new MediaType("application", "atom+xml");
-        APPLICATION_ATOM_XML_VALUE = APPLICATION_ATOM_XML.toString();
-
-        APPLICATION_JSON = new MediaType("application", "json", Map.of(PARAMETER_NAME_CHARSET, UTF_8.getName()));
-        JSON = APPLICATION_JSON;
-        APPLICATION_JSON_VALUE = APPLICATION_JSON.toString();
-
-        APPLICATION_OCTET_STREAM = new MediaType("application", "octet-stream");
-        APPLICATION_OCTET_STREAM_VALUE = APPLICATION_OCTET_STREAM.toString();
-
-        APPLICATION_PDF = new MediaType("application", "pdf");
-        APPLICATION_PDF_VALUE = APPLICATION_PDF.toString();
-
-        APPLICATION_RSS_XML = new MediaType("application", "rss+xml");
-        APPLICATION_RSS_XML_VALUE = APPLICATION_RSS_XML.toString();
-
-        APPLICATION_XHTML_XML = new MediaType("application", "xhtml+xml", Map.of(PARAMETER_NAME_CHARSET, UTF_8.getName()));
-        APPLICATION_XHTML_XML_VALUE = APPLICATION_XHTML_XML.toString();
-
-        APPLICATION_XML = new MediaType("application", "xml", Map.of(PARAMETER_NAME_CHARSET, UTF_8.getName()));
-        XML = APPLICATION_XML;
-        APPLICATION_XML_VALUE = APPLICATION_XML.toString();
-
-        APPLICATION_YAML = new MediaType("application", "yaml", Map.of(PARAMETER_NAME_CHARSET, UTF_8.getName()));
-
-        APPLICATION_FORM_URLENCODED = new MediaType("application", "x-www-form-urlencoded");
-        APPLICATION_FORM_URLENCODED_VALUE = APPLICATION_FORM_URLENCODED.toString();
-
-        MULTIPART_FORM_DATA = new MediaType("multipart", "form-data");
-        MULTIPART_FORM_DATA_VALUE = MULTIPART_FORM_DATA.toString();
-
-        // text/*
-        TEXT_PLAIN = new MediaType("text", "plain", Map.of(PARAMETER_NAME_CHARSET, UTF_8.getName()));
-        TEXT = TEXT_PLAIN;
-        TEXT_PLAIN_VALUE = TEXT_PLAIN.toString();
-        TEXT_VALUE = TEXT_PLAIN_VALUE;
-
-        TEXT_HTML = new MediaType("text", "html", Map.of(PARAMETER_NAME_CHARSET, UTF_8.getName()));
-        HTML = TEXT_HTML;
-        TEXT_HTML_VALUE = TEXT_HTML.toString();
-        HTML_VALUE = TEXT_HTML_VALUE;
-
-        TEXT_XML = new MediaType("text", "xml", Map.of(PARAMETER_NAME_CHARSET, UTF_8.getName()));
-        TEXT_XML_VALUE = TEXT_XML.toString();
-
-        TEXT_EVENT_STREAM = new MediaType("text", "event-stream", Map.of(PARAMETER_NAME_CHARSET, UTF_8.getName()));
-        TEXT_EVENT_STREAM_VALUE = TEXT_EVENT_STREAM.toString();
-
-        // images
-        IMAGE_GIF = new MediaType("image", "gif");
-        IMAGE_GIF_VALUE = IMAGE_GIF.toString();
-
-        IMAGE_JPEG = new MediaType("image", "jpeg");
-        IMAGE_JPEG_VALUE = IMAGE_JPEG.toString();
-
-        IMAGE_PNG = new MediaType("image", "png");
-        IMAGE_PNG_VALUE = IMAGE_PNG.toString();
-    }
 
     /**
      * Create a MediaType with wildcard subtype, default qFactor=1.0.

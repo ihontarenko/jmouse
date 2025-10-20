@@ -18,6 +18,7 @@ import java.util.*;
  *   <li>🧱 {@link #parse(String)} — build a hierarchy from a simple DSL.</li>
  * </ul>
  */
+@FunctionalInterface
 public interface RoleHierarchy {
 
     /**

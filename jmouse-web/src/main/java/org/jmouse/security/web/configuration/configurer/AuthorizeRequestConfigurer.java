@@ -10,7 +10,7 @@ import org.jmouse.security.web.RequestMatch;
 import org.jmouse.security.web.access.ExceptionTranslationFilter;
 import org.jmouse.security.web.configuration.*;
 import org.jmouse.security.web.access.DelegatingAuthorizationManager.Builder;
-import org.jmouse.security.web.configuration.matching.AbstractAuthorizationConfigurer;
+import org.jmouse.security.web.configuration.matching.AbstractAuthorizationRequestMatchCriterion;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.RouteMatch;
 import org.jmouse.web.match.routing.MappingMatcher;
@@ -19,18 +19,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder<B>>
-        extends HttpSecurityConfigurer<AuthorizeHttpRequestsConfigurer<B>, B> {
+public final class AuthorizeRequestConfigurer<B extends HttpSecurityBuilder<B>>
+        extends HttpSecurityConfigurer<AuthorizeRequestConfigurer<B>, B> {
 
-    private final AuthorizationConfigurer authorizationConfigurer = new AuthorizationConfigurer();
+    private final AuthorizationRequestMatchCriterion requestMatchCriterion = new AuthorizationRequestMatchCriterion();
 
-    public AuthorizationConfigurer getAuthorizationConfigurer() {
-        return authorizationConfigurer;
+    public AuthorizationRequestMatchCriterion getRequestMatchCriterion() {
+        return requestMatchCriterion;
     }
 
     public void addMapping(
             List<MappingMatcher<RequestRoute>> requestMatchers, AuthorizationManager<RequestMatch> manager, boolean negate) {
-        authorizationConfigurer.addMapping(requestMatchers, manager, negate);
+        requestMatchCriterion.addMapping(requestMatchers, manager, negate);
     }
 
     @Override
@@ -43,7 +43,7 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
     @Override
     public void configure(B http) {
         http.addFilterAfter(new AuthorizationFilter(
-                authorizationConfigurer.createAuthorizationManager()), ExceptionTranslationFilter.class);
+                requestMatchCriterion.createAuthorizationManager()), ExceptionTranslationFilter.class);
     }
 
     private String contextVariableGetter(RequestMatch context, String name) {
@@ -53,8 +53,8 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
         return String.valueOf(variables.get(name));
     }
 
-    private AuthorizationConfigurer applyMapping(
-            AuthorizationConfigurer owner,
+    private AuthorizationRequestMatchCriterion applyMapping(
+            AuthorizationRequestMatchCriterion owner,
             List<MappingMatcher<RequestRoute>> matchers,
             AuthorizationManager<RequestMatch> manager,
             boolean negate) {
@@ -64,8 +64,8 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
         return owner;
     }
 
-    final public class AuthorizationConfigurer
-            extends AbstractAuthorizationConfigurer<AuthorizationCriterion<AuthorizationConfigurer, RequestMatch>> {
+    final public class AuthorizationRequestMatchCriterion
+            extends AbstractAuthorizationRequestMatchCriterion<AuthorizationAccessCriterion<AuthorizationRequestMatchCriterion, RequestMatch>> {
 
         private final Builder                            builder       = new Builder();
         private       List<MappingMatcher<RequestRoute>> pending;
@@ -111,25 +111,26 @@ public final class AuthorizeHttpRequestsConfigurer<B extends HttpSecurityBuilder
         }
 
         @Override
-        protected AuthorizationCriterion<AuthorizationConfigurer, RequestMatch> applyMatchers(
+        protected AuthorizationAccessCriterion<AuthorizationRequestMatchCriterion, RequestMatch> applyMatchers(
                 List<MappingMatcher<RequestRoute>> requestMatchers) {
             validatePending();
             this.pending = requestMatchers;
-            AuthorizeHttpRequestsConfigurer<B> outer = AuthorizeHttpRequestsConfigurer.this;
-            return new AuthorizationCriterion<>(
+            AuthorizeRequestConfigurer<B> outer = AuthorizeRequestConfigurer.this;
+            return new AuthorizationAccessCriterion<>(
                     outer::applyMapping,
                     this,
                     requestMatchers,
+                    getRoleHierarchy(),
                     outer::contextVariableGetter
             );
         }
 
-        public AuthorizationConfigurer roleHierarchy(RoleHierarchy hierarchy) {
+        public AuthorizationRequestMatchCriterion roleHierarchy(RoleHierarchy hierarchy) {
             this.roleHierarchy = (hierarchy != null) ? hierarchy : RoleHierarchy.none();
             return this;
         }
 
-        public AuthorizationConfigurer rolePrefix(String prefix) {
+        public AuthorizationRequestMatchCriterion rolePrefix(String prefix) {
             this.rolePrefix = (prefix != null) ? prefix : "ROLE_";
             return this;
         }

@@ -12,7 +12,7 @@ import java.util.List;
 
 import static java.util.List.of;
 
-abstract public class AbstractAuthorizationConfigurer<T> {
+abstract public class AbstractAuthorizationRequestMatchCriterion<T> {
 
     abstract protected T applyMatchers(List<MappingMatcher<RequestRoute>> requestMatchers);
 

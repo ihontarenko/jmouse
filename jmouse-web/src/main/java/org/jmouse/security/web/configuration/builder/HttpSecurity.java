@@ -94,12 +94,14 @@ public final class HttpSecurity
         return this;
     }
 
-    public HttpSecurity authorization(Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationConfigurer> customizer) {
-        customizer.customize(attach(new AuthorizeHttpRequestsConfigurer<>()).getAuthorizationConfigurer());
+    public HttpSecurity authorization(
+            Customizer<AuthorizeRequestConfigurer<HttpSecurity>.AuthorizationRequestMatchCriterion> customizer) {
+        customizer.customize(attach(new AuthorizeRequestConfigurer<>()).getRequestMatchCriterion());
         return this;
     }
 
-    public HttpSecurity authentication(Customizer<AuthenticationConfigurer<HttpSecurity>> customizer) {
+    public HttpSecurity authentication(
+            Customizer<AuthenticationConfigurer<HttpSecurity>> customizer) {
         customizer.customize(new AuthenticationConfigurer<>(this::attach));
         return this;
     }

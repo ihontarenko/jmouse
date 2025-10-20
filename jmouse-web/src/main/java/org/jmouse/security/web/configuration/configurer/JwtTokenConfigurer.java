@@ -7,6 +7,7 @@ import org.jmouse.security.authentication.AuthenticationResolverRegistry;
 import org.jmouse.security.authentication.jwt.JwtTokenAuthenticationResolver;
 import org.jmouse.security.jwt.JwtCodec;
 import org.jmouse.security.jwt.codec.HS256JwtCodec;
+import org.jmouse.security.jwt.codec.RS256JwtCodec;
 import org.jmouse.security.web.authentication.*;
 import org.jmouse.security.web.authentication.bearer.BearerTokenAuthenticationEntryPoint;
 import org.jmouse.security.web.authentication.jwt.JwtAuthenticationFilter;
@@ -22,9 +23,9 @@ import java.time.Clock;
 public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>>
         extends AbstractAuthenticationConfigurer<B, JwtTokenConfigurer<B>> {
 
+    private final EntryPointConfigurer                  entryPointConfigurer = new EntryPointConfigurer();
     private final AbstractRealmAuthenticationEntryPoint entryPoint           = new BearerTokenAuthenticationEntryPoint();
-    private final EntryPointConfigurer entryPointConfigurer = new EntryPointConfigurer();
-    private final CodecConfigurer      jwtCodecConfigurer   = new CodecConfigurer();
+    private final CodecConfigurer                       jwtCodecConfigurer   = new CodecConfigurer();
 
     public JwtTokenConfigurer<B> entryPoint(Customizer<EntryPointConfigurer> customizer) {
         customizer.customize(entryPointConfigurer);
@@ -99,8 +100,7 @@ public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>>
         public CodecConfigurer hs256(Customizer<Hs256JwtCodecConfigurer> customizer) {
             Hs256JwtCodecConfigurer configurer = new Hs256JwtCodecConfigurer();
             customizer.customize(configurer);
-            this.codec = configurer.build();
-            return this;
+            return codec(configurer.build());
         }
 
         public CodecConfigurer rs256(Customizer<Rs256JwtCodecConfigurer> customizer) {
@@ -156,7 +156,11 @@ public final class JwtTokenConfigurer<B extends HttpSecurityBuilder<B>>
         }
 
         public class Rs256JwtCodecConfigurer {
-            // todo: not implemented yet
+
+            public JwtCodec build() {
+                return new RS256JwtCodec(CodecConfigurer.this.adapter, null, null);
+            }
+
         }
 
         public class EdDSAJwtCodecConfigurer {

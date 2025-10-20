@@ -2,9 +2,10 @@ package org.jmouse.security.jwt;
 
 /**
  * 🛡️ ValidatingJwtCodec
- *
+ * <p>
  * Decorator around a {@link JwtCodec} that applies additional claim validation
  * (e.g. {@code iss}, {@code aud}) after decoding a JWT.
+ * </p>
  *
  * <p>Responsibilities:</p>
  * <ul>
@@ -15,7 +16,7 @@ package org.jmouse.security.jwt;
  */
 public final class ValidatingJwtCodec implements JwtCodec {
 
-    private final JwtCodec delegate;
+    private final JwtCodec          delegate;
     private final JwtClaimsVerifier verifier;
 
     /**
