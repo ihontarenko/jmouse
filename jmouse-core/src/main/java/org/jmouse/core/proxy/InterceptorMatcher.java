@@ -3,6 +3,11 @@ package org.jmouse.core.proxy;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.reflection.ClassMatchers;
 
+import java.lang.annotation.Annotation;
+
+import static org.jmouse.core.reflection.ClassMatchers.hasMethodAnnotatedWith;
+import static org.jmouse.core.reflection.ClassMatchers.isAnnotatedWith;
+
 /**
  * 🎯 Specialization of {@link Matcher} for class-level interception rules.
  *
@@ -66,4 +71,17 @@ public interface InterceptorMatcher extends Matcher<Class<?>> {
 
         return matcher::matches;
     }
+
+    @SafeVarargs
+    static InterceptorMatcher forAnnotations(Class<? extends Annotation>... annotations) {
+        Matcher<Class<?>> matcher = none();
+
+        for (Class<? extends Annotation> annotation : annotations) {
+            matcher = matcher.or(isAnnotatedWith(annotation));
+            matcher = matcher.or(hasMethodAnnotatedWith(annotation));
+        }
+
+        return matcher::matches;
+    }
+
 }

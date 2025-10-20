@@ -52,4 +52,11 @@ public interface ProxyFactory {
      * @param interceptor interceptor to add
      */
     void addInterceptor(MethodInterceptor interceptor);
+
+    /**
+     * 🔎 Access the interceptor registry associated with this factory.
+     *
+     * @return global interceptor registry
+     */
+    InterceptorRegistry getRegistry();
 }

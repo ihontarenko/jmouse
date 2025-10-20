@@ -5,7 +5,6 @@ import org.jmouse.security.authorization.AuthorityPolicyAuthorizationManager;
 import org.jmouse.security.authorization.AuthorizationManager;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.core.access.RoleHierarchy;
-import org.jmouse.security.web.access.MappingApplier;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MappingMatcher;
 
@@ -102,6 +101,11 @@ public class AuthorizationAccessCriterion<T, C> {
                     -> expected != null && expected.equals(variables.getValue(context, variable))
                         ? AccessResult.PERMIT : AccessResult.DENY);
         }
+    }
+
+    @FunctionalInterface
+    public interface MappingApplier<T, C> {
+        T apply(T owner, List<MappingMatcher<RequestRoute>> matchers, AuthorizationManager<C> manager, boolean negate);
     }
 
 }

@@ -3,15 +3,10 @@ package org.jmouse.security.authorization.method;
 import org.jmouse.beans.InitializingBeanSupport;
 import org.jmouse.context.ApplicationBeanContext;
 import org.jmouse.core.proxy.MethodInvocation;
-import org.jmouse.core.reflection.annotation.Annotations;
-import org.jmouse.el.node.Expression;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 /**
  * 🧮 Caches and resolves expression-based authorization attributes for methods.
@@ -30,8 +25,8 @@ import java.util.function.Function;
 public abstract class AbstractExpressionAttributeRegistry<T extends ExpressionAttribute>
         implements InitializingBeanSupport<ApplicationBeanContext> {
 
-    private final Map<Key, T>                         cache = new ConcurrentHashMap<>();
-    private       MethodExpressionHandler<Expression> expressionHandler;
+    private final Map<Key, T>                               cache = new ConcurrentHashMap<>();
+    private       MethodExpressionHandler<MethodInvocation> expressionHandler;
 
     /**
      * 🏗️ Create a registry with a preconfigured handler (optional).
@@ -39,7 +34,7 @@ public abstract class AbstractExpressionAttributeRegistry<T extends ExpressionAt
      * @param expressionHandler handler used to parse/prepare method-level expressions;
      *                          if {@code null}, it will be retrieved from the context on init
      */
-    protected AbstractExpressionAttributeRegistry(MethodExpressionHandler<Expression> expressionHandler) {
+    protected AbstractExpressionAttributeRegistry(MethodExpressionHandler<MethodInvocation> expressionHandler) {
         this.expressionHandler = expressionHandler;
     }
 
@@ -60,11 +55,11 @@ public abstract class AbstractExpressionAttributeRegistry<T extends ExpressionAt
      * ⚡ Get (or compute and cache) the attribute for the given method and target class.
      *
      * @param method      the method
-     * @param targetClass the concrete target class (may influence annotation resolution)
+     * @param type the concrete target class (may influence annotation resolution)
      * @return resolved attribute (may be {@code null} if none found)
      */
-    public final T getAttribute(Method method, Class<?> targetClass) {
-        return cache.computeIfAbsent(new Key(method, targetClass), k -> resolveAttribute(method, targetClass));
+    public final T getAttribute(Method method, Class<?> type) {
+        return cache.computeIfAbsent(new Key(method, type), k -> resolveAttribute(method, type));
     }
 
     /**
@@ -93,20 +88,6 @@ public abstract class AbstractExpressionAttributeRegistry<T extends ExpressionAt
     }
 
     /**
-     * 🔎 Helper to obtain a finder for a single unique annotation of the given type.
-     *
-     * <p>The returned function searches an {@link AnnotatedElement} and returns the unique annotation
-     * instance if present, or {@code null} otherwise.</p>
-     *
-     * @param type annotation type to locate
-     * @param <A>  annotation generic
-     * @return a function that finds a unique {@code A} on an element
-     */
-    protected <A extends Annotation> Function<AnnotatedElement, A> findUniqueAnnotation(Class<A> type) {
-        return Annotations.lookup(type);
-    }
-
-    /**
      * 🧩 Strategy hook: resolve an attribute for the given method and target class.
      *
      * <p>Implementations typically inspect annotations (method/class hierarchy, meta-annotations, etc.)
@@ -123,7 +104,7 @@ public abstract class AbstractExpressionAttributeRegistry<T extends ExpressionAt
      *
      * @return the expression handler (never {@code null} after initialization)
      */
-    protected MethodExpressionHandler<Expression> getExpressionHandler() {
+    protected MethodExpressionHandler<MethodInvocation> getExpressionHandler() {
         return expressionHandler;
     }
 
@@ -139,8 +120,8 @@ public abstract class AbstractExpressionAttributeRegistry<T extends ExpressionAt
     public void doInitialize(ApplicationBeanContext context) {
         if (expressionHandler == null) {
             @SuppressWarnings("unchecked")
-            MethodExpressionHandler<Expression> bean =
-                    (MethodExpressionHandler<Expression>) context.getBean(MethodExpressionHandler.class);
+            MethodExpressionHandler<MethodInvocation> bean =
+                    (MethodExpressionHandler<MethodInvocation>) context.getBean(MethodExpressionHandler.class);
             expressionHandler = bean;
         }
     }

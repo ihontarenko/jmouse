@@ -9,7 +9,7 @@ import org.jmouse.security.web.authorization.AuthorizationFilter;
 import org.jmouse.security.web.RequestMatch;
 import org.jmouse.security.web.access.ExceptionTranslationFilter;
 import org.jmouse.security.web.configuration.*;
-import org.jmouse.security.web.access.DelegatingAuthorizationManager.Builder;
+import org.jmouse.security.web.access.CompositeAuthorizationManager.Builder;
 import org.jmouse.security.web.configuration.matching.AbstractAuthorizationRequestMatchCriterion;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.RouteMatch;

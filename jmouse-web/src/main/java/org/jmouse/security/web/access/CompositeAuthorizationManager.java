@@ -12,12 +12,12 @@ import org.jmouse.web.match.routing.MappingMatcher;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DelegatingAuthorizationManager implements AuthorizationManager<HttpServletRequest> {
+public class CompositeAuthorizationManager implements AuthorizationManager<HttpServletRequest> {
 
     private final List<RequestMatcherEntry<AuthorizationManager<RequestMatch>>> mappings;
     private final AuthorizationManager<HttpServletRequest>                      defaultManager;
 
-    private DelegatingAuthorizationManager(
+    private CompositeAuthorizationManager(
             List<RequestMatcherEntry<AuthorizationManager<RequestMatch>>> entries,
             AuthorizationManager<HttpServletRequest> defaultManager
     ) {
@@ -60,9 +60,9 @@ public class DelegatingAuthorizationManager implements AuthorizationManager<Http
             return this;
         }
 
-        public DelegatingAuthorizationManager build() {
+        public CompositeAuthorizationManager build() {
             if (!isEmpty()) {
-                return new DelegatingAuthorizationManager(entries, defaultManager);
+                return new CompositeAuthorizationManager(entries, defaultManager);
             }
 
             throw new IllegalStateException("NO AUTHORIZATION MAPPINGS CONFIGURED!");

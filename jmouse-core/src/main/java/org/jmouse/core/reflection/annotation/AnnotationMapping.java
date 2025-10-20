@@ -107,9 +107,11 @@ public class AnnotationMapping implements AnnotationAttributeMapping {
     private <T> T resolve(String name, Class<T> type) {
         T result = null;
 
-        for (MergedAnnotation meta : root.getFlattened()) {
-            if ((result = resolve(meta, name, type)) != null) {
-                break;
+        if (root != null) {
+            for (MergedAnnotation meta : root.getFlattened()) {
+                if ((result = resolve(meta, name, type)) != null) {
+                    break;
+                }
             }
         }
 

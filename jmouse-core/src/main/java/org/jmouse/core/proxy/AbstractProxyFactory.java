@@ -62,6 +62,7 @@ public abstract class AbstractProxyFactory implements ProxyFactory {
      *
      * @return global interceptor registry
      */
+    @Override
     public InterceptorRegistry getRegistry() {
         return registry;
     }

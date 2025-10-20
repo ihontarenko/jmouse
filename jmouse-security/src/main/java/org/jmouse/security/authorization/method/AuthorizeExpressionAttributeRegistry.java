@@ -1,5 +1,7 @@
 package org.jmouse.security.authorization.method;
 
+import org.jmouse.core.proxy.MethodInvocation;
+import org.jmouse.core.reflection.annotation.Annotations;
 import org.jmouse.el.node.Expression;
 import org.jmouse.security.core.access.annotation.Authorize;
 
@@ -9,30 +11,28 @@ import java.util.function.Function;
 
 public class AuthorizeExpressionAttributeRegistry extends AbstractExpressionAttributeRegistry<ExpressionAttribute> {
 
-    public AuthorizeExpressionAttributeRegistry(MethodExpressionHandler<Expression> expressionHandler) {
+    public AuthorizeExpressionAttributeRegistry(MethodExpressionHandler<MethodInvocation> expressionHandler) {
         super(expressionHandler);
     }
 
     @Override
     protected ExpressionAttribute resolveAttribute(Method method, Class<?> targetClass) {
-        ExpressionAttribute expressionAttribute = () -> null;
-        Authorize           authorize           = findAuthorize(method, targetClass);
+        ExpressionAttribute                   expressionAttribute = () -> null;
+        Function<AnnotatedElement, Authorize> lookup              = Annotations.lookup(Authorize.class);
+        Authorize                             authorize           = lookup.apply(method);
+
+        if (authorize == null) {
+            authorize = lookup.apply(getClass(method, targetClass));
+        }
 
         if (authorize != null) {
-            MethodExpressionHandler<Expression> expressionHandler = getExpressionHandler();
-            Expression                          expression        = expressionHandler.getExpressionLanguage()
+            MethodExpressionHandler<MethodInvocation> expressionHandler = getExpressionHandler();
+            Expression                                expression        = expressionHandler.getExpressionLanguage()
                     .compile(authorize.value());
-
-            expressionAttribute = () -> expression;
+            expressionAttribute =  new AuthorizedExpressionAttribute(authorize.phase(), expression);
         }
 
         return expressionAttribute;
-    }
-
-    private Authorize findAuthorize(Method method, Class<?> targetClass) {
-        Function<AnnotatedElement, Authorize> lookup     = findUniqueAnnotation(Authorize.class);
-        Authorize                             annotation = lookup.apply(method);
-        return annotation == null ? lookup.apply(getClass(method, targetClass)) : annotation;
     }
 
 }

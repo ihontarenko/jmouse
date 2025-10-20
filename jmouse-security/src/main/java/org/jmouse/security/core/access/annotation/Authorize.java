@@ -1,5 +1,7 @@
 package org.jmouse.security.core.access.annotation;
 
+import org.jmouse.security.core.access.Phase;
+
 import java.lang.annotation.*;
 
 @Target({ElementType.TYPE, ElementType.METHOD})
@@ -9,8 +11,6 @@ public @interface Authorize {
 
     String value() default "";
 
-    Phase phase() default Phase.PRE;
-
-    enum Phase {PRE, POST};
+    Phase phase() default Phase.BEFORE;
 
 }

@@ -6,6 +6,7 @@ import org.jmouse.beans.annotation.ProxiedBean;
 import org.jmouse.core.Bytes;
 import org.jmouse.core.throttle.RateLimit;
 import org.jmouse.core.throttle.RateLimitEnable;
+import org.jmouse.security.core.access.annotation.Authorize;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.http.multipart.UploadLimitExceededException;
 import org.jmouse.web.annotation.*;
@@ -125,33 +126,10 @@ public class SharedController {
     @GetMapping(
             requestPath = "/shared/{format}/bytes/{bytes}"
     )
-    public Bytes bytesA(@PathVariable("bytes") String bytes) {
+    @Authorize(value = "_.bytes | length", phase = Authorize.Phase.PRE)
+    public Bytes bytes(@PathVariable("bytes") String bytes) {
         return Bytes.parse(bytes);
     }
 
-    @CorsMapping(
-            origins = {"megogo.net"},
-            methods = {HttpMethod.GET, HttpMethod.POST},
-            exposedHeaders = {HttpHeader.CONTENT_LENGTH},
-            allowCredentials = true,
-            maxAge = 3600
-    )
-    @GetMapping(
-            requestPath = "/shared/{format}/bytes/{bytes}/megogo"
-    )
-    @RateLimit(name = "megogo call", max = 1, per = ChronoUnit.SECONDS, amount = 2, scope = METHOD)
-    public Bytes bytesB(@PathVariable("bytes") String bytes) {
-        return Bytes.parse(bytes);
-    }
-
-    @GetMapping(requestPath = "/shared/userModel/{name}")
-    public UserModel userModel(@PathVariable("name") String name) {
-        return new UserModel(name, "passwd!");
-    }
-
-    @GetMapping(requestPath = "/", produces = {"text/plain"})
-    public String home() {
-        return "home";
-    }
 
 }

@@ -5,6 +5,6 @@ import org.jmouse.el.node.Expression;
 @FunctionalInterface
 public interface ExpressionAttribute {
 
-    Expression getExpression();
+    Expression expression();
 
 }

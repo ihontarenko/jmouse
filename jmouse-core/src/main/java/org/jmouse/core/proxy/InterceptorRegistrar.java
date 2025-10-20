@@ -74,7 +74,7 @@ public class InterceptorRegistrar {
      * @param baseClasses root classes/packages to scan
      */
     public void register(Class<?>... baseClasses) {
-        if (!scanned) {
+        if (!scanned || baseClasses == null || baseClasses.length == 0) {
             for (Class<?> annotatedClass : ClassFinder.findAnnotatedClasses(Intercept.class, baseClasses)) {
                 Intercept          intercept        = annotatedClass.getAnnotation(Intercept.class);
                 Class<?>[]         supportedClasses = extractTargetClasses(annotatedClass);

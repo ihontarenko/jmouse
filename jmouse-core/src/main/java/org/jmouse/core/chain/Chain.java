@@ -14,7 +14,7 @@ import java.util.function.BiFunction;
  *   <li>➡️ Return {@link Outcome.Continue} to delegate further</li>
  *   <li>✅ Return {@link Outcome.Done} to short-circuit with a result</li>
  * </ul>
- * </p>
+ * </p>s
  *
  * @param <C> context type (shared state)
  * @param <I> input type (payload)

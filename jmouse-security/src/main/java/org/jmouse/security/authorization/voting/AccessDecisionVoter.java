@@ -10,6 +10,4 @@ public interface AccessDecisionVoter<T> {
 
     Vote vote(Authentication authentication, T target);
 
-
-
 }
