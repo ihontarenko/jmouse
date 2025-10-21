@@ -2,15 +2,7 @@ package org.jmouse.security.authorization.method.attribute.jsr250;
 
 import jakarta.annotation.security.PermitAll;
 
-import org.jmouse.core.proxy.MethodInvocation;
-import org.jmouse.security.authorization.method.ExpressionAttribute;
-import org.jmouse.security.authorization.method.MethodExpressionHandler;
-import org.jmouse.security.authorization.method.attribute.AttributeResolver;
-import org.jmouse.security.authorization.method.attribute.ExpressionAttributeFactory;
-
-import java.lang.reflect.Method;
-
-public class PermitAllAnnotationResolver implements AttributeResolver<PermitAll> {
+public class PermitAllAnnotationResolver extends Jsr250AnnotationResolver<PermitAll> {
 
     public static final String PERMIT_ALL_EL = "permitAll()";
 
@@ -20,19 +12,13 @@ public class PermitAllAnnotationResolver implements AttributeResolver<PermitAll>
     }
 
     @Override
-    public ExpressionAttribute resolve(
-            PermitAll annotation,
-            Method method,
-            Class<?> targetClass,
-            MethodExpressionHandler<MethodInvocation> handler,
-            ExpressionAttributeFactory factory
-    ) {
-        return factory.create(handler.getExpressionLanguage().compile(PERMIT_ALL_EL));
+    public int order() {
+        return 5;
     }
 
     @Override
-    public int order() {
-        return 5;
+    protected String getExpressionString(PermitAll annotation) {
+        return PERMIT_ALL_EL;
     }
 
 }

@@ -27,14 +27,12 @@ public interface AttributeResolver<A extends Annotation> {
      * @param method      the invoked method
      * @param targetClass the concrete target class
      * @param handler     expression/EL infrastructure
-     * @param factory     fallback factory to wrap compiled expressions into framework-specific attributes
      */
     ExpressionAttribute resolve(
             A annotation,
             Method method,
             Class<?> targetClass,
-            MethodExpressionHandler<MethodInvocation> handler,
-            ExpressionAttributeFactory factory
+            MethodExpressionHandler<MethodInvocation> handler
     );
 
     /**

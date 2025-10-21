@@ -29,22 +29,20 @@ public class CompositeAnnotationExpressionAttributeRegistry
         extends AbstractExpressionAttributeRegistry<ExpressionAttribute> {
 
     private final List<AttributeResolver<? extends Annotation>> resolvers;
-    private final ExpressionAttributeFactory                    attributeFactory;
 
     public CompositeAnnotationExpressionAttributeRegistry(
             MethodExpressionHandler<MethodInvocation> expressionHandler,
-            ExpressionAttributeFactory attributeFactory,
             List<AttributeResolver<? extends Annotation>> resolvers
     ) {
         super(expressionHandler);
-        this.attributeFactory = attributeFactory;
         this.resolvers = resolvers.stream().sorted(Comparator.comparingInt(AttributeResolver::order)).toList();
     }
 
-    public static ExpressionAttributeRegistry<ExpressionAttribute> defaultRegistry() {
+    public static ExpressionAttributeRegistry<ExpressionAttribute> defaultRegistry(
+            MethodExpressionHandler<MethodInvocation> expressionHandler
+    ) {
         return new CompositeAnnotationExpressionAttributeRegistry(
-                handler,
-                factory,
+                expressionHandler,
                 List.of(
                         new AuthorizeAnnotationResolver(),
                         new RolesAllowedAnnotationResolver(),
@@ -77,7 +75,7 @@ public class CompositeAnnotationExpressionAttributeRegistry
             if (annotation != null) {
                 @SuppressWarnings("unchecked")
                 AttributeResolver<Annotation> cast = (AttributeResolver<Annotation>) resolver;
-                return cast.resolve(annotation, method, targetClass, getExpressionHandler(), attributeFactory);
+                return cast.resolve(annotation, method, targetClass, getExpressionHandler());
             }
         }
         return null;

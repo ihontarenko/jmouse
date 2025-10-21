@@ -22,8 +22,7 @@ public class AuthorizeAnnotationResolver implements AttributeResolver<Authorize>
             Authorize authorize,
             Method method,
             Class<?> targetClass,
-            MethodExpressionHandler<MethodInvocation> handler,
-            ExpressionAttributeFactory factory
+            MethodExpressionHandler<MethodInvocation> handler
     ) {
         try {
             Expression expression = handler.getExpressionLanguage().compile(authorize.value());

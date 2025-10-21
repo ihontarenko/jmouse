@@ -2,17 +2,9 @@ package org.jmouse.security.authorization.method.attribute.jsr250;
 
 import jakarta.annotation.security.RolesAllowed;
 import org.jmouse.core.Streamable;
-import org.jmouse.core.proxy.MethodInvocation;
-import org.jmouse.el.node.Expression;
-import org.jmouse.security.authorization.method.ExpressionAttribute;
-import org.jmouse.security.authorization.method.MethodExpressionHandler;
-import org.jmouse.security.authorization.method.attribute.AttributeResolver;
-import org.jmouse.security.authorization.method.attribute.ExpressionAttributeFactory;
 import org.jmouse.util.StringHelper;
 
-import java.lang.reflect.Method;
-
-public class RolesAllowedAnnotationResolver implements AttributeResolver<RolesAllowed> {
+public class RolesAllowedAnnotationResolver extends Jsr250AnnotationResolver<RolesAllowed> {
 
     @Override
     public Class<RolesAllowed> annotationType() {
@@ -20,21 +12,10 @@ public class RolesAllowedAnnotationResolver implements AttributeResolver<RolesAl
     }
 
     @Override
-    public ExpressionAttribute resolve(
-            RolesAllowed annotation,
-            Method method,
-            Class<?> targetClass,
-            MethodExpressionHandler<MethodInvocation> handler,
-            ExpressionAttributeFactory factory
-    ) {
+    protected String getExpressionString(RolesAllowed annotation) {
         String rolesAllowed = Streamable.of(annotation.value())
-                .map(StringHelper::unquote)
-                .map(role -> "'" + role + "'")
+                .map(StringHelper::unquote).map(role -> "'" + role + "'")
                 .joining(", ");
-
-        String     expressionLanguage = "hasAnyRole(" + rolesAllowed + ")";
-        Expression expression         = handler.getExpressionLanguage().compile(expressionLanguage);
-
-        return factory.create(expression);
+        return "hasAnyRole(" + rolesAllowed + ")";
     }
 }
