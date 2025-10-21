@@ -38,7 +38,8 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
      */
     @Override
     protected void doWrite(String data, Class<?> type, HttpOutputMessage outputMessage) throws IOException {
-        outputMessage.getOutputStream().write(data.getBytes(getCharset(outputMessage.getHeaders().getContentType())));
+        outputMessage.getOutputStream().write(
+                (data == null ? "" : data).getBytes(getCharset(outputMessage.getHeaders().getContentType())));
     }
 
     /**

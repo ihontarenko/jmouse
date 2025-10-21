@@ -91,7 +91,7 @@ public interface MethodInterceptor {
      *         {@code false} if it should be rethrown
      */
     default boolean error(InvocationContext context, Method method, Object[] arguments, Throwable throwable) {
-        return true;
+        return false;
     }
 
 }

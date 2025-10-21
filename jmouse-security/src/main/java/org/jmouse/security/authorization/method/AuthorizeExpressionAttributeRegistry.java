@@ -3,6 +3,7 @@ package org.jmouse.security.authorization.method;
 import org.jmouse.core.proxy.MethodInvocation;
 import org.jmouse.core.reflection.annotation.Annotations;
 import org.jmouse.el.node.Expression;
+import org.jmouse.el.parser.ParseException;
 import org.jmouse.security.core.access.annotation.Authorize;
 
 import java.lang.reflect.AnnotatedElement;
@@ -27,9 +28,14 @@ public class AuthorizeExpressionAttributeRegistry extends AbstractExpressionAttr
 
         if (authorize != null) {
             MethodExpressionHandler<MethodInvocation> expressionHandler = getExpressionHandler();
-            Expression                                expression        = expressionHandler.getExpressionLanguage()
-                    .compile(authorize.value());
-            expressionAttribute =  new AuthorizedExpressionAttribute(authorize.phase(), expression);
+
+            try {
+                Expression expression = expressionHandler.getExpressionLanguage().compile(authorize.value());
+                expressionAttribute =  new AuthorizedExpressionAttribute(authorize.phase(), expression);
+            } catch (ParseException parseException) {
+                throw new IllegalArgumentException(
+                        "Could not parse expression: '%s'".formatted(authorize.value()), parseException);
+            }
         }
 
         return expressionAttribute;

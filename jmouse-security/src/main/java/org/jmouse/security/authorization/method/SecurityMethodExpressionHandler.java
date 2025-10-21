@@ -20,7 +20,8 @@ public class SecurityMethodExpressionHandler extends AbstractSecurityMethodExpre
     @Override
     protected void complementEvaluationContext(
             Authentication authentication, MethodInvocation invocation, EvaluationContext context) {
-        context.setValue("A", invocation.getArguments());
+        context.setValue(VARIABLE_ARGUMENTS, invocation.getArguments());
+        bindReturnValue(invocation.getReturnValue(), context);
     }
 
     @Override

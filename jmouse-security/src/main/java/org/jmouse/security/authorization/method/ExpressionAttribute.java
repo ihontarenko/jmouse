@@ -7,4 +7,8 @@ public interface ExpressionAttribute {
 
     Expression expression();
 
+    default boolean isDummy() {
+        return expression() == null;
+    }
+
 }

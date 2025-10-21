@@ -44,7 +44,6 @@ public class SecurityConfiguration {
         http.authorization(this::authorizationConfiguration);
 
         http.authentication(a -> a
-                .anonymous(Customizer.noop())
                 .submitForm(form -> form
                         .usernameParameter("username")
                         .passwordParameter("password")

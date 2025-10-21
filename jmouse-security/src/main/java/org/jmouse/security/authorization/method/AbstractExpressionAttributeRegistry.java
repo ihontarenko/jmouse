@@ -81,10 +81,8 @@ public abstract class AbstractExpressionAttributeRegistry<T extends ExpressionAt
      * @return resolved attribute (may be {@code null} if none found)
      */
     public final T getAttribute(MethodInvocation invocation) {
-        return getAttribute(
-                invocation.getMethod(),
-                getClass(invocation.getMethod(), invocation.getTarget().getClass())
-        );
+        Class<?> type = getClass(invocation.getMethod(), invocation.getTarget().getClass());
+        return getAttribute(invocation.getMethod(), type);
     }
 
     /**

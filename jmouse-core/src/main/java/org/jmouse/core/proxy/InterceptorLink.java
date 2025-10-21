@@ -92,26 +92,28 @@ public final class InterceptorLink implements Link<InvocationContext, MethodInvo
             bridge.setReturnValue(result);
             return Outcome.done(result);
         } catch (Throwable exception) {
-            Throwable throwable = exception;
-            boolean   handled   = false;
-
-            try {
-                handled = interceptor.error(context, base.getMethod(), base.getArguments(), throwable);
-            } catch (Throwable failed) {
-                throwable = failed;
-            }
-
-            if (!handled) {
-                throw new Bubble(throwable);
-            }
-
+            handle(exception, context, base);
             return Outcome.done(result);
         } finally {
             try {
                 interceptor.after(context, base.getMethod(), base.getArguments(), result);
             } catch (Throwable throwable) {
-                interceptor.error(context, base.getMethod(), base.getArguments(), throwable);
+                handle(throwable, context, base);
             }
+        }
+    }
+
+    private void handle(Throwable throwable, InvocationContext context, MethodInvocation invocation) {
+        boolean handled = false;
+
+        try {
+            handled = interceptor.error(context, invocation.getMethod(), invocation.getArguments(), throwable);
+        } catch (Throwable failed) {
+            throwable.addSuppressed(failed);
+        }
+
+        if (!handled) {
+            throw new Bubble(throwable);
         }
     }
 

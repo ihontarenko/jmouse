@@ -7,48 +7,116 @@ import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.authorization.AuthorizationManager;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.core.SecurityContextHolderStrategy;
+import org.jmouse.security.core.access.Phase;
 
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
+/**
+ * 🛡️ Interceptor for enforcing method-level authorization logic.
+ * <p>
+ * Applied to all proxied objects ({@link Intercept}(Object.class)), this interceptor
+ * delegates pre- and post-execution access control to a configured
+ * {@link AuthorizationManager}, typically an instance of {@link AuthorizeMethodManager}.
+ * </p>
+ *
+ * <h3>Lifecycle ⚙️</h3>
+ * <ol>
+ *   <li>🔹 {@link #authorizeBeforeExecution(MethodInvocation)} — checks access before method call</li>
+ *   <li>⚙️ {@link MethodInvocation#proceed()} — invokes the original target method</li>
+ *   <li>🔹 {@link #authorizeAfterExecution(MethodInvocation, Object)} — validates post-call access</li>
+ * </ol>
+ *
+ * <h3>Security Context 🔐</h3>
+ * Uses the current {@link SecurityContextHolderStrategy} from
+ * {@link SecurityContextHolder} to obtain the active {@link Authentication}.
+ * Throws an {@link IllegalStateException} if no authentication is available.
+ */
 @Intercept(Object.class)
 public class AuthorizeMethodInterceptor extends AbstractAuthorizeMethodInterceptor {
 
-    private final AuthorizationManager<MethodInvocation>  authorizationManager;
-    private final Supplier<SecurityContextHolderStrategy> contextHolder;
+    private final AuthorizationManager<AuthorizedMethodInvocation> manager;
+    private final Supplier<SecurityContextHolderStrategy>          context;
 
     {
-        contextHolder = SecurityContextHolder::getContextHolderStrategy;
+        context = SecurityContextHolder::getContextHolderStrategy;
     }
 
-    public AuthorizeMethodInterceptor(AuthorizationManager<MethodInvocation> authorizationManager) {
-        this.authorizationManager = authorizationManager;
+    /**
+     * Creates an interceptor bound to a specific authorization manager.
+     *
+     * @param manager the {@link AuthorizationManager} responsible for evaluating method access
+     */
+    public AuthorizeMethodInterceptor(AuthorizationManager<AuthorizedMethodInvocation> manager) {
+        this.manager = manager;
     }
 
+    /**
+     * 🧩 Invokes the target method while applying authorization checks
+     * before and after execution.
+     *
+     * @param invocation the current method invocation
+     * @return the method’s return value
+     * @throws Throwable if the target method or authorization fails
+     */
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        if (authorizationManager instanceof AuthorizeMethodManager authorizeMethodManager) {
-            authorizeMethodManager.check(getAuthentication(), invocation);
-        }
-
+        authorizeBeforeExecution(invocation);
         Object result = invocation.proceed();
-
-        if (authorizationManager instanceof AuthorizeMethodManager authorizeMethodManager) {
-            authorizeMethodManager.check(getAuthentication(), invocation);
-        }
-
+        authorizeAfterExecution(invocation, result);
         return result;
     }
 
+    /**
+     * 🔹 Performs pre-execution authorization (phase: {@link Phase#BEFORE}).
+     */
+    private void authorizeBeforeExecution(MethodInvocation invocation) {
+        authorizeExecution(invocation, Phase.BEFORE, null);
+    }
+
+    /**
+     * 🔹 Performs post-execution authorization (phase: {@link Phase#AFTER}).
+     */
+    private void authorizeAfterExecution(MethodInvocation invocation, Object result) {
+        authorizeExecution(invocation, Phase.AFTER, result);
+    }
+
+    /**
+     * 🚦 Centralized execution of authorization logic for both phases.
+     *
+     * @param invocation the intercepted method invocation
+     * @param phase      current authorization phase (before/after)
+     * @param result     optional result for post-phase checks
+     */
+    private void authorizeExecution(MethodInvocation invocation, Phase phase, Object result) {
+        if (manager instanceof AuthorizeMethodManager authorizeMethodManager) {
+            authorizeMethodManager.check(
+                    getAuthentication(), new AuthorizedMethodInvocation(invocation, phase, result));
+        }
+    }
+
+    /**
+     * 🔑 Retrieves the current {@link Authentication} from the
+     * {@link SecurityContextHolder}.
+     *
+     * @return the active authentication
+     * @throws IllegalStateException if no authentication exists
+     */
     private Authentication getAuthentication() {
-        SecurityContextHolderStrategy contextHolderStrategy = contextHolder.get();
-        Authentication authentication = contextHolderStrategy.getContext().getAuthentication();
+        SecurityContextHolderStrategy contextHolderStrategy = context.get();
+        Authentication                authentication        = contextHolderStrategy.getContext().getAuthentication();
 
         if (authentication == null) {
-            throw new IllegalStateException("An authentication is not present in context.");
+            throw new IllegalStateException("An authentication object is not present in the security context.");
         }
 
         return authentication;
+    }
+
+    @Override
+    public boolean error(InvocationContext context, Method method, Object[] arguments, Throwable throwable) {
+        // false - unhandled
+        return false;
     }
 
 }

@@ -40,8 +40,8 @@ public class SecurityFilterOrder {
         setOrder(SubmitFormRequestAuthenticationFilter.class, 150);
         setOrder(LogoutAuthenticationFilter.class, 170);
         setOrder(AnonymousAuthenticationFilter.class, 180);
-        setOrder(ExceptionTranslationFilter.class, 190);
-        setOrder(AuthorizationFilter.class, 200);
+        setOrder(AuthorizationFilter.class, 190);
+        setOrder(ExceptionTranslationFilter.class, 200);
     }
 
     /**

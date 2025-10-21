@@ -7,30 +7,41 @@ import org.jmouse.security.authorization.AuthorizationManager;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.core.access.Phase;
 
-public class AuthorizeMethodManager implements AuthorizationManager<MethodInvocation> {
+public class AuthorizeMethodManager implements AuthorizationManager<AuthorizedMethodInvocation> {
 
     private AuthorizeExpressionAttributeRegistry attributeRegistry = new AuthorizeExpressionAttributeRegistry(
             new SecurityMethodExpressionHandler()
     );
 
     @Override
-    public AccessResult check(Authentication authentication, MethodInvocation target) {
-        ExpressionHandler<MethodInvocation> expressionHandler = getAttributeRegistry().getExpressionHandler();
-        ExpressionAttribute                 attribute         = getAttributeRegistry().getAttribute(target);
-        EvaluationContext                   evaluationContext = expressionHandler.createContext(authentication, target);
-        Phase phase = Phase.BEFORE;
+    public AccessResult check(Authentication authentication, AuthorizedMethodInvocation target) {
+        ExpressionHandler<MethodInvocation> expressionHandler = getExpressionHandler();
+        ExpressionAttribute                 attribute         = getExpressionAttribute(target);
+        Phase                               phase             = Phase.BEFORE;
+        EvaluationContext                   evaluationContext = expressionHandler.createContext(
+                authentication, target.invocation());
 
         if (attribute instanceof AuthorizedExpressionAttribute expressionAttribute) {
             phase = expressionAttribute.phase();
         }
 
-        attribute.expression().evaluate(evaluationContext);
+        if (isApplicablePhase(phase, target) && !attribute.isDummy()) {
+            return SecurityExpressionEvaluator.evaluate(attribute.expression(), evaluationContext);
+        }
 
-        return null;
+        return AccessResult.PERMIT;
     }
 
-    private boolean isCompatiblePhase(Phase phase, MethodInvocation invocation) {
-        return phase == Phase.BEFORE || phase == Phase.AFTER;
+    private ExpressionHandler<MethodInvocation> getExpressionHandler() {
+        return getAttributeRegistry().getExpressionHandler();
+    }
+
+    private ExpressionAttribute getExpressionAttribute(AuthorizedMethodInvocation authorizedMethodInvocation) {
+        return getAttributeRegistry().getAttribute(authorizedMethodInvocation.invocation());
+    }
+
+    private boolean isApplicablePhase(Phase phase, AuthorizedMethodInvocation invocation) {
+        return phase == invocation.phase();
     }
 
     public AuthorizeExpressionAttributeRegistry getAttributeRegistry() {

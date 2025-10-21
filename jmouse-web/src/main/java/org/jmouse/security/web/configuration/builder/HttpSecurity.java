@@ -120,9 +120,9 @@ public final class HttpSecurity
         initializeConfigurers();
         configureConfigurers();
 
-        List<Filter> sorted = new ArrayList<>(filters);
-        sorted.sort(Sorter.PRIORITY_COMPARATOR);
+        List<Filter> unique = new ArrayList<>(Set.copyOf(this.filters));
+        unique.sort(Sorter.PRIORITY_COMPARATOR);
 
-        return new SecurityFilterChain(this.matcher, sorted);
+        return new SecurityFilterChain(this.matcher, unique);
     }
 }

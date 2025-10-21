@@ -62,6 +62,9 @@ public class Expressions {
         context.setValue("ci", (char) 23);
         context.setValue("data", List.of(1, 2, 3));
         context.setValue("strings", List.of("ZZ", "YY"));
+        context.setValue("bool", false);
+
+        el.evaluate("2 > 1 && !bool", context);
 
         el.compile("""
                            pipeline {

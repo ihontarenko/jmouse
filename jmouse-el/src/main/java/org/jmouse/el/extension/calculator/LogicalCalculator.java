@@ -38,6 +38,8 @@ public enum LogicalCalculator implements Calculator<Boolean> {
 
         if (valueA instanceof Boolean booleanA && valueB instanceof Boolean booleanB) {
             return operation.apply(booleanA, booleanB);
+        } else if (this == NOT && valueA instanceof Boolean booleanA) {
+            return operation.apply(booleanA, null);
         }
 
         return false;

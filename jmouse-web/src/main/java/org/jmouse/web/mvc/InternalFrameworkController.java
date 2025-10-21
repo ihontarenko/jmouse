@@ -93,7 +93,8 @@ public class InternalFrameworkController {
      * @return view name of the framework error page
      */
     @ExceptionHandler({
-            IllegalStateException.class
+            IllegalStateException.class,
+            IllegalArgumentException.class,
     })
     public Map<String, Object> handle500(HttpServletResponse response, Exception exception, Model model) {
         getGeneratedResponse(model, HttpStatus.INTERNAL_SERVER_ERROR, exception, response);

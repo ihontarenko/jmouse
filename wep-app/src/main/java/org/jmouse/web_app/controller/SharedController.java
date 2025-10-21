@@ -2,8 +2,10 @@ package org.jmouse.web_app.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.beans.annotation.ProxiedBean;
 import org.jmouse.core.Bytes;
+import org.jmouse.core.MediaType;
 import org.jmouse.core.throttle.RateLimit;
 import org.jmouse.core.throttle.RateLimitEnable;
 import org.jmouse.security.core.access.Phase;
@@ -17,6 +19,7 @@ import org.jmouse.web.http.ContentDisposition;
 import org.jmouse.web.http.multipart.MultipartFile;
 import org.jmouse.web.http.multipart.MultipartWebRequest;
 import org.jmouse.web.mvc.cors.CorsMapping;
+import org.jmouse.web_app.service.StringService;
 
 import java.io.IOException;
 import java.time.temporal.ChronoUnit;
@@ -34,6 +37,13 @@ import static org.jmouse.core.throttle.RateLimit.Scope.METHOD;
 @ProxiedBean
 @RateLimitEnable
 public class SharedController {
+
+    private StringService stringService;
+
+    @BeanConstructor
+    public SharedController(StringService stringService) {
+        this.stringService = stringService;
+    }
 
     @GetMapping(requestPath = "/shared/illegalStateException")
     public String illegalStateException() {
@@ -127,9 +137,14 @@ public class SharedController {
     @GetMapping(
             requestPath = "/shared/{format}/bytes/{bytes}"
     )
-    @Authorize("A[0] | length")
+    @Authorize("authentication.authenticated && !a:isAnonymous()")
     public Bytes bytes(@PathVariable("bytes") String bytes) {
         return Bytes.parse(bytes);
+    }
+
+    @GetMapping(requestPath = "/shared/random", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String random() {
+        return stringService.getRandom();
     }
 
 

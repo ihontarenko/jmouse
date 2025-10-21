@@ -42,7 +42,7 @@ public final class AuthorizeRequestConfigurer<B extends HttpSecurityBuilder<B>>
 
     @Override
     public void configure(B http) {
-        http.addFilterAfter(new AuthorizationFilter(
+        http.addFilterBefore(new AuthorizationFilter(
                 requestMatchCriterion.createAuthorizationManager()), ExceptionTranslationFilter.class);
     }
 

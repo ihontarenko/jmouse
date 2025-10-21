@@ -6,6 +6,7 @@ import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
+import org.jmouse.el.node.expression.unary.NegateUnaryOperation;
 import org.jmouse.el.node.expression.unary.PostfixUnaryOperation;
 import org.jmouse.el.node.expression.unary.PrefixUnaryOperation;
 
@@ -28,6 +29,9 @@ public class PrimaryExpressionParser implements Parser {
             left = context.getParser(ScopedCallParser.class).parse(cursor, context);
         } else if (cursor.matchesSequence(T_IDENTIFIER, T_DOT, T_IDENTIFIER)) {
             left = context.getParser(PropertyParser.class).parse(cursor, context);
+        } else if (cursor.isCurrent(T_NEGATE)) {
+            cursor.next();
+            left = new NegateUnaryOperation((Expression) parse(cursor, context));
         } else if (cursor.isCurrent(T_DECREMENT, T_INCREMENT)) {
             Token token = cursor.peek();
             cursor.next();
