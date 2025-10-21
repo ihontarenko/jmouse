@@ -36,14 +36,6 @@ public final class NoneCondition implements MappingMatcher<RequestRoute> {
     }
 
     /**
-     * Boolean façade (always false).
-     */
-    @Override
-    public boolean matches(RequestRoute route) {
-        return apply(route).matched();
-    }
-
-    /**
      * No ordering logic.
      */
     @Override

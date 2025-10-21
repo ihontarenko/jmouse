@@ -38,18 +38,10 @@ public final class DispatcherTypeMatcher implements MappingMatcher<RequestRoute>
         if (List.of(dispatcherTypes).contains(actual)) {
             return Match.hit()
                     .attach(DispatcherType.class, actual)
-                    .attach(Facet.class, new Facet(actual));
+                    .attach(Captured.class, new Captured(actual));
         }
 
         return Match.miss();
-    }
-
-    /**
-     * Boolean façade.
-     */
-    @Override
-    public boolean matches(RequestRoute route) {
-        return apply(route).matched();
     }
 
     /**
@@ -68,6 +60,6 @@ public final class DispatcherTypeMatcher implements MappingMatcher<RequestRoute>
     /**
      * Facet wrapper for clarity in downstream code.
      */
-    public record Facet(DispatcherType value) {
+    public record Captured(DispatcherType value) {
     }
 }

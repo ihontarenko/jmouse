@@ -66,14 +66,6 @@ public final class ConsumesMatcher implements MappingMatcher<RequestRoute> {
     }
 
     /**
-     * Boolean façade backed by {@link #apply(RequestRoute)}.
-     */
-    @Override
-    public boolean matches(RequestRoute route) {
-        return apply(route).matched();
-    }
-
-    /**
      * ⚖️ Specificity ordering: fewer acceptable types → higher priority (more specific).
      */
     @Override

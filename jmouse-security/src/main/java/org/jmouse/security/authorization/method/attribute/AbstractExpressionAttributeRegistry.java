@@ -1,8 +1,10 @@
-package org.jmouse.security.authorization.method;
+package org.jmouse.security.authorization.method.attribute;
 
 import org.jmouse.beans.InitializingBeanSupport;
 import org.jmouse.context.ApplicationBeanContext;
 import org.jmouse.core.proxy.MethodInvocation;
+import org.jmouse.security.authorization.method.ExpressionAttribute;
+import org.jmouse.security.authorization.method.MethodExpressionHandler;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -23,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @param <T> concrete attribute type resolved by this registry
  */
 public abstract class AbstractExpressionAttributeRegistry<T extends ExpressionAttribute>
-        implements InitializingBeanSupport<ApplicationBeanContext> {
+        implements ExpressionAttributeRegistry<T>, InitializingBeanSupport<ApplicationBeanContext> {
 
     private final Map<Key, T>                               cache = new ConcurrentHashMap<>();
     private       MethodExpressionHandler<MethodInvocation> expressionHandler;
@@ -58,6 +60,7 @@ public abstract class AbstractExpressionAttributeRegistry<T extends ExpressionAt
      * @param type the concrete target class (may influence annotation resolution)
      * @return resolved attribute (may be {@code null} if none found)
      */
+    @Override
     public final T getAttribute(Method method, Class<?> type) {
         return cache.computeIfAbsent(new Key(method, type), k -> resolveAttribute(method, type));
     }
@@ -68,6 +71,7 @@ public abstract class AbstractExpressionAttributeRegistry<T extends ExpressionAt
      * @param method the method
      * @return resolved attribute (may be {@code null} if none found)
      */
+    @Override
     public final T getAttribute(Method method) {
         return getAttribute(method, getClass(method, null));
     }
@@ -80,29 +84,19 @@ public abstract class AbstractExpressionAttributeRegistry<T extends ExpressionAt
      * @param invocation the current invocation
      * @return resolved attribute (may be {@code null} if none found)
      */
+    @Override
     public final T getAttribute(MethodInvocation invocation) {
         Class<?> type = getClass(invocation.getMethod(), invocation.getTarget().getClass());
         return getAttribute(invocation.getMethod(), type);
     }
 
     /**
-     * 🧩 Strategy hook: resolve an attribute for the given method and target class.
-     *
-     * <p>Implementations typically inspect annotations (method/class hierarchy, meta-annotations, etc.)
-     * and may build a pre-parsed/compiled form of the expression for fast evaluation.</p>
-     *
-     * @param method      method to inspect
-     * @param targetClass effective target class
-     * @return an attribute instance, or {@code null} if none applies
-     */
-    protected abstract T resolveAttribute(Method method, Class<?> targetClass);
-
-    /**
      * 🗣️ Access the configured {@link MethodExpressionHandler}.
      *
      * @return the expression handler (never {@code null} after initialization)
      */
-    protected MethodExpressionHandler<MethodInvocation> getExpressionHandler() {
+    @Override
+    public MethodExpressionHandler<MethodInvocation> getExpressionHandler() {
         return expressionHandler;
     }
 

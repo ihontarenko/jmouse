@@ -57,14 +57,6 @@ public final class QueryParameterMatcher implements MappingMatcher<RequestRoute>
     }
 
     /**
-     * Boolean façade backed by {@link #apply(RequestRoute)}.
-     */
-    @Override
-    public boolean matches(RequestRoute route) {
-        return apply(route).matched();
-    }
-
-    /**
      * Compares matchers by parameter name (lexicographically).
      * If names are equal, a matcher with a longer textual value is considered more specific.
      */

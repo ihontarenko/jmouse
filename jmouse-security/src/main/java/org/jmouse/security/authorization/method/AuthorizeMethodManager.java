@@ -4,12 +4,14 @@ import org.jmouse.core.proxy.MethodInvocation;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorizationManager;
+import org.jmouse.security.authorization.method.attribute.AuthorizeExpressionAttributeRegistry;
+import org.jmouse.security.authorization.method.attribute.ExpressionAttributeRegistry;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.core.access.Phase;
 
 public class AuthorizeMethodManager implements AuthorizationManager<AuthorizedMethodInvocation> {
 
-    private AuthorizeExpressionAttributeRegistry attributeRegistry = new AuthorizeExpressionAttributeRegistry(
+    private ExpressionAttributeRegistry<ExpressionAttribute> attributeRegistry = new AuthorizeExpressionAttributeRegistry(
             new SecurityMethodExpressionHandler()
     );
 
@@ -44,11 +46,11 @@ public class AuthorizeMethodManager implements AuthorizationManager<AuthorizedMe
         return phase == invocation.phase();
     }
 
-    public AuthorizeExpressionAttributeRegistry getAttributeRegistry() {
+    public ExpressionAttributeRegistry<ExpressionAttribute> getAttributeRegistry() {
         return attributeRegistry;
     }
 
-    public void setAttributeRegistry(AuthorizeExpressionAttributeRegistry attributeRegistry) {
+    public void setAttributeRegistry(ExpressionAttributeRegistry<ExpressionAttribute> attributeRegistry) {
         this.attributeRegistry = attributeRegistry;
     }
 }

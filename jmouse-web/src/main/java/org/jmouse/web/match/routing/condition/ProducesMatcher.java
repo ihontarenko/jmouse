@@ -50,7 +50,7 @@ public final class ProducesMatcher implements MappingMatcher<RequestRoute> {
 
             return Match.hit()
                     .attach(MediaType.class, selected)
-                    .attach(ContentNegotiation.class, new ContentNegotiation(
+                    .attach(Captured.class, new Captured(
                             selected, 1.0d
                     ));
         }
@@ -68,18 +68,10 @@ public final class ProducesMatcher implements MappingMatcher<RequestRoute> {
         if (winner != null) {
             return Match.hit()
                     .attach(MediaType.class, winner)
-                    .attach(ContentNegotiation.class, new ContentNegotiation(winner, qFactor));
+                    .attach(Captured.class, new Captured(winner, qFactor));
         }
 
         return Match.miss();
-    }
-
-    /**
-     * Boolean façade backed by {@link #apply(RequestRoute)}.
-     */
-    @Override
-    public boolean matches(RequestRoute requestRoute) {
-        return apply(requestRoute).matched();
     }
 
     /**
@@ -129,6 +121,6 @@ public final class ProducesMatcher implements MappingMatcher<RequestRoute> {
     /**
      * Facet describing the negotiation outcome.
      */
-    public record ContentNegotiation(MediaType selected, double qFactor) {
+    public record Captured(MediaType selected, double qFactor) {
     }
 }

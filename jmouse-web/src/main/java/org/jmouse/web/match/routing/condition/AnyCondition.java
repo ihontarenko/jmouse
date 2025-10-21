@@ -13,7 +13,6 @@ import org.jmouse.web.match.routing.MappingMatcher;
  * <p><b>Behavior:</b></p>
  * <ul>
  *   <li>{@link #apply(RequestRoute)} always returns {@link Match#hit()}.</li>
- *   <li>{@link #matches(RequestRoute)} delegates to {@code apply(...).matched()} (always {@code true}).</li>
  *   <li>{@link #compare(MappingMatcher, RequestRoute)} always returns {@code 0}.</li>
  * </ul>
  *
@@ -35,14 +34,6 @@ public final class AnyCondition implements MappingMatcher<RequestRoute> {
     @Override
     public Match apply(RequestRoute route) {
         return Match.hit();
-    }
-
-    /**
-     * Boolean façade.
-     */
-    @Override
-    public boolean matches(RequestRoute route) {
-        return apply(route).matched();
     }
 
     /**

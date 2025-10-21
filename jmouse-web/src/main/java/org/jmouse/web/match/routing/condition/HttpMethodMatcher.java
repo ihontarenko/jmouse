@@ -75,17 +75,6 @@ public final class HttpMethodMatcher implements MappingMatcher<RequestRoute> {
     }
 
     /**
-     * ✅ Boolean shortcut wrapper over {@link #apply(RequestRoute)}.
-     *
-     * @param route the current HTTP route
-     * @return {@code true} if the request method is allowed
-     */
-    @Override
-    public boolean matches(RequestRoute route) {
-        return apply(route).matched();
-    }
-
-    /**
      * 🔢 Defines matcher specificity.
      *
      * <p>Fewer allowed methods → more specific.

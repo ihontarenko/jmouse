@@ -6,8 +6,6 @@ import org.jmouse.web.match.PathPattern;
 import org.jmouse.web.match.RouteMatch;
 import org.jmouse.web.match.routing.MappingMatcher;
 
-import java.util.Objects;
-
 /**
  * 🛣️ Path-based condition for matching routes.
  *
@@ -59,18 +57,10 @@ public final class RequestPathMatcher implements MappingMatcher<RequestRoute> {
             return Match.hit()
                     .attach(PathPattern.class, routePath)
                     .attach(RouteMatch.class, routePath.match(path))
-                    .attach(MatchedPath.class, new MatchedPath(routePath.raw(), path));
+                    .attach(Captured.class, new Captured(routePath.raw(), path));
         }
 
         return Match.miss();
-    }
-
-    /**
-     * Boolean façade backed by {@link #apply(RequestRoute)}.
-     */
-    @Override
-    public boolean matches(RequestRoute requestRoute) {
-        return apply(requestRoute).matched();
     }
 
     /**
@@ -112,6 +102,6 @@ public final class RequestPathMatcher implements MappingMatcher<RequestRoute> {
     /**
      * Facet: matched pair of pattern and actual request path.
      */
-    public record MatchedPath(String pattern, String path) {
+    public record Captured(String pattern, String path) {
     }
 }
