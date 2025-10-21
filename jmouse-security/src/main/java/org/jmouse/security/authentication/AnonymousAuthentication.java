@@ -9,7 +9,7 @@ public class AnonymousAuthentication extends AbstractAuthentication {
     public static final String ANONYMOUS = "anonymous";
 
     public AnonymousAuthentication(Object principal, Object credentials) {
-        super(principal, credentials);
+        this(principal, credentials, Authority.ANONYMOUS);
     }
 
     public AnonymousAuthentication(Object principal, Object credentials, Collection<? extends Authority> authorities) {

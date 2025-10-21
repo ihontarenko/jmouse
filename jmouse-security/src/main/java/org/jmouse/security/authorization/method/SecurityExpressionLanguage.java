@@ -10,6 +10,8 @@ public class SecurityExpressionLanguage extends ExpressionLanguage {
     private static final Supplier<SecurityExpressionLanguage> EXPRESSION_LANGUAGE_SUPPLIER
             = SingletonSupplier.of(SecurityExpressionLanguage::new);
 
+    static {}
+
     public static ExpressionLanguage getSharedInstance() {
         return EXPRESSION_LANGUAGE_SUPPLIER.get();
     }

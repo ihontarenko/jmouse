@@ -38,7 +38,7 @@ public class Smoke {
 
     public static class Service {
 
-        @Authorize("(a:authentication, t:'R_ADMIN') -> arguments[0] == a.principal.name")
+        @Authorize("arguments[0] == authentication.principal.name")
         public void dummy(String name) {
             System.out.println("dummy call: " + name);
         }

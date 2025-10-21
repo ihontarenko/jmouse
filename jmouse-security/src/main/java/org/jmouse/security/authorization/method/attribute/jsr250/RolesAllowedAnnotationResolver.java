@@ -13,9 +13,9 @@ public class RolesAllowedAnnotationResolver extends Jsr250AnnotationResolver<Rol
 
     @Override
     protected String getExpressionString(RolesAllowed annotation) {
-        String rolesAllowed = Streamable.of(annotation.value())
-                .map(StringHelper::unquote).map(role -> "'" + role + "'")
-                .joining(", ");
-        return "hasAnyRole(" + rolesAllowed + ")";
+        String contains = Streamable.of(annotation.value())
+                .map(StringHelper::unquote).map(role -> "is contains('" + role + "')")
+                .joining(" or ");
+        return "authentication.authorities | map(a -> a.authority) | sout";
     }
 }
