@@ -54,6 +54,7 @@
         <jmh.version>1.37</jmh.version>
         <jaxb.version>4.0.0</jaxb.version>
         <jaxb-runtime.version>4.0.2</jaxb-runtime.version>
+        <jakarta-annotation.version>2.1.1</jakarta-annotation.version>
     </properties>
 
     <dependencyManagement>
@@ -153,6 +154,13 @@
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-yaml</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+
+            <!-- Jakarta Annotation -->
+            <dependency>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+                <version>${jakarta-annotation.version}</version>
             </dependency>
 
             <!-- JAXB API -->

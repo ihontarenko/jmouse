@@ -1,5 +1,6 @@
 package org.jmouse.web_app.controller;
 
+import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.annotation.BeanConstructor;
