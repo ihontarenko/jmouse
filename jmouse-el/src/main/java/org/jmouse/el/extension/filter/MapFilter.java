@@ -22,10 +22,15 @@ public class MapFilter extends AbstractFilter {
         if (!(arguments.getFirst() instanceof Lambda lambda)) {
             throw new IllegalArgumentException(
                     "Filter 'map' expects a lambda argument, got: " + arguments.getFirst());
-        } else {
-            return StreamSupport.stream(iterable.spliterator(), false)
-                    .map(item -> lambda.execute(Arguments.forArray(item), context)).iterator();
         }
+
+        if (arguments.size() != 1) {
+            throw new IllegalArgumentException(
+                    "Filter 'map' expects exactly one argument, got: " + arguments.size());
+        }
+
+        return StreamSupport.stream(iterable.spliterator(), false)
+                .map(item -> lambda.execute(Arguments.forArray(item), context)).iterator();
     }
 
     @Override

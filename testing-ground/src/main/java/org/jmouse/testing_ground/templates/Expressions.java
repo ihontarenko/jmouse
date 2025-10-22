@@ -20,6 +20,34 @@ import java.util.function.Function;
 
 public class Expressions {
 
+    public static class Authority {
+
+        private String authority;
+
+        public Authority(String authority) {
+            this.authority = authority;
+        }
+
+        public String getAuthority() {
+            return authority;
+        }
+
+    }
+
+    public static class AuthorizedUser {
+
+        private List<Authority> authorities;
+
+        public AuthorizedUser(List<Authority> authorities) {
+            this.authorities = authorities;
+        }
+
+        public List<Authority> getAuthorities() {
+            return authorities;
+        }
+
+    }
+
     public static void main(String[] args) {
         ExpressionLanguage el = new ExpressionLanguage();
 
@@ -63,6 +91,15 @@ public class Expressions {
         context.setValue("data", List.of(1, 2, 3));
         context.setValue("strings", List.of("ZZ", "YY"));
         context.setValue("bool", false);
+
+        context.setValue("u", new AuthorizedUser(List.of(
+                new Authority("R_ADMIN"), new Authority("R_USER")
+        )));
+
+        el.evaluate(
+                "(u.authorities | map(a -> a.authority) | list) is containsAny(['R_ADMIN', 'R_USER', 'ROOT'])", context);
+
+        el.evaluate("u.authorities", context);
 
         el.evaluate("2 > 1 && !bool", context);
 

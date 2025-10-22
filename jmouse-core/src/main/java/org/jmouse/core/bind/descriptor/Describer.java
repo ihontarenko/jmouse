@@ -1,7 +1,10 @@
 package org.jmouse.core.bind.descriptor;
 
+import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanDescriptor;
 import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
+import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectDescriptor;
+import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectIntrospector;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Method;
@@ -11,7 +14,7 @@ import java.util.Map;
 
 final public class Describer {
 
-    private static final Map<Class<?>, JavaBeanDescriptor<?>> DESCRIPTORS = new HashMap<>();
+    private static final Map<Class<?>, ObjectDescriptor<?>> DESCRIPTORS = new HashMap<>();
 
     private Describer() {}
 
@@ -31,9 +34,18 @@ final public class Describer {
         return Reflections.getShortName(type);
     }
 
-    public static JavaBeanDescriptor<?> forJavaBean(final Class<?> type) {
+    public static ObjectDescriptor<?> forJavaBean(final Class<?> type) {
         return DESCRIPTORS.computeIfAbsent(type, t -> new JavaBeanIntrospector<>(t)
                 .introspect().toDescriptor());
+    }
+
+    public static ObjectDescriptor<?> forValueObject(final Class<?> type) {
+        return DESCRIPTORS.computeIfAbsent(type, t -> new ValueObjectIntrospector<>(t)
+                .introspect().toDescriptor());
+    }
+
+    public static ObjectDescriptor<?> forObjectDescriptor(final Class<?> type) {
+        return type.isRecord() ? forValueObject(type) : forJavaBean(type);
     }
 
 }

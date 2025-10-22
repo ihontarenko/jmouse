@@ -35,7 +35,7 @@ public enum BasicToken implements Token.Type {
     T_AND(1070, "&&", "and"),
     T_OR(1080, "||", "or"),
     T_IS(1090, "is"),
-    T_CONTAINS(1100, "contains"),
+    // T_CONTAINS(1100, "contains"),
     T_NULL_COALESCE(1101, "??"),
     T_ARROW(1102, "->"),
 

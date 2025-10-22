@@ -26,6 +26,8 @@ public class Smoke {
 
         proxy.dummy("proxied");
 
+        proxy.dummy("ANONYMOUS");
+
         System.out.println("stop");
 
         proxy.dummy("proxied again");
@@ -38,7 +40,7 @@ public class Smoke {
 
     public static class Service {
 
-        @Authorize("arguments[0] == authentication.principal.name")
+        @Authorize("arguments[0] == authentication.principal")
         public void dummy(String name) {
             System.out.println("dummy call: " + name);
         }

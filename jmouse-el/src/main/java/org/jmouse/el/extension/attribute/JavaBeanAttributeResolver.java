@@ -2,7 +2,7 @@ package org.jmouse.el.extension.attribute;
 
 import org.jmouse.core.bind.AttributeResolver;
 import org.jmouse.core.bind.descriptor.Describer;
-import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanDescriptor;
+import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.core.Priority;
 
@@ -40,7 +40,7 @@ public class JavaBeanAttributeResolver implements AttributeResolver {
             getter = CACHE.get(key);
 
             if (getter == null) {
-                JavaBeanDescriptor<?> descriptor = Describer.forJavaBean(clazz);
+                ObjectDescriptor<?> descriptor = Describer.forObjectDescriptor(clazz);
                 if (descriptor.hasProperty(name)) {
                     getter = descriptor.getProperty(name).getGetterMethod().unwrap();
                     CACHE.put(key, getter);

@@ -23,12 +23,16 @@ public class FilterFilter extends AbstractFilter {
         if (!(arguments.getFirst() instanceof Lambda lambda)) {
             throw new IllegalArgumentException(
                     "Filter 'filter' expects a lambda argument");
-        } else {
-            Predicate<Object> predicate = item
-                    -> Boolean.TRUE.equals(lambda.execute(Arguments.forArray(item), context));
-            return StreamSupport.stream(iterable.spliterator(), false)
-                    .filter(predicate).iterator();
+        } else if (lambda.getParameters().size() != 1) {
+            throw new IllegalArgumentException(
+                    "Filter 'filter' expects exactly one argument");
         }
+
+        Predicate<Object> predicate = item
+                -> Boolean.TRUE.equals(lambda.execute(Arguments.forArray(item), context));
+
+        return StreamSupport.stream(iterable.spliterator(), false)
+                .filter(predicate).iterator();
     }
 
     @Override

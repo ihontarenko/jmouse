@@ -77,7 +77,7 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
                     // Get the start position of the capturing group.
                     startOffset = offset + matcher.start(groupName);
                     tokenType = GROUP_TO_TOKEN_TYPE.get(groupName);
-                    LOGGER.info("Found group '{}' in tag '{}'", tokenType, tokenValue);
+                    LOGGER.debug("Found group '{}' in tag '{}'", tokenType, tokenValue);
                     break;
                 }
             }
