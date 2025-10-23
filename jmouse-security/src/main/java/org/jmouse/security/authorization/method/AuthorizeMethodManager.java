@@ -10,6 +10,7 @@ import org.jmouse.security.core.access.ExpressionHandler;
 import org.jmouse.security.authorization.method.attribute.CompositeAnnotationExpressionAttributeRegistry;
 import org.jmouse.security.authorization.method.attribute.ExpressionAttributeRegistry;
 import org.jmouse.security.core.Authentication;
+import org.jmouse.security.core.access.MethodExpressionHandler;
 import org.jmouse.security.core.access.Phase;
 import org.jmouse.security.core.access.annotation.DeniedHandler;
 
@@ -21,9 +22,9 @@ import java.util.function.Supplier;
 public class AuthorizeMethodManager
         implements AuthorizationManager<MethodAuthorizationContext>, MethodAuthorizationDeniedHandler {
 
-    private       ExpressionAttributeRegistry<ExpressionAttribute<?>>   attributeRegistry;
-    private final Supplier<MethodAuthorizationDeniedHandler>         defaultDeniedResolver = ThrowingMethodAuthorizationDeniedHandler::new;
-    private InstanceResolver<MethodAuthorizationDeniedHandler> deniedResolver        = (type) -> defaultDeniedResolver.get();
+    private ExpressionAttributeRegistry<ExpressionAttribute<?>> attributeRegistry;
+    private Supplier<MethodAuthorizationDeniedHandler>          defaultDeniedResolver = ThrowingMethodAuthorizationDeniedHandler::new;
+    private InstanceResolver<MethodAuthorizationDeniedHandler>  deniedResolver        = (type) -> defaultDeniedResolver.get();
 
     public AuthorizeMethodManager(ExpressionAttributeRegistry<ExpressionAttribute<?>> attributeRegistry) {
         this.setAttributeRegistry(attributeRegistry);
@@ -33,6 +34,10 @@ public class AuthorizeMethodManager
         this(CompositeAnnotationExpressionAttributeRegistry.defaultRegistry(
                 new SecurityMethodExpressionHandler()
         ));
+    }
+
+    public void setDefaultDeniedResolver(Supplier<MethodAuthorizationDeniedHandler> defaultDeniedResolver) {
+        this.defaultDeniedResolver = defaultDeniedResolver;
     }
 
     public void setDeniedResolver(InstanceResolver<MethodAuthorizationDeniedHandler> resolver) {
@@ -46,6 +51,11 @@ public class AuthorizeMethodManager
         Phase                               phase             = Phase.BEFORE;
         EvaluationContext                   evaluationContext = expressionHandler
                 .createContext(authentication, target.proxyInvocation());
+
+        if (target.isAfter()
+                && expressionHandler instanceof MethodExpressionHandler<MethodInvocation> methodExpressionHandler) {
+            methodExpressionHandler.setReturnValue(target.result(), evaluationContext);
+        }
 
         if (attribute instanceof AnnotationExpressionAttribute<?> expressionAttribute) {
             phase = expressionAttribute.phase();
