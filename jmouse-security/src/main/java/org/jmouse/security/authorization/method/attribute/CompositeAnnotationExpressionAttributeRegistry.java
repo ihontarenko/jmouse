@@ -26,7 +26,7 @@ import java.util.function.Function;
  * </ol>
  */
 public class CompositeAnnotationExpressionAttributeRegistry
-        extends AbstractExpressionAttributeRegistry<ExpressionAttribute> {
+        extends AbstractExpressionAttributeRegistry<ExpressionAttribute<?>> {
 
     private final List<AttributeResolver<? extends Annotation>> resolvers;
 
@@ -38,7 +38,7 @@ public class CompositeAnnotationExpressionAttributeRegistry
         this.resolvers = resolvers.stream().sorted(Comparator.comparingInt(AttributeResolver::order)).toList();
     }
 
-    public static ExpressionAttributeRegistry<ExpressionAttribute> defaultRegistry(
+    public static ExpressionAttributeRegistry<ExpressionAttribute<?>> defaultRegistry(
             MethodExpressionHandler<MethodInvocation> expressionHandler
     ) {
         return new CompositeAnnotationExpressionAttributeRegistry(
@@ -53,8 +53,8 @@ public class CompositeAnnotationExpressionAttributeRegistry
     }
 
     @Override
-    public ExpressionAttribute resolveAttribute(Method method, Class<?> targetClass) {
-        ExpressionAttribute methodAttribute = tryResolveOn(method, method, targetClass);
+    public ExpressionAttribute<?> resolveAttribute(Method method, Class<?> targetClass) {
+        ExpressionAttribute<?> methodAttribute = tryResolveOn(method, method, targetClass);
 
         if (methodAttribute != null) {
             return methodAttribute;
@@ -65,7 +65,7 @@ public class CompositeAnnotationExpressionAttributeRegistry
         return tryResolveOn(type, method, type);
     }
 
-    private ExpressionAttribute tryResolveOn(AnnotatedElement element, Method method, Class<?> targetClass) {
+    private ExpressionAttribute<?> tryResolveOn(AnnotatedElement element, Method method, Class<?> targetClass) {
         for (AttributeResolver<? extends Annotation> resolver : resolvers) {
             @SuppressWarnings("unchecked")
             Class<Annotation>                      type       = (Class<Annotation>) resolver.annotationType();

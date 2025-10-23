@@ -36,7 +36,7 @@ import java.util.function.Supplier;
 @Intercept(Object.class)
 public class AuthorizeMethodInterceptor extends AbstractAuthorizeMethodInterceptor {
 
-    private final AuthorizationManager<AuthorizedMethodInvocation> manager;
+    private final AuthorizationManager<MethodAuthorizationContext> manager;
     private final Supplier<SecurityContextHolderStrategy>          context;
 
     {
@@ -48,7 +48,7 @@ public class AuthorizeMethodInterceptor extends AbstractAuthorizeMethodIntercept
      *
      * @param manager the {@link AuthorizationManager} responsible for evaluating method access
      */
-    public AuthorizeMethodInterceptor(AuthorizationManager<AuthorizedMethodInvocation> manager) {
+    public AuthorizeMethodInterceptor(AuthorizationManager<MethodAuthorizationContext> manager) {
         this.manager = manager;
     }
 
@@ -56,7 +56,7 @@ public class AuthorizeMethodInterceptor extends AbstractAuthorizeMethodIntercept
      * 🧩 Invokes the target method while applying authorization checks
      * before and after execution.
      *
-     * @param invocation the current method invocation
+     * @param invocation the current method proxyInvocation
      * @return the method’s return value
      * @throws Throwable if the target method or authorization fails
      */
@@ -85,15 +85,19 @@ public class AuthorizeMethodInterceptor extends AbstractAuthorizeMethodIntercept
     /**
      * 🚦 Centralized execution of authorization logic for both phases.
      *
-     * @param invocation the intercepted method invocation
+     * @param invocation the intercepted method proxyInvocation
      * @param phase      current authorization phase (before/after)
      * @param result     optional result for post-phase checks
      */
     private void authorizeExecution(MethodInvocation invocation, Phase phase, Object result) {
         if (manager instanceof AuthorizeMethodManager authorizeMethodManager) {
-            AccessResult accessResult = authorizeMethodManager.check(
-                    getAuthentication(), new AuthorizedMethodInvocation(invocation, phase, result));
-            System.out.println(phase + " : " + accessResult);
+            MethodAuthorizationContext methodInvocation = new MethodAuthorizationContext(invocation, phase, result);
+            AccessResult               decision         = authorizeMethodManager
+                    .check(getAuthentication(), methodInvocation);
+            if (decision != null && !decision.isGranted()
+                    && authorizeMethodManager instanceof MethodAuthorizationDeniedHandler deniedHandler) {
+                deniedHandler.handleDeniedInvocation(methodInvocation, decision);
+            }
         }
     }
 

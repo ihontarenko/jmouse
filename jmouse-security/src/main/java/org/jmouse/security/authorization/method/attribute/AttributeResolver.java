@@ -28,7 +28,7 @@ public interface AttributeResolver<A extends Annotation> {
      * @param targetClass the concrete target class
      * @param handler     expression/EL infrastructure
      */
-    ExpressionAttribute resolve(
+    ExpressionAttribute<A> resolve(
             A annotation, Method method, Class<?> targetClass, MethodExpressionHandler<MethodInvocation> handler);
 
     /**

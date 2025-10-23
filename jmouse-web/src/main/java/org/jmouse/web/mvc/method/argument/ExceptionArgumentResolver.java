@@ -52,7 +52,7 @@ public class ExceptionArgumentResolver extends AbstractArgumentResolver {
      * @param parameter        the method parameter
      * @param requestContext   the current request context
      * @param mappingResult    the mapping result (may be {@code null})
-     * @param invocationResult the result of the method invocation (may be {@code null})
+     * @param invocationResult the result of the method proxyInvocation (may be {@code null})
      * @return the resolved exception or {@code null} if not available or not assignable
      */
     @Override

@@ -27,7 +27,7 @@ import java.util.*;
  * methods annotated with {@link ExceptionHandler}, registering them as handlers
  * for specific exception types.</p>
  *
- * <p>At runtime, when an exception is thrown during handler invocation, this resolver
+ * <p>At runtime, when an exception is thrown during handler proxyInvocation, this resolver
  * checks if a matching handler exists and invokes it via {@link HandlerMethodInvocation}.</p>
  *
  * <p>This class supports multiple exception mappings and uses {@link ArgumentResolver}s

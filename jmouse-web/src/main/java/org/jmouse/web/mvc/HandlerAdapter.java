@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * 🧩 Strategy interface for invoking a handler (e.g., handler) within the jMouse MVC framework.
  *
  * <p>{@code HandlerAdapter} allows the framework to invoke various kinds of handlers (annotated methods,
- * POJOs, function-based handlers, etc.) in a uniform way, by adapting them to a common invocation model.</p>
+ * POJOs, function-based handlers, etc.) in a uniform way, by adapting them to a common proxyInvocation model.</p>
  *
  * <p>Handler adapters are typically registered in a central dispatching mechanism,
  * and chosen based on {@link #supportsHandler(MappedHandler)} check.</p>

@@ -11,7 +11,7 @@ import org.jmouse.web.mvc.MappingResult;
  * <p>Used by the framework to inject arguments into controller method parameters.
  * Implementations can extract arguments from various sources (e.g. query params, body, headers, session).
  *
- * <p>Usually invoked by {@link HandlerAdapter} during method invocation.
+ * <p>Usually invoked by {@link HandlerAdapter} during method proxyInvocation.
  *
  * <h3>Example</h3>
  * <pre>{@code

@@ -57,7 +57,7 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
      * Handles the given controller method return value by selecting an appropriate
      * {@link HttpMessageConverter} and writing the converted output to the HTTP response.
      *
-     * @param result        the invocation result, containing the return value and method metadata
+     * @param result        the proxyInvocation result, containing the return value and method metadata
      * @param requestContext the current request context
      * @throws UnsuitableException if no compatible message converter is found
      */
@@ -114,7 +114,7 @@ public class HttpMessageReturnValueHandler extends AbstractReturnValueHandler {
     /**
      * ✅ Checks whether this handler supports the given return type.
      *
-     * @param result the invocation result to check
+     * @param result the proxyInvocation result to check
      * @return {@code true} if return type is not {@code void} and not {@code null}
      */
     @Override

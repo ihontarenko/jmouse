@@ -6,7 +6,7 @@ import org.jmouse.el.node.Expression;
 import org.jmouse.security.core.Authentication;
 
 /**
- * 🧠 Evaluates an authorization expression for a method invocation.
+ * 🧠 Evaluates an authorization expression for a method proxyInvocation.
  */
 public interface ExpressionHandler<T> {
 

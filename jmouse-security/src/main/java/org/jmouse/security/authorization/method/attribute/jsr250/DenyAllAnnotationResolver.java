@@ -2,8 +2,9 @@ package org.jmouse.security.authorization.method.attribute.jsr250;
 
 import jakarta.annotation.security.DenyAll;
 import org.jmouse.core.proxy.MethodInvocation;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.expression.literal.BooleanLiteralNode;
-import org.jmouse.security.authorization.method.AuthorizedExpressionAttribute;
+import org.jmouse.security.authorization.method.AnnotationExpressionAttribute;
 import org.jmouse.security.authorization.method.ExpressionAttribute;
 import org.jmouse.security.core.access.MethodExpressionHandler;
 import org.jmouse.security.core.access.Phase;
@@ -11,6 +12,8 @@ import org.jmouse.security.core.access.Phase;
 import java.lang.reflect.Method;
 
 public class DenyAllAnnotationResolver extends Jsr250AnnotationResolver<DenyAll> {
+
+    private static final Expression DENY_ALL_EXPRESSION = new BooleanLiteralNode(false);
 
     @Override
     public Class<DenyAll> annotationType() {
@@ -23,13 +26,13 @@ public class DenyAllAnnotationResolver extends Jsr250AnnotationResolver<DenyAll>
     }
 
     @Override
-    public ExpressionAttribute resolve(
+    public ExpressionAttribute<DenyAll> resolve(
             DenyAll annotation,
             Method method,
             Class<?> targetClass,
             MethodExpressionHandler<MethodInvocation> handler
     ) {
-        return new AuthorizedExpressionAttribute(Phase.BEFORE, new BooleanLiteralNode(false));
+        return new AnnotationExpressionAttribute<>(Phase.BEFORE, DENY_ALL_EXPRESSION, annotation);
     }
 
     @Override

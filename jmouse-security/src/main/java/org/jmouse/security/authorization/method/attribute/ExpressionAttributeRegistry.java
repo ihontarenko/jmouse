@@ -6,7 +6,7 @@ import org.jmouse.security.core.access.MethodExpressionHandler;
 
 import java.lang.reflect.Method;
 
-public interface ExpressionAttributeRegistry<T extends ExpressionAttribute> {
+public interface ExpressionAttributeRegistry<T extends ExpressionAttribute<?>> {
 
     MethodExpressionHandler<MethodInvocation> getExpressionHandler();
 

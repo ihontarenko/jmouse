@@ -2,8 +2,9 @@ package org.jmouse.security.authorization.method.attribute.jsr250;
 
 import jakarta.annotation.security.PermitAll;
 import org.jmouse.core.proxy.MethodInvocation;
+import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.expression.literal.BooleanLiteralNode;
-import org.jmouse.security.authorization.method.AuthorizedExpressionAttribute;
+import org.jmouse.security.authorization.method.AnnotationExpressionAttribute;
 import org.jmouse.security.authorization.method.ExpressionAttribute;
 import org.jmouse.security.core.access.MethodExpressionHandler;
 import org.jmouse.security.core.access.Phase;
@@ -11,6 +12,8 @@ import org.jmouse.security.core.access.Phase;
 import java.lang.reflect.Method;
 
 public class PermitAllAnnotationResolver extends Jsr250AnnotationResolver<PermitAll> {
+
+    private static final Expression PERMIT_ALL_EXPRESSION = new BooleanLiteralNode(true);
 
     @Override
     public Class<PermitAll> annotationType() {
@@ -23,13 +26,13 @@ public class PermitAllAnnotationResolver extends Jsr250AnnotationResolver<Permit
     }
 
     @Override
-    public ExpressionAttribute resolve(
-            PermitAll annotation,
+    public ExpressionAttribute<PermitAll> resolve(
+            PermitAll permitAll,
             Method method,
             Class<?> targetClass,
             MethodExpressionHandler<MethodInvocation> handler
     ) {
-        return new AuthorizedExpressionAttribute(Phase.BEFORE, new BooleanLiteralNode(true));
+        return new AnnotationExpressionAttribute<>(Phase.BEFORE, PERMIT_ALL_EXPRESSION, permitAll);
     }
 
     @Override

@@ -19,12 +19,12 @@ import java.util.Optional;
  * 🧠 Responsible for invoking a {@link HandlerMethod} with resolved arguments.
  *
  * <p>This class orchestrates argument resolution using registered {@link ArgumentResolver}s
- * and reflects the target method invocation on the associated controller bean.
+ * and reflects the target method proxyInvocation on the associated controller bean.
  *
  * <p>Example:
  * <pre>{@code
- * HandlerMethodInvocation invocation = new HandlerMethodInvocation(method, mappingResult, resolvers);
- * Object result = invocation.invoke();
+ * HandlerMethodInvocation proxyInvocation = new HandlerMethodInvocation(method, mappingResult, resolvers);
+ * Object result = proxyInvocation.invoke();
  * }</pre>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
@@ -98,7 +98,7 @@ public class HandlerMethodInvocation {
     }
 
     /**
-     * ⚡ Delegate the reflective method invocation.
+     * ⚡ Delegate the reflective method proxyInvocation.
      *
      * <p>Uses {@link ProxyHelper#invoke(Object, Method, Object[])} to transparently
      * handle both plain targets and proxy objects.</p>
@@ -106,8 +106,8 @@ public class HandlerMethodInvocation {
      * @param object    target bean (possibly proxied)
      * @param method    reflected method to call
      * @param arguments resolved arguments to pass
-     * @return return value from the invocation
-     * @throws HandlerMethodInvocationException if invocation fails at runtime
+     * @return return value from the proxyInvocation
+     * @throws HandlerMethodInvocationException if proxyInvocation fails at runtime
      */
     private Object invokeMethod(Object object, Method method, Object[] arguments) {
         return ProxyHelper.invoke(object, method, arguments);

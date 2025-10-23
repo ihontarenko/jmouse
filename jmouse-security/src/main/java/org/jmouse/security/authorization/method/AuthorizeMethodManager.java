@@ -1,6 +1,8 @@
 package org.jmouse.security.authorization.method;
 
+import org.jmouse.core.InstanceResolver;
 import org.jmouse.core.proxy.MethodInvocation;
+import org.jmouse.core.reflection.annotation.Annotations;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorizationManager;
@@ -9,12 +11,21 @@ import org.jmouse.security.authorization.method.attribute.CompositeAnnotationExp
 import org.jmouse.security.authorization.method.attribute.ExpressionAttributeRegistry;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.core.access.Phase;
+import org.jmouse.security.core.access.annotation.DeniedHandler;
 
-public class AuthorizeMethodManager implements AuthorizationManager<AuthorizedMethodInvocation> {
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
-    private ExpressionAttributeRegistry<ExpressionAttribute> attributeRegistry;
+public class AuthorizeMethodManager
+        implements AuthorizationManager<MethodAuthorizationContext>, MethodAuthorizationDeniedHandler {
 
-    public AuthorizeMethodManager(ExpressionAttributeRegistry<ExpressionAttribute> attributeRegistry) {
+    private       ExpressionAttributeRegistry<ExpressionAttribute<?>>   attributeRegistry;
+    private final Supplier<MethodAuthorizationDeniedHandler>         defaultDeniedResolver = ThrowingMethodAuthorizationDeniedHandler::new;
+    private InstanceResolver<MethodAuthorizationDeniedHandler> deniedResolver        = (type) -> defaultDeniedResolver.get();
+
+    public AuthorizeMethodManager(ExpressionAttributeRegistry<ExpressionAttribute<?>> attributeRegistry) {
         this.setAttributeRegistry(attributeRegistry);
     }
 
@@ -24,19 +35,23 @@ public class AuthorizeMethodManager implements AuthorizationManager<AuthorizedMe
         ));
     }
 
-    @Override
-    public AccessResult check(Authentication authentication, AuthorizedMethodInvocation target) {
-        ExpressionHandler<MethodInvocation> expressionHandler = getExpressionHandler();
-        ExpressionAttribute                 attribute         = getExpressionAttribute(target);
-        Phase                               phase             = Phase.BEFORE;
-        EvaluationContext                   evaluationContext = expressionHandler.createContext(
-                authentication, target.invocation());
+    public void setDeniedResolver(InstanceResolver<MethodAuthorizationDeniedHandler> resolver) {
+        this.deniedResolver = resolver;
+    }
 
-        if (attribute instanceof AuthorizedExpressionAttribute expressionAttribute) {
+    @Override
+    public AccessResult check(Authentication authentication, MethodAuthorizationContext target) {
+        ExpressionHandler<MethodInvocation> expressionHandler = getExpressionHandler();
+        ExpressionAttribute<?>              attribute         = getExpressionAttribute(target);
+        Phase                               phase             = Phase.BEFORE;
+        EvaluationContext                   evaluationContext = expressionHandler
+                .createContext(authentication, target.proxyInvocation());
+
+        if (attribute instanceof AnnotationExpressionAttribute<?> expressionAttribute) {
             phase = expressionAttribute.phase();
         }
 
-        if (isApplicablePhase(phase, target) && !attribute.isDummy()) {
+        if (shouldAuthorizeMethod(phase, target) && !attribute.isDummy()) {
             return SecurityExpressionEvaluator.evaluate(attribute.expression(), evaluationContext);
         }
 
@@ -47,19 +62,40 @@ public class AuthorizeMethodManager implements AuthorizationManager<AuthorizedMe
         return getAttributeRegistry().getExpressionHandler();
     }
 
-    private ExpressionAttribute getExpressionAttribute(AuthorizedMethodInvocation authorizedMethodInvocation) {
-        return getAttributeRegistry().getAttribute(authorizedMethodInvocation.invocation());
+    private ExpressionAttribute<?> getExpressionAttribute(MethodAuthorizationContext authorizationContext) {
+        return getAttributeRegistry().getAttribute(authorizationContext.proxyInvocation());
     }
 
-    private boolean isApplicablePhase(Phase phase, AuthorizedMethodInvocation invocation) {
+    private boolean shouldAuthorizeMethod(Phase phase, MethodAuthorizationContext invocation) {
         return phase == invocation.phase();
     }
 
-    public ExpressionAttributeRegistry<ExpressionAttribute> getAttributeRegistry() {
+    public ExpressionAttributeRegistry<ExpressionAttribute<?>> getAttributeRegistry() {
         return attributeRegistry;
     }
 
-    public void setAttributeRegistry(ExpressionAttributeRegistry<ExpressionAttribute> attributeRegistry) {
+    public void setAttributeRegistry(ExpressionAttributeRegistry<ExpressionAttribute<?>> attributeRegistry) {
         this.attributeRegistry = attributeRegistry;
     }
+
+    @Override
+    public Object handleDeniedInvocation(MethodAuthorizationContext invocation, AccessResult decision) {
+        Method                                    method = invocation.proxyInvocation().getMethod();
+        Function<AnnotatedElement, DeniedHandler> lookup = Annotations.lookup(DeniedHandler.class);
+        DeniedHandler                             denied = lookup.apply(method);
+
+        if (denied == null) {
+            denied = lookup.apply(method.getDeclaringClass());
+        }
+
+        Supplier<MethodAuthorizationDeniedHandler> deniedHandler = defaultDeniedResolver;
+
+        if (denied != null) {
+            Class<? extends MethodAuthorizationDeniedHandler> deniedType = denied.value();
+            deniedHandler = () -> deniedResolver.resolve(deniedType);
+        }
+
+        return deniedHandler.get().handleDeniedInvocation(invocation, decision);
+    }
+
 }

@@ -86,7 +86,7 @@ public abstract class AbstractHandlerMethodAdapter extends HandlerMethodWebRespo
     }
 
     /**
-     * 🔧 Subclasses must implement the handler invocation logic.
+     * 🔧 Subclasses must implement the handler proxyInvocation logic.
      */
     protected abstract MVCResult doInvokeHandler(
             HttpServletRequest request, HttpServletResponse response, MappedHandler mappedHandler);

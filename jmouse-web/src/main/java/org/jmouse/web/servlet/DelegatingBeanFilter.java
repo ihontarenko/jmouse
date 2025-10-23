@@ -15,7 +15,7 @@ import java.io.IOException;
  * 📦 Useful when filters are defined as beans in the application context and should be applied
  * at runtime instead of being declared statically in {@code web.xml}.
  *
- * 🔁 On the first invocation of {@link #doFilter}, this wrapper locates the filter bean using its
+ * 🔁 On the first proxyInvocation of {@link #doFilter}, this wrapper locates the filter bean using its
  * name or type, initializes it with the {@link FilterConfig}, and caches it for reuse.
  *
  * <h3>⚙️ Example usage</h3>

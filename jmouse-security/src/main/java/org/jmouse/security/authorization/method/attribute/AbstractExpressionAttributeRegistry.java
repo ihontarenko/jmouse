@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @param <T> concrete attribute type resolved by this registry
  */
-public abstract class AbstractExpressionAttributeRegistry<T extends ExpressionAttribute>
+public abstract class AbstractExpressionAttributeRegistry<T extends ExpressionAttribute<?>>
         implements ExpressionAttributeRegistry<T>, InitializingBeanSupport<ApplicationBeanContext> {
 
     private final Map<Key, T>                               cache = new ConcurrentHashMap<>();
@@ -79,9 +79,9 @@ public abstract class AbstractExpressionAttributeRegistry<T extends ExpressionAt
     /**
      * ⚡ Get (or compute and cache) the attribute for a {@link MethodInvocation}.
      *
-     * <p>Uses {@code invocation.getTarget().getClass()} as the effective target class.</p>
+     * <p>Uses {@code proxyInvocation.getTarget().getClass()} as the effective target class.</p>
      *
-     * @param invocation the current invocation
+     * @param invocation the current proxyInvocation
      * @return resolved attribute (may be {@code null} if none found)
      */
     @Override

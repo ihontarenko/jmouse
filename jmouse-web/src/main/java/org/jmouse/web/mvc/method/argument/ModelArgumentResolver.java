@@ -24,7 +24,7 @@ public class ModelArgumentResolver extends AbstractArgumentResolver {
     }
 
     /**
-     * 📦 Returns the {@link Model} instance from the current invocation result.
+     * 📦 Returns the {@link Model} instance from the current proxyInvocation result.
      *
      * @param parameter the target parameter
      * @param requestContext   the current web request context (includes headers, session, etc.)

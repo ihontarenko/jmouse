@@ -26,7 +26,7 @@ import static org.jmouse.core.MethodParameter.forMethod;
  * 🎬 HandlerAdapter implementation for controllers with annotated handler methods.
  *
  * <p>This adapter invokes the {@link HandlerMethod} using the configured
- * argument resolvers and sets the invocation result return value.
+ * argument resolvers and sets the proxyInvocation result return value.
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -54,7 +54,7 @@ public class AnnotatedControllerHandlerMethodAdapter extends AbstractHandlerMeth
         setSupportedMethods(httpMethod);
         checkRequest(httpMethod, false);
 
-        // Prepare invocation context
+        // Prepare proxyInvocation context
         HandlerMethodInvocation methodInvocation = new HandlerMethodInvocation(
                 new HandlerMethodContext(requestContext, handlerMethod), mappingResult, argumentResolvers);
         MVCResult               mvcResult        = new MVCResult(

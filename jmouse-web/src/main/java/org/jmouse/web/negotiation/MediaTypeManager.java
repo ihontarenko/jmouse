@@ -34,7 +34,7 @@ public class MediaTypeManager implements LookupRegistry, InitializingBeanSupport
     private final List<MediaTypeLookup> strategies = new ArrayList<>();
 
     /**
-     * 📚 Returns the current list of lookups in invocation order.
+     * 📚 Returns the current list of lookups in proxyInvocation order.
      *
      * @return the registered {@link MediaTypeLookup} instances
      */

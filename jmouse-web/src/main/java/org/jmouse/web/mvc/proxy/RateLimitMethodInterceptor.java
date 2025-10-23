@@ -45,7 +45,7 @@ public final class RateLimitMethodInterceptor extends AbstractRateLimitMethodInt
      *
      * @param invocation the {@link MethodInvocation} encapsulating the target method and its parameters
      * @return the result of the method call
-     * @throws Throwable if an error occurs during the method invocation
+     * @throws Throwable if an error occurs during the method proxyInvocation
      */
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -55,6 +55,6 @@ public final class RateLimitMethodInterceptor extends AbstractRateLimitMethodInt
     @Override
     public void after(InvocationContext context, Method method, Object[] arguments, Object result) {
         MethodInvocation invocation = context.invocation();
-        System.out.println("invocation.getReturnValue() : " + invocation.getReturnValue());
+        System.out.println("proxyInvocation.getReturnValue() : " + invocation.getReturnValue());
     }
 }
