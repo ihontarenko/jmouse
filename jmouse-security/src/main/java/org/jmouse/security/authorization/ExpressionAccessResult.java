@@ -14,4 +14,9 @@ public class ExpressionAccessResult extends AccessResult.AbstractAccessResult {
         super(granted, message, attributes);
     }
 
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+
 }

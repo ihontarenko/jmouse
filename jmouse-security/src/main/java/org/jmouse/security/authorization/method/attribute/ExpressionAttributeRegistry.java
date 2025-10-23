@@ -2,7 +2,7 @@ package org.jmouse.security.authorization.method.attribute;
 
 import org.jmouse.core.proxy.MethodInvocation;
 import org.jmouse.security.authorization.method.ExpressionAttribute;
-import org.jmouse.security.authorization.method.MethodExpressionHandler;
+import org.jmouse.security.core.access.MethodExpressionHandler;
 
 import java.lang.reflect.Method;
 

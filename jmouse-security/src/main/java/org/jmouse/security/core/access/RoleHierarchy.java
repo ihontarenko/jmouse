@@ -148,7 +148,9 @@ public interface RoleHierarchy {
          */
         @Override
         public Set<Authority> getReachableRoles(Collection<? extends Authority> authorities) {
-            if (authorities == null || authorities.isEmpty()) return Set.of();
+            if (authorities == null || authorities.isEmpty()) {
+                return Set.of();
+            }
 
             Deque<Authority> queue   = new ArrayDeque<>();
             Set<Authority>   visited = new LinkedHashSet<>();

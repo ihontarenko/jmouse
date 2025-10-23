@@ -22,6 +22,6 @@ public class AuthoritiesAccessResult extends AccessResult.AbstractAccessResult {
 
     @Override
     public String toString() {
-        return "AuthoritiesAccessResult[%s] authorities=%s".formatted(granted, authorities);
+        return "%s : %s".formatted(super.toString(), authorities);
     }
 }

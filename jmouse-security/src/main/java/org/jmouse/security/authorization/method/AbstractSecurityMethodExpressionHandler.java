@@ -3,22 +3,20 @@ package org.jmouse.security.authorization.method;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.MethodImporter;
+import org.jmouse.security.core.access.AbstractExpressionHandler;
 import org.jmouse.security.authorization.method.support.AuthenticationFunctions;
 import org.jmouse.security.core.Authentication;
 
-abstract public class AbstractSecurityMethodExpressionHandler<T> implements ExpressionHandler<T> {
+abstract public class AbstractSecurityMethodExpressionHandler<T> extends AbstractExpressionHandler<T> {
 
     public static final String VARIABLE_AUTHENTICATION = "authentication";
 
-    private final ExpressionLanguage language;
-
-    protected AbstractSecurityMethodExpressionHandler(ExpressionLanguage language) {
-        this.language = language;
+    public AbstractSecurityMethodExpressionHandler(ExpressionLanguage language) {
+        super(language);
     }
 
-    @Override
-    public ExpressionLanguage getExpressionLanguage() {
-        return language;
+    public AbstractSecurityMethodExpressionHandler() {
+        super();
     }
 
     @Override
@@ -28,7 +26,6 @@ abstract public class AbstractSecurityMethodExpressionHandler<T> implements Expr
         attachAuthenticationFunction(authentication, evaluationContext);
         complementEvaluationContext(authentication, invocation, evaluationContext);
         return evaluationContext;
-
     }
 
     private void attachAuthenticationFunction(Authentication authentication, EvaluationContext evaluationContext) {

@@ -5,7 +5,7 @@ import org.jmouse.el.node.Expression;
 import org.jmouse.el.parser.ParseException;
 import org.jmouse.security.authorization.method.AuthorizedExpressionAttribute;
 import org.jmouse.security.authorization.method.ExpressionAttribute;
-import org.jmouse.security.authorization.method.MethodExpressionHandler;
+import org.jmouse.security.core.access.MethodExpressionHandler;
 import org.jmouse.security.core.access.annotation.Authorize;
 
 import java.lang.reflect.Method;
@@ -30,7 +30,7 @@ public class AuthorizeAnnotationResolver implements AttributeResolver<Authorize>
         } catch (ParseException e) {
             throw new IllegalArgumentException(
                     "Could not parse @Authorize expression: '%s' at %s#%s".formatted(
-                            authorize.value(), targetClass.getName(), method.getName()), e);
+                            authorize.value(), targetClass.getSimpleName(), method.getName()), e);
         }
     }
 

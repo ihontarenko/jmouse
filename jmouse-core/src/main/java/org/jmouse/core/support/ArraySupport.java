@@ -3,8 +3,10 @@ package org.jmouse.core.support;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 final public class ArraySupport {
 
@@ -17,6 +19,16 @@ final public class ArraySupport {
 
         if (object instanceof Collection<?> collection) {
             return collection;
+        }
+
+        if (object instanceof Iterator<?> iterator) {
+            @SuppressWarnings("unchecked")
+            Iterable<?> iterable = () -> (Iterator<Object>) iterator;
+            object = iterable;
+        }
+
+        if (object instanceof Iterable<?> iterable) {
+            return StreamSupport.stream(iterable.spliterator(), false).toList();
         }
 
         if (isArray(object)) {

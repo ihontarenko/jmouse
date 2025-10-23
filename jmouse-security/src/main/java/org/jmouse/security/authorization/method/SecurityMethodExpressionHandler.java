@@ -5,6 +5,7 @@ import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.Expression;
 import org.jmouse.security.core.Authentication;
+import org.jmouse.security.core.access.MethodExpressionHandler;
 
 public class SecurityMethodExpressionHandler extends AbstractSecurityMethodExpressionHandler<MethodInvocation>
         implements MethodExpressionHandler<MethodInvocation> {
@@ -21,7 +22,7 @@ public class SecurityMethodExpressionHandler extends AbstractSecurityMethodExpre
     protected void complementEvaluationContext(
             Authentication authentication, MethodInvocation invocation, EvaluationContext context) {
         context.setValue(VARIABLE_ARGUMENTS, invocation.getArguments());
-        bindReturnValue(invocation.getReturnValue(), context);
+        setReturnValue(invocation.getReturnValue(), context);
     }
 
     @Override

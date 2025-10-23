@@ -4,6 +4,7 @@ import org.jmouse.core.proxy.Intercept;
 import org.jmouse.core.proxy.InvocationContext;
 import org.jmouse.core.proxy.MethodInvocation;
 import org.jmouse.security.SecurityContextHolder;
+import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorizationManager;
 import org.jmouse.security.core.Authentication;
 import org.jmouse.security.core.SecurityContextHolderStrategy;
@@ -90,8 +91,9 @@ public class AuthorizeMethodInterceptor extends AbstractAuthorizeMethodIntercept
      */
     private void authorizeExecution(MethodInvocation invocation, Phase phase, Object result) {
         if (manager instanceof AuthorizeMethodManager authorizeMethodManager) {
-            authorizeMethodManager.check(
+            AccessResult accessResult = authorizeMethodManager.check(
                     getAuthentication(), new AuthorizedMethodInvocation(invocation, phase, result));
+            System.out.println(phase + " : " + accessResult);
         }
     }
 

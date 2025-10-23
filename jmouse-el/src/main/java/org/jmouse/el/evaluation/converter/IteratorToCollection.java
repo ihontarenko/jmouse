@@ -15,8 +15,9 @@ public class IteratorToCollection implements GenericConverter<Iterator<?>, Colle
 
     @Override
     public Collection<?> convert(Iterator<?> source, Class<Iterator<?>> sourceType, Class<Collection<?>> targetType) {
-        @SuppressWarnings("unchecked") Iterable<?> iterable = () -> (Iterator<Object>) source;
-        Stream<?> stream = StreamSupport.stream(iterable.spliterator(), false);
+        @SuppressWarnings("unchecked")
+        Iterable<?> iterable = () -> (Iterator<Object>) source;
+        Stream<?>   stream   = StreamSupport.stream(iterable.spliterator(), false);
 
         if (List.class.isAssignableFrom(targetType)) {
             return stream.toList();

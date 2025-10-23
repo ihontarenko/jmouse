@@ -40,6 +40,10 @@ public interface AccessResult {
             return attributes;
         }
 
+        @Override
+        public String toString() {
+            return "ACCESS_RESULT[%s]['%s']".formatted(isGranted() ? "PERMITTED" : "DENY", message);
+        }
     }
 
     class Permitted extends AbstractAccessResult {
@@ -52,6 +56,11 @@ public interface AccessResult {
             this(message, Map.of());
         }
 
+        @Override
+        public String toString() {
+            return super.toString();
+        }
+
     }
 
     class Deny extends AbstractAccessResult {
@@ -62,6 +71,11 @@ public interface AccessResult {
 
         public Deny(String message) {
             this(message, Map.of());
+        }
+
+        @Override
+        public String toString() {
+            return super.toString();
         }
 
     }

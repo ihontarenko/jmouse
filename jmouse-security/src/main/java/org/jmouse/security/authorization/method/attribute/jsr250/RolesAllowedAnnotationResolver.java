@@ -16,6 +16,6 @@ public class RolesAllowedAnnotationResolver extends Jsr250AnnotationResolver<Rol
         String contains = Streamable.of(annotation.value())
                 .map(StringHelper::unquote).map(StringHelper::quote)
                 .joining(", ");
-        return "(authentication.authorities | map(a -> a.authority) | list) is containsAny(" + contains + ")";
+        return "(authentication.authorities | map(a -> a.authority)) is containsAny(" + contains + ")";
     }
 }

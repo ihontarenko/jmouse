@@ -3,7 +3,7 @@ package org.jmouse.security.authorization.method.attribute.jsr250;
 import org.jmouse.core.proxy.MethodInvocation;
 import org.jmouse.security.authorization.method.AuthorizedExpressionAttribute;
 import org.jmouse.security.authorization.method.ExpressionAttribute;
-import org.jmouse.security.authorization.method.MethodExpressionHandler;
+import org.jmouse.security.core.access.MethodExpressionHandler;
 import org.jmouse.security.authorization.method.attribute.AttributeResolver;
 import org.jmouse.security.core.access.Phase;
 

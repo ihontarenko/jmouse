@@ -11,4 +11,18 @@ public interface PermissionEvaluator {
 
     boolean hasPermission(Authentication authentication, Object id, String targetType, String permission);
 
+    class DenyAll implements PermissionEvaluator {
+
+        @Override
+        public boolean hasPermission(Authentication authentication, Object object, String permission) {
+            return false;
+        }
+
+        @Override
+        public boolean hasPermission(Authentication authentication, Object id, String targetType, String permission) {
+            return false;
+        }
+
+    }
+
 }

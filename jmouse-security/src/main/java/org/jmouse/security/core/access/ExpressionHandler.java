@@ -1,4 +1,4 @@
-package org.jmouse.security.authorization.method;
+package org.jmouse.security.core.access;
 
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
@@ -13,7 +13,7 @@ public interface ExpressionHandler<T> {
     ExpressionLanguage getExpressionLanguage();
 
     EvaluationContext createContext(
-            Authentication authentication, T toUse);
+            Authentication authentication, T target);
 
     boolean evaluate(Expression expression, EvaluationContext context);
 

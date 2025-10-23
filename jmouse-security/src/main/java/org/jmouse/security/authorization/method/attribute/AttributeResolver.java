@@ -3,7 +3,7 @@ package org.jmouse.security.authorization.method.attribute;
 
 import org.jmouse.core.proxy.MethodInvocation;
 import org.jmouse.security.authorization.method.ExpressionAttribute;
-import org.jmouse.security.authorization.method.MethodExpressionHandler;
+import org.jmouse.security.core.access.MethodExpressionHandler;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -29,11 +29,7 @@ public interface AttributeResolver<A extends Annotation> {
      * @param handler     expression/EL infrastructure
      */
     ExpressionAttribute resolve(
-            A annotation,
-            Method method,
-            Class<?> targetClass,
-            MethodExpressionHandler<MethodInvocation> handler
-    );
+            A annotation, Method method, Class<?> targetClass, MethodExpressionHandler<MethodInvocation> handler);
 
     /**
      * Priority: smaller first. Allows preferring method-level resolvers, etc.
