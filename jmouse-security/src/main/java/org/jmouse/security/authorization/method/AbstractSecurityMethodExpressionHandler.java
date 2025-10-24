@@ -3,9 +3,9 @@ package org.jmouse.security.authorization.method;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.MethodImporter;
-import org.jmouse.security.core.access.AbstractExpressionHandler;
+import org.jmouse.security.access.AbstractExpressionHandler;
 import org.jmouse.security.authorization.method.support.AuthenticationFunctions;
-import org.jmouse.security.core.Authentication;
+import org.jmouse.security.Authentication;
 
 abstract public class AbstractSecurityMethodExpressionHandler<T> extends AbstractExpressionHandler<T> {
 

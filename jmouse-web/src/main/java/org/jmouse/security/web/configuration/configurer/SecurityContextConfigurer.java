@@ -1,8 +1,8 @@
 package org.jmouse.security.web.configuration.configurer;
 
 import org.jmouse.security.SecurityContextHolder;
-import org.jmouse.security.core.SecurityContextHolderStrategy;
-import org.jmouse.security.core.ThreadLocalSecurityContextHolderStrategy;
+import org.jmouse.security.SecurityContextHolderStrategy;
+import org.jmouse.security.ThreadLocalSecurityContextHolderStrategy;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.configuration.SharedAttributes;
 import org.jmouse.security.web.context.SecurityContextPersistenceFilter;

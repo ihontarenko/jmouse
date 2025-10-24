@@ -2,7 +2,7 @@ package org.jmouse.security.web.authentication.jwt;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.authentication.AuthenticationManager;
-import org.jmouse.security.core.Authentication;
+import org.jmouse.security.Authentication;
 import org.jmouse.security.web.authentication.AbstractAuthenticationFilter;
 import org.jmouse.security.web.authentication.AuthenticationFailureHandler;
 import org.jmouse.security.web.authentication.AuthenticationSuccessHandler;

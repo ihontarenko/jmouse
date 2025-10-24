@@ -2,7 +2,7 @@ package org.jmouse.security.web.authentication.bearer;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.authentication.BearerTokenAuthentication;
-import org.jmouse.security.core.Authentication;
+import org.jmouse.security.Authentication;
 import org.jmouse.security.web.authentication.AbstractAuthenticationProvider;
 import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.Headers;

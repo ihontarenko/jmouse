@@ -1,6 +1,6 @@
 package org.jmouse.security.jwt;
 
-import org.jmouse.security.core.Authority;
+import org.jmouse.security.Authority;
 
 import java.util.ArrayList;
 import java.util.Collection;

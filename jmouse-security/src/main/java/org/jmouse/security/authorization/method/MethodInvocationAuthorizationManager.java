@@ -3,7 +3,7 @@ package org.jmouse.security.authorization.method;
 import org.jmouse.core.proxy.MethodInvocation;
 import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorizationManager;
-import org.jmouse.security.core.Authentication;
+import org.jmouse.security.Authentication;
 
 public class MethodInvocationAuthorizationManager implements AuthorizationManager<MethodInvocation> {
 

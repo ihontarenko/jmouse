@@ -1,7 +1,7 @@
 package org.jmouse.security.web.session;
 
-import org.jmouse.security.core.Authentication;
-import org.jmouse.security.core.session.SessionRegistry;
+import org.jmouse.security.Authentication;
+import org.jmouse.security.session.SessionRegistry;
 import org.jmouse.web.http.RequestContextKeeper;
 
 import java.util.Comparator;

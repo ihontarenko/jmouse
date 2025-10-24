@@ -1,7 +1,7 @@
 package org.jmouse.security.web.configuration;
 
 import org.jmouse.security.authentication.AuthenticationManager;
-import org.jmouse.security.core.SecurityContextHolderStrategy;
+import org.jmouse.security.SecurityContextHolderStrategy;
 import org.jmouse.security.web.AuthenticationEntryPoint;
 import org.jmouse.security.web.AuthorizationFailureHandler;
 import org.jmouse.security.web.SecurityFilterOrder;

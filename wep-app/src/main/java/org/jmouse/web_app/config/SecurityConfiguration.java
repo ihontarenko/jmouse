@@ -2,12 +2,11 @@ package org.jmouse.web_app.config;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
-import org.jmouse.security.core.UserPrincipal;
-import org.jmouse.security.core.UserPrincipalService;
-import org.jmouse.security.core.access.RoleHierarchy;
-import org.jmouse.security.core.service.InMemoryUserPrincipalService;
+import org.jmouse.security.UserPrincipal;
+import org.jmouse.security.UserPrincipalService;
+import org.jmouse.security.access.RoleHierarchy;
+import org.jmouse.security.service.InMemoryUserPrincipalService;
 import org.jmouse.security.web.MatchableSecurityFilterChain;
-import org.jmouse.security.web.configuration.Customizer;
 import org.jmouse.security.web.configuration.builder.HttpSecurity;
 import org.jmouse.security.web.configuration.configurer.AuthorizeRequestConfigurer;
 import org.jmouse.web.http.HttpMethod;

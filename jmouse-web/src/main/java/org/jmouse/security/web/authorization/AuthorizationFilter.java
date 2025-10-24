@@ -9,7 +9,7 @@ import org.jmouse.security.authentication.AuthenticationException;
 import org.jmouse.security.authorization.AuthorizationException;
 import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorizationManager;
-import org.jmouse.security.core.Authentication;
+import org.jmouse.security.Authentication;
 import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.servlet.filter.BeanFilter;
 

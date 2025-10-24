@@ -1,7 +1,7 @@
 package org.jmouse.security.authentication;
 
-import org.jmouse.security.core.Authentication;
-import org.jmouse.security.core.Authority;
+import org.jmouse.security.Authentication;
+import org.jmouse.security.Authority;
 
 import java.security.Principal;
 import java.util.Collection;

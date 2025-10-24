@@ -3,8 +3,8 @@ package org.jmouse.security.authentication.dao;
 import org.jmouse.security.authentication.AbstractUsernamePasswordAuthenticationResolver;
 import org.jmouse.security.authentication.AuthenticationException;
 import org.jmouse.security.authentication.UsernamePasswordAuthentication;
-import org.jmouse.security.core.Authentication;
-import org.jmouse.security.core.UserPrincipal;
+import org.jmouse.security.Authentication;
+import org.jmouse.security.UserPrincipal;
 
 public class DaoAuthenticationResolver extends AbstractUsernamePasswordAuthenticationResolver {
 

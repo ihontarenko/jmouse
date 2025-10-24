@@ -1,7 +1,7 @@
 package org.jmouse.security.authorization.voting;
 
-import org.jmouse.security.core.Authentication;
-import org.jmouse.security.core.access.Vote;
+import org.jmouse.security.Authentication;
+import org.jmouse.security.access.Vote;
 
 /**
  * 🗳️ Individual access vote.

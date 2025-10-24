@@ -2,8 +2,8 @@ package org.jmouse.security.web.request;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.SecurityContextHolder;
-import org.jmouse.security.core.SecurityContext;
-import org.jmouse.security.core.SupplierDeferredSecurityContext;
+import org.jmouse.security.SecurityContext;
+import org.jmouse.security.SupplierDeferredSecurityContext;
 import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.web.http.RequestContextKeeper;
 

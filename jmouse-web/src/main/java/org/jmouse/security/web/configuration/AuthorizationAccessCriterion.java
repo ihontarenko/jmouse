@@ -3,8 +3,8 @@ package org.jmouse.security.web.configuration;
 import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorityPolicyAuthorizationManager;
 import org.jmouse.security.authorization.AuthorizationManager;
-import org.jmouse.security.core.Authentication;
-import org.jmouse.security.core.access.RoleHierarchy;
+import org.jmouse.security.Authentication;
+import org.jmouse.security.access.RoleHierarchy;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MappingMatcher;
 

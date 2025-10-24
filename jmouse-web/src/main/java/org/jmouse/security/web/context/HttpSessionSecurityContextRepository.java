@@ -2,9 +2,10 @@ package org.jmouse.security.web.context;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.jmouse.security.SecurityContext;
 import org.jmouse.security.SecurityContextHolder;
+import org.jmouse.security.SecurityContextHolderStrategy;
 import org.jmouse.security.authentication.AuthenticationInspector;
-import org.jmouse.security.core.*;
 import org.jmouse.web.http.RequestContextKeeper;
 import org.jmouse.web.http.WebHttpSession;
 
@@ -18,8 +19,8 @@ public class HttpSessionSecurityContextRepository implements SecurityContextRepo
     public static final String DEFAULT_SESSION_KEY = HttpSessionSecurityContextRepository.class.getName()
             .concat(".JMOUSE_SECURITY_CONTEXT");
 
-    private final SecurityContext               emptyPrototype        = SecurityContext.empty();
-    private       String                        sessionKey            = DEFAULT_SESSION_KEY;
+    private final SecurityContext emptyPrototype = SecurityContext.empty();
+    private       String          sessionKey     = DEFAULT_SESSION_KEY;
     private       boolean                       allowSessionCreation  = true;
 
     public HttpSessionSecurityContextRepository sessionKey(String key) {

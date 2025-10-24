@@ -1,6 +1,6 @@
 package org.jmouse.security.authentication;
 
-import org.jmouse.security.core.UserPrincipalService;
+import org.jmouse.security.UserPrincipalService;
 
 abstract public class AbstractUsernamePasswordAuthenticationResolver extends AbstractAuthenticationResolver {
 

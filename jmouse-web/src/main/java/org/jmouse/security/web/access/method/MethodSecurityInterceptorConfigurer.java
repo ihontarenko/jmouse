@@ -7,7 +7,7 @@ import org.jmouse.core.proxy.MethodInterceptor;
 import org.jmouse.core.proxy.ProxyFactory;
 import org.jmouse.security.authorization.method.AuthorizeMethodInterceptor;
 import org.jmouse.security.authorization.method.AuthorizeMethodManager;
-import org.jmouse.security.core.access.annotation.Authorize;
+import org.jmouse.security.access.annotation.Authorize;
 import org.jmouse.web.mvc.BeanConfigurer;
 
 import static org.jmouse.core.proxy.InterceptorMatcher.forAnnotations;

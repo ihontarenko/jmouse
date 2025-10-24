@@ -6,9 +6,9 @@ import org.jmouse.core.proxy.MethodInvocation;
 import org.jmouse.security.SecurityContextHolder;
 import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorizationManager;
-import org.jmouse.security.core.Authentication;
-import org.jmouse.security.core.SecurityContextHolderStrategy;
-import org.jmouse.security.core.access.Phase;
+import org.jmouse.security.Authentication;
+import org.jmouse.security.SecurityContextHolderStrategy;
+import org.jmouse.security.access.Phase;
 
 import java.lang.reflect.Method;
 import java.util.function.Supplier;

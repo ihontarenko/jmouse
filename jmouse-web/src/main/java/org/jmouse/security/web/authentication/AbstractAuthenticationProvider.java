@@ -1,7 +1,7 @@
 package org.jmouse.security.web.authentication;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.security.core.Authentication;
+import org.jmouse.security.Authentication;
 
 abstract public class AbstractAuthenticationProvider implements AuthenticationProvider {
 

@@ -1,16 +1,13 @@
 package org.jmouse.web_app.controller;
 
-import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.beans.annotation.ProxiedBean;
 import org.jmouse.core.Bytes;
 import org.jmouse.core.MediaType;
-import org.jmouse.core.throttle.RateLimit;
 import org.jmouse.core.throttle.RateLimitEnable;
-import org.jmouse.security.core.access.Phase;
-import org.jmouse.security.core.access.annotation.Authorize;
+import org.jmouse.security.access.annotation.Authorize;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.http.multipart.UploadLimitExceededException;
 import org.jmouse.web.annotation.*;
@@ -23,11 +20,8 @@ import org.jmouse.web.mvc.cors.CorsMapping;
 import org.jmouse.web_app.service.StringService;
 
 import java.io.IOException;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
-
-import static org.jmouse.core.throttle.RateLimit.Scope.METHOD;
 
 @CorsMapping(allowedHeaders = {
         HttpHeader.CONTENT_TYPE,

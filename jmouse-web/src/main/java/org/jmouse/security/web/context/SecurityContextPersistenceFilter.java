@@ -4,7 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.jmouse.security.SecurityContextHolder;
-import org.jmouse.security.core.SecurityContext;
+import org.jmouse.security.SecurityContext;
 import org.jmouse.security.web.session.SessionPersistenceResponseWrapper;
 import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.http.RequestContextKeeper;

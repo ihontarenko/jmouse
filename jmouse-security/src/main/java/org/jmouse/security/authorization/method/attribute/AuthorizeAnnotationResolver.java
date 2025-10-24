@@ -5,8 +5,8 @@ import org.jmouse.el.node.Expression;
 import org.jmouse.el.parser.ParseException;
 import org.jmouse.security.authorization.method.AnnotationExpressionAttribute;
 import org.jmouse.security.authorization.method.ExpressionAttribute;
-import org.jmouse.security.core.access.MethodExpressionHandler;
-import org.jmouse.security.core.access.annotation.Authorize;
+import org.jmouse.security.access.MethodExpressionHandler;
+import org.jmouse.security.access.annotation.Authorize;
 
 import java.lang.reflect.Method;
 

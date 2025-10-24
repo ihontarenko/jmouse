@@ -2,7 +2,7 @@ package org.jmouse.security.authorization.method.support;
 
 import org.jmouse.security.authentication.AuthenticationInspector;
 import org.jmouse.security.authentication.AuthenticationLevel;
-import org.jmouse.security.core.Authentication;
+import org.jmouse.security.Authentication;
 
 public class AuthenticationFunctions implements AuthenticationInspector {
 

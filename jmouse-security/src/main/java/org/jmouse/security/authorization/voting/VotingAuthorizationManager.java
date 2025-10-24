@@ -2,8 +2,8 @@ package org.jmouse.security.authorization.voting;
 
 import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorizationManager;
-import org.jmouse.security.core.Authentication;
-import org.jmouse.security.core.access.Vote;
+import org.jmouse.security.Authentication;
+import org.jmouse.security.access.Vote;
 
 import java.util.List;
 

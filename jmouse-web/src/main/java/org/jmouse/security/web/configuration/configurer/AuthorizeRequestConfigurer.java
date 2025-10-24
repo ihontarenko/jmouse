@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.matcher.Match;
 import org.jmouse.security.authorization.AuthorityPolicyAuthorizationManager;
 import org.jmouse.security.authorization.AuthorizationManager;
-import org.jmouse.security.core.access.RoleHierarchy;
+import org.jmouse.security.access.RoleHierarchy;
 import org.jmouse.security.web.authorization.AuthorizationFilter;
 import org.jmouse.security.web.RequestMatch;
 import org.jmouse.security.web.access.ExceptionTranslationFilter;

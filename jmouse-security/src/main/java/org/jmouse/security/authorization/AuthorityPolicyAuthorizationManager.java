@@ -1,9 +1,8 @@
 package org.jmouse.security.authorization;
 
 import org.jmouse.core.Streamable;
-import org.jmouse.security.authentication.AnonymousAuthentication;
-import org.jmouse.security.core.Authentication;
-import org.jmouse.security.core.access.RoleHierarchy;
+import org.jmouse.security.Authentication;
+import org.jmouse.security.access.RoleHierarchy;
 
 import java.util.Collection;
 import java.util.Set;

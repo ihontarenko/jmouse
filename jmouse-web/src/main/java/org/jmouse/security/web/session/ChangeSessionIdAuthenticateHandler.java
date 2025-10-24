@@ -2,7 +2,7 @@ package org.jmouse.security.web.session;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import org.jmouse.security.core.Authentication;
+import org.jmouse.security.Authentication;
 import org.jmouse.web.http.RequestContextKeeper;
 
 public class ChangeSessionIdAuthenticateHandler implements SessionAuthenticateHandler {

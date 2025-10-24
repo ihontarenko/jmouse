@@ -1,7 +1,7 @@
 package org.jmouse.security.authorization.method;
 
 import org.jmouse.core.proxy.MethodInvocation;
-import org.jmouse.security.core.access.Phase;
+import org.jmouse.security.access.Phase;
 
 public record MethodAuthorizationContext(MethodInvocation proxyInvocation, Phase phase, Object result) {
 

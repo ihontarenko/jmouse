@@ -3,7 +3,7 @@ package org.jmouse.security.web.access;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorizationManager;
-import org.jmouse.security.core.Authentication;
+import org.jmouse.security.Authentication;
 import org.jmouse.security.web.RequestMatcherEntry;
 import org.jmouse.security.web.RequestMatch;
 import org.jmouse.web.http.RequestRoute;

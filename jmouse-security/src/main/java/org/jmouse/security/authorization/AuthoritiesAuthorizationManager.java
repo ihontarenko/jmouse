@@ -1,8 +1,8 @@
 package org.jmouse.security.authorization;
 
-import org.jmouse.security.core.Authentication;
-import org.jmouse.security.core.Authority;
-import org.jmouse.security.core.access.RoleHierarchy;
+import org.jmouse.security.Authentication;
+import org.jmouse.security.Authority;
+import org.jmouse.security.access.RoleHierarchy;
 
 import java.util.Collection;
 import java.util.Set;

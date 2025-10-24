@@ -1,6 +1,6 @@
 package org.jmouse.security.authorization;
 
-import org.jmouse.security.core.Authentication;
+import org.jmouse.security.Authentication;
 
 /**
  * 🚦 Decides access for a given secured target (endpoint/method/message).

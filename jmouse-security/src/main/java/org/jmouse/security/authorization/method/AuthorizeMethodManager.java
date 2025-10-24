@@ -6,13 +6,13 @@ import org.jmouse.core.reflection.annotation.Annotations;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.security.authorization.AccessResult;
 import org.jmouse.security.authorization.AuthorizationManager;
-import org.jmouse.security.core.access.ExpressionHandler;
+import org.jmouse.security.access.ExpressionHandler;
 import org.jmouse.security.authorization.method.attribute.CompositeAnnotationExpressionAttributeRegistry;
 import org.jmouse.security.authorization.method.attribute.ExpressionAttributeRegistry;
-import org.jmouse.security.core.Authentication;
-import org.jmouse.security.core.access.MethodExpressionHandler;
-import org.jmouse.security.core.access.Phase;
-import org.jmouse.security.core.access.annotation.DeniedHandler;
+import org.jmouse.security.Authentication;
+import org.jmouse.security.access.MethodExpressionHandler;
+import org.jmouse.security.access.Phase;
+import org.jmouse.security.access.annotation.DeniedHandler;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;

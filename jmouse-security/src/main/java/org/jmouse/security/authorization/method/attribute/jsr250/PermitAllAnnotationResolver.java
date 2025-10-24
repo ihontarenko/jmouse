@@ -6,8 +6,8 @@ import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.expression.literal.BooleanLiteralNode;
 import org.jmouse.security.authorization.method.AnnotationExpressionAttribute;
 import org.jmouse.security.authorization.method.ExpressionAttribute;
-import org.jmouse.security.core.access.MethodExpressionHandler;
-import org.jmouse.security.core.access.Phase;
+import org.jmouse.security.access.MethodExpressionHandler;
+import org.jmouse.security.access.Phase;
 
 import java.lang.reflect.Method;
 

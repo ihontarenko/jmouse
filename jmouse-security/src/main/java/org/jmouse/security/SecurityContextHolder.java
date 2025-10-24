@@ -1,9 +1,5 @@
 package org.jmouse.security;
 
-import org.jmouse.security.core.SecurityContext;
-import org.jmouse.security.core.SecurityContextHolderStrategy;
-import org.jmouse.security.core.ThreadLocalSecurityContextHolderStrategy;
-
 final public class SecurityContextHolder {
 
     private static volatile SecurityContextHolderStrategy CONTEXT_HOLDER_STRATEGY;

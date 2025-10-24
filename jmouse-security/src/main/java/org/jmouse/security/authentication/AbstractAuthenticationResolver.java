@@ -1,6 +1,6 @@
 package org.jmouse.security.authentication;
 
-import org.jmouse.security.core.Authentication;
+import org.jmouse.security.Authentication;
 
 abstract public class AbstractAuthenticationResolver implements AuthenticationResolver {
 

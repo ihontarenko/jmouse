@@ -1,7 +1,7 @@
 package org.jmouse.security.authorization.method;
 
 import org.jmouse.el.node.Expression;
-import org.jmouse.security.core.access.Phase;
+import org.jmouse.security.access.Phase;
 
 import java.lang.annotation.Annotation;
 

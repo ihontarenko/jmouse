@@ -2,7 +2,7 @@ package org.jmouse.security.web.authentication.form;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.authentication.UsernamePasswordAuthentication;
-import org.jmouse.security.core.Authentication;
+import org.jmouse.security.Authentication;
 import org.jmouse.security.web.authentication.AbstractAuthenticationProvider;
 
 /**
