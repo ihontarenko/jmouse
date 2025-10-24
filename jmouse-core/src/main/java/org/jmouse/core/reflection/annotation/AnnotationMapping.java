@@ -1,6 +1,7 @@
 package org.jmouse.core.reflection.annotation;
 
 import org.jmouse.core.Getter;
+import org.jmouse.core.reflection.TypeMap;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -64,16 +65,18 @@ public class AnnotationMapping implements AnnotationAttributeMapping {
     }
 
     /** {@inheritDoc} */
-    @SuppressWarnings("unchecked")
     @Override
     public <T> T getAttributeValue(Method method, Class<T> type) {
         Object value = Getter.ofMethod(method).get(annotation);
+        type = TypeMap.wrap(type);
 
         if (value != null && !isDefaultValue(method, value)) {
-            return (T) value;
+            return type.cast(value);
         }
 
-        return resolve(method.getName(), type);
+        Object resolved = resolve(method.getName(), type);
+
+        return type.cast(resolved == null ? value : resolved);
     }
 
     /** {@inheritDoc} */

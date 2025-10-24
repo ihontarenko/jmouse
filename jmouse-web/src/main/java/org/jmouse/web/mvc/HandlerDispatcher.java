@@ -177,6 +177,10 @@ public class HandlerDispatcher implements InitializingBean {
             }
         } catch (Exception exception) {
             LOGGER.error("HANDLER DISPATCHER FAILED!", exception);
+
+            if (exception instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
         }
     }
 

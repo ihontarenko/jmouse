@@ -37,7 +37,6 @@ public final class AnnotationRepository {
         Set<AnnotationData>    scanned = AnnotationScanner.scan(element);
         List<MergedAnnotation> roots   = scanned.stream()
                 .map(data -> new MergedAnnotation(data, null)).toList();
-
         return new AnnotationRepository(roots);
     }
 

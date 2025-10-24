@@ -62,28 +62,40 @@ public class SecurityFilterChainDelegator implements Filter {
 
         for (MatchableSecurityFilterChain securityChain : chains) {
             if (securityChain.matches((HttpServletRequest) request)) {
-                // Wrap filters into a virtual chain
                 Virtual virtual = new Virtual(chain, securityChain.getFilters());
 
-                LOGGER.info(colorize("\uD83D\uDEE1\uFE0F\uD83D\uDD10 ${BLUE_BOLD_BRIGHT}SECURITY${RESET} ➡️ URI: ${RED_BOLD_BRIGHT}{}${RESET}"),
-                        ((HttpServletRequest) request).getRequestURI());
+                logMatcherRequest((HttpServletRequest) request);
 
                 for (Filter filter : securityChain.getFilters()) {
-                    Filter original = filter;
-                    if (filter instanceof OrderedFilter orderedFilter) {
-                        original = orderedFilter.filter();
-                    }
-                    LOGGER.info(colorize("➡️ ${BLUE_BOLD_BRIGHT}FILTER:${RESET} ${YELLOW_BOLD_BRIGHT}{}${RESET}"),
-                                original.getClass().getName());
+                    Filter original = unwrap(filter);
+                    logFilterName(original);
                 }
 
                 virtual.doFilter(request, response);
-                return; // ✅ stop after first match
+                return;
             }
         }
 
         // no match -> fall back to outer chain
         chain.doFilter(request, response);
+    }
+
+    private Filter unwrap(Filter filter) {
+        Filter original = filter;
+        if (filter instanceof OrderedFilter orderedFilter) {
+            original = orderedFilter.filter();
+        }
+        return original;
+    }
+
+    private void logMatcherRequest(HttpServletRequest request) {
+        LOGGER.info(colorize("\uD83D\uDEE1\uFE0F\uD83D\uDD10 ${BLUE_BOLD_BRIGHT}SECURITY${RESET} ➡️ URI: ${RED_BOLD_BRIGHT}{}${RESET}"),
+                    request.getRequestURI());
+    }
+
+    private void logFilterName(Filter original) {
+        LOGGER.info(colorize("➡️ ${BLUE_BOLD_BRIGHT}FILTER:${RESET} ${YELLOW_BOLD_BRIGHT}{}${RESET}"),
+                    original.getClass().getName());
     }
 
     /**

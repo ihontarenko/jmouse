@@ -128,4 +128,19 @@ public class TypeMap {
             byte.class
     );
 
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> wrap(Class<?> type) {
+        Class<T> wrapped = null;
+
+        if (type.isPrimitive()) {
+            wrapped = (Class<T>) WRAPPERS.get(type);
+        }
+
+        if (wrapped == null) {
+            wrapped = (Class<T>) type;
+        }
+
+        return wrapped;
+    }
+
 }

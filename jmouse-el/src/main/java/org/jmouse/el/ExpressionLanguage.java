@@ -7,6 +7,7 @@ import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.extension.StandardExtensionContainer;
 import org.jmouse.el.lexer.*;
 import org.jmouse.el.node.Expression;
+import org.jmouse.el.node.expression.literal.NullLiteralNode;
 import org.jmouse.el.parser.DefaultParserContext;
 import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.ParserContext;
@@ -24,8 +25,8 @@ import java.util.Map;
  */
 public class ExpressionLanguage {
 
-    private final ParserContext                    context;
-    private final Lexer                            lexer;
+    private final ParserContext                context;
+    private final Lexer                        lexer;
     private final ExpressionParser             parser;
     private final Cache<Cache.Key, Expression> cache;
     private final ExtensionContainer           extensions;
@@ -53,9 +54,9 @@ public class ExpressionLanguage {
      * @return a new {@link EvaluationContext}
      */
     public EvaluationContext newContext() {
-        EvaluationContext ctx = new DefaultEvaluationContext();
-        ctx.setExtensions(extensions);
-        return ctx;
+        EvaluationContext context = new DefaultEvaluationContext();
+        context.setExtensions(extensions);
+        return context;
     }
 
     /**
@@ -77,6 +78,10 @@ public class ExpressionLanguage {
     public Expression compile(String expression) {
         Cache.Key  key    = Cache.Key.forObject(expression);
         Expression cached = cache.get(key);
+
+        if (expression == null || expression.isBlank()) {
+            return new NullLiteralNode();
+        }
 
         if (cached == null) {
             TokenizableSource source =

@@ -5,6 +5,7 @@ import org.jmouse.core.Streamable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -254,6 +255,233 @@ public class MergedAnnotation {
         }
 
         return flattened;
+    }
+
+    public Map<String, Object> toAttributeMap() {
+        return toAttributeMap(false);
+    }
+
+    public Map<String, Object> toAttributeMap(boolean includeDefaults) {
+        Map<String, Object>        result  = new LinkedHashMap<>();
+        AnnotationAttributeMapping mapping = getAnnotationMapping();
+
+        for (Method attribute : mapping.getAttributes().getAttributes()) {
+            Object  attributeValue = mapping.getAttributeValue(attribute);
+            boolean isDefault      = mapping.isDefaultValue(attribute, attributeValue);
+            if (includeDefaults || !isDefault) {
+                result.put(attribute.getName(), attributeValue);
+            }
+        }
+
+        return Collections.unmodifiableMap(result);
+    }
+
+    public Map<String, Object> toResolvedAttributeMap() {
+        Map<String, Object>        result     = new LinkedHashMap<>();
+        AnnotationAttributeMapping mapping = getAnnotationMapping();
+
+        for (Method attribute : mapping.getAttributes().getAttributes()) {
+            @SuppressWarnings("unchecked")
+            Object attributeValue = mapping.getAttributeValue(attribute.getName(), (Class<Object>) attribute.getReturnType());
+            result.put(attribute.getName(), attributeValue);
+        }
+
+        return Collections.unmodifiableMap(result);
+    }
+
+    public Map<String, Object> toMergedQualifiedMap() {
+        return toMergedQualifiedMap(MergePolicy.FIRST_WINS, false);
+    }
+
+    public Map<String, Object> toMergedQualifiedMap(MergePolicy policy, boolean includeDefaults) {
+        Map<String, Object> result = new LinkedHashMap<>();
+
+        for (MergedAnnotation mergedAnnotation : getFlattened()) {
+            AnnotationAttributeMapping  annotationMapping = mergedAnnotation.getAnnotationMapping();
+            Class<? extends Annotation> annotationType    = mergedAnnotation.getAnnotationType();
+
+            for (Method method : annotationMapping.getAttributes().getAttributes()) {
+                Object  value     = annotationMapping.getAttributeValue(method);
+                boolean isDefault = annotationMapping.isDefaultValue(method, value);
+
+                if (!includeDefaults && isDefault) {
+                    continue;
+                }
+
+                String key = annotationType.getName() + "#" + method.getName();
+                apply(result, key, value, policy);
+            }
+
+        }
+
+        return Collections.unmodifiableMap(result);
+    }
+
+    public <A extends Annotation> Map<String, Object> toResolvedMapFor(Class<A> targetType) {
+        Map<String, Object>        result     = new LinkedHashMap<>();
+        AnnotationAttributes       attributes = AnnotationAttributes.forAnnotationType(targetType);
+        AnnotationAttributeMapping mapping    = new AnnotationMapping(getNativeAnnotation(), getRoot());
+
+        for (Method attribute : attributes.getAttributes()) {
+            @SuppressWarnings("unchecked")
+            Object value = mapping.getAttributeValue(attribute.getName(), (Class<Object>) attribute.getReturnType());
+            result.put(attribute.getName(), value);
+        }
+
+        return Collections.unmodifiableMap(result);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void apply(Map<String, Object> result, String key, Object value, MergePolicy policyStrategy) {
+        switch (policyStrategy) {
+            case COLLECT -> {
+                Object previous = result.get(key);
+                if (previous == null) {
+                    List<Object> collection = new ArrayList<>();
+                    collection.add(value);
+                    result.put(key, collection);
+                } else if (previous instanceof List<?> collection) {
+                    ((List<Object>) collection).add(value);
+                } else {
+                    List<Object> collection = new ArrayList<>();
+                    collection.add(previous);
+                    collection.add(value);
+                    result.put(key, collection);
+                }
+            }
+            case LAST_WINS
+                    -> result.put(key, value);
+            case FIRST_WINS
+                    -> result.putIfAbsent(key, value);
+        }
+    }
+
+    /**
+     * 🧾 Resolved view for the *visible* annotation (this.getAnnotationType())
+     * AND optionally its meta annotations, merged into a single unqualified map.
+     *
+     * <p>Example for {@code @PreAuthorize(...)} meta-annotated with {@code @Authorize}:
+     * result = { value, index } from PreAuthorize (resolved),
+     * plus { phase } from Authorize (its direct meta) if not already present.</p>
+     *
+     * <p>Keys are plain attribute names. Use {@link CollisionPolicy#KEEP_EXISTING} to
+     * prioritize the visible annotation; other policies are available when names collide.</p>
+     */
+    public Map<String, Object> toResolvedAttributeMapWithMetas() {
+        return toResolvedAttributeMapWithMetas(MetaScope.DIRECT_ONLY, CollisionPolicy.KEEP_EXISTING, false);
+    }
+
+    /**
+     * Same as {@link #toResolvedAttributeMapWithMetas()}, with controls.
+     *
+     * @param scope whether to include only the direct meta or all meta levels
+     * @param collisionPolicy how to handle key collisions (same attribute name)
+     * @param includeDefaults include attributes equal to their default values
+     */
+    public Map<String, Object> toResolvedAttributeMapWithMetas(
+            MetaScope scope,
+            CollisionPolicy collisionPolicy,
+            boolean includeDefaults
+    ) {
+        // 1) Start with the resolved map for the *visible* type (this annotation)
+        Map<String, Object> result = new LinkedHashMap<>(toResolvedAttributeMap());
+
+        // 2) Collect meta annotations to include
+        List<MergedAnnotation> metas = switch (scope) {
+            case DIRECT_ONLY
+                    -> getParent().map(List::of).orElse(List.of());
+            case ALL -> {
+                List<MergedAnnotation> flattened = getFlattened();
+                yield flattened.size() <= 1 ? List.of() : flattened.subList(1, flattened.size());
+            }
+        };
+
+        // 3) For each meta, add its *own* direct attribute values (or resolved-for-self)
+        for (MergedAnnotation meta : metas) {
+            // direct map: respects defaults flag, no alias remap into our type
+            Map<String, Object> metaMap = meta.toAttributeMap(includeDefaults);
+            // You could also use: meta.toResolvedMapFor(meta.getAnnotationType()) if you want
+            // alias-resolution within that meta type itself. Direct map is usually enough here.
+            for (Map.Entry<String, Object> entry : metaMap.entrySet()) {
+                String key   = entry.getKey();
+                Object value = entry.getValue();
+
+                switch (collisionPolicy) {
+                    case KEEP_EXISTING -> result.putIfAbsent(key, value);
+                    case OVERWRITE -> result.put(key, value);
+                    case QUALIFY_META_KEY -> {
+                        String unique = key;
+
+                        if (result.containsKey(key)) {
+                            var    type      = meta.getAnnotationType();
+                            String qualified = key + "@" + type.getSimpleName();
+                            int    index     = 0;
+                            while (result.containsKey(unique)) {
+                                unique = qualified + "#" + index++;
+                            }
+                            result.put(unique, value);
+                        }
+
+                        result.put(unique, value);
+                    }
+                }
+            }
+        }
+
+        return Collections.unmodifiableMap(result);
+    }
+
+    /**
+     * 🎯 Same concept, but targeted to an arbitrary "visible" type.
+     * Builds the resolved map for {@code targetType} as if it were the visible annotation,
+     * then augments it with meta attributes per the given scope/policy.
+     */
+    public <A extends Annotation> Map<String, Object> toResolvedAttributeMapForWithMetas(
+            Class<A> targetType,
+            MetaScope scope,
+            CollisionPolicy collisionPolicy,
+            boolean includeDefaults
+    ) {
+        // Start with how targetType looks after full resolve through this merged root
+        Map<String, Object> result = new LinkedHashMap<>(toResolvedMapFor(targetType));
+
+        // Add metas (same selection as above)
+        List<MergedAnnotation> metas = switch (scope) {
+            case DIRECT_ONLY -> getParent().map(List::of).orElse(List.of());
+            case ALL -> {
+                List<MergedAnnotation> flat = getFlattened();
+                yield flat.size() <= 1 ? List.of() : flat.subList(1, flat.size());
+            }
+        };
+
+        for (MergedAnnotation meta : metas) {
+            Map<String, Object> metaMap = meta.toAttributeMap(includeDefaults);
+            for (Map.Entry<String, Object> e : metaMap.entrySet()) {
+                String key   = e.getKey();
+                Object value = e.getValue();
+                switch (collisionPolicy) {
+                    case KEEP_EXISTING -> result.putIfAbsent(key, value);
+                    case OVERWRITE -> result.put(key, value);
+                    case QUALIFY_META_KEY -> {
+                        String unique = key;
+
+                        if (result.containsKey(key)) {
+                            var    type      = meta.getAnnotationType();
+                            String qualified = key + "@" + type.getSimpleName();
+                            int    index     = 0;
+                            while (result.containsKey(unique)) {
+                                unique = qualified + "#" + index++;
+                            }
+                            result.put(unique, value);
+                        }
+
+                        result.put(unique, value);
+                    }
+                }
+            }
+        }
+
+        return Collections.unmodifiableMap(result);
     }
 
     /**
