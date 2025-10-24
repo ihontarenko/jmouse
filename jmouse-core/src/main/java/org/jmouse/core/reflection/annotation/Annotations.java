@@ -2,6 +2,7 @@ package org.jmouse.core.reflection.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -40,15 +41,6 @@ public final class Annotations {
     }
 
     /**
-     * 🧭 Compatibility alias for code that expects a "unique" finder (returns {@code null} if absent).
-     *
-     * @see #lookup(Class)
-     */
-    public static <A extends Annotation> Function<AnnotatedElement, A> findUniqueAnnotation(Class<A> type) {
-        return lookup(type);
-    }
-
-    /**
      * ⚡ Direct, one-shot lookup that returns {@code null} if the annotation is absent.
      *
      * @param element annotated element (must not be {@code null})
@@ -76,4 +68,77 @@ public final class Annotations {
     public static <A extends Annotation> Function<AnnotatedElement, Optional<A>> lookupOptional(Class<A> type) {
         return element -> Optional.ofNullable(lookup(type).apply(element));
     }
+
+    /**
+     * 🧩 Builds a function that returns a <em>resolved</em> attribute map for a specific annotation type.
+     *
+     * <p>The returned function scans an {@link AnnotatedElement} via {@link AnnotationRepository}
+     * and, if the annotation is present (directly or via meta-annotations), produces a flat map of
+     * attribute {@code name → value} with <strong>all meta-levels merged</strong>
+     * (equivalent to {@link MergedAnnotation#asResolvedAll()}). If the annotation is absent,
+     * returns {@link java.util.Map#of() an empty map}.</p>
+     *
+     * <h4>Why “resolved all”?</h4>
+     * <p>It gives you a convenient, human-friendly view where the visible annotation’s attributes are
+     * combined with attributes inherited from its meta-annotations (breadth-first), using
+     * {@link CollisionPolicy#KEEP_EXISTING} so the visible annotation wins on conflicts.</p>
+     *
+     * <h4>Usage</h4>
+     * <pre>{@code
+     * // Given:
+     * // @PreAuthorize(value = "33 % 3 == 0", index = 666)
+     * // @Authorize(phase = Phase.BEFORE) // meta on @PreAuthorize
+     *
+     * Function<AnnotatedElement, Map<String,Object>> preAttrs = Annotations.attributes(PreAuthorize.class);
+     * Map<String,Object> m = preAttrs.apply(MyController.class);
+     * // => { value: "33 % 3 == 0", index: 666, phase: BEFORE }
+     *
+     * // If the element doesn't carry @PreAuthorize (directly or via metas):
+     * Map<String,Object> empty = preAttrs.apply(OtherClass.class); // empty map
+     * }</pre>
+     *
+     * @param type the annotation type to resolve (must not be {@code null})
+     * @param <A>  annotation generic
+     * @return a function mapping {@link AnnotatedElement} → merged attribute map (possibly empty)
+     */
+    public static <A extends Annotation> Function<AnnotatedElement, Map<String, Object>> attributes(Class<A> type) {
+        return e -> {
+            AnnotationRepository       repository = AnnotationRepository.ofAnnotatedElement(e);
+            Optional<MergedAnnotation> optional   = repository.get(type);
+            return optional.map(MergedAnnotation::asResolvedAll).orElseGet(Map::of);
+        };
+    }
+
+    /**
+     * 🎯 Retrieves a single resolved attribute value from an annotation on a given element.
+     *
+     * <p>This is a convenience wrapper around {@link #attributes(Class)} that extracts
+     * one specific attribute by name. The lookup traverses meta-annotations as well,
+     * since it internally delegates to {@link MergedAnnotation#asResolvedAll()}.</p>
+     *
+     * <h4>Usage</h4>
+     * <pre>{@code
+     * // Example: obtain single attribute value from @PreAuthorize
+     * Optional<Phase> optional = Annotations.attribute(
+     *      "phase", UserController.class, PreAuthorize.class);
+     *
+     * // Can be unwrapped or cast:
+     * Phase phase = optional.orElse(Phase.DEFAULT);
+     * }</pre>
+     *
+     * <p>If the annotation is not present or the attribute is missing, the result is
+     * {@link Optional#empty()}.</p>
+     *
+     * @param attribute the attribute name to retrieve
+     * @param element   the annotated element (e.g., class or method)
+     * @param type      the annotation type to inspect
+     * @param <A>       annotation generic
+     * @return an {@link Optional} containing the resolved attribute value, or empty if not found
+     */
+    @SuppressWarnings("unchecked")
+    public static <A extends Annotation, T> Optional<T> attribute(
+            String attribute, AnnotatedElement element, Class<A> type) {
+        return Optional.ofNullable((T)attributes(type).apply(element).get(attribute));
+    }
+
 }

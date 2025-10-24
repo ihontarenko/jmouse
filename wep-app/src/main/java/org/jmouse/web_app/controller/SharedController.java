@@ -7,8 +7,13 @@ import org.jmouse.beans.annotation.ProxiedBean;
 import org.jmouse.core.Bytes;
 import org.jmouse.core.MediaType;
 import org.jmouse.core.reflection.annotation.AnnotationRepository;
+import org.jmouse.core.reflection.annotation.Annotations;
+import org.jmouse.core.reflection.annotation.CollisionPolicy;
+import org.jmouse.core.reflection.annotation.MetaScope;
 import org.jmouse.core.throttle.RateLimitEnable;
 import org.jmouse.security.access.annotation.Authorize;
+import org.jmouse.security.access.annotation.DenyAfter;
+import org.jmouse.security.access.annotation.PostAuthorize;
 import org.jmouse.security.access.annotation.PreAuthorize;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.http.multipart.UploadLimitExceededException;
@@ -140,7 +145,7 @@ public class SharedController {
         return Bytes.parse(bytes);
     }
 
-    @PreAuthorize(value = "33 % 3 == 0", index = 666)
+//    @PostAuthorize(value = "33 % 3 == 0", order = 666)
     @GetMapping(
             requestPath = "/shared/random",
             produces = {
@@ -148,18 +153,9 @@ public class SharedController {
                     MediaType.APPLICATION_JSON_VALUE
             }
     )
+    @DenyAfter(number = 333)
     public String random() {
         return stringService.getRandom();
-    }
-
-    public static void main(String[] args) throws NoSuchMethodException {
-        Method               method     = SharedController.class.getMethod("random");
-        AnnotationRepository repository = AnnotationRepository.ofAnnotatedElement(method);
-
-        repository.get(Authorize.class)
-                .get().toResolvedAttributeMapWithMetas();
-
-        System.out.println(repository);
     }
 
 }

@@ -116,9 +116,8 @@ public class AuthorizeMethodManager
                 .createContext(authentication, target.proxyInvocation());
 
         // 🧩 Populate return value for AFTER phase evaluation
-        if (target.isAfter()
-                && expressionHandler instanceof MethodExpressionHandler<MethodInvocation> methodExpressionHandler) {
-            methodExpressionHandler.setReturnValue(target.result(), evaluationContext);
+        if (target.isAfter() && expressionHandler instanceof MethodExpressionHandler<MethodInvocation> handler) {
+            handler.setReturnValue(target.result(), evaluationContext);
         }
 
         if (attribute instanceof AnnotationExpressionAttribute<?> expressionAttribute) {

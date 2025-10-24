@@ -13,6 +13,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -65,15 +66,16 @@ public class CompositeAnnotationExpressionAttributeRegistry
         return tryResolveOn(type, method, type);
     }
 
+    @SuppressWarnings("unchecked")
     private ExpressionAttribute<?> tryResolveOn(AnnotatedElement element, Method method, Class<?> targetClass) {
         for (AttributeResolver<? extends Annotation> resolver : resolvers) {
-            @SuppressWarnings("unchecked")
-            Class<Annotation>                      type       = (Class<Annotation>) resolver.annotationType();
-            Function<AnnotatedElement, Annotation> lookup     = Annotations.lookup(type);
-            Annotation                             annotation = lookup.apply(element);
+            Class<Annotation>                               type       = (Class<Annotation>) resolver.annotationType();
+            Function<AnnotatedElement, Map<String, Object>> values = Annotations.attributes(type);
+            Function<AnnotatedElement, Annotation>          lookup     = Annotations.lookup(type);
+            Annotation                                      annotation = lookup.apply(element);
 
             if (annotation != null) {
-                @SuppressWarnings("unchecked")
+                Map<String, Object>           attributes        = values.apply(element);
                 AttributeResolver<Annotation> attributeResolver = (AttributeResolver<Annotation>) resolver;
                 return attributeResolver.resolve(annotation, method, targetClass, getExpressionHandler());
             }

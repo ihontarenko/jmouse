@@ -14,4 +14,6 @@ public @interface PostAuthorize {
     @MapTo(annotation = Authorize.class, attribute = "value")
     String value() default "";
 
+    int order() default 0;
+
 }

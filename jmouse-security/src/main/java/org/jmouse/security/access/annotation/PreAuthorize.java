@@ -14,6 +14,6 @@ public @interface PreAuthorize {
     @MapTo(annotation = Authorize.class, attribute = "value")
     String value() default "";
 
-    int index() default 1;
+    int index() default 0;
 
 }

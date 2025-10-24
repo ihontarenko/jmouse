@@ -9,8 +9,4 @@ public enum CollisionPolicy {
      * Replace existing value when meta provides the same key.
      */
     OVERWRITE,
-    /**
-     * When conflict: write as <name>@<SimpleMetaType>.
-     */
-    QUALIFY_META_KEY
 }

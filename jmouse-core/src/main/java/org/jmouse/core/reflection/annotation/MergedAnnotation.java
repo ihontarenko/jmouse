@@ -257,11 +257,36 @@ public class MergedAnnotation {
         return flattened;
     }
 
-    public Map<String, Object> toAttributeMap() {
-        return toAttributeMap(false);
+    /**
+     * 🗺️ Returns a map of this annotation's own attributes.
+     *
+     * <p>By default, attributes whose values equal their declared defaults are omitted.
+     * Use {@link #asMap(boolean)} to include them.</p>
+     *
+     * <h3>Example</h3>
+     * <pre>{@code
+     * @PreAuthorize(value = "33 % 3 == 0", index = 666)
+     * // For the MergedAnnotation representing @PreAuthorize:
+     * Map<String,Object> m = merged.asMap();
+     * // => { value: "33 % 3 == 0", index: 666 }   // default-valued attrs are skipped
+     * }</pre>
+     *
+     * @return unmodifiable map of attributeName → value for this annotation instance
+     */
+    public Map<String, Object> asMap() {
+        return asMap(false);
     }
 
-    public Map<String, Object> toAttributeMap(boolean includeDefaults) {
+    /**
+     * 🗺️ Returns a map of this annotation's own attributes with control over defaults.
+     *
+     * <p>If {@code includeDefaults} is {@code true}, attributes whose values equal their
+     * declared defaults are included; otherwise they are omitted.</p>
+     *
+     * @param includeDefaults whether to include attributes equal to their default values
+     * @return unmodifiable map of attributeName → value for this annotation instance
+     */
+    public Map<String, Object> asMap(boolean includeDefaults) {
         Map<String, Object>        result  = new LinkedHashMap<>();
         AnnotationAttributeMapping mapping = getAnnotationMapping();
 
@@ -276,154 +301,103 @@ public class MergedAnnotation {
         return Collections.unmodifiableMap(result);
     }
 
-    public Map<String, Object> toResolvedAttributeMap() {
-        Map<String, Object>        result     = new LinkedHashMap<>();
-        AnnotationAttributeMapping mapping = getAnnotationMapping();
-
-        for (Method attribute : mapping.getAttributes().getAttributes()) {
-            @SuppressWarnings("unchecked")
-            Object attributeValue = mapping.getAttributeValue(attribute.getName(), (Class<Object>) attribute.getReturnType());
-            result.put(attribute.getName(), attributeValue);
-        }
-
-        return Collections.unmodifiableMap(result);
-    }
-
-    public Map<String, Object> toMergedQualifiedMap() {
-        return toMergedQualifiedMap(MergePolicy.FIRST_WINS, false);
-    }
-
-    public Map<String, Object> toMergedQualifiedMap(MergePolicy policy, boolean includeDefaults) {
-        Map<String, Object> result = new LinkedHashMap<>();
-
-        for (MergedAnnotation mergedAnnotation : getFlattened()) {
-            AnnotationAttributeMapping  annotationMapping = mergedAnnotation.getAnnotationMapping();
-            Class<? extends Annotation> annotationType    = mergedAnnotation.getAnnotationType();
-
-            for (Method method : annotationMapping.getAttributes().getAttributes()) {
-                Object  value     = annotationMapping.getAttributeValue(method);
-                boolean isDefault = annotationMapping.isDefaultValue(method, value);
-
-                if (!includeDefaults && isDefault) {
-                    continue;
-                }
-
-                String key = annotationType.getName() + "#" + method.getName();
-                apply(result, key, value, policy);
-            }
-
-        }
-
-        return Collections.unmodifiableMap(result);
-    }
-
-    public <A extends Annotation> Map<String, Object> toResolvedMapFor(Class<A> targetType) {
-        Map<String, Object>        result     = new LinkedHashMap<>();
-        AnnotationAttributes       attributes = AnnotationAttributes.forAnnotationType(targetType);
-        AnnotationAttributeMapping mapping    = new AnnotationMapping(getNativeAnnotation(), getRoot());
-
-        for (Method attribute : attributes.getAttributes()) {
-            @SuppressWarnings("unchecked")
-            Object value = mapping.getAttributeValue(attribute.getName(), (Class<Object>) attribute.getReturnType());
-            result.put(attribute.getName(), value);
-        }
-
-        return Collections.unmodifiableMap(result);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static void apply(Map<String, Object> result, String key, Object value, MergePolicy policyStrategy) {
-        switch (policyStrategy) {
-            case COLLECT -> {
-                Object previous = result.get(key);
-                if (previous == null) {
-                    List<Object> collection = new ArrayList<>();
-                    collection.add(value);
-                    result.put(key, collection);
-                } else if (previous instanceof List<?> collection) {
-                    ((List<Object>) collection).add(value);
-                } else {
-                    List<Object> collection = new ArrayList<>();
-                    collection.add(previous);
-                    collection.add(value);
-                    result.put(key, collection);
-                }
-            }
-            case LAST_WINS
-                    -> result.put(key, value);
-            case FIRST_WINS
-                    -> result.putIfAbsent(key, value);
-        }
+    /**
+     * ✅ Resolved view for the <em>visible</em> annotation + its direct meta-annotation.
+     *
+     * <p>Builds a flat, unqualified map starting from {@link #asMap()} (this annotation only),
+     * then merges attributes from the <strong>direct</strong> meta according to
+     * {@link CollisionPolicy#KEEP_EXISTING} (visible annotation wins). Default-valued attributes
+     * from metas are skipped.</p>
+     *
+     * <h3>Example</h3>
+     * <pre>{@code
+     * @PreAuthorize(value = "33 % 3 == 0", index = 666)
+     * @Authorize(phase = Phase.BEFORE)   // meta on @PreAuthorize
+     *
+     * Map<String,Object> m = merged.asResolved();
+     * // => { value: "33 % 3 == 0", index: 666, phase: BEFORE }
+     * }</pre>
+     *
+     * @return unmodifiable merged map of attributeName → value
+     */
+    public Map<String, Object> asResolved() {
+        return asResolved(MetaScope.DIRECT_ONLY, CollisionPolicy.KEEP_EXISTING, false);
     }
 
     /**
-     * 🧾 Resolved view for the *visible* annotation (this.getAnnotationType())
-     * AND optionally its meta annotations, merged into a single unqualified map.
+     * 🌐 Resolved view for the visible annotation + <em>all</em> meta-annotations (breadth-first).
      *
-     * <p>Example for {@code @PreAuthorize(...)} meta-annotated with {@code @Authorize}:
-     * result = { value, index } from PreAuthorize (resolved),
-     * plus { phase } from Authorize (its direct meta) if not already present.</p>
+     * <p>Equivalent to {@code asResolved(MetaScope.ALL, KEEP_EXISTING, includeDefaults=false)}.</p>
      *
-     * <p>Keys are plain attribute names. Use {@link CollisionPolicy#KEEP_EXISTING} to
-     * prioritize the visible annotation; other policies are available when names collide.</p>
+     * <h3>Example</h3>
+     * <pre>{@code
+     * // If there are multiple meta levels (A -> B -> C), this collects B and C.
+     * Map<String,Object> m = merged.asResolvedAll();
+     * }</pre>
+     *
+     * @return unmodifiable merged map of attributeName → value
      */
-    public Map<String, Object> toResolvedAttributeMapWithMetas() {
-        return toResolvedAttributeMapWithMetas(MetaScope.DIRECT_ONLY, CollisionPolicy.KEEP_EXISTING, false);
+    public Map<String, Object> asResolvedAll() {
+        return asResolved(MetaScope.ALL, CollisionPolicy.KEEP_EXISTING, true);
     }
 
     /**
-     * Same as {@link #toResolvedAttributeMapWithMetas()}, with controls.
+     * 🧩 Resolved view for the visible annotation plus metas with full control.
      *
-     * @param scope whether to include only the direct meta or all meta levels
-     * @param collisionPolicy how to handle key collisions (same attribute name)
-     * @param includeDefaults include attributes equal to their default values
+     * <p>Starts from {@link #asMap()} (this annotation only) and merges meta-annotation attributes
+     * in breadth-first order (as returned by {@link #metasOf(MetaScope)}).</p>
+     *
+     * <ul>
+     *   <li><b>scope</b> — which meta levels to include ({@code DIRECT_ONLY} or {@code ALL}).</li>
+     *   <li><b>policy</b> — how to handle collisions for the same key:
+     *     <ul>
+     *       <li>{@link CollisionPolicy#KEEP_EXISTING} — keep existing value (visible annotation wins)</li>
+     *       <li>{@link CollisionPolicy#OVERWRITE} — meta value overwrites visible one</li>
+     *     </ul>
+     *   </li>
+     *   <li><b>includeDefaults</b> — whether to include default-valued attributes from metas.</li>
+     * </ul>
+     *
+     * <h3>Examples</h3>
+     * <pre>{@code
+     * // Direct meta only, visible wins (skip meta defaults):
+     * Map<String,Object> m1 = merged.asResolved(MetaScope.DIRECT_ONLY, CollisionPolicy.KEEP_EXISTING, false);
+     *
+     * // All metas, allow overwrite on conflicts, include meta defaults:
+     * Map<String,Object> m2 = merged.asResolved(MetaScope.ALL, CollisionPolicy.OVERWRITE, true);
+     * }</pre>
+     *
+     * @param scope meta-annotation scope to include
+     * @param policy collision policy for same-named attributes
+     * @param includeDefaults include attributes equal to their default values from metas
+     * @return unmodifiable merged map of attributeName → value
      */
-    public Map<String, Object> toResolvedAttributeMapWithMetas(
-            MetaScope scope,
-            CollisionPolicy collisionPolicy,
-            boolean includeDefaults
-    ) {
-        // 1) Start with the resolved map for the *visible* type (this annotation)
-        Map<String, Object> result = new LinkedHashMap<>(toResolvedAttributeMap());
+    public Map<String, Object> asResolved(MetaScope scope, CollisionPolicy policy, boolean includeDefaults) {
+        return merge(asMap(includeDefaults), metasOf(scope), policy, includeDefaults);
+    }
 
-        // 2) Collect meta annotations to include
-        List<MergedAnnotation> metas = switch (scope) {
-            case DIRECT_ONLY
-                    -> getParent().map(List::of).orElse(List.of());
-            case ALL -> {
-                List<MergedAnnotation> flattened = getFlattened();
-                yield flattened.size() <= 1 ? List.of() : flattened.subList(1, flattened.size());
-            }
-        };
+    /**
+     * 🧪 Merges a base attribute map with meta-annotation attribute maps.
+     *
+     * <p>This is the internal workhorse used by {@link #asResolved(MetaScope, CollisionPolicy, boolean)}.
+     * Iterates metas in breadth-first order and applies the given {@link CollisionPolicy}.</p>
+     *
+     * @param base base attributes (usually {@link #asMap()})
+     * @param metas meta-annotations to merge (from {@link #metasOf(MetaScope)})
+     * @param policy collision handling strategy
+     * @param includeDefaults include default-valued meta attributes
+     * @return unmodifiable merged map
+     */
+    private Map<String, Object> merge(
+            Map<String, Object> base, List<MergedAnnotation> metas, CollisionPolicy policy, boolean includeDefaults) {
+        Map<String, Object> result = new LinkedHashMap<>(base);
 
-        // 3) For each meta, add its *own* direct attribute values (or resolved-for-self)
         for (MergedAnnotation meta : metas) {
-            // direct map: respects defaults flag, no alias remap into our type
-            Map<String, Object> metaMap = meta.toAttributeMap(includeDefaults);
-            // You could also use: meta.toResolvedMapFor(meta.getAnnotationType()) if you want
-            // alias-resolution within that meta type itself. Direct map is usually enough here.
+            Map<String, Object> metaMap = meta.asMap(includeDefaults);
             for (Map.Entry<String, Object> entry : metaMap.entrySet()) {
-                String key   = entry.getKey();
-                Object value = entry.getValue();
-
-                switch (collisionPolicy) {
-                    case KEEP_EXISTING -> result.putIfAbsent(key, value);
-                    case OVERWRITE -> result.put(key, value);
-                    case QUALIFY_META_KEY -> {
-                        String unique = key;
-
-                        if (result.containsKey(key)) {
-                            var    type      = meta.getAnnotationType();
-                            String qualified = key + "@" + type.getSimpleName();
-                            int    index     = 0;
-                            while (result.containsKey(unique)) {
-                                unique = qualified + "#" + index++;
-                            }
-                            result.put(unique, value);
-                        }
-
-                        result.put(unique, value);
-                    }
+                switch (policy) {
+                    case KEEP_EXISTING -> result.putIfAbsent(entry.getKey(), entry.getValue());
+                    case OVERWRITE     -> result.put(entry.getKey(), entry.getValue());
                 }
             }
         }
@@ -432,57 +406,31 @@ public class MergedAnnotation {
     }
 
     /**
-     * 🎯 Same concept, but targeted to an arbitrary "visible" type.
-     * Builds the resolved map for {@code targetType} as if it were the visible annotation,
-     * then augments it with meta attributes per the given scope/policy.
+     * 🧭 Selects which meta-annotations to include for merging.
+     *
+     * <p>Returns metas in breadth-first order as produced by {@link #getFlattened()}:
+     * <ul>
+     *   <li>{@link MetaScope#DIRECT_ONLY} — a single-element list with the direct parent (if any).</li>
+     *   <li>{@link MetaScope#ALL} — all meta levels except self; may be empty.</li>
+     * </ul>
+     * </p>
+     *
+     * <h3>Example</h3>
+     * <pre>{@code
+     * List<MergedAnnotation> direct = merged.metasOf(MetaScope.DIRECT_ONLY); // size 0 or 1
+     * List<MergedAnnotation> all    = merged.metasOf(MetaScope.ALL);         // 0..N
+     * }</pre>
+     *
+     * @param scope meta scope selector
+     * @return list of meta-annotations to use for merging (never {@code null})
      */
-    public <A extends Annotation> Map<String, Object> toResolvedAttributeMapForWithMetas(
-            Class<A> targetType,
-            MetaScope scope,
-            CollisionPolicy collisionPolicy,
-            boolean includeDefaults
-    ) {
-        // Start with how targetType looks after full resolve through this merged root
-        Map<String, Object> result = new LinkedHashMap<>(toResolvedMapFor(targetType));
-
-        // Add metas (same selection as above)
-        List<MergedAnnotation> metas = switch (scope) {
+    public List<MergedAnnotation> metasOf(MetaScope scope) {
+        return switch (scope) {
             case DIRECT_ONLY -> getParent().map(List::of).orElse(List.of());
-            case ALL -> {
-                List<MergedAnnotation> flat = getFlattened();
-                yield flat.size() <= 1 ? List.of() : flat.subList(1, flat.size());
-            }
+            case ALL -> getRoot().getFlattened();
         };
-
-        for (MergedAnnotation meta : metas) {
-            Map<String, Object> metaMap = meta.toAttributeMap(includeDefaults);
-            for (Map.Entry<String, Object> e : metaMap.entrySet()) {
-                String key   = e.getKey();
-                Object value = e.getValue();
-                switch (collisionPolicy) {
-                    case KEEP_EXISTING -> result.putIfAbsent(key, value);
-                    case OVERWRITE -> result.put(key, value);
-                    case QUALIFY_META_KEY -> {
-                        String unique = key;
-
-                        if (result.containsKey(key)) {
-                            var    type      = meta.getAnnotationType();
-                            String qualified = key + "@" + type.getSimpleName();
-                            int    index     = 0;
-                            while (result.containsKey(unique)) {
-                                unique = qualified + "#" + index++;
-                            }
-                            result.put(unique, value);
-                        }
-
-                        result.put(unique, value);
-                    }
-                }
-            }
-        }
-
-        return Collections.unmodifiableMap(result);
     }
+
 
     /**
      * 🌀 Synthesize this merged annotation into a runtime proxy.
