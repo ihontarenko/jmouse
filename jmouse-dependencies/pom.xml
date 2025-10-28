@@ -66,6 +66,16 @@
             </dependency>
             <dependency>
                 <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-jdbc</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-jpa</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-el</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>

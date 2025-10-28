@@ -1,4 +1,10 @@
 package org.jmouse.jdbc.errors;
 
-public class NonUniqueResultException {
+/**
+ * 🔁 More than one row when single expected.
+ */
+public final class NonUniqueResultException extends JdbcException {
+    public NonUniqueResultException(String message) {
+        super(message);
+    }
 }

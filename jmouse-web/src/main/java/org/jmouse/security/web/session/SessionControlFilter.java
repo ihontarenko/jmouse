@@ -13,7 +13,7 @@ import java.io.IOException;
 
 public final class SessionControlFilter implements BeanFilter {
 
-    private final SessionRegistry registry;
+    private final SessionRegistry       registry;
     private final SessionInvalidHandler invalidHandler;
 
     public SessionControlFilter(SessionRegistry registry, SessionInvalidHandler invalidHandler) {

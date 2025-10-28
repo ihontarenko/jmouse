@@ -1,6 +1,7 @@
 package org.jmouse.security.web.configuration.configurer;
 
 import org.jmouse.security.session.SessionRegistry;
+import org.jmouse.security.web.configuration.Customizer;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.session.*;
 import org.jmouse.web.http.HttpStatus;
@@ -33,8 +34,9 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
         return this;
     }
 
-    public SessionCreationPolicyConfigurer policy() {
-        return new SessionCreationPolicyConfigurer();
+    public SessionManagementConfigurer<B> policy(Customizer<SessionCreationPolicyConfigurer> customizer) {
+        customizer.customize(new SessionCreationPolicyConfigurer());
+        return this;
     }
 
     public SessionManagementConfigurer<B> rewrite(boolean rewrite) {
@@ -42,8 +44,9 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
         return this;
     }
 
-    public URLRewriteConfigurer rewrite() {
-        return new URLRewriteConfigurer();
+    public SessionManagementConfigurer<B> rewrite(Customizer<URLRewriteConfigurer> customizer) {
+        customizer.customize(new URLRewriteConfigurer());
+        return this;
     }
 
     public SessionManagementConfigurer<B> sessionAuthenticationStrategy(SessionAuthenticateHandler strategy) {
@@ -112,14 +115,6 @@ public final class SessionManagementConfigurer<B extends HttpSecurityBuilder<B>>
         }
 
         return compose(chain);
-    }
-
-    private List<SessionAuthenticateHandler> sessionControlChain(SessionRegistry registry, int maxSessions) {
-        List<SessionAuthenticateHandler> chain = new ArrayList<>();
-        chain.add(new ChangeSessionIdAuthenticateHandler());
-        chain.add(new SessionExpirationAuthenticateHandler(maxSessions, registry)); // твій клас
-        chain.add(new RegisterNewSessionAuthenticateHandler(registry));
-        return chain;
     }
 
     private SessionAuthenticateHandler compose(List<SessionAuthenticateHandler> chain) {

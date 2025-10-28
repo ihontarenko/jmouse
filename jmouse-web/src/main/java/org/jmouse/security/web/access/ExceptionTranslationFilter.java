@@ -41,8 +41,8 @@ public class ExceptionTranslationFilter implements BeanFilter {
 
         try {
             chain.doFilter(request, response);
-        } catch (AuthorizationException accessDeniedException) {
-            failureHandler.onFailure(request, response, accessDeniedException);
+        } catch (AuthorizationException authorizationException) {
+            failureHandler.onFailure(request, response, authorizationException);
         } catch (AuthenticationException authenticationException) {
             SecurityContextHolder.clearContext();
             if (requestCache != null) {

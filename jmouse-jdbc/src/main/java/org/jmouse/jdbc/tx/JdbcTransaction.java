@@ -1,4 +1,16 @@
 package org.jmouse.jdbc.tx;
 
-public class JdbcTransaction {
+/**
+ * 💼 Minimal JDBC transaction contract.
+ */
+public interface JdbcTransaction {
+
+    void begin();
+
+    void commit();
+
+    void rollback();
+
+    boolean isActive();
+
 }

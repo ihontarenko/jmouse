@@ -10,11 +10,11 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jmouse-jdbc</artifactId>
+    <artifactId>jmouse-jpa</artifactId>
     <packaging>jar</packaging>
-    <name>jMouse - JDBC</name>
-    <description>jMouse Framework - JDBC</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-jdbc</url>
+    <name>jMouse - JPA</name>
+    <description>jMouse Framework - JPA</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-jpa</url>
 
     <licenses>
         <license>
@@ -34,7 +34,7 @@
     <scm>
         <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
         <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-jdbc</url>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-jpa</url>
     </scm>
 
     <properties>

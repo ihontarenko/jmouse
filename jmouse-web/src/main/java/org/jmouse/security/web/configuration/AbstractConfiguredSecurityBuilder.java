@@ -68,6 +68,7 @@ public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractCon
      * @param configurer configurer to add
      */
     public <C extends SecurityConfigurer<T, B>> void addConfigurer(C configurer) {
+        this.configurers.removeIf(configurer.getClass()::isInstance);
         this.configurers.add(configurer);
     }
 

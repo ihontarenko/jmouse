@@ -54,6 +54,14 @@ public class SecurityConfiguration {
                 )
         );
 
+        http.exceptionHandling(e -> e
+                .accessDeniedHandler((request, response, exception) -> {
+                    response.getWriter().println("forbidden!");
+                    response.getWriter().println(exception.getMessage());
+                    response.setStatus(403);
+                })
+        );
+
         return http.build();
     }
 
