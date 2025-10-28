@@ -4,21 +4,22 @@ import org.jmouse.jdbc.errors.JdbcException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.function.Supplier;
 
 /**
  * 🔁 Local (resource) transaction over a single {@link Connection}.
  * Respects {@link ConnectionBinding} if already bound.
  */
 public final class LocalJdbcTransaction implements JdbcTransaction {
-    private final ConnectionBinding binding;
-    private final java.util.function.Supplier<Connection> connectionSupplier;
+    private final ConnectionBinding    binding;
+    private final Supplier<Connection> supplier;
 
     private Connection owned; // only if we created it
     private boolean active;
 
-    public LocalJdbcTransaction(ConnectionBinding binding, java.util.function.Supplier<Connection> connectionSupplier) {
+    public LocalJdbcTransaction(ConnectionBinding binding, java.util.function.Supplier<Connection> supplier) {
         this.binding = binding;
-        this.connectionSupplier = connectionSupplier;
+        this.supplier = supplier;
     }
 
     @Override public void begin() {
@@ -26,7 +27,7 @@ public final class LocalJdbcTransaction implements JdbcTransaction {
         try {
             Connection connection = binding.currentConnection();
             if (connection == null) {
-                connection = connectionSupplier.get();
+                connection = supplier.get();
                 ThreadLocalConnectionBinding.ensureTxMode(connection);
                 binding.bind(connection);
                 owned = connection;
