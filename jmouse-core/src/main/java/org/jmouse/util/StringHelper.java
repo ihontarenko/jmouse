@@ -2,10 +2,7 @@ package org.jmouse.util;
 
 import java.io.InputStream;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class StringHelper {
 
@@ -98,6 +95,19 @@ public class StringHelper {
 
     public static String unquote(String value) {
         return !isQuoted(value) ? value : value.substring(1, value.length() - 1);
+    }
+
+    public static String getString(Map<String, ?> values, String... keys) {
+        String stringValue = null;
+
+        for (String key : keys) {
+            if (values.containsKey(key)) {
+                stringValue = String.valueOf(values.get(key));
+                break;
+            }
+        }
+
+        return stringValue;
     }
 
 }
