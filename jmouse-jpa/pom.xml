@@ -12,8 +12,8 @@
 
     <artifactId>jmouse-jpa</artifactId>
     <packaging>jar</packaging>
-    <name>jMouse - JPA</name>
-    <description>jMouse Framework - JPA</description>
+    <name>jMouse - JDBC</name>
+    <description>jMouse Framework - JDBC/JTA/JPA</description>
     <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-jpa</url>
 
     <licenses>

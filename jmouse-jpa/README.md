@@ -1,1 +1,1 @@
-# jmouse-jpa
+# jmouse-jdbc
