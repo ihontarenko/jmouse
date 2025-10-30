@@ -1,49 +1,31 @@
 package org.jmouse.tx;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public final class TransactionSynchronizations {
 
-    public static final int STATUS_COMMITTED   = 0;
-    public static final int STATUS_ROLLED_BACK = 1;
-    public static final int STATUS_UNKNOWN     = 2;
+    public static final int STATUS_COMMITTED   = TransactionSynchronization.STATUS_COMMITTED;
+    public static final int STATUS_ROLLED_BACK = TransactionSynchronization.STATUS_ROLLED_BACK;
+    public static final int STATUS_UNKNOWN     = TransactionSynchronization.STATUS_UNKNOWN;
 
-    private static final ThreadLocal<List<TransactionSynchronization>> SYNCHRONIZATIONS =
-            ThreadLocal.withInitial(ArrayList::new);
-
-    private TransactionSynchronizations() {}
-
-    public static void register(TransactionSynchronization synchronization) {
-        SYNCHRONIZATIONS.get().add(synchronization);
+    private TransactionSynchronizations() {
     }
 
-    public static void clear() {
-        SYNCHRONIZATIONS.remove();
-    }
-
-    public static void beforeCommit(boolean readOnly) {
-        for (TransactionSynchronization synchronization : SYNCHRONIZATIONS.get()) {
-            synchronization.beforeCommit(readOnly);
+    public static void beforeCommit() {
+        for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
+            synchronization.beforeCommit(
+                    TransactionSynchronizationManager.isCurrentTransactionReadOnly()
+            );
         }
     }
 
     public static void beforeCompletion() {
-        for (TransactionSynchronization synchronization : SYNCHRONIZATIONS.get()) {
+        for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
             synchronization.beforeCompletion();
         }
     }
 
-    public static void afterCommit() {
-        for (TransactionSynchronization synchronization : SYNCHRONIZATIONS.get()) {
-            synchronization.afterCommit();
-        }
-    }
-
     public static void afterCompletion(int status) {
-        for (TransactionSynchronization synchronization : SYNCHRONIZATIONS.get()) {
+        for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
             synchronization.afterCompletion(status);
         }
-        clear();
     }
 }

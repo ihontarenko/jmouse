@@ -1,4 +1,4 @@
-package org.jmouse.tx.errors;
+package org.jmouse.tx;
 
 public class TransactionException extends RuntimeException {
 

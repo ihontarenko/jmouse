@@ -1,8 +1,5 @@
 package org.jmouse.tx;
 
-/**
- * ⚙️ Live transaction state for current thread.
- */
 public interface TransactionStatus {
 
     boolean isNew();
@@ -13,7 +10,7 @@ public interface TransactionStatus {
 
     void setRollbackOnly();
 
-    Object getSuspended();
+    Object getSuspendedResources();
 
     Object getSavepoint();
 
@@ -21,32 +18,75 @@ public interface TransactionStatus {
 
     Object getResource();
 
-    /**
-     * 📦 basic impl.
-     */
-    final class Simple implements TransactionStatus {
-        private final boolean isNew;
-        private boolean completed;
-        private boolean rollbackOnly;
-        private final Object resource;
-        private final Object suspended;
-        private Object savepoint;
+    void markCompleted();
 
-        public Simple(boolean isNew, Object resource, Object suspended) {
+    default boolean hasSavepoint() {
+        return getSavepoint() != null;
+    }
+
+    final class Simple implements TransactionStatus {
+
+        private final boolean isNew;
+        private final Object  resource;
+        private final Object  suspended;
+        private       boolean completed;
+        private       boolean rollbackOnly;
+        private       Object  savepoint;
+
+        public Simple(String name, boolean isNew, Object resource, Object suspended) {
             this.isNew = isNew;
             this.resource = resource;
             this.suspended = suspended;
         }
 
-        @Override public boolean isNew() { return isNew; }
-        @Override public boolean isCompleted() { return completed; }
-        @Override public boolean isRollbackOnly() { return rollbackOnly; }
-        @Override public void setRollbackOnly() { this.rollbackOnly = true; }
-        @Override public Object getSuspended() { return suspended; }
-        @Override public Object getSavepoint() { return savepoint; }
-        @Override public void setSavepoint(Object savepoint) { this.savepoint = savepoint; }
-        @Override public Object getResource() { return resource; }
+        public Simple(boolean isNew, Object resource, Object suspended) {
+            this(null, isNew, resource, suspended);
+        }
 
-        public void markCompleted() { this.completed = true; }
+        @Override
+        public boolean isNew() {
+            return isNew;
+        }
+
+        @Override
+        public boolean isCompleted() {
+            return completed;
+        }
+
+        @Override
+        public boolean isRollbackOnly() {
+            return rollbackOnly;
+        }
+
+        @Override
+        public void setRollbackOnly() {
+            this.rollbackOnly = true;
+        }
+
+        @Override
+        public Object getSuspendedResources() {
+            return suspended;
+        }
+
+        @Override
+        public Object getSavepoint() {
+            return savepoint;
+        }
+
+        @Override
+        public void setSavepoint(Object savepoint) {
+            this.savepoint = savepoint;
+        }
+
+        @Override
+        public Object getResource() {
+            return resource;
+        }
+
+        @Override
+        public void markCompleted() {
+            this.completed = true;
+        }
+
     }
 }

@@ -19,6 +19,18 @@ public interface TransactionDefinition {
     int ISOLATION_REPEATABLE_READ  = 4;
     int ISOLATION_SERIALIZABLE     = 8;
 
+    int TIMEOUT_DEFAULT = -1;
+
+    static TransactionDefinition withDefaults() {
+        return new Simple(
+                PROPAGATION_REQUIRED,
+                ISOLATION_DEFAULT,
+                TIMEOUT_DEFAULT,
+                false,
+                null
+        );
+    }
+
     int getPropagation();
 
     int getIsolation();

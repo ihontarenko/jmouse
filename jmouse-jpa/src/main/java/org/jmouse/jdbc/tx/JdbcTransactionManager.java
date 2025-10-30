@@ -1,64 +1,170 @@
 package org.jmouse.jdbc.tx;
 
-import org.jmouse.tx.*;
-import org.jmouse.tx.errors.TransactionException;
+import org.jmouse.tx.AbstractTransactionManager;
+import org.jmouse.tx.TransactionDefinition;
+import org.jmouse.tx.TransactionStatus;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.Savepoint;
+import java.sql.SQLException;
 
-public class JdbcTransactionManager extends TransactionManager.Support {
+/**
+ * 💾 Plain JDBC transaction manager (single DataSource) with savepoint support.
+ *
+ * <p>One JDBC Connection per thread. No ConnectionHolder abstraction (yet),
+ * але семантика дуже близька до Spring's DataSourceTransactionManager.</p>
+ */
+public class JdbcTransactionManager extends AbstractTransactionManager {
 
     private final DataSource dataSource;
-    private final Object     resourceKey;
+
+    /**
+     * One tx-object per thread.
+     */
+    private final ThreadLocal<JdbcTransactionObject> current = new ThreadLocal<>();
 
     public JdbcTransactionManager(DataSource dataSource) {
         this.dataSource = dataSource;
-        this.resourceKey = dataSource; // можна завернути в ключ
     }
 
     @Override
-    public TransactionStatus begin(TransactionDefinition definition) {
+    protected Object doGetTransaction() {
+        JdbcTransactionObject existing = current.get();
+        return (existing != null ? existing : new JdbcTransactionObject());
+    }
+
+    @Override
+    protected boolean isExisting(Object txObject) {
+        JdbcTransactionObject jdbc = (JdbcTransactionObject) txObject;
+        return jdbc.connection != null;
+    }
+
+    @Override
+    protected void doBegin(Object txObject, TransactionDefinition definition) {
+        JdbcTransactionObject jdbc = (JdbcTransactionObject) txObject;
         try {
-            Connection connection    = dataSource.getConnection();
-            boolean    auto = connection.getAutoCommit();
-            connection.setAutoCommit(false);
+            Connection con = dataSource.getConnection();
+            con.setAutoCommit(false);
 
-            JtaResourceContext.bind(resourceKey, connection);
+            // isolation?
+            if (definition.getIsolation() != TransactionDefinition.ISOLATION_DEFAULT) {
+                con.setTransactionIsolation(definition.getIsolation());
+            }
 
-            var status = new TransactionStatus.Simple(true, connection);
+            // read-only?
+            if (definition.isReadOnly()) {
+                con.setReadOnly(true);
+            }
 
-            TransactionSynchronizations.beforeCommit(definition.isReadOnly());
-
-            return status;
-        } catch (Exception e) {
-            throw new IllegalStateException("Cannot start JDBC transaction", e);
+            jdbc.connection = con;
+            current.set(jdbc);
+        } catch (SQLException e) {
+            throw new IllegalStateException("Cannot open JDBC transaction", e);
         }
     }
 
     @Override
     protected void doCommit(TransactionStatus status) {
-        if (status.getResource() instanceof Connection connection) {
-            try (connection; connection) {
-                connection.commit();
-            } catch (Exception e) {
-                throw new TransactionException("Commit failed", e);
-            } finally {
-                JtaResourceContext.unbind(resourceKey);
-            }
+        JdbcTransactionObject jdbc = obtainCurrent();
+        if (jdbc.connection == null) {
+            return;
+        }
+        try {
+            jdbc.connection.commit();
+        } catch (SQLException e) {
+            throw new IllegalStateException("JDBC commit failed", e);
+        } finally {
+            closeAndClear(jdbc);
         }
     }
 
     @Override
     protected void doRollback(TransactionStatus status) {
-        if (status.getResource() instanceof Connection connection) {
-            try (connection) {
-                connection.rollback();
-            } catch (Exception e) {
-                throw new TransactionException("Rollback failed", e);
-            } finally {
-                JtaResourceContext.unbind(resourceKey);
-            }
+        JdbcTransactionObject jdbc = obtainCurrent();
+        if (jdbc.connection == null) {
+            return;
+        }
+        try {
+            jdbc.connection.rollback();
+        } catch (SQLException e) {
+            throw new IllegalStateException("JDBC rollback failed", e);
+        } finally {
+            closeAndClear(jdbc);
         }
     }
 
+    @Override
+    protected Object doSuspend(Object currentTx) {
+        // For JDBC it's basically “detach from thread”
+        JdbcTransactionObject jdbc = (JdbcTransactionObject) currentTx;
+        current.remove();
+        return jdbc;
+    }
+
+    @Override
+    protected void doResume(Object currentTx, Object suspended) {
+        current.set((JdbcTransactionObject) suspended);
+    }
+
+    // ⭐ savepoints
+    @Override
+    protected Object createSavepoint(Object resource) {
+        JdbcTransactionObject jdbc = (JdbcTransactionObject) resource;
+        if (jdbc.connection == null) {
+            throw new IllegalStateException("No JDBC connection for savepoint");
+        }
+        try {
+            return jdbc.connection.setSavepoint();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Cannot create JDBC savepoint", e);
+        }
+    }
+
+    @Override
+    protected void rollbackToSavepoint(Object resource, Object savepoint) {
+        JdbcTransactionObject jdbc = (JdbcTransactionObject) resource;
+        try {
+            jdbc.connection.rollback((Savepoint) savepoint);
+        } catch (SQLException e) {
+            throw new IllegalStateException("Cannot rollback to JDBC savepoint", e);
+        }
+    }
+
+    @Override
+    protected void releaseSavepoint(Object resource, Object savepoint) {
+        JdbcTransactionObject jdbc = (JdbcTransactionObject) resource;
+        try {
+            jdbc.connection.releaseSavepoint((Savepoint) savepoint);
+        } catch (SQLException e) {
+            // часто можна ігнорувати
+        }
+    }
+
+    private JdbcTransactionObject obtainCurrent() {
+        JdbcTransactionObject jdbc = current.get();
+        if (jdbc == null) {
+            jdbc = new JdbcTransactionObject();
+            current.set(jdbc);
+        }
+        return jdbc;
+    }
+
+    private void closeAndClear(JdbcTransactionObject jdbc) {
+        try {
+            jdbc.connection.setAutoCommit(true);
+            jdbc.connection.close();
+        } catch (SQLException ignored) {
+        } finally {
+            jdbc.connection = null;
+            current.remove();
+        }
+    }
+
+    /**
+     * 📦 Our minimal tx object (similar to Spring's DataSourceTransactionObject).
+     */
+    private static class JdbcTransactionObject {
+        Connection connection;
+    }
 }

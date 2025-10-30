@@ -1,177 +1,181 @@
 package org.jmouse.tx;
 
-import java.util.List;
-import java.util.Objects;
-
-/**
- * 🧠 Base transaction manager with propagation logic (no XA).
- */
-public abstract class AbstractTransactionManager implements TransactionManager {
+public abstract class AbstractTransactionManager implements FrameworkTransactionManager {
 
     @Override
-    public final TransactionStatus begin(TransactionDefinition def) {
-        Objects.requireNonNull(def, "definition");
+    public final TransactionStatus begin(TransactionDefinition definition) {
+        TransactionDefinition transactionDefinition = (
+                definition != null ? definition : TransactionDefinition.withDefaults()
+        );
 
-        TransactionStatus current = TransactionContext.current();
+        Object  object   = doGetTransaction();
+        boolean existing = isExisting(object);
 
-        // 1) if there's already a tx in this thread
-        if (current != null) {
-            return handleExisting(def, current);
+        if (existing) {
+            return handleExistingTransaction(transactionDefinition, object);
         }
 
-        // 2) no current tx
-        return startNew(def, null);
-    }
-
-    private TransactionStatus handleExisting(TransactionDefinition def, TransactionStatus current) {
-        return switch (def.getPropagation()) {
-            case TransactionDefinition.PROPAGATION_REQUIRED,
-                 TransactionDefinition.PROPAGATION_SUPPORTS,
-                 TransactionDefinition.PROPAGATION_MANDATORY -> {
-                // join existing
-                yield current;
-            }
-            case TransactionDefinition.PROPAGATION_REQUIRES_NEW -> {
-                // suspend current, start new
-                Object suspended = suspend(current);
-                yield startNew(def, suspended);
-            }
-            case TransactionDefinition.PROPAGATION_NOT_SUPPORTED -> {
-                // suspend and return 'no tx'
-                Object suspended2 = suspend(current);
-                // represent "no tx" as status with isNew=false and resource=null
-                TransactionStatus.Simple s = new TransactionStatus.Simple(false, null, suspended2);
-                TransactionContext.set(s);
-                yield s;
-            }
-            case TransactionDefinition.PROPAGATION_NEVER -> {
-                throw new IllegalStateException("Transaction exists but propagation is NEVER");
-            }
-            case TransactionDefinition.PROPAGATION_NESTED -> {
-                // create savepoint on current resource (if supported)
-                Object sp = createSavepoint(current.getResource());
-                current.setSavepoint(sp);
-                yield current;
-            }
-            default -> throw new IllegalArgumentException("Unknown propagation: " + def.getPropagation());
-        };
-    }
-
-    private TransactionStatus startNew(TransactionDefinition def, Object suspended) {
-        Object resource = doBegin(def);
-        TransactionStatus.Simple status = new TransactionStatus.Simple(true, resource, suspended);
-        TransactionContext.set(status);
-        return status;
+        return handleNewTransaction(transactionDefinition, object);
     }
 
     @Override
     public final void commit(TransactionStatus status) {
-        // already completed?
-        if (status.isCompleted()) {
-            return;
-        }
-
-        // nested?
-        if (status.getSavepoint() != null) {
-            // nested commit is no-op
-            TransactionContext.clear();
-            return;
-        }
-
-        // normal tx
         if (status.isRollbackOnly()) {
             rollback(status);
             return;
         }
 
-        // beforeCommit callbacks
-        List<TransactionSynchronization> syncs = TransactionContext.synchronizations();
-        for (var s : syncs) {
-            s.beforeCommit(false);
-        }
-        for (var s : syncs) {
-            s.beforeCompletion();
-        }
+        TransactionSynchronizations.beforeCommit();
+        TransactionSynchronizations.beforeCompletion();
 
-        doCommit(status);
-
-        if (status instanceof TransactionStatus.Simple s) {
-            s.markCompleted();
-        }
-        TransactionContext.clear();
-
-        // afterCommit callbacks
-        for (var s : syncs) {
-            s.afterCommit();
-            s.afterCompletion(TransactionSynchronizations.STATUS_COMMITTED);
+        if (!status.isNew() && status.hasSavepoint()) {
+            releaseSavepoint(status.getResource(), status.getSavepoint());
+        } else if (status.isNew()) {
+            doCommit(status);
         }
 
-        // resume suspended if any
-        resumeIfNecessary(status);
+        status.markCompleted();
+
+        if (status.getSuspendedResources() != null) {
+            doResume(status.getResource(), status.getSuspendedResources());
+        }
+
+        TransactionSynchronizations.afterCompletion(TransactionSynchronizations.STATUS_COMMITTED);
+        TransactionSynchronizationManager.clear();
     }
 
     @Override
     public final void rollback(TransactionStatus status) {
-        // nested rollback => rollback to savepoint
-        if (status.getSavepoint() != null) {
-            rollbackToSavepoint(status.getResource(), status.getSavepoint());
-            TransactionContext.clear();
-            resumeIfNecessary(status);
-            return;
+        TransactionSynchronizations.beforeCompletion();
+
+        if (!status.isNew() && status.hasSavepoint()) {
+            rollbackSavepoint(status.getResource(), status.getSavepoint());
+        } else if (status.isNew()) {
+            doRollback(status);
+        } else {
+            status.setRollbackOnly();
         }
 
-        doRollback(status);
+        status.markCompleted();
 
-        if (status instanceof TransactionStatus.Simple s) {
-            s.markCompleted();
-        }
-        TransactionContext.clear();
-
-        // synchronizations
-        List<TransactionSynchronization> syncs = TransactionContext.synchronizations();
-        for (var s : syncs) {
-            s.afterCompletion(TransactionSynchronizations.STATUS_ROLLED_BACK);
+        if (status.getSuspendedResources() != null) {
+            doResume(status.getResource(), status.getSuspendedResources());
         }
 
-        // resume suspended if any
-        resumeIfNecessary(status);
+        TransactionSynchronizations.afterCompletion(TransactionSynchronizations.STATUS_ROLLED_BACK);
+        TransactionSynchronizationManager.clear();
     }
 
-    private void resumeIfNecessary(TransactionStatus status) {
-        Object suspended = status.getSuspended();
-        if (suspended != null) {
-            resume(suspended);
-        }
+    private TransactionStatus handleNewTransaction(TransactionDefinition definition, Object object) {
+        return switch (definition.getPropagation()) {
+            case TransactionDefinition.PROPAGATION_REQUIRED,
+                 TransactionDefinition.PROPAGATION_REQUIRES_NEW,
+                 TransactionDefinition.PROPAGATION_NESTED
+                    -> newTransaction(definition, object, true, null);
+
+            case TransactionDefinition.PROPAGATION_SUPPORTS,
+                 TransactionDefinition.PROPAGATION_NEVER,
+                 TransactionDefinition.PROPAGATION_NOT_SUPPORTED -> emptyTransaction(definition);
+
+            case TransactionDefinition.PROPAGATION_MANDATORY ->
+                    throw new IllegalStateException("No existing transaction for PROPAGATION_MANDATORY");
+
+            default -> throw new IllegalArgumentException("Unsupported propagation: " + definition.getPropagation());
+        };
     }
 
-    // --- hooks for concrete impls ---
+    private TransactionStatus handleExistingTransaction(TransactionDefinition definition, Object object) {
+        return switch (definition.getPropagation()) {
+            case TransactionDefinition.PROPAGATION_REQUIRED,
+                 TransactionDefinition.PROPAGATION_SUPPORTS,
+                 TransactionDefinition.PROPAGATION_MANDATORY
+                    -> joinTransaction(definition, object);
 
-    /**
-     * Start underlying resource transaction.
-     */
-    protected abstract Object doBegin(TransactionDefinition def);
+            case TransactionDefinition.PROPAGATION_REQUIRES_NEW
+                    -> newTransaction(definition, object, true, doSuspend(object));
+
+            case TransactionDefinition.PROPAGATION_NOT_SUPPORTED
+                    -> suspendedTransaction(definition, doSuspend(object));
+
+            case TransactionDefinition.PROPAGATION_NEVER ->
+                    throw new IllegalStateException("Existing transaction found for PROPAGATION_NEVER");
+
+            case TransactionDefinition.PROPAGATION_NESTED -> {
+                Object savepoint = null;
+
+                try {
+                    savepoint = createSavepoint(object);
+                } catch (UnsupportedOperationException ignored) { }
+
+                if (savepoint != null) {
+                    TransactionSynchronizationManager.initialize(definition);
+                    TransactionStatus status = new TransactionStatus.Simple(
+                            definition.getName(), false, object, null);
+                    status.setSavepoint(savepoint);
+                    yield status;
+                }
+
+                yield joinTransaction(definition, object);
+            }
+
+            default -> throw new IllegalArgumentException(
+                    "UNSUPPORTED PROPAGATION: " + definition.getPropagation());
+        };
+    }
+
+    private TransactionStatus newTransaction(
+            TransactionDefinition definition,
+            Object object,
+            boolean newTransaction,
+            Object suspended
+    ) {
+        TransactionSynchronizationManager.initialize(definition);
+
+        doBegin(object, definition);
+
+        return new TransactionStatus.Simple(definition.getName(), newTransaction, object, suspended);
+    }
+
+    private TransactionStatus joinTransaction(TransactionDefinition definition, Object object) {
+        return newTransaction(definition, object, false, null);
+    }
+
+    private TransactionStatus emptyTransaction(TransactionDefinition definition) {
+        return newTransaction(definition, null, false, null);
+    }
+
+    private TransactionStatus suspendedTransaction(TransactionDefinition definition, Object suspended) {
+        return newTransaction(definition, null, false, suspended);
+    }
+
+    protected abstract Object doGetTransaction();
+
+    protected abstract boolean isExisting(Object object);
+
+    protected abstract void doBegin(Object object, TransactionDefinition definition);
 
     protected abstract void doCommit(TransactionStatus status);
 
     protected abstract void doRollback(TransactionStatus status);
 
-    /**
-     * Suspend underlying resource(s) and return handle.
-     */
-    protected abstract Object suspend(TransactionStatus current);
+    protected Object doSuspend(Object current) {
+        throw new UnsupportedOperationException("SUSPEND NOT SUPPORTED BY: " + getClass().getName());
+    }
 
-    /**
-     * Resume previously suspended resource(s).
-     */
-    protected abstract void resume(Object suspended);
+    protected void doResume(Object current, Object suspended) {
+        throw new UnsupportedOperationException("RESUME NOT SUPPORTED BY: " + getClass().getName());
+    }
 
-    /**
-     * Create savepoint on underlying resource if supported.
-     */
-    protected abstract Object createSavepoint(Object resource);
+    protected Object createSavepoint(Object resource) {
+        throw new UnsupportedOperationException("SAVE-POINTS NOT SUPPORTED BY: " + getClass().getName());
+    }
 
-    /**
-     * Roll back to previously created savepoint.
-     */
-    protected abstract void rollbackToSavepoint(Object resource, Object savepoint);
+    protected void rollbackSavepoint(Object resource, Object savepoint) {
+        throw new UnsupportedOperationException("SAVE-POINTS NOT SUPPORTED BY: " + getClass().getName());
+    }
+
+    protected void releaseSavepoint(Object resource, Object savepoint) {
+
+    }
+
 }
