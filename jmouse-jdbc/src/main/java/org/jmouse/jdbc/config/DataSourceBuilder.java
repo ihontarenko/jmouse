@@ -59,8 +59,8 @@ public final class DataSourceBuilder {
             if (initialContext.lookup(name) instanceof DataSource dataSource) {
                 return dataSource;
             }
-        } catch (Throwable ignored) {
-            return null;
-        }
+        } catch (Throwable ignored) { }
+
+        return null;
     }
 }

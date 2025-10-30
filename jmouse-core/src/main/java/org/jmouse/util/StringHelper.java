@@ -97,6 +97,26 @@ public class StringHelper {
         return !isQuoted(value) ? value : value.substring(1, value.length() - 1);
     }
 
+    public static String toCamel(String value) {
+        StringBuilder builder    = new StringBuilder(value.length());
+        boolean       upperCased = false;
+
+        for (char character : value.toCharArray()) {
+            if (character == '_' || character == ' ') {
+                upperCased = true;
+                continue;
+            }
+            builder.append(
+                    upperCased
+                            ? Character.toUpperCase(character)
+                            : Character.toLowerCase(character)
+            );
+            upperCased = false;
+        }
+
+        return builder.toString();
+    }
+
     public static String getString(Map<String, ?> values, String... keys) {
         String stringValue = null;
 

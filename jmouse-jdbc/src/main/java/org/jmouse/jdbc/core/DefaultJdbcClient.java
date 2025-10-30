@@ -1,5 +1,6 @@
 package org.jmouse.jdbc.core;
 
+import org.jmouse.jdbc.core.mapping.RowMapper;
 import org.jmouse.jdbc.errors.EmptyResultException;
 import org.jmouse.jdbc.errors.NonUniqueResultException;
 import org.jmouse.jdbc.spi.SQLExceptionTranslator;
@@ -20,14 +21,14 @@ import java.util.Optional;
  */
 public final class DefaultJdbcClient implements JdbcClient {
 
-    private final DataSource             ds;
+    private final DataSource             dataSource;
     private final ConnectionBinding      binding;
-    private final SQLExceptionTranslator tr;
+    private final SQLExceptionTranslator exceptionTranslator;
 
-    public DefaultJdbcClient(DataSource ds, ConnectionBinding binding, SQLExceptionTranslator translator) {
-        this.ds = ds;
+    public DefaultJdbcClient(DataSource dataSource, ConnectionBinding binding, SQLExceptionTranslator translator) {
+        this.dataSource = dataSource;
         this.binding = binding;
-        this.tr = translator;
+        this.exceptionTranslator = translator;
     }
 
     // -------------- Positional
@@ -123,7 +124,7 @@ public final class DefaultJdbcClient implements JdbcClient {
                 return ps.executeBatch();
             }
         } catch (SQLException e) {
-            throw tr.translate("batch", sql, e);
+            throw exceptionTranslator.translate("batch", sql, e);
         } finally {
             if (close) closeQuietly(c);
         }
@@ -151,7 +152,7 @@ public final class DefaultJdbcClient implements JdbcClient {
                 return ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw tr.translate("update", sql.text(), e);
+            throw exceptionTranslator.translate("update", sql.text(), e);
         } finally {
             if (close) closeQuietly(c);
         }
@@ -173,7 +174,7 @@ public final class DefaultJdbcClient implements JdbcClient {
                 return updated;
             }
         } catch (SQLException e) {
-            throw tr.translate("updateReturningKey", sql.text(), e);
+            throw exceptionTranslator.translate("updateReturningKey", sql.text(), e);
         } finally {
             if (close) closeQuietly(c);
         }
@@ -194,7 +195,7 @@ public final class DefaultJdbcClient implements JdbcClient {
                 }
             }
         } catch (SQLException e) {
-            throw tr.translate("query", sql.text(), e);
+            throw exceptionTranslator.translate("query", sql.text(), e);
         } finally {
             if (close) closeQuietly(c);
         }
@@ -207,7 +208,7 @@ public final class DefaultJdbcClient implements JdbcClient {
     private Connection currentOrAcquire() throws SQLException {
         Connection bound = binding.currentConnection();
         if (bound != null) return bound;
-        Connection c = ds.getConnection();
+        Connection c = dataSource.getConnection();
         return c; // caller closes only if owned — simplified via flag; here we rely on try-with-resource per statement
     }
 

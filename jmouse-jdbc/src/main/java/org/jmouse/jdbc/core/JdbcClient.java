@@ -1,7 +1,8 @@
 package org.jmouse.jdbc.core;
 
+import org.jmouse.jdbc.core.mapping.RowMapper;
+
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**

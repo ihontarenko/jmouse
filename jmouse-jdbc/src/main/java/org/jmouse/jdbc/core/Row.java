@@ -1,5 +1,7 @@
 package org.jmouse.jdbc.core;
 
+import org.jmouse.jdbc.core.mapping.ColumnMapper;
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;

@@ -1,5 +1,6 @@
 package org.jmouse.jdbc.core;
 
+import org.jmouse.jdbc.core.mapping.RowMapper;
 import org.jmouse.jdbc.errors.EmptyResultException;
 import org.jmouse.jdbc.errors.NonUniqueResultException;
 import org.jmouse.jdbc.spi.SQLExceptionTranslator;

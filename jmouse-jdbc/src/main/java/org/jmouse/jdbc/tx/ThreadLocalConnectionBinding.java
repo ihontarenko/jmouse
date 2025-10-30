@@ -11,8 +11,16 @@ public final class ThreadLocalConnectionBinding implements ConnectionBinding {
 
     private static final ThreadLocal<Connection> THREAD_LOCAL = new ThreadLocal<>();
 
-    public static void ensureTxMode(Connection c) throws SQLException {
-        if (c.getAutoCommit()) c.setAutoCommit(false);
+    public static void autoCommitDisable(Connection connection) throws SQLException {
+        if (connection.getAutoCommit()) {
+            connection.setAutoCommit(false);
+        }
+    }
+
+    public static void autoCommitEnable(Connection connection) throws SQLException {
+        if (!connection.getAutoCommit()) {
+            connection.setAutoCommit(true);
+        }
     }
 
     @Override

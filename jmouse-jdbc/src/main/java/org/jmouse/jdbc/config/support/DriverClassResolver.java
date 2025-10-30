@@ -8,6 +8,15 @@ import org.jmouse.jdbc.config.DataSourceProperties;
  */
 public final class DriverClassResolver {
 
+    public static final String JDBC_MARIADB           = "jdbc:mariadb:";
+    public static final String MARIADB_JDBC_DRIVER    = "org.mariadb.jdbc.Driver";
+    public static final String JDBC_H2                = "jdbc:h2:";
+    public static final String H2_JDBC_DRIVER         = "org.h2.Driver";
+    public static final String JDBC_MYSQL             = "jdbc:mysql:";
+    public static final String MYSQL_JDBC_DRIVER      = "com.mysql.cj.jdbc.Driver";
+    public static final String JDBC_POSTGRESQL        = "jdbc:postgresql:";
+    public static final String POSTGRESQL_JDBC_DRIVER = "org.postgresql.Driver";
+
     public static void ensureDriverLoaded(DataSourceProperties sourceProperties) {
         if (sourceProperties.driverClassName != null && !sourceProperties.driverClassName.isBlank()) {
             try {
@@ -19,14 +28,14 @@ public final class DriverClassResolver {
         }
         // Optional: known URL hints (kept tiny and non-binding)
         if (sourceProperties.url != null) {
-            if (sourceProperties.url.startsWith("jdbc:postgresql:")) {
-                tryLoad("org.postgresql.Driver");
-            } else if (sourceProperties.url.startsWith("jdbc:mysql:")) {
-                tryLoad("com.mysql.cj.jdbc.Driver");
-            } else if (sourceProperties.url.startsWith("jdbc:mariadb:")) {
-                tryLoad("org.mariadb.jdbc.Driver");
-            } else if (sourceProperties.url.startsWith("jdbc:h2:")) {
-                tryLoad("org.h2.Driver");
+            if (sourceProperties.url.startsWith(JDBC_POSTGRESQL)) {
+                tryLoad(POSTGRESQL_JDBC_DRIVER);
+            } else if (sourceProperties.url.startsWith(JDBC_MYSQL)) {
+                tryLoad(MYSQL_JDBC_DRIVER);
+            } else if (sourceProperties.url.startsWith(JDBC_MARIADB)) {
+                tryLoad(MARIADB_JDBC_DRIVER);
+            } else if (sourceProperties.url.startsWith(JDBC_H2)) {
+                tryLoad(H2_JDBC_DRIVER);
             }
         }
     }
@@ -34,9 +43,7 @@ public final class DriverClassResolver {
     private static void tryLoad(String fqcn) {
         try {
             Class.forName(fqcn);
-        } catch (Throwable ignored) {
-            /* rely on ServiceLoader of drivers */
-        }
+        } catch (Throwable ignored) { }
     }
 
     private DriverClassResolver() {}

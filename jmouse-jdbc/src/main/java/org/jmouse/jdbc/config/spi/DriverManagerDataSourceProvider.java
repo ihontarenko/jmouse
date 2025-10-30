@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.logging.Logger;
 
 /**
  * 🪙 Fallback provider using DriverManager (no pooling).
@@ -67,7 +68,7 @@ public final class DriverManagerDataSourceProvider implements DataSourceProvider
         }
 
         @Override
-        public java.io.PrintWriter getLogWriter() {
+        public PrintWriter getLogWriter() {
             return new PrintWriter(System.out);
         }
 
@@ -85,8 +86,8 @@ public final class DriverManagerDataSourceProvider implements DataSourceProvider
         }
 
         @Override
-        public java.util.logging.Logger getParentLogger() {
-            return java.util.logging.Logger.getGlobal();
+        public Logger getParentLogger() {
+            return Logger.getGlobal();
         }
     }
 }

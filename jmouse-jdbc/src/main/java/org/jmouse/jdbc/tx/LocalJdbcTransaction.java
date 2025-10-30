@@ -28,11 +28,11 @@ public final class LocalJdbcTransaction implements JdbcTransaction {
             Connection connection = binding.currentConnection();
             if (connection == null) {
                 connection = supplier.get();
-                ThreadLocalConnectionBinding.ensureTxMode(connection);
+                ThreadLocalConnectionBinding.autoCommitDisable(connection);
                 binding.bind(connection);
                 owned = connection;
             } else {
-                ThreadLocalConnectionBinding.ensureTxMode(connection);
+                ThreadLocalConnectionBinding.autoCommitDisable(connection);
             }
             active = true;
         } catch (SQLException e) {
@@ -42,8 +42,7 @@ public final class LocalJdbcTransaction implements JdbcTransaction {
 
     @Override public void commit() {
         if (!active) return;
-        try {
-            Connection connection = binding.currentConnection();
+        try (Connection connection = binding.currentConnection();) {
             if (connection != null) {
                 connection.commit();
             }
@@ -56,8 +55,7 @@ public final class LocalJdbcTransaction implements JdbcTransaction {
 
     @Override public void rollback() {
         if (!active) return;
-        try {
-            Connection connection = binding.currentConnection();
+        try (Connection connection = binding.currentConnection()) {
             if (connection != null) {
                 connection.rollback();
             }
