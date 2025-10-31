@@ -2,10 +2,10 @@ package org.jmouse.tx;
 
 public interface FrameworkTransactionManager {
 
-    TransactionStatus begin(TransactionDefinition definition);
+    TransactionSession begin(TransactionDefinition definition);
 
-    void commit(TransactionStatus status);
+    void commit(TransactionSession status);
 
-    void rollback(TransactionStatus status);
+    void rollback(TransactionSession status);
 
 }

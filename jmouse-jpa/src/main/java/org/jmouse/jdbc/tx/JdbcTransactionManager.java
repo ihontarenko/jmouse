@@ -1,20 +1,16 @@
 package org.jmouse.jdbc.tx;
 
-import org.jmouse.tx.AbstractTransactionManager;
+import org.jmouse.jdbc.ConnectionContext;
+import org.jmouse.tx.support.AbstractTransactionManager;
 import org.jmouse.tx.TransactionDefinition;
-import org.jmouse.tx.TransactionStatus;
+import org.jmouse.tx.TransactionSession;
+import org.jmouse.tx.support.JdbcTransactionObjectSupport;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.Savepoint;
 import java.sql.SQLException;
 
-/**
- * 💾 Plain JDBC transaction manager (single DataSource) with savepoint support.
- *
- * <p>One JDBC Connection per thread. No ConnectionHolder abstraction (yet),
- * але семантика дуже близька до Spring's DataSourceTransactionManager.</p>
- */
+
 public class JdbcTransactionManager extends AbstractTransactionManager {
 
     private final DataSource dataSource;
@@ -65,7 +61,7 @@ public class JdbcTransactionManager extends AbstractTransactionManager {
     }
 
     @Override
-    protected void doCommit(TransactionStatus status) {
+    protected void doCommit(TransactionSession status) {
         JdbcTransactionObject jdbc = obtainCurrent();
         if (jdbc.connection == null) {
             return;
@@ -80,7 +76,7 @@ public class JdbcTransactionManager extends AbstractTransactionManager {
     }
 
     @Override
-    protected void doRollback(TransactionStatus status) {
+    protected void doRollback(TransactionSession status) {
         JdbcTransactionObject jdbc = obtainCurrent();
         if (jdbc.connection == null) {
             return;
@@ -107,40 +103,6 @@ public class JdbcTransactionManager extends AbstractTransactionManager {
         current.set((JdbcTransactionObject) suspended);
     }
 
-    // ⭐ savepoints
-    @Override
-    protected Object createSavepoint(Object resource) {
-        JdbcTransactionObject jdbc = (JdbcTransactionObject) resource;
-        if (jdbc.connection == null) {
-            throw new IllegalStateException("No JDBC connection for savepoint");
-        }
-        try {
-            return jdbc.connection.setSavepoint();
-        } catch (SQLException e) {
-            throw new IllegalStateException("Cannot create JDBC savepoint", e);
-        }
-    }
-
-    @Override
-    protected void rollbackToSavepoint(Object resource, Object savepoint) {
-        JdbcTransactionObject jdbc = (JdbcTransactionObject) resource;
-        try {
-            jdbc.connection.rollback((Savepoint) savepoint);
-        } catch (SQLException e) {
-            throw new IllegalStateException("Cannot rollback to JDBC savepoint", e);
-        }
-    }
-
-    @Override
-    protected void releaseSavepoint(Object resource, Object savepoint) {
-        JdbcTransactionObject jdbc = (JdbcTransactionObject) resource;
-        try {
-            jdbc.connection.releaseSavepoint((Savepoint) savepoint);
-        } catch (SQLException e) {
-            // часто можна ігнорувати
-        }
-    }
-
     private JdbcTransactionObject obtainCurrent() {
         JdbcTransactionObject jdbc = current.get();
         if (jdbc == null) {
@@ -161,10 +123,11 @@ public class JdbcTransactionManager extends AbstractTransactionManager {
         }
     }
 
-    /**
-     * 📦 Our minimal tx object (similar to Spring's DataSourceTransactionObject).
-     */
-    private static class JdbcTransactionObject {
-        Connection connection;
+    private class JdbcTransactionObject extends JdbcTransactionObjectSupport {
+
+        public JdbcTransactionObject(ConnectionContext connectionContext) {
+            super(connectionContext);
+        }
+
     }
 }
