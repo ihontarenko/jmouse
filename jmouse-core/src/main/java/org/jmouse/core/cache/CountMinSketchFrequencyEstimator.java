@@ -14,7 +14,7 @@ package org.jmouse.core.cache;
  *
  * @param <K> key type
  */
-public final class CmsFrequencyEstimator<K> implements FrequencyEstimator<K> {
+public final class CountMinSketchFrequencyEstimator<K> implements FrequencyEstimator<K> {
 
     private final CountMinSketch<K> sketch;
 
@@ -23,7 +23,7 @@ public final class CmsFrequencyEstimator<K> implements FrequencyEstimator<K> {
      *
      * @param sketch the underlying sketch to use
      */
-    public CmsFrequencyEstimator(CountMinSketch<K> sketch) {
+    public CountMinSketchFrequencyEstimator(CountMinSketch<K> sketch) {
         this.sketch = sketch;
     }
 

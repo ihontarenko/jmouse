@@ -19,7 +19,6 @@ public class SoutFilter extends AbstractFilter {
                 out.println(iterator.next());
             }
         }
-
         return null;
     }
 

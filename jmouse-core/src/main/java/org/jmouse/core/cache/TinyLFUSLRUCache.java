@@ -77,7 +77,7 @@ public class TinyLFUSLRUCache<K, V> implements BasicCache<K, V> {
 
         this.tinyLFU = new TinyLFU<>(
                 new DoorkeeperSeenFilter<>(keeper),
-                new CmsFrequencyEstimator<>(sketch)
+                new CountMinSketchFrequencyEstimator<>(sketch)
         );
         this.internalCache = new SegmentLRUCache<>(probationCapacity, protectedCapacity);
     }

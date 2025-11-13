@@ -122,7 +122,7 @@ public class JdbcTransactionManager extends AbstractTransactionManager {
     }
 
     @Override
-    protected void rollbackToSavepoint(Object resource, Object savepoint) {
+    protected void rollbackSavepoint(Object resource, Object savepoint) {
         JdbcTransactionObject jdbc = (JdbcTransactionObject) resource;
         try {
             jdbc.connection.rollback((Savepoint) savepoint);
