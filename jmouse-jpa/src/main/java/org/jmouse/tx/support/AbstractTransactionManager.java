@@ -1,9 +1,11 @@
-package org.jmouse.tx;
+package org.jmouse.tx.support;
+
+import org.jmouse.tx.*;
 
 public abstract class AbstractTransactionManager implements FrameworkTransactionManager {
 
     @Override
-    public final TransactionStatus begin(TransactionDefinition definition) {
+    public final TransactionSession begin(TransactionDefinition definition) {
         TransactionDefinition transactionDefinition = (
                 definition != null ? definition : TransactionDefinition.withDefaults()
         );
@@ -19,7 +21,7 @@ public abstract class AbstractTransactionManager implements FrameworkTransaction
     }
 
     @Override
-    public final void commit(TransactionStatus status) {
+    public final void commit(TransactionSession status) {
         if (status.isRollbackOnly()) {
             rollback(status);
             return;
@@ -36,8 +38,8 @@ public abstract class AbstractTransactionManager implements FrameworkTransaction
 
         status.markCompleted();
 
-        if (status.getSuspendedResources() != null) {
-            doResume(status.getResource(), status.getSuspendedResources());
+        if (status.getSuspended() != null) {
+            doResume(status.getResource(), status.getSuspended());
         }
 
         TransactionSynchronizations.afterCompletion(TransactionSynchronizations.STATUS_COMMITTED);
@@ -45,7 +47,7 @@ public abstract class AbstractTransactionManager implements FrameworkTransaction
     }
 
     @Override
-    public final void rollback(TransactionStatus status) {
+    public final void rollback(TransactionSession status) {
         TransactionSynchronizations.beforeCompletion();
 
         if (!status.isNew() && status.hasSavepoint()) {
@@ -53,20 +55,20 @@ public abstract class AbstractTransactionManager implements FrameworkTransaction
         } else if (status.isNew()) {
             doRollback(status);
         } else {
-            status.setRollbackOnly();
+            status.markRollbackOnly();
         }
 
         status.markCompleted();
 
-        if (status.getSuspendedResources() != null) {
-            doResume(status.getResource(), status.getSuspendedResources());
+        if (status.getSuspended() != null) {
+            doResume(status.getResource(), status.getSuspended());
         }
 
         TransactionSynchronizations.afterCompletion(TransactionSynchronizations.STATUS_ROLLED_BACK);
         TransactionSynchronizationManager.clear();
     }
 
-    private TransactionStatus handleNewTransaction(TransactionDefinition definition, Object object) {
+    private TransactionSession handleNewTransaction(TransactionDefinition definition, Object object) {
         return switch (definition.getPropagation()) {
             case TransactionDefinition.PROPAGATION_REQUIRED,
                  TransactionDefinition.PROPAGATION_REQUIRES_NEW,
@@ -84,7 +86,7 @@ public abstract class AbstractTransactionManager implements FrameworkTransaction
         };
     }
 
-    private TransactionStatus handleExistingTransaction(TransactionDefinition definition, Object object) {
+    private TransactionSession handleExistingTransaction(TransactionDefinition definition, Object object) {
         return switch (definition.getPropagation()) {
             case TransactionDefinition.PROPAGATION_REQUIRED,
                  TransactionDefinition.PROPAGATION_SUPPORTS,
@@ -109,7 +111,7 @@ public abstract class AbstractTransactionManager implements FrameworkTransaction
 
                 if (savepoint != null) {
                     TransactionSynchronizationManager.initialize(definition);
-                    TransactionStatus status = new TransactionStatus.Simple(
+                    TransactionSession status = new TransactionSession.Simple(
                             definition.getName(), false, object, null);
                     status.setSavepoint(savepoint);
                     yield status;
@@ -123,7 +125,7 @@ public abstract class AbstractTransactionManager implements FrameworkTransaction
         };
     }
 
-    private TransactionStatus newTransaction(
+    private TransactionSession newTransaction(
             TransactionDefinition definition,
             Object object,
             boolean newTransaction,
@@ -133,18 +135,18 @@ public abstract class AbstractTransactionManager implements FrameworkTransaction
 
         doBegin(object, definition);
 
-        return new TransactionStatus.Simple(definition.getName(), newTransaction, object, suspended);
+        return new TransactionSession.Simple(definition.getName(), newTransaction, object, suspended);
     }
 
-    private TransactionStatus joinTransaction(TransactionDefinition definition, Object object) {
+    private TransactionSession joinTransaction(TransactionDefinition definition, Object object) {
         return newTransaction(definition, object, false, null);
     }
 
-    private TransactionStatus emptyTransaction(TransactionDefinition definition) {
+    private TransactionSession emptyTransaction(TransactionDefinition definition) {
         return newTransaction(definition, null, false, null);
     }
 
-    private TransactionStatus suspendedTransaction(TransactionDefinition definition, Object suspended) {
+    private TransactionSession suspendedTransaction(TransactionDefinition definition, Object suspended) {
         return newTransaction(definition, null, false, suspended);
     }
 
@@ -154,28 +156,12 @@ public abstract class AbstractTransactionManager implements FrameworkTransaction
 
     protected abstract void doBegin(Object object, TransactionDefinition definition);
 
-    protected abstract void doCommit(TransactionStatus status);
+    protected abstract void doCommit(TransactionSession status);
 
-    protected abstract void doRollback(TransactionStatus status);
+    protected abstract void doRollback(TransactionSession status);
 
-    protected Object doSuspend(Object current) {
-        throw new UnsupportedOperationException("SUSPEND NOT SUPPORTED BY: " + getClass().getName());
-    }
+    protected abstract Object doSuspend(Object current);
 
-    protected void doResume(Object current, Object suspended) {
-        throw new UnsupportedOperationException("RESUME NOT SUPPORTED BY: " + getClass().getName());
-    }
-
-    protected Object createSavepoint(Object resource) {
-        throw new UnsupportedOperationException("SAVE-POINTS NOT SUPPORTED BY: " + getClass().getName());
-    }
-
-    protected void rollbackSavepoint(Object resource, Object savepoint) {
-        throw new UnsupportedOperationException("SAVE-POINTS NOT SUPPORTED BY: " + getClass().getName());
-    }
-
-    protected void releaseSavepoint(Object resource, Object savepoint) {
-
-    }
+    protected abstract void doResume(Object current, Object suspended);
 
 }
