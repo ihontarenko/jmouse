@@ -1,8 +1,10 @@
 package org.jmouse.testing_ground.templates;
 
 import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.evaluation.ExpressionLanguageConversion;
 import org.jmouse.el.extension.MethodImporter;
 import org.jmouse.el.extension.calculator.MathematicCalculator;
 import org.jmouse.testing_ground.binder.dto.Book;
@@ -50,6 +52,11 @@ public class Expressions {
 
     public static void main(String[] args) {
         ExpressionLanguage el = new ExpressionLanguage();
+        Conversion conversion = new ExpressionLanguageConversion();
+
+        Object[] objects = {1, 2, 3, new Object[]{(char)45}};
+
+        conversion.convert(objects, String[].class);
 
         PropertyPath path = PropertyPath.forPath("user.names[0].default");
 

@@ -238,6 +238,13 @@ public class StandardConversion implements Conversion {
             }
         }
 
+        if (sourceType.isArray() && targetType.isArray()) {
+            ClassPair objectsToObjects = ClassPair.of(Object[].class, Object[].class);
+            if (converters.containsKey(objectsToObjects)) {
+                return objectsToObjects;
+            }
+        }
+
         return null;
     }
 

@@ -55,7 +55,7 @@ public record ClassPair(Class<?> classA, Class<?> classB) {
      * @return {@code true} if the two classes in the pair are the same, {@code false} otherwise
      */
     public boolean isTheSame() {
-        return Objects.equals(classA, classB) || classA.isAssignableFrom(classB) || classB.isAssignableFrom(classA);
+        return Objects.equals(classA, classB) || /*classA.isAssignableFrom(classB) ||*/ classB.isAssignableFrom(classA);
     }
 
     /**

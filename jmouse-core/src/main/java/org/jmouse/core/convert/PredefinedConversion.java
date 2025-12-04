@@ -47,6 +47,8 @@ abstract public class PredefinedConversion extends StandardConversion {
         // string-pattern and vice versa
         registerConverter(new StringToPatternConverter());
         registerConverter(new PatternToStringConverter());
+        // object array to object array
+        registerConverter(new ObjectArraysConverter(this));
     }
 
     @SuppressWarnings({"rawtypes"})

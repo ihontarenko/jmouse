@@ -21,25 +21,25 @@ public abstract class AbstractTransactionManager implements FrameworkTransaction
     }
 
     @Override
-    public final void commit(TransactionSession status) {
-        if (status.isRollbackOnly()) {
-            rollback(status);
+    public final void commit(TransactionSession session) {
+        if (session.isRollbackOnly()) {
+            rollback(session);
             return;
         }
 
         TransactionSynchronizations.beforeCommit();
         TransactionSynchronizations.beforeCompletion();
 
-        if (!status.isNew() && status.hasSavepoint()) {
-            releaseSavepoint(status.getResource(), status.getSavepoint());
-        } else if (status.isNew()) {
-            doCommit(status);
+        if (!session.isNew() && session.hasSavepoint()) {
+            session.releaseSavepoint(session.getSavepoint());
+        } else if (session.isNew()) {
+            doCommit(session);
         }
 
-        status.markCompleted();
+        session.markCompleted();
 
-        if (status.getSuspended() != null) {
-            doResume(status.getResource(), status.getSuspended());
+        if (session.getSuspended() != null) {
+            doResume(session.getResource(), session.getSuspended());
         }
 
         TransactionSynchronizations.afterCompletion(TransactionSynchronizations.STATUS_COMMITTED);
@@ -61,7 +61,7 @@ public abstract class AbstractTransactionManager implements FrameworkTransaction
         status.markCompleted();
 
         if (status.getSuspended() != null) {
-            doResume(status.getResource(), status.getSuspended());
+            doResume(status.getSavepoint(), status.getSuspended());
         }
 
         TransactionSynchronizations.afterCompletion(TransactionSynchronizations.STATUS_ROLLED_BACK);
@@ -77,7 +77,8 @@ public abstract class AbstractTransactionManager implements FrameworkTransaction
 
             case TransactionDefinition.PROPAGATION_SUPPORTS,
                  TransactionDefinition.PROPAGATION_NEVER,
-                 TransactionDefinition.PROPAGATION_NOT_SUPPORTED -> emptyTransaction(definition);
+                 TransactionDefinition.PROPAGATION_NOT_SUPPORTED
+                    -> emptyTransaction(definition);
 
             case TransactionDefinition.PROPAGATION_MANDATORY ->
                     throw new IllegalStateException("No existing transaction for PROPAGATION_MANDATORY");
