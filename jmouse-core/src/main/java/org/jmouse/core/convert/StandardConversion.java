@@ -102,6 +102,9 @@ public class StandardConversion implements Conversion {
     @Override
     @SuppressWarnings({"unchecked"})
     public <S, T> GenericConverter<S, T> getConverter(ClassPair classPair) {
+        if (!hasConverter(classPair)) {
+            throw new ConverterNotFound(classPair);
+        }
         return (GenericConverter<S, T>) converters.get(classPair);
     }
 
@@ -123,7 +126,13 @@ public class StandardConversion implements Conversion {
      */
     @Override
     public <S, T> GenericConverter<S, T> findConverter(ClassPair classPair) {
-        return getConverter(searchPossibleCandidate(classPair.classA(), classPair.classB()));
+        ClassPair candidate = searchPossibleCandidate(classPair.classA(), classPair.classB());
+
+        if (candidate == null) {
+            throw new ConverterNotFound(classPair);
+        }
+
+        return getConverter(candidate);
     }
 
     /**

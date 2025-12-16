@@ -54,7 +54,7 @@ public class Expressions {
         ExpressionLanguage el = new ExpressionLanguage();
         Conversion conversion = new ExpressionLanguageConversion();
 
-        Object[] objects = {1, 2, 3, new Object[]{(char)45}};
+        Object[] objects = {1, 2, (char)45};
 
         conversion.convert(objects, String[].class);
 

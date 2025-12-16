@@ -17,14 +17,15 @@ public class ObjectArraysConverter implements GenericConverter<Object[], Object[
 
     @Override
     public Object[] convert(Object[] source, Class<Object[]> sourceType, Class<Object[]> targetType) {
-        Class<?> targetComponentType = targetType.getComponentType();
         int      arraySize           = source.length;
-        Object   targetArray         = Array.newInstance(targetComponentType, arraySize);
+        Object   targetArray         = Array.newInstance(Object.class, arraySize);
 
         for (int i = 0; i < arraySize; i++) {
             Object                                       sourceValue         = source[i];
             Class<?>                                     sourceComponentType = sourceValue != null
                     ? sourceValue.getClass() : sourceType.getComponentType();
+            Class<?>                                     targetComponentType = sourceComponentType.isArray()
+                    ? sourceComponentType : targetType.getComponentType();
             GenericConverter<Object, Object>             genericConverter    = conversion.findConverter(
                     ClassPair.of(sourceComponentType, targetComponentType));
             @SuppressWarnings("unchecked") Class<Object> typeA               = (Class<Object>) sourceComponentType;
