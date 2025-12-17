@@ -9,7 +9,6 @@ public final class UpdateStatementCallback
     @Override
     public Integer doWithStatement(PreparedStatement statement)
             throws SQLException {
-
         return statement.executeUpdate();
     }
 }

@@ -50,9 +50,9 @@ public final class DefaultJdbcExecutor implements JdbcExecutor {
             ResultSetExtractor<T> extractor
     ) throws SQLException {
 
-        Connection connection = connectionProvider.getConnection();
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
+        Connection        connection = connectionProvider.getConnection();
+        PreparedStatement statement  = null;
+        ResultSet         resultSet  = null;
 
         try {
             statement = connection.prepareStatement(sql);
@@ -62,7 +62,26 @@ public final class DefaultJdbcExecutor implements JdbcExecutor {
             return extractor.extract(resultSet);
 
         } finally {
-            JdbcSupport.closeQuietly(resultSet);
+            JdbcSupport.closeQuietly(resultSet, statement);
+            connectionProvider.release(connection);
+        }
+    }
+
+    @Override
+    public int executeUpdate(String sql) throws SQLException {
+        return executeUpdate(sql, stmt -> {});
+    }
+
+    @Override
+    public int executeUpdate(String sql, PreparedStatementBinder binder) throws SQLException {
+        Connection connection = connectionProvider.getConnection();
+        PreparedStatement statement = null;
+
+        try {
+            statement = connection.prepareStatement(sql);
+            binder.bind(statement);
+            return statement.executeUpdate();
+        } finally {
             JdbcSupport.closeQuietly(statement);
             connectionProvider.release(connection);
         }

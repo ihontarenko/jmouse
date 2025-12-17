@@ -22,4 +22,8 @@ public interface JdbcExecutor {
             ResultSetExtractor<T> extractor
     ) throws SQLException;
 
+    int executeUpdate(String sql) throws SQLException;
+
+    int executeUpdate(String sql, PreparedStatementBinder binder) throws SQLException;
+
 }

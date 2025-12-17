@@ -18,7 +18,7 @@ public final class JdbcTransactionSession
 
     @Override
     public void begin() {
-        this.connection = provider.getConnection();
+        connection = provider.getConnection();
         connection.setAutoCommit(false);
 
         TransactionContextAccessSupport.bindResource(
