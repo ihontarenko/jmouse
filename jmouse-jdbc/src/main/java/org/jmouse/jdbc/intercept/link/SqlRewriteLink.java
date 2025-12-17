@@ -20,9 +20,11 @@ public final class SqlRewriteLink implements Link<JdbcExecutionContext, JdbcCall
     @Override
     public Outcome<Object> handle(JdbcExecutionContext context, JdbcCall<?> input, Chain<JdbcExecutionContext, JdbcCall<?>, Object> next) {
         String rewritten = rewriter.apply(input.getSql());
+
         if (rewritten != null && !rewritten.equals(input.getSql())) {
             input.setSql(rewritten);
         }
+
         return Outcome.next();
     }
 }

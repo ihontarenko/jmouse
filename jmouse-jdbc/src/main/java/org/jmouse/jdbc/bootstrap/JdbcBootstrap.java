@@ -30,16 +30,11 @@ public final class JdbcBootstrap {
     }
 
     public static JdbcClient create(
-            JdbcConfig config,
+            JdbcConfig configuration,
             JdbcPlatform platform,
             DialectRegistry dialectRegistry,
             Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> chainBuilder
     ) {
-        Objects.requireNonNull(config, "config");
-        Objects.requireNonNull(platform, "platform");
-        Objects.requireNonNull(dialectRegistry, "dialectRegistry");
-        Objects.requireNonNull(chainBuilder, "chainBuilder");
-
         // 1) Platform connection provider (raw)
         ConnectionProvider rawProvider = platform.connectionProvider();
 
@@ -47,7 +42,7 @@ public final class JdbcBootstrap {
         ConnectionProvider txAwareProvider = new TransactionAwareConnectionProvider(rawProvider);
 
         // 3) Resolve dialect id and dialect instance
-        DialectResolver resolver = dialectResolver(config, platform, rawProvider);
+        DialectResolver resolver = dialectResolver(configuration, platform, rawProvider);
         String dialectId = resolver.resolveDialectId();
         SqlDialect dialect = dialectRegistry.get(dialectId);
 

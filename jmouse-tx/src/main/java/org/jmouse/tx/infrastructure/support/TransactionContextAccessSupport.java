@@ -1,5 +1,6 @@
 package org.jmouse.tx.infrastructure.support;
 
+import org.jmouse.core.Contract;
 import org.jmouse.tx.infrastructure.TransactionContextHolder;
 
 import java.util.Objects;
@@ -15,16 +16,11 @@ public final class TransactionContextAccessSupport {
     }
 
     public static void register(TransactionContextHolder contextHolder) {
-        HOLDER = Objects.requireNonNull(contextHolder);
+        HOLDER = Contract.argument(contextHolder, "contextHolder");
     }
 
     public static TransactionContextHolder current() {
-        if (HOLDER == null) {
-            throw new IllegalStateException(
-                    "No transaction context holder registered."
-            );
-        }
-        return HOLDER;
+        return Contract.state(HOLDER, "TransactionContextAccessSupport.HOLDER");
     }
 
     public static <T> T getResource(Class<T> key) {

@@ -5,13 +5,17 @@ import org.jmouse.core.chain.Link;
 import org.jmouse.core.chain.Outcome;
 import org.jmouse.jdbc.intercept.JdbcCall;
 import org.jmouse.jdbc.intercept.JdbcExecutionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class TimingLink implements Link<JdbcExecutionContext, JdbcCall<?>, Object> {
 
-    private final long slowThresholdMillis;
+    private static final Logger LOGGER = LoggerFactory.getLogger(TimingLink.class);
 
-    public TimingLink(long slowThresholdMillis) {
-        this.slowThresholdMillis = slowThresholdMillis;
+    private final long threshold;
+
+    public TimingLink(long threshold) {
+        this.threshold = threshold;
     }
 
     @Override
@@ -21,8 +25,8 @@ public final class TimingLink implements Link<JdbcExecutionContext, JdbcCall<?>,
             return next.proceed(context, input);
         } finally {
             long elapsedMs = (System.nanoTime() - t0) / 1_000_000L;
-            if (elapsedMs >= slowThresholdMillis) {
-                System.out.println("[JDBC] SLOW (" + elapsedMs + " ms): " + input.getSql());
+            if (elapsedMs >= threshold) {
+                LOGGER.warn("[JDBC] SLOW ({} ms): {}", elapsedMs, input.getSql());
             }
         }
     }

@@ -17,15 +17,15 @@ public class ChainedJdbcExecutor implements JdbcExecutor {
 
     private static final PreparedStatementBinder NO_BINDER = stmt -> {};
 
-    private final JdbcExecutor delegate;
+    private final JdbcExecutor                                     delegate;
     private final Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain;
 
     public ChainedJdbcExecutor(
             JdbcExecutor delegate,
             Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain
     ) {
-        this.delegate = Objects.requireNonNull(delegate, "delegate");
-        this.chain = Objects.requireNonNull(chain, "chain");
+        this.delegate = delegate;
+        this.chain = chain;
     }
 
     @Override

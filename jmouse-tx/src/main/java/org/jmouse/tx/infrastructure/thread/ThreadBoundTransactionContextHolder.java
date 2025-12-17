@@ -27,9 +27,9 @@ public final class ThreadBoundTransactionContextHolder
 
     @Override
     public TransactionContext unbindContext() {
-        TransactionContext ctx = CONTEXT_HOLDER.get();
+        TransactionContext context = CONTEXT_HOLDER.get();
         CONTEXT_HOLDER.remove();
-        return ctx;
+        return context;
     }
 
     @Override
