@@ -2,13 +2,11 @@ package org.jmouse.jdbc.platform;
 
 import org.jmouse.jdbc.connection.ConnectionProvider;
 
-import java.util.Objects;
-
 public final class DriverManagerPlatform implements JdbcPlatform {
 
     private final DriverManagerPlatformConfig config;
-    private final DialectInputs dialectInputs;
-    private final PlatformCapabilities capabilities;
+    private final DialectInputs               dialectInputs;
+    private final PlatformCapabilities        capabilities;
 
     public DriverManagerPlatform(
             DriverManagerPlatformConfig config,

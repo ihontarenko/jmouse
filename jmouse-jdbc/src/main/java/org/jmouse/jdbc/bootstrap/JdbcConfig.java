@@ -48,20 +48,6 @@ public record JdbcConfig(
             Optional<Integer> maxRows,
             Optional<Duration> queryTimeout
     ) {
-        public QueryTuning {
-            if (fetchSize == null) {
-                throw new IllegalArgumentException("Fetch-size must be specified");
-            }
-
-            if (maxRows == null) {
-                throw new IllegalArgumentException("Max-rows must be specified");
-            }
-
-            if (queryTimeout == null) {
-                throw new IllegalArgumentException("Query-timeout must be specified");
-            }
-        }
-
         public static QueryTuning defaults() {
             return new QueryTuning(Optional.empty(), Optional.empty(), Optional.empty());
         }
