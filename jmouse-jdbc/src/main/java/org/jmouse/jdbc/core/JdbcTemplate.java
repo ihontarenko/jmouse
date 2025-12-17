@@ -1,15 +1,13 @@
 package org.jmouse.jdbc.core;
 
-import org.jmouse.jdbc.mapping.ListResultSetExtractor;
-import org.jmouse.jdbc.mapping.ResultSetExtractor;
-import org.jmouse.jdbc.mapping.RowMapper;
-import org.jmouse.jdbc.mapping.SingleResultSetExtractor;
+import org.jmouse.jdbc.mapping.*;
 import org.jmouse.jdbc.statement.PreparedStatementBinder;
 import org.jmouse.jdbc.statement.QueryStatementCallback;
 import org.jmouse.jdbc.statement.UpdateStatementCallback;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 public final class JdbcTemplate implements JdbcOperations {
 
@@ -22,6 +20,17 @@ public final class JdbcTemplate implements JdbcOperations {
 
     public JdbcTemplate(JdbcExecutor executor) {
         this.executor = executor;
+    }
+
+    @Override
+    public <T> Optional<T> querySingle(String sql, RowMapper<T> mapper) throws SQLException {
+        return querySingle(sql, NO_BINDER, mapper);
+    }
+
+    @Override
+    public <T> Optional<T> querySingle(String sql, PreparedStatementBinder binder, RowMapper<T> mapper)
+            throws SQLException {
+        return executor.execute(sql, binder, queryCallback, new StrictSingleResultSetExtractor<>(mapper, sql));
     }
 
     @Override

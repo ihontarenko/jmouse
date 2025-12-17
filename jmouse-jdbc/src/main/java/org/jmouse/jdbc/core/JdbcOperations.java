@@ -2,12 +2,17 @@ package org.jmouse.jdbc.core;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 import org.jmouse.jdbc.mapping.ResultSetExtractor;
 import org.jmouse.jdbc.mapping.RowMapper;
 import org.jmouse.jdbc.statement.PreparedStatementBinder;
 
 public interface JdbcOperations {
+
+    <T> Optional<T> querySingle(String sql, RowMapper<T> mapper) throws SQLException;
+
+    <T> Optional<T> querySingle(String sql, PreparedStatementBinder binder, RowMapper<T> mapper) throws SQLException;
 
     <T> T queryOne(String sql, RowMapper<T> mapper) throws SQLException;
 
