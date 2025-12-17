@@ -12,15 +12,15 @@ public final class NamedBinderCompiler {
     private final MissingParameterPolicy missingPolicy;
 
     public NamedBinderCompiler(MissingParameterPolicy missingPolicy) {
-        this.missingPolicy = Objects.requireNonNull(missingPolicy, "missingPolicy");
+        this.missingPolicy = missingPolicy;
     }
 
     public CompiledNamedSQL compile(String namedSql) {
-        ParsedSql parsed = new NamedParameterParser().parse(namedSql);
-        return new CompiledNamedSQL(namedSql, parsed.sql(), parsed.parameterNames());
+        ParsedSQL parsed = new NamedParameterParser().parse(namedSql);
+        return new CompiledNamedSQL(namedSql, parsed.sql(), parsed.parameters());
     }
 
-    public PreparedStatementBinder binder(CompiledNamedSQL sql, SqlParameterSource source) {
+    public PreparedStatementBinder binder(CompiledNamedSQL sql, ParameterSource source) {
         Objects.requireNonNull(sql, "sql");
         Objects.requireNonNull(source, "source");
 
@@ -28,21 +28,21 @@ public final class NamedBinderCompiler {
         return stmt -> bindAll(stmt, names, source);
     }
 
-    private void bindAll(PreparedStatement stmt, List<String> names, SqlParameterSource source) throws SQLException {
+    private void bindAll(PreparedStatement statement, List<String> names, ParameterSource source) throws SQLException {
         for (int i = 0; i < names.size(); i++) {
-            String name = names.get(i);
-            int index = i + 1;
+            String name  = names.get(i);
+            int    index = i + 1;
 
             if (!source.hasValue(name)) {
                 if (missingPolicy == MissingParameterPolicy.FAIL_FAST) {
                     throw new IllegalArgumentException("Missing SQL parameter '" + name + "'");
                 }
-                stmt.setObject(index, null);
+                statement.setObject(index, null);
                 continue;
             }
 
             Object value = source.getValue(name);
-            stmt.setObject(index, value);
+            statement.setObject(index, value);
         }
     }
 }

@@ -25,7 +25,7 @@ public abstract class AbstractTransactionCoordinator
 
     @Override
     public final TransactionStatus begin(TransactionDefinition definition) {
-        TransactionContext existing = contextHolder.getCurrent();
+        TransactionContext existing = contextHolder.getContext();
 
         if (existing != null) {
             return handleExistingTransaction(definition, existing);
@@ -40,7 +40,7 @@ public abstract class AbstractTransactionCoordinator
             throw new IllegalStateException("Transaction already completed");
         }
 
-        TransactionContext context = contextHolder.getCurrent();
+        TransactionContext context = contextHolder.getContext();
 
         if (context == null) {
             throw new IllegalStateException("No transaction context bound");
@@ -56,7 +56,7 @@ public abstract class AbstractTransactionCoordinator
 
     @Override
     public final void rollback(TransactionStatus status) {
-        TransactionContext context = contextHolder.getCurrent();
+        TransactionContext context = contextHolder.getContext();
         if (context == null) {
             throw new IllegalStateException("No transaction context bound");
         }
@@ -88,7 +88,7 @@ public abstract class AbstractTransactionCoordinator
                 return startNewTransaction(definition);
 
             case NESTED:
-                return startNestedTransaction(definition, existing);
+                return startNestedTransaction(existing);
 
             default:
                 throw new IllegalStateException(
@@ -108,9 +108,9 @@ public abstract class AbstractTransactionCoordinator
         doBegin(session, definition);
 
         MutableTransactionContext context =
-                new MutableTransactionContext(definition, status, session);
+                new MutableTransactionContext(status, session);
 
-        contextHolder.bind(context);
+        contextHolder.bindContext(context);
 
         SynchronizationContext synchronizationContext =
                 new DefaultSynchronizationContext();
@@ -131,9 +131,9 @@ public abstract class AbstractTransactionCoordinator
     }
 
     protected TransactionStatus startNestedTransaction(
-            TransactionDefinition definition,
             TransactionContext existing
     ) {
+        // no session
         TransactionSession session = existing.getSession();
 
         if (!(session instanceof SavepointSupport savepointCapable)) {
@@ -146,14 +146,13 @@ public abstract class AbstractTransactionCoordinator
 
         MutableTransactionContext nestedContext =
                 new MutableTransactionContext(
-                        definition,
                         new TransactionStatusSupport(false),
                         session
                 );
 
         nestedContext.setSavepoint(savepoint);
 
-        contextHolder.bind(nestedContext);
+        contextHolder.bindContext(nestedContext);
 
         return nestedContext.getStatus();
     }
@@ -173,6 +172,7 @@ public abstract class AbstractTransactionCoordinator
             triggerBeforeCommit(synchronizationContext);
 
             if (status.isNew()) {
+                // getSession ???
                 doCommit(context.getSession());
             } else {
                 context.getSavepoint().ifPresent(
@@ -240,13 +240,9 @@ public abstract class AbstractTransactionCoordinator
     }
 
     protected void resume(TransactionContext context) {
-        contextHolder.bind(context);
+        contextHolder.bindContext(context);
         doResume(context);
     }
-
-    // ------------------------------------------------------------
-    // Template hooks (do*)
-    // ------------------------------------------------------------
 
     protected abstract TransactionSession doOpenSession(
             TransactionDefinition definition

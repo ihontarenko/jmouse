@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public final class BeanSqlParameterSource implements SqlParameterSource {
+public final class BeanSqlParameterSource implements ParameterSource {
 
     private final Object bean;
     private final Map<String, Method> getters;

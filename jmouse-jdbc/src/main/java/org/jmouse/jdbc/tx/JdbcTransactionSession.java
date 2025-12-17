@@ -1,13 +1,14 @@
 package org.jmouse.jdbc.tx;
 
 import org.jmouse.jdbc.connection.ConnectionProvider;
+import org.jmouse.jdbc.core.exception.JdbcAccessException;
 import org.jmouse.tx.core.TransactionSession;
 import org.jmouse.tx.infrastructure.support.TransactionContextAccessSupport;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
-public final class JdbcTransactionSession
-        implements TransactionSession {
+public final class JdbcTransactionSession implements TransactionSession {
 
     private final ConnectionProvider provider;
     private Connection connection;
@@ -18,8 +19,12 @@ public final class JdbcTransactionSession
 
     @Override
     public void begin() {
-        connection = provider.getConnection();
-        connection.setAutoCommit(false);
+        try {
+            connection = provider.getConnection();
+            connection.setAutoCommit(false);
+        } catch (SQLException e) {
+            throw new JdbcAccessException(e);
+        }
 
         TransactionContextAccessSupport.bindResource(
                 JdbcResourceHolder.class,
@@ -29,12 +34,20 @@ public final class JdbcTransactionSession
 
     @Override
     public void commit() {
-        connection.commit();
+        try {
+            connection.commit();
+        } catch (SQLException e) {
+            throw new JdbcAccessException(e);
+        }
     }
 
     @Override
     public void rollback() {
-        connection.rollback();
+        try {
+            connection.rollback();
+        } catch (SQLException e) {
+            throw new JdbcAccessException(e);
+        }
     }
 
     @Override
@@ -45,7 +58,11 @@ public final class JdbcTransactionSession
     @Override
     public void close() {
         TransactionContextAccessSupport.unbindResource(JdbcResourceHolder.class);
-        provider.release(connection);
+        try {
+            provider.release(connection);
+        } catch (SQLException e) {
+            throw new JdbcAccessException(e);
+        }
     }
 }
 

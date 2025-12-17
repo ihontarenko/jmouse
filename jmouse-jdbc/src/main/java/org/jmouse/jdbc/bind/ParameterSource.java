@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.bind;
 
-public interface SqlParameterSource {
+public interface ParameterSource {
 
     boolean hasValue(String name);
 

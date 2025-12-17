@@ -6,7 +6,7 @@ import java.util.List;
 public final class NamedParameterParser {
 
     public ParsedSQL parse(String sql) {
-        StringBuilder out = new StringBuilder(sql.length());
+        StringBuilder buffer = new StringBuilder(sql.length());
         List<String> names = new ArrayList<>();
 
         boolean inSingleQuote = false;
@@ -18,16 +18,16 @@ public final class NamedParameterParser {
 
             // End line comment
             if (inLineComment) {
-                out.append(c);
+                buffer.append(c);
                 if (c == '\n') inLineComment = false;
                 continue;
             }
 
             // End block comment
             if (inBlockComment) {
-                out.append(c);
+                buffer.append(c);
                 if (c == '*' && i + 1 < sql.length() && sql.charAt(i + 1) == '/') {
-                    out.append('/');
+                    buffer.append('/');
                     i++;
                     inBlockComment = false;
                 }
@@ -37,13 +37,13 @@ public final class NamedParameterParser {
             // Start comments (when not in string)
             if (!inSingleQuote) {
                 if (c == '-' && i + 1 < sql.length() && sql.charAt(i + 1) == '-') {
-                    out.append(c).append('-');
+                    buffer.append(c).append('-');
                     i++;
                     inLineComment = true;
                     continue;
                 }
                 if (c == '/' && i + 1 < sql.length() && sql.charAt(i + 1) == '*') {
-                    out.append(c).append('*');
+                    buffer.append(c).append('*');
                     i++;
                     inBlockComment = true;
                     continue;
@@ -52,10 +52,10 @@ public final class NamedParameterParser {
 
             // Toggle string literal (single quotes)
             if (c == '\'') {
-                out.append(c);
+                buffer.append(c);
                 // handle escaped '' inside string
                 if (inSingleQuote && i + 1 < sql.length() && sql.charAt(i + 1) == '\'') {
-                    out.append('\'');
+                    buffer.append('\'');
                     i++;
                     continue;
                 }
@@ -67,7 +67,7 @@ public final class NamedParameterParser {
             if (!inSingleQuote && c == ':') {
                 // Skip postgres cast ::
                 if (i + 1 < sql.length() && sql.charAt(i + 1) == ':') {
-                    out.append("::");
+                    buffer.append("::");
                     i++;
                     continue;
                 }
@@ -79,16 +79,16 @@ public final class NamedParameterParser {
 
                     String name = sql.substring(start, j);
                     names.add(name);
-                    out.append('?');
+                    buffer.append('?');
                     i = j - 1;
                     continue;
                 }
             }
 
-            out.append(c);
+            buffer.append(c);
         }
 
-        return new ParsedSQL(out.toString(), List.copyOf(names));
+        return new ParsedSQL(buffer.toString(), List.copyOf(names));
     }
 
     private static boolean isNameStart(char c) {
@@ -98,4 +98,9 @@ public final class NamedParameterParser {
     private static boolean isNamePart(char c) {
         return Character.isLetterOrDigit(c) || c == '_';
     }
+
+    public static void main(String[] args) {
+        new NamedParameterParser().parse("select * from user where id = ? and name = :name");
+    }
+
 }

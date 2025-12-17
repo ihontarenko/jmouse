@@ -1,32 +1,19 @@
 package org.jmouse.tx.infrastructure;
 
-import org.jmouse.tx.core.TransactionDefinition;
 import org.jmouse.tx.core.TransactionSession;
 import org.jmouse.tx.core.TransactionStatus;
 
 import java.util.Optional;
 
-public class MutableTransactionContext implements TransactionContext {
+public final class MutableTransactionContext implements TransactionContext {
 
-    private final TransactionDefinition definition;
-    private final TransactionStatus     status;
-    private final TransactionSession    session;
+    private final TransactionStatus  status;
+    private final TransactionSession session;
+    private       Object             savepoint;
 
-    private Object savepoint;
-
-    public MutableTransactionContext(
-            TransactionDefinition definition,
-            TransactionStatus status,
-            TransactionSession session
-    ) {
-        this.definition = definition;
+    public MutableTransactionContext(TransactionStatus status, TransactionSession session) {
         this.status = status;
         this.session = session;
-    }
-
-    @Override
-    public TransactionDefinition getDefinition() {
-        return definition;
     }
 
     @Override
@@ -52,4 +39,14 @@ public class MutableTransactionContext implements TransactionContext {
         this.savepoint = null;
     }
 
+    @Override
+    public boolean isRollbackOnly() {
+        return status.isRollbackOnly();
+    }
+
+    @Override
+    public void setRollbackOnly() {
+        status.setRollbackOnly();
+    }
 }
+

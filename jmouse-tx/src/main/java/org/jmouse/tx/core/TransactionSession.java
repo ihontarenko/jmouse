@@ -3,7 +3,7 @@ package org.jmouse.tx.core;
 /**
  * Represents a low-level transactional session bound to a resource.
  */
-public interface TransactionSession {
+public interface TransactionSession extends AutoCloseable {
 
     void begin();
 
@@ -12,4 +12,8 @@ public interface TransactionSession {
     void rollback();
 
     boolean isActive();
+
+    @Override
+    void close();
+    
 }
