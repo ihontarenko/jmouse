@@ -1,6 +1,7 @@
 package org.jmouse.jdbc.core;
 
 import org.jmouse.core.chain.Chain;
+import org.jmouse.jdbc.core.exception.JdbcAccessException;
 import org.jmouse.jdbc.intercept.JdbcCall;
 import org.jmouse.jdbc.intercept.JdbcExecutionContext;
 import org.jmouse.jdbc.intercept.JdbcOperation;
@@ -12,11 +13,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 
-public final class ChainedJdbcExecutor implements JdbcExecutor {
+public class ChainedJdbcExecutor implements JdbcExecutor {
 
     private static final PreparedStatementBinder NO_BINDER = stmt -> {};
 
-    private final JdbcExecutor                                     delegate;
+    private final JdbcExecutor delegate;
     private final Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain;
 
     public ChainedJdbcExecutor(
@@ -45,7 +46,7 @@ public final class ChainedJdbcExecutor implements JdbcExecutor {
             ResultSetExtractor<T> extractor
     ) throws SQLException {
 
-        JdbcExecutionContext ctx = new JdbcExecutionContext(delegate);
+        JdbcExecutionContext ctx = newContext();
 
         JdbcCall<T> call = new JdbcCall<>(
                 sql,
@@ -57,9 +58,8 @@ public final class ChainedJdbcExecutor implements JdbcExecutor {
 
         try {
             return (T) chain.run(ctx, call);
-        } catch (RuntimeException e) {
-            // SQLException contract: якщо хочеш – тут можна зробити unwrapping/wrapping пізніше
-            throw e;
+        } catch (JdbcAccessException e) {
+            throw e.getCause();
         }
     }
 
@@ -69,10 +69,9 @@ public final class ChainedJdbcExecutor implements JdbcExecutor {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public int executeUpdate(String sql, PreparedStatementBinder binder) throws SQLException {
 
-        JdbcExecutionContext ctx = new JdbcExecutionContext(delegate);
+        JdbcExecutionContext ctx = newContext();
 
         JdbcCall<Integer> call = new JdbcCall<>(
                 sql,
@@ -82,7 +81,17 @@ public final class ChainedJdbcExecutor implements JdbcExecutor {
                 JdbcOperation.UPDATE
         );
 
-        Object result = chain.run(ctx, call);
-        return (Integer) result;
+        try {
+            return (Integer) chain.run(ctx, call);
+        } catch (JdbcAccessException e) {
+            throw e.getCause();
+        }
+    }
+
+    /**
+     * Factory method for context customization (dialect, settings, etc).
+     */
+    protected JdbcExecutionContext newContext() {
+        return new JdbcExecutionContext(delegate, null);
     }
 }
