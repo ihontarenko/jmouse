@@ -74,7 +74,7 @@
         <module>jmouse-core</module>
         <module>jmouse-el</module>
         <module>jmouse-tx</module>
-        <module>jmouse-jpa</module>
+        <module>jmouse-jdbc</module>
         <module>jmouse-security</module>
         <module>jmouse-expression</module>
         <module>jmouse-validation</module>

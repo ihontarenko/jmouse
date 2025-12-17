@@ -67,7 +67,12 @@
             </dependency>
             <dependency>
                 <groupId>org.jmouse</groupId>
-                <artifactId>jmouse-jpa</artifactId>
+                <artifactId>jmouse-jdbc</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-tx</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>
             <dependency>
