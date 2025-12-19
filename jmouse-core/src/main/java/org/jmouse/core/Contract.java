@@ -63,4 +63,13 @@ public final class Contract {
             throw new IllegalStateException("Invariant violation: " + message);
         }
     }
+
+    public static void unsupported(String message) {
+        throw new UnsupportedOperationException(message);
+    }
+
+    public static void forbidden(String message) {
+        throw new SecurityException(message);
+    }
+
 }

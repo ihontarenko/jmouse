@@ -15,7 +15,7 @@ import java.util.Objects;
 
 public class ChainedJdbcExecutor implements JdbcExecutor {
 
-    private static final PreparedStatementBinder NO_BINDER = stmt -> {};
+    private static final PreparedStatementBinder NO_BINDER = statement -> {};
 
     private final JdbcExecutor                                     delegate;
     private final Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain;
@@ -46,9 +46,8 @@ public class ChainedJdbcExecutor implements JdbcExecutor {
             ResultSetExtractor<T> extractor
     ) throws SQLException {
 
-        JdbcExecutionContext ctx = newContext();
-
-        JdbcCall<T> call = new JdbcCall<>(
+        JdbcExecutionContext context = newContext();
+        JdbcCall<T>          call    = new JdbcCall<>(
                 sql,
                 binder,
                 statementCallback,
@@ -57,7 +56,7 @@ public class ChainedJdbcExecutor implements JdbcExecutor {
         );
 
         try {
-            return (T) chain.run(ctx, call);
+            return (T) chain.run(context, call);
         } catch (JdbcAccessException e) {
             throw e.getCause();
         }

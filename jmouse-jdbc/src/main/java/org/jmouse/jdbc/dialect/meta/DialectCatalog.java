@@ -37,12 +37,12 @@ public final class DialectCatalog {
 
     public static DialectCatalog defaults() {
         return new DialectCatalog()
-                .register(DialectMatcher.productContainsIgnoreCase(POSTGRE_SQL_NAME), POSTGRES_ID)
-                .register(DialectMatcher.productContainsIgnoreCase(MY_SQL_NAME), MYSQL_ID)
-                .register(DialectMatcher.productContainsIgnoreCase("MariaDB"), "mysql")
-                .register(DialectMatcher.productContainsIgnoreCase("H2"), "h2")
-                .register(DialectMatcher.productContainsIgnoreCase("SQLite"), "sqlite")
-                .register(DialectMatcher.productContainsIgnoreCase("Microsoft SQL Server"), "mssql")
-                .register(DialectMatcher.productContainsIgnoreCase("Oracle"), "oracle");
+                .register(DialectMatcher.byProductName(POSTGRE_SQL_NAME), POSTGRES_ID)
+                .register(DialectMatcher.byProductName(MY_SQL_NAME), MYSQL_ID)
+                .register(DialectMatcher.byProductName("MariaDB"), "mysql")
+                .register(DialectMatcher.byProductName("H2"), "h2")
+                .register(DialectMatcher.byProductName("SQLite"), "sqlite")
+                .register(DialectMatcher.byProductName("Microsoft SQL Server"), "mssql")
+                .register(DialectMatcher.byProductName("Oracle"), "oracle");
     }
 }

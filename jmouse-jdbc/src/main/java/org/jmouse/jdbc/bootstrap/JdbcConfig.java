@@ -15,13 +15,6 @@ public record JdbcConfig(
         DialectResolution dialectResolution
 ) {
 
-    public JdbcConfig {
-        Objects.requireNonNull(name, "name");
-        Objects.requireNonNull(dialectId, "dialectId");
-        Objects.requireNonNull(queryTuning, "queryTuning");
-        Objects.requireNonNull(dialectResolution, "dialectResolution");
-    }
-
     public static JdbcConfig defaults() {
         return new JdbcConfig(
                 "jdbc",

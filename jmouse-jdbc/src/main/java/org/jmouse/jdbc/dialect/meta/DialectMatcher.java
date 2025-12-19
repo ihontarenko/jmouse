@@ -5,7 +5,7 @@ import org.jmouse.core.matcher.Matcher;
 @FunctionalInterface
 public interface DialectMatcher extends Matcher<DatabaseInfo> {
 
-    static DialectMatcher productContainsIgnoreCase(String token) {
+    static DialectMatcher byProductName(String token) {
         return info -> info.productName() != null
                 && info.productName().toLowerCase().contains(token.toLowerCase());
     }

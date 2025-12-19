@@ -1,6 +1,7 @@
 package org.jmouse.jdbc;
 
 import org.jmouse.jdbc.bootstrap.JdbcBootstrap;
+import org.jmouse.jdbc.bootstrap.JdbcClient;
 import org.jmouse.jdbc.bootstrap.JdbcConfig;
 import org.jmouse.jdbc.platform.DialectInputs;
 import org.jmouse.jdbc.platform.DriverManagerPlatform;
@@ -19,7 +20,7 @@ public class Test {
                 DialectInputs.configured("postgres", true)
         );
 
-        var client = JdbcBootstrap.create(config, platform);
+        JdbcClient client = JdbcBootstrap.create(config, platform);
 
         client.jdbc().querySingle("select 1", rs -> rs.getInt(1));
     }

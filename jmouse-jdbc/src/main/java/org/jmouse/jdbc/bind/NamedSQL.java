@@ -2,8 +2,8 @@ package org.jmouse.jdbc.bind;
 
 import java.util.List;
 
-public record CompiledNamedSQL(
-        String originalSql,
-        String sql,
+public record NamedSQL(
+        String normal,
+        String parsed,
         List<String> parameters
 ) { }

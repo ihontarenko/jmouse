@@ -1,0 +1,85 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: jm-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: jmouse
+      MYSQL_USER: jmouse
+      MYSQL_PASSWORD: jmouse
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_0900_ai_ci
+      --default-time-zone=+00:00
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot" ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  postgres:
+    image: postgres:16
+    container_name: jm-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: jmouse
+      POSTGRES_USER: jmouse
+      POSTGRES_PASSWORD: jmouse
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U jmouse -d jmouse" ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  oracle:
+    image: container-registry.oracle.com/database/free:23.5.0.0
+    container_name: jm-oracle
+    restart: unless-stopped
+    environment:
+      ORACLE_PWD: "Oracle_123"
+      ORACLE_CHARACTERSET: "AL32UTF8"
+    ports:
+      - "1521:1521"
+      - "5500:5500"
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+    shm_size: "1g"
+    healthcheck:
+      test: [ "CMD-SHELL", "bash -lc 'echo > /dev/tcp/127.0.0.1/1521'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+
+  h2:
+    image: oscarfonts/h2:2.2.224
+    container_name: jm-h2
+    restart: unless-stopped
+    environment:
+      H2_OPTIONS: "-ifNotExists -tcp -tcpAllowOthers -web -webAllowOthers"
+    ports:
+      - "8082:81"
+      - "9092:1521"
+    volumes:
+      - h2_data:/opt/h2-data
+
+  adminer:
+    image: adminer:4
+    container_name: jm-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+
+volumes:
+  mysql_data:
+  postgres_data:
+  oracle_data:
+  h2_data:

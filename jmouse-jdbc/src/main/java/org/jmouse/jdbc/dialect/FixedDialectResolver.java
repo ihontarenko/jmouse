@@ -1,7 +1,5 @@
 package org.jmouse.jdbc.dialect;
 
-import java.util.Objects;
-
 public final class FixedDialectResolver implements DialectResolver {
 
     private final String dialectId;

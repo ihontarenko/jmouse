@@ -19,22 +19,22 @@ public final class NamedJdbcTemplate {
     }
 
     public <T> Optional<T> querySingle(String sql, Map<String, ?> params, RowMapper<T> mapper) throws SQLException {
-        CompiledNamedSQL compiled = compiler.compile(sql);
-        return jdbc.querySingle(compiled.sql(), compiler.binder(compiled, new MapSqlParameterSource(params)), mapper);
+        NamedSQL compiled = compiler.compile(sql);
+        return jdbc.querySingle(compiled.parsed(), compiler.binder(compiled, new MapSqlParameterSource(params)), mapper);
     }
 
     public <T> Optional<T> querySingle(String sql, Object bean, RowMapper<T> mapper) throws SQLException {
-        CompiledNamedSQL compiled = compiler.compile(sql);
-        return jdbc.querySingle(compiled.sql(), compiler.binder(compiled, new BeanSqlParameterSource(bean)), mapper);
+        NamedSQL compiled = compiler.compile(sql);
+        return jdbc.querySingle(compiled.parsed(), compiler.binder(compiled, new BeanSqlParameterSource(bean)), mapper);
     }
 
     public <T> List<T> query(String sql, Map<String, ?> parameters, RowMapper<T> mapper) throws SQLException {
-        CompiledNamedSQL compiled = compiler.compile(sql);
-        return jdbc.query(compiled.sql(), compiler.binder(compiled, new MapSqlParameterSource(parameters)), mapper);
+        NamedSQL compiled = compiler.compile(sql);
+        return jdbc.query(compiled.parsed(), compiler.binder(compiled, new MapSqlParameterSource(parameters)), mapper);
     }
 
     public int update(String sql, Map<String, ?> parameters) throws SQLException {
-        CompiledNamedSQL compiled = compiler.compile(sql);
-        return jdbc.update(compiled.sql(), compiler.binder(compiled, new MapSqlParameterSource(parameters)));
+        NamedSQL compiled = compiler.compile(sql);
+        return jdbc.update(compiled.parsed(), compiler.binder(compiled, new MapSqlParameterSource(parameters)));
     }
 }

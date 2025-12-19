@@ -1,14 +1,14 @@
 package org.jmouse.jdbc.platform;
 
+import org.jmouse.core.Contract;
 import org.jmouse.jdbc.connection.ConnectionProvider;
 
 import javax.sql.DataSource;
-import java.util.Objects;
 
 public final class DataSourcePlatform implements JdbcPlatform {
 
-    private final DataSource dataSource;
-    private final DialectInputs dialectInputs;
+    private final DataSource           dataSource;
+    private final DialectInputs        dialectInputs;
     private final PlatformCapabilities capabilities;
 
     public DataSourcePlatform(
@@ -16,9 +16,9 @@ public final class DataSourcePlatform implements JdbcPlatform {
             DialectInputs dialectInputs,
             PlatformCapabilities capabilities
     ) {
-        this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
-        this.dialectInputs = Objects.requireNonNull(dialectInputs, "dialectInputs");
-        this.capabilities = Objects.requireNonNull(capabilities, "capabilities");
+        this.dataSource = Contract.nonNull(dataSource, "dataSource");
+        this.dialectInputs = Contract.nonNull(dialectInputs, "dialectInputs");
+        this.capabilities = Contract.nonNull(capabilities, "capabilities");
     }
 
     public static DataSourcePlatform of(DataSource dataSource, DialectInputs dialectInputs) {

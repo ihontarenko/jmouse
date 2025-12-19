@@ -42,9 +42,9 @@ public final class JdbcBootstrap {
         ConnectionProvider txAwareProvider = new TransactionAwareConnectionProvider(rawProvider);
 
         // 3) Resolve dialect id and dialect instance
-        DialectResolver resolver = dialectResolver(configuration, platform, rawProvider);
-        String dialectId = resolver.resolveDialectId();
-        SqlDialect dialect = dialectRegistry.get(dialectId);
+        DialectResolver resolver  = dialectResolver(configuration, platform, rawProvider);
+        String          dialectId = resolver.resolveDialectId();
+        SqlDialect      dialect   = dialectRegistry.get(dialectId);
 
         // 4) Core executor
         JdbcExecutor core = new DefaultJdbcExecutor(txAwareProvider);
@@ -61,10 +61,10 @@ public final class JdbcBootstrap {
         };
 
         // 7) Templates
-        JdbcTemplate jdbc = new JdbcTemplate(executor);
+        JdbcTemplate      jdbc  = new JdbcTemplate(executor);
         NamedJdbcTemplate named = new NamedJdbcTemplate(jdbc, MissingParameterPolicy.FAIL_FAST);
 
-        return new JdbcClient(jdbc, named, executor, dialect);
+        return new JdbcClient(jdbc, executor, dialect);
     }
 
     private static DialectResolver dialectResolver(JdbcConfig config, JdbcPlatform platform, ConnectionProvider rawProvider) {
