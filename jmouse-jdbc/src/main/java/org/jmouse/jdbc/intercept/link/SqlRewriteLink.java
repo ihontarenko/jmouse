@@ -1,15 +1,16 @@
 package org.jmouse.jdbc.intercept.link;
 
 import org.jmouse.core.chain.Chain;
-import org.jmouse.core.chain.Link;
 import org.jmouse.core.chain.Outcome;
 import org.jmouse.jdbc.intercept.JdbcCall;
+import org.jmouse.jdbc.intercept.JdbcChain;
 import org.jmouse.jdbc.intercept.JdbcExecutionContext;
+import org.jmouse.jdbc.intercept.JdbcLink;
 
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
-public final class SqlRewriteLink implements Link<JdbcExecutionContext, JdbcCall<?>, Object> {
+public final class SqlRewriteLink implements JdbcLink {
 
     private final UnaryOperator<String> rewriter;
 

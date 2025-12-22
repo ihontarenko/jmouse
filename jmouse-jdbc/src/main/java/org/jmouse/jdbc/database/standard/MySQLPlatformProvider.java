@@ -2,7 +2,7 @@ package org.jmouse.jdbc.database.standard;
 
 import org.jmouse.jdbc.database.*;
 
-public final class MySqlPlatformProvider implements DatabasePlatformProvider {
+public final class MySQLPlatformProvider implements DatabasePlatformProvider {
 
     public static final String MYSQL_NAME   = "mysql";
     public static final String MARIADB_NAME = "mariadb";
@@ -22,7 +22,7 @@ public final class MySqlPlatformProvider implements DatabasePlatformProvider {
 
     @Override
     public DatabasePlatform create(DatabaseInformation info) {
-        DatabaseVersion v = new DatabaseVersion(info.majorVersion(), info.minorVersion(), 0, info.productVersion());
+        DatabaseVersion version = new DatabaseVersion(info.majorVersion(), info.minorVersion(), 0, info.productVersion());
 
         return new DatabasePlatform() {
             @Override
@@ -32,7 +32,7 @@ public final class MySqlPlatformProvider implements DatabasePlatformProvider {
 
             @Override
             public DatabaseVersion version() {
-                return v;
+                return version;
             }
 
             @Override

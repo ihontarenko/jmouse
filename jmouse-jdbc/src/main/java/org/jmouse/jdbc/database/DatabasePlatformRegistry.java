@@ -19,8 +19,12 @@ public final class DatabasePlatformRegistry {
     }
 
     public DatabasePlatformRegistry fallback(DatabasePlatform fallback) {
-        this.fallback = Objects.requireNonNull(fallback, "fallback");
+        this.fallback = Contract.nonNull(fallback, "fallback");
         return this;
+    }
+
+    public DatabasePlatform fallback() {
+        return fallback;
     }
 
     public DatabasePlatform resolve(DatabaseInformation info) {
