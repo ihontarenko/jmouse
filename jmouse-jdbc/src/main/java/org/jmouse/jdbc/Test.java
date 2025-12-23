@@ -3,6 +3,7 @@ package org.jmouse.jdbc;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeansScannerBeanContextInitializer;
 import org.jmouse.beans.DefaultBeanContext;
+import org.jmouse.jdbc.core.CoreOperations;
 
 import java.sql.SQLException;
 
@@ -18,6 +19,10 @@ public class Test {
         System.out.println(context);
 
         JdbcClient client = context.getBean(JdbcClient.class);
+
+        CoreOperations operations = client.jdbc().core();
+
+        operations.queryOne("select 1", rs -> rs.getInt(1));
 
         System.out.println(client);
     }

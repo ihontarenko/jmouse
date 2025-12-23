@@ -5,6 +5,8 @@ import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.jdbc.database.DatabaseInformation;
 import org.jmouse.jdbc.database.DatabasePlatform;
 import org.jmouse.jdbc.database.DatabasePlatformRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -16,6 +18,8 @@ import java.sql.SQLException;
  * <p>Bootstrap-time resolver: acquires a temporary connection and releases it via provider.</p>
  */
 public final class DatabaseMetaPlatformResolver {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseMetaPlatformResolver.class);
 
     private final ConnectionProvider       provider;
     private final DatabasePlatformRegistry registry;
@@ -38,7 +42,11 @@ public final class DatabaseMetaPlatformResolver {
                     metaData.getDatabaseMinorVersion()
             );
 
-            return registry.resolve(info);
+            DatabasePlatform platform = registry.resolve(info);
+
+            LOGGER.info("Database Platform Detected: {}", platform.displayName());
+
+            return platform;
         } catch (SQLException e) {
             return registry.fallback();
         } finally {
