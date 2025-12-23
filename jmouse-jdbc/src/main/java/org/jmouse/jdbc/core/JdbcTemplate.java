@@ -1,77 +1,67 @@
 package org.jmouse.jdbc.core;
 
-import org.jmouse.jdbc.mapping.*;
-import org.jmouse.jdbc.statement.PreparedStatementBinder;
-import org.jmouse.jdbc.statement.QueryStatementCallback;
-import org.jmouse.jdbc.statement.UpdateStatementCallback;
+import org.jmouse.core.Contract;
+import org.jmouse.jdbc.bind.*;
+import org.jmouse.jdbc.mapping.RowMapper;
 
-import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Named-parameter JDBC template built on top of {@link CoreOperations}.
+ */
 public final class JdbcTemplate implements JdbcOperations {
 
-    private static final PreparedStatementBinder NO_BINDER = stmt -> {
-    };
+    private final CoreOperations      core;
+    private final NamedBinderCompiler compiler;
 
-    private final QueryStatementCallback  queryCallback  = new QueryStatementCallback();
-    private final JdbcExecutor            executor;
-    private final UpdateStatementCallback updateCallback = new UpdateStatementCallback();
-
-    public JdbcTemplate(JdbcExecutor executor) {
-        this.executor = executor;
+    public JdbcTemplate(CoreOperations core, MissingParameterPolicy missingPolicy) {
+        this.core = Contract.nonNull(core, "core");
+        this.compiler = new NamedBinderCompiler(Contract.nonNull(missingPolicy, "missingPolicy"));
     }
 
     @Override
-    public <T> Optional<T> querySingle(String sql, RowMapper<T> mapper) throws SQLException {
-        return querySingle(sql, NO_BINDER, mapper);
+    public CoreOperations core() {
+        return core;
     }
 
     @Override
-    public <T> Optional<T> querySingle(String sql, PreparedStatementBinder binder, RowMapper<T> mapper)
-            throws SQLException {
-        return executor.execute(sql, binder, queryCallback, new StrictSingleResultSetExtractor<>(mapper, sql));
+    public <T> Optional<T> querySingle(String sql, Map<String, ?> params, RowMapper<T> mapper) {
+        NamedSQL compiled = compiler.compile(sql);
+        return core.querySingle(
+                compiled.parsed(),
+                compiler.binder(compiled, new MapSqlParameterSource(params)),
+                mapper
+        );
     }
 
     @Override
-    public <T> T queryOne(String sql, RowMapper<T> mapper) throws SQLException {
-        return query(sql, NO_BINDER, new SingleResultSetExtractor<>(mapper));
+    public <T> Optional<T> querySingle(String sql, Object bean, RowMapper<T> mapper) {
+        NamedSQL compiled = compiler.compile(sql);
+        return core.querySingle(
+                compiled.parsed(),
+                compiler.binder(compiled, new BeanSqlParameterSource(bean)),
+                mapper
+        );
     }
 
     @Override
-    public <T> T queryOne(String sql, PreparedStatementBinder binder, RowMapper<T> mapper) throws SQLException {
-        return query(sql, binder, new SingleResultSetExtractor<>(mapper));
+    public <T> List<T> query(String sql, Map<String, ?> params, RowMapper<T> mapper) {
+        NamedSQL compiled = compiler.compile(sql);
+        return core.query(
+                compiled.parsed(),
+                compiler.binder(compiled, new MapSqlParameterSource(params)),
+                mapper
+        );
     }
 
     @Override
-    public <T> List<T> query(String sql, RowMapper<T> mapper) throws SQLException {
-        return query(sql, NO_BINDER, new ListResultSetExtractor<>(mapper));
-    }
-
-    @Override
-    public <T> List<T> query(String sql, PreparedStatementBinder binder, RowMapper<T> mapper) throws SQLException {
-        return query(sql, binder, new ListResultSetExtractor<>(mapper));
-    }
-
-    @Override
-    public <T> T query(String sql, ResultSetExtractor<T> extractor) throws SQLException {
-        return query(sql, NO_BINDER, extractor);
-    }
-
-    @Override
-    public <T> T query(String sql, PreparedStatementBinder binder, ResultSetExtractor<T> extractor)
-            throws SQLException {
-        // We reuse the same executor pipeline for all query paths.
-        return executor.execute(sql, binder, queryCallback, extractor);
-    }
-
-    @Override
-    public int update(String sql) throws SQLException {
-        return executor.executeUpdate(sql);
-    }
-
-    @Override
-    public int update(String sql, PreparedStatementBinder binder) throws SQLException {
-        return executor.executeUpdate(sql, binder);
+    public int update(String sql, Map<String, ?> params) {
+        NamedSQL compiled = compiler.compile(sql);
+        return core.update(
+                compiled.parsed(),
+                compiler.binder(compiled, new MapSqlParameterSource(params))
+        );
     }
 }

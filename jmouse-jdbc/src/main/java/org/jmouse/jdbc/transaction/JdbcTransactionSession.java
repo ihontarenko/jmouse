@@ -1,4 +1,4 @@
-package org.jmouse.jdbc.tx;
+package org.jmouse.jdbc.transaction;
 
 import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.jdbc.core.exception.JdbcAccessException;

@@ -11,16 +11,15 @@ import org.jmouse.jdbc.statement.StatementCallback;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Objects;
 
-public class ChainedJdbcExecutor implements JdbcExecutor {
+public class InterceptableJdbcExecutor implements JdbcExecutor {
 
     private static final PreparedStatementBinder NO_BINDER = statement -> {};
 
     private final JdbcExecutor                                     delegate;
     private final Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain;
 
-    public ChainedJdbcExecutor(
+    public InterceptableJdbcExecutor(
             JdbcExecutor delegate,
             Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain
     ) {

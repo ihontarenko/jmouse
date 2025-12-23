@@ -1,4 +1,4 @@
-package org.jmouse.jdbc.database.configuration;
+package org.jmouse.jdbc.configuration;
 
 import org.jmouse.beans.annotation.AggregatedBeans;
 import org.jmouse.beans.annotation.Bean;
@@ -23,7 +23,6 @@ public class DatabasePlatformConfiguration {
         DatabasePlatformRegistry registry = new DatabasePlatformRegistry()
                 .fallback(StandardPlatforms.ansi());
 
-        // External modules can contribute providers via BeanContext.
         for (DatabasePlatformProvider provider : providers) {
             registry.register(provider);
         }

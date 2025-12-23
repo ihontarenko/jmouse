@@ -39,15 +39,11 @@ public final class DatabaseMetaPlatformResolver {
             );
 
             return registry.resolve(info);
-
         } catch (SQLException e) {
             return registry.fallback();
-
         } finally {
             if (connection != null) {
-                try {
-                    provider.release(connection);
-                } catch (SQLException ignored) { }
+                provider.release(connection);
             }
         }
     }

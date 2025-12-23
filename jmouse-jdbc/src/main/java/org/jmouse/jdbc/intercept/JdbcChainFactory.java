@@ -2,6 +2,7 @@ package org.jmouse.jdbc.intercept;
 
 import org.jmouse.core.chain.Chain;
 import org.jmouse.jdbc.core.JdbcExecutor;
+import org.jmouse.jdbc.core.exception.DataAccessException;
 import org.jmouse.jdbc.mapping.ResultSetExtractor;
 import org.jmouse.jdbc.statement.StatementCallback;
 
@@ -34,8 +35,7 @@ public final class JdbcChainFactory {
                 return out;
 
             } catch (SQLException e) {
-                // поки що: пробрасываем як RuntimeException або загортаємо в твій DataAccessException
-                throw new RuntimeException(e);
+                throw new DataAccessException(e.getMessage());
             }
         }).toChain();
     }

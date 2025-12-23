@@ -2,10 +2,10 @@ package org.jmouse.jdbc.database;
 
 import org.jmouse.core.Contract;
 import org.jmouse.core.Sorter;
+import org.jmouse.jdbc.database.standard.StandardPlatforms;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public final class DatabasePlatformRegistry {
 

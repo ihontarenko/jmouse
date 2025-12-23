@@ -1,4 +1,4 @@
-package org.jmouse.jdbc.tx;
+package org.jmouse.jdbc.transaction;
 
 import java.sql.Connection;
 
