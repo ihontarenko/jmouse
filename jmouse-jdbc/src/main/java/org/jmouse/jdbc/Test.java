@@ -17,7 +17,7 @@ public class Test {
 
         System.out.println(context);
 
-        JdbcClient         client             = context.getBean(JdbcClient.class);
+        JdbcClient client = context.getBean(JdbcClient.class);
 
         System.out.println(client);
     }
