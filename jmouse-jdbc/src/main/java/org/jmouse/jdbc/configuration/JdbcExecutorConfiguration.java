@@ -4,7 +4,6 @@ import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.core.chain.Chain;
 import org.jmouse.jdbc.connection.ConnectionProvider;
-import org.jmouse.jdbc.connection.TransactionAwareConnectionProvider;
 import org.jmouse.jdbc.core.InterceptableJdbcExecutor;
 import org.jmouse.jdbc.core.DefaultJdbcExecutor;
 import org.jmouse.jdbc.core.JdbcExecutor;
@@ -17,14 +16,8 @@ import org.jmouse.jdbc.intercept.JdbcExecutionContext;
 public class JdbcExecutorConfiguration {
 
     @Bean
-    public ConnectionProvider txAwareConnectionProvider(ConnectionProvider rawConnectionProvider) {
-        return new TransactionAwareConnectionProvider(rawConnectionProvider);
-    }
-
-    @Bean
     public JdbcExecutor jdbcExecutor(
-            ConnectionProvider connectionProvider,
-            DatabasePlatform platform,
+            ConnectionProvider connectionProvider, DatabasePlatform platform,
             Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> jdbcChainBuilder
     ) {
         JdbcExecutor                                     core  = new DefaultJdbcExecutor(connectionProvider);

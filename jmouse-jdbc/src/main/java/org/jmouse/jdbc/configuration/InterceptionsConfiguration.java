@@ -12,7 +12,7 @@ import org.jmouse.jdbc.intercept.JdbcExecutionContext;
 import java.util.List;
 
 @BeanFactories
-public class JdbcChainConfiguration {
+public class InterceptionsConfiguration {
 
     @Bean(scope = BeanScope.PROTOTYPE)
     public Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> jdbcChainBuilder(

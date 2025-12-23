@@ -4,6 +4,7 @@ import org.jmouse.core.Contract;
 import org.jmouse.jdbc.bind.*;
 import org.jmouse.jdbc.mapping.RowMapper;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,7 +28,7 @@ public final class JdbcTemplate implements JdbcOperations {
     }
 
     @Override
-    public <T> Optional<T> querySingle(String sql, Map<String, ?> params, RowMapper<T> mapper) {
+    public <T> Optional<T> querySingle(String sql, Map<String, ?> params, RowMapper<T> mapper) throws SQLException {
         NamedSQL compiled = compiler.compile(sql);
         return core.querySingle(
                 compiled.parsed(),
@@ -37,7 +38,7 @@ public final class JdbcTemplate implements JdbcOperations {
     }
 
     @Override
-    public <T> Optional<T> querySingle(String sql, Object bean, RowMapper<T> mapper) {
+    public <T> Optional<T> querySingle(String sql, Object bean, RowMapper<T> mapper) throws SQLException {
         NamedSQL compiled = compiler.compile(sql);
         return core.querySingle(
                 compiled.parsed(),
@@ -47,7 +48,7 @@ public final class JdbcTemplate implements JdbcOperations {
     }
 
     @Override
-    public <T> List<T> query(String sql, Map<String, ?> params, RowMapper<T> mapper) {
+    public <T> List<T> query(String sql, Map<String, ?> params, RowMapper<T> mapper) throws SQLException {
         NamedSQL compiled = compiler.compile(sql);
         return core.query(
                 compiled.parsed(),
@@ -57,7 +58,7 @@ public final class JdbcTemplate implements JdbcOperations {
     }
 
     @Override
-    public int update(String sql, Map<String, ?> params) {
+    public int update(String sql, Map<String, ?> params) throws SQLException {
         NamedSQL compiled = compiler.compile(sql);
         return core.update(
                 compiled.parsed(),

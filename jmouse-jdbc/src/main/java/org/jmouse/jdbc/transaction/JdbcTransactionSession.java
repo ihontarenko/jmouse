@@ -58,11 +58,7 @@ public final class JdbcTransactionSession implements TransactionSession {
     @Override
     public void close() {
         TransactionContextAccessSupport.unbindResource(JdbcResourceHolder.class);
-        try {
-            provider.release(connection);
-        } catch (SQLException e) {
-            throw new JdbcAccessException(e);
-        }
+        provider.release(connection);
     }
 }
 

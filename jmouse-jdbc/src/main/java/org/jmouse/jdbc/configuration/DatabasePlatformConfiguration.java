@@ -30,9 +30,6 @@ public class DatabasePlatformConfiguration {
         return registry;
     }
 
-    /**
-     * Standard providers (can be overridden or supplemented by user modules).
-     */
     @Bean
     public DatabasePlatformProvider postgresPlatformProvider() {
         return new PostgresPlatformProvider();
