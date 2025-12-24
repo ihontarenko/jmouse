@@ -17,4 +17,10 @@ public final class ColumnRowMapper<T> implements RowMapper<T> {
     public T map(ResultSet resultSet) throws SQLException {
         return mapper.map(resultSet, index);
     }
+
+    @Override
+    public T map(RowView view) throws SQLException {
+        // ????
+        return mapper.map(view, index);
+    }
 }

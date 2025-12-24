@@ -44,8 +44,9 @@ final public class Describer {
                 .introspect().toDescriptor());
     }
 
-    public static ObjectDescriptor<?> forObjectDescriptor(final Class<?> type) {
-        return type.isRecord() ? forValueObject(type) : forJavaBean(type);
+    @SuppressWarnings("unchecked")
+    public static <T> ObjectDescriptor<T> forObjectDescriptor(final Class<T> type) {
+        return type.isRecord() ? (ObjectDescriptor<T>) forValueObject(type) : (ObjectDescriptor<T>) forJavaBean(type);
     }
 
 }

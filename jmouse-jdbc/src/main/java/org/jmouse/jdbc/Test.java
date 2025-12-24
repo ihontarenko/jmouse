@@ -3,10 +3,11 @@ package org.jmouse.jdbc;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeansScannerBeanContextInitializer;
 import org.jmouse.beans.DefaultBeanContext;
-import org.jmouse.core.bind.Bean;
-import org.jmouse.core.bind.ValueObject;
-import org.jmouse.core.bind.accessor.JavaBeanAccessor;
+import org.jmouse.core.bind.descriptor.Describer;
+import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
+import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.jdbc.core.CoreOperations;
+import org.jmouse.jdbc.mapping.BeanRowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,9 +27,12 @@ public class Test {
 
         CoreOperations operations = client.jdbc().core();
 
+        operations.query("select 333 as name, 123456 as id", BeanRowMapper.of(User.class));
+
         ResultSet resultSet = null;
 
-        Bean<User> bean = ValueObject.of(User.class);
+        ObjectDescriptor<User> descriptor = Describer.forObjectDescriptor(User.class);
+        PropertyDescriptor<User> propertyDescriptor = descriptor.getProperty("name");
 
         System.out.println(client);
     }

@@ -29,4 +29,5 @@ public interface CoreOperations {
     int update(String sql) throws SQLException;
 
     int update(String sql, PreparedStatementBinder binder) throws SQLException;
+
 }

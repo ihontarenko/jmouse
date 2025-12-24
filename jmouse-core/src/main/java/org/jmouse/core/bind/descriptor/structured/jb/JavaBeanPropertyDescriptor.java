@@ -26,7 +26,8 @@ import org.jmouse.core.Setter;
  * @author Ivan Hontarenko
  */
 public class JavaBeanPropertyDescriptor<T>
-        extends AbstractDescriptor<T, PropertyData<T>, JavaBeanPropertyIntrospector<T>> implements PropertyDescriptor<T> {
+        extends AbstractDescriptor<T, PropertyData<T>, JavaBeanPropertyIntrospector<T>>
+        implements PropertyDescriptor<T> {
 
     /**
      * Constructs a {@code JavaBeanPropertyDescriptor} with the given introspector and data container.
