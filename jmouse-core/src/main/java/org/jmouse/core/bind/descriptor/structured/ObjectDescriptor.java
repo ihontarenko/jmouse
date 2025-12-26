@@ -1,5 +1,6 @@
 package org.jmouse.core.bind.descriptor.structured;
 
+import org.jmouse.core.Contract;
 import org.jmouse.core.bind.DirectPropertyAccess;
 import org.jmouse.core.bind.PropertyAccessor;
 import org.jmouse.core.bind.descriptor.ClassTypeDescriptor;
@@ -91,4 +92,45 @@ public interface ObjectDescriptor<T> {
     default void addProperty(PropertyDescriptor<T> property) {
         getProperties().put(property.getName(), property);
     }
+
+    /**
+     * Obtain the value of the specified property from the given instance.
+     * <p>
+     * The property must exist and be readable; otherwise an
+     * {@link IllegalArgumentException} is raised.
+     * </p>
+     *
+     * @param property the property name
+     * @param instance the target object instance
+     * @return the current value of the property
+     */
+    default Object obtainValue(String property, T instance) {
+        Contract.state(hasProperty(property), () -> new IllegalArgumentException(
+                "Property " + property + " does not exist"));
+        PropertyAccessor<T> accessor = getProperty(property).getAccessor();
+        Contract.state(accessor.isReadable(), () -> new IllegalArgumentException(
+                "Property " + property + " is not readable"));
+        return accessor.readValue(instance);
+    }
+
+    /**
+     * Inject the given value into the specified property of the given instance.
+     * <p>
+     * The property must exist and be writable; otherwise an
+     * {@link IllegalArgumentException} is raised.
+     * </p>
+     *
+     * @param property the property name
+     * @param instance the target object instance
+     * @param value    the value to inject
+     */
+    default void injectValue(String property, T instance, Object value) {
+        Contract.state(hasProperty(property), () -> new IllegalArgumentException(
+                "Property " + property + " does not exist"));
+        PropertyAccessor<T> accessor = getProperty(property).getAccessor();
+        Contract.state(accessor.isWritable(), () -> new IllegalArgumentException(
+                "Property " + property + " is not writable"));
+        accessor.writeValue(instance, value);
+    }
+
 }

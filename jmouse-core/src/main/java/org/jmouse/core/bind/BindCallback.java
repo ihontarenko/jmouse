@@ -110,4 +110,15 @@ public interface BindCallback {
         return true;
     }
 
+    /**
+     * Sets the parent {@link BindCallback} for this callback.
+     * <p>
+     * Default implementation is a no-op, allowing callbacks that do not
+     * require parent awareness to ignore this contract.
+     * </p>
+     *
+     * @param callback the parent callback to associate with this instance
+     */
+    default void withParent(BindCallback callback) {}
+
 }

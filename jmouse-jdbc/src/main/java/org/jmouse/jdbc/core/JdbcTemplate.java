@@ -32,7 +32,7 @@ public final class JdbcTemplate implements JdbcOperations {
         NamedSQL compiled = compiler.compile(sql);
         return core.querySingle(
                 compiled.parsed(),
-                compiler.binder(compiled, new MapSqlParameterSource(params)),
+                compiler.binder(compiled, new MapParameterSource(params)),
                 mapper
         );
     }
@@ -42,7 +42,7 @@ public final class JdbcTemplate implements JdbcOperations {
         NamedSQL compiled = compiler.compile(sql);
         return core.querySingle(
                 compiled.parsed(),
-                compiler.binder(compiled, new BeanSqlParameterSource(bean)),
+                compiler.binder(compiled, new BeanParameterSource(bean)),
                 mapper
         );
     }
@@ -52,7 +52,7 @@ public final class JdbcTemplate implements JdbcOperations {
         NamedSQL compiled = compiler.compile(sql);
         return core.query(
                 compiled.parsed(),
-                compiler.binder(compiled, new MapSqlParameterSource(params)),
+                compiler.binder(compiled, new MapParameterSource(params)),
                 mapper
         );
     }
@@ -62,7 +62,7 @@ public final class JdbcTemplate implements JdbcOperations {
         NamedSQL compiled = compiler.compile(sql);
         return core.update(
                 compiled.parsed(),
-                compiler.binder(compiled, new MapSqlParameterSource(params))
+                compiler.binder(compiled, new MapParameterSource(params))
         );
     }
 }

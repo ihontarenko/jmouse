@@ -71,17 +71,17 @@ public final class RowView implements RowAccess {
      * @throws SQLException if metadata access fails
      */
     public static RowView of(ResultSet resultSet) throws SQLException {
-        ResultSetMetaData    metaData = resultSet.getMetaData();
-        int                  count    = metaData.getColumnCount();
+        ResultSetMetaData    metadata = resultSet.getMetaData();
+        int                  count    = metadata.getColumnCount();
         Map<String, Integer> mapping  = new HashMap<>(count * 2);
 
         for (int index = 1; index <= count; index++) {
-            Optional<String> columnName  = Optional.ofNullable(metaData.getColumnName(index));
-            Optional<String> columnLabel = Optional.ofNullable(metaData.getColumnLabel(index));
-            int[] cache = new int[] { index };
+            Optional<String> name  = Optional.ofNullable(metadata.getColumnName(index));
+            Optional<String> label = Optional.ofNullable(metadata.getColumnLabel(index));
+            int[]            cache = new int[]{index};
 
-            columnName.ifPresent(n -> mapping.put(n, cache[0]));
-            columnLabel.ifPresent(n -> mapping.putIfAbsent(n, cache[0]));
+            name.ifPresent(n -> mapping.put(n, cache[0]));
+            label.ifPresent(n -> mapping.putIfAbsent(n, cache[0]));
         }
 
         return new RowView(resultSet, count, mapping);

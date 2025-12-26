@@ -57,7 +57,19 @@ public class Example {
 
 //        vo.get("title2");
 
-        User user = Bind.with(wrapped).get(User.class);
+        BindCallback callback = new AbstractCallback() {
+            @Override
+            public void onUnbound(PropertyPath name, Bindable<?> bindable, BindContext context) {
+                System.out.println(STR."unbound: \{name}");
+                super.onUnbound(name, bindable, context);
+            }
+        };
+
+        User user = Bind.with(wrapped, callback).get(User.class);
+
+        Binder binder = Binder.with(data, callback);
+
+        Bind.with(binder).get(User.class);
 
         ObjectAccessor accessor = wrapper.wrap(user);
 

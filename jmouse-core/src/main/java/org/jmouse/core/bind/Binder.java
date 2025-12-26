@@ -16,17 +16,17 @@ import java.util.function.Supplier;
  */
 public class Binder implements ObjectBinder, BindContext {
 
-    private static final ObjectAccessorWrapper DEFAULT_WRAPPER = new StandardAccessorWrapper();
-    private static final Supplier<? extends RuntimeException> EXCEPTION_SUPPLIER = ()
-            -> new BindException("Recursive binding detected");
+    private static final ObjectAccessorWrapper                DEFAULT_WRAPPER    = new StandardAccessorWrapper();
+    private static final Supplier<? extends RuntimeException> EXCEPTION_SUPPLIER = () -> new BindException(
+            "Recursive binding detected");
 
     private final ObjectAccessor                  source;
     private final BinderFactory                   factory;
-    private final ObjectAccessorWrapper           wrapper;
     private final Conversion                      conversion;
     private final CyclicReferenceDetector<String> detector;
-    private       BindCallback                    defaultCallback;
+    private       BindCallback                    callback;
     private       BindingStrategy                 strategy;
+    private       ObjectAccessorWrapper           wrapper;
 
     /**
      * Constructs a {@code Binder} with the specified data source, binder factory, and binding strategy.
@@ -37,7 +37,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @param strategy the binding strategy (deep or shallow)
      */
     public Binder(ObjectAccessor source, BinderFactory factory, BindingStrategy strategy) {
-        this.defaultCallback = new DefaultBindingCallback();
+        this.callback = new DefaultBindingCallback();
         this.strategy = strategy;
         this.source = source;
         this.factory = factory;
@@ -65,9 +65,7 @@ public class Binder implements ObjectBinder, BindContext {
      */
     public static Binder with(Object source, BindCallback callback) {
         Binder binder = new Binder(DEFAULT_WRAPPER.wrap(source));
-
-        binder.setDefaultCallback(callback);
-
+        binder.setCallback(callback);
         return binder;
     }
 
@@ -127,7 +125,7 @@ public class Binder implements ObjectBinder, BindContext {
     public <T> BindResult<T> bind(PropertyPath path, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback) {
         try {
             ObjectBinder binder     = factory.getBinderFor(bindable);
-            BindCallback customizer = callback == null ? this.defaultCallback : callback;
+            BindCallback customizer = callback == null ? this.callback : callback;
 
             // Detect recursive binding before proceeding
             detector.detect(path::path, EXCEPTION_SUPPLIER);
@@ -158,7 +156,7 @@ public class Binder implements ObjectBinder, BindContext {
     @SuppressWarnings({"unchecked"})
     private <T> T doException(PropertyPath path, Bindable<T> bindable, Exception exception) {
         try {
-            return (T) defaultCallback.onFailure(path, bindable, this, exception);
+            return (T) callback.onFailure(path, bindable, this, exception);
         } catch (Exception cause) {
             BindException bindException;
 
@@ -243,12 +241,62 @@ public class Binder implements ObjectBinder, BindContext {
         return conversion;
     }
 
-    public BindCallback getDefaultCallback() {
-        return defaultCallback;
+    /**
+     * Return the default {@link BindCallback} associated with this binder.
+     *
+     * @return the default bind callback, or {@code null} if none is configured
+     */
+    public BindCallback getCallback() {
+        return callback;
     }
 
-    public void setDefaultCallback(BindCallback defaultCallback) {
-        this.defaultCallback = defaultCallback;
+    /**
+     * Set the default {@link BindCallback} for this binder.
+     * <p>
+     * If a previous callback is already configured, it will be set as the
+     * parent of the given callback, forming a callback chain.
+     * </p>
+     *
+     * @param callback the default bind callback to set
+     */
+    public void setCallback(BindCallback callback) {
+        BindCallback previous = this.callback;
+
+        if (previous != null) {
+            callback.withParent(previous);
+        }
+
+        this.callback = callback;
+    }
+
+    /**
+     * Return the {@link ObjectAccessorWrapper} to use.
+     * <p>
+     * Falls back to a default wrapper if none is explicitly configured.
+     * </p>
+     *
+     * @return the configured wrapper, or the default wrapper
+     */
+    public ObjectAccessorWrapper getWrapper() {
+        return wrapper == null ? DEFAULT_WRAPPER : wrapper;
+    }
+
+    /**
+     * Set the {@link ObjectAccessorWrapper} to use.
+     *
+     * @param wrapper the wrapper to set
+     */
+    public void setWrapper(ObjectAccessorWrapper wrapper) {
+        this.wrapper = wrapper;
+    }
+
+    /**
+     * Return the {@link BinderFactory} associated with this binder.
+     *
+     * @return the binder factory
+     */
+    public BinderFactory getFactory() {
+        return factory;
     }
 
 }

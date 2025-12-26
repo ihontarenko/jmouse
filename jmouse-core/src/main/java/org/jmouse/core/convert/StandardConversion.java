@@ -238,6 +238,10 @@ public class StandardConversion implements Conversion {
         sourceCandidates.add(sourceType.getSuperclass());
         targetCandidates.add(targetType);
 
+        if (targetType.isEnum()) {
+            targetCandidates.add(Enum.class);
+        }
+
         for (Class<?> sourceCandidate : sourceCandidates) {
             for (Class<?> targetCandidate : targetCandidates) {
                 ClassPair pair = new ClassPair(sourceCandidate, targetCandidate);

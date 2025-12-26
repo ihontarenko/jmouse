@@ -59,4 +59,15 @@ public class BasicAccessorWrapper implements ObjectAccessorWrapper {
 
         return instance;
     }
+
+    /**
+     * Register an {@link ObjectAccessorProvider}.
+     *
+     * @param provider the provider to register
+     */
+    @Override
+    public void registerProvider(ObjectAccessorProvider provider) {
+        providers.add(provider);
+    }
+
 }

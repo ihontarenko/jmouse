@@ -2,11 +2,11 @@ package org.jmouse.jdbc.bind;
 
 import java.util.Map;
 
-public final class MapSqlParameterSource implements ParameterSource {
+public final class MapParameterSource implements ParameterSource {
 
     private final Map<String, ?> values;
 
-    public MapSqlParameterSource(Map<String, ?> values) {
+    public MapParameterSource(Map<String, ?> values) {
         this.values = values;
     }
 

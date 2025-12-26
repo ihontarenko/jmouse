@@ -1,6 +1,8 @@
 package org.jmouse.jdbc.mapping;
 
 import org.jmouse.core.Contract;
+import org.jmouse.core.bind.Binder;
+import org.jmouse.core.bind.DefaultBindingCallback;
 import org.jmouse.core.bind.PropertyAccessor;
 import org.jmouse.core.bind.descriptor.Describer;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
@@ -36,6 +38,7 @@ public final class BeanRowMapper<T> implements RowMapper<T> {
     @Override
     public T map(RowView view) throws SQLException {
 
+        Binder binder = Binder.with(view, new DefaultBindingCallback());
 
         System.out.println(view);
 

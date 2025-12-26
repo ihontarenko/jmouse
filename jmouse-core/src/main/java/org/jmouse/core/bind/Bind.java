@@ -48,6 +48,20 @@ public final class Bind {
     }
 
     /**
+     * Creates a {@code Bind} instance with the specified {@link ObjectAccessor}
+     * and a default {@link BindCallback}.
+     *
+     * @param dataSource the data source
+     * @param callback   the default bind callback to use
+     * @return a new {@code Bind} instance
+     */
+    public static Bind with(ObjectAccessor dataSource, BindCallback callback) {
+        Binder binder = new Binder(dataSource);
+        binder.setCallback(callback);
+        return with(binder);
+    }
+
+    /**
      * Creates a {@code Bind} instance with the given {@link Binder}.
      *
      * @param binder the binder instance
