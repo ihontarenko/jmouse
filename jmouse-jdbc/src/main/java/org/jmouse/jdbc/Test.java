@@ -31,8 +31,6 @@ public class Test {
         operations.queryOne("select upper('John') as name, 123456 as id",
                          new ColumnRowMapper<>(2, ResultSet::getObject));
 
-        ResultSet resultSet = null;
-
         ObjectDescriptor<User> descriptor = Describer.forObjectDescriptor(User.class);
         PropertyDescriptor<User> propertyDescriptor = descriptor.getProperty("name");
 
