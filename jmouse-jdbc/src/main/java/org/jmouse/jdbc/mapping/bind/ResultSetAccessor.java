@@ -1,22 +1,26 @@
-package org.jmouse.jdbc.mapping;
+package org.jmouse.jdbc.mapping.bind;
 
 import org.jmouse.core.bind.AbstractAccessor;
 import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.jdbc.core.exception.ResultSetAccessException;
+import org.jmouse.jdbc.mapping.ResultSetRowMetadata;
+import org.jmouse.jdbc.mapping.RowMetadata;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ResultSetAccessor extends AbstractAccessor {
 
+    private final RowMetadata metadata;
+
     public ResultSetAccessor(Object source) {
         super(source);
-
-        // create RowMetadata instance here...
+        this.metadata = ResultSetRowMetadata.of((ResultSet) source);
     }
 
     @Override
     public ObjectAccessor get(String name) {
-        return null;
+        return get(metadata.indexOf(name));
     }
 
     @Override
@@ -24,7 +28,7 @@ public class ResultSetAccessor extends AbstractAccessor {
         try {
             return wrap(asType(ResultSet.class).getObject(index));
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new ResultSetAccessException("Unable to retrieve value from result-set.", e);
         }
     }
 

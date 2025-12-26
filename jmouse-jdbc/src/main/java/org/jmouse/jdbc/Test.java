@@ -8,6 +8,7 @@ import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.jdbc.core.CoreOperations;
 import org.jmouse.jdbc.mapping.BeanRowMapper;
+import org.jmouse.jdbc.mapping.ColumnRowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,7 +28,8 @@ public class Test {
 
         CoreOperations operations = client.jdbc().core();
 
-        operations.query("select 333 as name, 123456 as id", BeanRowMapper.of(User.class));
+        operations.queryOne("select upper('John') as name, 123456 as id",
+                         new ColumnRowMapper<>(2, ResultSet::getObject));
 
         ResultSet resultSet = null;
 

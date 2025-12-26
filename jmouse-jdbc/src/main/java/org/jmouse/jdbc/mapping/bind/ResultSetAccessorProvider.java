@@ -1,21 +1,23 @@
-package org.jmouse.core.bind.accessor;
+package org.jmouse.jdbc.mapping.bind;
 
 import org.jmouse.core.Priority;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.ObjectAccessorProvider;
 import org.jmouse.core.reflection.TypeInformation;
 
-@Priority(-2100)
-public class RecordAccessorProvider implements ObjectAccessorProvider {
+import java.sql.ResultSet;
+
+@Priority(-5000)
+public class ResultSetAccessorProvider implements ObjectAccessorProvider {
 
     @Override
     public boolean supports(Object source) {
-        return TypeInformation.forInstance(source).isRecord();
+        return TypeInformation.forInstance(source).is(ResultSet.class);
     }
 
     @Override
     public ObjectAccessor create(Object source) {
-        return new RecordAccessor(source);
+        return new ResultSetAccessor(source);
     }
 
 }

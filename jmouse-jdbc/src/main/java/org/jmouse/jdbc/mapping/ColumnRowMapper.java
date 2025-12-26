@@ -18,9 +18,4 @@ public final class ColumnRowMapper<T> implements RowMapper<T> {
         return mapper.map(resultSet, index);
     }
 
-    @Override
-    public T map(ResultSetRowMetadata view) throws SQLException {
-        // ????
-        return mapper.map(view, index);
-    }
 }
