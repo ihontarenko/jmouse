@@ -10,6 +10,8 @@ public class ResultSetAccessor extends AbstractAccessor {
 
     public ResultSetAccessor(Object source) {
         super(source);
+
+        // create RowMetadata instance here...
     }
 
     @Override

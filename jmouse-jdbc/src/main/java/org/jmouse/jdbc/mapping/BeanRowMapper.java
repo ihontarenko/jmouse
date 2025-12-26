@@ -36,7 +36,7 @@ public final class BeanRowMapper<T> implements RowMapper<T> {
     }
 
     @Override
-    public T map(RowView view) throws SQLException {
+    public T map(ResultSetRowMetadata view) throws SQLException {
 
         Binder binder = Binder.with(view, new DefaultBindingCallback());
 

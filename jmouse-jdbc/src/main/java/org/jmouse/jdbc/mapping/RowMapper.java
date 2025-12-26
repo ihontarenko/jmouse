@@ -7,9 +7,9 @@ import java.sql.SQLException;
 public interface RowMapper<T> {
 
     default T map(ResultSet resultSet) throws SQLException {
-        return map(RowView.of(resultSet));
+        return map(ResultSetRowMetadata.of(resultSet));
     }
 
-    T map(RowView view) throws SQLException;
+    T map(ResultSetRowMetadata view) throws SQLException;
 
 }
