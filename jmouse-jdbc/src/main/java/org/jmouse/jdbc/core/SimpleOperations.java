@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-public interface CoreOperations {
+public interface SimpleOperations {
 
     <T> Optional<T> querySingle(String sql, RowMapper<T> mapper) throws SQLException;
 

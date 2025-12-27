@@ -3,22 +3,20 @@ package org.jmouse.jdbc.core;
 import org.jmouse.jdbc.mapping.*;
 import org.jmouse.jdbc.statement.PreparedStatementBinder;
 import org.jmouse.jdbc.statement.QueryStatementCallback;
-import org.jmouse.jdbc.statement.UpdateStatementCallback;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-public final class CoreTemplate implements CoreOperations {
+public class SimpleTemplate implements SimpleOperations {
 
-    private static final PreparedStatementBinder NO_BINDER = stmt -> {
-    };
+    private static final PreparedStatementBinder NO_BINDER = stmt -> {};
 
-    private final QueryStatementCallback  queryCallback  = new QueryStatementCallback();
-    private final JdbcExecutor            executor;
-    private final UpdateStatementCallback updateCallback = new UpdateStatementCallback();
+    private final JdbcExecutor           executor;
+    private final QueryStatementCallback queryCallback = new QueryStatementCallback();
 
-    public CoreTemplate(JdbcExecutor executor) {
+    public SimpleTemplate(JdbcExecutor executor) {
         this.executor = executor;
     }
 
@@ -35,7 +33,7 @@ public final class CoreTemplate implements CoreOperations {
 
     @Override
     public <T> T queryOne(String sql, RowMapper<T> mapper) throws SQLException {
-        return query(sql, NO_BINDER, new SingleResultSetExtractor<>(mapper));
+        return queryOne(sql, NO_BINDER, mapper);
     }
 
     @Override
@@ -45,7 +43,7 @@ public final class CoreTemplate implements CoreOperations {
 
     @Override
     public <T> List<T> query(String sql, RowMapper<T> mapper) throws SQLException {
-        return query(sql, NO_BINDER, new ListResultSetExtractor<>(mapper));
+        return query(sql, NO_BINDER, mapper);
     }
 
     @Override
@@ -61,17 +59,20 @@ public final class CoreTemplate implements CoreOperations {
     @Override
     public <T> T query(String sql, PreparedStatementBinder binder, ResultSetExtractor<T> extractor)
             throws SQLException {
-        // We reuse the same executor pipeline for all query paths.
         return executor.execute(sql, binder, queryCallback, extractor);
     }
 
     @Override
     public int update(String sql) throws SQLException {
-        return executor.executeUpdate(sql);
+        return update(sql, NO_BINDER);
     }
 
     @Override
     public int update(String sql, PreparedStatementBinder binder) throws SQLException {
         return executor.executeUpdate(sql, binder);
+    }
+
+    protected JdbcExecutor executor() {
+        return executor;
     }
 }
