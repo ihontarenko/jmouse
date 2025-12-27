@@ -11,9 +11,7 @@ public record SQLPlan(String original, String compiled, List<Binding> bindings) 
     }
 
     public sealed interface Binding permits Binding.Named, Binding.Positional {
-
         record Named(String name, String rawToken, Expression expression) implements Binding { }
-
         record Positional(int position) implements Binding { }
     }
 }
