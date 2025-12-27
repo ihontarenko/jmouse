@@ -30,6 +30,8 @@ public class DemoA {
                 userMapper
         );
 
+        simple.update("create table t(id int)");
+
         System.out.println(users);
     }
 
