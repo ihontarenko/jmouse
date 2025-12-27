@@ -72,6 +72,17 @@ public class SimpleTemplate implements SimpleOperations {
         return executor.executeUpdate(sql, binder);
     }
 
+    @Override
+    public int[] batchUpdate(String sql, List<? extends PreparedStatementBinder> binders) throws SQLException {
+        return executor().executeBatch(sql, binders);
+    }
+
+    @Override
+    public <K> K update(String sql, PreparedStatementBinder binder, KeyExtractor<K> extractor)
+            throws SQLException {
+        return executor().executeUpdateWithKey(sql, binder, extractor);
+    }
+
     protected JdbcExecutor executor() {
         return executor;
     }

@@ -36,4 +36,8 @@ public interface NamedOperations extends SimpleOperations {
 
     int update(String sql, ParameterSource parameterSource) throws SQLException;
 
+    int[] batch(String sql, List<? extends ParameterSource> parameterSources) throws SQLException;
+
+    <K> K update(String sql, ParameterSource parameterSource, KeyExtractor<K> extractor) throws SQLException;
+
 }

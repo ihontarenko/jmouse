@@ -4,7 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
+import org.jmouse.core.Contract;
 import org.jmouse.jdbc.JdbcSupport;
 import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.jdbc.mapping.ResultSetExtractor;
@@ -87,5 +89,53 @@ public final class DefaultJdbcExecutor implements JdbcExecutor {
         }
     }
 
+    @Override
+    public int[] executeBatch(String sql, List<? extends PreparedStatementBinder> binders) throws SQLException {
+        Contract.nonNull(sql, "sql");
+        Contract.nonNull(binders, "binders");
+
+        if (binders.isEmpty()) {
+            return new int[0];
+        }
+
+        Connection connection = connectionProvider.getConnection();
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            for (PreparedStatementBinder binder : binders) {
+                if (binder != null) {
+                    binder.bind(statement);
+                }
+                statement.addBatch();
+            }
+
+            return statement.executeBatch();
+        } finally {
+            connectionProvider.release(connection);
+        }
+    }
+
+    @Override
+    public <K> K executeUpdateWithKey(
+            String sql,
+            PreparedStatementBinder binder,
+            KeyExtractor<K> extractor
+    ) throws SQLException {
+        Contract.nonNull(extractor, "extractor");
+        Contract.nonNull(sql, "sql");
+        Contract.nonNull(binder, "binder");
+
+        Connection connection = connectionProvider.getConnection();
+
+        try (PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            binder.bind(statement);
+            statement.executeUpdate();
+
+            try (ResultSet keys = statement.getGeneratedKeys()) {
+                return extractor.extract(keys);
+            }
+        } finally {
+            connectionProvider.release(connection);
+        }
+    }
 
 }

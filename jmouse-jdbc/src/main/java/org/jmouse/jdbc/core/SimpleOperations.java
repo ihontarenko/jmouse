@@ -30,4 +30,8 @@ public interface SimpleOperations {
 
     int update(String sql, PreparedStatementBinder binder) throws SQLException;
 
+    int[] batchUpdate(String sql, List<? extends PreparedStatementBinder> binders) throws SQLException;
+
+    <K> K update(String sql, PreparedStatementBinder binder, KeyExtractor<K> extractor) throws SQLException;
+
 }

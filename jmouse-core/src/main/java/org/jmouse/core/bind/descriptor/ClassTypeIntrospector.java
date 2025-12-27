@@ -69,7 +69,7 @@ public class ClassTypeIntrospector extends AnnotatedElementIntrospector<ClassTyp
      * Introspects and registers all public constructors.
      */
     public ClassTypeIntrospector constructors() {
-        for (Constructor<?> constructor : container.getTarget().getConstructors()) {
+        for (Constructor<?> constructor : container.getTarget().getDeclaredConstructors()) {
             constructor(new ConstructorIntrospector(constructor).introspect().toDescriptor());
         }
         return self();

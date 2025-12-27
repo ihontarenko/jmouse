@@ -11,6 +11,7 @@ import org.jmouse.jdbc.parameters.bind.SQLPlanPreparedStatementBinder;
 import org.jmouse.jdbc.statement.PreparedStatementBinder;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,6 +61,25 @@ public final class NamedTemplate extends SimpleTemplate implements NamedOperatio
         SQLCompiled             compiled = compile(sql);
         PreparedStatementBinder binder   = binder(compiled, params);
         return super.update(compiled.compiled(), binder);
+    }
+
+    @Override
+    public int[] batch(String sql, List<? extends ParameterSource> parameterSources) throws SQLException {
+        SQLCompiled                   compiled = compile(sql);
+        List<PreparedStatementBinder> binders  = new ArrayList<>(parameterSources.size());
+
+        for (ParameterSource parameterSource : parameterSources) {
+            binders.add(binder(compiled, parameterSource));
+        }
+
+        return super.batchUpdate(compiled.compiled(), binders);
+    }
+
+    @Override
+    public <K> K update(String sql, ParameterSource parameters, KeyExtractor<K> extractor) throws SQLException {
+        SQLCompiled compiled = compile(sql);
+        PreparedStatementBinder binder = binder(compiled, parameters);
+        return super.update(compiled.compiled(), binder, extractor);
     }
 
     private SQLCompiled compile(String sql) {

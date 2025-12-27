@@ -1,37 +1,36 @@
 package org.jmouse.jdbc.core;
 
+import org.jmouse.core.Contract;
 import org.jmouse.core.chain.Chain;
-import org.jmouse.jdbc.core.exception.JdbcAccessException;
-import org.jmouse.jdbc.intercept.JdbcCall;
-import org.jmouse.jdbc.intercept.JdbcExecutionContext;
-import org.jmouse.jdbc.intercept.JdbcOperation;
+import org.jmouse.jdbc.intercept.*;
 import org.jmouse.jdbc.mapping.ResultSetExtractor;
 import org.jmouse.jdbc.statement.PreparedStatementBinder;
 import org.jmouse.jdbc.statement.StatementCallback;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class InterceptableJdbcExecutor implements JdbcExecutor {
 
-    private static final PreparedStatementBinder NO_BINDER = statement -> {};
+    private static final PreparedStatementBinder NO_BINDER = statement -> {
+    };
 
     private final JdbcExecutor                                     delegate;
     private final Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain;
 
-    public InterceptableJdbcExecutor(
-            JdbcExecutor delegate,
-            Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain
-    ) {
-        this.delegate = delegate;
-        this.chain = chain;
+    public InterceptableJdbcExecutor(JdbcExecutor delegate, Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain) {
+        this.delegate = Contract.nonNull(delegate, "delegate");
+        this.chain = Contract.nonNull(chain, "chain");
+    }
+
+    protected JdbcExecutionContext newContext() {
+        return new JdbcExecutionContext(delegate);
     }
 
     @Override
     public <T> T execute(
-            String sql,
-            StatementCallback<ResultSet> statementCallback,
-            ResultSetExtractor<T> extractor
+            String sql, StatementCallback<ResultSet> statementCallback, ResultSetExtractor<T> extractor
     ) throws SQLException {
         return execute(sql, NO_BINDER, statementCallback, extractor);
     }
@@ -39,26 +38,11 @@ public class InterceptableJdbcExecutor implements JdbcExecutor {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T execute(
-            String sql,
-            PreparedStatementBinder binder,
-            StatementCallback<ResultSet> statementCallback,
-            ResultSetExtractor<T> extractor
+            String sql, PreparedStatementBinder binder, StatementCallback<ResultSet> callback, ResultSetExtractor<T> extractor
     ) throws SQLException {
-
         JdbcExecutionContext context = newContext();
-        JdbcCall<T>          call    = new JdbcCall<>(
-                sql,
-                binder,
-                statementCallback,
-                extractor,
-                JdbcOperation.QUERY
-        );
-
-        try {
-            return (T) chain.run(context, call);
-        } catch (JdbcAccessException e) {
-            throw e.getCause();
-        }
+        JdbcQueryCall<T>     call    = new JdbcQueryCall<>(sql, binder, callback, extractor);
+        return (T) chain.run(context, call);
     }
 
     @Override
@@ -68,28 +52,29 @@ public class InterceptableJdbcExecutor implements JdbcExecutor {
 
     @Override
     public int executeUpdate(String sql, PreparedStatementBinder binder) throws SQLException {
-
-        JdbcExecutionContext ctx = newContext();
-
-        JdbcCall<Integer> call = new JdbcCall<>(
-                sql,
-                binder,
-                null,
-                null,
-                JdbcOperation.UPDATE
-        );
-
-        try {
-            return (Integer) chain.run(ctx, call);
-        } catch (JdbcAccessException e) {
-            throw e.getCause();
-        }
+        JdbcExecutionContext context = newContext();
+        JdbcUpdateCall       call    = new JdbcUpdateCall(sql, binder);
+        Object               result  = chain.run(context, call);
+        return (Integer) result;
     }
 
-    /**
-     * Factory method for context customization (dialect, settings, etc).
-     */
-    protected JdbcExecutionContext newContext() {
-        return new JdbcExecutionContext(delegate, null);
+    @Override
+    public int[] executeBatch(String sql, List<? extends PreparedStatementBinder> binders) throws SQLException {
+        JdbcExecutionContext context = newContext();
+        JdbcBatchUpdateCall  call    = new JdbcBatchUpdateCall(sql, binders);
+        Object               result  = chain.run(context, call);
+        return (int[]) result;
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <K> K executeUpdateWithKey(
+            String sql, PreparedStatementBinder binder, KeyExtractor<K> extractor
+    ) throws SQLException {
+        JdbcExecutionContext context    = newContext();
+        JdbcKeyUpdateCall<K> call   = new JdbcKeyUpdateCall<>(sql, binder, extractor);
+        Object               result = chain.run(context, call);
+        return (K) result;
+    }
+
 }

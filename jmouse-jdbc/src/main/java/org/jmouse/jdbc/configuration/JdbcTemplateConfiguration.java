@@ -2,6 +2,7 @@ package org.jmouse.jdbc.configuration;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
+import org.jmouse.beans.annotation.PrimaryBean;
 import org.jmouse.beans.conditions.BeanCondition;
 import org.jmouse.jdbc.bind.MissingParameterPolicy;
 import org.jmouse.jdbc.core.*;
@@ -20,6 +21,7 @@ public class JdbcTemplateConfiguration {
     }
 
     @Bean
+    @PrimaryBean
     public SimpleOperations simpleTemplate(JdbcExecutor executor) {
         return new SimpleTemplate(executor);
     }
