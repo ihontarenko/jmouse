@@ -1,7 +1,9 @@
 package org.jmouse.jdbc.parameters.compile;
 
+import org.jmouse.core.Contract;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.StringSource;
+import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.lexer.TokenizableSource.Entry;
 import org.jmouse.el.node.Expression;
 import org.jmouse.jdbc.parameters.SQLPlan;
@@ -13,10 +15,10 @@ import java.util.List;
 
 public final class SQLPlanCompiler {
 
-    private final ExpressionLanguage el; // optional
+    private final ExpressionLanguage expressionLanguage;
 
-    public SQLPlanCompiler(ExpressionLanguage el) {
-        this.el = el;
+    public SQLPlanCompiler(ExpressionLanguage expressionLanguage) {
+        this.expressionLanguage = Contract.nonNull(expressionLanguage, "expressionLanguage");
     }
 
     public SQLPlan compile(StringSource source) {
@@ -27,6 +29,8 @@ public final class SQLPlanCompiler {
         int cursor            = 0;
         int positionalCounter = 0;
 
+        EvaluationContext evaluationContext = expressionLanguage.newContext();
+
         for (int i = 0; i < source.size(); i++) {
             Entry entry = source.get(i);
 
@@ -36,8 +40,11 @@ public final class SQLPlanCompiler {
                 cursor = entry.offset() + entry.length();
 
                 NamedSpecification specification = NamedSpecification.parse(entry.segment());
-                Expression         node          = (el != null && specification.hasPipeline())
-                        ? el.compile(specification.pipelineBody()) : null;
+                Expression         node          = null;
+
+                if (specification.hasPipeline()) {
+                    node = expressionLanguage.compile(entry.segment().substring(1));
+                }
 
                 bindings.add(new SQLPlan.Binding.Named(specification.name(), entry.segment(), node));
             }
@@ -57,11 +64,11 @@ public final class SQLPlanCompiler {
 
     static final class NamedSpecification {
         private final String name;
-        private final String pipelineBody; // "upper|trim" or null
+        private final String pipeline; // "upper|trim" or null
 
-        private NamedSpecification(String name, String pipelineBody) {
+        private NamedSpecification(String name, String pipeline) {
             this.name = name;
-            this.pipelineBody = pipelineBody;
+            this.pipeline = pipeline;
         }
 
         static NamedSpecification parse(String rawToken) {
@@ -88,11 +95,11 @@ public final class SQLPlanCompiler {
         }
 
         boolean hasPipeline() {
-            return pipelineBody != null && !pipelineBody.isBlank();
+            return pipeline != null && !pipeline.isBlank();
         }
 
-        String pipelineBody() {
-            return pipelineBody;
+        String pipeline() {
+            return pipeline;
         }
     }
 }
