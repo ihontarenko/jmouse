@@ -6,7 +6,6 @@ public record JdbcUpdateCall(
         String sql,
         PreparedStatementBinder binder
 ) implements JdbcCall<Integer> {
-
     @Override
     public JdbcOperation operation() {
         return JdbcOperation.UPDATE;

@@ -1,15 +1,14 @@
 package org.jmouse.jdbc.core;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 
 import org.jmouse.core.Contract;
 import org.jmouse.jdbc.JdbcSupport;
 import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.jdbc.mapping.ResultSetExtractor;
+import org.jmouse.jdbc.statement.CallableCallback;
+import org.jmouse.jdbc.statement.CallableStatementBinder;
 import org.jmouse.jdbc.statement.PreparedStatementBinder;
 import org.jmouse.jdbc.statement.StatementCallback;
 
@@ -115,7 +114,7 @@ public final class DefaultJdbcExecutor implements JdbcExecutor {
     }
 
     @Override
-    public <K> K executeUpdateWithKey(
+    public <K> K executeUpdate(
             String sql,
             PreparedStatementBinder binder,
             KeyExtractor<K> extractor
@@ -133,6 +132,19 @@ public final class DefaultJdbcExecutor implements JdbcExecutor {
             try (ResultSet keys = statement.getGeneratedKeys()) {
                 return extractor.extract(keys);
             }
+        } finally {
+            connectionProvider.release(connection);
+        }
+    }
+
+    @Override
+    public <T> T executeCall(String sql, CallableStatementBinder binder, CallableCallback<T> callback) throws SQLException {
+        Connection connection = connectionProvider.getConnection();
+        try (CallableStatement statement = connection.prepareCall(sql)) {
+            if (binder != null) {
+                binder.bind(statement);
+            }
+            return callback.doInCallable(statement);
         } finally {
             connectionProvider.release(connection);
         }

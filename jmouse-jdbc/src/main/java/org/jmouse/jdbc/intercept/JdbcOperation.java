@@ -4,5 +4,6 @@ public enum JdbcOperation {
     QUERY,
     UPDATE,
     BATCH_UPDATE,
-    UPDATE_RETURNING_KEYS
+    UPDATE_RETURNING_KEYS,
+    CALL
 }

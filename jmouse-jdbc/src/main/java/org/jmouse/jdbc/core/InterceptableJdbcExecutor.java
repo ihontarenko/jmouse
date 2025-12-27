@@ -4,6 +4,8 @@ import org.jmouse.core.Contract;
 import org.jmouse.core.chain.Chain;
 import org.jmouse.jdbc.intercept.*;
 import org.jmouse.jdbc.mapping.ResultSetExtractor;
+import org.jmouse.jdbc.statement.CallableCallback;
+import org.jmouse.jdbc.statement.CallableStatementBinder;
 import org.jmouse.jdbc.statement.PreparedStatementBinder;
 import org.jmouse.jdbc.statement.StatementCallback;
 
@@ -68,13 +70,21 @@ public class InterceptableJdbcExecutor implements JdbcExecutor {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <K> K executeUpdateWithKey(
+    public <K> K executeUpdate(
             String sql, PreparedStatementBinder binder, KeyExtractor<K> extractor
     ) throws SQLException {
         JdbcExecutionContext context    = newContext();
         JdbcKeyUpdateCall<K> call   = new JdbcKeyUpdateCall<>(sql, binder, extractor);
         Object               result = chain.run(context, call);
         return (K) result;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T executeCall(String sql, CallableStatementBinder binder, CallableCallback<T> callback) throws SQLException {
+        JdbcExecutionContext context = newContext();
+        JdbcCallableCall<T>  call    = new JdbcCallableCall<>(sql, binder, callback);
+        return (T) chain.run(context, call);
     }
 
 }

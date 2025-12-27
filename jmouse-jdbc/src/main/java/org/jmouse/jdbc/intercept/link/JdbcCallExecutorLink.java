@@ -24,7 +24,9 @@ public final class JdbcCallExecutorLink implements Link<JdbcExecutionContext, Jd
                 case JdbcBatchUpdateCall b ->
                         delegate.executeBatch(b.sql(), b.binders());
                 case JdbcKeyUpdateCall<?> k ->
-                        delegate.executeUpdateWithKey(k.sql(), k.binder(), k.keyExtractor());
+                        delegate.executeUpdate(k.sql(), k.binder(), k.keyExtractor());
+                case JdbcCallableCall<?> c ->
+                        delegate.executeCall(c.sql(), c.binder(), c.callback());
             };
             return Outcome.done(result);
         } catch (SQLException e) {

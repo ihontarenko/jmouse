@@ -2,6 +2,8 @@ package org.jmouse.jdbc.core;
 
 import org.jmouse.jdbc.mapping.ResultSetExtractor;
 import org.jmouse.jdbc.mapping.RowMapper;
+import org.jmouse.jdbc.statement.CallableCallback;
+import org.jmouse.jdbc.statement.CallableStatementBinder;
 import org.jmouse.jdbc.statement.PreparedStatementBinder;
 
 import java.sql.SQLException;
@@ -33,5 +35,9 @@ public interface SimpleOperations {
     int[] batchUpdate(String sql, List<? extends PreparedStatementBinder> binders) throws SQLException;
 
     <K> K update(String sql, PreparedStatementBinder binder, KeyExtractor<K> extractor) throws SQLException;
+
+    <T> T call(String sql, CallableStatementBinder binder, CallableCallback<T> callback) throws SQLException;
+
+    <T> T call(String sql, CallableCallback<T> callback) throws SQLException;
 
 }

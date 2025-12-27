@@ -1,17 +1,21 @@
 package org.jmouse.jdbc.core;
 
 import org.jmouse.jdbc.mapping.*;
+import org.jmouse.jdbc.statement.CallableCallback;
+import org.jmouse.jdbc.statement.CallableStatementBinder;
 import org.jmouse.jdbc.statement.PreparedStatementBinder;
 import org.jmouse.jdbc.statement.QueryStatementCallback;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
 public class SimpleTemplate implements SimpleOperations {
 
-    private static final PreparedStatementBinder NO_BINDER = stmt -> {};
+    private static final PreparedStatementBinder NO_BINDER      = statement -> {
+    };
+    private static final CallableStatementBinder NO_CALL_BINDER = statement -> {
+    };
 
     private final JdbcExecutor           executor;
     private final QueryStatementCallback queryCallback = new QueryStatementCallback();
@@ -80,7 +84,17 @@ public class SimpleTemplate implements SimpleOperations {
     @Override
     public <K> K update(String sql, PreparedStatementBinder binder, KeyExtractor<K> extractor)
             throws SQLException {
-        return executor().executeUpdateWithKey(sql, binder, extractor);
+        return executor().executeUpdate(sql, binder, extractor);
+    }
+
+    @Override
+    public <T> T call(String sql, CallableStatementBinder binder, CallableCallback<T> callback) throws SQLException {
+        return executor.executeCall(sql, binder, callback);
+    }
+
+    @Override
+    public <T> T call(String sql, CallableCallback<T> callback) throws SQLException {
+        return call(sql, NO_CALL_BINDER, callback);
     }
 
     protected JdbcExecutor executor() {

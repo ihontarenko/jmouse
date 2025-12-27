@@ -12,10 +12,8 @@ public record JdbcQueryCall<T>(
         StatementCallback<ResultSet> statementCallback,
         ResultSetExtractor<T> extractor
 ) implements JdbcCall<T> {
-
     @Override
     public JdbcOperation operation() {
         return JdbcOperation.QUERY;
     }
-
 }

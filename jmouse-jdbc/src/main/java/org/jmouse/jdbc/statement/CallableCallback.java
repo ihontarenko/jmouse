@@ -4,5 +4,5 @@ import java.sql.CallableStatement;
 import java.sql.SQLException;
 
 public interface CallableCallback<T> {
-    T doInCallable(CallableStatement callableStatement) throws SQLException;
+    T doInCallable(CallableStatement statement) throws SQLException;
 }

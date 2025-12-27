@@ -17,4 +17,5 @@ public record JdbcBatchUpdateCall(
     public int batchSize() {
         return binders == null ? 0 : binders.size();
     }
+
 }
