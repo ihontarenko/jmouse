@@ -4,8 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
-import org.jmouse.jdbc.core.exception.EmptyResultException;
-import org.jmouse.jdbc.core.exception.NonUniqueResultException;
+import org.jmouse.jdbc.exception.EmptyResultException;
+import org.jmouse.jdbc.exception.NonUniqueResultException;
 
 public final class StrictSingleResultSetExtractor<T> implements ResultSetExtractor<Optional<T>> {
 

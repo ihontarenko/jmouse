@@ -1,4 +1,4 @@
-package org.jmouse.jdbc.core.exception;
+package org.jmouse.jdbc.exception;
 
 public class ResultSetAccessException extends DataAccessException {
 

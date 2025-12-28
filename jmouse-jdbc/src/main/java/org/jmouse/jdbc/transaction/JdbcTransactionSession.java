@@ -1,7 +1,7 @@
 package org.jmouse.jdbc.transaction;
 
 import org.jmouse.jdbc.connection.ConnectionProvider;
-import org.jmouse.jdbc.core.exception.JdbcAccessException;
+import org.jmouse.jdbc.exception.JdbcAccessException;
 import org.jmouse.tx.core.TransactionSession;
 import org.jmouse.tx.infrastructure.support.TransactionContextAccessSupport;
 

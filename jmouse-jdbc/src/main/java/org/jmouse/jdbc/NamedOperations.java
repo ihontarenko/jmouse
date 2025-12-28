@@ -1,8 +1,9 @@
-package org.jmouse.jdbc.core;
+package org.jmouse.jdbc;
 
 import org.jmouse.jdbc.bind.BeanParameterSource;
 import org.jmouse.jdbc.bind.MapParameterSource;
 import org.jmouse.jdbc.bind.ParameterSource;
+import org.jmouse.jdbc.mapping.KeyExtractor;
 import org.jmouse.jdbc.mapping.RowMapper;
 
 import java.sql.SQLException;

@@ -1,4 +1,4 @@
-package org.jmouse.jdbc.core;
+package org.jmouse.jdbc.mapping;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -3,8 +3,6 @@ package org.jmouse.jdbc;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeansScannerBeanContextInitializer;
 import org.jmouse.beans.DefaultBeanContext;
-import org.jmouse.jdbc.core.NamedOperations;
-import org.jmouse.jdbc.core.SimpleOperations;
 import org.jmouse.jdbc.mapping.BeanRowMapper;
 import org.jmouse.jdbc.mapping.RowMapper;
 

@@ -1,4 +1,4 @@
-package org.jmouse.jdbc.core;
+package org.jmouse.jdbc;
 
 import org.jmouse.jdbc.mapping.*;
 import org.jmouse.jdbc.statement.CallableCallback;

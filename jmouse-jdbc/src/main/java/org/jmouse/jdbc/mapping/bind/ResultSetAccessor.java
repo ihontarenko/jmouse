@@ -2,7 +2,7 @@ package org.jmouse.jdbc.mapping.bind;
 
 import org.jmouse.core.bind.AbstractAccessor;
 import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.jdbc.core.exception.ResultSetAccessException;
+import org.jmouse.jdbc.exception.ResultSetAccessException;
 import org.jmouse.jdbc.mapping.ResultSetRowMetadata;
 import org.jmouse.jdbc.mapping.RowMetadata;
 

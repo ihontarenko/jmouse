@@ -1,8 +1,9 @@
-package org.jmouse.jdbc.core;
+package org.jmouse.jdbc;
 
 import org.jmouse.core.Contract;
 import org.jmouse.core.chain.Chain;
 import org.jmouse.jdbc.intercept.*;
+import org.jmouse.jdbc.mapping.KeyExtractor;
 import org.jmouse.jdbc.mapping.ResultSetExtractor;
 import org.jmouse.jdbc.statement.CallableCallback;
 import org.jmouse.jdbc.statement.CallableStatementBinder;

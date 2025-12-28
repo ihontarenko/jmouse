@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.intercept;
 
-import org.jmouse.jdbc.core.KeyExtractor;
+import org.jmouse.jdbc.mapping.KeyExtractor;
 import org.jmouse.jdbc.statement.PreparedStatementBinder;
 
 public record JdbcKeyUpdateCall<K>(

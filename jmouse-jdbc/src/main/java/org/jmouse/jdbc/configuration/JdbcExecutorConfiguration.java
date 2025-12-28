@@ -8,9 +8,11 @@ import org.jmouse.core.Priority;
 import org.jmouse.core.Sorter;
 import org.jmouse.core.chain.Chain;
 import org.jmouse.jdbc.connection.ConnectionProvider;
-import org.jmouse.jdbc.core.InterceptableJdbcExecutor;
-import org.jmouse.jdbc.core.DefaultJdbcExecutor;
-import org.jmouse.jdbc.core.JdbcExecutor;
+import org.jmouse.jdbc.InterceptableJdbcExecutor;
+import org.jmouse.jdbc.DefaultJdbcExecutor;
+import org.jmouse.jdbc.JdbcExecutor;
+import org.jmouse.jdbc.exception.SQLExceptionTranslator;
+import org.jmouse.jdbc.exception.SQLStateSQLExceptionTranslator;
 import org.jmouse.jdbc.intercept.JdbcCall;
 import org.jmouse.jdbc.intercept.JdbcChainContributor;
 import org.jmouse.jdbc.intercept.JdbcChainFactory;
@@ -18,6 +20,7 @@ import org.jmouse.jdbc.intercept.JdbcExecutionContext;
 import org.jmouse.jdbc.intercept.guard.SQLGuardPolicy;
 import org.jmouse.jdbc.intercept.guard.SQLSafetyGuardLink;
 import org.jmouse.jdbc.intercept.link.JdbcCallExecutorLink;
+import org.jmouse.jdbc.intercept.link.JdbcExceptionTranslationLink;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +55,16 @@ public class JdbcExecutorConfiguration {
     }
 
     @Bean
+    public SQLExceptionTranslator sqlExceptionTranslator() {
+        return new SQLStateSQLExceptionTranslator();
+    }
+
+    @Bean
+    public JdbcChainContributor exceptionTranslationContributor(SQLExceptionTranslator translator) {
+        return new JdbcExceptionTranslationLinkContributor(translator);
+    }
+
+    @Bean
     public JdbcExecutor jdbcExecutor(
             ConnectionProvider connectionProvider,
             Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> builder
@@ -71,6 +84,20 @@ public class JdbcExecutorConfiguration {
         @Override
         public void contribute(Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> builder) {
             builder.addLast(new JdbcCallExecutorLink());
+        }
+    }
+
+    @Priority(Integer.MIN_VALUE + 1)
+    public static class JdbcExceptionTranslationLinkContributor implements JdbcChainContributor {
+        private final SQLExceptionTranslator translator;
+
+        public JdbcExceptionTranslationLinkContributor(SQLExceptionTranslator translator) {
+            this.translator = translator;
+        }
+
+        @Override
+        public void contribute(Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> builder) {
+            builder.add(new JdbcExceptionTranslationLink(translator));
         }
     }
 
