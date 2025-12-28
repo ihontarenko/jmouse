@@ -1,7 +1,5 @@
 package org.jmouse.transaction;
 
-import java.util.concurrent.Callable;
-
 /**
  * {@code TransactionTemplate} is a programmatic transaction boundary helper.
  * <p>
@@ -34,7 +32,7 @@ import java.util.concurrent.Callable;
  *
  * @author jMouse
  */
-public class TransactionTemplate {
+public class TransactionTemplate implements TransactionCallback {
 
     /**
      * Underlying transaction manager coordinating begin/commit/rollback
@@ -48,19 +46,6 @@ public class TransactionTemplate {
      */
     public TransactionTemplate(TransactionManager coordinator) {
         this.coordinator = coordinator;
-    }
-
-    /**
-     * Executes transactional work without a return value.
-     *
-     * @param definition transaction definition (propagation, isolation, etc.)
-     * @param work       unit of work to execute
-     */
-    public void execute(TransactionDefinition definition, Worker work) {
-        execute(definition, () -> {
-            work.run();
-            return null;
-        });
     }
 
     /**
@@ -79,11 +64,11 @@ public class TransactionTemplate {
      * @param <T>        return type
      * @return result of the work
      */
-    public <T> T execute(TransactionDefinition definition, Callable<T> work) {
+    public <T> T inTransaction(TransactionDefinition definition, Work<T> work){
         TransactionStatus status = coordinator.begin(definition);
 
         try {
-            T result = work.call();
+            T result = work.run();
             coordinator.commit(status);
             return result;
         } catch (Throwable throwable) {
@@ -96,24 +81,6 @@ public class TransactionTemplate {
                     ? exception
                     : new RuntimeException(throwable);
         }
-    }
-
-    /**
-     * Functional contract for transactional work without enforcing {@link Callable}.
-     * <p>
-     * Intended for concise lambda usage.
-     */
-    @FunctionalInterface
-    public interface Worker {
-
-        /**
-         * Executes user logic within a transactional boundary.
-         *
-         * @param <T> return type (may be {@link Void})
-         * @return execution result
-         * @throws Exception any failure triggering rollback
-         */
-        <T> T run() throws Exception;
     }
 
 }

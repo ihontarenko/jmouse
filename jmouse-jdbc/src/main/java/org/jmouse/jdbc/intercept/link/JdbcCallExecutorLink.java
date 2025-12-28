@@ -13,22 +13,21 @@ public final class JdbcCallExecutorLink implements Link<JdbcExecutionContext, Jd
 
     @Override
     public Outcome<Object> handle(JdbcExecutionContext context, JdbcCall<?> call, Chain<JdbcExecutionContext, JdbcCall<?>, Object> next) {
-        JdbcExecutor delegate = context.delegate();
+        JdbcExecutor executor = context.delegate();
 
         try {
-            Object result = switch (call) {
+            return Outcome.done(switch (call) {
                 case JdbcQueryCall<?> q ->
-                        delegate.execute(q.sql(), q.binder(), q.callback(), q.extractor());
+                        executor.execute(q.sql(), q.binder(), q.configurer(), q.callback(), q.extractor());
                 case JdbcUpdateCall u ->
-                        delegate.executeUpdate(u.sql(), u.binder());
+                        executor.executeUpdate(u.sql(), u.binder(), u.configurer(), u.callback());
                 case JdbcBatchUpdateCall b ->
-                        delegate.executeBatch(b.sql(), b.binders());
+                        executor.executeBatch(b.sql(), b.binders(), b.configurer(), b.callback());
                 case JdbcKeyUpdateCall<?> k ->
-                        delegate.executeUpdate(k.sql(), k.binder(), k.keyExtractor());
+                        executor.executeUpdate(k.sql(), k.binder(), k.configurer(), k.callback());
                 case JdbcCallableCall<?> c ->
-                        delegate.executeCall(c.sql(), c.binder(), c.callback());
-            };
-            return Outcome.done(result);
+                        executor.executeCall(c.sql(), c.binder(), c.configurer(), c.callback());
+            });
         } catch (SQLException e) {
             throw new Bubble(e);
         }

@@ -8,7 +8,18 @@ public interface StatementConfigurer {
 
     void configure(Statement statement) throws SQLException;
 
-    StatementConfigurer NOOP = statement -> { };
+    StatementConfigurer NOOP = noop();
+
+    static StatementConfigurer noop() {
+        return new StatementConfigurer() {
+            @Override
+            public void configure(Statement statement) throws SQLException {}
+            @Override
+            public String toString() {
+                return "NOOP";
+            }
+        };
+    }
 
     static StatementConfigurer chain(StatementConfigurer a, StatementConfigurer b) {
         if (a == null || a == NOOP) return (b != null) ? b : NOOP;

@@ -71,12 +71,7 @@ public class JdbcExecutorConfiguration {
     ) {
         JdbcExecutor                                     executor = new SQLExecutor(connectionProvider);
         Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain    = JdbcChainFactory.build(builder);
-        return new InterceptableJdbcExecutor(executor, chain) {
-            @Override
-            protected JdbcExecutionContext newContext() {
-                return new JdbcExecutionContext(executor);
-            }
-        };
+        return new InterceptableJdbcExecutor(executor, chain);
     }
 
     @Priority(Integer.MIN_VALUE)
