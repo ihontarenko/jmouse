@@ -10,11 +10,11 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jmouse-tx</artifactId>
+    <artifactId>jmouse-transaction</artifactId>
     <packaging>jar</packaging>
     <name>jMouse - TX</name>
     <description>jMouse Framework - TX</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-tx</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-transaction</url>
 
     <licenses>
         <license>
@@ -34,7 +34,7 @@
     <scm>
         <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
         <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-tx</url>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-transaction</url>
     </scm>
 
     <properties>

@@ -80,7 +80,7 @@
             </dependency>
             <dependency>
                 <groupId>org.jmouse</groupId>
-                <artifactId>jmouse-tx</artifactId>
+                <artifactId>jmouse-transaction</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>
             <dependency>
