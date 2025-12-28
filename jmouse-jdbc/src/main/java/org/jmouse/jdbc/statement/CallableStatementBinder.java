@@ -5,5 +5,9 @@ import java.sql.SQLException;
 
 @FunctionalInterface
 public interface CallableStatementBinder {
+
+    CallableStatementBinder NOOP = statement -> {};
+
     void bind(CallableStatement statement) throws SQLException;
+
 }
