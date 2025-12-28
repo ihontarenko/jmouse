@@ -17,7 +17,7 @@ public class DefaultSynchronizationRegistry
 
     @Override
     public List<TransactionSynchronization> getSynchronizations() {
-        return Collections.unmodifiableList(synchronizations);
+        return List.copyOf(synchronizations);
     }
 
     @Override

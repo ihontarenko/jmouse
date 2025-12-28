@@ -163,12 +163,8 @@ public abstract class AbstractTransactionCoordinator
     // Commit / rollback logic
     // ------------------------------------------------------------
 
-    protected void processCommit(
-            TransactionContext context,
-            TransactionStatus status
-    ) {
-        SynchronizationContext synchronizationContext =
-                synchronizationHolder.getCurrent();
+    protected void processCommit(TransactionContext context, TransactionStatus status) {
+        SynchronizationContext synchronizationContext = synchronizationHolder.getCurrent();
 
         try {
             triggerBeforeCommit(synchronizationContext);
@@ -176,9 +172,12 @@ public abstract class AbstractTransactionCoordinator
             if (status.isNew()) {
                 doCommit(context.getSession());
             } else {
-                context.getSavepoint().ifPresent(
-                        sp -> doReleaseSavepoint(context.getSession(), sp)
-                );
+                context.getSavepoint().ifPresent(savepoint -> {
+                    doReleaseSavepoint(context.getSession(), savepoint);
+                    if (context instanceof MutableTransactionContext mutable) {
+                        mutable.clearSavepoint();
+                    }
+                });
             }
 
             triggerAfterCommit(synchronizationContext);
@@ -186,33 +185,36 @@ public abstract class AbstractTransactionCoordinator
                     synchronizationContext,
                     TransactionSynchronization.CompletionStatus.COMMITTED
             );
-        } catch (Exception ex) {
+        } catch (Exception exception) {
             triggerAfterRollback(synchronizationContext);
             triggerAfterCompletion(
                     synchronizationContext,
                     TransactionSynchronization.CompletionStatus.ROLLED_BACK
             );
-            throw ex;
+            if (status.isNew()) {
+                try {
+                    doRollback(context.getSession());
+                } catch (Exception ignored) {}
+            }
+            throw exception;
         } finally {
             cleanupAfterCompletion(status);
         }
     }
 
-
-    protected void processRollback(
-            TransactionContext context,
-            TransactionStatus status
-    ) {
-        SynchronizationContext syncContext =
-                synchronizationHolder.getCurrent();
+    protected void processRollback(TransactionContext context, TransactionStatus status) {
+        SynchronizationContext syncContext = synchronizationHolder.getCurrent();
 
         try {
             if (status.isNew()) {
                 doRollback(context.getSession());
             } else {
-                context.getSavepoint().ifPresent(
-                        savepoint -> doRollbackToSavepoint(context.getSession(), savepoint)
-                );
+                context.getSavepoint().ifPresent(savepoint -> {
+                    doRollbackToSavepoint(context.getSession(), savepoint);
+                    if (context instanceof MutableTransactionContext mutable) {
+                        mutable.clearSavepoint();
+                    }
+                });
             }
 
             triggerAfterRollback(syncContext);

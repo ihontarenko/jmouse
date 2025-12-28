@@ -29,7 +29,7 @@ import org.jmouse.core.Contract;
  *
  * @author jMouse
  */
-public class ThreadBoundSynchronizationContextHolder
+final public class ThreadBoundSynchronizationContextHolder
         implements SynchronizationContextHolder {
 
     /**
@@ -100,7 +100,7 @@ public class ThreadBoundSynchronizationContextHolder
      */
     private record Node(
             SynchronizationContext context,
-            ThreadBoundSynchronizationContextHolder.Node parent
+            Node parent
     ) { }
 
 }
