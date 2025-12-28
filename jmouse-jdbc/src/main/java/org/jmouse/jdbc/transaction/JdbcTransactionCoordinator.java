@@ -1,11 +1,13 @@
 package org.jmouse.jdbc.transaction;
 
-import org.jmouse.tx.core.*;
-import org.jmouse.tx.infrastructure.AbstractTransactionCoordinator;
-import org.jmouse.tx.infrastructure.TransactionContext;
-import org.jmouse.tx.infrastructure.TransactionContextHolder;
-import org.jmouse.tx.infrastructure.TransactionSessionFactory;
-import org.jmouse.tx.synchronization.SynchronizationContextHolder;
+import org.jmouse.transaction.SavepointSupport;
+import org.jmouse.transaction.TransactionDefinition;
+import org.jmouse.transaction.TransactionSession;
+import org.jmouse.transaction.infrastructure.AbstractTransactionCoordinator;
+import org.jmouse.transaction.infrastructure.TransactionContext;
+import org.jmouse.transaction.infrastructure.TransactionContextHolder;
+import org.jmouse.transaction.infrastructure.TransactionSessionFactory;
+import org.jmouse.transaction.synchronization.SynchronizationContextHolder;
 
 import java.util.Map;
 

@@ -1,7 +1,7 @@
 package org.jmouse.jdbc.connection;
 
 import org.jmouse.jdbc.transaction.JdbcResourceHolder;
-import org.jmouse.tx.infrastructure.support.TransactionContextAccessSupport;
+import org.jmouse.transaction.infrastructure.support.TransactionContextAccessSupport;
 
 import java.sql.Connection;
 import java.sql.SQLException;

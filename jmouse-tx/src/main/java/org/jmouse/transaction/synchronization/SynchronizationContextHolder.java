@@ -1,0 +1,16 @@
+package org.jmouse.transaction.synchronization;
+
+/**
+ * Strategy for binding synchronization context.
+ */
+public interface SynchronizationContextHolder {
+
+    SynchronizationContext getCurrent();
+
+    void bind(SynchronizationContext context);
+
+    SynchronizationContext unbind();
+
+    void clear();
+
+}

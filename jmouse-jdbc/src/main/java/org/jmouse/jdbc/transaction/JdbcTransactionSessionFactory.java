@@ -2,9 +2,9 @@ package org.jmouse.jdbc.transaction;
 
 import org.jmouse.core.Contract;
 import org.jmouse.jdbc.connection.ConnectionProvider;
-import org.jmouse.tx.core.TransactionDefinition;
-import org.jmouse.tx.core.TransactionSession;
-import org.jmouse.tx.infrastructure.TransactionSessionFactory;
+import org.jmouse.transaction.TransactionDefinition;
+import org.jmouse.transaction.TransactionSession;
+import org.jmouse.transaction.infrastructure.TransactionSessionFactory;
 
 public final class JdbcTransactionSessionFactory implements TransactionSessionFactory {
 
