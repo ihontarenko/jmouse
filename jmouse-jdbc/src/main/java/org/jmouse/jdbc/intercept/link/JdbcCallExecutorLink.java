@@ -5,7 +5,6 @@ import org.jmouse.core.chain.Link;
 import org.jmouse.core.chain.Outcome;
 import org.jmouse.core.proxy.Bubble;
 import org.jmouse.jdbc.JdbcExecutor;
-import org.jmouse.jdbc.exception.DataAccessException;
 import org.jmouse.jdbc.intercept.*;
 
 import java.sql.SQLException;

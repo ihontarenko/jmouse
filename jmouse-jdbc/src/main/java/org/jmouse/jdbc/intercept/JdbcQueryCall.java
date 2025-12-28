@@ -12,8 +12,26 @@ public record JdbcQueryCall<T>(
         StatementCallback<ResultSet> statementCallback,
         ResultSetExtractor<T> extractor
 ) implements JdbcCall<T> {
+
     @Override
     public JdbcOperation operation() {
         return JdbcOperation.QUERY;
     }
+
+    public JdbcQueryCall<T> with(StatementCallback<ResultSet> callback) {
+        return new JdbcQueryCall<>(sql, binder, callback, extractor);
+    }
+
+    public JdbcQueryCall<T> with(ResultSetExtractor<T> extractor) {
+        return new JdbcQueryCall<>(sql, binder, statementCallback, extractor);
+    }
+
+    public JdbcQueryCall<T> with(PreparedStatementBinder binder) {
+        return new JdbcQueryCall<>(sql, binder, statementCallback, extractor);
+    }
+
+    public JdbcQueryCall<T> with(String sql) {
+        return new JdbcQueryCall<>(sql, binder, statementCallback, extractor);
+    }
+
 }
