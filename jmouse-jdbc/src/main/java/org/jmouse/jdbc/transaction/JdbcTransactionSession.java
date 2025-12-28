@@ -2,6 +2,7 @@ package org.jmouse.jdbc.transaction;
 
 import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.jdbc.exception.JdbcAccessException;
+import org.jmouse.tx.core.SavepointSupport;
 import org.jmouse.tx.core.TransactionSession;
 import org.jmouse.tx.infrastructure.support.TransactionContextAccessSupport;
 import org.slf4j.Logger;
@@ -10,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public final class JdbcTransactionSession implements TransactionSession {
+public final class JdbcTransactionSession implements TransactionSession, SavepointSupport {
 
     private static final Logger             LOGGER = LoggerFactory.getLogger(JdbcTransactionSession.class);
     private final        ConnectionProvider provider;
@@ -18,6 +19,33 @@ public final class JdbcTransactionSession implements TransactionSession {
 
     public JdbcTransactionSession(ConnectionProvider provider) {
         this.provider = provider;
+    }
+
+    @Override
+    public Object createSavepoint() {
+        try {
+            return connection.setSavepoint();
+        } catch (SQLException e) {
+            throw new JdbcAccessException(e);
+        }
+    }
+
+    @Override
+    public void rollbackToSavepoint(Object savepoint) {
+        try {
+            connection.rollback((java.sql.Savepoint) savepoint);
+        } catch (SQLException e) {
+            throw new JdbcAccessException(e);
+        }
+    }
+
+    @Override
+    public void releaseSavepoint(Object savepoint) {
+        try {
+            connection.releaseSavepoint((java.sql.Savepoint) savepoint);
+        } catch (SQLException e) {
+            throw new JdbcAccessException(e);
+        }
     }
 
     @Override
