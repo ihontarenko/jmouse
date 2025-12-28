@@ -24,7 +24,7 @@ public class TransactionStatusSupport implements TransactionStatus {
     }
 
     @Override
-    public void setRollbackOnly() {
+    public void markRollbackOnly() {
         this.rollbackOnly = true;
     }
 

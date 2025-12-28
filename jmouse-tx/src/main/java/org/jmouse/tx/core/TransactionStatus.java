@@ -9,7 +9,7 @@ public interface TransactionStatus {
 
     boolean isRollbackOnly();
 
-    void setRollbackOnly();
+    void markRollbackOnly();
 
     boolean isCompleted();
 

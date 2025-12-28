@@ -1,5 +1,6 @@
 package org.jmouse.tx.infrastructure;
 
+import org.jmouse.core.Contract;
 import org.jmouse.tx.core.*;
 import org.jmouse.tx.synchronization.*;
 import org.slf4j.Logger;
@@ -31,10 +32,22 @@ public abstract class AbstractTransactionCoordinator
 
     @Override
     public final TransactionStatus begin(TransactionDefinition definition) {
-        TransactionContext existing = contextHolder.getContext();
+        TransactionContext     existing    = contextHolder.getContext();
+        TransactionPropagation propagation = definition.getPropagation();
 
-        if (existing == null && definition.getPropagation() == TransactionPropagation.MANDATORY) {
-            throw new IllegalStateException("No existing transaction found for propagation MANDATORY");
+        if (existing == null) {
+            if (propagation == TransactionPropagation.MANDATORY) {
+                throw new IllegalStateException("No existing transaction found for propagation MANDATORY");
+            }
+            if (propagation == TransactionPropagation.NEVER) {
+                return NoopTransactionStatus.INSTANCE;
+            }
+            if (propagation == TransactionPropagation.SUPPORTS) {
+                return NoopTransactionStatus.INSTANCE;
+            }
+            if (propagation == TransactionPropagation.NOT_SUPPORTED) {
+                return NoopTransactionStatus.INSTANCE;
+            }
         }
 
         if (existing != null) {
@@ -46,6 +59,15 @@ public abstract class AbstractTransactionCoordinator
 
     @Override
     public final void commit(TransactionStatus status) {
+        if (status instanceof NoopTransactionStatus) {
+            return;
+        }
+
+        if (status instanceof TransactionStatusSupport statusSupport && statusSupport.hasSuspended()) {
+            cleanupAfterCompletion(status);
+            return;
+        }
+
         if (status.isCompleted()) {
             throw new IllegalStateException("Transaction already completed");
         }
@@ -66,9 +88,21 @@ public abstract class AbstractTransactionCoordinator
 
     @Override
     public final void rollback(TransactionStatus status) {
-        TransactionContext context = contextHolder.getContext();
-        if (context == null) {
-            throw new IllegalStateException("No transaction context bound");
+        if (status instanceof NoopTransactionStatus) {
+            return;
+        }
+
+        if (status instanceof TransactionStatusSupport ss && ss.hasSuspended()) {
+            cleanupAfterCompletion(status);
+            return;
+        }
+
+        TransactionContext context = Contract.nonNull(
+                contextHolder.getContext(), "No required transaction context bound.");
+
+        if (!status.isNew() && context.getSavepoint().isEmpty()) {
+            context.setRollbackOnly();
+            return;
         }
 
         processRollback(context, status);
@@ -81,11 +115,7 @@ public abstract class AbstractTransactionCoordinator
         TransactionPropagation propagation = definition.getPropagation();
 
         switch (propagation) {
-            case REQUIRED:
-            case SUPPORTS:
-                return participateInExisting(existing);
-
-            case MANDATORY:
+            case SUPPORTS, MANDATORY, REQUIRED:
                 return participateInExisting(existing);
 
             case NEVER:
@@ -106,6 +136,11 @@ public abstract class AbstractTransactionCoordinator
             case NESTED:
                 return startNestedTransaction(existing);
 
+            case NOT_SUPPORTED:
+                TransactionStatusSupport statusSupport = new TransactionStatusSupport(false);
+                statusSupport.setSuspended(suspend());
+                return statusSupport;
+
             default:
                 throw new IllegalStateException(
                         "Unsupported propagation: " + propagation
@@ -114,7 +149,7 @@ public abstract class AbstractTransactionCoordinator
     }
 
     protected TransactionStatus startNewTransaction(TransactionDefinition definition) {
-        TransactionSession       session = doOpenSession(definition);
+        TransactionSession       session = openSession(definition);
         TransactionStatusSupport status  = new TransactionStatusSupport(true);
 
         doBegin(session, definition);
@@ -209,7 +244,7 @@ public abstract class AbstractTransactionCoordinator
     }
 
     protected void processRollback(TransactionContext context, TransactionStatus status) {
-        SynchronizationContext syncContext = synchronizationHolder.getCurrent();
+        SynchronizationContext synchronizationContext = synchronizationHolder.getCurrent();
 
         try {
             if (status.isNew()) {
@@ -223,9 +258,9 @@ public abstract class AbstractTransactionCoordinator
                 });
             }
 
-            triggerAfterRollback(syncContext);
+            triggerAfterRollback(synchronizationContext);
             triggerAfterCompletion(
-                    syncContext,
+                    synchronizationContext,
                     TransactionSynchronization.CompletionStatus.ROLLED_BACK
             );
         } finally {
@@ -279,9 +314,9 @@ public abstract class AbstractTransactionCoordinator
         }
     }
 
-    protected abstract TransactionSession doOpenSession(
-            TransactionDefinition definition
-    );
+    protected TransactionSession openSession(TransactionDefinition definition) {
+        return sessionFactory.openSession(definition);
+    }
 
     protected abstract void doBegin(
             TransactionSession session,

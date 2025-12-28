@@ -20,11 +20,6 @@ public final class JdbcTransactionCoordinator extends AbstractTransactionCoordin
     }
 
     @Override
-    protected TransactionSession doOpenSession(TransactionDefinition definition) {
-        return sessionFactory.openSession(definition);
-    }
-
-    @Override
     protected SynchronizationContextHolder getSynchronizationContextHolder() {
         return synchronizationHolder;
     }

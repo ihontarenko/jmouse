@@ -46,7 +46,7 @@ public final class MutableTransactionContext implements TransactionContext {
 
     @Override
     public void setRollbackOnly() {
-        status.setRollbackOnly();
+        status.markRollbackOnly();
     }
 }
 
