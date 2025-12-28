@@ -2,6 +2,8 @@ package org.jmouse.tx.infrastructure;
 
 import org.jmouse.tx.core.*;
 import org.jmouse.tx.synchronization.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -10,6 +12,8 @@ import java.util.Map;
  */
 public abstract class AbstractTransactionCoordinator
         extends SynchronizationSupport implements TransactionManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionManager.class);
 
     protected final TransactionContextHolder     contextHolder;
     protected final SynchronizationContextHolder synchronizationHolder;
@@ -186,16 +190,18 @@ public abstract class AbstractTransactionCoordinator
                     TransactionSynchronization.CompletionStatus.COMMITTED
             );
         } catch (Exception exception) {
+            if (status.isNew()) {
+                try {
+                    doRollback(context.getSession());
+                } catch (Exception rollbackException) {
+                    LOGGER.error("Failed to rollback transaction!", rollbackException);
+                }
+            }
             triggerAfterRollback(synchronizationContext);
             triggerAfterCompletion(
                     synchronizationContext,
                     TransactionSynchronization.CompletionStatus.ROLLED_BACK
             );
-            if (status.isNew()) {
-                try {
-                    doRollback(context.getSession());
-                } catch (Exception ignored) {}
-            }
             throw exception;
         } finally {
             cleanupAfterCompletion(status);
