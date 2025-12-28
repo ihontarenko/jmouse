@@ -1,5 +1,7 @@
 package org.jmouse.tx.infrastructure;
 
+import java.util.Map;
+
 /**
  * Strategy for binding transaction context to an execution scope.
  */
@@ -18,6 +20,10 @@ public interface TransactionContextHolder {
     <T> T unbindResource(Class<T> key);
 
     boolean hasResource(Class<?> key);
+
+    Map<Class<?>, Object> createSnapshot();
+
+    void applySnapshot(Map<Class<?>, Object> snapshot);
 
     void clear();
 

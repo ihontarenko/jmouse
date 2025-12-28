@@ -9,6 +9,8 @@ public interface SynchronizationContextHolder {
 
     void bind(SynchronizationContext context);
 
+    SynchronizationContext unbind();
+
     void clear();
 
 }

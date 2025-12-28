@@ -4,14 +4,17 @@ import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.jdbc.exception.JdbcAccessException;
 import org.jmouse.tx.core.TransactionSession;
 import org.jmouse.tx.infrastructure.support.TransactionContextAccessSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 public final class JdbcTransactionSession implements TransactionSession {
 
-    private final ConnectionProvider provider;
-    private Connection connection;
+    private static final Logger             LOGGER = LoggerFactory.getLogger(JdbcTransactionSession.class);
+    private final        ConnectionProvider provider;
+    private              Connection         connection;
 
     public JdbcTransactionSession(ConnectionProvider provider) {
         this.provider = provider;
@@ -52,13 +55,22 @@ public final class JdbcTransactionSession implements TransactionSession {
 
     @Override
     public boolean isActive() {
-        return false;
+        return connection != null;
     }
 
     @Override
     public void close() {
-        TransactionContextAccessSupport.unbindResource(JdbcResourceHolder.class);
-        provider.release(connection);
+        try {
+            if (connection != null) {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException sqlException) {
+            LOGGER.error("Error closing connection!", sqlException);
+        } finally {
+            TransactionContextAccessSupport.unbindResource(JdbcResourceHolder.class);
+            provider.release(connection);
+            connection = null;
+        }
     }
 }
 

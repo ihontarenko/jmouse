@@ -4,9 +4,10 @@ import org.jmouse.tx.core.TransactionStatus;
 
 public class TransactionStatusSupport implements TransactionStatus {
 
-    private final boolean isNew;
-    private       boolean rollbackOnly;
-    private       boolean completed;
+    private final boolean            isNew;
+    private       boolean            rollbackOnly;
+    private       boolean            completed;
+    private       SuspendedResources suspended;
 
     public TransactionStatusSupport(boolean isNew) {
         this.isNew = isNew;
@@ -35,4 +36,17 @@ public class TransactionStatusSupport implements TransactionStatus {
     public void markCompleted() {
         this.completed = true;
     }
+
+    public boolean hasSuspended() {
+        return suspended != null;
+    }
+
+    public SuspendedResources getSuspended() {
+        return suspended;
+    }
+
+    public void setSuspended(SuspendedResources suspended) {
+        this.suspended = suspended;
+    }
+
 }

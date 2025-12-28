@@ -11,9 +11,11 @@ public abstract class SynchronizationSupport {
     }
 
     protected void triggerBeforeCommit(SynchronizationContext context) {
-        context.getRegistry()
-                .getSynchronizations()
-                .forEach(TransactionSynchronization::beforeCommit);
+        if (context != null) {
+            context.getRegistry()
+                    .getSynchronizations()
+                    .forEach(TransactionSynchronization::beforeCommit);
+        }
     }
 
     protected void triggerAfterCommit(SynchronizationContext context) {
@@ -35,7 +37,5 @@ public abstract class SynchronizationSupport {
         context.getRegistry()
                 .getSynchronizations()
                 .forEach(s -> s.afterCompletion(status));
-
-        getSynchronizationContextHolder().clear();
     }
 }

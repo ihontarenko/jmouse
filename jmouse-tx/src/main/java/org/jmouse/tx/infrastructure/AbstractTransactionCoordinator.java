@@ -3,6 +3,8 @@ package org.jmouse.tx.infrastructure;
 import org.jmouse.tx.core.*;
 import org.jmouse.tx.synchronization.*;
 
+import java.util.Map;
+
 /**
  * Template-based transaction coordinator.
  */
@@ -26,6 +28,10 @@ public abstract class AbstractTransactionCoordinator
     @Override
     public final TransactionStatus begin(TransactionDefinition definition) {
         TransactionContext existing = contextHolder.getContext();
+
+        if (existing == null && definition.getPropagation() == TransactionPropagation.MANDATORY) {
+            throw new IllegalStateException("No existing transaction found for propagation MANDATORY");
+        }
 
         if (existing != null) {
             return handleExistingTransaction(definition, existing);
@@ -84,8 +90,14 @@ public abstract class AbstractTransactionCoordinator
                 );
 
             case REQUIRES_NEW:
-                suspend(existing);
-                return startNewTransaction(definition);
+                SuspendedResources suspended = suspend();
+                TransactionStatus status = startNewTransaction(definition);
+
+                if (status instanceof TransactionStatusSupport statusSupport) {
+                    statusSupport.setSuspended(suspended);
+                }
+
+                return status;
 
             case NESTED:
                 return startNestedTransaction(existing);
@@ -97,29 +109,19 @@ public abstract class AbstractTransactionCoordinator
         }
     }
 
-    protected TransactionStatus startNewTransaction(
-            TransactionDefinition definition
-    ) {
-        TransactionSession session = doOpenSession(definition);
-
-        TransactionStatusSupport status =
-                new TransactionStatusSupport(true);
+    protected TransactionStatus startNewTransaction(TransactionDefinition definition) {
+        TransactionSession       session = doOpenSession(definition);
+        TransactionStatusSupport status  = new TransactionStatusSupport(true);
 
         doBegin(session, definition);
 
-        MutableTransactionContext context =
-                new MutableTransactionContext(status, session);
+        MutableTransactionContext context                = new MutableTransactionContext(status, session);
+        SynchronizationContext    synchronizationContext = new DefaultSynchronizationContext();
 
         contextHolder.bindContext(context);
+        synchronizationHolder.bind(synchronizationContext);
 
-        SynchronizationContext synchronizationContext =
-                new DefaultSynchronizationContext();
-
-        if (status.isNew()) {
-            synchronizationHolder.bind(synchronizationContext);
-        }
-
-        triggerBeforeBegin(synchronizationContext);
+        triggerBeforeBegin(synchronizationHolder.getCurrent());
 
         return status;
     }
@@ -172,7 +174,6 @@ public abstract class AbstractTransactionCoordinator
             triggerBeforeCommit(synchronizationContext);
 
             if (status.isNew()) {
-                // getSession ???
                 doCommit(context.getSession());
             } else {
                 context.getSavepoint().ifPresent(
@@ -210,7 +211,7 @@ public abstract class AbstractTransactionCoordinator
                 doRollback(context.getSession());
             } else {
                 context.getSavepoint().ifPresent(
-                        sp -> doRollbackToSavepoint(context.getSession(), sp)
+                        savepoint -> doRollbackToSavepoint(context.getSession(), savepoint)
                 );
             }
 
@@ -224,24 +225,50 @@ public abstract class AbstractTransactionCoordinator
         }
     }
 
-
     protected void cleanupAfterCompletion(TransactionStatus status) {
-        status.markCompleted();
-        contextHolder.clear();
+        TransactionStatusSupport statusSupport =
+                (status instanceof TransactionStatusSupport support) ? support : null;
+
+        if (statusSupport != null) {
+            statusSupport.markCompleted();
+        }
+
+        TransactionContext finished = contextHolder.unbindContext();
+
+        if (status.isNew()) {
+            synchronizationHolder.unbind();
+            if (finished != null) {
+                finished.getSession().close();
+            }
+        }
+
+        if (statusSupport != null && statusSupport.hasSuspended()) {
+            resume(statusSupport.getSuspended());
+            statusSupport.setSuspended(null);
+        }
     }
 
     // ------------------------------------------------------------
     // Suspend / resume
     // ------------------------------------------------------------
 
-    protected void suspend(TransactionContext context) {
-        doSuspend(context);
-        contextHolder.clear();
+    protected SuspendedResources suspend() {
+        TransactionContext     transactionContext     = contextHolder.unbindContext();
+        SynchronizationContext synchronizationContext = synchronizationHolder.unbind();
+        Map<Class<?>, Object>  snapshot               = contextHolder.createSnapshot();
+        doSuspend(transactionContext, snapshot);
+        return new SuspendedResources(transactionContext, synchronizationContext, snapshot);
     }
 
-    protected void resume(TransactionContext context) {
-        contextHolder.bindContext(context);
-        doResume(context);
+    protected void resume(SuspendedResources suspended) {
+        if (suspended != null) {
+            contextHolder.bindContext(suspended.transactionContext());
+            if (suspended.synchronizationContext() != null) {
+                synchronizationHolder.bind(suspended.synchronizationContext());
+            }
+            contextHolder.applySnapshot(suspended.resourceSnapshot());
+            doResume(suspended.transactionContext(), suspended.resourceSnapshot());
+        }
     }
 
     protected abstract TransactionSession doOpenSession(
@@ -262,11 +289,11 @@ public abstract class AbstractTransactionCoordinator
     );
 
     protected abstract void doSuspend(
-            TransactionContext context
+            TransactionContext context, Map<Class<?>, Object>  snapshot
     );
 
     protected abstract void doResume(
-            TransactionContext context
+            TransactionContext context, Map<Class<?>, Object>  snapshot
     );
 
     protected abstract void doRollbackToSavepoint(

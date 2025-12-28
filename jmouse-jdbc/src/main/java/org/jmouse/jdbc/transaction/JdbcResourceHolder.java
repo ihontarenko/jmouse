@@ -5,6 +5,7 @@ import java.sql.Connection;
 public final class JdbcResourceHolder {
 
     private final Connection connection;
+    private       boolean    synchronizedWithTransaction;
 
     public JdbcResourceHolder(Connection connection) {
         this.connection = connection;
@@ -13,5 +14,14 @@ public final class JdbcResourceHolder {
     public Connection getConnection() {
         return connection;
     }
+
+    public boolean isSynchronized() {
+        return synchronizedWithTransaction;
+    }
+
+    public void setSynchronized(boolean synchronizedWithTransaction) {
+        this.synchronizedWithTransaction = synchronizedWithTransaction;
+    }
+
 }
 
