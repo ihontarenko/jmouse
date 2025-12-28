@@ -5,6 +5,9 @@ import java.sql.SQLException;
 
 @FunctionalInterface
 public interface PreparedStatementBinder {
+
     void bind(PreparedStatement statement) throws SQLException;
+
     PreparedStatementBinder NOOP = statement -> {};
+
 }

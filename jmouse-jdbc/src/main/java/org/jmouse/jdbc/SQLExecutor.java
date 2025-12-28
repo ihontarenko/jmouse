@@ -3,17 +3,16 @@ package org.jmouse.jdbc;
 import java.sql.*;
 import java.util.List;
 
-import org.jmouse.core.Contract;
 import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.jdbc.mapping.KeyExtractor;
 import org.jmouse.jdbc.mapping.ResultSetExtractor;
 import org.jmouse.jdbc.statement.*;
 
-public final class DefaultJdbcExecutor implements JdbcExecutor {
+public final class SQLExecutor implements JdbcExecutor {
 
     private final ConnectionProvider connectionProvider;
 
-    public DefaultJdbcExecutor(ConnectionProvider connectionProvider) {
+    public SQLExecutor(ConnectionProvider connectionProvider) {
         this.connectionProvider = connectionProvider;
     }
 
@@ -25,9 +24,6 @@ public final class DefaultJdbcExecutor implements JdbcExecutor {
             StatementCallback<ResultSet> callback,
             ResultSetExtractor<T> extractor
     ) throws SQLException {
-        Contract.nonNull(configurer, "configurer");
-        Contract.nonNull(callback, "callback");
-
         Connection        connection = connectionProvider.getConnection();
         PreparedStatement statement  = null;
         ResultSet         resultSet  = null;
@@ -38,7 +34,7 @@ public final class DefaultJdbcExecutor implements JdbcExecutor {
             binder.bind(statement);
             configurer.configure(statement);
 
-            resultSet = callback.doWithStatement(statement);
+            resultSet = callback.doStatementExecute(statement);
             return extractor.extract(resultSet);
 
         } finally {
@@ -48,19 +44,23 @@ public final class DefaultJdbcExecutor implements JdbcExecutor {
     }
 
     @Override
-    public int executeUpdate(String sql) throws SQLException {
-        return executeUpdate(sql, statement -> {});
-    }
-
-    @Override
-    public int executeUpdate(String sql, PreparedStatementBinder binder) throws SQLException {
-        Connection        connection = connectionProvider.getConnection();
-        PreparedStatement statement  = null;
+    public int executeUpdate(
+            String sql,
+            PreparedStatementBinder binder,
+            StatementConfigurer configurer,
+            StatementCallback<Integer> callback
+    ) throws SQLException {
+        Connection connection = connectionProvider.getConnection();
+        PreparedStatement statement = null;
 
         try {
             statement = connection.prepareStatement(sql);
+
             binder.bind(statement);
-            return statement.executeUpdate();
+            configurer.configure(statement);
+
+            return callback.doStatementExecute(statement);
+
         } finally {
             JdbcSupport.closeQuietly(statement);
             connectionProvider.release(connection);
@@ -68,16 +68,22 @@ public final class DefaultJdbcExecutor implements JdbcExecutor {
     }
 
     @Override
-    public int[] executeBatch(String sql, List<? extends PreparedStatementBinder> binders) throws SQLException {
-        Contract.nonNull(sql, "sql");
-        Contract.nonNull(binders, "binders");
-
+    public int[] executeBatch(
+            String sql,
+            List<? extends PreparedStatementBinder> binders,
+            StatementConfigurer configurer,
+            StatementCallback<int[]> callback
+    ) throws SQLException {
         if (binders.isEmpty()) {
             return new int[0];
         }
 
-        Connection connection = connectionProvider.getConnection();
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+        Connection        connection = connectionProvider.getConnection();
+        PreparedStatement statement  = null;
+
+        try {
+            statement = connection.prepareStatement(sql);
+            configurer.configure(statement);
 
             for (PreparedStatementBinder binder : binders) {
                 if (binder != null) {
@@ -86,8 +92,9 @@ public final class DefaultJdbcExecutor implements JdbcExecutor {
                 statement.addBatch();
             }
 
-            return statement.executeBatch();
+            return callback.doStatementExecute(statement);
         } finally {
+            JdbcSupport.closeQuietly(statement);
             connectionProvider.release(connection);
         }
     }
@@ -98,10 +105,6 @@ public final class DefaultJdbcExecutor implements JdbcExecutor {
             PreparedStatementBinder binder,
             KeyExtractor<K> extractor
     ) throws SQLException {
-        Contract.nonNull(extractor, "extractor");
-        Contract.nonNull(sql, "sql");
-        Contract.nonNull(binder, "binder");
-
         Connection connection = connectionProvider.getConnection();
 
         try (PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -117,14 +120,49 @@ public final class DefaultJdbcExecutor implements JdbcExecutor {
     }
 
     @Override
-    public <T> T executeCall(String sql, CallableStatementBinder binder, CallableCallback<T> callback) throws SQLException {
-        Connection connection = connectionProvider.getConnection();
-        try (CallableStatement statement = connection.prepareCall(sql)) {
-            if (binder != null) {
-                binder.bind(statement);
+    public <K> K executeUpdate(
+            String sql,
+            PreparedStatementBinder binder,
+            StatementConfigurer configurer,
+            KeyUpdateCallback<K> callback
+    ) throws SQLException {
+        Connection        connection = connectionProvider.getConnection();
+        PreparedStatement statement  = null;
+
+        try {
+            statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+
+            binder.bind(statement);
+            configurer.configure(statement);
+
+            statement.executeUpdate();
+
+            try (ResultSet keys = statement.getGeneratedKeys()) {
+                return callback.doStatementExecute(statement, keys);
             }
+        } finally {
+            JdbcSupport.closeQuietly(statement);
+            connectionProvider.release(connection);
+        }
+    }
+
+    @Override
+    public <T> T executeCall(
+            String sql,
+            CallableStatementBinder binder,
+            StatementConfigurer configurer,
+            CallableCallback<T> callback
+    ) throws SQLException {
+        Connection connection = connectionProvider.getConnection();
+        CallableStatement statement = null;
+
+        try {
+            statement = connection.prepareCall(sql);
+            binder.bind(statement);
+            configurer.configure(statement);
             return callback.doInCallable(statement);
         } finally {
+            JdbcSupport.closeQuietly(statement);
             connectionProvider.release(connection);
         }
     }

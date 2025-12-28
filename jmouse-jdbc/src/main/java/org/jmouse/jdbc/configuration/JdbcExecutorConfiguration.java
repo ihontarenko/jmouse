@@ -9,7 +9,7 @@ import org.jmouse.core.Sorter;
 import org.jmouse.core.chain.Chain;
 import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.jdbc.InterceptableJdbcExecutor;
-import org.jmouse.jdbc.DefaultJdbcExecutor;
+import org.jmouse.jdbc.SQLExecutor;
 import org.jmouse.jdbc.JdbcExecutor;
 import org.jmouse.jdbc.exception.SQLExceptionTranslator;
 import org.jmouse.jdbc.exception.SQLStateSQLExceptionTranslator;
@@ -69,7 +69,7 @@ public class JdbcExecutorConfiguration {
             ConnectionProvider connectionProvider,
             Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> builder
     ) {
-        JdbcExecutor                                     executor = new DefaultJdbcExecutor(connectionProvider);
+        JdbcExecutor                                     executor = new SQLExecutor(connectionProvider);
         Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain    = JdbcChainFactory.build(builder);
         return new InterceptableJdbcExecutor(executor, chain) {
             @Override

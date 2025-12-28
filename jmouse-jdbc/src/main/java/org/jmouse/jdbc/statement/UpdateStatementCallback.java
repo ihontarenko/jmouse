@@ -7,7 +7,7 @@ public final class UpdateStatementCallback
         implements StatementCallback<Integer> {
 
     @Override
-    public Integer doWithStatement(PreparedStatement statement)
+    public Integer doStatementExecute(PreparedStatement statement)
             throws SQLException {
         return statement.executeUpdate();
     }

@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public final class QueryStatementCallback implements StatementCallback<ResultSet> {
 
     @Override
-    public ResultSet doWithStatement(PreparedStatement statement) throws SQLException {
+    public ResultSet doStatementExecute(PreparedStatement statement) throws SQLException {
         return statement.executeQuery();
     }
 
