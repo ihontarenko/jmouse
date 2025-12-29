@@ -2,21 +2,20 @@ package org.jmouse.jdbc.connection.datasource.support;
 
 import org.jmouse.core.Contract;
 import org.jmouse.jdbc.connection.datasource.DataSourceResolver;
-import org.jmouse.jdbc.connection.datasource.support.AbstractDataSource;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.function.Supplier;
 
-public final class AbstractRoutingDataSource extends AbstractDataSource {
+public final class RoutingDataSource extends AbstractDataSource {
 
     private final DataSourceResolver resolver;
     private final Supplier<String>   lookupKey;
     private final boolean            lenientFallback;
     private final String             defaultKey;
 
-    public AbstractRoutingDataSource(
+    public RoutingDataSource(
             DataSourceResolver resolver, Supplier<String> lookupKey, boolean lenientFallback, String defaultKey
     ) {
         this.resolver = Contract.nonNull(resolver, "resolver");
@@ -27,15 +26,15 @@ public final class AbstractRoutingDataSource extends AbstractDataSource {
 
     @Override
     public Connection getConnection() throws SQLException {
-        return determineTargetDataSource().getConnection();
+        return resolveDataSource().getConnection();
     }
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        return determineTargetDataSource().getConnection(username, password);
+        return resolveDataSource().getConnection(username, password);
     }
 
-    private DataSource determineTargetDataSource() {
+    private DataSource resolveDataSource() {
         String key = lookupKey.get();
 
         if (key == null || key.isBlank()) {

@@ -22,7 +22,7 @@ public class JdbcTransactionConfiguration {
 
     @Bean(JDBC_TX_SESSION_FACTORY)
     public TransactionSessionFactory jdbcTransactionSessionFactory(
-            @Qualifier(ConnectionConfiguration.DATA_SOURCE_CONNECTION_PROVIDER) ConnectionProvider rawProvider,
+            @Qualifier(JdbcConnectionProviderConfiguration.PRIMARY_CONNECTION_PROVIDER) ConnectionProvider rawProvider,
             @Qualifier(CONNECTION_CUSTOMIZER) ConnectionCustomizer customizer
     ) {
         return new JdbcTransactionSessionFactory(rawProvider, customizer);
@@ -39,7 +39,7 @@ public class JdbcTransactionConfiguration {
     @PrimaryBean
     public TransactionManager jdbcTransactionManager(
             TransactionContextHolder contextHolder,
-            @Qualifier(CONNECTION_CUSTOMIZER) TransactionSessionFactory sessionFactory,
+            @Qualifier(JDBC_TX_SESSION_FACTORY) TransactionSessionFactory sessionFactory,
             SynchronizationContextHolder synchronizationHolder,
             JoinTransactionValidator joinTransactionValidator
     ) {

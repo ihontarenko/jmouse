@@ -16,7 +16,7 @@ import java.util.List;
  * Core database-platform configuration for jMouse JDBC.
  */
 @BeanFactories
-public class DatabasePlatformConfiguration {
+public class JdbcPlatformConfiguration {
 
     @Bean
     public DatabasePlatformRegistry databasePlatformRegistry(@AggregatedBeans List<DatabasePlatformProvider> providers) {
