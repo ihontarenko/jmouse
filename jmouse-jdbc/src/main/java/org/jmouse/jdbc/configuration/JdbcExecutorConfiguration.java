@@ -49,10 +49,6 @@ public class JdbcExecutorConfiguration {
         return new JdbcCallExecutorLinkContributor();
     }
 
-    @Bean
-    public JdbcChainContributor sqlSafetyGuardLinkContributor() {
-        return new SQLSafetyGuardLinkContributor();
-    }
 
     @Bean
     public SQLExceptionTranslator sqlExceptionTranslator() {

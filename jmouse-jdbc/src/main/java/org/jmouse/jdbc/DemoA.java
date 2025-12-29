@@ -6,6 +6,7 @@ import org.jmouse.beans.DefaultBeanContext;
 import org.jmouse.jdbc.connection.datasource.DataSourceKeyHolder;
 import org.jmouse.jdbc.mapping.BeanRowMapper;
 import org.jmouse.jdbc.mapping.RowMapper;
+import org.jmouse.transaction.TransactionOperation;
 import org.jmouse.transaction.infrastructure.TransactionContextHolder;
 
 import javax.sql.DataSource;
@@ -23,16 +24,17 @@ public class DemoA {
 
         context.getBean(TransactionContextHolder.class);
 
-        DataSourceKeyHolder.use("primary");
+        DataSourceKeyHolder.use("mysql");
 
         context.getBean(DataSource.class).getConnection();
 
         SimpleOperations simple = context.getBean(SimpleOperations.class);
-        NamedOperations named = context.getBean(NamedOperations.class);
 
         RowMapper<User> userMapper = new BeanRowMapper<>(User.class);
 
-        List<User> users = named.query(
+        TransactionOperation operation = context.getBean(TransactionOperation.class);
+
+        List<User> users = simple.query(
                 "select id, name from users",
                 userMapper
         );

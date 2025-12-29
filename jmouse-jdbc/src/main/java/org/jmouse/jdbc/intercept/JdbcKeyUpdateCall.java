@@ -19,7 +19,7 @@ public record JdbcKeyUpdateCall<K>(
     public JdbcKeyUpdateCall<K> with(StatementConfigurer configurer) {
         return new JdbcKeyUpdateCall<>(
                 sql, binder,
-                StatementConfigurer.chain(this.configurer(), configurer),
+                StatementConfigurer.combine(this.configurer(), configurer),
                 callback
         );
     }

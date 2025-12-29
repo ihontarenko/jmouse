@@ -1,11 +1,11 @@
 package org.jmouse.transaction;
 
-public class TransactionOperations {
+public class TransactionOperation {
 
     private final TransactionCallback   callback;
     private final TransactionDefinition defaults;
 
-    public TransactionOperations(TransactionCallback callback, TransactionDefinition defaults) {
+    public TransactionOperation(TransactionCallback callback, TransactionDefinition defaults) {
         this.callback = callback;
         this.defaults = defaults;
     }

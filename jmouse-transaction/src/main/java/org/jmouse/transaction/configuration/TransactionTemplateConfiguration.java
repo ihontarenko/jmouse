@@ -21,9 +21,9 @@ public class TransactionTemplateConfiguration {
 
     // optional: TxOperations convenience facade
     @Bean(TX_OPERATIONS)
-    public TransactionOperations txOperations(
+    public TransactionOperation txOperations(
             TransactionCallback callback, @Qualifier(TX_DEFINITION_DEFAULTS) TransactionDefinition defaults) {
-        return new TransactionOperations(callback, defaults);
+        return new TransactionOperation(callback, defaults);
     }
 
     @Bean(TX_DEFINITION_DEFAULTS)
