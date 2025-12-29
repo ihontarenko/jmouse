@@ -5,8 +5,8 @@ import javax.sql.DataSource;
 public final class DriverManagerDataSourceFactory implements DataSourceFactory {
 
     @Override
-    public boolean supports(DataSourceSpecification spec) {
-        return true;
+    public boolean supports(DataSourceSpecification specification) {
+        return specification.url() != null && !specification.url().isEmpty();
     }
 
     @Override
@@ -25,4 +25,5 @@ public final class DriverManagerDataSourceFactory implements DataSourceFactory {
     public int priority() {
         return Integer.MIN_VALUE;
     }
+
 }

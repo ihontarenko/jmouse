@@ -3,9 +3,12 @@ package org.jmouse.jdbc;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeansScannerBeanContextInitializer;
 import org.jmouse.beans.DefaultBeanContext;
+import org.jmouse.jdbc.connection.datasource.DataSourceKeyHolder;
 import org.jmouse.jdbc.mapping.BeanRowMapper;
 import org.jmouse.jdbc.mapping.RowMapper;
+import org.jmouse.transaction.infrastructure.TransactionContextHolder;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -17,6 +20,12 @@ public class DemoA {
         context.refresh();
         context.addInitializer(new BeansScannerBeanContextInitializer());
         context.refresh();
+
+        context.getBean(TransactionContextHolder.class);
+
+        DataSourceKeyHolder.use("primary");
+
+        context.getBean(DataSource.class).getConnection();
 
         SimpleOperations simple = context.getBean(SimpleOperations.class);
         NamedOperations named = context.getBean(NamedOperations.class);

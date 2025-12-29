@@ -3,15 +3,11 @@ package org.jmouse.jdbc.configuration;
 import org.jmouse.beans.annotation.AggregatedBeans;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
-import org.jmouse.beans.annotation.PrimaryBean;
 import org.jmouse.core.Sorter;
 import org.jmouse.jdbc.connection.datasource.*;
-import org.jmouse.jdbc.connection.datasource.support.RoutingDataSource;
 
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 @BeanFactories
 public class JdbcDataSourceConfiguration {
@@ -54,12 +50,22 @@ public class JdbcDataSourceConfiguration {
     }
 
     @Bean
+    public DataSourceFactory dataSourceFactory() {
+        return new DriverManagerDataSourceFactory();
+    }
+
+    @Bean
     public DataSourceResolver dataSourceResolver(
             DataSourceSpecificationRegistry specifications,
             DataSourceRegistry resolved,
             DataSourceFactoryRegistry factories
     ) {
         return new SimpleDataSourceResolver(specifications, resolved, factories);
+    }
+
+    @Bean
+    public DataSourceKey dataSourceKey() {
+        return DataSourceKeyHolder::current;
     }
 
 }

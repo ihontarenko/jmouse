@@ -5,19 +5,18 @@ import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.PrimaryBean;
 import org.jmouse.core.Priority;
 import org.jmouse.jdbc.connection.datasource.*;
-import org.jmouse.jdbc.connection.datasource.support.RoutingDataSource;
+import org.jmouse.jdbc.connection.datasource.RoutingDataSource;
 
 import javax.sql.DataSource;
 import java.util.Properties;
-import java.util.function.Supplier;
 
 @BeanFactories
 public class AppDataSourcesConfiguration {
 
     @Bean
     @PrimaryBean
-    public DataSource dataSource(DataSourceResolver resolver, Supplier<String> dataSourceLookupKey) {
-        return new RoutingDataSource(resolver, dataSourceLookupKey, false, null);
+    public DataSource dataSource(DataSourceResolver resolver, DataSourceKey dataSourceKey) {
+        return new RoutingDataSource(resolver, dataSourceKey, false, null);
     }
 
     @Bean

@@ -1,22 +1,21 @@
-package org.jmouse.jdbc.connection.datasource.support;
+package org.jmouse.jdbc.connection.datasource;
 
 import org.jmouse.core.Contract;
-import org.jmouse.jdbc.connection.datasource.DataSourceResolver;
+import org.jmouse.jdbc.connection.datasource.support.AbstractDataSource;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.function.Supplier;
 
 public final class RoutingDataSource extends AbstractDataSource {
 
     private final DataSourceResolver resolver;
-    private final Supplier<String>   lookupKey;
+    private final DataSourceKey      lookupKey;
     private final boolean            lenientFallback;
     private final String             defaultKey;
 
     public RoutingDataSource(
-            DataSourceResolver resolver, Supplier<String> lookupKey, boolean lenientFallback, String defaultKey
+            DataSourceResolver resolver, DataSourceKey lookupKey, boolean lenientFallback, String defaultKey
     ) {
         this.resolver = Contract.nonNull(resolver, "resolver");
         this.lookupKey = Contract.nonNull(lookupKey, "lookupKey");

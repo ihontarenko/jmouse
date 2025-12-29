@@ -13,7 +13,7 @@ public final class DataSourceRegistry {
     public void register(String name, DataSource dataSource) {
         Contract.nonNull(name, "name");
         Contract.nonNull(dataSource, "dataSource");
-        Contract.state(dataSources.putIfAbsent(name, dataSource) != null,
+        Contract.state(dataSources.putIfAbsent(name, dataSource) == null,
                        "DATA-SOURCE already registered: " + name);
     }
 
