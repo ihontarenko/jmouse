@@ -15,7 +15,9 @@ public interface BindContext {
      *
      * @return the data source
      */
-    ObjectAccessor getDataSource();
+    ObjectAccessor getObjectAccessor();
+
+    void setObjectAccessor(ObjectAccessor objectAccessor);
 
     /**
      * Returns the root {@link ObjectBinder} that manages the binding process.

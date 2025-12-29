@@ -20,10 +20,10 @@ public class Binder implements ObjectBinder, BindContext {
     private static final Supplier<? extends RuntimeException> EXCEPTION_SUPPLIER = () -> new BindException(
             "Recursive binding detected");
 
-    private final ObjectAccessor                  source;
     private final BinderFactory                   factory;
     private final Conversion                      conversion;
     private final CyclicReferenceDetector<String> detector;
+    private ObjectAccessor                        objectAccessor;
     private       BindCallback                    callback;
     private       BindingStrategy                 strategy;
     private       ObjectAccessorWrapper           wrapper;
@@ -32,14 +32,14 @@ public class Binder implements ObjectBinder, BindContext {
      * Constructs a {@code Binder} with the specified data source, binder factory, and binding strategy.
      * Registers the default binders (MapBinder, ArrayBinder, SetBinder, ListBinder, and JavaBeanBinder).
      *
-     * @param source the data source for binding
+     * @param objectAccessor the data source for binding
      * @param factory the factory for creating binders
      * @param strategy the binding strategy (deep or shallow)
      */
-    public Binder(ObjectAccessor source, BinderFactory factory, BindingStrategy strategy) {
+    public Binder(ObjectAccessor objectAccessor, BinderFactory factory, BindingStrategy strategy) {
         this.callback = new DefaultBindingCallback();
         this.strategy = strategy;
-        this.source = source;
+        this.objectAccessor = objectAccessor;
         this.factory = factory;
         this.detector = new DefaultCyclicReferenceDetector<>();
         this.conversion = new BinderConversion();
@@ -82,10 +82,10 @@ public class Binder implements ObjectBinder, BindContext {
     /**
      * Constructs a {@code Binder} using the specified data source and default binder factory.
      *
-     * @param source the data source for binding
+     * @param objectAccessor the data source for binding
      */
-    public Binder(ObjectAccessor source) {
-        this(source, new DefaultBinderFactory(), BindingStrategy.DEEP);
+    public Binder(ObjectAccessor objectAccessor) {
+        this(objectAccessor, new DefaultBinderFactory(), BindingStrategy.DEEP);
     }
 
     /**
@@ -108,7 +108,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @return the result of the binding
      */
     public <T> BindResult<T> bind(String path, Bindable<T> bindable) {
-        return bind(PropertyPath.forPath(path), bindable, source, null);
+        return bind(PropertyPath.forPath(path), bindable, objectAccessor, null);
     }
 
     /**
@@ -187,8 +187,13 @@ public class Binder implements ObjectBinder, BindContext {
      * @return the data source
      */
     @Override
-    public ObjectAccessor getDataSource() {
-        return source;
+    public ObjectAccessor getObjectAccessor() {
+        return objectAccessor;
+    }
+
+    @Override
+    public void setObjectAccessor(ObjectAccessor objectAccessor) {
+        this.objectAccessor = objectAccessor;
     }
 
     /**

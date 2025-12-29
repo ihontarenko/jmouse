@@ -23,7 +23,7 @@ public final class StrictSingleResultSetExtractor<T> implements ResultSetExtract
             throw new EmptyResultException("Expected 1 row but got 0 for SQL: " + sqlForMessage);
         }
 
-        T value = mapper.map(resultSet);
+        T value = mapper.map(resultSet, 1);
 
         if (resultSet.next()) {
             int count = 2;

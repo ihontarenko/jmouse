@@ -15,12 +15,13 @@ public final class ListResultSetExtractor<T> implements ResultSetExtractor<List<
 
     @Override
     public List<T> extract(ResultSet resultSet) throws SQLException {
-        List<T> list = new ArrayList<>();
+        List<T> collection = new ArrayList<>();
+        int     rowIndex   = 1;
 
         while (resultSet.next()) {
-            list.add(mapper.map(resultSet));
+            collection.add(mapper.map(resultSet, rowIndex++));
         }
 
-        return list;
+        return collection;
     }
 }

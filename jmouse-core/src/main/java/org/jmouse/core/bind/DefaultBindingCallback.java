@@ -100,7 +100,7 @@ public class DefaultBindingCallback extends AbstractCallback {
             String prefix = replacer.prefix();
             if (stringValue.contains(prefix)) {
                 PlaceholderResolver resolver = (placeholder, defaultValue) -> {
-                    ObjectAccessor accessor = context.getDataSource();
+                    ObjectAccessor accessor = context.getObjectAccessor();
                     PropertyPath   path     = PropertyPath.forPath(placeholder);
                     ObjectAccessor other    = accessor.navigate(path);
                     return other.isNull() ? defaultValue : other.asText();

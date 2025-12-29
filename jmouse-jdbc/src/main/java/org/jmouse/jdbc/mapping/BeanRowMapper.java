@@ -1,8 +1,9 @@
 package org.jmouse.jdbc.mapping;
 
 import org.jmouse.core.Contract;
-import org.jmouse.core.bind.Bind;
-import org.jmouse.core.bind.Binder;
+import org.jmouse.core.bind.*;
+import org.jmouse.core.bind.accessor.DummyObjectAccessor;
+import org.jmouse.core.reflection.InferredType;
 import org.jmouse.jdbc.mapping.bind.JdbcAccessorWrapper;
 
 import java.sql.ResultSet;
@@ -10,9 +11,11 @@ import java.sql.ResultSet;
 public final class BeanRowMapper<T> implements RowMapper<T> {
 
     private final Class<T> type;
+    private final Binder binder;
 
     public BeanRowMapper(Class<T> type) {
         this.type = Contract.nonNull(type, "type");
+        this.binder = new Binder(new DummyObjectAccessor(null));
     }
 
     public static <T> BeanRowMapper<T> of(Class<T> type) {
@@ -20,8 +23,16 @@ public final class BeanRowMapper<T> implements RowMapper<T> {
     }
 
     @Override
-    public T map(ResultSet resultSet) {
-        return Bind.with(new Binder(JdbcAccessorWrapper.WRAPPER.wrap(resultSet))).get(type);
+    public T map(ResultSet resultSet, int rowIndex) {
+        ObjectAccessor accessor = JdbcAccessorWrapper.WRAPPER.wrap(resultSet);
+        binder.setObjectAccessor(accessor);
+        BindResult<T> result = binder.bind(null, toBindable(type));
+        Contract.state(result.isPresent(), "Failed to map '" + type + "'.");
+        return result.getValue();
+    }
+
+    private Bindable<T> toBindable(Class<T> type) {
+        return Bindable.of(InferredType.forClass(type));
     }
 
 }

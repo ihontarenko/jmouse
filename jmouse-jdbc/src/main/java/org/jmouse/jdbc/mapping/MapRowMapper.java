@@ -8,7 +8,7 @@ import java.util.Map;
 public class MapRowMapper implements RowMapper<Map<String, Object>> {
 
     @Override
-    public Map<String, Object> map(ResultSet resultSet) throws SQLException {
+    public Map<String, Object> map(ResultSet resultSet, int rowIndex) throws SQLException {
         RowMetadata         metadata = ResultSetRowMetadata.of(resultSet);
         Map<String, Object> map      = new HashMap<>();
 

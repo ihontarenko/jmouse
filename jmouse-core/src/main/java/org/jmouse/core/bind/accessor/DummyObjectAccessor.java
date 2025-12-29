@@ -45,7 +45,7 @@ public class DummyObjectAccessor extends AbstractAccessor {
      */
     @Override
     public void set(String name, Object value) {
-        throw new java.lang.UnsupportedOperationException("DUMMY DATA SOURCE");
+        throw new UnsupportedOperationException("DUMMY DATA SOURCE");
     }
 
     /**
@@ -60,6 +60,6 @@ public class DummyObjectAccessor extends AbstractAccessor {
      */
     @Override
     public void set(int index, Object value) {
-        throw new java.lang.UnsupportedOperationException("DUMMY DATA SOURCE");
+        throw new UnsupportedOperationException("DUMMY DATA SOURCE");
     }
 }

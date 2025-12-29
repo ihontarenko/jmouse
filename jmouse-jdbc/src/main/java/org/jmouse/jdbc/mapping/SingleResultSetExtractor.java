@@ -14,7 +14,7 @@ public final class SingleResultSetExtractor<T> implements ResultSetExtractor<T> 
     @Override
     public T extract(ResultSet resultSet) throws SQLException {
         if (resultSet.next()) {
-            return mapper.map(resultSet);
+            return mapper.map(resultSet, 1);
         }
 
         return null;
