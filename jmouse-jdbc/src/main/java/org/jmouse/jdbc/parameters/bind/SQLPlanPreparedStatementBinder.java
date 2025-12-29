@@ -14,6 +14,8 @@ import org.jmouse.jdbc.statement.PreparedStatementBinder;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import static java.lang.String.valueOf;
+
 public final class SQLPlanPreparedStatementBinder implements PreparedStatementBinder {
 
     private final ExpressionLanguage     expressionLanguage;
@@ -46,7 +48,7 @@ public final class SQLPlanPreparedStatementBinder implements PreparedStatementBi
                 }
             } else if (binding instanceof Binding.Positional(int position, Kind kind)) {
                 value = !parameterSource.hasValue(position)
-                        ? handleMissing(kind.name(), String.valueOf(position), parameterPosition) : parameterSource.getValue(position);
+                        ? handleMissing(kind.name(), valueOf(position), parameterPosition) : parameterSource.getValue(position);
             } else {
                 throw new IllegalStateException("Unknown binding: " + binding);
             }
