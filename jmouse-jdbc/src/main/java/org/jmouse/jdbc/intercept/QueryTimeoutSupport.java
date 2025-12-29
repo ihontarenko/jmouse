@@ -1,28 +1,29 @@
 package org.jmouse.jdbc.intercept;
 
-import org.jmouse.transaction.infrastructure.TransactionContext;
-import org.jmouse.transaction.infrastructure.support.TransactionContextAccessSupport;
+import org.jmouse.transaction.infrastructure.MutableTransactionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static org.jmouse.transaction.infrastructure.support.TransactionContextAccessSupport.current;
+
 public final class QueryTimeoutSupport {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryTimeoutSupport.class);
 
     private QueryTimeoutSupport() { }
 
     public static void applyIfPresent(Statement statement) throws SQLException {
-        if (statement == null) return;
-
-        TransactionContext context = TransactionContextAccessSupport.current().getContext();
-
-        if (context == null || context.getDefinition() == null) {
-            return;
-        }
-
-        int timeout = context.getDefinition().getTimeoutSeconds();
-
-        if (timeout > 0) {
-            statement.setQueryTimeout(timeout);
+        if (statement != null && current().getContext() instanceof MutableTransactionContext mutable) {
+            mutable.getEffectiveTimeoutSeconds().ifPresent(seconds -> {
+                try {
+                    statement.setQueryTimeout(seconds);
+                } catch (Exception e) {
+                    LOGGER.error("Failed to set query timeout to: {}s", seconds, e);
+                }
+            });
         }
     }
 }

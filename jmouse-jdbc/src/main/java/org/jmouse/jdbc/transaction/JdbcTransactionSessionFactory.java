@@ -8,14 +8,20 @@ import org.jmouse.transaction.infrastructure.TransactionSessionFactory;
 
 public final class JdbcTransactionSessionFactory implements TransactionSessionFactory {
 
-    private final ConnectionProvider connectionProvider;
+    private final ConnectionProvider   connectionProvider;
+    private final ConnectionCustomizer customizer;
 
-    public JdbcTransactionSessionFactory(ConnectionProvider connectionProvider) {
+    public JdbcTransactionSessionFactory(
+            ConnectionProvider connectionProvider, ConnectionCustomizer customizer
+    ) {
         this.connectionProvider = Contract.nonNull(connectionProvider, "connectionProvider");
+        this.customizer = Contract.nonNull(customizer, "customizer");
     }
 
     @Override
     public TransactionSession openSession(TransactionDefinition definition) {
-        return new JdbcTransactionSession(connectionProvider);
+        JdbcTransactionSession session = new JdbcTransactionSession(connectionProvider, customizer);
+        session.configure(definition);
+        return session;
     }
 }

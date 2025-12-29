@@ -1,4 +1,4 @@
-package org.jmouse.jdbc.bind;
+package org.jmouse.jdbc.parameters;
 
 import java.util.List;
 import java.util.Objects;

@@ -158,6 +158,10 @@ public abstract class AbstractTransactionCoordinator
         MutableTransactionContext context                = new MutableTransactionContext(definition, status, session);
         SynchronizationContext    synchronizationContext = new DefaultSynchronizationContext();
 
+        if (definition.getTimeoutSeconds() > 0) {
+            context.setEffectiveTimeoutSeconds(definition.getTimeoutSeconds());
+        }
+
         contextHolder.bindContext(context);
         synchronizationHolder.bind(synchronizationContext);
 

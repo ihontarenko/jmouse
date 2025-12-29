@@ -12,6 +12,7 @@ public final class MutableTransactionContext implements TransactionContext {
     private final TransactionStatus     status;
     private final TransactionSession    session;
     private       Object                savepoint;
+    private       Integer               effectiveTimeoutSeconds;
 
     public MutableTransactionContext(TransactionDefinition definition, TransactionStatus status, TransactionSession session) {
         this.definition = definition;
@@ -39,14 +40,6 @@ public final class MutableTransactionContext implements TransactionContext {
         return Optional.ofNullable(savepoint);
     }
 
-    public void setSavepoint(Object savepoint) {
-        this.savepoint = savepoint;
-    }
-
-    public void clearSavepoint() {
-        this.savepoint = null;
-    }
-
     @Override
     public boolean isRollbackOnly() {
         return status.isRollbackOnly();
@@ -56,5 +49,22 @@ public final class MutableTransactionContext implements TransactionContext {
     public void setRollbackOnly() {
         status.markRollbackOnly();
     }
+
+    public void setSavepoint(Object savepoint) {
+        this.savepoint = savepoint;
+    }
+
+    public void clearSavepoint() {
+        this.savepoint = null;
+    }
+
+    public Optional<Integer> getEffectiveTimeoutSeconds() {
+        return Optional.ofNullable(effectiveTimeoutSeconds);
+    }
+
+    public void setEffectiveTimeoutSeconds(Integer seconds) {
+        this.effectiveTimeoutSeconds = seconds;
+    }
+
 }
 

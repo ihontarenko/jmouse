@@ -3,24 +3,32 @@ package org.jmouse.jdbc.bulk;
 import org.jmouse.core.Contract;
 import org.jmouse.jdbc.SimpleTemplate;
 import org.jmouse.jdbc.statement.PreparedStatementBinder;
+import org.jmouse.transaction.TransactionCallback;
+import org.jmouse.transaction.TransactionDefinition;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.stream.IntStream;
 
 public final class ParallelBatchUpdater<T> {
 
-    private final SimpleTemplate template;
-    private final ExecutorService         executor;
-    private final BulkTransactionCallback transactionCallback;
+    private final SimpleTemplate        template;
+    private final TransactionCallback   transactionCallback;
+    private final ExecutorService       executor;
+    private final TransactionDefinition definition;
 
     public ParallelBatchUpdater(
-            SimpleTemplate template, ExecutorService executor, BulkTransactionCallback transactionCallback
+            SimpleTemplate template,
+            ExecutorService executor,
+            TransactionCallback transactionCallback,
+            TransactionDefinition definition
     ) {
         this.template = Contract.nonNull(template, "template");
         this.executor = Contract.nonNull(executor, "executor");
         this.transactionCallback = Contract.nonNull(transactionCallback, "transactionCallback");
+        this.definition = Contract.nonNull(definition, "definition");
     }
 
     public BulkBatchResult execute(
@@ -113,23 +121,13 @@ public final class ParallelBatchUpdater<T> {
             String sql, List<T> chunk, int chunkIndex, BinderFactory<T> binderFactory
     ) {
         try {
-            long affected = transactionCallback.inTransaction(() -> {
+            long affected = transactionCallback.inTransaction(definition, () -> {
                 List<PreparedStatementBinder> binders = new ArrayList<>(chunk.size());
                 for (T item : chunk) {
                     binders.add(binderFactory.binderFor(item));
                 }
-
-                int[] counts = template.batchUpdate(sql, binders);
-
-                long sum = 0;
-                for (int c : counts) {
-                    // JDBC can return SUCCESS_NO_INFO (-2) - treat it as 1 “logical” affected or 0?
-                    // Here: count positive values, ignore SUCCESS_NO_INFO/EXECUTE_FAILED.
-                    if (c > 0) sum += c;
-                }
-                return sum;
+                return IntStream.of(template.batchUpdate(sql, binders)).reduce(0, Integer::sum);
             });
-
             return ChunkResult.ok(chunkIndex, affected);
         } catch (Throwable e) {
             return ChunkResult.fail(chunkIndex, e);

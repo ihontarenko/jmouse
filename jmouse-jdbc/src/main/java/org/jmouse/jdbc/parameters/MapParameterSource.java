@@ -1,4 +1,4 @@
-package org.jmouse.jdbc.bind;
+package org.jmouse.jdbc.parameters;
 
 import org.jmouse.core.Contract;
 

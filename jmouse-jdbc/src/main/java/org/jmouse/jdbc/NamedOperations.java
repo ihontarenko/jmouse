@@ -1,8 +1,8 @@
 package org.jmouse.jdbc;
 
-import org.jmouse.jdbc.bind.BeanParameterSource;
-import org.jmouse.jdbc.bind.MapParameterSource;
-import org.jmouse.jdbc.bind.ParameterSource;
+import org.jmouse.jdbc.parameters.BeanParameterSource;
+import org.jmouse.jdbc.parameters.MapParameterSource;
+import org.jmouse.jdbc.parameters.ParameterSource;
 import org.jmouse.jdbc.mapping.KeyExtractor;
 import org.jmouse.jdbc.mapping.RowMapper;
 

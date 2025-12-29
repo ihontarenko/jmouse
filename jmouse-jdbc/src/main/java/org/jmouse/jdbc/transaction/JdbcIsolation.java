@@ -4,15 +4,25 @@ import org.jmouse.transaction.TransactionIsolation;
 
 import java.sql.Connection;
 
-public class IsolationMapping {
+public class JdbcIsolation {
 
-    public static int toJDBCIsolation(TransactionIsolation iso) {
-        return switch (iso) {
+    private JdbcIsolation() {}
+
+    public static int toJdbc(TransactionIsolation isolation) {
+        return switch (isolation) {
             case DEFAULT, READ_COMMITTED -> Connection.TRANSACTION_READ_COMMITTED;
             case READ_UNCOMMITTED -> Connection.TRANSACTION_READ_UNCOMMITTED;
             case REPEATABLE_READ -> Connection.TRANSACTION_REPEATABLE_READ;
             case SERIALIZABLE -> Connection.TRANSACTION_SERIALIZABLE;
         };
+    }
+
+    public static boolean isDefault(TransactionIsolation isolation) {
+        return isolation == null || isolation == TransactionIsolation.DEFAULT;
+    }
+
+    public static boolean isNone(int jdbcIsolation) {
+        return jdbcIsolation == Connection.TRANSACTION_NONE;
     }
 
 }

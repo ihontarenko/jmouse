@@ -4,7 +4,7 @@ import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.PrimaryBean;
 import org.jmouse.jdbc.*;
-import org.jmouse.jdbc.bind.MissingParameterPolicy;
+import org.jmouse.jdbc.parameters.MissingParameterPolicy;
 import org.jmouse.jdbc.parameters.SQLExpressionLanguage;
 import org.jmouse.jdbc.parameters.SQLParameterProcessor;
 import org.jmouse.jdbc.parameters.compile.SQLPlanCompiler;

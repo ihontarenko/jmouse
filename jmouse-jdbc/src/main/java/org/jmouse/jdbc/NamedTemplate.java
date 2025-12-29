@@ -1,8 +1,8 @@
 package org.jmouse.jdbc;
 
 import org.jmouse.el.ExpressionLanguage;
-import org.jmouse.jdbc.bind.MissingParameterPolicy;
-import org.jmouse.jdbc.bind.ParameterSource;
+import org.jmouse.jdbc.parameters.MissingParameterPolicy;
+import org.jmouse.jdbc.parameters.ParameterSource;
 import org.jmouse.jdbc.mapping.KeyExtractor;
 import org.jmouse.jdbc.mapping.RowMapper;
 import org.jmouse.jdbc.parameters.SQLCompiled;
