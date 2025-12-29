@@ -1,7 +1,7 @@
 package org.jmouse.jdbc.connection.datasource;
 
 import java.time.Duration;
-import java.util.Map;
+import java.util.Properties;
 
 public record DataSourceSpecification(
         String name,
@@ -9,8 +9,10 @@ public record DataSourceSpecification(
         String url,
         String username,
         String password,
+        String catalog,
+        String schema,
         Pool pool,               // optional
-        Map<String, String> properties
+        Properties properties
 ) {
     public record Pool(
             int minSize,

@@ -35,10 +35,12 @@ public abstract class AbstractDataSource implements DataSource {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T unwrap(Class<T> iface) throws SQLException {
-        if (!iface.isInstance(this)) {
-            throw new SQLException("Cannot unwrap %s as %s".formatted(getClass().getName(), iface.getName()));
+        if (isWrapperFor(iface)) {
+            return (T) this;
         }
-        return (T) this;
+        throw new SQLException("DataSource of type [%s] cannot be unwrapped as [%s]".formatted(
+                getClass().getName(), iface.getName())
+        );
     }
 
     @Override
