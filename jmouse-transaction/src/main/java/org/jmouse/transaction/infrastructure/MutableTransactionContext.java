@@ -5,6 +5,7 @@ import org.jmouse.transaction.TransactionSession;
 import org.jmouse.transaction.TransactionStatus;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 public final class MutableTransactionContext implements TransactionContext {
 
@@ -13,6 +14,7 @@ public final class MutableTransactionContext implements TransactionContext {
     private final TransactionSession    session;
     private       Object                savepoint;
     private       Integer               effectiveTimeoutSeconds;
+    private       TransactionAttributes attributes;
 
     public MutableTransactionContext(TransactionDefinition definition, TransactionStatus status, TransactionSession session) {
         this.definition = definition;
@@ -64,6 +66,30 @@ public final class MutableTransactionContext implements TransactionContext {
 
     public void setEffectiveTimeoutSeconds(Integer seconds) {
         this.effectiveTimeoutSeconds = seconds;
+    }
+
+    public Optional<TransactionAttributes> getAttributes() {
+        return Optional.ofNullable(attributes);
+    }
+
+    public void setAttributes(TransactionAttributes attributes) {
+        this.attributes = attributes;
+    }
+
+    public int remainingTimeoutSeconds() {
+        if (attributes == null || !attributes.hasTimeout()) {
+            return 0;
+        }
+
+        long leftNanos = attributes.deadlineNanos() - System.nanoTime();
+
+        if (leftNanos <= 0) {
+            return 1;
+        }
+
+        long seconds = TimeUnit.NANOSECONDS.toSeconds(leftNanos);
+
+        return (seconds <= 0) ? 1 : (int) Math.min(seconds, Integer.MAX_VALUE);
     }
 
 }

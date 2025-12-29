@@ -5,6 +5,7 @@ import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.jdbc.transaction.*;
 import org.jmouse.transaction.TransactionManager;
 import org.jmouse.transaction.configuration.TransactionInfrastructureConfiguration;
+import org.jmouse.transaction.infrastructure.JoinTransactionValidator;
 import org.jmouse.transaction.infrastructure.TransactionContextHolder;
 import org.jmouse.transaction.infrastructure.TransactionSessionFactory;
 import org.jmouse.transaction.synchronization.SynchronizationContextHolder;
@@ -39,8 +40,11 @@ public class JdbcTransactionConfiguration {
     public TransactionManager jdbcTransactionManager(
             TransactionContextHolder contextHolder,
             @Qualifier(CONNECTION_CUSTOMIZER) TransactionSessionFactory sessionFactory,
-            SynchronizationContextHolder synchronizationHolder
+            SynchronizationContextHolder synchronizationHolder,
+            JoinTransactionValidator joinTransactionValidator
     ) {
-        return new JdbcTransactionCoordinator(contextHolder, sessionFactory, synchronizationHolder);
+        return new JdbcTransactionCoordinator(
+                contextHolder, sessionFactory, synchronizationHolder, joinTransactionValidator
+        );
     }
 }

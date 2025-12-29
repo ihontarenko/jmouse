@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Template-based transaction coordinator.
@@ -18,16 +19,19 @@ public abstract class AbstractTransactionCoordinator
 
     protected final TransactionContextHolder     contextHolder;
     protected final SynchronizationContextHolder synchronizationHolder;
+    protected final JoinTransactionValidator     joinValidator;
     protected final TransactionSessionFactory    sessionFactory;
 
     protected AbstractTransactionCoordinator(
             TransactionContextHolder contextHolder,
             TransactionSessionFactory sessionFactory,
-            SynchronizationContextHolder synchronizationHolder
+            SynchronizationContextHolder synchronizationHolder,
+            JoinTransactionValidator joinValidator
     ) {
         this.contextHolder = contextHolder;
         this.sessionFactory = sessionFactory;
         this.synchronizationHolder = synchronizationHolder;
+        this.joinValidator = joinValidator;
     }
 
     @Override
@@ -116,7 +120,7 @@ public abstract class AbstractTransactionCoordinator
 
         switch (propagation) {
             case SUPPORTS, MANDATORY, REQUIRED:
-                return participateInExisting(existing);
+                return participateInExisting(existing, definition);
 
             case NEVER:
                 throw new IllegalStateException(
@@ -162,6 +166,13 @@ public abstract class AbstractTransactionCoordinator
             context.setEffectiveTimeoutSeconds(definition.getTimeoutSeconds());
         }
 
+        TransactionAttributes attributes = new TransactionAttributes(
+                definition.getIsolation(),
+                definition.isReadOnly(),
+                toDeadlineNanos(definition.getTimeoutSeconds())
+        );
+        context.setAttributes(attributes);
+
         contextHolder.bindContext(context);
         synchronizationHolder.bind(synchronizationContext);
 
@@ -171,16 +182,18 @@ public abstract class AbstractTransactionCoordinator
     }
 
     protected TransactionStatus participateInExisting(
-            TransactionContext existing
+            TransactionContext existing, TransactionDefinition requested
     ) {
+        if (existing instanceof MutableTransactionContext mutable) {
+            mutable.getAttributes().ifPresent(attributes -> joinValidator.validate(requested, attributes));
+        }
         return existing.getStatus();
     }
 
     protected TransactionStatus startNestedTransaction(
-            TransactionContext existing
+            TransactionContext outerContext
     ) {
-        // no session
-        TransactionSession session = existing.getSession();
+        TransactionSession session = outerContext.getSession();
 
         if (!(session instanceof SavepointSupport savepointCapable)) {
             throw new IllegalStateException(
@@ -192,12 +205,16 @@ public abstract class AbstractTransactionCoordinator
 
         MutableTransactionContext nestedContext =
                 new MutableTransactionContext(
-                        existing.getDefinition(),
+                        outerContext.getDefinition(),
                         new TransactionStatusSupport(false),
                         session
                 );
 
         nestedContext.setSavepoint(savepoint);
+
+        if (outerContext instanceof MutableTransactionContext outerMutable) {
+            outerMutable.getAttributes().ifPresent(nestedContext::setAttributes);
+        }
 
         contextHolder.bindContext(nestedContext);
 
@@ -354,5 +371,12 @@ public abstract class AbstractTransactionCoordinator
             TransactionSession session,
             Object savepoint
     );
+
+    protected long toDeadlineNanos(int timeoutSeconds) {
+        if (timeoutSeconds <= 0) {
+            return 0L;
+        }
+        return System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds);
+    }
 
 }

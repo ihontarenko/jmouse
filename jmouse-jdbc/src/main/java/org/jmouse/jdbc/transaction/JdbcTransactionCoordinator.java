@@ -3,10 +3,7 @@ package org.jmouse.jdbc.transaction;
 import org.jmouse.transaction.SavepointSupport;
 import org.jmouse.transaction.TransactionDefinition;
 import org.jmouse.transaction.TransactionSession;
-import org.jmouse.transaction.infrastructure.AbstractTransactionCoordinator;
-import org.jmouse.transaction.infrastructure.TransactionContext;
-import org.jmouse.transaction.infrastructure.TransactionContextHolder;
-import org.jmouse.transaction.infrastructure.TransactionSessionFactory;
+import org.jmouse.transaction.infrastructure.*;
 import org.jmouse.transaction.synchronization.SynchronizationContextHolder;
 
 import java.util.Map;
@@ -16,9 +13,10 @@ public final class JdbcTransactionCoordinator extends AbstractTransactionCoordin
     public JdbcTransactionCoordinator(
             TransactionContextHolder contextHolder,
             TransactionSessionFactory transactionSessionFactory,
-            SynchronizationContextHolder synchronizationHolder
+            SynchronizationContextHolder synchronizationHolder,
+            JoinTransactionValidator joinValidator
     ) {
-        super(contextHolder, transactionSessionFactory, synchronizationHolder);
+        super(contextHolder, transactionSessionFactory, synchronizationHolder, joinValidator);
     }
 
     @Override
