@@ -1,6 +1,4 @@
-package org.jmouse.jdbc.bulk;
-
-import org.jmouse.jdbc.statement.PreparedStatementBinder;
+package org.jmouse.jdbc.statement;
 
 @FunctionalInterface
 public interface BinderFactory<T> {

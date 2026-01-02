@@ -2,6 +2,7 @@ package org.jmouse.jdbc.bulk;
 
 import org.jmouse.core.Contract;
 import org.jmouse.jdbc.SimpleTemplate;
+import org.jmouse.jdbc.statement.BinderFactory;
 import org.jmouse.jdbc.statement.PreparedStatementBinder;
 import org.jmouse.transaction.TransactionCallback;
 import org.jmouse.transaction.TransactionDefinition;
