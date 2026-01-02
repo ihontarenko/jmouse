@@ -11,7 +11,7 @@ import org.jmouse.core.bind.Bind;
 import org.jmouse.core.bind.Binder;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.accessor.JavaBeanAccessor;
-import org.jmouse.core.env.Environment;
+import org.jmouse.core.environment.Environment;
 import org.jmouse.core.reflection.FieldFinder;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
 import org.slf4j.Logger;

@@ -1,8 +1,7 @@
-package org.jmouse.core.env;
+package org.jmouse.core.environment;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

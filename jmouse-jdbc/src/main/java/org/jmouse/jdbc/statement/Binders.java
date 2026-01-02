@@ -1,9 +1,13 @@
 package org.jmouse.jdbc.statement;
 
+import org.jmouse.core.Contract;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class Binders {
 
@@ -13,23 +17,40 @@ public final class Binders {
         return stmt -> {};
     }
 
-    public static PreparedStatementBinder of(Object... arguments) {
+    public static <T> List<PreparedStatementBinder> forEach(List<T> items, BinderFactory<T> factory) {
+        Contract.nonNull(items, "items");
+        Contract.nonNull(factory, "factory");
+
+        if (items.isEmpty()) {
+            return List.of();
+        }
+
+        List<PreparedStatementBinder> binders = new ArrayList<>(items.size());
+
+        for (T item : items) {
+            binders.add(factory.binderFor(item));
+        }
+
+        return binders;
+    }
+
+    public static PreparedStatementBinder ofObjects(Object... arguments) {
         return statement -> {
-            for (int i = 0; i < arguments.length; i++) {
-                statement.setObject(i + 1, arguments[i]);
+            for (int index = 0; index < arguments.length; index++) {
+                statement.setObject(index + 1, arguments[index]);
             }
         };
     }
 
-    public static PreparedStatementBinder string(int index, String value) {
-        return stmt -> stmt.setString(index, value);
+    public static PreparedStatementBinder bindString(int index, String value) {
+        return statement -> statement.setString(index, value);
     }
 
-    public static PreparedStatementBinder longValue(int index, long value) {
-        return stmt -> stmt.setLong(index, value);
+    public static PreparedStatementBinder bindLong(int index, long value) {
+        return statement -> statement.setLong(index, value);
     }
 
-    public static PreparedStatementBinder longObject(int index, Long value) {
+    public static PreparedStatementBinder bindLong(int index, Long value) {
         return statement -> {
             if (value == null) {
                 statement.setObject(index, null);
@@ -39,19 +60,19 @@ public final class Binders {
         };
     }
 
-    public static PreparedStatementBinder intValue(int index, int value) {
+    public static PreparedStatementBinder bindInteger(int index, int value) {
         return statement -> statement.setInt(index, value);
     }
 
-    public static PreparedStatementBinder boolValue(int index, boolean value) {
+    public static PreparedStatementBinder bindBoolean(int index, boolean value) {
         return statement -> statement.setBoolean(index, value);
     }
 
-    public static PreparedStatementBinder instant(int index, Instant value) {
+    public static PreparedStatementBinder bindInstant(int index, Instant value) {
         return statement -> statement.setTimestamp(index, value == null ? null : Timestamp.from(value));
     }
 
-    public static PreparedStatementBinder compose(PreparedStatementBinder... binders) {
+    public static PreparedStatementBinder composeBinders(PreparedStatementBinder... binders) {
         return statement -> {
             for (PreparedStatementBinder binder : binders) {
                 if (binder != null) {

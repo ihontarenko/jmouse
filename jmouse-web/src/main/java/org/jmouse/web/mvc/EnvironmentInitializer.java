@@ -1,8 +1,8 @@
 package org.jmouse.web.mvc;
 
 import org.jmouse.beans.annotation.Bean;
-import org.jmouse.core.env.Environment;
-import org.jmouse.core.env.MapPropertySource;
+import org.jmouse.core.environment.Environment;
+import org.jmouse.core.environment.MapPropertySource;
 
 import java.util.Map;
 

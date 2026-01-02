@@ -1,4 +1,4 @@
-package org.jmouse.core.env;
+package org.jmouse.core.environment;
 
 import org.jmouse.core.convert.ClassPair;
 import org.jmouse.core.convert.Conversion;

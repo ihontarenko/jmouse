@@ -3,9 +3,9 @@ package org.jmouse.core.bind.accessor;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.ObjectAccessorWrapper;
 import org.jmouse.core.bind.UnsupportedOperationException;
-import org.jmouse.core.env.MapPropertySource;
-import org.jmouse.core.env.PropertyResolver;
-import org.jmouse.core.env.PropertySource;
+import org.jmouse.core.environment.MapPropertySource;
+import org.jmouse.core.environment.PropertyResolver;
+import org.jmouse.core.environment.PropertySource;
 
 import java.util.Map;
 

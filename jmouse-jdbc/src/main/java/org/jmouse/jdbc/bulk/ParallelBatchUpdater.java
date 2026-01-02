@@ -1,5 +1,6 @@
 package org.jmouse.jdbc.bulk;
 
+import org.jmouse.core.Chunker;
 import org.jmouse.core.Contract;
 import org.jmouse.jdbc.SimpleTemplate;
 import org.jmouse.jdbc.statement.BinderFactory;
@@ -9,6 +10,7 @@ import org.jmouse.transaction.TransactionDefinition;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
@@ -40,7 +42,7 @@ public final class ParallelBatchUpdater<T> {
         Contract.nonNull(binderFactory, "binderFactory");
         Contract.nonNull(policy, "policy");
 
-        List<List<T>> chunks = Chunker.split(items, policy.chunkSize());
+        List<List<T>> chunks = Chunker.split(items, policy.chunkSize(), List.class, List.class);
 
         if (chunks.isEmpty()) {
             return BulkBatchResult.empty();

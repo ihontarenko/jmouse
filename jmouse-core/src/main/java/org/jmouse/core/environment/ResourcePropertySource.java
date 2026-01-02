@@ -1,4 +1,4 @@
-package org.jmouse.core.env;
+package org.jmouse.core.environment;
 
 import org.jmouse.core.io.Resource;
 import org.slf4j.Logger;

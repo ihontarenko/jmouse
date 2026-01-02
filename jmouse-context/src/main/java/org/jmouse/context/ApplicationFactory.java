@@ -1,6 +1,6 @@
 package org.jmouse.context;
 
-import org.jmouse.core.env.Environment;
+import org.jmouse.core.environment.Environment;
 
 /**
  * A factory interface for creating instances of {@link ApplicationBeanContext}.

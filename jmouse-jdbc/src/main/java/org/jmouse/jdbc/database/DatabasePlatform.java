@@ -7,6 +7,8 @@ package org.jmouse.jdbc.database;
  */
 public interface DatabasePlatform {
 
+    PaginationDialect pagination();
+
     DatabaseId id();
 
     DatabaseVersion version();

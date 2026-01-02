@@ -3,7 +3,7 @@ package org.jmouse.web.initializer.context;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanContextInitializer;
 import org.jmouse.core.convert.Conversion;
-import org.jmouse.core.env.Environment;
+import org.jmouse.core.environment.Environment;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.web.mvc.BeanConfigurer;
 import org.jmouse.core.Priority;

@@ -1,6 +1,6 @@
 package org.jmouse.context;
 
-import org.jmouse.core.env.*;
+import org.jmouse.core.environment.*;
 import org.jmouse.core.io.CompositeResourceLoader;
 import org.jmouse.core.io.PatternMatcherResourceLoader;
 import org.jmouse.core.io.Resource;

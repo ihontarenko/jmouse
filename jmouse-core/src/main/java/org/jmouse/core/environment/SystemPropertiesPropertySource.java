@@ -1,4 +1,4 @@
-package org.jmouse.core.env;
+package org.jmouse.core.environment;
 
 /**
  * A {@link PropertySource} implementation that uses system properties as the underlying property source.

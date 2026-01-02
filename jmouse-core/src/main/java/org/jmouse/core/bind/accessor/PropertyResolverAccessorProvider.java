@@ -2,7 +2,7 @@ package org.jmouse.core.bind.accessor;
 
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.ObjectAccessorProvider;
-import org.jmouse.core.env.PropertyResolver;
+import org.jmouse.core.environment.PropertyResolver;
 import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.core.Priority;
 

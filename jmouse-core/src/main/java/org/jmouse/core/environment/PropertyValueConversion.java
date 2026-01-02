@@ -1,6 +1,6 @@
-package org.jmouse.core.env;
+package org.jmouse.core.environment;
 
-import org.jmouse.core.env.converter.HierarchicalMapConverter;
+import org.jmouse.core.environment.converter.HierarchicalMapConverter;
 import org.jmouse.core.convert.StandardConversion;
 import org.jmouse.core.convert.converter.NumberToStringConverter;
 import org.jmouse.core.convert.converter.StringToNumberConverter;

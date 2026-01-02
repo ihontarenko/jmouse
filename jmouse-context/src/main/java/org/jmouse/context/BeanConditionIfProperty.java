@@ -4,7 +4,7 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.conditions.AbstractBeanRegistrationCondition;
 import org.jmouse.beans.conditions.BeanCondition;
 import org.jmouse.beans.conditions.ConditionalMetadata;
-import org.jmouse.core.env.Environment;
+import org.jmouse.core.environment.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

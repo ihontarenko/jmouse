@@ -5,12 +5,9 @@ import org.jmouse.beans.BeanFactory;
 import org.jmouse.beans.BeanNotFoundException;
 import org.jmouse.beans.BeanScope;
 import org.jmouse.core.bind.Binder;
-import org.jmouse.core.env.Environment;
-import org.jmouse.core.env.PropertyResolver;
+import org.jmouse.core.environment.Environment;
+import org.jmouse.core.environment.PropertyResolver;
 import org.jmouse.core.io.ResourceLoader;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * A specialized {@link BeanContext} that combines functionality from {@link BeanFactory},

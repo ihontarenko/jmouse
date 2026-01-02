@@ -1,6 +1,6 @@
 package org.jmouse.context;
 
-import org.jmouse.core.env.PropertySource;
+import org.jmouse.core.environment.PropertySource;
 import org.jmouse.core.reflection.Reflections;
 
 import java.util.*;
