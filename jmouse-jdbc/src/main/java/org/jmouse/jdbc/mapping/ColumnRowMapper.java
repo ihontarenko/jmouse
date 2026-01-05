@@ -22,7 +22,7 @@ import java.sql.SQLException;
  * <h3>Example</h3>
  * <pre>{@code
  * RowMapper<Long> idMapper =
- *     new ColumnRowMapper<>(1, (rs, col) -> rs.getLong(col));
+ *     new ColumnRowMapper<>(1, (rs, column) -> rs.getLong(column));
  *
  * List<Long> ids = jdbc.query(
  *     "select id from users",

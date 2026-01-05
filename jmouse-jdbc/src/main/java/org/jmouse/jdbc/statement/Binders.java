@@ -14,18 +14,7 @@ public final class Binders {
     private Binders() {}
 
     public static StatementBinder empty() {
-        return stmt -> {};
-    }
-
-    public static <T> List<StatementBinder> forEach(List<T> items, BinderFactory<T> factory) {
-        Contract.nonNull(items, "items");
-        Contract.nonNull(factory, "factory");
-
-        List<StatementBinder> out = new ArrayList<>(items.size());
-        for (T item : items) {
-            out.add(factory.binderFor(item));
-        }
-        return out;
+        return statement -> {};
     }
 
     public static <T> List<StatementBinder> forEach(List<T> items, BinderFactory<T> factory) {
