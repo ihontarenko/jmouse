@@ -7,8 +7,6 @@ import java.sql.SQLException;
 @FunctionalInterface
 public interface KeyUpdateCallback<K> {
 
-
-
     K doStatementExecute(PreparedStatement statement, ResultSet generatedKeys) throws SQLException;
 
 }

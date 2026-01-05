@@ -19,6 +19,7 @@ import java.util.Optional;
  *     <li>Expose only a few <b>wide</b> (fully-configurable) abstract methods</li>
  *     <li>Provide ergonomic default overloads for common cases</li>
  *     <li>Keep the API declarative and mapper-oriented</li>
+ *     <li>Allow optional execution hooks via {@link StatementHandler} 📎</li>
  * </ul>
  *
  * <h3>Typical usage</h3>
@@ -35,6 +36,22 @@ import java.util.Optional;
  * );
  * }</pre>
  *
+ * <h3>Using statement hooks</h3>
+ * <pre>{@code
+ * StatementHandler timing = stmt -> {
+ *     long started = System.nanoTime();
+ *     // ... store metadata in your sink ...
+ * };
+ *
+ * List<User> users = jdbc.query(
+ *     "select * from users",
+ *     StatementBinder.NOOP,
+ *     StatementConfigurer.fetchSize(500),
+ *     timing,
+ *     (row, i) -> new User(row.getLong("id"), row.getString("name"))
+ * );
+ * }</pre>
+ *
  * @author jMouse
  */
 public interface SimpleOperations {
@@ -45,6 +62,7 @@ public interface SimpleOperations {
      * @param sql        SQL query to execute
      * @param binder     parameter binder (may be {@link StatementBinder#NOOP})
      * @param configurer statement configuration (timeouts, fetch size, etc.)
+     * @param handler    statement lifecycle hook (may be {@link StatementHandler#NOOP})
      * @param mapper     row mapper
      * @param <T>        mapped element type
      * @return optional mapped result, empty if no rows were returned
@@ -58,6 +76,9 @@ public interface SimpleOperations {
             RowMapper<T> mapper
     ) throws SQLException;
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP}.
+     */
     default <T> Optional<T> querySingle(
             String sql,
             StatementBinder binder,
@@ -67,6 +88,9 @@ public interface SimpleOperations {
         return querySingle(sql, binder, StatementConfigurer.NOOP, handler, mapper);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementHandler#NOOP}.
+     */
     default <T> Optional<T> querySingle(
             String sql,
             StatementBinder binder,
@@ -76,6 +100,9 @@ public interface SimpleOperations {
         return querySingle(sql, binder, configurer, StatementHandler.NOOP, mapper);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#NOOP}.
+     */
     default <T> Optional<T> querySingle(
             String sql,
             StatementBinder binder,
@@ -84,6 +111,10 @@ public interface SimpleOperations {
         return querySingle(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, mapper);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementBinder#NOOP}, {@link StatementConfigurer#NOOP},
+     * and {@link StatementHandler#NOOP}.
+     */
     default <T> Optional<T> querySingle(
             String sql,
             RowMapper<T> mapper
@@ -99,6 +130,7 @@ public interface SimpleOperations {
      * @param sql        SQL query to execute
      * @param binder     parameter binder
      * @param configurer statement configuration
+     * @param handler    statement lifecycle hook
      * @param mapper     row mapper
      * @param <T>        mapped element type
      * @return mapped result
@@ -112,6 +144,9 @@ public interface SimpleOperations {
             RowMapper<T> mapper
     ) throws SQLException;
 
+    /**
+     * Convenience overload: uses {@link StatementHandler#NOOP}.
+     */
     default <T> T queryOne(
             String sql,
             StatementBinder binder,
@@ -121,6 +156,9 @@ public interface SimpleOperations {
         return queryOne(sql, binder, configurer, StatementHandler.NOOP, mapper);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP}.
+     */
     default <T> T queryOne(
             String sql,
             StatementBinder binder,
@@ -130,6 +168,9 @@ public interface SimpleOperations {
         return queryOne(sql, binder, StatementConfigurer.NOOP, handler, mapper);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#NOOP}.
+     */
     default <T> T queryOne(
             String sql,
             StatementBinder binder,
@@ -138,6 +179,10 @@ public interface SimpleOperations {
         return queryOne(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, mapper);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementBinder#NOOP}, {@link StatementConfigurer#NOOP},
+     * and {@link StatementHandler#NOOP}.
+     */
     default <T> T queryOne(
             String sql,
             RowMapper<T> mapper
@@ -151,6 +196,7 @@ public interface SimpleOperations {
      * @param sql        SQL query to execute
      * @param binder     parameter binder
      * @param configurer statement configuration
+     * @param handler    statement lifecycle hook
      * @param mapper     row mapper
      * @param <T>        mapped element type
      * @return list of mapped results (possibly empty)
@@ -164,6 +210,9 @@ public interface SimpleOperations {
             RowMapper<T> mapper
     ) throws SQLException;
 
+    /**
+     * Convenience overload: uses {@link StatementHandler#NOOP}.
+     */
     default <T> List<T> query(
             String sql,
             StatementBinder binder,
@@ -173,6 +222,9 @@ public interface SimpleOperations {
         return query(sql, binder, configurer, StatementHandler.NOOP, mapper);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP}.
+     */
     default <T> List<T> query(
             String sql,
             StatementBinder binder,
@@ -182,6 +234,9 @@ public interface SimpleOperations {
         return query(sql, binder, StatementConfigurer.NOOP, handler, mapper);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#NOOP}.
+     */
     default <T> List<T> query(
             String sql,
             StatementBinder binder,
@@ -190,6 +245,10 @@ public interface SimpleOperations {
         return query(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, mapper);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementBinder#NOOP}, {@link StatementConfigurer#NOOP},
+     * and {@link StatementHandler#NOOP}.
+     */
     default <T> List<T> query(
             String sql,
             RowMapper<T> mapper
@@ -203,7 +262,8 @@ public interface SimpleOperations {
      * @param sql        SQL query to execute
      * @param binder     parameter binder
      * @param configurer statement configuration
-     * @param extractor result set extractor
+     * @param handler    statement lifecycle hook
+     * @param extractor  result set extractor
      * @param <T>        result type
      * @return extracted result
      * @throws SQLException if JDBC access fails
@@ -216,6 +276,9 @@ public interface SimpleOperations {
             ResultSetExtractor<T> extractor
     ) throws SQLException;
 
+    /**
+     * Convenience overload: uses {@link StatementHandler#NOOP}.
+     */
     default <T> T query(
             String sql,
             StatementBinder binder,
@@ -225,6 +288,9 @@ public interface SimpleOperations {
         return query(sql, binder, configurer, StatementHandler.NOOP, extractor);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP}.
+     */
     default <T> T query(
             String sql,
             StatementBinder binder,
@@ -234,6 +300,9 @@ public interface SimpleOperations {
         return query(sql, binder, StatementConfigurer.NOOP, handler, extractor);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#NOOP}.
+     */
     default <T> T query(
             String sql,
             StatementBinder binder,
@@ -242,6 +311,10 @@ public interface SimpleOperations {
         return query(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, extractor);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementBinder#NOOP}, {@link StatementConfigurer#NOOP},
+     * and {@link StatementHandler#NOOP}.
+     */
     default <T> T query(
             String sql,
             ResultSetExtractor<T> extractor
@@ -255,6 +328,7 @@ public interface SimpleOperations {
      * @param sql        SQL statement to execute
      * @param binder     parameter binder
      * @param configurer statement configuration
+     * @param handler    statement lifecycle hook
      * @return update count
      * @throws SQLException if JDBC access fails
      */
@@ -265,6 +339,9 @@ public interface SimpleOperations {
             StatementHandler handler
     ) throws SQLException;
 
+    /**
+     * Convenience overload: uses {@link StatementHandler#NOOP}.
+     */
     default int update(
             String sql,
             StatementBinder binder,
@@ -273,6 +350,9 @@ public interface SimpleOperations {
         return update(sql, binder, configurer, StatementHandler.NOOP);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP}.
+     */
     default int update(
             String sql,
             StatementBinder binder,
@@ -281,6 +361,9 @@ public interface SimpleOperations {
         return update(sql, binder, StatementConfigurer.NOOP, handler);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#NOOP}.
+     */
     default int update(
             String sql,
             StatementBinder binder
@@ -288,6 +371,10 @@ public interface SimpleOperations {
         return update(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementBinder#NOOP}, {@link StatementConfigurer#NOOP},
+     * and {@link StatementHandler#NOOP}.
+     */
     default int update(String sql) throws SQLException {
         return update(sql, StatementBinder.NOOP, StatementConfigurer.NOOP, StatementHandler.NOOP);
     }
@@ -298,6 +385,7 @@ public interface SimpleOperations {
      * @param sql        SQL statement to execute
      * @param binders    parameter binders applied per batch item
      * @param configurer statement configuration
+     * @param handler    statement lifecycle hook
      * @return array of update counts (driver-dependent semantics)
      * @throws SQLException if JDBC access fails
      */
@@ -308,6 +396,9 @@ public interface SimpleOperations {
             StatementHandler handler
     ) throws SQLException;
 
+    /**
+     * Convenience overload: uses {@link StatementHandler#NOOP}.
+     */
     default int[] batchUpdate(
             String sql,
             List<? extends StatementBinder> binders,
@@ -316,6 +407,9 @@ public interface SimpleOperations {
         return batchUpdate(sql, binders, configurer, StatementHandler.NOOP);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP}.
+     */
     default int[] batchUpdate(
             String sql,
             List<? extends StatementBinder> binders,
@@ -324,6 +418,9 @@ public interface SimpleOperations {
         return batchUpdate(sql, binders, StatementConfigurer.NOOP, handler);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#NOOP}.
+     */
     default int[] batchUpdate(
             String sql,
             List<? extends StatementBinder> binders
@@ -337,7 +434,8 @@ public interface SimpleOperations {
      * @param sql        SQL statement to execute
      * @param binder     parameter binder
      * @param configurer statement configuration (may enable key retrieval)
-     * @param extractor generated key extractor
+     * @param handler    statement lifecycle hook
+     * @param extractor  generated key extractor
      * @param <K>        key/result type
      * @return extracted key value
      * @throws SQLException if JDBC access fails
@@ -350,6 +448,9 @@ public interface SimpleOperations {
             KeyExtractor<K> extractor
     ) throws SQLException;
 
+    /**
+     * Convenience overload: uses {@link StatementHandler#NOOP}.
+     */
     default <K> K update(
             String sql,
             StatementBinder binder,
@@ -359,6 +460,9 @@ public interface SimpleOperations {
         return update(sql, binder, configurer, StatementHandler.NOOP, extractor);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP}.
+     */
     default <K> K update(
             String sql,
             StatementBinder binder,
@@ -368,6 +472,9 @@ public interface SimpleOperations {
         return update(sql, binder, StatementConfigurer.NOOP, handler, extractor);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#NOOP}.
+     */
     default <K> K update(
             String sql,
             StatementBinder binder,
@@ -382,6 +489,7 @@ public interface SimpleOperations {
      * @param sql        call SQL (e.g. {@code "{call my_proc(?)}"})
      * @param binder     callable statement binder (IN / OUT parameters)
      * @param configurer statement configuration
+     * @param handler    statement lifecycle hook
      * @param callback   callable callback
      * @param <T>        result type
      * @return callback result
@@ -395,6 +503,9 @@ public interface SimpleOperations {
             CallableCallback<T> callback
     ) throws SQLException;
 
+    /**
+     * Convenience overload: uses {@link StatementHandler#NOOP}.
+     */
     default <T> T call(
             String sql,
             CallableStatementBinder binder,
@@ -404,6 +515,9 @@ public interface SimpleOperations {
         return call(sql, binder, configurer, StatementHandler.NOOP, callback);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP}.
+     */
     default <T> T call(
             String sql,
             CallableStatementBinder binder,
@@ -413,6 +527,9 @@ public interface SimpleOperations {
         return call(sql, binder, StatementConfigurer.NOOP, handler, callback);
     }
 
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP}, {@link StatementHandler#NOOP}.
+     */
     default <T> T call(
             String sql,
             CallableStatementBinder binder,

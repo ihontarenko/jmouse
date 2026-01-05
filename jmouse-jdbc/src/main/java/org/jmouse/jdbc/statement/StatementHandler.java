@@ -6,17 +6,17 @@ import java.sql.Statement;
 @FunctionalInterface
 public interface StatementHandler {
 
-    <S extends Statement, R> R handle(S statement, StatementWork<? super S, R> work) throws SQLException;
+    <S extends Statement, R> R handle(S statement, StatementExecutor<? super S, R> executor) throws SQLException;
 
     @FunctionalInterface
-    interface StatementWork<S extends Statement, R> {
+    interface StatementExecutor<S extends Statement, R> {
         R execute(S statement) throws SQLException;
     }
 
     StatementHandler NOOP = new StatementHandler() {
         @Override
-        public <S extends Statement, R> R handle(S statement, StatementWork<? super S, R> work) throws SQLException {
-            return work.execute(statement);
+        public <S extends Statement, R> R handle(S statement, StatementExecutor<? super S, R> executor) throws SQLException {
+            return executor.execute(statement);
         }
 
         @Override
@@ -34,8 +34,8 @@ public interface StatementHandler {
 
         return new StatementHandler() {
             @Override
-            public <S extends Statement, R> R handle(S statement, StatementWork<? super S, R> work) throws SQLException {
-                return temporary0.handle(statement, s -> temporary1.handle(s, work));
+            public <S extends Statement, R> R handle(S statement, StatementExecutor<? super S, R> executor) throws SQLException {
+                return temporary0.handle(statement, s -> temporary1.handle(s, executor));
             }
             @Override
             public String toString() {

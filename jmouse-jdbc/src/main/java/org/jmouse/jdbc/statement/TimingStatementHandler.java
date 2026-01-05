@@ -15,10 +15,10 @@ public final class TimingStatementHandler implements StatementHandler {
     }
 
     @Override
-    public <S extends Statement, R> R handle(S statement, StatementWork<? super S, R> work) throws SQLException {
+    public <S extends Statement, R> R handle(S statement, StatementExecutor<? super S, R> executor) throws SQLException {
         long start = System.nanoTime();
         try {
-            return work.execute(statement);
+            return executor.execute(statement);
         } finally {
             sink.records().add(new Record(
                     statement.getClass().getSimpleName(),
