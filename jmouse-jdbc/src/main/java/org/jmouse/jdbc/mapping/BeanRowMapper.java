@@ -91,7 +91,7 @@ public final class BeanRowMapper<T> implements RowMapper<T> {
         ObjectAccessor accessor = JdbcAccessorWrapper.WRAPPER.wrap(resultSet);
         binder.setObjectAccessor(accessor);
         BindResult<T> result = binder.bind(null, toBindable(type));
-        Contract.state(result.isPresent(), "Failed to map '" + type + "'.");
+        Contract.state(result.isPresent(), "Failed to map bean-type: '" + type + "'.");
         return result.getValue();
     }
 
