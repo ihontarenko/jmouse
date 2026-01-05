@@ -9,7 +9,7 @@ import org.jmouse.jdbc.parameters.SQLCompiled;
 import org.jmouse.jdbc.parameters.SQLParameterProcessor;
 import org.jmouse.jdbc.parameters.SQLParsed;
 import org.jmouse.jdbc.parameters.bind.SQLPlanPreparedStatementBinder;
-import org.jmouse.jdbc.statement.PreparedStatementBinder;
+import org.jmouse.jdbc.statement.StatementBinder;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -38,36 +38,36 @@ public final class NamedTemplate extends SimpleTemplate implements NamedOperatio
 
     @Override
     public <T> Optional<T> querySingle(String sql, ParameterSource params, RowMapper<T> mapper) throws SQLException {
-        SQLCompiled             compiled = compile(sql);
-        PreparedStatementBinder binder   = binder(compiled, params);
+        SQLCompiled     compiled = compile(sql);
+        StatementBinder binder   = binder(compiled, params);
         return super.querySingle(compiled.compiled(), binder, mapper);
     }
 
     @Override
     public <T> T queryOne(String sql, ParameterSource params, RowMapper<T> mapper) throws SQLException {
-        SQLCompiled             compiled = compile(sql);
-        PreparedStatementBinder binder   = binder(compiled, params);
+        SQLCompiled     compiled = compile(sql);
+        StatementBinder binder   = binder(compiled, params);
         return super.queryOne(compiled.compiled(), binder, mapper);
     }
 
     @Override
     public <T> List<T> query(String sql, ParameterSource params, RowMapper<T> mapper) throws SQLException {
-        SQLCompiled             compiled = compile(sql);
-        PreparedStatementBinder binder   = binder(compiled, params);
+        SQLCompiled     compiled = compile(sql);
+        StatementBinder binder   = binder(compiled, params);
         return super.query(compiled.compiled(), binder, mapper);
     }
 
     @Override
     public int update(String sql, ParameterSource params) throws SQLException {
-        SQLCompiled             compiled = compile(sql);
-        PreparedStatementBinder binder   = binder(compiled, params);
+        SQLCompiled     compiled = compile(sql);
+        StatementBinder binder   = binder(compiled, params);
         return super.update(compiled.compiled(), binder);
     }
 
     @Override
     public int[] batch(String sql, List<? extends ParameterSource> parameterSources) throws SQLException {
-        SQLCompiled                   compiled = compile(sql);
-        List<PreparedStatementBinder> binders  = new ArrayList<>(parameterSources.size());
+        SQLCompiled           compiled = compile(sql);
+        List<StatementBinder> binders  = new ArrayList<>(parameterSources.size());
 
         for (ParameterSource parameterSource : parameterSources) {
             binders.add(binder(compiled, parameterSource));
@@ -78,8 +78,8 @@ public final class NamedTemplate extends SimpleTemplate implements NamedOperatio
 
     @Override
     public <K> K update(String sql, ParameterSource parameters, KeyExtractor<K> extractor) throws SQLException {
-        SQLCompiled compiled = compile(sql);
-        PreparedStatementBinder binder = binder(compiled, parameters);
+        SQLCompiled     compiled = compile(sql);
+        StatementBinder binder   = binder(compiled, parameters);
         return super.update(compiled.compiled(), binder, extractor);
     }
 
@@ -90,7 +90,7 @@ public final class NamedTemplate extends SimpleTemplate implements NamedOperatio
         });
     }
 
-    private PreparedStatementBinder binder(SQLCompiled compiled, ParameterSource params) {
+    private StatementBinder binder(SQLCompiled compiled, ParameterSource params) {
         return new SQLPlanPreparedStatementBinder(expressionLanguage, compiled.plan(), params, missingPolicy);
     }
 }

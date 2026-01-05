@@ -9,14 +9,14 @@ import org.jmouse.jdbc.parameters.ParameterSource;
 import org.jmouse.jdbc.parameters.SQLPlan;
 import org.jmouse.jdbc.parameters.SQLPlan.Binding;
 import org.jmouse.jdbc.parameters.SQLPlan.Binding.Kind;
-import org.jmouse.jdbc.statement.PreparedStatementBinder;
+import org.jmouse.jdbc.statement.StatementBinder;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import static java.lang.String.valueOf;
 
-public final class SQLPlanPreparedStatementBinder implements PreparedStatementBinder {
+public final class SQLPlanPreparedStatementBinder implements StatementBinder {
 
     private final ExpressionLanguage     expressionLanguage;
     private final SQLPlan                plan;

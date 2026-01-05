@@ -4,13 +4,12 @@ import org.jmouse.core.Chunker;
 import org.jmouse.core.Contract;
 import org.jmouse.jdbc.SimpleTemplate;
 import org.jmouse.jdbc.statement.BinderFactory;
-import org.jmouse.jdbc.statement.PreparedStatementBinder;
+import org.jmouse.jdbc.statement.StatementBinder;
 import org.jmouse.transaction.TransactionCallback;
 import org.jmouse.transaction.TransactionDefinition;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
@@ -125,7 +124,7 @@ public final class ParallelBatchUpdater<T> {
     ) {
         try {
             long affected = transactionCallback.inTransaction(definition, () -> {
-                List<PreparedStatementBinder> binders = new ArrayList<>(chunk.size());
+                List<StatementBinder> binders = new ArrayList<>(chunk.size());
                 for (T item : chunk) {
                     binders.add(binderFactory.binderFor(item));
                 }

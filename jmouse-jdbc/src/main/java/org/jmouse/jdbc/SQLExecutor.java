@@ -4,7 +4,6 @@ import java.sql.*;
 import java.util.List;
 
 import org.jmouse.jdbc.connection.ConnectionProvider;
-import org.jmouse.jdbc.mapping.KeyExtractor;
 import org.jmouse.jdbc.mapping.ResultSetExtractor;
 import org.jmouse.jdbc.statement.*;
 
@@ -15,7 +14,7 @@ import org.jmouse.jdbc.statement.*;
  * <ul>
  *     <li>obtains a {@link Connection} from a {@link ConnectionProvider}</li>
  *     <li>creates {@link PreparedStatement}/{@link CallableStatement}</li>
- *     <li>binds parameters via {@link PreparedStatementBinder}/{@link CallableStatementBinder}</li>
+ *     <li>binds parameters via {@link StatementBinder}/{@link CallableStatementBinder}</li>
  *     <li>applies statement configuration via {@link StatementConfigurer}</li>
  *     <li>executes JDBC operations via {@link StatementCallback}/{@link KeyUpdateCallback}/{@link CallableCallback}</li>
  *     <li>ensures resources are closed and connections are released</li>
@@ -72,8 +71,9 @@ public final class SQLExecutor implements JdbcExecutor {
     @Override
     public <T> T execute(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             StatementCallback<ResultSet> callback,
             ResultSetExtractor<T> extractor
     ) throws SQLException {
@@ -87,7 +87,7 @@ public final class SQLExecutor implements JdbcExecutor {
             binder.bind(statement);
             configurer.configure(statement);
 
-            resultSet = callback.doStatementExecute(statement);
+            resultSet = handler.handle(statement, callback::doStatementExecute);
             return extractor.extract(resultSet);
 
         } finally {
@@ -109,8 +109,9 @@ public final class SQLExecutor implements JdbcExecutor {
     @Override
     public int executeUpdate(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             StatementCallback<Integer> callback
     ) throws SQLException {
         Connection connection = connectionProvider.getConnection();
@@ -122,8 +123,7 @@ public final class SQLExecutor implements JdbcExecutor {
             binder.bind(statement);
             configurer.configure(statement);
 
-            return callback.doStatementExecute(statement);
-
+            return handler.handle(statement, callback::doStatementExecute);
         } finally {
             JdbcSupport.closeQuietly(statement);
             connectionProvider.release(connection);
@@ -145,8 +145,9 @@ public final class SQLExecutor implements JdbcExecutor {
     @Override
     public int[] executeBatch(
             String sql,
-            List<? extends PreparedStatementBinder> binders,
+            List<? extends StatementBinder> binders,
             StatementConfigurer configurer,
+            StatementHandler handler,
             StatementCallback<int[]> callback
     ) throws SQLException {
         if (binders.isEmpty()) {
@@ -160,14 +161,14 @@ public final class SQLExecutor implements JdbcExecutor {
             statement = connection.prepareStatement(sql);
             configurer.configure(statement);
 
-            for (PreparedStatementBinder binder : binders) {
+            for (StatementBinder binder : binders) {
                 if (binder != null) {
                     binder.bind(statement);
                 }
                 statement.addBatch();
             }
 
-            return callback.doStatementExecute(statement);
+            return handler.handle(statement, callback::doStatementExecute);
         } finally {
             JdbcSupport.closeQuietly(statement);
             connectionProvider.release(connection);
@@ -175,73 +176,41 @@ public final class SQLExecutor implements JdbcExecutor {
     }
 
     /**
-     * Executes an update and extracts generated keys using a {@link KeyExtractor}.
+     * Executes an update returning generated keys, delegating extraction to a callback.
      * <p>
-     * Uses {@link PreparedStatement#RETURN_GENERATED_KEYS}.
+     * This is the <b>widest</b> signature for key-returning updates and exposes a
+     * {@link StatementHandler} hook.
      *
-     * @param sql       SQL to execute
-     * @param binder    binds statement parameters
-     * @param extractor extracts generated keys from the {@link ResultSet} returned by {@link PreparedStatement#getGeneratedKeys()}
-     * @param <K>       key/result type
-     * @return extracted key result
+     * @param sql        SQL to execute (typically INSERT)
+     * @param binder     binds statement parameters
+     * @param configurer statement configuration (may enable key retrieval)
+     * @param handler    execution hook for statement lifecycle/metadata
+     * @param callback   invoked with the executed statement and its generated keys
+     * @param <K>        key/result type
+     * @return extracted keys (or any other callback-defined result)
      * @throws SQLException if JDBC access fails
      */
     @Override
     public <K> K executeUpdate(
             String sql,
-            PreparedStatementBinder binder,
-            KeyExtractor<K> extractor
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            StatementHandler handler,
+            KeyUpdateCallback<K> callback
     ) throws SQLException {
         Connection connection = connectionProvider.getConnection();
 
         try (PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             binder.bind(statement);
-            statement.executeUpdate();
-
-            try (ResultSet keys = statement.getGeneratedKeys()) {
-                return extractor.extract(keys);
-            }
-        } finally {
-            connectionProvider.release(connection);
-        }
-    }
-
-    /**
-     * Executes an update that returns generated keys, delegating key processing to a {@link KeyUpdateCallback}.
-     * <p>
-     * Uses {@link PreparedStatement#RETURN_GENERATED_KEYS}.
-     *
-     * @param sql        SQL to execute
-     * @param binder     binds statement parameters
-     * @param configurer configures statement options
-     * @param callback   processes the executed statement and its generated keys
-     * @param <K>        key/result type
-     * @return callback result
-     * @throws SQLException if JDBC access fails
-     */
-    @Override
-    public <K> K executeUpdate(
-            String sql,
-            PreparedStatementBinder binder,
-            StatementConfigurer configurer,
-            KeyUpdateCallback<K> callback
-    ) throws SQLException {
-        Connection        connection = connectionProvider.getConnection();
-        PreparedStatement statement  = null;
-
-        try {
-            statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-
-            binder.bind(statement);
             configurer.configure(statement);
 
-            statement.executeUpdate();
-
-            try (ResultSet keys = statement.getGeneratedKeys()) {
-                return callback.doStatementExecute(statement, keys);
-            }
+            return handler.handle(statement, s -> {
+                s.executeUpdate();
+                try (ResultSet keys = s.getGeneratedKeys()) {
+                    return callback.doStatementExecute(s, keys);
+                }
+            });
         } finally {
-            JdbcSupport.closeQuietly(statement);
             connectionProvider.release(connection);
         }
     }
@@ -262,6 +231,7 @@ public final class SQLExecutor implements JdbcExecutor {
             String sql,
             CallableStatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             CallableCallback<T> callback
     ) throws SQLException {
         Connection connection = connectionProvider.getConnection();
@@ -271,7 +241,7 @@ public final class SQLExecutor implements JdbcExecutor {
             statement = connection.prepareCall(sql);
             binder.bind(statement);
             configurer.configure(statement);
-            return callback.doInCallable(statement);
+            return handler.handle(statement, callback::doInCallable);
         } finally {
             JdbcSupport.closeQuietly(statement);
             connectionProvider.release(connection);

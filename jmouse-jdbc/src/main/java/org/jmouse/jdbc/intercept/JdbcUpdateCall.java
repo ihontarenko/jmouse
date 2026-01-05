@@ -1,8 +1,9 @@
 package org.jmouse.jdbc.intercept;
 
-import org.jmouse.jdbc.statement.PreparedStatementBinder;
+import org.jmouse.jdbc.statement.StatementBinder;
 import org.jmouse.jdbc.statement.StatementCallback;
 import org.jmouse.jdbc.statement.StatementConfigurer;
+import org.jmouse.jdbc.statement.StatementHandler;
 
 /**
  * {@link JdbcCall} descriptor for executing a JDBC update operation
@@ -11,7 +12,7 @@ import org.jmouse.jdbc.statement.StatementConfigurer;
  * This call type encapsulates all components required for an update execution:
  * <ul>
  *     <li>SQL statement</li>
- *     <li>{@link PreparedStatementBinder} for parameter binding</li>
+ *     <li>{@link StatementBinder} for parameter binding</li>
  *     <li>{@link StatementConfigurer} for statement tuning (timeouts, fetch size, etc.)</li>
  *     <li>{@link StatementCallback} that performs the JDBC execution and returns the update count</li>
  * </ul>
@@ -37,8 +38,9 @@ import org.jmouse.jdbc.statement.StatementConfigurer;
  */
 public record JdbcUpdateCall(
         String sql,
-        PreparedStatementBinder binder,
+        StatementBinder binder,
         StatementConfigurer configurer,
+        StatementHandler handler,
         StatementCallback<Integer> callback
 ) implements JdbcCall<Integer> {
 
@@ -63,6 +65,7 @@ public record JdbcUpdateCall(
         return new JdbcUpdateCall(
                 sql, binder,
                 StatementConfigurer.combine(this.configurer(), configurer),
+                handler,
                 callback
         );
     }

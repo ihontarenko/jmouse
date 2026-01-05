@@ -1,8 +1,9 @@
 package org.jmouse.jdbc.intercept;
 
-import org.jmouse.jdbc.statement.PreparedStatementBinder;
+import org.jmouse.jdbc.statement.StatementBinder;
 import org.jmouse.jdbc.statement.StatementCallback;
 import org.jmouse.jdbc.statement.StatementConfigurer;
+import org.jmouse.jdbc.statement.StatementHandler;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ import java.util.List;
  * <h3>Payload</h3>
  * <ul>
  *     <li>SQL text</li>
- *     <li>List of {@link PreparedStatementBinder} instances (one per batch item)</li>
+ *     <li>List of {@link StatementBinder} instances (one per batch item)</li>
  *     <li>{@link StatementConfigurer} for statement tuning (timeouts, fetch size, etc.)</li>
  *     <li>{@link StatementCallback} performing the actual batch execution</li>
  * </ul>
@@ -45,8 +46,9 @@ import java.util.List;
  */
 public record JdbcBatchUpdateCall(
         String sql,
-        List<? extends PreparedStatementBinder> binders,
+        List<? extends StatementBinder> binders,
         StatementConfigurer configurer,
+        StatementHandler handler,
         StatementCallback<int[]> callback
 ) implements JdbcCall<int[]> {
 
@@ -84,6 +86,7 @@ public record JdbcBatchUpdateCall(
         return new JdbcBatchUpdateCall(
                 sql, binders,
                 StatementConfigurer.combine(this.configurer(), configurer),
+                handler,
                 callback
         );
     }

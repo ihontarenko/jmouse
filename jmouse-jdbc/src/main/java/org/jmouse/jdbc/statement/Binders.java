@@ -13,11 +13,22 @@ public final class Binders {
 
     private Binders() {}
 
-    public static PreparedStatementBinder empty() {
+    public static StatementBinder empty() {
         return stmt -> {};
     }
 
-    public static <T> List<PreparedStatementBinder> forEach(List<T> items, BinderFactory<T> factory) {
+    public static <T> List<StatementBinder> forEach(List<T> items, BinderFactory<T> factory) {
+        Contract.nonNull(items, "items");
+        Contract.nonNull(factory, "factory");
+
+        List<StatementBinder> out = new ArrayList<>(items.size());
+        for (T item : items) {
+            out.add(factory.binderFor(item));
+        }
+        return out;
+    }
+
+    public static <T> List<StatementBinder> forEach(List<T> items, BinderFactory<T> factory) {
         Contract.nonNull(items, "items");
         Contract.nonNull(factory, "factory");
 
@@ -25,7 +36,7 @@ public final class Binders {
             return List.of();
         }
 
-        List<PreparedStatementBinder> binders = new ArrayList<>(items.size());
+        List<StatementBinder> binders = new ArrayList<>(items.size());
 
         for (T item : items) {
             binders.add(factory.binderFor(item));
@@ -34,7 +45,7 @@ public final class Binders {
         return binders;
     }
 
-    public static PreparedStatementBinder ofObjects(Object... arguments) {
+    public static StatementBinder ofObjects(Object... arguments) {
         return statement -> {
             for (int index = 0; index < arguments.length; index++) {
                 statement.setObject(index + 1, arguments[index]);
@@ -42,15 +53,15 @@ public final class Binders {
         };
     }
 
-    public static PreparedStatementBinder bindString(int index, String value) {
+    public static StatementBinder bindString(int index, String value) {
         return statement -> statement.setString(index, value);
     }
 
-    public static PreparedStatementBinder bindLong(int index, long value) {
+    public static StatementBinder bindLong(int index, long value) {
         return statement -> statement.setLong(index, value);
     }
 
-    public static PreparedStatementBinder bindLong(int index, Long value) {
+    public static StatementBinder bindLong(int index, Long value) {
         return statement -> {
             if (value == null) {
                 statement.setObject(index, null);
@@ -60,21 +71,21 @@ public final class Binders {
         };
     }
 
-    public static PreparedStatementBinder bindInteger(int index, int value) {
+    public static StatementBinder bindInteger(int index, int value) {
         return statement -> statement.setInt(index, value);
     }
 
-    public static PreparedStatementBinder bindBoolean(int index, boolean value) {
+    public static StatementBinder bindBoolean(int index, boolean value) {
         return statement -> statement.setBoolean(index, value);
     }
 
-    public static PreparedStatementBinder bindInstant(int index, Instant value) {
+    public static StatementBinder bindInstant(int index, Instant value) {
         return statement -> statement.setTimestamp(index, value == null ? null : Timestamp.from(value));
     }
 
-    public static PreparedStatementBinder composeBinders(PreparedStatementBinder... binders) {
+    public static StatementBinder composeBinders(StatementBinder... binders) {
         return statement -> {
-            for (PreparedStatementBinder binder : binders) {
+            for (StatementBinder binder : binders) {
                 if (binder != null) {
                     binder.bind(statement);
                 }
@@ -82,7 +93,7 @@ public final class Binders {
         };
     }
 
-    public static PreparedStatementBinder checked(CheckedBinder binder) {
+    public static StatementBinder checked(CheckedBinder binder) {
         return binder::bind;
     }
 

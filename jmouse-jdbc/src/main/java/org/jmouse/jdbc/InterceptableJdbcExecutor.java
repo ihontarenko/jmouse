@@ -102,13 +102,14 @@ public final class InterceptableJdbcExecutor implements JdbcExecutor {
     @Override
     public <T> T execute(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             StatementCallback<ResultSet> callback,
             ResultSetExtractor<T> extractor
     ) throws SQLException {
         JdbcExecutionContext context = newContext();
-        JdbcQueryCall<T>     call    = new JdbcQueryCall<>(sql, binder, configurer, callback, extractor);
+        JdbcQueryCall<T>     call    = new JdbcQueryCall<>(sql, binder, configurer, handler, callback, extractor);
         @SuppressWarnings("unchecked")
         T result = (T) chain.run(context, call);
         return result;
@@ -127,12 +128,13 @@ public final class InterceptableJdbcExecutor implements JdbcExecutor {
     @Override
     public int executeUpdate(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             StatementCallback<Integer> callback
     ) throws SQLException {
         JdbcExecutionContext context = newContext();
-        JdbcUpdateCall       call    = new JdbcUpdateCall(sql, binder, configurer, callback);
+        JdbcUpdateCall       call    = new JdbcUpdateCall(sql, binder, configurer, handler, callback);
         Object               result  = chain.run(context, call);
         return (Integer) result;
     }
@@ -150,12 +152,13 @@ public final class InterceptableJdbcExecutor implements JdbcExecutor {
     @Override
     public int[] executeBatch(
             String sql,
-            List<? extends PreparedStatementBinder> binders,
+            List<? extends StatementBinder> binders,
             StatementConfigurer configurer,
+            StatementHandler handler,
             StatementCallback<int[]> callback
     ) throws SQLException {
         JdbcExecutionContext context = newContext();
-        JdbcBatchUpdateCall  call    = new JdbcBatchUpdateCall(sql, binders, configurer, callback);
+        JdbcBatchUpdateCall  call    = new JdbcBatchUpdateCall(sql, binders, configurer, handler, callback);
         Object               result  = chain.run(context, call);
         return (int[]) result;
     }
@@ -174,12 +177,13 @@ public final class InterceptableJdbcExecutor implements JdbcExecutor {
     @Override
     public <K> K executeUpdate(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             KeyUpdateCallback<K> callback
     ) throws SQLException {
         JdbcExecutionContext context = newContext();
-        JdbcKeyUpdateCall<K> call    = new JdbcKeyUpdateCall<>(sql, binder, configurer, callback);
+        JdbcKeyUpdateCall<K> call    = new JdbcKeyUpdateCall<>(sql, binder, configurer, handler, callback);
         @SuppressWarnings("unchecked")
         K result = (K) chain.run(context, call);
         return result;
@@ -199,11 +203,12 @@ public final class InterceptableJdbcExecutor implements JdbcExecutor {
     @Override
     public <K> K executeUpdate(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             KeyExtractor<K> extractor
     ) throws SQLException {
-        return executeUpdate(sql, binder, configurer, (statement, keys) -> extractor.extract(keys));
+        return executeUpdate(sql, binder, configurer, handler, (statement, keys) -> extractor.extract(keys));
     }
 
     /**
@@ -222,10 +227,11 @@ public final class InterceptableJdbcExecutor implements JdbcExecutor {
             String sql,
             CallableStatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             CallableCallback<T> callback
     ) throws SQLException {
         JdbcExecutionContext context = newContext();
-        JdbcCallableCall<T>  call    = new JdbcCallableCall<>(sql, binder, configurer, callback);
+        JdbcCallableCall<T>  call    = new JdbcCallableCall<>(sql, binder, configurer, handler, callback);
         @SuppressWarnings("unchecked")
         T result = (T) chain.run(context, call);
         return result;

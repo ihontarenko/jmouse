@@ -43,7 +43,7 @@ public interface SimpleOperations {
      * Executes a query expected to return <b>at most one</b> row.
      *
      * @param sql        SQL query to execute
-     * @param binder     parameter binder (may be {@link PreparedStatementBinder#NOOP})
+     * @param binder     parameter binder (may be {@link StatementBinder#NOOP})
      * @param configurer statement configuration (timeouts, fetch size, etc.)
      * @param mapper     row mapper
      * @param <T>        mapped element type
@@ -52,24 +52,43 @@ public interface SimpleOperations {
      */
     <T> Optional<T> querySingle(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             RowMapper<T> mapper
     ) throws SQLException;
 
-    /**
-     * Convenience overload: no parameters, no statement configuration.
-     */
-    default <T> Optional<T> querySingle(String sql, RowMapper<T> mapper) throws SQLException {
-        return querySingle(sql, PreparedStatementBinder.NOOP, StatementConfigurer.NOOP, mapper);
+    default <T> Optional<T> querySingle(
+            String sql,
+            StatementBinder binder,
+            StatementHandler handler,
+            RowMapper<T> mapper
+    ) throws SQLException {
+        return querySingle(sql, binder, StatementConfigurer.NOOP, handler, mapper);
     }
 
-    /**
-     * Convenience overload: parameter binding without statement configuration.
-     */
-    default <T> Optional<T> querySingle(String sql, PreparedStatementBinder binder, RowMapper<T> mapper)
-            throws SQLException {
-        return querySingle(sql, binder, StatementConfigurer.NOOP, mapper);
+    default <T> Optional<T> querySingle(
+            String sql,
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            RowMapper<T> mapper
+    ) throws SQLException {
+        return querySingle(sql, binder, configurer, StatementHandler.NOOP, mapper);
+    }
+
+    default <T> Optional<T> querySingle(
+            String sql,
+            StatementBinder binder,
+            RowMapper<T> mapper
+    ) throws SQLException {
+        return querySingle(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, mapper);
+    }
+
+    default <T> Optional<T> querySingle(
+            String sql,
+            RowMapper<T> mapper
+    ) throws SQLException {
+        return querySingle(sql, StatementBinder.NOOP, StatementConfigurer.NOOP, StatementHandler.NOOP, mapper);
     }
 
     /**
@@ -87,23 +106,43 @@ public interface SimpleOperations {
      */
     <T> T queryOne(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             RowMapper<T> mapper
     ) throws SQLException;
 
-    /**
-     * Convenience overload: no parameters, no statement configuration.
-     */
-    default <T> T queryOne(String sql, RowMapper<T> mapper) throws SQLException {
-        return queryOne(sql, PreparedStatementBinder.NOOP, StatementConfigurer.NOOP, mapper);
+    default <T> T queryOne(
+            String sql,
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            RowMapper<T> mapper
+    ) throws SQLException {
+        return queryOne(sql, binder, configurer, StatementHandler.NOOP, mapper);
     }
 
-    /**
-     * Convenience overload: parameter binding without statement configuration.
-     */
-    default <T> T queryOne(String sql, PreparedStatementBinder binder, RowMapper<T> mapper) throws SQLException {
-        return queryOne(sql, binder, StatementConfigurer.NOOP, mapper);
+    default <T> T queryOne(
+            String sql,
+            StatementBinder binder,
+            StatementHandler handler,
+            RowMapper<T> mapper
+    ) throws SQLException {
+        return queryOne(sql, binder, StatementConfigurer.NOOP, handler, mapper);
+    }
+
+    default <T> T queryOne(
+            String sql,
+            StatementBinder binder,
+            RowMapper<T> mapper
+    ) throws SQLException {
+        return queryOne(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, mapper);
+    }
+
+    default <T> T queryOne(
+            String sql,
+            RowMapper<T> mapper
+    ) throws SQLException {
+        return queryOne(sql, StatementBinder.NOOP, StatementConfigurer.NOOP, StatementHandler.NOOP, mapper);
     }
 
     /**
@@ -119,23 +158,43 @@ public interface SimpleOperations {
      */
     <T> List<T> query(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             RowMapper<T> mapper
     ) throws SQLException;
 
-    /**
-     * Convenience overload: no parameters, no statement configuration.
-     */
-    default <T> List<T> query(String sql, RowMapper<T> mapper) throws SQLException {
-        return query(sql, PreparedStatementBinder.NOOP, StatementConfigurer.NOOP, mapper);
+    default <T> List<T> query(
+            String sql,
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            RowMapper<T> mapper
+    ) throws SQLException {
+        return query(sql, binder, configurer, StatementHandler.NOOP, mapper);
     }
 
-    /**
-     * Convenience overload: parameter binding without statement configuration.
-     */
-    default <T> List<T> query(String sql, PreparedStatementBinder binder, RowMapper<T> mapper) throws SQLException {
-        return query(sql, binder, StatementConfigurer.NOOP, mapper);
+    default <T> List<T> query(
+            String sql,
+            StatementBinder binder,
+            StatementHandler handler,
+            RowMapper<T> mapper
+    ) throws SQLException {
+        return query(sql, binder, StatementConfigurer.NOOP, handler, mapper);
+    }
+
+    default <T> List<T> query(
+            String sql,
+            StatementBinder binder,
+            RowMapper<T> mapper
+    ) throws SQLException {
+        return query(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, mapper);
+    }
+
+    default <T> List<T> query(
+            String sql,
+            RowMapper<T> mapper
+    ) throws SQLException {
+        return query(sql, StatementBinder.NOOP, StatementConfigurer.NOOP, StatementHandler.NOOP, mapper);
     }
 
     /**
@@ -151,24 +210,43 @@ public interface SimpleOperations {
      */
     <T> T query(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             ResultSetExtractor<T> extractor
     ) throws SQLException;
 
-    /**
-     * Convenience overload: no parameters, no statement configuration.
-     */
-    default <T> T query(String sql, ResultSetExtractor<T> extractor) throws SQLException {
-        return query(sql, PreparedStatementBinder.NOOP, StatementConfigurer.NOOP, extractor);
+    default <T> T query(
+            String sql,
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            ResultSetExtractor<T> extractor
+    ) throws SQLException {
+        return query(sql, binder, configurer, StatementHandler.NOOP, extractor);
     }
 
-    /**
-     * Convenience overload: parameter binding without statement configuration.
-     */
-    default <T> T query(String sql, PreparedStatementBinder binder, ResultSetExtractor<T> extractor)
-            throws SQLException {
-        return query(sql, binder, StatementConfigurer.NOOP, extractor);
+    default <T> T query(
+            String sql,
+            StatementBinder binder,
+            StatementHandler handler,
+            ResultSetExtractor<T> extractor
+    ) throws SQLException {
+        return query(sql, binder, StatementConfigurer.NOOP, handler, extractor);
+    }
+
+    default <T> T query(
+            String sql,
+            StatementBinder binder,
+            ResultSetExtractor<T> extractor
+    ) throws SQLException {
+        return query(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, extractor);
+    }
+
+    default <T> T query(
+            String sql,
+            ResultSetExtractor<T> extractor
+    ) throws SQLException {
+        return query(sql, StatementBinder.NOOP, StatementConfigurer.NOOP, StatementHandler.NOOP, extractor);
     }
 
     /**
@@ -182,22 +260,36 @@ public interface SimpleOperations {
      */
     int update(
             String sql,
-            PreparedStatementBinder binder,
-            StatementConfigurer configurer
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            StatementHandler handler
     ) throws SQLException;
 
-    /**
-     * Convenience overload: no parameters, no statement configuration.
-     */
-    default int update(String sql) throws SQLException {
-        return update(sql, PreparedStatementBinder.NOOP, StatementConfigurer.NOOP);
+    default int update(
+            String sql,
+            StatementBinder binder,
+            StatementConfigurer configurer
+    ) throws SQLException {
+        return update(sql, binder, configurer, StatementHandler.NOOP);
     }
 
-    /**
-     * Convenience overload: parameter binding without statement configuration.
-     */
-    default int update(String sql, PreparedStatementBinder binder) throws SQLException {
-        return update(sql, binder, StatementConfigurer.NOOP);
+    default int update(
+            String sql,
+            StatementBinder binder,
+            StatementHandler handler
+    ) throws SQLException {
+        return update(sql, binder, StatementConfigurer.NOOP, handler);
+    }
+
+    default int update(
+            String sql,
+            StatementBinder binder
+    ) throws SQLException {
+        return update(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP);
+    }
+
+    default int update(String sql) throws SQLException {
+        return update(sql, StatementBinder.NOOP, StatementConfigurer.NOOP, StatementHandler.NOOP);
     }
 
     /**
@@ -211,15 +303,32 @@ public interface SimpleOperations {
      */
     int[] batchUpdate(
             String sql,
-            List<? extends PreparedStatementBinder> binders,
-            StatementConfigurer configurer
+            List<? extends StatementBinder> binders,
+            StatementConfigurer configurer,
+            StatementHandler handler
     ) throws SQLException;
 
-    /**
-     * Convenience overload: no statement configuration.
-     */
-    default int[] batchUpdate(String sql, List<? extends PreparedStatementBinder> binders) throws SQLException {
-        return batchUpdate(sql, binders, StatementConfigurer.NOOP);
+    default int[] batchUpdate(
+            String sql,
+            List<? extends StatementBinder> binders,
+            StatementConfigurer configurer
+    ) throws SQLException {
+        return batchUpdate(sql, binders, configurer, StatementHandler.NOOP);
+    }
+
+    default int[] batchUpdate(
+            String sql,
+            List<? extends StatementBinder> binders,
+            StatementHandler handler
+    ) throws SQLException {
+        return batchUpdate(sql, binders, StatementConfigurer.NOOP, handler);
+    }
+
+    default int[] batchUpdate(
+            String sql,
+            List<? extends StatementBinder> binders
+    ) throws SQLException {
+        return batchUpdate(sql, binders, StatementConfigurer.NOOP, StatementHandler.NOOP);
     }
 
     /**
@@ -235,16 +344,36 @@ public interface SimpleOperations {
      */
     <K> K update(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             KeyExtractor<K> extractor
     ) throws SQLException;
 
-    /**
-     * Convenience overload: parameter binding without statement configuration.
-     */
-    default <K> K update(String sql, PreparedStatementBinder binder, KeyExtractor<K> extractor) throws SQLException {
-        return update(sql, binder, StatementConfigurer.NOOP, extractor);
+    default <K> K update(
+            String sql,
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            KeyExtractor<K> extractor
+    ) throws SQLException {
+        return update(sql, binder, configurer, StatementHandler.NOOP, extractor);
+    }
+
+    default <K> K update(
+            String sql,
+            StatementBinder binder,
+            StatementHandler handler,
+            KeyExtractor<K> extractor
+    ) throws SQLException {
+        return update(sql, binder, StatementConfigurer.NOOP, handler, extractor);
+    }
+
+    default <K> K update(
+            String sql,
+            StatementBinder binder,
+            KeyExtractor<K> extractor
+    ) throws SQLException {
+        return update(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, extractor);
     }
 
     /**
@@ -262,20 +391,34 @@ public interface SimpleOperations {
             String sql,
             CallableStatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             CallableCallback<T> callback
     ) throws SQLException;
 
-    /**
-     * Convenience overload: no parameters, no statement configuration.
-     */
-    default <T> T call(String sql, CallableCallback<T> callback) throws SQLException {
-        return call(sql, CallableStatementBinder.NOOP, StatementConfigurer.NOOP, callback);
+    default <T> T call(
+            String sql,
+            CallableStatementBinder binder,
+            StatementConfigurer configurer,
+            CallableCallback<T> callback
+    ) throws SQLException {
+        return call(sql, binder, configurer, StatementHandler.NOOP, callback);
     }
 
-    /**
-     * Convenience overload: callable binder without statement configuration.
-     */
-    default <T> T call(String sql, CallableStatementBinder binder, CallableCallback<T> callback) throws SQLException {
-        return call(sql, binder, StatementConfigurer.NOOP, callback);
+    default <T> T call(
+            String sql,
+            CallableStatementBinder binder,
+            StatementHandler handler,
+            CallableCallback<T> callback
+    ) throws SQLException {
+        return call(sql, binder, StatementConfigurer.NOOP, handler, callback);
     }
+
+    default <T> T call(
+            String sql,
+            CallableStatementBinder binder,
+            CallableCallback<T> callback
+    ) throws SQLException {
+        return call(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, callback);
+    }
+
 }

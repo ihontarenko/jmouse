@@ -18,6 +18,7 @@ import java.util.List;
  *     <li>configuring statement options (timeouts, fetch size, etc.)</li>
  *     <li>invoking the actual JDBC operation</li>
  *     <li>delegating result processing to callbacks/extractors</li>
+ *     <li>invoking execution hooks via {@link StatementHandler} (optional)</li>
  * </ul>
  *
  * <p>
@@ -29,6 +30,8 @@ import java.util.List;
  * List<User> users = executor.execute(
  *     "select id, name from users where active = ?",
  *     ps -> ps.setBoolean(1, true),
+ *     StatementConfigurer.NOOP,
+ *     StatementHandler.NOOP,
  *     StatementCallback.QUERY,
  *     rs -> {
  *         List<User> list = new ArrayList<>();
@@ -44,7 +47,9 @@ import java.util.List;
  * <pre>{@code
  * int updated = executor.executeUpdate(
  *     "update users set name = ? where id = ?",
- *     ps -> { ps.setString(1, "Alice"); ps.setLong(2, 10L); }
+ *     ps -> { ps.setString(1, "Alice"); ps.setLong(2, 10L); },
+ *     StatementConfigurer.NOOP,
+ *     StatementHandler.NOOP
  * );
  * }</pre>
  *
@@ -53,7 +58,9 @@ import java.util.List;
  * Long id = executor.executeUpdate(
  *     "insert into users(name) values(?)",
  *     ps -> ps.setString(1, "Bob"),
- *     keys -> keys.next() ? keys.getLong(1) : null
+ *     StatementConfigurer.NOOP,
+ *     StatementHandler.NOOP,
+ *     (stmt, keys) -> keys.next() ? keys.getLong(1) : null
  * );
  * }</pre>
  *
@@ -64,9 +71,15 @@ public interface JdbcExecutor {
     /**
      * Executes a SQL query using a prepared statement and returns a mapped result.
      *
+     * <p>
+     * This is the <b>widest</b> query signature that exposes all extension points:
+     * binding, configuration, execution hooks, the actual execution callback,
+     * and the result extractor.
+     *
      * @param sql        SQL to execute
-     * @param binder     binds statement parameters (may be {@link PreparedStatementBinder#NOOP})
+     * @param binder     binds statement parameters (may be {@link StatementBinder#NOOP})
      * @param configurer configures statement options (may be {@link StatementConfigurer#NOOP})
+     * @param handler    execution hook for statement lifecycle/metadata (may be {@link StatementHandler#NOOP})
      * @param callback   performs the JDBC operation and returns a {@link ResultSet}
      * @param extractor  maps the {@link ResultSet} to the target result
      * @param <T>        result type
@@ -75,112 +88,212 @@ public interface JdbcExecutor {
      */
     <T> T execute(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             StatementCallback<ResultSet> callback,
             ResultSetExtractor<T> extractor
     ) throws SQLException;
 
     /**
-     * Convenience overload: uses {@link StatementConfigurer#NOOP}.
-     */
-    default <T> T execute(
-            String sql,
-            PreparedStatementBinder binder,
-            StatementCallback<ResultSet> callback,
-            ResultSetExtractor<T> extractor
-    ) throws SQLException {
-        return execute(sql, binder, StatementConfigurer.NOOP, callback, extractor);
-    }
-
-    /**
-     * Convenience overload: uses {@link PreparedStatementBinder#NOOP} and {@link StatementConfigurer#NOOP}.
-     */
-    default <T> T execute(
-            String sql,
-            StatementCallback<ResultSet> callback,
-            ResultSetExtractor<T> extractor
-    ) throws SQLException {
-        return execute(sql, PreparedStatementBinder.NOOP, StatementConfigurer.NOOP, callback, extractor);
-    }
-
-    /**
-     * Executes a SQL update (INSERT/UPDATE/DELETE) using a prepared statement.
+     * Convenience overload: uses {@link StatementHandler#NOOP}.
      *
      * @param sql        SQL to execute
      * @param binder     binds statement parameters
      * @param configurer configures statement options
+     * @param callback   performs the JDBC operation and returns a {@link ResultSet}
+     * @param extractor  maps the {@link ResultSet}
+     * @param <T>        result type
+     * @return extracted result
+     * @throws SQLException if JDBC access fails
+     */
+    default <T> T execute(
+            String sql,
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            StatementCallback<ResultSet> callback,
+            ResultSetExtractor<T> extractor
+    ) throws SQLException {
+        return execute(sql, binder, configurer, StatementHandler.NOOP, callback, extractor);
+    }
+
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#NOOP}.
+     *
+     * @param sql       SQL to execute
+     * @param binder    binds statement parameters
+     * @param callback  performs the JDBC operation and returns a {@link ResultSet}
+     * @param extractor maps the {@link ResultSet}
+     * @param <T>       result type
+     * @return extracted result
+     * @throws SQLException if JDBC access fails
+     */
+    default <T> T execute(
+            String sql,
+            StatementBinder binder,
+            StatementCallback<ResultSet> callback,
+            ResultSetExtractor<T> extractor
+    ) throws SQLException {
+        return execute(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, callback, extractor);
+    }
+
+    /**
+     * Convenience overload: uses {@link StatementBinder#NOOP}, {@link StatementConfigurer#NOOP}
+     * and {@link StatementHandler#NOOP}.
+     *
+     * @param sql       SQL to execute
+     * @param callback  performs the JDBC operation and returns a {@link ResultSet}
+     * @param extractor maps the {@link ResultSet}
+     * @param <T>       result type
+     * @return extracted result
+     * @throws SQLException if JDBC access fails
+     */
+    default <T> T execute(
+            String sql,
+            StatementCallback<ResultSet> callback,
+            ResultSetExtractor<T> extractor
+    ) throws SQLException {
+        return execute(sql, StatementBinder.NOOP, StatementConfigurer.NOOP, StatementHandler.NOOP, callback, extractor);
+    }
+
+    /**
+     * Executes a SQL update (INSERT/UPDATE/DELETE) using a prepared statement.
+     * <p>
+     * This is the <b>widest</b> update signature and includes {@link StatementHandler}
+     * as an execution hook.
+     *
+     * @param sql        SQL to execute
+     * @param binder     binds statement parameters
+     * @param configurer configures statement options
+     * @param handler    execution hook for statement lifecycle/metadata
      * @param callback   performs the JDBC operation and returns update count
      * @return update count
      * @throws SQLException if JDBC access fails
      */
     int executeUpdate(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             StatementCallback<Integer> callback
     ) throws SQLException;
 
     /**
-     * Convenience overload: executes update without parameters or config.
+     * Convenience overload: uses {@link StatementHandler#NOOP}.
+     */
+    default int executeUpdate(
+            String sql,
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            StatementCallback<Integer> callback
+    )
+            throws SQLException {
+        return executeUpdate(sql, binder, configurer, StatementHandler.NOOP, callback);
+    }
+
+    /**
+     * Convenience overload: uses {@link StatementCallback#UPDATE} and {@link StatementHandler#NOOP}.
+     */
+    default int executeUpdate(
+            String sql,
+            StatementBinder binder,
+            StatementConfigurer configurer
+    )
+            throws SQLException {
+        return executeUpdate(sql, binder, configurer, StatementHandler.NOOP, StatementCallback.UPDATE);
+    }
+
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP}, {@link StatementHandler#NOOP},
+     * and {@link StatementCallback#UPDATE}.
+     */
+    default int executeUpdate(
+            String sql,
+            StatementBinder binder
+    )
+            throws SQLException {
+        return executeUpdate(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, StatementCallback.UPDATE);
+    }
+
+    /**
+     * Convenience overload: executes update without parameters or configuration.
      */
     default int executeUpdate(String sql) throws SQLException {
-        return executeUpdate(sql, PreparedStatementBinder.NOOP, StatementConfigurer.NOOP, StatementCallback.UPDATE);
-    }
-
-    /**
-     * Convenience overload: executes update with parameter binding only.
-     */
-    default int executeUpdate(String sql, PreparedStatementBinder binder) throws SQLException {
-        return executeUpdate(sql, binder, StatementConfigurer.NOOP, StatementCallback.UPDATE);
-    }
-
-    /**
-     * Convenience overload: executes update with parameter binding and statement configuration.
-     */
-    default int executeUpdate(String sql, PreparedStatementBinder binder, StatementConfigurer configurer)
-            throws SQLException {
-        return executeUpdate(sql, binder, configurer, StatementCallback.UPDATE);
+        return executeUpdate(
+                sql,
+                StatementBinder.NOOP,
+                StatementConfigurer.NOOP,
+                StatementHandler.NOOP,
+                StatementCallback.UPDATE
+        );
     }
 
     /**
      * Executes a batch operation using a prepared statement.
+     * <p>
+     * This is the <b>widest</b> batch signature and includes {@link StatementHandler}
+     * as an execution hook.
      *
      * @param sql        SQL to execute
      * @param binders    parameter binders applied per batch item
      * @param configurer statement configuration
+     * @param handler    execution hook for statement lifecycle/metadata
      * @param callback   performs the JDBC operation and returns update counts
      * @return array of update counts (driver-dependent semantics)
      * @throws SQLException if JDBC access fails
      */
     int[] executeBatch(
             String sql,
-            List<? extends PreparedStatementBinder> binders,
+            List<? extends StatementBinder> binders,
             StatementConfigurer configurer,
+            StatementHandler handler,
             StatementCallback<int[]> callback
     ) throws SQLException;
 
     /**
-     * Convenience overload: uses {@link StatementConfigurer#NOOP}.
+     * Convenience overload: uses {@link StatementCallback#BATCH}.
      */
-    default int[] executeBatch(String sql, List<? extends PreparedStatementBinder> binders) throws SQLException {
-        return executeBatch(sql, binders, StatementConfigurer.NOOP, StatementCallback.BATCH);
+    default int[] executeBatch(
+            String sql,
+            List<? extends StatementBinder> binders,
+            StatementConfigurer configurer,
+            StatementHandler handler
+    ) throws SQLException {
+        return executeBatch(sql, binders, configurer, handler, StatementCallback.BATCH);
     }
 
     /**
-     * Convenience overload: uses {@link StatementCallback#BATCH}.
+     * Convenience overload: uses {@link StatementHandler#NOOP} and {@link StatementCallback#BATCH}.
      */
-    default int[] executeBatch(String sql, List<? extends PreparedStatementBinder> binders, StatementConfigurer configurer)
-            throws SQLException {
-        return executeBatch(sql, binders, configurer, StatementCallback.BATCH);
+    default int[] executeBatch(
+            String sql,
+            List<? extends StatementBinder> binders,
+            StatementConfigurer configurer
+    ) throws SQLException {
+        return executeBatch(sql, binders, configurer, StatementHandler.NOOP, StatementCallback.BATCH);
+    }
+
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP}, {@link StatementHandler#NOOP},
+     * and {@link StatementCallback#BATCH}.
+     */
+    default int[] executeBatch(
+            String sql,
+            List<? extends StatementBinder> binders
+    ) throws SQLException {
+        return executeBatch(sql, binders, StatementConfigurer.NOOP, StatementHandler.NOOP, StatementCallback.BATCH);
     }
 
     /**
      * Executes an update returning generated keys, delegating extraction to a callback.
+     * <p>
+     * This is the <b>widest</b> signature for key-returning updates and exposes a
+     * {@link StatementHandler} hook.
      *
      * @param sql        SQL to execute (typically INSERT)
      * @param binder     binds statement parameters
      * @param configurer statement configuration (may enable key retrieval)
+     * @param handler    execution hook for statement lifecycle/metadata
      * @param callback   invoked with the executed statement and its generated keys
      * @param <K>        key/result type
      * @return extracted keys (or any other callback-defined result)
@@ -188,8 +301,9 @@ public interface JdbcExecutor {
      */
     <K> K executeUpdate(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             KeyUpdateCallback<K> callback
     ) throws SQLException;
 
@@ -198,42 +312,55 @@ public interface JdbcExecutor {
      */
     default <K> K executeUpdate(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            StatementHandler handler,
+            KeyExtractor<K> extractor
+    ) throws SQLException {
+        return executeUpdate(sql, binder, configurer, handler,
+                             (statement, keys) -> extractor.extract(keys));
+    }
+
+    /**
+     * Convenience overload: extracts generated keys using a {@link KeyExtractor}.
+     * Uses {@link StatementHandler#NOOP}.
+     */
+    default <K> K executeUpdate(
+            String sql,
+            StatementBinder binder,
             StatementConfigurer configurer,
             KeyExtractor<K> extractor
     ) throws SQLException {
-        return executeUpdate(sql, binder, configurer, (stmt, keys) -> extractor.extract(keys));
+        return executeUpdate(sql, binder, configurer, StatementHandler.NOOP,
+                             (statement, keys) -> extractor.extract(keys));
     }
 
     /**
-     * Convenience overload: uses {@link StatementConfigurer#NOOP}.
+     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#NOOP}.
      */
     default <K> K executeUpdate(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             KeyExtractor<K> extractor
     ) throws SQLException {
-        return executeUpdate(sql, binder, StatementConfigurer.NOOP, (statement, keys) -> extractor.extract(keys));
-    }
-
-    /**
-     * Convenience overload: allows passing {@link StatementConfigurer} after the {@link KeyExtractor}.
-     */
-    default <K> K executeUpdate(
-            String sql,
-            PreparedStatementBinder binder,
-            KeyExtractor<K> extractor,
-            StatementConfigurer configurer
-    ) throws SQLException {
-        return executeUpdate(sql, binder, configurer, (statement, keys) -> extractor.extract(keys));
+        return executeUpdate(
+                sql, binder,
+                StatementConfigurer.NOOP,
+                StatementHandler.NOOP,
+                (statement, keys) -> extractor.extract(keys)
+        );
     }
 
     /**
      * Executes a stored procedure / function call using a callable statement.
+     * <p>
+     * This is the <b>widest</b> call signature and includes {@link StatementHandler}
+     * as an execution hook.
      *
      * @param sql        call SQL (e.g. {@code "{call proc(?, ?)}"})
      * @param binder     binds IN/OUT parameters
      * @param configurer statement configuration
+     * @param handler    execution hook for statement lifecycle/metadata
      * @param callback   performs the call and returns an arbitrary result
      * @param <T>        result type
      * @return callback result
@@ -243,18 +370,31 @@ public interface JdbcExecutor {
             String sql,
             CallableStatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             CallableCallback<T> callback
     ) throws SQLException;
 
     /**
-     * Convenience overload: uses {@link StatementConfigurer#NOOP}.
+     * Convenience overload: uses {@link StatementHandler#NOOP}.
+     */
+    default <T> T executeCall(
+            String sql,
+            CallableStatementBinder binder,
+            StatementConfigurer configurer,
+            CallableCallback<T> callback
+    ) throws SQLException {
+        return executeCall(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, callback);
+    }
+
+    /**
+     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#NOOP}.
      */
     default <T> T executeCall(
             String sql,
             CallableStatementBinder binder,
             CallableCallback<T> callback
     ) throws SQLException {
-        return executeCall(sql, binder, StatementConfigurer.NOOP, callback);
+        return executeCall(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, callback);
     }
 
 }

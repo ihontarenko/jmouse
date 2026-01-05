@@ -3,6 +3,7 @@ package org.jmouse.jdbc.intercept;
 import org.jmouse.jdbc.statement.CallableCallback;
 import org.jmouse.jdbc.statement.CallableStatementBinder;
 import org.jmouse.jdbc.statement.StatementConfigurer;
+import org.jmouse.jdbc.statement.StatementHandler;
 
 /**
  * {@link JdbcCall} descriptor for executing a JDBC callable statement
@@ -41,6 +42,7 @@ public record JdbcCallableCall<T>(
         String sql,
         CallableStatementBinder binder,
         StatementConfigurer configurer,
+        StatementHandler handler,
         CallableCallback<T> callback
 ) implements JdbcCall<T> {
 
@@ -67,6 +69,7 @@ public record JdbcCallableCall<T>(
         return new JdbcCallableCall<>(
                 sql, binder,
                 StatementConfigurer.combine(this.configurer(), configurer),
+                handler,
                 callback
         );
     }

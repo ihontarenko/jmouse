@@ -1,13 +1,15 @@
 package org.jmouse.jdbc.intercept;
 
 import org.jmouse.jdbc.statement.KeyUpdateCallback;
-import org.jmouse.jdbc.statement.PreparedStatementBinder;
+import org.jmouse.jdbc.statement.StatementBinder;
 import org.jmouse.jdbc.statement.StatementConfigurer;
+import org.jmouse.jdbc.statement.StatementHandler;
 
 public record JdbcKeyUpdateCall<K>(
         String sql,
-        PreparedStatementBinder binder,
+        StatementBinder binder,
         StatementConfigurer configurer,
+        StatementHandler handler,
         KeyUpdateCallback<K> callback
 ) implements JdbcCall<K> {
 
@@ -20,6 +22,7 @@ public record JdbcKeyUpdateCall<K>(
         return new JdbcKeyUpdateCall<>(
                 sql, binder,
                 StatementConfigurer.combine(this.configurer(), configurer),
+                handler,
                 callback
         );
     }

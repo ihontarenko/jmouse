@@ -3,7 +3,6 @@ package org.jmouse.jdbc;
 import org.jmouse.jdbc.mapping.*;
 import org.jmouse.jdbc.statement.*;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -74,11 +73,16 @@ public class SimpleTemplate implements SimpleOperations {
     @Override
     public <T> Optional<T> querySingle(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             RowMapper<T> mapper
     ) throws SQLException {
-        return executor.execute(sql, binder, configurer, StatementCallback.QUERY, new StrictSingleResultSetExtractor<>(mapper, sql));
+        return executor.execute(
+                sql, binder, configurer, handler,
+                StatementCallback.QUERY,
+                new StrictSingleResultSetExtractor<>(mapper, sql)
+        );
     }
 
     /**
@@ -95,11 +99,12 @@ public class SimpleTemplate implements SimpleOperations {
     @Override
     public <T> T queryOne(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             RowMapper<T> mapper
     ) throws SQLException {
-        return query(sql, binder, configurer, new SingleResultSetExtractor<>(mapper));
+        return query(sql, binder, configurer, handler, new SingleResultSetExtractor<>(mapper));
     }
 
     /**
@@ -116,11 +121,12 @@ public class SimpleTemplate implements SimpleOperations {
     @Override
     public <T> List<T> query(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             RowMapper<T> mapper
     ) throws SQLException {
-        return query(sql, binder, configurer, new ListResultSetExtractor<>(mapper));
+        return query(sql, binder, configurer, handler, new ListResultSetExtractor<>(mapper));
     }
 
     /**
@@ -137,11 +143,12 @@ public class SimpleTemplate implements SimpleOperations {
     @Override
     public <T> T query(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             ResultSetExtractor<T> extractor
     ) throws SQLException {
-        return executor.execute(sql, binder, configurer, StatementCallback.QUERY, extractor);
+        return executor.execute(sql, binder, configurer, handler, StatementCallback.QUERY, extractor);
     }
 
     /**
@@ -156,10 +163,11 @@ public class SimpleTemplate implements SimpleOperations {
     @Override
     public int update(
             String sql,
-            PreparedStatementBinder binder,
-            StatementConfigurer configurer
+            StatementBinder binder,
+            StatementConfigurer configurer,
+            StatementHandler handler
     ) throws SQLException {
-        return executor.executeUpdate(sql, binder, configurer);
+        return executor.executeUpdate(sql, binder, configurer, handler, StatementCallback.UPDATE);
     }
 
     /**
@@ -174,10 +182,11 @@ public class SimpleTemplate implements SimpleOperations {
     @Override
     public int[] batchUpdate(
             String sql,
-            List<? extends PreparedStatementBinder> binders,
-            StatementConfigurer configurer
+            List<? extends StatementBinder> binders,
+            StatementConfigurer configurer,
+            StatementHandler handler
     ) throws SQLException {
-        return executor.executeBatch(sql, binders, configurer);
+        return executor.executeBatch(sql, binders, configurer, handler, StatementCallback.BATCH);
     }
 
     /**
@@ -194,12 +203,14 @@ public class SimpleTemplate implements SimpleOperations {
     @Override
     public <K> K update(
             String sql,
-            PreparedStatementBinder binder,
+            StatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             KeyExtractor<K> extractor
     ) throws SQLException {
         return executor.executeUpdate(
-                sql, binder, configurer, (statement, keys) -> extractor.extract(keys));
+                sql, binder, configurer, handler, (statement, keys) -> extractor.extract(keys)
+        );
     }
 
     /**
@@ -218,9 +229,10 @@ public class SimpleTemplate implements SimpleOperations {
             String sql,
             CallableStatementBinder binder,
             StatementConfigurer configurer,
+            StatementHandler handler,
             CallableCallback<T> callback
     ) throws SQLException {
-        return executor.executeCall(sql, binder, configurer, callback);
+        return executor.executeCall(sql, binder, configurer, handler, callback);
     }
 
     /**

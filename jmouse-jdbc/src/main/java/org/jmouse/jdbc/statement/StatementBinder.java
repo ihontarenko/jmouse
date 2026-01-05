@@ -4,14 +4,14 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 @FunctionalInterface
-public interface PreparedStatementBinder {
+public interface StatementBinder {
 
     void bind(PreparedStatement statement) throws SQLException;
 
-    PreparedStatementBinder NOOP = noop();
+    StatementBinder NOOP = noop();
 
-    static PreparedStatementBinder noop() {
-        return new PreparedStatementBinder() {
+    static StatementBinder noop() {
+        return new StatementBinder() {
             @Override
             public void bind(PreparedStatement statement) throws SQLException {}
             @Override

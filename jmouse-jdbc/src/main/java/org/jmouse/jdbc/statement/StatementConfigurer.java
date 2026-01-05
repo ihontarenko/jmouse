@@ -18,7 +18,7 @@ import java.sql.Statement;
  * <p>
  * It is intentionally separated from parameter binding to keep concerns clear:
  * <ul>
- *     <li>{@link PreparedStatementBinder} → binds parameters</li>
+ *     <li>{@link StatementBinder} → binds parameters</li>
  *     <li>{@code StatementConfigurer} → configures execution behavior</li>
  * </ul>
  *

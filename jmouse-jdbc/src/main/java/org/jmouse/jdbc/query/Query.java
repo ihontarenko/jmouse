@@ -4,7 +4,7 @@ import org.jmouse.core.Contract;
 import org.jmouse.jdbc.SimpleOperations;
 import org.jmouse.jdbc.database.DatabasePlatform;
 import org.jmouse.jdbc.mapping.RowMapper;
-import org.jmouse.jdbc.statement.PreparedStatementBinder;
+import org.jmouse.jdbc.statement.StatementBinder;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public final class Query {
     private final List<String> where   = new ArrayList<>();
     private final List<String> orderBy = new ArrayList<>();
 
-    private PreparedStatementBinder binder = PreparedStatementBinder.NOOP;
+    private StatementBinder binder = StatementBinder.NOOP;
 
     private Long    offset;
     private Integer limit;
@@ -46,11 +46,11 @@ public final class Query {
         return this;
     }
 
-    public Query where(String predicate, PreparedStatementBinder binder) {
+    public Query where(String predicate, StatementBinder binder) {
         Contract.nonNull(predicate, "predicate");
         where.add(predicate);
-        if (binder != null && binder != PreparedStatementBinder.NOOP) {
-            this.binder = PreparedStatementBinder.chain(this.binder, binder);
+        if (binder != null && binder != StatementBinder.NOOP) {
+            this.binder = StatementBinder.chain(this.binder, binder);
         }
         return this;
     }

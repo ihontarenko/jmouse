@@ -1,9 +1,10 @@
 package org.jmouse.jdbc.intercept;
 
 import org.jmouse.jdbc.mapping.ResultSetExtractor;
-import org.jmouse.jdbc.statement.PreparedStatementBinder;
+import org.jmouse.jdbc.statement.StatementBinder;
 import org.jmouse.jdbc.statement.StatementCallback;
 import org.jmouse.jdbc.statement.StatementConfigurer;
+import org.jmouse.jdbc.statement.StatementHandler;
 
 import java.sql.ResultSet;
 
@@ -13,7 +14,7 @@ import java.sql.ResultSet;
  * This call type captures all components required for query execution:
  * <ul>
  *     <li>SQL text</li>
- *     <li>{@link PreparedStatementBinder} for parameter binding</li>
+ *     <li>{@link StatementBinder} for parameter binding</li>
  *     <li>{@link StatementConfigurer} for statement tuning (timeouts, fetch size, etc.)</li>
  *     <li>{@link StatementCallback} that performs the JDBC execution and returns a {@link ResultSet}</li>
  *     <li>{@link ResultSetExtractor} that maps the {@link ResultSet} into the desired result type</li>
@@ -44,8 +45,9 @@ import java.sql.ResultSet;
  */
 public record JdbcQueryCall<T>(
         String sql,
-        PreparedStatementBinder binder,
+        StatementBinder binder,
         StatementConfigurer configurer,
+        StatementHandler handler,
         StatementCallback<ResultSet> callback,
         ResultSetExtractor<T> extractor
 ) implements JdbcCall<T> {
@@ -69,7 +71,12 @@ public record JdbcQueryCall<T>(
      * @return new call instance with combined configuration
      */
     public JdbcQueryCall<T> with(StatementConfigurer configurer) {
-        return new JdbcQueryCall<>(sql, binder, StatementConfigurer.combine(this.configurer(), configurer), callback, extractor);
+        return new JdbcQueryCall<>(
+                sql, binder,
+                StatementConfigurer.combine(this.configurer(), configurer),
+                handler,
+                callback, extractor
+        );
     }
 
     /**
@@ -79,7 +86,7 @@ public record JdbcQueryCall<T>(
      * @return new call instance
      */
     public JdbcQueryCall<T> with(StatementCallback<ResultSet> callback) {
-        return new JdbcQueryCall<>(sql, binder, configurer, callback, extractor);
+        return new JdbcQueryCall<>(sql, binder, configurer, handler, callback, extractor);
     }
 
     /**
@@ -89,17 +96,17 @@ public record JdbcQueryCall<T>(
      * @return new call instance
      */
     public JdbcQueryCall<T> with(ResultSetExtractor<T> extractor) {
-        return new JdbcQueryCall<>(sql, binder, configurer, callback, extractor);
+        return new JdbcQueryCall<>(sql, binder, configurer, handler, callback, extractor);
     }
 
     /**
-     * Returns a new call instance with a replaced {@link PreparedStatementBinder}.
+     * Returns a new call instance with a replaced {@link StatementBinder}.
      *
      * @param binder new binder
      * @return new call instance
      */
-    public JdbcQueryCall<T> with(PreparedStatementBinder binder) {
-        return new JdbcQueryCall<>(sql, binder, configurer, callback, extractor);
+    public JdbcQueryCall<T> with(StatementBinder binder) {
+        return new JdbcQueryCall<>(sql, binder, configurer, handler, callback, extractor);
     }
 
     /**
@@ -109,7 +116,7 @@ public record JdbcQueryCall<T>(
      * @return new call instance
      */
     public JdbcQueryCall<T> with(String sql) {
-        return new JdbcQueryCall<>(sql, binder, configurer, callback, extractor);
+        return new JdbcQueryCall<>(sql, binder, configurer, handler, callback, extractor);
     }
 
 }

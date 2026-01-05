@@ -1,6 +1,7 @@
 package org.jmouse.jdbc.intercept;
 
 import org.jmouse.jdbc.statement.StatementConfigurer;
+import org.jmouse.jdbc.statement.StatementHandler;
 
 /**
  * Immutable descriptor of a single JDBC invocation.
@@ -63,6 +64,13 @@ public sealed interface JdbcCall<R> permits
      * @return statement configurer (never {@code null})
      */
     StatementConfigurer configurer();
+
+    /**
+     * Returns the statement handler hook applied to this call.
+     *
+     * @return statement handler (never {@code null})
+     */
+    StatementHandler handler();
 
     /**
      * Returns a new {@code JdbcCall} instance with the given {@link StatementConfigurer}.
