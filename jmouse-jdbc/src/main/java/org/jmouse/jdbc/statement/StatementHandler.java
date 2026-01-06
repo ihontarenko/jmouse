@@ -8,6 +8,14 @@ public interface StatementHandler {
 
     <S extends Statement, R> R handle(S statement, StatementExecutor<? super S, R> executor) throws SQLException;
 
+    default void before(Statement statement) {}
+
+    default void after(Statement statement, R result) {}
+
+    default void onError(Statement statement, Throwable error) {}
+
+    default void afterFinally(Statement statement) {}
+
     @FunctionalInterface
     interface StatementExecutor<S extends Statement, R> {
         R execute(S statement) throws SQLException;
