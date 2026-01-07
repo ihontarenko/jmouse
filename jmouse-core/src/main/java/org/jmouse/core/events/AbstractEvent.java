@@ -1,4 +1,4 @@
-package org.jmouse.core.observer;
+package org.jmouse.core.events;
 
 import java.util.Objects;
 

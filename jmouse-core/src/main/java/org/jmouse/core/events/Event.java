@@ -1,4 +1,4 @@
-package org.jmouse.core.observer;
+package org.jmouse.core.events;
 
 /**
  * Represents an event in a publish-subscribe (observer) pattern. Each event has:

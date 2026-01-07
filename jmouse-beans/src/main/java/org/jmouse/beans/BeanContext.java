@@ -1,5 +1,6 @@
 package org.jmouse.beans;
 
+import org.jmouse.beans.events.BeanContextEventSupport;
 import org.jmouse.beans.naming.BeanNameResolver;
 import org.jmouse.beans.definition.BeanDefinitionFactory;
 import org.jmouse.beans.processor.BeanPostProcessorAware;
@@ -26,7 +27,7 @@ import java.util.Map;
  * @see BeanPostProcessorAware for post-processing support
  */
 public interface BeanContext extends BeanContainer, BeanContainerRegistry,
-        BeanDefinitionContainer, BeanInitializer, BeanPostProcessorAware {
+        BeanDefinitionContainer, BeanInitializer, BeanPostProcessorAware, BeanContextEventSupport {
 
     /**
      * 📌 Defines how this context will behave when a bean is not found locally.

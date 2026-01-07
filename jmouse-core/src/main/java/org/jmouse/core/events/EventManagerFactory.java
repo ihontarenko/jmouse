@@ -1,7 +1,7 @@
-package org.jmouse.core.observer;
+package org.jmouse.core.events;
 
 import org.jmouse.core.reflection.TypeMatchers;
-import org.jmouse.core.observer.annotation.Listener;
+import org.jmouse.core.events.annotation.Listener;
 import org.jmouse.core.reflection.ClassFinder;
 
 import java.util.function.Consumer;

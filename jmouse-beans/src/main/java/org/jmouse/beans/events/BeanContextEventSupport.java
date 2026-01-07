@@ -1,11 +1,10 @@
 package org.jmouse.beans.events;
 
 import org.jmouse.core.Verify;
-import org.jmouse.core.observer.Event;
-import org.jmouse.core.observer.EventListener;
-import org.jmouse.core.observer.EventManager;
+import org.jmouse.core.events.Event;
+import org.jmouse.core.events.EventListener;
+import org.jmouse.core.events.EventManager;
 
-import java.util.Objects;
 import java.util.function.Consumer;
 
 import static org.jmouse.beans.events.BeanContextEventPayload.*;
@@ -17,7 +16,7 @@ import static org.jmouse.beans.events.BeanContextEventPayload.*;
  * {@code onBean...} methods while delegating the underlying subscription
  * mechanics to an {@code EventManager}.</p>
  */
-public interface BeanContextEvents {
+public interface BeanContextEventSupport {
 
     String TYPED_PAYLOAD_LISTENER = "typed_payload_listener";
 
@@ -36,7 +35,7 @@ public interface BeanContextEvents {
      * @param <P>      expected payload type
      * @return this (fluent)
      */
-    default <P extends BeanContextEventPayload> BeanContextEvents on(
+    default <P extends BeanContextEventPayload> BeanContextEventSupport on(
             BeanContextEventName name,
             Class<P> payloadType,
             Consumer<P> consumer
@@ -48,6 +47,14 @@ public interface BeanContextEvents {
         return this;
     }
 
+    default BeanContextEventSupport onBeforeRefresh(Consumer<ContextPayload> consumer) {
+        return on(BeanContextEventName.CONTEXT_REFRESH_START, ContextPayload.class, consumer);
+    }
+
+    default BeanContextEventSupport onAfterRefresh(Consumer<ContextPayload> consumer) {
+        return on(BeanContextEventName.CONTEXT_REFRESH_FINISH, ContextPayload.class, consumer);
+    }
+
     /**
      * Subscribe to the bean lookup start event.
      * <p>
@@ -57,7 +64,7 @@ public interface BeanContextEvents {
      * @param consumer callback receiving {@link LookupPayload}
      * @return this (fluent)
      */
-    default BeanContextEvents onBeanLookupStart(Consumer<LookupPayload> consumer) {
+    default BeanContextEventSupport onBeanLookupStart(Consumer<LookupPayload> consumer) {
         return on(BeanContextEventName.BEAN_LOOKUP_START, LookupPayload.class, consumer);
     }
 
@@ -70,7 +77,7 @@ public interface BeanContextEvents {
      * @param consumer callback receiving {@link CreatePayload}
      * @return this (fluent)
      */
-    default BeanContextEvents onBeanCreated(Consumer<CreatePayload> consumer) {
+    default BeanContextEventSupport onBeanCreated(Consumer<CreatePayload> consumer) {
         return on(BeanContextEventName.BEAN_CREATED, CreatePayload.class, consumer);
     }
 
@@ -80,7 +87,7 @@ public interface BeanContextEvents {
      * @param consumer callback receiving {@link LookupPayload}
      * @return this (fluent)
      */
-    default BeanContextEvents onBeanNotFound(Consumer<LookupPayload> consumer) {
+    default BeanContextEventSupport onBeanNotFound(Consumer<LookupPayload> consumer) {
         return on(BeanContextEventName.BEAN_NOT_FOUND, LookupPayload.class, consumer);
     }
 
@@ -90,7 +97,7 @@ public interface BeanContextEvents {
      * @param consumer callback receiving {@link LookupPayload}
      * @return this (fluent)
      */
-    default BeanContextEvents onBeanFound(Consumer<LookupPayload> consumer) {
+    default BeanContextEventSupport onBeanFound(Consumer<LookupPayload> consumer) {
         return on(BeanContextEventName.BEAN_FOUND, LookupPayload.class, consumer);
     }
 
@@ -100,7 +107,7 @@ public interface BeanContextEvents {
      * @param consumer callback receiving {@link ErrorPayload}
      * @return this (fluent)
      */
-    default BeanContextEvents onBeanCreateFailed(Consumer<ErrorPayload> consumer) {
+    default BeanContextEventSupport onBeanCreateFailed(Consumer<ErrorPayload> consumer) {
         return on(BeanContextEventName.BEAN_CREATE_FAILED, ErrorPayload.class, consumer);
     }
 
@@ -110,7 +117,7 @@ public interface BeanContextEvents {
      * @param consumer callback receiving {@link ErrorPayload}
      * @return this (fluent)
      */
-    default BeanContextEvents onContextError(Consumer<ErrorPayload> consumer) {
+    default BeanContextEventSupport onContextError(Consumer<ErrorPayload> consumer) {
         return on(BeanContextEventName.CONTEXT_ERROR, ErrorPayload.class, consumer);
     }
 
@@ -120,7 +127,7 @@ public interface BeanContextEvents {
      * @param consumer callback receiving {@link ErrorPayload}
      * @return this (fluent)
      */
-    default BeanContextEvents onError(Consumer<ErrorPayload> consumer) {
+    default BeanContextEventSupport onError(Consumer<ErrorPayload> consumer) {
         return on(BeanContextEventName.GENERAL_ERROR, ErrorPayload.class, consumer);
     }
 
@@ -130,7 +137,7 @@ public interface BeanContextEvents {
      * @param consumer callback receiving {@link InitPayload}
      * @return this (fluent)
      */
-    default BeanContextEvents onBeanProcessedBeforeInit(Consumer<InitPayload> consumer) {
+    default BeanContextEventSupport onBeanProcessedBeforeInit(Consumer<InitPayload> consumer) {
         return on(BeanContextEventName.BEAN_PROCESSED_BEFORE_INIT, InitPayload.class, consumer);
     }
 
@@ -140,7 +147,7 @@ public interface BeanContextEvents {
      * @param consumer callback receiving {@link InitPayload}
      * @return this (fluent)
      */
-    default BeanContextEvents onBeanProcessedAfterInit(Consumer<InitPayload> consumer) {
+    default BeanContextEventSupport onBeanProcessedAfterInit(Consumer<InitPayload> consumer) {
         return on(BeanContextEventName.BEAN_PROCESSED_AFTER_INIT, InitPayload.class, consumer);
     }
 
@@ -165,7 +172,7 @@ public interface BeanContextEvents {
         }
 
         @Override
-        public void update(Event<BeanContextEventPayload> event) {
+        public void onEvent(Event<BeanContextEventPayload> event) {
             BeanContextEventPayload payload = event.payload();
             if (payloadType.isInstance(payload)) {
                 consumer.accept(payloadType.cast(payload));
@@ -173,13 +180,13 @@ public interface BeanContextEvents {
         }
 
         @Override
-        public Class<?> applicableType() {
+        public Class<?> payloadType() {
             return BeanContextEventPayload.class;
         }
 
         @Override
-        public boolean supports(Class<?> actualType) {
-            return applicableType().isAssignableFrom(actualType);
+        public boolean supportsPayloadType(Class<?> actualType) {
+            return payloadType().isAssignableFrom(actualType);
         }
     }
 }

@@ -1,6 +1,6 @@
 package org.jmouse.context;
 
-import org.jmouse.core.observer.AbstractEvent;
+import org.jmouse.core.events.AbstractEvent;
 
 /**
  * An event class for publishing {@link ApplicationBeanContext} updates or lifecycle changes.

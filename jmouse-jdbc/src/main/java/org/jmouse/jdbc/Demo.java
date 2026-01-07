@@ -4,7 +4,7 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeansScannerBeanContextInitializer;
 import org.jmouse.beans.DefaultBeanContext;
 import org.jmouse.beans.EventBridgeContextInitializer;
-import org.jmouse.beans.events.BeanContextEvents;
+import org.jmouse.beans.events.BeanContextEventSupport;
 
 final public class Demo {
 
@@ -15,19 +15,17 @@ final public class Demo {
         context.addInitializer(new EventBridgeContextInitializer());
         context.refresh();
 
-        if (context instanceof BeanContextEvents contextEvents) {
-            contextEvents.onBeanCreated(p -> {
-                System.out.println("Created bean: " + p.definition().getBeanName() + " -> " + p.instance());
-            });
-
-            contextEvents.onBeanNotFound(p -> {
-                System.out.println("Missing bean: " + p.beanName());
-            });
-
-            contextEvents.onContextError(p -> {
-                System.out.println("Context error at stage " + p.stage() + ": " + p.error());
-            });
-        }
+        context.onBeanCreated(p -> {
+            System.out.println("Created bean: " + p.definition().getBeanName() + " -> " + p.instance());
+        }).onBeanLookupStart(p -> {
+            System.out.println("Lookup: " + p);
+        }).onBeanNotFound(p -> {
+            System.out.println("Missing bean: " + p.beanName());
+        }).onContextError(p -> {
+            System.out.println("Context error at stage " + p.stage() + ": " + p.error());
+        }).onBeforeRefresh(contextPayload -> {
+            System.out.println("Before refresh: " + contextPayload);
+        });
 
         SimpleOperations simple = context.getBean(SimpleOperations.class);
 

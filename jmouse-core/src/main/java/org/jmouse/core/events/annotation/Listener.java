@@ -1,4 +1,4 @@
-package org.jmouse.core.observer.annotation;
+package org.jmouse.core.events.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

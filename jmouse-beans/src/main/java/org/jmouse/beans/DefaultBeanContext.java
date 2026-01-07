@@ -8,11 +8,10 @@ import org.jmouse.beans.events.BeanContextEvent;
 import org.jmouse.beans.events.BeanContextEventName;
 import org.jmouse.beans.events.BeanContextEventPayload;
 import org.jmouse.beans.events.BeanContextEventPayload.*;
-import org.jmouse.beans.events.BeanContextEvents;
 import org.jmouse.core.CyclicReferenceDetector;
 import org.jmouse.core.DefaultCyclicReferenceDetector;
 import org.jmouse.core.Delegate;
-import org.jmouse.core.observer.EventManager;
+import org.jmouse.core.events.EventManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jmouse.beans.annotation.BeanInitializer;
@@ -66,7 +65,7 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * UserService userServiceByName = context.getBean("userService");
  * }</pre>
  */
-public class DefaultBeanContext implements BeanContext, BeanFactory, BeanContextEvents {
+public class DefaultBeanContext implements BeanContext, BeanFactory {
 
     private static final String DEFAULT_CONTEXT_NAME = "DEFAULT-BEANS-CONTEXT";
     private static final Logger LOGGER               = LoggerFactory.getLogger(DefaultBeanContext.class);
@@ -237,28 +236,28 @@ public class DefaultBeanContext implements BeanContext, BeanFactory, BeanContext
 
         Sorter.sort(initializers);
 
-        for (BeanContextInitializer initializer : initializers) {
-            int                                     hashCode         = Objects.hash(initializer);
-            Class<? extends BeanContextInitializer> initializerClass = initializer.getClass();
+        emit(CONTEXT_REFRESH_START, new ContextPayload(this));
 
-            if (initialized.contains(hashCode)) {
-                LOGGER.warn("Initializer '{}' is already initialized.", getShortName(initializerClass));
-                continue;
-            }
+        try {
+            for (BeanContextInitializer initializer : initializers) {
+                int                                     hashCode         = Objects.hash(initializer);
+                Class<? extends BeanContextInitializer> initializerClass = initializer.getClass();
 
-            emit(CONTEXT_REFRESH_START, new ContextPayload(this));
+                if (initialized.contains(hashCode)) {
+                    LOGGER.warn("Initializer '{}' is already initialized.", getShortName(initializerClass));
+                    continue;
+                }
 
-            try {
                 initializer.initialize(this);
-            } catch (Throwable e) {
-                emit(CONTEXT_ERROR, new ErrorPayload(this, CONTEXT_REFRESH_START, null, null, e));
-                throw e;
-            } finally {
-                emit(CONTEXT_REFRESH_FINISH, new ContextPayload(this));
-            }
 
-            initialized.add(hashCode);
-            LOGGER.info("Initializer '{}' was successfully executed.", getShortName(initializerClass));
+                initialized.add(hashCode);
+                LOGGER.info("Initializer '{}' was successfully executed.", getShortName(initializerClass));
+            }
+        } catch (Throwable e) {
+            emit(CONTEXT_ERROR, new ErrorPayload(this, CONTEXT_REFRESH_START, null, null, e));
+            throw e;
+        } finally {
+            emit(CONTEXT_REFRESH_FINISH, new ContextPayload(this));
         }
 
         LOGGER.warn("==========================================");
@@ -291,14 +290,19 @@ public class DefaultBeanContext implements BeanContext, BeanFactory, BeanContext
      */
     @Override
     public <T> T getBean(Class<T> type) {
+        emit(BEAN_LOOKUP_START, new LookupPayload(this, null, type));
+
         List<String> beanNames = getBeanNames(type);
 
         if (beanNames.isEmpty()) {
+            emit(BEAN_NOT_FOUND, new LookupPayload(this, null, type));
             throw new BeanNotFoundException("No beans associated with '%s' type".formatted(type.getName()));
         }
 
         if (beanNames.size() == 1) {
-            return getBean(beanNames.getFirst());
+            String name = beanNames.getFirst();
+            emit(BeanContextEventName.BEAN_FOUND, new LookupPayload(this, name, type));
+            return getBean(name);
         }
 
         Optional<String> primaryName = beanNames.stream()
@@ -313,10 +317,14 @@ public class DefaultBeanContext implements BeanContext, BeanFactory, BeanContext
                 }).findFirst();
 
         if (primaryName.isPresent()) {
-            return getBean(primaryName.get());
+            String name = primaryName.get();
+            emit(BEAN_PRIMARY_SELECTED, new LookupPayload(this, name, type));
+            return getBean(name);
         }
 
-        throw new BeanContextException(
+        emit(BEAN_LOOKUP_AMBIGUOUS, new AmbiguousLookupPayload(this, type, List.copyOf(beanNames)));
+
+        throw new BeanAmbiguousException(
                 "Multiple beans found for type: '%s'. Please specify the bean name. Available beans: %s"
                         .formatted(type.getName(), beanNames));
     }
@@ -453,7 +461,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory, BeanContext
 
             // Initializes a bean instance by applying pre-initialization and post-initialization
             instance = initializeBean(instance, definition);
-            emit(BEAN_INIT_FINISH, new CreatePayload(this, definition, initialized));
+            emit(BEAN_INIT_FINISH, new CreatePayload(this, definition, instance));
 
             return instance;
         } catch (Exception exception) {
@@ -1119,7 +1127,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory, BeanContext
      */
     protected void emit(BeanContextEventName name, BeanContextEventPayload payload) {
         try {
-            events.notify(new BeanContextEvent(name.name(), payload, this));
+            events.publish(new BeanContextEvent(name.name(), payload, this));
         } catch (Throwable listenerError) {
             LOGGER.warn(
                     "Failed to publish event: '{}': {}",

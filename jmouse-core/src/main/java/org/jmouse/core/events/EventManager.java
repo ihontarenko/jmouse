@@ -1,5 +1,6 @@
-package org.jmouse.core.observer;
+package org.jmouse.core.events;
 
+import org.jmouse.core.Verify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,37 +70,47 @@ final public class EventManager {
     /**
      * Subscribes a listener to a specific event type.
      *
-     * @param eventType the type of event to subscribe to.
+     * @param eventName the type of event to subscribe to.
      * @param listener  the listener to be notified when the event occurs.
      */
-    public void subscribe(String eventType, EventListener<?> listener) {
-        LOGGER.info("SUBSCRIBE NEW LISTENER '{}' FOR EVENT '{}'", listener.name(), eventType);
-        listeners.computeIfAbsent(eventType, key -> new ArrayList<>()).add(listener);
+    public void subscribe(String eventName, EventListener<?> listener) {
+        Verify.nonNull(eventName, "event-name");
+        Verify.nonNull(listener, "listener");
+
+        LOGGER.info("Subscribe listener '{}' to event '{}'", listener.name(), eventName);
+
+        listeners.computeIfAbsent(eventName, key -> new ArrayList<>()).add(listener);
     }
 
     /**
      * Unsubscribes a listener from a specific event type.
      *
-     * @param eventType the type of event to unsubscribe from.
+     * @param eventName the type of event to unsubscribe from.
      * @param listener  the listener to be removed.
      */
-    public void unsubscribe(String eventType, EventListener<?> listener) {
-        List<EventListener<?>> eventListeners = listeners.get(eventType);
-        if (eventListeners != null) {
-            eventListeners.remove(listener);
-            if (eventListeners.isEmpty()) {
-                unsubscribe(eventType);
-            }
+    public void unsubscribe(String eventName, EventListener<?> listener) {
+        Verify.nonNull(eventName, "event-name");
+        Verify.nonNull(listener, "listener");
+
+        List<EventListener<?>> eventListeners = listeners.get(eventName);
+        if (eventListeners == null) {
+            return;
+        }
+
+        eventListeners.remove(listener);
+        if (eventListeners.isEmpty()) {
+            listeners.remove(eventName);
         }
     }
 
     /**
      * Removes all listeners subscribed to a specific event type.
      *
-     * @param eventType the type of event to clear all subscriptions for.
+     * @param eventName the type of event to clear all subscriptions for.
      */
-    public void unsubscribe(String eventType) {
-        listeners.remove(eventType);
+    public void unsubscribe(String eventName) {
+        Verify.nonNull(eventName, "event-name");
+        listeners.remove(eventName);
     }
 
     /**
@@ -109,17 +120,24 @@ final public class EventManager {
      * @param <T>   the type of the event payload.
      */
     @SuppressWarnings("unchecked")
-    public <T> void notify(Event<T> event) {
-        List<EventListener<?>> eventListeners = listeners.get(event.name());
-        if (eventListeners != null) {
-            for (EventListener<?> listener : eventListeners) {
-                if (listener.supports(event.payloadType())) {
-                    EventListener<T> typedListener = (EventListener<T>) listener;
-                    LOGGER.info("FIRE EVENT '{}' FOR '{}'", event.name(), listener.name());
-                    typedListener.update(event);
-                } else {
-                    LOGGER.info("SKIP EVENT '{}({})' FOR '{}'", event.name(), event.payloadType(), listener.name());
-                }
+    public <T> void publish(Event<T> event) {
+        Verify.nonNull(event, "event");
+
+        List<EventListener<?>> listeners   = this.listeners.get(event.name());
+        Class<?>               payloadType = event.payloadType();
+
+        if (listeners == null || listeners.isEmpty()) {
+            return;
+        }
+
+        for (EventListener<?> rawListener : listeners) {
+            EventListener<T> listener = (EventListener<T>) rawListener;
+
+            if (listener.supportsPayloadType(payloadType)) {
+                LOGGER.info("Dispatch event '{}' to '{}'", event.name(), listener.name());
+                listener.onEvent(event);
+            } else {
+                LOGGER.debug("Skip event '{}({})' for '{}'", event.name(), payloadType.getName(), listener.name());
             }
         }
     }
