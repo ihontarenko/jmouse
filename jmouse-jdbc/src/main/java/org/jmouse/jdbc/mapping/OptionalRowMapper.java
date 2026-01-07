@@ -32,8 +32,8 @@ import java.util.Optional;
  * }</pre>
  *
  * <p>
- * Note: {@code Optional.empty()} is returned if the delegate mapper returns
- * {@code null}. Any {@link SQLException} raised by the delegate is propagated.
+ * Note: {@code Optional.empty()} is returned if the executor mapper returns
+ * {@code null}. Any {@link SQLException} raised by the executor is propagated.
  *
  * @param <T> wrapped element type
  * @author jMouse
@@ -48,7 +48,7 @@ public final class OptionalRowMapper<T> implements RowMapper<Optional<T>> {
     /**
      * Creates a new {@code OptionalRowMapper}.
      *
-     * @param delegate delegate {@link RowMapper} to wrap
+     * @param delegate executor {@link RowMapper} to wrap
      */
     public OptionalRowMapper(RowMapper<T> delegate) {
         this.delegate = delegate;

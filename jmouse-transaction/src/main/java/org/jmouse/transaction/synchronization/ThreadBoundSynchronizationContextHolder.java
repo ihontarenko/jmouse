@@ -1,6 +1,6 @@
 package org.jmouse.transaction.synchronization;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 
 /**
  * Thread-bound implementation of {@link SynchronizationContextHolder}.
@@ -60,7 +60,7 @@ final public class ThreadBoundSynchronizationContextHolder
      */
     @Override
     public void bind(SynchronizationContext context) {
-        Contract.nonNull(context, "context");
+        Verify.nonNull(context, "context");
         Node head = STACK.get();
         STACK.set(new Node(context, head));
     }

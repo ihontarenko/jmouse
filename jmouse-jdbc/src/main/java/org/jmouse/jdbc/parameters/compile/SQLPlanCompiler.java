@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.parameters.compile;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.StringSource;
 import org.jmouse.el.evaluation.EvaluationContext;
@@ -18,7 +18,7 @@ public final class SQLPlanCompiler {
     private final ExpressionLanguage expressionLanguage;
 
     public SQLPlanCompiler(ExpressionLanguage expressionLanguage) {
-        this.expressionLanguage = Contract.nonNull(expressionLanguage, "expressionLanguage");
+        this.expressionLanguage = Verify.nonNull(expressionLanguage, "expressionLanguage");
     }
 
     public SQLPlan compile(StringSource source) {

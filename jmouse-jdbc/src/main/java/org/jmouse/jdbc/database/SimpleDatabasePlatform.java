@@ -1,7 +1,5 @@
 package org.jmouse.jdbc.database;
 
-import org.jmouse.core.Contract;
-
 import java.util.Objects;
 
 public final class SimpleDatabasePlatform implements DatabasePlatform {

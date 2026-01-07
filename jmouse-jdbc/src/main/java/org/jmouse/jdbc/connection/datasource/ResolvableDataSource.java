@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.connection.datasource;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.jdbc.connection.datasource.support.AbstractDataSource;
 
 import javax.sql.DataSource;
@@ -13,8 +13,8 @@ public final class ResolvableDataSource extends AbstractDataSource {
     private final DataSourceKey      lookupKey;
 
     public ResolvableDataSource(DataSourceResolver resolver, DataSourceKey lookupKey) {
-        this.resolver = Contract.nonNull(resolver, "resolver");
-        this.lookupKey = Contract.nonNull(lookupKey, "lookupKey");
+        this.resolver = Verify.nonNull(resolver, "resolver");
+        this.lookupKey = Verify.nonNull(lookupKey, "lookupKey");
     }
 
     @Override

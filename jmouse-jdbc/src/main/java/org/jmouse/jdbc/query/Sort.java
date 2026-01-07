@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.query;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,8 +49,8 @@ public final class Sort {
     public record Order(String property, Direction direction) {
 
         public Order {
-            Contract.nonNull(property, "property");
-            Contract.nonNull(direction, "direction");
+            Verify.nonNull(property, "property");
+            Verify.nonNull(direction, "direction");
         }
 
         public static Order asc(String property) {

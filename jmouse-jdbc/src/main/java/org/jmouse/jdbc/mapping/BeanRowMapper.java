@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.mapping;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.core.bind.*;
 import org.jmouse.core.bind.accessor.DummyObjectAccessor;
 import org.jmouse.core.reflection.InferredType;
@@ -60,7 +60,7 @@ public final class BeanRowMapper<T> implements RowMapper<T> {
      * @param type target bean type (must not be {@code null})
      */
     public BeanRowMapper(Class<T> type) {
-        this.type = Contract.nonNull(type, "type");
+        this.type = Verify.nonNull(type, "type");
         this.binder = new Binder(new DummyObjectAccessor(null));
     }
 
@@ -91,7 +91,7 @@ public final class BeanRowMapper<T> implements RowMapper<T> {
         ObjectAccessor accessor = JdbcAccessorWrapper.WRAPPER.wrap(resultSet);
         binder.setObjectAccessor(accessor);
         BindResult<T> result = binder.bind(null, toBindable(type));
-        Contract.state(result.isPresent(), "Failed to map bean-type: '" + type + "'.");
+        Verify.state(result.isPresent(), "Failed to map bean-type: '" + type + "'.");
         return result.getValue();
     }
 

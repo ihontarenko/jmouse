@@ -3,6 +3,9 @@ package org.jmouse.core;
 import java.lang.reflect.Constructor;
 import java.util.*;
 
+import static org.jmouse.core.Verify.nonNull;
+import static org.jmouse.core.Verify.state;
+
 public final class CollectionFactory {
 
     public static final int DEFAULT_CAPACITY = 16;
@@ -10,23 +13,23 @@ public final class CollectionFactory {
     private CollectionFactory() {}
 
     public static <E, C extends Collection<E>> C createCollection(Class<C> collectionType, int initialCapacity) {
-        Contract.nonNull(collectionType, "collectionType");
-        Contract.state(initialCapacity >= 0, "argument: initialCapacity");
+        nonNull(collectionType, "collectionType");
+        state(initialCapacity >= 0, "argument: initialCapacity");
 
-        if (collectionType == List.class || collectionType == Collection.class) {
+        if (List.class.isAssignableFrom(collectionType)) {
             return cast(new ArrayList<>(initialCapacity));
         }
-        if (collectionType == Set.class) {
+        if (Set.class.isAssignableFrom(collectionType)) {
             return cast(new LinkedHashSet<>(Math.max(DEFAULT_CAPACITY, initialCapacity)));
         }
-        if (collectionType == SortedSet.class || collectionType == NavigableSet.class) {
+        if (SortedSet.class.isAssignableFrom(collectionType) || NavigableSet.class.isAssignableFrom(collectionType)) {
             return cast(new TreeSet<>());
         }
-        if (collectionType == Queue.class || collectionType == Deque.class) {
+        if (Queue.class.isAssignableFrom(collectionType) || Deque.class.isAssignableFrom(collectionType)) {
             return cast(new ArrayDeque<>(Math.max(DEFAULT_CAPACITY, initialCapacity)));
         }
 
-        Contract.state(!EnumSet.class.isAssignableFrom(collectionType), "use createEnumSet(enumType)");
+        state(!EnumSet.class.isAssignableFrom(collectionType), "use createEnumSet(enumType)");
 
         if (ArrayList.class.isAssignableFrom(collectionType)) {
             return cast(new ArrayList<>(initialCapacity));
@@ -61,10 +64,10 @@ public final class CollectionFactory {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <E, C extends Collection<E>> C createLike(
             Collection<?> source, int initialCapacity, Class<C> targetType) {
-        Contract.nonNull(source, "source");
-        Contract.nonNull(targetType, "targetType");
+        nonNull(source, "source");
+        nonNull(targetType, "targetType");
 
-        if (targetType != Collection.class) {
+        if (!Collection.class.isAssignableFrom(targetType)) {
             return createCollection(targetType, initialCapacity);
         }
 
@@ -84,7 +87,7 @@ public final class CollectionFactory {
     }
 
     public static <E extends Enum<E>> EnumSet<E> createEnumSet(Class<E> enumType) {
-        return EnumSet.noneOf(Contract.nonNull(enumType, "enumType"));
+        return EnumSet.noneOf(nonNull(enumType, "enumType"));
     }
 
     private static <E, C extends Collection<E>> C instantiateCollection(Class<C> collectionType) {

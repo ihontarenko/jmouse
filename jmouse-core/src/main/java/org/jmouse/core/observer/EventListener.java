@@ -1,6 +1,7 @@
 package org.jmouse.core.observer;
 
 public interface EventListener<T> {
+
     String name();
 
     void update(Event<T> event);
@@ -8,4 +9,5 @@ public interface EventListener<T> {
     Class<?> applicableType();
 
     boolean supports(Class<?> actualType);
+
 }

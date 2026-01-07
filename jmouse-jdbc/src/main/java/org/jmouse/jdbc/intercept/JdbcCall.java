@@ -3,6 +3,8 @@ package org.jmouse.jdbc.intercept;
 import org.jmouse.jdbc.statement.StatementConfigurer;
 import org.jmouse.jdbc.statement.StatementHandler;
 
+import java.sql.ResultSet;
+
 /**
  * Immutable descriptor of a single JDBC invocation.
  * <p>
@@ -33,11 +35,11 @@ import org.jmouse.jdbc.statement.StatementHandler;
  * }
  * }</pre>
  *
- * @param <R> logical result type of the call
+ * @param <T> logical result type of the call
  *
  * @author jMouse
  */
-public sealed interface JdbcCall<R> permits
+public sealed interface JdbcCall<T> permits
         JdbcQueryCall,
         JdbcUpdateCall,
         JdbcBatchUpdateCall,
@@ -70,7 +72,7 @@ public sealed interface JdbcCall<R> permits
      *
      * @return statement handler (never {@code null})
      */
-    StatementHandler handler();
+    StatementHandler<T> handler();
 
     /**
      * Returns a new {@code JdbcCall} instance with the given {@link StatementConfigurer}.
@@ -80,6 +82,6 @@ public sealed interface JdbcCall<R> permits
      * @param configurer new statement configuration
      * @return new call instance with updated configuration
      */
-    JdbcCall<R> with(StatementConfigurer configurer);
+    JdbcCall<T> with(StatementConfigurer configurer);
 
 }

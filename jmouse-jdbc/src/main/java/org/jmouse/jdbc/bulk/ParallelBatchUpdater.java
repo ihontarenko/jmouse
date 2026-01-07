@@ -1,7 +1,7 @@
 package org.jmouse.jdbc.bulk;
 
 import org.jmouse.core.Chunker;
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.jdbc.SimpleTemplate;
 import org.jmouse.jdbc.statement.BinderFactory;
 import org.jmouse.jdbc.statement.StatementBinder;
@@ -27,19 +27,19 @@ public final class ParallelBatchUpdater<T> {
             TransactionCallback transactionCallback,
             TransactionDefinition definition
     ) {
-        this.template = Contract.nonNull(template, "template");
-        this.executor = Contract.nonNull(executor, "executor");
-        this.transactionCallback = Contract.nonNull(transactionCallback, "transactionCallback");
-        this.definition = Contract.nonNull(definition, "definition");
+        this.template = Verify.nonNull(template, "template");
+        this.executor = Verify.nonNull(executor, "executor");
+        this.transactionCallback = Verify.nonNull(transactionCallback, "transactionCallback");
+        this.definition = Verify.nonNull(definition, "definition");
     }
 
     public BulkBatchResult execute(
             String sql, List<T> items, BinderFactory<T> binderFactory, BulkExecutionPolicy policy
     ) throws SQLException {
-        Contract.nonNull(sql, "sql");
-        Contract.nonNull(items, "items");
-        Contract.nonNull(binderFactory, "binderFactory");
-        Contract.nonNull(policy, "policy");
+        Verify.nonNull(sql, "sql");
+        Verify.nonNull(items, "items");
+        Verify.nonNull(binderFactory, "binderFactory");
+        Verify.nonNull(policy, "policy");
 
         List<List<T>> chunks = Chunker.split(items, policy.chunkSize(), List.class, List.class);
 

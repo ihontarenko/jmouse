@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.parameters;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 
 import java.util.Map;
 
@@ -44,7 +44,7 @@ public final class MapParameterSource implements ParameterSource {
      * @param values map of parameter names to values
      */
     public MapParameterSource(Map<String, ?> values) {
-        this.values = Contract.nonNull(values, "values");
+        this.values = Verify.nonNull(values, "values");
     }
 
     /**

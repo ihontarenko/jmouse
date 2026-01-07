@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.connection.datasource;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.jdbc.connection.datasource.support.AbstractDriverBasedDataSource;
 
 import java.sql.Connection;
@@ -14,7 +14,7 @@ public final class DriverManagerDataSource extends AbstractDriverBasedDataSource
     }
 
     public DriverManagerDataSource(String url, String username, String password) {
-        setUrl(Contract.nonNull(url, "url"));
+        setUrl(Verify.nonNull(url, "url"));
         setUsername(username);
         setPassword(password);
     }

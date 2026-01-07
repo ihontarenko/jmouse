@@ -9,6 +9,7 @@ public final class AuditKeyCallback<K> implements KeyUpdateCallback<K> {
     private int affected;
 
     @Override
+    @SuppressWarnings("unchecked")
     public K doStatementExecute(PreparedStatement stmt, ResultSet keys)
             throws SQLException {
         affected = stmt.executeUpdate();

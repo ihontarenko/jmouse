@@ -5,7 +5,7 @@ import org.jmouse.jdbc.database.SQLQuoting;
 import java.util.Set;
 import java.util.StringJoiner;
 
-import static org.jmouse.core.Contract.nonNull;
+import static org.jmouse.core.Verify.nonNull;
 
 public final class OrderBy {
 

@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.query;
 
-import static org.jmouse.core.Contract.state;
+import static org.jmouse.core.Verify.state;
 
 /**
  * Value object representing offset/limit pagination parameters.

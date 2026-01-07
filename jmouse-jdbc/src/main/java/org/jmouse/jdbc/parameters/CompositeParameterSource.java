@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.parameters;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 
 public final class CompositeParameterSource implements ParameterSource {
 
@@ -28,13 +28,13 @@ public final class CompositeParameterSource implements ParameterSource {
 
     @Override
     public Object getValue(int position) {
-        Contract.nonNull(positional, "positional parameter-source is required");
+        Verify.nonNull(positional, "positional parameter-source is required");
         return positional.getValue(position);
     }
 
     @Override
     public Object getValue(String name) {
-        Contract.nonNull(named, "named parameter-source is required");
+        Verify.nonNull(named, "named parameter-source is required");
         return named.getValue(name);
     }
 }

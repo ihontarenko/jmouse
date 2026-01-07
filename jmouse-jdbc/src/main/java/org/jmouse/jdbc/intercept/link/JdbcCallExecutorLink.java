@@ -6,6 +6,12 @@ import org.jmouse.core.chain.Outcome;
 import org.jmouse.core.proxy.Bubble;
 import org.jmouse.jdbc.JdbcExecutor;
 import org.jmouse.jdbc.intercept.*;
+import org.jmouse.jdbc.statement.CallableCallback;
+import org.jmouse.jdbc.statement.KeyUpdateCallback;
+import org.jmouse.jdbc.statement.StatementCallback;
+import org.jmouse.jdbc.statement.StatementHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 
@@ -27,7 +33,7 @@ import java.sql.SQLException;
  * <pre>{@code
  * Link: JdbcCallExecutorLink
  *   input:  JdbcExecutionContext + JdbcCall<?>
- *   action: delegate to JdbcExecutor (execute / update / batch / keys / call)
+ *   action: executor to JdbcExecutor (execute / update / batch / keys / call)
  *   output: Outcome.done(result)
  * }</pre>
  *
@@ -38,23 +44,26 @@ import java.sql.SQLException;
  */
 public final class JdbcCallExecutorLink implements Link<JdbcExecutionContext, JdbcCall<?>, Object> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(JdbcCallExecutorLink.class);
+
     /**
      * Executes the given {@link JdbcCall} against the {@link JdbcExecutor} stored in the context.
      * <p>
      * Any {@link SQLException} is wrapped in {@link Bubble} to preserve the original cause
      * while satisfying upstream interception/proxy contracts.
      *
-     * @param context execution context carrying the delegate executor
+     * @param context execution context carrying the executor executor
      * @param call    immutable call descriptor
      * @param next    next chain segment (unused; this link is terminal)
      * @return completed outcome with the JDBC call result
      * @throws Bubble wraps {@link SQLException}
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Outcome<Object> handle(JdbcExecutionContext context, JdbcCall<?> call, Chain<JdbcExecutionContext, JdbcCall<?>, Object> next) {
-        JdbcExecutor executor = context.delegate();
-
+        JdbcExecutor executor = context.executor();
         try {
+            LOGGER.info("Executing {} ({})", call.operation(), call.sql());
             return Outcome.done(switch (call) {
                 case JdbcQueryCall<?> q ->
                         executor.execute(q.sql(), q.binder(), q.configurer(), q.handler(), q.callback(), q.extractor());
@@ -63,9 +72,17 @@ public final class JdbcCallExecutorLink implements Link<JdbcExecutionContext, Jd
                 case JdbcBatchUpdateCall b ->
                         executor.executeBatch(b.sql(), b.binders(), b.configurer(), b.handler(), b.callback());
                 case JdbcKeyUpdateCall<?> k ->
-                        executor.executeUpdate(k.sql(), k.binder(), k.configurer(), k.handler(), k.callback());
+                        executor.executeUpdate(
+                                k.sql(), k.binder(), k.configurer(),
+                                (StatementHandler<Object>) k.handler(),
+                                (KeyUpdateCallback<Object>) k.callback()
+                        );
                 case JdbcCallableCall<?> c ->
-                        executor.executeCall(c.sql(), c.binder(), c.configurer(), c.handler(), c.callback());
+                        executor.executeCall(
+                                c.sql(), c.binder(), c.configurer(),
+                                (StatementHandler<Object>) c.handler(),
+                                (CallableCallback<Object>) c.callback()
+                        );
             });
         } catch (SQLException e) {
             throw new Bubble(e);

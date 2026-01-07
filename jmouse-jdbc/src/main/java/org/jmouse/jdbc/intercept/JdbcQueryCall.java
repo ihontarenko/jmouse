@@ -47,10 +47,10 @@ public record JdbcQueryCall<T>(
         String sql,
         StatementBinder binder,
         StatementConfigurer configurer,
-        StatementHandler handler,
+        StatementHandler<ResultSet> handler,
         StatementCallback<ResultSet> callback,
         ResultSetExtractor<T> extractor
-) implements JdbcCall<T> {
+) implements JdbcCall<ResultSet> {
 
     /**
      * Returns the logical operation type for this call.

@@ -1,6 +1,6 @@
 package org.jmouse.transaction.infrastructure;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.transaction.TransactionDefinition;
 import org.jmouse.transaction.TransactionIsolation;
 
@@ -19,10 +19,10 @@ public final class JoinTransactionValidator {
             JoinAttributePolicy readOnlyPolicy,
             BiConsumer<String, Throwable> logger
     ) {
-        this.isolationPolicy = Contract.nonNull(isolationPolicy, "isolationPolicy");
-        this.timeoutPolicy = Contract.nonNull(timeoutPolicy, "timeoutPolicy");
-        this.readOnlyPolicy = Contract.nonNull(readOnlyPolicy, "readOnlyPolicy");
-        this.logger = Contract.nonNull(logger, "logger");
+        this.isolationPolicy = Verify.nonNull(isolationPolicy, "isolationPolicy");
+        this.timeoutPolicy = Verify.nonNull(timeoutPolicy, "timeoutPolicy");
+        this.readOnlyPolicy = Verify.nonNull(readOnlyPolicy, "readOnlyPolicy");
+        this.logger = Verify.nonNull(logger, "logger");
     }
 
     public void validate(TransactionDefinition requested, TransactionAttributes effective) {

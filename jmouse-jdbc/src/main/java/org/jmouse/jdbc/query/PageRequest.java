@@ -1,11 +1,11 @@
 package org.jmouse.jdbc.query;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 
 public record PageRequest(OffsetLimit page, Sort sort) {
 
     public PageRequest {
-        Contract.nonNull(page, "page");
+        Verify.nonNull(page, "page");
         sort = (sort != null ? sort : Sort.unsorted());
     }
 

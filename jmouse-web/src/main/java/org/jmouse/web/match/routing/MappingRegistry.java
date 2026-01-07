@@ -9,7 +9,6 @@ import java.util.Map;
  *
  * <p>Supports basic CRUD operations over mappings.</p>
  *
- * @param <M> the mapping key type
  * @param <T> the mapping registration type
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
@@ -50,7 +49,7 @@ public final class MappingRegistry<T> {
     /**
      * Removes the registration associated with the given mapping.
      *
-     * @param mapping the mapping key to remove
+     * @param criteria the mapping key to remove
      * @return the removed registration, or {@code null} if none existed
      */
     public MappingRegistration<T> remove(MappingCriteria criteria) {
@@ -60,7 +59,7 @@ public final class MappingRegistry<T> {
     /**
      * Checks if the registry contains the given mapping.
      *
-     * @param mapping the mapping key to check
+     * @param criteria the mapping key to check
      * @return {@code true} if the mapping exists, {@code false} otherwise
      */
     public boolean contains(MappingCriteria criteria) {

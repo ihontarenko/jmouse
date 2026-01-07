@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.connection;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.jdbc.connection.support.AbstractConnectionProvider;
 
 import javax.sql.DataSource;
@@ -15,7 +15,7 @@ public final class DataSourceConnectionProvider extends AbstractConnectionProvid
     private final DataSource dataSource;
 
     public DataSourceConnectionProvider(DataSource dataSource) {
-        this.dataSource = Contract.nonNull(dataSource, "dataSource");
+        this.dataSource = Verify.nonNull(dataSource, "dataSource");
     }
 
     @Override

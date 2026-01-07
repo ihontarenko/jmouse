@@ -56,7 +56,7 @@ public final class ColumnRowMapper<T> implements RowMapper<T> {
      * Creates a new {@code ColumnRowMapper}.
      *
      * @param columnIndex JDBC column index (1-based)
-     * @param rowMapper   delegate mapper that will receive the column index
+     * @param rowMapper   executor mapper that will receive the column index
      */
     public ColumnRowMapper(int columnIndex, RowMapper<T> rowMapper) {
         this.columnIndex = columnIndex;

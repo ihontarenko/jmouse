@@ -48,7 +48,7 @@ public record JdbcBatchUpdateCall(
         String sql,
         List<? extends StatementBinder> binders,
         StatementConfigurer configurer,
-        StatementHandler handler,
+        StatementHandler<int[]> handler,
         StatementCallback<int[]> callback
 ) implements JdbcCall<int[]> {
 

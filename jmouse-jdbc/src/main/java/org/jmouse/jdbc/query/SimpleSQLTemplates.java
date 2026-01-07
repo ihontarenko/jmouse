@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.query;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.jdbc.database.DatabasePlatform;
 import org.jmouse.jdbc.database.SQLTemplates;
 
@@ -9,7 +9,7 @@ public class SimpleSQLTemplates implements SQLTemplates {
     private final DatabasePlatform platform;
 
     public SimpleSQLTemplates(DatabasePlatform platform) {
-        this.platform = Contract.nonNull(platform, "platform");
+        this.platform = Verify.nonNull(platform, "platform");
     }
 
     @Override

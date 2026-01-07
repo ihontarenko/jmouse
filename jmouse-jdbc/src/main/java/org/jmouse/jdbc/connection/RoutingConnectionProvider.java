@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.connection;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.jdbc.connection.datasource.DataSourceResolver;
 import org.jmouse.jdbc.connection.support.AbstractConnectionProvider;
 
@@ -14,8 +14,8 @@ public final class RoutingConnectionProvider extends AbstractConnectionProvider 
     private final Supplier<String>   lookupKey;
 
     public RoutingConnectionProvider(DataSourceResolver resolver, Supplier<String> lookupKey) {
-        this.resolver = Contract.nonNull(resolver, "resolver");
-        this.lookupKey = Contract.nonNull(lookupKey, "lookupKey");
+        this.resolver = Verify.nonNull(resolver, "resolver");
+        this.lookupKey = Verify.nonNull(lookupKey, "lookupKey");
     }
 
     @Override

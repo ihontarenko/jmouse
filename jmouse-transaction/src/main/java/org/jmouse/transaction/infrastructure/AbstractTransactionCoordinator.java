@@ -1,6 +1,6 @@
 package org.jmouse.transaction.infrastructure;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.transaction.*;
 import org.jmouse.transaction.synchronization.*;
 import org.slf4j.Logger;
@@ -101,7 +101,7 @@ public abstract class AbstractTransactionCoordinator
             return;
         }
 
-        TransactionContext context = Contract.nonNull(
+        TransactionContext context = Verify.nonNull(
                 contextHolder.getContext(), "No required transaction context bound.");
 
         if (!status.isNew() && context.getSavepoint().isEmpty()) {

@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.parameters;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.core.bind.descriptor.Describer;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 
@@ -11,7 +11,7 @@ public final class BeanParameterSource implements ParameterSource {
 
     @SuppressWarnings("unchecked")
     public BeanParameterSource(Object instance) {
-        this.instance = Contract.nonNull(instance, "bean-instance");
+        this.instance = Verify.nonNull(instance, "bean-instance");
         Class<?> beanType = instance.getClass();
         this.bean = Describer.forObjectDescriptor((Class<Object>) beanType);
     }

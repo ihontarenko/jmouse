@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.transaction;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.transaction.TransactionDefinition;
 
 import java.sql.Connection;
@@ -12,7 +12,7 @@ public final class CompositeConnectionCustomizer implements ConnectionCustomizer
     private final List<ConnectionCustomizer> delegates;
 
     public CompositeConnectionCustomizer(List<ConnectionCustomizer> delegates) {
-        this.delegates = List.copyOf(Contract.nonNull(delegates, "delegates"));
+        this.delegates = List.copyOf(Verify.nonNull(delegates, "delegates"));
     }
 
     @Override

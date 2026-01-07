@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.mapping;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 
 import java.util.List;
 import java.util.Map;
@@ -60,7 +60,7 @@ public interface RowMetadata {
     default int indexOf(String column) {
         Map<String, Integer> index = indexMap();
         Integer i = index.get(column);
-        Contract.state(i != null, () -> new IllegalArgumentException("Unknown column '" + column + "'"));
+        Verify.state(i != null, () -> new IllegalArgumentException("Unknown column '" + column + "'"));
         return i;
     }
 

@@ -9,7 +9,7 @@ public record JdbcKeyUpdateCall<K>(
         String sql,
         StatementBinder binder,
         StatementConfigurer configurer,
-        StatementHandler handler,
+        StatementHandler<K> handler,
         KeyUpdateCallback<K> callback
 ) implements JdbcCall<K> {
 

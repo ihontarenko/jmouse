@@ -26,9 +26,15 @@ import org.jmouse.jdbc.statement.StatementHandler;
  * <pre>{@code
  * JdbcCallableCall<Integer> call = new JdbcCallableCall<>(
  *     "{call sum_two(?, ?)}",
- *     cs -> { cs.setInt(1, 10); cs.registerOutParameter(2, Types.INTEGER); },
+ *     callableStatement -> {
+ *          callableStatement.setInt(1, 10);
+ *          callableStatement.registerOutParameter(2, Types.INTEGER);
+ *     },
  *     StatementConfigurer.NOOP,
- *     cs -> { cs.execute(); return cs.getInt(2); }
+ *     callableStatement -> {
+ *          callableStatement.execute();
+ *          return callableStatement.getInt(2);
+ *     }
  * );
  *
  * call = call.with(StatementConfigurer.timeout(5));
@@ -42,7 +48,7 @@ public record JdbcCallableCall<T>(
         String sql,
         CallableStatementBinder binder,
         StatementConfigurer configurer,
-        StatementHandler handler,
+        StatementHandler<T> handler,
         CallableCallback<T> callback
 ) implements JdbcCall<T> {
 

@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.connection.datasource;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 
 import javax.sql.DataSource;
 import java.util.LinkedHashMap;
@@ -11,10 +11,10 @@ public final class DataSourceRegistry {
     private final Map<String, DataSource> dataSources = new LinkedHashMap<>();
 
     public void register(String name, DataSource dataSource) {
-        Contract.nonNull(name, "name");
-        Contract.nonNull(dataSource, "dataSource");
-        Contract.state(dataSources.putIfAbsent(name, dataSource) == null,
-                       "DATA-SOURCE already registered: " + name);
+        Verify.nonNull(name, "name");
+        Verify.nonNull(dataSource, "dataSource");
+        Verify.state(dataSources.putIfAbsent(name, dataSource) == null,
+                     "DATA-SOURCE already registered: " + name);
     }
 
     public DataSource obtain(String name) {
@@ -22,7 +22,7 @@ public final class DataSourceRegistry {
     }
 
     public DataSource require(String name) {
-        return Contract.state(obtain(name), "DATA-SOURCE NOT FOUND: " + name);
+        return Verify.state(obtain(name), "DATA-SOURCE NOT FOUND: " + name);
     }
 
     public Map<String, DataSource> snapshot() {

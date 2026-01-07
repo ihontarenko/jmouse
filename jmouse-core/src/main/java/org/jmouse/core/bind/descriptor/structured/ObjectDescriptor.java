@@ -1,6 +1,6 @@
 package org.jmouse.core.bind.descriptor.structured;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.core.bind.DirectPropertyAccess;
 import org.jmouse.core.bind.PropertyAccessor;
 import org.jmouse.core.bind.descriptor.ClassTypeDescriptor;
@@ -105,10 +105,10 @@ public interface ObjectDescriptor<T> {
      * @return the current value of the property
      */
     default Object obtainValue(String property, T instance) {
-        Contract.state(hasProperty(property), () -> new IllegalArgumentException(
+        Verify.state(hasProperty(property), () -> new IllegalArgumentException(
                 "Property " + property + " does not exist"));
         PropertyAccessor<T> accessor = getProperty(property).getAccessor();
-        Contract.state(accessor.isReadable(), () -> new IllegalArgumentException(
+        Verify.state(accessor.isReadable(), () -> new IllegalArgumentException(
                 "Property " + property + " is not readable"));
         return accessor.readValue(instance);
     }
@@ -125,10 +125,10 @@ public interface ObjectDescriptor<T> {
      * @param value    the value to inject
      */
     default void injectValue(String property, T instance, Object value) {
-        Contract.state(hasProperty(property), () -> new IllegalArgumentException(
+        Verify.state(hasProperty(property), () -> new IllegalArgumentException(
                 "Property " + property + " does not exist"));
         PropertyAccessor<T> accessor = getProperty(property).getAccessor();
-        Contract.state(accessor.isWritable(), () -> new IllegalArgumentException(
+        Verify.state(accessor.isWritable(), () -> new IllegalArgumentException(
                 "Property " + property + " is not writable"));
         accessor.writeValue(instance, value);
     }

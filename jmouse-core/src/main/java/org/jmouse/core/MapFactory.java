@@ -11,8 +11,8 @@ public final class MapFactory {
 
     @SuppressWarnings({"unchecked"})
     public static <K, V> Map<K, V> createMap(Class<?> mapType, int initialCapacity) {
-        Contract.nonNull(mapType, "mapType");
-        Contract.state(initialCapacity > 0, "initialCapacity must be >= 0");
+        Verify.nonNull(mapType, "mapType");
+        Verify.state(initialCapacity > 0, "initialCapacity must be >= 0");
 
         if (mapType == Map.class) {
             return new LinkedHashMap<>(capacity(initialCapacity));
@@ -22,8 +22,8 @@ public final class MapFactory {
             return new TreeMap<>();
         }
 
-        Contract.state(Map.class.isAssignableFrom(mapType), "mapType must be Map type");
-        Contract.state(!EnumMap.class.isAssignableFrom(mapType), "use createEnumMap(enumKeyType)");
+        Verify.state(Map.class.isAssignableFrom(mapType), "mapType must be Map type");
+        Verify.state(!EnumMap.class.isAssignableFrom(mapType), "use createEnumMap(enumKeyType)");
 
         if (HashMap.class.isAssignableFrom(mapType)) {
             return new HashMap<>(capacity(initialCapacity));
@@ -53,7 +53,7 @@ public final class MapFactory {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static <K, V> Map<K, V> createLike(Map<?, ?> source, int initialCapacity) {
-        Contract.nonNull(source, "source");
+        Verify.nonNull(source, "source");
         return switch (source) {
             case EnumMap<?, ?> enumMap -> {
                 Class<? extends Enum> enumType = null;
@@ -66,7 +66,7 @@ public final class MapFactory {
                 }
 
                 if (enumType != null) {
-                    yield (Map<K, V>) new EnumMap(enumType);
+                    yield ((Map<K, V>) new EnumMap(enumType));
                 }
 
                 yield new LinkedHashMap<>(capacity(initialCapacity));
@@ -85,7 +85,7 @@ public final class MapFactory {
     }
 
     public static <E extends Enum<E>, V> EnumMap<E, V> createEnumMap(Class<E> enumKeyType) {
-        return new EnumMap<>(Contract.nonNull(enumKeyType, "enumKeyType"));
+        return new EnumMap<>(Verify.nonNull(enumKeyType, "enumKeyType"));
     }
 
     private static int capacity(int initialCapacity) {

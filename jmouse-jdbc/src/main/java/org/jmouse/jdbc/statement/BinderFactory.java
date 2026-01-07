@@ -2,7 +2,7 @@ package org.jmouse.jdbc.statement;
 
 import java.util.function.Function;
 
-import static org.jmouse.core.Contract.nonNull;
+import static org.jmouse.core.Verify.nonNull;
 
 @FunctionalInterface
 public interface BinderFactory<T> {

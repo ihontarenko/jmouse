@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.database;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.core.Sorter;
 import org.jmouse.jdbc.database.standard.StandardPlatforms;
 
@@ -68,7 +68,7 @@ public final class DatabasePlatformRegistry {
      * @return this registry instance (for fluent API)
      */
     public DatabasePlatformRegistry register(DatabasePlatformProvider provider) {
-        providers.add(Contract.nonNull(provider, "provider"));
+        providers.add(Verify.nonNull(provider, "provider"));
         providers.sort(Sorter.PRIORITY_COMPARATOR.reversed());
         return this;
     }
@@ -83,7 +83,7 @@ public final class DatabasePlatformRegistry {
      * @return this registry instance (for fluent API)
      */
     public DatabasePlatformRegistry fallback(DatabasePlatform fallback) {
-        this.fallback = Contract.nonNull(fallback, "fallback");
+        this.fallback = Verify.nonNull(fallback, "fallback");
         return this;
     }
 

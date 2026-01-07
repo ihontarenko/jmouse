@@ -1,6 +1,6 @@
 package org.jmouse.transaction.infrastructure.support;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.transaction.infrastructure.TransactionContextHolder;
 
 /**
@@ -14,11 +14,11 @@ public final class TransactionContextAccessSupport {
     }
 
     public static void register(TransactionContextHolder contextHolder) {
-        HOLDER = Contract.argument(contextHolder, "contextHolder");
+        HOLDER = Verify.argument(contextHolder, "contextHolder");
     }
 
     public static TransactionContextHolder current() {
-        return Contract.state(HOLDER, "TransactionContextAccessSupport.HOLDER");
+        return Verify.state(HOLDER, "TransactionContextAccessSupport.HOLDER");
     }
 
     public static <T> T getResource(Class<T> key) {

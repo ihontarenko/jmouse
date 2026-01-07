@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.transaction;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.transaction.TransactionDefinition;
 import org.jmouse.transaction.TransactionSession;
@@ -14,8 +14,8 @@ public final class JdbcTransactionSessionFactory implements TransactionSessionFa
     public JdbcTransactionSessionFactory(
             ConnectionProvider connectionProvider, ConnectionCustomizer customizer
     ) {
-        this.connectionProvider = Contract.nonNull(connectionProvider, "connectionProvider");
-        this.customizer = Contract.nonNull(customizer, "customizer");
+        this.connectionProvider = Verify.nonNull(connectionProvider, "connectionProvider");
+        this.customizer = Verify.nonNull(customizer, "customizer");
     }
 
     @Override

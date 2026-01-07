@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.connection.datasource;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 
 import javax.sql.DataSource;
 
@@ -15,9 +15,9 @@ public final class SimpleDataSourceResolver implements DataSourceResolver {
             DataSourceRegistry dataSourceRegistry,
             DataSourceFactoryRegistry factoryRegistry
     ) {
-        this.specificationRegistry = Contract.nonNull(specificationRegistry, "specificationRegistry");
-        this.factoryRegistry = Contract.nonNull(factoryRegistry, "factoryRegistry");
-        this.dataSourceRegistry = Contract.nonNull(dataSourceRegistry, "dataSourceRegistry");
+        this.specificationRegistry = Verify.nonNull(specificationRegistry, "specificationRegistry");
+        this.factoryRegistry = Verify.nonNull(factoryRegistry, "factoryRegistry");
+        this.dataSourceRegistry = Verify.nonNull(dataSourceRegistry, "dataSourceRegistry");
     }
 
     @Override

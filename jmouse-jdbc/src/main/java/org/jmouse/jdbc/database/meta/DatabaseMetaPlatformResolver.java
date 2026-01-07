@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.database.meta;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.jdbc.database.DatabaseInformation;
 import org.jmouse.jdbc.database.DatabasePlatform;
@@ -63,8 +63,8 @@ public final class DatabaseMetaPlatformResolver {
      * @param registry database platform registry
      */
     public DatabaseMetaPlatformResolver(ConnectionProvider provider, DatabasePlatformRegistry registry) {
-        this.provider = Contract.nonNull(provider, "provider");
-        this.registry = Contract.nonNull(registry, "registry");
+        this.provider = Verify.nonNull(provider, "provider");
+        this.registry = Verify.nonNull(registry, "registry");
     }
 
     /**

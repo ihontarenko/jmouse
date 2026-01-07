@@ -40,7 +40,7 @@ public record JdbcUpdateCall(
         String sql,
         StatementBinder binder,
         StatementConfigurer configurer,
-        StatementHandler handler,
+        StatementHandler<Integer> handler,
         StatementCallback<Integer> callback
 ) implements JdbcCall<Integer> {
 

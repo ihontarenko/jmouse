@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.jmouse.core.Contract.nonNull;
+import static org.jmouse.core.Verify.nonNull;
 
 public final class BinderFactories {
 

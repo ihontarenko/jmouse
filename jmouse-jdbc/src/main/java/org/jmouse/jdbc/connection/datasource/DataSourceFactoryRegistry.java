@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.connection.datasource;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ public final class DataSourceFactoryRegistry {
     private final List<DataSourceFactory> factories = new ArrayList<>();
 
     public DataSourceFactoryRegistry register(DataSourceFactory factory) {
-        factories.add(Contract.nonNull(factory, "factory"));
+        factories.add(Verify.nonNull(factory, "factory"));
         return this;
     }
 

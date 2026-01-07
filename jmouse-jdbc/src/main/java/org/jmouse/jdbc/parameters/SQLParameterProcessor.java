@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.parameters;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.el.StringSource;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.jdbc.parameters.compile.SQLPlanCompiler;
@@ -14,8 +14,8 @@ public final class SQLParameterProcessor {
     private final SQLPlanCompiler       compiler;
 
     public SQLParameterProcessor(SQLParameterTokenizer tokenizer, SQLPlanCompiler compiler) {
-        this.compiler = Contract.nonNull(compiler, "compiler");
-        this.tokenizer = Contract.nonNull(tokenizer, "tokenizer");
+        this.compiler = Verify.nonNull(compiler, "compiler");
+        this.tokenizer = Verify.nonNull(tokenizer, "tokenizer");
     }
 
     public SQLParsed parse(String name, String sql) {

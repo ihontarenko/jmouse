@@ -83,7 +83,7 @@ public interface StatementHandler<R> {
     /**
      * Handles execution of a JDBC {@link Statement}.
      * <p>
-     * Implementations should typically delegate to the provided
+     * Implementations should typically executor to the provided
      * {@link StatementExecutor}, optionally surrounding it with
      * additional behavior.
      *

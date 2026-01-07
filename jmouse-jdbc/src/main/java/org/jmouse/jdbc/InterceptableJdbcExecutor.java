@@ -1,6 +1,6 @@
 package org.jmouse.jdbc;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.core.chain.Chain;
 import org.jmouse.jdbc.intercept.*;
 import org.jmouse.jdbc.mapping.KeyExtractor;
@@ -72,8 +72,8 @@ public final class InterceptableJdbcExecutor implements JdbcExecutor {
      */
     public InterceptableJdbcExecutor(JdbcExecutor delegate,
                                      Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain) {
-        this.delegate = Contract.nonNull(delegate, "delegate");
-        this.chain = Contract.nonNull(chain, "chain");
+        this.delegate = Verify.nonNull(delegate, "executor");
+        this.chain = Verify.nonNull(chain, "chain");
     }
 
     /**

@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.statement;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -18,8 +18,8 @@ public final class Binders {
     }
 
     public static <T> List<StatementBinder> forEach(List<T> items, BinderFactory<T> factory) {
-        Contract.nonNull(items, "items");
-        Contract.nonNull(factory, "factory");
+        Verify.nonNull(items, "items");
+        Verify.nonNull(factory, "factory");
 
         if (items.isEmpty()) {
             return List.of();

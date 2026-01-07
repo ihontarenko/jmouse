@@ -4,9 +4,15 @@ import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDefinitionFactory;
 import org.jmouse.beans.definition.DuplicateBeanDefinitionException;
 import org.jmouse.beans.definition.ObjectFactoryBeanDefinition;
+import org.jmouse.beans.events.BeanContextEvent;
+import org.jmouse.beans.events.BeanContextEventName;
+import org.jmouse.beans.events.BeanContextEventPayload;
+import org.jmouse.beans.events.BeanContextEventPayload.*;
+import org.jmouse.beans.events.BeanContextEvents;
 import org.jmouse.core.CyclicReferenceDetector;
 import org.jmouse.core.DefaultCyclicReferenceDetector;
 import org.jmouse.core.Delegate;
+import org.jmouse.core.observer.EventManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jmouse.beans.annotation.BeanInitializer;
@@ -24,6 +30,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.jmouse.beans.BeanLookupStrategy.INHERIT_DEFINITION;
+import static org.jmouse.beans.events.BeanContextEventName.*;
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**
@@ -59,9 +66,9 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * UserService userServiceByName = context.getBean("userService");
  * }</pre>
  */
-public class DefaultBeanContext implements BeanContext, BeanFactory {
+public class DefaultBeanContext implements BeanContext, BeanFactory, BeanContextEvents {
 
-    public static final  String DEFAULT_CONTEXT_NAME = "DEFAULT-BEANS-CONTEXT";
+    private static final String DEFAULT_CONTEXT_NAME = "DEFAULT-BEANS-CONTEXT";
     private static final Logger LOGGER               = LoggerFactory.getLogger(DefaultBeanContext.class);
 
     /**
@@ -156,9 +163,20 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     private String contextId;
 
     /**
-     * 🧭 Defines how to resolve beans
-     * */
+     * 🧭 Strategy used to resolve and lookup beans within this context.
+     * <p>
+     * Allows customization of bean resolution behavior
+     * (e.g. local-first, parent-first, chained lookup).
+     */
     private BeanLookupStrategy lookupStrategy;
+
+    /**
+     * 📡 Internal event manager for {@code BeanContext}.
+     * <p>
+     * Responsible for publishing lifecycle and state-change events
+     * to registered listeners.
+     */
+    private final EventManager events = new EventManager();
 
     /**
      * Constructs a new {@code DefaultBeanContext} with the specified parent context and base classes.
@@ -228,7 +246,17 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
                 continue;
             }
 
-            initializer.initialize(this);
+            emit(CONTEXT_REFRESH_START, new ContextPayload(this));
+
+            try {
+                initializer.initialize(this);
+            } catch (Throwable e) {
+                emit(CONTEXT_ERROR, new ErrorPayload(this, CONTEXT_REFRESH_START, null, null, e));
+                throw e;
+            } finally {
+                emit(CONTEXT_REFRESH_FINISH, new ContextPayload(this));
+            }
+
             initialized.add(hashCode);
             LOGGER.info("Initializer '{}' was successfully executed.", getShortName(initializerClass));
         }
@@ -335,38 +363,49 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         ObjectFactory<T> objectFactory = () -> this.createBean(tmp);
         T                instance      = null;
 
-        if (definition != null) {
-            Scope beanScope = scopeResolver.resolveScope(name);
+        emit(BEAN_LOOKUP_START, new LookupPayload(this, name, null));
 
-            // get applicable bean instances container and try to find bean
-            BeanContainer instanceContainer = getBeanContainer(beanScope);
-
-            // get bean or try to create new one via lambda
-            instance = instanceContainer.getBean(name, objectFactory);
-        }
-
-        if (instance == null && getBeanLookupStrategy() == INHERIT_DEFINITION && parent != null) {
-            definition = parent.getDefinition(name);
-
+        try {
             if (definition != null) {
-                registerDefinition(definition);
-                instance = getBean(name);
+                Scope beanScope = scopeResolver.resolveScope(name);
+
+                // get applicable bean instances container and try to find bean
+                BeanContainer instanceContainer = getBeanContainer(beanScope);
+
+                // get bean or try to create new one via lambda
+                instance = instanceContainer.getBean(name, objectFactory);
             }
-        }
 
-        // if bean not found try to search it in parent context
-        if (instance == null && parent != null) {
-            instance = parent.getBean(name);
-        }
+            if (instance == null && getBeanLookupStrategy() == INHERIT_DEFINITION && parent != null) {
+                definition = parent.getDefinition(name);
 
-        // If still not found — fail
-        if (instance == null) {
-            throw new BeanNotFoundException(
-                    "Bean '%s' could not be resolved via lookup strategy '%s'"
-                            .formatted(name, getBeanLookupStrategy()));
-        }
+                if (definition != null) {
+                    registerDefinition(definition);
+                    instance = getBean(name);
+                }
+            }
 
-        return instance;
+            // if bean not found try to search it in parent context
+            if (instance == null && parent != null) {
+                instance = parent.getBean(name);
+            }
+
+            // If still not found — fail
+            if (instance == null) {
+                throw new BeanNotFoundException(
+                        "Bean '%s' could not be resolved via lookup strategy '%s'"
+                                .formatted(name, getBeanLookupStrategy()));
+            }
+
+            emit(BEAN_FOUND, new LookupPayload(this, name, null));
+            return instance;
+        } catch (BeanNotFoundException e) {
+            emit(BEAN_NOT_FOUND, new LookupPayload(this, name, null));
+            throw e;
+        } catch (RuntimeException e) {
+            emit(CONTEXT_ERROR, new ErrorPayload(this, BEAN_LOOKUP_START, name, getDefinition(name), e));
+            throw e;
+        }
     }
 
 
@@ -402,15 +441,19 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
                 -> new BeanInstantiationException(
                         "Cyclic dependency detected for bean: %s".formatted(definition.getBeanName()));
 
+        emit(BEAN_CREATE_START, new CreatePayload(this, definition, null));
+
         try {
             // Detect cyclic references using the general-purpose Identifier interface
             referenceDetector.detect(definition::getBeanName, exceptionSupplier);
 
             // resolve an instantiate raw bean
             T instance = beanFactory.createBean(definition);
+            emit(BEAN_CREATED, new CreatePayload(this, definition, instance));
 
             // Initializes a bean instance by applying pre-initialization and post-initialization
             instance = initializeBean(instance, definition);
+            emit(BEAN_INIT_FINISH, new CreatePayload(this, definition, initialized));
 
             return instance;
         } catch (Exception exception) {
@@ -437,6 +480,8 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     public <T> T initializeBean(T instance, BeanDefinition definition) {
         // Perform pre-initialization steps using registered BeanPostProcessors
         for (BeanPostProcessor processor : processors) {
+            emit(BEAN_PROCESSED_BEFORE_INIT,
+                 new InitPayload(this, definition, instance, processor.getClass().getName()));
             instance = (T) processor.postProcessBeforeInitialize(instance, definition, this);
         }
 
@@ -444,10 +489,14 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         for (Method initializer : Reflections.findAllAnnotatedMethods(
                 definition.getBeanClass(), BeanInitializer.class)) {
             Reflections.invokeMethod(instance, initializer, this);
+            emit(BEAN_INITIALIZER_INVOKED,
+                 new InitPayload(this, definition, instance, initializer.toGenericString()));
         }
 
         // Perform post-initialization steps using registered BeanPostProcessors
         for (BeanPostProcessor processor : processors) {
+            emit(BEAN_PROCESSED_AFTER_INIT,
+                 new InitPayload(this, definition, instance, processor.getClass().getName()));
             instance = (T) processor.postProcessAfterInitialize(instance, definition, this);
         }
 
@@ -806,7 +855,15 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public void registerDefinition(BeanDefinition definition) {
-        definitionContainer.registerDefinition(definition);
+        try {
+            definitionContainer.registerDefinition(definition);
+            emit(DEFINITION_REGISTERED, new DefinitionPayload(
+                    this, definition));
+        } catch (DuplicateBeanDefinitionException e) {
+            emit(DEFINITION_DUPLICATE, new ErrorPayload(
+                    this, DEFINITION_DUPLICATE, definition.getBeanName(), definition, e));
+            throw e;
+        }
     }
 
     /**
@@ -1009,29 +1066,84 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     }
 
     /**
-     * Gets the unique identifier of this context.
+     * 📡 Internal event manager for {@code BeanContext}.
      *
-     * @return the context ID as a {@link String}.
+     * @return the event manager
+     */
+    @Override
+    public EventManager getEventManager() {
+        return events;
+    }
+
+    /**
+     * Returns the unique identifier of this {@code BeanContext}.
+     *
+     * @return the context identifier
      */
     public String getContextId() {
         return contextId;
     }
 
     /**
-     * Sets the unique identifier for this context.
+     * Sets the unique identifier for this {@code BeanContext}.
+     * <p>
+     * The context ID is mainly used for logging, debugging,
+     * and hierarchical context representation.
      *
-     * @param contextId the context ID to set.
+     * @param contextId the context identifier to assign
      */
     public void setContextId(String contextId) {
         this.contextId = contextId;
     }
 
+    /**
+     * Provides a formatter used to render context names.
+     * <p>
+     * By default, wraps the context ID into square brackets:
+     * {@code [contextId]}.
+     *
+     * @return a formatter function for context names
+     */
     private Function<Object, String> getContextName() {
         return "[%s]"::formatted;
     }
 
+    /**
+     * Emits a {@link BeanContextEvent} to all registered listeners.
+     * <p>
+     * Listener failures are isolated and do not affect
+     * the context execution flow.
+     *
+     * @param name    the event name
+     * @param payload the event payload
+     */
+    protected void emit(BeanContextEventName name, BeanContextEventPayload payload) {
+        try {
+            events.notify(new BeanContextEvent(name.name(), payload, this));
+        } catch (Throwable listenerError) {
+            LOGGER.warn(
+                    "Failed to publish event: '{}': {}",
+                    name,
+                    listenerError,
+                    listenerError
+            );
+        }
+    }
+
+    /**
+     * Returns a human-readable representation of this context.
+     * <p>
+     * Includes the context ID and its parent hierarchy, if present:
+     * <pre>
+     * [child] -> [parent] -> [root]
+     * </pre>
+     *
+     * @return string representation of the context
+     */
     @Override
     public String toString() {
-        return getContextName().apply(getContextId()) + (parent != null ? " -> " + parent : "");
+        return getContextName().apply(getContextId())
+                + (parent != null ? " -> " + parent : "");
     }
+
 }

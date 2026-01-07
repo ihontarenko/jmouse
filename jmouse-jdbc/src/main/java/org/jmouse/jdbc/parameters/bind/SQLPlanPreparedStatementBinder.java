@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.parameters.bind;
 
-import org.jmouse.core.Contract;
+import org.jmouse.core.Verify;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.Expression;
@@ -85,10 +85,10 @@ public final class SQLPlanPreparedStatementBinder implements StatementBinder {
      */
     public SQLPlanPreparedStatementBinder(
             ExpressionLanguage expressionLanguage, SQLPlan plan, ParameterSource parameterSource, MissingParameterPolicy missingPolicy) {
-        this.expressionLanguage = Contract.nonNull(expressionLanguage, "expressionLanguage");
-        this.plan = Contract.nonNull(plan, "plan");
-        this.parameterSource = Contract.nonNull(parameterSource, "parameterSource");
-        this.missingPolicy = Contract.nonNull(missingPolicy, "missingPolicy");
+        this.expressionLanguage = Verify.nonNull(expressionLanguage, "expressionLanguage");
+        this.plan = Verify.nonNull(plan, "plan");
+        this.parameterSource = Verify.nonNull(parameterSource, "parameterSource");
+        this.missingPolicy = Verify.nonNull(missingPolicy, "missingPolicy");
     }
 
     /**
