@@ -26,8 +26,13 @@ public final class MySQLPlatformProvider implements DatabasePlatformProvider {
 
         return new DatabasePlatform() {
             @Override
+            public PaginationStrategy pagination() {
+                return new LimitOffsetPagination();
+            }
+
+            @Override
             public DatabaseId id() {
-                return new DatabaseId("mysql", info.productName());
+                return new DatabaseId(MYSQL_NAME, info.productName());
             }
 
             @Override

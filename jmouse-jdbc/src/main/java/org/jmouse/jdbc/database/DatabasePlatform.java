@@ -78,23 +78,6 @@ public interface DatabasePlatform {
      * @return SQL templates
      */
     SQLTemplates sql();
-
-    /**
-     * Optional hook point for vendor-specific SQL normalization or rewrite.
-     * <p>
-     * This hook is invoked before SQL execution and may:
-     * <ul>
-     *     <li>rewrite vendor-specific syntax</li>
-     *     <li>apply compatibility transformations</li>
-     *     <li>normalize identifiers or functions</li>
-     * </ul>
-     *
-     * @return rewrite hook (defaults to no-op)
-     */
-    default RewriteHook rewriteHook() {
-        return RewriteHook.noop();
-    }
-
     default String applyPagination(String sql, OffsetLimit page) {
         return pagination().apply(sql, page);
     }

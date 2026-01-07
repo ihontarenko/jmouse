@@ -15,6 +15,11 @@ public final class AnsiDatabasePlatform implements DatabasePlatform {
     private static final SQLTemplates SQL = "%s OFFSET %d ROWS FETCH NEXT %d ROWS ONLY"::formatted;
 
     @Override
+    public PaginationStrategy pagination() {
+        return new LimitOffsetPagination();
+    }
+
+    @Override
     public DatabaseId id() {
         return ID;
     }

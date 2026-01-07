@@ -11,6 +11,7 @@ import org.jmouse.jdbc.connection.ConnectionProvider;
 import org.jmouse.jdbc.InterceptableJdbcExecutor;
 import org.jmouse.jdbc.SQLExecutor;
 import org.jmouse.jdbc.JdbcExecutor;
+import org.jmouse.jdbc.database.DatabasePlatform;
 import org.jmouse.jdbc.exception.SQLExceptionTranslator;
 import org.jmouse.jdbc.exception.SQLStateSQLExceptionTranslator;
 import org.jmouse.jdbc.intercept.JdbcCall;
@@ -63,9 +64,10 @@ public class JdbcExecutorConfiguration {
     @Bean
     public JdbcExecutor jdbcExecutor(
             ConnectionProvider connectionProvider,
-            Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> builder
+            Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> builder,
+            DatabasePlatform databasePlatform
     ) {
-        JdbcExecutor                                     executor = new SQLExecutor(connectionProvider);
+        JdbcExecutor                                     executor = new SQLExecutor(connectionProvider, databasePlatform);
         Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain    = JdbcChainFactory.build(builder);
         return new InterceptableJdbcExecutor(executor, chain);
     }

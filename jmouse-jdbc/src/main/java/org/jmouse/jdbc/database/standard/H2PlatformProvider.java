@@ -12,11 +12,17 @@ public final class H2PlatformProvider implements DatabasePlatformProvider {
     }
 
     @Override
-    public DatabasePlatform create(DatabaseInformation info) {
-        DatabaseVersion version = new DatabaseVersion(info.majorVersion(), info.minorVersion(), 0, info.productVersion());
+    public DatabasePlatform create(DatabaseInformation information) {
+        DatabaseVersion version = new DatabaseVersion(
+                information.majorVersion(),
+                information.minorVersion(),
+                0,
+                information.productVersion()
+        );
 
         return new SimpleDatabasePlatform(
-                new DatabaseId(H2_NAME, info.productName()),
+                new LimitOffsetPagination(),
+                new DatabaseId(H2_NAME, information.productName()),
                 version,
                 new DatabaseCapabilities(true, true, true, false, false, false),
                 SQLQuoting.ansi(),

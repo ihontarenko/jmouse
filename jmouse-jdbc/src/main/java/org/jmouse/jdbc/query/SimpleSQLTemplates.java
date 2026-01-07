@@ -16,4 +16,5 @@ public class SimpleSQLTemplates implements SQLTemplates {
     public String limitOffset(String sql, int offset, int limit) {
         return platform.pagination().apply(sql, OffsetLimit.of(offset, limit));
     }
+    
 }

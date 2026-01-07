@@ -107,11 +107,15 @@ public final class DatabasePlatformRegistry {
      * @return resolved database platform (never {@code null})
      */
     public DatabasePlatform resolve(DatabaseInformation info) {
+        DatabasePlatform platform = fallback;
+
         for (DatabasePlatformProvider provider : providers) {
             if (provider.supports(info)) {
-                return provider.create(info);
+                platform = provider.create(info);
+                break;
             }
         }
-        return fallback;
+
+        return platform;
     }
 }

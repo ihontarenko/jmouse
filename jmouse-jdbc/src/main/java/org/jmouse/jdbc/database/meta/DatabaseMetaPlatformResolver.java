@@ -13,22 +13,76 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 /**
- * Resolves {@link DatabasePlatform} using JDBC {@link DatabaseMetaData}.
+ * Resolves the active {@link DatabasePlatform} using JDBC {@link DatabaseMetaData}.
+ * <p>
+ * {@code DatabaseMetaPlatformResolver} is a bootstrap-time component responsible for:
+ * <ul>
+ *     <li>opening a temporary JDBC {@link Connection}</li>
+ *     <li>extracting vendor and version information via {@link DatabaseMetaData}</li>
+ *     <li>resolving an appropriate {@link DatabasePlatform} from the registry</li>
+ *     <li>releasing the connection back to the {@link ConnectionProvider}</li>
+ * </ul>
  *
- * <p>Bootstrap-time resolver: acquires a temporary connection and releases it via provider.</p>
+ * <p>
+ * This resolver is typically invoked once during application startup and the
+ * resulting {@link DatabasePlatform} is reused throughout the application.
+ *
+ * <h3>Failure behavior</h3>
+ * <p>
+ * If JDBC metadata cannot be obtained (for example, due to a {@link SQLException}),
+ * the registry fallback platform is returned.
+ *
+ * <h3>Typical usage</h3>
+ * <pre>{@code
+ * DatabaseMetaPlatformResolver resolver =
+ *     new DatabaseMetaPlatformResolver(connectionProvider, platformRegistry);
+ *
+ * DatabasePlatform platform = resolver.resolve();
+ * }</pre>
+ *
+ * @author jMouse
  */
 public final class DatabaseMetaPlatformResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseMetaPlatformResolver.class);
 
+    /**
+     * Connection provider used to obtain a temporary JDBC connection.
+     */
     private final ConnectionProvider       provider;
+
+    /**
+     * Registry responsible for resolving database platforms.
+     */
     private final DatabasePlatformRegistry registry;
 
+    /**
+     * Creates a new resolver instance.
+     *
+     * @param provider JDBC connection provider
+     * @param registry database platform registry
+     */
     public DatabaseMetaPlatformResolver(ConnectionProvider provider, DatabasePlatformRegistry registry) {
         this.provider = Contract.nonNull(provider, "provider");
         this.registry = Contract.nonNull(registry, "registry");
     }
 
+    /**
+     * Resolves the {@link DatabasePlatform} for the current database.
+     * <p>
+     * This method:
+     * <ol>
+     *     <li>Obtains a JDBC connection</li>
+     *     <li>Reads {@link DatabaseMetaData}</li>
+     *     <li>Builds a {@link DatabaseInformation} descriptor</li>
+     *     <li>Delegates resolution to {@link DatabasePlatformRegistry}</li>
+     * </ol>
+     *
+     * <p>
+     * The connection is always released back to the provider.
+     *
+     * @return resolved database platform (never {@code null})
+     */
     public DatabasePlatform resolve() {
         Connection connection = null;
         try {

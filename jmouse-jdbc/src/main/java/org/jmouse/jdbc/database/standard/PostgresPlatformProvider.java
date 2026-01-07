@@ -19,6 +19,11 @@ public final class PostgresPlatformProvider implements DatabasePlatformProvider 
 
         return new DatabasePlatform() {
             @Override
+            public PaginationStrategy pagination() {
+                return new OffsetFetchPagination();
+            }
+
+            @Override
             public DatabaseId id() {
                 return new DatabaseId(POSTGRES_ID, info.productName());
             }
