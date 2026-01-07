@@ -42,17 +42,14 @@ public final class EventBridgeContextInitializer implements BeanContextInitializ
      */
     @Override
     public void initialize(BeanContext context) {
-        if (context instanceof BeanContextEventSupport events) {
-            for (String name : context.getBeanNames(EventListener.class)) {
-                EventListener<?> listener = context.getBean(name);
+        for (String name : context.getBeanNames(EventListener.class)) {
+            EventListener<?> listener = context.getBean(name);
 
-                String[] eventNames = Reflections.getAnnotationValue(
-                        listener.getClass(), Listener.class, Listener::events);
+            String[] eventNames = Reflections.getAnnotationValue(listener.getClass(), Listener.class, Listener::events);
 
-                if (eventNames != null) {
-                    for (String eventName : eventNames) {
-                        events.getEventManager().subscribe(eventName, listener);
-                    }
+            if (eventNames != null) {
+                for (String eventName : eventNames) {
+                    context.getEventManager().subscribe(eventName, listener);
                 }
             }
         }

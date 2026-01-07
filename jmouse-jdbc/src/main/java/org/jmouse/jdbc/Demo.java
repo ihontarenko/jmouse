@@ -13,7 +13,6 @@ final public class Demo {
         context.setContextId("JDBC-CONTEXT");
         context.addInitializer(new BeansScannerBeanContextInitializer());
         context.addInitializer(new EventBridgeContextInitializer());
-        context.refresh();
 
         context.onBeanCreated(p -> {
             System.out.println("Created bean: " + p.definition().getBeanName() + " -> " + p.instance());
@@ -26,6 +25,8 @@ final public class Demo {
         }).onBeforeRefresh(contextPayload -> {
             System.out.println("Before refresh: " + contextPayload);
         });
+
+        context.refresh();
 
         SimpleOperations simple = context.getBean(SimpleOperations.class);
 
