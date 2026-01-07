@@ -90,13 +90,13 @@ public interface JdbcExecutor {
             String sql,
             StatementBinder binder,
             StatementConfigurer configurer,
-            StatementHandler handler,
+            StatementHandler<ResultSet> handler,
             StatementCallback<ResultSet> callback,
             ResultSetExtractor<T> extractor
     ) throws SQLException;
 
     /**
-     * Convenience overload: uses {@link StatementHandler#NOOP}.
+     * Convenience overload: uses {@link StatementHandler#NOOP_QUERY}.
      *
      * @param sql        SQL to execute
      * @param binder     binds statement parameters
@@ -114,11 +114,11 @@ public interface JdbcExecutor {
             StatementCallback<ResultSet> callback,
             ResultSetExtractor<T> extractor
     ) throws SQLException {
-        return execute(sql, binder, configurer, StatementHandler.NOOP, callback, extractor);
+        return execute(sql, binder, configurer, StatementHandler.NOOP_QUERY, callback, extractor);
     }
 
     /**
-     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#NOOP}.
+     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#NOOP_QUERY}.
      *
      * @param sql       SQL to execute
      * @param binder    binds statement parameters
@@ -134,12 +134,12 @@ public interface JdbcExecutor {
             StatementCallback<ResultSet> callback,
             ResultSetExtractor<T> extractor
     ) throws SQLException {
-        return execute(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, callback, extractor);
+        return execute(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP_QUERY, callback, extractor);
     }
 
     /**
      * Convenience overload: uses {@link StatementBinder#NOOP}, {@link StatementConfigurer#NOOP}
-     * and {@link StatementHandler#NOOP}.
+     * and {@link StatementHandler#NOOP_QUERY}.
      *
      * @param sql       SQL to execute
      * @param callback  performs the JDBC operation and returns a {@link ResultSet}
@@ -153,7 +153,7 @@ public interface JdbcExecutor {
             StatementCallback<ResultSet> callback,
             ResultSetExtractor<T> extractor
     ) throws SQLException {
-        return execute(sql, StatementBinder.NOOP, StatementConfigurer.NOOP, StatementHandler.NOOP, callback, extractor);
+        return execute(sql, StatementBinder.NOOP, StatementConfigurer.NOOP, StatementHandler.NOOP_QUERY, callback, extractor);
     }
 
     /**
@@ -174,12 +174,12 @@ public interface JdbcExecutor {
             String sql,
             StatementBinder binder,
             StatementConfigurer configurer,
-            StatementHandler handler,
+            StatementHandler<Integer> handler,
             StatementCallback<Integer> callback
     ) throws SQLException;
 
     /**
-     * Convenience overload: uses {@link StatementHandler#NOOP}.
+     * Convenience overload: uses {@link StatementHandler#NOOP_QUERY}.
      */
     default int executeUpdate(
             String sql,
@@ -188,11 +188,11 @@ public interface JdbcExecutor {
             StatementCallback<Integer> callback
     )
             throws SQLException {
-        return executeUpdate(sql, binder, configurer, StatementHandler.NOOP, callback);
+        return executeUpdate(sql, binder, configurer, StatementHandler.NOOP_UPDATE, callback);
     }
 
     /**
-     * Convenience overload: uses {@link StatementCallback#UPDATE} and {@link StatementHandler#NOOP}.
+     * Convenience overload: uses {@link StatementCallback#UPDATE} and {@link StatementHandler#NOOP_UPDATE}.
      */
     default int executeUpdate(
             String sql,
@@ -200,11 +200,11 @@ public interface JdbcExecutor {
             StatementConfigurer configurer
     )
             throws SQLException {
-        return executeUpdate(sql, binder, configurer, StatementHandler.NOOP, StatementCallback.UPDATE);
+        return executeUpdate(sql, binder, configurer, StatementHandler.NOOP_UPDATE, StatementCallback.UPDATE);
     }
 
     /**
-     * Convenience overload: uses {@link StatementConfigurer#NOOP}, {@link StatementHandler#NOOP},
+     * Convenience overload: uses {@link StatementConfigurer#NOOP}, {@link StatementHandler#NOOP_UPDATE},
      * and {@link StatementCallback#UPDATE}.
      */
     default int executeUpdate(
@@ -212,7 +212,7 @@ public interface JdbcExecutor {
             StatementBinder binder
     )
             throws SQLException {
-        return executeUpdate(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, StatementCallback.UPDATE);
+        return executeUpdate(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP_UPDATE, StatementCallback.UPDATE);
     }
 
     /**
@@ -223,7 +223,7 @@ public interface JdbcExecutor {
                 sql,
                 StatementBinder.NOOP,
                 StatementConfigurer.NOOP,
-                StatementHandler.NOOP,
+                StatementHandler.NOOP_UPDATE,
                 StatementCallback.UPDATE
         );
     }
@@ -246,7 +246,7 @@ public interface JdbcExecutor {
             String sql,
             List<? extends StatementBinder> binders,
             StatementConfigurer configurer,
-            StatementHandler handler,
+            StatementHandler<int[]> handler,
             StatementCallback<int[]> callback
     ) throws SQLException;
 
@@ -257,31 +257,31 @@ public interface JdbcExecutor {
             String sql,
             List<? extends StatementBinder> binders,
             StatementConfigurer configurer,
-            StatementHandler handler
+            StatementHandler<int[]> handler
     ) throws SQLException {
         return executeBatch(sql, binders, configurer, handler, StatementCallback.BATCH);
     }
 
     /**
-     * Convenience overload: uses {@link StatementHandler#NOOP} and {@link StatementCallback#BATCH}.
+     * Convenience overload: uses {@link StatementHandler#NOOP_BATCH} and {@link StatementCallback#BATCH}.
      */
     default int[] executeBatch(
             String sql,
             List<? extends StatementBinder> binders,
             StatementConfigurer configurer
     ) throws SQLException {
-        return executeBatch(sql, binders, configurer, StatementHandler.NOOP, StatementCallback.BATCH);
+        return executeBatch(sql, binders, configurer, StatementHandler.NOOP_BATCH, StatementCallback.BATCH);
     }
 
     /**
-     * Convenience overload: uses {@link StatementConfigurer#NOOP}, {@link StatementHandler#NOOP},
+     * Convenience overload: uses {@link StatementConfigurer#NOOP}, {@link StatementHandler#NOOP_BATCH},
      * and {@link StatementCallback#BATCH}.
      */
     default int[] executeBatch(
             String sql,
             List<? extends StatementBinder> binders
     ) throws SQLException {
-        return executeBatch(sql, binders, StatementConfigurer.NOOP, StatementHandler.NOOP, StatementCallback.BATCH);
+        return executeBatch(sql, binders, StatementConfigurer.NOOP, StatementHandler.NOOP_BATCH, StatementCallback.BATCH);
     }
 
     /**
@@ -303,7 +303,7 @@ public interface JdbcExecutor {
             String sql,
             StatementBinder binder,
             StatementConfigurer configurer,
-            StatementHandler handler,
+            StatementHandler<K> handler,
             KeyUpdateCallback<K> callback
     ) throws SQLException;
 
@@ -314,7 +314,7 @@ public interface JdbcExecutor {
             String sql,
             StatementBinder binder,
             StatementConfigurer configurer,
-            StatementHandler handler,
+            StatementHandler<K> handler,
             KeyExtractor<K> extractor
     ) throws SQLException {
         return executeUpdate(sql, binder, configurer, handler,
@@ -323,7 +323,7 @@ public interface JdbcExecutor {
 
     /**
      * Convenience overload: extracts generated keys using a {@link KeyExtractor}.
-     * Uses {@link StatementHandler#NOOP}.
+     * Uses {@link StatementHandler#noop()}.
      */
     default <K> K executeUpdate(
             String sql,
@@ -331,12 +331,12 @@ public interface JdbcExecutor {
             StatementConfigurer configurer,
             KeyExtractor<K> extractor
     ) throws SQLException {
-        return executeUpdate(sql, binder, configurer, StatementHandler.NOOP,
+        return executeUpdate(sql, binder, configurer, StatementHandler.noop(),
                              (statement, keys) -> extractor.extract(keys));
     }
 
     /**
-     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#NOOP}.
+     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#noop()}.
      */
     default <K> K executeUpdate(
             String sql,
@@ -346,7 +346,7 @@ public interface JdbcExecutor {
         return executeUpdate(
                 sql, binder,
                 StatementConfigurer.NOOP,
-                StatementHandler.NOOP,
+                StatementHandler.noop(),
                 (statement, keys) -> extractor.extract(keys)
         );
     }
@@ -370,12 +370,12 @@ public interface JdbcExecutor {
             String sql,
             CallableStatementBinder binder,
             StatementConfigurer configurer,
-            StatementHandler handler,
+            StatementHandler<T> handler,
             CallableCallback<T> callback
     ) throws SQLException;
 
     /**
-     * Convenience overload: uses {@link StatementHandler#NOOP}.
+     * Convenience overload: uses {@link StatementHandler#noop()}.
      */
     default <T> T executeCall(
             String sql,
@@ -383,18 +383,18 @@ public interface JdbcExecutor {
             StatementConfigurer configurer,
             CallableCallback<T> callback
     ) throws SQLException {
-        return executeCall(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, callback);
+        return executeCall(sql, binder, StatementConfigurer.NOOP, StatementHandler.noop(), callback);
     }
 
     /**
-     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#NOOP}.
+     * Convenience overload: uses {@link StatementConfigurer#NOOP} and {@link StatementHandler#noop()}.
      */
     default <T> T executeCall(
             String sql,
             CallableStatementBinder binder,
             CallableCallback<T> callback
     ) throws SQLException {
-        return executeCall(sql, binder, StatementConfigurer.NOOP, StatementHandler.NOOP, callback);
+        return executeCall(sql, binder, StatementConfigurer.NOOP, StatementHandler.noop(), callback);
     }
 
 }

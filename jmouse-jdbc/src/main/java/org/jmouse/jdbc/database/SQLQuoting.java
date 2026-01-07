@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.database;
 
-public interface SqlQuoting {
+public interface SQLQuoting {
 
     String quoteIdentifier(String identifier);
 
@@ -9,8 +9,8 @@ public interface SqlQuoting {
      */
     String escapeLiteral(String raw);
 
-    static SqlQuoting ansi() {
-        return new SqlQuoting() {
+    static SQLQuoting ansi() {
+        return new SQLQuoting() {
             @Override
             public String quoteIdentifier(String identifier) {
                 return "\"%s\"".formatted(identifier);

@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.database;
 
-public interface SqlTemplates {
+public interface SQLTemplates {
 
     String limitOffset(String sql, int offset, int limit);
 

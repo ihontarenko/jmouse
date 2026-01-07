@@ -2,11 +2,15 @@ package org.jmouse.jdbc.query;
 
 import org.jmouse.jdbc.SimpleOperations;
 import org.jmouse.jdbc.database.DatabasePlatform;
+import org.jmouse.jdbc.database.PaginationStrategy;
+import org.jmouse.jdbc.database.PaginationStrategy.PaginationBind;
 import org.jmouse.jdbc.mapping.ResultSetExtractor;
 import org.jmouse.jdbc.mapping.RowMapper;
+import org.jmouse.jdbc.statement.CountedStatementBinder;
 import org.jmouse.jdbc.statement.StatementBinder;
 import org.jmouse.jdbc.statement.StatementHandler;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public final class QueryFacade {
@@ -31,38 +35,43 @@ public final class QueryFacade {
             StatementHandler<?> handler
     ) throws SQLException {
 
-        var pagination = platform.pagination();
-
-        String pagedSql = pagination.apply(sql, OffsetLimit.of(page.offset(), page.limit() + 1));
-        var pageBind = pagination.bind(OffsetLimit.of(page.offset(), page.limit() + 1));
+        PaginationStrategy pagination = platform.pagination();
+        OffsetLimit        plusOne    = OffsetLimit.of(page.offset(), page.limit() + 1);
+        String             pagedSql   = pagination.apply(sql, plusOne);
+        PaginationBind     pageBind   = pagination.bind(plusOne);
 
         StatementBinder combined = statement -> {
-            int index = 1;
-            binder.bind(statement);
-            // assume binder consumed N parameters; if you need exact, evolve binder to expose param count
-            // For now: put pagination at the end; user SQL must have its own params first.
-            pageBind.bind(statement, guessNextIndex(statement));
+            StatementBinder safeBinder = (binder != null ? binder : StatementBinder.NOOP);
+            safeBinder.bind(statement);
+
+            int startIndex = nextIndexAfterBinder(statement, safeBinder);
+            pageBind.bind(statement, startIndex);
         };
 
         ResultSetExtractor<Page<T>> extractor = PageExtractors.offsetLimit(page, mapper);
 
-        // IMPORTANT: this requires your SimpleOperations / executor to expose handler-enabled overloads.
-        return ((HandlerCapableOperations) simple).query(sql, combined, extractor, handler);
+        return ((HandlerCapableOperations) simple).query(pagedSql, combined, extractor, handler);
     }
 
-    private int guessNextIndex(java.sql.PreparedStatement ps) {
+    private int nextIndexAfterBinder(PreparedStatement ps, StatementBinder binder) {
+        if (binder instanceof CountedStatementBinder counted) {
+            return 1 + counted.countOfParameters();
+        }
+        return guessNextIndex(ps);
+    }
+
+    private int guessNextIndex(PreparedStatement preparedStatement) {
         // With pure JDBC you can't read "current param index".
-        // So the correct solution is "CountedBinder" (binder + paramCount).
-        // We'll do it in the next refinement step.
+        // Temporary fallback: assume binder has 0 params.
         return 1;
     }
 
-    /**
-     * Adapter contract: SimpleOperations variant that supports StatementHandler.
-     * Implement this in SimpleTemplate with extra overloads.
-     */
     public interface HandlerCapableOperations {
-        <T> T query(String sql, StatementBinder binder, ResultSetExtractor<T> extractor, StatementHandler<?> handler)
-                throws SQLException;
+        <T> T query(
+                String sql,
+                StatementBinder binder,
+                ResultSetExtractor<T> extractor,
+                StatementHandler<?> handler
+        ) throws SQLException;
     }
 }

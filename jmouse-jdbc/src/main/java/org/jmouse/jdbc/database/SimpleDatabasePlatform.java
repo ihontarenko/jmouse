@@ -9,16 +9,16 @@ public final class SimpleDatabasePlatform implements DatabasePlatform {
     private final DatabaseId id;
     private final DatabaseVersion version;
     private final DatabaseCapabilities capabilities;
-    private final SqlQuoting quoting;
-    private final SqlTemplates sql;
-    private final RewriteHook rewriteHook;
+    private final SQLQuoting           quoting;
+    private final SQLTemplates         sql;
+    private final RewriteHook  rewriteHook;
 
     public SimpleDatabasePlatform(
             DatabaseId id,
             DatabaseVersion version,
             DatabaseCapabilities capabilities,
-            SqlQuoting quoting,
-            SqlTemplates sql
+            SQLQuoting quoting,
+            SQLTemplates sql
     ) {
         this(id, version, capabilities, quoting, sql, RewriteHook.noop());
     }
@@ -27,8 +27,8 @@ public final class SimpleDatabasePlatform implements DatabasePlatform {
             DatabaseId id,
             DatabaseVersion version,
             DatabaseCapabilities capabilities,
-            SqlQuoting quoting,
-            SqlTemplates sql,
+            SQLQuoting quoting,
+            SQLTemplates sql,
             RewriteHook rewriteHook
     ) {
         this.id = Objects.requireNonNull(id, "id");
@@ -42,7 +42,7 @@ public final class SimpleDatabasePlatform implements DatabasePlatform {
     @Override public DatabaseId id() { return id; }
     @Override public DatabaseVersion version() { return version; }
     @Override public DatabaseCapabilities capabilities() { return capabilities; }
-    @Override public SqlQuoting quoting() { return quoting; }
-    @Override public SqlTemplates sql() { return sql; }
+    @Override public SQLQuoting quoting() { return quoting; }
+    @Override public SQLTemplates sql() { return sql; }
     @Override public RewriteHook rewriteHook() { return rewriteHook; }
 }

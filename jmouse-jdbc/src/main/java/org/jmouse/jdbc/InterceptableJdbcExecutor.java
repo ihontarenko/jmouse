@@ -104,7 +104,7 @@ public final class InterceptableJdbcExecutor implements JdbcExecutor {
             String sql,
             StatementBinder binder,
             StatementConfigurer configurer,
-            StatementHandler handler,
+            StatementHandler<ResultSet> handler,
             StatementCallback<ResultSet> callback,
             ResultSetExtractor<T> extractor
     ) throws SQLException {
@@ -130,7 +130,7 @@ public final class InterceptableJdbcExecutor implements JdbcExecutor {
             String sql,
             StatementBinder binder,
             StatementConfigurer configurer,
-            StatementHandler handler,
+            StatementHandler<Integer> handler,
             StatementCallback<Integer> callback
     ) throws SQLException {
         JdbcExecutionContext context = newContext();
@@ -154,7 +154,7 @@ public final class InterceptableJdbcExecutor implements JdbcExecutor {
             String sql,
             List<? extends StatementBinder> binders,
             StatementConfigurer configurer,
-            StatementHandler handler,
+            StatementHandler<int[]> handler,
             StatementCallback<int[]> callback
     ) throws SQLException {
         JdbcExecutionContext context = newContext();
@@ -179,7 +179,7 @@ public final class InterceptableJdbcExecutor implements JdbcExecutor {
             String sql,
             StatementBinder binder,
             StatementConfigurer configurer,
-            StatementHandler handler,
+            StatementHandler<K> handler,
             KeyUpdateCallback<K> callback
     ) throws SQLException {
         JdbcExecutionContext context = newContext();
@@ -205,7 +205,7 @@ public final class InterceptableJdbcExecutor implements JdbcExecutor {
             String sql,
             StatementBinder binder,
             StatementConfigurer configurer,
-            StatementHandler handler,
+            StatementHandler<K> handler,
             KeyExtractor<K> extractor
     ) throws SQLException {
         return executeUpdate(sql, binder, configurer, handler, (statement, keys) -> extractor.extract(keys));
@@ -227,7 +227,7 @@ public final class InterceptableJdbcExecutor implements JdbcExecutor {
             String sql,
             CallableStatementBinder binder,
             StatementConfigurer configurer,
-            StatementHandler handler,
+            StatementHandler<T> handler,
             CallableCallback<T> callback
     ) throws SQLException {
         JdbcExecutionContext context = newContext();

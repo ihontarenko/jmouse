@@ -34,12 +34,12 @@ public final class PostgresPlatformProvider implements DatabasePlatformProvider 
             }
 
             @Override
-            public SqlQuoting quoting() {
-                return SqlQuoting.ansi();
+            public SQLQuoting quoting() {
+                return SQLQuoting.ansi();
             }
 
             @Override
-            public SqlTemplates sql() {
+            public SQLTemplates sql() {
                 return (sql, offset, limit) -> "%s LIMIT %d OFFSET %d".formatted(sql, limit, offset);
             }
         };

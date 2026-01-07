@@ -19,8 +19,8 @@ public final class H2PlatformProvider implements DatabasePlatformProvider {
                 new DatabaseId(H2_NAME, info.productName()),
                 version,
                 new DatabaseCapabilities(true, true, true, false, false, false),
-                SqlQuoting.ansi(),
-                new SqlTemplates() {
+                SQLQuoting.ansi(),
+                new SQLTemplates() {
                     @Override
                     public String limitOffset(String sql, int offset, int limit) {
                         return "%s LIMIT %d OFFSET %d".formatted(sql, limit, offset);

@@ -1,5 +1,6 @@
 package org.jmouse.jdbc.statement.handler;
 
+import org.jmouse.jdbc.statement.StatementExecutor;
 import org.jmouse.jdbc.statement.StatementHandler;
 import org.jmouse.jdbc.statement.StatementWarning;
 
@@ -8,7 +9,7 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.List;
 
-public class WarningCollectorStatementHandler implements StatementHandler {
+public class WarningCollectorStatementHandler<R> implements StatementHandler<R> {
 
     private final List<StatementWarning> sink;
 
@@ -17,7 +18,7 @@ public class WarningCollectorStatementHandler implements StatementHandler {
     }
 
     @Override
-    public <S extends Statement, R> R handle(S statement, StatementExecutor<? super S, R> executor)
+    public <S extends Statement> R handle(S statement, StatementExecutor<S, R> executor)
             throws SQLException {
         try {
             return executor.execute(statement);

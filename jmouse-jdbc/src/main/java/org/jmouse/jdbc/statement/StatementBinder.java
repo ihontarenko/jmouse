@@ -12,12 +12,15 @@ public interface StatementBinder {
 
     static StatementBinder noop() {
         return new StatementBinder() {
+
             @Override
             public void bind(PreparedStatement statement) throws SQLException {}
+
             @Override
             public String toString() {
                 return "NOOP";
             }
+
         };
     }
 

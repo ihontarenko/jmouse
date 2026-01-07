@@ -82,6 +82,40 @@ public final class Binders {
         };
     }
 
+    public static CountedStatementBinder countedOf(Object... arguments) {
+        return CountedStatementBinder.of(ofObjects(arguments), arguments == null ? 0 : arguments.length);
+    }
+
+    public static CountedStatementBinder countedOf(CountedStatementBinder... binders) {
+        return new CountedStatementBinder() {
+            @Override
+            public void bind(PreparedStatement statement) throws SQLException {
+                for (CountedStatementBinder binder : binders) {
+                    if (binder != null) {
+                        binder.bind(statement);
+                    }
+                }
+            }
+
+            @Override
+            public int countOfParameters() {
+                int count = 0;
+
+                for (CountedStatementBinder binder : binders) {
+                    if (binder != null) {
+                        count += binder.countOfParameters();
+                    }
+                }
+
+                return count;
+            }
+        };
+    }
+
+    public static CountedStatementBinder counted(StatementBinder binder, int countOfParameters) {
+        return CountedStatementBinder.of(binder, countOfParameters);
+    }
+
     public static StatementBinder checked(CheckedBinder binder) {
         return binder::bind;
     }

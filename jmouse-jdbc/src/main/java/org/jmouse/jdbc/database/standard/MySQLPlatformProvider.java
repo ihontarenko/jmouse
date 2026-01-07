@@ -41,8 +41,8 @@ public final class MySQLPlatformProvider implements DatabasePlatformProvider {
             }
 
             @Override
-            public SqlQuoting quoting() {
-                return new SqlQuoting() {
+            public SQLQuoting quoting() {
+                return new SQLQuoting() {
                     @Override
                     public String quoteIdentifier(String identifier) {
                         return "`%s`".formatted(identifier);
@@ -56,7 +56,7 @@ public final class MySQLPlatformProvider implements DatabasePlatformProvider {
             }
 
             @Override
-            public SqlTemplates sql() {
+            public SQLTemplates sql() {
                 return "%s LIMIT %d, %d"::formatted;
             }
         };

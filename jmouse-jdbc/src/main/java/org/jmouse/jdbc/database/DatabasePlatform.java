@@ -1,5 +1,7 @@
 package org.jmouse.jdbc.database;
 
+import org.jmouse.jdbc.query.OffsetLimit;
+
 /**
  * Complete runtime database profile.
  * <p>
@@ -68,14 +70,14 @@ public interface DatabasePlatform {
      *
      * @return SQL quoting strategy
      */
-    SqlQuoting quoting();
+    SQLQuoting quoting();
 
     /**
      * Returns database-specific SQL templates and builders.
      *
      * @return SQL templates
      */
-    SqlTemplates sql();
+    SQLTemplates sql();
 
     /**
      * Optional hook point for vendor-specific SQL normalization or rewrite.
@@ -93,6 +95,10 @@ public interface DatabasePlatform {
         return RewriteHook.noop();
     }
 
+    default String applyPagination(String sql, OffsetLimit page) {
+        return pagination().apply(sql, page);
+    }
+
     /**
      * Returns a human-readable label for logging and diagnostics.
      * <p>
@@ -104,6 +110,6 @@ public interface DatabasePlatform {
      * @return display name
      */
     default String displayName() {
-        return id().vendor() + ":" + id().product() + " " + version();
+        return "%s:%s %s".formatted(id().vendor(), id().product(), version());
     }
 }

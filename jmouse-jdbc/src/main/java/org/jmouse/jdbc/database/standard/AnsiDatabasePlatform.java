@@ -8,11 +8,11 @@ public final class AnsiDatabasePlatform implements DatabasePlatform {
     public static final  String               ANSI_NAME   = "ANSI";
     private static final DatabaseId           ID          = new DatabaseId(ANSI_VENDOR, ANSI_NAME);
     private static final DatabaseVersion      VERSION     = DatabaseVersion.unknown(ANSI_VENDOR);
-    private static final DatabaseCapabilities CAPS        = DatabaseCapabilities.defaults();
-    private static final SqlQuoting           QUOTING     = SqlQuoting.ansi();
+    private static final DatabaseCapabilities CAPS    = DatabaseCapabilities.defaults();
+    private static final SQLQuoting           QUOTING = SQLQuoting.ansi();
 
     // ANSI SQL:2008 style (not universally supported, but OK as fallback)
-    private static final SqlTemplates SQL = "%s OFFSET %d ROWS FETCH NEXT %d ROWS ONLY"::formatted;
+    private static final SQLTemplates SQL = "%s OFFSET %d ROWS FETCH NEXT %d ROWS ONLY"::formatted;
 
     @Override
     public DatabaseId id() {
@@ -30,12 +30,12 @@ public final class AnsiDatabasePlatform implements DatabasePlatform {
     }
 
     @Override
-    public SqlQuoting quoting() {
+    public SQLQuoting quoting() {
         return QUOTING;
     }
 
     @Override
-    public SqlTemplates sql() {
+    public SQLTemplates sql() {
         return SQL;
     }
 
