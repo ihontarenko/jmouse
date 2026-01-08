@@ -60,4 +60,9 @@ public final class TracedEvent<T> implements TraceableEvent<T> {
         return trace;
     }
 
+    @Override
+    public String toString() {
+        return "TRACED: " + event.toString();
+    }
+
 }

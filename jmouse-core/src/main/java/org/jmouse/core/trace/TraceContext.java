@@ -1,7 +1,7 @@
 package org.jmouse.core.trace;
 
 import org.jmouse.core.IdGenerator;
-import org.jmouse.core.UUIDGenerator;
+import org.jmouse.core.SecureRandomStringGenerator;
 
 import java.time.Instant;
 
@@ -15,9 +15,9 @@ public record TraceContext(
         Instant timestamp
 ) {
 
-    public static final IdGenerator<String, String> UUID_GENERATOR = new UUIDGenerator();
-    public static final String                      PREFIX         = "jMouse_";
-    public static final IdGenerator<String, String> ID_GENERATOR   = () -> PREFIX + UUID_GENERATOR.generate();
+    public static final IdGenerator<String, String> STRING_GENERATOR = new SecureRandomStringGenerator(12);
+    public static final String                      PREFIX           = "jMouse_";
+    public static final IdGenerator<String, String> ID_GENERATOR     = () -> PREFIX + STRING_GENERATOR.generate();
 
     public static TraceContext root() {
         return new TraceContext(ID_GENERATOR.generate(), ID_GENERATOR.generate(), null, 0, Instant.now());

@@ -10,6 +10,10 @@ final public class Demo {
         context.addInitializer(new BeansScannerBeanContextInitializer());
         context.addInitializer(new EventBridgeContextInitializer());
 
+        context.onBeanLookupStarted(p -> {
+            System.out.println("EVENT:Lookup: " + p);
+        });
+
         context.refresh();
 
         SimpleOperations simple = context.getBean(SimpleOperations.class);

@@ -13,6 +13,7 @@ import org.jmouse.core.DefaultCyclicReferenceDetector;
 import org.jmouse.core.Delegate;
 import org.jmouse.core.context.ExecutionContextHolder;
 import org.jmouse.core.events.*;
+import org.jmouse.core.trace.SpanScopes;
 import org.jmouse.core.trace.TraceContext;
 import org.jmouse.core.trace.TraceKeys;
 import org.slf4j.Logger;
@@ -191,7 +192,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      *
      * <p>Defaults to {@link EventPublishPolicy#publishAll()}.</p>
      */
-    private volatile EventPublishPolicy publishPolicy = EventPublishPolicy.rootOnly();
+    private volatile EventPublishPolicy publishPolicy = EventPublishPolicy.publishAll();
 
     /**
      * Constructs a new {@code DefaultBeanContext} with the specified parent context and base classes.
@@ -318,7 +319,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public <T> T getBean(Class<T> type) {
-        return doLookup(type);
+        return SpanScopes.rootIfAbsent(() -> doLookup(type));
     }
 
     protected <T> T doLookup(Class<T> type) {
@@ -333,7 +334,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
 
         if (beanNames.size() == 1) {
             String name = beanNames.getFirst();
-            emit(BEAN_LOOKUP_NOT_FOUND, new LookupPayload(this, name, type));
+            emit(BEAN_LOOKUP_RESOLVED, new LookupPayload(this, name, type));
             return getBean(name);
         }
 
@@ -398,7 +399,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public <T> T getBean(String name) {
-        return doLookup(name);
+        return SpanScopes.child(() -> doLookup(name));
     }
 
     protected <T> T doLookup(String name) {
@@ -1203,8 +1204,11 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * @param payload the event payload
      */
     protected void emit(EventName name, BeanContextEventPayload payload) {
-        if (publishPolicy.shouldPublish(name, ExecutionContextHolder.current().get(TraceKeys.TRACE), this)) {
+        TraceContext traceContext = ExecutionContextHolder.current().get(TraceKeys.TRACE);
+        if (publishPolicy.shouldPublish(name, traceContext, this)) {
             events.publish(new BeanContextEvent(name, payload, this));
+        } else {
+            LOGGER.info("Skip event: {}, Trace: {}", name, traceContext);
         }
     }
 

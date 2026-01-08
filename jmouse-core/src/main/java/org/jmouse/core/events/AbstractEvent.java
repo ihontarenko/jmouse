@@ -1,5 +1,7 @@
 package org.jmouse.core.events;
 
+import org.jmouse.util.Strings;
+
 import java.util.Objects;
 
 /**
@@ -99,5 +101,10 @@ public abstract class AbstractEvent<T> implements Event<T> {
     @Override
     public Object caller() {
         return caller;
+    }
+
+    @Override
+    public String toString() {
+        return "%s: %s".formatted(Strings.underscored(getClass().getSimpleName(), true), name().label());
     }
 }
