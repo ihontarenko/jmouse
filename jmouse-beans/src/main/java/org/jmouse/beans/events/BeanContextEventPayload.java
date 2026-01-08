@@ -11,7 +11,7 @@ import static org.jmouse.beans.events.BeanContextEventPayload.*;
  * 🔔 Marker interface for all {@link BeanContext} event payloads.
  * <p>
  * Each implementation represents contextual data associated with
- * a specific {@link BeanContextEventName} emitted during bean
+ * a specific {@link BeanEventName} emitted during bean
  * resolution, creation, initialization, or error handling.
  *
  * <h3>Design</h3>
@@ -116,7 +116,7 @@ public sealed interface BeanContextEventPayload
      */
     record ErrorPayload(
             BeanContext context,
-            BeanContextEventName stage,
+            BeanEventName stage,
             String beanName,
             BeanDefinition definition,
             Throwable error

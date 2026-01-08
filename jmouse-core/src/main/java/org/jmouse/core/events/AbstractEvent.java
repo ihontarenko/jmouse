@@ -15,7 +15,7 @@ public abstract class AbstractEvent<T> implements Event<T> {
      * The unique name identifying this event, used by observers or handlers
      * to recognize and filter events.
      */
-    protected final String name;
+    protected final EventName name;
 
     /**
      * The payload containing data relevant to this event.
@@ -36,7 +36,7 @@ public abstract class AbstractEvent<T> implements Event<T> {
      * @param payload the payload containing data relevant to this event
      * @param caller  an optional reference to the source or origin of this event
      */
-    public AbstractEvent(String name, T payload, Object caller) {
+    public AbstractEvent(EventName name, T payload, Object caller) {
         this.name = name;
         this.payload = payload;
         this.caller = caller;
@@ -49,7 +49,7 @@ public abstract class AbstractEvent<T> implements Event<T> {
      * @param name    the name identifying this event
      * @param payload the payload containing data relevant to this event
      */
-    public AbstractEvent(String name, T payload) {
+    public AbstractEvent(EventName name, T payload) {
         this(name, payload, null);
     }
 
@@ -60,7 +60,7 @@ public abstract class AbstractEvent<T> implements Event<T> {
      * @return the name of this event
      */
     @Override
-    public String name() {
+    public EventName name() {
         return name;
     }
 

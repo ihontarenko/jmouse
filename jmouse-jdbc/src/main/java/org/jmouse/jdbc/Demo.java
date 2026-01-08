@@ -4,7 +4,6 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeansScannerBeanContextInitializer;
 import org.jmouse.beans.DefaultBeanContext;
 import org.jmouse.beans.EventBridgeContextInitializer;
-import org.jmouse.beans.events.BeanContextEventSupport;
 
 final public class Demo {
 

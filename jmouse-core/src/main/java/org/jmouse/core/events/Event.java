@@ -23,7 +23,7 @@ public interface Event<T> {
      *
      * @return the name of this event
      */
-    String name();
+    EventName name();
 
     /**
      * The payload of this event, containing data relevant to observers. Could be any

@@ -5,13 +5,13 @@ import org.jmouse.beans.definition.BeanDefinitionFactory;
 import org.jmouse.beans.definition.DuplicateBeanDefinitionException;
 import org.jmouse.beans.definition.ObjectFactoryBeanDefinition;
 import org.jmouse.beans.events.BeanContextEvent;
-import org.jmouse.beans.events.BeanContextEventName;
+import org.jmouse.beans.events.BeanEventName;
 import org.jmouse.beans.events.BeanContextEventPayload;
 import org.jmouse.beans.events.BeanContextEventPayload.*;
 import org.jmouse.core.CyclicReferenceDetector;
 import org.jmouse.core.DefaultCyclicReferenceDetector;
 import org.jmouse.core.Delegate;
-import org.jmouse.core.events.EventManager;
+import org.jmouse.core.events.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jmouse.beans.annotation.BeanInitializer;
@@ -29,7 +29,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.jmouse.beans.BeanLookupStrategy.INHERIT_DEFINITION;
-import static org.jmouse.beans.events.BeanContextEventName.*;
+import static org.jmouse.beans.events.BeanEventName.*;
 import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**
@@ -178,6 +178,19 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     private final EventManager events = new EventManager();
 
     /**
+     * 📨 Active event publish policy for this {@code BeanContext}.
+     * <p>
+     * Controls which {@link BeanEventName} events
+     * are emitted and dispatched to listeners.
+     * <p>
+     * Marked as {@code volatile} to ensure visibility across threads
+     * when the publish policy is updated at runtime.
+     *
+     * <p>Defaults to {@link EventPublishPolicy#publishAll()}.</p>
+     */
+    private volatile EventPublishPolicy publishPolicy = EventPublishPolicy.rootOnly();
+
+    /**
      * Constructs a new {@code DefaultBeanContext} with the specified parent context and base classes.
      * <p>
      * If a parent context is provided, this context may inherit beans from the parent. Additionally,
@@ -229,14 +242,14 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * it will be skipped to prevent duplicate initialization.
      */
     @Override
-    public void refresh() {
+    public final void refresh() {
         LOGGER.warn("=========================================");
         LOGGER.warn("========== START INITIALIZING! ==========");
         LOGGER.warn("=========================================");
 
         Sorter.sort(initializers);
 
-        emit(CONTEXT_REFRESH_START, new ContextPayload(this));
+        emit(CONTEXT_REFRESH_STARTED, new ContextPayload(this));
 
         try {
             for (BeanContextInitializer initializer : initializers) {
@@ -253,17 +266,21 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
                 initialized.add(hashCode);
                 LOGGER.info("Initializer '{}' was successfully executed.", getShortName(initializerClass));
             }
+
+            onRefresh();
         } catch (Throwable e) {
-            emit(CONTEXT_ERROR, new ErrorPayload(this, CONTEXT_REFRESH_START, null, null, e));
+            emit(CONTEXT_REFRESH_FAILED, new ErrorPayload(this, CONTEXT_REFRESH_STARTED, null, null, e));
             throw e;
         } finally {
-            emit(CONTEXT_REFRESH_FINISH, new ContextPayload(this));
+            emit(CONTEXT_REFRESH_COMPLETED, new ContextPayload(this));
         }
 
         LOGGER.warn("==========================================");
         LOGGER.warn("========== FINISH INITIALIZING! ==========");
         LOGGER.warn("==========================================");
     }
+
+    protected void onRefresh() {}
 
     /**
      * Clears all tracked initializations, allowing the registered {@link BeanContextInitializer}s
@@ -290,18 +307,18 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public <T> T getBean(Class<T> type) {
-        emit(BEAN_LOOKUP_START, new LookupPayload(this, null, type));
+        emit(BEAN_LOOKUP_STARTED, new LookupPayload(this, null, type));
 
         List<String> beanNames = getBeanNames(type);
 
         if (beanNames.isEmpty()) {
-            emit(BEAN_NOT_FOUND, new LookupPayload(this, null, type));
+            emit(BEAN_LOOKUP_NOT_FOUND, new LookupPayload(this, null, type));
             throw new BeanNotFoundException("No beans associated with '%s' type".formatted(type.getName()));
         }
 
         if (beanNames.size() == 1) {
             String name = beanNames.getFirst();
-            emit(BeanContextEventName.BEAN_FOUND, new LookupPayload(this, name, type));
+            emit(BEAN_LOOKUP_NOT_FOUND, new LookupPayload(this, name, type));
             return getBean(name);
         }
 
@@ -318,7 +335,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
 
         if (primaryName.isPresent()) {
             String name = primaryName.get();
-            emit(BEAN_PRIMARY_SELECTED, new LookupPayload(this, name, type));
+            emit(BEAN_LOOKUP_PRIMARY_SELECTED, new LookupPayload(this, name, type));
             return getBean(name);
         }
 
@@ -371,7 +388,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         ObjectFactory<T> objectFactory = () -> this.createBean(tmp);
         T                instance      = null;
 
-        emit(BEAN_LOOKUP_START, new LookupPayload(this, name, null));
+        emit(BEAN_LOOKUP_STARTED, new LookupPayload(this, name, null));
 
         try {
             if (definition != null) {
@@ -405,13 +422,13 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
                                 .formatted(name, getBeanLookupStrategy()));
             }
 
-            emit(BEAN_FOUND, new LookupPayload(this, name, null));
+            emit(BEAN_LOOKUP_RESOLVED, new LookupPayload(this, name, null));
             return instance;
         } catch (BeanNotFoundException e) {
-            emit(BEAN_NOT_FOUND, new LookupPayload(this, name, null));
+            emit(BEAN_LOOKUP_NOT_FOUND, new LookupPayload(this, name, null));
             throw e;
         } catch (RuntimeException e) {
-            emit(CONTEXT_ERROR, new ErrorPayload(this, BEAN_LOOKUP_START, name, getDefinition(name), e));
+            emit(CONTEXT_INTERNAL_ERROR, new ErrorPayload(this, BEAN_LOOKUP_STARTED, name, getDefinition(name), e));
             throw e;
         }
     }
@@ -449,7 +466,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
                 -> new BeanInstantiationException(
                         "Cyclic dependency detected for bean: %s".formatted(definition.getBeanName()));
 
-        emit(BEAN_CREATE_START, new CreatePayload(this, definition, null));
+        emit(BEAN_CREATION_STARTED, new CreatePayload(this, definition, null));
 
         try {
             // Detect cyclic references using the general-purpose Identifier interface
@@ -457,11 +474,11 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
 
             // resolve an instantiate raw bean
             T instance = beanFactory.createBean(definition);
-            emit(BEAN_CREATED, new CreatePayload(this, definition, instance));
+            emit(BEAN_CREATION_COMPLETED, new CreatePayload(this, definition, instance));
 
             // Initializes a bean instance by applying pre-initialization and post-initialization
             instance = initializeBean(instance, definition);
-            emit(BEAN_INIT_FINISH, new CreatePayload(this, definition, instance));
+            emit(BEAN_INITIALIZATION_COMPLETED, new CreatePayload(this, definition, instance));
 
             return instance;
         } catch (Exception exception) {
@@ -486,30 +503,36 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     @Override
     @SuppressWarnings({"unchecked"})
     public <T> T initializeBean(T instance, BeanDefinition definition) {
-        // Perform pre-initialization steps using registered BeanPostProcessors
-        for (BeanPostProcessor processor : processors) {
-            emit(BEAN_PROCESSED_BEFORE_INIT,
-                 new InitPayload(this, definition, instance, processor.getClass().getName()));
-            instance = (T) processor.postProcessBeforeInitialize(instance, definition, this);
-        }
+        try {
+            // Perform pre-initialization steps using registered BeanPostProcessors
+            for (BeanPostProcessor processor : processors) {
+                emit(BEAN_INITIALIZATION_BEFORE_PROCESSING,
+                        new InitPayload(this, definition, instance, processor.getClass().getName()));
+                instance = (T) processor.postProcessBeforeInitialize(instance, definition, this);
+            }
 
-        // Invoke the initializer method if present in the bean class
-        for (Method initializer : Reflections.findAllAnnotatedMethods(
-                definition.getBeanClass(), BeanInitializer.class)) {
-            Reflections.invokeMethod(instance, initializer, this);
-            emit(BEAN_INITIALIZER_INVOKED,
-                 new InitPayload(this, definition, instance, initializer.toGenericString()));
-        }
+            // Invoke the initializer method if present in the bean class
+            for (Method initializer : Reflections.findAllAnnotatedMethods(
+                    definition.getBeanClass(), BeanInitializer.class)) {
+                Reflections.invokeMethod(instance, initializer, this);
+                emit(BEAN_INITIALIZER_INVOKED,
+                        new InitPayload(this, definition, instance, initializer.toGenericString()));
+            }
 
-        // Perform post-initialization steps using registered BeanPostProcessors
-        for (BeanPostProcessor processor : processors) {
-            emit(BEAN_PROCESSED_AFTER_INIT,
-                 new InitPayload(this, definition, instance, processor.getClass().getName()));
-            instance = (T) processor.postProcessAfterInitialize(instance, definition, this);
-        }
+            // Perform post-initialization steps using registered BeanPostProcessors
+            for (BeanPostProcessor processor : processors) {
+                emit(BEAN_INITIALIZATION_AFTER_PROCESSING,
+                        new InitPayload(this, definition, instance, processor.getClass().getName()));
+                instance = (T) processor.postProcessAfterInitialize(instance, definition, this);
+            }
 
-        if (instance instanceof InitializingBean initializingBean) {
-            initializingBean.afterCompletion(this);
+            if (instance instanceof InitializingBean initializingBean) {
+                initializingBean.afterCompletion(this);
+            }
+        } catch (Exception exception) {
+            emit(BEAN_INITIALIZATION_FAILED, new ErrorPayload(
+                    this, BEAN_INITIALIZATION_STARTED, definition.getBeanName(), definition, exception));
+            throw exception;
         }
 
         return instance;
@@ -638,6 +661,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * @throws BeanContextException if the bean cannot be registered due to scope restrictions or other errors.
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void registerBean(String name, Object bean, Scope scope) {
         boolean       isLazy    = bean instanceof ObjectFactory<?>;
         BeanContainer container = getBeanContainer(scope);
@@ -865,12 +889,12 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
     public void registerDefinition(BeanDefinition definition) {
         try {
             definitionContainer.registerDefinition(definition);
-            emit(DEFINITION_REGISTERED, new DefinitionPayload(
+            emit(BEAN_DEFINITION_REGISTERED, new DefinitionPayload(
                     this, definition));
-        } catch (DuplicateBeanDefinitionException e) {
-            emit(DEFINITION_DUPLICATE, new ErrorPayload(
-                    this, DEFINITION_DUPLICATE, definition.getBeanName(), definition, e));
-            throw e;
+        } catch (DuplicateBeanDefinitionException exception) {
+            emit(BEAN_LOOKUP_AMBIGUOUS, new ErrorPayload(
+                    this, BEAN_DEFINITION_REGISTERED, definition.getBeanName(), definition, exception));
+            throw exception;
         }
     }
 
@@ -1083,6 +1107,29 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         return events;
     }
 
+
+    /**
+     * Returns the current event publish policy.
+     *
+     * @return the active {@link EventPublishPolicy}
+     */
+    public EventPublishPolicy getPublishPolicy() {
+        return publishPolicy;
+    }
+
+    /**
+     * Sets the event publish policy.
+     * <p>
+     * The publish policy controls how and when
+     * {@link BeanEventName} events
+     * are emitted by this context.
+     *
+     * @param publishPolicy the publish policy to apply
+     */
+    public void setPublishPolicy(EventPublishPolicy publishPolicy) {
+        this.publishPolicy = publishPolicy;
+    }
+
     /**
      * Returns the unique identifier of this {@code BeanContext}.
      *
@@ -1125,9 +1172,15 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * @param name    the event name
      * @param payload the event payload
      */
-    protected void emit(BeanContextEventName name, BeanContextEventPayload payload) {
+    protected void emit(EventName name, BeanContextEventPayload payload) {
         try {
-            events.publish(new BeanContextEvent(name.name(), payload, this));
+            EventTrace trace = SpanContextHolder.current();
+
+            if (!publishPolicy.shouldPublish(name, trace, this)) {
+                return;
+            }
+
+            events.publish(new BeanContextEvent(name, payload, this));
         } catch (Throwable listenerError) {
             LOGGER.warn(
                     "Failed to publish event: '{}': {}",

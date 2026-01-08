@@ -1,145 +1,313 @@
 package org.jmouse.core.events;
 
-import org.jmouse.core.Verify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import static org.jmouse.core.Verify.nonNull;
 
 /**
- * A manager for handling event subscriptions and notifications.
- * It allows subscribers to listen for specific event types and notifies them when those events occur.
+ * Thread-safe event bus that supports per-event and global subscriptions.
  *
- * <p>Example usage:</p>
- * <pre>{@code
- * // Define custom event and listener implementations
- * public class MyEvent implements Event<String> {
- *     private final String name;
- *     private final String payload;
+ * <p>
+ * {@code EventManager} manages listener registration and dispatches published events
+ * to listeners subscribed to a specific {@link EventName} and to global listeners
+ * registered under {@link #ALL_EVENTS}.
+ * </p>
  *
- *     public MyEvent(String name, String payload) {
- *         this.name = name;
- *         this.payload = payload;
- *     }
+ * <h3>Key features</h3>
+ * <ul>
+ *   <li>Thread-safe subscription and publishing via {@link ConcurrentHashMap} and {@link CopyOnWriteArrayList}</li>
+ *   <li>Subscription handle ({@link Subscription}) for easy unsubscription</li>
+ *   <li>Listener error isolation via {@link EventDispatchErrorHandler}</li>
+ *   <li>Optional trace enrichment for non-traceable events</li>
+ * </ul>
  *
- *     @Override
- *     public String name() {
- *         return name;
- *     }
- *
- *     @Override
- *     public String payload() {
- *         return payload;
- *     }
- * }
- *
- * public class MyEventListener implements EventListener<String> {
- *     @Override
- *     public void update(Event<? super String> event) {
- *         System.out.println("Received event: " + event.name() + " with payload: " + event.payload());
- *     }
- * }
- *
- * // Create and use EventManager
- * public static void main(String[] args) {
- *     EventManager eventManager = new EventManager("event1", "event2");
- *
- *     MyEventListener listener = new MyEventListener();
- *     eventManager.subscribe("event1", listener);
- *
- *     MyEvent event = new MyEvent("event1", "Hello, World!");
- *     eventManager.notify(event);
- * }
- * }</pre>
+ * <h3>Thread-safety</h3>
+ * <ul>
+ *   <li>Subscription/unsubscription is safe concurrently with publishing.</li>
+ *   <li>Publishing iterates over snapshot-style lists ({@link CopyOnWriteArrayList}).</li>
+ * </ul>
  */
-final public class EventManager {
+public final class EventManager {
 
     /**
-     * A logger instance
+     * Special event name used for listeners that should receive all published events.
+     */
+    public static final EventName ALL_EVENTS = new AnyEvent(() -> "ANY-CATEGORY");
+
+    /**
+     * Internal logger for subscription and dispatch diagnostics.
      */
     public static final Logger LOGGER = LoggerFactory.getLogger(EventManager.class);
 
     /**
-     * A map that associates event types with lists of subscribed listeners.
+     * Listener registry grouped by {@link EventName}.
      */
-    private final Map<String, List<EventListener<?>>> listeners = new HashMap<>();
+    private final ConcurrentHashMap<EventName, CopyOnWriteArrayList<EventListener<?>>> listeners
+            = new ConcurrentHashMap<>();
 
     /**
-     * Subscribes a listener to a specific event type.
-     *
-     * @param eventName the type of event to subscribe to.
-     * @param listener  the listener to be notified when the event occurs.
+     * Handler invoked when a listener fails during dispatch.
+     * <p>
+     * Marked {@code volatile} to allow runtime replacement with visibility across threads.
      */
-    public void subscribe(String eventName, EventListener<?> listener) {
-        Verify.nonNull(eventName, "event-name");
-        Verify.nonNull(listener, "listener");
+    private volatile EventDispatchErrorHandler errorHandler = EventManager::defaultErrorHandler;
 
-        LOGGER.info("Subscribe listener '{}' to event '{}'", listener.name(), eventName);
-
-        listeners.computeIfAbsent(eventName, key -> new ArrayList<>()).add(listener);
+    /**
+     * Default listener error handler that logs failures and isolates them from the publisher.
+     *
+     * @param event    the event being dispatched (may be {@code null} in defensive scenarios)
+     * @param listener the listener that failed (may be {@code null} in defensive scenarios)
+     * @param error    the failure raised by the listener
+     */
+    private static void defaultErrorHandler(Event<?> event, EventListener<?> listener, Throwable error) {
+        LOGGER.warn(
+                "Listener '{}' failed for event '{}': {}",
+                (listener == null ? "<unknown>" : listener.name()),
+                (event == null ? "<unknown>" : event.name()),
+                error.toString(), error
+        );
     }
 
     /**
-     * Unsubscribes a listener from a specific event type.
+     * Subscribe a listener to a specific event name.
      *
-     * @param eventName the type of event to unsubscribe from.
-     * @param listener  the listener to be removed.
+     * <p>
+     * The returned {@link Subscription} can be used to unsubscribe the listener
+     * from the same event name.
+     * </p>
+     *
+     * @param name     event name to subscribe to
+     * @param listener listener instance
+     * @return subscription handle
      */
-    public void unsubscribe(String eventName, EventListener<?> listener) {
-        Verify.nonNull(eventName, "event-name");
-        Verify.nonNull(listener, "listener");
+    public Subscription subscribe(EventName name, EventListener<?> listener) {
+        nonNull(name, "event-name");
+        nonNull(listener, "listener");
 
-        List<EventListener<?>> eventListeners = listeners.get(eventName);
-        if (eventListeners == null) {
-            return;
+        listeners.computeIfAbsent(name, k -> new CopyOnWriteArrayList<>()).add(listener);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Subscribed '{}' to '{}'", listener.name(), name);
         }
 
-        eventListeners.remove(listener);
-        if (eventListeners.isEmpty()) {
-            listeners.remove(eventName);
+        return () -> unsubscribe(name, listener);
+    }
+
+    /**
+     * Subscribe a listener to all events.
+     * <p>
+     * This is a convenience shortcut for subscribing to {@link #ALL_EVENTS}.
+     * </p>
+     *
+     * @param listener listener instance
+     * @return subscription handle
+     */
+    public Subscription subscribeAll(EventListener<?> listener) {
+        return subscribe(ALL_EVENTS, listener);
+    }
+
+    /**
+     * Unsubscribe a listener from a specific event name.
+     *
+     * @param name     event name
+     * @param listener listener instance
+     * @return {@code true} if the listener was removed, {@code false} otherwise
+     */
+    public boolean unsubscribe(EventName name, EventListener<?> listener) {
+        nonNull(name, "event-name");
+        nonNull(listener, "listener");
+
+        var arrayList = listeners.get(name);
+
+        if (arrayList == null) {
+            return false;
         }
+
+        boolean removed = arrayList.remove(listener);
+
+        if (arrayList.isEmpty()) {
+            listeners.remove(name, arrayList);
+        }
+
+        if (removed && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Unsubscribed '{}' from '{}'", listener.name(), name);
+        }
+
+        return removed;
     }
 
     /**
-     * Removes all listeners subscribed to a specific event type.
-     *
-     * @param eventName the type of event to clear all subscriptions for.
+     * Remove all listeners for all event names, including {@link #ALL_EVENTS}.
      */
-    public void unsubscribe(String eventName) {
-        Verify.nonNull(eventName, "event-name");
-        listeners.remove(eventName);
+    public void clearAll() {
+        listeners.clear();
     }
 
     /**
-     * Notifies all listeners subscribed to the specified event type.
+     * Publish an event to all matching listeners.
+     * <p>
+     * The event is dispatched to:
+     * </p>
+     * <ul>
+     *   <li>listeners subscribed to {@code event.name()}</li>
+     *   <li>listeners subscribed to {@link #ALL_EVENTS}</li>
+     * </ul>
      *
-     * @param event the event to be dispatched to listeners.
-     * @param <T>   the type of the event payload.
+     * <p>
+     * Listener failures are isolated and routed to the configured
+     * {@link #setErrorHandler(EventDispatchErrorHandler) error handler}.
+     * </p>
+     *
+     * <p>
+     * If the given event is not {@link TraceableEvent traceable}, it is wrapped
+     * with trace metadata (see {@link #toTraceableEvent(Event)}).
+     * </p>
+     *
+     * @param event event to publish
+     * @param <T>   payload type
      */
-    @SuppressWarnings("unchecked")
     public <T> void publish(Event<T> event) {
-        Verify.nonNull(event, "event");
+        nonNull(event, "event");
 
-        List<EventListener<?>> listeners   = this.listeners.get(event.name());
-        Class<?>               payloadType = event.payloadType();
+        Event<T> effective = toTraceableEvent(event);
 
-        if (listeners == null || listeners.isEmpty()) {
+        dispatch(effective, listeners.get(effective.name()));
+        dispatch(effective, listeners.get(ALL_EVENTS));
+    }
+
+    /**
+     * Returns the set of currently registered event names.
+     * <p>
+     * The returned set is a live view of the internal registry.
+     * </p>
+     *
+     * @return registered event names
+     */
+    public Set<EventName> eventNames() {
+        return listeners.keySet();
+    }
+
+    /**
+     * Remove all listeners subscribed to the given event name.
+     *
+     * @param name event name
+     */
+    public void clear(EventName name) {
+        nonNull(name, "event-name");
+        listeners.remove(name);
+    }
+
+    /**
+     * Returns the number of listeners registered for a given event name.
+     *
+     * @param name event name
+     * @return listener count
+     */
+    public int listenerCount(EventName name) {
+        nonNull(name, "event-name");
+        List<EventListener<?>> list = listeners.get(name);
+        return list == null ? 0 : list.size();
+    }
+
+    /**
+     * Configure the dispatch error handler.
+     * <p>
+     * The handler is invoked when:
+     * </p>
+     * <ul>
+     *   <li>{@link EventListener#supportsPayloadType(Class)} throws</li>
+     *   <li>{@link EventListener#onEvent(Event)} throws</li>
+     * </ul>
+     *
+     * @param errorHandler handler invoked on listener failures
+     */
+    public void setErrorHandler(EventDispatchErrorHandler errorHandler) {
+        this.errorHandler = nonNull(errorHandler, "errorHandler");
+    }
+
+    /**
+     * Dispatch an event to a bucket of listeners.
+     * <p>
+     * Each listener is checked for payload compatibility via
+     * {@link EventListener#supportsPayloadType(Class)} before invocation.
+     * </p>
+     *
+     * @param event   event to dispatch
+     * @param bucket  listener bucket (may be {@code null})
+     * @param <T>     payload type
+     */
+    private <T> void dispatch(Event<T> event, List<EventListener<?>> bucket) {
+        if (bucket == null || bucket.isEmpty()) {
             return;
         }
 
-        for (EventListener<?> rawListener : listeners) {
-            EventListener<T> listener = (EventListener<T>) rawListener;
+        Class<?> payloadType = event.payloadType();
 
-            if (listener.supportsPayloadType(payloadType)) {
-                LOGGER.info("Dispatch event '{}' to '{}'", event.name(), listener.name());
-                listener.onEvent(event);
-            } else {
-                LOGGER.debug("Skip event '{}({})' for '{}'", event.name(), payloadType.getName(), listener.name());
+        for (EventListener<?> listener : bucket) {
+            @SuppressWarnings("unchecked") EventListener<T> eventListener = (EventListener<T>) listener;
+            boolean supported;
+
+            try {
+                supported = eventListener.supportsPayloadType(payloadType);
+            } catch (Throwable exception) {
+                errorHandler.onListenerError(event, listener, exception);
+                continue;
+            }
+
+            if (!supported) {
+                if (LOGGER.isTraceEnabled()) {
+                    LOGGER.trace("Skip event '{}({})' for '{}'", event.name(), payloadType.getName(), listener.name());
+                }
+                continue;
+            }
+
+            try {
+                if (LOGGER.isTraceEnabled()) {
+                    LOGGER.trace("Dispatch '{}' to '{}'", event.name(), listener.name());
+                }
+                eventListener.onEvent(event);
+            } catch (Throwable e) {
+                errorHandler.onListenerError(event, listener, e);
             }
         }
     }
-}
 
+    /**
+     * Ensures that the event carries {@link EventTrace} metadata.
+     * <p>
+     * If the event already implements {@link TraceableEvent}, it is returned as-is.
+     * Otherwise, the event is wrapped into {@link TracedEvent} using the current trace
+     * from {@link SpanContextHolder}. If no trace is present, a new root trace is created.
+     * </p>
+     *
+     * <p>
+     * This method preserves span identity when a current trace exists and only refreshes
+     * the timestamp via {@link EventTrace#touch()}.
+     * </p>
+     *
+     * @param event event to enrich
+     * @param <T>   payload type
+     * @return the original event if already traceable, otherwise a traced wrapper
+     */
+    private <T> Event<T> toTraceableEvent(Event<T> event) {
+        if (event instanceof TraceableEvent<?>) {
+            return event;
+        }
+
+        EventTrace trace = SpanContextHolder.current();
+
+        if (trace == null) {
+            trace = EventTrace.root();
+        } else {
+            trace = trace.touch();
+        }
+
+        return new TracedEvent<>(event, trace);
+    }
+}

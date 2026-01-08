@@ -4,13 +4,14 @@ import org.jmouse.core.Verify;
 import org.jmouse.core.events.Event;
 import org.jmouse.core.events.EventListener;
 import org.jmouse.core.events.EventManager;
+import org.jmouse.core.events.EventName;
 
 import java.util.function.Consumer;
 
 import static org.jmouse.beans.events.BeanContextEventPayload.*;
 
 /**
- * Convenience hooks API for subscribing to {@link BeanContextEventName} lifecycle events.
+ * Convenience hooks API for subscribing to {@link BeanEventName} lifecycle events.
  *
  * <p>Implement this interface in a concrete BeanContext to provide ergonomic
  * {@code onBean...} methods while delegating the underlying subscription
@@ -36,119 +37,55 @@ public interface BeanContextEventSupport {
      * @return this (fluent)
      */
     default <P extends BeanContextEventPayload> BeanContextEventSupport on(
-            BeanContextEventName name,
+            EventName name,
             Class<P> payloadType,
             Consumer<P> consumer
     ) {
         Verify.nonNull(name, "name");
         Verify.nonNull(payloadType, "payloadType");
         Verify.nonNull(consumer, "consumer");
-        getEventManager().subscribe(name.name(), new TypedPayloadListener<>(payloadType, consumer));
+        getEventManager().subscribe(name, new TypedPayloadListener<>(payloadType, consumer));
         return this;
     }
 
     default BeanContextEventSupport onBeforeRefresh(Consumer<ContextPayload> consumer) {
-        return on(BeanContextEventName.CONTEXT_REFRESH_START, ContextPayload.class, consumer);
+        return on(BeanEventName.CONTEXT_REFRESH_STARTED, ContextPayload.class, consumer);
     }
 
     default BeanContextEventSupport onAfterRefresh(Consumer<ContextPayload> consumer) {
-        return on(BeanContextEventName.CONTEXT_REFRESH_FINISH, ContextPayload.class, consumer);
+        return on(BeanEventName.CONTEXT_REFRESH_COMPLETED, ContextPayload.class, consumer);
     }
 
-    /**
-     * Subscribe to the bean lookup start event.
-     * <p>
-     * Invoked when the context begins resolving a bean,
-     * before any instantiation or caching logic is applied.
-     *
-     * @param consumer callback receiving {@link LookupPayload}
-     * @return this (fluent)
-     */
-    default BeanContextEventSupport onBeanLookupStart(Consumer<LookupPayload> consumer) {
-        return on(BeanContextEventName.BEAN_LOOKUP_START, LookupPayload.class, consumer);
+    default BeanContextEventSupport onRefreshFailed(Consumer<ErrorPayload> consumer) {
+        return on(BeanEventName.CONTEXT_REFRESH_FAILED, ErrorPayload.class, consumer);
     }
 
-    /**
-     * Subscribe to the bean created event.
-     * <p>
-     * Invoked after a bean instance has been successfully created
-     * and fully initialized by the context.
-     *
-     * @param consumer callback receiving {@link CreatePayload}
-     * @return this (fluent)
-     */
-    default BeanContextEventSupport onBeanCreated(Consumer<CreatePayload> consumer) {
-        return on(BeanContextEventName.BEAN_CREATED, CreatePayload.class, consumer);
+    default BeanContextEventSupport onBeanLookupStarted(Consumer<LookupPayload> consumer) {
+        return on(BeanEventName.BEAN_LOOKUP_STARTED, LookupPayload.class, consumer);
     }
 
-    /**
-     * Subscribe to bean not found event.
-     *
-     * @param consumer callback receiving {@link LookupPayload}
-     * @return this (fluent)
-     */
-    default BeanContextEventSupport onBeanNotFound(Consumer<LookupPayload> consumer) {
-        return on(BeanContextEventName.BEAN_NOT_FOUND, LookupPayload.class, consumer);
+    default BeanContextEventSupport onBeanLookupResolved(Consumer<LookupPayload> consumer) {
+        return on(BeanEventName.BEAN_LOOKUP_RESOLVED, LookupPayload.class, consumer);
     }
 
-    /**
-     * Subscribe to bean found event.
-     *
-     * @param consumer callback receiving {@link LookupPayload}
-     * @return this (fluent)
-     */
-    default BeanContextEventSupport onBeanFound(Consumer<LookupPayload> consumer) {
-        return on(BeanContextEventName.BEAN_FOUND, LookupPayload.class, consumer);
+    default BeanContextEventSupport onBeanLookupNotFound(Consumer<LookupPayload> consumer) {
+        return on(BeanEventName.BEAN_LOOKUP_NOT_FOUND, LookupPayload.class, consumer);
     }
 
-    /**
-     * Subscribe to bean creation failure event.
-     *
-     * @param consumer callback receiving {@link ErrorPayload}
-     * @return this (fluent)
-     */
-    default BeanContextEventSupport onBeanCreateFailed(Consumer<ErrorPayload> consumer) {
-        return on(BeanContextEventName.BEAN_CREATE_FAILED, ErrorPayload.class, consumer);
+    default BeanContextEventSupport onBeanCreationStarted(Consumer<CreatePayload> consumer) {
+        return on(BeanEventName.BEAN_CREATION_STARTED, CreatePayload.class, consumer);
     }
 
-    /**
-     * Subscribe to any context error event.
-     *
-     * @param consumer callback receiving {@link ErrorPayload}
-     * @return this (fluent)
-     */
-    default BeanContextEventSupport onContextError(Consumer<ErrorPayload> consumer) {
-        return on(BeanContextEventName.CONTEXT_ERROR, ErrorPayload.class, consumer);
+    default BeanContextEventSupport onBeanCreationCompleted(Consumer<CreatePayload> consumer) {
+        return on(BeanEventName.BEAN_CREATION_COMPLETED, CreatePayload.class, consumer);
     }
 
-    /**
-     * Subscribe to any "general error" event.
-     *
-     * @param consumer callback receiving {@link ErrorPayload}
-     * @return this (fluent)
-     */
-    default BeanContextEventSupport onError(Consumer<ErrorPayload> consumer) {
-        return on(BeanContextEventName.GENERAL_ERROR, ErrorPayload.class, consumer);
+    default BeanContextEventSupport onBeanCreationFailed(Consumer<ErrorPayload> consumer) {
+        return on(BeanEventName.BEAN_CREATION_FAILED, ErrorPayload.class, consumer);
     }
 
-    /**
-     * Subscribe to bean post-processing stages (before/after init).
-     *
-     * @param consumer callback receiving {@link InitPayload}
-     * @return this (fluent)
-     */
-    default BeanContextEventSupport onBeanProcessedBeforeInit(Consumer<InitPayload> consumer) {
-        return on(BeanContextEventName.BEAN_PROCESSED_BEFORE_INIT, InitPayload.class, consumer);
-    }
-
-    /**
-     * Subscribe to bean post-processing stages (after init).
-     *
-     * @param consumer callback receiving {@link InitPayload}
-     * @return this (fluent)
-     */
-    default BeanContextEventSupport onBeanProcessedAfterInit(Consumer<InitPayload> consumer) {
-        return on(BeanContextEventName.BEAN_PROCESSED_AFTER_INIT, InitPayload.class, consumer);
+    default BeanContextEventSupport onContextInternalError(Consumer<ErrorPayload> consumer) {
+        return on(BeanEventName.CONTEXT_INTERNAL_ERROR, ErrorPayload.class, consumer);
     }
 
     /**
