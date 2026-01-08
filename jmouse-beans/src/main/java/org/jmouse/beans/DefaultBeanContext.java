@@ -250,6 +250,14 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         LOGGER.warn("========== START INITIALIZING! ==========");
         LOGGER.warn("=========================================");
 
+        doRefresh();
+
+        LOGGER.warn("==========================================");
+        LOGGER.warn("========== FINISH INITIALIZING! ==========");
+        LOGGER.warn("==========================================");
+    }
+
+    protected void doRefresh() {
         Sorter.sort(initializers);
 
         emit(CONTEXT_REFRESH_STARTED, new ContextPayload(this));
@@ -277,10 +285,6 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         } finally {
             emit(CONTEXT_REFRESH_COMPLETED, new ContextPayload(this));
         }
-
-        LOGGER.warn("==========================================");
-        LOGGER.warn("========== FINISH INITIALIZING! ==========");
-        LOGGER.warn("==========================================");
     }
 
     protected void onRefresh() {}
@@ -294,9 +298,13 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public void cleanup() {
+        doCleanup();
+        LOGGER.warn("WARNING! Initializer states cleared!");
+    }
+
+    protected void doCleanup() {
         // Clear the set of initialized classes to allow reinitialization
         initialized.clear();
-        LOGGER.warn("WARNING! Initializer states cleared!");
     }
 
     /**
@@ -310,6 +318,10 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public <T> T getBean(Class<T> type) {
+        return doLookup(type);
+    }
+
+    protected <T> T doLookup(Class<T> type) {
         emit(BEAN_LOOKUP_STARTED, new LookupPayload(this, null, type));
 
         List<String> beanNames = getBeanNames(type);
@@ -386,6 +398,10 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public <T> T getBean(String name) {
+        return doLookup(name);
+    }
+
+    protected <T> T doLookup(String name) {
         BeanDefinition   definition    = getDefinition(name);
         BeanDefinition   tmp           = definition;
         ObjectFactory<T> objectFactory = () -> this.createBean(tmp);
@@ -436,7 +452,6 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
         }
     }
 
-
     /**
      * Creates a bean instance from the given {@link BeanDefinition}, handling
      * cyclic dependency detection, post-processing, and optional registration.
@@ -457,6 +472,10 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public <T> T createBean(BeanDefinition definition) {
+        return doCreateBean(definition);
+    }
+
+    protected  <T> T doCreateBean(BeanDefinition definition) {
         if (definition == null) {
             throw new BeanContextException("Bean definition required");
         }
@@ -467,7 +486,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
 
         Supplier<BeanInstantiationException> exceptionSupplier = ()
                 -> new BeanInstantiationException(
-                        "Cyclic dependency detected for bean: %s".formatted(definition.getBeanName()));
+                "Cyclic dependency detected for bean: %s".formatted(definition.getBeanName()));
 
         emit(BEAN_CREATION_STARTED, new CreatePayload(this, definition, null));
 
@@ -504,13 +523,17 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * @return the initialized bean instance, potentially wrapped or modified.
      */
     @Override
-    @SuppressWarnings({"unchecked"})
     public <T> T initializeBean(T instance, BeanDefinition definition) {
+        return doInitializeBean(instance, definition);
+    }
+
+    @SuppressWarnings({"unchecked"})
+    protected <T> T doInitializeBean(T instance, BeanDefinition definition) {
         try {
             // Perform pre-initialization steps using registered BeanPostProcessors
             for (BeanPostProcessor processor : processors) {
                 emit(BEAN_INITIALIZATION_BEFORE_PROCESSING,
-                        new InitPayload(this, definition, instance, processor.getClass().getName()));
+                     new InitPayload(this, definition, instance, processor.getClass().getName()));
                 instance = (T) processor.postProcessBeforeInitialize(instance, definition, this);
             }
 
@@ -519,13 +542,13 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
                     definition.getBeanClass(), BeanInitializer.class)) {
                 Reflections.invokeMethod(instance, initializer, this);
                 emit(BEAN_INITIALIZER_INVOKED,
-                        new InitPayload(this, definition, instance, initializer.toGenericString()));
+                     new InitPayload(this, definition, instance, initializer.toGenericString()));
             }
 
             // Perform post-initialization steps using registered BeanPostProcessors
             for (BeanPostProcessor processor : processors) {
                 emit(BEAN_INITIALIZATION_AFTER_PROCESSING,
-                        new InitPayload(this, definition, instance, processor.getClass().getName()));
+                     new InitPayload(this, definition, instance, processor.getClass().getName()));
                 instance = (T) processor.postProcessAfterInitialize(instance, definition, this);
             }
 
@@ -890,6 +913,10 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     @Override
     public void registerDefinition(BeanDefinition definition) {
+        doRegisterDefinition(definition);
+    }
+
+    protected void doRegisterDefinition(BeanDefinition definition) {
         try {
             definitionContainer.registerDefinition(definition);
             emit(BEAN_DEFINITION_REGISTERED, new DefinitionPayload(
@@ -1176,21 +1203,8 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * @param payload the event payload
      */
     protected void emit(EventName name, BeanContextEventPayload payload) {
-        try {
-            TraceContext trace = ExecutionContextHolder.current().get(TraceKeys.TRACE);
-
-            if (!publishPolicy.shouldPublish(name, trace, this)) {
-                return;
-            }
-
+        if (publishPolicy.shouldPublish(name, ExecutionContextHolder.current().get(TraceKeys.TRACE), this)) {
             events.publish(new BeanContextEvent(name, payload, this));
-        } catch (Throwable listenerError) {
-            LOGGER.warn(
-                    "Failed to publish event: '{}': {}",
-                    name,
-                    listenerError,
-                    listenerError
-            );
         }
     }
 

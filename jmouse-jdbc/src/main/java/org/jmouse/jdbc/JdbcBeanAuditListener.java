@@ -7,7 +7,7 @@ import org.jmouse.core.events.Event;
 import org.jmouse.core.events.annotation.Listener;
 
 @Bean
-@Listener(events = {"BEAN_CREATED", "BEAN_CREATE_FAILED", "BEAN_LOOKUP_START"})
+@Listener(events = {"bean.creation.started", "bean.context.refresh.started", "bean.lookup.started"})
 public class JdbcBeanAuditListener extends AbstractEventListener<BeanContextEventPayload> {
 
     @Override

@@ -9,6 +9,10 @@ public final class SpanScopes {
 
     private SpanScopes() {}
 
+    public static <T> T none(Supplier<T> action) {
+        return action.get();
+    }
+
     public static <T> T rootIfAbsent(Supplier<T> action) {
         ExecutionContext context = ExecutionContextHolder.current();
         TraceContext     trace   = context.get(TraceKeys.TRACE);

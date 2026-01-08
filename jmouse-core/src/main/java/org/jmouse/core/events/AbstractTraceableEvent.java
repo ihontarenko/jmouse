@@ -1,5 +1,7 @@
 package org.jmouse.core.events;
 
+import org.jmouse.core.trace.TraceContext;
+
 import static org.jmouse.core.Verify.nonNull;
 
 /**
@@ -9,15 +11,15 @@ import static org.jmouse.core.Verify.nonNull;
  */
 public abstract class AbstractTraceableEvent<T> extends AbstractEvent<T> implements TraceableEvent<T> {
 
-    private final EventTrace trace;
+    private final TraceContext trace;
 
-    protected AbstractTraceableEvent(String name, T payload, Object caller, EventTrace trace) {
+    protected AbstractTraceableEvent(EventName name, T payload, Object caller, TraceContext trace) {
         super(name, payload, caller);
         this.trace = nonNull(trace, "trace");
     }
 
     @Override
-    public EventTrace trace() {
+    public TraceContext trace() {
         return trace;
     }
 }

@@ -73,7 +73,7 @@ public final class EventManager {
      * @param error    the failure raised by the listener
      */
     private static void defaultErrorHandler(Event<?> event, EventListener<?> listener, Throwable error) {
-        LOGGER.warn(
+        LOGGER.error(
                 "Listener '{}' failed for event '{}': {}",
                 (listener == null ? "<unknown>" : listener.name()),
                 (event == null ? "<unknown>" : event.name()),
@@ -127,8 +127,8 @@ public final class EventManager {
      * @return {@code true} if the listener was removed, {@code false} otherwise
      */
     public boolean unsubscribe(EventName name, EventListener<?> listener) {
-        nonNull(name, "event-name");
         nonNull(listener, "listener");
+        nonNull(name, "event-name");
 
         var arrayList = listeners.get(name.id());
 
@@ -254,7 +254,8 @@ public final class EventManager {
             return;
         }
 
-        Class<?> payloadType = event.payloadType();
+        Class<?>  payloadType = event.payloadType();
+        EventName eventName   = event.name();
 
         for (EventListener<?> listener : bucket) {
             @SuppressWarnings("unchecked") EventListener<T> eventListener = (EventListener<T>) listener;
@@ -268,21 +269,43 @@ public final class EventManager {
             }
 
             if (!supported) {
-                if (LOGGER.isTraceEnabled()) {
-                    LOGGER.trace("Skip event '{}({})' for '{}'", event.name(), payloadType.getName(), listener.name());
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Skip event '{}({})' for '{}'", event.name(), payloadType.getName(), listener.name());
                 }
                 continue;
             }
 
             try {
-                if (LOGGER.isTraceEnabled()) {
-                    LOGGER.trace("Dispatch '{}' to '{}'", event.name(), listener.name());
+                if (LOGGER.isDebugEnabled()) {
+                    TraceContext trace = null;
+
+                    if (event instanceof TraceableEvent<?> traceable) {
+                        trace = traceable.trace();
+                    }
+
+                    LOGGER.debug(
+                            "{} {} :: {} → {}",
+                            trace != null ? formatTraceMessage(trace) : "[no-trace]",
+                            eventName.category().label(),
+                            eventName.label(),
+                            listener.name()
+                    );
                 }
                 eventListener.onEvent(event);
             } catch (Throwable e) {
                 errorHandler.onListenerError(event, listener, e);
             }
         }
+    }
+
+    private static String formatTraceMessage(TraceContext t) {
+        return "[%s :: %s :: %s :: %d]"
+                .formatted(
+                        t.correlationId(),
+                        t.spanId(),
+                        t.parentSpanId() != null ? t.parentSpanId() : "-",
+                        t.depth()
+                );
     }
 
     private <T> Event<T> toTraceableEvent(Event<T> event) {
