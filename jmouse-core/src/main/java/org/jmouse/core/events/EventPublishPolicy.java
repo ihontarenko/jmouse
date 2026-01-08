@@ -1,5 +1,7 @@
 package org.jmouse.core.events;
 
+import org.jmouse.core.trace.TraceContext;
+
 /**
  * 📨 Strategy interface that decides whether an event should be published.
  * <p>
@@ -27,7 +29,7 @@ public interface EventPublishPolicy {
      * @param caller    the publishing component or context
      * @return {@code true} to publish the event, {@code false} to skip it
      */
-    boolean shouldPublish(EventName eventName, EventTrace trace, Object caller);
+    boolean shouldPublish(EventName eventName, TraceContext trace, Object caller);
 
     /**
      * Publish all events without filtering.

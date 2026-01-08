@@ -2,7 +2,9 @@ package org.jmouse.beans;
 
 import org.jmouse.beans.events.BeanContextEventSupport;
 import org.jmouse.core.Priority;
+import org.jmouse.core.events.EventCategory;
 import org.jmouse.core.events.EventListener;
+import org.jmouse.core.events.EventName;
 import org.jmouse.core.events.annotation.Listener;
 import org.jmouse.core.reflection.Reflections;
 
@@ -49,7 +51,7 @@ public final class EventBridgeContextInitializer implements BeanContextInitializ
 
             if (eventNames != null) {
                 for (String eventName : eventNames) {
-                    context.getEventManager().subscribe(eventName, listener);
+                    context.getEventManager().subscribe(EventName.of(eventName, EventCategory.UNCATEGORIZED), listener);
                 }
             }
         }

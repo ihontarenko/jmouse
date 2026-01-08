@@ -1,5 +1,9 @@
 package org.jmouse.core.events;
 
+import org.jmouse.core.context.ExecutionContext;
+import org.jmouse.core.context.ExecutionContextHolder;
+import org.jmouse.core.trace.TraceContext;
+import org.jmouse.core.trace.TraceKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +42,7 @@ public final class EventManager {
     /**
      * Special event name used for listeners that should receive all published events.
      */
-    public static final EventName ALL_EVENTS = new AnyEvent(() -> "ANY-CATEGORY");
+    public static final EventName ALL_EVENTS = new AnyEvent(EventCategory.UNCATEGORIZED);
 
     /**
      * Internal logger for subscription and dispatch diagnostics.
@@ -48,7 +52,10 @@ public final class EventManager {
     /**
      * Listener registry grouped by {@link EventName}.
      */
-    private final ConcurrentHashMap<EventName, CopyOnWriteArrayList<EventListener<?>>> listeners
+    private final ConcurrentHashMap<String, CopyOnWriteArrayList<EventListener<?>>> listeners
+            = new ConcurrentHashMap<>();
+
+    private final ConcurrentHashMap<String, CopyOnWriteArrayList<Subscription>> subscriptions
             = new ConcurrentHashMap<>();
 
     /**
@@ -90,7 +97,7 @@ public final class EventManager {
         nonNull(name, "event-name");
         nonNull(listener, "listener");
 
-        listeners.computeIfAbsent(name, k -> new CopyOnWriteArrayList<>()).add(listener);
+        listeners.computeIfAbsent(name.id(), k -> new CopyOnWriteArrayList<>()).add(listener);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Subscribed '{}' to '{}'", listener.name(), name);
@@ -123,7 +130,7 @@ public final class EventManager {
         nonNull(name, "event-name");
         nonNull(listener, "listener");
 
-        var arrayList = listeners.get(name);
+        var arrayList = listeners.get(name.id());
 
         if (arrayList == null) {
             return false;
@@ -132,7 +139,7 @@ public final class EventManager {
         boolean removed = arrayList.remove(listener);
 
         if (arrayList.isEmpty()) {
-            listeners.remove(name, arrayList);
+            listeners.remove(name.id(), arrayList);
         }
 
         if (removed && LOGGER.isDebugEnabled()) {
@@ -177,8 +184,8 @@ public final class EventManager {
 
         Event<T> effective = toTraceableEvent(event);
 
-        dispatch(effective, listeners.get(effective.name()));
-        dispatch(effective, listeners.get(ALL_EVENTS));
+        dispatch(effective, listeners.get(effective.name().id()));
+        dispatch(effective, listeners.get(ALL_EVENTS.id()));
     }
 
     /**
@@ -189,7 +196,7 @@ public final class EventManager {
      *
      * @return registered event names
      */
-    public Set<EventName> eventNames() {
+    public Set<String> eventNames() {
         return listeners.keySet();
     }
 
@@ -278,32 +285,16 @@ public final class EventManager {
         }
     }
 
-    /**
-     * Ensures that the event carries {@link EventTrace} metadata.
-     * <p>
-     * If the event already implements {@link TraceableEvent}, it is returned as-is.
-     * Otherwise, the event is wrapped into {@link TracedEvent} using the current trace
-     * from {@link SpanContextHolder}. If no trace is present, a new root trace is created.
-     * </p>
-     *
-     * <p>
-     * This method preserves span identity when a current trace exists and only refreshes
-     * the timestamp via {@link EventTrace#touch()}.
-     * </p>
-     *
-     * @param event event to enrich
-     * @param <T>   payload type
-     * @return the original event if already traceable, otherwise a traced wrapper
-     */
     private <T> Event<T> toTraceableEvent(Event<T> event) {
         if (event instanceof TraceableEvent<?>) {
             return event;
         }
 
-        EventTrace trace = SpanContextHolder.current();
+        ExecutionContext context = ExecutionContextHolder.current();
+        TraceContext     trace   = context.get(TraceKeys.TRACE);
 
         if (trace == null) {
-            trace = EventTrace.root();
+            trace = TraceContext.root();
         } else {
             trace = trace.touch();
         }

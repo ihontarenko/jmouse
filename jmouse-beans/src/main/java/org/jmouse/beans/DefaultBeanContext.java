@@ -11,7 +11,10 @@ import org.jmouse.beans.events.BeanContextEventPayload.*;
 import org.jmouse.core.CyclicReferenceDetector;
 import org.jmouse.core.DefaultCyclicReferenceDetector;
 import org.jmouse.core.Delegate;
+import org.jmouse.core.context.ExecutionContextHolder;
 import org.jmouse.core.events.*;
+import org.jmouse.core.trace.TraceContext;
+import org.jmouse.core.trace.TraceKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jmouse.beans.annotation.BeanInitializer;
@@ -1174,7 +1177,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     protected void emit(EventName name, BeanContextEventPayload payload) {
         try {
-            EventTrace trace = SpanContextHolder.current();
+            TraceContext trace = ExecutionContextHolder.current().get(TraceKeys.TRACE);
 
             if (!publishPolicy.shouldPublish(name, trace, this)) {
                 return;

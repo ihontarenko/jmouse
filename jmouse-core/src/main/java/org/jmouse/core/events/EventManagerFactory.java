@@ -58,7 +58,7 @@ public class EventManagerFactory {
                     EventListener<?> eventListener = (EventListener<?>) instantiate(findFirstConstructor(annotatedClass));
                     Listener annotation = annotatedClass.getAnnotation(Listener.class);
                     for (String event : annotation.events()) {
-                        eventManager.subscribe(event, eventListener);
+                        eventManager.subscribe(EventName.of(event, EventCategory.UNCATEGORIZED), eventListener);
                     }
                 } else {
                     throw new ObserverException(
