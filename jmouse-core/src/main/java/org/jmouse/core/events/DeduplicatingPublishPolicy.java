@@ -18,17 +18,17 @@ public final class DeduplicatingPublishPolicy implements EventPublishPolicy {
     }
 
     @Override
-    public boolean shouldPublish(EventName name, TraceContext trace, Object source) {
-        if (!delegate.shouldPublish(name, trace, source)) {
+    public boolean shouldPublish(EventName name, TraceContext trace, Object source, Object payload) {
+        if (!delegate.shouldPublish(name, trace, source, payload)) {
             return false;
         }
 
-        // Without trace, we cannot do correlation-aware deduplicate reliably -> allow publish.
+        // Without trace, we cannot do correlation-aware deduplicate reliably -> allow publishing
         if (trace == null) {
             return true;
         }
 
-        String key = strategy.keyOf(name, trace, source);
+        String key = strategy.keyOf(name, trace, source, payload);
         // No key means "do not deduplicate" (always publish)
         if (key == null || key.isBlank()) {
             return true;
@@ -43,7 +43,10 @@ public final class DeduplicatingPublishPolicy implements EventPublishPolicy {
      */
     @FunctionalInterface
     public interface DeduplicateKeyStrategy {
-        String keyOf(EventName name, TraceContext trace, Object source);
+        /**
+         * @return deduplicate key or {@code null} to disable deduplicate for this event
+         */
+        String keyOf(EventName name, TraceContext trace, Object source, Object payload);
     }
 
 }

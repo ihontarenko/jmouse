@@ -5,6 +5,7 @@ import org.jmouse.core.events.Event;
 import org.jmouse.core.events.EventListener;
 import org.jmouse.core.events.EventManager;
 import org.jmouse.core.events.EventName;
+import org.jmouse.util.Strings;
 
 import java.util.function.Consumer;
 
@@ -18,8 +19,6 @@ import static org.jmouse.beans.events.BeanContextEventPayload.*;
  * mechanics to an {@code EventManager}.</p>
  */
 public interface BeanContextEventSupport {
-
-    String TYPED_PAYLOAD_LISTENER = "typed_payload_listener";
 
     /**
      * Underlying event manager used to subscribe listeners.
@@ -105,7 +104,7 @@ public interface BeanContextEventSupport {
 
         @Override
         public String name() {
-            return TYPED_PAYLOAD_LISTENER;
+            return Strings.underscored(getClass().getSimpleName(), true);
         }
 
         @Override

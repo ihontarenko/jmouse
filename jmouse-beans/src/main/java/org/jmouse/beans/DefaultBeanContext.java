@@ -1205,7 +1205,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      */
     protected void emit(EventName name, BeanContextEventPayload payload) {
         TraceContext traceContext = ExecutionContextHolder.current().get(TraceKeys.TRACE);
-        if (publishPolicy.shouldPublish(name, traceContext, this)) {
+        if (publishPolicy.shouldPublish(name, traceContext, this, payload)) {
             events.publish(new BeanContextEvent(name, payload, this));
         } else {
             LOGGER.info("Skip event: {}, Trace: {}", name, traceContext);

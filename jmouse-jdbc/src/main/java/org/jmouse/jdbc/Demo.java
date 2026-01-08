@@ -1,6 +1,9 @@
 package org.jmouse.jdbc;
 
 import org.jmouse.beans.*;
+import org.jmouse.beans.events.BeanEventDeduplicateKeyStrategy;
+import org.jmouse.core.events.DeduplicatingPublishPolicy;
+import org.jmouse.core.events.EventPublishPolicy;
 
 final public class Demo {
 
@@ -11,8 +14,15 @@ final public class Demo {
         context.addInitializer(new EventBridgeContextInitializer());
 
         context.onBeanLookupStarted(p -> {
-            System.out.println("EVENT:Lookup: " + p);
+            System.out.println("EVENT:Lookup: Bean: " + p.requiredType() + " | " + p.beanName());
         });
+
+        ((DefaultBeanContext) context).setPublishPolicy(
+                new DeduplicatingPublishPolicy(
+                        EventPublishPolicy.publishAll(),
+                        new BeanEventDeduplicateKeyStrategy()
+                )
+        );
 
         context.refresh();
 

@@ -29,7 +29,7 @@ public interface EventPublishPolicy {
      * @param caller    the publishing component or context
      * @return {@code true} to publish the event, {@code false} to skip it
      */
-    boolean shouldPublish(EventName eventName, TraceContext trace, Object caller);
+    boolean shouldPublish(EventName eventName, TraceContext trace, Object caller, Object payload);
 
     /**
      * Publish all events without filtering.
@@ -37,7 +37,7 @@ public interface EventPublishPolicy {
      * @return a policy that always publishes events
      */
     static EventPublishPolicy publishAll() {
-        return (n, t, c) -> true;
+        return (n, t, c, p) -> true;
     }
 
     /**
@@ -49,7 +49,7 @@ public interface EventPublishPolicy {
      * @return a policy that publishes only root-level events
      */
     static EventPublishPolicy rootOnly() {
-        return (n, t, c) -> t == null || t.depth() == 0;
+        return (n, t, c, p) -> t == null || t.depth() == 0;
     }
 
 }
