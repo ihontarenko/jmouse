@@ -8,7 +8,6 @@ import static java.lang.Boolean.parseBoolean;
 import static java.lang.Double.parseDouble;
 import static java.lang.Float.parseFloat;
 import static java.lang.Integer.parseInt;
-import static org.jmouse.common.ast.token.DefaultToken.*;
 
 /**
  * The {@code LiteralCompiler} class compiles {@link LiteralNode} objects into their respective Java structured representations.

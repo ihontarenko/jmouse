@@ -1,7 +1,7 @@
 package org.jmouse.validator.old;
 
-import org.jmouse.common.support.context.AbstractAttributesContext;
-import org.jmouse.common.support.context.AttributesContext;
+import org.jmouse.core.scope.AbstractAttributesContext;
+import org.jmouse.core.scope.AttributesContext;
 
 public interface ValidationContext extends AttributesContext {
 

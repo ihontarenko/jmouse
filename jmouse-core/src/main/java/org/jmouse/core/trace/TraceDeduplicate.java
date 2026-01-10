@@ -1,8 +1,8 @@
 package org.jmouse.core.trace;
 
-import org.jmouse.core.context.ContextKey;
-import org.jmouse.core.context.ExecutionContext;
-import org.jmouse.core.context.ExecutionContextHolder;
+import org.jmouse.core.execution.ContextKey;
+import org.jmouse.core.execution.ExecutionContext;
+import org.jmouse.core.execution.ExecutionContextHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

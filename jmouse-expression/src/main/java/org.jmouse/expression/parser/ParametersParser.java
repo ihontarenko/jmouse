@@ -7,8 +7,6 @@ import org.jmouse.common.ast.parser.Parser;
 import org.jmouse.common.ast.parser.ParserContext;
 import org.jmouse.expression.ast.ParametersNode;
 
-import static org.jmouse.common.ast.token.DefaultToken.*;
-
 public class ParametersParser implements Parser {
 
     @Override

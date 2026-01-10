@@ -5,8 +5,6 @@ import org.jmouse.common.ast.node.Node;
 import org.jmouse.common.ast.parser.Parser;
 import org.jmouse.common.ast.parser.ParserContext;
 
-import static org.jmouse.common.ast.token.DefaultToken.*;
-
 public class ArrayParser implements Parser {
 
     @Override

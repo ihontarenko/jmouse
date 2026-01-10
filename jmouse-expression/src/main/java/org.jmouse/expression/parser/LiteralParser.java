@@ -7,8 +7,6 @@ import org.jmouse.common.ast.lexer.Lexer;
 import org.jmouse.common.ast.node.Node;
 import org.jmouse.common.ast.token.Token;
 
-import static org.jmouse.common.ast.token.DefaultToken.*;
-
 public class LiteralParser implements Parser {
 
     public static final Token[] TOKENS = {T_INT, T_FLOAT, T_STRING, T_TRUE, T_FALSE, T_NULL};

@@ -1,0 +1,17 @@
+package org.jmouse.core.scope;
+
+public interface AttributesContext {
+
+    <T> T requireAttribute(Object name);
+
+    <T> T getAttribute(Object name);
+
+    void setAttribute(Object name, Object argument);
+
+    void setAttribute(Object argument);
+
+    void setAttributes(Object... arguments);
+
+    boolean hasAttribute(Object name);
+
+}

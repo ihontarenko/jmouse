@@ -1,6 +1,6 @@
 package org.jmouse.core.reflection;
 
-import org.jmouse.common.support.context.AbstractContext;
+import org.jmouse.core.scope.AbstractContext;
 
 import java.util.ArrayList;
 import java.util.List;

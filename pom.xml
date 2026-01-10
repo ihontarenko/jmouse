@@ -72,6 +72,7 @@
         <module>jmouse-dependencies</module>
         <module>jmouse-vendor</module>
         <module>jmouse-core</module>
+        <module>jmouse-common</module>
         <module>jmouse-el</module>
         <module>jmouse-transaction</module>
         <module>jmouse-jdbc</module>
