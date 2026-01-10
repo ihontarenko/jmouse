@@ -1,7 +1,7 @@
 package org.jmouse.core.trace;
 
-import org.jmouse.core.execution.ExecutionContext;
-import org.jmouse.core.execution.ExecutionContextHolder;
+import org.jmouse.core.context.execution.ExecutionContext;
+import org.jmouse.core.context.execution.ExecutionContextHolder;
 
 public final class Trace {
 

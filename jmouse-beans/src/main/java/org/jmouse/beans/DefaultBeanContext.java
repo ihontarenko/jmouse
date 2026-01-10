@@ -11,7 +11,7 @@ import org.jmouse.beans.events.BeanContextEventPayload.*;
 import org.jmouse.core.CyclicReferenceDetector;
 import org.jmouse.core.DefaultCyclicReferenceDetector;
 import org.jmouse.core.Delegate;
-import org.jmouse.core.execution.ExecutionContextHolder;
+import org.jmouse.core.context.execution.ExecutionContextHolder;
 import org.jmouse.core.events.*;
 import org.jmouse.core.trace.SpanScopes;
 import org.jmouse.core.trace.TraceContext;
