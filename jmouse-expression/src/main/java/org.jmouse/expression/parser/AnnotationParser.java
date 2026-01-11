@@ -6,6 +6,7 @@ import org.jmouse.common.ast.node.Node;
 import org.jmouse.common.ast.parser.Parser;
 import org.jmouse.common.ast.parser.ParserContext;
 
+import static org.jmouse.common.ast.token.DefaultToken.*;
 import static org.jmouse.expression.ExtendedToken.T_ANNOTATION;
 
 public class AnnotationParser implements Parser {

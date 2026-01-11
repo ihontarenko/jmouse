@@ -2,14 +2,17 @@ package org.jmouse.expression.parser;
 
 import org.jmouse.common.ast.parser.Parser;
 import org.jmouse.common.ast.parser.ParserContext;
+import org.jmouse.common.ast.token.DefaultToken;
 import org.jmouse.expression.ast.LiteralNode;
 import org.jmouse.common.ast.lexer.Lexer;
 import org.jmouse.common.ast.node.Node;
 import org.jmouse.common.ast.token.Token;
 
+import static org.jmouse.common.ast.token.DefaultToken.*;
+
 public class LiteralParser implements Parser {
 
-    public static final Token[] TOKENS = {T_INT, T_FLOAT, T_STRING, T_TRUE, T_FALSE, T_NULL};
+    public static final Token[] TOKENS = {DefaultToken.T_INT, T_FLOAT, T_STRING, T_TRUE, T_FALSE, T_NULL};
 
     @Override
     public void parse(Lexer lexer, Node parent, ParserContext context) {
