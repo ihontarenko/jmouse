@@ -1,30 +1,30 @@
 package org.jmouse.core.context.keys;
 
+import org.jmouse.core.Verify;
+
 /**
- * 🗝 Context key resolution strategy.
+ * Context key resolution strategy.
  *
- * <p>
- * Resolves a context key for a given value,
- * allowing indirect or convention-based
- * key mapping.
- * </p>
- *
- * <p>
- * Common use cases:
- * </p>
- * <ul>
- *   <li>Deriving keys from value type</li>
- *   <li>Mapping domain objects to context keys</li>
- *   <li>Supporting implicit context population</li>
- * </ul>
+ * Resolves a stable storage key for a given value.
  */
 public interface ContextKeyResolver {
 
     /**
-     * 🔍 Resolve context key for given value.
+     * Resolve a stable context key for the given value.
      *
-     * @param value source value
-     * @return resolved context key (may be {@code null})
+     * @param value source value (must be non-null)
+     * @return resolved key (never {@code null})
      */
     Object resolveKeyFor(Object value);
+
+    /**
+     * Alias of {@link #resolveKeyFor(Object)} with a more explicit name.
+     *
+     * @param value source value (must be non-null)
+     * @return resolved key (never {@code null})
+     */
+    default Object resolveKeyForValue(Object value) {
+        Verify.nonNull(value, "value");
+        return resolveKeyFor(value);
+    }
 }
