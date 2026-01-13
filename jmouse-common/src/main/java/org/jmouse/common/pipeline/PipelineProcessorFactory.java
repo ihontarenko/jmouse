@@ -1,11 +1,14 @@
 package org.jmouse.common.pipeline;
 
-import org.jmouse.common.pipeline.definition.RootDefinition;
-import org.jmouse.common.pipeline.definition.RootDefinition.Processor;
-import org.jmouse.core.reflection.Reflections;
+import org.jmouse.common.pipeline.definition.model.ParameterDefinition;
+import org.jmouse.common.pipeline.definition.model.ProcessorDefinition;
 import org.jmouse.common.support.resolver.Resolver;
 import org.jmouse.common.support.resolver.Resolvers;
 import org.jmouse.common.support.resolver.ResolversFactory;
+import org.jmouse.core.Verify;
+import org.jmouse.core.reflection.Reflections;
+
+import java.util.List;
 
 import static org.jmouse.common.support.resolver.Resolvers.valueOf;
 
@@ -17,31 +20,47 @@ public class PipelineProcessorFactory {
         this.resolversFactory = new ResolversFactory();
     }
 
-    public PipelineProcessor createProcessor(Processor processorDefinition) {
+    public PipelineProcessor createProcessor(ProcessorDefinition definition) {
+        Verify.nonNull(definition, "processorDefinition");
+        Verify.nonNull(definition.className(), "processorDefinition.className");
+        Verify.state(!definition.className().isBlank(), "processorDefinition.className must be non-blank");
+
         try {
+            Class<?>                  processorClass = Class.forName(definition.className());
+            List<ParameterDefinition> parameters     = definition.parameters();
+            PipelineProcessor         processor      = (PipelineProcessor) Reflections.instantiate(
+                    processorClass.getDeclaredConstructor());
 
-            Class<?>          processorClass = Class.forName(processorDefinition.className());
-            PipelineProcessor processor      = (PipelineProcessor) Reflections.instantiate(processorClass.getDeclaredConstructor());
-
-            if (processorDefinition.parameters() != null) {
-                for (RootDefinition.Parameter parameter : processorDefinition.parameters()) {
-                    Object resolvedValue = resolveParameter(parameter);
-                    Reflections.setFieldValue(processor, parameter.name(), resolvedValue);
+            if (parameters != null && !parameters.isEmpty()) {
+                for (ParameterDefinition param : parameters) {
+                    Object resolved = resolveParameter(param);
+                    Reflections.setFieldValue(processor, param.name(), resolved);
                 }
             }
 
             return processor;
         } catch (Exception e) {
             throw new ProcessorInstantiationException(
-                    "Error creating processor: '%s'".formatted(processorDefinition.className()), e);
+                    "Error creating processor: '%s'".formatted(definition.className()), e);
         }
     }
 
-    private Object resolveParameter(RootDefinition.Parameter parameter) {
-        Resolvers resolverType = valueOf(parameter.resolver().toUpperCase());
-        Resolver  resolver     = resolversFactory.createResolver(resolverType);
+    private Object resolveParameter(ParameterDefinition parameter) {
+        Verify.nonNull(parameter, "parameter");
+        Verify.nonNull(parameter.name(), "parameter.name");
 
-        return resolver.resolve(parameter.value(), null);
+        String resolverName = parameter.resolver();
+        if (resolverName == null || resolverName.isBlank()) {
+            return parameter.value();
+        }
+
+        Resolvers resolverType = valueOf(resolverName.toUpperCase());
+        Resolver resolver = resolversFactory.createResolver(resolverType);
+
+        Object value = resolver.resolve(parameter.value(), null);
+
+        // value = convertIfNeeded(value, parameter.converter());
+
+        return value;
     }
-
 }

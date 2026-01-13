@@ -27,8 +27,8 @@ public final class PipelineBuilder {
         Map<String, ChainDefinition> built = new LinkedHashMap<>();
 
         for (ChainBuilder chainBuilder : chains.values()) {
-            ChainDefinition cd = chainBuilder.build();
-            built.put(cd.name(), cd);
+            ChainDefinition chainDefinition = chainBuilder.build();
+            built.put(chainDefinition.name(), chainDefinition);
         }
 
         return new PipelineDefinition(name, built);

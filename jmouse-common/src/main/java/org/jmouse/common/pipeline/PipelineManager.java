@@ -1,73 +1,31 @@
 package org.jmouse.common.pipeline;
 
 import org.jmouse.common.pipeline.context.PipelineContext;
-import org.jmouse.common.pipeline.definition.PipelineDefinitionException;
-import org.jmouse.common.pipeline.definition.RootDefinition;
-import org.jmouse.core.proxy.DefaultProxyFactory;
-import org.jmouse.core.proxy.ProxyFactory;
-import org.jmouse.common.pipeline.definition.DefinitionLoader;
+import org.jmouse.common.pipeline.definition.model.PipelineDefinition;
+import org.jmouse.common.pipeline.runtime.PipelineCompiler;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
-public class PipelineManager {
+public final class PipelineManager {
 
-    private final Map<String, PipelineChain> chains       = new HashMap<>();
-    private final RootDefinition             rootDefinition;
-    private final PipelineProcessorFactory   processorFactory;
-    private final ProxyFactory               proxyFactory = new DefaultProxyFactory();
+    private final PipelineCompiler           compiler;
+    private final PipelineDefinition         definition;
+    private final Map<String, PipelineChain> cache = new HashMap<>();
 
-    public PipelineManager(String definition) {
-        this.rootDefinition = DefinitionLoader.createLoader(definition).load(definition);
-        this.processorFactory = new PipelineProcessorFactory();
+    public PipelineManager(PipelineDefinition definition, PipelineCompiler compiler) {
+        this.definition = definition;
+        this.compiler = compiler;
     }
 
-    public RootDefinition getRootDefinition() {
-        return rootDefinition;
+    public PipelineChain chain(String name) {
+        return cache.computeIfAbsent(name,
+                n -> compiler.compile(definition, n));
     }
 
-    public PipelineChain createProcessorChain(String chainName) {
-        RootDefinition.Chain chainDefinition = rootDefinition.chains().get(chainName);
-
-        if (chainDefinition == null) {
-            throw new PipelineDefinitionException("No chain definition found: " + chainName);
-        }
-
-        if (chains.containsKey(chainDefinition.name())) {
-            return chains.get(chainDefinition.name());
-        }
-
-        Map<String, PipelineProcessor>   processors = new HashMap<>();
-        Map<String, ProcessorProperties> properties = new HashMap<>();
-
-        chainDefinition.links().forEach((linkName, linkDefinition) -> {
-            RootDefinition.ProcessorProperties propertiesDefinition = linkDefinition.properties();
-            PipelineProcessor                  processor            = processorFactory.createProcessor(
-                    linkDefinition.processor());
-            Map<String, String>                transitions          = propertiesDefinition == null ? new HashMap<>()
-                    : propertiesDefinition.transitions();
-            Map<String, String>                configuration        = propertiesDefinition == null ? new HashMap<>()
-                    : propertiesDefinition.configuration();
-            Optional<RootDefinition.Fallback> fallback = propertiesDefinition == null ? Optional.empty() : Optional.ofNullable(
-                    propertiesDefinition.fallback());
-
-            processors.put(linkName, proxyFactory.createProxy(processor));
-            properties.put(linkName, new ProcessorProperties(
-                    transitions, configuration, fallback.map(RootDefinition.Fallback::link).orElse(null)));
-        });
-
-        PipelineChain chain = new PipelineProcessorChain(chainDefinition.initial(), processors, properties);
-        PipelineChain proxy = proxyFactory.createProxy(chain);
-
-        chains.put(chainDefinition.name(), proxy);
-
-        return proxy;
-    }
-
-    public void runPipeline(String chainName, PipelineContext context) throws Exception {
+    public void run(String chainName, PipelineContext context) throws Exception {
         context.getResultContext().clear();
-        createProcessorChain(chainName).proceed(context);
+        chain(chainName).proceed(context);
     }
-
 }
+

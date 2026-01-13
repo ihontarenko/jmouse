@@ -130,4 +130,28 @@ public class StringHelper {
         return stringValue;
     }
 
+    public static String trim(String string) {
+        return string == null ? null : string.trim();
+    }
+
+    public static String extension(String location) {
+        if (location == null) {
+            return "";
+        }
+
+        int    questionIndex = location.indexOf('?');
+        String clean         = (questionIndex >= 0 ? location.substring(0, questionIndex) : location);
+        int    dotIndex      = clean.lastIndexOf('.');
+
+        if (dotIndex < 0) {
+            return "";
+        }
+
+        return clean.substring(dotIndex + 1).toLowerCase();
+    }
+
+    public static String blankToNull(String string) {
+        return (string == null || string.isBlank()) ? null : string;
+    }
+
 }
