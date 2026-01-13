@@ -1,6 +1,7 @@
 package org.jmouse.security.web.configuration.builder;
 
 import jakarta.servlet.Filter;
+import org.jmouse.core.Customizer;
 import org.jmouse.core.Sorter;
 import org.jmouse.security.UserPrincipalService;
 import org.jmouse.security.web.*;

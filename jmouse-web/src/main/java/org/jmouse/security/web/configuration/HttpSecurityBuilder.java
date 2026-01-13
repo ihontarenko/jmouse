@@ -1,6 +1,7 @@
 package org.jmouse.security.web.configuration;
 
 import jakarta.servlet.Filter;
+import org.jmouse.core.Customizer;
 import org.jmouse.security.web.MatchableSecurityFilterChain;
 import org.jmouse.web.match.routing.MatcherCriteria;
 

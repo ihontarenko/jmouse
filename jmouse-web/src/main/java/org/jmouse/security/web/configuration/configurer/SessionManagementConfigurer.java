@@ -1,7 +1,7 @@
 package org.jmouse.security.web.configuration.configurer;
 
 import org.jmouse.security.session.SessionRegistry;
-import org.jmouse.security.web.configuration.Customizer;
+import org.jmouse.core.Customizer;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.session.*;
 import org.jmouse.web.http.HttpStatus;

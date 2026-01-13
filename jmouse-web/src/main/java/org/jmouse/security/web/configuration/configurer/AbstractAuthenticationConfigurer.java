@@ -7,7 +7,7 @@ import org.jmouse.security.web.OrderedFilter;
 import org.jmouse.security.web.authentication.*;
 import org.jmouse.security.web.authentication.ui.LoginUrlAuthenticationEntryPoint;
 import org.jmouse.security.web.authentication.ui.SuccessRedirectHandler;
-import org.jmouse.security.web.configuration.Customizer;
+import org.jmouse.core.Customizer;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
 import org.jmouse.security.web.configuration.SharedAttributes;

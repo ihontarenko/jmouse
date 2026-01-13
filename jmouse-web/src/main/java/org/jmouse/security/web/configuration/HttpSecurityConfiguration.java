@@ -4,6 +4,7 @@ import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.InitializingBeanSupport;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
+import org.jmouse.core.Customizer;
 import org.jmouse.security.authentication.AuthenticationManager;
 import org.jmouse.security.authentication.ResolversAuthenticationManager;
 import org.jmouse.security.authentication.dao.DaoAuthenticationResolver;

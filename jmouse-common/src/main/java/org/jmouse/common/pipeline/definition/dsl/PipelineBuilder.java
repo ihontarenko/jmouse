@@ -2,6 +2,7 @@ package org.jmouse.common.pipeline.definition.dsl;
 
 import org.jmouse.common.pipeline.definition.model.ChainDefinition;
 import org.jmouse.common.pipeline.definition.model.PipelineDefinition;
+import org.jmouse.core.Customizer;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,9 +17,9 @@ public final class PipelineBuilder {
         this.name = name;
     }
 
-    public PipelineBuilder chain(String name, Consumer<ChainBuilder> specifier) {
+    public PipelineBuilder chain(String name, Customizer<ChainBuilder> customizer) {
         ChainBuilder chain = chains.computeIfAbsent(name, ChainBuilder::new);
-        specifier.accept(chain);
+        customizer.customize(chain);
         return this;
     }
 

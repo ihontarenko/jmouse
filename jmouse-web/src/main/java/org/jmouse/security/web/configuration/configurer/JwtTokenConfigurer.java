@@ -11,7 +11,7 @@ import org.jmouse.security.jwt.codec.RS256JwtCodec;
 import org.jmouse.security.web.authentication.*;
 import org.jmouse.security.web.authentication.bearer.BearerTokenAuthenticationEntryPoint;
 import org.jmouse.security.web.authentication.jwt.JwtAuthenticationFilter;
-import org.jmouse.security.web.configuration.Customizer;
+import org.jmouse.core.Customizer;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.context.SecurityContextRepository;
 import org.jmouse.security.web.jwt.JacksonJsonMapper;

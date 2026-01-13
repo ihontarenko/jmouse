@@ -2,7 +2,7 @@ package org.jmouse.security.web.configuration.configurer;
 
 import org.jmouse.security.web.MatchableSecurityFilterChain;
 import org.jmouse.security.web.configuration.ConfigurerAdapter;
-import org.jmouse.security.web.configuration.Customizer;
+import org.jmouse.core.Customizer;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.configuration.HttpSecurityConfigurer;
 import org.jmouse.security.web.configuration.builder.HttpSecurity;

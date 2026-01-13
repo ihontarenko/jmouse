@@ -1,6 +1,4 @@
-package org.jmouse.security.web.configuration;
-
-import org.jmouse.core.Streamable;
+package org.jmouse.core;
 
 import java.util.Objects;
 

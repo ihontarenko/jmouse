@@ -1,7 +1,7 @@
 package org.jmouse.security.web.configuration.matching;
 
 import jakarta.servlet.DispatcherType;
-import org.jmouse.security.web.configuration.Customizer;
+import org.jmouse.core.Customizer;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MappingMatcher;
 import org.jmouse.web.match.routing.MatcherCriteria;

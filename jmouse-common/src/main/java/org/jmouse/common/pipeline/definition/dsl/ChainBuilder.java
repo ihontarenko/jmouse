@@ -8,8 +8,8 @@ import java.util.Map;
 
 public final class ChainBuilder {
 
-    private final String name;
-    private String initial;
+    private       String                   initial;
+    private final String                   name;
     private final Map<String, LinkBuilder> links = new LinkedHashMap<>();
 
     ChainBuilder(String name) {
@@ -27,9 +27,9 @@ public final class ChainBuilder {
 
     ChainDefinition build() {
         Map<String, LinkDefinition> built = new LinkedHashMap<>();
-        for (LinkBuilder lb : links.values()) {
-            LinkDefinition ld = lb.build();
-            built.put(ld.name(), ld);
+        for (LinkBuilder linkBuilder : links.values()) {
+            LinkDefinition linkDefinition = linkBuilder.build();
+            built.put(linkDefinition.name(), linkDefinition);
         }
         return new ChainDefinition(name, initial, built);
     }
