@@ -82,6 +82,7 @@
         <module>jmouse-beans</module>
         <module>jmouse-context</module>
         <module>jmouse-web</module>
+        <module>jmouse-crawler</module>
         <module>wep-app</module>
         <module>testing-ground</module>
     </modules>

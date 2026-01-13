@@ -123,6 +123,11 @@
                 <artifactId>jmouse-web</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-crawler</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
             <!-- Proxy -->
             <!-- CGLIB Dependencies -->
             <dependency>
@@ -177,6 +182,13 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <!-- Properties support -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-properties</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
 
