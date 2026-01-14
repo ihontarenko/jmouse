@@ -1,10 +1,5 @@
 package org.jmouse.crawler.runtime;
 
-import org.jmouse.crawler.core.CrawlHint;
-import org.jmouse.crawler.core.CrawlTask;
-import org.jmouse.crawler.runtime.CrawlProcessingContext;
-import org.jmouse.crawler.runtime.CrawlRunContext;
-import org.jmouse.crawler.runtime.DecisionLog;
 import org.jmouse.crawler.spi.FetchResult;
 import org.jmouse.crawler.spi.ParsedDocument;
 

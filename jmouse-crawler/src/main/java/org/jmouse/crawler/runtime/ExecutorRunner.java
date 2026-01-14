@@ -1,8 +1,5 @@
 package org.jmouse.crawler.runtime;
 
-import org.jmouse.crawler.core.CrawlTask;
-import org.jmouse.crawler.core.TaskDisposition;
-
 import java.time.Instant;
 import java.util.concurrent.*;
 

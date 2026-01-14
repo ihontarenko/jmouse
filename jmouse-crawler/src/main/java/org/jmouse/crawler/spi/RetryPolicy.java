@@ -1,6 +1,6 @@
 package org.jmouse.crawler.spi;
 
-import org.jmouse.crawler.core.CrawlTask;
+import org.jmouse.crawler.runtime.CrawlTask;
 
 import java.time.Instant;
 

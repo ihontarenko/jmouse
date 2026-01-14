@@ -1,10 +1,8 @@
 package org.jmouse.crawler.runtime;
 
-import org.jmouse.crawler.core.CrawlTask;
-import org.jmouse.crawler.core.TaskDisposition;
-import org.jmouse.crawler.core.TaskDisposition.Completed;
-import org.jmouse.crawler.core.TaskDisposition.Discarded;
-import org.jmouse.crawler.core.TaskDisposition.RetryLater;
+import org.jmouse.crawler.runtime.TaskDisposition.Completed;
+import org.jmouse.crawler.runtime.TaskDisposition.Discarded;
+import org.jmouse.crawler.runtime.TaskDisposition.RetryLater;
 import org.jmouse.crawler.routing.CrawlRoute;
 import org.jmouse.crawler.routing.PipelineResult;
 import org.jmouse.crawler.spi.RetryDecision;
@@ -74,13 +72,20 @@ public final class SimpleCrawlEngine implements ParallelCrawlEngine {
 
     @Override
     public TaskDisposition execute(CrawlTask task, Instant now) {
-        // scope+seen gate must be done before pipeline execution
+
         if (!run.scope().isAllowed(task)) {
             return TaskDisposition.discarded(run.scope().denyReason(task));
         }
+
         if (!run.seen().firstTime(task.url())) {
             return TaskDisposition.discarded("duplicate");
         }
+
+        Instant notBefore = run.politeness().notBefore(task.url(), now);
+        if (notBefore.isAfter(now)) {
+            return TaskDisposition.retryLater(notBefore, "politeness", null);
+        }
+
         return executeTask(task, now);
     }
 

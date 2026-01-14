@@ -1,4 +1,4 @@
-package org.jmouse.crawler.core;
+package org.jmouse.crawler.runtime;
 
 import java.net.URI;
 import java.time.Instant;

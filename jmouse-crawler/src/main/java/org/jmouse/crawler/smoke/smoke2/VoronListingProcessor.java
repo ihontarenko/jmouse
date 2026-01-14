@@ -1,0 +1,41 @@
+package org.jmouse.crawler.smoke.smoke2;
+
+import org.jmouse.crawler.routing.CrawlStep;
+import org.jmouse.crawler.routing.PipelineResult;
+import org.jmouse.crawler.runtime.CrawlProcessingContext;
+
+import java.net.URI;
+
+public final class VoronListingProcessor implements CrawlStep {
+
+    // selectors — конфігні, підправиш під DOM
+    private final String productLinkCss;
+    private final String nextPageCss;
+
+    public VoronListingProcessor(String productLinkCss, String nextPageCss) {
+        this.productLinkCss = productLinkCss;
+        this.nextPageCss = nextPageCss;
+    }
+
+    @Override
+    public PipelineResult execute(CrawlProcessingContext ctx) {
+
+        URI base = ctx.fetchResult() != null && ctx.fetchResult().finalUrl() != null
+                ? ctx.fetchResult().finalUrl()
+                : ctx.task().url();
+
+//        // 1) product pages
+//        for (URI u : css.links(ctx.document(), productLinkCss, "href", base)) {
+//            ctx.enqueue(u, VoronHint.PRODUCT);
+//        }
+//
+//        // 2) pagination
+//        URI next = css.firstLink(ctx.document(), nextPageCss, "href", base);
+//        if (next != null) {
+//            ctx.enqueue(next, VoronHint.PAGINATION); // або LISTING — як тобі зручніше
+//        }
+
+        return PipelineResult.ok("listing");
+    }
+}
+

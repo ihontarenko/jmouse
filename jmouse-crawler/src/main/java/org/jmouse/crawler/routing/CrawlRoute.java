@@ -1,7 +1,7 @@
 package org.jmouse.crawler.routing;
 
-import org.jmouse.crawler.core.CrawlHint;
-import org.jmouse.crawler.core.CrawlTask;
+import org.jmouse.crawler.runtime.CrawlHint;
+import org.jmouse.crawler.runtime.CrawlTask;
 import org.jmouse.crawler.runtime.CrawlRunContext;
 
 public interface CrawlRoute {

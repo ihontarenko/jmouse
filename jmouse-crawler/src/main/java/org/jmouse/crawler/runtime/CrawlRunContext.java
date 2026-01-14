@@ -1,11 +1,6 @@
 package org.jmouse.crawler.runtime;
 
-import org.jmouse.crawler.routing.CrawlRouteResolver;
-import org.jmouse.crawler.spi.Fetcher;
-import org.jmouse.crawler.spi.ParserRegistry;
-import org.jmouse.crawler.spi.RetryPolicy;
-import org.jmouse.crawler.spi.ScopePolicy;
-import org.jmouse.crawler.spi.SeenStore;
+import org.jmouse.crawler.spi.*;
 
 import java.time.Clock;
 
@@ -32,5 +27,7 @@ public interface CrawlRunContext {
     Clock clock();
 
     UtilityRegistry utilities();
+
+    PolitenessPolicy politeness();
 
 }

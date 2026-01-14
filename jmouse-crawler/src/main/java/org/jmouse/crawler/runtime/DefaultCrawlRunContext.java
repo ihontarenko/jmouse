@@ -1,6 +1,5 @@
 package org.jmouse.crawler.runtime;
 
-import org.jmouse.crawler.routing.CrawlRouteResolver;
 import org.jmouse.crawler.spi.*;
 
 import java.time.Clock;
@@ -17,6 +16,7 @@ public final class DefaultCrawlRunContext implements CrawlRunContext {
     private final ScopePolicy        scope;
     private final RetryPolicy        retry;
     private final UtilityRegistry    utilities;
+    private final PolitenessPolicy   politeness;
 
     private final Clock clock;
 
@@ -31,7 +31,8 @@ public final class DefaultCrawlRunContext implements CrawlRunContext {
             ScopePolicy scope,
             RetryPolicy retry,
             Clock clock,
-            UtilityRegistry utilities
+            UtilityRegistry utilities,
+            PolitenessPolicy politeness
     ) {
         this.frontier = frontier;
         this.retryBuffer = retryBuffer;
@@ -44,6 +45,7 @@ public final class DefaultCrawlRunContext implements CrawlRunContext {
         this.retry = retry;
         this.clock = clock;
         this.utilities = utilities;
+        this.politeness = politeness;
     }
 
     @Override
@@ -99,5 +101,10 @@ public final class DefaultCrawlRunContext implements CrawlRunContext {
     @Override
     public UtilityRegistry utilities() {
         return utilities;
+    }
+
+    @Override
+    public PolitenessPolicy politeness() {
+        return null;
     }
 }

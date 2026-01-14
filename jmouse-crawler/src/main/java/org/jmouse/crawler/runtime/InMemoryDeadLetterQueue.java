@@ -1,7 +1,5 @@
 package org.jmouse.crawler.runtime;
 
-import org.jmouse.crawler.core.CrawlTask;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
