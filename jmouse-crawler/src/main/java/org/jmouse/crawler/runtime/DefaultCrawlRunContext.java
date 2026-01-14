@@ -16,6 +16,7 @@ public final class DefaultCrawlRunContext implements CrawlRunContext {
     private final SeenStore          seen;
     private final ScopePolicy        scope;
     private final RetryPolicy        retry;
+    private final UtilityRegistry    utilities;
 
     private final Clock clock;
 
@@ -29,7 +30,8 @@ public final class DefaultCrawlRunContext implements CrawlRunContext {
             SeenStore seen,
             ScopePolicy scope,
             RetryPolicy retry,
-            Clock clock
+            Clock clock,
+            UtilityRegistry utilities
     ) {
         this.frontier = frontier;
         this.retryBuffer = retryBuffer;
@@ -41,6 +43,7 @@ public final class DefaultCrawlRunContext implements CrawlRunContext {
         this.scope = scope;
         this.retry = retry;
         this.clock = clock;
+        this.utilities = utilities;
     }
 
     @Override
@@ -91,5 +94,10 @@ public final class DefaultCrawlRunContext implements CrawlRunContext {
     @Override
     public Clock clock() {
         return clock;
+    }
+
+    @Override
+    public UtilityRegistry utilities() {
+        return utilities;
     }
 }

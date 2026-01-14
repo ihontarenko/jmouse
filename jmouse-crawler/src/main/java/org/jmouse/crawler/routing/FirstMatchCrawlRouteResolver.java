@@ -17,10 +17,21 @@ public final class FirstMatchCrawlRouteResolver implements CrawlRouteResolver {
     public CrawlRoute resolve(CrawlTask task, CrawlRunContext run) {
         CrawlRoute matched = null;
 
-        for (CrawlRoute route : routes) {
-            if (route.matches(task, run)) {
-                matched = route;
-                break;
+        if (task.hint() != null) {
+            for (CrawlRoute route : routes) {
+                if (route.supportsHint(task.hint())) {
+                    matched = route;
+                    break;
+                }
+            }
+        }
+
+        if (matched == null) {
+            for (CrawlRoute route : routes) {
+                if (route.matches(task, run)) {
+                    matched = route;
+                    break;
+                }
             }
         }
 

@@ -10,9 +10,10 @@ public record CrawlTask(
         String discoveredBy,
         int priority,
         Instant scheduledAt,
-        int attempt
+        int attempt,
+        CrawlHint hint
 ) {
     public CrawlTask nextAttempt(Instant now) {
-        return new CrawlTask(url, depth, parent, discoveredBy, priority, now, attempt + 1);
+        return new CrawlTask(url, depth, parent, discoveredBy, priority, now, attempt + 1, hint);
     }
 }

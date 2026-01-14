@@ -1,5 +1,6 @@
 package org.jmouse.crawler.routing;
 
+import org.jmouse.crawler.core.CrawlHint;
 import org.jmouse.crawler.core.CrawlTask;
 import org.jmouse.crawler.runtime.CrawlRunContext;
 
@@ -10,5 +11,9 @@ public interface CrawlRoute {
     CrawlPipeline pipeline();
 
     boolean matches(CrawlTask task, CrawlRunContext run);
+
+    default boolean supportsHint(CrawlHint hint) {
+        return false;
+    }
 
 }

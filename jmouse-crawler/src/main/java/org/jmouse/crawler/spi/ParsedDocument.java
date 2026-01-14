@@ -1,5 +1,5 @@
 package org.jmouse.crawler.spi;
 
 public interface ParsedDocument {
-    String type(); // "html", "xml", etc.
+    String type();
 }

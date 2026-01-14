@@ -1,19 +1,18 @@
-package org.jmouse.crawler.runtime.impl;
+package org.jmouse.crawler.runtime;
 
 import org.jmouse.crawler.core.CrawlTask;
 import org.jmouse.crawler.core.TaskDisposition;
+import org.jmouse.crawler.core.TaskDisposition.Completed;
+import org.jmouse.crawler.core.TaskDisposition.Discarded;
+import org.jmouse.crawler.core.TaskDisposition.RetryLater;
 import org.jmouse.crawler.routing.CrawlRoute;
 import org.jmouse.crawler.routing.PipelineResult;
-import org.jmouse.crawler.runtime.*;
-import org.jmouse.crawler.spi.FetchRequest;
 import org.jmouse.crawler.spi.RetryDecision;
 
-import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 
-public final class SimpleCrawlEngine implements CrawlEngine {
+public final class SimpleCrawlEngine implements ParallelCrawlEngine {
 
     private final CrawlRunContext run;
 
@@ -27,53 +26,82 @@ public final class SimpleCrawlEngine implements CrawlEngine {
     }
 
     @Override
-    public void runOnce() {
+    public boolean tick() {
         Instant now = run.clock().instant();
+
+        boolean didWork = false;
 
         // 1) Move ready retries back to frontier
         List<CrawlTask> ready = run.retryBuffer().drainReady(now, 128);
-        for (CrawlTask t : ready) {
-            run.frontier().offer(t);
+        if (!ready.isEmpty()) {
+            didWork = true;
+            for (CrawlTask t : ready) run.frontier().offer(t);
         }
 
         // 2) Take next task
         CrawlTask task = run.frontier().poll();
         if (task == null) {
-            return;
+            return didWork; // false if nothing moved and nothing polled
         }
 
-        // 3) Basic scope + seen gate (ETAP 1 keeps it minimal)
-        if (!run.scope().isAllowed(task)) {
-            String reason = run.scope().denyReason(task);
-            // discard (not a failure)
-            return;
-        }
-        if (!run.seen().firstTime(task.url())) {
-            // duplicate
-            return;
-        }
+        // 3) Scope + seen gate
+        if (!run.scope().isAllowed(task)) return true;
+        if (!run.seen().firstTime(task.url())) return true;
 
-        // 4) Execute route pipeline
-        TaskDisposition disposition = executeTask(task, now);
+        // 4) Execute
+        TaskDisposition taskDisposition = executeTask(task, now);
 
         // 5) Apply disposition
+        applyDisposition(task, taskDisposition, now);
+
+        return true;
+    }
+
+    @Override
+    public int moveReadyRetries(int max) {
+        Instant now = now();
+        List<CrawlTask> ready = run.retryBuffer().drainReady(now, max);
+        for (CrawlTask t : ready) {
+            run.frontier().offer(t);
+        }
+        return ready.size();
+    }
+
+    @Override
+    public CrawlTask poll() {
+        return run.frontier().poll();
+    }
+
+    @Override
+    public TaskDisposition execute(CrawlTask task, Instant now) {
+        // scope+seen gate must be done before pipeline execution
+        if (!run.scope().isAllowed(task)) {
+            return TaskDisposition.discarded(run.scope().denyReason(task));
+        }
+        if (!run.seen().firstTime(task.url())) {
+            return TaskDisposition.discarded("duplicate");
+        }
+        return executeTask(task, now);
+    }
+
+    @Override
+    public void apply(CrawlTask task, TaskDisposition disposition, Instant now) {
         applyDisposition(task, disposition, now);
     }
 
     @Override
-    public void runUntilDrained() {
-        // Minimal draining strategy:
-        // keep running while there is something in frontier or retry buffer ready soon.
-        // For ETAP 1 we stop when frontier is empty AND retryBuffer is empty.
-        while (run.frontier().size() > 0 || run.retryBuffer().size() > 0) {
-            runOnce();
-            // Note: no sleeping/backoff here in ETAP 1.
-            // In ETAP 2/4 we will add gating and time-based loop.
-            if (run.frontier().size() == 0 && run.retryBuffer().size() > 0) {
-                // If only delayed retries exist, ETAP 1 ends (no waiting).
-                break;
-            }
-        }
+    public int frontierSize() {
+        return run.frontier().size();
+    }
+
+    @Override
+    public int retrySize() {
+        return run.retryBuffer().size();
+    }
+
+    @Override
+    public Instant now() {
+        return run.clock().instant();
     }
 
     private TaskDisposition executeTask(CrawlTask task, Instant now) {
@@ -107,16 +135,11 @@ public final class SimpleCrawlEngine implements CrawlEngine {
     }
 
     private void applyDisposition(CrawlTask task, TaskDisposition disposition, Instant now) {
-        if (disposition instanceof TaskDisposition.Completed) {
+        if (disposition instanceof Completed || disposition instanceof Discarded) {
             return;
         }
 
-        if (disposition instanceof TaskDisposition.Discarded) {
-            return;
-        }
-
-        if (disposition instanceof TaskDisposition.RetryLater(Instant notBefore, String reason, Throwable error)) {
-            // we increment attempt on retry
+        if (disposition instanceof RetryLater(Instant notBefore, String reason, Throwable error)) {
             CrawlTask next = task.nextAttempt(now);
             run.retryBuffer().schedule(next, notBefore, reason, error);
             return;
