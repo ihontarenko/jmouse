@@ -14,7 +14,7 @@ public final class PolitenessPolicies {
     public static PolitenessPolicy gentle(long perHostMinDelayMillis, double globalMaxRps) {
         return new CompositePolitenessPolicy(List.of(
                 new PerHostMinDelayPolitenessPolicy(Duration.ofMillis(perHostMinDelayMillis)),
-                new GlobalRpsPolitenessPolicy(globalMaxRps)
+                new RPSPolitenessPolicy(globalMaxRps)
         ));
     }
 
@@ -23,6 +23,6 @@ public final class PolitenessPolicies {
     }
 
     public static PolitenessPolicy globalRps(double globalMaxRps) {
-        return new GlobalRpsPolitenessPolicy(globalMaxRps);
+        return new RPSPolitenessPolicy(globalMaxRps);
     }
 }

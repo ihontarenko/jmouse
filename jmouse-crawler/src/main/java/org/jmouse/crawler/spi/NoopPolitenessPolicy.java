@@ -8,7 +8,7 @@ public enum NoopPolitenessPolicy implements PolitenessPolicy {
     INSTANCE;
 
     @Override
-    public Instant notBefore(URI url, Instant now) {
-        return now;
+    public Instant notBefore(URI url, Instant instant) {
+        return instant;
     }
 }

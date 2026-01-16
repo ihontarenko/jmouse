@@ -13,8 +13,8 @@ public final class RoutesBuilder {
 
     private final List<CrawlRoute> routes = new ArrayList<>();
 
-    public RouteSpec route(String id) {
-        return new RouteSpec(this, id);
+    public RouteSpecification route(String id) {
+        return new RouteSpecification(this, id);
     }
 
     CrawlRouteResolver build() {
@@ -25,7 +25,7 @@ public final class RoutesBuilder {
         routes.add(route);
     }
 
-    public static final class RouteSpec {
+    public static final class RouteSpecification {
         private final RoutesBuilder parent;
         private final String        id;
         private final Set<String>   hintIds = new LinkedHashSet<>();
@@ -33,12 +33,12 @@ public final class RoutesBuilder {
         private UrlMatch      match = UrlMatches.any();
         private CrawlPipeline pipeline;
 
-        RouteSpec(RoutesBuilder parent, String id) {
+        RouteSpecification(RoutesBuilder parent, String id) {
             this.parent = parent;
             this.id = id;
         }
 
-        public RouteSpec hints(Object... clientHints) {
+        public RouteSpecification hints(Object... clientHints) {
             for (Object h : clientHints) {
                 if (h == null) continue;
                 if (h instanceof CrawlHint ch) hintIds.add(ch.id());
@@ -48,12 +48,12 @@ public final class RoutesBuilder {
             return this;
         }
 
-        public RouteSpec match(UrlMatch match) {
+        public RouteSpecification match(UrlMatch match) {
             this.match = Objects.requireNonNull(match, "match");
             return this;
         }
 
-        public RouteSpec pipeline(Consumer<PipelineBuilder> c) {
+        public RouteSpecification pipeline(Consumer<PipelineBuilder> c) {
             PipelineBuilder pb = new PipelineBuilder();
             c.accept(pb);
             this.pipeline = pb.build();

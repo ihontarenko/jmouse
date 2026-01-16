@@ -18,7 +18,9 @@ public final class DefaultCrawlScheduler implements CrawlScheduler {
     private final RetryBuffer      retryBuffer;
     private final Clock            clock;
     private final int              retryDrainBatch;
-    private final Duration         maxParkDuration;
+    private final Duration         maxDuration;
+    private final Duration         minDuration       = Duration.ZERO;
+    private final int              scanFrontierBatch = 128;
 
     public DefaultCrawlScheduler(
             Frontier frontier,
@@ -26,14 +28,14 @@ public final class DefaultCrawlScheduler implements CrawlScheduler {
             RetryBuffer retryBuffer,
             Clock clock,
             int retryDrainBatch,
-            Duration maxParkDuration
+            Duration maxDuration
     ) {
         this.frontier = nonNull(frontier, "frontier");
         this.retryBuffer = nonNull(retryBuffer, "retryBuffer");
         this.politeness = nonNull(politeness, "politeness");
         this.clock = nonNull(clock, "clock");
         this.retryDrainBatch = max(1, retryDrainBatch);
-        this.maxParkDuration = nonNull(maxParkDuration, "maxParkDuration");
+        this.maxDuration = nonNull(maxDuration, "maxParkDuration");
     }
 
     @Override
@@ -42,19 +44,24 @@ public final class DefaultCrawlScheduler implements CrawlScheduler {
 
         moveReadyRetries(now);
 
-        CrawlTask task = frontier.poll();
-        if (task != null) {
-            // politeness gate HERE
+        for (int i = 0; i < scanFrontierBatch; i++) {
+            CrawlTask task = frontier.poll();
+
+            if (task == null) {
+                break;
+            }
+
             Instant notBefore = politeness.notBefore(task.url(), now);
+
             if (notBefore != null && notBefore.isAfter(now)) {
                 retryBuffer.schedule(task.schedule(notBefore), notBefore, REASON_POLITENESS, null);
-                return parkDecision(now);
+                continue;
             }
 
             return new ScheduleDecision.TaskReady(task);
         }
 
-        return parkOrDrained(now);
+        return toDecision(now);
     }
 
     private void moveReadyRetries(Instant now) {
@@ -63,25 +70,35 @@ public final class DefaultCrawlScheduler implements CrawlScheduler {
         }
     }
 
-    private ScheduleDecision parkOrDrained(Instant now) {
-        if (frontier.size() == 0 && retryBuffer.size() == 0) {
-            return ScheduleDecision.Drained.INSTANCE;
+    private ScheduleDecision toDecision(Instant now) {
+        ScheduleDecision decision = ScheduleDecision.Drained.INSTANCE;
+
+        if (frontier.size() > 0 || retryBuffer.size() > 0) {
+            decision = toScheduleDecision(now);
         }
-        return parkDecision(now);
+
+        return decision;
     }
 
-    private ScheduleDecision parkDecision(Instant now) {
+    private ScheduleDecision toScheduleDecision(Instant instant) {
         Instant nextNotBefore = retryBuffer.peekNotBefore();
+
         if (nextNotBefore == null) {
             Duration fallback = Duration.ofMillis(10);
-            return new ScheduleDecision.Park(fallback, now.plus(fallback));
+            return new ScheduleDecision.Park(fallback, instant.plus(fallback));
         }
 
-        Duration park = Duration.between(now, nextNotBefore);
-        if (park.isNegative()) park = Duration.ZERO;
-        if (park.compareTo(maxParkDuration) > 0) park = maxParkDuration;
+        Duration duration = Duration.between(instant, nextNotBefore);
 
-        return new ScheduleDecision.Park(park, nextNotBefore);
+        if (duration.isNegative()) {
+            duration = minDuration;
+        }
+
+        if (duration.compareTo(maxDuration) > 0) {
+            duration = maxDuration;
+        }
+
+        return new ScheduleDecision.Park(duration, nextNotBefore);
     }
 }
 

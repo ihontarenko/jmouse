@@ -4,6 +4,7 @@ import org.jmouse.core.Verify;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.util.concurrent.locks.LockSupport;
 
 public abstract class AbstractSchedulerRunner implements CrawlRunner {
 
@@ -16,19 +17,26 @@ public abstract class AbstractSchedulerRunner implements CrawlRunner {
     }
 
     protected final void park(Duration duration) {
-        if (duration == null || duration.isZero() || duration.isNegative()) {
-            Thread.onSpinWait();
+        if (duration == null || duration.isNegative() || duration.isZero()) {
+            Thread.yield();
+            return;
+        }
+
+        long nanos = duration.toNanos();
+
+        if (nanos < 1_000_000L) {
+            LockSupport.parkNanos(nanos);
             return;
         }
 
         try {
-            Thread.sleep(Math.min(duration.toMillis(), 50));
+            Thread.sleep(Math.min(duration.toMillis(), 50L));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
 
-    protected final ParallelCrawlEngine requireParallel(CrawlEngine engine) {
-        return Verify.instanceOf(engine, ParallelCrawlEngine.class, "engine");
+    protected final CrawlEngine requireParallel(CrawlEngine engine) {
+        return Verify.instanceOf(engine, CrawlEngine.class, "engine");
     }
 }

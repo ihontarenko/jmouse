@@ -40,15 +40,13 @@ public final class PerHostMinDelayPolitenessPolicy implements PolitenessPolicy {
         nextAllowed.compute(host, (h, previousNextAllowed) -> {
             Instant nextAllowed = (previousNextAllowed == null) ? now : previousNextAllowed;
 
-            // allowed now
             if (!nextAllowed.isAfter(now)) {
-                holder.notBefore = now;                 // can go now
-                return now.plus(minDelay);              // reserve next slot
+                holder.notBefore = now;
+                return now.plus(minDelay);
             }
 
-            // not allowed yet
-            holder.notBefore = nextAllowed;                // must wait until nextAllowed
-            return nextAllowed;                         // keep as-is
+            holder.notBefore = nextAllowed;
+            return nextAllowed;
         });
 
         return holder.notBefore != null ? holder.notBefore : now;

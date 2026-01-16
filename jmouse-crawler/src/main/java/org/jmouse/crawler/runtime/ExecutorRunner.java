@@ -4,7 +4,6 @@ import org.jmouse.core.Verify;
 
 import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.concurrent.*;
 
 public final class ExecutorRunner extends AbstractSchedulerRunner {
@@ -20,7 +19,7 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
 
     @Override
     public void runUntilDrained(CrawlEngine engine) {
-        ParallelCrawlEngine     parallelEngine    = requireParallel(engine);
+        CrawlEngine             parallelEngine    = requireParallel(engine);
         CompletionService<Done> completionService = new ExecutorCompletionService<>(executor);
         int                     inFlight          = 0;
         ScheduleDecision        lastDecision      = null;
@@ -97,7 +96,7 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
 
     private static int drainCompletedNonBlocking(
             CompletionService<Done> completionService,
-            ParallelCrawlEngine engine,
+            CrawlEngine engine,
             Clock clock, int inFlight
     ) {
         int applied = 0;

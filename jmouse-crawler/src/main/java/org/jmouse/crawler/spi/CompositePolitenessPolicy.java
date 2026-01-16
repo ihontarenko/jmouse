@@ -15,11 +15,11 @@ public final class CompositePolitenessPolicy implements PolitenessPolicy {
     }
 
     @Override
-    public Instant notBefore(URI url, Instant now) {
-        Instant temporary = now;
+    public Instant notBefore(URI url, Instant instant) {
+        Instant temporary = instant;
 
         for (PolitenessPolicy politenessPolicy : policies) {
-            Instant notBefore = politenessPolicy.notBefore(url, now);
+            Instant notBefore = politenessPolicy.notBefore(url, instant);
             if (notBefore != null && notBefore.isAfter(temporary)) {
                 temporary = notBefore;
             }

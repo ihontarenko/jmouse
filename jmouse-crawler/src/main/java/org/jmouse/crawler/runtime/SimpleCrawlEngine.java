@@ -8,22 +8,15 @@ import org.jmouse.crawler.spi.*;
 
 import java.time.Instant;
 
-public final class SimpleCrawlEngine implements ParallelCrawlEngine {
+public final class SimpleCrawlEngine implements CrawlEngine {
 
-    private static final String STAGE_PIPELINE          = "pipeline";
-    private static final String RETRY_REASON_POLITENESS = "politeness";
-    private static final int    MAX_ROUTE_HOPS          = 8;
+    private static final String STAGE_PIPELINE = "pipeline";
+    private static final int    MAX_ROUTE_HOPS = 8;
 
     private final CrawlRunContext runContext;
 
     public SimpleCrawlEngine(CrawlRunContext runContext) {
         this.runContext = Verify.nonNull(runContext, "runContext");
-    }
-
-    @Override
-    public void submit(CrawlTask task) {
-        Verify.nonNull(task, "task");
-        runContext.frontier().offer(task);
     }
 
     @Override
@@ -71,7 +64,7 @@ public final class SimpleCrawlEngine implements ParallelCrawlEngine {
             return TaskDisposition.completed();
         } catch (Throwable error) {
             RetryDecision retryDecision = runContext.retry().onFailure(task, error, now);
-            return mapRetryDecision(retryDecision, error, processingContext.routeId(), STAGE_PIPELINE);
+            return toTaskDisposition(retryDecision, error, processingContext.routeId(), STAGE_PIPELINE);
         }
     }
 
@@ -102,7 +95,7 @@ public final class SimpleCrawlEngine implements ParallelCrawlEngine {
         throw new IllegalStateException("Route hop limit exceeded (" + MAX_ROUTE_HOPS + ")");
     }
 
-    private TaskDisposition mapRetryDecision(
+    private TaskDisposition toTaskDisposition(
             RetryDecision retryDecision,
             Throwable error,
             String routeId,
@@ -111,15 +104,10 @@ public final class SimpleCrawlEngine implements ParallelCrawlEngine {
         return switch (retryDecision) {
             case RetryDecision.Retry(Instant notBefore, String reason) ->
                     TaskDisposition.retryLater(notBefore, reason, error, stageId, routeId);
-
             case RetryDecision.Discard(String reason) ->
                     TaskDisposition.discarded(reason);
-
             case RetryDecision.DeadLetter(String reason) ->
                     TaskDisposition.deadLetter(reason, error, stageId, routeId);
-
-            default ->
-                    TaskDisposition.deadLetter("Unknown retry decision: " + retryDecision, error, stageId, routeId);
         };
     }
 
@@ -128,22 +116,9 @@ public final class SimpleCrawlEngine implements ParallelCrawlEngine {
             return;
         }
 
-        System.out.println("DLQ: "
-                                   + runContext.deadLetterQueue().size()
-                                   + " FRONTIER: "
-                                   + runContext.frontier().size()
-                                   + " RETRY_BUFFER: "
-                                   + runContext.retryBuffer().size());
-
         if (disposition instanceof TaskDisposition.RetryLater retryLater) {
-            CrawlTask nextAttempt = task.attempt(now);
-            System.out.println(
-                    "RETRY: url=" + task.url() +
-                            " attempt=" + task.attempt() + " -> " + nextAttempt.attempt() +
-                            " notBefore=" + retryLater.notBefore() +
-                            " reason=" + retryLater.reason()
-            );
-            runContext.retryBuffer().schedule(nextAttempt, retryLater.notBefore(), retryLater.reason(), retryLater.error());
+            CrawlTask newTask = task.attempt(now);
+            runContext.retryBuffer().schedule(newTask, retryLater.notBefore(), retryLater.reason(), retryLater.error());
             return;
         }
 
