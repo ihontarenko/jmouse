@@ -8,8 +8,8 @@ import java.util.Objects;
 
 public final class PipelineBuilder {
 
-    private String id = "pipeline";
-    private final List<StepsPipeline.NamedStep> steps = new ArrayList<>();
+    private String                               id    = "pipeline";
+    private final List<StepsPipeline.StepHolder> steps = new ArrayList<>();
 
     public PipelineBuilder id(String id) {
         this.id = Objects.requireNonNull(id, "id");
@@ -17,7 +17,7 @@ public final class PipelineBuilder {
     }
 
     public PipelineBuilder step(String stepId, CrawlStep step) {
-        steps.add(new StepsPipeline.NamedStep(stepId, step));
+        steps.add(new StepsPipeline.StepHolder(stepId, step));
         return this;
     }
 

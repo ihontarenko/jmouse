@@ -1,5 +1,6 @@
 package org.jmouse.crawler.runtime;
 
+import org.jmouse.crawler.routing.CrawlRouteResolver;
 import org.jmouse.crawler.spi.*;
 
 import java.time.Clock;
@@ -11,6 +12,8 @@ public interface CrawlRunContext {
     RetryBuffer retryBuffer();
 
     DeadLetterQueue deadLetterQueue();
+
+    DecisionLog decisionLog();
 
     CrawlRouteResolver routes();
 

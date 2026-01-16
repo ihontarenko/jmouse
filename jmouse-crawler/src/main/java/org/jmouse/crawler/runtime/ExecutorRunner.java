@@ -85,9 +85,9 @@ public final class ExecutorRunner implements CrawlRunner {
         }
     }
 
-    private static Done takeWithTimeout(CompletionService<Done> cs, long millis) {
+    private static Done takeWithTimeout(CompletionService<Done> completionService, long millis) {
         try {
-            Future<Done> f = cs.poll(millis, TimeUnit.MILLISECONDS);
+            Future<Done> f = completionService.poll(millis, TimeUnit.MILLISECONDS);
             return (f != null) ? getQuietly(f) : null;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

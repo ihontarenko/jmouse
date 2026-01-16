@@ -1,5 +1,6 @@
 package org.jmouse.crawler.smoke.smoke2;
 
+import org.jmouse.crawler.html.CssSelector;
 import org.jmouse.crawler.routing.CrawlStep;
 import org.jmouse.crawler.routing.PipelineResult;
 import org.jmouse.crawler.runtime.CrawlProcessingContext;
@@ -24,10 +25,13 @@ public final class VoronListingProcessor implements CrawlStep {
                 ? ctx.fetchResult().finalUrl()
                 : ctx.task().url();
 
+        CssSelector cssSelector = ctx.utility(CssSelector.class);
+//        cssSelector.links(ctx.document(), "a[href^='/uk/catalog/']");
+
 //        // 1) product pages
-//        for (URI u : css.links(ctx.document(), productLinkCss, "href", base)) {
-//            ctx.enqueue(u, VoronHint.PRODUCT);
-//        }
+        for (URI u : cssSelector.links(ctx.document(), "a[href^='/uk/catalog/']")) {
+            ctx.enqueue(u, VoronHint.PRODUCT);
+        }
 //
 //        // 2) pagination
 //        URI next = css.firstLink(ctx.document(), nextPageCss, "href", base);
@@ -35,7 +39,7 @@ public final class VoronListingProcessor implements CrawlStep {
 //            ctx.enqueue(next, VoronHint.PAGINATION); // або LISTING — як тобі зручніше
 //        }
 
-        return PipelineResult.ok("listing");
+        return PipelineResult.goon("listing");
     }
 }
 

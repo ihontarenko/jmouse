@@ -1,8 +1,9 @@
 package org.jmouse.crawler.dsl;
 
 import org.jmouse.core.Verify;
+import org.jmouse.crawler.routing.CrawlRouteResolver;
 import org.jmouse.crawler.runtime.*;
-import org.jmouse.crawler.runtime.impl.InMemoryRetryBuffer;
+import org.jmouse.crawler.runtime.InMemoryRetryBuffer;
 import org.jmouse.crawler.spi.*;
 
 import java.time.Clock;
@@ -17,11 +18,12 @@ public final class CrawlerRuntimeBuilder {
     // io
     private Fetcher        fetcher;
     private ParserRegistry parserRegistry;
+    private DecisionLog    decisionLog;
 
     // policies
-    private SeenStore       seenStore;
-    private ScopePolicy     scopePolicy;
-    private RetryPolicy     retryPolicy;
+    private SeenStore        seenStore;
+    private ScopePolicy      scopePolicy;
+    private RetryPolicy      retryPolicy;
     private PolitenessPolicy politenessPolicy;
 
     // infra
@@ -43,6 +45,11 @@ public final class CrawlerRuntimeBuilder {
 
     public CrawlerRuntimeBuilder deadLetterQueue(DeadLetterQueue value) {
         this.deadLetterQueue = Verify.nonNull(value, "deadLetterQueue");
+        return this;
+    }
+
+    public CrawlerRuntimeBuilder decisionLog(DecisionLog value) {
+        this.decisionLog = Verify.nonNull(value, "decisionLog");
         return this;
     }
 
@@ -125,6 +132,10 @@ public final class CrawlerRuntimeBuilder {
             parserRegistry = ParserRegistries.noop();
         }
 
+        if (decisionLog == null) {
+            decisionLog = new InMemoryDecisionLog();
+        }
+
         Verify.state(fetcher != null,
                 "Fetcher must be configured via runtime.fetcher(...)");
     }
@@ -155,6 +166,7 @@ public final class CrawlerRuntimeBuilder {
                 frontier,
                 retryBuffer,
                 deadLetterQueue,
+                decisionLog,
                 routes,
                 fetcher,
                 parserRegistry,

@@ -1,174 +1,197 @@
 package org.jmouse.crawler.runtime;
 
-import org.jmouse.crawler.runtime.TaskDisposition.Completed;
-import org.jmouse.crawler.runtime.TaskDisposition.Discarded;
-import org.jmouse.crawler.runtime.TaskDisposition.RetryLater;
+import org.jmouse.core.Verify;
 import org.jmouse.crawler.routing.CrawlRoute;
+import org.jmouse.crawler.routing.CrawlRouteRegistry;
 import org.jmouse.crawler.routing.PipelineResult;
-import org.jmouse.crawler.spi.RetryDecision;
+import org.jmouse.crawler.spi.*;
 
 import java.time.Instant;
 import java.util.List;
 
 public final class SimpleCrawlEngine implements ParallelCrawlEngine {
 
-    private final CrawlRunContext run;
+    private static final String STAGE_PIPELINE          = "pipeline";
+    private static final String RETRY_REASON_POLITENESS = "politeness";
+    private static final int    MAX_ROUTE_HOPS          = 8;
 
-    public SimpleCrawlEngine(CrawlRunContext run) {
-        this.run = run;
+    private final CrawlRunContext runContext;
+
+    public SimpleCrawlEngine(CrawlRunContext runContext) {
+        this.runContext = Verify.nonNull(runContext, "runContext");
     }
 
     @Override
     public void submit(CrawlTask task) {
-        run.frontier().offer(task);
-    }
-
-    @Override
-    public boolean tick() {
-        Instant now = run.clock().instant();
-
-        boolean didWork = false;
-
-        // 1) Move ready retries back to frontier
-        List<CrawlTask> ready = run.retryBuffer().drainReady(now, 128);
-        if (!ready.isEmpty()) {
-            didWork = true;
-            for (CrawlTask t : ready) run.frontier().offer(t);
-        }
-
-        // 2) Take next task
-        CrawlTask task = run.frontier().poll();
-        if (task == null) {
-            return didWork; // false if nothing moved and nothing polled
-        }
-
-        // 3) Scope + seen gate
-        if (!run.scope().isAllowed(task)) return true;
-        if (!run.seen().firstTime(task.url())) return true;
-
-        // 4) Execute
-        TaskDisposition taskDisposition = executeTask(task, now);
-
-        // 5) Apply disposition
-        applyDisposition(task, taskDisposition, now);
-
-        return true;
+        Verify.nonNull(task, "task");
+        runContext.frontier().offer(task);
     }
 
     @Override
     public int moveReadyRetries(int max) {
-        Instant now = now();
-        List<CrawlTask> ready = run.retryBuffer().drainReady(now, max);
-        for (CrawlTask t : ready) {
-            run.frontier().offer(t);
+        Instant         now        = now();
+        List<CrawlTask> readyTasks = runContext.retryBuffer().drainReady(now, max);
+
+        for (CrawlTask readyTask : readyTasks) {
+            runContext.frontier().offer(readyTask);
         }
-        return ready.size();
+
+        return readyTasks.size();
     }
 
     @Override
     public CrawlTask poll() {
-        return run.frontier().poll();
-    }
-
-    @Override
-    public TaskDisposition execute(CrawlTask task, Instant now) {
-
-        if (!run.scope().isAllowed(task)) {
-            return TaskDisposition.discarded(run.scope().denyReason(task));
-        }
-
-        if (!run.seen().firstTime(task.url())) {
-            return TaskDisposition.discarded("duplicate");
-        }
-
-        Instant notBefore = run.politeness().notBefore(task.url(), now);
-        if (notBefore.isAfter(now)) {
-            return TaskDisposition.retryLater(notBefore, "politeness", null);
-        }
-
-        return executeTask(task, now);
+        return runContext.frontier().poll();
     }
 
     @Override
     public void apply(CrawlTask task, TaskDisposition disposition, Instant now) {
+        Verify.nonNull(task, "task");
+        Verify.nonNull(disposition, "disposition");
+        Verify.nonNull(now, "now");
         applyDisposition(task, disposition, now);
     }
 
     @Override
     public int frontierSize() {
-        return run.frontier().size();
+        return runContext.frontier().size();
     }
 
     @Override
     public int retrySize() {
-        return run.retryBuffer().size();
+        return runContext.retryBuffer().size();
     }
 
     @Override
     public Instant now() {
-        return run.clock().instant();
+        return runContext.clock().instant();
     }
 
-    private TaskDisposition executeTask(CrawlTask task, Instant now) {
-        DefaultCrawlProcessingContext context = new DefaultCrawlProcessingContext(task, run);
+    @Override
+    public TaskDisposition execute(CrawlTask task, Instant now) {
+        Verify.nonNull(task, "task");
+        Verify.nonNull(now, "now");
 
-        CrawlRoute route = run.routes().resolve(task, run);
+        ScopePolicy      scopePolicy      = runContext.scope();
+        SeenStore        seenStore        = runContext.seen();
+        PolitenessPolicy politenessPolicy = runContext.politeness();
+        Instant          notBefore        = politenessPolicy.notBefore(task.url(), now);
+
+        if (scopePolicy.isDisallowed(task)) {
+            return TaskDisposition.discarded(scopePolicy.denyReason(task));
+        }
+
+        if (notBefore.isAfter(now)) {
+            return TaskDisposition.retryLater(notBefore, RETRY_REASON_POLITENESS, null, STAGE_PIPELINE, "route:unknown");
+        }
+
+        if (seenStore.isProcessed(task.url())) {
+            return TaskDisposition.discarded("already processed");
+        }
+
+        return doExecutePipeline(task, now);
+    }
+
+    private TaskDisposition doExecutePipeline(CrawlTask task, Instant now) {
+        SeenStore                     seenStore         = runContext.seen();
+        DefaultCrawlProcessingContext processingContext = new DefaultCrawlProcessingContext(task, runContext);
+        CrawlRoute                    route             = runContext.routes().resolve(task, runContext);
 
         if (route == null) {
-            return TaskDisposition.deadLetter("No route resolved", null);
+            return TaskDisposition.deadLetter("No route resolved", null, STAGE_PIPELINE, "route:unknown");
         }
 
-        context.setRouteId(route.id());
+        processingContext.setRouteId(route.id());
 
         try {
-            PipelineResult result = route.pipeline().execute(context);
+            PipelineResult ignore = route.pipeline().execute(processingContext);
+            ignore = followRouteHops(processingContext, ignore);
+            seenStore.markProcessed(task.url());
             return TaskDisposition.completed();
         } catch (Throwable error) {
-            RetryDecision decision = run.retry().onFailure(task, error, now);
-
-            if (decision instanceof RetryDecision.Retry(Instant notBefore, String reason)) {
-                return TaskDisposition.retryLater(notBefore, reason, error);
-            }
-            if (decision instanceof RetryDecision.Discard(String reason)) {
-                return TaskDisposition.discarded(reason);
-            }
-            if (decision instanceof RetryDecision.DeadLetter(String reason)) {
-                return TaskDisposition.deadLetter(reason, error);
-            }
-            return TaskDisposition.deadLetter("Unknown retry decision", error);
+            RetryDecision retryDecision = runContext.retry().onFailure(task, error, now);
+            return mapRetryDecision(retryDecision, error, processingContext.routeId(), STAGE_PIPELINE);
         }
+    }
+
+    private PipelineResult followRouteHops(
+            DefaultCrawlProcessingContext processingContext,
+            PipelineResult initialResult
+    ) throws Exception {
+
+        PipelineResult currentResult = initialResult;
+
+        for (int hop = 1; hop <= MAX_ROUTE_HOPS; hop++) {
+            if (!(currentResult instanceof PipelineResult.Route routeInstruction)) {
+                return currentResult;
+            }
+
+            String nextRouteId = routeInstruction.routeId();
+
+            CrawlRouteRegistry registry = Verify.instanceOf(
+                    runContext.routes(), CrawlRouteRegistry.class, "runContext.routes"
+            );
+
+            CrawlRoute nextRoute = registry.byId(nextRouteId);
+            Verify.state(nextRoute != null, "next route not found: " + nextRouteId);
+            processingContext.setRouteId(nextRoute.id());
+            currentResult = nextRoute.pipeline().execute(processingContext);
+        }
+
+        throw new IllegalStateException("Route hop limit exceeded (" + MAX_ROUTE_HOPS + ")");
+    }
+
+    private TaskDisposition mapRetryDecision(
+            RetryDecision retryDecision,
+            Throwable error,
+            String routeId,
+            String stageId
+    ) {
+        return switch (retryDecision) {
+            case RetryDecision.Retry(Instant notBefore, String reason) ->
+                    TaskDisposition.retryLater(notBefore, reason, error, stageId, routeId);
+
+            case RetryDecision.Discard(String reason) ->
+                    TaskDisposition.discarded(reason);
+
+            case RetryDecision.DeadLetter(String reason) ->
+                    TaskDisposition.deadLetter(reason, error, stageId, routeId);
+
+            default ->
+                    TaskDisposition.deadLetter("Unknown retry decision: " + retryDecision, error, stageId, routeId);
+        };
     }
 
     private void applyDisposition(CrawlTask task, TaskDisposition disposition, Instant now) {
-        if (disposition instanceof Completed || disposition instanceof Discarded) {
+        if (disposition instanceof TaskDisposition.Completed || disposition instanceof TaskDisposition.Discarded) {
             return;
         }
 
-        if (disposition instanceof RetryLater(Instant notBefore, String reason, Throwable error)) {
-            CrawlTask next = task.nextAttempt(now);
-            run.retryBuffer().schedule(next, notBefore, reason, error);
+        System.out.println("DLQ: "
+                                   + runContext.deadLetterQueue().size()
+                                   + " FRONTIER: "
+                                   + runContext.frontier().size()
+                                   + " RETRY_BUFFER: "
+                                   + runContext.retryBuffer().size());
+
+        if (disposition instanceof TaskDisposition.RetryLater retryLater) {
+            CrawlTask nextAttempt = task.nextAttempt(now);
+            runContext.retryBuffer().schedule(nextAttempt, retryLater.notBefore(), retryLater.reason(), retryLater.error());
             return;
         }
 
-        if (disposition instanceof TaskDisposition.DeadLetter(String reason, Throwable error)) {
+        if (disposition instanceof TaskDisposition.DeadLetter(
+                String reason, Throwable error, String stageId, String routeId
+        )) {
             DeadLetterItem item = new DeadLetterItem(
                     now,
                     reason,
-                    "pipeline",
-                    "route:" + safe(run, task),
+                    stageId,
+                    routeId,
                     task.attempt(),
                     error
             );
-            run.deadLetterQueue().put(task, item);
-        }
-    }
-
-    private String safe(CrawlRunContext run, CrawlTask task) {
-        try {
-            CrawlRoute route = run.routes().resolve(task, run);
-            return route != null ? route.id() : "unknown";
-        } catch (Throwable ignored) {
-            return "unknown";
+            runContext.deadLetterQueue().put(task, item);
         }
     }
 }

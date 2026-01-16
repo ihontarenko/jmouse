@@ -11,15 +11,19 @@ public record FetchParsePipeline(String id) implements CrawlPipeline {
 
     @Override
     public PipelineResult execute(CrawlProcessingContext context) throws Exception {
-        FetchResult fetched = context.run().fetcher().fetch(new FetchRequest(context.task().url(), Map.of()));
-        Parser      parser  = context.run().parsers().resolve(fetched.contentType());
+        FetchResult fetched = context.run()
+                .fetcher()
+                .fetch(new FetchRequest(context.task().url(), Map.of()));
+
+        Parser parser = context.run().parsers().resolve(fetched.contentType());
+
         context.setFetchResult(fetched);
 
         if (parser != null) {
             context.setDocument(parser.parse(fetched));
         }
 
-        return PipelineResult.ok("fetch-parse");
+        return PipelineResult.goon("fetch-parse");
     }
 
 }

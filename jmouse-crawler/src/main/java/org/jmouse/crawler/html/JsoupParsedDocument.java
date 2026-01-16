@@ -1,7 +1,9 @@
 package org.jmouse.crawler.html;
 
 import org.jmouse.crawler.spi.ParsedDocument;
+import org.jsoup.helper.W3CDom;
 import org.jsoup.nodes.Document;
+import org.w3c.dom.Node;
 
 public record JsoupParsedDocument(Document document) implements ParsedDocument {
 
@@ -9,4 +11,13 @@ public record JsoupParsedDocument(Document document) implements ParsedDocument {
     public String type() {
         return "text/html";
     }
+
+    public org.w3c.dom.Document asW3C() {
+        return new W3CDom().fromJsoup(document);
+    }
+
+    public Node asW3CNode() {
+        return asW3C();
+    }
+
 }

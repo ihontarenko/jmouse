@@ -231,21 +231,21 @@ public final class Verify {
     }
 
     /**
-     * Validate that {@code obj} is an instance of {@code type}.
+     * Validate that {@code object} is an instance of {@code type}.
      *
-     * @param obj  value to validate
+     * @param object  value to validate
      * @param type required type
      * @param name argument name (used in the exception message)
      * @param <T>  required type
-     * @return {@code obj} cast to {@code T}
-     * @throws IllegalArgumentException if obj is {@code null} or not an instance of type
+     * @return {@code object} cast to {@code T}
+     * @throws IllegalArgumentException if object is {@code null} or not an instance of type
      */
-    public static <T> T instanceOf(Object obj, Class<T> type, String name) {
+    public static <T> T instanceOf(Object object, Class<T> type, String name) {
         argument(type, "type");
-        require(type.isInstance(obj),
+        require(type.isInstance(object),
                 "Argument '" + name + "' must be an instance of " + type.getName() +
-                        (obj == null ? ", but was null" : ", but was " + obj.getClass().getName()));
-        return type.cast(obj);
+                        (object == null ? ", but was null" : ", but was " + object.getClass().getName()));
+        return type.cast(object);
     }
 
     // -------------------------------------------------------------------------

@@ -2,23 +2,25 @@ package org.jmouse.crawler.runtime;
 
 import org.jmouse.crawler.spi.FetchResult;
 import org.jmouse.crawler.spi.ParsedDocument;
+import org.jmouse.crawler.spi.ScopePolicy;
+import org.jmouse.crawler.spi.SeenStore;
 
 import java.net.URI;
 
 public final class DefaultCrawlProcessingContext implements CrawlProcessingContext {
 
     private final CrawlTask       task;
-    private final CrawlRunContext run;
+    private final CrawlRunContext runContext;
     private final DecisionLog     decisions;
 
     private FetchResult    fetchResult;
     private ParsedDocument document;
     private String         routeId;
 
-    public DefaultCrawlProcessingContext(CrawlTask task, CrawlRunContext run) {
+    public DefaultCrawlProcessingContext(CrawlTask task, CrawlRunContext runContext) {
         this.task = task;
-        this.run = run;
-        this.decisions = new InMemoryDecisionLog();
+        this.runContext = runContext;
+        this.decisions = runContext.decisionLog();
     }
 
     @Override
@@ -28,7 +30,7 @@ public final class DefaultCrawlProcessingContext implements CrawlProcessingConte
 
     @Override
     public CrawlRunContext run() {
-        return run;
+        return runContext;
     }
 
     @Override
@@ -73,7 +75,10 @@ public final class DefaultCrawlProcessingContext implements CrawlProcessingConte
 
     @Override
     public void enqueue(URI url, CrawlHint hint) {
-        CrawlTask parent = this.task;
+        CrawlTask   parent      = this.task;
+        ScopePolicy scopePolicy = runContext.scope();
+        SeenStore   seenStore   = runContext.seen();
+        Frontier    frontier    = runContext.frontier();
 
         CrawlTask next = new CrawlTask(
                 url,
@@ -81,22 +86,22 @@ public final class DefaultCrawlProcessingContext implements CrawlProcessingConte
                 parent.url(),
                 "from:" + parent.url(),
                 parent.priority(),
-                run.clock().instant(),
+                runContext.clock().instant(),
                 0,
                 hint
         );
 
-        if (!run.scope().isAllowed(next)) {
-            decisions.reject("SCOPE", "denied");
+        if (!scopePolicy.isAllowed(next)) {
+            decisions.reject(DecisionCodes.SCOPE_DENY, "out of scope");
             return;
         }
 
-        if (!run.seen().firstTime(next.url())) {
-            decisions.reject("SEEN", "duplicate");
+        if (!seenStore.markDiscovered(next.url())) {
+            decisions.reject(DecisionCodes.DUPLICATE_DISCOVERED, "duplicate discovered");
             return;
         }
 
-        run.frontier().offer(next);
+        frontier.offer(next);
     }
 
 }

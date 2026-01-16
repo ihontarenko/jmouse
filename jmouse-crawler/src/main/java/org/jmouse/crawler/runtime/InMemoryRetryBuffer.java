@@ -1,7 +1,4 @@
-package org.jmouse.crawler.runtime.impl;
-
-import org.jmouse.crawler.runtime.CrawlTask;
-import org.jmouse.crawler.runtime.RetryBuffer;
+package org.jmouse.crawler.runtime;
 
 import java.time.Instant;
 import java.util.ArrayList;

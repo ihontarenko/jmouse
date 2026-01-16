@@ -2,7 +2,7 @@ package org.jmouse.crawler.dsl;
 
 import org.jmouse.crawler.routing.*;
 import org.jmouse.crawler.runtime.CrawlHint;
-import org.jmouse.crawler.runtime.CrawlRouteResolver;
+import org.jmouse.crawler.routing.CrawlRouteResolver;
 import org.jmouse.crawler.runtime.CrawlRunContext;
 import org.jmouse.crawler.runtime.CrawlTask;
 
@@ -18,7 +18,7 @@ public final class RoutesBuilder {
     }
 
     CrawlRouteResolver build() {
-        return new FirstMatchCrawlRouteResolver(routes);
+        return new FirstMatchRouteRegistry(routes);
     }
 
     void add(CrawlRoute route) {
@@ -68,11 +68,11 @@ public final class RoutesBuilder {
         }
     }
 
-    // Route implementation: hint-first handled by resolver, route supports hint set.
     private static final class HintAwareRoute implements CrawlRoute {
-        private final String id;
-        private final Set<String> hintIds;
-        private final UrlMatch match;
+
+        private final String        id;
+        private final Set<String>   hintIds;
+        private final UrlMatch      match;
         private final CrawlPipeline pipeline;
 
         HintAwareRoute(String id, Set<String> hintIds, UrlMatch match, CrawlPipeline pipeline) {

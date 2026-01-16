@@ -23,7 +23,7 @@ public final class RetryPolicies {
 
     private static final class SimpleRetryPolicy implements RetryPolicy {
 
-        private final int maxAttempts;
+        private final int      maxAttempts;
         private final Duration baseDelay;
 
         private SimpleRetryPolicy(int maxAttempts, Duration baseDelay) {
@@ -46,8 +46,8 @@ public final class RetryPolicies {
             }
 
             // Backoff: baseDelay * (attempt + 1)
-            Duration delay = baseDelay.multipliedBy((long) attempt + 1L);
-            Instant notBefore = now.plus(delay);
+            Duration delay     = baseDelay.multipliedBy((long) attempt + 1L);
+            Instant  notBefore = now.plus(delay);
 
             return RetryDecision.retry(notBefore, "Retry after " + delay);
         }

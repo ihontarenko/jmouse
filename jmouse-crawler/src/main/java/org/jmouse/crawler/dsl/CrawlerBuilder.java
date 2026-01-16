@@ -1,6 +1,7 @@
 package org.jmouse.crawler.dsl;
 
 import org.jmouse.core.Verify;
+import org.jmouse.crawler.routing.CrawlRouteResolver;
 import org.jmouse.crawler.runtime.CrawlTask;
 import org.jmouse.crawler.runtime.*;
 
@@ -69,8 +70,8 @@ public final class CrawlerBuilder {
     public Crawler build() {
         runtimeBuilder.ensureDefaults();
 
-        CrawlRouteResolver resolver = (CrawlRouteResolver) routesBuilder.build();
-        UtilityRegistry utilities = utilitiesBuilder.build();
+        CrawlRouteResolver resolver  = routesBuilder.build();
+        UtilityRegistry    utilities = utilitiesBuilder.build();
 
         CrawlRunContext runContext = runtimeBuilder.build(resolver, utilities);
 

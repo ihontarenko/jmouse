@@ -10,8 +10,9 @@ public final class InMemoryDeadLetterQueue implements DeadLetterQueue {
 
     @Override
     public void put(CrawlTask task, DeadLetterItem item) {
-        if (task == null || item == null) return;
-        queue.offer(new DeadLetterEntry(task, item));
+        if (task != null && item != null) {
+            queue.offer(new DeadLetterEntry(task, item));
+        }
     }
 
     @Override

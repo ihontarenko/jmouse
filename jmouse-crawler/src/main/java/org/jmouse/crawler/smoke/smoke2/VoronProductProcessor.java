@@ -18,12 +18,12 @@ public final class VoronProductProcessor implements CrawlStep {
         String title = "";
         if (title == null || title.isBlank()) {
             context.decisions().reject("NOT_FOUND", "title not found");
-            return new PipelineResult("OK", "product");
+            return PipelineResult.stop("title not found");
         }
 
         System.out.println("PRODUCT: " + title + " | " + context.task().url());
         context.decisions().accept("TITLE", title);
 
-        return PipelineResult.ok("product");
+        return PipelineResult.goon("product");
     }
 }

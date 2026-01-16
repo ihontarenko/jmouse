@@ -1,7 +1,6 @@
 package org.jmouse.crawler.runtime;
 
 import org.jmouse.crawler.spi.SeenStore;
-import org.jmouse.core.Verify;
 
 import java.net.URI;
 import java.util.Set;
@@ -9,24 +8,32 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class ConcurrentSeenStore implements SeenStore {
 
-    private final Set<String> seen;
+    private final Set<String> discovered = ConcurrentHashMap.newKeySet();
+    private final Set<String> processed  = ConcurrentHashMap.newKeySet();
 
-    public ConcurrentSeenStore() {
-        this.seen = ConcurrentHashMap.newKeySet();
+    private static String normalize(URI uri) {
+        return uri.toString();
     }
 
     @Override
-    public boolean firstTime(URI url) {
-        if (url == null) {
-            return false;
-        }
-        return seen.add(normalize(url));
+    public boolean markDiscovered(URI url) {
+        return discovered.add(normalize(url));
     }
 
-    private static String normalize(URI uri) {
-        // Minimal normalization. Extend later (strip fragments, normalize trailing slash, etc.)
-        String value = uri.toString();
-        Verify.nonNull(value, "uri");
-        return value;
+    @Override
+    public boolean markProcessed(URI url) {
+        return processed.add(normalize(url));
     }
+
+    @Override
+    public boolean isDiscovered(URI url) {
+        return discovered.contains(normalize(url));
+    }
+
+    @Override
+    public boolean isProcessed(URI url) {
+        return processed.contains(normalize(url));
+    }
+
 }
+

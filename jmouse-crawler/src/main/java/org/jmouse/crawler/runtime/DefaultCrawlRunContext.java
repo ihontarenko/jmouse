@@ -1,5 +1,6 @@
 package org.jmouse.crawler.runtime;
 
+import org.jmouse.crawler.routing.CrawlRouteResolver;
 import org.jmouse.crawler.spi.*;
 
 import java.time.Clock;
@@ -9,6 +10,7 @@ public final class DefaultCrawlRunContext implements CrawlRunContext {
     private final Frontier           frontier;
     private final RetryBuffer        retryBuffer;
     private final DeadLetterQueue    dlq;
+    private final DecisionLog        decisionLog;
     private final CrawlRouteResolver routes;
     private final Fetcher            fetcher;
     private final ParserRegistry     parsers;
@@ -24,6 +26,7 @@ public final class DefaultCrawlRunContext implements CrawlRunContext {
             Frontier frontier,
             RetryBuffer retryBuffer,
             DeadLetterQueue dlq,
+            DecisionLog decisionLog,
             CrawlRouteResolver routes,
             Fetcher fetcher,
             ParserRegistry parsers,
@@ -37,6 +40,7 @@ public final class DefaultCrawlRunContext implements CrawlRunContext {
         this.frontier = frontier;
         this.retryBuffer = retryBuffer;
         this.dlq = dlq;
+        this.decisionLog = decisionLog;
         this.routes = routes;
         this.fetcher = fetcher;
         this.parsers = parsers;
@@ -61,6 +65,11 @@ public final class DefaultCrawlRunContext implements CrawlRunContext {
     @Override
     public DeadLetterQueue deadLetterQueue() {
         return dlq;
+    }
+
+    @Override
+    public DecisionLog decisionLog() {
+        return decisionLog;
     }
 
     @Override
@@ -105,6 +114,6 @@ public final class DefaultCrawlRunContext implements CrawlRunContext {
 
     @Override
     public PolitenessPolicy politeness() {
-        return null;
+        return politeness;
     }
 }
