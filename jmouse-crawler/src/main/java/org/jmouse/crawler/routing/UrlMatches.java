@@ -7,12 +7,12 @@ public final class UrlMatches {
     private UrlMatches() {}
 
     public static ProcessingRouteTask any() {
-        return (t, r) -> true;
+        return c -> true;
     }
 
     public static ProcessingRouteTask host(String host) {
         String h = host.toLowerCase(Locale.ROOT);
-        return (t, r) -> t.url() != null && h.equalsIgnoreCase(t.url().getHost());
+        return (c) -> c.task().url() != null && h.equalsIgnoreCase(c.task().url().getHost());
     }
 
     public static ProcessingRouteTask pathPrefix(String prefix) {

@@ -17,6 +17,8 @@ import org.jmouse.crawler.spi.PolitenessPolicies;
 import java.time.Duration;
 import java.util.List;
 
+import static org.jmouse.crawler.routing.UrlMatches.*;
+
 public class Smoke2 {
 
     public static void main(String[] args) {
@@ -47,9 +49,9 @@ public class Smoke2 {
 
                     routes.route("VORON_LISTING")
                             .hints(VoronHint.LISTING, VoronHint.PAGINATION)
-                            .match(UrlMatches.all(
-                                    UrlMatches.host("voron.ua"),
-                                    UrlMatches.pathPrefix("/uk/catalog/")
+                            .match(all(
+                                    host("voron.ua"),
+                                    pathPrefix("/uk/catalog/")
                             ))
                             .pipeline(pipeline -> pipeline
                                     .id("voron-listing")
@@ -63,9 +65,9 @@ public class Smoke2 {
 
                     routes.route("VORON_PRODUCT")
                             .hints(VoronHint.PRODUCT)
-                            .match(UrlMatches.all(
-                                    UrlMatches.host("voron.ua"),
-                                    UrlMatches.pathPrefix("/uk/product/")
+                            .match(all(
+                                    host("voron.ua"),
+                                    pathPrefix("/uk/product/")
                             ))
                             .pipeline(pipeline -> pipeline
                                     .id("voron-product")
