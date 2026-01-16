@@ -13,7 +13,12 @@ public record CrawlTask(
         int attempt,
         CrawlHint hint
 ) {
-    public CrawlTask nextAttempt(Instant now) {
+    public CrawlTask attempt(Instant now) {
         return new CrawlTask(url, depth, parent, discoveredBy, priority, now, attempt + 1, hint);
     }
+
+    public CrawlTask schedule(Instant scheduledAt) {
+        return new CrawlTask(url, depth, parent, discoveredBy, priority, scheduledAt, attempt, hint);
+    }
+
 }

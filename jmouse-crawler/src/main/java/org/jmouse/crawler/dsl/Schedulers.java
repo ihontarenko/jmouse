@@ -18,6 +18,7 @@ public final class Schedulers {
         Verify.nonNull(maxParkDuration, "maxParkDuration");
         return runContext -> new DefaultCrawlScheduler(
                 runContext.frontier(),
+                runContext.politeness(),
                 runContext.retryBuffer(),
                 runContext.clock(),
                 retryDrainBatch,

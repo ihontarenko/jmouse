@@ -2,6 +2,7 @@ package org.jmouse.crawler.runtime;
 
 import org.jmouse.core.Verify;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.*;
@@ -11,8 +12,8 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
     private final ExecutorService executor;
     private final int             maxInFlight;
 
-    public ExecutorRunner(CrawlScheduler scheduler, ExecutorService executor, int maxInFlight) {
-        super(scheduler);
+    public ExecutorRunner(CrawlScheduler scheduler, Clock clock, ExecutorService executor, int maxInFlight) {
+        super(scheduler, clock);
         this.executor = Verify.nonNull(executor, "executor");
         this.maxInFlight = Math.max(1, maxInFlight);
     }
@@ -31,11 +32,9 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
                 ScheduleDecision decision = (lastDecision != null) ? lastDecision : scheduler.nextDecision();
                 lastDecision = null;
 
-                if (decision instanceof ScheduleDecision.TaskReady taskReady) {
-                    CrawlTask task = taskReady.task();
-                    Instant now = taskReady.now();
-
-                    completionService.submit(() -> new Done(task, parallelEngine.execute(task, now), now));
+                if (decision instanceof ScheduleDecision.TaskReady(CrawlTask task)) {
+                    // no now var
+                    completionService.submit(() -> new Done(task, parallelEngine.execute(task)));
                     inFlight++;
                     continue;
                 }
@@ -46,7 +45,7 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
             }
 
             // 2) Apply any completed work (non-blocking first)
-            int applied = drainCompletedNonBlocking(completionService, parallelEngine, inFlight);
+            int applied = drainCompletedNonBlocking(completionService, parallelEngine, clock, inFlight);
             inFlight -= applied;
 
             // 3) Decide what to do next
@@ -61,7 +60,7 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
                 // Scheduler drained, but workers are still running -> wait for at least one completion.
                 Done done = takeOne(completionService);
                 if (done != null) {
-                    parallelEngine.apply(done.task(), done.disposition(), done.now());
+                    parallelEngine.apply(done.task(), done.disposition(), clock.instant());
                     inFlight--;
                 }
                 continue;
@@ -79,7 +78,7 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
                 // - if duration is very small, just do a short poll.
                 Done done = pollOne(completionService, park.duration());
                 if (done != null) {
-                    parallelEngine.apply(done.task(), done.disposition(), done.now());
+                    parallelEngine.apply(done.task(), done.disposition(), clock.instant());
                     inFlight--;
                 } else {
                     // no completion -> park briefly (avoids busy spin)
@@ -99,7 +98,7 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
     private static int drainCompletedNonBlocking(
             CompletionService<Done> completionService,
             ParallelCrawlEngine engine,
-            int inFlight
+            Clock clock, int inFlight
     ) {
         int applied = 0;
 
@@ -110,7 +109,7 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
             }
 
             Done done = getQuietly(future);
-            engine.apply(done.task(), done.disposition(), done.now());
+            engine.apply(done.task(), done.disposition(), clock.instant());
             applied++;
         }
 
@@ -152,5 +151,5 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
         }
     }
 
-    private record Done(CrawlTask task, TaskDisposition disposition, Instant now) {}
+    private record Done(CrawlTask task, TaskDisposition disposition) {}
 }

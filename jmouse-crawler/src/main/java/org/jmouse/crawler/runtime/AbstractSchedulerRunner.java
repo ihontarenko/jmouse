@@ -2,14 +2,17 @@ package org.jmouse.crawler.runtime;
 
 import org.jmouse.core.Verify;
 
+import java.time.Clock;
 import java.time.Duration;
 
 public abstract class AbstractSchedulerRunner implements CrawlRunner {
 
     protected final CrawlScheduler scheduler;
+    protected final Clock          clock;
 
-    protected AbstractSchedulerRunner(CrawlScheduler scheduler) {
+    protected AbstractSchedulerRunner(CrawlScheduler scheduler, Clock clock) {
         this.scheduler = Verify.nonNull(scheduler, "scheduler");
+        this.clock = clock;
     }
 
     protected final void park(Duration duration) {

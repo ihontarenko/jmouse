@@ -1,32 +1,39 @@
 package org.jmouse.crawler.runtime;
 
-import org.jmouse.core.Verify;
+import org.jmouse.crawler.spi.PolitenessPolicy;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
+
+import static java.lang.Math.max;
+import static org.jmouse.core.Verify.nonNull;
 
 public final class DefaultCrawlScheduler implements CrawlScheduler {
 
-    private final Frontier    frontier;
-    private final RetryBuffer retryBuffer;
-    private final Clock       clock;
-    private final int         retryDrainBatch;
-    private final Duration    maxParkDuration;
+    private static final String REASON_POLITENESS = "politeness";
+
+    private final Frontier         frontier;
+    private final PolitenessPolicy politeness;
+    private final RetryBuffer      retryBuffer;
+    private final Clock            clock;
+    private final int              retryDrainBatch;
+    private final Duration         maxParkDuration;
 
     public DefaultCrawlScheduler(
             Frontier frontier,
+            PolitenessPolicy politeness,
             RetryBuffer retryBuffer,
             Clock clock,
             int retryDrainBatch,
             Duration maxParkDuration
     ) {
-        this.frontier = Verify.nonNull(frontier, "frontier");
-        this.retryBuffer = Verify.nonNull(retryBuffer, "retryBuffer");
-        this.clock = Verify.nonNull(clock, "clock");
-        this.retryDrainBatch = Math.max(1, retryDrainBatch);
-        this.maxParkDuration = Verify.nonNull(maxParkDuration, "maxParkDuration");
+        this.frontier = nonNull(frontier, "frontier");
+        this.retryBuffer = nonNull(retryBuffer, "retryBuffer");
+        this.politeness = nonNull(politeness, "politeness");
+        this.clock = nonNull(clock, "clock");
+        this.retryDrainBatch = max(1, retryDrainBatch);
+        this.maxParkDuration = nonNull(maxParkDuration, "maxParkDuration");
     }
 
     @Override
@@ -37,37 +44,44 @@ public final class DefaultCrawlScheduler implements CrawlScheduler {
 
         CrawlTask task = frontier.poll();
         if (task != null) {
-            return new ScheduleDecision.TaskReady(task, now);
+            // politeness gate HERE
+            Instant notBefore = politeness.notBefore(task.url(), now);
+            if (notBefore != null && notBefore.isAfter(now)) {
+                retryBuffer.schedule(task.schedule(notBefore), notBefore, REASON_POLITENESS, null);
+                return parkDecision(now);
+            }
+
+            return new ScheduleDecision.TaskReady(task);
         }
 
-        // no task in frontier
-        if (frontier.size() == 0 && retryBuffer.size() == 0) {
-            return ScheduleDecision.Drained.INSTANCE;
-        }
-
-        Instant nextNotBefore = retryBuffer.peekNotBefore();
-        if (nextNotBefore == null) {
-            // defensive fallback: if buffer has items but cannot peek
-            return new ScheduleDecision.Park(Duration.ofMillis(10), now.plusMillis(10));
-        }
-
-        Duration park = Duration.between(now, nextNotBefore);
-
-        if (park.isNegative()) {
-            park = Duration.ZERO;
-        }
-
-        if (park.compareTo(maxParkDuration) > 0) {
-            park = maxParkDuration;
-        }
-
-        return new ScheduleDecision.Park(park, nextNotBefore);
+        return parkOrDrained(now);
     }
 
     private void moveReadyRetries(Instant now) {
-        List<CrawlTask> readyTasks = retryBuffer.drainReady(now, retryDrainBatch);
-        for (CrawlTask readyTask : readyTasks) {
-            frontier.offer(readyTask);
+        for (CrawlTask ready : retryBuffer.drainReady(now, retryDrainBatch)) {
+            frontier.offer(ready);
         }
     }
+
+    private ScheduleDecision parkOrDrained(Instant now) {
+        if (frontier.size() == 0 && retryBuffer.size() == 0) {
+            return ScheduleDecision.Drained.INSTANCE;
+        }
+        return parkDecision(now);
+    }
+
+    private ScheduleDecision parkDecision(Instant now) {
+        Instant nextNotBefore = retryBuffer.peekNotBefore();
+        if (nextNotBefore == null) {
+            Duration fallback = Duration.ofMillis(10);
+            return new ScheduleDecision.Park(fallback, now.plus(fallback));
+        }
+
+        Duration park = Duration.between(now, nextNotBefore);
+        if (park.isNegative()) park = Duration.ZERO;
+        if (park.compareTo(maxParkDuration) > 0) park = maxParkDuration;
+
+        return new ScheduleDecision.Park(park, nextNotBefore);
+    }
 }
+

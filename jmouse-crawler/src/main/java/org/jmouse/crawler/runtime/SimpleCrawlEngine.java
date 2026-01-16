@@ -35,21 +35,15 @@ public final class SimpleCrawlEngine implements ParallelCrawlEngine {
     }
 
     @Override
-    public TaskDisposition execute(CrawlTask task, Instant now) {
+    public TaskDisposition execute(CrawlTask task) {
         Verify.nonNull(task, "task");
-        Verify.nonNull(now, "now");
 
+        Instant          now              = runContext.clock().instant();
         ScopePolicy      scopePolicy      = runContext.scope();
         SeenStore        seenStore        = runContext.seen();
-        PolitenessPolicy politenessPolicy = runContext.politeness();
-        Instant          notBefore        = politenessPolicy.notBefore(task.url(), now);
 
         if (scopePolicy.isDisallowed(task)) {
             return TaskDisposition.discarded(scopePolicy.denyReason(task));
-        }
-
-        if (notBefore.isAfter(now)) {
-            return TaskDisposition.retryLater(notBefore, RETRY_REASON_POLITENESS, null, STAGE_PIPELINE, "route:unknown");
         }
 
         if (seenStore.isProcessed(task.url())) {
@@ -142,7 +136,13 @@ public final class SimpleCrawlEngine implements ParallelCrawlEngine {
                                    + runContext.retryBuffer().size());
 
         if (disposition instanceof TaskDisposition.RetryLater retryLater) {
-            CrawlTask nextAttempt = task.nextAttempt(now);
+            CrawlTask nextAttempt = task.attempt(now);
+            System.out.println(
+                    "RETRY: url=" + task.url() +
+                            " attempt=" + task.attempt() + " -> " + nextAttempt.attempt() +
+                            " notBefore=" + retryLater.notBefore() +
+                            " reason=" + retryLater.reason()
+            );
             runContext.retryBuffer().schedule(nextAttempt, retryLater.notBefore(), retryLater.reason(), retryLater.error());
             return;
         }

@@ -11,17 +11,17 @@ public final class Runners {
     private Runners() {}
 
     public static CrawlRunnerFactory singleThread() {
-        return (runContext, scheduler) -> new SingleThreadRunner(scheduler);
+        return (context, scheduler) -> new SingleThreadRunner(scheduler, context.clock());
     }
 
     public static CrawlRunnerFactory executor(int threads, int maxInFlight) {
-        return (runContext, scheduler) -> {
+        return (context, scheduler) -> {
             ExecutorService executor = Executors.newFixedThreadPool(threads);
-            return new ExecutorRunner(scheduler, executor, maxInFlight);
+            return new ExecutorRunner(scheduler, context.clock(), executor, maxInFlight);
         };
     }
 
     public static CrawlRunnerFactory executor(ExecutorService executor, int maxInFlight) {
-        return (runContext, scheduler) -> new ExecutorRunner(scheduler, executor, maxInFlight);
+        return (context, scheduler) -> new ExecutorRunner(scheduler, context.clock(), executor, maxInFlight);
     }
 }
