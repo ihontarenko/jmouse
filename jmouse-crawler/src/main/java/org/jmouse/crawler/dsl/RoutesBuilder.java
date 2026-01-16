@@ -1,37 +1,39 @@
 package org.jmouse.crawler.dsl;
 
+import org.jmouse.core.Verify;
 import org.jmouse.crawler.routing.*;
-import org.jmouse.crawler.runtime.CrawlHint;
-import org.jmouse.crawler.routing.CrawlRouteResolver;
-import org.jmouse.crawler.runtime.CrawlRunContext;
-import org.jmouse.crawler.runtime.CrawlTask;
+import org.jmouse.crawler.runtime.RoutingHint;
+import org.jmouse.crawler.routing.ProcessingRouteResolver;
+import org.jmouse.crawler.runtime.RunContext;
+import org.jmouse.crawler.runtime.ProcessingTask;
 
 import java.util.*;
 import java.util.function.Consumer;
 
 public final class RoutesBuilder {
 
-    private final List<CrawlRoute> routes = new ArrayList<>();
+    private final List<ProcessingRoute> routes = new ArrayList<>();
 
     public RouteSpecification route(String id) {
         return new RouteSpecification(this, id);
     }
 
-    CrawlRouteResolver build() {
+    ProcessingRouteResolver build() {
         return new FirstMatchRouteRegistry(routes);
     }
 
-    void add(CrawlRoute route) {
+    void add(ProcessingRoute route) {
         routes.add(route);
     }
 
     public static final class RouteSpecification {
+
         private final RoutesBuilder parent;
         private final String        id;
         private final Set<String>   hintIds = new LinkedHashSet<>();
 
-        private UrlMatch      match = UrlMatches.any();
-        private CrawlPipeline pipeline;
+        private ProcessingRouteTask match = UrlMatches.any();
+        private CrawlPipeline       pipeline;
 
         RouteSpecification(RoutesBuilder parent, String id) {
             this.parent = parent;
@@ -39,60 +41,64 @@ public final class RoutesBuilder {
         }
 
         public RouteSpecification hints(Object... clientHints) {
-            for (Object h : clientHints) {
-                if (h == null) continue;
-                if (h instanceof CrawlHint ch) hintIds.add(ch.id());
-                else if (h instanceof Enum<?> e) hintIds.add(e.name());
-                else hintIds.add(String.valueOf(h));
+            for (Object hint : clientHints) {
+                switch (hint) {
+                    case null -> {}
+                    case RoutingHint routingHint -> hintIds.add(routingHint.id());
+                    case Enum<?> enumValue -> hintIds.add(enumValue.name());
+                    default -> hintIds.add(String.valueOf(hint));
+                }
             }
             return this;
         }
 
-        public RouteSpecification match(UrlMatch match) {
-            this.match = Objects.requireNonNull(match, "match");
+        public RouteSpecification match(ProcessingRouteTask match) {
+            this.match = Verify.nonNull(match, "match");
             return this;
         }
 
-        public RouteSpecification pipeline(Consumer<PipelineBuilder> c) {
-            PipelineBuilder pb = new PipelineBuilder();
-            c.accept(pb);
-            this.pipeline = pb.build();
+        public RouteSpecification pipeline(Consumer<PipelineBuilder> consumer) {
+            PipelineBuilder pipelineBuilder = new PipelineBuilder();
+            consumer.accept(pipelineBuilder);
+            this.pipeline = pipelineBuilder.build();
             return this;
         }
 
         public void register() {
-            if (pipeline == null) {
-                throw new IllegalStateException("pipeline is required for route: " + id);
-            }
-            parent.add(new HintAwareRoute(id, hintIds, match, pipeline));
+            parent.add(new HintAwareRoute(
+                    id, hintIds, match, Verify.nonNull(pipeline, "pipeline")
+            ));
         }
+
     }
 
-    private static final class HintAwareRoute implements CrawlRoute {
+    private record HintAwareRoute(
+            String id,
+            Set<String> hintIds,
+            ProcessingRouteTask match,
+            CrawlPipeline pipeline
+    )
+        implements ProcessingRoute {
 
-        private final String        id;
-        private final Set<String>   hintIds;
-        private final UrlMatch      match;
-        private final CrawlPipeline pipeline;
-
-        HintAwareRoute(String id, Set<String> hintIds, UrlMatch match, CrawlPipeline pipeline) {
+        private HintAwareRoute(
+                String id, Set<String> hintIds,
+                ProcessingRouteTask match, CrawlPipeline pipeline
+        ) {
             this.id = id;
             this.hintIds = Set.copyOf(hintIds);
             this.match = match;
             this.pipeline = pipeline;
         }
 
-        @Override public String id() { return id; }
-        @Override public CrawlPipeline pipeline() { return pipeline; }
-
         @Override
-        public boolean matches(CrawlTask task, CrawlRunContext run) {
-            return false;
+        public boolean matches(ProcessingTask task, RunContext run) {
+            return match.matches(new ProcessingRouteTask.Candidate(task, run));
         }
 
         @Override
-        public boolean supportsHint(CrawlHint hint) {
+        public boolean supportsHint(RoutingHint hint) {
             return hint != null && hintIds.contains(hint.id());
         }
+
     }
 }

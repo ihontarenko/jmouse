@@ -11,19 +11,19 @@ public final class InMemoryRetryBuffer implements RetryBuffer {
     private final PriorityBlockingQueue<Item> queue = new PriorityBlockingQueue<>(128, Comparator.comparing(Item::notBefore));
 
     @Override
-    public void schedule(CrawlTask task, Instant notBefore, String reason, Throwable error) {
+    public void schedule(ProcessingTask task, Instant notBefore, String reason, Throwable error) {
         if (task != null && notBefore != null) {
             queue.offer(new Item(notBefore, task, reason, error));
         }
     }
 
     @Override
-    public List<CrawlTask> drainReady(Instant now, int max) {
+    public List<ProcessingTask> drainReady(Instant now, int max) {
         if (now == null || max <= 0) {
             return List.of();
         }
 
-        List<CrawlTask> ready = new ArrayList<>(Math.min(max, 64));
+        List<ProcessingTask> ready = new ArrayList<>(Math.min(max, 64));
 
         while (ready.size() < max) {
             Item head = queue.peek();
@@ -55,5 +55,5 @@ public final class InMemoryRetryBuffer implements RetryBuffer {
         return head.notBefore();
     }
 
-    private record Item(Instant notBefore, CrawlTask task, String reason, Throwable error) { }
+    private record Item(Instant notBefore, ProcessingTask task, String reason, Throwable error) { }
 }

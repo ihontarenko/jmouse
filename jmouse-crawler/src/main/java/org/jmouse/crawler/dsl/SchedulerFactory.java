@@ -1,9 +1,9 @@
 package org.jmouse.crawler.dsl;
 
-import org.jmouse.crawler.runtime.CrawlRunContext;
-import org.jmouse.crawler.runtime.CrawlScheduler;
+import org.jmouse.crawler.runtime.RunContext;
+import org.jmouse.crawler.runtime.JobScheduler;
 
 @FunctionalInterface
 public interface SchedulerFactory {
-    CrawlScheduler create(CrawlRunContext runContext);
+    JobScheduler create(RunContext runContext);
 }

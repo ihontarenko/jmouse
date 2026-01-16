@@ -1,4 +1,4 @@
-package org.jmouse.crawler.html;
+package org.jmouse.crawler.content;
 
 import com.jayway.jsonpath.JsonPath;
 import org.jmouse.core.Verify;

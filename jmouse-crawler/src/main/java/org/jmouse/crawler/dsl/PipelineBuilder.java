@@ -16,7 +16,7 @@ public final class PipelineBuilder {
         return this;
     }
 
-    public PipelineBuilder step(String stepId, CrawlStep step) {
+    public PipelineBuilder step(String stepId, PipelineStep step) {
         steps.add(new StepsPipeline.StepHolder(stepId, step));
         return this;
     }

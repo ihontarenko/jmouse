@@ -5,7 +5,6 @@ import org.jmouse.core.Verify;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -24,32 +23,32 @@ public final class PerHostMinDelayPolitenessPolicy implements PolitenessPolicy {
     }
 
     @Override
-    public Instant notBefore(URI url, Instant now) {
-        if (url == null || now == null) {
-            return now;
+    public Instant notBefore(URI url, Instant instant) {
+        if (url == null || instant == null) {
+            return instant;
         }
 
         String host = url.getHost();
 
         if (host == null || host.isBlank()) {
-            return now;
+            return instant;
         }
 
         final Holder holder = new Holder();
 
         nextAllowed.compute(host, (h, previousNextAllowed) -> {
-            Instant nextAllowed = (previousNextAllowed == null) ? now : previousNextAllowed;
+            Instant nextAllowed = (previousNextAllowed == null) ? instant : previousNextAllowed;
 
-            if (!nextAllowed.isAfter(now)) {
-                holder.notBefore = now;
-                return now.plus(minDelay);
+            if (!nextAllowed.isAfter(instant)) {
+                holder.notBefore = instant;
+                return instant.plus(minDelay);
             }
 
             holder.notBefore = nextAllowed;
             return nextAllowed;
         });
 
-        return holder.notBefore != null ? holder.notBefore : now;
+        return holder.notBefore != null ? holder.notBefore : instant;
     }
 
     private static final class Holder {

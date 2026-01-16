@@ -9,7 +9,7 @@ public final class InMemoryDeadLetterQueue implements DeadLetterQueue {
     private final ConcurrentLinkedQueue<DeadLetterEntry> queue = new ConcurrentLinkedQueue<>();
 
     @Override
-    public void put(CrawlTask task, DeadLetterItem item) {
+    public void put(ProcessingTask task, DeadLetterItem item) {
         if (task != null && item != null) {
             queue.offer(new DeadLetterEntry(task, item));
         }

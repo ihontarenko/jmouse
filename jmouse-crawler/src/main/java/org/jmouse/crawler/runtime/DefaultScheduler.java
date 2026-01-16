@@ -9,7 +9,7 @@ import java.time.Instant;
 import static java.lang.Math.max;
 import static org.jmouse.core.Verify.nonNull;
 
-public final class DefaultCrawlScheduler implements CrawlScheduler {
+public final class DefaultScheduler implements JobScheduler {
 
     private static final String REASON_POLITENESS = "politeness";
 
@@ -22,7 +22,7 @@ public final class DefaultCrawlScheduler implements CrawlScheduler {
     private final Duration         minDuration       = Duration.ZERO;
     private final int              scanFrontierBatch = 128;
 
-    public DefaultCrawlScheduler(
+    public DefaultScheduler(
             Frontier frontier,
             PolitenessPolicy politeness,
             RetryBuffer retryBuffer,
@@ -45,7 +45,7 @@ public final class DefaultCrawlScheduler implements CrawlScheduler {
         moveReadyRetries(now);
 
         for (int i = 0; i < scanFrontierBatch; i++) {
-            CrawlTask task = frontier.poll();
+            ProcessingTask task = frontier.poll();
 
             if (task == null) {
                 break;
@@ -65,7 +65,7 @@ public final class DefaultCrawlScheduler implements CrawlScheduler {
     }
 
     private void moveReadyRetries(Instant now) {
-        for (CrawlTask ready : retryBuffer.drainReady(now, retryDrainBatch)) {
+        for (ProcessingTask ready : retryBuffer.drainReady(now, retryDrainBatch)) {
             frontier.offer(ready);
         }
     }

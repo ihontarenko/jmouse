@@ -1,18 +1,18 @@
 package org.jmouse.crawler.runtime;
 
-import org.jmouse.crawler.routing.CrawlRouteResolver;
+import org.jmouse.crawler.routing.ProcessingRouteResolver;
 import org.jmouse.crawler.spi.*;
 
 import java.time.Clock;
 
-public final class DefaultCrawlRunContext implements CrawlRunContext {
+public final class DefaultRunContext implements RunContext {
 
     private final Frontier           frontier;
     private final RetryBuffer        retryBuffer;
     private final DeadLetterQueue    dlq;
-    private final DecisionLog        decisionLog;
-    private final CrawlRouteResolver routes;
-    private final Fetcher            fetcher;
+    private final DecisionLog             decisionLog;
+    private final ProcessingRouteResolver routes;
+    private final Fetcher                 fetcher;
     private final ParserRegistry     parsers;
     private final SeenStore          seen;
     private final ScopePolicy        scope;
@@ -22,12 +22,12 @@ public final class DefaultCrawlRunContext implements CrawlRunContext {
 
     private final Clock clock;
 
-    public DefaultCrawlRunContext(
+    public DefaultRunContext(
             Frontier frontier,
             RetryBuffer retryBuffer,
             DeadLetterQueue dlq,
             DecisionLog decisionLog,
-            CrawlRouteResolver routes,
+            ProcessingRouteResolver routes,
             Fetcher fetcher,
             ParserRegistry parsers,
             SeenStore seen,
@@ -73,7 +73,7 @@ public final class DefaultCrawlRunContext implements CrawlRunContext {
     }
 
     @Override
-    public CrawlRouteResolver routes() {
+    public ProcessingRouteResolver routes() {
         return routes;
     }
 

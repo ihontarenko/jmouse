@@ -13,12 +13,12 @@ public final class ScopePolicies {
     private static final class AllowAllScopePolicy implements ScopePolicy {
 
         @Override
-        public boolean isAllowed(CrawlTask task) {
+        public boolean isAllowed(ProcessingTask task) {
             return true;
         }
 
         @Override
-        public String denyReason(CrawlTask task) {
+        public String denyReason(ProcessingTask task) {
             return null;
         }
     }

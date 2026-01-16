@@ -1,11 +1,11 @@
 package org.jmouse.crawler.runtime;
 
-import org.jmouse.crawler.routing.CrawlRouteResolver;
+import org.jmouse.crawler.routing.ProcessingRouteResolver;
 import org.jmouse.crawler.spi.*;
 
 import java.time.Clock;
 
-public interface CrawlRunContext {
+public interface RunContext {
 
     Frontier frontier();
 
@@ -15,7 +15,7 @@ public interface CrawlRunContext {
 
     DecisionLog decisionLog();
 
-    CrawlRouteResolver routes();
+    ProcessingRouteResolver routes();
 
     Fetcher fetcher();
 

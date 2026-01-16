@@ -4,15 +4,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public final class FifoFrontier implements Frontier {
 
-    private final ConcurrentLinkedQueue<CrawlTask> queue = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<ProcessingTask> queue = new ConcurrentLinkedQueue<>();
 
     @Override
-    public void offer(CrawlTask task) {
+    public void offer(ProcessingTask task) {
         if (task != null) queue.offer(task);
     }
 
     @Override
-    public CrawlTask poll() {
+    public ProcessingTask poll() {
         return queue.poll();
     }
 

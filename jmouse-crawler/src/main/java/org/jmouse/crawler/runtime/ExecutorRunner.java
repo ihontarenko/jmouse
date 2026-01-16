@@ -11,15 +11,15 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
     private final ExecutorService executor;
     private final int             maxInFlight;
 
-    public ExecutorRunner(CrawlScheduler scheduler, Clock clock, ExecutorService executor, int maxInFlight) {
+    public ExecutorRunner(JobScheduler scheduler, Clock clock, ExecutorService executor, int maxInFlight) {
         super(scheduler, clock);
         this.executor = Verify.nonNull(executor, "executor");
         this.maxInFlight = Math.max(1, maxInFlight);
     }
 
     @Override
-    public void runUntilDrained(CrawlEngine engine) {
-        CrawlEngine             parallelEngine    = requireParallel(engine);
+    public void runUntilDrained(ProcessingEngine engine) {
+        ProcessingEngine        parallelEngine    = requireParallel(engine);
         CompletionService<Done> completionService = new ExecutorCompletionService<>(executor);
         int                     inFlight          = 0;
         ScheduleDecision        lastDecision      = null;
@@ -31,7 +31,7 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
                 ScheduleDecision decision = (lastDecision != null) ? lastDecision : scheduler.nextDecision();
                 lastDecision = null;
 
-                if (decision instanceof ScheduleDecision.TaskReady(CrawlTask task)) {
+                if (decision instanceof ScheduleDecision.TaskReady(ProcessingTask task)) {
                     // no now var
                     completionService.submit(() -> new Done(task, parallelEngine.execute(task)));
                     inFlight++;
@@ -96,7 +96,7 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
 
     private static int drainCompletedNonBlocking(
             CompletionService<Done> completionService,
-            CrawlEngine engine,
+            ProcessingEngine engine,
             Clock clock, int inFlight
     ) {
         int applied = 0;
@@ -150,5 +150,5 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
         }
     }
 
-    private record Done(CrawlTask task, TaskDisposition disposition) {}
+    private record Done(ProcessingTask task, TaskDisposition disposition) {}
 }

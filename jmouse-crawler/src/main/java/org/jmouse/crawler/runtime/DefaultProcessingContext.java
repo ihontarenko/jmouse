@@ -7,29 +7,29 @@ import org.jmouse.crawler.spi.SeenStore;
 
 import java.net.URI;
 
-public final class DefaultCrawlProcessingContext implements CrawlProcessingContext {
+public final class DefaultProcessingContext implements ProcessingContext {
 
-    private final CrawlTask       task;
-    private final CrawlRunContext runContext;
-    private final DecisionLog     decisions;
+    private final ProcessingTask task;
+    private final RunContext     runContext;
+    private final DecisionLog    decisions;
 
     private FetchResult    fetchResult;
     private ParsedDocument document;
     private String         routeId;
 
-    public DefaultCrawlProcessingContext(CrawlTask task, CrawlRunContext runContext) {
+    public DefaultProcessingContext(ProcessingTask task, RunContext runContext) {
         this.task = task;
         this.runContext = runContext;
         this.decisions = runContext.decisionLog();
     }
 
     @Override
-    public CrawlTask task() {
+    public ProcessingTask task() {
         return task;
     }
 
     @Override
-    public CrawlRunContext run() {
+    public RunContext run() {
         return runContext;
     }
 
@@ -74,13 +74,13 @@ public final class DefaultCrawlProcessingContext implements CrawlProcessingConte
     }
 
     @Override
-    public void enqueue(URI url, CrawlHint hint) {
-        CrawlTask   parent      = this.task;
-        ScopePolicy scopePolicy = runContext.scope();
-        SeenStore   seenStore   = runContext.seen();
-        Frontier    frontier    = runContext.frontier();
+    public void enqueue(URI url, RoutingHint hint) {
+        ProcessingTask parent      = this.task;
+        ScopePolicy    scopePolicy = runContext.scope();
+        SeenStore      seenStore   = runContext.seen();
+        Frontier       frontier    = runContext.frontier();
 
-        CrawlTask next = new CrawlTask(
+        ProcessingTask next = new ProcessingTask(
                 url,
                 parent.depth() + 1,
                 parent.url(),

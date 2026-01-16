@@ -5,11 +5,11 @@ import org.jmouse.crawler.spi.ParsedDocument;
 
 import java.net.URI;
 
-public interface CrawlProcessingContext {
+public interface ProcessingContext {
 
-    CrawlTask task();
+    ProcessingTask task();
 
-    CrawlRunContext run();
+    RunContext run();
 
     FetchResult fetchResult();
 
@@ -27,7 +27,7 @@ public interface CrawlProcessingContext {
 
     void enqueue(URI url);
 
-    void enqueue(URI url, CrawlHint hint);
+    void enqueue(URI url, RoutingHint hint);
 
     default <T> T utility(Class<T> type) {
         return run().utilities().get(type);

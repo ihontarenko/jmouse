@@ -1,24 +1,24 @@
 package org.jmouse.crawler.routing;
 
-import org.jmouse.crawler.runtime.CrawlRunContext;
-import org.jmouse.crawler.runtime.CrawlTask;
+import org.jmouse.crawler.runtime.RunContext;
+import org.jmouse.crawler.runtime.ProcessingTask;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class FirstMatchRouteRegistry implements CrawlRouteRegistry {
+public final class FirstMatchRouteRegistry implements ProcessingRouteRegistry {
 
-    private final List<CrawlRoute>        routes;
-    private final Map<String, CrawlRoute> byId;
+    private final List<ProcessingRoute>        routes;
+    private final Map<String, ProcessingRoute> byId;
 
-    public FirstMatchRouteRegistry(List<CrawlRoute> routes) {
+    public FirstMatchRouteRegistry(List<ProcessingRoute> routes) {
         this.routes = List.copyOf(routes);
 
-        Map<String, CrawlRoute> index = new LinkedHashMap<>();
+        Map<String, ProcessingRoute> index = new LinkedHashMap<>();
 
-        for (CrawlRoute route : this.routes) {
+        for (ProcessingRoute route : this.routes) {
             index.put(route.id(), route);
         }
 
@@ -26,11 +26,11 @@ public final class FirstMatchRouteRegistry implements CrawlRouteRegistry {
     }
 
     @Override
-    public CrawlRoute resolve(CrawlTask task, CrawlRunContext runContext) {
-        CrawlRoute matched = null;
+    public ProcessingRoute resolve(ProcessingTask task, RunContext runContext) {
+        ProcessingRoute matched = null;
 
         if (task.hint() != null) {
-            for (CrawlRoute route : routes) {
+            for (ProcessingRoute route : routes) {
                 if (route.supportsHint(task.hint())) {
                     matched = route;
                     break;
@@ -39,7 +39,8 @@ public final class FirstMatchRouteRegistry implements CrawlRouteRegistry {
         }
 
         if (matched == null) {
-            for (CrawlRoute route : routes) {
+            for (ProcessingRoute route : routes) {
+
                 if (route.matches(task, runContext)) {
                     matched = route;
                     break;
@@ -51,7 +52,7 @@ public final class FirstMatchRouteRegistry implements CrawlRouteRegistry {
     }
 
     @Override
-    public CrawlRoute byId(String routeId) {
+    public ProcessingRoute byId(String routeId) {
         return byId.get(routeId);
     }
 }

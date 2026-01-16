@@ -2,7 +2,7 @@ package org.jmouse.crawler.smoke;
 
 import org.jmouse.crawler.dsl.CrawlerBuilder;
 import org.jmouse.crawler.dsl.Runners;
-import org.jmouse.crawler.html.*;
+import org.jmouse.crawler.content.*;
 import org.jmouse.crawler.http.HttpClientFetcher;
 import org.jmouse.crawler.http.HttpFetcherConfig;
 import org.jmouse.crawler.routing.*;

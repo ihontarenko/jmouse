@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface DeadLetterQueue {
 
-    void put(CrawlTask task, DeadLetterItem item);
+    void put(ProcessingTask task, DeadLetterItem item);
 
     List<DeadLetterEntry> pollBatch(int max);
 

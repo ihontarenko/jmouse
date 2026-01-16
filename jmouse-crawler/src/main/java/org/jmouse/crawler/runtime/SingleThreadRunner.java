@@ -5,18 +5,18 @@ import java.time.Instant;
 
 public final class SingleThreadRunner extends AbstractSchedulerRunner {
 
-    public SingleThreadRunner(CrawlScheduler scheduler, Clock clock) {
+    public SingleThreadRunner(JobScheduler scheduler, Clock clock) {
         super(scheduler, clock);
     }
 
     @Override
-    public void runUntilDrained(CrawlEngine engine) {
-        CrawlEngine parallelEngine = requireParallel(engine);
+    public void runUntilDrained(ProcessingEngine engine) {
+        ProcessingEngine parallelEngine = requireParallel(engine);
         while (true) {
             switch (scheduler.nextDecision()) {
                 case ScheduleDecision.TaskReady taskReady -> {
-                    CrawlTask task = taskReady.task();
-                    Instant now = clock.instant();
+                    ProcessingTask task = taskReady.task();
+                    Instant        now  = clock.instant();
                     TaskDisposition disposition = parallelEngine.execute(task);
                     parallelEngine.apply(task, disposition, now);
                 }

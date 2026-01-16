@@ -32,7 +32,7 @@ public final class RetryPolicies {
         }
 
         @Override
-        public RetryDecision onFailure(CrawlTask task, Throwable error, Instant now) {
+        public RetryDecision onFailure(ProcessingTask task, Throwable error, Instant now) {
             if (task == null || now == null) {
                 return RetryDecision.deadLetter("Invalid retry evaluation context");
             }

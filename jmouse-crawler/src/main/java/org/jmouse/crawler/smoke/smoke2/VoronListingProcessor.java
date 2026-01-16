@@ -1,13 +1,13 @@
 package org.jmouse.crawler.smoke.smoke2;
 
-import org.jmouse.crawler.html.CssSelector;
-import org.jmouse.crawler.routing.CrawlStep;
+import org.jmouse.crawler.content.CssSelector;
+import org.jmouse.crawler.routing.PipelineStep;
 import org.jmouse.crawler.routing.PipelineResult;
-import org.jmouse.crawler.runtime.CrawlProcessingContext;
+import org.jmouse.crawler.runtime.ProcessingContext;
 
 import java.net.URI;
 
-public final class VoronListingProcessor implements CrawlStep {
+public final class VoronListingProcessor implements PipelineStep {
 
     // selectors — конфігні, підправиш під DOM
     private final String productLinkCss;
@@ -19,7 +19,7 @@ public final class VoronListingProcessor implements CrawlStep {
     }
 
     @Override
-    public PipelineResult execute(CrawlProcessingContext ctx) {
+    public PipelineResult execute(ProcessingContext ctx) {
 
         URI base = ctx.fetchResult() != null && ctx.fetchResult().finalUrl() != null
                 ? ctx.fetchResult().finalUrl()

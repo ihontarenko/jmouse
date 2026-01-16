@@ -1,8 +1,8 @@
 package org.jmouse.crawler.routing;
 
-import org.jmouse.crawler.runtime.CrawlProcessingContext;
+import org.jmouse.crawler.runtime.ProcessingContext;
 
 public interface CrawlPipeline {
     String id();
-    PipelineResult execute(CrawlProcessingContext ctx) throws Exception;
+    PipelineResult execute(ProcessingContext ctx) throws Exception;
 }

@@ -1,7 +1,7 @@
 package org.jmouse.crawler.dsl;
 
 import org.jmouse.core.Verify;
-import org.jmouse.crawler.routing.CrawlRouteResolver;
+import org.jmouse.crawler.routing.ProcessingRouteResolver;
 import org.jmouse.crawler.runtime.*;
 import org.jmouse.crawler.runtime.InMemoryRetryBuffer;
 import org.jmouse.crawler.spi.*;
@@ -155,14 +155,14 @@ public final class CrawlerRuntimeBuilder {
 
     /* ===================== build ===================== */
 
-    CrawlRunContext build(CrawlRouteResolver routes, UtilityRegistry utilities) {
+    RunContext build(ProcessingRouteResolver routes, UtilityRegistry utilities) {
         Verify.nonNull(routes, "routes");
 
         if (utilities == null) {
             utilities = UtilityRegistry.empty();
         }
 
-        return new DefaultCrawlRunContext(
+        return new DefaultRunContext(
                 frontier,
                 retryBuffer,
                 deadLetterQueue,

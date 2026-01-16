@@ -1,7 +1,7 @@
 package org.jmouse.crawler.routing;
 
 import org.jmouse.core.Verify;
-import org.jmouse.crawler.runtime.CrawlProcessingContext;
+import org.jmouse.crawler.runtime.ProcessingContext;
 import org.jmouse.crawler.runtime.DecisionCodes;
 import org.jmouse.crawler.runtime.DecisionLog;
 
@@ -27,15 +27,15 @@ public final class StepsPipeline implements CrawlPipeline {
     }
 
     @Override
-    public PipelineResult execute(CrawlProcessingContext context) throws Exception {
+    public PipelineResult execute(ProcessingContext context) throws Exception {
         Verify.nonNull(context, "context");
 
         DecisionLog    decisions  = context.decisions();
         PipelineResult lastResult = null;
 
         for (StepHolder stepHolder : steps) {
-            String    stepId = stepHolder.id();
-            CrawlStep step   = stepHolder.step();
+            String       stepId = stepHolder.id();
+            PipelineStep step   = stepHolder.step();
 
             decisions.accept(
                     DecisionCodes.PIPELINE_STEP_START,
@@ -97,7 +97,7 @@ public final class StepsPipeline implements CrawlPipeline {
         return (message != null && !message.isBlank()) ? message : "(no message)";
     }
 
-    public record StepHolder(String id, CrawlStep step) {
+    public record StepHolder(String id, PipelineStep step) {
         public StepHolder {
             Verify.nonNull(id, "id");
             Verify.state(!id.isBlank(), "id must be non-blank");

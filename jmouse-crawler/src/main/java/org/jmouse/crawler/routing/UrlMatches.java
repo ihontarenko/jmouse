@@ -6,29 +6,29 @@ public final class UrlMatches {
 
     private UrlMatches() {}
 
-    public static UrlMatch any() {
+    public static ProcessingRouteTask any() {
         return (t, r) -> true;
     }
 
-    public static UrlMatch host(String host) {
+    public static ProcessingRouteTask host(String host) {
         String h = host.toLowerCase(Locale.ROOT);
         return (t, r) -> t.url() != null && h.equalsIgnoreCase(t.url().getHost());
     }
 
-    public static UrlMatch pathPrefix(String prefix) {
+    public static ProcessingRouteTask pathPrefix(String prefix) {
         return (t, r) -> t.url() != null && t.url().getPath() != null && t.url().getPath().startsWith(prefix);
     }
 
-    public static UrlMatch all(UrlMatch... ms) {
+    public static ProcessingRouteTask all(ProcessingRouteTask... ms) {
         return (t, r) -> {
-            for (UrlMatch m : ms) if (!m.test(t, r)) return false;
+            for (ProcessingRouteTask m : ms) if (!m.test(t, r)) return false;
             return true;
         };
     }
 
-    public static UrlMatch anyOf(UrlMatch... ms) {
+    public static ProcessingRouteTask anyOf(ProcessingRouteTask... ms) {
         return (t, r) -> {
-            for (UrlMatch m : ms) if (m.test(t, r)) return true;
+            for (ProcessingRouteTask m : ms) if (m.test(t, r)) return true;
             return false;
         };
     }

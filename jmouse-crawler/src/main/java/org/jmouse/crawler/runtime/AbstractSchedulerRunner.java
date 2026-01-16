@@ -8,10 +8,10 @@ import java.util.concurrent.locks.LockSupport;
 
 public abstract class AbstractSchedulerRunner implements CrawlRunner {
 
-    protected final CrawlScheduler scheduler;
-    protected final Clock          clock;
+    protected final JobScheduler scheduler;
+    protected final Clock        clock;
 
-    protected AbstractSchedulerRunner(CrawlScheduler scheduler, Clock clock) {
+    protected AbstractSchedulerRunner(JobScheduler scheduler, Clock clock) {
         this.scheduler = Verify.nonNull(scheduler, "scheduler");
         this.clock = clock;
     }
@@ -36,7 +36,7 @@ public abstract class AbstractSchedulerRunner implements CrawlRunner {
         }
     }
 
-    protected final CrawlEngine requireParallel(CrawlEngine engine) {
-        return Verify.instanceOf(engine, CrawlEngine.class, "engine");
+    protected final ProcessingEngine requireParallel(ProcessingEngine engine) {
+        return Verify.instanceOf(engine, ProcessingEngine.class, "engine");
     }
 }

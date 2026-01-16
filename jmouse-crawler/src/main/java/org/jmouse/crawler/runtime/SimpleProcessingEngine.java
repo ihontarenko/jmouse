@@ -1,26 +1,26 @@
 package org.jmouse.crawler.runtime;
 
 import org.jmouse.core.Verify;
-import org.jmouse.crawler.routing.CrawlRoute;
-import org.jmouse.crawler.routing.CrawlRouteRegistry;
+import org.jmouse.crawler.routing.ProcessingRoute;
+import org.jmouse.crawler.routing.ProcessingRouteRegistry;
 import org.jmouse.crawler.routing.PipelineResult;
 import org.jmouse.crawler.spi.*;
 
 import java.time.Instant;
 
-public final class SimpleCrawlEngine implements CrawlEngine {
+public final class SimpleProcessingEngine implements ProcessingEngine {
 
     private static final String STAGE_PIPELINE = "pipeline";
     private static final int    MAX_ROUTE_HOPS = 8;
 
-    private final CrawlRunContext runContext;
+    private final RunContext runContext;
 
-    public SimpleCrawlEngine(CrawlRunContext runContext) {
+    public SimpleProcessingEngine(RunContext runContext) {
         this.runContext = Verify.nonNull(runContext, "runContext");
     }
 
     @Override
-    public void apply(CrawlTask task, TaskDisposition disposition, Instant now) {
+    public void apply(ProcessingTask task, TaskDisposition disposition, Instant now) {
         Verify.nonNull(task, "task");
         Verify.nonNull(disposition, "disposition");
         Verify.nonNull(now, "now");
@@ -28,7 +28,7 @@ public final class SimpleCrawlEngine implements CrawlEngine {
     }
 
     @Override
-    public TaskDisposition execute(CrawlTask task) {
+    public TaskDisposition execute(ProcessingTask task) {
         Verify.nonNull(task, "task");
 
         Instant          now              = runContext.clock().instant();
@@ -46,10 +46,10 @@ public final class SimpleCrawlEngine implements CrawlEngine {
         return doExecutePipeline(task, now);
     }
 
-    private TaskDisposition doExecutePipeline(CrawlTask task, Instant now) {
-        SeenStore                     seenStore         = runContext.seen();
-        DefaultCrawlProcessingContext processingContext = new DefaultCrawlProcessingContext(task, runContext);
-        CrawlRoute                    route             = runContext.routes().resolve(task, runContext);
+    private TaskDisposition doExecutePipeline(ProcessingTask task, Instant now) {
+        SeenStore                seenStore         = runContext.seen();
+        DefaultProcessingContext processingContext = new DefaultProcessingContext(task, runContext);
+        ProcessingRoute          route             = runContext.routes().resolve(task, runContext);
 
         if (route == null) {
             return TaskDisposition.deadLetter("No route resolved", null, STAGE_PIPELINE, "route:unknown");
@@ -69,7 +69,7 @@ public final class SimpleCrawlEngine implements CrawlEngine {
     }
 
     private PipelineResult followRouteHops(
-            DefaultCrawlProcessingContext processingContext,
+            DefaultProcessingContext processingContext,
             PipelineResult initialResult
     ) throws Exception {
 
@@ -82,11 +82,11 @@ public final class SimpleCrawlEngine implements CrawlEngine {
 
             String nextRouteId = routeInstruction.routeId();
 
-            CrawlRouteRegistry registry = Verify.instanceOf(
-                    runContext.routes(), CrawlRouteRegistry.class, "runContext.routes"
+            ProcessingRouteRegistry registry = Verify.instanceOf(
+                    runContext.routes(), ProcessingRouteRegistry.class, "runContext.routes"
             );
 
-            CrawlRoute nextRoute = registry.byId(nextRouteId);
+            ProcessingRoute nextRoute = registry.byId(nextRouteId);
             Verify.state(nextRoute != null, "next route not found: " + nextRouteId);
             processingContext.setRouteId(nextRoute.id());
             currentResult = nextRoute.pipeline().execute(processingContext);
@@ -111,13 +111,13 @@ public final class SimpleCrawlEngine implements CrawlEngine {
         };
     }
 
-    private void applyDisposition(CrawlTask task, TaskDisposition disposition, Instant now) {
+    private void applyDisposition(ProcessingTask task, TaskDisposition disposition, Instant now) {
         if (disposition instanceof TaskDisposition.Completed || disposition instanceof TaskDisposition.Discarded) {
             return;
         }
 
         if (disposition instanceof TaskDisposition.RetryLater retryLater) {
-            CrawlTask newTask = task.attempt(now);
+            ProcessingTask newTask = task.attempt(now);
             runContext.retryBuffer().schedule(newTask, retryLater.notBefore(), retryLater.reason(), retryLater.error());
             return;
         }

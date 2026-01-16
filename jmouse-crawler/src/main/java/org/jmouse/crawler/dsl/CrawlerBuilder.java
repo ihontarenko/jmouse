@@ -1,8 +1,8 @@
 package org.jmouse.crawler.dsl;
 
 import org.jmouse.core.Verify;
-import org.jmouse.crawler.routing.CrawlRouteResolver;
-import org.jmouse.crawler.runtime.CrawlTask;
+import org.jmouse.crawler.routing.ProcessingRouteResolver;
+import org.jmouse.crawler.runtime.ProcessingTask;
 import org.jmouse.crawler.runtime.*;
 
 import java.net.URI;
@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 
 public final class CrawlerBuilder {
 
-    private final List<CrawlTask> seeds = new ArrayList<>();
+    private final List<ProcessingTask> seeds = new ArrayList<>();
 
     private final CrawlerRuntimeBuilder runtimeBuilder   = new CrawlerRuntimeBuilder();
     private final RoutesBuilder         routesBuilder    = new RoutesBuilder();
@@ -34,7 +34,7 @@ public final class CrawlerBuilder {
     public CrawlerBuilder seed(URI url, Object hint) {
         Verify.nonNull(url, "url");
 
-        seeds.add(new CrawlTask(
+        seeds.add(new ProcessingTask(
                 url,
                 0,
                 null,
@@ -76,14 +76,14 @@ public final class CrawlerBuilder {
     public Crawler build() {
         runtimeBuilder.ensureDefaults();
 
-        CrawlRouteResolver routeResolver = routesBuilder.build();
-        UtilityRegistry    utilities     = utilitiesBuilder.build();
-        CrawlRunContext    runContext    = runtimeBuilder.build(routeResolver, utilities);
-        CrawlScheduler     scheduler     = schedulerFactory.create(runContext);
-        CrawlRunner        runner        = runnerFactory.create(runContext, scheduler);
-        CrawlEngine        engine        = new SimpleCrawlEngine(runContext);
+        ProcessingRouteResolver routeResolver = routesBuilder.build();
+        UtilityRegistry         utilities     = utilitiesBuilder.build();
+        RunContext   runContext = runtimeBuilder.build(routeResolver, utilities);
+        JobScheduler scheduler  = schedulerFactory.create(runContext);
+        CrawlRunner  runner     = runnerFactory.create(runContext, scheduler);
+        ProcessingEngine engine = new SimpleProcessingEngine(runContext);
 
-        for (CrawlTask seed : seeds) {
+        for (ProcessingTask seed : seeds) {
             engine.submit(seed);
         }
 

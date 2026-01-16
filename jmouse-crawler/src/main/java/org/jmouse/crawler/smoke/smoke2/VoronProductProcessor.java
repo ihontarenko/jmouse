@@ -1,10 +1,10 @@
 package org.jmouse.crawler.smoke.smoke2;
 
-import org.jmouse.crawler.routing.CrawlStep;
+import org.jmouse.crawler.routing.PipelineStep;
 import org.jmouse.crawler.routing.PipelineResult;
-import org.jmouse.crawler.runtime.CrawlProcessingContext;
+import org.jmouse.crawler.runtime.ProcessingContext;
 
-public final class VoronProductProcessor implements CrawlStep {
+public final class VoronProductProcessor implements PipelineStep {
 
     private final String titleCss;
 
@@ -13,7 +13,7 @@ public final class VoronProductProcessor implements CrawlStep {
     }
 
     @Override
-    public PipelineResult execute(CrawlProcessingContext context) {
+    public PipelineResult execute(ProcessingContext context) {
 
         String title = "";
         if (title == null || title.isBlank()) {

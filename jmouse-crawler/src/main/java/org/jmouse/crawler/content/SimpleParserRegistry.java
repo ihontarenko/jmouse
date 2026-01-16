@@ -1,4 +1,4 @@
-package org.jmouse.crawler.html;
+package org.jmouse.crawler.content;
 
 import org.jmouse.crawler.spi.Parser;
 import org.jmouse.crawler.spi.ParserRegistry;

@@ -1,14 +1,14 @@
 package org.jmouse.crawler.spi;
 
-import org.jmouse.crawler.runtime.CrawlTask;
+import org.jmouse.crawler.runtime.ProcessingTask;
 
 public interface ScopePolicy {
 
-    boolean isAllowed(CrawlTask task);
+    boolean isAllowed(ProcessingTask task);
 
-    String denyReason(CrawlTask task);
+    String denyReason(ProcessingTask task);
 
-    default boolean isDisallowed(CrawlTask task) {
+    default boolean isDisallowed(ProcessingTask task) {
         return !isAllowed(task);
     }
 

@@ -1,5 +1,5 @@
 package org.jmouse.crawler.runtime;
 
-public interface CrawlScheduler {
+public interface JobScheduler {
     ScheduleDecision nextDecision();
 }

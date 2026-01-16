@@ -1,5 +1,5 @@
 package org.jmouse.crawler.runtime;
 
-public interface CrawlHint {
+public interface RoutingHint {
     String id();
 }
