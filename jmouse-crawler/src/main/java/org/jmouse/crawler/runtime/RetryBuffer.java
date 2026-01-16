@@ -11,4 +11,6 @@ public interface RetryBuffer {
 
     int size();
 
+    Instant peekNotBefore();
+
 }

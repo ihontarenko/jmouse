@@ -1,83 +1,92 @@
 package org.jmouse.crawler.runtime;
 
+import org.jmouse.core.Verify;
+
+import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.*;
 
 public final class ExecutorRunner implements CrawlRunner {
 
+    private final CrawlScheduler  scheduler;
     private final ExecutorService executor;
-    private final int maxInFlight;
-    private final int retryDrainBatch;
+    private final int             maxInFlight;
 
-    public ExecutorRunner(ExecutorService executor, int maxInFlight) {
-        this(executor, maxInFlight, 256);
-    }
-
-    public ExecutorRunner(ExecutorService executor, int maxInFlight, int retryDrainBatch) {
-        this.executor = executor;
+    public ExecutorRunner(CrawlScheduler scheduler, ExecutorService executor, int maxInFlight) {
+        this.scheduler = Verify.nonNull(scheduler, "scheduler");
+        this.executor = Verify.nonNull(executor, "executor");
         this.maxInFlight = Math.max(1, maxInFlight);
-        this.retryDrainBatch = Math.max(1, retryDrainBatch);
     }
 
     @Override
     public void runUntilDrained(CrawlEngine engine) {
-        if (!(engine instanceof ParallelCrawlEngine pe)) {
-            throw new IllegalArgumentException("Engine does not support parallel execution: " + engine.getClass().getName());
-        }
-
-        CompletionService<Done> cs = new ExecutorCompletionService<>(executor);
-        int inFlight = 0;
+        ParallelCrawlEngine     parallelEngine    = Verify.instanceOf(engine, ParallelCrawlEngine.class, "engine");
+        CompletionService<Done> completionService = new ExecutorCompletionService<>(executor);
+        int                     inFlight          = 0;
 
         while (true) {
-
-            // 1) move ready retries
-            pe.moveReadyRetries(retryDrainBatch);
-
-            // 2) submit tasks while we have capacity
             while (inFlight < maxInFlight) {
-                CrawlTask task = pe.poll();
-                if (task == null) break;
+                ScheduleDecision decision = scheduler.nextDecision();
 
-                Instant now = pe.now();
-                cs.submit(() -> new Done(task, pe.execute(task, now), now));
-                inFlight++;
+                if (decision instanceof ScheduleDecision.TaskReady(CrawlTask task, Instant now)) {
+                    completionService.submit(() -> {
+                        TaskDisposition disposition = parallelEngine.execute(task, now);
+                        return new Done(task, disposition, now);
+                    });
+                    inFlight++;
+                    continue;
+                }
+
+                if (decision instanceof ScheduleDecision.Park ignore) {
+                    drainCompletions(completionService, parallelEngine, Duration.ZERO, inFlight);
+                    break;
+                }
+
+                if (decision instanceof ScheduleDecision.Drained) {
+                    break;
+                }
             }
 
-            // 3) drain completions (apply in runner thread)
-            int applied = 0;
-            while (inFlight > 0) {
-                Future<Done> f = cs.poll();
-                if (f == null) break;
-
-                Done done = getQuietly(f);
-                pe.apply(done.task(), done.disposition(), done.now());
-                inFlight--;
-                applied++;
-            }
-
-            // 4) stop condition: nothing queued, nothing delayed, nothing running
-            if (pe.frontierSize() == 0 && pe.retrySize() == 0 && inFlight == 0) {
-                break;
-            }
-
-            // 5) avoid busy spin:
-            // if nothing to submit and nothing applied, but tasks are still running -> wait briefly for one completion
-            if (applied == 0 && pe.frontierSize() == 0 && inFlight > 0) {
-                Done done = takeWithTimeout(cs, 50);
+            // drain at least one completion or park briefly
+            if (inFlight > 0) {
+                Done done = pollWithTimeout(completionService, 50);
                 if (done != null) {
-                    pe.apply(done.task(), done.disposition(), done.now());
+                    parallelEngine.apply(done.task(), done.disposition(), done.now());
                     inFlight--;
+                }
+            }
+
+            // final stop condition: scheduler drained AND no running tasks
+            if (inFlight == 0) {
+                ScheduleDecision decision = scheduler.nextDecision();
+                if (decision instanceof ScheduleDecision.Drained) {
+                    return;
+                }
+                if (decision instanceof ScheduleDecision.Park park) {
+                    park(park.duration());
+                }
+                if (decision instanceof ScheduleDecision.TaskReady taskReady) {
+                    // put back into scheduler flow: easiest is to submit it back
+                    scheduler.submit(taskReady.task());
                 }
             }
         }
     }
 
-    private static Done getQuietly(Future<Done> f) {
+    private static Done pollWithTimeout(CompletionService<Done> completionService, long millis) {
         try {
-            return f.get();
+            Future<Done> future = completionService.poll(millis, TimeUnit.MILLISECONDS);
+            return future != null ? getQuietly(future) : null;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return null;
+        }
+    }
+
+    private static Done getQuietly(Future<Done> future) {
+        try {
+            return future.get();
         } catch (ExecutionException e) {
-            // worker threw unexpectedly; treat as DLQ at runner-level would require engine access.
-            // Here we rethrow to make it visible; alternatively map to deadLetter.
             throw new RuntimeException(e.getCause());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -85,15 +94,26 @@ public final class ExecutorRunner implements CrawlRunner {
         }
     }
 
-    private static Done takeWithTimeout(CompletionService<Done> completionService, long millis) {
+    private static void drainCompletions(
+            CompletionService<Done> completionService,
+            ParallelCrawlEngine engine,
+            Duration timeout,
+            int inFlight
+    ) {
+        // optional: keep minimal (can be expanded)
+    }
+
+    private static void park(Duration duration) {
+        if (duration == null || duration.isZero() || duration.isNegative()) {
+            Thread.onSpinWait();
+            return;
+        }
         try {
-            Future<Done> f = completionService.poll(millis, TimeUnit.MILLISECONDS);
-            return (f != null) ? getQuietly(f) : null;
+            Thread.sleep(Math.min(duration.toMillis(), 50));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            return null;
         }
     }
 
-    private record Done(CrawlTask task, TaskDisposition disposition, Instant now) {}
+    private record Done(CrawlTask task, TaskDisposition disposition, Instant now) { }
 }

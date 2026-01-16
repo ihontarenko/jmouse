@@ -2,18 +2,12 @@ package org.jmouse.crawler.runtime;
 
 import org.jmouse.core.Verify;
 
-import java.time.Instant;
-
 public final class SingleThreadRunner implements CrawlRunner {
 
-    private final int retryDrainBatch;
+    private final CrawlScheduler scheduler;
 
-    public SingleThreadRunner() {
-        this(256);
-    }
-
-    public SingleThreadRunner(int retryDrainBatch) {
-        this.retryDrainBatch = Math.max(1, retryDrainBatch);
+    public SingleThreadRunner(CrawlScheduler scheduler) {
+        this.scheduler = Verify.nonNull(scheduler, "scheduler");
     }
 
     @Override
@@ -21,20 +15,30 @@ public final class SingleThreadRunner implements CrawlRunner {
         ParallelCrawlEngine parallelEngine = Verify.instanceOf(engine, ParallelCrawlEngine.class, "engine");
 
         while (true) {
-            parallelEngine.moveReadyRetries(retryDrainBatch);
+            ScheduleDecision decision = scheduler.nextDecision();
 
-            CrawlTask task = parallelEngine.poll();
-            if (task == null) {
-                if (parallelEngine.frontierSize() == 0 && parallelEngine.retrySize() == 0) {
-                    break;
+            switch (decision) {
+                case ScheduleDecision.TaskReady taskReady -> {
+                    TaskDisposition disposition = parallelEngine.execute(taskReady.task(), taskReady.now());
+                    parallelEngine.apply(taskReady.task(), disposition, taskReady.now());
                 }
-                continue;
+                case ScheduleDecision.Park park -> park(park.duration());
+                case ScheduleDecision.Drained ignored -> {
+                    return;
+                }
             }
+        }
+    }
 
-            Instant         now         = parallelEngine.now();
-            TaskDisposition disposition = parallelEngine.execute(task, now);
-
-            parallelEngine.apply(task, disposition, now);
+    private static void park(java.time.Duration duration) {
+        if (duration == null || duration.isZero() || duration.isNegative()) {
+            Thread.onSpinWait();
+            return;
+        }
+        try {
+            Thread.sleep(Math.min(duration.toMillis(), 50));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }

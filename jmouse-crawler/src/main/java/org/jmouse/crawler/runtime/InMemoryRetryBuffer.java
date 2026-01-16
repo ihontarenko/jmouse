@@ -44,5 +44,16 @@ public final class InMemoryRetryBuffer implements RetryBuffer {
         return queue.size();
     }
 
+    @Override
+    public Instant peekNotBefore() {
+        Item head = queue.peek();
+
+        if (head == null) {
+            return null;
+        }
+
+        return head.notBefore();
+    }
+
     private record Item(Instant notBefore, CrawlTask task, String reason, Throwable error) { }
 }
