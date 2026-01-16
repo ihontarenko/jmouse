@@ -18,7 +18,8 @@ public final class CrawlerBuilder {
     private final RoutesBuilder         routesBuilder    = new RoutesBuilder();
     private final UtilitiesBuilder      utilitiesBuilder = new UtilitiesBuilder();
 
-    private CrawlRunner crawlRunner = new SingleThreadRunner();
+    private CrawlRunnerFactory runnerFactory    = Runners.singleThread();
+    private SchedulerFactory   schedulerFactory = Schedulers.defaultScheduler();
 
     private CrawlerBuilder() {}
 
@@ -62,26 +63,31 @@ public final class CrawlerBuilder {
         return this;
     }
 
-    public CrawlerBuilder runner(CrawlRunner runner) {
-        this.crawlRunner = Verify.nonNull(runner, "runner");
+    public CrawlerBuilder runner(CrawlRunnerFactory runnerFactory) {
+        this.runnerFactory = Verify.nonNull(runnerFactory, "runnerFactory");
+        return this;
+    }
+
+    public CrawlerBuilder scheduler(SchedulerFactory schedulerFactory) {
+        this.schedulerFactory = Verify.nonNull(schedulerFactory, "schedulerFactory");
         return this;
     }
 
     public Crawler build() {
         runtimeBuilder.ensureDefaults();
 
-        CrawlRouteResolver resolver  = routesBuilder.build();
-        UtilityRegistry    utilities = utilitiesBuilder.build();
-
-        CrawlRunContext runContext = runtimeBuilder.build(resolver, utilities);
-
-        CrawlEngine engine = new SimpleCrawlEngine(runContext);
+        CrawlRouteResolver routeResolver = routesBuilder.build();
+        UtilityRegistry    utilities     = utilitiesBuilder.build();
+        CrawlRunContext    runContext    = runtimeBuilder.build(routeResolver, utilities);
+        CrawlScheduler     scheduler     = schedulerFactory.create(runContext);
+        CrawlRunner        runner        = runnerFactory.create(runContext, scheduler);
+        CrawlEngine        engine        = new SimpleCrawlEngine(runContext);
 
         for (CrawlTask seed : seeds) {
             engine.submit(seed);
         }
 
-        return new Crawler(engine, crawlRunner);
+        return new Crawler(engine, runner);
     }
 }
 

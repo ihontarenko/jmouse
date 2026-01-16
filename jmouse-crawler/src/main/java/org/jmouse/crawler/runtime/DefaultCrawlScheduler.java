@@ -30,14 +30,6 @@ public final class DefaultCrawlScheduler implements CrawlScheduler {
     }
 
     @Override
-    public void submit(CrawlTask task) {
-        if (task == null) {
-            return;
-        }
-        frontier.offer(task);
-    }
-
-    @Override
     public ScheduleDecision nextDecision() {
         Instant now = clock.instant();
 

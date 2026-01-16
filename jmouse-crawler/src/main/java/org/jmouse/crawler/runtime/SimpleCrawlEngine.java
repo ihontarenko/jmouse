@@ -7,7 +7,6 @@ import org.jmouse.crawler.routing.PipelineResult;
 import org.jmouse.crawler.spi.*;
 
 import java.time.Instant;
-import java.util.List;
 
 public final class SimpleCrawlEngine implements ParallelCrawlEngine {
 
@@ -28,43 +27,11 @@ public final class SimpleCrawlEngine implements ParallelCrawlEngine {
     }
 
     @Override
-    public int moveReadyRetries(int max) {
-        Instant         now        = now();
-        List<CrawlTask> readyTasks = runContext.retryBuffer().drainReady(now, max);
-
-        for (CrawlTask readyTask : readyTasks) {
-            runContext.frontier().offer(readyTask);
-        }
-
-        return readyTasks.size();
-    }
-
-    @Override
-    public CrawlTask poll() {
-        return runContext.frontier().poll();
-    }
-
-    @Override
     public void apply(CrawlTask task, TaskDisposition disposition, Instant now) {
         Verify.nonNull(task, "task");
         Verify.nonNull(disposition, "disposition");
         Verify.nonNull(now, "now");
         applyDisposition(task, disposition, now);
-    }
-
-    @Override
-    public int frontierSize() {
-        return runContext.frontier().size();
-    }
-
-    @Override
-    public int retrySize() {
-        return runContext.retryBuffer().size();
-    }
-
-    @Override
-    public Instant now() {
-        return runContext.clock().instant();
     }
 
     @Override
