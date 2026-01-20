@@ -6,6 +6,8 @@ import java.time.Duration;
 
 public final class HttpFetcherConfig {
 
+    public static final String J_MOUSE_CRAWLER_UA = "jMouse-Crawler/1.0";
+
     private final Duration connectTimeout;
     private final Duration requestTimeout;
     private final boolean  followRedirects;
@@ -42,7 +44,7 @@ public final class HttpFetcherConfig {
         private Duration connectTimeout  = Duration.ofSeconds(10);
         private Duration requestTimeout  = Duration.ofSeconds(30);
         private boolean  followRedirects = true;
-        private String   userAgent       = "jMouse-Crawler/1.0";
+        private String   userAgent       = J_MOUSE_CRAWLER_UA;
 
         public Builder connectTimeout(Duration value) {
             this.connectTimeout = Verify.nonNull(value, "connectTimeout");

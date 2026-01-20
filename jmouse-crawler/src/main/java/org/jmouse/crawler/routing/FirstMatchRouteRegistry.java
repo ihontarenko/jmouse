@@ -29,21 +29,10 @@ public final class FirstMatchRouteRegistry implements ProcessingRouteRegistry {
     public ProcessingRoute resolve(ProcessingTask task, RunContext runContext) {
         ProcessingRoute matched = null;
 
-        if (task.hint() != null) {
-            for (ProcessingRoute route : routes) {
-                if (route.supportsHint(task.hint())) {
-                    matched = route;
-                    break;
-                }
-            }
-        }
-
-        if (matched == null) {
-            for (ProcessingRoute route : routes) {
-                if (route.matches(task, runContext)) {
-                    matched = route;
-                    break;
-                }
+        for (ProcessingRoute route : routes) {
+            if (route.matches(task, runContext)) {
+                matched = route;
+                break;
             }
         }
 

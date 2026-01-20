@@ -30,7 +30,6 @@ public final class RoutesBuilder {
 
         private final RoutesBuilder parent;
         private final String        id;
-        private final Set<String>   hintIds = new LinkedHashSet<>();
 
         private ProcessingRouteTask match = UrlMatches.any();
         private CrawlPipeline       pipeline;
@@ -38,18 +37,6 @@ public final class RoutesBuilder {
         RouteSpecification(RoutesBuilder parent, String id) {
             this.parent = parent;
             this.id = id;
-        }
-
-        public RouteSpecification hints(Object... clientHints) {
-            for (Object hint : clientHints) {
-                switch (hint) {
-                    case null -> {}
-                    case RoutingHint routingHint -> hintIds.add(routingHint.id());
-                    case Enum<?> enumValue -> hintIds.add(enumValue.name());
-                    default -> hintIds.add(String.valueOf(hint));
-                }
-            }
-            return this;
         }
 
         public RouteSpecification match(ProcessingRouteTask match) {
@@ -65,39 +52,33 @@ public final class RoutesBuilder {
         }
 
         public void register() {
-            parent.add(new HintAwareRoute(
-                    id, hintIds, match, Verify.nonNull(pipeline, "pipeline")
+            parent.add(new SimpleRoute(
+                    id, match, Verify.nonNull(pipeline, "pipeline")
             ));
         }
 
     }
 
-    private record HintAwareRoute(
+    private record SimpleRoute(
             String id,
-            Set<String> hintIds,
             ProcessingRouteTask match,
             CrawlPipeline pipeline
     )
         implements ProcessingRoute {
 
-        private HintAwareRoute(
-                String id, Set<String> hintIds,
-                ProcessingRouteTask match, CrawlPipeline pipeline
+        private SimpleRoute(
+                String id,
+                ProcessingRouteTask match,
+                CrawlPipeline pipeline
         ) {
             this.id = id;
-            this.hintIds = Set.copyOf(hintIds);
-            this.match = match;
             this.pipeline = pipeline;
+            this.match = match;
         }
 
         @Override
         public boolean matches(ProcessingTask task, RunContext run) {
             return match.matches(new ProcessingRouteTask.Candidate(task.hint(), task, run));
-        }
-
-        @Override
-        public boolean supportsHint(RoutingHint hint) {
-            return hint != null && hintIds.contains(hint.id());
         }
 
     }

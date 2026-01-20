@@ -1,6 +1,8 @@
 package org.jmouse.crawler.routing;
 
-import java.util.Locale;
+import org.jmouse.crawler.runtime.RoutingHint;
+
+import java.util.Set;
 
 public final class UrlMatches {
 
@@ -10,9 +12,12 @@ public final class UrlMatches {
         return c -> true;
     }
 
+    public static ProcessingRouteTask hints(RoutingHint... hints) {
+        return c -> Set.of(hints).contains(c.hint());
+    }
+
     public static ProcessingRouteTask host(String host) {
-        String h = host.toLowerCase(Locale.ROOT);
-        return (c) -> c.task().url() != null && h.equalsIgnoreCase(c.task().url().getHost());
+        return (c) -> c.task().url() != null && host.equalsIgnoreCase(c.task().url().getHost());
     }
 
     public static ProcessingRouteTask pathPrefix(String prefix) {

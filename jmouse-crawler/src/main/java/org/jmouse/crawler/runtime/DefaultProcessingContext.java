@@ -91,7 +91,7 @@ public final class DefaultProcessingContext implements ProcessingContext {
                 hint
         );
 
-        if (!scopePolicy.isAllowed(next)) {
+        if (scopePolicy.isDisallowed(next)) {
             decisions.reject(DecisionCodes.SCOPE_DENY, "out of scope");
             return;
         }

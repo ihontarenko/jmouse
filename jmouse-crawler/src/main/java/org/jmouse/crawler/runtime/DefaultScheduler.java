@@ -108,11 +108,11 @@ public final class DefaultScheduler implements JobScheduler {
                 break;
             }
 
-            Instant notBefore = politeness.notBefore(task.url(), now);
+            Instant eligibleAt = politeness.eligibleAt(task.url(), now);
 
             // Politeness deferral: push back into retry buffer with a specific reason.
-            if (notBefore != null && notBefore.isAfter(now)) {
-                retryBuffer.schedule(task.schedule(notBefore), notBefore, REASON_POLITENESS, null);
+            if (eligibleAt != null && eligibleAt.isAfter(now)) {
+                retryBuffer.schedule(task.schedule(eligibleAt), eligibleAt, REASON_POLITENESS, null);
                 continue;
             }
 
