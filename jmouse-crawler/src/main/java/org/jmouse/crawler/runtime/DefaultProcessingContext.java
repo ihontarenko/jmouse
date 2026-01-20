@@ -84,7 +84,7 @@ public final class DefaultProcessingContext implements ProcessingContext {
                 url,
                 parent.depth() + 1,
                 parent.url(),
-                "from:" + parent.url(),
+                parent.url().toString(),
                 parent.priority(),
                 runContext.clock().instant(),
                 0,

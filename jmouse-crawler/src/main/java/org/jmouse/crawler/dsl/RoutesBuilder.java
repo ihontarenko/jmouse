@@ -92,7 +92,7 @@ public final class RoutesBuilder {
 
         @Override
         public boolean matches(ProcessingTask task, RunContext run) {
-            return match.matches(new ProcessingRouteTask.Candidate(task, run));
+            return match.matches(new ProcessingRouteTask.Candidate(task.hint(), task, run));
         }
 
         @Override

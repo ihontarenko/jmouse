@@ -78,13 +78,15 @@ public final class CrawlerBuilder {
 
         ProcessingRouteResolver routeResolver = routesBuilder.build();
         UtilityRegistry         utilities     = utilitiesBuilder.build();
-        RunContext   runContext = runtimeBuilder.build(routeResolver, utilities);
-        JobScheduler scheduler  = schedulerFactory.create(runContext);
-        CrawlRunner  runner     = runnerFactory.create(runContext, scheduler);
-        ProcessingEngine engine = new SimpleProcessingEngine(runContext);
+        RunContext              runContext    = runtimeBuilder.build(routeResolver, utilities);
+        JobScheduler            scheduler     = schedulerFactory.create(runContext);
+        CrawlRunner             runner        = runnerFactory.create(runContext, scheduler);
+        ProcessingEngine        engine        = new SimpleProcessingEngine(runContext);
+
+        Frontier frontier = runContext.frontier();
 
         for (ProcessingTask seed : seeds) {
-            engine.submit(seed);
+            frontier.offer(seed);
         }
 
         return new Crawler(engine, runner);

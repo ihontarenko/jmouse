@@ -49,7 +49,7 @@ public class Smoke2 {
 
                     routes.route("VORON_LISTING")
                             .hints(VoronHint.LISTING, VoronHint.PAGINATION)
-                            .match(all(
+                            .match(allOf(
                                     host("voron.ua"),
                                     pathPrefix("/uk/catalog/")
                             ))
@@ -65,7 +65,7 @@ public class Smoke2 {
 
                     routes.route("VORON_PRODUCT")
                             .hints(VoronHint.PRODUCT)
-                            .match(all(
+                            .match(allOf(
                                     host("voron.ua"),
                                     pathPrefix("/uk/product/")
                             ))

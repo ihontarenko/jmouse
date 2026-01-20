@@ -16,19 +16,27 @@ public final class UrlMatches {
     }
 
     public static ProcessingRouteTask pathPrefix(String prefix) {
-        return (t, r) -> t.url() != null && t.url().getPath() != null && t.url().getPath().startsWith(prefix);
+        return (c) -> c.url() != null && c.url().getPath() != null && c.url().getPath().startsWith(prefix);
     }
 
-    public static ProcessingRouteTask all(ProcessingRouteTask... ms) {
-        return (t, r) -> {
-            for (ProcessingRouteTask m : ms) if (!m.test(t, r)) return false;
+    public static ProcessingRouteTask allOf(ProcessingRouteTask... ms) {
+        return (c) -> {
+            for (ProcessingRouteTask t : ms) {
+                if (!t.matches(c)) {
+                    return false;
+                }
+            }
             return true;
         };
     }
 
     public static ProcessingRouteTask anyOf(ProcessingRouteTask... ms) {
-        return (t, r) -> {
-            for (ProcessingRouteTask m : ms) if (m.test(t, r)) return true;
+        return (c) -> {
+            for (ProcessingRouteTask m : ms) {
+                if (m.matches(c)) {
+                    return true;
+                }
+            }
             return false;
         };
     }

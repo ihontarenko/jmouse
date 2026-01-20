@@ -40,7 +40,6 @@ public final class FirstMatchRouteRegistry implements ProcessingRouteRegistry {
 
         if (matched == null) {
             for (ProcessingRoute route : routes) {
-
                 if (route.matches(task, runContext)) {
                     matched = route;
                     break;

@@ -45,7 +45,7 @@ public final class InMemoryRetryBuffer implements RetryBuffer {
     }
 
     @Override
-    public Instant peekNotBefore() {
+    public Instant peekEligibleAt() {
         Item head = queue.peek();
 
         if (head == null) {
