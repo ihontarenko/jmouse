@@ -8,17 +8,53 @@ import org.jmouse.crawler.spi.*;
 
 import java.time.Instant;
 
+/**
+ * Simple, synchronous {@link ProcessingEngine} that executes a routing pipeline and
+ * translates outcomes into {@link TaskDisposition}. ⚙️
+ *
+ * <p>Execution model:</p>
+ * <ul>
+ *   <li>{@link #execute(ProcessingTask)} performs task work (fetch/parse/pipeline) and produces a disposition.</li>
+ *   <li>{@link #apply(ProcessingTask, TaskDisposition, Instant)} applies side effects (retry scheduling, DLQ) based on the disposition.</li>
+ * </ul>
+ *
+ * <p>Key behaviors:</p>
+ * <ul>
+ *   <li>Scope and duplicate checks are performed before pipeline execution.</li>
+ *   <li>Routes are resolved through {@link RunContext#routes()}.</li>
+ *   <li>Pipeline may request routing hops via {@link PipelineResult.Route}, bounded by {@link #MAX_ROUTE_HOPS}.</li>
+ *   <li>Failures are translated via {@link RetryPolicy} into retry/discard/dead-letter dispositions.</li>
+ * </ul>
+ *
+ * <p>Thread-safety: the engine is safe to share if {@link RunContext} dependencies are thread-safe.
+ * Individual {@link DefaultProcessingContext} instances are per-task and thread-confined.</p>
+ */
 public final class SimpleProcessingEngine implements ProcessingEngine {
 
+    /**
+     * Logical stage identifier used in dispositions produced by this engine.
+     */
     private static final String STAGE_PIPELINE = "pipeline";
-    private static final int    MAX_ROUTE_HOPS = 8;
 
-    private final RunContext runContext;
+    /**
+     * Safety bound against infinite route loops.
+     */
+    private static final int MAX_ROUTE_HOPS = 8;
 
+    private final RunContext run;
+
+    /**
+     * @param runContext run-level context (must be non-null)
+     */
     public SimpleProcessingEngine(RunContext runContext) {
-        this.runContext = Verify.nonNull(runContext, "runContext");
+        this.run = Verify.nonNull(runContext, "runContext");
     }
 
+    /**
+     * Apply disposition side effects (retry scheduling and DLQ).
+     *
+     * <p>Completed and discarded dispositions have no further side effects.</p>
+     */
     @Override
     public void apply(ProcessingTask task, TaskDisposition disposition, Instant now) {
         Verify.nonNull(task, "task");
@@ -27,29 +63,39 @@ public final class SimpleProcessingEngine implements ProcessingEngine {
         applyDisposition(task, disposition, now);
     }
 
+    /**
+     * Execute the task and compute the outcome disposition.
+     *
+     * <p>This method performs preflight validation (scope and duplicate checks)
+     * and then runs the routing pipeline.</p>
+     */
     @Override
     public TaskDisposition execute(ProcessingTask task) {
         Verify.nonNull(task, "task");
 
-        Instant          now              = runContext.clock().instant();
-        ScopePolicy      scopePolicy      = runContext.scope();
-        SeenStore        seenStore        = runContext.seen();
+        Instant     now   = run.clock().instant();
+        ScopePolicy scope = run.scope();
+        SeenStore   seen  = run.seen();
 
-        if (scopePolicy.isDisallowed(task)) {
-            return TaskDisposition.discarded(scopePolicy.denyReason(task));
+        if (scope.isDisallowed(task)) {
+            return TaskDisposition.discarded(scope.denyReason(task));
         }
 
-        if (seenStore.isProcessed(task.url())) {
+        if (seen.isProcessed(task.url())) {
             return TaskDisposition.discarded("already processed");
         }
 
-        return doExecutePipeline(task, now);
+        return executePipeline(task, now);
     }
 
-    private TaskDisposition doExecutePipeline(ProcessingTask task, Instant now) {
-        SeenStore                seenStore         = runContext.seen();
-        DefaultProcessingContext processingContext = new DefaultProcessingContext(task, runContext);
-        ProcessingRoute          route             = runContext.routes().resolve(task, runContext);
+    /**
+     * Resolve route and execute its pipeline, including bounded route hops.
+     */
+    private TaskDisposition executePipeline(ProcessingTask task, Instant now) {
+        SeenStore seen = run.seen();
+
+        DefaultProcessingContext processingContext = new DefaultProcessingContext(task, run);
+        ProcessingRoute          route             = run.routes().resolve(task, run);
 
         if (route == null) {
             return TaskDisposition.deadLetter("No route resolved", null, STAGE_PIPELINE, "route:unknown");
@@ -58,52 +104,66 @@ public final class SimpleProcessingEngine implements ProcessingEngine {
         processingContext.setRouteId(route.id());
 
         try {
-            PipelineResult ignore = route.pipeline().execute(processingContext);
-            ignore = followRouteHops(processingContext, ignore);
-            seenStore.markProcessed(task.url());
-            return TaskDisposition.completed();
+            PipelineResult result = route.pipeline().execute(processingContext);
+            result = followRouteHops(processingContext, result);
+
+            // Mark as processed only after a successful pipeline completion.
+            seen.markProcessed(task.url());
+
+            return TaskDisposition.completed(result);
         } catch (Throwable error) {
-            RetryDecision retryDecision = runContext.retry().onFailure(task, error, now);
-            return toTaskDisposition(retryDecision, error, processingContext.routeId(), STAGE_PIPELINE);
+            RetryDecision decision = run.retry().onFailure(task, error, now);
+            return toDisposition(decision, error, processingContext.routeId(), STAGE_PIPELINE);
         }
     }
 
-    private PipelineResult followRouteHops(
-            DefaultProcessingContext processingContext,
-            PipelineResult initialResult
-    ) throws Exception {
-
-        PipelineResult currentResult = initialResult;
+    /**
+     * Follow route hop instructions emitted by pipelines.
+     *
+     * <p>When a pipeline returns {@link PipelineResult.Route}, the engine resolves
+     * the target route and executes its pipeline with the same context.
+     * A hop limit is enforced to prevent infinite routing loops.</p>
+     *
+     * @throws Exception if a downstream pipeline throws
+     */
+    private PipelineResult followRouteHops(DefaultProcessingContext ctx, PipelineResult initialResult) throws Exception {
+        PipelineResult result = initialResult;
 
         for (int hop = 1; hop <= MAX_ROUTE_HOPS; hop++) {
-            if (!(currentResult instanceof PipelineResult.Route routeInstruction)) {
-                return currentResult;
+            if (!(result instanceof PipelineResult.Route routeInstruction)) {
+                return result;
             }
 
             String nextRouteId = routeInstruction.routeId();
 
             ProcessingRouteRegistry registry = Verify.instanceOf(
-                    runContext.routes(), ProcessingRouteRegistry.class, "runContext.routes"
+                    run.routes(), ProcessingRouteRegistry.class, "run.routes"
             );
 
             ProcessingRoute nextRoute = registry.byId(nextRouteId);
             Verify.state(nextRoute != null, "next route not found: " + nextRouteId);
-            processingContext.setRouteId(nextRoute.id());
-            currentResult = nextRoute.pipeline().execute(processingContext);
+
+            ctx.setRouteId(nextRoute.id());
+
+            // Hop to the next route.
+            result = nextRoute.pipeline().execute(ctx);
         }
 
         throw new IllegalStateException("Route hop limit exceeded (" + MAX_ROUTE_HOPS + ")");
     }
 
-    private TaskDisposition toTaskDisposition(
-            RetryDecision retryDecision,
+    /**
+     * Translate {@link RetryDecision} into a {@link TaskDisposition}.
+     */
+    private static TaskDisposition toDisposition(
+            RetryDecision decision,
             Throwable error,
             String routeId,
             String stageId
     ) {
-        return switch (retryDecision) {
-            case RetryDecision.Retry(Instant notBefore, String reason) ->
-                    TaskDisposition.retryLater(notBefore, reason, error, stageId, routeId);
+        return switch (decision) {
+            case RetryDecision.Retry(Instant eligibleAt, String reason) ->
+                    TaskDisposition.retryLater(eligibleAt, reason, error, stageId, routeId);
             case RetryDecision.Discard(String reason) ->
                     TaskDisposition.discarded(reason);
             case RetryDecision.DeadLetter(String reason) ->
@@ -111,14 +171,25 @@ public final class SimpleProcessingEngine implements ProcessingEngine {
         };
     }
 
+    /**
+     * Apply side effects implied by the disposition.
+     *
+     * <p>Important: this method is called by the runner, potentially from a different
+     * thread than {@link #execute(ProcessingTask)}. Keep shared state mutation here.</p>
+     */
     private void applyDisposition(ProcessingTask task, TaskDisposition disposition, Instant now) {
         if (disposition instanceof TaskDisposition.Completed || disposition instanceof TaskDisposition.Discarded) {
             return;
         }
 
         if (disposition instanceof TaskDisposition.RetryLater retryLater) {
-            ProcessingTask newTask = task.attempt(now);
-            runContext.retryBuffer().schedule(newTask, retryLater.notBefore(), retryLater.reason(), retryLater.error());
+            ProcessingTask retryTask = task.attempt(now);
+            run.retryBuffer().schedule(
+                    retryTask,
+                    retryLater.notBefore(), // consider renaming to eligibleAt in TaskDisposition as well
+                    retryLater.reason(),
+                    retryLater.error()
+            );
             return;
         }
 
@@ -133,7 +204,7 @@ public final class SimpleProcessingEngine implements ProcessingEngine {
                     task.attempt(),
                     error
             );
-            runContext.deadLetterQueue().put(task, item);
+            run.deadLetterQueue().put(task, item);
         }
     }
 }

@@ -64,7 +64,7 @@ public class Smoke2 {
                             .register();
 
                     routes.route("VORON_PRODUCT")
-                            .match(allOf(
+                            .match(anyOf(
                                     hints(VoronHint.PRODUCT),
                                     host("voron.ua"),
                                     pathPrefix("/uk/product/")
