@@ -21,7 +21,7 @@ public final class PipelineBuilder {
         return this;
     }
 
-    public CrawlPipeline build() {
+    public ProcessingPipeline build() {
         return new StepsPipeline(id, steps);
     }
 }

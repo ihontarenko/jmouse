@@ -60,7 +60,7 @@ public class Smoke2 {
                             ))
                             .pipeline(pipeline -> pipeline
                                     .id("voron-listing")
-                                    .step("fetch-parse", new FetchParsePipeline("fetch-parse")::execute)
+                                    .step("fetch-parse", new FetchParsePipeline("fetch-parse"))
                                     .step("listing", new VoronListingProcessor(
                                             "a[href*='/uk/product/']",
                                             "a[rel='next'], .pagination a.next"
@@ -76,7 +76,7 @@ public class Smoke2 {
                             ))
                             .pipeline(pipeline -> pipeline
                                     .id("voron-product")
-                                    .step("fetch-parse", new FetchParsePipeline("fetch-parse")::execute)
+                                    .step("fetch-parse", new FetchParsePipeline("fetch-parse"))
                                     .step("product", new VoronProductProcessor("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td.center_col > div.product-block > h1"))
                             )
                             .register();

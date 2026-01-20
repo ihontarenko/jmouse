@@ -5,6 +5,8 @@ import org.jmouse.crawler.routing.ProcessingRoute;
 import org.jmouse.crawler.routing.ProcessingRouteRegistry;
 import org.jmouse.crawler.routing.PipelineResult;
 import org.jmouse.crawler.spi.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 
@@ -40,6 +42,8 @@ public final class SimpleProcessingEngine implements ProcessingEngine {
      * Safety bound against infinite route loops.
      */
     private static final int MAX_ROUTE_HOPS = 8;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleProcessingEngine.class);
 
     private final RunContext run;
 
@@ -78,10 +82,12 @@ public final class SimpleProcessingEngine implements ProcessingEngine {
         SeenStore   seen  = run.seen();
 
         if (scope.isDisallowed(task)) {
+            LOGGER.info("Disallowed execution of task {}", task);
             return TaskDisposition.discarded(scope.denyReason(task));
         }
 
         if (seen.isProcessed(task.url())) {
+            LOGGER.info("Skipping execution of task {}. Already processed", task);
             return TaskDisposition.discarded("already processed");
         }
 
@@ -98,6 +104,7 @@ public final class SimpleProcessingEngine implements ProcessingEngine {
         ProcessingRoute          route             = run.routes().resolve(task, run);
 
         if (route == null) {
+            LOGGER.error("No route found for task {}", task);
             return TaskDisposition.deadLetter("No route resolved", null, STAGE_PIPELINE, "route:unknown");
         }
 

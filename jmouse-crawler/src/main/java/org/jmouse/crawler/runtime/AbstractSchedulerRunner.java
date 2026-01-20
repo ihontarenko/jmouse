@@ -90,7 +90,7 @@ public abstract class AbstractSchedulerRunner implements CrawlRunner {
      * @param engine engine instance
      * @return validated engine
      */
-    protected final ProcessingEngine requireParallel(ProcessingEngine engine) {
+    protected final ProcessingEngine requireEngine(ProcessingEngine engine) {
         return Verify.instanceOf(engine, ProcessingEngine.class, "engine");
     }
 }

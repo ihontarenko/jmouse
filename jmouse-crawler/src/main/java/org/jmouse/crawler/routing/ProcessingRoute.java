@@ -7,7 +7,7 @@ public interface ProcessingRoute {
 
     String id();
 
-    CrawlPipeline pipeline();
+    ProcessingPipeline pipeline();
 
     boolean matches(ProcessingTask task, RunContext run);
 

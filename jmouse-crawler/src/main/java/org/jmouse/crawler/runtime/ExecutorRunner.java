@@ -1,6 +1,8 @@
 package org.jmouse.crawler.runtime;
 
 import org.jmouse.core.Verify;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -19,6 +21,8 @@ import java.util.concurrent.*;
  */
 public final class ExecutorRunner extends AbstractSchedulerRunner {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExecutorRunner.class);
+
     private final ExecutorService executor;
     private final int             maxInFlight;
 
@@ -36,12 +40,18 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
 
     @Override
     public void runUntilDrained(ProcessingEngine engine) {
-        ProcessingEngine processingEngine = requireParallel(engine);
+        ProcessingEngine processingEngine = requireEngine(engine);
 
         CompletionService<Done> completion = new ExecutorCompletionService<>(executor);
 
         int inFlight = 0;
         ScheduleDecision stashed = null;
+
+        LOGGER.info(
+                "Started (maxInFlight={}, executor={})",
+                maxInFlight,
+                executor
+        );
 
         while (true) {
 
@@ -114,6 +124,12 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
             ProcessingEngine processingEngine,
             ProcessingTask task
     ) {
+        LOGGER.trace(
+                "Submit task url={}, attempt={}, scheduledAt={}",
+                task.url(),
+                task.attempt(),
+                task.scheduledAt()
+        );
         service.submit(() -> new Done(task, processingEngine.execute(task)));
     }
 
@@ -187,6 +203,11 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
      * Apply a completed task result to the engine with a timestamp. ⏱️
      */
     private static void apply(ProcessingEngine engine, Clock clock, Done done) {
+        LOGGER.trace(
+                "Task completed url={}, disposition={}",
+                done.task().url(),
+                done.disposition()
+        );
         engine.apply(done.task(), done.disposition(), clock.instant());
     }
 

@@ -2,7 +2,6 @@ package org.jmouse.crawler.dsl;
 
 import org.jmouse.core.Verify;
 import org.jmouse.crawler.routing.*;
-import org.jmouse.crawler.runtime.RoutingHint;
 import org.jmouse.crawler.routing.ProcessingRouteResolver;
 import org.jmouse.crawler.runtime.RunContext;
 import org.jmouse.crawler.runtime.ProcessingTask;
@@ -32,7 +31,7 @@ public final class RoutesBuilder {
         private final String        id;
 
         private ProcessingRouteTask match = UrlMatches.any();
-        private CrawlPipeline       pipeline;
+        private ProcessingPipeline  pipeline;
 
         RouteSpecification(RoutesBuilder parent, String id) {
             this.parent = parent;
@@ -62,14 +61,14 @@ public final class RoutesBuilder {
     private record SimpleRoute(
             String id,
             ProcessingRouteTask match,
-            CrawlPipeline pipeline
+            ProcessingPipeline pipeline
     )
         implements ProcessingRoute {
 
         private SimpleRoute(
                 String id,
                 ProcessingRouteTask match,
-                CrawlPipeline pipeline
+                ProcessingPipeline pipeline
         ) {
             this.id = id;
             this.pipeline = pipeline;
