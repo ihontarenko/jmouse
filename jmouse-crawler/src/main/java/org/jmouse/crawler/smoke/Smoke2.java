@@ -14,8 +14,10 @@ import org.jmouse.crawler.spi.Fetcher;
 import org.jmouse.crawler.spi.ParserRegistry;
 import org.jmouse.crawler.spi.PolitenessPolicies;
 
+import java.net.URI;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 import static org.jmouse.crawler.routing.UrlMatches.*;
 
@@ -43,6 +45,9 @@ public class Smoke2 {
                         .decisionLog(decisionLog)
                         .politeness(PolitenessPolicies.gentle(80, 100))
                         .retry(RetryPolicies.simple(2, Duration.ofMillis(100)))
+                        .dynamicAttributes(DynamicAttributes.withInitial(
+                                Map.of("site", URI.create("https://voron.ua/"))
+                        ))
                 )
 
                 .routes(routes -> {
@@ -72,7 +77,7 @@ public class Smoke2 {
                             .pipeline(pipeline -> pipeline
                                     .id("voron-product")
                                     .step("fetch-parse", new FetchParsePipeline("fetch-parse")::execute)
-                                    .step("product", new VoronProductProcessor("h1"))
+                                    .step("product", new VoronProductProcessor("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td.center_col > div.product-block > h1"))
                             )
                             .register();
                 })

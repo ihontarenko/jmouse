@@ -15,6 +15,8 @@ public interface RunContext {
 
     DecisionLog decisionLog();
 
+    DynamicAttributes attributes();
+
     ProcessingRouteResolver routes();
 
     Fetcher fetcher();

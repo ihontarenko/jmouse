@@ -4,6 +4,7 @@ import org.jmouse.crawler.content.CssSelector;
 import org.jmouse.crawler.routing.PipelineStep;
 import org.jmouse.crawler.routing.PipelineResult;
 import org.jmouse.crawler.runtime.ProcessingContext;
+import org.jmouse.crawler.runtime.RunContext;
 
 import java.net.URI;
 
@@ -20,6 +21,7 @@ public final class VoronListingProcessor implements PipelineStep {
 
     @Override
     public PipelineResult execute(ProcessingContext ctx) {
+        RunContext runContext = ctx.run();
 
         URI base = ctx.fetchResult() != null && ctx.fetchResult().finalUrl() != null
                 ? ctx.fetchResult().finalUrl()
@@ -30,7 +32,8 @@ public final class VoronListingProcessor implements PipelineStep {
 
 //        // 1) product pages
         for (URI u : cssSelector.links(ctx.document(), "a[href^='/uk/catalog/']")) {
-            ctx.enqueue(u, VoronHint.PRODUCT);
+            URI site = runContext.attributes().getAttribute("site");
+            ctx.enqueue(site.resolve(u), VoronHint.PRODUCT);
         }
 //
 //        // 2) pagination

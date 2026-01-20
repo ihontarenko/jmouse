@@ -16,9 +16,10 @@ public final class CrawlerRuntimeBuilder {
     private DeadLetterQueue deadLetterQueue;
 
     // io
-    private Fetcher        fetcher;
-    private ParserRegistry parserRegistry;
-    private DecisionLog    decisionLog;
+    private Fetcher           fetcher;
+    private ParserRegistry    parserRegistry;
+    private DecisionLog       decisionLog;
+    private DynamicAttributes attributes;
 
     // policies
     private SeenStore        seenStore;
@@ -50,6 +51,11 @@ public final class CrawlerRuntimeBuilder {
 
     public CrawlerRuntimeBuilder decisionLog(DecisionLog value) {
         this.decisionLog = Verify.nonNull(value, "decisionLog");
+        return this;
+    }
+
+    public CrawlerRuntimeBuilder dynamicAttributes(DynamicAttributes attributes) {
+        this.attributes = Verify.nonNull(attributes, "attributes");
         return this;
     }
 
@@ -136,6 +142,10 @@ public final class CrawlerRuntimeBuilder {
             decisionLog = new InMemoryDecisionLog();
         }
 
+        if (attributes == null) {
+            attributes = new InMemoryDynamicAttributes();
+        }
+
         Verify.state(fetcher != null,
                 "Fetcher must be configured via runtime.fetcher(...)");
     }
@@ -167,6 +177,7 @@ public final class CrawlerRuntimeBuilder {
                 retryBuffer,
                 deadLetterQueue,
                 decisionLog,
+                attributes,
                 routes,
                 fetcher,
                 parserRegistry,

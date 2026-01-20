@@ -7,18 +7,19 @@ import java.time.Clock;
 
 public final class DefaultRunContext implements RunContext {
 
-    private final Frontier           frontier;
-    private final RetryBuffer        retryBuffer;
-    private final DeadLetterQueue    dlq;
+    private final Frontier                frontier;
+    private final RetryBuffer             retryBuffer;
+    private final DeadLetterQueue         dlq;
     private final DecisionLog             decisionLog;
+    private final DynamicAttributes       attributes;
     private final ProcessingRouteResolver routes;
     private final Fetcher                 fetcher;
-    private final ParserRegistry     parsers;
-    private final SeenStore          seen;
-    private final ScopePolicy        scope;
-    private final RetryPolicy        retry;
-    private final UtilityRegistry    utilities;
-    private final PolitenessPolicy   politeness;
+    private final ParserRegistry          parsers;
+    private final SeenStore               seen;
+    private final ScopePolicy             scope;
+    private final RetryPolicy             retry;
+    private final UtilityRegistry         utilities;
+    private final PolitenessPolicy        politeness;
 
     private final Clock clock;
 
@@ -27,6 +28,7 @@ public final class DefaultRunContext implements RunContext {
             RetryBuffer retryBuffer,
             DeadLetterQueue dlq,
             DecisionLog decisionLog,
+            DynamicAttributes attributes,
             ProcessingRouteResolver routes,
             Fetcher fetcher,
             ParserRegistry parsers,
@@ -41,6 +43,7 @@ public final class DefaultRunContext implements RunContext {
         this.retryBuffer = retryBuffer;
         this.dlq = dlq;
         this.decisionLog = decisionLog;
+        this.attributes = attributes;
         this.routes = routes;
         this.fetcher = fetcher;
         this.parsers = parsers;
@@ -70,6 +73,11 @@ public final class DefaultRunContext implements RunContext {
     @Override
     public DecisionLog decisionLog() {
         return decisionLog;
+    }
+
+    @Override
+    public DynamicAttributes attributes() {
+        return attributes;
     }
 
     @Override
