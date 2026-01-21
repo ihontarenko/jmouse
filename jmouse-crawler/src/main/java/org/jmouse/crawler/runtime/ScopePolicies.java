@@ -1,6 +1,7 @@
 package org.jmouse.crawler.runtime;
 
-import org.jmouse.crawler.spi.ScopePolicy;
+import org.jmouse.crawler.api.ProcessingTask;
+import org.jmouse.crawler.api.ScopePolicy;
 
 public final class ScopePolicies {
 

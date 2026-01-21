@@ -1,7 +1,8 @@
 package org.jmouse.crawler.runtime;
 
-import org.jmouse.crawler.spi.RetryDecision;
-import org.jmouse.crawler.spi.RetryPolicy;
+import org.jmouse.crawler.api.ProcessingTask;
+import org.jmouse.crawler.runtime.core.RetryDecision;
+import org.jmouse.crawler.api.RetryPolicy;
 import org.jmouse.core.Verify;
 
 import java.time.Duration;
