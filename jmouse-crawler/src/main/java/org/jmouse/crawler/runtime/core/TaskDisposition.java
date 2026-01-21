@@ -15,7 +15,7 @@ public sealed interface TaskDisposition
     ) implements TaskDisposition {}
 
     record RetryLater(
-            Instant notBefore,
+            Instant eligibleAt,
             String reason,
             Throwable error,
             String stageId,

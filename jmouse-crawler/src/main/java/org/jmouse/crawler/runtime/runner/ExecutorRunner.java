@@ -1,6 +1,7 @@
 package org.jmouse.crawler.runtime.runner;
 
 import org.jmouse.core.Verify;
+import org.jmouse.core.context.execution.ExecutionContextHolder;
 import org.jmouse.crawler.api.ProcessingEngine;
 import org.jmouse.crawler.api.ProcessingTask;
 import org.jmouse.crawler.runtime.schedule.ScheduleDecision;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.*;
 
 /**
@@ -136,6 +138,14 @@ public final class ExecutorRunner extends AbstractSchedulerRunner {
                 task.scheduledAt()
         );
         service.submit(() -> new Done(task, processingEngine.execute(task)));
+        service.submit(() -> {
+            try (var ignored = ExecutionContextHolder.open(
+                    ExecutionContextHolder.current().with(TraceKeys.TRACE, task.trace())
+            )) {
+                TaskDisposition disposition   = processingEngine.execute(task);
+                return new Done(task, disposition);
+            }
+        });
     }
 
     /**

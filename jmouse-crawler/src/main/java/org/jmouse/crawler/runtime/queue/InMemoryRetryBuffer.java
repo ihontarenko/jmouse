@@ -28,7 +28,7 @@ public final class InMemoryRetryBuffer implements RetryBuffer {
     /**
      * Retry items ordered by eligibility instant (earliest first).
      *
-     * <p>Naming note: internally we keep "eligibleAt", even if legacy code used "notBefore".</p>
+     * <p>Naming note: internally we keep "eligibleAt", even if legacy code used "eligibleAt".</p>
      */
     private final PriorityBlockingQueue<Item> queue =
             new PriorityBlockingQueue<>(128, Comparator.comparing(Item::eligibleAt));

@@ -7,6 +7,7 @@ import org.jmouse.crawler.dsl.factory.Schedulers;
 import org.jmouse.crawler.route.ProcessingRouteResolver;
 import org.jmouse.crawler.runtime.core.SimpleProcessingEngine;
 import org.jmouse.crawler.api.UtilityRegistry;
+import org.jmouse.crawler.runtime.core.TaskFactory;
 import org.jmouse.crawler.runtime.runner.JobRunner;
 import org.jmouse.crawler.runtime.schedule.JobScheduler;
 
@@ -17,10 +18,10 @@ import java.util.function.Consumer;
 
 public final class FacadeBuilder {
 
-    private final List<ProcessingTask>  seeds            = new ArrayList<>();
-    private final CrawlerRuntimeBuilder runtimeBuilder   = new CrawlerRuntimeBuilder();
-    private final RoutesBuilder         routesBuilder    = new RoutesBuilder();
-    private final UtilitiesBuilder      utilitiesBuilder = new UtilitiesBuilder();
+    private final List<SeedSpecification> seeds          = new ArrayList<>();
+    private final RunContextBuilder       runtimeBuilder = new RunContextBuilder();
+    private final RoutesBuilder     routesBuilder    = new RoutesBuilder();
+    private final UtilitiesBuilder  utilitiesBuilder = new UtilitiesBuilder();
 
     private CrawlRunnerFactory runnerFactory    = Runners.singleThread();
     private SchedulerFactory   schedulerFactory = Schedulers.defaultScheduler();
@@ -31,28 +32,19 @@ public final class FacadeBuilder {
         return new FacadeBuilder();
     }
 
-    public FacadeBuilder seed(String url, Object hint) {
+    private record SeedSpecification(URI url, RoutingHint hint) {}
+
+    public FacadeBuilder seed(String url, RoutingHint hint) {
         return seed(URI.create(Verify.nonNull(url, "url")), hint);
     }
 
-    public FacadeBuilder seed(URI url, Object hint) {
+    public FacadeBuilder seed(URI url, RoutingHint hint) {
         Verify.nonNull(url, "url");
-
-        seeds.add(new ProcessingTask(
-                url,
-                0,
-                null,
-                "seed",
-                0,
-                runtimeBuilder.clock().instant(),
-                0,
-                runtimeBuilder.hints().adapt(hint)
-        ));
-
+        seeds.add(new SeedSpecification(url, hint));
         return this;
     }
 
-    public FacadeBuilder runtime(Consumer<CrawlerRuntimeBuilder> customizer) {
+    public FacadeBuilder runtime(Consumer<RunContextBuilder> customizer) {
         Verify.nonNull(customizer, "customizer").accept(runtimeBuilder);
         return this;
     }
@@ -83,17 +75,20 @@ public final class FacadeBuilder {
         ProcessingRouteResolver routeResolver = routesBuilder.build();
         UtilityRegistry         utilities     = utilitiesBuilder.build();
         RunContext              runContext    = runtimeBuilder.build(routeResolver, utilities);
+
         JobScheduler     scheduler = schedulerFactory.create(runContext);
         JobRunner        runner    = runnerFactory.create(runContext, scheduler);
         ProcessingEngine engine    = new SimpleProcessingEngine(runContext);
 
-        Frontier frontier = runContext.frontier();
+        Frontier    frontier = runContext.frontier();
+        TaskFactory tasks    = runContext.tasks();
 
-        for (ProcessingTask seed : seeds) {
-            frontier.offer(seed);
+        for (SeedSpecification seed : seeds) {
+            frontier.offer(
+                    tasks.seed(seed.url(), seed.hint(), TaskOrigin.seed("seed"))
+            );
         }
 
         return new Crawler(engine, runner);
     }
 }
-

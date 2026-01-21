@@ -8,22 +8,26 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public final class FixedIntervalGate implements TimeGate {
 
-    private final Duration                 interval;
-    private final AtomicReference<Instant> next = new AtomicReference<>(Instant.EPOCH);
+    private final Duration                 delay;
+    private final AtomicReference<Instant> next = new AtomicReference<>();
 
-    public FixedIntervalGate(Duration interval) {
-        this.interval = Verify.nonNull(interval, "interval");
+    public FixedIntervalGate(Duration delay) {
+        this.delay = Verify.nonNull(delay, "delay");
     }
 
-    @Override
-    public Instant eligibleAt(Instant now) {
+    public Instant acquire(Instant now) {
         while (true) {
             Instant previous = next.get();
-            Instant allowed  = previous.isAfter(now) ? previous : now;
-            Instant reserve  = allowed.plus(interval);
+            Instant eligible = (previous == null) ? now : previous;
 
-            if (next.compareAndSet(previous, reserve)) {
-                return allowed;
+            if (eligible.isAfter(now)) {
+                return eligible;
+            }
+
+            Instant next = now.plus(delay);
+
+            if (this.next.compareAndSet(previous, next)) {
+                return now;
             }
         }
     }

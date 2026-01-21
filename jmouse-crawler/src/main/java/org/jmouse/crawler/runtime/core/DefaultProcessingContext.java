@@ -119,11 +119,24 @@ public final class DefaultProcessingContext implements ProcessingContext {
             return;
         }
 
-        ScopePolicy scope = run.scope();
-        SeenStore   seen  = run.seen();
+        ScopePolicy scope    = run.scope();
+        SeenStore   seen     = run.seen();
         Frontier    frontier = run.frontier();
 
-        ProcessingTask next = buildChildTask(url, hint);
+        ProcessingTask parent = this.task;
+
+        if (url.equals(parent.url())) {
+            decisions.reject(DecisionCodes.DUPLICATE_SELF, "self link");
+            return;
+        }
+
+        TaskOrigin origin = TaskOrigin.discovered(
+                "pipeline",
+                routeId(),
+                parent.id()
+        );
+
+        ProcessingTask next = run.tasks().childOf(parent, url, hint, origin);
 
         if (scope.isDisallowed(next)) {
             decisions.reject(DecisionCodes.SCOPE_DENY, "out of scope");
@@ -136,27 +149,9 @@ public final class DefaultProcessingContext implements ProcessingContext {
         }
 
         frontier.offer(next);
-        decisions.accept(DecisionCodes.ENQUEUE_ACCEPT, "enqueued");
+
+        decisions.accept(DecisionCodes.ENQUEUE_ACCEPT,
+                         "enqueued childId=%s parentId=%s route=%s".formatted(next.id(), parent.id(), routeId()));
     }
 
-    /**
-     * Build a child task derived from the current {@link #task()}.
-     *
-     * <p>Scheduling timestamp is taken from {@link RunContext#clock()} to keep time sourcing consistent.</p>
-     */
-    private ProcessingTask buildChildTask(URI url, RoutingHint hint) {
-        ProcessingTask parent = this.task;
-        Instant        now    = run.clock().instant();
-
-        return new ProcessingTask(
-                url,
-                parent.depth() + 1,
-                parent.url(),
-                parent.url().toString(),
-                parent.priority(),
-                now,
-                0,
-                hint
-        );
-    }
 }

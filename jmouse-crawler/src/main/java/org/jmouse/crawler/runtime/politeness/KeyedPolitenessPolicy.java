@@ -1,15 +1,20 @@
 package org.jmouse.crawler.runtime.politeness;
 
 import org.jmouse.core.Verify;
+import org.jmouse.crawler.api.KeyAwarePolitenessPolicy;
 import org.jmouse.crawler.api.ProcessingTask;
-import org.jmouse.crawler.api.PolitenessPolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
-public final class KeyedPolitenessPolicy<K> implements PolitenessPolicy {
+public final class KeyedPolitenessPolicy<K extends PolitenessKey>
+        implements KeyAwarePolitenessPolicy<K> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeyedPolitenessPolicy.class);
 
     private final PolitenessKeyResolver<K>   resolver;
     private final ConcurrentMap<K, TimeGate> gates;
@@ -26,9 +31,25 @@ public final class KeyedPolitenessPolicy<K> implements PolitenessPolicy {
 
     @Override
     public Instant eligibleAt(ProcessingTask task, Instant now) {
-        K        key  = resolver.resolve(task);
+        K        key  = keyOf(task);
         TimeGate gate = gates.computeIfAbsent(key, gateFactory);
-        return gate.eligibleAt(now);
+        Instant eligible = gate.acquire(now);
+
+        LOGGER.debug(
+                "politeness.check key={} task={} now={} eligibleAt={}",
+                key,
+                task.url(),
+                now,
+                eligible
+        );
+
+        return eligible;
     }
+
+    @Override
+    public K keyOf(ProcessingTask task) {
+        return resolver.resolve(task);
+    }
+
 }
 

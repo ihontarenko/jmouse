@@ -49,7 +49,16 @@ public class Smoke2 {
                         .fetcher(fetcher)
                         .parsers(parserRegistry)
                         .decisionLog(decisionLog)
+
+
+
                         .politeness(PolitenessPolicies.gentle(80, 100))
+                        .politeness(p -> p
+                                .keyResolver(new DefaultPolitenessKeyResolver())
+                                .lane("html", Duration.ofMillis(200))
+                                .lane("page", Duration.ofMillis(500))
+                                .lane("media", Duration.ofMillis(1200))
+                        )
                         .retry(RetryPolicies.simple(2, Duration.ofMillis(100)))
                         .dynamicAttributes(DynamicAttributes.withInitial(
                                 Map.of("site", URI.create("https://voron.ua/"))

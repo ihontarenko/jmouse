@@ -2,7 +2,7 @@ package org.jmouse.crawler.runtime.core;
 
 import org.jmouse.crawler.api.*;
 import org.jmouse.crawler.route.ProcessingRouteResolver;
-import org.jmouse.crawler.runtime.dlq.DeadLetterQueue;
+import org.jmouse.crawler.api.DeadLetterQueue;
 import org.jmouse.crawler.api.Frontier;
 import org.jmouse.crawler.api.RetryBuffer;
 import org.jmouse.crawler.api.DynamicAttributes;
@@ -15,19 +15,21 @@ import java.time.Clock;
 
 public final class DefaultRunContext implements RunContext {
 
-    private final Frontier        frontier;
-    private final RetryBuffer     retryBuffer;
-    private final DeadLetterQueue dlq;
-    private final DecisionLog     decisionLog;
+    private final Frontier                frontier;
+    private final RetryBuffer             retryBuffer;
+    private final DeadLetterQueue         dlq;
+    private final DecisionLog             decisionLog;
     private final DynamicAttributes       attributes;
     private final ProcessingRouteResolver routes;
     private final Fetcher                 fetcher;
-    private final ParserRegistry parsers;
-    private final SeenStore      seen;
-    private final ScopePolicy    scope;
+    private final ParserRegistry          parsers;
+    private final SeenStore               seen;
+    private final ScopePolicy             scope;
     private final RetryPolicy             retry;
     private final UtilityRegistry         utilities;
     private final PolitenessPolicy        politeness;
+    private final TaskFactory             tasks;
+    private final InFlightBuffer          inFlight;
 
     private final Clock clock;
 
@@ -45,7 +47,9 @@ public final class DefaultRunContext implements RunContext {
             RetryPolicy retry,
             Clock clock,
             UtilityRegistry utilities,
-            PolitenessPolicy politeness
+            PolitenessPolicy politeness,
+            TaskFactory tasks,
+            InFlightBuffer inFlight
     ) {
         this.frontier = frontier;
         this.retryBuffer = retryBuffer;
@@ -61,6 +65,8 @@ public final class DefaultRunContext implements RunContext {
         this.clock = clock;
         this.utilities = utilities;
         this.politeness = politeness;
+        this.tasks = tasks;
+        this.inFlight = inFlight;
     }
 
     @Override
@@ -131,5 +137,15 @@ public final class DefaultRunContext implements RunContext {
     @Override
     public PolitenessPolicy politeness() {
         return politeness;
+    }
+
+    @Override
+    public TaskFactory tasks() {
+        return tasks;
+    }
+
+    @Override
+    public InFlightBuffer inFlight() {
+        return inFlight;
     }
 }

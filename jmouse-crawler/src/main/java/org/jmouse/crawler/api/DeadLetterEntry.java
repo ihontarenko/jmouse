@@ -1,6 +1,4 @@
-package org.jmouse.crawler.runtime.dlq;
-
-import org.jmouse.crawler.api.ProcessingTask;
+package org.jmouse.crawler.api;
 
 /**
  * Immutable entry stored in a {@link DeadLetterQueue}. ☠️

@@ -5,7 +5,7 @@ import org.jmouse.crawler.api.*;
 import org.jmouse.crawler.route.ProcessingRoute;
 import org.jmouse.crawler.route.ProcessingRouteRegistry;
 import org.jmouse.crawler.pipeline.PipelineResult;
-import org.jmouse.crawler.runtime.dlq.DeadLetterItem;
+import org.jmouse.crawler.api.DeadLetterItem;
 import org.jmouse.crawler.api.SeenStore;
 import org.jmouse.crawler.api.RetryPolicy;
 import org.jmouse.crawler.api.ScopePolicy;
@@ -137,7 +137,7 @@ public final class SimpleProcessingEngine implements ProcessingEngine {
      *
      * @throws Exception if a downstream pipeline throws
      */
-    private PipelineResult followRouteHops(DefaultProcessingContext ctx, PipelineResult initialResult) throws Exception {
+    private PipelineResult followRouteHops(DefaultProcessingContext processingContext, PipelineResult initialResult) throws Exception {
         PipelineResult result = initialResult;
 
         for (int hop = 1; hop <= MAX_ROUTE_HOPS; hop++) {
@@ -154,10 +154,10 @@ public final class SimpleProcessingEngine implements ProcessingEngine {
             ProcessingRoute nextRoute = registry.byId(nextRouteId);
             Verify.state(nextRoute != null, "next route not found: " + nextRouteId);
 
-            ctx.setRouteId(nextRoute.id());
+            processingContext.setRouteId(nextRoute.id());
 
             // Hop to the next route.
-            result = nextRoute.pipeline().execute(ctx);
+            result = nextRoute.pipeline().execute(processingContext);
         }
 
         throw new IllegalStateException("Route hop limit exceeded (" + MAX_ROUTE_HOPS + ")");
@@ -197,7 +197,7 @@ public final class SimpleProcessingEngine implements ProcessingEngine {
             ProcessingTask retryTask = task.attempt(now);
             run.retryBuffer().schedule(
                     retryTask,
-                    retryLater.notBefore(), // consider renaming to eligibleAt in TaskDisposition as well
+                    retryLater.eligibleAt(),
                     retryLater.reason(),
                     retryLater.error()
             );

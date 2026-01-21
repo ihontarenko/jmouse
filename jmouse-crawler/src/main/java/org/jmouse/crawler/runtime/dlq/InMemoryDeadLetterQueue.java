@@ -1,5 +1,8 @@
 package org.jmouse.crawler.runtime.dlq;
 
+import org.jmouse.crawler.api.DeadLetterEntry;
+import org.jmouse.crawler.api.DeadLetterItem;
+import org.jmouse.crawler.api.DeadLetterQueue;
 import org.jmouse.crawler.api.ProcessingTask;
 
 import java.util.ArrayList;

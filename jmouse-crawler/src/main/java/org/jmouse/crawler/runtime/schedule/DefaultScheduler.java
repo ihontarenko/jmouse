@@ -4,6 +4,8 @@ import org.jmouse.crawler.api.*;
 import org.jmouse.crawler.api.Frontier;
 import org.jmouse.crawler.api.RetryBuffer;
 import org.jmouse.crawler.api.PolitenessPolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -43,6 +45,8 @@ public final class DefaultScheduler implements JobScheduler {
      * can be computed (e.g. retry buffer has no not-before). ⚠️
      */
     private static final Duration FALLBACK_PARK = Duration.ofMillis(10);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultScheduler.class);
 
     private final Frontier         frontier;
     private final PolitenessPolicy politeness;
@@ -115,11 +119,33 @@ public final class DefaultScheduler implements JobScheduler {
 
             // Politeness deferral: push back into retry buffer with a specific reason.
             if (eligibleAt != null && eligibleAt.isAfter(now)) {
-                retryBuffer.schedule(task.schedule(eligibleAt), eligibleAt, REASON_POLITENESS, null);
+                Duration delay = Duration.between(now, eligibleAt);
+
+                Object key = (politeness instanceof KeyAwarePolitenessPolicy<?> keyAware)
+                        ? keyAware.keyOf(task) : null;
+
+                LOGGER.debug("scheduler.defer reason=politeness delay={} task={} key={}",
+                             delay, task.url(), key);
+
+                retryBuffer.schedule(task.deferred(eligibleAt), eligibleAt, REASON_POLITENESS, null);
                 continue;
             }
 
+            LOGGER.debug(
+                    "scheduler.dispatch task={} lane={}",
+                    task.url(),
+                    task.hint() // або lane
+            );
+
             return new ScheduleDecision.TaskReady(task);
+        }
+
+        if (frontier.size() > 0) {
+            LOGGER.warn(
+                    "scheduler.park.with-frontier size={} retry={}",
+                    frontier.size(),
+                    retryBuffer.size()
+            );
         }
 
         return decideWhenNoTaskReady(now);

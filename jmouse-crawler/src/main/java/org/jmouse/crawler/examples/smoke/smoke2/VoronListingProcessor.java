@@ -7,6 +7,7 @@ import org.jmouse.crawler.api.ProcessingContext;
 import org.jmouse.crawler.api.RunContext;
 
 import java.net.URI;
+import java.util.List;
 
 public final class VoronListingProcessor implements PipelineStep {
 
@@ -30,8 +31,10 @@ public final class VoronListingProcessor implements PipelineStep {
         CssSelector cssSelector = ctx.utility(CssSelector.class);
 //        cssSelector.links(ctx.document(), "a[href^='/uk/catalog/']");
 
+        List<URI> uris = cssSelector.links(ctx.document(), "a[href^='/uk/catalog/']");
+
 //        // 1) product pages
-        for (URI u : cssSelector.links(ctx.document(), "a[href^='/uk/catalog/']")) {
+        for (URI u : uris.subList(0, 3)) {
             URI site = runContext.attributes().getAttribute("site");
             ctx.enqueue(site.resolve(u), VoronHint.PRODUCT);
         }
