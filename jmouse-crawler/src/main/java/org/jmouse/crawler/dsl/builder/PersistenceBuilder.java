@@ -12,7 +12,7 @@ public final class PersistenceBuilder {
     private Durability     durability     = Durability.batched(256, Duration.ofMillis(200));
     private SnapshotPolicy snapshotPolicy = SnapshotPolicy.every(10_000)
             .or(SnapshotPolicy.every(Duration.ofSeconds(30)));
-    private StateCodec     codec          = new SimpleLineCodec(); // replace later
+    private Codec          codec          = new SimpleLineCodec(); // replace later
 
     public PersistenceBuilder directory(Path dir) {
         this.directory = Verify.nonNull(dir, "dir");

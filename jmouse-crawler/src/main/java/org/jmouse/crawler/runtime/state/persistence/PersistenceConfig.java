@@ -8,7 +8,7 @@ public record PersistenceConfig(
         Path directory,
         Durability durability,
         SnapshotPolicy snapshotPolicy,
-        StateCodec codec
+        Codec codec
 ) {
     public PersistenceConfig {
         Verify.nonNull(directory, "directory");

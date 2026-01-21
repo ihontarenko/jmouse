@@ -1,13 +1,15 @@
 package org.jmouse.crawler.runtime.state.persistence.file;
 
 import org.jmouse.core.Verify;
+import org.jmouse.crawler.runtime.state.persistence.Codec;
 import org.jmouse.crawler.runtime.state.persistence.Durability;
-import org.jmouse.crawler.runtime.state.persistence.StateCodec;
 import org.jmouse.crawler.runtime.state.persistence.WALRepository;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,17 +21,16 @@ public final class FileWALRepository<E> implements WALRepository<E> {
 
     private final Path       walFile;
     private final Path       rotatedFile;
-    private final StateCodec codec;
+    private final Codec      codec;
     private final Class<E>   eventType;
     private final Durability durability;
 
     private final ReentrantLock lock = new ReentrantLock();
 
-    private long buffered             = 0;
     private long operationsSinceFlush = 0;
     private long lastFlushNanos       = System.nanoTime();
 
-    public FileWALRepository(Path walFile, StateCodec codec, Class<E> eventType, Durability durability) {
+    public FileWALRepository(Path walFile, Codec codec, Class<E> eventType, Durability durability) {
         this.walFile = Verify.nonNull(walFile, "walFile");
         this.rotatedFile = walFile.resolveSibling(walFile.getFileName() + ".old");
         this.codec = Verify.nonNull(codec, "codec");
@@ -53,15 +54,15 @@ public final class FileWALRepository<E> implements WALRepository<E> {
                 return;
             }
 
-            if (durability instanceof Durability.Batched batched) {
-                if (operationsSinceFlush >= batched.maxRecords() || elapsedExceeded(batched.maxDelay())) {
+            if (durability instanceof Durability.Batched(int maxRecords, Duration maxDelay)) {
+                if (operationsSinceFlush >= maxRecords || elapsedExceeded(maxDelay)) {
                     flush();
                 }
                 return;
             }
 
-            if (durability instanceof Durability.Async async) {
-                if (elapsedExceeded(async.flushInterval())) {
+            if (durability instanceof Durability.Async(Duration flushInterval)) {
+                if (elapsedExceeded(flushInterval)) {
                     flush();
                 }
             }
@@ -79,8 +80,8 @@ public final class FileWALRepository<E> implements WALRepository<E> {
         }
 
         try {
-            List<String> lines = Files.readAllLines(walFile, StandardCharsets.UTF_8);
-            List<E> events = new ArrayList<>(lines.size());
+            List<String> lines  = Files.readAllLines(walFile, StandardCharsets.UTF_8);
+            List<E>      events = new ArrayList<>(lines.size());
             for (String line : lines) {
                 if (line == null || line.isBlank()) continue;
                 events.add(codec.decode(line, eventType));
@@ -119,7 +120,7 @@ public final class FileWALRepository<E> implements WALRepository<E> {
     }
 
     private boolean elapsedExceeded(Duration d) {
-        long now = System.nanoTime();
+        long now          = System.nanoTime();
         long elapsedNanos = now - lastFlushNanos;
         return elapsedNanos >= d.toNanos();
     }

@@ -18,8 +18,8 @@ import org.jmouse.crawler.runtime.state.*;
 
 import org.jmouse.crawler.runtime.state.persistence.*;
 
+import org.jmouse.crawler.runtime.state.persistence.FileSnapshotRepository;
 import org.jmouse.crawler.runtime.state.persistence.events.InFlightEvent;
-import org.jmouse.crawler.runtime.state.persistence.file.FileSnapshotRepository;
 import org.jmouse.crawler.runtime.state.persistence.file.FileWALRepository;
 import org.jmouse.crawler.runtime.state.persistence.snapshot.InFlightSnapshot;
 import org.jmouse.crawler.runtime.state.persistence.wrap.PersistentInFlightBuffer;

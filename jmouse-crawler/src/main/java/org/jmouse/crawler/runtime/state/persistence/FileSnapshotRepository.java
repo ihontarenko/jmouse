@@ -1,8 +1,6 @@
-package org.jmouse.crawler.runtime.state.persistence.file;
+package org.jmouse.crawler.runtime.state.persistence;
 
 import org.jmouse.core.Verify;
-import org.jmouse.crawler.runtime.state.persistence.SnapshotRepository;
-import org.jmouse.crawler.runtime.state.persistence.StateCodec;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -15,13 +13,13 @@ import static java.nio.file.StandardOpenOption.*;
 
 public final class FileSnapshotRepository<S> implements SnapshotRepository<S> {
 
-    private final Path       snapshotFile;
-    private final Path       temporaryFile;
-    private final StateCodec codec;
-    private final Class<S>   snapshotType;
-    private final S          empty;
+    private final Path     snapshotFile;
+    private final Path     temporaryFile;
+    private final Codec    codec;
+    private final Class<S> snapshotType;
+    private final S        empty;
 
-    public FileSnapshotRepository(Path snapshotFile, StateCodec codec, Class<S> snapshotType, S empty) {
+    public FileSnapshotRepository(Path snapshotFile, Codec codec, Class<S> snapshotType, S empty) {
         this.snapshotFile = Verify.nonNull(snapshotFile, "snapshotFile");
         this.temporaryFile = snapshotFile.resolveSibling(snapshotFile.getFileName() + ".tmp");
         this.codec = Verify.nonNull(codec, "codec");
