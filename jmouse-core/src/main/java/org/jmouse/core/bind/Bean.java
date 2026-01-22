@@ -37,6 +37,20 @@ abstract public class Bean<T> {
     }
 
     /**
+     * @return a object-descriptor of java-bean
+     */
+    public ObjectDescriptor<T> getDescriptor() {
+        return descriptor;
+    }
+
+    /**
+     * @return a inferred-type of java-bean
+     */
+    public InferredType getType() {
+        return type;
+    }
+
+    /**
      * Retrieves all properties defined in this structured.
      *
      * @return a collection of properties
