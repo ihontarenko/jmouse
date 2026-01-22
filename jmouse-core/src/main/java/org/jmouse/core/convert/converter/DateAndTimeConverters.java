@@ -26,7 +26,8 @@ public class DateAndTimeConverters {
                 of(ZonedDateTime.class, String.class, ZonedDateTime::toString),
                 of(GregorianCalendar.class, Instant.class, GregorianCalendar::toInstant),
                 of(Instant.class, GregorianCalendar.class, source
-                        -> GregorianCalendar.from(source.atZone(ZoneId.systemDefault())))
+                        -> GregorianCalendar.from(source.atZone(ZoneId.systemDefault()))),
+                of(Instant.class, Instant.class, Instant::from)
         );
     }
 

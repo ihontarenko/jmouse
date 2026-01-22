@@ -1,18 +1,19 @@
 package org.jmouse.crawler.dsl.builder;
 
-import org.jmouse.crawler.runtime.state.persistence.*;
 import org.jmouse.core.Verify;
+import org.jmouse.crawler.runtime.state.persistence.*;
 
 import java.nio.file.Path;
 import java.time.Duration;
+
+import static org.jmouse.crawler.runtime.state.persistence.SnapshotPolicy.every;
 
 public final class PersistenceBuilder {
 
     private Path           directory;
     private Durability     durability     = Durability.batched(256, Duration.ofMillis(200));
-    private SnapshotPolicy snapshotPolicy = SnapshotPolicy.every(10_000)
-            .or(SnapshotPolicy.every(Duration.ofSeconds(30)));
-    private Codec          codec          = new SimpleLineCodec(); // replace later
+    private SnapshotPolicy snapshotPolicy = SnapshotPolicy.or(every(Duration.ofSeconds(30)), every(10_000));
+    private Codec          codec          = new NoopCodec();
 
     public PersistenceBuilder directory(Path dir) {
         this.directory = Verify.nonNull(dir, "dir");
@@ -29,13 +30,13 @@ public final class PersistenceBuilder {
         return this;
     }
 
-    public PersistenceBuilder codec(StateCodec codec) {
+    public PersistenceBuilder codec(Codec codec) {
         this.codec = Verify.nonNull(codec, "codec");
         return this;
     }
 
     public PersistenceConfig build() {
-        Verify.state(directory != null, "persistence.dir must be configured");
+        Verify.state(directory != null, "persistence.directory must be configured");
         return new PersistenceConfig(directory, durability, snapshotPolicy, codec);
     }
 

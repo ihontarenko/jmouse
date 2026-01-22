@@ -30,6 +30,11 @@ abstract public class PredefinedConversion extends StandardConversion {
             registerConverter(converter);
         }
 
+        // converters for URI/URL
+        for (GenericConverter<?, ?> converter : JavaNetConverters.getConverters()) {
+            registerConverter(converter);
+        }
+
         // javaClass-to-string and vice versa
         registerConverter(String.class, Class.class, new PredefinedConversion.StringToClassConverter());
         // bytes-to-string and vice versa

@@ -1,28 +1,29 @@
 package org.jmouse.crawler.runtime.state.persistence;
 
 import java.time.Duration;
-import java.time.Instant;
 
+@FunctionalInterface
 public interface SnapshotPolicy {
 
-    boolean shouldSnapshot(long opsSinceLastSnapshot, Instant now, Instant lastSnapshotAt);
+    boolean shouldCheckpoint();
+
+    static SnapshotPolicy or(SnapshotPolicy p0, SnapshotPolicy p1) {
+        return () -> p0.shouldCheckpoint() || p1.shouldCheckpoint();
+    }
+
+    static SnapshotPolicy and(SnapshotPolicy p0, SnapshotPolicy p1) {
+        return () -> p0.shouldCheckpoint() && p1.shouldCheckpoint();
+    }
 
     static SnapshotPolicy every(long operations) {
-        if (operations < 1) {
-            throw new IllegalArgumentException("operations must be >= 1");
-        }
-        return (operationsSince, now, lastAt) -> operationsSince >= operations;
+        return new OperationsSnapshotPolicy(operations, Duration.ZERO);
     }
 
-    static SnapshotPolicy every(Duration interval) {
-        if (interval == null || interval.isNegative() || interval.isZero()) {
-            throw new IllegalArgumentException("interval must be > 0");
-        }
-        return (opsSince, now, lastAt) -> lastAt == null || now.isAfter(lastAt.plus(interval));
+    static SnapshotPolicy every(Duration minInterval) {
+        return new OperationsSnapshotPolicy(1, minInterval);
     }
 
-    default SnapshotPolicy or(SnapshotPolicy other) {
-        return (operationsSince, now, lastAt) ->
-                this.shouldSnapshot(operationsSince, now, lastAt) || other.shouldSnapshot(operationsSince, now, lastAt);
+    static SnapshotPolicy every(long operations, Duration minInterval) {
+        return new OperationsSnapshotPolicy(operations, minInterval);
     }
 }

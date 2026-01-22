@@ -58,8 +58,10 @@ public class ValueObjectBinder extends AbstractBinder {
         TypeInformation sourceDescriptor = TypeInformation.forClass(accessor.navigate(name).getDataType());
         TypeInformation targetDescriptor = bindable.getTypeInformation();
 
-        // Ensure the target is a record and the source is a compatible type (map or JavaBean)
-        if (targetDescriptor.isRecord() && (sourceDescriptor.isMap() || sourceDescriptor.isBean())) {
+        // Ensure the target is a record and the source is a compatible type (either map, Record or JavaBean)
+        if (targetDescriptor.isRecord() && (
+                sourceDescriptor.isMap() || sourceDescriptor.isBean() || sourceDescriptor.isRecord()
+        )) {
             return bindValueObject(name, bindable, accessor, callback);
         }
 
@@ -113,7 +115,12 @@ public class ValueObjectBinder extends AbstractBinder {
         MethodDescriptor methodDescriptor = property.getGetterMethod();
 
         if (methodDescriptor != null && methodDescriptor.getAnnotations() != null) {
+            if (methodDescriptor.getAnnotations().isEmpty()) {
+                return defaultValue;
+            }
+
             AnnotationDescriptor annotationDescriptor = methodDescriptor.getAnnotations().getFirst();
+
             if (annotationDescriptor.unwrap() instanceof BindDefault bindDefault) {
                 defaultValue = bindDefault.value();
             }

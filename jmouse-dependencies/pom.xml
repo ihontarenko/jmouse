@@ -194,6 +194,14 @@
                 <version>${jackson.version}</version>
             </dependency>
 
+            <!-- JSR310 -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jsr310</artifactId>
+                <version>${jackson.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
             <!-- Jakarta Annotation -->
             <dependency>
                 <groupId>jakarta.annotation</groupId>

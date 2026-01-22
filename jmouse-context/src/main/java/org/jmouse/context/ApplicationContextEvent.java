@@ -1,6 +1,8 @@
 package org.jmouse.context;
 
 import org.jmouse.core.events.AbstractEvent;
+import org.jmouse.core.events.EventCategory;
+import org.jmouse.core.events.EventName;
 
 /**
  * An event class for publishing {@link ApplicationBeanContext} updates or lifecycle changes.
@@ -39,6 +41,6 @@ public class ApplicationContextEvent extends AbstractEvent<ApplicationBeanContex
      * @param caller  an optional reference to the source or origin of this event
      */
     public ApplicationContextEvent(String name, ApplicationBeanContext payload, Object caller) {
-        super(name, payload, caller);
+        super(EventName.of(name, EventCategory.UNCATEGORIZED), payload, caller);
     }
 }

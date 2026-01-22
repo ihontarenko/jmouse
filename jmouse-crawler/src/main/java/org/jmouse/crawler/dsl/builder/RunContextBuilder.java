@@ -20,7 +20,7 @@ import org.jmouse.crawler.runtime.state.persistence.*;
 
 import org.jmouse.crawler.runtime.state.persistence.FileSnapshotRepository;
 import org.jmouse.crawler.runtime.state.persistence.events.InFlightEvent;
-import org.jmouse.crawler.runtime.state.persistence.file.FileWALRepository;
+import org.jmouse.crawler.runtime.state.persistence.file.FileWalRepository;
 import org.jmouse.crawler.runtime.state.persistence.snapshot.InFlightSnapshot;
 import org.jmouse.crawler.runtime.state.persistence.wrap.PersistentInFlightBuffer;
 
@@ -256,7 +256,7 @@ public final class RunContextBuilder {
     private void applyPersistence(PersistenceConfig persistenceConfig) {
         Path directory = persistenceConfig.directory();
 
-        WALRepository<InFlightEvent> wal = new FileWALRepository<>(
+        WalRepository<InFlightEvent> wal = new FileWalRepository<>(
                 directory.resolve("inflight.wal"),
                 persistenceConfig.codec(),
                 InFlightEvent.class,

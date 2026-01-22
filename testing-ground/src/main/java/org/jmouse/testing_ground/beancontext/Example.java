@@ -5,11 +5,18 @@ import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.DefaultBeanContext;
 import org.jmouse.beans.ScannerBeanContextInitializer;
 import org.jmouse.context.ApplicationConfigurer;
+import org.jmouse.core.bind.PropertyAccessor;
+import org.jmouse.core.bind.accessor.JavaBeanAccessor;
+import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
+import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanDescriptor;
+import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
 import org.jmouse.testing_ground.beancontext.application.AdminUser;
 import org.jmouse.testing_ground.beancontext.application.GetValue;
 import org.jmouse.web.Launcher;
 import org.jmouse.testing_ground.beancontext.application.User;
 import org.jmouse.testing_ground.beancontext.application.UserHolder;
+
+import java.util.Map;
 
 public class Example {
 
