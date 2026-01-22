@@ -78,7 +78,7 @@ public abstract class AbstractCallback implements BindCallback {
      * @return the transformed or original value
      */
     @Override
-    public Object onBinding(PropertyPath name, Bindable<?> bindable, BindContext context, Object value) {
+    public Object onBinding(PropertyPath name, TypedValue<?> bindable, BindContext context, Object value) {
         return parent == null
                 ? BindCallback.super.onBinding(name, bindable, context, value)
                 : parent.onBinding(name, bindable, context, value);
@@ -96,7 +96,7 @@ public abstract class AbstractCallback implements BindCallback {
      * @param value    the result of the binding operation
      */
     @Override
-    public void onBound(PropertyPath name, Bindable<?> bindable, BindContext context, BindResult<Object> value) {
+    public void onBound(PropertyPath name, TypedValue<?> bindable, BindContext context, BindResult<Object> value) {
         if (parent != null) {
             parent.onBound(name, bindable, context, value);
         }
@@ -113,7 +113,7 @@ public abstract class AbstractCallback implements BindCallback {
      * @param context  the binding context
      */
     @Override
-    public void onUnbound(PropertyPath name, Bindable<?> bindable, BindContext context) {
+    public void onUnbound(PropertyPath name, TypedValue<?> bindable, BindContext context) {
         if (parent != null) {
             parent.onUnbound(name, bindable, context);
         }
@@ -134,7 +134,7 @@ public abstract class AbstractCallback implements BindCallback {
      * @throws Exception if the exception should be propagated
      */
     @Override
-    public Object onFailure(PropertyPath name, Bindable<?> bindable, BindContext context, Exception exception)
+    public Object onFailure(PropertyPath name, TypedValue<?> bindable, BindContext context, Exception exception)
             throws Exception {
         return parent == null
                 ? BindCallback.super.onFailure(name, bindable, context, exception)

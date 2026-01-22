@@ -60,7 +60,7 @@ public class DefaultBindingCallback extends AbstractCallback {
      * @param value    the bound value result
      */
     @Override
-    public void onBound(PropertyPath name, Bindable<?> bindable, BindContext context, BindResult<Object> value) {
+    public void onBound(PropertyPath name, TypedValue<?> bindable, BindContext context, BindResult<Object> value) {
         parent.onBound(name, bindable, context, value);
     }
 
@@ -75,7 +75,7 @@ public class DefaultBindingCallback extends AbstractCallback {
      * @param context  the binding context
      */
     @Override
-    public void onUnbound(PropertyPath name, Bindable<?> bindable, BindContext context) {
+    public void onUnbound(PropertyPath name, TypedValue<?> bindable, BindContext context) {
         super.onUnbound(name, bindable, context);
     }
 
@@ -93,7 +93,7 @@ public class DefaultBindingCallback extends AbstractCallback {
      * @return the transformed or resolved value
      */
     @Override
-    public Object onBinding(PropertyPath name, Bindable<?> bindable, BindContext context, Object value) {
+    public Object onBinding(PropertyPath name, TypedValue<?> bindable, BindContext context, Object value) {
         Object handled = value;
 
         if (handled instanceof String stringValue && bindable.getTypeInformation().isString()) {

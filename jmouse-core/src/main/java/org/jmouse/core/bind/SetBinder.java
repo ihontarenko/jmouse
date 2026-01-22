@@ -31,7 +31,7 @@ public class SetBinder extends CollectionBinder {
     }
 
     /**
-     * Checks if the given {@link Bindable} object is a {@link Set}. This method ensures that the binder is used
+     * Checks if the given {@link TypedValue} object is a {@link Set}. This method ensures that the binder is used
      * only when the bindable object is of a compatible {@link Set} type.
      *
      * @param <T> the type of the bindable object
@@ -39,7 +39,7 @@ public class SetBinder extends CollectionBinder {
      * @return {@code true} if the bindable type is a {@link Set}, {@code false} otherwise
      */
     @Override
-    public <T> boolean supports(Bindable<T> bindable) {
+    public <T> boolean supports(TypedValue<T> bindable) {
         return bindable.getType().isSet();
     }
 
@@ -52,7 +52,7 @@ public class SetBinder extends CollectionBinder {
      * @return a supplier that creates a new {@link LinkedHashSet}
      */
     @Override
-    protected <T> Supplier<? extends Collection<T>> getCollectionSupplier(Bindable<T> bindable) {
+    protected <T> Supplier<? extends Collection<T>> getCollectionSupplier(TypedValue<T> bindable) {
         return LinkedHashSet::new;
     }
 }

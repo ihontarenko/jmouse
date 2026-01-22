@@ -14,7 +14,7 @@ import java.sql.ResultSet;
  * <p>
  * The mapping process adapts the {@link ResultSet} into an {@link ObjectAccessor} via
  * {@link JdbcAccessorWrapper} and then delegates the binding into the target type using
- * {@link Bindable} metadata (built from {@link InferredType}).
+ * {@link TypedValue} metadata (built from {@link InferredType}).
  *
  * <h3>Typical usage</h3>
  * <pre>{@code
@@ -96,13 +96,13 @@ public final class BeanRowMapper<T> implements RowMapper<T> {
     }
 
     /**
-     * Converts a class into a {@link Bindable} representation used by the binder.
+     * Converts a class into a {@link TypedValue} representation used by the binder.
      *
      * @param type target type
      * @return bindable metadata for the target type
      */
-    private Bindable<T> toBindable(Class<T> type) {
-        return Bindable.of(InferredType.forClass(type));
+    private TypedValue<T> toBindable(Class<T> type) {
+        return TypedValue.of(InferredType.forClass(type));
     }
 
 }

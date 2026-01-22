@@ -31,7 +31,7 @@ public class ListBinder extends CollectionBinder {
     }
 
     /**
-     * Checks if the given {@link Bindable} object is of type {@link List}.
+     * Checks if the given {@link TypedValue} object is of type {@link List}.
      * This method ensures that the binder is used only when the bindable object is of a compatible type.
      *
      * @param <T> the type of the bindable object
@@ -39,7 +39,7 @@ public class ListBinder extends CollectionBinder {
      * @return {@code true} if the bindable type is a {@link List}, {@code false} otherwise
      */
     @Override
-    public <T> boolean supports(Bindable<T> bindable) {
+    public <T> boolean supports(TypedValue<T> bindable) {
         return bindable.getType().isList();
     }
 
@@ -52,7 +52,7 @@ public class ListBinder extends CollectionBinder {
      * @return a supplier that creates a new {@link LinkedList}
      */
     @Override
-    protected <T> Supplier<? extends Collection<T>> getCollectionSupplier(Bindable<T> bindable) {
+    protected <T> Supplier<? extends Collection<T>> getCollectionSupplier(TypedValue<T> bindable) {
         return LinkedList::new;
     }
 }

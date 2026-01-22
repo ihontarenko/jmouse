@@ -10,7 +10,7 @@ import org.jmouse.util.Strings;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
-import static org.jmouse.core.bind.Bindable.of;
+import static org.jmouse.core.bind.TypedValue.of;
 import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
 
 /**
@@ -35,10 +35,10 @@ public class JavaBeanBinder extends AbstractBinder {
     }
 
     /**
-     * Binds the given {@link Bindable} JavaBean to values from the {@link ObjectAccessor}.
+     * Binds the given {@link TypedValue} JavaBean to values from the {@link ObjectAccessor}.
      * <p>
      * This method checks if the target type is an object or scalar, and delegates to
-     * {@link #bindValue(PropertyPath, Bindable, ObjectAccessor, BindCallback)} if necessary. Otherwise, it
+     * {@link #bindValue(PropertyPath, TypedValue, ObjectAccessor, BindCallback)} if necessary. Otherwise, it
      * iterates over the JavaBean's properties and attempts to bind each writable
      * property.
      * </p>
@@ -51,7 +51,7 @@ public class JavaBeanBinder extends AbstractBinder {
      * @return a {@link BindResult} containing the bound JavaBean instance
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath name, TypedValue<T> bindable, ObjectAccessor accessor, BindCallback callback) {
         InferredType type = bindable.getType();
         JavaBean<T>  bean = JavaBean.of(type);
 
@@ -72,7 +72,7 @@ public class JavaBeanBinder extends AbstractBinder {
             // Check if the property is writable then perform value binding for the property
             if (property.isWritable()) {
                 PropertyPath       propertyPath     = name.append(propertyName);
-                Bindable<Object>   bindableProperty = of(propertyType).withSuppliedInstance(value);
+                TypedValue<Object> bindableProperty = of(propertyType).withSuppliedInstance(value);
                 BindResult<Object> result           = bindValue(propertyPath, bindableProperty, accessor, callback);
 
                 if (result.isEmpty()) {
@@ -172,14 +172,14 @@ public class JavaBeanBinder extends AbstractBinder {
     }
 
     /**
-     * Determines whether this binder supports the given {@link Bindable}.
+     * Determines whether this binder supports the given {@link TypedValue}.
      *
      * @param bindable the bindable instance to check
      * @param <T>      the type of the bindable
      * @return {@code true}, indicating support for all bindable types
      */
     @Override
-    public <T> boolean supports(Bindable<T> bindable) {
+    public <T> boolean supports(TypedValue<T> bindable) {
         return bindable.getType().isBean();
     }
 }

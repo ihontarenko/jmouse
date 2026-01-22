@@ -46,10 +46,10 @@ public class ArrayBinder extends CollectionBinder {
      * @return a {@link BindResult} containing the bound array, or an empty result if no valid binding was found
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath root, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath root, TypedValue<T> bindable, ObjectAccessor accessor, BindCallback callback) {
         InferredType  elementType = bindable.getType().getComponentType();
         InferredType  type        = InferredType.forParametrizedClass(List.class, elementType.getRawType());
-        BindResult<T> result      = super.bind(root, Bindable.of(type), accessor, callback);
+        BindResult<T> result      = super.bind(root, TypedValue.of(type), accessor, callback);
 
         // resulted array object
         T elements = null;
@@ -65,14 +65,14 @@ public class ArrayBinder extends CollectionBinder {
                 elements = (T) array;
             }
         } else {
-            callback.onUnbound(root, Bindable.of(type), context);
+            callback.onUnbound(root, TypedValue.of(type), context);
         }
 
         return BindResult.of(elements);
     }
 
     /**
-     * Checks if the given {@link Bindable} object is an array. This method ensures that the binder is used only
+     * Checks if the given {@link TypedValue} object is an array. This method ensures that the binder is used only
      * when the bindable object is of a compatible array type.
      *
      * @param <T> the type of the bindable object
@@ -80,7 +80,7 @@ public class ArrayBinder extends CollectionBinder {
      * @return {@code true} if the bindable type is an array, {@code false} otherwise
      */
     @Override
-    public <T> boolean supports(Bindable<T> bindable) {
+    public <T> boolean supports(TypedValue<T> bindable) {
         return bindable.getType().isArray();
     }
 
@@ -93,7 +93,7 @@ public class ArrayBinder extends CollectionBinder {
      * @return a supplier that creates a new {@link ArrayList}
      */
     @Override
-    protected <T> Supplier<? extends Collection<T>> getCollectionSupplier(Bindable<T> bindable) {
+    protected <T> Supplier<? extends Collection<T>> getCollectionSupplier(TypedValue<T> bindable) {
         return ArrayList::new;
     }
 }

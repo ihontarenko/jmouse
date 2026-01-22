@@ -9,12 +9,12 @@ import java.util.Collection;
 public interface BinderFactory {
 
     /**
-     * Retrieves an appropriate {@link ObjectBinder} for the given {@link Bindable} type.
+     * Retrieves an appropriate {@link ObjectBinder} for the given {@link TypedValue} type.
      *
      * @param bindable the target bindable type
      * @return the matching {@link ObjectBinder}, or {@code null} if none is found
      */
-    ObjectBinder getBinderFor(Bindable<?> bindable);
+    ObjectBinder getBinderFor(TypedValue<?> bindable);
 
     /**
      * Registers a new {@link ObjectBinder} in the factory.

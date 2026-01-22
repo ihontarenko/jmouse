@@ -10,7 +10,7 @@ import java.util.List;
  * A default implementation of {@link BinderFactory}.
  * <p>
  * This factory maintains a list of registered {@link ObjectBinder} instances and provides
- * a mechanism for retrieving the appropriate binder based on the provided {@link Bindable} type.
+ * a mechanism for retrieving the appropriate binder based on the provided {@link TypedValue} type.
  * Binders are sorted before being evaluated to ensure priority-based selection.
  * </p>
  *
@@ -23,7 +23,7 @@ public class DefaultBinderFactory implements BinderFactory {
     private final List<ObjectBinder> binders = new ArrayList<>();
 
     /**
-     * Retrieves the most suitable {@link ObjectBinder} for the given {@link Bindable} type.
+     * Retrieves the most suitable {@link ObjectBinder} for the given {@link TypedValue} type.
      * <p>
      * The registered binders are sorted before context to ensure priority-based selection.
      * If no matching binder is found, a {@link BindException} is thrown.
@@ -34,7 +34,7 @@ public class DefaultBinderFactory implements BinderFactory {
      * @throws BindException if no suitable binder is found
      */
     @Override
-    public ObjectBinder getBinderFor(Bindable<?> bindable) {
+    public ObjectBinder getBinderFor(TypedValue<?> bindable) {
         Sorter.sort(this.binders);
 
         for (ObjectBinder binder : binders) {

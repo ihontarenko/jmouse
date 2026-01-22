@@ -49,7 +49,7 @@ public class MapBinder extends AbstractBinder {
      */
     @Override
     public <T> BindResult<T> bind(
-            PropertyPath name, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback) {
+            PropertyPath name, TypedValue<T> bindable, ObjectAccessor accessor, BindCallback callback) {
         TypeInformation   typeDescriptor = bindable.getTypeInformation();
         Set<PropertyPath> keys           = accessor.navigate(name).nameSet();
 
@@ -65,7 +65,7 @@ public class MapBinder extends AbstractBinder {
             // Iterate through each key and bind the corresponding value
             for (PropertyPath key : keys) {
                 String               keyName       = key.path();
-                Bindable<Object>     valueBindable = getBindableEntry(vi, map, keyName);
+                TypedValue<Object>   valueBindable = getBindableEntry(vi, map, keyName);
                 PropertyPath.Entries entries       = key.entries();
 
                 // If the key consists of multiple elements, we explicitly convert it into an indexed format.
@@ -101,12 +101,12 @@ public class MapBinder extends AbstractBinder {
      * Otherwise, a new bindable instance will be created for the entry.
      * </p>
      */
-    protected Bindable<Object> getBindableEntry(TypeInformation descriptor, Map<Object, Object> map, String name) {
-        Bindable<Object> entry = Bindable.of(descriptor.getType());
+    protected TypedValue<Object> getBindableEntry(TypeInformation descriptor, Map<Object, Object> map, String name) {
+        TypedValue<Object> entry = TypedValue.of(descriptor.getType());
 
         // If the map already contains the key, use the existing value
         if (map.containsKey(name)) {
-            entry = Bindable.ofInstance(map.get(name));
+            entry = TypedValue.ofInstance(map.get(name));
         }
 
         return entry;
@@ -124,7 +124,7 @@ public class MapBinder extends AbstractBinder {
      * @return the map to bind values to
      */
     @SuppressWarnings({"unchecked"})
-    protected Map<Object, ?> getMap(Bindable<?> bindable) {
+    protected Map<Object, ?> getMap(TypedValue<?> bindable) {
         TypeInformation typeDescriptor = bindable.getTypeInformation();
         Supplier<?>     supplier       = bindable.getValue();
 
@@ -150,12 +150,12 @@ public class MapBinder extends AbstractBinder {
      * @param bindable the bindable instance
      * @return a supplier that provides a new {@link LinkedHashMap}
      */
-    protected Supplier<Map<Object, ?>> getMapSupplier(Bindable<?> bindable) {
+    protected Supplier<Map<Object, ?>> getMapSupplier(TypedValue<?> bindable) {
         return LinkedHashMap::new;
     }
 
     /**
-     * Checks if the {@link MapBinder} supports binding the given {@link Bindable} instance.
+     * Checks if the {@link MapBinder} supports binding the given {@link TypedValue} instance.
      * <p>
      * This method checks if the target type is a subtype of {@link Map}.
      * </p>
@@ -165,7 +165,7 @@ public class MapBinder extends AbstractBinder {
      * @return true if the binder supports the target type, false otherwise
      */
     @Override
-    public <T> boolean supports(Bindable<T> bindable) {
+    public <T> boolean supports(TypedValue<T> bindable) {
         return isSupertype(Map.class).matches(bindable.getType().getRawType());
     }
 }

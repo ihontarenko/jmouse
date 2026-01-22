@@ -59,7 +59,7 @@ public class Example {
 
         BindCallback callback = new AbstractCallback() {
             @Override
-            public void onUnbound(PropertyPath name, Bindable<?> bindable, BindContext context) {
+            public void onUnbound(PropertyPath name, TypedValue<?> bindable, BindContext context) {
                 System.out.println(STR."unbound: \{name}");
                 super.onUnbound(name, bindable, context);
             }

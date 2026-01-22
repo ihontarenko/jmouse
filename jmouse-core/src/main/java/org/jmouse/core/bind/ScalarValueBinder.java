@@ -25,7 +25,7 @@ public class ScalarValueBinder extends AbstractBinder {
     }
 
     /**
-     * Binds a scalar value from the {@link ObjectAccessor} to the given {@link Bindable} type.
+     * Binds a scalar value from the {@link ObjectAccessor} to the given {@link TypedValue} type.
      * <p>
      * This method ensures that only scalar types are handled. If a non-scalar type is provided,
      * an {@link IllegalArgumentException} is thrown.
@@ -40,7 +40,7 @@ public class ScalarValueBinder extends AbstractBinder {
      * @throws IllegalArgumentException if a non-scalar type is provided
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath name, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath name, TypedValue<T> bindable, ObjectAccessor accessor, BindCallback callback) {
         TypeInformation descriptor  = bindable.getTypeInformation();
         boolean         isCompliant = descriptor.isScalar() || descriptor.isEnum() || descriptor.isClass();
 
@@ -52,7 +52,7 @@ public class ScalarValueBinder extends AbstractBinder {
     }
 
     /**
-     * Determines if this binder supports the given {@link Bindable} type.
+     * Determines if this binder supports the given {@link TypedValue} type.
      * <p>
      * This binder supports only scalar types such as {@link String}, {@link Number}, {@link Boolean}, and {@link Character}.
      * </p>
@@ -62,7 +62,7 @@ public class ScalarValueBinder extends AbstractBinder {
      * @return {@code true} if the type is scalar, otherwise {@code false}
      */
     @Override
-    public <T> boolean supports(Bindable<T> bindable) {
+    public <T> boolean supports(TypedValue<T> bindable) {
         InferredType type = bindable.getType();
         return type.isScalar() || type.isEnum() || type.isClass();
     }

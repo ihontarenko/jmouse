@@ -13,13 +13,13 @@ import java.util.Set;
 public final class Bind {
 
     /** A bindable instance for {@code Map<String, String>}. */
-    public static final Bindable<Map<String, String>> STRING_MAP  = Bindable.ofMap(String.class, String.class);
+    public static final TypedValue<Map<String, String>> STRING_MAP = TypedValue.ofMap(String.class, String.class);
 
     /** A bindable instance for {@code Set<String>}. */
-    public static final Bindable<Set<String>>         STRING_SET  = Bindable.ofSet(String.class);
+    public static final TypedValue<Set<String>> STRING_SET = TypedValue.ofSet(String.class);
 
     /** A bindable instance for {@code List<String>}. */
-    public static final Bindable<List<String>>        STRING_LIST = Bindable.ofList(String.class);
+    public static final TypedValue<List<String>> STRING_LIST = TypedValue.ofList(String.class);
 
     private final Binder binder;
 
@@ -79,7 +79,7 @@ public final class Bind {
      * @param <T> the expected result type
      * @return the binding result containing the bound value
      */
-    public <T> BindResult<T> to(String path, Bindable<T> bindable) {
+    public <T> BindResult<T> to(String path, TypedValue<T> bindable) {
         return binder.bind(path, bindable);
     }
 
@@ -93,7 +93,7 @@ public final class Bind {
      */
     @SuppressWarnings({"unchecked"})
     public <T> BindResult<T> to(String path, Object target) {
-        return (BindResult<T>) binder.bind(path, Bindable.ofInstance(target));
+        return (BindResult<T>) binder.bind(path, TypedValue.ofInstance(target));
     }
 
     /**
@@ -103,7 +103,7 @@ public final class Bind {
      * @param <T> the expected result type
      * @return the binding result containing the bound value
      */
-    public <T> BindResult<T> to(Bindable<T> bindable) {
+    public <T> BindResult<T> to(TypedValue<T> bindable) {
         return binder.bind(bindable);
     }
 
@@ -116,7 +116,7 @@ public final class Bind {
      */
     @SuppressWarnings({"unchecked"})
     public <T> BindResult<T> to(Object target) {
-        return (BindResult<T>) binder.bind(Bindable.ofInstance(target));
+        return (BindResult<T>) binder.bind(TypedValue.ofInstance(target));
     }
 
     /**
@@ -128,7 +128,7 @@ public final class Bind {
      * @return the binding result
      */
     public <T> BindResult<T> to(String path, InferredType type) {
-        return to(path, Bindable.of(type));
+        return to(path, TypedValue.of(type));
     }
 
     /**
@@ -151,7 +151,7 @@ public final class Bind {
      * @return the binding result
      */
     public <T> BindResult<T> to(InferredType type) {
-        return to(Bindable.of(type));
+        return to(TypedValue.of(type));
     }
 
     /**
@@ -213,7 +213,7 @@ public final class Bind {
      * @return the binding result containing a {@code Map<String, V>}
      */
     public <V> BindResult<Map<String, V>> toMap(String path, Class<V> valueType) {
-        return to(path, Bindable.ofMap(String.class, valueType));
+        return to(path, TypedValue.ofMap(String.class, valueType));
     }
 
     public <V> Map<String, V> getMap(String path, Class<V> valueType) {
@@ -228,7 +228,7 @@ public final class Bind {
      * @return the binding result containing a {@code Map<String, V>}
      */
     public <V> BindResult<Map<String, V>> toMap(Class<V> valueType) {
-        return to(Bindable.ofMap(String.class, valueType));
+        return to(TypedValue.ofMap(String.class, valueType));
     }
 
     public <V> Map<String, V> getMap(Class<V> valueType) {
@@ -242,7 +242,7 @@ public final class Bind {
      * @return the binding result containing a {@code Map<String, Object>}
      */
     public BindResult<Map<String, Object>> toMap(String path) {
-        return to(path, Bindable.ofMap(String.class, Object.class));
+        return to(path, TypedValue.ofMap(String.class, Object.class));
     }
 
     public Map<String, Object> getMap(String path) {
@@ -271,7 +271,7 @@ public final class Bind {
      * @return the binding result containing a {@code List<V>}
      */
     public <V> BindResult<List<V>> toList(String path, Class<V> elementType) {
-        return to(path, Bindable.ofList(elementType));
+        return to(path, TypedValue.ofList(elementType));
     }
 
     /**
@@ -282,7 +282,7 @@ public final class Bind {
      * @return the binding result containing a {@code List<V>}
      */
     public <V> BindResult<List<V>> toList(Class<V> elementType) {
-        return to(Bindable.ofList(elementType));
+        return to(TypedValue.ofList(elementType));
     }
 
     /**
@@ -302,7 +302,7 @@ public final class Bind {
      * @return the binding result containing a {@code Set<V>}
      */
     public <V> BindResult<Set<V>> toSet(Class<V> elementType) {
-        return to(Bindable.ofSet(elementType));
+        return to(TypedValue.ofSet(elementType));
     }
 
     /**

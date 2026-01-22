@@ -89,30 +89,30 @@ public class Binder implements ObjectBinder, BindContext {
     }
 
     /**
-     * Binds the given {@link Bindable} object with the source data using the default path (null).
+     * Binds the given {@link TypedValue} object with the source data using the default path (null).
      *
      * @param <T> the type of the object to bind
      * @param bindable the object to bind
      * @return the result of the binding
      */
-    public <T> BindResult<T> bind(Bindable<T> bindable) {
+    public <T> BindResult<T> bind(TypedValue<T> bindable) {
         return bind(null, bindable);
     }
 
     /**
-     * Binds the given {@link Bindable} object with the source data at the specified path.
+     * Binds the given {@link TypedValue} object with the source data at the specified path.
      *
      * @param <T> the type of the object to bind
      * @param path the path at which to bind the object
      * @param bindable the object to bind
      * @return the result of the binding
      */
-    public <T> BindResult<T> bind(String path, Bindable<T> bindable) {
+    public <T> BindResult<T> bind(String path, TypedValue<T> bindable) {
         return bind(PropertyPath.forPath(path), bindable, objectAccessor, null);
     }
 
     /**
-     * Binds the given {@link Bindable} object with the source data at the specified path and source.
+     * Binds the given {@link TypedValue} object with the source data at the specified path and source.
      *
      * @param <T> the type of the object to bind
      * @param path the path at which to bind the object
@@ -122,7 +122,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @return the result of the binding
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath path, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath path, TypedValue<T> bindable, ObjectAccessor accessor, BindCallback callback) {
         try {
             ObjectBinder binder     = factory.getBinderFor(bindable);
             BindCallback customizer = callback == null ? this.callback : callback;
@@ -154,7 +154,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @throws BindException if the callback throws an exception that is not already a {@link BindException}
      */
     @SuppressWarnings({"unchecked"})
-    private <T> T doException(PropertyPath path, Bindable<T> bindable, Exception exception) {
+    private <T> T doException(PropertyPath path, TypedValue<T> bindable, Exception exception) {
         try {
             return (T) callback.onFailure(path, bindable, this, exception);
         } catch (Exception cause) {
@@ -176,7 +176,7 @@ public class Binder implements ObjectBinder, BindContext {
      * @throws UnsupportedOperationException if called on the root binder
      */
     @Override
-    public <T> BindResult<T> bindValue(PropertyPath name, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback) {
+    public <T> BindResult<T> bindValue(PropertyPath name, TypedValue<T> bindable, ObjectAccessor accessor, BindCallback callback) {
         throw new UnsupportedOperationException(
                 "Root binder is not supported this method. This methods can be called only in type-binder specific.");
     }

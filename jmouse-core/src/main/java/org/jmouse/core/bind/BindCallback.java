@@ -46,7 +46,7 @@ public interface BindCallback {
      * @param value    the value to be bound
      * @return the transformed or original value
      */
-    default Object onBinding(PropertyPath name, Bindable<?> bindable, BindContext context, Object value) {
+    default Object onBinding(PropertyPath name, TypedValue<?> bindable, BindContext context, Object value) {
         return value;
     }
 
@@ -61,7 +61,7 @@ public interface BindCallback {
      * @param context  the binding context
      * @param value    the result of the binding operation
      */
-    default void onBound(PropertyPath name, Bindable<?> bindable, BindContext context, BindResult<Object> value) {
+    default void onBound(PropertyPath name, TypedValue<?> bindable, BindContext context, BindResult<Object> value) {
     }
 
     /**
@@ -74,7 +74,7 @@ public interface BindCallback {
      * @param bindable the target bindable
      * @param context  the binding context
      */
-    default void onUnbound(PropertyPath name, Bindable<?> bindable, BindContext context) {
+    default void onUnbound(PropertyPath name, TypedValue<?> bindable, BindContext context) {
     }
 
     /**
@@ -91,7 +91,7 @@ public interface BindCallback {
      * @return a fallback value, or rethrows the exception if not handled
      * @throws Exception if the exception should be propagated
      */
-    default Object onFailure(PropertyPath name, Bindable<?> bindable, BindContext context, Exception exception)
+    default Object onFailure(PropertyPath name, TypedValue<?> bindable, BindContext context, Exception exception)
             throws Exception {
         throw exception;
     }

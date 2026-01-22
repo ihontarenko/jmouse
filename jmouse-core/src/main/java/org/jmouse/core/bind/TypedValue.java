@@ -18,109 +18,109 @@ import java.util.function.Supplier;
  *
  * @param <T> the type of the bindable value
  */
-public final class Bindable<T> {
+public final class TypedValue<T> {
 
     private final InferredType type;
     private final Supplier<T>  value;
 
     /**
-     * Creates a new {@link Bindable} instance with a specified type and value supplier.
+     * Creates a new {@link TypedValue} instance with a specified type and value supplier.
      *
      * @param type  the {@link InferredType} representing the type of the value
      * @param value a {@link Supplier} providing the value
      */
-    public Bindable(InferredType type, Supplier<T> value) {
+    public TypedValue(InferredType type, Supplier<T> value) {
         this.type = type;
         this.value = value;
     }
 
     /**
-     * Creates a new {@link Bindable} instance with a specified type and a default {@code null} supplier.
+     * Creates a new {@link TypedValue} instance with a specified type and a default {@code null} supplier.
      *
      * @param type the {@link InferredType} representing the type of the value
      */
-    public Bindable(InferredType type) {
+    public TypedValue(InferredType type) {
         this(type, () -> null);
     }
 
     /**
-     * Creates a new {@link Bindable} instance for a given raw class type.
+     * Creates a new {@link TypedValue} instance for a given raw class type.
      *
      * @param rawType the class type to wrap
      */
-    public Bindable(Class<T> rawType) {
+    public TypedValue(Class<T> rawType) {
         this(InferredType.forClass(rawType));
     }
 
     /**
-     * Creates a {@link Bindable} instance representing a {@link Map} with the specified key and value types.
+     * Creates a {@link TypedValue} instance representing a {@link Map} with the specified key and value types.
      *
      * @param keyType   the class type of the map keys
      * @param valueType the class type of the map values
      * @param <K>       the type of the keys in the map
      * @param <V>       the type of the values in the map
-     * @return a {@link Bindable} representing a map with the given key-value types
+     * @return a {@link TypedValue} representing a map with the given key-value types
      */
-    public static <K, V> Bindable<Map<K, V>> ofMap(Class<K> keyType, Class<V> valueType) {
+    public static <K, V> TypedValue<Map<K, V>> ofMap(Class<K> keyType, Class<V> valueType) {
         return of(InferredType.forParametrizedClass(Map.class, keyType, valueType));
     }
 
     /**
-     * Creates a {@link Bindable} instance representing a {@link List} with the specified element type.
+     * Creates a {@link TypedValue} instance representing a {@link List} with the specified element type.
      *
      * @param rawType the class type of the list elements
      * @param <V>     the type of the elements in the list
-     * @return a {@link Bindable} representing a list of the given element type
+     * @return a {@link TypedValue} representing a list of the given element type
      */
-    public static <V> Bindable<List<V>> ofList(Class<V> rawType) {
+    public static <V> TypedValue<List<V>> ofList(Class<V> rawType) {
         return of(InferredType.forParametrizedClass(List.class, rawType));
     }
 
     /**
-     * Creates a {@link Bindable} instance representing a {@link Set} with the specified element type.
+     * Creates a {@link TypedValue} instance representing a {@link Set} with the specified element type.
      *
      * @param rawType the class type of the set elements
      * @param <V>     the type of the elements in the set
-     * @return a {@link Bindable} representing a set of the given element type
+     * @return a {@link TypedValue} representing a set of the given element type
      */
-    public static <V> Bindable<Set<V>> ofSet(Class<V> rawType) {
+    public static <V> TypedValue<Set<V>> ofSet(Class<V> rawType) {
         return of(InferredType.forParametrizedClass(Set.class, rawType));
     }
 
 
     /**
-     * Creates a new {@link Bindable} instance from a {@link InferredType}.
+     * Creates a new {@link TypedValue} instance from a {@link InferredType}.
      *
      * @param type the {@link InferredType} to wrap
      * @param <T>  the expected type
-     * @return a new {@link Bindable} instance
+     * @return a new {@link TypedValue} instance
      */
-    public static <T> Bindable<T> of(InferredType type) {
-        return new Bindable<>(type);
+    public static <T> TypedValue<T> of(InferredType type) {
+        return new TypedValue<>(type);
     }
 
     /**
-     * Creates a new {@link Bindable} instance from a {@link Class}.
+     * Creates a new {@link TypedValue} instance from a {@link Class}.
      *
      * @param type the class type to wrap
      * @param <T>  the expected type
-     * @return a new {@link Bindable} instance
+     * @return a new {@link TypedValue} instance
      */
-    public static <T> Bindable<T> of(Class<T> type) {
+    public static <T> TypedValue<T> of(Class<T> type) {
         return of(InferredType.forClass(type));
     }
 
     /**
-     * Creates a {@link Bindable} instance wrapping an existing object.
+     * Creates a {@link TypedValue} instance wrapping an existing object.
      *
      * @param instance the instance to wrap
      * @param <T>      the expected type
-     * @return a new {@link Bindable} instance with the provided object as its value
+     * @return a new {@link TypedValue} instance with the provided object as its value
      */
     @SuppressWarnings({"unchecked"})
-    public static <T> Bindable<T> ofInstance(T instance) {
+    public static <T> TypedValue<T> ofInstance(T instance) {
         Objects.requireNonNull(instance, "DirectAccess must not be NULL");
-        return Bindable.of((Class<T>) instance.getClass()).withInstance(instance);
+        return TypedValue.of((Class<T>) instance.getClass()).withInstance(instance);
     }
 
     /**
@@ -154,23 +154,23 @@ public final class Bindable<T> {
     }
 
     /**
-     * Creates a new {@link Bindable} instance with the specified instance as its value.
+     * Creates a new {@link TypedValue} instance with the specified instance as its value.
      *
      * @param instance the instance to wrap
-     * @return a new {@link Bindable} with the same type but the provided instance as value
+     * @return a new {@link TypedValue} with the same type but the provided instance as value
      */
-    public Bindable<T> withInstance(T instance) {
+    public TypedValue<T> withInstance(T instance) {
         return withSuppliedInstance(() -> instance);
     }
 
     /**
-     * Creates a new {@link Bindable} instance with the specified instance as its value.
+     * Creates a new {@link TypedValue} instance with the specified instance as its value.
      *
      * @param supplier the supplier with instance
-     * @return a new {@link Bindable} with the same type but the provided instance as value
+     * @return a new {@link TypedValue} with the same type but the provided instance as value
      */
-    public Bindable<T> withSuppliedInstance(Supplier<T> supplier) {
-        return new Bindable<>(this.type, supplier);
+    public TypedValue<T> withSuppliedInstance(Supplier<T> supplier) {
+        return new TypedValue<>(this.type, supplier);
     }
 
     @Override

@@ -46,7 +46,7 @@ abstract public class AbstractBinder implements ObjectBinder {
     @SuppressWarnings({"unchecked"})
     @Override
     public <T> BindResult<T> bindValue(
-            PropertyPath name, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback) {
+            PropertyPath name, TypedValue<T> bindable, ObjectAccessor accessor, BindCallback callback) {
         PropertyPath   path  = callback.onKeyCreated(name, context);
         ObjectAccessor value = accessor.navigate(path);
 
@@ -55,7 +55,7 @@ abstract public class AbstractBinder implements ObjectBinder {
             return BindResult.empty();
         }
 
-        bindable = (Bindable<T>) refreshBindable(bindable, value);
+        bindable = (TypedValue<T>) refreshBindable(bindable, value);
 
         TypeInformation descriptor      = bindable.getTypeInformation();
         TypeInformation valueDescriptor = TypeInformation.forClass(value.getDataType());
@@ -103,13 +103,13 @@ abstract public class AbstractBinder implements ObjectBinder {
      * @param value    the value to bind
      * @return the refreshed bindable instance
      */
-    protected Bindable<?> refreshBindable(Bindable<?> bindable, ObjectAccessor value) {
+    protected TypedValue<?> refreshBindable(TypedValue<?> bindable, ObjectAccessor value) {
         TypeInformation valueDescriptor = TypeInformation.forClass(value.getDataType());
         TypeInformation descriptor      = bindable.getTypeInformation();
 
         // Override bindable type if necessary based on value descriptor
         if (descriptor.isObject() && !valueDescriptor.isScalar()) {
-            bindable = Bindable.of(value.getDataType());
+            bindable = TypedValue.of(value.getDataType());
         }
 
         return bindable;

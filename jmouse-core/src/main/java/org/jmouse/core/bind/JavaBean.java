@@ -69,7 +69,7 @@ public final class JavaBean<T> extends Bean<T> {
      * @return a factory that creates instances of the bindable
      */
     @SuppressWarnings("unchecked")
-    public Factory<T> getFactory(Bindable<T> bindable) {
+    public Factory<T> getFactory(TypedValue<T> bindable) {
         return Factory.of(new CachedSupplier<>(() -> {
             T           instance = null;
             Supplier<T> supplier = bindable.getValue();

@@ -6,7 +6,7 @@ import org.jmouse.core.reflection.TypeInformation;
 import java.util.Collection;
 import java.util.function.Supplier;
 
-import static org.jmouse.core.bind.Bindable.of;
+import static org.jmouse.core.bind.TypedValue.of;
 
 /**
  * The {@code CollectionBinder} class is an abstract binder for handling collection types.
@@ -31,7 +31,7 @@ abstract public class CollectionBinder extends AbstractBinder {
     }
 
     /**
-     * Binds a collection to the provided path using the specified {@link Bindable} object and data source.
+     * Binds a collection to the provided path using the specified {@link TypedValue} object and data source.
      * The collection elements are bound recursively, and their individual values are added to the collection.
      * <p>
      * The binding process continues until all elements in the collection are processed or until no further
@@ -46,7 +46,7 @@ abstract public class CollectionBinder extends AbstractBinder {
      * @return the binding result containing the collection, or an empty result if no binding is possible
      */
     @Override
-    public <T> BindResult<T> bind(PropertyPath root, Bindable<T> bindable, ObjectAccessor accessor, BindCallback callback) {
+    public <T> BindResult<T> bind(PropertyPath root, TypedValue<T> bindable, ObjectAccessor accessor, BindCallback callback) {
         TypeInformation typeDescriptor = bindable.getTypeInformation();
 
         // Check if the bindable is a collection
@@ -82,7 +82,7 @@ abstract public class CollectionBinder extends AbstractBinder {
     }
 
     private BindResult<?> bindCollectionElement(
-            PropertyPath name, Bindable<?> bindable, ObjectAccessor source, Collection<Object> elements, BindCallback callback) {
+            PropertyPath name, TypedValue<?> bindable, ObjectAccessor source, Collection<Object> elements, BindCallback callback) {
         // Bind the individual element and add it to the collection
         BindResult<?> result = bindValue(name, bindable, source, callback);
 
@@ -93,14 +93,14 @@ abstract public class CollectionBinder extends AbstractBinder {
     }
 
     /**
-     * Retrieves the collection associated with the provided {@link Bindable} object.
+     * Retrieves the collection associated with the provided {@link TypedValue} object.
      * If the bindable's value is a collection, it returns it; otherwise, it returns a default collection from
      * a supplier.
      *
      * @param bindable the bindable object representing the collection
      * @return the collection associated with the bindable object, or a default collection if none is found
      */
-    protected Collection<?> getCollection(Bindable<?> bindable) {
+    protected Collection<?> getCollection(TypedValue<?> bindable) {
         TypeInformation typeDescriptor = bindable.getTypeInformation();
         Supplier<?>     supplier       = bindable.getValue();
 
@@ -122,6 +122,6 @@ abstract public class CollectionBinder extends AbstractBinder {
      * @param <T> the type of elements in the collection
      * @return a supplier that provides the default collection
      */
-    abstract protected <T> Supplier<? extends Collection<T>> getCollectionSupplier(Bindable<T> bindable);
+    abstract protected <T> Supplier<? extends Collection<T>> getCollectionSupplier(TypedValue<T> bindable);
 }
 
