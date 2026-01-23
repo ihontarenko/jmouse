@@ -1,6 +1,6 @@
 package org.jmouse.el.extension;
 
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.el.evaluation.EvaluationContext;
 
 /**
@@ -18,7 +18,7 @@ public interface Test {
      * @param type
      * @return {@code true} if the test passes; {@code false} otherwise
      */
-    boolean test(Object value, Arguments arguments, EvaluationContext context, ClassTypeInspector type);
+    boolean test(Object value, Arguments arguments, EvaluationContext context, TypeClassifier type);
 
     /**
      * Returns the name of this test extension.

@@ -1,7 +1,7 @@
 package org.jmouse.el.extension.test;
 
 import org.jmouse.core.convert.Conversion;
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 
@@ -18,7 +18,7 @@ public class EvenTest extends AbstractTest {
      * Evaluates whether the provided instance represents an even number.
      */
     @Override
-    public boolean test(Object value, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
+    public boolean test(Object value, Arguments arguments, EvaluationContext context, TypeClassifier type) {
         Conversion conversion = context.getConversion();
         boolean    isEven     = false;
 

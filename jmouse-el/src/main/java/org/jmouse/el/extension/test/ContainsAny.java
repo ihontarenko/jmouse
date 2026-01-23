@@ -1,13 +1,12 @@
 package org.jmouse.el.extension.test;
 
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.core.support.ArraySupport;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 
 /**
  * ✅ Returns {@code true} if the <em>actual</em> value contains <em>any</em> of the <em>expected</em> values.
@@ -29,7 +28,7 @@ import java.util.List;
 public class ContainsAny extends AbstractContainsTest {
 
     @Override
-    public boolean test(Object value, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
+    public boolean test(Object value, Arguments arguments, EvaluationContext context, TypeClassifier type) {
         Collection<?> expected = toExpected(arguments);
         Collection<?> actual   = ArraySupport.toCollection(value);
 

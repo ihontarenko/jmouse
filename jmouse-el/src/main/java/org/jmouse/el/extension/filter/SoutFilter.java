@@ -1,6 +1,6 @@
 package org.jmouse.el.extension.filter;
 
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 
@@ -11,7 +11,7 @@ import static java.lang.System.out;
 public class SoutFilter extends AbstractFilter {
 
     @Override
-    public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
+    public Object apply(Object input, Arguments arguments, EvaluationContext context, TypeClassifier type) {
         if (input instanceof String string) {
             out.println(string);
         } else if (input instanceof Iterator<?> iterator) {

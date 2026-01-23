@@ -1,6 +1,6 @@
 package org.jmouse.el.extension.filter;
 
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 
@@ -30,7 +30,7 @@ public class TrimFilter extends AbstractFilter {
      * @return the trimmed string if input is a {@code String}, or the original input otherwise
      */
     @Override
-    public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
+    public Object apply(Object input, Arguments arguments, EvaluationContext context, TypeClassifier type) {
         Object result = input;
 
         if (input instanceof String string) {

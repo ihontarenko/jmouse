@@ -2,7 +2,7 @@ package org.jmouse.core.bind;
 
 import org.jmouse.core.bind.PropertyPath.Entries;
 import org.jmouse.core.bind.PropertyPath.Type;
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.*;
@@ -19,7 +19,7 @@ import static org.jmouse.core.reflection.InferredType.forInstance;
  * It allows working with objects, lists, maps, arrays, and primitive types in a unified way.
  * </p>
  */
-public interface ObjectAccessor extends ClassTypeInspector {
+public interface ObjectAccessor extends TypeClassifier {
 
     /**
      * A standard wrapper for object accessor operations.

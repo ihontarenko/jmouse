@@ -19,7 +19,7 @@ import java.util.function.*;
  *   <li>{@link GenericArrayType} - generic arrays</li>
  * </ul>
  */
-public class InferredType implements ClassTypeInspector {
+public class InferredType implements TypeClassifier {
 
     /**
      * 🗄️ Cache key for storing {@link InferredType} instances with their resolution context.

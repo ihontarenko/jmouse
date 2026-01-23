@@ -1,4 +1,4 @@
-package org.jmouse.core.mapping.diagnostics;
+package org.jmouse.core.mapping.errors;
 
 import java.util.ArrayList;
 import java.util.Collections;

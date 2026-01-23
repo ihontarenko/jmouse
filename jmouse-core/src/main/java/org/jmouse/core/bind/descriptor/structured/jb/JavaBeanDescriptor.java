@@ -5,7 +5,7 @@ import org.jmouse.core.bind.descriptor.ClassTypeDescriptor;
 import org.jmouse.core.bind.descriptor.structured.ObjectData;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 
 import java.util.Map;
 
@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public class JavaBeanDescriptor<T>
         extends AbstractDescriptor<T, ObjectData<T>, JavaBeanIntrospector<T>>
-        implements ClassTypeInspector, ObjectDescriptor<T> {
+        implements TypeClassifier, ObjectDescriptor<T> {
 
     /**
      * Constructs a {@code JavaBeanDescriptor} with the given introspector and data container.

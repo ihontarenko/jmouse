@@ -1,4 +1,4 @@
-package org.jmouse.core.mapping.diagnostics;
+package org.jmouse.core.mapping.errors;
 
 import org.jmouse.core.bind.PropertyPath;
 

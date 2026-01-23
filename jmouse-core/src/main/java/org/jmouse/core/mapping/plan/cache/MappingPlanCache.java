@@ -2,15 +2,15 @@ package org.jmouse.core.mapping.plan.cache;
 
 import org.jmouse.core.mapping.plan.MappingPlan;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 public final class MappingPlanCache {
 
-    private final Map<Class<?>, MappingPlan<?>> byTargetType = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<PlanKey, MappingPlan<?>> cache = new ConcurrentHashMap<>();
 
     @SuppressWarnings("unchecked")
-    public <T> MappingPlan<T> getOrCompute(Class<T> targetType, java.util.function.Supplier<MappingPlan<T>> supplier) {
-        return (MappingPlan<T>) byTargetType.computeIfAbsent(targetType, k -> supplier.get());
+    public <T> MappingPlan<T> compute(PlanKey key, Supplier<MappingPlan<T>> supplier) {
+        return (MappingPlan<T>) cache.computeIfAbsent(key, k -> supplier.get());
     }
 }

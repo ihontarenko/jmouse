@@ -1,12 +1,10 @@
 package org.jmouse.el.extension.filter;
 
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 
-import java.util.Collection;
 import java.util.StringJoiner;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.joining;
@@ -14,7 +12,7 @@ import static java.util.stream.Collectors.joining;
 public class JoinFilter extends AbstractFilter {
 
     @Override
-    public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
+    public Object apply(Object input, Arguments arguments, EvaluationContext context, TypeClassifier type) {
         String separator = toString(context, arguments.getFirst());
         String result    = null;
         String prefix    = "";

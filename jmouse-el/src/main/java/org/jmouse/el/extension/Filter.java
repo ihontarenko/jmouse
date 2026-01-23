@@ -1,6 +1,6 @@
 package org.jmouse.el.extension;
 
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.el.evaluation.EvaluationContext;
 
 /**
@@ -11,7 +11,7 @@ public interface Filter {
     /**
      * Applies this filter to the specified input.
      */
-    Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type);
+    Object apply(Object input, Arguments arguments, EvaluationContext context, TypeClassifier type);
 
     /**
      * Returns the name of this filter.

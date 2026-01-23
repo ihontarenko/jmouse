@@ -1,6 +1,6 @@
 package org.jmouse.el.extension.filter;
 
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 
@@ -12,7 +12,7 @@ import java.util.Map;
 public class LastFilter extends AbstractFilter {
 
     @Override
-    public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
+    public Object apply(Object input, Arguments arguments, EvaluationContext context, TypeClassifier type) {
         Object last = null;
 
         if (type.isCollection()) {

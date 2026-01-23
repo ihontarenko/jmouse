@@ -1,6 +1,6 @@
 package org.jmouse.util;
 
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.core.reflection.TypeInformation;
 
 import java.util.Iterator;
@@ -26,8 +26,8 @@ public class Iterables {
 
     @SuppressWarnings("unchecked")
     public static Iterable<?> toIterable(final Object object) {
-        Iterable<?>        iterable = null;
-        ClassTypeInspector type     = TypeInformation.forInstance(object);
+        Iterable<?>    iterable = null;
+        TypeClassifier type     = TypeInformation.forInstance(object);
 
         if (type.isIterable()) {
             iterable = ((Iterable<?>) object);

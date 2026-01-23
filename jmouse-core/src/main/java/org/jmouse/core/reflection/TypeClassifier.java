@@ -5,7 +5,7 @@ import java.util.*;
 /**
  * Provides a type inspection utility for analyzing and classifying Java classes.
  */
-public interface ClassTypeInspector {
+public interface TypeClassifier {
 
     /**
      * Returns the class type being inspected.
@@ -24,7 +24,7 @@ public interface ClassTypeInspector {
     /**
      * Checks if the inspected type is assignable from the given inspector.
      */
-    default boolean is(ClassTypeInspector inspector) {
+    default boolean is(TypeClassifier inspector) {
         return is(inspector.getClassType());
     }
 

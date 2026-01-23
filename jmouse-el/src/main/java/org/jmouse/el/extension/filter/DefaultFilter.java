@@ -1,6 +1,6 @@
 package org.jmouse.el.extension.filter;
 
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 
@@ -32,7 +32,7 @@ public class DefaultFilter extends AbstractFilter {
      * @return the original input if not {@code null}, otherwise the first argument
      */
     @Override
-    public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
+    public Object apply(Object input, Arguments arguments, EvaluationContext context, TypeClassifier type) {
         return input == null ? arguments.getFirst() : input;
     }
 

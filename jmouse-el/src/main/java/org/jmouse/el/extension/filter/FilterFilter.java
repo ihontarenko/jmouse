@@ -1,6 +1,6 @@
 package org.jmouse.el.extension.filter;
 
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.extension.Lambda;
@@ -12,7 +12,7 @@ import java.util.stream.StreamSupport;
 public class FilterFilter extends AbstractFilter {
 
     @Override
-    public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
+    public Object apply(Object input, Arguments arguments, EvaluationContext context, TypeClassifier type) {
         Iterable<?> iterable = Iterables.toIterable(input);
 
         if (iterable == null) {

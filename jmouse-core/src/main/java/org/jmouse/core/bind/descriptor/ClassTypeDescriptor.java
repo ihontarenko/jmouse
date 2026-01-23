@@ -1,14 +1,14 @@
 package org.jmouse.core.bind.descriptor;
 
 import org.jmouse.core.bind.descriptor.internal.ClassTypeData;
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class ClassTypeDescriptor extends AnnotatedElementDescriptor<Class<?>, ClassTypeData, ClassTypeIntrospector> implements ClassTypeInspector {
+public class ClassTypeDescriptor extends AnnotatedElementDescriptor<Class<?>, ClassTypeData, ClassTypeIntrospector> implements TypeClassifier {
 
     public ClassTypeDescriptor(ClassTypeIntrospector introspector, ClassTypeData container) {
         super(introspector, container);

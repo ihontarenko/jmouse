@@ -1,6 +1,6 @@
 package org.jmouse.core.mapping;
 
-import org.jmouse.core.mapping.diagnostics.MappingProblem;
+import org.jmouse.core.mapping.errors.MappingProblem;
 
 import java.util.List;
 

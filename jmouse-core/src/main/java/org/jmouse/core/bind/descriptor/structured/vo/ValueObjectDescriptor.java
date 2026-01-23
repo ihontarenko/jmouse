@@ -4,12 +4,12 @@ import org.jmouse.core.bind.descriptor.AbstractDescriptor;
 import org.jmouse.core.bind.descriptor.ClassTypeDescriptor;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 
 import java.util.Map;
 
 public class ValueObjectDescriptor<T> extends AbstractDescriptor<T, ValueObjectData<T>, ValueObjectIntrospector<T>>
-        implements ClassTypeInspector, ObjectDescriptor<T> {
+        implements TypeClassifier, ObjectDescriptor<T> {
 
     protected ValueObjectDescriptor(ValueObjectIntrospector<T> introspector, ValueObjectData<T> container) {
         super(introspector, container);

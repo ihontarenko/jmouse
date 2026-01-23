@@ -1,65 +1,52 @@
 package org.jmouse.core.mapping;
 
-import org.jmouse.core.mapping.config.ErrorHandlingPolicy;
+import org.jmouse.core.Verify;
 import org.jmouse.core.mapping.config.MappingConfig;
-import org.jmouse.core.mapping.diagnostics.MappingDiagnostics;
+import org.jmouse.core.mapping.model.SourceModelFactory;
+import org.jmouse.core.mapping.model.TargetModelFactory;
+import org.jmouse.core.mapping.plan.CompositeMappingPlanBuilder;
 import org.jmouse.core.mapping.plan.MappingPlan;
-import org.jmouse.core.mapping.plan.build.MapToBeanPlanBuilder;
-import org.jmouse.core.mapping.plan.build.MapToRecordPlanBuilder;
-import org.jmouse.core.mapping.plan.build.SimpleMappingPlanBuilder;
 import org.jmouse.core.mapping.plan.cache.MappingPlanCache;
+import org.jmouse.core.mapping.plan.cache.PlanKey;
+import org.jmouse.core.mapping.plan.contrib.StructuredToStructuredContributor;
+import org.jmouse.core.mapping.plan.spi.PlanBuildContext;
 import org.jmouse.core.mapping.runtime.MappingContext;
 
-import java.util.Map;
-import java.util.Objects;
+import java.util.List;
 
 public final class DefaultObjectMapper implements ObjectMapper {
 
-    private final MappingConfig config;
-
-    private final MappingPlanCache         planCache;
-    private final SimpleMappingPlanBuilder planBuilder;
+    private final MappingConfig               config;
+    private final TargetModelFactory          factory = new TargetModelFactory();
+    private final MappingPlanCache            cache   = new MappingPlanCache();
+    private final CompositeMappingPlanBuilder builder;
 
     public DefaultObjectMapper(MappingConfig config) {
-        this.config = Objects.requireNonNull(config, "config");
-        this.planCache = new MappingPlanCache();
-        this.planBuilder = new SimpleMappingPlanBuilder(
-                new MapToBeanPlanBuilder(),
-                new MapToRecordPlanBuilder()
+        this.config = Verify.nonNull(config, "config");
+        this.builder = new CompositeMappingPlanBuilder(
+                List.of(new StructuredToStructuredContributor()),
+                new PlanBuildContext(this)
         );
     }
 
     @Override
     public <T> T map(Object source, Class<T> targetType) {
-        Objects.requireNonNull(targetType, "targetType");
+        Verify.nonNull(targetType, "targetType");
 
-        if (source != null && !(source instanceof Map<?, ?>)) {
-            throw new UnsupportedOperationException("Stage 3 supports Map source only");
-        }
+        MappingContext context = new MappingContext(this, config.policy(), config.conversion());
 
-        MappingDiagnostics diagnostics = new MappingDiagnostics();
-        MappingContext context = new MappingContext(
-                this,
-                config.policy(),
-                config.conversion(),
-                config.virtualPropertyResolver(),
-                diagnostics
-        );
+        var sourceModel = SourceModelFactory.defaultFactory(context).wrap(source);
+        var targetModel = factory.forType(targetType);
 
-        MappingPlan<T> plan = planCache.getOrCompute(targetType, () -> planBuilder.build(targetType));
-        T result = plan.execute(source, context);
+        PlanKey key = new PlanKey(sourceModel.kind(), targetType, config.policy().hashCode());
 
-        // In fail-fast mode, exceptions already thrown. For collect-and-throw, respect diagnostics.
-        if (config.policy().errorHandlingPolicy() == ErrorHandlingPolicy.COLLECT_AND_THROW
-                && diagnostics.hasErrors()) {
-            throw new MappingException("Mapping failed", diagnostics.problems());
-        }
+        MappingPlan<T> plan = cache.compute(key, () -> builder.build(sourceModel, targetModel));
 
-        return result;
+        return plan.execute(source, context);
     }
 
     @Override
     public void map(Object source, Object target) {
-        throw new UnsupportedOperationException("Merge mapping is not implemented in Stage 3");
+        throw new UnsupportedOperationException("Merge mapping comes later");
     }
 }

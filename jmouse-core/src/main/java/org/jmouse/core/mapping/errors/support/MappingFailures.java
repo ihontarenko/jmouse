@@ -1,11 +1,11 @@
-package org.jmouse.core.mapping.plan.support;
+package org.jmouse.core.mapping.errors.support;
 
 import org.jmouse.core.mapping.MappingException;
-import org.jmouse.core.mapping.diagnostics.MappingProblem;
+import org.jmouse.core.mapping.errors.MappingProblem;
 
 import java.util.List;
 
-import static org.jmouse.core.mapping.diagnostics.MappingProblem.Severity;
+import static org.jmouse.core.mapping.errors.MappingProblem.Severity;
 
 public final class MappingFailures {
 

@@ -3,31 +3,19 @@ package org.jmouse.core.mapping.runtime;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.mapping.ObjectMapper;
 import org.jmouse.core.mapping.config.MappingPolicy;
-import org.jmouse.core.mapping.diagnostics.MappingDiagnostics;
-import org.jmouse.core.mapping.virtuals.VirtualPropertyResolver;
 
-import static org.jmouse.core.Verify.nonNull;
+import java.util.Objects;
 
-public record MappingContext(
-        ObjectMapper mapper,
-        MappingPolicy policy,
-        Conversion conversion,
-        VirtualPropertyResolver virtualPropertyResolver,
-        MappingDiagnostics diagnostics
-) {
+public record MappingContext(ObjectMapper mapper, MappingPolicy policy, Conversion conversion) {
 
     public MappingContext(
             ObjectMapper mapper,
             MappingPolicy policy,
-            Conversion conversion,
-            VirtualPropertyResolver virtualPropertyResolver,
-            MappingDiagnostics diagnostics
+            Conversion conversion
     ) {
-        this.policy = nonNull(policy, "policy");
-        this.conversion = nonNull(conversion, "conversion");
-        this.virtualPropertyResolver = nonNull(virtualPropertyResolver, "virtualPropertyResolver");
-        this.diagnostics = nonNull(diagnostics, "diagnostics");
-        this.mapper = nonNull(mapper, "mapper");
+        this.mapper = Objects.requireNonNull(mapper, "mapper");
+        this.policy = Objects.requireNonNull(policy, "policy");
+        this.conversion = Objects.requireNonNull(conversion, "conversion");
     }
 
 }

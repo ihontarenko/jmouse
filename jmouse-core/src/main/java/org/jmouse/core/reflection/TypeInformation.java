@@ -9,7 +9,7 @@ import java.util.Objects;
  * various type-checking operations commonly used in reflection-based processing.
  * </p>
  */
-public class TypeInformation implements ClassTypeInspector {
+public class TypeInformation implements TypeClassifier {
 
     private final Class<?>     rawType;
     private final InferredType type;

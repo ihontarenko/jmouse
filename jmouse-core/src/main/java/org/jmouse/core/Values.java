@@ -1,6 +1,6 @@
 package org.jmouse.core;
 
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.core.reflection.TypeInformation;
 
 import java.util.Arrays;
@@ -36,7 +36,7 @@ public interface Values extends Streamable<Object> {
      */
     Object get(int index);
 
-    default ClassTypeInspector getType(int index) {
+    default TypeClassifier getType(int index) {
         return TypeInformation.forInstance(get(index));
     }
 

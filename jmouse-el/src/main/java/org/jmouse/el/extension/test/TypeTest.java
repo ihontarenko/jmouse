@@ -1,10 +1,8 @@
 package org.jmouse.el.extension.test;
 
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
-
-import java.util.Collection;
 
 /**
  * Test implementation that checks if a value is an {@link Iterable}.
@@ -15,7 +13,7 @@ import java.util.Collection;
 public class TypeTest extends AbstractTest {
 
     @Override
-    public boolean test(Object value, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
+    public boolean test(Object value, Arguments arguments, EvaluationContext context, TypeClassifier type) {
         boolean result = false;
 
         if (arguments.getFirst() instanceof String string) {

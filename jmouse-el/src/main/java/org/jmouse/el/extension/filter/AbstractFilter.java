@@ -1,5 +1,6 @@
 package org.jmouse.el.extension.filter;
 
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Filter;
 
@@ -8,7 +9,7 @@ import org.jmouse.el.extension.Filter;
  * <p>
  * This class provides a default {@code toString()} implementation that returns a string
  * in the format "Filter: {filterName}". Subclasses should implement {@link Filter#getName()}
- * and {@link Filter#apply(Object, org.jmouse.el.extension.Arguments, org.jmouse.el.evaluation.EvaluationContext, org.jmouse.core.reflection.ClassTypeInspector)}
+ * and {@link Filter#apply(Object, org.jmouse.el.extension.Arguments, org.jmouse.el.evaluation.EvaluationContext, TypeClassifier)}
  * to provide specific filtering behavior.
  * </p>
  *

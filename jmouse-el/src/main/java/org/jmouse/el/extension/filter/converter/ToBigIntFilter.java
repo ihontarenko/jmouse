@@ -1,6 +1,6 @@
 package org.jmouse.el.extension.filter.converter;
 
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.extension.Filter;
@@ -20,7 +20,7 @@ public class ToBigIntFilter implements Filter {
      * Converts the input value to a {@link BigInteger} using the conversion service.
      */
     @Override
-    public Object apply(Object input, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
+    public Object apply(Object input, Arguments arguments, EvaluationContext context, TypeClassifier type) {
         return context.getConversion().convert(input, BigInteger.class);
     }
 

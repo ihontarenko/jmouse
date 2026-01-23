@@ -1,6 +1,6 @@
 package org.jmouse.el.node.expression;
 
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.EvaluationException;
@@ -105,8 +105,8 @@ public class FilterNode extends AbstractExpression {
             }
         }
 
-        Object             compiled  = getLeft().evaluate(context);
-        ClassTypeInspector inspector = TypeInformation.forInstance(compiled);
+        Object         compiled  = getLeft().evaluate(context);
+        TypeClassifier inspector = TypeInformation.forInstance(compiled);
 
         return filter.apply(compiled, arguments, context, inspector);
     }

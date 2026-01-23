@@ -1,6 +1,6 @@
 package org.jmouse.el.extension.test;
 
-import org.jmouse.core.reflection.ClassTypeInspector;
+import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.evaluation.EvaluationContext;
 
@@ -13,7 +13,7 @@ public class OddTest extends AbstractTest {
      * Evaluates whether the given value satisfies the odd condition.
      */
     @Override
-    public boolean test(Object value, Arguments arguments, EvaluationContext context, ClassTypeInspector type) {
+    public boolean test(Object value, Arguments arguments, EvaluationContext context, TypeClassifier type) {
         return !new EvenTest().test(value, arguments, context, type);
     }
 
