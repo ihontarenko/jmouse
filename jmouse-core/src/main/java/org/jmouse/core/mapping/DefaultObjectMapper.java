@@ -1,6 +1,7 @@
 package org.jmouse.core.mapping;
 
 import org.jmouse.core.Verify;
+import org.jmouse.core.bind.StandardAccessorWrapper;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.model.SourceModel;
 import org.jmouse.core.mapping.model.SourceModelFactory;
@@ -11,6 +12,7 @@ import org.jmouse.core.mapping.plan.build.CompositeMappingPlanBuilder;
 import org.jmouse.core.mapping.plan.build.PlanBuildContext;
 import org.jmouse.core.mapping.plan.cache.MappingPlanCache;
 import org.jmouse.core.mapping.plan.cache.PlanKey;
+import org.jmouse.core.mapping.plan.contributor.CollectionToCollectionContributor;
 import org.jmouse.core.mapping.plan.contributor.StructuredToStructuredContributor;
 import org.jmouse.core.mapping.runtime.MappingContext;
 import org.jmouse.core.mapping.values.ValueKind;
@@ -29,28 +31,15 @@ public final class DefaultObjectMapper implements ObjectMapper {
 
     public DefaultObjectMapper(MappingConfig config) {
         this.config = Verify.nonNull(config, "config");
-        this.builder = new CompositeMappingPlanBuilder(
-                List.of(new StructuredToStructuredContributor()),
-                new PlanBuildContext(this, config)
-        );
+        this.builder =
     }
 
     @Override
     public <T> T map(Object source, Class<T> targetType) {
         Verify.nonNull(targetType, "targetType");
 
-        MappingContext context = new MappingContext(this, config.policy(), config.conversion());
-
-        SourceModel sourceModel = sourceFactory.wrap(source);
-        TargetModel targetModel = targetFactory.forType(targetType);
-
-        ValueKind sourceKind  = sourceModel.kind();
-        int       fingerprint = config.policy().hashCode();
-
-        MappingPlan<T> plan = cache.compute(
-                new PlanKey(sourceKind, targetType, fingerprint),
-                () -> builder.build(sourceModel, targetModel)
-        );
+        MappingContext context = new MappingContext(
+                this, config.policy(), config.conversion(), new StandardAccessorWrapper());
 
         return plan.execute(source, context);
     }

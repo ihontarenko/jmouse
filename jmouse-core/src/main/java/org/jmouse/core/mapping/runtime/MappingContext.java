@@ -1,31 +1,35 @@
 package org.jmouse.core.mapping.runtime;
 
 import org.jmouse.core.Verify;
+import org.jmouse.core.bind.ObjectAccessorWrapper;
 import org.jmouse.core.convert.Conversion;
-import org.jmouse.core.mapping.ObjectMapper;
+import org.jmouse.core.mapping.bindings.TypeMappingBindings;
 import org.jmouse.core.mapping.config.MappingPolicy;
-import org.jmouse.core.reflection.TypeInformation;
+import org.jmouse.core.mapping.plan.PlanRegistry;
 
-public final class MappingContext {
+public record MappingContext(
+        Mapper mapper,
+        PlanRegistry planRegistry,
+        ObjectAccessorWrapper wrapper,
+        Conversion conversion,
+        TypeMappingBindings mappingBindings,
+        MappingPolicy policy
+) {
 
-    private final ObjectMapper  mapper;
-    private final Conversion    conversion;
-    private final MappingPolicy policy;
-
-    public MappingContext(ObjectMapper mapper, MappingPolicy policy, Conversion conversion) {
+    public MappingContext(
+            Mapper mapper,
+            PlanRegistry planRegistry,
+            ObjectAccessorWrapper wrapper,
+            Conversion conversion,
+            TypeMappingBindings mappingBindings,
+            MappingPolicy policy
+    ) {
         this.mapper = Verify.nonNull(mapper, "mapper");
-        this.policy = Verify.nonNull(policy, "policy");
+        this.planRegistry = Verify.nonNull(planRegistry, "planRegistry");
+        this.wrapper = Verify.nonNull(wrapper, "accessorWrapper");
         this.conversion = Verify.nonNull(conversion, "conversion");
-    }
-
-    public ObjectMapper mapper() { return mapper; }
-
-    public MappingPolicy policy() { return policy; }
-
-    public Conversion conversion() { return conversion; }
-
-    public TypeInformation typeInformation(Class<?> type) {
-        return TypeInformation.forClass(type);
+        this.mappingBindings = Verify.nonNull(mappingBindings, "mappingBindings");
+        this.policy = Verify.nonNull(policy, "policy");
     }
 
 }
