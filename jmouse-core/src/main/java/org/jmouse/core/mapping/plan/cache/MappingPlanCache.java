@@ -11,6 +11,7 @@ public final class MappingPlanCache {
 
     @SuppressWarnings("unchecked")
     public <T> MappingPlan<T> compute(PlanKey key, Supplier<MappingPlan<T>> supplier) {
-        return (MappingPlan<T>) cache.computeIfAbsent(key, k -> supplier.get());
+        return (MappingPlan<T>) cache.computeIfAbsent(key, ignore -> supplier.get());
     }
+
 }

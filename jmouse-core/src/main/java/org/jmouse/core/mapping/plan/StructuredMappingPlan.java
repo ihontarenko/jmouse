@@ -11,26 +11,28 @@ import java.util.Objects;
 
 public final class StructuredMappingPlan implements MappingPlan<Object> {
 
+    private final TargetModel        targetModel;
+    private final List<Step>         steps;
+    private final SourceModelFactory sourceModelFactory;
+
     @FunctionalInterface
     public interface Step {
-        void apply(SourceModel source, TargetSession session, MappingContext context);
+        void apply(SourceModel source, TargetSession target, MappingContext context);
     }
 
-    private final TargetModel target;
-    private final List<Step> steps;
-
-    public StructuredMappingPlan(TargetModel target, List<Step> steps) {
-        this.target = Objects.requireNonNull(target, "target");
+    public StructuredMappingPlan(TargetModel targetModel, List<Step> steps, SourceModelFactory sourceModelFactory) {
+        this.targetModel = Objects.requireNonNull(targetModel, "targetModel");
         this.steps = Objects.requireNonNull(steps, "steps");
+        this.sourceModelFactory = Objects.requireNonNull(sourceModelFactory, "sourceModelFactory");
     }
 
     @Override
     public Object execute(Object source, MappingContext context) {
-        SourceModel src = SourceModelFactory.defaultFactory(context).wrap(source);
-        TargetSession session = target.newSession();
+        SourceModel   sourceModel = sourceModelFactory.wrap(source);
+        TargetSession session     = targetModel.newSession();
 
         for (Step step : steps) {
-            step.apply(src, session, context);
+            step.apply(sourceModel, session, context);
         }
 
         return session.build();

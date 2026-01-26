@@ -4,9 +4,11 @@ import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 
 public interface TargetSession {
 
-    Object instance();
+    boolean isRecord();
 
-    void write(PropertyDescriptor<Object> propertyDescriptor, Object value);
+    Object instance(); // beans only; for records returns null
+
+    void write(PropertyDescriptor<?> property, Object value);
 
     void putConstructorArgument(String name, Object value);
 

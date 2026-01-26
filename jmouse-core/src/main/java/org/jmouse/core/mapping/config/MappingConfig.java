@@ -1,24 +1,20 @@
 package org.jmouse.core.mapping.config;
 
-import org.jmouse.core.Verify;
 import org.jmouse.core.convert.Conversion;
-import org.jmouse.core.mapping.virtuals.VirtualPropertyResolver;
+import org.jmouse.core.mapping.bindings.MappingRulesRegistry;
 
 import java.util.Objects;
 
-/**
- * Immutable mapper configuration.
- */
 public final class MappingConfig {
 
-    private final MappingPolicy policy;
-    private final Conversion conversion;
-    private final VirtualPropertyResolver virtualPropertyResolver;
+    private final MappingPolicy        policy;
+    private final Conversion           conversion;
+    private final MappingRulesRegistry rules;
 
-    private MappingConfig(Builder builder) {
-        this.policy = Objects.requireNonNull(builder.policy, "policy");
-        this.conversion = Objects.requireNonNull(builder.conversion, "conversion");
-        this.virtualPropertyResolver = Objects.requireNonNull(builder.virtualPropertyResolver, "virtualPropertyResolver");
+    private MappingConfig(MappingPolicy policy, Conversion conversion, MappingRulesRegistry rules) {
+        this.policy = Objects.requireNonNull(policy, "policy");
+        this.conversion = Objects.requireNonNull(conversion, "conversion");
+        this.rules = Objects.requireNonNull(rules, "rules");
     }
 
     public static Builder builder() {
@@ -33,34 +29,32 @@ public final class MappingConfig {
         return conversion;
     }
 
-    public VirtualPropertyResolver virtualPropertyResolver() {
-        return virtualPropertyResolver;
+    public MappingRulesRegistry rules() {
+        return rules;
     }
 
     public static final class Builder {
+        private MappingPolicy        policy;
+        private Conversion           conversion;
+        private MappingRulesRegistry rules = MappingRulesRegistry.empty();
 
-        private MappingPolicy           policy                  = MappingPolicy.defaults();
-        private Conversion              conversion;
-        private VirtualPropertyResolver virtualPropertyResolver = VirtualPropertyResolver.noop();
-
-        public Builder policy(MappingPolicy value) {
-            this.policy = value;
+        public Builder policy(MappingPolicy policy) {
+            this.policy = policy;
             return this;
         }
 
-        public Builder conversion(Conversion value) {
-            this.conversion = value;
+        public Builder conversion(Conversion conversion) {
+            this.conversion = conversion;
             return this;
         }
 
-        public Builder virtualPropertyResolver(VirtualPropertyResolver value) {
-            this.virtualPropertyResolver = value;
+        public Builder rules(MappingRulesRegistry rules) {
+            this.rules = rules;
             return this;
         }
 
         public MappingConfig build() {
-            Verify.nonNull(conversion, "conversion");
-            return new MappingConfig(this);
+            return new MappingConfig(policy, conversion, rules);
         }
     }
 }

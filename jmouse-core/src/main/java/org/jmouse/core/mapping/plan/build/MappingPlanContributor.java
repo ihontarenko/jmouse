@@ -1,4 +1,4 @@
-package org.jmouse.core.mapping.plan.spi;
+package org.jmouse.core.mapping.plan.build;
 
 import org.jmouse.core.mapping.model.SourceModel;
 import org.jmouse.core.mapping.model.TargetModel;

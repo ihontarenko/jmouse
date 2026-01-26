@@ -12,5 +12,4 @@ public interface TargetModel {
     ObjectDescriptor<?> descriptor();
 
     TargetSession newSession();
-
 }
