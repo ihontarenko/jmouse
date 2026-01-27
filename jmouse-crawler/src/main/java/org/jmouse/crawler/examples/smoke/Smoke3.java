@@ -1,7 +1,7 @@
 package org.jmouse.crawler.examples.smoke;
 
 import org.jmouse.core.bind.*;
-import org.jmouse.core.mapping.binding.MappingRulesRegistry;
+import org.jmouse.core.mapping.binding.TypeMappingRules;
 import org.jmouse.core.mapping.binding.TypeMappingBuilder;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.plan.MappingPlanRegistry;
@@ -50,7 +50,7 @@ public class Smoke3 {
     }
 
     public static Mapper mapper() {
-        var registry = MappingRulesRegistry.builder()
+        var registry = TypeMappingRules.builder()
                 .register(
                         new TypeMappingBuilder<>(ProcessingTask.class, ProcessingTaskDto.class)
                                 .bind("user", "username")

@@ -40,8 +40,7 @@ public final class JavaBeanPlan<T> extends AbstractMappingPlan<T> implements Map
             String       propertyName = property.getName();
             InferredType propertyType = property.getType().getJavaType();
 
-            Object value = applyBindingIfAny(
-                    source,
+            Object value = applyPropertyBinding(
                     accessor,
                     context,
                     propertyName,
@@ -60,9 +59,9 @@ public final class JavaBeanPlan<T> extends AbstractMappingPlan<T> implements Map
             Object adapted;
 
             try {
-                adapted = adapt(value, propertyType, context);
+                adapted = adaptValue(value, propertyType, context);
             } catch (Exception exception) {
-                throw fail(
+                throw toMappingException(
                         "bean_property_adapt_failed",
                         "Failed to adapt property '%s' to '%s'".formatted(propertyName, propertyType),
                         exception
@@ -72,7 +71,7 @@ public final class JavaBeanPlan<T> extends AbstractMappingPlan<T> implements Map
             try {
                 property.getAccessor().writeValue(target, adapted);
             } catch (Exception exception) {
-                throw fail(
+                throw toMappingException(
                         "bean_property_write_failed",
                         "Failed to write property '%s'".formatted(propertyName),
                         exception

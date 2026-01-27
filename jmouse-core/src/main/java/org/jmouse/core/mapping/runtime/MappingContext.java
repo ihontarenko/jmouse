@@ -3,7 +3,7 @@ package org.jmouse.core.mapping.runtime;
 import org.jmouse.core.Verify;
 import org.jmouse.core.bind.ObjectAccessorWrapper;
 import org.jmouse.core.convert.Conversion;
-import org.jmouse.core.mapping.binding.MappingRulesRegistry;
+import org.jmouse.core.mapping.binding.TypeMappingRules;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.plan.PlanRegistry;
 
@@ -12,7 +12,7 @@ public record MappingContext(
         PlanRegistry planRegistry,
         ObjectAccessorWrapper wrapper,
         Conversion conversion,
-        MappingRulesRegistry mappingRules,
+        TypeMappingRules mappingRules,
         MappingPolicy policy
 ) {
     public MappingContext(
@@ -20,7 +20,7 @@ public record MappingContext(
             PlanRegistry planRegistry,
             ObjectAccessorWrapper wrapper,
             Conversion conversion,
-            MappingRulesRegistry mappingRules,
+            TypeMappingRules mappingRules,
             MappingPolicy policy
     ) {
         this.mapper = Verify.nonNull(mapper, "mapper");

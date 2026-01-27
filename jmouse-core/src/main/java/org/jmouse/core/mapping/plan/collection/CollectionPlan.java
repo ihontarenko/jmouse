@@ -34,7 +34,7 @@ public final class CollectionPlan extends AbstractMappingPlan<Collection<Object>
         Collection<Object> target      = instantiate();
 
         for (Object item : iterable) {
-            target.add(adapt(item, elementType, context));
+            target.add(adaptValue(item, elementType, context));
         }
 
         return target;

@@ -1,6 +1,7 @@
 package org.jmouse.core.mapping.plan.record;
 
 import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.ValueObject;
 import org.jmouse.core.bind.descriptor.structured.DescriptorResolver;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
@@ -16,13 +17,17 @@ import java.util.List;
 
 public final class RecordPlan<T> extends AbstractMappingPlan<T> implements MappingPlan<T> {
 
-    private final Class<T>              targetType;
-    private final ObjectDescriptor<T>   descriptor;
-    private final Constructor<T>        canonicalCtor;
+    private final Class<T>                    targetType;
+    private final ObjectDescriptor<T>         descriptor;
+    private final Constructor<T>              canonicalCtor;
     private final List<PropertyDescriptor<T>> components;
+
+    private final ValueObject<? extends Record> valueObject;
 
     public RecordPlan(InferredType targetType) {
         super(targetType);
+
+
 
         this.targetType = targetType.getRawType();
         if (this.targetType == null || !this.targetType.isRecord()) {
@@ -35,6 +40,8 @@ public final class RecordPlan<T> extends AbstractMappingPlan<T> implements Mappi
 
         @SuppressWarnings("unchecked")
         Class<? extends Record> rt = (Class<? extends Record>) this.targetType;
+
+        this.valueObject = ValueObject.of(rt);
 
         // твої дескриптори вже вміють record (ValueObjectDescriptor) — використовуємо
         this.descriptor = (ObjectDescriptor<T>) DescriptorResolver.ofRecordType(rt);
@@ -53,16 +60,16 @@ public final class RecordPlan<T> extends AbstractMappingPlan<T> implements Mappi
 
         ObjectAccessor accessor = sourceAccessor(source, context);
 
+        ValueObject.Values values = valueObject.getRecordValues();
+
         Object[] args = new Object[components.size()];
 
         for (int i = 0; i < components.size(); i++) {
             PropertyDescriptor<T> property = components.get(i);
+            String                name     = property.getName();
+            InferredType          type     = property.getType().getJavaType();
 
-            String       name = property.getName();
-            InferredType type = property.getType().getJavaType();
-
-            Object value = applyBindingIfAny(
-                    source,
+            Object value = applyPropertyBinding(
                     accessor,
                     context,
                     name,
@@ -76,15 +83,17 @@ public final class RecordPlan<T> extends AbstractMappingPlan<T> implements Mappi
             }
 
             try {
-                args[i] = adapt(value, type, context);
+                args[i] = adaptValue(value, type, context);
             } catch (Exception exception) {
-                throw fail(
+                throw toMappingException(
                         "record_component_adapt_failed",
                         "Failed to adapt record component '%s' to '%s'".formatted(name, type),
                         exception
                 );
             }
         }
+
+        valueObject.getInstance(values);
 
         try {
             return canonicalCtor.newInstance(args);

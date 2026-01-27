@@ -35,7 +35,7 @@ public final class ArrayPlan<T> extends AbstractMappingPlan<T> implements Mappin
         Object array = Array.newInstance(componentRaw, items.size());
 
         for (int i = 0; i < items.size(); i++) {
-            Object adapted = adapt(items.get(i), componentType, context);
+            Object adapted = adaptValue(items.get(i), componentType, context);
             Array.set(array, i, adapted);
         }
 

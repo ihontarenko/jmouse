@@ -2,7 +2,7 @@ package org.jmouse.core.mapping.examples;
 
 import org.jmouse.core.bind.BinderConversion;
 import org.jmouse.core.bind.StandardAccessorWrapper;
-import org.jmouse.core.mapping.binding.MappingRulesRegistry;
+import org.jmouse.core.mapping.binding.TypeMappingRules;
 import org.jmouse.core.mapping.binding.TypeMappingBuilder;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.plan.MappingPlanRegistry;
@@ -24,9 +24,11 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Smoke1 {
 
     public static void main(String... arguments) {
-        var registry = MappingRulesRegistry.builder()
+
+        TypeMappingRules registry = TypeMappingRules.builder()
                 .register(
-                        new TypeMappingBuilder<>(Map.class, Smoke1.UserDTO.class)
+                        TypeMappingRules.builder()
+                                .mapping(Map.class, Smoke1.UserDTO.class)
                                 .bind("user", "username")
                                 .ignore("password")
                                 .constant("password", "masked")

@@ -1,13 +1,14 @@
 package org.jmouse.core.mapping.plan.map;
 
 import org.jmouse.core.MapFactory;
+import org.jmouse.core.mapping.config.MappingPolicy;
+import org.jmouse.core.mapping.config.NullHandlingPolicy;
+import org.jmouse.core.mapping.config.TypeMismatchPolicy;
 import org.jmouse.core.mapping.plan.MappingPlan;
 import org.jmouse.core.mapping.plan.support.AbstractMappingPlan;
 import org.jmouse.core.mapping.runtime.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
-import java.lang.reflect.Constructor;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class MapPlan extends AbstractMappingPlan<Map<Object, Object>> implements MappingPlan<Map<Object, Object>> {
@@ -29,15 +30,37 @@ public final class MapPlan extends AbstractMappingPlan<Map<Object, Object>> impl
             return null;
         }
 
-        InferredType mType = targetType.toMap();
-        InferredType kType = mType.getFirst();
-        InferredType vType = mType.getLast();
+        MappingPolicy policy = context.policy();
+
+        InferredType  mType  = targetType.toMap();
+        InferredType  kType  = mType.getFirst();
+        InferredType  vType  = mType.getLast();
 
         Map<Object, Object> target = instantiate();
 
         for (Map.Entry<?, ?> entry : mapSource.entrySet()) {
-            Object key   = adapt(entry.getKey(), kType, context);
-            Object value = adapt(entry.getValue(), vType, context);
+            Object key   = entry.getKey();
+            Object value = entry.getValue();
+
+            if (value == null && policy.nullHandlingPolicy() == NullHandlingPolicy.SKIP) {
+                continue;
+            }
+
+            try {
+                key = adaptValue(key, kType, context);
+                value = adaptValue(value, vType, context);
+            } catch (RuntimeException ex) {
+                if (policy.typeMismatchPolicy() == TypeMismatchPolicy.FAIL) {
+                    throw toMappingException("map_entry_adapt_failed",
+                                             "Failed to adapt map entry key/value to target map types", ex);
+                }
+                continue;
+            }
+
+            if (value == null && policy.nullHandlingPolicy() == NullHandlingPolicy.SKIP) {
+                continue;
+            }
+
             target.put(key, value);
         }
 
@@ -45,21 +68,6 @@ public final class MapPlan extends AbstractMappingPlan<Map<Object, Object>> impl
     }
 
     private Map<Object, Object> instantiate() {
-
-        MapFactory.createMap(rawTarget);
-
-        if (rawTarget.isInterface()) {
-            return new LinkedHashMap<>();
-        }
-        try {
-            @SuppressWarnings("unchecked")
-            Constructor<? extends Map<Object, Object>> ctor =
-                    (Constructor<? extends Map<Object, Object>>) rawTarget.getDeclaredConstructor();
-            ctor.setAccessible(true);
-            return ctor.newInstance();
-        } catch (Exception ex) {
-            // fallback to stable default
-            return new LinkedHashMap<>();
-        }
+        return MapFactory.createMap(rawTarget);
     }
 }
