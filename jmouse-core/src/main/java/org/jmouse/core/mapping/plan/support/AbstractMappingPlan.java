@@ -2,9 +2,9 @@ package org.jmouse.core.mapping.plan.support;
 
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.convert.Conversion;
-import org.jmouse.core.mapping.bindings.BindingType;
-import org.jmouse.core.mapping.bindings.FieldBinding;
-import org.jmouse.core.mapping.bindings.TypeMappingBindings;
+import org.jmouse.core.mapping.binding.BindingType;
+import org.jmouse.core.mapping.binding.FieldBinding;
+import org.jmouse.core.mapping.binding.TypeMappingBindings;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.runtime.MappingContext;
 import org.jmouse.core.reflection.InferredType;
@@ -72,6 +72,7 @@ public abstract class AbstractMappingPlan<T> {
         TypeInformation targetInfo = TypeInformation.forJavaType(targetType);
 
         // is convertible
+        context.conversion().hasConverter(value.getClass(), targetType.getClassType());
 
         if (targetInfo.isScalar() || targetInfo.isEnum() || targetInfo.isClass()) {
             return convertIfNeeded(value, targetInfo.getClassType(), context.conversion());

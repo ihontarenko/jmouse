@@ -2,8 +2,8 @@ package org.jmouse.core.mapping.examples;
 
 import org.jmouse.core.bind.BinderConversion;
 import org.jmouse.core.bind.StandardAccessorWrapper;
-import org.jmouse.core.mapping.bindings.MappingRulesRegistry;
-import org.jmouse.core.mapping.bindings.TypeMappingBuilder;
+import org.jmouse.core.mapping.binding.MappingRulesRegistry;
+import org.jmouse.core.mapping.binding.TypeMappingBuilder;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.plan.MappingPlanRegistry;
 import org.jmouse.core.mapping.plan.array.ArrayPlanContributor;
@@ -67,11 +67,19 @@ public class Smoke1 {
         User user = mapper.map(source, User.class);
         UserDTO userDTO = mapper.map(source, UserDTO.class);
 
+        Map<User, String> sourceMap = Map.of(new User("John"), "User-123");
+
+
+
         System.out.println(userDTO);
     }
 
     static class User {
         private String user;
+
+        public User(String user) {
+            this.user = user;
+        }
 
         public String getUser() {
             return user;

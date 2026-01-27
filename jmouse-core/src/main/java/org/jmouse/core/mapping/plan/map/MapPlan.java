@@ -26,12 +26,8 @@ public final class MapPlan extends AbstractMappingPlan<Map<Object, Object>> impl
         }
 
         if (!(source instanceof Map<?, ?> mapSource)) {
-            // allow fallback: try to wrap and unwrap? (keep strict for now)
             return null;
         }
-
-        // example
-        context.policy().nullHandlingPolicy(); ///
 
         InferredType mType = targetType.toMap();
         InferredType kType = mType.getFirst();

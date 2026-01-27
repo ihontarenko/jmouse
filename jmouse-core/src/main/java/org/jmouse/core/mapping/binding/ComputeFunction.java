@@ -1,4 +1,4 @@
-package org.jmouse.core.mapping.bindings;
+package org.jmouse.core.mapping.binding;
 
 import org.jmouse.core.mapping.runtime.MappingContext;
 

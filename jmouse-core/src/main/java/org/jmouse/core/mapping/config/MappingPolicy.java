@@ -1,23 +1,17 @@
 package org.jmouse.core.mapping.config;
 
-/**
- * Mapping policy bundle.
- * Immutable and safe to share across threads.
- */
 public final class MappingPolicy {
 
-    private final UnassignedTargetPropertyPolicy unassignedTargetPropertyPolicy;
     private final NullHandlingPolicy             nullHandlingPolicy;
     private final TypeMismatchPolicy             typeMismatchPolicy;
+    private final UnassignedTargetPropertyPolicy unassignedTargetPropertyPolicy;
     private final CollectionMappingPolicy        collectionMappingPolicy;
-    private final ErrorHandlingPolicy            errorHandlingPolicy;
 
     private MappingPolicy(Builder builder) {
-        this.unassignedTargetPropertyPolicy = builder.unassignedTargetPropertyPolicy;
         this.nullHandlingPolicy = builder.nullHandlingPolicy;
         this.typeMismatchPolicy = builder.typeMismatchPolicy;
+        this.unassignedTargetPropertyPolicy = builder.unassignedTargetPropertyPolicy;
         this.collectionMappingPolicy = builder.collectionMappingPolicy;
-        this.errorHandlingPolicy = builder.errorHandlingPolicy;
     }
 
     public static Builder builder() {
@@ -28,10 +22,6 @@ public final class MappingPolicy {
         return builder().build();
     }
 
-    public UnassignedTargetPropertyPolicy unassignedTargetPropertyPolicy() {
-        return unassignedTargetPropertyPolicy;
-    }
-
     public NullHandlingPolicy nullHandlingPolicy() {
         return nullHandlingPolicy;
     }
@@ -40,44 +30,37 @@ public final class MappingPolicy {
         return typeMismatchPolicy;
     }
 
+    public UnassignedTargetPropertyPolicy unassignedTargetPropertyPolicy() {
+        return unassignedTargetPropertyPolicy;
+    }
+
     public CollectionMappingPolicy collectionMappingPolicy() {
         return collectionMappingPolicy;
     }
 
-    public ErrorHandlingPolicy errorHandlingPolicy() {
-        return errorHandlingPolicy;
-    }
-
     public static final class Builder {
-
+        private NullHandlingPolicy             nullHandlingPolicy             = NullHandlingPolicy.PROPAGATE;
+        private TypeMismatchPolicy             typeMismatchPolicy             = TypeMismatchPolicy.CONVERT_IF_POSSIBLE;
         private UnassignedTargetPropertyPolicy unassignedTargetPropertyPolicy = UnassignedTargetPropertyPolicy.LEAVE_DEFAULT;
-        private NullHandlingPolicy nullHandlingPolicy = NullHandlingPolicy.PROPAGATE;
-        private TypeMismatchPolicy typeMismatchPolicy = TypeMismatchPolicy.CONVERT_IF_POSSIBLE;
-        private CollectionMappingPolicy collectionMappingPolicy = CollectionMappingPolicy.REPLACE;
-        private ErrorHandlingPolicy errorHandlingPolicy = ErrorHandlingPolicy.FAIL_FAST;
+        private CollectionMappingPolicy        collectionMappingPolicy        = CollectionMappingPolicy.REPLACE;
 
-        public Builder unassignedTargetPropertyPolicy(UnassignedTargetPropertyPolicy value) {
-            this.unassignedTargetPropertyPolicy = value;
+        public Builder nullHandlingPolicy(NullHandlingPolicy policy) {
+            this.nullHandlingPolicy = policy;
             return this;
         }
 
-        public Builder nullHandlingPolicy(NullHandlingPolicy value) {
-            this.nullHandlingPolicy = value;
+        public Builder typeMismatchPolicy(TypeMismatchPolicy policy) {
+            this.typeMismatchPolicy = policy;
             return this;
         }
 
-        public Builder typeMismatchPolicy(TypeMismatchPolicy value) {
-            this.typeMismatchPolicy = value;
+        public Builder unassignedTargetPropertyPolicy(UnassignedTargetPropertyPolicy policy) {
+            this.unassignedTargetPropertyPolicy = policy;
             return this;
         }
 
-        public Builder collectionMappingPolicy(CollectionMappingPolicy value) {
-            this.collectionMappingPolicy = value;
-            return this;
-        }
-
-        public Builder errorHandlingPolicy(ErrorHandlingPolicy value) {
-            this.errorHandlingPolicy = value;
+        public Builder collectionMappingPolicy(CollectionMappingPolicy policy) {
+            this.collectionMappingPolicy = policy;
             return this;
         }
 

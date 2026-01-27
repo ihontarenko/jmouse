@@ -1,10 +1,9 @@
 package org.jmouse.crawler.examples.smoke;
 
 import org.jmouse.core.bind.*;
-import org.jmouse.core.mapping.bindings.MappingRulesRegistry;
-import org.jmouse.core.mapping.bindings.TypeMappingBuilder;
+import org.jmouse.core.mapping.binding.MappingRulesRegistry;
+import org.jmouse.core.mapping.binding.TypeMappingBuilder;
 import org.jmouse.core.mapping.config.MappingPolicy;
-import org.jmouse.core.mapping.examples.Smoke1;
 import org.jmouse.core.mapping.plan.MappingPlanRegistry;
 import org.jmouse.core.mapping.plan.array.ArrayPlanContributor;
 import org.jmouse.core.mapping.plan.bean.JavaBeanPlanContributor;
@@ -25,7 +24,6 @@ import org.jmouse.crawler.runtime.state.persistence.dto.ProcessingTaskDto;
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Smoke3 {

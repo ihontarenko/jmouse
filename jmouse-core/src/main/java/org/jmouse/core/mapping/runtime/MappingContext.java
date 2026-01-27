@@ -3,7 +3,7 @@ package org.jmouse.core.mapping.runtime;
 import org.jmouse.core.Verify;
 import org.jmouse.core.bind.ObjectAccessorWrapper;
 import org.jmouse.core.convert.Conversion;
-import org.jmouse.core.mapping.bindings.MappingRulesRegistry;
+import org.jmouse.core.mapping.binding.MappingRulesRegistry;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.plan.PlanRegistry;
 
