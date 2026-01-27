@@ -15,15 +15,15 @@ public final class ObjectMapper implements Mapper {
     }
 
     @Override
-    public <T> T map(Object source, Class<T> targetType) {
+    public <T> T map(Object source, Class<T> target) {
         if (source == null) {
             return null;
         }
 
-        Verify.nonNull(targetType, "targetType");
+        Verify.nonNull(target, "target");
 
-        InferredType   target = InferredType.forClass(targetType);
-        MappingPlan<T> plan   = context.planRegistry().planFor(source, target, context);
+        InferredType   type = InferredType.forClass(target);
+        MappingPlan<T> plan = context.planRegistry().planFor(source, type, context);
 
         return plan.execute(source, context);
     }

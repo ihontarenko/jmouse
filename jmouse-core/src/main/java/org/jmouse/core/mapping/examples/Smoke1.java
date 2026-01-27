@@ -1,19 +1,26 @@
 package org.jmouse.core.mapping.examples;
 
 import org.jmouse.core.bind.BinderConversion;
-import org.jmouse.core.mapping.DefaultObjectMapper;
+import org.jmouse.core.bind.StandardAccessorWrapper;
+import org.jmouse.core.convert.StandardConversion;
 import org.jmouse.core.mapping.bindings.MappingRulesRegistry;
 import org.jmouse.core.mapping.bindings.TypeMappingBuilder;
-import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.config.MappingPolicy;
+import org.jmouse.core.mapping.plan.DefaultPlanRegistry;
+import org.jmouse.core.mapping.plan.bean.JavaBeanPlanContributor;
+import org.jmouse.core.mapping.runtime.Mapper;
+import org.jmouse.core.mapping.runtime.MappingContext;
+import org.jmouse.core.mapping.runtime.ObjectMapper;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Smoke1 {
 
     public static void main(String... arguments) {
-        var rules = MappingRulesRegistry.builder()
+        var registry = MappingRulesRegistry.builder()
                 .register(
                         new TypeMappingBuilder<>(Map.class, Smoke1.UserDTO.class)
                                 .bind("user", "username")
@@ -23,13 +30,21 @@ public class Smoke1 {
                 )
                 .build();
 
-        var config = MappingConfig.builder()
-                .policy(MappingPolicy.defaults())
-                .conversion(new BinderConversion())
-                .rules(rules)
-                .build();
+        AtomicReference<Mapper> reference = new AtomicReference<>();
 
-        var mapper = new DefaultObjectMapper(config);
+        MappingContext context = new MappingContext(
+                reference::get,
+                new DefaultPlanRegistry(List.of(
+                        new JavaBeanPlanContributor()
+                )),
+                new StandardAccessorWrapper(),
+                new BinderConversion(),
+                registry,
+                MappingPolicy.defaults()
+        );
+
+        ObjectMapper mapper = new ObjectMapper(context);
+        reference.set(mapper);
 
         Map<String, Object> source = Map.of(
                 "user", "john",
@@ -40,8 +55,22 @@ public class Smoke1 {
                 )
         );
 
-        UserDTO dto = mapper.map(source, UserDTO.class);
-        System.out.println(dto);
+        User user = mapper.map(source, User.class);
+        UserDTO userDTO = mapper.map(source, UserDTO.class);
+
+        System.out.println(userDTO);
+    }
+
+    static class User {
+        private String user;
+
+        public String getUser() {
+            return user;
+        }
+
+        public void setUser(String user) {
+            this.user = user;
+        }
     }
 
     record UserDTO(String user, String password, UserDetailsDTO details) {}

@@ -12,8 +12,6 @@ import org.jmouse.core.mapping.plan.support.AbstractMappingPlan;
 import org.jmouse.core.mapping.runtime.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
-import java.lang.reflect.Constructor;
-
 public final class JavaBeanPlan<T> extends AbstractMappingPlan<T> implements MappingPlan<T> {
 
     private final Class<T>            targetType;
@@ -47,6 +45,7 @@ public final class JavaBeanPlan<T> extends AbstractMappingPlan<T> implements Map
                     accessor,
                     context,
                     propertyName,
+                    context.mappingRules().find(source.getClass(), propertyType.getClassType()),
                     () -> safeGet(accessor, propertyName)
             );
 
@@ -87,9 +86,6 @@ public final class JavaBeanPlan<T> extends AbstractMappingPlan<T> implements Map
     private T instantiate() {
         try {
             return JavaBean.of(targetType).getFactory(TypedValue.of(targetType)).create();
-//            Constructor<T> ctor = targetType.getDeclaredConstructor();
-//            ctor.setAccessible(true);
-//            return ctor.newInstance();
         } catch (Exception ex) {
             throw new MappingException(
                     "bean_instantiation_failed",

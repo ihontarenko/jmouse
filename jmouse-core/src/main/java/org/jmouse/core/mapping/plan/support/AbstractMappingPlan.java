@@ -4,6 +4,7 @@ import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.mapping.bindings.FieldBinding;
 import org.jmouse.core.mapping.bindings.BindingType;
+import org.jmouse.core.mapping.bindings.MappingRulesRegistry;
 import org.jmouse.core.mapping.bindings.TypeMappingBindings;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.runtime.MappingContext;
@@ -29,10 +30,10 @@ public abstract class AbstractMappingPlan<T> {
             ObjectAccessor accessor,
             MappingContext context,
             String targetName,
+            TypeMappingBindings bindings,
             ValueSupplier fallback
     ) {
-        TypeMappingBindings mappingBindings = context.mappingBindings();
-        FieldBinding        binding         = (mappingBindings != null ? mappingBindings.find(targetName) : null);
+        FieldBinding binding = (bindings != null ? bindings.find(targetName) : null);
 
         if (binding == null) {
             return fallback.get();
@@ -69,7 +70,7 @@ public abstract class AbstractMappingPlan<T> {
             return convertIfNeeded(value, targetInfo.getClassType(), context.conversion());
         }
 
-        return context.mapper().map(value, targetType.getRawType());
+        return context.objectMapper().map(value, targetType.getRawType());
     }
 
     protected final Object safeNavigate(ObjectAccessor accessor, String path) {
