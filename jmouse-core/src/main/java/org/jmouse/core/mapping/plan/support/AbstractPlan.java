@@ -7,8 +7,8 @@ import org.jmouse.core.mapping.binding.PropertyMapping;
 import org.jmouse.core.mapping.binding.TypeMappingSpecification;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.plan.MappingPlan;
-import org.jmouse.core.mapping.runtime.Mapper;
-import org.jmouse.core.mapping.runtime.MappingContext;
+import org.jmouse.core.mapping.Mapper;
+import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +31,9 @@ import java.util.Objects;
  *
  * @param <T> target type produced by the mapping plan
  */
-public abstract class AbstractMappingPlan<T> implements MappingPlan<T> {
+public abstract class AbstractPlan<T> implements MappingPlan<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMappingPlan.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPlan.class);
 
     /**
      * Target type metadata of this plan.
@@ -46,7 +46,7 @@ public abstract class AbstractMappingPlan<T> implements MappingPlan<T> {
      * @param targetType inferred target type (never {@code null})
      * @throws NullPointerException if {@code targetType} is {@code null}
      */
-    protected AbstractMappingPlan(InferredType targetType) {
+    protected AbstractPlan(InferredType targetType) {
         this.targetType = Objects.requireNonNull(targetType, "targetType");
     }
 

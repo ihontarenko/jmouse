@@ -5,13 +5,13 @@ import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.config.NullHandlingPolicy;
 import org.jmouse.core.mapping.config.TypeMismatchPolicy;
 import org.jmouse.core.mapping.plan.MappingPlan;
-import org.jmouse.core.mapping.plan.support.AbstractMappingPlan;
-import org.jmouse.core.mapping.runtime.MappingContext;
+import org.jmouse.core.mapping.plan.support.AbstractPlan;
+import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.Map;
 
-public final class MapPlan extends AbstractMappingPlan<Map<Object, Object>> implements MappingPlan<Map<Object, Object>> {
+public final class MapPlan extends AbstractPlan<Map<Object, Object>> implements MappingPlan<Map<Object, Object>> {
 
     private final Class<?> rawTarget;
 

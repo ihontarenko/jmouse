@@ -2,7 +2,7 @@ package org.jmouse.core.mapping.plan;
 
 import org.jmouse.core.Verify;
 import org.jmouse.core.mapping.errors.MappingException;
-import org.jmouse.core.mapping.runtime.MappingContext;
+import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.*;

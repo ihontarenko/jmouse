@@ -1,4 +1,4 @@
-package org.jmouse.core.mapping.runtime;
+package org.jmouse.core.mapping;
 
 import org.jmouse.core.reflection.InferredType;
 

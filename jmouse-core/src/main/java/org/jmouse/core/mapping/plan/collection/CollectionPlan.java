@@ -1,15 +1,15 @@
 package org.jmouse.core.mapping.plan.collection;
 
 import org.jmouse.core.mapping.plan.MappingPlan;
-import org.jmouse.core.mapping.plan.support.AbstractMappingPlan;
-import org.jmouse.core.mapping.runtime.MappingContext;
+import org.jmouse.core.mapping.plan.support.AbstractPlan;
+import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.*;
 
-public final class CollectionPlan extends AbstractMappingPlan<Collection<Object>>
+public final class CollectionPlan extends AbstractPlan<Collection<Object>>
         implements MappingPlan<Collection<Object>> {
 
     private final Class<?> rawTarget;

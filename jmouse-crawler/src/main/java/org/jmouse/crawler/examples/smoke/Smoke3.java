@@ -2,7 +2,6 @@ package org.jmouse.crawler.examples.smoke;
 
 import org.jmouse.core.bind.*;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
-import org.jmouse.core.mapping.binding.TypeMappingBuilder;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.plan.MappingPlanRegistry;
 import org.jmouse.core.mapping.plan.array.ArrayPlanContributor;
@@ -11,16 +10,15 @@ import org.jmouse.core.mapping.plan.collection.CollectionPlanContributor;
 import org.jmouse.core.mapping.plan.map.MapPlanContributor;
 import org.jmouse.core.mapping.plan.record.RecordPlanContributor;
 import org.jmouse.core.mapping.plan.scalar.ScalarPlanContributor;
-import org.jmouse.core.mapping.runtime.Mapper;
-import org.jmouse.core.mapping.runtime.MappingContext;
-import org.jmouse.core.mapping.runtime.ObjectMapper;
+import org.jmouse.core.mapping.Mapper;
+import org.jmouse.core.mapping.MappingContext;
+import org.jmouse.core.mapping.ObjectMapper;
 import org.jmouse.core.trace.TraceContext;
 import org.jmouse.crawler.api.ProcessingTask;
 import org.jmouse.crawler.api.TaskId;
 import org.jmouse.crawler.api.TaskOrigin;
 import org.jmouse.crawler.examples.smoke.smoke2.VoronHint;
 import org.jmouse.crawler.runtime.state.persistence.dto.ProcessingTaskDto;
-import org.jmouse.crawler.runtime.state.persistence.dto.TaskOriginDto;
 
 import java.net.URI;
 import java.time.Instant;

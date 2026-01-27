@@ -1,6 +1,6 @@
 package org.jmouse.core.mapping.binding;
 
-import org.jmouse.core.mapping.runtime.MappingContext;
+import org.jmouse.core.mapping.MappingContext;
 
 @FunctionalInterface
 public interface ComputeFunction<S> {

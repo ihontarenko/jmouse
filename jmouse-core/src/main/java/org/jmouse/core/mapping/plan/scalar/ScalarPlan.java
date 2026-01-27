@@ -1,12 +1,12 @@
 package org.jmouse.core.mapping.plan.scalar;
 
 import org.jmouse.core.mapping.plan.MappingPlan;
-import org.jmouse.core.mapping.plan.support.AbstractMappingPlan;
-import org.jmouse.core.mapping.runtime.MappingContext;
+import org.jmouse.core.mapping.plan.support.AbstractPlan;
+import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.reflection.TypeInformation;
 
-public final class ScalarPlan<T> extends AbstractMappingPlan<T> implements MappingPlan<T> {
+public final class ScalarPlan<T> extends AbstractPlan<T> implements MappingPlan<T> {
 
     private final Class<T> rawTarget;
 

@@ -11,9 +11,9 @@ import org.jmouse.core.mapping.plan.collection.CollectionPlanContributor;
 import org.jmouse.core.mapping.plan.map.MapPlanContributor;
 import org.jmouse.core.mapping.plan.record.RecordPlanContributor;
 import org.jmouse.core.mapping.plan.scalar.ScalarPlanContributor;
-import org.jmouse.core.mapping.runtime.Mapper;
-import org.jmouse.core.mapping.runtime.MappingContext;
-import org.jmouse.core.mapping.runtime.ObjectMapper;
+import org.jmouse.core.mapping.Mapper;
+import org.jmouse.core.mapping.MappingContext;
+import org.jmouse.core.mapping.ObjectMapper;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.Date;

@@ -7,12 +7,11 @@ import org.jmouse.core.bind.descriptor.structured.DescriptorResolver;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.mapping.errors.MappingException;
-import org.jmouse.core.mapping.plan.MappingPlan;
-import org.jmouse.core.mapping.plan.support.AbstractMappingPlan;
-import org.jmouse.core.mapping.runtime.MappingContext;
+import org.jmouse.core.mapping.plan.support.AbstractObjectPlan;
+import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
-public final class JavaBeanPlan<T> extends AbstractMappingPlan<T> implements MappingPlan<T> {
+public final class JavaBeanPlan<T> extends AbstractObjectPlan<T> {
 
     private final Class<T>            targetType;
     private final ObjectDescriptor<T> descriptor;
@@ -29,13 +28,16 @@ public final class JavaBeanPlan<T> extends AbstractMappingPlan<T> implements Map
             return null;
         }
 
-        ObjectAccessor accessor = sourceAccessor(source, context);
-        T              target   = instantiate();
+        ObjectAccessor accessor   = sourceAccessor(source, context);
+        T              target     = instantiate();
+        Class<?>       sourceType = accessor.getClassType();
 
         for (PropertyDescriptor<T> property : descriptor.getProperties().values()) {
             if (!property.isWritable()) {
                 continue;
             }
+
+            Class<?> targetType = getTargetType(property);
 
             String       propertyName = property.getName();
             InferredType propertyType = property.getType().getJavaType();
@@ -44,15 +46,11 @@ public final class JavaBeanPlan<T> extends AbstractMappingPlan<T> implements Map
                     accessor,
                     context,
                     propertyName,
-                    context.mappingRegistry().find(source.getClass(), propertyType.getClassType()),
+                    context.mappingRegistry().find(sourceType, targetType),
                     () -> safeGet(accessor, propertyName)
             );
 
-            if (value == IgnoredValue.INSTANCE) {
-                continue;
-            }
-
-            if (value == null) {
+            if (value == IgnoredValue.INSTANCE || value == null) {
                 continue;
             }
 
@@ -93,4 +91,7 @@ public final class JavaBeanPlan<T> extends AbstractMappingPlan<T> implements Map
             );
         }
     }
+
+
+
 }

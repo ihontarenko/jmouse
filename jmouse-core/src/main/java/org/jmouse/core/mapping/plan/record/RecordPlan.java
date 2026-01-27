@@ -7,15 +7,15 @@ import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.plan.MappingPlan;
-import org.jmouse.core.mapping.plan.support.AbstractMappingPlan;
-import org.jmouse.core.mapping.runtime.MappingContext;
+import org.jmouse.core.mapping.plan.support.AbstractPlan;
+import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class RecordPlan<T> extends AbstractMappingPlan<T> implements MappingPlan<T> {
+public final class RecordPlan<T> extends AbstractPlan<T> implements MappingPlan<T> {
 
     private final Class<T>                    targetType;
     private final ObjectDescriptor<T>         descriptor;

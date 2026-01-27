@@ -2,7 +2,7 @@ package org.jmouse.core.mapping.plan.bean;
 
 import org.jmouse.core.mapping.plan.MappingPlan;
 import org.jmouse.core.mapping.plan.MappingPlanContributor;
-import org.jmouse.core.mapping.runtime.MappingContext;
+import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
 public final class JavaBeanPlanContributor implements MappingPlanContributor {

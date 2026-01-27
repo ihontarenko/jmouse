@@ -1,15 +1,15 @@
 package org.jmouse.core.mapping.plan.array;
 
 import org.jmouse.core.mapping.plan.MappingPlan;
-import org.jmouse.core.mapping.plan.support.AbstractMappingPlan;
-import org.jmouse.core.mapping.runtime.MappingContext;
+import org.jmouse.core.mapping.plan.support.AbstractPlan;
+import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ArrayPlan<T> extends AbstractMappingPlan<T> implements MappingPlan<T> {
+public final class ArrayPlan<T> extends AbstractPlan<T> implements MappingPlan<T> {
 
     private final Class<?> rawArrayType;
 
