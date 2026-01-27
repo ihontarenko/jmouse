@@ -4,6 +4,7 @@ import org.jmouse.core.Verify;
 import org.jmouse.core.bind.ObjectAccessorWrapper;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
+import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.plan.PlanRegistry;
 
@@ -13,7 +14,8 @@ public record MappingContext(
         ObjectAccessorWrapper wrapper,
         Conversion conversion,
         TypeMappingRegistry mappingRegistry,
-        MappingPolicy policy
+        MappingPolicy policy,
+        MappingConfig config
 ) {
 
     public MappingContext(
@@ -22,7 +24,8 @@ public record MappingContext(
             ObjectAccessorWrapper wrapper,
             Conversion conversion,
             TypeMappingRegistry mappingRegistry,
-            MappingPolicy policy
+            MappingPolicy policy,
+            MappingConfig config
     ) {
         this.mapperProvider = Verify.nonNull(mapperProvider, "mapperProvider");
         this.planRegistry = Verify.nonNull(planRegistry, "planRegistry");
@@ -30,6 +33,7 @@ public record MappingContext(
         this.conversion = Verify.nonNull(conversion, "conversion");
         this.mappingRegistry = Verify.nonNull(mappingRegistry, "mappingRegistry");
         this.policy = Verify.nonNull(policy, "policy");
+        this.config = Verify.nonNull(config, "config");
     }
 
     public Mapper mapper() {

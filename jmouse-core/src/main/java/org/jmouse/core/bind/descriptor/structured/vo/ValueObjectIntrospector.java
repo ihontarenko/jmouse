@@ -95,7 +95,7 @@ public class ValueObjectIntrospector<T>
     }
 
     public ValueObjectIntrospector<T> component(ValueObjectPropertyDescriptor<T> property) {
-        container.addProperty(property);
+        container.addComponent(property);
         return self();
     }
 

@@ -2,11 +2,12 @@ package org.jmouse.crawler.examples.smoke;
 
 import org.jmouse.core.bind.*;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
+import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.plan.MappingPlanRegistry;
 import org.jmouse.core.mapping.plan.array.ArrayPlanContributor;
 import org.jmouse.core.mapping.plan.bean.JavaBeanPlanContributor;
-import org.jmouse.core.mapping.plan.collection.CollectionPlanContributor;
+import org.jmouse.core.mapping.plan.collection.ListPlanContributor;
 import org.jmouse.core.mapping.plan.map.MapPlanContributor;
 import org.jmouse.core.mapping.plan.record.RecordPlanContributor;
 import org.jmouse.core.mapping.plan.scalar.ScalarPlanContributor;
@@ -22,7 +23,9 @@ import org.jmouse.crawler.runtime.state.persistence.dto.ProcessingTaskDto;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Smoke3 {
@@ -77,6 +80,12 @@ public class Smoke3 {
                 )
                 .build();
 
+        MappingConfig config = MappingConfig.builder()
+                .listFactory(LinkedList::new)
+                .setFactory(TreeSet::new) // якщо треба sorted
+                .maxCollectionSize(50_000)
+                .build();
+
         AtomicReference<Mapper> reference = new AtomicReference<>();
 
         MappingContext context = new MappingContext(
@@ -86,13 +95,14 @@ public class Smoke3 {
                         new RecordPlanContributor(),
                         new ScalarPlanContributor(),
                         new MapPlanContributor(),
-                        new CollectionPlanContributor(),
+                        new ListPlanContributor(),
                         new ArrayPlanContributor()
                 )),
                 new StandardAccessorWrapper(),
                 new BinderConversion(),
                 registry,
-                MappingPolicy.defaults()
+                MappingPolicy.defaults(),
+                config
         );
 
         ObjectMapper mapper = new ObjectMapper(context);

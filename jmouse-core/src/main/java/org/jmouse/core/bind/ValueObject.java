@@ -98,6 +98,13 @@ final public class ValueObject<T extends Record> extends Bean<T> {
         }));
     }
 
+    /**
+     * @return a canonical {@code Constructor} for this record
+     */
+    public Constructor<T> getCanonicalConstructor() {
+        return constructor;
+    }
+
     @Override
     public String toString() {
         return "ValueObject: %s; Properties: %d".formatted(type, getProperties().size());

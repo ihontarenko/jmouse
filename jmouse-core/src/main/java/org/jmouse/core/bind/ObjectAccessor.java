@@ -225,11 +225,14 @@ public interface ObjectAccessor extends TypeClassifier {
      */
     default Set<String> keySet() {
         Set<String> keys = new HashSet<>();
+
         if (isMap()) {
             keys = asMap().keySet().stream().map(Object::toString).collect(toUnmodifiableSet());
-        } else if (isList()) {
-            keys = IntStream.range(0, asList().size()).mapToObj("[%d]"::formatted).collect(toUnmodifiableSet());
+        } else if (isCollection() || isArray()) {
+            int size = isCollection() ? asCollection().size() : asArray().length;
+            keys = IntStream.range(0, size).mapToObj("[%d]"::formatted).collect(toUnmodifiableSet());
         }
+
         return keys;
     }
 
@@ -241,6 +244,13 @@ public interface ObjectAccessor extends TypeClassifier {
      */
     default Set<PropertyPath> nameSet() {
         return keySet().stream().map(PropertyPath::forPath).collect(toUnmodifiableSet());
+    }
+
+    /**
+     * Size of elements.
+     */
+    default int length() {
+        return keySet().size();
     }
 
     /**

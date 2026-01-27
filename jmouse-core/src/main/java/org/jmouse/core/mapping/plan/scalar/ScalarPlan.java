@@ -8,11 +8,8 @@ import org.jmouse.core.reflection.TypeInformation;
 
 public final class ScalarPlan<T> extends AbstractPlan<T> implements MappingPlan<T> {
 
-    private final Class<T> rawTarget;
-
     public ScalarPlan(InferredType targetType) {
         super(targetType);
-        this.rawTarget = targetType.getRawType();
     }
 
     @Override
@@ -21,16 +18,15 @@ public final class ScalarPlan<T> extends AbstractPlan<T> implements MappingPlan<
             return null;
         }
 
-        TypeInformation classifier = TypeInformation.forJavaType(targetType);
-
-        if (classifier.isScalar() || classifier.isEnum() || classifier.isClass()) {
+        if (targetType.isScalar() || targetType.isEnum() || targetType.isClass()) {
             @SuppressWarnings("unchecked")
-            T converted = (T) convertIfNeeded(source, rawTarget, context.conversion());
+            T converted = (T) convertIfNeeded(source, getTargetType().getClassType(), context.conversion());
             return converted;
         }
 
         @SuppressWarnings("unchecked")
         T casted = (T) source;
+
         return casted;
     }
 }

@@ -28,27 +28,19 @@ public final class JavaBeanPlan<T> extends AbstractObjectPlan<T> {
             return null;
         }
 
-        ObjectAccessor accessor   = sourceAccessor(source, context);
-        T              target     = instantiate();
+        ObjectAccessor accessor   = toObjectAccessor(source, context);
+        T              instance   = instantiate();
         Class<?>       sourceType = accessor.getClassType();
+        Class<?>       targetType = getTargetType().getClassType();
 
         for (PropertyDescriptor<T> property : descriptor.getProperties().values()) {
             if (!property.isWritable()) {
                 continue;
             }
 
-            Class<?> targetType = getTargetType(property);
-
             String       propertyName = property.getName();
             InferredType propertyType = property.getType().getJavaType();
-
-            Object value = applyValue(
-                    accessor,
-                    context,
-                    propertyName,
-                    context.mappingRegistry().find(sourceType, targetType),
-                    () -> safeGet(accessor, propertyName)
-            );
+            Object       value        = applyValue(accessor, context, sourceType, targetType, propertyName);
 
             if (value == IgnoredValue.INSTANCE || value == null) {
                 continue;
@@ -67,7 +59,7 @@ public final class JavaBeanPlan<T> extends AbstractObjectPlan<T> {
             }
 
             try {
-                property.getAccessor().writeValue(target, adapted);
+                property.getAccessor().writeValue(instance, adapted);
             } catch (Exception exception) {
                 throw toMappingException(
                         "bean_property_write_failed",
@@ -77,7 +69,7 @@ public final class JavaBeanPlan<T> extends AbstractObjectPlan<T> {
             }
         }
 
-        return target;
+        return instance;
     }
 
     private T instantiate() {
@@ -91,7 +83,5 @@ public final class JavaBeanPlan<T> extends AbstractObjectPlan<T> {
             );
         }
     }
-
-
 
 }

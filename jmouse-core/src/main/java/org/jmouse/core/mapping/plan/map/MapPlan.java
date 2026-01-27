@@ -1,6 +1,8 @@
 package org.jmouse.core.mapping.plan.map;
 
 import org.jmouse.core.MapFactory;
+import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.config.NullHandlingPolicy;
 import org.jmouse.core.mapping.config.TypeMismatchPolicy;
@@ -13,11 +15,8 @@ import java.util.Map;
 
 public final class MapPlan extends AbstractPlan<Map<Object, Object>> implements MappingPlan<Map<Object, Object>> {
 
-    private final Class<?> rawTarget;
-
     public MapPlan(InferredType targetType) {
         super(targetType);
-        this.rawTarget = targetType.getRawType();
     }
 
     @Override
@@ -32,11 +31,13 @@ public final class MapPlan extends AbstractPlan<Map<Object, Object>> implements 
 
         MappingPolicy policy = context.policy();
 
-        InferredType  mType  = targetType.toMap();
-        InferredType  kType  = mType.getFirst();
-        InferredType  vType  = mType.getLast();
+        InferredType mType = getTargetType().toMap();
+        InferredType kType = mType.getFirst();
+        InferredType vType = mType.getLast();
 
-        Map<Object, Object> target = instantiate();
+        Map<Object, Object> target = instantiate(context.config());
+
+        ObjectAccessor accessor = toObjectAccessor(mapSource, context);
 
         for (Map.Entry<?, ?> entry : mapSource.entrySet()) {
             Object key   = entry.getKey();
@@ -49,10 +50,12 @@ public final class MapPlan extends AbstractPlan<Map<Object, Object>> implements 
             try {
                 key = adaptValue(key, kType, context);
                 value = adaptValue(value, vType, context);
-            } catch (RuntimeException ex) {
+            } catch (RuntimeException exception) {
                 if (policy.typeMismatchPolicy() == TypeMismatchPolicy.FAIL) {
-                    throw toMappingException("map_entry_adapt_failed",
-                                             "Failed to adapt map entry key/value to target map types", ex);
+                    throw toMappingException(
+                            "map_entry_adapt_failed",
+                            "Failed to adapt map entry key/value to target map types", exception
+                    );
                 }
                 continue;
             }
@@ -67,7 +70,7 @@ public final class MapPlan extends AbstractPlan<Map<Object, Object>> implements 
         return target;
     }
 
-    private Map<Object, Object> instantiate() {
-        return MapFactory.createMap(rawTarget);
+    private Map<Object, Object> instantiate(MappingConfig config) {
+        return config.mapFactory().get();
     }
 }

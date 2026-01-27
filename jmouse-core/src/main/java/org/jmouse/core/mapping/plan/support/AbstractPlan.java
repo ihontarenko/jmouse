@@ -4,7 +4,6 @@ import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.mapping.binding.PropertyMapping;
-import org.jmouse.core.mapping.binding.TypeMappingSpecification;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.plan.MappingPlan;
 import org.jmouse.core.mapping.Mapper;
@@ -61,7 +60,7 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
      * @param context mapping context providing wrapper configuration
      * @return accessor for the given source
      */
-    protected final ObjectAccessor sourceAccessor(Object source, MappingContext context) {
+    protected final ObjectAccessor toObjectAccessor(Object source, MappingContext context) {
         return context.wrapper().wrap(source);
     }
 
@@ -81,21 +80,17 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
      *
      * @param accessor source accessor used for navigation and fallback reads
      * @param context mapping context providing runtime services
-     * @param targetName target property name to resolve
-     * @param bindings optional mapping rule; may be {@code null}
      * @param fallback fallback supplier when no binding exists
      * @return resolved value, {@code null}, or {@link IgnoredValue#INSTANCE} when ignored
      */
     protected final Object applyValue(
             ObjectAccessor accessor,
             MappingContext context,
-            String targetName,
-            TypeMappingSpecification bindings,
+            PropertyMapping mapping,
             ValueSupplier fallback
     ) {
         Object          source  = accessor.unwrap();
-        PropertyMapping binding = (bindings != null ? bindings.find(targetName) : null);
-        return switch (binding) {
+        return switch (mapping) {
             case PropertyMapping.Ignore ignore -> IgnoredValue.INSTANCE;
             case PropertyMapping.Constant constant -> constant.value();
             case PropertyMapping.Compute compute -> compute.function().compute(source, context);
@@ -131,7 +126,8 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
         Conversion conversion = context.conversion();
 
         if (targetType.isScalar() || targetType.isEnum() || targetType.isClass()) {
-            return convertIfNeeded(value, type, conversion);
+            return mapper.map(value, targetType);
+//            return convertIfNeeded(value, type, conversion);
         }
 
         if (conversion.hasConverter(value.getClass(), type)) {
@@ -232,6 +228,13 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
      */
     protected final MappingException toMappingException(String code, String message, Exception exception) {
         return new MappingException(code, message, exception);
+    }
+
+    /**
+     * Target type related to this mapping plan
+     */
+    public InferredType getTargetType() {
+        return targetType;
     }
 
     /**

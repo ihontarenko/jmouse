@@ -2,54 +2,31 @@ package org.jmouse.core.mapping.plan.record;
 
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.ValueObject;
-import org.jmouse.core.bind.descriptor.structured.DescriptorResolver;
-import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
+import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectDescriptor;
 import org.jmouse.core.mapping.errors.MappingException;
-import org.jmouse.core.mapping.plan.MappingPlan;
-import org.jmouse.core.mapping.plan.support.AbstractPlan;
 import org.jmouse.core.mapping.MappingContext;
+import org.jmouse.core.mapping.plan.support.AbstractObjectPlan;
 import org.jmouse.core.reflection.InferredType;
 
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
-
-public final class RecordPlan<T> extends AbstractPlan<T> implements MappingPlan<T> {
-
-    private final Class<T>                    targetType;
-    private final ObjectDescriptor<T>         descriptor;
-    private final Constructor<T>              canonicalCtor;
-    private final List<PropertyDescriptor<T>> components;
+public final class RecordPlan<T> extends AbstractObjectPlan<T> {
 
     private final ValueObject<? extends Record> valueObject;
 
     public RecordPlan(InferredType targetType) {
         super(targetType);
 
-
-
-        this.targetType = targetType.getRawType();
-        if (this.targetType == null || !this.targetType.isRecord()) {
+        if (getTargetType() == null || !getTargetType().isRecord()) {
             throw new MappingException(
                     "record_plan_target_not_record",
-                    "RecordPlan target must be a record, got: " + targetType,
-                    null
+                    "RecordPlan target must be a record, got: " + targetType
             );
         }
 
         @SuppressWarnings("unchecked")
-        Class<? extends Record> rt = (Class<? extends Record>) this.targetType;
+        Class<? extends Record> recordType = (Class<? extends Record>) this.targetType.getClassType();
 
-        this.valueObject = ValueObject.of(rt);
-
-        // твої дескриптори вже вміють record (ValueObjectDescriptor) — використовуємо
-        this.descriptor = (ObjectDescriptor<T>) DescriptorResolver.ofRecordType(rt);
-
-        this.components = new ArrayList<>(descriptor.getProperties().values());
-
-        this.canonicalCtor = resolveCanonicalConstructor();
-        this.canonicalCtor.setAccessible(true);
+        this.valueObject = ValueObject.of(recordType);
     }
 
     @Override
@@ -58,32 +35,26 @@ public final class RecordPlan<T> extends AbstractPlan<T> implements MappingPlan<
             return null;
         }
 
-        ObjectAccessor accessor = sourceAccessor(source, context);
+        ObjectAccessor     accessor   = toObjectAccessor(source, context);
+        Class<?>           sourceType = accessor.getClassType();
+        Class<?>           targetType = getTargetType().getClassType();
+        ValueObject.Values values     = valueObject.getRecordValues();
 
-        ValueObject.Values values = valueObject.getRecordValues();
+        @SuppressWarnings("unchecked")
+        ValueObjectDescriptor<T> descriptor = (ValueObjectDescriptor<T>) valueObject.getDescriptor();
 
-        Object[] args = new Object[components.size()];
-
-        for (int i = 0; i < components.size(); i++) {
-            PropertyDescriptor<T> property = components.get(i);
-            String                name     = property.getName();
-            InferredType          type     = property.getType().getJavaType();
-
-            Object value = applyValue(
-                    accessor,
-                    context,
-                    name,
-                    context.mappingRegistry().find(source.getClass(), targetType),
-                    () -> safeGet(accessor, name)
-            );
+        for (PropertyDescriptor<T> property : descriptor.getComponents().values()) {
+            String       name       = property.getName();
+            InferredType type       = property.getType().getJavaType();
+            Object       value      = applyValue(accessor, context, sourceType, targetType, name);
 
             if (value == IgnoredValue.INSTANCE || value == null) {
-                args[i] = null;
+                values.put(name, null);
                 continue;
             }
 
             try {
-                args[i] = adaptValue(value, type, context);
+                values.put(name, adaptValue(value, type, context));
             } catch (Exception exception) {
                 throw toMappingException(
                         "record_component_adapt_failed",
@@ -93,31 +64,15 @@ public final class RecordPlan<T> extends AbstractPlan<T> implements MappingPlan<
             }
         }
 
-        valueObject.getInstance(values);
-
         try {
-            return canonicalCtor.newInstance(args);
-        } catch (Exception ex) {
+            @SuppressWarnings("unchecked")
+            T instance = (T) valueObject.getInstance(values).create();
+            return instance;
+        } catch (Exception exception) {
             throw new MappingException(
                     "record_instantiation_failed",
                     "Failed to instantiate record: " + targetType.getName(),
-                    ex
-            );
-        }
-    }
-
-    private Constructor<T> resolveCanonicalConstructor() {
-        try {
-            Class<?>[] signature = components.stream()
-                    .map(p -> p.getType().getJavaType().getRawType())
-                    .toArray(Class<?>[]::new);
-
-            return targetType.getDeclaredConstructor(signature);
-        } catch (Exception ex) {
-            throw new MappingException(
-                    "record_canonical_ctor_not_found",
-                    "Canonical constructor not found for record: " + targetType.getName(),
-                    ex
+                    exception
             );
         }
     }

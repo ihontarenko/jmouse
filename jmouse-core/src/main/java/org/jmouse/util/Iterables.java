@@ -60,7 +60,7 @@ public class Iterables {
         int size = 0;
 
         if (iterable != null) {
-            for (Object object : iterable) {
+            for (Object ignored : iterable) {
                 size++;
             }
         }
