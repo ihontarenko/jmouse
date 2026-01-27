@@ -5,8 +5,7 @@ public final class MappingException extends RuntimeException {
     private final String code;
 
     public MappingException(String code, String message) {
-        super(message);
-        this.code = code;
+        this(code, message, null);
     }
 
     public MappingException(String code, String message, Throwable cause) {

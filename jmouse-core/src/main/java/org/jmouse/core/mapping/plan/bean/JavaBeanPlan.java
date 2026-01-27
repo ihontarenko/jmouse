@@ -40,7 +40,7 @@ public final class JavaBeanPlan<T> extends AbstractMappingPlan<T> implements Map
             String       propertyName = property.getName();
             InferredType propertyType = property.getType().getJavaType();
 
-            Object value = applyBinding(
+            Object value = applyBindingIfAny(
                     source,
                     accessor,
                     context,
@@ -86,11 +86,11 @@ public final class JavaBeanPlan<T> extends AbstractMappingPlan<T> implements Map
     private T instantiate() {
         try {
             return JavaBean.of(targetType).getFactory(TypedValue.of(targetType)).create();
-        } catch (Exception ex) {
+        } catch (Exception exception) {
             throw new MappingException(
                     "bean_instantiation_failed",
                     "Failed to instantiate target bean: " + targetType.getName(),
-                    ex
+                    exception
             );
         }
     }

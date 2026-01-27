@@ -2,18 +2,21 @@ package org.jmouse.core.mapping.plan.support;
 
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.convert.Conversion;
-import org.jmouse.core.mapping.bindings.FieldBinding;
 import org.jmouse.core.mapping.bindings.BindingType;
-import org.jmouse.core.mapping.bindings.MappingRulesRegistry;
+import org.jmouse.core.mapping.bindings.FieldBinding;
 import org.jmouse.core.mapping.bindings.TypeMappingBindings;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.runtime.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.reflection.TypeInformation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
 public abstract class AbstractMappingPlan<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMappingPlan.class);
 
     protected final InferredType targetType;
 
@@ -25,7 +28,7 @@ public abstract class AbstractMappingPlan<T> {
         return context.wrapper().wrap(source);
     }
 
-    protected final Object applyBinding(
+    protected final Object applyBindingIfAny(
             Object source,
             ObjectAccessor accessor,
             MappingContext context,
@@ -40,6 +43,8 @@ public abstract class AbstractMappingPlan<T> {
         }
 
         BindingType type = binding.type();
+
+        LOGGER.debug("Applying binding-type: {} for field: {}", type, targetName);
 
         return switch (type) {
             case IGNORE -> IgnoredValue.INSTANCE;
@@ -66,6 +71,8 @@ public abstract class AbstractMappingPlan<T> {
 
         TypeInformation targetInfo = TypeInformation.forJavaType(targetType);
 
+        // is convertible
+
         if (targetInfo.isScalar() || targetInfo.isEnum() || targetInfo.isClass()) {
             return convertIfNeeded(value, targetInfo.getClassType(), context.conversion());
         }
@@ -75,17 +82,24 @@ public abstract class AbstractMappingPlan<T> {
 
     protected final Object safeNavigate(ObjectAccessor accessor, String path) {
         try {
-            ObjectAccessor value = accessor.navigate(path);
-            return value.unwrap();
-        } catch (RuntimeException ignored) {
+            if (accessor.navigate(path) instanceof ObjectAccessor objectAccessor) {
+                return objectAccessor.unwrap();
+            }
+            return null;
+        } catch (RuntimeException exception) {
+            LOGGER.error("Unable to navigate value for path '{}'.", path, exception);
             return null;
         }
     }
 
     protected final Object safeGet(ObjectAccessor accessor, String name) {
         try {
-            return accessor.get(name);
+            if (accessor.get(name) instanceof ObjectAccessor objectAccessor) {
+                return objectAccessor.unwrap();
+            }
+            return null;
         } catch (RuntimeException exception) {
+            LOGGER.error("Unable to locate value for field '{}'.", name, exception);
             return null;
         }
     }
@@ -102,8 +116,8 @@ public abstract class AbstractMappingPlan<T> {
         return conversion.convert(value, targetType);
     }
 
-    protected final MappingException fail(String code, String message, Exception ex) {
-        return new MappingException(code, message, ex);
+    protected final MappingException fail(String code, String message, Exception exception) {
+        return new MappingException(code, message, exception);
     }
 
     @FunctionalInterface

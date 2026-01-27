@@ -2,12 +2,16 @@ package org.jmouse.core.mapping.examples;
 
 import org.jmouse.core.bind.BinderConversion;
 import org.jmouse.core.bind.StandardAccessorWrapper;
-import org.jmouse.core.convert.StandardConversion;
 import org.jmouse.core.mapping.bindings.MappingRulesRegistry;
 import org.jmouse.core.mapping.bindings.TypeMappingBuilder;
 import org.jmouse.core.mapping.config.MappingPolicy;
-import org.jmouse.core.mapping.plan.DefaultPlanRegistry;
+import org.jmouse.core.mapping.plan.MappingPlanRegistry;
+import org.jmouse.core.mapping.plan.array.ArrayPlanContributor;
 import org.jmouse.core.mapping.plan.bean.JavaBeanPlanContributor;
+import org.jmouse.core.mapping.plan.collection.CollectionPlanContributor;
+import org.jmouse.core.mapping.plan.map.MapPlanContributor;
+import org.jmouse.core.mapping.plan.record.RecordPlanContributor;
+import org.jmouse.core.mapping.plan.scalar.ScalarPlanContributor;
 import org.jmouse.core.mapping.runtime.Mapper;
 import org.jmouse.core.mapping.runtime.MappingContext;
 import org.jmouse.core.mapping.runtime.ObjectMapper;
@@ -34,8 +38,13 @@ public class Smoke1 {
 
         MappingContext context = new MappingContext(
                 reference::get,
-                new DefaultPlanRegistry(List.of(
-                        new JavaBeanPlanContributor()
+                new MappingPlanRegistry(List.of(
+                        new JavaBeanPlanContributor(),
+                        new RecordPlanContributor(),
+                        new ScalarPlanContributor(),
+                        new MapPlanContributor(),
+                        new CollectionPlanContributor(),
+                        new ArrayPlanContributor()
                 )),
                 new StandardAccessorWrapper(),
                 new BinderConversion(),

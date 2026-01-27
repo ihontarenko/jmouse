@@ -8,12 +8,12 @@ import org.jmouse.core.reflection.InferredType;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class DefaultPlanRegistry implements PlanRegistry {
+public final class MappingPlanRegistry implements PlanRegistry {
 
     private final List<MappingPlanContributor> contributors;
     private final Map<PlanKey, MappingPlan<?>> cache = new ConcurrentHashMap<>();
 
-    public DefaultPlanRegistry(List<MappingPlanContributor> contributors) {
+    public MappingPlanRegistry(List<MappingPlanContributor> contributors) {
         this.contributors = List.copyOf(Verify.nonNull(contributors, "contributors"));
     }
 
