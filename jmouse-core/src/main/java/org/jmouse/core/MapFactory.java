@@ -12,7 +12,7 @@ public final class MapFactory {
     @SuppressWarnings({"unchecked"})
     public static <K, V> Map<K, V> createMap(Class<?> mapType, int initialCapacity) {
         Verify.nonNull(mapType, "mapType");
-        Verify.state(initialCapacity > 0, "initialCapacity must be >= 0");
+        Verify.state(initialCapacity >= 0, "initialCapacity must be >= 0");
 
         if (mapType == Map.class) {
             return new LinkedHashMap<>(capacity(initialCapacity));

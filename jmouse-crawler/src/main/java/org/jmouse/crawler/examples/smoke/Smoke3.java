@@ -1,7 +1,7 @@
 package org.jmouse.crawler.examples.smoke;
 
 import org.jmouse.core.bind.*;
-import org.jmouse.core.mapping.binding.TypeMappingRules;
+import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.binding.TypeMappingBuilder;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.plan.MappingPlanRegistry;
@@ -20,6 +20,7 @@ import org.jmouse.crawler.api.TaskId;
 import org.jmouse.crawler.api.TaskOrigin;
 import org.jmouse.crawler.examples.smoke.smoke2.VoronHint;
 import org.jmouse.crawler.runtime.state.persistence.dto.ProcessingTaskDto;
+import org.jmouse.crawler.runtime.state.persistence.dto.TaskOriginDto;
 
 import java.net.URI;
 import java.time.Instant;
@@ -44,20 +45,37 @@ public class Smoke3 {
 
         Mapper mapper = mapper();
 
-        mapper.map(processingTask, ProcessingTaskDto.class);
+        ProcessingTaskDto processingTaskDto = mapper.map(processingTask, ProcessingTaskDto.class);
+        ProcessingTask processingTaskRemapped = mapper.map(processingTaskDto, ProcessingTask.class);
+
+        processingTaskRemapped.equals(processingTask); // true
 
         System.out.println("Finish");
     }
 
     public static Mapper mapper() {
-        var registry = TypeMappingRules.builder()
-                .register(
-                        new TypeMappingBuilder<>(ProcessingTask.class, ProcessingTaskDto.class)
-                                .bind("user", "username")
-                                .ignore("password")
-                                .constant("password", "masked")
-                                .bind("id", source -> source.id().value())
-                                .build()
+        var registry = TypeMappingRegistry.builder()
+                .mapping(ProcessingTask.class, ProcessingTaskDto.class, m -> m
+                        .bind("user", "username")
+                        .ignore("password")
+                        .constant("password", "masked")
+                        .bind("id", source -> source.id().value())
+                ).mapping(ProcessingTaskDto.class, ProcessingTask.class, m -> m
+                        .bind("user", "username")
+                        .ignore("password")
+                        .constant("password", "masked")
+                        .bind("id", s -> new TaskId(s.id()))
+                        .compute("origin", (source, context) -> {
+                            String kind = source.origin().kind();
+
+                            if (kind.equals("retry")) {
+                                return TaskOrigin.retry(source.origin().reason());
+                            }
+
+                            return TaskOrigin.retry("default-reason");
+                        })
+                        .compute("hint", (source, context)
+                                -> VoronHint.valueOf(source.hint().toUpperCase().trim()))
                 )
                 .build();
 
@@ -83,29 +101,6 @@ public class Smoke3 {
         reference.set(mapper);
 
         return mapper;
-    }
-
-    static class TaskOriginKindVirtualProperty implements VirtualProperty<TaskOrigin> {
-
-        @Override
-        public Class<TaskOrigin> getType() {
-            return TaskOrigin.class;
-        }
-
-        @Override
-        public String getName() {
-            return "kind";
-        }
-
-        @Override
-        public boolean isReadable() {
-            return true;
-        }
-
-        @Override
-        public Object readValue(TaskOrigin object) {
-            return VirtualProperty.super.readValue(object);
-        }
     }
 
 }

@@ -182,7 +182,7 @@ public interface Streamable<T> extends Iterable<T>, Supplier<Stream<T>> {
     }
 
     /**
-     * 🗺️ Collects to map with key toString mapper and identity values.
+     * 🗺️ Collects to map with key toString mapperProvider and identity values.
      */
     default Map<String, T> toStringMap() {
         return toMap(Object::toString, Function.identity());

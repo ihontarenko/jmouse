@@ -44,7 +44,7 @@ public final class JavaBeanPlan<T> extends AbstractMappingPlan<T> implements Map
                     accessor,
                     context,
                     propertyName,
-                    context.mappingRules().find(source.getClass(), propertyType.getClassType()),
+                    context.mappingRegistry().find(source.getClass(), propertyType.getClassType()),
                     () -> safeGet(accessor, propertyName)
             );
 

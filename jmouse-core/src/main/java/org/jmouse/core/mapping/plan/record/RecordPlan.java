@@ -73,7 +73,7 @@ public final class RecordPlan<T> extends AbstractMappingPlan<T> implements Mappi
                     accessor,
                     context,
                     name,
-                    context.mappingRules().find(source.getClass(), targetType),
+                    context.mappingRegistry().find(source.getClass(), targetType),
                     () -> safeGet(accessor, name)
             );
 

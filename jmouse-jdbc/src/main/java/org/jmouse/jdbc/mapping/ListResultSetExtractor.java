@@ -45,14 +45,14 @@ import java.util.List;
 public final class ListResultSetExtractor<T> implements ResultSetExtractor<List<T>> {
 
     /**
-     * Delegate row mapper used for each result row.
+     * Delegate row mapperProvider used for each result row.
      */
     private final RowMapper<T> mapper;
 
     /**
      * Creates a new {@code ListResultSetExtractor}.
      *
-     * @param mapper row mapper used to convert each {@link ResultSet} row
+     * @param mapper row mapperProvider used to convert each {@link ResultSet} row
      */
     public ListResultSetExtractor(RowMapper<T> mapper) {
         this.mapper = mapper;

@@ -22,19 +22,19 @@ import java.util.Set;
  *     <li>📘 XML — via {@link XmlMapper}</li>
  *     <li>📒 YAML — via {@link YAMLMapper}</li>
  * </ul>
- * Each registration associates its mapper with one or more {@link MediaType}s,
+ * Each registration associates its mapperProvider with one or more {@link MediaType}s,
  * allowing {@link JacksonObjectMapperResolver} to dynamically select the appropriate
- * mapper based on the content type.
+ * mapperProvider based on the content type.
  * </p>
  */
 @BeanFactories
 public class JacksonObjectMapperConfiguration {
 
     /**
-     * 📘 XML mapper registration supporting {@code application/xml},
+     * 📘 XML mapperProvider registration supporting {@code application/xml},
      * {@code text/xml}, and {@code application/atom+xml}.
      *
-     * @return XML mapper registration bean
+     * @return XML mapperProvider registration bean
      */
     @Bean
     public JacksonObjectMapperRegistration xmlRegistration() {
@@ -44,9 +44,9 @@ public class JacksonObjectMapperConfiguration {
     }
 
     /**
-     * 📄 JSON mapper registration for {@code application/json}.
+     * 📄 JSON mapperProvider registration for {@code application/json}.
      *
-     * @return JSON mapper registration bean
+     * @return JSON mapperProvider registration bean
      */
     @Bean
     public JacksonObjectMapperRegistration jsonRegistration() {
@@ -56,9 +56,9 @@ public class JacksonObjectMapperConfiguration {
     }
 
     /**
-     * 📒 YAML mapper registration for {@code application/yaml}.
+     * 📒 YAML mapperProvider registration for {@code application/yaml}.
      *
-     * @return YAML mapper registration bean
+     * @return YAML mapperProvider registration bean
      */
     @Bean
     public JacksonObjectMapperRegistration yamlRegistration() {
@@ -75,8 +75,8 @@ public class JacksonObjectMapperConfiguration {
      * instances based on {@link MediaType}.
      * </p>
      *
-     * @param registrationBeans aggregated mapper registration beans
-     * @return unified Jackson object mapper resolver
+     * @param registrationBeans aggregated mapperProvider registration beans
+     * @return unified Jackson object mapperProvider resolver
      */
     @Bean
     public JacksonObjectMapperResolver jacksonObjectMapperResolver(

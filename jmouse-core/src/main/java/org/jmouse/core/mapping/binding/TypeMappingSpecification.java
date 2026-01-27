@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Immutable mapping rule for a specific {@code (sourceType -> targetType)} pair. 🧩
  *
- * <p>{@code TypeMappingRule} holds a set of {@link PropertyBinding} instructions keyed by
+ * <p>{@code TypeMappingRule} holds a set of {@link PropertyMapping} instructions keyed by
  * target property name. The mapping engine uses these bindings to decide how each target
  * property should be populated (reference, constant, compute, provider, ignore, ...).</p>
  *
@@ -32,14 +32,14 @@ import java.util.Map;
  *   <li>{@link #find(String)} returns {@code null} when no binding exists for the target name.</li>
  * </ul>
  *
- * @see PropertyBinding
- * @see TypeMappingRules
+ * @see PropertyMapping
+ * @see TypeMappingRegistry
  */
-public final class TypeMappingRule {
+public final class TypeMappingSpecification {
 
     private final Class<?>                     sourceType;
     private final Class<?>                     targetType;
-    private final Map<String, PropertyBinding> bindings;
+    private final Map<String, PropertyMapping> mappings;
 
     /**
      * Create a mapping rule for a specific type pair.
@@ -61,14 +61,14 @@ public final class TypeMappingRule {
      *
      * @param sourceType source type this rule applies to
      * @param targetType target type this rule applies to
-     * @param bindings bindings keyed by target property name
+     * @param mappings bindings keyed by target property name
      * @throws IllegalArgumentException if {@code sourceType} or {@code targetType} is {@code null}
      * @throws NullPointerException if {@code bindings} is {@code null} (caller responsibility)
      */
-    public TypeMappingRule(Class<?> sourceType, Class<?> targetType, Map<String, PropertyBinding> bindings) {
+    public TypeMappingSpecification(Class<?> sourceType, Class<?> targetType, Map<String, PropertyMapping> mappings) {
         this.sourceType = Verify.nonNull(sourceType, "sourceType");
         this.targetType = Verify.nonNull(targetType, "targetType");
-        this.bindings = Collections.unmodifiableMap(new LinkedHashMap<>(bindings));
+        this.mappings = Collections.unmodifiableMap(new LinkedHashMap<>(mappings));
     }
 
     /**
@@ -90,7 +90,7 @@ public final class TypeMappingRule {
     }
 
     /**
-     * Find the {@link PropertyBinding} for the given target property name.
+     * Find the {@link PropertyMapping} for the given target property name.
      *
      * <h3>Example</h3>
      * <pre>{@code
@@ -103,8 +103,8 @@ public final class TypeMappingRule {
      * @param targetName target property name
      * @return binding for {@code targetName}, or {@code null} if not present
      */
-    public PropertyBinding find(String targetName) {
-        return bindings.get(targetName);
+    public PropertyMapping find(String targetName) {
+        return mappings.get(targetName);
     }
 
 }

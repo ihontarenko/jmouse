@@ -1,9 +1,10 @@
 package org.jmouse.core.mapping.plan.support;
 
 import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.core.convert.Conversion;
-import org.jmouse.core.mapping.binding.PropertyBinding;
-import org.jmouse.core.mapping.binding.TypeMappingRule;
+import org.jmouse.core.mapping.binding.PropertyMapping;
+import org.jmouse.core.mapping.binding.TypeMappingSpecification;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.plan.MappingPlan;
 import org.jmouse.core.mapping.runtime.Mapper;
@@ -66,16 +67,16 @@ public abstract class AbstractMappingPlan<T> implements MappingPlan<T> {
     }
 
     /**
-     * Apply a {@link PropertyBinding} for {@code targetName} if present in {@code bindings},
+     * Apply a {@link PropertyMapping} for {@code targetName} if present in {@code bindings},
      * otherwise use {@code fallback}.
      *
      * <p>Resolution rules:</p>
      * <ul>
-     *   <li>{@link PropertyBinding.Ignore} returns {@link IgnoredValue#INSTANCE}</li>
-     *   <li>{@link PropertyBinding.Constant} returns the constant value</li>
-     *   <li>{@link PropertyBinding.Compute} evaluates {@code function.compute(source, context)}</li>
-     *   <li>{@link PropertyBinding.Provider} evaluates {@code provider.provide(source)}</li>
-     *   <li>{@link PropertyBinding.Reference} resolves value via {@link #safeNavigate(ObjectAccessor, String)}</li>
+     *   <li>{@link PropertyMapping.Ignore} returns {@link IgnoredValue#INSTANCE}</li>
+     *   <li>{@link PropertyMapping.Constant} returns the constant value</li>
+     *   <li>{@link PropertyMapping.Compute} evaluates {@code function.compute(source, context)}</li>
+     *   <li>{@link PropertyMapping.Provider} evaluates {@code provider.provide(source)}</li>
+     *   <li>{@link PropertyMapping.Reference} resolves value via {@link #safeNavigate(ObjectAccessor, String)}</li>
      *   <li>No binding returns {@code fallback.get()}</li>
      * </ul>
      *
@@ -90,17 +91,17 @@ public abstract class AbstractMappingPlan<T> implements MappingPlan<T> {
             ObjectAccessor accessor,
             MappingContext context,
             String targetName,
-            TypeMappingRule bindings,
+            TypeMappingSpecification bindings,
             ValueSupplier fallback
     ) {
         Object          source  = accessor.unwrap();
-        PropertyBinding binding = (bindings != null ? bindings.find(targetName) : null);
+        PropertyMapping binding = (bindings != null ? bindings.find(targetName) : null);
         return switch (binding) {
-            case PropertyBinding.Ignore ignore -> IgnoredValue.INSTANCE;
-            case PropertyBinding.Constant constant -> constant.value();
-            case PropertyBinding.Compute compute -> compute.function().compute(source, context);
-            case PropertyBinding.Provider provider -> provider.provider().provide(source);
-            case PropertyBinding.Reference reference -> safeNavigate(accessor, reference.sourceReference());
+            case PropertyMapping.Ignore ignore -> IgnoredValue.INSTANCE;
+            case PropertyMapping.Constant constant -> constant.value();
+            case PropertyMapping.Compute compute -> compute.function().compute(source, context);
+            case PropertyMapping.Provider provider -> provider.provider().provide(source);
+            case PropertyMapping.Reference reference -> safeNavigate(accessor, reference.sourceReference());
             case null -> fallback.get();
         };
     }
@@ -126,19 +127,23 @@ public abstract class AbstractMappingPlan<T> implements MappingPlan<T> {
             return null;
         }
 
-        TypeInformation targetInfo = TypeInformation.forJavaType(targetType);
-        Mapper          mapper     = context.objectMapper();
-        Conversion      conversion = context.conversion();
+        Mapper     mapper     = context.mapper();
+        Class<?>   type       = targetType.getClassType();
+        Conversion conversion = context.conversion();
 
-        if (targetInfo.isScalar() || targetInfo.isEnum() || targetInfo.isClass()) {
-            return convertIfNeeded(value, targetInfo.getClassType(), conversion);
+        if (targetType.isScalar() || targetType.isEnum() || targetType.isClass()) {
+            return convertIfNeeded(value, type, conversion);
         }
 
-        if (conversion.hasConverter(value.getClass(), targetType.getClassType())) {
-            return convertIfNeeded(value, targetInfo.getClassType(), conversion);
+        if (conversion.hasConverter(value.getClass(), type)) {
+            return convertIfNeeded(value, type, conversion);
         }
 
-        return mapper.map(value, targetType.getRawType());
+        if (type.isInstance(value)) {
+            return value;
+        }
+
+        return mapper.map(value, targetType);
     }
 
     /**
@@ -152,7 +157,13 @@ public abstract class AbstractMappingPlan<T> implements MappingPlan<T> {
      */
     protected final Object safeNavigate(ObjectAccessor accessor, String path) {
         try {
-            if (accessor.navigate(path) instanceof ObjectAccessor objectAccessor) {
+            PropertyPath propertyPath = PropertyPath.forPath(path);
+
+            if (propertyPath.isSimple()) {
+                return safeGet(accessor, path);
+            }
+
+            if (accessor.navigate(propertyPath) instanceof ObjectAccessor objectAccessor) {
                 return objectAccessor.unwrap();
             }
             return null;
@@ -224,7 +235,7 @@ public abstract class AbstractMappingPlan<T> implements MappingPlan<T> {
     }
 
     /**
-     * Lazy fallback supplier used when no explicit {@link org.jmouse.core.mapping.binding.PropertyBinding}
+     * Lazy fallback supplier used when no explicit {@link PropertyMapping}
      * exists for a target property.
      */
     @FunctionalInterface

@@ -40,8 +40,13 @@ public class ValueObjectDescriptor<T> extends AbstractDescriptor<T, ValueObjectD
         return getType().getClassType();
     }
 
+    public Map<String, PropertyDescriptor<T>> getComponents() {
+        return container.getComponents();
+    }
+
     @Override
     public String toString() {
         return "[VO]: " + container.getType().getJavaType();
     }
+
 }

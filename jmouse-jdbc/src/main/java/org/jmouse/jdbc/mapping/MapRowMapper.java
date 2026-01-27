@@ -17,7 +17,7 @@ import java.util.Map;
  * </ul>
  *
  * <p>
- * This mapper is particularly useful for:
+ * This mapperProvider is particularly useful for:
  * <ul>
  *     <li>ad-hoc queries</li>
  *     <li>dynamic projections</li>

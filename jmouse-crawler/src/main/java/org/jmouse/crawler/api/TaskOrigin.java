@@ -1,12 +1,18 @@
 package org.jmouse.crawler.api;
 
+import org.jmouse.core.bind.descriptor.DescriptorProperty;
+
 public sealed interface TaskOrigin
         permits TaskOrigin.Seed, TaskOrigin.Discovered, TaskOrigin.Retry, TaskOrigin.Restored {
 
+    @DescriptorProperty("kind")
     String kind();
 
     record Seed(String publisher) implements TaskOrigin {
-        @Override public String kind() { return "seed"; }
+        @Override
+        public String kind() {
+            return "seed";
+        }
     }
 
     record Discovered(

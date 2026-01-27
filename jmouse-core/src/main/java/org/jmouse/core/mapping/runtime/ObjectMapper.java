@@ -20,17 +20,15 @@ public final class ObjectMapper implements Mapper {
     }
 
     @Override
-    public <T> T map(Object source, Class<T> target) {
+    public <T> T map(Object source, InferredType type) {
         if (source == null) {
             return null;
         }
 
-        Verify.nonNull(target, "target");
+        Verify.nonNull(type, "type");
 
         try {
-            InferredType   type = InferredType.forClass(target);
             MappingPlan<T> plan = context.planRegistry().planFor(source, type, context);
-
             return plan.execute(source, context);
         } catch (MappingException mappingException) {
             LOGGER.error("[{}]: {}", mappingException.code(), mappingException.getMessage());

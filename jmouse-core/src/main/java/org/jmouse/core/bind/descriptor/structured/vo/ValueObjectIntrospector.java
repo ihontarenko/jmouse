@@ -1,6 +1,7 @@
 package org.jmouse.core.bind.descriptor.structured.vo;
 
 import org.jmouse.core.bind.descriptor.*;
+import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.Streamable;
 
@@ -57,13 +58,43 @@ public class ValueObjectIntrospector<T>
                 introspector.getterMethod(method);
             }
 
-            property(introspector.toDescriptor());
+            ValueObjectPropertyDescriptor<T> propertyDescriptor = introspector.toDescriptor();
+
+            property(propertyDescriptor);
+            component(propertyDescriptor);
+        }
+
+        ClassTypeDescriptor descriptor = container.getType();
+
+        for (Map.Entry<String, MethodDescriptor> entry : descriptor.getMethods().entrySet()) {
+            MethodDescriptor      method   = entry.getValue();
+            PropertyDescriptor<T> previous = container.getProperty(method.getName());
+
+            if (previous instanceof ValueObjectPropertyDescriptor<?> ignored) {
+                continue;
+            }
+
+            AnnotationDescriptor annotationDescriptor = method.findAnnotation(DescriptorProperty.class);
+
+            if (annotationDescriptor != null) {
+                ValueObjectDescriptor<T>           parentDescriptor     = toDescriptor();
+                ValueObjectPropertyIntrospector<T> propertyIntrospector = new ValueObjectPropertyIntrospector<>(null);
+                propertyIntrospector.owner(parentDescriptor).name(
+                        String.valueOf(annotationDescriptor.getAttribute("value"))
+                ).type(method.getReturnType()).getterMethod(method);
+                container.addProperty(propertyIntrospector.toDescriptor());
+            }
         }
 
         return self();
     }
 
     public ValueObjectIntrospector<T> property(ValueObjectPropertyDescriptor<T> property) {
+        container.addProperty(property);
+        return self();
+    }
+
+    public ValueObjectIntrospector<T> component(ValueObjectPropertyDescriptor<T> property) {
         container.addProperty(property);
         return self();
     }

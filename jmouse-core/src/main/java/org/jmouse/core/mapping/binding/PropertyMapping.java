@@ -45,12 +45,12 @@ import org.jmouse.core.mapping.errors.MappingException;
  * @see ValueProvider
  * @see ComputeFunction
  */
-public sealed interface PropertyBinding permits
-        PropertyBinding.Ignore,
-        PropertyBinding.Constant,
-        PropertyBinding.Reference,
-        PropertyBinding.Provider,
-        PropertyBinding.Compute {
+public sealed interface PropertyMapping permits
+        PropertyMapping.Ignore,
+        PropertyMapping.Constant,
+        PropertyMapping.Reference,
+        PropertyMapping.Provider,
+        PropertyMapping.Compute {
 
     /**
      * Target property name this binding is responsible for.
@@ -62,7 +62,7 @@ public sealed interface PropertyBinding permits
     /**
      * Binding that marks a target property as ignored.
      *
-     * <p>Ignored properties are not written by the mapper.
+     * <p>Ignored properties are not written by the mapperProvider.
      * Typically used to skip sensitive or derived fields.</p>
      *
      * <h3>Example</h3>
@@ -72,7 +72,7 @@ public sealed interface PropertyBinding permits
      *
      * @param targetName target property name
      */
-    record Ignore(String targetName) implements PropertyBinding {
+    record Ignore(String targetName) implements PropertyMapping {
         public Ignore {
             Verify.nonNull(targetName, "targetName");
         }
@@ -90,7 +90,7 @@ public sealed interface PropertyBinding permits
      * @param targetName target property name
      * @param value constant value (may be {@code null})
      */
-    record Constant(String targetName, Object value) implements PropertyBinding {
+    record Constant(String targetName, Object value) implements PropertyMapping {
         public Constant {
             Verify.nonNull(targetName, "targetName");
         }
@@ -117,7 +117,7 @@ public sealed interface PropertyBinding permits
      * @param targetName target property name
      * @param sourceReference source reference/path used by the accessor
      */
-    record Reference(String targetName, String sourceReference) implements PropertyBinding {
+    record Reference(String targetName, String sourceReference) implements PropertyMapping {
         public Reference {
             Verify.nonNull(targetName, "targetName");
             Verify.nonNull(sourceReference, "sourceReference");
@@ -145,7 +145,7 @@ public sealed interface PropertyBinding permits
      * @param targetName target property name
      * @param provider provider function (never {@code null})
      */
-    record Provider(String targetName, ValueProvider<Object> provider) implements PropertyBinding {
+    record Provider(String targetName, ValueProvider<Object> provider) implements PropertyMapping {
         public Provider {
             Verify.nonNull(targetName, "targetName");
             Verify.nonNull(provider, "provider");
@@ -220,7 +220,7 @@ public sealed interface PropertyBinding permits
      * @param targetName target property name
      * @param function compute function (never {@code null})
      */
-    record Compute(String targetName, ComputeFunction<Object> function) implements PropertyBinding {
+    record Compute(String targetName, ComputeFunction<Object> function) implements PropertyMapping {
         public Compute {
             Verify.nonNull(targetName, "targetName");
             Verify.nonNull(function, "function");

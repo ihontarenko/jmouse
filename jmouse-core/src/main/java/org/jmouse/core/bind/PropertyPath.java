@@ -29,13 +29,19 @@ import java.util.StringJoiner;
  */
 final public class PropertyPath {
 
-    /** An empty PropertyPath instance. */
+    /**
+     * An empty PropertyPath instance.
+     */
     public static final Entries EMPTY = new Entries(0, new int[0], new int[0], new int[0], "");
 
-    /** Cached paths. */
+    /**
+     * Cached paths.
+     */
     public static final Map<String, PropertyPath> CACHE = new HashMap<>();
 
-    /** The separator used in property paths (dot notation). */
+    /**
+     * The separator used in property paths (dot notation).
+     */
     public static final char SEPARATOR = '.';
 
     private Entries entries;
@@ -223,6 +229,13 @@ final public class PropertyPath {
      */
     public String path() {
         return entries.toString();
+    }
+
+    /**
+     * @return true if simple of false if not
+     */
+    public boolean isSimple() {
+        return entries().size == 1;
     }
 
     @Override

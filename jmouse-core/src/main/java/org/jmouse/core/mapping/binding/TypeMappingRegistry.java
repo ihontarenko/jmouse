@@ -1,12 +1,13 @@
 package org.jmouse.core.mapping.binding;
 
+import org.jmouse.core.Customizer;
 import org.jmouse.core.Verify;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Registry of {@link TypeMappingRule} definitions used by the mapping engine to resolve
+ * Registry of {@link TypeMappingSpecification} definitions used by the mapping engine to resolve
  * per-(sourceType,targetType) mapping configuration. 🧭
  *
  * <p>{@code TypeMappingRules} is an immutable container built via {@link Builder}.
@@ -44,15 +45,15 @@ import java.util.List;
  * <p><strong>Important:</strong> when multiple rules satisfy steps (2) or (3),
  * the first registered rule wins (stable iteration order).</p>
  *
- * @see TypeMappingRule
+ * @see TypeMappingSpecification
  * @see Builder
  */
-public final class TypeMappingRules {
+public final class TypeMappingRegistry {
 
-    private final List<TypeMappingRule> mappings;
+    private final List<TypeMappingSpecification> specifications;
 
-    private TypeMappingRules(List<TypeMappingRule> mappings) {
-        this.mappings = List.copyOf(mappings);
+    private TypeMappingRegistry(List<TypeMappingSpecification> specifications) {
+        this.specifications = List.copyOf(specifications);
     }
 
     /**
@@ -65,8 +66,8 @@ public final class TypeMappingRules {
      *
      * @return empty {@code TypeMappingRules}
      */
-    public static TypeMappingRules empty() {
-        return new TypeMappingRules(List.of());
+    public static TypeMappingRegistry empty() {
+        return new TypeMappingRegistry(List.of());
     }
 
     /**
@@ -86,7 +87,7 @@ public final class TypeMappingRules {
     }
 
     /**
-     * Resolve a {@link TypeMappingRule} for the given source and target types.
+     * Resolve a {@link TypeMappingSpecification} for the given source and target types.
      *
      * <p>The lookup uses the following order:</p>
      * <ol>
@@ -110,26 +111,26 @@ public final class TypeMappingRules {
      * @return resolved rule, or {@code null} when none matches
      * @throws IllegalArgumentException if {@code sourceType} or {@code targetType} is {@code null}
      */
-    public TypeMappingRule find(Class<?> sourceType, Class<?> targetType) {
+    public TypeMappingSpecification find(Class<?> sourceType, Class<?> targetType) {
         Verify.nonNull(sourceType, "sourceType");
         Verify.nonNull(targetType, "targetType");
 
         // 1) exact
-        for (TypeMappingRule bindings : mappings) {
+        for (TypeMappingSpecification bindings : specifications) {
             if (bindings.sourceType() == sourceType && bindings.targetType() == targetType) {
                 return bindings;
             }
         }
 
         // 2) assignable (source supertype)
-        for (TypeMappingRule bindings : mappings) {
+        for (TypeMappingSpecification bindings : specifications) {
             if (bindings.targetType() == targetType && bindings.sourceType().isAssignableFrom(sourceType)) {
                 return bindings;
             }
         }
 
         // 3) wildcard source = Object.class
-        for (TypeMappingRule bindings : mappings) {
+        for (TypeMappingSpecification bindings : specifications) {
             if (bindings.targetType() == targetType && bindings.sourceType() == Object.class) {
                 return bindings;
             }
@@ -139,19 +140,19 @@ public final class TypeMappingRules {
     }
 
     /**
-     * Builder for {@link TypeMappingRules}. 🧱
+     * Builder for {@link TypeMappingRegistry}. 🧱
      *
      * <p>Registration order matters for non-exact matches: the first compatible rule wins.</p>
      */
     public static final class Builder {
 
-        private final List<TypeMappingRule> collection = new ArrayList<>();
+        private final List<TypeMappingSpecification> collection = new ArrayList<>();
 
         /**
          * Create a fluent {@link TypeMappingBuilder} for the given type pair.
          *
          * <p><strong>Note:</strong> this method only creates the builder. To actually register the rule,
-         * build it and pass to {@link #register(TypeMappingRule)}.</p>
+         * build it and pass to {@link #register(TypeMappingSpecification)}.</p>
          *
          * <h3>Example</h3>
          * <pre>{@code
@@ -175,8 +176,19 @@ public final class TypeMappingRules {
             return new TypeMappingBuilder<>(sourceType, targetType);
         }
 
+        public <S, T> Builder mapping(
+                Class<S> sourceType,
+                Class<T> targetType,
+                Customizer<TypeMappingBuilder<S, T>> customizer
+        ) {
+            Verify.nonNull(customizer, "customizer");
+            TypeMappingBuilder<S, T> builder = new TypeMappingBuilder<>(sourceType, targetType);
+            customizer.customize(builder);
+            return register(builder.build());
+        }
+
         /**
-         * Register a pre-built {@link TypeMappingRule}.
+         * Register a pre-built {@link TypeMappingSpecification}.
          *
          * <h3>Example</h3>
          * <pre>{@code
@@ -187,18 +199,26 @@ public final class TypeMappingRules {
          * @return this builder
          * @throws IllegalArgumentException if {@code bindings} is {@code null}
          */
-        public Builder register(TypeMappingRule bindings) {
+        public Builder register(TypeMappingSpecification bindings) {
             collection.add(Verify.nonNull(bindings, "bindings"));
             return this;
         }
 
+        public Builder registerAll(TypeMappingSpecification... rules) {
+            Verify.nonNull(rules, "rules");
+            for (TypeMappingSpecification rule : rules) {
+                register(rule);
+            }
+            return this;
+        }
+
         /**
-         * Build an immutable {@link TypeMappingRules} instance.
+         * Build an immutable {@link TypeMappingRegistry} instance.
          *
          * @return immutable rules registry
          */
-        public TypeMappingRules build() {
-            return new TypeMappingRules(collection);
+        public TypeMappingRegistry build() {
+            return new TypeMappingRegistry(collection);
         }
 
     }

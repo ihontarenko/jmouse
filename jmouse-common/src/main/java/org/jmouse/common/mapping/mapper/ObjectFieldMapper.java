@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A mapper that converts an structured to a {@link Map} of its field names and values.
+ * A mapperProvider that converts an structured to a {@link Map} of its field names and values.
  * <p>
  * This class uses reflection to retrieve private fields and map their values. It also supports reverse mapping
  * from a {@link Map} to an structured.

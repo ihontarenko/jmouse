@@ -91,6 +91,7 @@ public class JavaBeanIntrospector<T>
      * @param method the method descriptor to analyze
      * @return this introspector instance for method chaining
      */
+    @SuppressWarnings("unchecked")
     public JavaBeanIntrospector<T> property(MethodDescriptor method) {
         String                          name         = method.getPropertyName();
         JavaBeanPropertyIntrospector<T> introspector = new JavaBeanPropertyIntrospector<>(null);

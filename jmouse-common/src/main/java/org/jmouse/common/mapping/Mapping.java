@@ -27,27 +27,27 @@ public interface Mapping {
     <R> R map(Object source);
 
     /**
-     * Retrieves a mapper for the specified source structured.
+     * Retrieves a mapperProvider for the specified source structured.
      *
      * @param preferredType the source structured
      * @return the appropriate Mapper instance
-     * @throws MappingException if no suitable mapper is found
+     * @throws MappingException if no suitable mapperProvider is found
      */
     Set<Mapper<Object, Object>> mappers(Class<?> preferredType);
 
     /**
-     * Retrieves a mapper for the specified source structured.
+     * Retrieves a mapperProvider for the specified source structured.
      *
      * @param object the source structured
      * @param <S> the source type
      * @param <R> the target type
      * @return the appropriate Mapper instance
-     * @throws MappingException if no suitable mapper is found
+     * @throws MappingException if no suitable mapperProvider is found
      */
     <S, R> Mapper<S, R> mapper(S object);
 
     /**
-     * Registers a new mapper to handle specific structured mappings.
+     * Registers a new mapperProvider to handle specific structured mappings.
      *
      * @param mapper the Mapper to register
      */
@@ -62,11 +62,11 @@ public interface Mapping {
         private final Map<Class<?>, Set<Mapper<Object, Object>>> mappers = new HashMap<>();
 
         /**
-         * Retrieves a mapper for the specified source structured.
+         * Retrieves a mapperProvider for the specified source structured.
          *
          * @param source the source structured
          * @return the appropriate Mapper instance
-         * @throws MappingException if no suitable mapper is found
+         * @throws MappingException if no suitable mapperProvider is found
          */
         @Override
         public <S, R> Mapper<S, R> mapper(S source) {
@@ -75,7 +75,7 @@ public interface Mapping {
             for (Mapper<Object, Object> mapper : mappers(expectedType)) {
                 if (mapper.supports(source)) {
 
-                    LOGGER.info("Acceptable mapper '{}' for type '{}'.",
+                    LOGGER.info("Acceptable mapperProvider '{}' for type '{}'.",
                             getShortName(mapper), expectedType.getName());
 
                     return (Mapper<S, R>) mapper;
@@ -83,15 +83,15 @@ public interface Mapping {
             }
 
             throw new MappingException(
-                    "No applicable mapper was found for type '%s'".formatted(expectedType.getCanonicalName()));
+                    "No applicable mapperProvider was found for type '%s'".formatted(expectedType.getCanonicalName()));
         }
 
         /**
-         * Retrieves a mapper for the specified source structured.
+         * Retrieves a mapperProvider for the specified source structured.
          *
          * @param preferredType the source structured
          * @return the appropriate Mapper instance
-         * @throws MappingException if no suitable mapper is found
+         * @throws MappingException if no suitable mapperProvider is found
          */
         @Override
         public Set<Mapper<Object, Object>> mappers(Class<?> preferredType) {
@@ -99,14 +99,14 @@ public interface Mapping {
 
             if (candidates == null) {
                 throw new MappingException(
-                        "No mapper candidates was found passed source '%s'".formatted(getShortName(preferredType)));
+                        "No mapperProvider candidates was found passed source '%s'".formatted(getShortName(preferredType)));
             }
 
             return candidates;
         }
 
         /**
-         * Maps an structured to a target type by using the appropriate mapper.
+         * Maps an structured to a target type by using the appropriate mapperProvider.
          *
          * @param source the source structured to map
          * @param <R> the target type
@@ -118,21 +118,21 @@ public interface Mapping {
         }
 
         /**
-         * Registers a new mapper by determining its preferred type.
+         * Registers a new mapperProvider by determining its preferred type.
          *
          * @param mapper the Mapper to register
-         * @throws MappingException if the mapper type cannot be determined
+         * @throws MappingException if the mapperProvider type cannot be determined
          */
         @Override
         public void register(Mapper<?, ?> mapper) {
             Class<?> preferredType = resolvePreferredMappersType(mapper.getClass());
 
-//            JavaType javaType      = JavaType.forInstance(mapper);
+//            JavaType javaType      = JavaType.forInstance(mapperProvider);
 //            Class<?> preferredType = javaType.locate(Mapper.class).getFirst().getRawType();
 
             if (preferredType == null) {
                 throw new MappingException(
-                        "Please generalize mapper '%s' to resolve acceptable type".formatted(getShortName(mapper)));
+                        "Please generalize mapperProvider '%s' to resolve acceptable type".formatted(getShortName(mapper)));
             }
 
             LOGGER.info("Mapper '{}' assigned for type '{}'.", mapper.getClass().getName(), preferredType.getName());
@@ -142,9 +142,9 @@ public interface Mapping {
         }
 
         /**
-         * Resolves the preferred type for the specified mapper class.
+         * Resolves the preferred type for the specified mapperProvider class.
          *
-         * @param type the mapper class
+         * @param type the mapperProvider class
          * @return the preferred type, or null if not found
          */
         private Class<?> resolvePreferredMappersType(Class<?> type) {
@@ -160,7 +160,7 @@ public interface Mapping {
         }
 
         /**
-         * Resolves the expected type of the source structured for mapper lookup.
+         * Resolves the expected type of the source structured for mapperProvider lookup.
          *
          * @param source the source structured
          * @return the resolved type

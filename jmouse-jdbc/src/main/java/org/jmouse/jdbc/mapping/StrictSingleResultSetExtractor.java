@@ -45,7 +45,7 @@ import org.jmouse.jdbc.exception.NonUniqueResultException;
 public final class StrictSingleResultSetExtractor<T> implements ResultSetExtractor<Optional<T>> {
 
     /**
-     * Delegate mapper used to map the single expected row.
+     * Delegate mapperProvider used to map the single expected row.
      */
     private final RowMapper<T> mapper;
 
@@ -57,7 +57,7 @@ public final class StrictSingleResultSetExtractor<T> implements ResultSetExtract
     /**
      * Creates a new {@code StrictSingleResultSetExtractor}.
      *
-     * @param mapper         row mapper for the single result
+     * @param mapper         row mapperProvider for the single result
      * @param sqlForMessage  SQL string included in exception messages
      */
     public StrictSingleResultSetExtractor(RowMapper<T> mapper, String sqlForMessage) {

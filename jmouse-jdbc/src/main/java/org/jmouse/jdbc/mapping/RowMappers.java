@@ -45,7 +45,7 @@ public final class RowMappers {
      * from the given column index.
      *
      * @param index JDBC column index (1-based)
-     * @return string column row mapper
+     * @return string column row mapperProvider
      */
     public static RowMapper<String> stringColumn(int index) {
         return new ColumnRowMapper<>(index, ResultSet::getString);
@@ -58,7 +58,7 @@ public final class RowMappers {
      * SQL {@code NULL} values are mapped to {@code null}.
      *
      * @param index JDBC column index (1-based)
-     * @return long column row mapper
+     * @return long column row mapperProvider
      */
     public static RowMapper<Long> longColumn(int index) {
         return new ColumnRowMapper<>(index, (resultSet, i)
@@ -72,7 +72,7 @@ public final class RowMappers {
      * SQL {@code NULL} values are mapped to {@code null}.
      *
      * @param index JDBC column index (1-based)
-     * @return integer column row mapper
+     * @return integer column row mapperProvider
      */
     public static RowMapper<Integer> integerColumn(int index) {
         return new ColumnRowMapper<>(index, (resultSet, i)
@@ -86,7 +86,7 @@ public final class RowMappers {
      * SQL {@code NULL} values are mapped to {@code null}.
      *
      * @param index JDBC column index (1-based)
-     * @return boolean column row mapper
+     * @return boolean column row mapperProvider
      */
     public static RowMapper<Boolean> booleanColumn(int index) {
         return new ColumnRowMapper<>(index, (resultSet, i)

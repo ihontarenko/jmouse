@@ -12,13 +12,19 @@ import java.util.Set;
  */
 public final class Bind {
 
-    /** A bindable instance for {@code Map<String, String>}. */
+    /**
+     * A bindable instance for {@code Map<String, String>}.
+     */
     public static final TypedValue<Map<String, String>> STRING_MAP = TypedValue.ofMap(String.class, String.class);
 
-    /** A bindable instance for {@code Set<String>}. */
+    /**
+     * A bindable instance for {@code Set<String>}.
+     */
     public static final TypedValue<Set<String>> STRING_SET = TypedValue.ofSet(String.class);
 
-    /** A bindable instance for {@code List<String>}. */
+    /**
+     * A bindable instance for {@code List<String>}.
+     */
     public static final TypedValue<List<String>> STRING_LIST = TypedValue.ofList(String.class);
 
     private final Binder binder;

@@ -11,7 +11,7 @@ package org.jmouse.jdbc.connection.datasource;
  * <pre>{@code
  * DataSourceKeyHolder.use("read-replica");
  * try {
- *     jdbc.query("select * from users", mapper);
+ *     jdbc.query("select * from users", mapperProvider);
  * } finally {
  *     DataSourceKeyHolder.clear();
  * }

@@ -40,7 +40,7 @@ final public class MappingFactory {
                     Object mapper = instantiate(findFirstConstructor(mapperClass));
                     mapping.register((Mapper<?, ?>) mapper);
                 } catch (ReflectionException reflectionException) {
-                    LOGGER.error("Failed to create mapper instance [{}]", reflectionException.getMessage());
+                    LOGGER.error("Failed to create mapperProvider instance [{}]", reflectionException.getMessage());
                 }
             }
         });

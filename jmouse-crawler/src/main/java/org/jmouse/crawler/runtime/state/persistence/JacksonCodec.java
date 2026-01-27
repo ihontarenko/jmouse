@@ -9,7 +9,7 @@ public final class JacksonCodec implements Codec {
     private final ObjectMapper mapper;
 
     public JacksonCodec(ObjectMapper mapper) {
-        this.mapper = Verify.nonNull(mapper, "mapper");
+        this.mapper = Verify.nonNull(mapper, "mapperProvider");
     }
 
     @Override

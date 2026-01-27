@@ -66,7 +66,7 @@ public class SimpleTemplate implements SimpleOperations {
      * @param sql        SQL query to execute
      * @param binder     parameter binder
      * @param configurer statement configuration
-     * @param mapper     row mapper
+     * @param mapper     row mapperProvider
      * @param <T>        mapped element type
      * @return optional mapped result
      * @throws SQLException if JDBC access fails or more than one row is returned
@@ -92,7 +92,7 @@ public class SimpleTemplate implements SimpleOperations {
      * @param sql        SQL query to execute
      * @param binder     parameter binder
      * @param configurer statement configuration
-     * @param mapper     row mapper
+     * @param mapper     row mapperProvider
      * @param <T>        mapped element type
      * @return mapped result
      * @throws SQLException if JDBC access fails or result size is not exactly one
@@ -114,7 +114,7 @@ public class SimpleTemplate implements SimpleOperations {
      * @param sql        SQL query to execute
      * @param binder     parameter binder
      * @param configurer statement configuration
-     * @param mapper     row mapper
+     * @param mapper     row mapperProvider
      * @param <T>        mapped element type
      * @return list of mapped results (possibly empty)
      * @throws SQLException if JDBC access fails

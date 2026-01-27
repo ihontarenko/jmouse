@@ -18,11 +18,11 @@ import java.sql.ResultSet;
  *
  * <h3>Typical usage</h3>
  * <pre>{@code
- * BeanRowMapper<User> mapper = BeanRowMapper.of(User.class);
+ * BeanRowMapper<User> mapperProvider = BeanRowMapper.of(User.class);
  *
  * List<User> users = jdbc.query(
  *     "select id, name, active from users",
- *     mapper
+ *     mapperProvider
  * );
  * }</pre>
  *
@@ -34,7 +34,7 @@ import java.sql.ResultSet;
  * </ul>
  *
  * <p>
- * ⚠️ This mapper is stateful: it reuses a single {@link Binder} instance and swaps its
+ * ⚠️ This mapperProvider is stateful: it reuses a single {@link Binder} instance and swaps its
  * {@link ObjectAccessor} per row. Do not share the same instance across concurrent threads
  * unless {@link Binder} is explicitly thread-safe.
  *
@@ -69,7 +69,7 @@ public final class BeanRowMapper<T> implements RowMapper<T> {
      *
      * @param type target bean type
      * @param <T>  target type
-     * @return mapper instance
+     * @return mapperProvider instance
      */
     public static <T> BeanRowMapper<T> of(Class<T> type) {
         return new BeanRowMapper<>(type);

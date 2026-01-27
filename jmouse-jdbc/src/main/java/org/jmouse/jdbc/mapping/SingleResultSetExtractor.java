@@ -44,14 +44,14 @@ import java.sql.SQLException;
 public final class SingleResultSetExtractor<T> implements ResultSetExtractor<T> {
 
     /**
-     * Delegate mapper used to map the first row.
+     * Delegate mapperProvider used to map the first row.
      */
     private final RowMapper<T> mapper;
 
     /**
      * Creates a new {@code SingleResultSetExtractor}.
      *
-     * @param mapper row mapper for the first result row
+     * @param mapper row mapperProvider for the first result row
      */
     public SingleResultSetExtractor(RowMapper<T> mapper) {
         this.mapper = mapper;

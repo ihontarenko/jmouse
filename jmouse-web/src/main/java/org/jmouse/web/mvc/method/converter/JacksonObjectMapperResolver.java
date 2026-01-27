@@ -15,7 +15,7 @@ import java.util.List;
  *
  * ⚙️ Typical usage:
  * <pre>{@code
- * ObjectMapper mapper = resolver.resolveObjectMapper(MediaType.APPLICATION_JSON);
+ * ObjectMapper mapperProvider = resolver.resolveObjectMapper(MediaType.APPLICATION_JSON);
  * }</pre>
  *
  * @param mapperRegistrations list of registered Jackson mappers with their media type predicates
@@ -23,7 +23,7 @@ import java.util.List;
 public record JacksonObjectMapperResolver(List<JacksonObjectMapperRegistration> mapperRegistrations) {
 
     /**
-     * 🔍 Finds a mapper registration applicable for the given {@link MediaType}.
+     * 🔍 Finds a mapperProvider registration applicable for the given {@link MediaType}.
      * If multiple registrations match, the last one in the list takes precedence.
      *
      * @param mediaType the target media type to match
@@ -44,7 +44,7 @@ public record JacksonObjectMapperResolver(List<JacksonObjectMapperRegistration> 
     /**
      * 🧩 Resolves the {@link ObjectMapper} suitable for the specified media type.
      *
-     * @param mediaType the content type for which to obtain a mapper
+     * @param mediaType the content type for which to obtain a mapperProvider
      * @return the resolved {@link ObjectMapper} instance
      * @throws NullPointerException if no registration matches the given media type
      */

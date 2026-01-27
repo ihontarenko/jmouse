@@ -1,5 +1,13 @@
 package org.jmouse.core.mapping.runtime;
 
+import org.jmouse.core.reflection.InferredType;
+
 public interface Mapper {
-    <T> T map(Object source, Class<T> targetType);
+
+    default <T> T map(Object source, Class<T> targetType) {
+        return map(source, InferredType.forType(targetType));
+    }
+
+    <T> T map(Object source, InferredType type);
+
 }

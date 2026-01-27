@@ -19,7 +19,7 @@ import java.util.Optional;
  * <ul>
  *     <li>Expose only a few <b>wide</b> (fully-configurable) abstract methods</li>
  *     <li>Provide ergonomic default overloads for common cases</li>
- *     <li>Keep the API declarative and mapper-oriented</li>
+ *     <li>Keep the API declarative and mapperProvider-oriented</li>
  *     <li>Allow optional execution hooks via {@link StatementHandler} 📎</li>
  * </ul>
  *
@@ -64,7 +64,7 @@ public interface SimpleOperations {
      * @param binder     parameter binder (may be {@link StatementBinder#noop()})
      * @param configurer statement configuration (timeouts, fetch size, etc.)
      * @param handler    statement lifecycle hook (may be {@link StatementHandler#noop()})
-     * @param mapper     row mapper
+     * @param mapper     row mapperProvider
      * @param <T>        mapped element type
      * @return optional mapped result, empty if no rows were returned
      * @throws SQLException if JDBC access fails
@@ -132,7 +132,7 @@ public interface SimpleOperations {
      * @param binder     parameter binder
      * @param configurer statement configuration
      * @param handler    statement lifecycle hook
-     * @param mapper     row mapper
+     * @param mapper     row mapperProvider
      * @param <T>        mapped element type
      * @return mapped result
      * @throws SQLException if JDBC access fails
@@ -198,7 +198,7 @@ public interface SimpleOperations {
      * @param binder     parameter binder
      * @param configurer statement configuration
      * @param handler    statement lifecycle hook
-     * @param mapper     row mapper
+     * @param mapper     row mapperProvider
      * @param <T>        mapped element type
      * @return list of mapped results (possibly empty)
      * @throws SQLException if JDBC access fails

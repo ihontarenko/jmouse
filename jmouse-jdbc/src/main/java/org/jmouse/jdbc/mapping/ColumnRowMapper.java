@@ -4,7 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * {@link RowMapper} decorator that delegates mapping to another mapper
+ * {@link RowMapper} decorator that delegates mapping to another mapperProvider
  * while forcing a specific column index.
  * <p>
  * {@code ColumnRowMapper} adapts an existing {@link RowMapper} so that it
@@ -15,7 +15,7 @@ import java.sql.SQLException;
  * This is useful when:
  * <ul>
  *     <li>mapping scalar results (single-column queries)</li>
- *     <li>reusing an existing mapper that expects a column index</li>
+ *     <li>reusing an existing mapperProvider that expects a column index</li>
  *     <li>bridging APIs where row index and column index semantics differ</li>
  * </ul>
  *
@@ -48,7 +48,7 @@ public final class ColumnRowMapper<T> implements RowMapper<T> {
     private final int columnIndex;
 
     /**
-     * Delegate row mapper.
+     * Delegate row mapperProvider.
      */
     private final RowMapper<T> rowMapper;
 
@@ -56,7 +56,7 @@ public final class ColumnRowMapper<T> implements RowMapper<T> {
      * Creates a new {@code ColumnRowMapper}.
      *
      * @param columnIndex JDBC column index (1-based)
-     * @param rowMapper   executor mapper that will receive the column index
+     * @param rowMapper   executor mapperProvider that will receive the column index
      */
     public ColumnRowMapper(int columnIndex, RowMapper<T> rowMapper) {
         this.columnIndex = columnIndex;

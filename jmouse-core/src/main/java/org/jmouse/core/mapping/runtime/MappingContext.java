@@ -3,35 +3,37 @@ package org.jmouse.core.mapping.runtime;
 import org.jmouse.core.Verify;
 import org.jmouse.core.bind.ObjectAccessorWrapper;
 import org.jmouse.core.convert.Conversion;
-import org.jmouse.core.mapping.binding.TypeMappingRules;
+import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.plan.PlanRegistry;
 
 public record MappingContext(
-        MapperProvider mapper,
+        MapperProvider mapperProvider,
         PlanRegistry planRegistry,
         ObjectAccessorWrapper wrapper,
         Conversion conversion,
-        TypeMappingRules mappingRules,
+        TypeMappingRegistry mappingRegistry,
         MappingPolicy policy
 ) {
+
     public MappingContext(
-            MapperProvider mapper,
+            MapperProvider mapperProvider,
             PlanRegistry planRegistry,
             ObjectAccessorWrapper wrapper,
             Conversion conversion,
-            TypeMappingRules mappingRules,
+            TypeMappingRegistry mappingRegistry,
             MappingPolicy policy
     ) {
-        this.mapper = Verify.nonNull(mapper, "mapper");
+        this.mapperProvider = Verify.nonNull(mapperProvider, "mapperProvider");
         this.planRegistry = Verify.nonNull(planRegistry, "planRegistry");
         this.wrapper = Verify.nonNull(wrapper, "accessorWrapper");
         this.conversion = Verify.nonNull(conversion, "conversion");
-        this.mappingRules = Verify.nonNull(mappingRules, "mappingRules");
+        this.mappingRegistry = Verify.nonNull(mappingRegistry, "mappingRegistry");
         this.policy = Verify.nonNull(policy, "policy");
     }
 
-    public Mapper objectMapper() {
-        return mapper.get();
+    public Mapper mapper() {
+        return mapperProvider.get();
     }
+
 }

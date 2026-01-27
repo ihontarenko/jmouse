@@ -23,12 +23,12 @@ import java.sql.SQLException;
  *
  * <h3>Typical usage</h3>
  * <pre>{@code
- * RowMapper<User> mapper = (rs, i) ->
+ * RowMapper<User> mapperProvider = (rs, i) ->
  *     new User(rs.getLong("id"), rs.getString("name"));
  *
  * List<User> users = jdbc.query(
  *     "select id, name from users",
- *     mapper
+ *     mapperProvider
  * );
  * }</pre>
  *

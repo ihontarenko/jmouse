@@ -12,7 +12,7 @@ import java.util.Optional;
  * without changing the underlying mapping logic.
  *
  * <p>
- * This mapper is especially useful when:
+ * This mapperProvider is especially useful when:
  * <ul>
  *     <li>the queried column or projection may be {@code NULL}</li>
  *     <li>you want to express optionality explicitly in the API</li>
@@ -21,18 +21,18 @@ import java.util.Optional;
  *
  * <h3>Example</h3>
  * <pre>{@code
- * RowMapper<Optional<String>> mapper =
+ * RowMapper<Optional<String>> mapperProvider =
  *     new OptionalRowMapper<>((rs, i) -> rs.getString("nickname"));
  *
  * Optional<String> nickname = jdbc.queryOne(
  *     "select nickname from users where id = ?",
  *     ps -> ps.setLong(1, 10L),
- *     mapper
+ *     mapperProvider
  * );
  * }</pre>
  *
  * <p>
- * Note: {@code Optional.empty()} is returned if the executor mapper returns
+ * Note: {@code Optional.empty()} is returned if the executor mapperProvider returns
  * {@code null}. Any {@link SQLException} raised by the executor is propagated.
  *
  * @param <T> wrapped element type
@@ -41,7 +41,7 @@ import java.util.Optional;
 public final class OptionalRowMapper<T> implements RowMapper<Optional<T>> {
 
     /**
-     * Delegate mapper producing the underlying value.
+     * Delegate mapperProvider producing the underlying value.
      */
     private final RowMapper<T> delegate;
 

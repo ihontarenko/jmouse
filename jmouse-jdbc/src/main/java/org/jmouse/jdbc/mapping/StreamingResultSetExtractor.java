@@ -49,7 +49,7 @@ import java.util.function.Consumer;
 public final class StreamingResultSetExtractor<T> implements ResultSetExtractor<Void> {
 
     /**
-     * Delegate mapper used to map each row.
+     * Delegate mapperProvider used to map each row.
      */
     private final RowMapper<T> mapper;
 
@@ -61,7 +61,7 @@ public final class StreamingResultSetExtractor<T> implements ResultSetExtractor<
     /**
      * Creates a new {@code StreamingResultSetExtractor}.
      *
-     * @param mapper   row mapper used for each result row
+     * @param mapper   row mapperProvider used for each result row
      * @param consumer consumer invoked per mapped row
      */
     public StreamingResultSetExtractor(RowMapper<T> mapper, Consumer<T> consumer) {

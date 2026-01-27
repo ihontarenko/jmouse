@@ -52,7 +52,7 @@ public interface Mapper<S, D> {
     }
 
     /**
-     * Checks if the given structured is supported by this mapper.
+     * Checks if the given structured is supported by this mapperProvider.
      * This is determined by comparing the structured's class to the parameterized type of S.
      *
      * @param source the structured to check
