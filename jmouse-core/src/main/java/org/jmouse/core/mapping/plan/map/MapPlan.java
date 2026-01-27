@@ -30,6 +30,9 @@ public final class MapPlan extends AbstractMappingPlan<Map<Object, Object>> impl
             return null;
         }
 
+        // example
+        context.policy().nullHandlingPolicy(); ///
+
         InferredType mType = targetType.toMap();
         InferredType kType = mType.getFirst();
         InferredType vType = mType.getLast();
