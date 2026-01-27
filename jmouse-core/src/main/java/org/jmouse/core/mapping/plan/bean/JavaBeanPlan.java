@@ -40,7 +40,7 @@ public final class JavaBeanPlan<T> extends AbstractMappingPlan<T> implements Map
             String       propertyName = property.getName();
             InferredType propertyType = property.getType().getJavaType();
 
-            Object value = applyPropertyBinding(
+            Object value = applyValue(
                     accessor,
                     context,
                     propertyName,

@@ -10,7 +10,6 @@ import org.jmouse.core.mapping.plan.MappingPlan;
 import org.jmouse.core.mapping.runtime.Mapper;
 import org.jmouse.core.mapping.runtime.MappingContext;
 import org.jmouse.core.reflection.InferredType;
-import org.jmouse.core.reflection.TypeInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +86,7 @@ public abstract class AbstractMappingPlan<T> implements MappingPlan<T> {
      * @param fallback fallback supplier when no binding exists
      * @return resolved value, {@code null}, or {@link IgnoredValue#INSTANCE} when ignored
      */
-    protected final Object applyPropertyBinding(
+    protected final Object applyValue(
             ObjectAccessor accessor,
             MappingContext context,
             String targetName,
@@ -166,6 +165,7 @@ public abstract class AbstractMappingPlan<T> implements MappingPlan<T> {
             if (accessor.navigate(propertyPath) instanceof ObjectAccessor objectAccessor) {
                 return objectAccessor.unwrap();
             }
+
             return null;
         } catch (RuntimeException exception) {
             LOGGER.error("Unable to navigate value for path '{}'.", path, exception);

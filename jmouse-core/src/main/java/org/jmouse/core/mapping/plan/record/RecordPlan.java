@@ -69,7 +69,7 @@ public final class RecordPlan<T> extends AbstractMappingPlan<T> implements Mappi
             String                name     = property.getName();
             InferredType          type     = property.getType().getJavaType();
 
-            Object value = applyPropertyBinding(
+            Object value = applyValue(
                     accessor,
                     context,
                     name,
