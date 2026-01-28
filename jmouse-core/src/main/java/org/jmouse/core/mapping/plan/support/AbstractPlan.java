@@ -3,11 +3,14 @@ package org.jmouse.core.mapping.plan.support;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.core.convert.Conversion;
+import org.jmouse.core.mapping.MappingScope;
 import org.jmouse.core.mapping.binding.PropertyMapping;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.plan.MappingPlan;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.MappingContext;
+import org.jmouse.core.mapping.plugin.MappingValue;
+import org.jmouse.core.mapping.plugin.PluginBus;
 import org.jmouse.core.reflection.InferredType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,13 +124,25 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
             return null;
         }
 
+        PluginBus  bus        = context.plugins();
         Mapper     mapper     = context.mapper();
         Class<?>   type       = targetType.getClassType();
         Conversion conversion = context.conversion();
 
+        MappingScope scope     = context.scope();
+        Object       rootValue = scope.sourceRoot();
+        PropertyPath path      = scope.path();
+
+        value = bus.onValue(new MappingValue(
+                rootValue,
+                value,
+                targetType,
+                path,
+                context
+        ));
+
         if (targetType.isScalar() || targetType.isEnum() || targetType.isClass()) {
             return mapper.map(value, targetType);
-//            return convertIfNeeded(value, type, conversion);
         }
 
         if (conversion.hasConverter(value.getClass(), type)) {

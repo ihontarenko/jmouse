@@ -27,12 +27,16 @@ public final class ObjectMapper implements Mapper {
 
         Verify.nonNull(type, "type");
 
+        MappingInvocation invocation    = MappingInvocation.begin(context, source, source.getClass(), type);
+        MappingContext    scopedContext = invocation.context();
+        MappingPlan<T>    plan          = scopedContext.planRegistry().planFor(source, type, scopedContext);
+
         try {
-            MappingPlan<T> plan = context.planRegistry().planFor(source, type, context);
-            return plan.execute(source, context);
+            T value = plan.execute(source, scopedContext);
+            return invocation.finish(source, value, type);
         } catch (MappingException mappingException) {
             LOGGER.error("[{}]: {}", mappingException.code(), mappingException.getMessage());
-            throw mappingException;
+            throw invocation.fail(mappingException);
         }
     }
 }

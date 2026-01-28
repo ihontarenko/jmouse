@@ -2,6 +2,7 @@ package org.jmouse.core.mapping.examples;
 
 import org.jmouse.core.bind.BinderConversion;
 import org.jmouse.core.bind.StandardAccessorWrapper;
+import org.jmouse.core.mapping.MappingScope;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.config.MappingPolicy;
@@ -15,6 +16,7 @@ import org.jmouse.core.mapping.plan.scalar.ScalarPlanContributor;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.ObjectMapper;
+import org.jmouse.core.mapping.plugin.TrimStringsPlugin;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.*;
@@ -31,16 +33,17 @@ public class Smoke1 {
                     .constant("password", "masked")
                 ).build();
 
-        AtomicReference<Mapper> reference = new AtomicReference<>();
-
         MappingConfig config = MappingConfig.builder()
                 .listFactory(LinkedList::new)
                 .setFactory(TreeSet::new) // якщо треба sorted
                 .maxCollectionSize(50_000)
+                .plugins(List.of(
+                        new TrimStringsPlugin()
+                ))
                 .build();
 
         MappingContext context = new MappingContext(
-                reference::get,
+                ObjectMapper::new,
                 new MappingPlanRegistry(List.of(
                         new JavaBeanPlanContributor(),
                         new RecordPlanContributor(),
@@ -53,11 +56,11 @@ public class Smoke1 {
                 new BinderConversion(),
                 registry,
                 MappingPolicy.defaults(),
-                config
+                config,
+                MappingScope.root(null)
         );
 
-        ObjectMapper mapper = new ObjectMapper(context);
-        reference.set(mapper);
+        Mapper mapper = context.mapper();
 
         Map<String, Object> source = Map.of(
                 "user", "john",
@@ -68,8 +71,8 @@ public class Smoke1 {
                 )
         );
 
-//        User user = mapperProvider.map(source, User.class);
-//        UserDTO userDTO = mapperProvider.map(source, UserDTO.class);
+        User user = mapper.map(source, User.class);
+        UserDTO userDTO = mapper.map(source, UserDTO.class);
 
         Map<User, String> sourceMap = Map.of(new User("John"), "User-123");
 

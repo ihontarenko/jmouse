@@ -2,5 +2,9 @@ package org.jmouse.core.mapping;
 
 @FunctionalInterface
 public interface MapperProvider {
-    Mapper get();
+
+    /**
+     * Return a mapper instance bound to the given context.
+     */
+    Mapper get(MappingContext context);
 }

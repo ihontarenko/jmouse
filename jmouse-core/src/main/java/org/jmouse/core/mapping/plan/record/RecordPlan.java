@@ -44,9 +44,10 @@ public final class RecordPlan<T> extends AbstractObjectPlan<T> {
         ValueObjectDescriptor<T> descriptor = (ValueObjectDescriptor<T>) valueObject.getDescriptor();
 
         for (PropertyDescriptor<T> property : descriptor.getComponents().values()) {
-            String       name       = property.getName();
-            InferredType type       = property.getType().getJavaType();
-            Object       value      = applyValue(accessor, context, sourceType, targetType, name);
+            String         name           = property.getName();
+            InferredType   type           = property.getType().getJavaType();
+            MappingContext mappingContext = context.appendPath(name);
+            Object         value          = applyValue(accessor, mappingContext, sourceType, targetType, name);
 
             if (value == IgnoredValue.INSTANCE || value == null) {
                 values.put(name, null);
@@ -54,7 +55,7 @@ public final class RecordPlan<T> extends AbstractObjectPlan<T> {
             }
 
             try {
-                values.put(name, adaptValue(value, type, context));
+                values.put(name, adaptValue(value, type, mappingContext));
             } catch (Exception exception) {
                 throw toMappingException(
                         "record_component_adapt_failed",

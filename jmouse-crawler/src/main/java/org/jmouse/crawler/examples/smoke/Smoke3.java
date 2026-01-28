@@ -1,6 +1,7 @@
 package org.jmouse.crawler.examples.smoke;
 
 import org.jmouse.core.bind.*;
+import org.jmouse.core.mapping.MappingScope;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.config.MappingPolicy;
@@ -102,7 +103,8 @@ public class Smoke3 {
                 new BinderConversion(),
                 registry,
                 MappingPolicy.defaults(),
-                config
+                config,
+                MappingScope.root(null)
         );
 
         ObjectMapper mapper = new ObjectMapper(context);

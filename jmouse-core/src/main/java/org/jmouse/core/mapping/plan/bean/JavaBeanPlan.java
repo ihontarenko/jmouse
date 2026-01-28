@@ -38,9 +38,10 @@ public final class JavaBeanPlan<T> extends AbstractObjectPlan<T> {
                 continue;
             }
 
-            String       propertyName = property.getName();
-            InferredType propertyType = property.getType().getJavaType();
-            Object       value        = applyValue(accessor, context, sourceType, targetType, propertyName);
+            String         propertyName   = property.getName();
+            InferredType   propertyType   = property.getType().getJavaType();
+            MappingContext mappingContext = context.appendPath(propertyName);
+            Object         value          = applyValue(accessor, mappingContext, sourceType, targetType, propertyName);
 
             if (value == IgnoredValue.INSTANCE || value == null) {
                 continue;
@@ -49,7 +50,7 @@ public final class JavaBeanPlan<T> extends AbstractObjectPlan<T> {
             Object adapted;
 
             try {
-                adapted = adaptValue(value, propertyType, context);
+                adapted = adaptValue(value, propertyType, mappingContext);
             } catch (Exception exception) {
                 throw toMappingException(
                         "bean_property_adapt_failed",

@@ -1,6 +1,7 @@
 package org.jmouse.core.mapping.config;
 
 import org.jmouse.core.Verify;
+import org.jmouse.core.mapping.plugin.MappingPlugin;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -13,7 +14,9 @@ public final class MappingConfig {
     private final Supplier<? extends Map<Object, Object>> mapFactory;        // fallback
 
     private final ArrayMaterializationPolicy arrayMaterializationPolicy;
-    private final int maxCollectionSize;
+    private final int                        maxCollectionSize;
+
+    private final List<MappingPlugin> plugins;
 
     private MappingConfig(Builder builder) {
         this.arrayMaterializationPolicy = builder.arrayMaterializationPolicy;
@@ -22,6 +25,7 @@ public final class MappingConfig {
         this.collectionFactory          = builder.collectionFactory;
         this.mapFactory                 = builder.mapFactory;
         this.maxCollectionSize          = builder.maxCollectionSize;
+        this.plugins                    = builder.plugins;
     }
 
     public static MappingConfig defaults() {
@@ -30,6 +34,10 @@ public final class MappingConfig {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public List<MappingPlugin> plugins() {
+        return plugins;
     }
 
     public ArrayMaterializationPolicy arrayMaterializationPolicy() {
@@ -68,6 +76,8 @@ public final class MappingConfig {
 
         private int maxCollectionSize = 10_000;
 
+        private List<MappingPlugin> plugins;
+
         public Builder listFactory(Supplier<? extends List<Object>> factory) {
             this.listFactory = Verify.nonNull(factory, "listFactory");
             return this;
@@ -96,6 +106,11 @@ public final class MappingConfig {
         public Builder maxCollectionSize(int value) {
             Verify.state(value > 0, "maxCollectionSize must be > 0");
             this.maxCollectionSize = value;
+            return this;
+        }
+
+        public Builder plugins(List<MappingPlugin> plugins) {
+            this.plugins = Verify.nonNull(plugins, "plugins");
             return this;
         }
 
