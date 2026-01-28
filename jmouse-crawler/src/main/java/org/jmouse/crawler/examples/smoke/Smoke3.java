@@ -1,22 +1,8 @@
 package org.jmouse.crawler.examples.smoke;
 
-import org.jmouse.core.bind.*;
-import org.jmouse.core.mapping.MappingScope;
+import org.jmouse.core.mapping.*;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.binding.annotation.AnnotationRuleSource;
-import org.jmouse.core.mapping.config.MappingConfig;
-import org.jmouse.core.mapping.config.MappingPolicy;
-import org.jmouse.core.mapping.plan.MappingPlanRegistry;
-import org.jmouse.core.mapping.plan.array.ArrayPlanContributor;
-import org.jmouse.core.mapping.plan.bean.JavaBeanPlanContributor;
-import org.jmouse.core.mapping.plan.collection.ListPlanContributor;
-import org.jmouse.core.mapping.plan.map.MapPlanContributor;
-import org.jmouse.core.mapping.plan.record.RecordPlanContributor;
-import org.jmouse.core.mapping.plan.scalar.ScalarPlanContributor;
-import org.jmouse.core.mapping.Mapper;
-import org.jmouse.core.mapping.MappingContext;
-import org.jmouse.core.mapping.ObjectMapper;
-import org.jmouse.core.mapping.plugin.DebugInformationPlugin;
 import org.jmouse.core.trace.TraceContext;
 import org.jmouse.crawler.api.ProcessingTask;
 import org.jmouse.crawler.api.TaskId;
@@ -26,9 +12,6 @@ import org.jmouse.crawler.runtime.state.persistence.dto.ProcessingTaskDto;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TreeSet;
 
 public class Smoke3 {
 
@@ -84,34 +67,10 @@ public class Smoke3 {
                 )
                 .build();
 
-        MappingConfig config = MappingConfig.builder()
-                .listFactory(LinkedList::new)
-                .setFactory(TreeSet::new) // якщо треба sorted
-                .maxCollectionSize(50_000)
-                .plugins(List.of(
-                        new DebugInformationPlugin()
-                ))
+
+        return Mappers.builder()
+                .registry(registry)
                 .build();
-
-        MappingContext context = new MappingContext(
-                ObjectMapper::new,
-                new MappingPlanRegistry(List.of(
-                        new JavaBeanPlanContributor(),
-                        new RecordPlanContributor(),
-                        new ScalarPlanContributor(),
-                        new MapPlanContributor(),
-                        new ListPlanContributor(),
-                        new ArrayPlanContributor()
-                )),
-                new StandardAccessorWrapper(),
-                new BinderConversion(),
-                registry,
-                MappingPolicy.defaults(),
-                config,
-                MappingScope.root(null)
-        );
-
-        return context.mapper();
     }
 
 }
