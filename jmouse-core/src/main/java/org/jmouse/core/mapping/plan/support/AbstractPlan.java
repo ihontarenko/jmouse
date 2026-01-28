@@ -124,13 +124,14 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
             return null;
         }
 
-        PluginBus  bus        = context.plugins();
-        Mapper     mapper     = context.mapper();
-        Class<?>   type       = targetType.getClassType();
-        Conversion conversion = context.conversion();
+        InferredType sourceType = InferredType.forInstance(value);
+        PluginBus    bus        = context.plugins();
+        Mapper       mapper     = context.mapper();
+        Class<?>     type       = targetType.getClassType();
+        Conversion   conversion = context.conversion();
 
         MappingScope scope     = context.scope();
-        Object       rootValue = scope.sourceRoot();
+        Object       rootValue = scope.root();
         PropertyPath path      = scope.path();
 
         value = bus.onValue(new MappingValue(
@@ -145,7 +146,7 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
             return mapper.map(value, targetType);
         }
 
-        if (conversion.hasConverter(value.getClass(), type)) {
+        if (conversion.hasConverter(value.getClass(), type) && !targetType.isCollection() && !targetType.isMap()) {
             return convertIfNeeded(value, type, conversion);
         }
 

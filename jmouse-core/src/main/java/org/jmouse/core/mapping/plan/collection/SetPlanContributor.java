@@ -9,7 +9,7 @@ public final class SetPlanContributor implements MappingPlanContributor {
 
     @Override
     public boolean supports(Object source, InferredType targetType, MappingContext context) {
-        return targetType.isList();
+        return targetType.isSet();
     }
 
     @Override

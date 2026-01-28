@@ -3,7 +3,7 @@ package org.jmouse.core.mapping;
 import org.jmouse.core.bind.PropertyPath;
 
 public record MappingScope(
-        Object sourceRoot,
+        Object root,
         PropertyPath path
 ) {
     public static MappingScope root(Object rootSource) {
@@ -11,7 +11,7 @@ public record MappingScope(
     }
 
     public MappingScope withPath(PropertyPath path) {
-        return new MappingScope(sourceRoot, path);
+        return new MappingScope(root, path);
     }
 
     public MappingScope append(String segment) {

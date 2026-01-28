@@ -19,7 +19,7 @@ public final class MappingInvocation {
     }
 
     public static MappingInvocation begin(MappingContext base, Object source, Class<?> sourceType, InferredType targetType) {
-        boolean root = base.scope().sourceRoot() == null;
+        boolean root = base.scope().root() == null;
 
         MappingContext scoped = root
                 ? base.withScope(MappingScope.root(source))
