@@ -167,8 +167,12 @@ public class StandardConversion implements Conversion {
                 return (R) source;
             }
 
-            // Try to find a direct converter
-            GenericConverter<T, R> converter = getConverter(classPair);
+            GenericConverter<T, R> converter = null;
+
+            try {
+                // Try to find a direct converter
+                converter = getConverter(classPair);
+            } catch (ConverterNotFound ignored) {}
 
             // Try to find a enum-specific converter if any
             if (Enum.class.isAssignableFrom(targetType)) {

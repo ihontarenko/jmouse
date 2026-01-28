@@ -1,13 +1,11 @@
 package org.jmouse.core.bind.descriptor.structured;
 
-import org.jmouse.core.bind.JavaBean;
-import org.jmouse.core.bind.ValueObject;
-import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanDescriptor;
-import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
+import org.jmouse.core.bind.descriptor.structured.bean.JavaBeanDescriptor;
+import org.jmouse.core.bind.descriptor.structured.bean.JavaBeanIntrospector;
 import org.jmouse.core.bind.descriptor.structured.map.MapDescriptor;
 import org.jmouse.core.bind.descriptor.structured.map.MapIntrospector;
-import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectDescriptor;
-import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectIntrospector;
+import org.jmouse.core.bind.descriptor.structured.record.ValueObjectDescriptor;
+import org.jmouse.core.bind.descriptor.structured.record.ValueObjectIntrospector;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

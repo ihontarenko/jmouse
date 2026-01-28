@@ -3,6 +3,7 @@ package org.jmouse.core.mapping.examples;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.mapping.*;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
+import org.jmouse.core.mapping.binding.annotation.AnnotationRuleSource;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.reflection.InferredType;
 
@@ -16,6 +17,7 @@ public class Smoke1 {
                                 .setFactory(TreeSet::new)
                                 .build())
                 .registry(TypeMappingRegistry.builder()
+                                  .ruleSource(new AnnotationRuleSource())
                           .mapping(Map.class, UserDTO.class, m -> m
                                   .bind("user", "user")
                                   .bind("groups", "group")

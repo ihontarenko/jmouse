@@ -1,4 +1,4 @@
-package org.jmouse.core.bind.descriptor.structured.vo;
+package org.jmouse.core.bind.descriptor.structured.record;
 
 import org.jmouse.core.bind.descriptor.ConstructorDescriptor;
 import org.jmouse.core.bind.descriptor.structured.ObjectData;

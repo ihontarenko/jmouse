@@ -22,6 +22,7 @@ public class JavaNetConverters {
                     }
                 }),
                 of(URI.class, String.class, URI::toString),
+                of(String.class, URI.class, URI::create),
                 // URL
                 of(URL.class, URL.class, url -> url),
                 of(URL.class, URI.class, url -> {

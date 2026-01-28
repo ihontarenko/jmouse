@@ -1,7 +1,7 @@
 package org.jmouse.core.bind;
 
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
-import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectIntrospector;
+import org.jmouse.core.bind.descriptor.structured.record.ValueObjectIntrospector;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.core.CachedSupplier;

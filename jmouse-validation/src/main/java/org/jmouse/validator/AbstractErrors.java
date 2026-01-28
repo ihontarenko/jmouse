@@ -1,7 +1,7 @@
 package org.jmouse.validator;
 
-import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanDescriptor;
-import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
+import org.jmouse.core.bind.descriptor.structured.bean.JavaBeanDescriptor;
+import org.jmouse.core.bind.descriptor.structured.bean.JavaBeanIntrospector;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -45,12 +45,12 @@ import org.jmouse.core.mapping.errors.MappingException;
  * @see ValueProvider
  * @see ComputeFunction
  */
-public sealed interface PropertyMapping permits
-        PropertyMapping.Ignore,
-        PropertyMapping.Constant,
-        PropertyMapping.Reference,
-        PropertyMapping.Provider,
-        PropertyMapping.Compute {
+public sealed interface PropertyMapping
+        permits PropertyMapping.Ignore,
+                PropertyMapping.Constant,
+                PropertyMapping.Reference,
+                PropertyMapping.Provider,
+                PropertyMapping.Compute {
 
     /**
      * Target property name this binding is responsible for.

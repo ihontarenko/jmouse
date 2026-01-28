@@ -4,9 +4,11 @@ import org.jmouse.core.Verify;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.mapping.binding.PropertyMapping;
-import org.jmouse.core.mapping.binding.TypeMappingSpecification;
+import org.jmouse.core.mapping.binding.TypeMappingRule;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
+
+import java.util.List;
 
 /**
  * Base plan for source-to-object mapping scenarios. 🧩
@@ -15,7 +17,7 @@ import org.jmouse.core.reflection.InferredType;
  * object mapping plans:</p>
  * <ul>
  *   <li>Resolve the runtime target type for a {@link PropertyDescriptor}</li>
- *   <li>Lookup {@link TypeMappingSpecification} from the {@link MappingContext} mapping registry</li>
+ *   <li>Lookup {@link TypeMappingRule} from the {@link MappingContext} mapping registry</li>
  *   <li>Resolve {@link PropertyMapping} for a target property name within a specification</li>
  * </ul>
  *
@@ -46,19 +48,7 @@ abstract public class AbstractObjectPlan<T> extends AbstractPlan<T> {
     }
 
     /**
-     * Check whether a mapping specification exists for the given source and target types.
-     *
-     * @param context mapping context
-     * @param a source type
-     * @param b target type
-     * @return {@code true} when a specification is available, otherwise {@code false}
-     */
-    protected boolean hasMappingSpecifications(MappingContext context, Class<?> a, Class<?> b) {
-        return getMappingSpecifications(context, a, b) != null;
-    }
-
-    /**
-     * Resolve a {@link TypeMappingSpecification} from the mapping registry for the given type pair.
+     * Resolve a {@link TypeMappingRule} from the mapping registry for the given type pair.
      *
      * @param context mapping context (never {@code null})
      * @param a source type
@@ -66,8 +56,8 @@ abstract public class AbstractObjectPlan<T> extends AbstractPlan<T> {
      * @return mapping specification, or {@code null} when not registered
      * @throws IllegalArgumentException if {@code context} is {@code null}
      */
-    protected TypeMappingSpecification getMappingSpecifications(MappingContext context, Class<?> a, Class<?> b) {
-        return Verify.nonNull(context, "context").mappingRegistry().find(a, b);
+    protected List<TypeMappingRule> getMappingRules(MappingContext context, Class<?> a, Class<?> b) {
+        return Verify.nonNull(context, "context").mappingRegistry().find(a, b, context);
     }
 
     /**
@@ -77,30 +67,17 @@ abstract public class AbstractObjectPlan<T> extends AbstractPlan<T> {
      * @param specification mapping specification (may be {@code null})
      * @return property mapping, or {@code null} when absent
      */
-    protected PropertyMapping getPropertyMapping(String name, TypeMappingSpecification specification) {
+    protected PropertyMapping getPropertyMapping(String name, TypeMappingRule specification) {
         return specification == null ? null : specification.find(name);
     }
 
     /**
-     * Return the {@link PropertyMapping} for the given property name if present.
-     *
-     * <p>This is a semantic alias for {@link #getPropertyMapping(String, TypeMappingSpecification)}.</p>
-     *
-     * @param name target property name
-     * @param specification mapping specification (may be {@code null})
-     * @return property mapping, or {@code null} when absent
-     */
-    protected PropertyMapping hasPropertyMapping(String name, TypeMappingSpecification specification) {
-        return getPropertyMapping(name, specification);
-    }
-
-    /**
      * Resolve a value for the given target property {@code name} using an optional
-     * {@link TypeMappingSpecification} for the {@code (a -> b)} type pair.
+     * {@link TypeMappingRule} for the {@code (a -> b)} type pair.
      *
      * <p>Resolution rules:</p>
      * <ul>
-     *   <li>If a {@link TypeMappingSpecification} exists, attempts to find a {@link PropertyMapping}
+     *   <li>If a {@link TypeMappingRule} exists, attempts to find a {@link PropertyMapping}
      *       for {@code name} and delegates to {@code applyValue(accessor, context, propertyMapping, safe)}.</li>
      *   <li>If no specification exists, falls back to {@link #safeGet(ObjectAccessor, String)}.</li>
      * </ul>
@@ -113,12 +90,18 @@ abstract public class AbstractObjectPlan<T> extends AbstractPlan<T> {
      * @return resolved value, or {@code null} when missing / navigation fails
      */
     protected Object applyValue(ObjectAccessor accessor, MappingContext context, Class<?> a, Class<?> b, String name) {
-        TypeMappingSpecification specification = getMappingSpecifications(context, a, b);
-        ValueSupplier            safe          = () -> safeGet(accessor, name);
+        List<TypeMappingRule> mappingRules = getMappingRules(context, a, b);
+        ValueSupplier         safe         = () -> safeGet(accessor, name);
 
-        if (specification != null) {
-            PropertyMapping propertyMapping = getPropertyMapping(name, specification);
-            return applyValue(accessor, context, propertyMapping, safe);
+        if (!mappingRules.isEmpty()) {
+            for (TypeMappingRule mappingRule : mappingRules) {
+                if (mappingRule != null) {
+                    PropertyMapping propertyMapping = getPropertyMapping(name, mappingRule);
+                    if (propertyMapping != null) {
+                        return applyValue(accessor, context, propertyMapping, safe);
+                    }
+                }
+            }
         }
 
         return safe.get();

@@ -1,5 +1,7 @@
 package org.jmouse.crawler.runtime.state.persistence.dto;
 
+import org.jmouse.core.mapping.binding.annotation.MappingReference;
+
 import java.net.URI;
 import java.time.Instant;
 
@@ -13,7 +15,8 @@ public record ProcessingTaskDto(
         TraceContextDto trace,
         URI url,
         int depth,
-        URI parent,
+        @MappingReference("parent")
+        String parentURI,
         TaskOriginDto origin,
         int priority,
         Instant scheduledAt,

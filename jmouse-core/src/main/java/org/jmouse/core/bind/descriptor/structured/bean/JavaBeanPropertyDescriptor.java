@@ -1,4 +1,4 @@
-package org.jmouse.core.bind.descriptor.structured.jb;
+package org.jmouse.core.bind.descriptor.structured.bean;
 
 import org.jmouse.core.bind.descriptor.AbstractDescriptor;
 import org.jmouse.core.bind.descriptor.ClassTypeDescriptor;

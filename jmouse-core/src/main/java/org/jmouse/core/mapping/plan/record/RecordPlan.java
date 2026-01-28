@@ -3,7 +3,7 @@ package org.jmouse.core.mapping.plan.record;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.ValueObject;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
-import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectDescriptor;
+import org.jmouse.core.bind.descriptor.structured.record.ValueObjectDescriptor;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.plan.support.AbstractObjectPlan;

@@ -1,10 +1,8 @@
 package org.jmouse.core.bind.descriptor;
 
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
-import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanDescriptor;
-import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
-import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectDescriptor;
-import org.jmouse.core.bind.descriptor.structured.vo.ValueObjectIntrospector;
+import org.jmouse.core.bind.descriptor.structured.bean.JavaBeanIntrospector;
+import org.jmouse.core.bind.descriptor.structured.record.ValueObjectIntrospector;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Method;

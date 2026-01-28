@@ -3,6 +3,7 @@ package org.jmouse.crawler.examples.smoke;
 import org.jmouse.core.bind.*;
 import org.jmouse.core.mapping.MappingScope;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
+import org.jmouse.core.mapping.binding.annotation.AnnotationRuleSource;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.plan.MappingPlanRegistry;
@@ -28,7 +29,6 @@ import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class Smoke3 {
 
@@ -38,7 +38,7 @@ public class Smoke3 {
                 TraceContext.root(),
                 URI.create("https://google.com"),
                 1,
-                null,
+                URI.create("https://jmouse.org/"),
                 TaskOrigin.retry("reason-a"),
                 1,
                 Instant.now(),
@@ -58,6 +58,7 @@ public class Smoke3 {
 
     public static Mapper mapper() {
         var registry = TypeMappingRegistry.builder()
+                .ruleSource(new AnnotationRuleSource())
                 .mapping(ProcessingTask.class, ProcessingTaskDto.class, m -> m
                         .bind("user", "username")
                         .ignore("password")
@@ -65,6 +66,7 @@ public class Smoke3 {
                         .bind("id", source -> source.id().value())
                 ).mapping(ProcessingTaskDto.class, ProcessingTask.class, m -> m
                         .bind("user", "username")
+                        .bind("parent", "parentURI")
                         .ignore("password")
                         .constant("password", "masked")
                         .bind("id", s -> new TaskId(s.id()))

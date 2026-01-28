@@ -35,7 +35,7 @@ import java.util.Map;
  * @see PropertyMapping
  * @see TypeMappingRegistry
  */
-public final class TypeMappingSpecification {
+public final class TypeMappingRule {
 
     private final Class<?>                     sourceType;
     private final Class<?>                     targetType;
@@ -65,7 +65,7 @@ public final class TypeMappingSpecification {
      * @throws IllegalArgumentException if {@code sourceType} or {@code targetType} is {@code null}
      * @throws NullPointerException if {@code bindings} is {@code null} (caller responsibility)
      */
-    public TypeMappingSpecification(Class<?> sourceType, Class<?> targetType, Map<String, PropertyMapping> mappings) {
+    public TypeMappingRule(Class<?> sourceType, Class<?> targetType, Map<String, PropertyMapping> mappings) {
         this.sourceType = Verify.nonNull(sourceType, "sourceType");
         this.targetType = Verify.nonNull(targetType, "targetType");
         this.mappings = Collections.unmodifiableMap(new LinkedHashMap<>(mappings));

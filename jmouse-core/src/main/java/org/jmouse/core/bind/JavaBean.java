@@ -1,6 +1,6 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
+import org.jmouse.core.bind.descriptor.structured.bean.JavaBeanIntrospector;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.CachedSupplier;
 import org.jmouse.core.Factory;

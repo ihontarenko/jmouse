@@ -1,9 +1,6 @@
 package org.jmouse.core.graph;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A generic interface representing a directed graph structure where nodes of type {@code T}
@@ -64,7 +61,7 @@ public interface Graph<T> {
      * @return a list of {@link Edge} objects connecting consecutive nodes
      */
     static <T> Set<Edge<T>> toEdges(Collection<T> collection) {
-        Set<Edge<T>> edges = new HashSet<>();
+        Set<Edge<T>> edges = new LinkedHashSet<>();
         int          n     = collection.size() - 1;
         List<T>      nodes = List.copyOf(collection);
 

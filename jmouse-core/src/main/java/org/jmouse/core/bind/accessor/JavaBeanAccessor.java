@@ -3,8 +3,8 @@ package org.jmouse.core.bind.accessor;
 import org.jmouse.core.bind.AbstractBeanAccessor;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
-import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanDescriptor;
-import org.jmouse.core.bind.descriptor.structured.jb.JavaBeanIntrospector;
+import org.jmouse.core.bind.descriptor.structured.bean.JavaBeanDescriptor;
+import org.jmouse.core.bind.descriptor.structured.bean.JavaBeanIntrospector;
 
 import java.util.HashMap;
 import java.util.Map;

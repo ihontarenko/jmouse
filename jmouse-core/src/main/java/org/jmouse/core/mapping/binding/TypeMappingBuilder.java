@@ -41,8 +41,8 @@ public final class TypeMappingBuilder<S, T> {
         return this;
     }
 
-    public TypeMappingSpecification build() {
-        return new TypeMappingSpecification(sourceType, targetType, bindings);
+    public TypeMappingRule build() {
+        return new TypeMappingRule(sourceType, targetType, bindings);
     }
 
 }
