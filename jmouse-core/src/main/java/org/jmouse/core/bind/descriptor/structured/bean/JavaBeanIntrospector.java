@@ -5,6 +5,7 @@ import org.jmouse.core.bind.descriptor.ClassTypeDescriptor;
 import org.jmouse.core.bind.descriptor.ClassTypeIntrospector;
 import org.jmouse.core.bind.descriptor.MethodDescriptor;
 import org.jmouse.core.bind.descriptor.structured.ObjectData;
+import org.jmouse.core.bind.descriptor.structured.ObjectIntrospector;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.reflection.InferredType;
 
@@ -93,16 +94,19 @@ public class JavaBeanIntrospector<T>
      */
     @SuppressWarnings("unchecked")
     public JavaBeanIntrospector<T> property(MethodDescriptor method) {
-        String                          name         = method.getPropertyName();
-        JavaBeanPropertyIntrospector<T> introspector = new JavaBeanPropertyIntrospector<>(null);
-        PropertyDescriptor<T>           previous     = container.getProperty(name);
-        JavaBeanDescriptor<T>           parent       = toDescriptor();
+        String methodName    = method.getPropertyName();
+        String preferredName = ObjectIntrospector.getPreferredPropertyName(method);
+        String propertyName  = preferredName == null ? methodName : preferredName;
+
+        JavaBeanPropertyIntrospector<T> introspector  = new JavaBeanPropertyIntrospector<>(null);
+        PropertyDescriptor<T>           previous      = container.getProperty(propertyName);
+        JavaBeanDescriptor<T>           parent        = toDescriptor();
 
         if (previous instanceof JavaBeanPropertyDescriptor<?> propertyDescriptor) {
             introspector = (JavaBeanPropertyIntrospector<T>) propertyDescriptor.toIntrospector();
         }
 
-        introspector.owner(parent).name(name);
+        introspector.owner(parent).name(propertyName);
 
         if (method.isGetter() || method.isSetter()) {
             if (method.isGetter()) {

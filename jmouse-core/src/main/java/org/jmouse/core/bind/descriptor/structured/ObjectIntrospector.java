@@ -1,22 +1,17 @@
 package org.jmouse.core.bind.descriptor.structured;
 
-import org.jmouse.core.bind.descriptor.AbstractDescriptor;
-import org.jmouse.core.bind.descriptor.AbstractIntrospector;
+import org.jmouse.core.bind.descriptor.AnnotatedElementDescriptor;
+import org.jmouse.core.bind.descriptor.PreferredPropertyName;
+import org.jmouse.core.reflection.Reflections;
 
-abstract public class ObjectIntrospector<I extends ObjectIntrospector<?, ?, ?>, T, D extends AbstractDescriptor<?, ?, ?>> extends AbstractIntrospector<ObjectData<T>, I, T, D> {
+final public class ObjectIntrospector {
 
-    protected ObjectIntrospector(T target) {
-        super(target);
-    }
-
-    @Override
-    public I introspect() {
-        return self();
-    }
-
-    @Override
-    public ObjectData<T> getContainerFor(T target) {
-        return new ObjectData<>(target);
+    public static String getPreferredPropertyName(AnnotatedElementDescriptor<?, ?, ?> descriptor) {
+        return Reflections.getAnnotationValue(
+                descriptor.unwrap(),
+                PreferredPropertyName.class,
+                PreferredPropertyName::value
+        );
     }
 
 }
