@@ -6,8 +6,8 @@ public record MappingScope(
         Object sourceRoot,
         PropertyPath path
 ) {
-    public static MappingScope root(Object sourceRoot) {
-        return new MappingScope(sourceRoot, PropertyPath.empty());
+    public static MappingScope root(Object rootSource) {
+        return new MappingScope(rootSource, PropertyPath.empty());
     }
 
     public MappingScope withPath(PropertyPath path) {

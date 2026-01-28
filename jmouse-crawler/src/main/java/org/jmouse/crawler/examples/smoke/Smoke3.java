@@ -15,6 +15,7 @@ import org.jmouse.core.mapping.plan.scalar.ScalarPlanContributor;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.ObjectMapper;
+import org.jmouse.core.mapping.plugin.DebugInformationPlugin;
 import org.jmouse.core.trace.TraceContext;
 import org.jmouse.crawler.api.ProcessingTask;
 import org.jmouse.crawler.api.TaskId;
@@ -85,12 +86,13 @@ public class Smoke3 {
                 .listFactory(LinkedList::new)
                 .setFactory(TreeSet::new) // якщо треба sorted
                 .maxCollectionSize(50_000)
+                .plugins(List.of(
+                        new DebugInformationPlugin()
+                ))
                 .build();
 
-        AtomicReference<Mapper> reference = new AtomicReference<>();
-
         MappingContext context = new MappingContext(
-                reference::get,
+                ObjectMapper::new,
                 new MappingPlanRegistry(List.of(
                         new JavaBeanPlanContributor(),
                         new RecordPlanContributor(),
@@ -107,10 +109,7 @@ public class Smoke3 {
                 MappingScope.root(null)
         );
 
-        ObjectMapper mapper = new ObjectMapper(context);
-        reference.set(mapper);
-
-        return mapper;
+        return context.mapper();
     }
 
 }
