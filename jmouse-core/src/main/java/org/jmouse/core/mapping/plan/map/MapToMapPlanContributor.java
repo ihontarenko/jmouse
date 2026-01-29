@@ -4,19 +4,22 @@ import org.jmouse.core.mapping.plan.MappingPlan;
 import org.jmouse.core.mapping.plan.MappingPlanContributor;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
-import org.jmouse.core.reflection.TypeInformation;
 
-public final class MapPlanContributor implements MappingPlanContributor {
+public final class MapToMapPlanContributor implements MappingPlanContributor {
 
     @Override
     public boolean supports(Object source, InferredType targetType, MappingContext context) {
-        return TypeInformation.forJavaType(targetType).isMap();
+        if (!targetType.isMap()) {
+            return false;
+        }
+
+        return InferredType.forInstance(source).isMap();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> MappingPlan<T> build(InferredType targetType, MappingContext context) {
-        return (MappingPlan<T>) new MapPlan(targetType);
+        return (MappingPlan<T>) new MapToMapPlan(targetType);
     }
 
 }

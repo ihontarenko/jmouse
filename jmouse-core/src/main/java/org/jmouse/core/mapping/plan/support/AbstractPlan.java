@@ -124,18 +124,17 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
             return null;
         }
 
-        InferredType sourceType = InferredType.forInstance(value);
         PluginBus    bus        = context.plugins();
         Mapper       mapper     = context.mapper();
         Class<?>     type       = targetType.getClassType();
         Conversion   conversion = context.conversion();
 
-        MappingScope scope     = context.scope();
-        Object       rootValue = scope.root();
-        PropertyPath path      = scope.path();
+        MappingScope scope = context.scope();
+        Object       root  = scope.root();
+        PropertyPath path  = scope.path();
 
         value = bus.onValue(new MappingValue(
-                rootValue,
+                root,
                 value,
                 targetType,
                 path,
@@ -146,7 +145,7 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
             return mapper.map(value, targetType);
         }
 
-        if (conversion.hasAnyConverter(value.getClass(), type) && !targetType.isCollection() && !targetType.isMap()) {
+        if (hasConverterFor(value.getClass(), type, context) && !targetType.isCollection() && !targetType.isMap()) {
             return convertIfNeeded(value, type, conversion);
         }
 
@@ -232,6 +231,21 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
         }
 
         return conversion.convert(value, targetType);
+    }
+
+    /**
+     * Check whether the conversion subsystem can produce a value of {@code targetType} from {@code sourceType}.
+     *
+     * <p>This method delegates to {@link org.jmouse.core.convert.Conversion#hasAnyConverter(Class, Class)},
+     * which may consider both direct converters and multi-step conversion chains.</p>
+     *
+     * @param sourceType source runtime type
+     * @param targetType target runtime type
+     * @param context mapping context providing the {@link org.jmouse.core.convert.Conversion} service
+     * @return {@code true} if any conversion path exists, otherwise {@code false}
+     */
+    protected final boolean hasConverterFor(Class<?> sourceType, Class<?> targetType, MappingContext context) {
+        return context.conversion().hasAnyConverter(sourceType, targetType);
     }
 
     /**

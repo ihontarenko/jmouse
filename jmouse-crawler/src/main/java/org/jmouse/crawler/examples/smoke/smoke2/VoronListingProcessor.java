@@ -34,7 +34,7 @@ public final class VoronListingProcessor implements PipelineStep {
         List<URI> uris = cssSelector.links(ctx.document(), "a[href^='/uk/catalog/']");
 
 //        // 1) product pages
-        for (URI u : uris.subList(0, 3)) {
+        for (URI u : uris.subList(10, 13)) {
             URI site = runContext.attributes().getAttribute("site");
             ctx.enqueue(site.resolve(u), VoronHint.PRODUCT);
         }

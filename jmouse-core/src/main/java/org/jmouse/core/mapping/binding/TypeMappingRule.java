@@ -107,4 +107,16 @@ public final class TypeMappingRule {
         return mappings.get(targetName);
     }
 
+
+    /**
+     * Return the internal mappings map.
+     *
+     * <p>This method is intended for internal use only.</p>
+     *
+     * @return mappings indexed by target property name
+     */
+    public Map<String, PropertyMapping> mappings() {
+        return mappings;
+    }
+
 }

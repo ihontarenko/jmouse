@@ -1,5 +1,6 @@
 package org.jmouse.core.mapping.plan;
 
+import org.jmouse.core.Sorter;
 import org.jmouse.core.Verify;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.MappingContext;
@@ -14,7 +15,9 @@ public final class MappingPlanRegistry implements PlanRegistry {
     private final Map<PlanKey, MappingPlan<?>> cache = new ConcurrentHashMap<>();
 
     public MappingPlanRegistry(List<MappingPlanContributor> contributors) {
-        this.contributors = List.copyOf(Verify.nonNull(contributors, "contributors"));
+        List<MappingPlanContributor> sorted = new ArrayList<>(contributors);
+        Sorter.sort(sorted);
+        this.contributors = List.copyOf(Verify.nonNull(sorted, "contributors"));
     }
 
     @Override

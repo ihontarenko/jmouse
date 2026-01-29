@@ -40,6 +40,10 @@ public class DateAndTimeConverters {
                     }
 
                     return Instant.parse(value);
+                }),
+                of(Instant.class, String.class, source -> {
+                    // ISO-8601 in UTC, e.g. "2026-01-29T16:45:12.345Z"
+                    return source.toString();
                 })
         );
     }

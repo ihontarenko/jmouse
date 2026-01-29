@@ -104,8 +104,8 @@ abstract public class AbstractBeanAccessor extends AbstractAccessor {
      * @return a collection of keys as strings
      */
     @Override
-    public Set<String> keySet() {
-        Set<String> keys = new HashSet<>();
+    public Set<Object> keySet() {
+        Set<Object> keys = new HashSet<>();
 
         descriptor.getProperties().forEach((name, property) -> keys.add(name));
 

@@ -16,6 +16,9 @@ public final class MappingConfig {
     private final ArrayMaterializationPolicy arrayMaterializationPolicy;
     private final int                        maxCollectionSize;
 
+    private final MapKeyPolicy                  mapKeyPolicy;
+    private final ObjectToMapMode               objectToMapMode;
+
     private final List<MappingPlugin> plugins;
 
     private MappingConfig(Builder builder) {
@@ -25,6 +28,8 @@ public final class MappingConfig {
         this.collectionFactory          = builder.collectionFactory;
         this.mapFactory                 = builder.mapFactory;
         this.maxCollectionSize          = builder.maxCollectionSize;
+        this.mapKeyPolicy               = builder.mapKeyPolicy;
+        this.objectToMapMode            = builder.objectToMapMode;
         this.plugins                    = builder.plugins;
     }
 
@@ -34,6 +39,14 @@ public final class MappingConfig {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public MapKeyPolicy mapKeyPolicy() {
+        return mapKeyPolicy;
+    }
+
+    public ObjectToMapMode objectToMapMode() {
+        return objectToMapMode;
     }
 
     public List<MappingPlugin> plugins() {
@@ -74,6 +87,9 @@ public final class MappingConfig {
         private ArrayMaterializationPolicy arrayMaterializationPolicy =
                 ArrayMaterializationPolicy.STREAM_WHEN_SIZED;
 
+        private MapKeyPolicy                  mapKeyPolicy = MapKeyPolicy.STRINGIFY;
+        private ObjectToMapMode               objectToMapMode = ObjectToMapMode.TREE;
+
         private int maxCollectionSize = 10_000;
 
         private List<MappingPlugin> plugins;
@@ -106,6 +122,16 @@ public final class MappingConfig {
         public Builder maxCollectionSize(int value) {
             Verify.state(value > 0, "maxCollectionSize must be > 0");
             this.maxCollectionSize = value;
+            return this;
+        }
+
+        public Builder mapKeyPolicy(MapKeyPolicy value) {
+            this.mapKeyPolicy = Verify.nonNull(value, "mapKeyPolicy");
+            return this;
+        }
+
+        public Builder objectToMapMode(ObjectToMapMode value) {
+            this.objectToMapMode = Verify.nonNull(value, "objectToMapMode");
             return this;
         }
 

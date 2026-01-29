@@ -75,6 +75,22 @@ public interface ObjectAccessor extends TypeClassifier {
     ObjectAccessor get(String name);
 
     /**
+     * Retrieve a nested {@link ObjectAccessor} by key object.
+     *
+     * <p>Intended for map-like structures where keys are not necessarily strings.</p>
+     *
+     * @param key map key (may be {@code null}, depending on implementation)
+     * @return nested accessor for the given key
+     * @throws UnsupportedOperationException if this accessor is not map-like
+     */
+    default ObjectAccessor get(Object key) {
+        if (key instanceof String keyString) {
+            return get(keyString);
+        }
+        throw new UnsupportedOperationException("Supported only for map-like accessors.");
+    }
+
+    /**
      * Retrieves a nested ObjectAccessor by index.
      *
      * @param index the index of the nested data source
@@ -216,34 +232,62 @@ public interface ObjectAccessor extends TypeClassifier {
     }
 
     /**
-     * Retrieves a set of keys representing the entries in this ObjectAccessor.
-     * <p>
-     * For maps, returns the key set as strings. For lists, generates keys in the format "[index]".
-     * </p>
+     * Return a set of keys representing addressable entries of this accessor.
      *
-     * @return a set of keys as strings
+     * <p>Key generation rules:</p>
+     * <ul>
+     *   <li>If this accessor wraps a map, returns the original map keys.</li>
+     *   <li>If this accessor wraps a collection or array, returns index keys as {@link Integer}s:
+     *       {@code 0}, {@code 1}, {@code 2}, ...</li>
+     *   <li>For non-indexable values, returns an empty set.</li>
+     * </ul>
+     *
+     * <p><strong>Note:</strong> despite the method name, this method does not guarantee {@link String} keys.
+     * Use {@link #nameSet()} when you need keys normalized to property-path strings.</p>
+     *
+     * @return a set of keys (never {@code null})
      */
-    default Set<String> keySet() {
-        Set<String> keys = new HashSet<>();
+    default Set<Object> keySet() {
+        Set<Object> keys = new HashSet<>();
 
         if (isMap()) {
-            keys = asMap().keySet().stream().map(Object::toString).collect(toUnmodifiableSet());
+            keys.addAll(asMap().keySet().stream().collect(toUnmodifiableSet()));
         } else if (isCollection() || isArray()) {
-            int size = isCollection() ? asCollection().size() : asArray().length;
-            keys = IntStream.range(0, size).mapToObj("[%d]"::formatted).collect(toUnmodifiableSet());
+            int length = isCollection() ? asCollection().size() : asArray().length;
+            keys.addAll(Set.of(IntStream.range(0, length).boxed().toArray()));
         }
 
         return keys;
     }
 
     /**
-     * Converts the keys in this ObjectAccessor to PropertyPath instances.
+     * Convert the keys of this accessor into {@link PropertyPath} instances.
      *
-     * @return a set of PropertyPath instances representing the keys
-     * @see #keySet()
+     * <p>Conversion rules:</p>
+     * <ul>
+     *   <li>{@link String} keys are used as-is</li>
+     *   <li>{@link Integer} keys are converted into index notation {@code "[n]"}</li>
+     * </ul>
+     *
+     * @return immutable set of property paths derived from {@link #keySet()}
+     * @throws IllegalStateException if an unsupported key type is encountered
      */
     default Set<PropertyPath> nameSet() {
-        return keySet().stream().map(PropertyPath::forPath).collect(toUnmodifiableSet());
+        Set<String> keys = new LinkedHashSet<>();
+
+        for (Object key : keySet()) {
+            if (key instanceof String keyString) {
+                keys.add(keyString);
+            } else if (key instanceof Integer keyInteger) {
+                keys.add("[" + keyInteger + "]");
+            } else {
+                throw new IllegalStateException(
+                        "Unsupported key type for nameSet(): " + (key == null ? "null" : key.getClass().getName())
+                );
+            }
+        }
+
+        return keys.stream().map(PropertyPath::forPath).collect(toUnmodifiableSet());
     }
 
     /**

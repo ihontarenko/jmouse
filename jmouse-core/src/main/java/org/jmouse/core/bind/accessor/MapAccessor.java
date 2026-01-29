@@ -54,6 +54,30 @@ public class MapAccessor extends AbstractAccessor {
     }
 
     /**
+     * Retrieve a nested {@link ObjectAccessor} by key object.
+     *
+     * <p>Intended for map-like structures where keys are not necessarily strings.</p>
+     *
+     * @param key map key (may be {@code null}, depending on implementation)
+     * @return nested accessor for the given key
+     * @throws java.lang.UnsupportedOperationException if this accessor is not map-like
+     */
+    @Override
+    public ObjectAccessor get(Object key) {
+        Object value = null;
+
+        if (asMap() instanceof Map<?,?> map) {
+            @SuppressWarnings("unchecked")
+            Map<Object, Object> source = (Map<Object, Object>) map;
+            if (source.containsKey(key)) {
+                value = source.get(key);
+            }
+        }
+
+        return wrap(value);
+    }
+
+    /**
      * Retrieves a nested {@link ObjectAccessor} by index.
      * <p>
      * If the source is a {@link List}, this method returns the value at the specified index.

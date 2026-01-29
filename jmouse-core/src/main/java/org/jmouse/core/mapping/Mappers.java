@@ -10,7 +10,8 @@ import org.jmouse.core.mapping.plan.array.ArrayPlanContributor;
 import org.jmouse.core.mapping.plan.bean.JavaBeanPlanContributor;
 import org.jmouse.core.mapping.plan.collection.ListPlanContributor;
 import org.jmouse.core.mapping.plan.collection.SetPlanContributor;
-import org.jmouse.core.mapping.plan.map.MapPlanContributor;
+import org.jmouse.core.mapping.plan.map.MapToMapPlanContributor;
+import org.jmouse.core.mapping.plan.map.ObjectToMapPlanContributor;
 import org.jmouse.core.mapping.plan.record.RecordPlanContributor;
 import org.jmouse.core.mapping.plan.scalar.ScalarPlanContributor;
 
@@ -45,7 +46,8 @@ public class Mappers {
             new JavaBeanPlanContributor(),
             new RecordPlanContributor(),
             new ScalarPlanContributor(),
-            new MapPlanContributor(),
+            new MapToMapPlanContributor(),
+            new ObjectToMapPlanContributor(),
             new ListPlanContributor(),
             new SetPlanContributor(),
             new ArrayPlanContributor()

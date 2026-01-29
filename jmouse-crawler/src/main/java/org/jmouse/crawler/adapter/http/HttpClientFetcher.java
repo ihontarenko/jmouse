@@ -48,9 +48,8 @@ public final class HttpClientFetcher implements Fetcher {
 
         this.client = HttpClient.newBuilder()
                 .connectTimeout(this.config.connectTimeout())
-                .followRedirects(this.config.followRedirects()
-                                         ? HttpClient.Redirect.NORMAL
-                                         : HttpClient.Redirect.NEVER)
+                .followRedirects(
+                        this.config.followRedirects() ? HttpClient.Redirect.NORMAL : HttpClient.Redirect.NEVER)
                 .build();
     }
 

@@ -3,12 +3,20 @@ package org.jmouse.crawler.examples.smoke;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
+import org.jmouse.core.reflection.InferredType;
+import org.jmouse.core.trace.TraceContext;
 import org.jmouse.crawler.adapter.jsonpath.JaywayJsonPathSelector;
 import org.jmouse.crawler.adapter.jsoup.*;
 import org.jmouse.crawler.api.*;
 import org.jmouse.crawler.dsl.builder.FacadeBuilder;
 import org.jmouse.crawler.dsl.factory.Runners;
 import org.jmouse.crawler.runtime.queue.FifoFrontier;
+import org.jmouse.crawler.runtime.state.checkpoint.FileSnapshotStore;
+import org.jmouse.crawler.runtime.state.checkpoint.JacksonSnapshotCodec;
+import org.jmouse.crawler.runtime.state.checkpoint.SnapshotCodec;
+import org.jmouse.crawler.runtime.state.checkpoint.StoreBackedSnapshotRepository;
+import org.jmouse.crawler.runtime.state.checkpoint.frontier.CheckpointingFrontier;
+import org.jmouse.crawler.runtime.state.checkpoint.frontier.FrontierSnapshot;
 import org.jmouse.crawler.selector.*;
 import org.jmouse.crawler.adapter.http.HttpClientFetcher;
 import org.jmouse.crawler.adapter.http.HttpFetcherConfig;
@@ -23,6 +31,7 @@ import org.jmouse.crawler.runtime.PolitenessPolicies;
 import java.net.URI;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +48,10 @@ public class Smoke2 {
                     .compute("hint", (source, context)
                             -> VoronHint.valueOf(String.valueOf(source.get("hint")).toUpperCase().trim()))
                 )
+                .mapping(ProcessingTask.class, Map.class, m -> m
+                        .bind("task_id", "id")
+                        .bind("pwd", "password")
+                )
                 .build();
 
         return Mappers.builder()
@@ -48,7 +61,40 @@ public class Smoke2 {
 
     public static void main(String[] args) {
 
-        Path stateDir = Path.of("build", "crawler-state", "smoke2");
+        ProcessingTask processingTask = new ProcessingTask(
+                TaskId.random(),
+                TraceContext.root(),
+                URI.create("https://google.com/"),
+                100,
+                URI.create("https://jmouse.org/"),
+                TaskOrigin.seed("pub-processor"),
+                0,
+                Instant.now(),
+                2, VoronHint.PRODUCT
+        );
+
+        mapper().map(processingTask, InferredType.forParametrizedClass(Map.class, String.class, Object.class));
+
+        var           objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        SnapshotCodec codec        = new JacksonSnapshotCodec(objectMapper);
+
+        var store = new FileSnapshotStore(Path.of("var/state/frontier.snapshot.json"));
+        var repo  = new StoreBackedSnapshotRepository<>(
+                store,
+                codec,
+                FrontierSnapshot.class,
+                FrontierSnapshot.empty()
+        );
+
+        Frontier frontier = new FifoFrontier();
+
+        frontier = new CheckpointingFrontier(
+                frontier,
+                repo,
+                mapper(), // твій jMouse Mapper
+                () -> true, // або policy
+                true
+        );
 
 
         /// //////////////////////
@@ -65,6 +111,8 @@ public class Smoke2 {
 
         DecisionLog decisionLog = new InMemoryDecisionLog();
 
+        Frontier finalFrontier = frontier;
+
         Crawler crawler = FacadeBuilder.create()
 
                 .seed("https://voron.ua/uk/catalog/active-components/integrated-circuit/logic-gates", VoronHint.LISTING)
@@ -73,7 +121,7 @@ public class Smoke2 {
                         .parsers(parserRegistry)
                         .decisionLog(decisionLog)
 
-                        .frontier(new FifoFrontier())
+                        .frontier(finalFrontier)
 
                         .politeness(PolitenessPolicies.gentle(80, 100))
                         .politeness(p -> p
