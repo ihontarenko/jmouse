@@ -1,6 +1,7 @@
 package org.jmouse.crawler.runtime.state.checkpoint.frontier;
 
 import org.jmouse.core.Verify;
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.crawler.api.Frontier;
 import org.jmouse.crawler.api.ProcessingTask;
@@ -52,6 +53,7 @@ public final class CheckpointingFrontier implements Frontier {
         mirror.clear();
 
         FrontierSnapshot snapshot = snapshots.load();
+
         if (snapshot != null && snapshot.tasks() != null) {
             mirror.addAll(snapshot.tasks());
         }
@@ -74,7 +76,10 @@ public final class CheckpointingFrontier implements Frontier {
             return;
         }
 
-        Map<String, Object> values = mapper.map(task, Map.class);
+        Map<String, Object> values = mapper.map(
+                task,
+                TypedValue.ofMap(String.class, Object.class).getType()
+        );
 
         mirror.add(values);
         delegate.offer(task);

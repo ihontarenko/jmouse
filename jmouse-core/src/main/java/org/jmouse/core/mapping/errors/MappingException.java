@@ -17,4 +17,9 @@ public final class MappingException extends RuntimeException {
         return code;
     }
 
+    @Override
+    public String toString() {
+        return "[" + code.toUpperCase() + "]: " + super.toString();
+    }
+
 }

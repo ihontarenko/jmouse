@@ -42,11 +42,21 @@ public class Smoke2 {
     public static Mapper mapper() {
         TypeMappingRegistry registry = TypeMappingRegistry.builder()
                 .mapping(Map.class, ProcessingTask.class, m -> m
-                    .compute("origin", (source, context) -> {
-                        return TaskOrigin.retry("default-reason");
-                    })
-                    .compute("hint", (source, context)
-                            -> VoronHint.valueOf(String.valueOf(source.get("hint")).toUpperCase().trim()))
+                        .compute("origin", (source, context) -> {
+                            if (source.get("origin") instanceof Map<?,?> origin) {
+                                String kind = String.valueOf(origin.get("kind"));
+
+                                if (kind.equals("seed")) {
+                                    return TaskOrigin.seed(
+                                            String.valueOf(origin.get("publisher"))
+                                    );
+                                }
+                            }
+
+                            return TaskOrigin.retry("default!");
+                        })
+                        .compute("hint", (source, context) -> VoronHint.valueOf(String.valueOf(source.get("hint")).toUpperCase().trim()))
+                        .bind("id", "task_id")
                 )
                 .mapping(ProcessingTask.class, Map.class, m -> m
                         .bind("task_id", "id")
