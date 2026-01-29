@@ -146,7 +146,7 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
             return mapper.map(value, targetType);
         }
 
-        if (conversion.hasConverter(value.getClass(), type) && !targetType.isCollection() && !targetType.isMap()) {
+        if (conversion.hasAnyConverter(value.getClass(), type) && !targetType.isCollection() && !targetType.isMap()) {
             return convertIfNeeded(value, type, conversion);
         }
 

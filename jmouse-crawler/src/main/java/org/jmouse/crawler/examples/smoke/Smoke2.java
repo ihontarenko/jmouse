@@ -1,22 +1,14 @@
 package org.jmouse.crawler.examples.smoke;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jmouse.core.bind.Bind;
-import org.jmouse.core.bind.Binder;
-import org.jmouse.core.bind.DefaultBindingCallback;
-import org.jmouse.core.trace.TraceContext;
+import org.jmouse.core.mapping.Mapper;
+import org.jmouse.core.mapping.Mappers;
+import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.crawler.adapter.jsonpath.JaywayJsonPathSelector;
 import org.jmouse.crawler.adapter.jsoup.*;
 import org.jmouse.crawler.api.*;
 import org.jmouse.crawler.dsl.builder.FacadeBuilder;
 import org.jmouse.crawler.dsl.factory.Runners;
 import org.jmouse.crawler.runtime.queue.FifoFrontier;
-import org.jmouse.crawler.runtime.state.persistence.*;
-import org.jmouse.crawler.runtime.state.persistence.dto.ProcessingTaskDto;
-import org.jmouse.crawler.runtime.state.persistence.file.FileWalRepository;
-import org.jmouse.crawler.runtime.state.persistence.snapshot.FrontierSnapshot;
-import org.jmouse.crawler.runtime.state.persistence.wal.StateEvent;
-import org.jmouse.crawler.runtime.state.persistence.wrapper.PersistentFrontier;
 import org.jmouse.crawler.selector.*;
 import org.jmouse.crawler.adapter.http.HttpClientFetcher;
 import org.jmouse.crawler.adapter.http.HttpFetcherConfig;
@@ -31,7 +23,6 @@ import org.jmouse.crawler.runtime.PolitenessPolicies;
 import java.net.URI;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -39,38 +30,26 @@ import static org.jmouse.crawler.route.URLMatches.*;
 
 public class Smoke2 {
 
+    public static Mapper mapper() {
+        TypeMappingRegistry registry = TypeMappingRegistry.builder()
+                .mapping(Map.class, ProcessingTask.class, m -> m
+                    .compute("origin", (source, context) -> {
+                        return TaskOrigin.retry("default-reason");
+                    })
+                    .compute("hint", (source, context)
+                            -> VoronHint.valueOf(String.valueOf(source.get("hint")).toUpperCase().trim()))
+                )
+                .build();
+
+        return Mappers.builder()
+                .registry(registry)
+                .build();
+    }
+
     public static void main(String[] args) {
 
         Path stateDir = Path.of("build", "crawler-state", "smoke2");
 
-        Codec        codec  = new JacksonCodec(JacksonMappers.defaultMapper());
-
-        SnapshotRepository<FrontierSnapshot> frontierSnapshotRepository =
-                new FileSnapshotRepository<>(
-                        stateDir.resolve("frontier.snapshot.json"),
-                        codec,
-                        FrontierSnapshot.class,
-                        FrontierSnapshot.empty()
-                );
-
-        WalRepository<StateEvent> frontierWal =
-                new FileWalRepository<>(
-                        stateDir.resolve("frontier.wal.jsonl"),
-                        codec,
-                        StateEvent.class,
-                        Durability.sync()
-                );
-
-        SnapshotPolicy snapshotPolicy =
-                SnapshotPolicy.every(2);
-
-        Frontier persistentFrontier = new PersistentFrontier(
-                new FifoFrontier(),
-                frontierSnapshotRepository,
-                frontierWal,
-                snapshotPolicy,
-                true // restoreOnCreate
-        );
 
         /// //////////////////////
 
@@ -94,7 +73,7 @@ public class Smoke2 {
                         .parsers(parserRegistry)
                         .decisionLog(decisionLog)
 
-                        .frontier(persistentFrontier)
+                        .frontier(new FifoFrontier())
 
                         .politeness(PolitenessPolicies.gentle(80, 100))
                         .politeness(p -> p
@@ -152,7 +131,7 @@ public class Smoke2 {
 
                 .build();
 
-//        crawler.runUntilDrained();
+        crawler.runUntilDrained();
 
         System.out.println(decisionLog);
 

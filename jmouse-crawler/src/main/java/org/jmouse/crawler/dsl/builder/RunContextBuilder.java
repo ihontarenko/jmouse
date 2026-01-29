@@ -16,14 +16,6 @@ import org.jmouse.crawler.runtime.queue.InMemoryRetryBuffer;
 import org.jmouse.crawler.runtime.dlq.InMemoryDeadLetterQueue;
 import org.jmouse.crawler.runtime.state.*;
 
-import org.jmouse.crawler.runtime.state.persistence.*;
-
-import org.jmouse.crawler.runtime.state.persistence.FileSnapshotRepository;
-import org.jmouse.crawler.runtime.state.persistence.events.InFlightEvent;
-import org.jmouse.crawler.runtime.state.persistence.file.FileWalRepository;
-import org.jmouse.crawler.runtime.state.persistence.snapshot.InFlightSnapshot;
-import org.jmouse.crawler.runtime.state.persistence.wrap.PersistentInFlightBuffer;
-
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Duration;
@@ -48,10 +40,6 @@ public final class RunContextBuilder {
     private InFlightBuffer inFlight;
 
     private Clock clock;
-
-    // persistence
-    private PersistenceConfig  persistence;
-    private StateBootstrapper  bootstrapper;
 
     /* ===================== setters ===================== */
 
@@ -133,19 +121,6 @@ public final class RunContextBuilder {
         return this;
     }
 
-    /**
-     * Enable persistence via client-side configuration.
-     *
-     * <p>When enabled, builder will wrap selected runtime stores with persistent decorators
-     * and expose {@link #bootstrapper()} for restore/checkpoint hooks.</p>
-     */
-    public RunContextBuilder persistence(Customizer<PersistenceBuilder> customizer) {
-        PersistenceBuilder builder = new PersistenceBuilder();
-        Verify.nonNull(customizer, "customizer").customize(builder);
-        this.persistence = builder.build();
-        return this;
-    }
-
     /* ===================== defaults ===================== */
 
     void ensureDefaults() {
@@ -204,24 +179,12 @@ public final class RunContextBuilder {
 
         Verify.state(fetcher != null, "Fetcher must be configured via runtime.fetcher(...)");
 
-        if (persistence != null) {
-            applyPersistence(persistence);
-        }
     }
 
     public Clock clock() {
         return clock == null ? Clock.systemUTC() : clock;
     }
 
-    /**
-     * Expose bootstrapper to be called by FacadeBuilder:
-     * <pre>
-     *   runtimeBuilder.bootstrapper().restore();
-     * </pre>
-     */
-    public StateBootstrapper bootstrapper() {
-        return bootstrapper;
-    }
 
     /* ===================== build ===================== */
 
@@ -251,33 +214,4 @@ public final class RunContextBuilder {
         );
     }
 
-    /* ===================== persistence wiring ===================== */
-
-    private void applyPersistence(PersistenceConfig persistenceConfig) {
-        Path directory = persistenceConfig.directory();
-
-        WalRepository<InFlightEvent> wal = new FileWalRepository<>(
-                directory.resolve("inflight.wal"),
-                persistenceConfig.codec(),
-                InFlightEvent.class,
-                persistenceConfig.durability()
-        );
-
-        SnapshotRepository<InFlightSnapshot> snapshots = new FileSnapshotRepository<>(
-                directory.resolve("inflight.snapshot"),
-                persistenceConfig.codec(),
-                InFlightSnapshot.class,
-                InFlightSnapshot.empty()
-        );
-
-        this.inFlight = new PersistentInFlightBuffer(
-                this.inFlight,
-                wal,
-                snapshots,
-                persistenceConfig.snapshotPolicy(),
-                this.clock
-        );
-
-        this.bootstrapper = new DefaultStateBootstrapper(this.frontier, this.inFlight);
-    }
 }

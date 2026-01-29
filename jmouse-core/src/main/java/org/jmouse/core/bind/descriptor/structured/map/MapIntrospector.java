@@ -85,7 +85,7 @@ public class MapIntrospector<K, V>
             ClassTypeDescriptor keyType   = new ClassTypeIntrospector(forClass(key.getClass()))
                     .name()
                     .toDescriptor();
-            ClassTypeDescriptor valueType = new ClassTypeIntrospector(forClass(value.getClass()))
+            ClassTypeDescriptor valueType = new ClassTypeIntrospector(forClass(value == null ? Object.class : value.getClass()))
                     .name()
                     .toDescriptor();
 

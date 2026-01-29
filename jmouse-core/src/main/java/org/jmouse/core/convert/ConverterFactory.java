@@ -59,6 +59,23 @@ public interface ConverterFactory {
     void registerConverter(GenericConverter<?, ?> genericConverter);
 
     /**
+     * Check whether any conversion path exists between {@code sourceType} and {@code targetType}.
+     *
+     * <p>This method first checks for a direct converter. If none is found, it tries to resolve
+     * an indirect conversion via:</p>
+     * <ul>
+     *   <li>a compatible converter candidate (e.g. assignable source/target match), or</li>
+     *   <li>a multi-step transition chain (A -&gt; B -&gt; C) that can reach {@code targetType}</li>
+     * </ul>
+     *
+     * @param sourceType source runtime type (never {@code null})
+     * @param targetType target runtime type (never {@code null})
+     * @return {@code true} if a direct converter, candidate converter, or transition chain exists;
+     *         {@code false} otherwise
+     */
+    boolean hasAnyConverter(Class<?> sourceType, Class<?> targetType);
+
+    /**
      * Checks if a converter is registered for the given source and target types.
      *
      * @param sourceType the class representing the source type

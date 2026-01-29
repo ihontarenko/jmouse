@@ -27,7 +27,20 @@ public class DateAndTimeConverters {
                 of(GregorianCalendar.class, Instant.class, GregorianCalendar::toInstant),
                 of(Instant.class, GregorianCalendar.class, source
                         -> GregorianCalendar.from(source.atZone(ZoneId.systemDefault()))),
-                of(Instant.class, Instant.class, Instant::from)
+                of(Instant.class, Instant.class, Instant::from),
+                of(String.class, Instant.class, source -> {
+                    String value = source.trim();
+
+                    if (value.matches("^-?\\d{13}$")) {
+                        return Instant.ofEpochMilli(Long.parseLong(value));
+                    }
+
+                    if (value.matches("^-?\\d+$")) {
+                        return Instant.ofEpochSecond(Long.parseLong(value));
+                    }
+
+                    return Instant.parse(value);
+                })
         );
     }
 

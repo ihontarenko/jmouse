@@ -75,6 +75,12 @@ public final class JavaBeanPlan<T> extends AbstractObjectPlan<T> {
 
     private T instantiate() {
         try {
+            if (targetType.isInterface()) {
+                throw new MappingException(
+                        "bean_instantiation_failed",
+                        "Failed to instantiate target bean because target-type is an interface: " + targetType.getName()
+                );
+            }
             return JavaBean.of(targetType).getFactory(TypedValue.of(targetType)).create();
         } catch (Exception exception) {
             throw new MappingException(
