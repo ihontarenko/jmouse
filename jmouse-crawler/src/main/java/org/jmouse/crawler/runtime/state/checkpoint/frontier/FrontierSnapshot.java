@@ -8,4 +8,5 @@ public record FrontierSnapshot(List<Map<String, Object>> tasks) {
     public static FrontierSnapshot empty() {
         return new FrontierSnapshot(List.of());
     }
+
 }
