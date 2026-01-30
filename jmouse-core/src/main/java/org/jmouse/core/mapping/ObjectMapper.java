@@ -1,6 +1,7 @@
 package org.jmouse.core.mapping;
 
 import org.jmouse.core.Verify;
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.plan.MappingPlan;
 import org.jmouse.core.reflection.InferredType;
@@ -43,39 +44,40 @@ public final class ObjectMapper implements Mapper {
     }
 
     /**
-     * Map the given {@code source} into the requested inferred target {@code type}.
+     * Core mapping operation using {@link TypedValue}.
      *
-     * <p>Plan resolution is delegated to the configured plan registry:
-     * {@code planRegistry.planFor(source, type, context)}.</p>
-     *
-     * <p>Any {@link MappingException} thrown by the plan is logged and rethrown after
-     * notifying the invocation bus via {@link MappingInvocation#fail(MappingException)}.</p>
+     * <p>{@code typedValue} describes:</p>
+     * <ul>
+     *   <li>the target type metadata</li>
+     *   <li>an optional target instance (existing or supplier-backed)</li>
+     * </ul>
      *
      * @param source source object (may be {@code null})
-     * @param type inferred target type (never {@code null})
+     * @param typedValue target type descriptor and optional instance holder
      * @param <T> target type
-     * @return mapped value, or {@code null} when {@code source} is {@code null}
-     * @throws IllegalArgumentException if {@code type} is {@code null}
-     * @throws MappingException when mapping fails
+     * @return mapped value (may be {@code null} when {@code source} is {@code null})
      */
     @Override
-    public <T> T map(Object source, InferredType type) {
+    public <T> T map(Object source, TypedValue<T> typedValue) {
         if (source == null) {
             return null;
         }
 
-        Verify.nonNull(type, "type");
+        Verify.nonNull(typedValue, "typedValue");
 
+        InferredType      type          = typedValue.getType();
         MappingInvocation invocation    = MappingInvocation.begin(context, source, source.getClass(), type);
         MappingContext    scopedContext = invocation.context();
-        MappingPlan<T>    plan          = scopedContext.planRegistry().planFor(source, type, scopedContext);
+        MappingPlan<T>    mappingPlan   = scopedContext.planRegistry().planFor(source, typedValue, scopedContext);
 
         try {
-            T value = plan.execute(source, scopedContext);
+            T value = mappingPlan.execute(source, scopedContext);
             return invocation.finish(source, value, type);
         } catch (MappingException mappingException) {
-            LOGGER.error("[{}]: {}", mappingException.code(), mappingException.getMessage());
-            throw invocation.fail(mappingException);
+            if (!(invocation.fail(mappingException) instanceof MappingException exception)) {
+                return null;
+            }
+            throw exception;
         }
     }
 }

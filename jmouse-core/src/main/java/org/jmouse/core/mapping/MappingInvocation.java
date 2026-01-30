@@ -2,9 +2,13 @@ package org.jmouse.core.mapping;
 
 import org.jmouse.core.Verify;
 import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.mapping.config.MappingConfig;
+import org.jmouse.core.mapping.errors.ErrorAction;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.plugin.*;
 import org.jmouse.core.reflection.InferredType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Orchestrates a single mapping invocation and its plugin lifecycle. 🧭
@@ -20,6 +24,8 @@ import org.jmouse.core.reflection.InferredType;
  * {@link PluginBus.Noop} to avoid repeated lifecycle notifications.</p>
  */
 public final class MappingInvocation {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MappingInvocation.class);
 
     private final MappingContext context;
     private final PluginBus      bus;
@@ -96,8 +102,26 @@ public final class MappingInvocation {
      * @return the same exception instance (as {@link RuntimeException})
      */
     public RuntimeException fail(MappingException exception) {
-        PropertyPath path = context.scope().path();
-        bus.onError(new MappingFailure(exception, path, context));
+        PropertyPath  propertyPath = context.scope().path();
+        MappingConfig config       = context.config();
+
+        bus.onError(new MappingFailure(exception, propertyPath, context));
+
+        switch (config.errorCodePolicy().getActionFor(exception.code())) {
+            case THROW -> {
+                LOGGER.error("[{}]: {}", exception.code(), exception.getMessage(), exception);
+                throw exception;
+            }
+            case WARN -> {
+                LOGGER.warn("[{}]: {} meta={}", exception.code(), exception.getMessage(), exception.meta(), exception);
+                return null;
+            }
+            case SILENT -> {
+                return null;
+            }
+        }
+
+        // not reachable, but friendly for compiler
         return exception;
     }
 }

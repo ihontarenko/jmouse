@@ -1,5 +1,6 @@
 package org.jmouse.core.mapping.plan.bean;
 
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.plan.MappingPlan;
 import org.jmouse.core.mapping.plan.MappingPlanContributor;
 import org.jmouse.core.mapping.MappingContext;
@@ -13,7 +14,7 @@ public final class JavaBeanPlanContributor implements MappingPlanContributor {
     }
 
     @Override
-    public <T> MappingPlan<T> build(InferredType targetType, MappingContext context) {
-        return new JavaBeanPlan<>(targetType);
+    public <T> MappingPlan<T> build(TypedValue<T> typedValue, MappingContext context) {
+        return new JavaBeanPlan<>(typedValue);
     }
 }

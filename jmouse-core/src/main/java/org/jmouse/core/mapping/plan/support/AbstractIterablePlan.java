@@ -1,6 +1,7 @@
 package org.jmouse.core.mapping.plan.support;
 
 import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
@@ -8,8 +9,8 @@ import java.util.*;
 
 abstract public class AbstractIterablePlan<T> extends AbstractPlan<T> {
 
-    protected AbstractIterablePlan(InferredType targetType) {
-        super(targetType);
+    protected AbstractIterablePlan(TypedValue<T> typedValue) {
+        super(typedValue);
     }
 
     @Override

@@ -3,6 +3,10 @@ package org.jmouse.crawler.examples.smoke;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
+import org.jmouse.core.mapping.config.MappingConfig;
+import org.jmouse.core.mapping.errors.ErrorAction;
+import org.jmouse.core.mapping.errors.ErrorCodePolicy;
+import org.jmouse.core.mapping.errors.MappingErrorCodes;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.trace.TraceContext;
 import org.jmouse.crawler.adapter.jsonpath.JaywayJsonPathSelector;
@@ -34,6 +38,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.jmouse.crawler.route.URLMatches.*;
 
@@ -66,6 +71,16 @@ public class Smoke2 {
 
         return Mappers.builder()
                 .registry(registry)
+                .config(MappingConfig.builder()
+                                .errorCodePolicy(
+                                        ErrorCodePolicy.builder()
+                                                .onCode(MappingErrorCodes.PLAN_NO_CONTRIBUTOR, ErrorAction.THROW)
+                                                .onPrefix("map.", ErrorAction.WARN)
+                                                .onPrefix("scalar.", ErrorAction.THROW)
+                                                .defaultAction(ErrorAction.THROW)
+                                                .build()
+                                )
+                                .build())
                 .build();
     }
 
@@ -83,7 +98,15 @@ public class Smoke2 {
                 2, VoronHint.PRODUCT
         );
 
-        mapper().map(processingTask, InferredType.forParametrizedClass(Map.class, String.class, Object.class));
+        Map<String, Object> target = new ConcurrentHashMap<>();
+
+        mapper().map(processingTask, InferredType.forParametrizedClass(
+                Map.class, String.class, Object.class
+        ), ConcurrentHashMap::new);
+
+        System.out.println(target);
+
+        System.exit(1);
 
         var           objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
         SnapshotCodec codec        = new JacksonSnapshotCodec(objectMapper);

@@ -1,6 +1,7 @@
 package org.jmouse.core.mapping.plan.record;
 
 import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.bind.ValueObject;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.bind.descriptor.structured.record.ValueObjectDescriptor;
@@ -13,18 +14,18 @@ public final class RecordPlan<T> extends AbstractObjectPlan<T> {
 
     private final ValueObject<? extends Record> valueObject;
 
-    public RecordPlan(InferredType targetType) {
-        super(targetType);
+    public RecordPlan(TypedValue<T> typedValue) {
+        super(typedValue);
 
         if (getTargetType() == null || !getTargetType().isRecord()) {
             throw new MappingException(
                     "record_plan_target_not_record",
-                    "RecordPlan target must be a record, got: " + targetType
+                    "RecordPlan target must be a record, got: " + typedValue.getType()
             );
         }
 
         @SuppressWarnings("unchecked")
-        Class<? extends Record> recordType = (Class<? extends Record>) this.targetType.getClassType();
+        Class<? extends Record> recordType = (Class<? extends Record>) getTargetType().getClassType();
 
         this.valueObject = ValueObject.of(recordType);
     }

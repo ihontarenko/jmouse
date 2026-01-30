@@ -1,9 +1,12 @@
 package org.jmouse.core.mapping.plan.map;
 
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.plan.MappingPlan;
 import org.jmouse.core.mapping.plan.MappingPlanContributor;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
+
+import java.util.Map;
 
 public final class MapToMapPlanContributor implements MappingPlanContributor {
 
@@ -18,8 +21,8 @@ public final class MapToMapPlanContributor implements MappingPlanContributor {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> MappingPlan<T> build(InferredType targetType, MappingContext context) {
-        return (MappingPlan<T>) new MapToMapPlan(targetType);
+    public <T> MappingPlan<T> build(TypedValue<T> typedValue, MappingContext context) {
+        return (MappingPlan<T>) new MapToMapPlan((TypedValue<Map<Object, Object>>) typedValue);
     }
 
 }

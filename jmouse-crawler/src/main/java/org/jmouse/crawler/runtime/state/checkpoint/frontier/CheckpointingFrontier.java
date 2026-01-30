@@ -59,8 +59,9 @@ public final class CheckpointingFrontier implements Frontier {
         }
 
         for (Map<String, Object> raw : mirror) {
-            ProcessingTask task = mapper.map(raw, ProcessingTask.class);
-            delegate.offer(task);
+            delegate.offer(
+                    mapper.map(raw, ProcessingTask.class)
+            );
         }
 
         restored = true;

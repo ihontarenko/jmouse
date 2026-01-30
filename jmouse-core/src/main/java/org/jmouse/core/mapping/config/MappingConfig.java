@@ -1,6 +1,7 @@
 package org.jmouse.core.mapping.config;
 
 import org.jmouse.core.Verify;
+import org.jmouse.core.mapping.errors.ErrorCodePolicy;
 import org.jmouse.core.mapping.plugin.MappingPlugin;
 
 import java.util.*;
@@ -19,6 +20,8 @@ public final class MappingConfig {
     private final MapKeyPolicy                  mapKeyPolicy;
     private final ObjectToMapMode               objectToMapMode;
 
+    private final ErrorCodePolicy errorCodePolicy;
+
     private final List<MappingPlugin> plugins;
 
     private MappingConfig(Builder builder) {
@@ -31,6 +34,7 @@ public final class MappingConfig {
         this.mapKeyPolicy               = builder.mapKeyPolicy;
         this.objectToMapMode            = builder.objectToMapMode;
         this.plugins                    = builder.plugins;
+        this.errorCodePolicy            = builder.errorCodePolicy;
     }
 
     public static MappingConfig defaults() {
@@ -39,6 +43,10 @@ public final class MappingConfig {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public ErrorCodePolicy errorCodePolicy() {
+        return errorCodePolicy;
     }
 
     public MapKeyPolicy mapKeyPolicy() {
@@ -94,6 +102,8 @@ public final class MappingConfig {
 
         private List<MappingPlugin> plugins;
 
+        private ErrorCodePolicy errorCodePolicy = ErrorCodePolicy.builder().build();
+
         public Builder listFactory(Supplier<? extends List<Object>> factory) {
             this.listFactory = Verify.nonNull(factory, "listFactory");
             return this;
@@ -137,6 +147,11 @@ public final class MappingConfig {
 
         public Builder plugins(List<MappingPlugin> plugins) {
             this.plugins = Verify.nonNull(plugins, "plugins");
+            return this;
+        }
+
+        public Builder errorCodePolicy(ErrorCodePolicy policy) {
+            this.errorCodePolicy = Verify.nonNull(policy, "errorCodePolicy");
             return this;
         }
 

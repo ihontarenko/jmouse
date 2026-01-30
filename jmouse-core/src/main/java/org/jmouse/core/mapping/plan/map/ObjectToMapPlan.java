@@ -2,6 +2,7 @@ package org.jmouse.core.mapping.plan.map;
 
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.binding.PropertyMapping;
@@ -61,10 +62,10 @@ public final class ObjectToMapPlan extends AbstractMapPlan<Map<Object, Object>> 
     /**
      * Create a plan instance for the requested target type.
      *
-     * @param targetType inferred target map type
+     * @param typedValue typed value target map type
      */
-    public ObjectToMapPlan(InferredType targetType) {
-        super(targetType);
+    public ObjectToMapPlan(TypedValue<Map<Object, Object>> typedValue) {
+        super(typedValue);
     }
 
     /**

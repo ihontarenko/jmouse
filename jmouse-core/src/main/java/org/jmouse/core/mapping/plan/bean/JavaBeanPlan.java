@@ -16,9 +16,9 @@ public final class JavaBeanPlan<T> extends AbstractObjectPlan<T> {
     private final Class<T>            targetType;
     private final ObjectDescriptor<T> descriptor;
 
-    public JavaBeanPlan(InferredType targetType) {
-        super(targetType);
-        this.targetType = targetType.getRawType();
+    public JavaBeanPlan(TypedValue<T> typedValue) {
+        super(typedValue);
+        this.targetType = typedValue.getType().getRawType();
         this.descriptor = DescriptorResolver.ofBeanType(this.targetType);
     }
 

@@ -1,7 +1,9 @@
 package org.jmouse.core.mapping.plan.support;
 
+import org.jmouse.core.Verify;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.mapping.MappingScope;
 import org.jmouse.core.mapping.binding.PropertyMapping;
@@ -14,8 +16,6 @@ import org.jmouse.core.mapping.plugin.PluginBus;
 import org.jmouse.core.reflection.InferredType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Objects;
 
 /**
  * Base implementation for {@link MappingPlan} that provides common utilities for
@@ -37,19 +37,10 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPlan.class);
 
-    /**
-     * Target type metadata of this plan.
-     */
-    protected final InferredType targetType;
+    protected final TypedValue<T> typedValue;
 
-    /**
-     * Create a mapping plan for the given target type.
-     *
-     * @param targetType inferred target type (never {@code null})
-     * @throws NullPointerException if {@code targetType} is {@code null}
-     */
-    protected AbstractPlan(InferredType targetType) {
-        this.targetType = Objects.requireNonNull(targetType, "targetType");
+    protected AbstractPlan(TypedValue<T> typedValue) {
+        this.typedValue = Verify.nonNull(typedValue, "typedValue");
     }
 
     /**
@@ -264,7 +255,14 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
      * Target type related to this mapping plan
      */
     public InferredType getTargetType() {
-        return targetType;
+        return getTypedValue().getType();
+    }
+
+    /**
+     * Target {@link TypedValue} related to this mapping plan
+     */
+    public TypedValue<T> getTypedValue() {
+        return typedValue;
     }
 
     /**

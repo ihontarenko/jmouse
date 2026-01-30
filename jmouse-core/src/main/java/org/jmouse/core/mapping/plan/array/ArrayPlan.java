@@ -1,5 +1,6 @@
 package org.jmouse.core.mapping.plan.array;
 
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.config.ArrayMaterializationPolicy;
 import org.jmouse.core.mapping.plan.support.AbstractIterablePlan;
@@ -14,8 +15,8 @@ import java.util.OptionalInt;
 
 public final class ArrayPlan extends AbstractIterablePlan<Object> {
 
-    public ArrayPlan(InferredType targetType) {
-        super(targetType);
+    public ArrayPlan(TypedValue<Object> typedValue) {
+        super(typedValue);
     }
 
     @Override

@@ -2,6 +2,7 @@ package org.jmouse.core.mapping.plan;
 
 import org.jmouse.core.Sorter;
 import org.jmouse.core.Verify;
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
@@ -51,43 +52,58 @@ public final class MappingPlanRegistry implements PlanRegistry {
     /**
      * Resolve a {@link MappingPlan} for the given mapping request.
      *
-     * <p>Plans are memoized by {@code (sourceClass, targetRawClass)}.</p>
+     * <p>The plan is cached using a key composed of:</p>
+     * <ul>
+     *   <li>the runtime {@code source.getClass()}</li>
+     *   <li>the raw target class from {@code typedValue.getType().getRawType()}</li>
+     * </ul>
+     *
+     * <p><strong>Note:</strong> the cache key does not include generic parameters or the target instance
+     * provided by {@link TypedValue}. If instance-sensitive planning is required, extend {@code PlanKey}
+     * to include the relevant aspects.</p>
      *
      * @param source source object (must be non-null)
-     * @param targetType inferred target type
+     * @param typedValue target typed value (type metadata + optional instance holder)
      * @param context mapping context
-     * @param <T> target type
-     * @return mapping plan suitable for the request
-     * @throws MappingException if no contributor can build a plan for the request
+     * @param <T> plan output type
+     * @return cached or newly built mapping plan
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> MappingPlan<T> planFor(Object source, InferredType targetType, MappingContext context) {
-        PlanKey key = new PlanKey(source.getClass(), targetType.getRawType());
-        return (MappingPlan<T>) cache.computeIfAbsent(key, ignore -> build(source, targetType, context));
+    public <T> MappingPlan<T> planFor(Object source, TypedValue<T> typedValue, MappingContext context) {
+        InferredType type = typedValue.getType();
+        PlanKey      key  = new PlanKey(source.getClass(), type.getRawType());
+        return (MappingPlan<T>) cache.computeIfAbsent(key, ignore -> build(source, typedValue, context));
     }
 
     /**
-     * Build a plan by scanning contributors and selecting the first compatible one.
+     * Build a {@link MappingPlan} by scanning registered contributors and selecting the first match.
+     *
+     * <p>Contributors are consulted in registry order. The first contributor that returns {@code true}
+     * from {@link MappingPlanContributor#supports(Object, InferredType, MappingContext)} is responsible
+     * for building the plan via {@link MappingPlanContributor#build(TypedValue, MappingContext)}.</p>
      *
      * @param source source object
-     * @param targetType inferred target type
+     * @param typedValue typed target descriptor (type metadata + optional instance holder)
      * @param context mapping context
      * @return built plan
-     * @throws MappingException if no contributor supports the request
+     * @throws MappingException if no contributor supports the mapping request
      */
-    private MappingPlan<?> build(Object source, InferredType targetType, MappingContext context) {
+    private MappingPlan<?> build(Object source, TypedValue<?> typedValue, MappingContext context) {
+        InferredType targetType = typedValue.getType();
+        InferredType sourceType = InferredType.forInstance(source);
+
         for (MappingPlanContributor contributor : contributors) {
             if (contributor.supports(source, targetType, context)) {
-                return contributor.build(targetType, context);
+                return contributor.build(typedValue, context);
             }
         }
 
         throw new MappingException(
                 "no_plan_contributor",
-                "No plan contributor for source='%s', target='%s'".formatted(source.getClass().getName(), targetType),
+                "No plan contributor for source='%s', target='%s'".formatted(sourceType.getClassType(), targetType),
                 null
-        );
+        ).withMeta("source", sourceType).withMeta("target", targetType);
     }
 
     /**

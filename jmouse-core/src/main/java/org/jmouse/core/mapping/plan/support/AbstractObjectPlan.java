@@ -2,6 +2,7 @@ package org.jmouse.core.mapping.plan.support;
 
 import org.jmouse.core.Verify;
 import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.mapping.binding.PropertyMapping;
 import org.jmouse.core.mapping.binding.TypeMappingRule;
@@ -31,10 +32,10 @@ abstract public class AbstractObjectPlan<T> extends AbstractPlan<T> {
     /**
      * Create an object plan for the given target type.
      *
-     * @param targetType inferred target type (never {@code null})
+     * @param typedValue typed value type (never {@code null})
      */
-    protected AbstractObjectPlan(InferredType targetType) {
-        super(targetType);
+    protected AbstractObjectPlan(TypedValue<T> typedValue) {
+        super(typedValue);
     }
 
     /**

@@ -1,9 +1,12 @@
 package org.jmouse.core.mapping.plan.map;
 
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.plan.MappingPlan;
 import org.jmouse.core.mapping.plan.MappingPlanContributor;
 import org.jmouse.core.reflection.InferredType;
+
+import java.util.Map;
 
 /**
  * {@link MappingPlanContributor} that builds an {@link ObjectToMapPlan} for mapping
@@ -47,15 +50,15 @@ public final class ObjectToMapPlanContributor implements MappingPlanContributor 
     /**
      * Build a mapping plan for the given target type.
      *
-     * @param targetType inferred target type
+     * @param typedValue typed value target
      * @param context mapping context
      * @param <T> plan output type
      * @return mapping plan instance
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> MappingPlan<T> build(InferredType targetType, MappingContext context) {
-        return (MappingPlan<T>) new ObjectToMapPlan(targetType);
+    public <T> MappingPlan<T> build(TypedValue<T> typedValue, MappingContext context) {
+        return (MappingPlan<T>) new ObjectToMapPlan((TypedValue<Map<Object, Object>>) typedValue);
     }
 
 }

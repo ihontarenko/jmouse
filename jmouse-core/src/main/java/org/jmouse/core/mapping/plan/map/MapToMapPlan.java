@@ -1,6 +1,7 @@
 package org.jmouse.core.mapping.plan.map;
 
 import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.config.TypeMismatchPolicy;
 import org.jmouse.core.mapping.plan.support.AbstractMapPlan;
@@ -15,8 +16,8 @@ public final class MapToMapPlan extends AbstractMapPlan<Map<Object, Object>> {
             Map.class, Object.class, Object.class
     );
 
-    public MapToMapPlan(InferredType targetType) {
-        super(targetType);
+    public MapToMapPlan(TypedValue<Map<Object, Object>> typedValue) {
+        super(typedValue);
     }
 
     @Override

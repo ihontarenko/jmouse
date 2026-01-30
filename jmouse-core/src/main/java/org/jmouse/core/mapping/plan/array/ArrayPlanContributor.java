@@ -1,5 +1,6 @@
 package org.jmouse.core.mapping.plan.array;
 
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.plan.MappingPlan;
 import org.jmouse.core.mapping.plan.MappingPlanContributor;
 import org.jmouse.core.mapping.MappingContext;
@@ -14,7 +15,7 @@ public final class ArrayPlanContributor implements MappingPlanContributor {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> MappingPlan<T> build(InferredType targetType, MappingContext context) {
-        return (MappingPlan<T>) new ArrayPlan(targetType);
+    public <T> MappingPlan<T> build(TypedValue<T> typedValue, MappingContext context) {
+        return (MappingPlan<T>) new ArrayPlan((TypedValue<Object>) typedValue);
     }
 }
