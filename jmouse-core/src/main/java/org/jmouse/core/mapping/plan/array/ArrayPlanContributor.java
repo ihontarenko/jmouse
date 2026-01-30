@@ -1,11 +1,13 @@
 package org.jmouse.core.mapping.plan.array;
 
+import org.jmouse.core.Priority;
 import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.plan.MappingPlan;
 import org.jmouse.core.mapping.plan.MappingPlanContributor;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
+@Priority(Integer.MIN_VALUE + 3000)
 public final class ArrayPlanContributor implements MappingPlanContributor {
 
     @Override

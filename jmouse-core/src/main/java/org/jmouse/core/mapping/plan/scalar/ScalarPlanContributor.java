@@ -1,5 +1,6 @@
 package org.jmouse.core.mapping.plan.scalar;
 
+import org.jmouse.core.Priority;
 import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.plan.MappingPlan;
 import org.jmouse.core.mapping.plan.MappingPlanContributor;
@@ -7,6 +8,7 @@ import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.reflection.TypeInformation;
 
+@Priority(Integer.MIN_VALUE + 200)
 public final class ScalarPlanContributor implements MappingPlanContributor {
 
     @Override

@@ -95,7 +95,19 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
     }
 
     /**
-     * Adapt the given {@code value} into {@code targetType}.
+     * Convenience overload for adapting {@code value} into the given {@code targetType}.
+     *
+     * @param value raw value to adapt (may be {@code null})
+     * @param targetType inferred target type
+     * @param context mapping context
+     * @return adapted value (may be {@code null})
+     */
+    protected final Object adaptValue(Object value, InferredType targetType, MappingContext context) {
+        return adaptValue(value, TypedValue.of(targetType), context);
+    }
+
+    /**
+     * Adapt the given {@code value} into the target described by {@code typedValue}.
      *
      * <p>Strategy:</p>
      * <ul>
@@ -106,15 +118,16 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
      * </ul>
      *
      * @param value raw value to adapt (may be {@code null})
-     * @param targetType inferred target type metadata
+     * @param typedValue target type metadata and optional target instance holder
      * @param context mapping context providing {@link Mapper} and {@link Conversion}
      * @return adapted value (may be {@code null})
      */
-    protected final Object adaptValue(Object value, InferredType targetType, MappingContext context) {
+    protected final Object adaptValue(Object value, TypedValue<T> typedValue, MappingContext context) {
         if (value == null) {
             return null;
         }
 
+        InferredType targetType = typedValue.getType();
         PluginBus    bus        = context.plugins();
         Mapper       mapper     = context.mapper();
         Class<?>     type       = targetType.getClassType();
@@ -133,18 +146,18 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
         ));
 
         if (targetType.isScalar() || targetType.isEnum() || targetType.isClass()) {
-            return mapper.map(value, targetType);
+            return mapper.map(value, typedValue);
         }
 
         if (hasConverterFor(value.getClass(), type, context) && !targetType.isCollection() && !targetType.isMap()) {
             return convertIfNeeded(value, type, conversion);
         }
 
-        if (type.isInstance(value)) {
+        if (type.isInstance(value) && !targetType.isCollection() && !targetType.isMap()) {
             return value;
         }
 
-        return mapper.map(value, targetType);
+        return mapper.map(value, typedValue);
     }
 
     /**

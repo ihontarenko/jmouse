@@ -178,4 +178,17 @@ public final class TypedValue<T> {
         return "Bindable(Type: %s)".formatted(type);
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof TypedValue<?> that)) return false;
+
+        return type.equals(that.type) && value.equals(that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = type.hashCode();
+        result = 31 * result + value.hashCode();
+        return result;
+    }
 }

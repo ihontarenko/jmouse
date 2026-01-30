@@ -3,6 +3,7 @@ package org.jmouse.core.mapping.plan.support;
 import org.jmouse.core.Verify;
 import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.config.MappingConfig;
+import org.jmouse.core.reflection.InferredType;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -23,6 +24,17 @@ abstract public class AbstractMapPlan<T extends Map<?, ?>> extends AbstractPlan<
         }
 
         return Verify.nonNull(instance, "instance");
+    }
+
+    @SuppressWarnings("unchecked")
+    public TypedValue<T> getMapTypedValue(Map<Object, Object> target, Object key, InferredType type) {
+        TypedValue<T> typedValue = TypedValue.of(type);
+
+        if (target.containsKey(key)) {
+            typedValue = typedValue.withInstance((T) target.get(key));
+        }
+
+        return typedValue;
     }
 
 }

@@ -1,5 +1,6 @@
 package org.jmouse.core.mapping.plan.map;
 
+import org.jmouse.core.Priority;
 import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.plan.MappingPlan;
@@ -21,6 +22,7 @@ import java.util.Map;
  *
  * <p>The produced plan is responsible for extracting object properties and populating the target map.</p>
  */
+@Priority(Integer.MIN_VALUE + 1000)
 public final class ObjectToMapPlanContributor implements MappingPlanContributor {
 
     /**

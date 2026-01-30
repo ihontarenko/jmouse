@@ -1,5 +1,6 @@
 package org.jmouse.core.mapping.plan.map;
 
+import org.jmouse.core.Priority;
 import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.plan.MappingPlan;
 import org.jmouse.core.mapping.plan.MappingPlanContributor;
@@ -8,6 +9,7 @@ import org.jmouse.core.reflection.InferredType;
 
 import java.util.Map;
 
+@Priority(Integer.MIN_VALUE + 500)
 public final class MapToMapPlanContributor implements MappingPlanContributor {
 
     @Override
@@ -16,7 +18,7 @@ public final class MapToMapPlanContributor implements MappingPlanContributor {
             return false;
         }
 
-        return InferredType.forInstance(source).isMap();
+        return InferredType.forInstance(source).isMap() && targetType.isMap();
     }
 
     @Override

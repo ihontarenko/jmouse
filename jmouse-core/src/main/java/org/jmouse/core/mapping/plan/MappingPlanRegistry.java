@@ -72,8 +72,9 @@ public final class MappingPlanRegistry implements PlanRegistry {
     @SuppressWarnings("unchecked")
     public <T> MappingPlan<T> planFor(Object source, TypedValue<T> typedValue, MappingContext context) {
         InferredType type = typedValue.getType();
-        PlanKey      key  = new PlanKey(source.getClass(), type.getRawType());
-        return (MappingPlan<T>) cache.computeIfAbsent(key, ignore -> build(source, typedValue, context));
+        PlanKey      key  = new PlanKey(source.hashCode(), type.hashCode());
+//        return (MappingPlan<T>) cache.computeIfAbsent(key, ignore -> build(source, typedValue, context));
+        return (MappingPlan<T>) build(source, typedValue, context);
     }
 
     /**
@@ -109,8 +110,8 @@ public final class MappingPlanRegistry implements PlanRegistry {
     /**
      * Cache key for mapping plans.
      *
-     * @param sourceType source runtime class
-     * @param targetType target raw class
+     * @param sourceHashCode hash code source
+     * @param targetHashCode hash code target
      */
-    private record PlanKey(Class<?> sourceType, Class<?> targetType) {}
+    private record PlanKey(Integer sourceHashCode, Integer targetHashCode) {}
 }

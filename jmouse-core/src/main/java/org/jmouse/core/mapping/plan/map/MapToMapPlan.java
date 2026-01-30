@@ -51,7 +51,7 @@ public final class MapToMapPlan extends AbstractMapPlan<Map<Object, Object>> {
 
             try {
                 keyValue = adaptValue(keyValue, keyType, context);
-                mapValue = adaptValue(mapValue, effectiveType, context);
+                mapValue = adaptValue(mapValue, getMapTypedValue(target, keyValue, effectiveType), context);
             } catch (RuntimeException exception) {
                 if (policy.typeMismatchPolicy() == TypeMismatchPolicy.FAIL) {
                     throw toMappingException(
