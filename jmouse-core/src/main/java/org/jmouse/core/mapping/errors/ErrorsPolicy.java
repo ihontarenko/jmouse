@@ -7,13 +7,13 @@ import java.util.Objects;
 /**
  * Error handling policy by error code (exact) and/or prefix.
  */
-public final class ErrorCodePolicy {
+public final class ErrorsPolicy {
 
     private final Map<String, ErrorAction> prefixes;
     private final Map<String, ErrorAction> exact;
     private final ErrorAction              defaultAction;
 
-    private ErrorCodePolicy(Builder b) {
+    private ErrorsPolicy(Builder b) {
         this.exact = Map.copyOf(b.exact);
         this.prefixes = Map.copyOf(b.prefixes);
         this.defaultAction = b.defaultAction;
@@ -64,8 +64,8 @@ public final class ErrorCodePolicy {
             return this;
         }
 
-        public ErrorCodePolicy build() {
-            return new ErrorCodePolicy(this);
+        public ErrorsPolicy build() {
+            return new ErrorsPolicy(this);
         }
     }
 }

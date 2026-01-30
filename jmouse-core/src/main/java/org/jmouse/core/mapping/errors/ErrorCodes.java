@@ -15,7 +15,7 @@ package org.jmouse.core.mapping.errors;
  *   <li>plugin.*      - plugin pipeline failures</li>
  * </ul>
  */
-public final class MappingErrorCodes {
+public final class ErrorCodes {
 
     // plan.*
     public static final String PLAN_NO_CONTRIBUTOR = "plan.no_contributor";
@@ -45,6 +45,6 @@ public final class MappingErrorCodes {
     // plugin.*
     public static final String PLUGIN_VALUE_REJECTED = "plugin.value_rejected";
 
-    private MappingErrorCodes() {
+    private ErrorCodes() {
     }
 }

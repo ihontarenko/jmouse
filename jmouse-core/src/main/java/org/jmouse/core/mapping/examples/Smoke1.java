@@ -57,7 +57,9 @@ public class Smoke1 {
 
         InferredType inferredType = InferredType.forParametrizedClass(Map.class, SimpleUserDTO.class, String.class);
 
-        mapper.map(sourceMap, inferredType);
+        Map<Object, Object> mapped = new WeakHashMap<>();
+
+        mapper.map(sourceMap, inferredType, mapped);
 
         System.out.println("aaa");
 

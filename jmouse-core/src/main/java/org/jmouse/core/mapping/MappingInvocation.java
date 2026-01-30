@@ -3,7 +3,6 @@ package org.jmouse.core.mapping;
 import org.jmouse.core.Verify;
 import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.core.mapping.config.MappingConfig;
-import org.jmouse.core.mapping.errors.ErrorAction;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.plugin.*;
 import org.jmouse.core.reflection.InferredType;
@@ -107,12 +106,12 @@ public final class MappingInvocation {
 
         bus.onError(new MappingFailure(exception, propertyPath, context));
 
-        switch (config.errorCodePolicy().getActionFor(exception.code())) {
+        switch (config.errorsPolicy().getActionFor(exception.code())) {
             case THROW -> {
                 LOGGER.error("[{}]: {}", exception.code(), exception.getMessage(), exception);
                 throw exception;
             }
-            case WARN -> {
+            case WARNING -> {
                 LOGGER.warn("[{}]: {} meta={}", exception.code(), exception.getMessage(), exception.meta(), exception);
                 return null;
             }

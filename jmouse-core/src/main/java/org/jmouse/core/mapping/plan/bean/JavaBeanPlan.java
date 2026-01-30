@@ -15,11 +15,13 @@ public final class JavaBeanPlan<T> extends AbstractObjectPlan<T> {
 
     private final Class<T>            targetType;
     private final ObjectDescriptor<T> descriptor;
+    private final JavaBean<T>         bean;
 
     public JavaBeanPlan(TypedValue<T> typedValue) {
         super(typedValue);
         this.targetType = typedValue.getType().getRawType();
         this.descriptor = DescriptorResolver.ofBeanType(this.targetType);
+        this.bean = JavaBean.of(getTargetType());
     }
 
     @Override
@@ -81,7 +83,14 @@ public final class JavaBeanPlan<T> extends AbstractObjectPlan<T> {
                         "Failed to instantiate target bean because target-type is an interface: " + targetType.getName()
                 );
             }
-            return JavaBean.of(targetType).getFactory(TypedValue.of(targetType)).create();
+
+            T instance = getTypedValue().getValue().get();
+
+            if (instance == null) {
+                instance = bean.getFactory(getTypedValue()).create();
+            }
+
+            return instance;
         } catch (Exception exception) {
             throw new MappingException(
                     "bean_instantiation_failed",

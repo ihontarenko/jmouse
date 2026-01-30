@@ -5,8 +5,8 @@ import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.errors.ErrorAction;
-import org.jmouse.core.mapping.errors.ErrorCodePolicy;
-import org.jmouse.core.mapping.errors.MappingErrorCodes;
+import org.jmouse.core.mapping.errors.ErrorsPolicy;
+import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.trace.TraceContext;
 import org.jmouse.crawler.adapter.jsonpath.JaywayJsonPathSelector;
@@ -65,23 +65,57 @@ public class Smoke2 {
                 )
                 .mapping(ProcessingTask.class, Map.class, m -> m
                         .bind("task_id", "id")
-                        .bind("pwd", "password")
                 )
                 .build();
 
         return Mappers.builder()
                 .registry(registry)
                 .config(MappingConfig.builder()
-                                .errorCodePolicy(
-                                        ErrorCodePolicy.builder()
-                                                .onCode(MappingErrorCodes.PLAN_NO_CONTRIBUTOR, ErrorAction.THROW)
-                                                .onPrefix("map.", ErrorAction.WARN)
+                                .errorsPolicy(
+                                        ErrorsPolicy.builder()
+                                                .onCode(ErrorCodes.PLAN_NO_CONTRIBUTOR, ErrorAction.THROW)
+                                                .onPrefix("map.", ErrorAction.WARNING)
                                                 .onPrefix("scalar.", ErrorAction.THROW)
                                                 .defaultAction(ErrorAction.THROW)
                                                 .build()
                                 )
                                 .build())
                 .build();
+    }
+
+    public static class DataObject {
+
+        private String url;
+        private String parent;
+        private int depth;
+
+        public DataObject(String parent) {
+            this.parent = parent;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getParent() {
+            return parent;
+        }
+
+        public void setParent(String parent) {
+            this.parent = parent;
+        }
+
+        public int getDepth() {
+            return depth;
+        }
+
+        public void setDepth(int depth) {
+            this.depth = depth;
+        }
     }
 
     public static void main(String[] args) {
@@ -102,7 +136,11 @@ public class Smoke2 {
 
         mapper().map(processingTask, InferredType.forParametrizedClass(
                 Map.class, String.class, Object.class
-        ), ConcurrentHashMap::new);
+        ), target);
+
+        DataObject dataObject = new DataObject("http://site.com/");
+
+        mapper().map(target, dataObject);
 
         System.out.println(target);
 

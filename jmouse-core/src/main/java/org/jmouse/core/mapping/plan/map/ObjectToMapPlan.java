@@ -3,7 +3,6 @@ package org.jmouse.core.mapping.plan.map;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.core.bind.TypedValue;
-import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.binding.PropertyMapping;
 import org.jmouse.core.mapping.binding.TypeMappingRule;
@@ -116,13 +115,13 @@ public final class ObjectToMapPlan extends AbstractMapPlan<Map<Object, Object>> 
                     );
 
                     if (value == IgnoredValue.INSTANCE) {
-                        markConsumedSourceKey(mapping, targetKey, sourceKeys);
+                        consumeSourceKey(mapping, targetKey, sourceKeys);
                         continue;
                     }
 
                     Object mapped = materializeTree(value, context);
                     target.put(targetKey, mapped);
-                    markConsumedSourceKey(mapping, targetKey, sourceKeys);
+                    consumeSourceKey(mapping, targetKey, sourceKeys);
                 }
             }
         }
@@ -154,7 +153,7 @@ public final class ObjectToMapPlan extends AbstractMapPlan<Map<Object, Object>> 
      * @param targetKey target map key that was produced
      * @param sourceKeys mutable set of remaining source keys
      */
-    private void markConsumedSourceKey(PropertyMapping mapping, String targetKey, Set<Object> sourceKeys) {
+    private void consumeSourceKey(PropertyMapping mapping, String targetKey, Set<Object> sourceKeys) {
         if (mapping == null) {
             sourceKeys.remove(targetKey);
             return;
