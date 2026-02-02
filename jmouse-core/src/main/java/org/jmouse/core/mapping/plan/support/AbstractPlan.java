@@ -204,7 +204,7 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
             }
             return null;
         } catch (RuntimeException exception) {
-            LOGGER.error("Unable to locate value for field '{}'.", name, exception);
+            LOGGER.warn("Unable to locate value for field '{}'. Cause: {}", name, exception.getMessage());
             return null;
         }
     }

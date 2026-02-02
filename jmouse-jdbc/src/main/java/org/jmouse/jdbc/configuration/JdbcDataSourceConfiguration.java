@@ -6,11 +6,17 @@ import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.core.Sorter;
 import org.jmouse.jdbc.connection.datasource.*;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 
 @BeanFactories
 public class JdbcDataSourceConfiguration {
+
+    @Bean
+    public DataSource defaultDataSource(DataSourceResolver resolver, DataSourceKey sourceKey) {
+        return new ResolvableDataSource(resolver, sourceKey);
+    }
 
     @Bean
     public DataSourceSpecificationRegistry dataSourceSpecificationRegistry(
