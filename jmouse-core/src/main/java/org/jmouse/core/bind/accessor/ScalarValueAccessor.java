@@ -24,7 +24,7 @@ public class ScalarValueAccessor extends AbstractAccessor {
     @Override
     public ObjectAccessor get(String name) {
         throw new UnsupportedOperationException(
-                "Accessor '%s' does not support indexed accessing"
+                "Accessor '%s' does not support named accessing"
                         .formatted(getClass().getName()));
     }
 

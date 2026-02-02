@@ -32,12 +32,12 @@ import java.sql.SQLException;
  * <h3>Context binding</h3>
  * <pre>{@code
  * begin():
- *   Connection c = provider.getConnection();
+ *   Connection c = valueProvider.getConnection();
  *   bindResource(JdbcResourceHolder.class, new JdbcResourceHolder(c));
  *
  * close():
  *   unbindResource(JdbcResourceHolder.class);
- *   provider.release(c);
+ *   valueProvider.release(c);
  * }</pre>
  *
  * <p>
@@ -78,7 +78,7 @@ public final class JdbcTransactionSession implements TransactionSession, Savepoi
     /**
      * Creates a new {@code JdbcTransactionSession}.
      *
-     * @param provider             connection provider
+     * @param provider             connection valueProvider
      * @param connectionCustomizer customizer responsible for applying/restoring connection settings
      */
     public JdbcTransactionSession(ConnectionProvider provider, ConnectionCustomizer connectionCustomizer) {

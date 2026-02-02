@@ -46,10 +46,10 @@ import org.jmouse.core.Ordered;
 public interface DatabasePlatformProvider extends Ordered {
 
     /**
-     * Determines whether this provider supports the given database.
+     * Determines whether this valueProvider supports the given database.
      *
      * @param info runtime database information
-     * @return {@code true} if this provider can handle the database,
+     * @return {@code true} if this valueProvider can handle the database,
      *         {@code false} otherwise
      */
     boolean supports(DatabaseInformation info);
@@ -66,12 +66,12 @@ public interface DatabasePlatformProvider extends Ordered {
     DatabasePlatform create(DatabaseInformation info);
 
     /**
-     * Priority for provider ordering and tie-breaking.
+     * Priority for valueProvider ordering and tie-breaking.
      * <p>
      * Providers with higher values take precedence over lower ones
      * when multiple providers support the same database.
      *
-     * @return provider priority (default: {@code 0})
+     * @return valueProvider priority (default: {@code 0})
      */
     @Override
     default int order() {

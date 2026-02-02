@@ -28,7 +28,7 @@ import org.jmouse.core.mapping.errors.MappingException;
  * );
  *
  * // Provide value from typed source (no MappingContext usage)
- * PropertyBinding b5 = PropertyBinding.provider(
+ * PropertyBinding b5 = PropertyBinding.valueProvider(
  *     "isAdult",
  *     User.class,
  *     user -> user.age() >= 18
@@ -125,17 +125,17 @@ public sealed interface PropertyMapping
     }
 
     /**
-     * Binding that provides a value using a custom provider function.
+     * Binding that provides a value using a custom valueProvider function.
      *
      * <p>This is useful for "pulling" values from the source object when you don't want to rely
      * on reflective property access or path resolution.</p>
      *
-     * <p>Typed providers are adapted into an {@code Object}-based provider with a runtime
+     * <p>Typed providers are adapted into an {@code Object}-based valueProvider with a runtime
      * source type check (see {@link #typed(String, Class, ValueProvider)}).</p>
      *
      * <h3>Example</h3>
      * <pre>{@code
-     * PropertyBinding.Provider b = PropertyBinding.provider(
+     * PropertyBinding.Provider b = PropertyBinding.valueProvider(
      *     "ageGroup",
      *     User.class,
      *     u -> u.age() >= 18 ? "adult" : "child"
@@ -143,16 +143,16 @@ public sealed interface PropertyMapping
      * }</pre>
      *
      * @param targetName target property name
-     * @param provider provider function (never {@code null})
+     * @param valueProvider valueProvider function (never {@code null})
      */
-    record Provider(String targetName, ValueProvider<Object> provider) implements PropertyMapping {
+    record Provider(String targetName, ValueProvider<Object> valueProvider) implements PropertyMapping {
         public Provider {
             Verify.nonNull(targetName, "targetName");
-            Verify.nonNull(provider, "provider");
+            Verify.nonNull(valueProvider, "valueProvider");
         }
 
         /**
-         * Create a type-safe provider binding that validates the runtime source type.
+         * Create a type-safe valueProvider binding that validates the runtime source type.
          *
          * <p>If {@code source} is non-null but not an instance of {@code sourceType},
          * a {@link MappingException} is thrown.</p>
@@ -168,14 +168,14 @@ public sealed interface PropertyMapping
          *
          * @param targetName target property name
          * @param sourceType expected runtime type of source object
-         * @param provider typed provider
+         * @param provider typed valueProvider
          * @param <S> source type
-         * @return adapted provider binding with runtime checks
-         * @throws IllegalArgumentException if {@code sourceType} or {@code provider} is {@code null}
+         * @return adapted valueProvider binding with runtime checks
+         * @throws IllegalArgumentException if {@code sourceType} or {@code valueProvider} is {@code null}
          */
         public static <S> Provider typed(String targetName, Class<S> sourceType, ValueProvider<? super S> provider) {
             Verify.nonNull(sourceType, "sourceType");
-            Verify.nonNull(provider, "provider");
+            Verify.nonNull(provider, "valueProvider");
 
             ValueProvider<Object> adapted = source -> {
                 if (source == null) {
@@ -309,9 +309,9 @@ public sealed interface PropertyMapping
      *
      * @param targetName target property name
      * @param sourceType expected runtime type of source object
-     * @param provider typed provider
+     * @param provider typed valueProvider
      * @param <S> source type
-     * @return provider binding
+     * @return valueProvider binding
      */
     static <S> Provider provider(String targetName, Class<S> sourceType, ValueProvider<? super S> provider) {
         return Provider.typed(targetName, sourceType, provider);

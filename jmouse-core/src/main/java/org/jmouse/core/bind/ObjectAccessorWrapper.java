@@ -16,7 +16,7 @@ public interface ObjectAccessorWrapper {
     /**
      * Register an {@link ObjectAccessorProvider}.
      *
-     * @param provider the provider to register
+     * @param provider the valueProvider to register
      */
     void registerProvider(ObjectAccessorProvider provider);
 

@@ -36,7 +36,7 @@ public abstract class AbstractContext implements Context {
     /**
      * Constructor with a specified {@link BeanProvider}.
      *
-     * @param beanProvider the structured provider to associate with this context.
+     * @param beanProvider the structured valueProvider to associate with this context.
      */
     public AbstractContext(BeanProvider beanProvider) {
         this.beanProvider = beanProvider;
@@ -45,7 +45,7 @@ public abstract class AbstractContext implements Context {
     /**
      * Sets the {@link BeanProvider} for this context.
      *
-     * @param beanProvider the structured provider to set.
+     * @param beanProvider the structured valueProvider to set.
      */
     @Override
     public void setBeanProvider(BeanProvider beanProvider) {
@@ -55,7 +55,7 @@ public abstract class AbstractContext implements Context {
     /**
      * Retrieves the current {@link BeanProvider}.
      *
-     * @return the associated structured provider.
+     * @return the associated structured valueProvider.
      */
     @Override
     public BeanProvider getBeanProvider() {

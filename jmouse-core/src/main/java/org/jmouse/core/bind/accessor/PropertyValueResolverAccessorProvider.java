@@ -6,14 +6,14 @@ import org.jmouse.core.bind.PropertyValueResolver;
 
 /**
  * An {@link ObjectAccessorProvider} implementation for sources that implement
- * {@link PropertyValueResolver}. This provider checks if the given source is a
+ * {@link PropertyValueResolver}. This valueProvider checks if the given source is a
  * {@code PropertyValueResolver} and creates an appropriate {@link ObjectAccessor}
  * to wrap it.
  */
 public class PropertyValueResolverAccessorProvider implements ObjectAccessorProvider {
 
     /**
-     * Checks if this provider supports the given source object.
+     * Checks if this valueProvider supports the given source object.
      *
      * @param source the object to be wrapped
      * @return {@code true} if the source is an instance of {@link PropertyValueResolver};

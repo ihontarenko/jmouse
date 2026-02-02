@@ -32,36 +32,36 @@ public interface InstanceProvider<T> {
     T get();
 
     /**
-     * 🔒 Singleton provider – always returns the same fixed instance.
+     * 🔒 Singleton valueProvider – always returns the same fixed instance.
      *
      * @param instance the single instance to return
      * @param <T>      the type of the instance
-     * @return a provider that always returns {@code instance}
+     * @return a valueProvider that always returns {@code instance}
      */
     static <T> InstanceProvider<T> singleton(T instance) {
         return new SingletonProvider<>(instance);
     }
 
     /**
-     * ♻️ Prototype provider – creates a new instance on each call.
+     * ♻️ Prototype valueProvider – creates a new instance on each call.
      *
      * @param supplier factory to create instances
      * @param <T>      the type of the instance
-     * @return a provider that calls {@code supplier.get()} each time
+     * @return a valueProvider that calls {@code supplier.get()} each time
      */
     static <T> InstanceProvider<T> prototype(Supplier<T> supplier) {
         return new PrototypeProvider<>(supplier);
     }
 
     /**
-     * 🧵 Thread-local provider – provides one instance per thread.
+     * 🧵 Thread-local valueProvider – provides one instance per thread.
      *
      * <p>Each thread will lazily receive its own instance, supplied
      * by {@code supplier}, which is cached for subsequent calls.</p>
      *
      * @param supplier factory to create instances
      * @param <T>      the type of the instance
-     * @return a provider bound to the current thread
+     * @return a valueProvider bound to the current thread
      */
     static <T> InstanceProvider<T> threadLocal(Supplier<T> supplier) {
         return new ThreadLocalProvider<>(supplier);

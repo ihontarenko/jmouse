@@ -28,9 +28,9 @@ public class BasicAccessorWrapper implements ObjectAccessorWrapper {
     }
 
     /**
-     * Wraps the given source into a ObjectAccessor by delegating to the appropriate provider.
+     * Wraps the given source into a ObjectAccessor by delegating to the appropriate valueProvider.
      * <p>
-     * If no provider supports the source, an UnsupportedOperationException is thrown.
+     * If no valueProvider supports the source, an UnsupportedOperationException is thrown.
      * </p>
      *
      * @param source the source object to wrap
@@ -63,7 +63,7 @@ public class BasicAccessorWrapper implements ObjectAccessorWrapper {
     /**
      * Register an {@link ObjectAccessorProvider}.
      *
-     * @param provider the provider to register
+     * @param provider the valueProvider to register
      */
     @Override
     public void registerProvider(ObjectAccessorProvider provider) {

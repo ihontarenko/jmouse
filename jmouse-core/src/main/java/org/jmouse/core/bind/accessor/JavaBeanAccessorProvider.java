@@ -8,7 +8,7 @@ import org.jmouse.core.Priority;
 /**
  * An {@link ObjectAccessorProvider} implementation that supports Java Bean objects.
  * <p>
- * This provider checks whether a given source object is a Java Bean using its type information.
+ * This valueProvider checks whether a given source object is a Java Bean using its type information.
  * If the source is identified as a bean, it creates and returns a corresponding {@link ObjectAccessor}
  * instance (specifically, a {@link JavaBeanAccessor}).
  * </p>

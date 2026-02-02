@@ -7,10 +7,10 @@ import org.jmouse.core.reflection.TypeInformation;
 public class ScalarValueAccessorProvider implements ObjectAccessorProvider {
 
     /**
-     * Checks if this provider supports the given source object.
+     * Checks if this valueProvider supports the given source object.
      *
      * @param source the object to be wrapped
-     * @return {@code true} if this provider can create an ObjectAccessor for the source; {@code false} otherwise
+     * @return {@code true} if this valueProvider can create an ObjectAccessor for the source; {@code false} otherwise
      */
     @Override
     public boolean supports(Object source) {

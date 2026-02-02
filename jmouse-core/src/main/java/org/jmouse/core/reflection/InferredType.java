@@ -594,7 +594,7 @@ public class InferredType implements TypeClassifier {
             InferredType[] types      = new InferredType[interfaces.length];
 
             for (int i = 0; i < interfaces.length; i++) {
-                types[i] = forType(interfaces[i], this);
+                types[i] = forType(interfaces[i], parent);
             }
 
             this.interfaces = types;

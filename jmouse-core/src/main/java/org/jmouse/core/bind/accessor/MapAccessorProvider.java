@@ -7,7 +7,7 @@ import org.jmouse.core.reflection.TypeInformation;
 /**
  * An {@link ObjectAccessorProvider} implementation that supports Map-based data sources.
  * <p>
- * This provider checks if the given source object is a Map using type information.
+ * This valueProvider checks if the given source object is a Map using type information.
  * If the source is determined to be a Map, it creates and returns a corresponding
  * {@link ObjectAccessor} instance (specifically, a {@link MapAccessor}) that enables access
  * to the map's keys and values.
@@ -16,7 +16,7 @@ import org.jmouse.core.reflection.TypeInformation;
 public class MapAccessorProvider implements ObjectAccessorProvider {
 
     /**
-     * Determines whether the provided source object is supported by this provider.
+     * Determines whether the provided source object is supported by this valueProvider.
      * <p>
      * This method uses {@link TypeInformation} to check if the source object is a Map.
      * </p>

@@ -18,9 +18,9 @@ import java.util.List;
  * <h3>Resolution strategy</h3>
  * <ul>
  *     <li>Providers are evaluated in descending {@link org.jmouse.core.Priority} order</li>
- *     <li>The first provider that {@link DatabasePlatformProvider#supports(DatabaseInformation)}
+ *     <li>The first valueProvider that {@link DatabasePlatformProvider#supports(DatabaseInformation)}
  *         the given database info wins</li>
- *     <li>If no provider matches, a configurable fallback platform is returned</li>
+ *     <li>If no valueProvider matches, a configurable fallback platform is returned</li>
  * </ul>
  *
  * <p>
@@ -53,7 +53,7 @@ public final class DatabasePlatformRegistry {
     private final List<DatabasePlatformProvider> providers = new ArrayList<>();
 
     /**
-     * Fallback platform used when no provider supports the database.
+     * Fallback platform used when no valueProvider supports the database.
      * Defaults to ANSI-compatible platform.
      */
     private       DatabasePlatform               fallback  = StandardPlatforms.ansi();
@@ -64,11 +64,11 @@ public final class DatabasePlatformRegistry {
      * Providers are automatically sorted by descending priority
      * after registration.
      *
-     * @param provider platform provider to register
+     * @param provider platform valueProvider to register
      * @return this registry instance (for fluent API)
      */
     public DatabasePlatformRegistry register(DatabasePlatformProvider provider) {
-        providers.add(Verify.nonNull(provider, "provider"));
+        providers.add(Verify.nonNull(provider, "valueProvider"));
         providers.sort(Sorter.PRIORITY_COMPARATOR.reversed());
         return this;
     }
@@ -76,7 +76,7 @@ public final class DatabasePlatformRegistry {
     /**
      * Sets the fallback {@link DatabasePlatform}.
      * <p>
-     * The fallback is used when no registered provider supports
+     * The fallback is used when no registered valueProvider supports
      * the given {@link DatabaseInformation}.
      *
      * @param fallback fallback platform

@@ -22,7 +22,7 @@ import java.util.Set;
  * <p>This plan is intended for object-to-map projections (e.g., exporting objects as structured maps).
  * The resulting map is built using:</p>
  * <ul>
- *   <li>explicit mapping rules (rename/ignore/reference/compute/constant/provider) when available</li>
+ *   <li>explicit mapping rules (rename/ignore/reference/compute/constant/valueProvider) when available</li>
  *   <li>a "rest mapping" pass that copies remaining source properties into the target map</li>
  * </ul>
  *
@@ -102,7 +102,7 @@ public final class ObjectToMapPlan extends AbstractMapPlan<Map<Object, Object>> 
         for (TypeMappingRule mappingRule : mappingRules) {
 
             if (mappingRule != null && !mappingRule.mappings().isEmpty()) {
-                // 1) Build entries from explicit bindings (rename/ignore/compute/constant/provider/reference)
+                // 1) Build entries from explicit bindings (rename/ignore/compute/constant/valueProvider/reference)
                 for (Map.Entry<String, PropertyMapping> entry : mappingRule.mappings().entrySet()) {
                     String          targetKey = entry.getKey();
                     PropertyMapping mapping   = entry.getValue();

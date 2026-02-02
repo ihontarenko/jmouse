@@ -47,7 +47,7 @@ public final class DatabaseMetaPlatformResolver {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseMetaPlatformResolver.class);
 
     /**
-     * Connection provider used to obtain a temporary JDBC connection.
+     * Connection valueProvider used to obtain a temporary JDBC connection.
      */
     private final ConnectionProvider       provider;
 
@@ -59,11 +59,11 @@ public final class DatabaseMetaPlatformResolver {
     /**
      * Creates a new resolver instance.
      *
-     * @param provider JDBC connection provider
+     * @param provider JDBC connection valueProvider
      * @param registry database platform registry
      */
     public DatabaseMetaPlatformResolver(ConnectionProvider provider, DatabasePlatformRegistry registry) {
-        this.provider = Verify.nonNull(provider, "provider");
+        this.provider = Verify.nonNull(provider, "valueProvider");
         this.registry = Verify.nonNull(registry, "registry");
     }
 
@@ -79,7 +79,7 @@ public final class DatabaseMetaPlatformResolver {
      * </ol>
      *
      * <p>
-     * The connection is always released back to the provider.
+     * The connection is always released back to the valueProvider.
      *
      * @return resolved database platform (never {@code null})
      */

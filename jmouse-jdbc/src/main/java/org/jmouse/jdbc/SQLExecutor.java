@@ -23,7 +23,7 @@ import org.jmouse.jdbc.statement.*;
  *
  * <h3>Execution lifecycle</h3>
  * <pre>{@code
- * Connection c = provider.getConnection();
+ * Connection c = valueProvider.getConnection();
  * try {
  *   PreparedStatement ps = c.prepareStatement(sql);
  *   binder.bind(ps);
@@ -31,13 +31,13 @@ import org.jmouse.jdbc.statement.*;
  *   // execute via callback and/or extract results
  * } finally {
  *   close(ResultSet/Statement);
- *   provider.release(c);
+ *   valueProvider.release(c);
  * }
  * }</pre>
  *
  * <p>
  * ⚠️ Transaction participation is determined by the configured {@link ConnectionProvider}.
- * For example, a transaction-aware provider may return a thread-bound connection.
+ * For example, a transaction-aware valueProvider may return a thread-bound connection.
  *
  * @author jMouse
  */
@@ -56,7 +56,7 @@ public final class SQLExecutor implements JdbcExecutor {
     /**
      * Creates a new {@code SQLExecutor}.
      *
-     * @param connectionProvider connection provider used for all executions
+     * @param connectionProvider connection valueProvider used for all executions
      */
     public SQLExecutor(ConnectionProvider connectionProvider, DatabasePlatform databasePlatform) {
         this.connectionProvider = connectionProvider;

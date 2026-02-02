@@ -5,6 +5,7 @@ import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.bind.ValueObject;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.bind.descriptor.structured.record.ValueObjectDescriptor;
+import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.plan.support.AbstractObjectPlan;
@@ -59,7 +60,7 @@ public final class RecordPlan<T> extends AbstractObjectPlan<T> {
                 values.put(name, adaptValue(value, type, mappingContext));
             } catch (Exception exception) {
                 throw toMappingException(
-                        "record_component_adapt_failed",
+                        ErrorCodes.RECORD_COMPONENT_ADAPT_FAILED,
                         "Failed to adapt record component '%s' to '%s'".formatted(name, type),
                         exception
                 );
@@ -72,7 +73,7 @@ public final class RecordPlan<T> extends AbstractObjectPlan<T> {
             return instance;
         } catch (Exception exception) {
             throw new MappingException(
-                    "record_instantiation_failed",
+                    ErrorCodes.RECORD_INSTANTIATION_FAILED,
                     "Failed to instantiate record: " + targetType.getName(),
                     exception
             );

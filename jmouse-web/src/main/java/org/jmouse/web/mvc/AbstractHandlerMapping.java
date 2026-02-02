@@ -130,10 +130,10 @@ public abstract class AbstractHandlerMapping implements HandlerMapping, Initiali
     }
 
     /**
-     * Returns the active provider that resolves CORS configuration
+     * Returns the active valueProvider that resolves CORS configuration
      * (e.g., from {@link CorsMapping} annotations).
      *
-     * @return non-null CORS configuration provider
+     * @return non-null CORS configuration valueProvider
      * @see AnnotationCorsConfigurationProvider
      */
     public CorsConfigurationProvider getCorsProvider() {

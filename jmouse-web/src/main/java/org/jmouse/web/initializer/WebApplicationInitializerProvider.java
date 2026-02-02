@@ -14,8 +14,8 @@ import java.util.List;
  *
  * <p>Example usage:</p>
  * <pre>{@code
- * WebApplicationInitializerProvider provider = new WebApplicationInitializerProvider(context);
- * List<WebApplicationInitializer> initializers = provider.getRegistrationBeans();
+ * WebApplicationInitializerProvider valueProvider = new WebApplicationInitializerProvider(context);
+ * List<WebApplicationInitializer> initializers = valueProvider.getRegistrationBeans();
  * }</pre>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)

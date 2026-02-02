@@ -228,4 +228,8 @@ public interface TypeClassifier {
         return getClassType() == null || is(Unknown.class);
     }
 
+    default boolean isAnonymous() {
+        return getClassType().isAnonymousClass();
+    }
+
 }

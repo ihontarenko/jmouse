@@ -16,7 +16,7 @@ package org.jmouse.core.context.beans;
 public interface BeanLookupContext extends BeanLookup {
 
     /**
-     * 🔌 Attach bean provider.
+     * 🔌 Attach bean valueProvider.
      *
      * @param beanProvider backing {@link BeanLookup}
      */

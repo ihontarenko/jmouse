@@ -67,7 +67,7 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
      *   <li>{@link PropertyMapping.Ignore} returns {@link IgnoredValue#INSTANCE}</li>
      *   <li>{@link PropertyMapping.Constant} returns the constant value</li>
      *   <li>{@link PropertyMapping.Compute} evaluates {@code function.compute(source, context)}</li>
-     *   <li>{@link PropertyMapping.Provider} evaluates {@code provider.provide(source)}</li>
+     *   <li>{@link PropertyMapping.Provider} evaluates {@code valueProvider.provide(source)}</li>
      *   <li>{@link PropertyMapping.Reference} resolves value via {@link #safeNavigate(ObjectAccessor, String)}</li>
      *   <li>No binding returns {@code fallback.get()}</li>
      * </ul>
@@ -83,13 +83,13 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
             PropertyMapping mapping,
             ValueSupplier fallback
     ) {
-        Object          source  = accessor.unwrap();
+        Object source = accessor.unwrap();
         return switch (mapping) {
             case PropertyMapping.Ignore ignore -> IgnoredValue.INSTANCE;
             case PropertyMapping.Constant constant -> constant.value();
             case PropertyMapping.Compute compute -> compute.function().compute(source, context);
-            case PropertyMapping.Provider provider -> provider.provider().provide(source);
             case PropertyMapping.Reference reference -> safeNavigate(accessor, reference.sourceReference());
+            case PropertyMapping.Provider provider -> provider.valueProvider().provide(source);
             case null -> fallback.get();
         };
     }
@@ -122,7 +122,7 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
      * @param context mapping context providing {@link Mapper} and {@link Conversion}
      * @return adapted value (may be {@code null})
      */
-    protected final Object adaptValue(Object value, TypedValue<T> typedValue, MappingContext context) {
+    protected final Object adaptValue(Object value, TypedValue<?> typedValue, MappingContext context) {
         if (value == null) {
             return null;
         }
@@ -204,7 +204,7 @@ public abstract class AbstractPlan<T> implements MappingPlan<T> {
             }
             return null;
         } catch (RuntimeException exception) {
-            LOGGER.warn("Unable to locate value for field '{}'. Cause: {}", name, exception.getMessage());
+            LOGGER.error("Getting safety value for '{}' failed. Cause: {}", name, exception.getMessage());
             return null;
         }
     }

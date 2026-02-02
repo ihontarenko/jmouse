@@ -47,13 +47,14 @@ public final class ArrayPlan extends AbstractIterablePlan<Object> {
 
         List<Object> temporary = new ArrayList<>();
         int          maximum   = context.config().maxCollectionSize();
-        int          count     = 0;
+        int          counter   = 0;
 
         for (Iterator<?> iterator = iterableSource.iterator(); iterator.hasNext();) {
-            if (++count > maximum) {
+            if (++counter > maximum) {
                 throw new IllegalStateException("Array size exceeds maxCollectionSize=" + maximum);
             }
-            temporary.add(adaptValue(iterator.next(), elementType, context));
+            MappingContext mappingContext = context.appendPath("[" + (counter - 1) + "]");
+            temporary.add(adaptValue(iterator.next(), elementType, mappingContext));
         }
 
         Object array = Array.newInstance(elementType.getClassType(), temporary.size());

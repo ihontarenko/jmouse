@@ -26,12 +26,13 @@ abstract public class AbstractMapPlan<T extends Map<?, ?>> extends AbstractPlan<
         return Verify.nonNull(instance, "instance");
     }
 
-    @SuppressWarnings("unchecked")
-    public TypedValue<T> getMapTypedValue(Map<Object, Object> target, Object key, InferredType type) {
-        TypedValue<T> typedValue = TypedValue.of(type);
+    public TypedValue<?> getMapTypedValue(Map<Object, Object> target, Object key, InferredType type) {
+        TypedValue<Object> typedValue = TypedValue.of(type);
 
         if (target.containsKey(key)) {
-            typedValue = typedValue.withInstance((T) target.get(key));
+            Object value = target.get(key);
+            typedValue = TypedValue.of(InferredType.forInstance(value));
+            typedValue = typedValue.withInstance(value);
         }
 
         return typedValue;

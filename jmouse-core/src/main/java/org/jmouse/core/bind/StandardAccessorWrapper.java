@@ -25,7 +25,7 @@ public class StandardAccessorWrapper extends BasicAccessorWrapper {
     /**
      * Constructs a {@code StandardAccessorWrapper} with a default set of {@link ObjectAccessorProvider} instances.
      * <p>
-     * The default provider list includes support for scalar values, collections, maps,
+     * The default valueProvider list includes support for scalar values, collections, maps,
      * property value resolvers, Java Beans, records, and property resolvers.
      * </p>
      */

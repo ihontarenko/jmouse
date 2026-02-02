@@ -49,7 +49,7 @@ public abstract class AbstractConfiguredSecurityBuilder<T, B extends AbstractCon
     }
 
     /**
-     * ➕ Apply a {@link ConfigurerAdapter}, wiring builder and bean provider.
+     * ➕ Apply a {@link ConfigurerAdapter}, wiring builder and bean valueProvider.
      *
      * @param configurer adapter to add
      * @return the same adapter (for fluent tweaks)

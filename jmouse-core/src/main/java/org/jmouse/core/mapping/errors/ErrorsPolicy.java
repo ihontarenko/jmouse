@@ -13,10 +13,10 @@ public final class ErrorsPolicy {
     private final Map<String, ErrorAction> exact;
     private final ErrorAction              defaultAction;
 
-    private ErrorsPolicy(Builder b) {
-        this.exact = Map.copyOf(b.exact);
-        this.prefixes = Map.copyOf(b.prefixes);
-        this.defaultAction = b.defaultAction;
+    private ErrorsPolicy(Builder builder) {
+        this.exact = Map.copyOf(builder.exact);
+        this.prefixes = Map.copyOf(builder.prefixes);
+        this.defaultAction = builder.defaultAction;
     }
 
     public static Builder builder() {

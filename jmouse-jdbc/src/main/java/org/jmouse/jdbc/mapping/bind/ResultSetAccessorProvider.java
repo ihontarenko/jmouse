@@ -15,7 +15,7 @@ import java.sql.ResultSet;
  * access during binding and mapping operations.
  *
  * <p>
- * This provider is typically used indirectly by higher-level components such as:
+ * This valueProvider is typically used indirectly by higher-level components such as:
  * <ul>
  *     <li>{@code BeanRowMapper}</li>
  *     <li>generic binders operating on JDBC results</li>
@@ -23,13 +23,13 @@ import java.sql.ResultSet;
  *
  * <h3>Priority</h3>
  * <p>
- * The provider is registered with a very low priority ({@code -5000}) to ensure
+ * The valueProvider is registered with a very low priority ({@code -5000}) to ensure
  * it is selected only when no more specific accessor providers apply.
  *
  * <h3>Example scenario</h3>
  * <pre>{@code
  * ResultSet rs = statement.executeQuery();
- * ObjectAccessor accessor = provider.create(rs);
+ * ObjectAccessor accessor = valueProvider.create(rs);
  * }</pre>
  *
  * @author jMouse
@@ -38,7 +38,7 @@ import java.sql.ResultSet;
 public class ResultSetAccessorProvider implements ObjectAccessorProvider {
 
     /**
-     * Determines whether this provider supports the given source object.
+     * Determines whether this valueProvider supports the given source object.
      *
      * @param source source object
      * @return {@code true} if the source is a {@link ResultSet}

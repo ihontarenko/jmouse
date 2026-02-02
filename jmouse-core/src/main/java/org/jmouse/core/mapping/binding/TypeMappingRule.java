@@ -11,7 +11,7 @@ import java.util.Map;
  *
  * <p>{@code TypeMappingRule} holds a set of {@link PropertyMapping} instructions keyed by
  * target property name. The mapping engine uses these bindings to decide how each target
- * property should be populated (reference, constant, compute, provider, ignore, ...).</p>
+ * property should be populated (reference, constant, compute, valueProvider, ignore, ...).</p>
  *
  * <h2>Examples</h2>
  * <pre>{@code

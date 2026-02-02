@@ -33,7 +33,7 @@ public class SubmitFormRequestAuthenticationProvider extends AbstractAuthenticat
     private final String passwordParameter;
 
     /**
-     * 🏗️ Create a provider with custom parameter names.
+     * 🏗️ Create a valueProvider with custom parameter names.
      *
      * @param usernameParameter form field name for username
      * @param passwordParameter form field name for password

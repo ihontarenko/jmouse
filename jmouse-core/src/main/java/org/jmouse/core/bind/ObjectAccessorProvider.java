@@ -1,7 +1,7 @@
 package org.jmouse.core.bind;
 
 /**
- * Defines a provider for creating {@link ObjectAccessor} instances.
+ * Defines a valueProvider for creating {@link ObjectAccessor} instances.
  * <p>
  * Implementations of this interface determine whether they support a given source object
  * and, if so, create an appropriate {@link ObjectAccessor} to wrap that object.
@@ -11,10 +11,10 @@ package org.jmouse.core.bind;
 public interface ObjectAccessorProvider {
 
     /**
-     * Checks if this provider supports the given source object.
+     * Checks if this valueProvider supports the given source object.
      *
      * @param source the object to be wrapped
-     * @return {@code true} if this provider can create an ObjectAccessor for the source; {@code false} otherwise
+     * @return {@code true} if this valueProvider can create an ObjectAccessor for the source; {@code false} otherwise
      */
     boolean supports(Object source);
 

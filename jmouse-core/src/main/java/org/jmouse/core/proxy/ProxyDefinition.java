@@ -67,7 +67,7 @@ public final class ProxyDefinition<T> {
     }
 
     /**
-     * @return provider for creating/obtaining target instances
+     * @return valueProvider for creating/obtaining target instances
      */
     public InstanceProvider<T> instanceProvider() {
         return instanceProvider;
@@ -121,7 +121,7 @@ public final class ProxyDefinition<T> {
         }
 
         /**
-         * @param instanceProvider provider for target instances
+         * @param instanceProvider valueProvider for target instances
          */
         public Builder<T> instanceProvider(InstanceProvider<T> instanceProvider) {
             this.instanceProvider = instanceProvider;

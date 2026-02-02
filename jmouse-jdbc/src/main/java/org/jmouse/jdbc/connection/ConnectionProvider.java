@@ -11,20 +11,20 @@ import java.sql.SQLException;
  *
  * <h3>Typical implementations</h3>
  * <ul>
- *     <li>Direct {@link java.sql.DriverManager}-based provider</li>
- *     <li>{@link javax.sql.DataSource}-backed provider</li>
- *     <li>Transaction-aware provider integrating with jMouse TX</li>
+ *     <li>Direct {@link java.sql.DriverManager}-based valueProvider</li>
+ *     <li>{@link javax.sql.DataSource}-backed valueProvider</li>
+ *     <li>Transaction-aware valueProvider integrating with jMouse TX</li>
  * </ul>
  *
  * <h3>Usage example</h3>
  * <pre>{@code
- * ConnectionProvider provider = ...;
+ * ConnectionProvider valueProvider = ...;
  *
- * Connection connection = provider.getConnection();
+ * Connection connection = valueProvider.getConnection();
  * try {
  *     // use connection
  * } finally {
- *     provider.release(connection);
+ *     valueProvider.release(connection);
  * }
  * }</pre>
  *
