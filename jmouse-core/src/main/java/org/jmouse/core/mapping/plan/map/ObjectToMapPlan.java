@@ -8,6 +8,7 @@ import org.jmouse.core.mapping.binding.PropertyMapping;
 import org.jmouse.core.mapping.binding.TypeMappingRule;
 import org.jmouse.core.mapping.config.MapKeyPolicy;
 import org.jmouse.core.mapping.config.MappingConfig;
+import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.mapping.plan.support.AbstractMapPlan;
 import org.jmouse.core.reflection.InferredType;
 
@@ -119,6 +120,7 @@ public final class ObjectToMapPlan extends AbstractMapPlan<Map<Object, Object>> 
                         continue;
                     }
 
+                    // todo: update context with correct path
                     Object mapped = materializeTree(value, context);
                     target.put(targetKey, mapped);
                     consumeSourceKey(mapping, targetKey, sourceKeys);
@@ -198,7 +200,7 @@ public final class ObjectToMapPlan extends AbstractMapPlan<Map<Object, Object>> 
             case STRINGIFY -> String.valueOf(key);
             case SKIP -> null;
             case FAIL -> throw toMappingException(
-                    "map_key_not_string",
+                    ErrorCodes.MAP_KEY_NOT_STRING,
                     "Object-To-Map requires String keys, got: " + key.getClass().getName(),
                     null
             );

@@ -44,13 +44,14 @@ public abstract class AbstractCollectionPlan extends AbstractIterablePlan<Collec
     protected final Collection<Object> mapIterable(IterableSource iterableSource, InferredType elementType, MappingContext context) {
         Collection<Object> target  = getCollectionFactory(context).get();
         int                maximum = context.config().maxCollectionSize();
-        int                count   = 0;
+        int                counter = 0;
 
         for (var iterator = iterableSource.iterator(); iterator.hasNext(); ) {
-            if (++count > maximum) {
+            if (++counter > maximum) {
                 throw new IllegalStateException("Collection size exceeds maxCollectionSize=" + maximum);
             }
-            target.add(adaptValue(iterator.next(), elementType, context));
+            MappingContext mappingContext = context.appendPath("[" + (counter - 1) + "]");
+            target.add(adaptValue(iterator.next(), elementType, mappingContext));
         }
 
         return target;
