@@ -4,13 +4,13 @@ import org.jmouse.core.Priority;
 import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.strategy.MappingStrategy;
-import org.jmouse.core.mapping.strategy.MappingPlanContributor;
+import org.jmouse.core.mapping.strategy.MappingStrategyContributor;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.Map;
 
 /**
- * {@link MappingPlanContributor} that builds an {@link ObjectToMapStrategy} for mapping
+ * {@link MappingStrategyContributor} that builds an {@link ObjectToMapStrategy} for mapping
  * arbitrary objects into {@code Map<String, ?>} targets. 🗺️
  *
  * <p>This contributor activates only when:</p>
@@ -23,7 +23,7 @@ import java.util.Map;
  * <p>The produced plan is responsible for extracting object properties and populating the target map.</p>
  */
 @Priority(Integer.MIN_VALUE + 1000)
-public final class ObjectToMapPlanContributor implements MappingPlanContributor {
+public final class ObjectToMapStrategyContributor implements MappingStrategyContributor {
 
     /**
      * Check whether this contributor can build a plan for the given mapping request.

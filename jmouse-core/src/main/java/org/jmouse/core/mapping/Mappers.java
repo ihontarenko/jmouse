@@ -4,16 +4,16 @@ import org.jmouse.core.bind.StandardAccessorWrapper;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.config.MappingPolicy;
-import org.jmouse.core.mapping.strategy.MappingPlanContributor;
+import org.jmouse.core.mapping.strategy.MappingStrategyContributor;
 import org.jmouse.core.mapping.strategy.MappingStrategyRegistry;
-import org.jmouse.core.mapping.strategy.array.ArrayPlanContributor;
-import org.jmouse.core.mapping.strategy.bean.JavaBeanPlanContributor;
-import org.jmouse.core.mapping.strategy.collection.ListPlanContributor;
-import org.jmouse.core.mapping.strategy.collection.SetPlanContributor;
-import org.jmouse.core.mapping.strategy.map.MapToMapPlanContributor;
-import org.jmouse.core.mapping.strategy.map.ObjectToMapPlanContributor;
-import org.jmouse.core.mapping.strategy.record.RecordPlanContributor;
-import org.jmouse.core.mapping.strategy.scalar.ScalarPlanContributor;
+import org.jmouse.core.mapping.strategy.array.ArrayStrategyContributor;
+import org.jmouse.core.mapping.strategy.bean.JavaBeanStrategyContributor;
+import org.jmouse.core.mapping.strategy.collection.ListStrategyContributor;
+import org.jmouse.core.mapping.strategy.collection.SetStrategyContributor;
+import org.jmouse.core.mapping.strategy.map.MapToMapStrategyContributor;
+import org.jmouse.core.mapping.strategy.map.ObjectToMapStrategyContributor;
+import org.jmouse.core.mapping.strategy.record.RecordStrategyContributor;
+import org.jmouse.core.mapping.strategy.scalar.ScalarStrategyContributor;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import java.util.List;
  *
  * <p>This class centralizes default wiring for the mapping subsystem, including:</p>
  * <ul>
- *   <li>Default {@link MappingPlanContributor} set (beans, records, scalars, maps, collections, arrays)</li>
+ *   <li>Default {@link MappingStrategyContributor} set (beans, records, scalars, maps, collections, arrays)</li>
  *   <li>Default {@link StandardAccessorWrapper} for source/target access</li>
  *   <li>Default conversion service ({@link MapperConversion})</li>
  *   <li>Default policies via {@link MappingPolicy#defaults()}</li>
@@ -42,15 +42,15 @@ public class Mappers {
      * <p>Order matters: contributors are typically consulted in registration order when selecting
      * a suitable plan for a given mapping request.</p>
      */
-    public static final List<MappingPlanContributor> DEFAULT_CONTRIBUTORS = List.of(
-            new JavaBeanPlanContributor(),
-            new RecordPlanContributor(),
-            new ScalarPlanContributor(),
-            new MapToMapPlanContributor(),
-            new ObjectToMapPlanContributor(),
-            new ListPlanContributor(),
-            new SetPlanContributor(),
-            new ArrayPlanContributor()
+    public static final List<MappingStrategyContributor> DEFAULT_CONTRIBUTORS = List.of(
+            new JavaBeanStrategyContributor(),
+            new RecordStrategyContributor(),
+            new ScalarStrategyContributor(),
+            new MapToMapStrategyContributor(),
+            new ObjectToMapStrategyContributor(),
+            new ListStrategyContributor(),
+            new SetStrategyContributor(),
+            new ArrayStrategyContributor()
     );
 
     /**

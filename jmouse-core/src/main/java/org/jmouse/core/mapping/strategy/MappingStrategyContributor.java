@@ -7,7 +7,7 @@ import org.jmouse.core.reflection.InferredType;
 /**
  * Factory/selector for building {@link MappingStrategy} instances. 🧩
  *
- * <p>A {@code MappingPlanContributor} participates in plan resolution by:</p>
+ * <p>A {@code MappingStrategyContributor} participates in plan resolution by:</p>
  * <ol>
  *   <li>declaring support for a mapping request via {@link #supports(Object, InferredType, MappingContext)}</li>
  *   <li>building a concrete {@link MappingStrategy} via {@link #build(TypedValue, MappingContext)}</li>
@@ -27,7 +27,7 @@ import org.jmouse.core.reflection.InferredType;
  * @see StrategyRegistry
  * @see TypedValue
  */
-public interface MappingPlanContributor {
+public interface MappingStrategyContributor {
 
     /**
      * Determine whether this contributor can build a mapping plan for the given request.

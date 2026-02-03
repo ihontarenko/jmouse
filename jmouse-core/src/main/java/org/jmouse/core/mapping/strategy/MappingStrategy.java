@@ -8,7 +8,7 @@ import org.jmouse.core.mapping.MappingContext;
  * <p>A {@code MappingStrategy} encapsulates the concrete mapping algorithm for a specific
  * source/target type combination.</p>
  *
- * <p>Plans are typically created by {@link MappingPlanContributor}s and resolved through a
+ * <p>Plans are typically created by {@link MappingStrategyContributor}s and resolved through a
  * {@link StrategyRegistry}.</p>
  *
  * @param <T> target type produced by this plan

@@ -13,8 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Default {@link StrategyRegistry} implementation that resolves and caches {@link MappingStrategy}s. 🧠
  *
- * <p>{@code MappingStrategyRegistry} maintains an ordered list of {@link MappingPlanContributor}s and
- * selects the first contributor that {@linkplain MappingPlanContributor#supports(Object, InferredType, MappingContext)
+ * <p>{@code MappingStrategyRegistry} maintains an ordered list of {@link MappingStrategyContributor}s and
+ * selects the first contributor that {@linkplain MappingStrategyContributor#supports(Object, InferredType, MappingContext)
  * supports} a given mapping request.</p>
  *
  * <h3>Contributor ordering</h3>
@@ -27,12 +27,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p><strong>Note:</strong> the cache key uses {@link InferredType#getRawType()} and does not include
  * generic parameters. If generic-sensitive planning is required, extend {@code PlanKey} accordingly.</p>
  *
- * @see MappingPlanContributor
+ * @see MappingStrategyContributor
  * @see MappingStrategy
  */
 public final class MappingStrategyRegistry implements StrategyRegistry {
 
-    private final List<MappingPlanContributor>     contributors;
+    private final List<MappingStrategyContributor> contributors;
     private final Map<PlanKey, MappingStrategy<?>> cache = new ConcurrentHashMap<>();
 
     /**
@@ -43,8 +43,8 @@ public final class MappingStrategyRegistry implements StrategyRegistry {
      * @param contributors contributor list
      * @throws IllegalArgumentException if {@code contributors} is {@code null}
      */
-    public MappingStrategyRegistry(List<MappingPlanContributor> contributors) {
-        List<MappingPlanContributor> sorted = new ArrayList<>(contributors);
+    public MappingStrategyRegistry(List<MappingStrategyContributor> contributors) {
+        List<MappingStrategyContributor> sorted = new ArrayList<>(contributors);
         Sorter.sort(sorted);
         this.contributors = List.copyOf(Verify.nonNull(sorted, "contributors"));
     }
@@ -81,8 +81,8 @@ public final class MappingStrategyRegistry implements StrategyRegistry {
      * Build a {@link MappingStrategy} by scanning registered contributors and selecting the first match.
      *
      * <p>Contributors are consulted in registry order. The first contributor that returns {@code true}
-     * from {@link MappingPlanContributor#supports(Object, InferredType, MappingContext)} is responsible
-     * for building the plan via {@link MappingPlanContributor#build(TypedValue, MappingContext)}.</p>
+     * from {@link MappingStrategyContributor#supports(Object, InferredType, MappingContext)} is responsible
+     * for building the plan via {@link MappingStrategyContributor#build(TypedValue, MappingContext)}.</p>
      *
      * @param source source object
      * @param typedValue typed target descriptor (type metadata + optional instance holder)
@@ -94,7 +94,7 @@ public final class MappingStrategyRegistry implements StrategyRegistry {
         InferredType targetType = typedValue.getType();
         InferredType sourceType = InferredType.forInstance(source);
 
-        for (MappingPlanContributor contributor : contributors) {
+        for (MappingStrategyContributor contributor : contributors) {
             if (contributor.supports(source, targetType, context)) {
                 return contributor.build(typedValue, context);
             }
