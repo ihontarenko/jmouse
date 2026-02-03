@@ -65,13 +65,13 @@ public final class ObjectMapper implements Mapper {
 
         Verify.nonNull(typedValue, "typedValue");
 
-        InferredType      type          = typedValue.getType();
-        MappingInvocation invocation    = MappingInvocation.begin(context, source, source.getClass(), type);
-        MappingContext     scopedContext   = invocation.context();
-        MappingStrategy<T> mappingStrategy = scopedContext.strategyRegistry().planFor(source, typedValue, scopedContext);
+        InferredType       type          = typedValue.getType();
+        MappingInvocation  invocation    = MappingInvocation.begin(context, source, source.getClass(), type);
+        MappingContext     scopedContext = invocation.context();
+        MappingStrategy<T> strategy      = scopedContext.strategyRegistry().strategyFor(source, typedValue, scopedContext);
 
         try {
-            T value = mappingStrategy.execute(source, scopedContext);
+            T value = strategy.execute(source, scopedContext);
             return invocation.finish(source, value, type);
         } catch (MappingException mappingException) {
             if (!(invocation.fail(mappingException) instanceof MappingException exception)) {

@@ -29,5 +29,5 @@ public interface StrategyRegistry {
      * @param <T> plan output type
      * @return mapping plan for the request
      */
-    <T> MappingStrategy<T> planFor(Object source, TypedValue<T> typedValue, MappingContext context);
+    <T> MappingStrategy<T> strategyFor(Object source, TypedValue<T> typedValue, MappingContext context);
 }

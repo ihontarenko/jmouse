@@ -70,7 +70,7 @@ public final class MappingStrategyRegistry implements StrategyRegistry {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> MappingStrategy<T> planFor(Object source, TypedValue<T> typedValue, MappingContext context) {
+    public <T> MappingStrategy<T> strategyFor(Object source, TypedValue<T> typedValue, MappingContext context) {
         InferredType type = typedValue.getType();
         PlanKey      key  = new PlanKey(source.hashCode(), type.hashCode());
 //        return (MappingStrategy<T>) cache.computeIfAbsent(key, ignore -> build(source, typedValue, context));
