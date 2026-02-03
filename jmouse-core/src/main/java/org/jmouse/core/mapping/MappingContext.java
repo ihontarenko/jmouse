@@ -7,7 +7,7 @@ import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.config.MappingPolicy;
-import org.jmouse.core.mapping.plan.StrategyRegistry;
+import org.jmouse.core.mapping.strategy.StrategyRegistry;
 import org.jmouse.core.mapping.plugin.PluginBus;
 
 public record MappingContext(

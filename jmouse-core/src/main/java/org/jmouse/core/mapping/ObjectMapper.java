@@ -3,7 +3,7 @@ package org.jmouse.core.mapping;
 import org.jmouse.core.Verify;
 import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.errors.MappingException;
-import org.jmouse.core.mapping.plan.MappingStrategy;
+import org.jmouse.core.mapping.strategy.MappingStrategy;
 import org.jmouse.core.reflection.InferredType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

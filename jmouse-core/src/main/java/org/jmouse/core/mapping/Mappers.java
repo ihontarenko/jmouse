@@ -4,16 +4,16 @@ import org.jmouse.core.bind.StandardAccessorWrapper;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.config.MappingPolicy;
-import org.jmouse.core.mapping.plan.MappingPlanContributor;
-import org.jmouse.core.mapping.plan.MappingStrategyRegistry;
-import org.jmouse.core.mapping.plan.array.ArrayPlanContributor;
-import org.jmouse.core.mapping.plan.bean.JavaBeanPlanContributor;
-import org.jmouse.core.mapping.plan.collection.ListPlanContributor;
-import org.jmouse.core.mapping.plan.collection.SetPlanContributor;
-import org.jmouse.core.mapping.plan.map.MapToMapPlanContributor;
-import org.jmouse.core.mapping.plan.map.ObjectToMapPlanContributor;
-import org.jmouse.core.mapping.plan.record.RecordPlanContributor;
-import org.jmouse.core.mapping.plan.scalar.ScalarPlanContributor;
+import org.jmouse.core.mapping.strategy.MappingPlanContributor;
+import org.jmouse.core.mapping.strategy.MappingStrategyRegistry;
+import org.jmouse.core.mapping.strategy.array.ArrayPlanContributor;
+import org.jmouse.core.mapping.strategy.bean.JavaBeanPlanContributor;
+import org.jmouse.core.mapping.strategy.collection.ListPlanContributor;
+import org.jmouse.core.mapping.strategy.collection.SetPlanContributor;
+import org.jmouse.core.mapping.strategy.map.MapToMapPlanContributor;
+import org.jmouse.core.mapping.strategy.map.ObjectToMapPlanContributor;
+import org.jmouse.core.mapping.strategy.record.RecordPlanContributor;
+import org.jmouse.core.mapping.strategy.scalar.ScalarPlanContributor;
 
 import java.util.List;
 
