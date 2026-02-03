@@ -17,6 +17,6 @@ public final class RecordStrategyContributor implements MappingStrategyContribut
 
     @Override
     public <T> MappingStrategy<T> build(TypedValue<T> typedValue, MappingContext context) {
-        return new RecordStrategy<>(typedValue);
+        return new RecordStrategy<>();
     }
 }

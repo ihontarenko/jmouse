@@ -2,7 +2,6 @@ package org.jmouse.core.mapping.strategy.support;
 
 import org.jmouse.core.Verify;
 import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.mapping.binding.PropertyMapping;
 import org.jmouse.core.mapping.binding.TypeMappingRule;
@@ -27,15 +26,6 @@ import java.util.List;
  * @param <T> target type produced by the plan
  */
 abstract public class AbstractObjectStrategy<T> extends AbstractStrategy<T> {
-
-    /**
-     * Create an object plan for the given target type.
-     *
-     * @param typedValue typed value type (never {@code null})
-     */
-    protected AbstractObjectStrategy(TypedValue<T> typedValue) {
-        super(typedValue);
-    }
 
     /**
      * Resolve the raw Java class used as the target property type.

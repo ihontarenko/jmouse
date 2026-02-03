@@ -13,55 +13,51 @@ import org.jmouse.core.reflection.InferredType;
 
 public final class RecordStrategy<T> extends AbstractObjectStrategy<T> {
 
-    private final ValueObject<? extends Record> valueObject;
+    @Override
+    public T execute(Object source, TypedValue<T> typedValue, MappingContext context) {
+        InferredType type = typedValue.getType();
 
-    public RecordStrategy(TypedValue<T> typedValue) {
-        super(typedValue);
-
-        if (getTargetType() == null || !getTargetType().isRecord()) {
+        if (type == null || !type.isRecord()) {
             throw new MappingException(
-                    "record_plan_target_not_record",
-                    "RecordStrategy target must be a record, got: " + typedValue.getType()
+                    ErrorCodes.RECORD_TARGET_NOT_RECORD,
+                    "RecordStrategy target must be a record, got: " + type
             );
         }
 
-        @SuppressWarnings("unchecked")
-        Class<? extends Record> recordType = (Class<? extends Record>) getTargetType().getClassType();
-
-        this.valueObject = ValueObject.of(recordType);
-    }
-
-    @Override
-    public T execute(Object source, MappingContext context) {
         if (source == null) {
             return null;
         }
 
+        @SuppressWarnings("unchecked")
+        Class<? extends Record>       recordType  = (Class<? extends Record>) type.getClassType();
+        ValueObject<? extends Record> valueObject = ValueObject.of(recordType);
+
         ObjectAccessor     accessor   = toObjectAccessor(source, context);
         Class<?>           sourceType = accessor.getClassType();
-        Class<?>           targetType = getTargetType().getClassType();
+        Class<?>           targetType = type.getClassType();
         ValueObject.Values values     = valueObject.getRecordValues();
 
         @SuppressWarnings("unchecked")
         ValueObjectDescriptor<T> descriptor = (ValueObjectDescriptor<T>) valueObject.getDescriptor();
 
         for (PropertyDescriptor<T> property : descriptor.getComponents().values()) {
-            String         name           = property.getName();
-            InferredType   type           = property.getType().getJavaType();
-            MappingContext mappingContext = context.appendPath(name);
-            Object         value          = applyValue(accessor, mappingContext, sourceType, targetType, name);
+            String       propertyName = property.getName();
+            InferredType propertyType = property.getType().getJavaType();
+
+            MappingContext mappingContext = context.appendPath(propertyName);
+            Object         value          = applyValue(accessor, mappingContext, sourceType, targetType, propertyName);
 
             if (value == IgnoredValue.INSTANCE || value == null) {
-                values.put(name, null);
+                values.put(propertyName, null);
                 continue;
             }
 
             try {
-                values.put(name, adaptValue(value, type, mappingContext));
+                values.put(propertyName, adaptValue(value, propertyType, mappingContext));
             } catch (Exception exception) {
                 throw toMappingException(
                         ErrorCodes.RECORD_COMPONENT_ADAPT_FAILED,
-                        "Failed to adapt record component '%s' to '%s'".formatted(name, type),
+                        "Failed to adapt record component '%s' to '%s'".formatted(propertyName, propertyType),
                         exception
                 );
             }

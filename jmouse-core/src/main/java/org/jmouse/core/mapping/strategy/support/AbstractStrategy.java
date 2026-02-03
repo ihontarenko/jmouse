@@ -1,6 +1,5 @@
 package org.jmouse.core.mapping.strategy.support;
 
-import org.jmouse.core.Verify;
 import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.PropertyPath;
 import org.jmouse.core.bind.TypedValue;
@@ -36,12 +35,6 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStrategy.class);
-
-    protected final TypedValue<T> typedValue;
-
-    protected AbstractStrategy(TypedValue<T> typedValue) {
-        this.typedValue = Verify.nonNull(typedValue, "typedValue");
-    }
 
     /**
      * Wrap the given {@code source} object into an {@link ObjectAccessor} using the wrapper
@@ -262,20 +255,6 @@ public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
      */
     protected final MappingException toMappingException(String code, String message, Exception exception) {
         return new MappingException(code, message, exception);
-    }
-
-    /**
-     * Target type related to this mapping plan
-     */
-    public InferredType getTargetType() {
-        return getTypedValue().getType();
-    }
-
-    /**
-     * Target {@link TypedValue} related to this mapping plan
-     */
-    public TypedValue<T> getTypedValue() {
-        return typedValue;
     }
 
     /**

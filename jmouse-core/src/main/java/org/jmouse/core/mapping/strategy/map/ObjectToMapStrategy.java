@@ -60,21 +60,12 @@ public final class ObjectToMapStrategy extends AbstractMapStrategy<Map<Object, O
             InferredType.forType(String.class);
 
     /**
-     * Create a plan instance for the requested target type.
-     *
-     * @param typedValue typed value target map type
-     */
-    public ObjectToMapStrategy(TypedValue<Map<Object, Object>> typedValue) {
-        super(typedValue);
-    }
-
-    /**
      * Execute object-to-map mapping.
      *
      * <p>Algorithm outline:</p>
      * <ol>
      *   <li>Wrap source into {@link ObjectAccessor}.</li>
-     *   <li>Instantiate target map via {@link #instantiate(MappingConfig)}.</li>
+     *   <li>Instantiate target map via {@link #instantiate(MappingConfig, TypedValue)}.</li>
      *   <li>Apply explicit rules ({@link TypeMappingRule}) first and mark consumed source keys.</li>
      *   <li>Copy the remaining source keys into the target ("rest mapping").</li>
      * </ol>
@@ -84,7 +75,7 @@ public final class ObjectToMapStrategy extends AbstractMapStrategy<Map<Object, O
      * @return mapped tree map, or {@code null} when {@code source} is {@code null}
      */
     @Override
-    public Map<Object, Object> execute(Object source, MappingContext context) {
+    public Map<Object, Object> execute(Object source, TypedValue<Map<Object, Object>> typedValue, MappingContext context) {
         if (source == null) {
             return null;
         }
@@ -94,7 +85,7 @@ public final class ObjectToMapStrategy extends AbstractMapStrategy<Map<Object, O
         Set<Object>    sourceKeys = new LinkedHashSet<>(accessor.keySet());
 
         // target should be Map<String, ?>
-        Map<Object, Object> target = instantiate(config);
+        Map<Object, Object> target = instantiate(config, typedValue);
 
         // rule (sourceType -> Map.class)
         List<TypeMappingRule> mappingRules =

@@ -10,13 +10,9 @@ import java.util.function.Supplier;
 
 abstract public class AbstractMapStrategy<T extends Map<?, ?>> extends AbstractStrategy<T> {
 
-    protected AbstractMapStrategy(TypedValue<T> typedValue) {
-        super(typedValue);
-    }
-
     @SuppressWarnings("unchecked")
-    protected Map<Object, Object> instantiate(MappingConfig config) {
-        Map<Object, Object> instance = (Map<Object, Object>) getTypedValue().getValue().get();
+    protected Map<Object, Object> instantiate(MappingConfig config, TypedValue<T> typedValue) {
+        Map<Object, Object> instance = (Map<Object, Object>) typedValue.getValue().get();
         Supplier<T>         factory  = (Supplier<T>) config.mapFactory();
 
         if (instance == null) {

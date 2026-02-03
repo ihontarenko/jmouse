@@ -8,7 +8,6 @@ import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Default {@link StrategyRegistry} implementation that resolves and caches {@link MappingStrategy}s. 🧠
@@ -33,7 +32,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class MappingStrategyRegistry implements StrategyRegistry {
 
     private final List<MappingStrategyContributor> contributors;
-    private final Map<PlanKey, MappingStrategy<?>> cache = new ConcurrentHashMap<>();
 
     /**
      * Create a plan registry with the provided contributors.
@@ -44,9 +42,9 @@ public final class MappingStrategyRegistry implements StrategyRegistry {
      * @throws IllegalArgumentException if {@code contributors} is {@code null}
      */
     public MappingStrategyRegistry(List<MappingStrategyContributor> contributors) {
-        List<MappingStrategyContributor> sorted = new ArrayList<>(contributors);
+        List<MappingStrategyContributor> sorted = new ArrayList<>(Verify.nonNull(contributors, "contributors"));
         Sorter.sort(sorted);
-        this.contributors = List.copyOf(Verify.nonNull(sorted, "contributors"));
+        this.contributors = List.copyOf(sorted);
     }
 
     /**
@@ -71,9 +69,6 @@ public final class MappingStrategyRegistry implements StrategyRegistry {
     @Override
     @SuppressWarnings("unchecked")
     public <T> MappingStrategy<T> strategyFor(Object source, TypedValue<T> typedValue, MappingContext context) {
-        InferredType type = typedValue.getType();
-        PlanKey      key  = new PlanKey(source.hashCode(), type.hashCode());
-//        return (MappingStrategy<T>) cache.computeIfAbsent(key, ignore -> build(source, typedValue, context));
         return (MappingStrategy<T>) build(source, typedValue, context);
     }
 

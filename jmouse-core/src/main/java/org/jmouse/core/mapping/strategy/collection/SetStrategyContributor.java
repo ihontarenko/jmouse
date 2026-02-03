@@ -20,7 +20,7 @@ public final class SetStrategyContributor implements MappingStrategyContributor 
     @Override
     @SuppressWarnings("unchecked")
     public <T> MappingStrategy<T> build(TypedValue<T> typedValue, MappingContext context) {
-        return (MappingStrategy<T>) new SetStrategy((TypedValue<Collection<Object>>) typedValue);
+        return (MappingStrategy<T>) new SetCollectionStrategy();
     }
 
 }

@@ -201,13 +201,13 @@ public final class Arrays {
         return newArray;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T[] reverse(T[] a) {
         T[] b = (T[]) Array.newInstance(a.getClass().getComponentType(), a.length);
-        int n = a.length;
-        int j = n;
+        int j = a.length;
 
-        for (int i = 0; i < n; i++) {
-            b[--j] = a[i];
+        for (T t : a) {
+            b[--j] = t;
         }
 
         return b;

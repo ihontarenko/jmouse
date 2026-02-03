@@ -15,10 +15,6 @@ import java.util.OptionalInt;
 
 public final class ArrayStrategy extends AbstractIterableStrategy<Object> {
 
-    public ArrayStrategy(TypedValue<Object> typedValue) {
-        super(typedValue);
-    }
-
     @Override
     protected Object mapIterable(IterableSource iterableSource, InferredType elementType, MappingContext context) {
         ArrayMaterializationPolicy policy    = context.config().arrayMaterializationPolicy();
@@ -27,6 +23,8 @@ public final class ArrayStrategy extends AbstractIterableStrategy<Object> {
         if (knownSize.isPresent()) {
             int    size  = knownSize.getAsInt();
             Object array = Array.newInstance(elementType.getClassType(), size);
+
+            // Arrays.expand(array, size);
 
             if (iterableSource.isIndexed()) {
                 for (int index = 0; index < size; index++) {

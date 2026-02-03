@@ -19,6 +19,6 @@ public final class ScalarStrategyContributor implements MappingStrategyContribut
 
     @Override
     public <T> MappingStrategy<T> build(TypedValue<T> typedValue, MappingContext context) {
-        return new ScalarStrategy<>(typedValue);
+        return new ScalarStrategy<>();
     }
 }

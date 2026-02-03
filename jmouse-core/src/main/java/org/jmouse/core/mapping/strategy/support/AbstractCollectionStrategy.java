@@ -1,6 +1,5 @@
 package org.jmouse.core.mapping.strategy.support;
 
-import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
@@ -19,15 +18,6 @@ import java.util.function.Supplier;
  * @see AbstractIterableStrategy
  */
 public abstract class AbstractCollectionStrategy extends AbstractIterableStrategy<Collection<Object>> {
-
-    /**
-     * Create a collection plan bound to the given typed target value.
-     *
-     * @param typedValue target typed value (type metadata + optional instance holder)
-     */
-    protected AbstractCollectionStrategy(TypedValue<Collection<Object>> typedValue) {
-        super(typedValue);
-    }
 
     /**
      * Map the provided iterable source into a newly created target collection.

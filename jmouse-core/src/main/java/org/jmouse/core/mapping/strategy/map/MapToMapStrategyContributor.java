@@ -7,8 +7,6 @@ import org.jmouse.core.mapping.strategy.MappingStrategyContributor;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
-import java.util.Map;
-
 @Priority(Integer.MIN_VALUE + 500)
 public final class MapToMapStrategyContributor implements MappingStrategyContributor {
 
@@ -23,7 +21,7 @@ public final class MapToMapStrategyContributor implements MappingStrategyContrib
     @Override
     @SuppressWarnings("unchecked")
     public <T> MappingStrategy<T> build(TypedValue<T> typedValue, MappingContext context) {
-        return (MappingStrategy<T>) new MapToMapStrategy((TypedValue<Map<Object, Object>>) typedValue);
+        return (MappingStrategy<T>) new MapToMapStrategy();
     }
 
 }

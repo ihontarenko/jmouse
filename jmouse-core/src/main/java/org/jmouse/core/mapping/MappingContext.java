@@ -37,8 +37,8 @@ public record MappingContext(
         this.conversion = Verify.nonNull(conversion, "conversion");
         this.mappingRegistry = Verify.nonNull(mappingRegistry, "mappingRegistry");
         this.policy = Verify.nonNull(policy, "policy");
-        this.config = Verify.nonNull(config, "config");
         this.scope = Verify.nonNull(scope, "scope");
+        this.config = Verify.nonNull(config, "config");
     }
 
     public MappingContext withScope(MappingScope scope) {

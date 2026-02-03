@@ -60,7 +60,7 @@ public final class ObjectToMapStrategyContributor implements MappingStrategyCont
     @Override
     @SuppressWarnings("unchecked")
     public <T> MappingStrategy<T> build(TypedValue<T> typedValue, MappingContext context) {
-        return (MappingStrategy<T>) new ObjectToMapStrategy((TypedValue<Map<Object, Object>>) typedValue);
+        return (MappingStrategy<T>) new ObjectToMapStrategy();
     }
 
 }

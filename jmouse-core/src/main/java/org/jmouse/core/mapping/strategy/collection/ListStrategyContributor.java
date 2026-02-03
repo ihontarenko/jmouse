@@ -7,8 +7,6 @@ import org.jmouse.core.mapping.strategy.MappingStrategyContributor;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
-import java.util.Collection;
-
 @Priority(Integer.MIN_VALUE + 2000)
 public final class ListStrategyContributor implements MappingStrategyContributor {
 
@@ -20,7 +18,7 @@ public final class ListStrategyContributor implements MappingStrategyContributor
     @Override
     @SuppressWarnings("unchecked")
     public <T> MappingStrategy<T> build(TypedValue<T> typedValue, MappingContext context) {
-        return (MappingStrategy<T>) new ListStrategy((TypedValue<Collection<Object>>) typedValue);
+        return (MappingStrategy<T>) new ListCollectionStrategy();
     }
 
 }

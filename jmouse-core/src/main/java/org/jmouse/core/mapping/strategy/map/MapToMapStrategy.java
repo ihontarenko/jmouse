@@ -4,35 +4,63 @@ import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.config.TypeMismatchPolicy;
+import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.mapping.strategy.support.AbstractMapStrategy;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.Map;
 
+/**
+ * Mapping strategy for {@code Map -> Map} transformations. 🗺️
+ *
+ * <p>This strategy reads entries from a source map-like value and adapts both keys and values into
+ * the target map key/value types described by {@link TypedValue#getType()}.</p>
+ *
+ * <h3>Nested values</h3>
+ * <p>If the declared target value type is {@code Object} and the source value is not simple,
+ * the value is materialized as a nested {@code Map<Object,Object>} using {@link #NESTED_MAP_TYPE}.</p>
+ *
+ * <h3>Error handling</h3>
+ * <p>Entry adaptation errors are handled according to {@link MappingPolicy#typeMismatchPolicy()}:</p>
+ * <ul>
+ *   <li>{@link TypeMismatchPolicy#FAIL}: throw a {@code map.entry_adapt_failed} exception</li>
+ *   <li>otherwise: skip the failing entry</li>
+ * </ul>
+ *
+ * <p>When a key is a {@link String}, the mapping path is temporarily extended to improve diagnostics.</p>
+ */
 public final class MapToMapStrategy extends AbstractMapStrategy<Map<Object, Object>> {
 
+    /**
+     * Nested materialization type used when the target value type is {@code Object}
+     * and the source value is complex (non-simple).
+     */
     private static final InferredType NESTED_MAP_TYPE = InferredType.forParametrizedClass(
             Map.class, Object.class, Object.class
     );
 
-    public MapToMapStrategy(TypedValue<Map<Object, Object>> typedValue) {
-        super(typedValue);
-    }
-
+    /**
+     * Execute map-to-map mapping.
+     *
+     * @param source source value (expected to be map-like)
+     * @param typedValue typed target descriptor (target map type + optional instance)
+     * @param context mapping context
+     * @return mapped target map, or {@code null} when {@code source} is {@code null} or not map-like
+     */
     @Override
-    public Map<Object, Object> execute(Object source, MappingContext context) {
+    public Map<Object, Object> execute(Object source, TypedValue<Map<Object, Object>> typedValue, MappingContext context) {
         if (source == null) {
             return null;
         }
 
         MappingPolicy policy = context.policy();
 
-        InferredType mapType   = getTargetType().toMap();
+        InferredType mapType   = typedValue.getType().toMap();
         InferredType valueType = mapType.getLast();
         InferredType keyType   = mapType.getFirst();
 
-        Map<Object, Object> target   = instantiate(context.config());
+        Map<Object, Object> target   = instantiate(context.config(), typedValue);
         ObjectAccessor      accessor = toObjectAccessor(source, context);
 
         if (!accessor.isMap()) {
@@ -62,7 +90,7 @@ public final class MapToMapStrategy extends AbstractMapStrategy<Map<Object, Obje
             } catch (RuntimeException exception) {
                 if (policy.typeMismatchPolicy() == TypeMismatchPolicy.FAIL) {
                     throw toMappingException(
-                            "map_entry_adapt_failed",
+                            ErrorCodes.MAP_ENTRY_ADAPT_FAILED,
                             "Failed to adapt map entry key/value to target map types", exception
                     );
                 }

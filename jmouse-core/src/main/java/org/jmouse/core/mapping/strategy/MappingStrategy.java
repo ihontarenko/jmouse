@@ -1,5 +1,6 @@
 package org.jmouse.core.mapping.strategy;
 
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
 
 /**
@@ -19,8 +20,9 @@ public interface MappingStrategy<T> {
      * Execute mapping from the given {@code source} into a target value.
      *
      * @param source source object (may be {@code null}, depending on plan behavior)
+     * @param typedValue target descriptor (type + optional existing instance)
      * @param context mapping context providing accessors, conversion, configuration, policies, etc.
-     * @return mapped target value
+     * @return mapped value (new or updated instance)
      */
-    T execute(Object source, MappingContext context);
+    T execute(Object source, TypedValue<T> typedValue, MappingContext context);
 }

@@ -9,12 +9,8 @@ import java.util.*;
 
 abstract public class AbstractIterableStrategy<T> extends AbstractStrategy<T> {
 
-    protected AbstractIterableStrategy(TypedValue<T> typedValue) {
-        super(typedValue);
-    }
-
     @Override
-    public final T execute(Object source, MappingContext context) {
+    public final T execute(Object source, TypedValue<T> typedValue, MappingContext context) {
         if (source == null) {
             return null;
         }
@@ -22,7 +18,7 @@ abstract public class AbstractIterableStrategy<T> extends AbstractStrategy<T> {
         ObjectAccessor accessor       = toObjectAccessor(source, context);
         IterableSource iterableSource = toIterableSource(accessor);
 
-        return mapIterable(iterableSource, getElementType(), context);
+        return mapIterable(iterableSource, getElementType(typedValue), context);
     }
 
     private IterableSource toIterableSource(ObjectAccessor accessor) {
@@ -92,8 +88,8 @@ abstract public class AbstractIterableStrategy<T> extends AbstractStrategy<T> {
         };
     }
 
-    protected InferredType getElementType() {
-        InferredType type = getTargetType();
+    protected InferredType getElementType(TypedValue<?> typedValue) {
+        InferredType type = typedValue.getType();
 
         if (type.isArray()) {
             return type.getComponentType();
