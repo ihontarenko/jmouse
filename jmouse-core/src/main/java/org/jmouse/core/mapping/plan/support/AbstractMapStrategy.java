@@ -8,9 +8,9 @@ import org.jmouse.core.reflection.InferredType;
 import java.util.Map;
 import java.util.function.Supplier;
 
-abstract public class AbstractMapPlan<T extends Map<?, ?>> extends AbstractPlan<T> {
+abstract public class AbstractMapStrategy<T extends Map<?, ?>> extends AbstractStrategy<T> {
 
-    protected AbstractMapPlan(TypedValue<T> typedValue) {
+    protected AbstractMapStrategy(TypedValue<T> typedValue) {
         super(typedValue);
     }
 

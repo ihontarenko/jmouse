@@ -8,20 +8,20 @@ import org.jmouse.core.bind.descriptor.structured.record.ValueObjectDescriptor;
 import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.MappingContext;
-import org.jmouse.core.mapping.plan.support.AbstractObjectPlan;
+import org.jmouse.core.mapping.plan.support.AbstractObjectStrategy;
 import org.jmouse.core.reflection.InferredType;
 
-public final class RecordPlan<T> extends AbstractObjectPlan<T> {
+public final class RecordStrategy<T> extends AbstractObjectStrategy<T> {
 
     private final ValueObject<? extends Record> valueObject;
 
-    public RecordPlan(TypedValue<T> typedValue) {
+    public RecordStrategy(TypedValue<T> typedValue) {
         super(typedValue);
 
         if (getTargetType() == null || !getTargetType().isRecord()) {
             throw new MappingException(
                     "record_plan_target_not_record",
-                    "RecordPlan target must be a record, got: " + typedValue.getType()
+                    "RecordStrategy target must be a record, got: " + typedValue.getType()
             );
         }
 

@@ -3,14 +3,14 @@ package org.jmouse.core.mapping.plan.map;
 import org.jmouse.core.Priority;
 import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
-import org.jmouse.core.mapping.plan.MappingPlan;
+import org.jmouse.core.mapping.plan.MappingStrategy;
 import org.jmouse.core.mapping.plan.MappingPlanContributor;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.Map;
 
 /**
- * {@link MappingPlanContributor} that builds an {@link ObjectToMapPlan} for mapping
+ * {@link MappingPlanContributor} that builds an {@link ObjectToMapStrategy} for mapping
  * arbitrary objects into {@code Map<String, ?>} targets. 🗺️
  *
  * <p>This contributor activates only when:</p>
@@ -59,8 +59,8 @@ public final class ObjectToMapPlanContributor implements MappingPlanContributor 
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> MappingPlan<T> build(TypedValue<T> typedValue, MappingContext context) {
-        return (MappingPlan<T>) new ObjectToMapPlan((TypedValue<Map<Object, Object>>) typedValue);
+    public <T> MappingStrategy<T> build(TypedValue<T> typedValue, MappingContext context) {
+        return (MappingStrategy<T>) new ObjectToMapStrategy((TypedValue<Map<Object, Object>>) typedValue);
     }
 
 }

@@ -6,7 +6,7 @@ import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.config.MappingPolicy;
-import org.jmouse.core.mapping.plan.PlanRegistry;
+import org.jmouse.core.mapping.plan.StrategyRegistry;
 
 /**
  * Fluent builder for constructing a {@link Mapper} with explicit wiring. 🧱
@@ -16,7 +16,7 @@ import org.jmouse.core.mapping.plan.PlanRegistry;
  *
  * <p>Required components:</p>
  * <ul>
- *   <li>{@link PlanRegistry} - plan selection/registry</li>
+ *   <li>{@link StrategyRegistry} - plan selection/registry</li>
  *   <li>{@link ObjectAccessorWrapper} - source/target accessor wrapper</li>
  *   <li>{@link Conversion} - conversion service</li>
  *   <li>{@link TypeMappingRegistry} - type mapping specifications/overrides</li>
@@ -31,7 +31,7 @@ import org.jmouse.core.mapping.plan.PlanRegistry;
  */
 public final class MapperBuilder {
 
-    private PlanRegistry          planRegistry;
+    private StrategyRegistry      strategyRegistry;
     private ObjectAccessorWrapper wrapper;
     private Conversion            conversion;
     private TypeMappingRegistry   mappingRegistry;
@@ -41,11 +41,11 @@ public final class MapperBuilder {
     /**
      * Set the plan registry used to resolve mapping plans.
      *
-     * @param planRegistry plan registry
+     * @param strategyRegistry plan registry
      * @return this builder
      */
-    public MapperBuilder planRegistry(PlanRegistry planRegistry) {
-        this.planRegistry = planRegistry;
+    public MapperBuilder planRegistry(StrategyRegistry strategyRegistry) {
+        this.strategyRegistry = strategyRegistry;
         return this;
     }
 
@@ -115,7 +115,7 @@ public final class MapperBuilder {
      */
     public Mapper build() {
 
-        Verify.nonNull(planRegistry, "planRegistry");
+        Verify.nonNull(strategyRegistry, "strategyRegistry");
         Verify.nonNull(wrapper, "wrapper");
         Verify.nonNull(conversion, "conversion");
         Verify.nonNull(mappingRegistry, "mappingRegistry");
@@ -124,7 +124,7 @@ public final class MapperBuilder {
 
         MappingContext context = new MappingContext(
                 ObjectMapper::new,
-                planRegistry,
+                strategyRegistry,
                 wrapper,
                 conversion,
                 mappingRegistry,

@@ -61,10 +61,10 @@ public class Smoke2 {
                             return TaskOrigin.retry("default!");
                         })
                         .compute("hint", (source, context) -> VoronHint.valueOf(String.valueOf(source.get("hint")).toUpperCase().trim()))
-                        .bind("id", "task_id")
+                        .reference("id", "task_id")
                 )
                 .mapping(ProcessingTask.class, Map.class, m -> m
-                        .bind("task_id", "id")
+                        .reference("task_id", "id")
                 )
                 .build();
 

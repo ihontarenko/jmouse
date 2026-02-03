@@ -19,9 +19,9 @@ public class Smoke1 {
                 .registry(TypeMappingRegistry.builder()
                                   .ruleSource(new AnnotationRuleSource())
                           .mapping(Map.class, UserDTO.class, m -> m
-                                  .bind("user", "user")
-                                  .bind("groups", "group")
-                                  .bind("groupSet", "group")
+                                  .reference("user", "user")
+                                  .reference("groups", "group")
+                                  .reference("groupSet", "group")
                                   .ignore("password")
                                   .constant("password", "masked")
                           ).mapping(Map.class, UserDetailsDTO.class, m -> m

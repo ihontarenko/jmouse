@@ -2,14 +2,14 @@ package org.jmouse.core.mapping.plan.collection;
 
 import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
-import org.jmouse.core.mapping.plan.support.AbstractCollectionPlan;
+import org.jmouse.core.mapping.plan.support.AbstractCollectionStrategy;
 
 import java.util.Collection;
 import java.util.function.Supplier;
 
-public class SetPlan extends AbstractCollectionPlan {
+public class SetStrategy extends AbstractCollectionStrategy {
 
-    public SetPlan(TypedValue<Collection<Object>> typedValue) {
+    public SetStrategy(TypedValue<Collection<Object>> typedValue) {
         super(typedValue);
     }
 

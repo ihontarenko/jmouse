@@ -4,19 +4,19 @@ import org.jmouse.core.bind.ObjectAccessor;
 import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.config.TypeMismatchPolicy;
-import org.jmouse.core.mapping.plan.support.AbstractMapPlan;
+import org.jmouse.core.mapping.plan.support.AbstractMapStrategy;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.Map;
 
-public final class MapToMapPlan extends AbstractMapPlan<Map<Object, Object>> {
+public final class MapToMapStrategy extends AbstractMapStrategy<Map<Object, Object>> {
 
     private static final InferredType NESTED_MAP_TYPE = InferredType.forParametrizedClass(
             Map.class, Object.class, Object.class
     );
 
-    public MapToMapPlan(TypedValue<Map<Object, Object>> typedValue) {
+    public MapToMapStrategy(TypedValue<Map<Object, Object>> typedValue) {
         super(typedValue);
     }
 

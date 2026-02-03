@@ -3,7 +3,7 @@ package org.jmouse.core.mapping.plan.array;
 import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.config.ArrayMaterializationPolicy;
-import org.jmouse.core.mapping.plan.support.AbstractIterablePlan;
+import org.jmouse.core.mapping.plan.support.AbstractIterableStrategy;
 import org.jmouse.core.mapping.plan.support.IterableSource;
 import org.jmouse.core.reflection.InferredType;
 
@@ -13,9 +13,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.OptionalInt;
 
-public final class ArrayPlan extends AbstractIterablePlan<Object> {
+public final class ArrayStrategy extends AbstractIterableStrategy<Object> {
 
-    public ArrayPlan(TypedValue<Object> typedValue) {
+    public ArrayStrategy(TypedValue<Object> typedValue) {
         super(typedValue);
     }
 

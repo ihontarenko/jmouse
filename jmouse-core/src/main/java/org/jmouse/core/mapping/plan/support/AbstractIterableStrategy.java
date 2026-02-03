@@ -7,9 +7,9 @@ import org.jmouse.core.reflection.InferredType;
 
 import java.util.*;
 
-abstract public class AbstractIterablePlan<T> extends AbstractPlan<T> {
+abstract public class AbstractIterableStrategy<T> extends AbstractStrategy<T> {
 
-    protected AbstractIterablePlan(TypedValue<T> typedValue) {
+    protected AbstractIterableStrategy(TypedValue<T> typedValue) {
         super(typedValue);
     }
 

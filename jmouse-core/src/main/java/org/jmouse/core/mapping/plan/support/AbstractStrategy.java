@@ -8,7 +8,7 @@ import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.mapping.MappingScope;
 import org.jmouse.core.mapping.binding.PropertyMapping;
 import org.jmouse.core.mapping.errors.MappingException;
-import org.jmouse.core.mapping.plan.MappingPlan;
+import org.jmouse.core.mapping.plan.MappingStrategy;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.plugin.MappingValue;
@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Base implementation for {@link MappingPlan} that provides common utilities for
+ * Base implementation for {@link MappingStrategy} that provides common utilities for
  * mapping plan execution. 🧠
  *
  * <p>This abstraction centralizes reusable plan logic such as:</p>
@@ -33,13 +33,13 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> target type produced by the mapping plan
  */
-public abstract class AbstractPlan<T> implements MappingPlan<T> {
+public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPlan.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStrategy.class);
 
     protected final TypedValue<T> typedValue;
 
-    protected AbstractPlan(TypedValue<T> typedValue) {
+    protected AbstractStrategy(TypedValue<T> typedValue) {
         this.typedValue = Verify.nonNull(typedValue, "typedValue");
     }
 

@@ -5,7 +5,7 @@ import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.plan.MappingPlanContributor;
-import org.jmouse.core.mapping.plan.MappingPlanRegistry;
+import org.jmouse.core.mapping.plan.MappingStrategyRegistry;
 import org.jmouse.core.mapping.plan.array.ArrayPlanContributor;
 import org.jmouse.core.mapping.plan.bean.JavaBeanPlanContributor;
 import org.jmouse.core.mapping.plan.collection.ListPlanContributor;
@@ -28,7 +28,7 @@ import java.util.List;
  *   <li>Default policies via {@link MappingPolicy#defaults()}</li>
  *   <li>Default config via {@link MappingConfig}</li>
  *   <li>Default type mapping registry via {@link TypeMappingRegistry}</li>
- *   <li>Default plan registry via {@link MappingPlanRegistry}</li>
+ *   <li>Default plan registry via {@link MappingStrategyRegistry}</li>
  * </ul>
  *
  * <p>{@code Mappers} is a bootstrap utility; the returned {@link MapperBuilder} can be further customized
@@ -72,7 +72,7 @@ public class Mappers {
      *   <li>{@link MappingPolicy#defaults()}</li>
      *   <li>default {@link MappingConfig} instance</li>
      *   <li>empty {@link TypeMappingRegistry}</li>
-     *   <li>{@link MappingPlanRegistry} with {@link #DEFAULT_CONTRIBUTORS}</li>
+     *   <li>{@link MappingStrategyRegistry} with {@link #DEFAULT_CONTRIBUTORS}</li>
      * </ul>
      *
      * @return preconfigured mapper builder
@@ -84,7 +84,7 @@ public class Mappers {
                 .policy(MappingPolicy.defaults())
                 .config(MappingConfig.builder().build())
                 .registry(TypeMappingRegistry.builder().build())
-                .planRegistry(new MappingPlanRegistry(DEFAULT_CONTRIBUTORS));
+                .planRegistry(new MappingStrategyRegistry(DEFAULT_CONTRIBUTORS));
     }
 
 }

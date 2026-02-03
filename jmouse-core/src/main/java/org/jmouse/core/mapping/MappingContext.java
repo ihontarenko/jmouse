@@ -7,12 +7,12 @@ import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.config.MappingPolicy;
-import org.jmouse.core.mapping.plan.PlanRegistry;
+import org.jmouse.core.mapping.plan.StrategyRegistry;
 import org.jmouse.core.mapping.plugin.PluginBus;
 
 public record MappingContext(
         MapperProvider mapperProvider,
-        PlanRegistry planRegistry,
+        StrategyRegistry strategyRegistry,
         ObjectAccessorWrapper wrapper,
         Conversion conversion,
         TypeMappingRegistry mappingRegistry,
@@ -23,7 +23,7 @@ public record MappingContext(
 
     public MappingContext(
             MapperProvider mapperProvider,
-            PlanRegistry planRegistry,
+            StrategyRegistry strategyRegistry,
             ObjectAccessorWrapper wrapper,
             Conversion conversion,
             TypeMappingRegistry mappingRegistry,
@@ -32,7 +32,7 @@ public record MappingContext(
             MappingScope scope
     ) {
         this.mapperProvider = Verify.nonNull(mapperProvider, "mapperProvider");
-        this.planRegistry = Verify.nonNull(planRegistry, "planRegistry");
+        this.strategyRegistry = Verify.nonNull(strategyRegistry, "strategyRegistry");
         this.wrapper = Verify.nonNull(wrapper, "accessorWrapper");
         this.conversion = Verify.nonNull(conversion, "conversion");
         this.mappingRegistry = Verify.nonNull(mappingRegistry, "mappingRegistry");
@@ -42,7 +42,7 @@ public record MappingContext(
     }
 
     public MappingContext withScope(MappingScope scope) {
-        return new MappingContext(mapperProvider, planRegistry, wrapper, conversion,
+        return new MappingContext(mapperProvider, strategyRegistry, wrapper, conversion,
                                   mappingRegistry, policy, config, scope);
     }
 

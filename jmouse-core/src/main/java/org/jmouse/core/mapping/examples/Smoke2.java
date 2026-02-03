@@ -8,14 +8,13 @@ import org.jmouse.core.mapping.MappingScope;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.errors.ErrorsPolicy;
+import org.jmouse.core.mapping.plugin.TrimStringsPlugin;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Smoke2 {
 
@@ -26,14 +25,14 @@ public class Smoke2 {
     public static Mapper getMapper() {
         TypeMappingRegistry mappingRegistry = TypeMappingRegistry.builder()
                 .mapping(Map.class, Map.class, m -> m
-                        .bind("name", "name"))
+                        .reference("name", "name"))
                 // String -> Group record
                 .mapping(String.class, Group.class, m -> m
-//                                 .bind("name", (String s) -> s)
+                         .provider("name", (String s) -> s)
                          .compute("name", (src, ctx) -> {
 
-                             MappingScope          scope    = ctx.scope();
                              ObjectAccessorWrapper wrapper  = ctx.wrapper();
+                             MappingScope          scope    = ctx.scope();
                              ObjectAccessor        accessor = wrapper.wrap(scope.root());
 
                              System.out.println(scope.path());
@@ -41,6 +40,13 @@ public class Smoke2 {
                              return src;
                          })
                 )
+                .mapping(List.class, Group[].class, m -> m
+                        .compute("groups", (source, context) -> {
+
+                            System.out.println(source);
+
+                            return new Group[0];
+                        }))
                 .build();
 
         return Mappers.builder()
@@ -50,6 +56,9 @@ public class Smoke2 {
                                         ErrorsPolicy.builder()
                                                 .build()
                                 )
+                                .plugins(List.of(
+                                        new TrimStringsPlugin()
+                                ))
                                 .build()
                 )
                 .registry(mappingRegistry)

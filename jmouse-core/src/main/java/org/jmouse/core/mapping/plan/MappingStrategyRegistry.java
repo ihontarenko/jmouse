@@ -11,9 +11,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Default {@link PlanRegistry} implementation that resolves and caches {@link MappingPlan}s. 🧠
+ * Default {@link StrategyRegistry} implementation that resolves and caches {@link MappingStrategy}s. 🧠
  *
- * <p>{@code MappingPlanRegistry} maintains an ordered list of {@link MappingPlanContributor}s and
+ * <p>{@code MappingStrategyRegistry} maintains an ordered list of {@link MappingPlanContributor}s and
  * selects the first contributor that {@linkplain MappingPlanContributor#supports(Object, InferredType, MappingContext)
  * supports} a given mapping request.</p>
  *
@@ -28,12 +28,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * generic parameters. If generic-sensitive planning is required, extend {@code PlanKey} accordingly.</p>
  *
  * @see MappingPlanContributor
- * @see MappingPlan
+ * @see MappingStrategy
  */
-public final class MappingPlanRegistry implements PlanRegistry {
+public final class MappingStrategyRegistry implements StrategyRegistry {
 
-    private final List<MappingPlanContributor> contributors;
-    private final Map<PlanKey, MappingPlan<?>> cache = new ConcurrentHashMap<>();
+    private final List<MappingPlanContributor>     contributors;
+    private final Map<PlanKey, MappingStrategy<?>> cache = new ConcurrentHashMap<>();
 
     /**
      * Create a plan registry with the provided contributors.
@@ -43,14 +43,14 @@ public final class MappingPlanRegistry implements PlanRegistry {
      * @param contributors contributor list
      * @throws IllegalArgumentException if {@code contributors} is {@code null}
      */
-    public MappingPlanRegistry(List<MappingPlanContributor> contributors) {
+    public MappingStrategyRegistry(List<MappingPlanContributor> contributors) {
         List<MappingPlanContributor> sorted = new ArrayList<>(contributors);
         Sorter.sort(sorted);
         this.contributors = List.copyOf(Verify.nonNull(sorted, "contributors"));
     }
 
     /**
-     * Resolve a {@link MappingPlan} for the given mapping request.
+     * Resolve a {@link MappingStrategy} for the given mapping request.
      *
      * <p>The plan is cached using a key composed of:</p>
      * <ul>
@@ -70,15 +70,15 @@ public final class MappingPlanRegistry implements PlanRegistry {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> MappingPlan<T> planFor(Object source, TypedValue<T> typedValue, MappingContext context) {
+    public <T> MappingStrategy<T> planFor(Object source, TypedValue<T> typedValue, MappingContext context) {
         InferredType type = typedValue.getType();
         PlanKey      key  = new PlanKey(source.hashCode(), type.hashCode());
-//        return (MappingPlan<T>) cache.computeIfAbsent(key, ignore -> build(source, typedValue, context));
-        return (MappingPlan<T>) build(source, typedValue, context);
+//        return (MappingStrategy<T>) cache.computeIfAbsent(key, ignore -> build(source, typedValue, context));
+        return (MappingStrategy<T>) build(source, typedValue, context);
     }
 
     /**
-     * Build a {@link MappingPlan} by scanning registered contributors and selecting the first match.
+     * Build a {@link MappingStrategy} by scanning registered contributors and selecting the first match.
      *
      * <p>Contributors are consulted in registry order. The first contributor that returns {@code true}
      * from {@link MappingPlanContributor#supports(Object, InferredType, MappingContext)} is responsible
@@ -90,7 +90,7 @@ public final class MappingPlanRegistry implements PlanRegistry {
      * @return built plan
      * @throws MappingException if no contributor supports the mapping request
      */
-    private MappingPlan<?> build(Object source, TypedValue<?> typedValue, MappingContext context) {
+    private MappingStrategy<?> build(Object source, TypedValue<?> typedValue, MappingContext context) {
         InferredType targetType = typedValue.getType();
         InferredType sourceType = InferredType.forInstance(source);
 

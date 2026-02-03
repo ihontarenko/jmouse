@@ -7,14 +7,13 @@ import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.mapping.binding.PropertyMapping;
 import org.jmouse.core.mapping.binding.TypeMappingRule;
 import org.jmouse.core.mapping.MappingContext;
-import org.jmouse.core.reflection.InferredType;
 
 import java.util.List;
 
 /**
  * Base plan for source-to-object mapping scenarios. 🧩
  *
- * <p>{@code AbstractObjectPlan} provides small, reusable helpers that are commonly needed by
+ * <p>{@code AbstractObjectStrategy} provides small, reusable helpers that are commonly needed by
  * object mapping plans:</p>
  * <ul>
  *   <li>Resolve the runtime target type for a {@link PropertyDescriptor}</li>
@@ -27,14 +26,14 @@ import java.util.List;
  *
  * @param <T> target type produced by the plan
  */
-abstract public class AbstractObjectPlan<T> extends AbstractPlan<T> {
+abstract public class AbstractObjectStrategy<T> extends AbstractStrategy<T> {
 
     /**
      * Create an object plan for the given target type.
      *
      * @param typedValue typed value type (never {@code null})
      */
-    protected AbstractObjectPlan(TypedValue<T> typedValue) {
+    protected AbstractObjectStrategy(TypedValue<T> typedValue) {
         super(typedValue);
     }
 

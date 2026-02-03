@@ -16,16 +16,16 @@ import java.util.function.Supplier;
  * <p>Collection growth is guarded by {@code context.config().maxCollectionSize()} to prevent
  * runaway allocations (e.g., accidentally mapping an infinite/very large source).</p>
  *
- * @see AbstractIterablePlan
+ * @see AbstractIterableStrategy
  */
-public abstract class AbstractCollectionPlan extends AbstractIterablePlan<Collection<Object>> {
+public abstract class AbstractCollectionStrategy extends AbstractIterableStrategy<Collection<Object>> {
 
     /**
      * Create a collection plan bound to the given typed target value.
      *
      * @param typedValue target typed value (type metadata + optional instance holder)
      */
-    protected AbstractCollectionPlan(TypedValue<Collection<Object>> typedValue) {
+    protected AbstractCollectionStrategy(TypedValue<Collection<Object>> typedValue) {
         super(typedValue);
     }
 

@@ -1,13 +1,13 @@
 package org.jmouse.core.mapping.plan.scalar;
 
 import org.jmouse.core.bind.TypedValue;
-import org.jmouse.core.mapping.plan.MappingPlan;
-import org.jmouse.core.mapping.plan.support.AbstractPlan;
+import org.jmouse.core.mapping.plan.MappingStrategy;
+import org.jmouse.core.mapping.plan.support.AbstractStrategy;
 import org.jmouse.core.mapping.MappingContext;
 
-public final class ScalarPlan<T> extends AbstractPlan<T> implements MappingPlan<T> {
+public final class ScalarStrategy<T> extends AbstractStrategy<T> implements MappingStrategy<T> {
 
-    public ScalarPlan(TypedValue<T> typedValue) {
+    public ScalarStrategy(TypedValue<T> typedValue) {
         super(typedValue);
     }
 

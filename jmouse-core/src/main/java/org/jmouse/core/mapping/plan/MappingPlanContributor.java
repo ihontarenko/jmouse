@@ -5,12 +5,12 @@ import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
 /**
- * Factory/selector for building {@link MappingPlan} instances. 🧩
+ * Factory/selector for building {@link MappingStrategy} instances. 🧩
  *
  * <p>A {@code MappingPlanContributor} participates in plan resolution by:</p>
  * <ol>
  *   <li>declaring support for a mapping request via {@link #supports(Object, InferredType, MappingContext)}</li>
- *   <li>building a concrete {@link MappingPlan} via {@link #build(TypedValue, MappingContext)}</li>
+ *   <li>building a concrete {@link MappingStrategy} via {@link #build(TypedValue, MappingContext)}</li>
  * </ol>
  *
  * <p>The {@link TypedValue} provided to {@link #build(TypedValue, MappingContext)} may carry:</p>
@@ -20,11 +20,11 @@ import org.jmouse.core.reflection.InferredType;
  *   <li>a supplier for lazy instance creation</li>
  * </ul>
  *
- * <p>Contributors are typically registered in a {@link PlanRegistry} and consulted in order
+ * <p>Contributors are typically registered in a {@link StrategyRegistry} and consulted in order
  * until a compatible contributor is found.</p>
  *
- * @see MappingPlan
- * @see PlanRegistry
+ * @see MappingStrategy
+ * @see StrategyRegistry
  * @see TypedValue
  */
 public interface MappingPlanContributor {
@@ -40,12 +40,12 @@ public interface MappingPlanContributor {
     boolean supports(Object source, InferredType targetType, MappingContext context);
 
     /**
-     * Build a {@link MappingPlan} for the given typed target value.
+     * Build a {@link MappingStrategy} for the given typed target value.
      *
      * @param typedValue typed target descriptor (type metadata + optional instance holder)
      * @param context mapping context
      * @param <T> plan output type
      * @return mapping plan instance
      */
-    <T> MappingPlan<T> build(TypedValue<T> typedValue, MappingContext context);
+    <T> MappingStrategy<T> build(TypedValue<T> typedValue, MappingContext context);
 }

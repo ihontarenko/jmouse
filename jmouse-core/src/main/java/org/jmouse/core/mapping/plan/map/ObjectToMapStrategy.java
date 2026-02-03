@@ -9,7 +9,7 @@ import org.jmouse.core.mapping.binding.TypeMappingRule;
 import org.jmouse.core.mapping.config.MapKeyPolicy;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.errors.ErrorCodes;
-import org.jmouse.core.mapping.plan.support.AbstractMapPlan;
+import org.jmouse.core.mapping.plan.support.AbstractMapStrategy;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.LinkedHashSet;
@@ -37,7 +37,7 @@ import java.util.Set;
  *
  * <p>Key coercion for the rest mapping phase is controlled by {@link MapKeyPolicy}.</p>
  */
-public final class ObjectToMapPlan extends AbstractMapPlan<Map<Object, Object>> {
+public final class ObjectToMapStrategy extends AbstractMapStrategy<Map<Object, Object>> {
 
     /**
      * Target type for object tree maps.
@@ -64,7 +64,7 @@ public final class ObjectToMapPlan extends AbstractMapPlan<Map<Object, Object>> 
      *
      * @param typedValue typed value target map type
      */
-    public ObjectToMapPlan(TypedValue<Map<Object, Object>> typedValue) {
+    public ObjectToMapStrategy(TypedValue<Map<Object, Object>> typedValue) {
         super(typedValue);
     }
 

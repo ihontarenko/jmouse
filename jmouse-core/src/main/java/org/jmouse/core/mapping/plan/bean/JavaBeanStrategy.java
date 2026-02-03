@@ -7,17 +7,17 @@ import org.jmouse.core.bind.descriptor.structured.DescriptorResolver;
 import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.mapping.errors.MappingException;
-import org.jmouse.core.mapping.plan.support.AbstractObjectPlan;
+import org.jmouse.core.mapping.plan.support.AbstractObjectStrategy;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
-public final class JavaBeanPlan<T> extends AbstractObjectPlan<T> {
+public final class JavaBeanStrategy<T> extends AbstractObjectStrategy<T> {
 
     private final Class<T>            targetType;
     private final ObjectDescriptor<T> descriptor;
     private final JavaBean<T>         bean;
 
-    public JavaBeanPlan(TypedValue<T> typedValue) {
+    public JavaBeanStrategy(TypedValue<T> typedValue) {
         super(typedValue);
         this.targetType = typedValue.getType().getRawType();
         this.descriptor = DescriptorResolver.ofBeanType(this.targetType);
