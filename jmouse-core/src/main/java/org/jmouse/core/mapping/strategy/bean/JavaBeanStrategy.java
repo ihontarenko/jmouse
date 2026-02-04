@@ -38,7 +38,7 @@ public final class JavaBeanStrategy<T> extends AbstractObjectStrategy<T> {
      *
      * <p>If {@code source} is {@code null}, returns {@code null}.</p>
      *
-     * @param source source object
+     * @param sourceValue source object
      * @param typedValue typed target descriptor (type metadata + optional instance holder)
      * @param context mapping context
      * @return mapped bean instance
@@ -46,8 +46,8 @@ public final class JavaBeanStrategy<T> extends AbstractObjectStrategy<T> {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public T execute(Object source, TypedValue<T> typedValue, MappingContext context) {
-        if (source == null) {
+    public T execute(Object sourceValue, TypedValue<T> typedValue, MappingContext context) {
+        if (sourceValue == null) {
             return null;
         }
 
@@ -56,9 +56,10 @@ public final class JavaBeanStrategy<T> extends AbstractObjectStrategy<T> {
         JavaBean<T>         javaBean    = JavaBean.of(targetType);
         ObjectDescriptor<T> descriptor  = DescriptorResolver.ofBeanType(targetClass);
 
-        ObjectAccessor accessor   = toObjectAccessor(source, context);
+        ObjectAccessor source     = toObjectAccessor(sourceValue, context);
         T              instance   = instantiate(typedValue, javaBean);
-        Class<?>       sourceType = accessor.getClassType();
+        ObjectAccessor target     = toObjectAccessor(instance, context);
+        Class<?>       sourceType = source.getClassType();
 
         for (PropertyDescriptor<T> property : descriptor.getProperties().values()) {
             if (!property.isWritable()) {
@@ -68,7 +69,7 @@ public final class JavaBeanStrategy<T> extends AbstractObjectStrategy<T> {
             String         propertyName   = property.getName();
             InferredType   propertyType   = property.getType().getJavaType();
             MappingContext mappingContext = context.appendPath(propertyName);
-            Object         value          = applyValue(accessor, mappingContext, sourceType, targetClass, propertyName);
+            Object         value          = applyValue(source, mappingContext, sourceType, targetClass, propertyName);
 
             if (value == IgnoredValue.INSTANCE || value == null) {
                 continue;
@@ -77,7 +78,7 @@ public final class JavaBeanStrategy<T> extends AbstractObjectStrategy<T> {
             Object adapted;
 
             try {
-                adapted = adaptValue(value, propertyType, mappingContext);
+                adapted = adaptValue(value, getTypedValue(target, propertyName, propertyType), mappingContext);
             } catch (Exception exception) {
                 throw toMappingException(
                         ErrorCodes.BEAN_PROPERTY_ADAPT_FAILED,

@@ -1,5 +1,6 @@
 package org.jmouse.core.mapping.strategy.support;
 
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
@@ -31,8 +32,13 @@ public abstract class AbstractCollectionStrategy extends AbstractIterableStrateg
      * @throws IllegalStateException if the number of elements exceeds {@code maxCollectionSize}
      */
     @Override
-    protected final Collection<Object> mapIterable(IterableSource iterableSource, InferredType elementType, MappingContext context) {
-        Collection<Object> target  = getCollectionFactory(context).get();
+    protected final Collection<Object> mapIterable(
+            IterableSource iterableSource,
+            TypedValue<?> typedValue,
+            InferredType elementType,
+            MappingContext context
+    ) {
+        Collection<Object> target  = getTargetCollection(typedValue, context);
         int                maximum = context.config().maxCollectionSize();
         int                counter = 0;
 
@@ -45,6 +51,17 @@ public abstract class AbstractCollectionStrategy extends AbstractIterableStrateg
         }
 
         return target;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Collection<Object> getTargetCollection(TypedValue<?> typedValue, MappingContext context) {
+        Collection<Object> collection = (Collection<Object>) typedValue.getValue().get();
+
+        if (collection == null) {
+            collection = getCollectionFactory(context).get();
+        }
+
+        return collection;
     }
 
     /**

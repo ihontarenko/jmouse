@@ -68,12 +68,12 @@ public final class MapToMapStrategy extends AbstractMapStrategy<Map<Object, Obje
         }
 
         for (Object keyValue : accessor.keySet()) {
-            ObjectAccessor wrapped  = accessor.get(keyValue);
-            Object         mapValue = wrapped.unwrap();
+            ObjectAccessor objectAccessor = accessor.get(keyValue);
+            Object         mapValue       = objectAccessor.unwrap();
 
             InferredType effectiveType = valueType;
 
-            if (effectiveType.isObject() && !wrapped.isSimple()) {
+            if (effectiveType.isObject() && !objectAccessor.isSimple()) {
                 effectiveType = NESTED_MAP_TYPE;
             }
 
@@ -86,7 +86,11 @@ public final class MapToMapStrategy extends AbstractMapStrategy<Map<Object, Obje
                     temporaryContext = context.appendPath(keyString);
                 }
 
-                mapValue = adaptValue(mapValue, getMapTypedValue(target, keyValue, effectiveType), temporaryContext);
+                mapValue = adaptValue(
+                        mapValue,
+                        getTypedValue(toObjectAccessor(target, context), keyValue, effectiveType),
+                        temporaryContext
+                );
             } catch (RuntimeException exception) {
                 if (policy.typeMismatchPolicy() == TypeMismatchPolicy.FAIL) {
                     throw toMappingException(

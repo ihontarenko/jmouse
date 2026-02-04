@@ -18,7 +18,8 @@ package org.jmouse.core.mapping.errors;
 public final class ErrorCodes {
 
     // plan.*
-    public static final String PLAN_NO_CONTRIBUTOR = "plan.no_contributor";
+    public static final String STRATEGY_NO_CONTRIBUTOR    = "strategy.no_contributor";
+    public static final String STRATEGY_INCOMPATIBLE_TYPE = "strategy.incompatible_type";
 
     // bean.*
     public static final String BEAN_INSTANTIATION_FAILED  = "bean.instantiation_failed";

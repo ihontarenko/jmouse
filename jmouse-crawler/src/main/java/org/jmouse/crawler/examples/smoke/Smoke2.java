@@ -73,7 +73,7 @@ public class Smoke2 {
                 .config(MappingConfig.builder()
                                 .errorsPolicy(
                                         ErrorsPolicy.builder()
-                                                .onCode(ErrorCodes.PLAN_NO_CONTRIBUTOR, ErrorAction.THROW)
+                                                .onCode(ErrorCodes.STRATEGY_NO_CONTRIBUTOR, ErrorAction.THROW)
                                                 .onPrefix("map.", ErrorAction.WARNING)
                                                 .onPrefix("scalar.", ErrorAction.THROW)
                                                 .defaultAction(ErrorAction.THROW)

@@ -1,6 +1,7 @@
 package org.jmouse.core.mapping.examples;
 
 import org.jmouse.core.bind.ObjectAccessor;
+import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.*;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.binding.annotation.AnnotationRuleSource;
@@ -14,6 +15,7 @@ public class Smoke1 {
     public static void main(String... arguments) {
         Mapper mapper = Mappers.builder()
                 .config(MappingConfig.builder()
+                                .listFactory(LinkedList::new)
                                 .setFactory(TreeSet::new)
                                 .build())
                 .registry(TypeMappingRegistry.builder()
@@ -44,6 +46,7 @@ public class Smoke1 {
                 "user", "john",
                 "password", "secret",
                 "group", List.of("a", "b", "c", "a"),
+                "groups", new String[]{"B"},
                 "details", Map.of(
                         "status", "BLOCKED",
                         "dateOfBirth", Map.of("dateOfBirth", new Date())
@@ -51,7 +54,8 @@ public class Smoke1 {
         );
 
 //        User    user    = mapper.map(source, User.class);
-        UserDTO userDTO = mapper.map(source, UserDTO.class);
+//        UserDTO userDTO = mapper.map(source, UserDTO.class);
+        User userObject = mapper.map(source, User.class);
 
         Map<User, String> sourceMap = Map.of(new User("John"), "User-123");
 
@@ -60,6 +64,21 @@ public class Smoke1 {
         Map<Object, Object> mapped = new WeakHashMap<>();
 
         mapper.map(sourceMap, inferredType, mapped);
+        InferredType mapType = InferredType.forParametrizedClass(Map.class, String.class, Object.class);
+
+        Map<Object, Object> mapTarget = new WeakHashMap<>();
+        Map<Object, Object> nestedA = new WeakHashMap<>();
+
+        List<String> strings = new LinkedList<>();
+
+        mapTarget.put("details", nestedA);
+        nestedA.put("groupSet", strings);
+
+        strings.add("x");
+
+//        mapper.map(userDTO, TypedValue.of(mapType).withInstance(mapTarget));
+
+
 
         System.out.println("aaa");
 
@@ -72,12 +91,21 @@ public class Smoke1 {
 
     public static class User {
         private String user;
+        private Group[] groups = new Group[]{Group.A};
 
         public User() {
         }
 
         public User(String user) {
             this.user = user;
+        }
+
+        public Group[] getGroups() {
+            return groups;
+        }
+
+        public void setGroups(Group[] groups) {
+            this.groups = groups;
         }
 
         public String getUser() {
@@ -89,13 +117,13 @@ public class Smoke1 {
         }
     }
 
-    record UserDTO(String user, String password, UserDetailsDTO details, Group[] groups) {}
-    record SimpleUserDTO(String user) {}
-    record UserDetailsDTO(DateOfBirth dateOfBirth, Status status, Set<Group> groupSet) {}
+    public record UserDTO(String user, String password, UserDetailsDTO details, Group[] groups) {}
+    public record SimpleUserDTO(String user) {}
+    public record UserDetailsDTO(DateOfBirth dateOfBirth, Status status, Set<Group> groupSet) {}
 
-    enum Status { BLOCKED, UNBLOCKED }
+    public enum Status { BLOCKED, UNBLOCKED }
 
-    static class DateOfBirth {
+    public static class DateOfBirth {
         private Date dateOfBirth;
         public Date getDateOfBirth() { return dateOfBirth; }
         public void setDateOfBirth(Date dateOfBirth) { this.dateOfBirth = dateOfBirth; }

@@ -6,6 +6,7 @@ import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.mapping.MappingScope;
 import org.jmouse.core.mapping.binding.PropertyMapping;
+import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.strategy.MappingStrategy;
 import org.jmouse.core.mapping.Mapper;
@@ -39,12 +40,21 @@ public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStrategy.class);
 
     public TypedValue<?> getTypedValue(ObjectAccessor accessor, Object key, InferredType type) {
-        TypedValue<Object> typedValue  = TypedValue.of(type);
-        Object             targetValue = accessor.get(key);
+        TypedValue<Object> typedValue     = TypedValue.of(type);
+        ObjectAccessor     objectAccessor = accessor.get(key);
 
-        if (targetValue != null) {
-            typedValue = TypedValue.of(InferredType.forInstance(targetValue));
-            typedValue = typedValue.withInstance(targetValue);
+        if (objectAccessor != null && !objectAccessor.isNull()) {
+            Object unwrapped = objectAccessor.unwrap();
+
+            if (!objectAccessor.isArray() && !objectAccessor.isCollection() && !objectAccessor.is(type)) {
+                throw toMappingException(
+                        ErrorCodes.STRATEGY_INCOMPATIBLE_TYPE,
+                        "Incompatible type of value %s, required-type: %s".formatted(
+                                objectAccessor.getClassType(), type.getClassType()), null
+                );
+            }
+
+            typedValue = typedValue.withInstance(unwrapped);
         }
 
         return typedValue;
@@ -156,7 +166,8 @@ public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
             return mapper.map(value, typedValue);
         }
 
-        if (hasConverterFor(value.getClass(), type, context) && !targetType.isCollection() && !targetType.isMap()) {
+        boolean isComplexStructure = targetType.isCollection() || targetType.isMap() || targetType.isArray();
+        if (hasConverterFor(value.getClass(), type, context) && !isComplexStructure) {
             return convertIfNeeded(value, type, conversion);
         }
 

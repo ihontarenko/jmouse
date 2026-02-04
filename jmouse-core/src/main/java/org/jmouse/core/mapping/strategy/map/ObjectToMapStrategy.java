@@ -111,7 +111,7 @@ public final class ObjectToMapStrategy extends AbstractMapStrategy<Map<Object, O
                         continue;
                     }
 
-                    Object mapped = materializeTree(value, context.appendPath(targetKey));
+                    Object mapped = materializeTree(target, targetKey, value, context.appendPath(targetKey));
                     target.put(targetKey, mapped);
                     consumeSourceKey(mapping, targetKey, sourceKeys);
                 }
@@ -126,8 +126,8 @@ public final class ObjectToMapStrategy extends AbstractMapStrategy<Map<Object, O
                 continue;
             }
 
-            ObjectAccessor wrapped = accessor.get(sourceKey);
-            target.put(key, materializeTree(wrapped.unwrap(), context.appendPath(key)));
+            Object value = safeGet(accessor, key);
+            target.put(key, materializeTree(target, key, value, context.appendPath(key)));
         }
 
         return target;
@@ -212,34 +212,35 @@ public final class ObjectToMapStrategy extends AbstractMapStrategy<Map<Object, O
      * <p>This method intentionally relies on existing {@link org.jmouse.core.convert.Conversion} rules
      * to classify leaf values instead of hardcoding type checks.</p>
      */
-    private Object materializeTree(Object value, MappingContext context) {
-        if (value == null) {
+    private Object materializeTree(Object targetObject, String key, Object sourceObject, MappingContext context) {
+        if (sourceObject == null) {
             return null;
         }
 
-        ObjectAccessor accessor = toObjectAccessor(value, context);
+        ObjectAccessor source = toObjectAccessor(sourceObject, context);
+        ObjectAccessor target = toObjectAccessor(targetObject, context);
 
         // 1) simple / scalar values are terminal (leaf)
-        if (accessor.isSimple()) {
-            return adaptValue(value, InferredType.forClass(Object.class), context);
+        if (source.isSimple()) {
+            return adaptValue(sourceObject, InferredType.forClass(Object.class), context);
         }
 
         // 2) map-like structures are expanded recursively
-        if (accessor.isMap()) {
-            return adaptValue(value, TREE_MAP_TYPE, context);
+        if (source.isMap()) {
+            return adaptValue(sourceObject, getTypedValue(target, key, TREE_MAP_TYPE), context);
         }
 
         // 3) iterables and arrays are materialized as lists
-        if (accessor.isIterable() || accessor.isCollection() || accessor.isArray()) {
-            return adaptValue(value, TREE_LIST_TYPE, context);
+        if (source.isIterable() || source.isArray()) {
+            return adaptValue(sourceObject, getTypedValue(target, key, TREE_LIST_TYPE), context);
         }
 
         // 4) values convertible to String are treated as leaves (e.g. URI, UUID, Date)
-        if (hasConverterFor(accessor.getClassType(), String.class, context)) {
-            return adaptValue(value, STRING_TYPE, context);
+        if (hasConverterFor(source.getClassType(), String.class, context)) {
+            return adaptValue(sourceObject, STRING_TYPE, context);
         }
 
         // 5) fallback: expand complex object into map tree
-        return adaptValue(value, TREE_MAP_TYPE, context);
+        return adaptValue(sourceObject, getTypedValue(target, key, TREE_MAP_TYPE), context);
     }
 }

@@ -6,6 +6,7 @@ import org.jmouse.core.mapping.config.ArrayMaterializationPolicy;
 import org.jmouse.core.mapping.strategy.support.AbstractIterableStrategy;
 import org.jmouse.core.mapping.strategy.support.IterableSource;
 import org.jmouse.core.reflection.InferredType;
+import org.jmouse.util.Arrays;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -16,23 +17,28 @@ import java.util.OptionalInt;
 public final class ArrayStrategy extends AbstractIterableStrategy<Object> {
 
     @Override
-    protected Object mapIterable(IterableSource iterableSource, InferredType elementType, MappingContext context) {
-        ArrayMaterializationPolicy policy    = context.config().arrayMaterializationPolicy();
-        OptionalInt                knownSize = iterableSource.knownSize();
+    protected Object mapIterable(
+            IterableSource iterableSource,
+            TypedValue<?> typedValue,
+            InferredType elementType,
+            MappingContext context
+    ) {
+        OptionalInt knownSize = iterableSource.knownSize();
 
         if (knownSize.isPresent()) {
-            int    size  = knownSize.getAsInt();
-            Object array = Array.newInstance(elementType.getClassType(), size);
+            int    size   = knownSize.getAsInt();
+            Object array  = getTargetArray(typedValue, elementType, size);
+            int    offset = Array.getLength(array) - size;
 
-            // Arrays.expand(array, size);
+            size += offset;
 
             if (iterableSource.isIndexed()) {
-                for (int index = 0; index < size; index++) {
-                    Object adapted = adaptValue(iterableSource.get(index), elementType, context);
+                for (int index = offset; index < size; index++) {
+                    Object adapted = adaptValue(iterableSource.get(index - offset), elementType, context);
                     Array.set(array, index, adapted);
                 }
             } else {
-                int index = 0;
+                int index = offset;
                 for (Iterator<?> iterator = iterableSource.iterator(); iterator.hasNext();) {
                     Object adapted = adaptValue(iterator.next(), elementType, context);
                     Array.set(array, index++, adapted);
@@ -55,10 +61,22 @@ public final class ArrayStrategy extends AbstractIterableStrategy<Object> {
             temporary.add(adaptValue(iterator.next(), elementType, mappingContext));
         }
 
-        Object array = Array.newInstance(elementType.getClassType(), temporary.size());
+        Object array = getTargetArray(typedValue, elementType, temporary.size());
 
         for (int i = 0; i < temporary.size(); i++) {
             Array.set(array, i, temporary.get(i));
+        }
+
+        return array;
+    }
+
+    private Object getTargetArray(TypedValue<?> typedValue, InferredType elementType, int size) {
+        Object array = typedValue.getValue().get();
+
+        if (array == null) {
+            array = Array.newInstance(elementType.getClassType(), size);
+        } else {
+            array = Arrays.expand(array, size + Array.getLength(array));
         }
 
         return array;

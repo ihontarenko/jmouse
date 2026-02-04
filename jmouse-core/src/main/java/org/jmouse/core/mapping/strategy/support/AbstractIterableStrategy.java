@@ -18,7 +18,7 @@ abstract public class AbstractIterableStrategy<T> extends AbstractStrategy<T> {
         ObjectAccessor accessor       = toObjectAccessor(source, context);
         IterableSource iterableSource = toIterableSource(accessor);
 
-        return mapIterable(iterableSource, getElementType(typedValue), context);
+        return mapIterable(iterableSource, typedValue, getElementType(typedValue), context);
     }
 
     private IterableSource toIterableSource(ObjectAccessor accessor) {
@@ -98,6 +98,11 @@ abstract public class AbstractIterableStrategy<T> extends AbstractStrategy<T> {
         return type.toCollection().getFirst();
     }
 
-    protected abstract T mapIterable(IterableSource iterableSource, InferredType elementType, MappingContext context);
+    protected abstract T mapIterable(
+            IterableSource iterableSource,
+            TypedValue<?> typedValue,
+            InferredType elementType,
+            MappingContext context
+    );
 
 }
