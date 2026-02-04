@@ -105,7 +105,7 @@ public final class SQLPlanPreparedStatementBinder implements StatementBinder {
         for (Binding binding : plan.bindings()) {
             Object value;
 
-            if (binding instanceof Binding.Named(String name, String rawToken, Expression expression, Kind kind)) {
+            if (binding instanceof Binding.Named(String name, String ignored, Expression expression, Kind kind)) {
                 value = !parameterSource.hasValue(name)
                         ? handleMissing(kind.name(), name, parameterPosition) : parameterSource.getValue(name);
                 if (expression != null) {

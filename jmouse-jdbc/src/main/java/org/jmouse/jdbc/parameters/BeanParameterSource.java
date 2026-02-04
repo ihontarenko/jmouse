@@ -6,7 +6,7 @@ import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
 
 public final class BeanParameterSource implements ParameterSource {
 
-    private final Object instance;
+    private final Object                   instance;
     private final ObjectDescriptor<Object> bean;
 
     @SuppressWarnings("unchecked")

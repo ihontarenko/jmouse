@@ -22,16 +22,16 @@ public final class SpanScopes {
         TraceContext     trace   = context.get(TraceKeys.TRACE);
 
         if (trace != null) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("rootIfAbsent(): trace already present -> {}", shortTrace(trace));
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("rootIfAbsent(): trace already present -> {}", shortTrace(trace));
             }
             return action.get();
         }
 
         TraceContext root = TraceContext.root();
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("rootIfAbsent(): no trace -> open root {}", shortTrace(root));
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("rootIfAbsent(): no trace -> open root {}", shortTrace(root));
         }
 
         try (ExecutionContextHolder.Scope ignored =
@@ -45,8 +45,8 @@ public final class SpanScopes {
         TraceContext     trace   = context.get(TraceKeys.TRACE);
         TraceContext     next    = (trace == null) ? TraceContext.root() : trace.child();
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("child(): {} -> open {}", shortTrace(trace), shortTrace(next));
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("child(): {} -> open {}", shortTrace(trace), shortTrace(next));
         }
 
         try (ExecutionContextHolder.Scope ignored =

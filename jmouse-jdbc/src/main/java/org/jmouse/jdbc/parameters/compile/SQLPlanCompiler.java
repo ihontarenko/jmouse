@@ -29,8 +29,6 @@ public final class SQLPlanCompiler {
         int cursor            = 0;
         int positionalCounter = 0;
 
-        EvaluationContext evaluationContext = expressionLanguage.newContext();
-
         for (int i = 0; i < source.size(); i++) {
             Entry entry = source.get(i);
 

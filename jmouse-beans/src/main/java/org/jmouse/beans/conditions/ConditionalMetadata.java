@@ -36,6 +36,7 @@ public interface ConditionalMetadata {
      * @return annotation instance
      * @throws ClassCastException if annotation is missing
      */
+    @SuppressWarnings("unchecked")
     default <A extends Annotation> A getAnnotation(Class<A> annotationType) {
         Optional<MergedAnnotation> annotation = getMergedAnnotation().getAnnotation(annotationType);
 

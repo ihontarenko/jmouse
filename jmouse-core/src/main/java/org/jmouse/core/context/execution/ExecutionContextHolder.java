@@ -137,16 +137,8 @@ public final class ExecutionContextHolder {
      */
     public static Scope open(ExecutionContext next) {
         Deque<ExecutionContext> deque  = STACK.get();
-        int before = deque.size();
 
         deque.push(next);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(
-                    "open(): depth {} -> {}, top={}",
-                    before, deque.size(), shortContext(next)
-            );
-        }
 
         return new Scope(next);
     }
@@ -185,30 +177,14 @@ public final class ExecutionContextHolder {
      */
     public static void replace(ExecutionContext next) {
         Deque<ExecutionContext> deque  = STACK.get();
-        int before = deque.size();
 
         if (deque.isEmpty()) {
             deque.push(next);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(
-                        "replace(): stack empty -> push, depth {} -> {}, top={}",
-                        before, deque.size(), shortContext(next)
-                );
-            }
             return;
         }
 
-        ExecutionContext previous = deque.peek();
-
         deque.pop();
         deque.push(next);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(
-                    "replace(): depth {}, previousTop={} -> newTop={}",
-                    before, shortContext(previous), shortContext(next)
-            );
-        }
     }
 
     /**
@@ -266,19 +242,7 @@ public final class ExecutionContextHolder {
             return;
         }
 
-        int before = deque.size();
-        ExecutionContext top = deque.peek();
-
         deque.pop();
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(
-                    "close(): depth {} -> {}, topWas={}, expected={}",
-                    before, deque.size(),
-                    shortContext(top),
-                    shortContext(expected)
-            );
-        }
 
         if (deque.isEmpty()) {
             STACK.remove();

@@ -29,12 +29,11 @@ public final class SQLParameterSplitter implements Splitter<List<RawToken>, Toke
 
     @Override
     public List<RawToken> split(TokenizableSource source, int offset, int length) {
-        int end = offset + length;
+        int            end       = offset + length;
+        List<RawToken> buffer    = new ArrayList<>();
+        int            textStart = offset;
+        int            index     = offset;
 
-        List<RawToken> buffer = new ArrayList<>();
-        int textStart = offset;
-
-        int index = offset;
         while (index < end) {
             char character = source.charAt(index);
 
@@ -91,8 +90,7 @@ public final class SQLParameterSplitter implements Splitter<List<RawToken>, Toke
                 index++;
 
                 while (index < end) {
-                    char current = source.charAt(index++);
-                    if (current == character) {
+                    if (source.charAt(index++) == character) {
                         // SQL escaping '' inside single quotes
                         if (character == QUOTE_CHARACTER && index < end && source.charAt(index) == QUOTE_CHARACTER) {
                             index++; // consume escaped quote
