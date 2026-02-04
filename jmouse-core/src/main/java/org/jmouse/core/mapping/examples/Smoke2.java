@@ -98,7 +98,7 @@ public class Smoke2 {
 
         private String  name;
         private int     id;
-        private Group[] groups; // how to add mapping rules?
+        private Group[] groups = {new Group("moderator")}; // how to add mapping rules?
 
         public String getName() {
             return name;

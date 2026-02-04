@@ -16,6 +16,8 @@ import org.jmouse.core.reflection.InferredType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 /**
  * Base implementation for {@link MappingStrategy} that provides common utilities for
  * mapping plan execution. 🧠
@@ -35,6 +37,18 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStrategy.class);
+
+    public TypedValue<?> getTypedValue(ObjectAccessor accessor, Object key, InferredType type) {
+        TypedValue<Object> typedValue  = TypedValue.of(type);
+        Object             targetValue = accessor.get(key);
+
+        if (targetValue != null) {
+            typedValue = TypedValue.of(InferredType.forInstance(targetValue));
+            typedValue = typedValue.withInstance(targetValue);
+        }
+
+        return typedValue;
+    }
 
     /**
      * Wrap the given {@code source} object into an {@link ObjectAccessor} using the wrapper

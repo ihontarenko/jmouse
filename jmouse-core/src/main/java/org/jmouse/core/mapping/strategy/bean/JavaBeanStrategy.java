@@ -23,7 +23,7 @@ import org.jmouse.core.reflection.InferredType;
  *   <li>writes the adapted value using the property accessor</li>
  * </ol>
  *
- * <p>Property mapping respects ignore semantics: when a property resolves to {@link IgnoredValue#INSTANCE},
+ * <p>Property mapping respects ignore semantics: when a property resolves to {@link org.jmouse.core.mapping.strategy.support.AbstractStrategy.IgnoredValue#INSTANCE},
  * the property is skipped.</p>
  *
  * <p>Path tracking is maintained by appending the current property name to the {@link MappingContext},

@@ -94,7 +94,7 @@ public final class ObjectToMapStrategy extends AbstractMapStrategy<Map<Object, O
         for (TypeMappingRule mappingRule : mappingRules) {
 
             if (mappingRule != null && !mappingRule.mappings().isEmpty()) {
-                // 1) Build entries from explicit bindings (rename/ignore/compute/constant/valueProvider/reference)
+                // Build entries from explicit bindings (ignore/compute/constant/valueProvider/reference)
                 for (Map.Entry<String, PropertyMapping> entry : mappingRule.mappings().entrySet()) {
                     String          targetKey = entry.getKey();
                     PropertyMapping mapping   = entry.getValue();
@@ -111,8 +111,7 @@ public final class ObjectToMapStrategy extends AbstractMapStrategy<Map<Object, O
                         continue;
                     }
 
-                    // todo: update context with correct path
-                    Object mapped = materializeTree(value, context);
+                    Object mapped = materializeTree(value, context.appendPath(targetKey));
                     target.put(targetKey, mapped);
                     consumeSourceKey(mapping, targetKey, sourceKeys);
                 }
@@ -128,7 +127,7 @@ public final class ObjectToMapStrategy extends AbstractMapStrategy<Map<Object, O
             }
 
             ObjectAccessor wrapped = accessor.get(sourceKey);
-            target.put(key, materializeTree(wrapped.unwrap(), context));
+            target.put(key, materializeTree(wrapped.unwrap(), context.appendPath(key)));
         }
 
         return target;
@@ -192,7 +191,7 @@ public final class ObjectToMapStrategy extends AbstractMapStrategy<Map<Object, O
             case SKIP -> null;
             case FAIL -> throw toMappingException(
                     ErrorCodes.MAP_KEY_NOT_STRING,
-                    "Object-To-Map requires String keys, got: " + key.getClass().getName(),
+                    "Object-to-map requires String keys, got: " + key.getClass().getName(),
                     null
             );
         };
@@ -231,7 +230,7 @@ public final class ObjectToMapStrategy extends AbstractMapStrategy<Map<Object, O
         }
 
         // 3) iterables and arrays are materialized as lists
-        if (accessor.isIterable() || accessor.isArray()) {
+        if (accessor.isIterable() || accessor.isCollection() || accessor.isArray()) {
             return adaptValue(value, TREE_LIST_TYPE, context);
         }
 
