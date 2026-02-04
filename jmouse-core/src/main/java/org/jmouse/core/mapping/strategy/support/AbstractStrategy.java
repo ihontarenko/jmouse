@@ -39,6 +39,28 @@ public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStrategy.class);
 
+    /**
+     * Resolve a {@link TypedValue} for mapping a value stored under {@code key} inside the given accessor.
+     *
+     * <p>This helper is used primarily by map/collection strategies to support "in-place" mapping:
+     * if a target container already contains a value for the given {@code key}, that value can be reused
+     * as the target instance.</p>
+     *
+     * <p>Behavior:</p>
+     * <ul>
+     *   <li>Starts with {@code TypedValue.of(type)} (no instance).</li>
+     *   <li>Reads {@code accessor.get(key)} and, if present and not null, unwraps it.</li>
+     *   <li>Performs a compatibility check: if the existing value is not array/collection and is not
+     *       assignable to the requested {@code type}, a {@link org.jmouse.core.mapping.errors.MappingException}
+     *       is thrown.</li>
+     *   <li>On success, returns {@code typedValue.withInstance(unwrapped)}.</li>
+     * </ul>
+     *
+     * @param accessor source/target accessor used to locate the existing value
+     * @param key key/index/property used to lookup the nested value
+     * @param type expected inferred type for the nested value
+     * @return typed value describing {@code type} and optionally carrying an existing instance
+     */
     public TypedValue<?> getTypedValue(ObjectAccessor accessor, Object key, InferredType type) {
         TypedValue<Object> typedValue     = TypedValue.of(type);
         ObjectAccessor     objectAccessor = accessor.get(key);

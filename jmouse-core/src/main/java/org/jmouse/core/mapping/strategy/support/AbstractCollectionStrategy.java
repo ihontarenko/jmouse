@@ -53,6 +53,17 @@ public abstract class AbstractCollectionStrategy extends AbstractIterableStrateg
         return target;
     }
 
+    /**
+     * Resolve the target {@link Collection} instance to be populated.
+     *
+     * <p>This method supports "in-place" mapping: when {@link TypedValue} already contains an
+     * instance, it will be reused. Otherwise, a new collection instance is created using
+     * {@link #getCollectionFactory(MappingContext)}.</p>
+     *
+     * @param typedValue typed target descriptor that may carry an existing collection instance
+     * @param context mapping context
+     * @return target collection instance (never {@code null})
+     */
     @SuppressWarnings("unchecked")
     private Collection<Object> getTargetCollection(TypedValue<?> typedValue, MappingContext context) {
         Collection<Object> collection = (Collection<Object>) typedValue.getValue().get();

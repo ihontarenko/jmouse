@@ -1,7 +1,7 @@
 package org.jmouse.core.mapping.examples;
 
 import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.bind.ValueObject;
 import org.jmouse.core.mapping.*;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.binding.annotation.AnnotationRuleSource;

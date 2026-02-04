@@ -65,7 +65,7 @@ public final class ObjectToMapStrategy extends AbstractMapStrategy<Map<Object, O
      * <p>Algorithm outline:</p>
      * <ol>
      *   <li>Wrap source into {@link ObjectAccessor}.</li>
-     *   <li>Instantiate target map via {@link #instantiate(MappingConfig, TypedValue)}.</li>
+     *   <li>Instantiate target map via {@link #getTargetMap(MappingConfig, TypedValue)}.</li>
      *   <li>Apply explicit rules ({@link TypeMappingRule}) first and mark consumed source keys.</li>
      *   <li>Copy the remaining source keys into the target ("rest mapping").</li>
      * </ol>
@@ -85,7 +85,7 @@ public final class ObjectToMapStrategy extends AbstractMapStrategy<Map<Object, O
         Set<Object>    sourceKeys = new LinkedHashSet<>(accessor.keySet());
 
         // target should be Map<String, ?>
-        Map<Object, Object> target = instantiate(config, typedValue);
+        Map<Object, Object> target = getTargetMap(config, typedValue);
 
         // rule (sourceType -> Map.class)
         List<TypeMappingRule> mappingRules =

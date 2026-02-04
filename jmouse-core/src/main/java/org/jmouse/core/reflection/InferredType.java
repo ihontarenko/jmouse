@@ -367,7 +367,11 @@ public class InferredType implements TypeClassifier {
                 InferredType variable = NONE_TYPE;
 
                 if (parent != null) {
-                    variable = parent.resolveVariable(typeVariable);
+                    InferredType resolver = parent;
+                    while (resolver != null && !variable.isResolved()) {
+                        variable = resolver.resolveVariable(typeVariable);
+                        resolver = resolver.parent;
+                    }
                 } else if (Arrays.notEmpty(typeVariable.getBounds())) {
                     variable = forType(typeVariable.getBounds()[0], this);
                 }
@@ -405,7 +409,7 @@ public class InferredType implements TypeClassifier {
         InferredType type         = null;
         String       expectedName = variable.getName();
 
-        if (isParameterizedType()) {
+        if (isParameterizedType() || isResolved()) {
             int counter = 0;
             for (TypeVariable<? extends Class<?>> typeVariable : getRawType().getTypeParameters()) {
                 String actualName = typeVariable.getName();
@@ -594,7 +598,7 @@ public class InferredType implements TypeClassifier {
             InferredType[] types      = new InferredType[interfaces.length];
 
             for (int i = 0; i < interfaces.length; i++) {
-                types[i] = forType(interfaces[i], parent);
+                types[i] = forType(interfaces[i], this);
             }
 
             this.interfaces = types;

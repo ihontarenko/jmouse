@@ -60,7 +60,7 @@ public final class MapToMapStrategy extends AbstractMapStrategy<Map<Object, Obje
         InferredType valueType = mapType.getLast();
         InferredType keyType   = mapType.getFirst();
 
-        Map<Object, Object> target   = instantiate(context.config(), typedValue);
+        Map<Object, Object> target   = getTargetMap(context.config(), typedValue);
         ObjectAccessor      accessor = toObjectAccessor(source, context);
 
         if (!accessor.isMap()) {

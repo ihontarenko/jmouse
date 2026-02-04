@@ -11,8 +11,37 @@ import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.strategy.support.AbstractObjectStrategy;
 import org.jmouse.core.reflection.InferredType;
 
+/**
+ * Object mapping strategy for Java {@code record} targets. 🧾
+ *
+ * <p>{@code RecordStrategy} maps source values into record components and then instantiates the record
+ * using a {@link ValueObject} factory. Unlike bean strategies, records are immutable, so mapping is
+ * performed by collecting constructor/component values first.</p>
+ *
+ * <p>For each record component:</p>
+ * <ol>
+ *   <li>resolve the raw value (explicit mapping or default accessor lookup)</li>
+ *   <li>adapt the value to the component type via {@link #adaptValue(Object, InferredType, MappingContext)}</li>
+ *   <li>store the component value into a {@link ValueObject.Values} bag</li>
+ * </ol>
+ *
+ * <p>If a component resolves to {@link IgnoredValue#INSTANCE} or {@code null}, the component value is
+ * explicitly set to {@code null}.</p>
+ *
+ * @param <T> record target type
+ */
 public final class RecordStrategy<T> extends AbstractObjectStrategy<T> {
 
+    /**
+     * Execute record mapping.
+     *
+     * @param source source object
+     * @param typedValue typed target descriptor (must describe a record type)
+     * @param context mapping context
+     * @return mapped record instance, or {@code null} when {@code source} is {@code null}
+     * @throws MappingException if the target type is not a record, component adaptation fails,
+     *                          or record instantiation fails
+     */
     @Override
     public T execute(Object source, TypedValue<T> typedValue, MappingContext context) {
         InferredType type = typedValue.getType();
