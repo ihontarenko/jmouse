@@ -41,7 +41,7 @@ abstract public class Reflections {
      */
     public static final Set<String> JAVA_MODULE_NAMES = JAVA_MODULES.stream().map(r -> r.descriptor().name())
             .collect(Collectors.toSet());
-    private static final Map<Class<?>, Object> PRIMITIVES_DEFAULT_TYPE_VALUES = Map.of(
+    public static final Map<Class<?>, Object> PRIMITIVES_DEFAULT_TYPE_VALUES = Map.of(
                     boolean.class, false,
                     byte.class, (byte) 0,
                     short.class, (short) 0,

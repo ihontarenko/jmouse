@@ -14,6 +14,7 @@ import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.plugin.MappingValue;
 import org.jmouse.core.mapping.plugin.PluginBus;
 import org.jmouse.core.reflection.InferredType;
+import org.jmouse.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +69,13 @@ public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
         if (objectAccessor != null && !objectAccessor.isNull()) {
             Object unwrapped = objectAccessor.unwrap();
 
-            if (!objectAccessor.isArray() && !objectAccessor.isCollection() && !objectAccessor.is(type)) {
+            InferredType effectiveType = type;
+
+            if (effectiveType.isPrimitive()) {
+                effectiveType = InferredType.forType(Arrays.boxType(effectiveType.getClassType()));
+            }
+
+            if (!objectAccessor.isArray() && !objectAccessor.isCollection() && !objectAccessor.is(effectiveType)) {
                 throw toMappingException(
                         ErrorCodes.STRATEGY_INCOMPATIBLE_TYPE,
                         "Incompatible type of value %s, required-type: %s".formatted(

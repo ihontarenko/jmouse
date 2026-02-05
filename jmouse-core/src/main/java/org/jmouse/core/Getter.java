@@ -1,5 +1,8 @@
 package org.jmouse.core;
 
+import org.jmouse.core.reflection.Reflections;
+
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Map;
@@ -47,7 +50,18 @@ public interface Getter<T, R> {
                 if ((getter.getModifiers() & Modifier.PUBLIC) == 0) {
                     getter.setAccessible(true);
                 }
-                return (V) getter.invoke(instance);
+
+                try {
+                    return (V) getter.invoke(instance);
+                } catch (InvocationTargetException e) {
+                    Class<?> type = getter.getReturnType();
+
+                    if (type.isPrimitive()) {
+                        return (V) Reflections.PRIMITIVES_DEFAULT_TYPE_VALUES.get(type);
+                    }
+
+                    throw e;
+                }
             } catch (Exception exception) {
                 throw new GetterCallException(
                         "Failed to call getter '%s'".formatted(getMethodName(getter)), exception);
