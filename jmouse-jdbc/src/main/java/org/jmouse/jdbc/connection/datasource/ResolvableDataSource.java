@@ -28,6 +28,6 @@ public final class ResolvableDataSource extends AbstractDataSource {
     }
 
     private DataSource resolveDataSource() {
-        return resolver.resolve(lookupKey.get());
+        return resolver.resolve(Verify.notBlank(lookupKey.get(), "Specify data-source-key to resolve data-source"));
     }
 }

@@ -7,6 +7,7 @@ import org.jmouse.context.ApplicationFactory;
 import org.jmouse.context.conversion.ContextConversion;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.environment.Environment;
+import org.jmouse.core.events.EventManager;
 import org.jmouse.core.io.CompositeResourceLoader;
 import org.jmouse.core.io.ResourceLoader;
 import org.jmouse.el.ExpressionLanguage;
@@ -90,6 +91,7 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
         context.registerBean(ExpressionLanguage.class, new ExpressionLanguage());
         context.registerBean(DEFAULT_REPLACER_BEAN_NAME, new StandardPlaceholderReplacer());
         context.registerBean(ROUTE_REPLACER_BEAN_NAME, new StandardPlaceholderReplacer("{", "}", ":"));
+        context.registerBean(EventManager.class, context.getEventManager());
 
         return context;
     }
