@@ -1,7 +1,7 @@
 package org.jmouse.testing_ground.binder;
 
 import org.jmouse.core.access.*;
-import org.jmouse.core.bind.*;
+import org.jmouse.core.binding.*;
 import org.jmouse.core.access.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.access.descriptor.structured.bean.JavaBeanIntrospector;
 import org.jmouse.testing_ground.binder.dto.*;

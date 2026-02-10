@@ -3,7 +3,7 @@ package org.jmouse.testing_ground.binder.dto;
 import org.jmouse.beans.annotation.AggregatedBeans;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.Qualifier;
-import org.jmouse.core.bind.BindRequired;
+import org.jmouse.core.binding.BindRequired;
 
 import java.util.*;
 

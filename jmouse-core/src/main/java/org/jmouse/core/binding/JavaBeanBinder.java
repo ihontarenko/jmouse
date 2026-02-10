@@ -1,4 +1,4 @@
-package org.jmouse.core.bind;
+package org.jmouse.core.binding;
 
 import org.jmouse.core.access.JavaBean;
 import org.jmouse.core.access.ObjectAccessor;

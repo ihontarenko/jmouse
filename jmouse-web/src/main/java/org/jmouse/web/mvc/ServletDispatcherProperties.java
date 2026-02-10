@@ -1,7 +1,7 @@
 package org.jmouse.web.mvc;
 
 import org.jmouse.context.BeanProperties;
-import org.jmouse.core.bind.BindDefault;
+import org.jmouse.core.binding.BindDefault;
 
 @BeanProperties("jmouse.web.server.dispatcher")
 public class ServletDispatcherProperties {

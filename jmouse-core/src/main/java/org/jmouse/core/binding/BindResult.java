@@ -1,4 +1,4 @@
-package org.jmouse.core.bind;
+package org.jmouse.core.binding;
 
 import java.util.Objects;
 import java.util.function.Consumer;

@@ -7,7 +7,7 @@ import org.jmouse.beans.processor.BeanPostProcessor;
 import org.jmouse.context.ApplicationBeanContext;
 import org.jmouse.context.BeanProperties;
 import org.jmouse.core.access.TypedValue;
-import org.jmouse.core.bind.Binder;
+import org.jmouse.core.binding.Binder;
 
 /**
  * {@link BeanPostProcessor} that binds external configuration properties into beans

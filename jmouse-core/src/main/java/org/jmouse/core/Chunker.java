@@ -27,11 +27,12 @@ final public class Chunker {
         int   capacity = (source.size() + chunkSize - 1) / chunkSize;
         Outer chunks   = CollectionFactory.createCollection(outerType, capacity);
 
-        Iterator<T> it = source.iterator();
-        while (it.hasNext()) {
+        Iterator<T> iterator = source.iterator();
+
+        while (iterator.hasNext()) {
             Inner chunk = CollectionFactory.createCollection(innerType, Math.min(chunkSize, source.size()));
-            for (int i = 0; i < chunkSize && it.hasNext(); i++) {
-                chunk.add(it.next());
+            for (int i = 0; i < chunkSize && iterator.hasNext(); i++) {
+                chunk.add(iterator.next());
             }
             chunks.add(chunk);
         }

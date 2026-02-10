@@ -1,4 +1,4 @@
-package org.jmouse.core.bind;
+package org.jmouse.core.binding;
 
 import org.jmouse.core.convert.PredefinedConversion;
 import org.jmouse.core.convert.converter.NumberToNumberConverter;

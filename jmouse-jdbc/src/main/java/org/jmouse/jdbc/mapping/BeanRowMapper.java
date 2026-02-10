@@ -3,7 +3,7 @@ package org.jmouse.jdbc.mapping;
 import org.jmouse.core.Verify;
 import org.jmouse.core.access.ObjectAccessor;
 import org.jmouse.core.access.TypedValue;
-import org.jmouse.core.bind.*;
+import org.jmouse.core.binding.*;
 import org.jmouse.core.access.accessor.DummyObjectAccessor;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.jdbc.mapping.bind.JdbcAccessorWrapper;

@@ -1,6 +1,6 @@
 package org.jmouse.web.mvc;
 
-import org.jmouse.core.bind.BindDefault;
+import org.jmouse.core.binding.BindDefault;
 
 /**
  * 🧾 Defines configurable view path settings.

@@ -4,7 +4,7 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanFactory;
 import org.jmouse.beans.BeanNotFoundException;
 import org.jmouse.beans.BeanScope;
-import org.jmouse.core.bind.Binder;
+import org.jmouse.core.binding.Binder;
 import org.jmouse.core.environment.Environment;
 import org.jmouse.core.environment.PropertyResolver;
 import org.jmouse.core.io.ResourceLoader;

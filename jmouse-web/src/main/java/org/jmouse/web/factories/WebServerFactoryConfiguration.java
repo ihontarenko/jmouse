@@ -4,7 +4,7 @@ import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.context.BeanConditionExpression;
 import org.jmouse.context.BeanProperties;
-import org.jmouse.core.bind.BindName;
+import org.jmouse.core.binding.BindName;
 import org.jmouse.web.mvc.context.BeanConditionExists;
 import org.jmouse.web.server.WebServerConfig;
 import org.jmouse.web.server.WebServerFactory;

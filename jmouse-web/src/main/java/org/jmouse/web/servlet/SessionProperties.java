@@ -2,7 +2,7 @@ package org.jmouse.web.servlet;
 
 import jakarta.servlet.SessionTrackingMode;
 import org.jmouse.context.BeanProperties;
-import org.jmouse.core.bind.BindDefault;
+import org.jmouse.core.binding.BindDefault;
 
 import java.util.Set;
 
