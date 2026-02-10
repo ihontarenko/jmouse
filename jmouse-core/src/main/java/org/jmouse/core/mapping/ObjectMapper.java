@@ -1,7 +1,7 @@
 package org.jmouse.core.mapping;
 
 import org.jmouse.core.Verify;
-import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.strategy.MappingStrategy;
 import org.jmouse.core.reflection.InferredType;

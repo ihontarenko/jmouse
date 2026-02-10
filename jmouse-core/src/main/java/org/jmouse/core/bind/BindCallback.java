@@ -1,5 +1,8 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.access.PropertyPath;
+import org.jmouse.core.access.TypedValue;
+
 /**
  * A callback interface for handling various stages of the binding process.
  * <p>

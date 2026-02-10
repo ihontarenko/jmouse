@@ -1,6 +1,6 @@
 package org.jmouse.core.mapping;
 
-import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.access.PropertyPath;
 
 /**
  * Mapping scope holder that tracks the root source object and the current property path. 🧭

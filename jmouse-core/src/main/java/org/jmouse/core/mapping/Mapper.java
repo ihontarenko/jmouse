@@ -1,6 +1,6 @@
 package org.jmouse.core.mapping;
 
-import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.function.Supplier;

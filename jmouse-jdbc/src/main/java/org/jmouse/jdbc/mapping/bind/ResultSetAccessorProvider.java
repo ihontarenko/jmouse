@@ -1,8 +1,8 @@
 package org.jmouse.jdbc.mapping.bind;
 
 import org.jmouse.core.Priority;
-import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.ObjectAccessorProvider;
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.ObjectAccessorProvider;
 import org.jmouse.core.reflection.TypeInformation;
 
 import java.sql.ResultSet;

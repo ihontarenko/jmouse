@@ -1,11 +1,11 @@
 package org.jmouse.core.mapping.strategy.bean;
 
-import org.jmouse.core.bind.JavaBean;
-import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.TypedValue;
-import org.jmouse.core.bind.descriptor.structured.DescriptorResolver;
-import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
-import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
+import org.jmouse.core.access.JavaBean;
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.TypedValue;
+import org.jmouse.core.access.descriptor.structured.DescriptorResolver;
+import org.jmouse.core.access.descriptor.structured.ObjectDescriptor;
+import org.jmouse.core.access.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.strategy.support.AbstractObjectStrategy;

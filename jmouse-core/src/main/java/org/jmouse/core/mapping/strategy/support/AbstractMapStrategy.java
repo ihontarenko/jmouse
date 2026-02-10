@@ -1,7 +1,7 @@
 package org.jmouse.core.mapping.strategy.support;
 
 import org.jmouse.core.Verify;
-import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.mapping.config.MappingConfig;
 
 import java.util.Map;

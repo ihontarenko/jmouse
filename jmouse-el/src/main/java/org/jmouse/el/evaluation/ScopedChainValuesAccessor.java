@@ -1,8 +1,8 @@
 package org.jmouse.el.evaluation;
 
-import org.jmouse.core.bind.AbstractAccessor;
-import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.UnsupportedOperationException;
+import org.jmouse.core.access.AbstractAccessor;
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.UnsupportedOperationException;
 
 public class ScopedChainValuesAccessor extends AbstractAccessor {
 

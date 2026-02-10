@@ -1,6 +1,6 @@
 package org.jmouse.testing_ground.templates;
 
-import org.jmouse.core.bind.VirtualProperty;
+import org.jmouse.core.access.VirtualProperty;
 import org.jmouse.el.StringSource;
 import org.jmouse.el.evaluation.DefaultEvaluationContext;
 import org.jmouse.el.evaluation.EvaluationContext;

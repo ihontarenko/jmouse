@@ -1,8 +1,8 @@
 package org.jmouse.jdbc.parameters;
 
 import org.jmouse.core.Verify;
-import org.jmouse.core.bind.descriptor.Describer;
-import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
+import org.jmouse.core.access.descriptor.Describer;
+import org.jmouse.core.access.descriptor.structured.ObjectDescriptor;
 
 public final class BeanParameterSource implements ParameterSource {
 

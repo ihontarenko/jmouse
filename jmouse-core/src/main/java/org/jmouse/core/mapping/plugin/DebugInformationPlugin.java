@@ -1,6 +1,6 @@
 package org.jmouse.core.mapping.plugin;
 
-import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.access.PropertyPath;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.reflection.InferredType;
 

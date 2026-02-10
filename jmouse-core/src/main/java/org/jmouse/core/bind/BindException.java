@@ -1,5 +1,8 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.access.PropertyPath;
+import org.jmouse.core.access.TypedValue;
+
 /**
  * Exception thrown when a binding operation fails.
  */

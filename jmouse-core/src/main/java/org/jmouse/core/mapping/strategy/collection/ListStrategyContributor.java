@@ -1,7 +1,7 @@
 package org.jmouse.core.mapping.strategy.collection;
 
 import org.jmouse.core.Priority;
-import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.mapping.strategy.MappingStrategy;
 import org.jmouse.core.mapping.strategy.MappingStrategyContributor;
 import org.jmouse.core.mapping.MappingContext;

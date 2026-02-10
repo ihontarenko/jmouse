@@ -1,8 +1,8 @@
 package org.jmouse.el.evaluation;
 
-import org.jmouse.core.bind.DefaultPropertyValueResolver;
-import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.VirtualPropertyResolver;
+import org.jmouse.core.access.DefaultPropertyValueResolver;
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.VirtualPropertyResolver;
 
 /**
  * A custom property value resolver for expression language evaluation.

@@ -4,7 +4,7 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.conditions.AbstractBeanRegistrationCondition;
 import org.jmouse.beans.conditions.BeanCondition;
 import org.jmouse.beans.conditions.ConditionalMetadata;
-import org.jmouse.core.bind.accessor.PropertyResolverAccessor;
+import org.jmouse.core.access.accessor.PropertyResolverAccessor;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.slf4j.Logger;

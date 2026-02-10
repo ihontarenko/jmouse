@@ -1,12 +1,11 @@
 package org.jmouse.core.mapping.strategy.scalar;
 
-import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.strategy.MappingStrategy;
 import org.jmouse.core.mapping.strategy.support.AbstractStrategy;
 import org.jmouse.core.mapping.MappingContext;
-import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.reflection.TypeClassifier;
 
 /**

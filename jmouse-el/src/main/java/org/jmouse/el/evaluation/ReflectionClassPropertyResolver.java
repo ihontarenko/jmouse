@@ -1,6 +1,6 @@
 package org.jmouse.el.evaluation;
 
-import org.jmouse.core.bind.VirtualProperty;
+import org.jmouse.core.access.VirtualProperty;
 
 public class ReflectionClassPropertyResolver implements VirtualProperty<Object> {
 

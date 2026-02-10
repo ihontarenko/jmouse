@@ -1,12 +1,15 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.PropertyPath;
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.reflection.TypeInformation;
 
 import java.util.Collection;
 import java.util.function.Supplier;
 
-import static org.jmouse.core.bind.TypedValue.of;
+import static org.jmouse.core.access.TypedValue.of;
 
 /**
  * The {@code CollectionBinder} class is an abstract binder for handling collection types.

@@ -1,8 +1,8 @@
 package org.jmouse.el.extension.attribute;
 
-import org.jmouse.core.bind.AttributeResolver;
-import org.jmouse.core.bind.descriptor.Describer;
-import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
+import org.jmouse.core.access.AttributeResolver;
+import org.jmouse.core.access.descriptor.Describer;
+import org.jmouse.core.access.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.core.Priority;
 

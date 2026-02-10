@@ -1,8 +1,7 @@
 package org.jmouse.el.evaluation;
 
-import org.jmouse.core.bind.*;
-import org.jmouse.core.bind.PropertyPath.Entries;
-import org.jmouse.core.bind.AttributeResolver;
+import org.jmouse.core.access.*;
+import org.jmouse.core.access.PropertyPath.Entries;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.renderable.Inheritance;
@@ -14,15 +13,15 @@ import java.util.List;
  * <p>
  * Provides the necessary services for expression evaluation such as variable scopes,
  * extensions, conversion, and property resolution via a standard {@link ObjectAccessor}
- * wrapped by a default {@link ObjectAccessorWrapper}.
+ * wrapped by a default {@link AccessorWrapper}.
  * </p>
  */
 public interface EvaluationContext extends VirtualPropertyResolver.Aware {
 
     /**
-     * The default ObjectAccessorWrapper used to wrap object access operations.
+     * The default AccessorWrapper used to wrap object access operations.
      */
-    ObjectAccessorWrapper WRAPPER = new StandardAccessorWrapper();
+    AccessorWrapper WRAPPER = new ObjectAccessorWrapper();
 
     /**
      * Returns the current inheritance chain that manages variable scope hierarchy.

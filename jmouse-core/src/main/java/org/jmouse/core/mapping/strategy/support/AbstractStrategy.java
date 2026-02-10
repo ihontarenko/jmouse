@@ -1,8 +1,8 @@
 package org.jmouse.core.mapping.strategy.support;
 
-import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.PropertyPath;
-import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.PropertyPath;
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.mapping.MappingScope;
 import org.jmouse.core.mapping.binding.PropertyMapping;
@@ -18,8 +18,6 @@ import org.jmouse.core.reflection.InferredType;
 import org.jmouse.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 /**
  * Base implementation for {@link MappingStrategy} that provides common utilities for

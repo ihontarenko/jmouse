@@ -1,7 +1,7 @@
 package org.jmouse.crawler.runtime.state.checkpoint.frontier;
 
 import org.jmouse.core.Verify;
-import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.crawler.api.Frontier;
 import org.jmouse.crawler.api.ProcessingTask;

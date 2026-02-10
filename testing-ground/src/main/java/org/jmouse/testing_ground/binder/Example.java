@@ -1,8 +1,9 @@
 package org.jmouse.testing_ground.binder;
 
+import org.jmouse.core.access.*;
 import org.jmouse.core.bind.*;
-import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
-import org.jmouse.core.bind.descriptor.structured.bean.JavaBeanIntrospector;
+import org.jmouse.core.access.descriptor.structured.ObjectDescriptor;
+import org.jmouse.core.access.descriptor.structured.bean.JavaBeanIntrospector;
 import org.jmouse.testing_ground.binder.dto.*;
 import org.jmouse.core.Setter;
 
@@ -43,7 +44,7 @@ public class Example {
         data.put("books", books);
         data.put("address", addresses);
 
-        ObjectAccessorWrapper wrapper = new StandardAccessorWrapper();
+        AccessorWrapper wrapper = new ObjectAccessorWrapper();
 
         ObjectAccessor wrapped = wrapper.wrap(data);
         ObjectAccessor vo      = wrapper.wrap(new BookImmutable(222, "Title", "Stephen King", "Maine"));

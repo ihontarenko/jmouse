@@ -2,7 +2,7 @@ package org.jmouse.core.mapping.strategy;
 
 import org.jmouse.core.Sorter;
 import org.jmouse.core.Verify;
-import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.MappingContext;

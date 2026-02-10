@@ -1,8 +1,12 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.descriptor.AnnotationDescriptor;
-import org.jmouse.core.bind.descriptor.MethodDescriptor;
-import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.PropertyPath;
+import org.jmouse.core.access.TypedValue;
+import org.jmouse.core.access.ValueObject;
+import org.jmouse.core.access.descriptor.AnnotationDescriptor;
+import org.jmouse.core.access.descriptor.MethodDescriptor;
+import org.jmouse.core.access.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.core.Factory;
 import org.jmouse.core.Priority;

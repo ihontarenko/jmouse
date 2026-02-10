@@ -3,6 +3,9 @@ package org.jmouse.core.bind;
 import org.jmouse.core.PlaceholderReplacer;
 import org.jmouse.core.PlaceholderResolver;
 import org.jmouse.core.StandardPlaceholderReplacer;
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.PropertyPath;
+import org.jmouse.core.access.TypedValue;
 
 /**
  * DirectAccess implementation of a binding callback used in property binding operations.

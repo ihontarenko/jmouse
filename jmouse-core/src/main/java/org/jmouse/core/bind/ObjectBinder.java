@@ -1,5 +1,9 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.PropertyPath;
+import org.jmouse.core.access.TypedValue;
+
 /**
  * Defines the contract for binding objects from a {@link ObjectAccessor}.
  * Implementations of this interface are responsible for mapping data

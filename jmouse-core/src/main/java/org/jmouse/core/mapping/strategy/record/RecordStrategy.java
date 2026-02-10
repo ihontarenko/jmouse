@@ -1,10 +1,10 @@
 package org.jmouse.core.mapping.strategy.record;
 
-import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.TypedValue;
-import org.jmouse.core.bind.ValueObject;
-import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
-import org.jmouse.core.bind.descriptor.structured.record.ValueObjectDescriptor;
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.TypedValue;
+import org.jmouse.core.access.ValueObject;
+import org.jmouse.core.access.descriptor.structured.PropertyDescriptor;
+import org.jmouse.core.access.descriptor.structured.record.ValueObjectDescriptor;
 import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.MappingContext;

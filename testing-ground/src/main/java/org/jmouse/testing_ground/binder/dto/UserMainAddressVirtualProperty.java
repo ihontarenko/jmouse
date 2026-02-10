@@ -1,6 +1,6 @@
 package org.jmouse.testing_ground.binder.dto;
 
-import org.jmouse.core.bind.VirtualProperty;
+import org.jmouse.core.access.VirtualProperty;
 
 public class UserMainAddressVirtualProperty implements VirtualProperty<User> {
 

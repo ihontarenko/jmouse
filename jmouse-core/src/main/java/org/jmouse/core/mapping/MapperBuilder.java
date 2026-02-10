@@ -1,7 +1,7 @@
 package org.jmouse.core.mapping;
 
 import org.jmouse.core.Verify;
-import org.jmouse.core.bind.ObjectAccessorWrapper;
+import org.jmouse.core.access.AccessorWrapper;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.config.MappingConfig;
@@ -17,7 +17,7 @@ import org.jmouse.core.mapping.strategy.StrategyRegistry;
  * <p>Required components:</p>
  * <ul>
  *   <li>{@link StrategyRegistry} - plan selection/registry</li>
- *   <li>{@link ObjectAccessorWrapper} - source/target accessor wrapper</li>
+ *   <li>{@link AccessorWrapper} - source/target accessor wrapper</li>
  *   <li>{@link Conversion} - conversion service</li>
  *   <li>{@link TypeMappingRegistry} - type mapping specifications/overrides</li>
  *   <li>{@link MappingPolicy} - mapping behavior policy</li>
@@ -31,9 +31,9 @@ import org.jmouse.core.mapping.strategy.StrategyRegistry;
  */
 public final class MapperBuilder {
 
-    private StrategyRegistry      strategyRegistry;
-    private ObjectAccessorWrapper wrapper;
-    private Conversion            conversion;
+    private StrategyRegistry strategyRegistry;
+    private AccessorWrapper  wrapper;
+    private Conversion       conversion;
     private TypeMappingRegistry   mappingRegistry;
     private MappingPolicy         policy;
     private MappingConfig         config;
@@ -55,7 +55,7 @@ public final class MapperBuilder {
      * @param wrapper accessor wrapper
      * @return this builder
      */
-    public MapperBuilder wrapper(ObjectAccessorWrapper wrapper) {
+    public MapperBuilder wrapper(AccessorWrapper wrapper) {
         this.wrapper = wrapper;
         return this;
     }

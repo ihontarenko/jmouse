@@ -1,5 +1,6 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.access.ObjectAccessor;
 import org.jmouse.core.convert.Conversion;
 
 /**

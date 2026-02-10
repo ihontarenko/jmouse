@@ -1,7 +1,11 @@
 package org.jmouse.core.bind;
 
-import org.jmouse.core.bind.descriptor.MethodDescriptor;
-import org.jmouse.core.bind.descriptor.structured.PropertyDescriptor;
+import org.jmouse.core.access.JavaBean;
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.PropertyPath;
+import org.jmouse.core.access.TypedValue;
+import org.jmouse.core.access.descriptor.MethodDescriptor;
+import org.jmouse.core.access.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.Factory;
 import org.jmouse.core.Priority;
@@ -10,7 +14,7 @@ import org.jmouse.util.Strings;
 import java.lang.reflect.Method;
 import java.util.function.Supplier;
 
-import static org.jmouse.core.bind.TypedValue.of;
+import static org.jmouse.core.access.TypedValue.of;
 import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
 
 /**

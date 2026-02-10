@@ -1,6 +1,6 @@
 package org.jmouse.testing_ground.templates;
 
-import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.access.PropertyPath;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.evaluation.ReflectionClassPropertyResolver;
 import org.jmouse.el.extension.MethodImporter;

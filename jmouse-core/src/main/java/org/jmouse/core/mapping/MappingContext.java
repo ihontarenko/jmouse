@@ -1,8 +1,8 @@
 package org.jmouse.core.mapping;
 
 import org.jmouse.core.Verify;
-import org.jmouse.core.bind.ObjectAccessorWrapper;
-import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.access.AccessorWrapper;
+import org.jmouse.core.access.PropertyPath;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.config.MappingConfig;
@@ -13,7 +13,7 @@ import org.jmouse.core.mapping.plugin.PluginBus;
 public record MappingContext(
         MapperProvider mapperProvider,
         StrategyRegistry strategyRegistry,
-        ObjectAccessorWrapper wrapper,
+        AccessorWrapper wrapper,
         Conversion conversion,
         TypeMappingRegistry mappingRegistry,
         MappingPolicy policy,
@@ -24,7 +24,7 @@ public record MappingContext(
     public MappingContext(
             MapperProvider mapperProvider,
             StrategyRegistry strategyRegistry,
-            ObjectAccessorWrapper wrapper,
+            AccessorWrapper wrapper,
             Conversion conversion,
             TypeMappingRegistry mappingRegistry,
             MappingPolicy policy,

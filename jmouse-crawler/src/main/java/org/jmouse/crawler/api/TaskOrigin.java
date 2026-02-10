@@ -1,6 +1,6 @@
 package org.jmouse.crawler.api;
 
-import org.jmouse.core.bind.descriptor.DescriptorProperty;
+import org.jmouse.core.access.descriptor.DescriptorProperty;
 
 public sealed interface TaskOrigin
         permits TaskOrigin.Seed, TaskOrigin.Discovered, TaskOrigin.Retry, TaskOrigin.Restored {

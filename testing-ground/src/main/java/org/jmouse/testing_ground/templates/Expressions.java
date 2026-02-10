@@ -1,6 +1,6 @@
 package org.jmouse.testing_ground.templates;
 
-import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.access.PropertyPath;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;

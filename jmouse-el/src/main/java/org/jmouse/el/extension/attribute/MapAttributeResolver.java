@@ -1,6 +1,6 @@
 package org.jmouse.el.extension.attribute;
 
-import org.jmouse.core.bind.AttributeResolver;
+import org.jmouse.core.access.AttributeResolver;
 import org.jmouse.core.Priority;
 
 import java.util.Map;

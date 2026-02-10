@@ -1,5 +1,7 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.access.TypedValue;
+
 import java.util.Collection;
 
 /**

@@ -1,5 +1,7 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.List;

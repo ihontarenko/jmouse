@@ -1,5 +1,7 @@
 package org.jmouse.core.bind;
 
+import org.jmouse.core.access.*;
+import org.jmouse.core.access.UnsupportedOperationException;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.CyclicReferenceDetector;
 import org.jmouse.core.DefaultCyclicReferenceDetector;
@@ -16,17 +18,17 @@ import java.util.function.Supplier;
  */
 public class Binder implements ObjectBinder, BindContext {
 
-    private static final ObjectAccessorWrapper                DEFAULT_WRAPPER    = new StandardAccessorWrapper();
+    private static final AccessorWrapper                      DEFAULT_WRAPPER    = new ObjectAccessorWrapper();
     private static final Supplier<? extends RuntimeException> EXCEPTION_SUPPLIER = () -> new BindException(
             "Recursive binding detected");
 
     private final BinderFactory                   factory;
     private final Conversion                      conversion;
     private final CyclicReferenceDetector<String> detector;
-    private ObjectAccessor                        objectAccessor;
+    private       ObjectAccessor                  objectAccessor;
     private       BindCallback                    callback;
-    private       BindingStrategy                 strategy;
-    private       ObjectAccessorWrapper           wrapper;
+    private BindingStrategy strategy;
+    private AccessorWrapper wrapper;
 
     /**
      * Constructs a {@code Binder} with the specified data source, binder factory, and binding strategy.
@@ -43,7 +45,7 @@ public class Binder implements ObjectBinder, BindContext {
         this.factory = factory;
         this.detector = new DefaultCyclicReferenceDetector<>();
         this.conversion = new BinderConversion();
-        this.wrapper = new StandardAccessorWrapper();
+        this.wrapper = new ObjectAccessorWrapper();
 
         // register default binders
         factory.registerBinder(new ScalarValueBinder(this));
@@ -275,23 +277,23 @@ public class Binder implements ObjectBinder, BindContext {
     }
 
     /**
-     * Return the {@link ObjectAccessorWrapper} to use.
+     * Return the {@link AccessorWrapper} to use.
      * <p>
      * Falls back to a default wrapper if none is explicitly configured.
      * </p>
      *
      * @return the configured wrapper, or the default wrapper
      */
-    public ObjectAccessorWrapper getWrapper() {
+    public AccessorWrapper getWrapper() {
         return wrapper == null ? DEFAULT_WRAPPER : wrapper;
     }
 
     /**
-     * Set the {@link ObjectAccessorWrapper} to use.
+     * Set the {@link AccessorWrapper} to use.
      *
      * @param wrapper the wrapper to set
      */
-    public void setWrapper(ObjectAccessorWrapper wrapper) {
+    public void setWrapper(AccessorWrapper wrapper) {
         this.wrapper = wrapper;
     }
 

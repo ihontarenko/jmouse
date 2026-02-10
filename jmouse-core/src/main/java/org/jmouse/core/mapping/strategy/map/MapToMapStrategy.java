@@ -1,7 +1,7 @@
 package org.jmouse.core.mapping.strategy.map;
 
-import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.mapping.config.MappingPolicy;
 import org.jmouse.core.mapping.config.TypeMismatchPolicy;
 import org.jmouse.core.mapping.errors.ErrorCodes;

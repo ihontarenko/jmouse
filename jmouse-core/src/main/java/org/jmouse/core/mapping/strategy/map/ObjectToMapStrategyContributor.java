@@ -1,13 +1,11 @@
 package org.jmouse.core.mapping.strategy.map;
 
 import org.jmouse.core.Priority;
-import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.strategy.MappingStrategy;
 import org.jmouse.core.mapping.strategy.MappingStrategyContributor;
 import org.jmouse.core.reflection.InferredType;
-
-import java.util.Map;
 
 /**
  * {@link MappingStrategyContributor} that builds an {@link ObjectToMapStrategy} for mapping

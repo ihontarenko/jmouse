@@ -1,7 +1,7 @@
 package org.jmouse.el.extension;
 
 import org.jmouse.el.ObjectContainer;
-import org.jmouse.core.bind.AttributeResolver;
+import org.jmouse.core.access.AttributeResolver;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContainer;

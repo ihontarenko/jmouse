@@ -1,6 +1,6 @@
 package org.jmouse.core.mapping.strategy;
 
-import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
 
 /**

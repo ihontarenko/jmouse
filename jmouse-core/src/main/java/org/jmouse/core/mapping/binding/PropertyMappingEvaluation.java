@@ -1,8 +1,8 @@
 package org.jmouse.core.mapping.binding;
 
 import org.jmouse.core.Verify;
-import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.ValueNavigator;
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.ValueNavigator;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.errors.MappingException;
 

@@ -1,6 +1,6 @@
 package org.jmouse.core.mapping;
 
-import org.jmouse.core.bind.StandardAccessorWrapper;
+import org.jmouse.core.access.ObjectAccessorWrapper;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.config.MappingPolicy;
@@ -23,7 +23,7 @@ import java.util.List;
  * <p>This class centralizes default wiring for the mapping subsystem, including:</p>
  * <ul>
  *   <li>Default {@link MappingStrategyContributor} set (beans, records, scalars, maps, collections, arrays)</li>
- *   <li>Default {@link StandardAccessorWrapper} for source/target access</li>
+ *   <li>Default {@link ObjectAccessorWrapper} for source/target access</li>
  *   <li>Default conversion service ({@link MapperConversion})</li>
  *   <li>Default policies via {@link MappingPolicy#defaults()}</li>
  *   <li>Default config via {@link MappingConfig}</li>
@@ -67,7 +67,7 @@ public class Mappers {
      *
      * <p>The builder is initialized with:</p>
      * <ul>
-     *   <li>{@link StandardAccessorWrapper}</li>
+     *   <li>{@link ObjectAccessorWrapper}</li>
      *   <li>{@link MapperConversion}</li>
      *   <li>{@link MappingPolicy#defaults()}</li>
      *   <li>default {@link MappingConfig} instance</li>
@@ -79,7 +79,7 @@ public class Mappers {
      */
     public static MapperBuilder builder() {
         return new MapperBuilder()
-                .wrapper(new StandardAccessorWrapper())
+                .wrapper(new ObjectAccessorWrapper())
                 .conversion(new MapperConversion())
                 .policy(MappingPolicy.defaults())
                 .config(MappingConfig.builder().build())

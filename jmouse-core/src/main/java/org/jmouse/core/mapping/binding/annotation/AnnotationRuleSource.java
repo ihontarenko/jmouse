@@ -1,7 +1,7 @@
 package org.jmouse.core.mapping.binding.annotation;
 
-import org.jmouse.core.bind.descriptor.structured.DescriptorResolver;
-import org.jmouse.core.bind.descriptor.structured.ObjectDescriptor;
+import org.jmouse.core.access.descriptor.structured.DescriptorResolver;
+import org.jmouse.core.access.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.binding.*;
 

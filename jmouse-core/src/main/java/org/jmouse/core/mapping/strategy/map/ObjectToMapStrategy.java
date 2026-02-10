@@ -1,8 +1,8 @@
 package org.jmouse.core.mapping.strategy.map;
 
-import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.PropertyPath;
-import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.PropertyPath;
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.binding.PropertyMapping;
 import org.jmouse.core.mapping.binding.TypeMappingRule;

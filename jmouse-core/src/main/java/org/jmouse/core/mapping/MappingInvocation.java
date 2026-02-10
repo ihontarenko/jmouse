@@ -1,7 +1,7 @@
 package org.jmouse.core.mapping;
 
 import org.jmouse.core.Verify;
-import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.access.PropertyPath;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.plugin.*;

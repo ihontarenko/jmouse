@@ -1,6 +1,7 @@
 package org.jmouse.core.bind;
 
 import org.jmouse.core.Sorter;
+import org.jmouse.core.access.TypedValue;
 
 import java.util.ArrayList;
 import java.util.Collection;

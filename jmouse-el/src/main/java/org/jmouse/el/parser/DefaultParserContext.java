@@ -1,7 +1,7 @@
 package org.jmouse.el.parser;
 
 import org.jmouse.el.extension.*;
-import org.jmouse.core.bind.AttributeResolver;
+import org.jmouse.core.access.AttributeResolver;
 import org.jmouse.el.lexer.Token;
 
 import java.util.List;

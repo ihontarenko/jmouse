@@ -6,7 +6,7 @@ import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.processor.BeanPostProcessor;
 import org.jmouse.context.ApplicationBeanContext;
 import org.jmouse.context.BeanProperties;
-import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.bind.Binder;
 
 /**

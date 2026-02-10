@@ -1,8 +1,8 @@
 package org.jmouse.web.mvc.method;
 
 import org.jmouse.core.MethodParameter;
-import org.jmouse.core.bind.descriptor.MethodDescriptor;
-import org.jmouse.core.bind.descriptor.MethodIntrospector;
+import org.jmouse.core.access.descriptor.MethodDescriptor;
+import org.jmouse.core.access.descriptor.MethodIntrospector;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Method;

@@ -1,6 +1,6 @@
 package org.jmouse.core.environment.converter;
 
-import org.jmouse.core.bind.PropertyPath;
+import org.jmouse.core.access.PropertyPath;
 import org.jmouse.core.convert.ClassPair;
 import org.jmouse.core.convert.GenericConverter;
 

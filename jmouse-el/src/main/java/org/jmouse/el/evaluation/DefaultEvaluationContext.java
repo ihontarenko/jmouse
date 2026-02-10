@@ -1,9 +1,9 @@
 package org.jmouse.el.evaluation;
 
-import org.jmouse.core.bind.ObjectAccessor;
-import org.jmouse.core.bind.ObjectAccessorWrapper;
-import org.jmouse.core.bind.VirtualPropertyResolver;
-import org.jmouse.core.bind.AttributeResolver;
+import org.jmouse.core.access.AccessorWrapper;
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.VirtualPropertyResolver;
+import org.jmouse.core.access.AttributeResolver;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.extension.StandardExtensionContainer;
@@ -70,7 +70,7 @@ public class DefaultEvaluationContext implements EvaluationContext {
     public ObjectAccessor getValueAccessor() {
         if (accessor == null) {
             accessor = new ScopedChainValuesAccessor(getScopedChain());
-            ((ObjectAccessorWrapper.Aware) accessor).setWrapper(WRAPPER);
+            ((AccessorWrapper.Aware) accessor).setWrapper(WRAPPER);
         }
         return accessor;
     }
