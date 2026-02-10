@@ -78,6 +78,18 @@ final public class PropertyPath {
     }
 
     /**
+     * Create a new {@link PropertyPath} from another path instance.
+     *
+     * <p>This method creates a new wrapper instance referencing the same underlying entries.</p>
+     *
+     * @param path source path (must not be {@code null})
+     * @return new property path instance
+     */
+    public static PropertyPath of(PropertyPath path) {
+        return new PropertyPath(path.entries());
+    }
+
+    /**
      * Creates a PropertyPath instance from a given name.
      *
      * @param name the property path to parse

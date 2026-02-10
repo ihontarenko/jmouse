@@ -3,6 +3,7 @@ package org.jmouse.core.mapping.strategy;
 import org.jmouse.core.Sorter;
 import org.jmouse.core.Verify;
 import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
@@ -96,8 +97,8 @@ public final class MappingStrategyRegistry implements StrategyRegistry {
         }
 
         throw new MappingException(
-                "no_plan_contributor",
-                "No plan contributor for source='%s', target='%s'".formatted(sourceType.getClassType(), targetType),
+                ErrorCodes.STRATEGY_NO_CONTRIBUTOR,
+                "No plan contributor for source='%s', target='%s'".formatted(sourceType, targetType),
                 null
         ).withMeta("source", sourceType).withMeta("target", targetType);
     }

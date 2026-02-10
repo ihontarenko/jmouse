@@ -1,6 +1,8 @@
 package org.jmouse.core.mapping.strategy.scalar;
 
 import org.jmouse.core.bind.TypedValue;
+import org.jmouse.core.mapping.errors.ErrorCodes;
+import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.strategy.MappingStrategy;
 import org.jmouse.core.mapping.strategy.support.AbstractStrategy;
 import org.jmouse.core.mapping.MappingContext;
@@ -40,9 +42,20 @@ public final class ScalarStrategy<T> extends AbstractStrategy<T> implements Mapp
         TypeClassifier typeClassifier = typedValue.getType();
 
         if (typeClassifier.isScalar() || typeClassifier.isEnum() || typeClassifier.isClass()) {
-            @SuppressWarnings("unchecked")
-            T converted = (T) convertIfNeeded(source, typeClassifier.getClassType(), context.conversion());
-            return converted;
+            try {
+                @SuppressWarnings("unchecked")
+                T converted = (T) convertIfNeeded(source, typeClassifier.getClassType(), context.conversion());
+                return converted;
+            } catch (Exception exception) {
+                throw new MappingException(
+                        ErrorCodes.SCALAR_CONVERSION_FAILED,
+                        "Conversion of scalar value (%s) for path '%s' failed.".formatted(
+                                typedValue.getType(),
+                                context.currentPath()
+                        ),
+                        exception
+                );
+            }
         }
 
         @SuppressWarnings("unchecked")

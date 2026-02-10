@@ -62,4 +62,8 @@ public record MappingContext(
         return new PluginBus(config().plugins());
     }
 
+    public PropertyPath currentPath() {
+        return PropertyPath.of(scope().path());
+    }
+
 }

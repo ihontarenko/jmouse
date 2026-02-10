@@ -5,19 +5,18 @@ package org.jmouse.core.mapping.errors;
  *
  * <p>Taxonomy (namespace.prefix):</p>
  * <ul>
- *   <li>plan.*        - plan selection/build problems</li>
+ *   <li>strategy.*    - strategy selection/build problems</li>
  *   <li>bean.*        - bean mapping failures</li>
  *   <li>record.*      - record mapping failures</li>
  *   <li>map.*         - map mapping failures</li>
  *   <li>collection.*  - collections/arrays mapping failures</li>
  *   <li>scalar.*      - scalar conversion failures</li>
  *   <li>binding.*     - binding specification problems</li>
- *   <li>plugin.*      - plugin pipeline failures</li>
  * </ul>
  */
 public final class ErrorCodes {
 
-    // plan.*
+    // strategy.*
     public static final String STRATEGY_NO_CONTRIBUTOR    = "strategy.no_contributor";
     public static final String STRATEGY_INCOMPATIBLE_TYPE = "strategy.incompatible_type";
 
@@ -28,7 +27,6 @@ public final class ErrorCodes {
 
     // record.*
     public static final String RECORD_TARGET_NOT_RECORD        = "record.target_not_record";
-    public static final String RECORD_CANONICAL_CTOR_NOT_FOUND = "record.canonical_ctor_not_found";
     public static final String RECORD_COMPONENT_ADAPT_FAILED   = "record.component_adapt_failed";
     public static final String RECORD_INSTANTIATION_FAILED     = "record.instantiation_failed";
 
@@ -36,15 +34,18 @@ public final class ErrorCodes {
     public static final String MAP_ENTRY_ADAPT_FAILED = "map.entry_adapt_failed";
     public static final String MAP_KEY_NOT_STRING     = "map.key_not_string";
 
+    // collection.*
+    public static final String COLLECTION_SIZE_EXCEEDS     = "collection.size_exceeds";
+
+    // array.*
+    public static final String ARRAY_SIZE_EXCEEDS     = "array.size_exceeds";
+
     // scalar.*
     public static final String SCALAR_CONVERSION_FAILED = "scalar.conversion_failed";
 
     // binding.*
     public static final String BINDING_SOURCE_TYPE_MISMATCH         = "binding.source_type_mismatch";
     public static final String BINDING_COMPUTE_SOURCE_TYPE_MISMATCH = "binding.compute_source_type_mismatch";
-
-    // plugin.*
-    public static final String PLUGIN_VALUE_REJECTED = "plugin.value_rejected";
 
     private ErrorCodes() {
     }

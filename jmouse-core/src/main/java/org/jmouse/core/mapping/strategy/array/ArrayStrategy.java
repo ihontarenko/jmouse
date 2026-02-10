@@ -3,6 +3,7 @@ package org.jmouse.core.mapping.strategy.array;
 import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.config.ArrayMaterializationPolicy;
+import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.mapping.strategy.support.AbstractIterableStrategy;
 import org.jmouse.core.mapping.strategy.support.IterableSource;
 import org.jmouse.core.reflection.InferredType;
@@ -55,7 +56,11 @@ public final class ArrayStrategy extends AbstractIterableStrategy<Object> {
 
         for (Iterator<?> iterator = iterableSource.iterator(); iterator.hasNext();) {
             if (++counter > maximum) {
-                throw new IllegalStateException("Array size exceeds maxCollectionSize=" + maximum);
+                throw toMappingException(
+                        ErrorCodes.ARRAY_SIZE_EXCEEDS,
+                        "Array size exceeds maxCollectionSize=" + maximum,
+                        null
+                );
             }
             MappingContext mappingContext = context.appendPath("[" + (counter - 1) + "]");
             temporary.add(adaptValue(iterator.next(), elementType, mappingContext));

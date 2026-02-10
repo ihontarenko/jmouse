@@ -6,6 +6,7 @@ import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.core.mapping.MappingScope;
 import org.jmouse.core.mapping.binding.PropertyMapping;
+import org.jmouse.core.mapping.binding.PropertyMappingEvaluation;
 import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.strategy.MappingStrategy;
@@ -52,7 +53,7 @@ public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
      *   <li>Starts with {@code TypedValue.of(type)} (no instance).</li>
      *   <li>Reads {@code accessor.get(key)} and, if present and not null, unwraps it.</li>
      *   <li>Performs a compatibility check: if the existing value is not array/collection and is not
-     *       assignable to the requested {@code type}, a {@link org.jmouse.core.mapping.errors.MappingException}
+     *       assignable to the requested {@code type}, a {@link MappingException}
      *       is thrown.</li>
      *   <li>On success, returns {@code typedValue.withInstance(unwrapped)}.</li>
      * </ul>
@@ -129,15 +130,17 @@ public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
             PropertyMapping mapping,
             ValueSupplier fallback
     ) {
-        Object source = accessor.unwrap();
-        return switch (mapping) {
-            case PropertyMapping.Ignore ignore -> IgnoredValue.INSTANCE;
-            case PropertyMapping.Constant constant -> constant.value();
-            case PropertyMapping.Compute compute -> compute.function().compute(source, context);
-            case PropertyMapping.Reference reference -> safeNavigate(accessor, reference.sourceReference());
-            case PropertyMapping.Provider provider -> provider.valueProvider().provide(source);
-            case null -> fallback.get();
-        };
+        if (mapping == null) {
+            return fallback.get();
+        }
+
+        Object value = mapping.accept(new PropertyMappingEvaluation(accessor, context, this::safeNavigate, fallback::get));
+
+        if (value == PropertyMappingEvaluation.IGNORED) {
+            return IgnoredValue.INSTANCE;
+        }
+
+        return value;
     }
 
     /**
@@ -287,12 +290,12 @@ public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
     /**
      * Check whether the conversion subsystem can produce a value of {@code targetType} from {@code sourceType}.
      *
-     * <p>This method delegates to {@link org.jmouse.core.convert.Conversion#hasAnyConverter(Class, Class)},
+     * <p>This method delegates to {@link Conversion#hasAnyConverter(Class, Class)},
      * which may consider both direct converters and multi-step conversion chains.</p>
      *
      * @param sourceType source runtime type
      * @param targetType target runtime type
-     * @param context mapping context providing the {@link org.jmouse.core.convert.Conversion} service
+     * @param context mapping context providing the {@link Conversion} service
      * @return {@code true} if any conversion path exists, otherwise {@code false}
      */
     protected final boolean hasConverterFor(Class<?> sourceType, Class<?> targetType, MappingContext context) {

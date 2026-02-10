@@ -45,31 +45,31 @@ import static org.jmouse.crawler.route.URLMatches.*;
 public class Smoke2 {
 
     public static Mapper mapper() {
-        TypeMappingRegistry registry = TypeMappingRegistry.builder()
-                .mapping(Map.class, ProcessingTask.class, m -> m
-                        .compute("origin", (source, context) -> {
-                            if (source.get("origin") instanceof Map<?,?> origin) {
-                                String kind = String.valueOf(origin.get("kind"));
-
-                                if (kind.equals("seed")) {
-                                    return TaskOrigin.seed(
-                                            String.valueOf(origin.get("publisher"))
-                                    );
-                                }
-                            }
-
-                            return TaskOrigin.retry("default!");
-                        })
-                        .compute("hint", (source, context) -> VoronHint.valueOf(String.valueOf(source.get("hint")).toUpperCase().trim()))
-                        .reference("id", "task_id")
-                )
-                .mapping(ProcessingTask.class, Map.class, m -> m
-                        .reference("task_id", "id")
-                )
-                .build();
+//        TypeMappingRegistry registry = TypeMappingRegistry.builder()
+//                .mapping(Map.class, ProcessingTask.class, m -> m
+//                        .compute("origin", (source, context) -> {
+//                            if (source.get("origin") instanceof Map<?,?> origin) {
+//                                String kind = String.valueOf(origin.get("kind"));
+//
+//                                if (kind.equals("seed")) {
+//                                    return TaskOrigin.seed(
+//                                            String.valueOf(origin.get("publisher"))
+//                                    );
+//                                }
+//                            }
+//
+//                            return TaskOrigin.retry("default!");
+//                        })
+//                        .compute("hint", (source, context) -> VoronHint.valueOf(String.valueOf(source.get("hint")).toUpperCase().trim()))
+//                        .reference("id", "task_id")
+//                )
+//                .mapping(ProcessingTask.class, Map.class, m -> m
+//                        .reference("task_id", "id")
+//                )
+//                .build();
 
         return Mappers.builder()
-                .registry(registry)
+//                .registry(registry)
                 .config(MappingConfig.builder()
                                 .errorsPolicy(
                                         ErrorsPolicy.builder()
@@ -87,7 +87,7 @@ public class Smoke2 {
 
         private String url;
         private String parent;
-        private int depth;
+        private int    depth;
 
         public DataObject(String parent) {
             this.parent = parent;

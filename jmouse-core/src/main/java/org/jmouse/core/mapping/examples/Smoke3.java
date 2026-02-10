@@ -13,9 +13,18 @@ public class Smoke3 {
         Mapper mapper = Mappers.builder()
                 .registry(TypeMappingRegistry.builder()
                                   .mapping(UserA.class, UserB.class, m -> m
-                                          .reference("birthDay", "dateOfBirth"))
+                                          .property("birthDay", builder -> builder
+                                                  .reference("dateOfBirth")
+                                          )
+                                          .property("name", p -> p
+                                                  .transform((value, ctx) -> String.valueOf(value).toUpperCase())
+                                          )
+                                  )
                                   .mapping(UserB.class, UserA.class, m -> m
-                                          .reference("dateOfBirth", "birthDay"))
+                                          .property("dateOfBirth", p -> p
+                                                  .reference("birthDay")
+                                          )
+                                  )
                                   .build())
                 .build();
 

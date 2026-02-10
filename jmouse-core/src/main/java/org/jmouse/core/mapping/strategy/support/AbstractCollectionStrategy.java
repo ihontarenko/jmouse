@@ -2,6 +2,7 @@ package org.jmouse.core.mapping.strategy.support;
 
 import org.jmouse.core.bind.TypedValue;
 import org.jmouse.core.mapping.MappingContext;
+import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.Collection;
@@ -44,7 +45,11 @@ public abstract class AbstractCollectionStrategy extends AbstractIterableStrateg
 
         for (var iterator = iterableSource.iterator(); iterator.hasNext(); ) {
             if (++counter > maximum) {
-                throw new IllegalStateException("Collection size exceeds maxCollectionSize=" + maximum);
+                throw toMappingException(
+                        ErrorCodes.COLLECTION_SIZE_EXCEEDS,
+                        "Collection size exceeds maxCollectionSize=" + maximum,
+                        null
+                );
             }
             MappingContext mappingContext = context.appendPath("[" + (counter - 1) + "]");
             target.add(adaptValue(iterator.next(), elementType, mappingContext));
