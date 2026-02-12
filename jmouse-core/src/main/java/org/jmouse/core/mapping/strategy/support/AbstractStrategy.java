@@ -4,6 +4,7 @@ import org.jmouse.core.access.ObjectAccessor;
 import org.jmouse.core.access.PropertyPath;
 import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.convert.Conversion;
+import org.jmouse.core.mapping.MappingDestination;
 import org.jmouse.core.mapping.MappingScope;
 import org.jmouse.core.mapping.binding.PropertyMapping;
 import org.jmouse.core.mapping.binding.PropertyMappingEvaluation;
@@ -153,6 +154,12 @@ public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
         return adaptValue(value, TypedValue.of(targetType), context);
     }
 
+    protected final Object adaptValue(Object value, TypedValue<?> typedValue, MappingContext context) {
+        MappingScope scope = context.scope();
+        Object       root  = scope.targetRoot() != null ? scope.targetRoot() : scope.sourceRoot();
+        return adaptValue(value, typedValue, context, new MappingDestination.RootTarget(root, scope.path()));
+    }
+
     /**
      * Adapt the given {@code value} into the target described by {@code typedValue}.
      *
@@ -169,7 +176,7 @@ public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
      * @param context mapping context providing {@link Mapper} and {@link Conversion}
      * @return adapted value (may be {@code null})
      */
-    protected final Object adaptValue(Object value, TypedValue<?> typedValue, MappingContext context) {
+    protected final Object adaptValue(Object value, TypedValue<?> typedValue, MappingContext context, MappingDestination destination) {
         if (value == null) {
             return null;
         }
@@ -181,15 +188,20 @@ public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
         Conversion   conversion = context.conversion();
 
         MappingScope scope = context.scope();
-        Object       root  = scope.root();
+        Object       root  = scope.targetRoot() != null ? scope.targetRoot() : scope.sourceRoot();
         PropertyPath path  = scope.path();
+
+        if (destination == null) {
+            destination = new MappingDestination.RootTarget(root, path);
+        }
 
         value = bus.onValue(new MappingValue(
                 root,
                 value,
                 targetType,
                 path,
-                context
+                context,
+                destination
         ));
 
         if (targetType.isScalar() || targetType.isEnum() || targetType.isClass()) {

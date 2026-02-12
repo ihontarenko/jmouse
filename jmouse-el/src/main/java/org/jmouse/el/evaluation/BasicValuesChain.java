@@ -48,7 +48,7 @@ public class BasicValuesChain implements ScopedChain {
     @Override
     public ScopeValues pop() {
         if (chain.size() == 1) {
-            throw new EvaluationException("Unable to remove root scope values");
+            throw new EvaluationException("Unable to remove sourceRoot scope values");
         }
         return chain.pop();
     }

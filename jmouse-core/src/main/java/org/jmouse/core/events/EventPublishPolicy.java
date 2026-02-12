@@ -41,12 +41,12 @@ public interface EventPublishPolicy {
     }
 
     /**
-     * Publish only root-level events.
+     * Publish only sourceRoot-level events.
      * <p>
      * Events with no trace information or with a trace depth of {@code 0}
-     * are considered root events.
+     * are considered sourceRoot events.
      *
-     * @return a policy that publishes only root-level events
+     * @return a policy that publishes only sourceRoot-level events
      */
     static EventPublishPolicy rootOnly() {
         return (n, t, c, p) -> t == null || t.depth() == 0;

@@ -71,7 +71,7 @@ public class InterceptorRegistrar {
      * Scan for interceptors annotated with {@link Intercept} under the given base classes
      * and register them in the {@link InterceptorRegistry}.
      *
-     * @param baseClasses root classes/packages to scan
+     * @param baseClasses sourceRoot classes/packages to scan
      */
     public void register(Class<?>... baseClasses) {
         if (!scanned || baseClasses == null || baseClasses.length == 0) {

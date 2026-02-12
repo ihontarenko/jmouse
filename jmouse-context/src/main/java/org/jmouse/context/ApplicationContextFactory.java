@@ -23,7 +23,7 @@ public interface ApplicationContextFactory<T extends ApplicationBeanContext> {
 
     /**
      * 🧬 Creates a new context with a parent context.
-     * <p>Allows dependency inheritance from the root context.</p>
+     * <p>Allows dependency inheritance from the sourceRoot context.</p>
      *
      * @param contextId   unique context identifier
      * @param rootContext parent context for inheritance
@@ -33,9 +33,9 @@ public interface ApplicationContextFactory<T extends ApplicationBeanContext> {
     T createContext(String contextId, T rootContext, Class<?>... classes);
 
     /**
-     * 🌱 Creates an empty root-level application context.
+     * 🌱 Creates an empty sourceRoot-level application context.
      *
-     * @return root application context
+     * @return sourceRoot application context
      */
     T createRootContext();
 

@@ -13,12 +13,12 @@ public final class RequestParametersJavaStructureConverter {
         this.options = options;
     }
 
-    public Object convert(RequestParametersTree tree) {
+    public Object toJavaObject(RequestParametersTree tree) {
         return convertNode(tree.root());
     }
 
     public Map<String, Object> toMap(RequestParametersTree tree) {
-        Object converted = convert(tree);
+        Object converted = toJavaObject(tree);
 
         if (converted instanceof Map<?, ?> map) {
             @SuppressWarnings("unchecked")

@@ -38,7 +38,7 @@ public class WebApplicationBeanContext extends AbstractWebApplicationBeanContext
     }
 
     /**
-     * Creates a root web context without a parent.
+     * Creates a sourceRoot web context without a parent.
      *
      * @param baseClasses packages to scan for beans
      */

@@ -200,7 +200,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * If a parent context is provided, this context may inherit beans from the parent. Additionally,
      * the provided base classes are used as entry points for scanning and resolving beans.
      *
-     * @param parent     the parent bean context, or {@code null} if this is a root context
+     * @param parent     the parent bean context, or {@code null} if this is a sourceRoot context
      * @param baseClasses an array of classes to serve as the base for bean scanning and resolution.
      *                    If {@code null}, no base classes are set.
      */
@@ -1217,7 +1217,7 @@ public class DefaultBeanContext implements BeanContext, BeanFactory {
      * <p>
      * Includes the context ID and its parent hierarchy, if present:
      * <pre>
-     * [child] -> [parent] -> [root]
+     * [child] -> [parent] -> [sourceRoot]
      * </pre>
      *
      * @return string representation of the context

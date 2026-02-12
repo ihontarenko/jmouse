@@ -14,12 +14,12 @@ import org.slf4j.LoggerFactory;
  *
  * <p>{@code MappingInvocation} is responsible for:</p>
  * <ul>
- *   <li>Determining whether the invocation is the root mapping call</li>
- *   <li>Creating/using a scoped {@link MappingContext} (root scope initialization)</li>
+ *   <li>Determining whether the invocation is the sourceRoot mapping call</li>
+ *   <li>Creating/using a scoped {@link MappingContext} (sourceRoot scope initialization)</li>
  *   <li>Triggering plugin lifecycle hooks ({@code onStart}/{@code onFinish}/{@code onError})</li>
  * </ul>
  *
- * <p>Plugins are executed only for the root mapping call. Nested mapping operations use
+ * <p>Plugins are executed only for the sourceRoot mapping call. Nested mapping operations use
  * {@link PluginBus.Noop} to avoid repeated lifecycle notifications.</p>
  */
 public final class MappingInvocation {
@@ -39,24 +39,24 @@ public final class MappingInvocation {
     /**
      * Begin a mapping invocation.
      *
-     * <p>If the provided {@code base} context does not have a root scope yet, this method:</p>
+     * <p>If the provided {@code base} context does not have a sourceRoot scope yet, this method:</p>
      * <ul>
-     *   <li>creates a root {@link MappingScope} using the provided {@code source}</li>
+     *   <li>creates a sourceRoot {@link MappingScope} using the provided {@code source}</li>
      *   <li>switches to a scoped context via {@link MappingContext#withScope(MappingScope)}</li>
      *   <li>enables plugins from {@link MappingContext#plugins()}</li>
      * </ul>
      *
-     * <p>If the context already has a root scope, the invocation is considered nested and
+     * <p>If the context already has a sourceRoot scope, the invocation is considered nested and
      * plugins are disabled (noop bus).</p>
      *
      * @param base base mapping context
-     * @param source root source object
+     * @param source sourceRoot source object
      * @param sourceType declared/expected source type (used for diagnostics)
      * @param targetType target type to map into
      * @return new {@link MappingInvocation} instance
      */
     public static MappingInvocation begin(MappingContext base, Object source, Class<?> sourceType, InferredType targetType) {
-        boolean root = base.scope().root() == null;
+        boolean root = base.scope().sourceRoot() == null;
 
         MappingContext scoped = root
                 ? base.withScope(MappingScope.root(source))
@@ -81,7 +81,7 @@ public final class MappingInvocation {
     /**
      * Finish the invocation successfully and notify plugins.
      *
-     * @param source root source object
+     * @param source sourceRoot source object
      * @param value produced target value
      * @param targetType target type metadata
      * @param <T> target value type

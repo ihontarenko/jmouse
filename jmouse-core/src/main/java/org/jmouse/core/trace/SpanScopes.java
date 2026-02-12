@@ -31,7 +31,7 @@ public final class SpanScopes {
         TraceContext root = TraceContext.root();
 
         if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("rootIfAbsent(): no trace -> open root {}", shortTrace(root));
+            LOGGER.trace("rootIfAbsent(): no trace -> open sourceRoot {}", shortTrace(root));
         }
 
         try (ExecutionContextHolder.Scope ignored =

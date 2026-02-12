@@ -16,8 +16,8 @@ import java.util.Map;
  *     <li>Linking: it binds macros and blocks using {@code MacroLinker} and {@code BlockLinker}
  *         and performs pre-processing via {@code InitializerVisitor}.</li>
  *     <li>Merging: it merges the view registries from the inheritance stack to form an effective registry.</li>
- *     <li>Determining the root view: retrieves the uppermost view from the inheritance stack.</li>
- *     <li>Rendering: it invokes a {@code RendererVisitor} on the root node to produce the final content.</li>
+ *     <li>Determining the sourceRoot view: retrieves the uppermost view from the inheritance stack.</li>
+ *     <li>Rendering: it invokes a {@code RendererVisitor} on the sourceRoot node to produce the final content.</li>
  * </ol>
  * </p>
  */
@@ -48,8 +48,8 @@ public class TemplateRenderer implements Renderer {
         initialize(template, context);
 
         // 1. Merge view registries from the inheritance stack.
-        // 2. Determine the root (uppermost) view from the inheritance stack.
-        // 3. Get the root node of the view.
+        // 2. Determine the sourceRoot (uppermost) view from the inheritance stack.
+        // 3. Get the sourceRoot node of the view.
         TemplateRegistry registry = getRegistry(context);
         Template         root     = getRootTemplate(context);
         Node             node     = root.getRoot();
@@ -66,7 +66,7 @@ public class TemplateRenderer implements Renderer {
     }
 
     /**
-     * Retrieves the root view from the evaluation context's inheritance stack.
+     * Retrieves the sourceRoot view from the evaluation context's inheritance stack.
      *
      * @param context the evaluation context containing the inheritance stack
      * @return the uppermost view in the inheritance stack

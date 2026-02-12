@@ -19,7 +19,7 @@ package org.jmouse.core.mapping.plugin;
 public interface MappingPlugin {
 
     /**
-     * Called once when a root mapping invocation starts.
+     * Called once when a sourceRoot mapping invocation starts.
      *
      * @param call mapping call descriptor
      */

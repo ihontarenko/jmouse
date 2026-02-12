@@ -55,31 +55,27 @@ public final class RequestParametersTreeParser {
                 return mergeScalarValues(currentNode, values);
             }
 
-            RequestParametersObjectNode objectNode = toObjectNode(currentNode);
-
             RequestParametersPathToken nextToken = pathTokens.get(position + 1);
 
             if (nextToken instanceof RequestParametersPathToken.PropertyNameToken(String name)) {
-                RequestParametersNode child    = objectNode.fields().get(name);
-                RequestParametersNode newChild = insertInto(child, pathTokens, position + 1, values);
+                RequestParametersObjectNode objectNode = toObjectNode(currentNode);
+                RequestParametersNode       child      = objectNode.fields().get(name);
+                RequestParametersNode       newChild   = insertInto(child, pathTokens, position + 1, values);
                 objectNode.fields().put(name, newChild);
+
                 return objectNode;
             }
 
-            if (nextToken instanceof RequestParametersPathToken.ArrayIndexToken || nextToken instanceof RequestParametersPathToken.ArrayAppendToken) {
-                // propertyName -> next token is array access, so the property value is an array node
-                RequestParametersNode childArrayNode    = objectNode.fields().get(propertyName);
-                RequestParametersNode newChildArrayNode = insertInto(childArrayNode, pathTokens, position + 1, values);
-                objectNode.fields().put(propertyName, newChildArrayNode);
-                return objectNode;
+            if (nextToken instanceof RequestParametersPathToken.ArrayIndexToken
+                    || nextToken instanceof RequestParametersPathToken.ArrayAppendToken) {
+                return insertInto(currentNode, pathTokens, position + 1, values);
             }
 
-            return objectNode;
+            return currentNode;
         }
 
-        if (currentToken instanceof RequestParametersPathToken.ArrayIndexToken arrayIndexToken) {
+        if (currentToken instanceof RequestParametersPathToken.ArrayIndexToken(int index)) {
             RequestParametersArrayNode arrayNode = toArrayNode(currentNode);
-            int                        index     = arrayIndexToken.index();
 
             ensureArraySize(arrayNode.items(), index + 1);
 
@@ -100,19 +96,18 @@ public final class RequestParametersTreeParser {
         }
 
         if (currentToken instanceof RequestParametersPathToken.ArrayAppendToken) {
-            RequestParametersArrayNode arrayNode = toArrayNode(currentNode);
+            RequestParametersArrayNode  arrayNode  = toArrayNode(currentNode);
+            List<RequestParametersNode> arrayItems = arrayNode.items();
 
             if (isLastToken) {
-                arrayNode.items().add(new RequestParametersScalarNode(new ArrayList<>(values)));
+                arrayItems.add(new RequestParametersScalarNode(new ArrayList<>(values)));
                 return arrayNode;
             }
 
-            RequestParametersNode newItem = insertInto(new RequestParametersObjectNode(new LinkedHashMap<>()),
-                                                       pathTokens,
-                                                       position + 1,
-                                                       values);
+            RequestParametersNode newItem = insertInto(
+                    new RequestParametersObjectNode(new LinkedHashMap<>()), pathTokens, position + 1, values);
 
-            arrayNode.items().add(newItem);
+            arrayItems.add(newItem);
             return arrayNode;
         }
 
@@ -123,11 +118,10 @@ public final class RequestParametersTreeParser {
         if (existing == null) {
             return new RequestParametersScalarNode(new ArrayList<>(values));
         }
-        if (existing instanceof RequestParametersScalarNode scalarNode) {
-            scalarNode.values().addAll(values);
-            return scalarNode;
+        if (existing instanceof RequestParametersScalarNode(List<String> scalarItems)) {
+            scalarItems.addAll(values);
+            return existing;
         }
-        // Conflict policy (MVP): overwrite non-scalar with scalar.
         return new RequestParametersScalarNode(new ArrayList<>(values));
     }
 

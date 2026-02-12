@@ -27,7 +27,7 @@ public final class RequestParametersSmokeExample {
         RequestParametersJavaStructureConverter converter =
                 new RequestParametersJavaStructureConverter(RequestParametersJavaStructureOptions.defaults());
 
-        Object java = converter.convert(tree);
+        Object java = converter.toJavaObject(tree);
 
         System.out.println("\nJAVA:");
         System.out.println(java);

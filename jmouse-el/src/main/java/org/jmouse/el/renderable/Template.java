@@ -54,9 +54,9 @@ public interface Template {
     TokenizableSource getSource();
 
     /**
-     * Returns the root node of this view's abstract syntax tree.
+     * Returns the sourceRoot node of this view's abstract syntax tree.
      *
-     * @return the root {@link Node} of the view
+     * @return the sourceRoot {@link Node} of the view
      */
     Node getRoot();
 

@@ -72,7 +72,7 @@ public class TomcatWebServerConfigurer implements WebServer.Configurer<Tomcat> {
      * Configures the Tomcat server by:
      * <ul>
      *     <li>Setting its base directory using {@link #createTemporaryDirectory(int)}.</li>
-     *     <li>Creating a new {@link Context} with the given context root and document base.</li>
+     *     <li>Creating a new {@link Context} with the given context sourceRoot and document base.</li>
      *     <li>Setting the port on the {@link Connector}.</li>
      *     <li>Registering the provided {@link ServletContainerInitializer} and initializer classes.</li>
      * </ul>
@@ -127,16 +127,16 @@ public class TomcatWebServerConfigurer implements WebServer.Configurer<Tomcat> {
     }
 
     /**
-     * Retrieves the current context root.
+     * Retrieves the current context sourceRoot.
      *
-     * @return the context root as a string
+     * @return the context sourceRoot as a string
      */
     public String getContextRoot() {
         return contextRoot;
     }
 
     /**
-     * Sets the context root for the Tomcat server.
+     * Sets the context sourceRoot for the Tomcat server.
      *
      * @param contextRoot the context path (e.g., "/app")
      */

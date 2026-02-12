@@ -15,7 +15,7 @@ import java.util.Objects;
  *
  * <p>{@code ObjectMapper} is the main runtime entry point used by the mapping subsystem. It:</p>
  * <ul>
- *   <li>creates a {@link MappingInvocation} to manage root scope and plugin lifecycle</li>
+ *   <li>creates a {@link MappingInvocation} to manage sourceRoot scope and plugin lifecycle</li>
  *   <li>resolves an appropriate {@link MappingStrategy} from the configured plan registry</li>
  *   <li>executes the plan and returns the produced value</li>
  *   <li>handles {@link MappingException} by notifying plugins and rethrowing</li>

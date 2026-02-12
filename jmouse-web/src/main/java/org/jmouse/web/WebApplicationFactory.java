@@ -25,7 +25,7 @@ import java.util.Set;
  * 🕸️ Factory class for creating and configuring {@link WebBeanContext} instances
  * in a web-based jMouse application.
  *
- * <p>Provides methods to construct root and child web contexts, inject default beans,
+ * <p>Provides methods to construct sourceRoot and child web contexts, inject default beans,
  * and configure MVC infrastructure.</p>
  *
  * <pre>{@code
@@ -58,7 +58,7 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
      * Creates a new {@link WebBeanContext} with the given parent context.
      *
      * @param contextId   the identifier for the context.
-     * @param rootContext optional parent context (typically the root).
+     * @param rootContext optional parent context (typically the sourceRoot).
      * @param classes     the base classes to scan.
      * @return a new {@link WebBeanContext} instance.
      */
@@ -75,10 +75,10 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
     }
 
     /**
-     * Creates and configures the root web application context.
+     * Creates and configures the sourceRoot web application context.
      * Registers core beans such as {@link Environment}, {@link Conversion}, {@link ResourceLoader}, etc.
      *
-     * @return a fully initialized root {@link WebBeanContext}.
+     * @return a fully initialized sourceRoot {@link WebBeanContext}.
      */
     @Override
     public WebBeanContext createRootContext() {
@@ -101,7 +101,7 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
      * Adds default initializers for component scanning and MVC infrastructure.
      *
      * @param contextId   unique context ID.
-     * @param rootContext the root context (parent).
+     * @param rootContext the sourceRoot context (parent).
      * @param classes     application base classes.
      * @return initialized web application context.
      */

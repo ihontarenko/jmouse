@@ -194,7 +194,7 @@ public final class Bind {
     }
 
     /**
-     * Binds a value at the root path as a {@code String}.
+     * Binds a value at the sourceRoot path as a {@code String}.
      *
      * @return the binding result unwrapped as {@code String}
      */

@@ -38,7 +38,7 @@ public final class SecurityExpressionEvaluator {
      * 🔍 Evaluates a compiled {@link Expression} using the provided evaluation context.
      *
      * @param expression the parsed EL expression (e.g. <code>hasRole('ADMIN')</code>)
-     * @param context    the evaluation context containing variables and root objects
+     * @param context    the evaluation context containing variables and sourceRoot objects
      * @return an {@link AccessResult} describing the access decision outcome,
      *         or {@code null} if the expression returned {@code null}
      * @throws IllegalArgumentException if evaluation or parsing fails,

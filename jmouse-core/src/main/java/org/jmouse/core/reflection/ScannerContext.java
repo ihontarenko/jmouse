@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A specialized context for managing root classes during scanning operations.
- * Extends {@link AbstractContext} to provide additional functionality specific to root class management.
+ * A specialized context for managing sourceRoot classes during scanning operations.
+ * Extends {@link AbstractContext} to provide additional functionality specific to sourceRoot class management.
  *
  * <p>Example usage:
  * <pre>{@code
@@ -20,29 +20,29 @@ import java.util.List;
 public final class ScannerContext extends AbstractContext {
 
     /**
-     * Retrieves the default root classes associated with {@link ClassFinder}.
+     * Retrieves the default sourceRoot classes associated with {@link ClassFinder}.
      *
-     * @return a list of default root classes.
+     * @return a list of default sourceRoot classes.
      */
     public List<Class<?>> getDefaultRootClasses() {
         return getRootClasses(ClassFinder.class);
     }
 
     /**
-     * Retrieves the root classes associated with a specific caller.
+     * Retrieves the sourceRoot classes associated with a specific caller.
      *
      * @param caller the class representing the caller.
-     * @return a list of root classes for the given caller.
+     * @return a list of sourceRoot classes for the given caller.
      */
     public List<Class<?>> getRootClasses(Class<?> caller) {
         return getProperty(caller, new ArrayList<>());
     }
 
     /**
-     * Adds a root class to the list associated with a specific caller.
+     * Adds a sourceRoot class to the list associated with a specific caller.
      *
      * @param caller    the class representing the caller.
-     * @param rootClass the root class to add.
+     * @param rootClass the sourceRoot class to add.
      */
     public void addRootClass(Class<?> caller, Class<?> rootClass) {
         List<Class<?>> classes = getRootClasses(caller);
@@ -51,16 +51,16 @@ public final class ScannerContext extends AbstractContext {
     }
 
     /**
-     * Adds a default root class to the list associated with {@link ClassFinder}.
+     * Adds a default sourceRoot class to the list associated with {@link ClassFinder}.
      *
-     * @param rootClass the default root class to add.
+     * @param rootClass the default sourceRoot class to add.
      */
     public void addDefaultRootClass(Class<?> rootClass) {
         addRootClass(ClassFinder.class, rootClass);
     }
 
     /**
-     * Cleans up (clears) the root classes associated with a specific caller.
+     * Cleans up (clears) the sourceRoot classes associated with a specific caller.
      *
      * @param caller the class representing the caller.
      */

@@ -173,9 +173,9 @@ public class Binder implements ObjectBinder, BindContext {
     }
 
     /**
-     * This method is not supported for the root binder and is meant to be used in type-specific binders.
+     * This method is not supported for the sourceRoot binder and is meant to be used in type-specific binders.
      *
-     * @throws UnsupportedOperationException if called on the root binder
+     * @throws UnsupportedOperationException if called on the sourceRoot binder
      */
     @Override
     public <T> BindResult<T> bindValue(PropertyPath name, TypedValue<T> bindable, ObjectAccessor accessor, BindCallback callback) {
@@ -199,9 +199,9 @@ public class Binder implements ObjectBinder, BindContext {
     }
 
     /**
-     * Returns the root binder for this binding process.
+     * Returns the sourceRoot binder for this binding process.
      *
-     * @return the root binder
+     * @return the sourceRoot binder
      */
     @Override
     public ObjectBinder getRootBinder() {

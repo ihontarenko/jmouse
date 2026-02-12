@@ -23,7 +23,7 @@ import java.util.function.BiConsumer;
 public interface WebBeanContext extends ApplicationBeanContext {
 
     /**
-     * 🌍 Name of root web context.
+     * 🌍 Name of sourceRoot web context.
      */
     String DEFAULT_ROOT_WEB_CONTEXT_NAME = "ROOT-CONTEXT";
 
@@ -38,7 +38,7 @@ public interface WebBeanContext extends ApplicationBeanContext {
     String DEFAULT_APPLICATION_CLASSES_BEAN = "applicationClasses";
 
     /**
-     * 🪝 Servlet attribute key to store root context.
+     * 🪝 Servlet attribute key to store sourceRoot context.
      */
     String ROOT_WEB_BEAN_CONTEXT_ATTRIBUTE = WebBeanContext.class.getName() + ".ROOT";
 
@@ -67,7 +67,7 @@ public interface WebBeanContext extends ApplicationBeanContext {
     ServletContext getServletContext();
 
     /**
-     * 🚨 Get required root web context or throw.
+     * 🚨 Get required sourceRoot web context or throw.
      */
     static WebBeanContext getRequiredWebBeanContext(ServletContext servletContext) {
         WebBeanContext rootContext = getRootWebBeanContext(servletContext);
@@ -78,7 +78,7 @@ public interface WebBeanContext extends ApplicationBeanContext {
     }
 
     /**
-     * 🧱 Get root context by known attribute name.
+     * 🧱 Get sourceRoot context by known attribute name.
      */
     static WebBeanContext getRootWebBeanContext(ServletContext servletContext) {
         return (WebBeanContext) servletContext.getAttribute(ROOT_WEB_BEAN_CONTEXT_ATTRIBUTE);

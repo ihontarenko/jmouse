@@ -25,7 +25,7 @@ import java.lang.annotation.*;
 public @interface BeanConditionApplicationBeanContext {
 
     /**
-     * 🔒 Only register in root context (no parent).
+     * 🔒 Only register in sourceRoot context (no parent).
      */
     boolean rootOnly();
 

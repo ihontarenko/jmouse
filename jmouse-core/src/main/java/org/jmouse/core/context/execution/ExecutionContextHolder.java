@@ -99,7 +99,7 @@ public final class ExecutionContextHolder {
             ThreadLocal.withInitial(ArrayDeque::new);
 
     /**
-     * Shared root context used when no context is bound to the thread.
+     * Shared sourceRoot context used when no context is bound to the thread.
      */
     private static final ExecutionContext ROOT = new DefaultExecutionContext();
 

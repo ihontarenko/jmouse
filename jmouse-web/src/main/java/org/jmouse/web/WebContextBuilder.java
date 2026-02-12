@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  * WebBeanContext ctx = new WebApplicationContextBuilder(factory)
  *     .name("web-app")
  *     .baseClasses(AppConfig.class, Controllers.class) // user classes
- *     .coreClasses(MyFrameworkDefaults.class)          // framework/root scan (optional)
+ *     .coreClasses(MyFrameworkDefaults.class)          // framework/sourceRoot scan (optional)
  *     .useDefault()                                    // scanners, env, etc.
  *     .useWebMvc()                                     // MVC infra + controllers
  *     .customize(c -> {/* post-creation tweaks *\/})
@@ -43,7 +43,7 @@ public interface WebContextBuilder {
     WebContextBuilder userClasses(Class<?>... baseClasses);
 
     /**
-     * 🧱 Add framework/root classes as scan roots.
+     * 🧱 Add framework/sourceRoot classes as scan roots.
      * Use for infrastructure defaults that should be available to all apps.
      *
      * @param coreClasses classes whose packages will be scanned as core

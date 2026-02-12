@@ -27,8 +27,8 @@ import java.util.Map;
  *             .up()
  *         .up();
  *
- * Node root = builder.build();
- * System.out.println(renderHtml(root));
+ * Node sourceRoot = builder.build();
+ * System.out.println(renderHtml(sourceRoot));
  * }</pre>
  */
 public class HtmlBuilder {
@@ -51,7 +51,7 @@ public class HtmlBuilder {
 
     public HtmlBuilder add(TagName tagName) {
         if (parent == null) {
-            throw new IllegalStateException("Cannot add a sibling to the root node.");
+            throw new IllegalStateException("Cannot add a sibling to the sourceRoot node.");
         }
 
         return parent.addChild(tagName);

@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  *
  * <h3>Errors & Plugins</h3>
  * <p>{@link #errorsPolicy()} defines how mapping exceptions are handled (throw/warn/silent).
- * {@link #plugins()} provides mapping plugins executed by the root invocation.</p>
+ * {@link #plugins()} provides mapping plugins executed by the sourceRoot invocation.</p>
  *
  * @see ErrorsPolicy
  * @see MappingPlugin
@@ -109,7 +109,7 @@ public final class MappingConfig {
     }
 
     /**
-     * Return mapping plugins enabled for the root mapping invocation.
+     * Return mapping plugins enabled for the sourceRoot mapping invocation.
      *
      * @return plugin list (may be empty)
      */

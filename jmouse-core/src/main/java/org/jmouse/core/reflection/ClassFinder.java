@@ -184,7 +184,7 @@ public interface ClassFinder {
      *
      * @param matcher     a matcher to filter scanned classes
      * @param comparators optional comparators for sorting results
-     * @param baseClasses root classes to scan from (optional)
+     * @param baseClasses sourceRoot classes to scan from (optional)
      * @return collection of matched and optionally sorted classes
      */
     static Collection<Class<?>> findAll(

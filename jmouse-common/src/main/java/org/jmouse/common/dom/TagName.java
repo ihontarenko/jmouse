@@ -2,7 +2,7 @@ package org.jmouse.common.dom;
 
 public enum TagName {
 
-    // root tags
+    // sourceRoot tags
     HTML, HEAD, BODY, TITLE, BASE, LINK, META, STYLE, SCRIPT, NOSCRIPT,
 
     // content tags

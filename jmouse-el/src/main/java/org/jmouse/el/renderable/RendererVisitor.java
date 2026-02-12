@@ -283,7 +283,7 @@ public class RendererVisitor implements NodeVisitor {
             EvaluationContext embeddedContext = fake.newContext();
 
             // 1. Link scoped values to embedded view
-            // 2. Import registry from root to fake
+            // 2. Import registry from sourceRoot to fake
             // 3. Establish inheritance: set the parent of the fake view to be the real view.
             embeddedContext.setScopedChain(context.getScopedChain());
             fake.getRegistry().copyFrom(registry);

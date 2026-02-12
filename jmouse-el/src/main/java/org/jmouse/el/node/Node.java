@@ -35,9 +35,9 @@ public interface Node {
     }
 
     /**
-     * Checks if the node is the root (i.e., has no parent).
+     * Checks if the node is the sourceRoot (i.e., has no parent).
      *
-     * @return {@code true} if the node is the root, otherwise {@code false}
+     * @return {@code true} if the node is the sourceRoot, otherwise {@code false}
      */
     default boolean isRoot() {
         return !hasParent();
@@ -46,7 +46,7 @@ public interface Node {
     /**
      * Returns the parent of this node.
      *
-     * @return the parent node or {@code null} if this is the root
+     * @return the parent node or {@code null} if this is the sourceRoot
      */
     Node getParent();
 

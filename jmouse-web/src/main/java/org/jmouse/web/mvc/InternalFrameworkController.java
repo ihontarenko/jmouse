@@ -110,7 +110,7 @@ public class InternalFrameworkController {
      *   <li><b>httpStatus</b>, <b>statusCode</b> — status enum and numeric code</li>
      *   <li><b>requestMethod</b>, <b>requestPath</b>, <b>queryString</b> — request summary</li>
      *   <li><b>message</b> — concise exception message</li>
-     *   <li><b>stackTrace</b> — map of exception messages to stack traces (root → causes)</li>
+     *   <li><b>stackTrace</b> — map of exception messages to stack traces (sourceRoot → causes)</li>
      *   <li><b>timestamp</b> — ISO-8601 instant</li>
      * </ul>
      *
@@ -145,8 +145,8 @@ public class InternalFrameworkController {
      *
      * <p>Map keys are concise messages (class + message); values are full stack traces.</p>
      *
-     * @param throwable root throwable
-     * @return ordered map of messages to stack-trace strings (root followed by causes)
+     * @param throwable sourceRoot throwable
+     * @return ordered map of messages to stack-trace strings (sourceRoot followed by causes)
      */
     private Map<String, String> getDetailedStackTrace(Throwable throwable) {
         Map<String, String> stack     = new HashMap<>();

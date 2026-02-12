@@ -128,9 +128,9 @@ public class TemplateEngine implements Engine {
     }
 
     /**
-     * Creates a new view instance based on the provided AST root and source.
+     * Creates a new view instance based on the provided AST sourceRoot and source.
      *
-     * @param root   the root node of the view AST
+     * @param root   the sourceRoot node of the view AST
      * @param source the tokenizable source of the view
      * @return a new {@link Template} instance
      */

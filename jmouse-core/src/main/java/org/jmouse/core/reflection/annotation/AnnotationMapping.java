@@ -29,10 +29,10 @@ public class AnnotationMapping implements AnnotationAttributeMapping {
     private final MergedAnnotation     root;
 
     /**
-     * 🏗️ Constructs a new mapping for the given annotation and its root metadata.
+     * 🏗️ Constructs a new mapping for the given annotation and its sourceRoot metadata.
      *
      * @param annotation the annotation to wrap
-     * @param root the root merged annotation (with full hierarchy)
+     * @param root the sourceRoot merged annotation (with full hierarchy)
      */
     public AnnotationMapping(Annotation annotation, MergedAnnotation root) {
         this.annotation = annotation;

@@ -21,10 +21,10 @@ public interface BindContext {
     void setObjectAccessor(ObjectAccessor objectAccessor);
 
     /**
-     * Returns the root {@link ObjectBinder} that manages the binding process.
+     * Returns the sourceRoot {@link ObjectBinder} that manages the binding process.
      * This binder is responsible for handling various binding strategies.
      *
-     * @return the root object binder
+     * @return the sourceRoot object binder
      */
     ObjectBinder getRootBinder();
 

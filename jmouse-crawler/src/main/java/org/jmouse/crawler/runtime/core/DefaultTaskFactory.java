@@ -51,7 +51,7 @@ public final class DefaultTaskFactory implements TaskFactory {
     }
 
     /**
-     * Create a seed (root) task for the given URL.
+     * Create a seed (sourceRoot) task for the given URL.
      *
      * <p>A seed task:</p>
      * <ul>

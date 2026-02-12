@@ -4,7 +4,7 @@ package org.jmouse;
  * Represents a module in the JMouse framework.
  * <p>
  * This class stores descriptor about a module, including its name, version,
- * and a reference to the root class that serves as its entry point.
+ * and a reference to the sourceRoot class that serves as its entry point.
  * </p>
  */
 final public class JMouseModule {
@@ -50,21 +50,21 @@ final public class JMouseModule {
     }
 
     /**
-     * Retrieves the root class of the module.
+     * Retrieves the sourceRoot class of the module.
      * <p>
-     * The root class serves as the entry point for the module.
+     * The sourceRoot class serves as the entry point for the module.
      * </p>
      *
-     * @return the root class of the module
+     * @return the sourceRoot class of the module
      */
     public Class<?> getRoot() {
         return root;
     }
 
     /**
-     * Sets the root class of the module.
+     * Sets the sourceRoot class of the module.
      *
-     * @param root the root class to set
+     * @param root the sourceRoot class to set
      */
     public void setRoot(Class<?> root) {
         this.root = root;
@@ -73,7 +73,7 @@ final public class JMouseModule {
     /**
      * Returns a string representation of the module.
      *
-     * @return a formatted string containing the module's name, version, and root class
+     * @return a formatted string containing the module's name, version, and sourceRoot class
      */
     @Override
     public String toString() {

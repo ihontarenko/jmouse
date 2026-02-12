@@ -16,14 +16,14 @@ public enum ErrorAction {
     /**
      * Log the error and continue mapping.
      *
-     * <p>The root mapping call returns {@code null} (or a policy-defined fallback).</p>
+     * <p>The sourceRoot mapping call returns {@code null} (or a policy-defined fallback).</p>
      */
     WARNING,
 
     /**
      * Ignore the error silently and continue mapping.
      *
-     * <p>The root mapping call returns {@code null} (or a policy-defined fallback).</p>
+     * <p>The sourceRoot mapping call returns {@code null} (or a policy-defined fallback).</p>
      */
     SILENT
 }

@@ -145,7 +145,7 @@ public class MergedAnnotation {
     }
 
     /**
-     * Reference to root annotation
+     * Reference to sourceRoot annotation
      */
     public MergedAnnotation getRoot() {
         return root;

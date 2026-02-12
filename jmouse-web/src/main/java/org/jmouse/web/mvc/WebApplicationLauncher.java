@@ -21,7 +21,7 @@ import java.util.List;
  *
  * <p>Responsible for:</p>
  * <ul>
- *   <li>Creating the root {@link WebBeanContext}</li>
+ *   <li>Creating the sourceRoot {@link WebBeanContext}</li>
  *   <li>Registering core initializers (beans, MVC, infrastructure)</li>
  *   <li>Warming up critical components</li>
  *   <li>Creating and starting the {@link WebServer}</li>
@@ -47,7 +47,7 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
      * ▶️ Launch the application and return the initialized {@link WebBeanContext}.
      *
      * <ul>
-     *   <li>Builds root context via {@link WebApplicationFactory}</li>
+     *   <li>Builds sourceRoot context via {@link WebApplicationFactory}</li>
      *   <li>Registers context and MVC initializers</li>
      *   <li>Refreshes context and warms it up</li>
      *   <li>Creates and starts embedded {@link WebServer}</li>

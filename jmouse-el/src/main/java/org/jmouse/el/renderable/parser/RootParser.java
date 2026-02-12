@@ -14,7 +14,7 @@ import org.jmouse.el.renderable.node.TextNode;
 import static org.jmouse.el.renderable.lexer.TemplateToken.*;
 
 /**
- * 🏗️ The root parser responsible for processing the entire view.
+ * 🏗️ The sourceRoot parser responsible for processing the entire view.
  * <p>
  * Parses:
  * <ul>

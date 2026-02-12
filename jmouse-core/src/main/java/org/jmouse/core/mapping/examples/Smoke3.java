@@ -1,18 +1,61 @@
 package org.jmouse.core.mapping.examples;
 
+import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
+import org.jmouse.core.mapping.config.MappingConfig;
+import org.jmouse.core.mapping.errors.ErrorAction;
+import org.jmouse.core.mapping.errors.ErrorCodes;
+import org.jmouse.core.mapping.errors.ErrorsPolicy;
+import org.jmouse.core.mapping.plugin.*;
 import org.jmouse.core.reflection.InferredType;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 public class Smoke3 {
 
     public static void main(String... arguments) {
         Mapper mapper = Mappers.builder()
+                .config(
+                        MappingConfig.builder()
+                                .plugins(List.of(
+                                        new MappingPlugin() {
+                                            @Override
+                                            public void onStart(MappingCall call) {
+                                                MappingPlugin.super.onStart(call);
+                                            }
+
+                                            @Override
+                                            public Object onValue(MappingValue value) {
+                                                return MappingPlugin.super.onValue(value);
+                                            }
+
+                                            @Override
+                                            public void onFinish(MappingResult result) {
+                                                MappingPlugin.super.onFinish(result);
+                                            }
+
+                                            @Override
+                                            public void onError(MappingFailure failure) {
+                                                MappingPlugin.super.onError(failure);
+                                            }
+                                        }
+                                ))
+                                .errorsPolicy(
+                                        ErrorsPolicy.builder()
+                                                .onCode(ErrorCodes.STRATEGY_NO_CONTRIBUTOR, ErrorAction.THROW)
+                                                .onPrefix("map.", ErrorAction.WARNING)
+                                                .onPrefix("scalar.", ErrorAction.THROW)
+                                                .defaultAction(ErrorAction.THROW)
+                                                .build()
+                                )
+                                .build()
+                )
+                // mapping settings
                 .registry(TypeMappingRegistry.builder()
                                   .mapping(UserA.class, UserB.class, m -> m
                                           .property("birthDay", builder -> builder
@@ -42,6 +85,8 @@ public class Smoke3 {
         dataObject.setDepth(1);
         dataObject.setUrl("https://google.com/");
 
+        DataObject object = mapper.map(Map.of("parent", "parent value!"), TypedValue.of(DataObject.class));
+        object.getParent(); // parent value!
         mapper.map(user, InferredType.forParametrizedClass(Map.class, String.class, Object.class));
 
         System.out.println(userB);
@@ -53,6 +98,8 @@ public class Smoke3 {
         private String url;
         private String parent;
         private int    depth;
+
+        public DataObject() {}
 
         public DataObject(String parent) {
             this.parent = parent;

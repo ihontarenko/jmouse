@@ -36,7 +36,7 @@ abstract public class AbstractBinder implements ObjectBinder {
      * <p>
      * If the requested name is present in the accessor, this method attempts to
      * retrieve and convert the value based on the target {@link TypeInformation}.
-     * If deep binding is enabled, it delegates to the root binder for nested binding.
+     * If deep binding is enabled, it delegates to the sourceRoot binder for nested binding.
      * </p>
      *
      * @param name     the structured name path of the binding target
@@ -86,7 +86,7 @@ abstract public class AbstractBinder implements ObjectBinder {
 
             return BindResult.empty();
         } else if (context.isDeepBinding()) {
-            // If deep binding is enabled, delegate to root rootBinder
+            // If deep binding is enabled, delegate to sourceRoot rootBinder
             return rootBinder.bind(path, bindable, accessor, callback);
         }
 

@@ -82,7 +82,7 @@ public final class AnnotationRepository {
     }
 
     /**
-     * Flattens the tree of root annotations and their meta-annotations into a map indexed by type.
+     * Flattens the tree of sourceRoot annotations and their meta-annotations into a map indexed by type.
      */
     private Map<Class<? extends Annotation>, List<MergedAnnotation>> indexing(List<MergedAnnotation> roots) {
         Map<Class<? extends Annotation>, List<MergedAnnotation>> index = new LinkedHashMap<>();

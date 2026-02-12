@@ -27,7 +27,7 @@ abstract public class AbstractNode implements Node {
     /**
      * Constructs an {@code AbstractNode} with the specified parent node.
      *
-     * @param parent the parent node, or {@code null} if this is a root node
+     * @param parent the parent node, or {@code null} if this is a sourceRoot node
      */
     public AbstractNode(Node parent) {
         this.parent = parent;
@@ -36,7 +36,7 @@ abstract public class AbstractNode implements Node {
     /**
      * Returns the parent node of this node.
      *
-     * @return the parent node or {@code null} if this is a root node
+     * @return the parent node or {@code null} if this is a sourceRoot node
      */
     @Override
     public Node getParent() {

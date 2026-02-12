@@ -9,7 +9,7 @@ import org.jmouse.web.security.firewall.FirewallPolicy;
  * 🔒 Firewall policy that protects against <b>path traversal attacks</b>.
  *
  * <p>Path traversal (also known as directory traversal) is an attack technique
- * where an attacker attempts to access files and directories outside the web root
+ * where an attacker attempts to access files and directories outside the web sourceRoot
  * by injecting sequences like {@code ../} into the request path.
  *
  * <p>This policy normalizes the request URI and blocks requests that attempt
