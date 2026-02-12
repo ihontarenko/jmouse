@@ -23,7 +23,7 @@ public interface ProcessingContext {
     /**
      * Return the task currently being processed.
      */
-    ProcessingTask task();
+    ProcessingTask processingTask();
 
     /**
      * Return the run-level context shared across all tasks.
@@ -62,7 +62,7 @@ public interface ProcessingContext {
      * Return the decision log used to record accept/reject outcomes
      * during processing of this task.
      */
-    DecisionLog decisions();
+    DecisionLog decisionLog();
 
     /**
      * Return the identifier of the route selected for this task.
@@ -108,6 +108,6 @@ public interface ProcessingContext {
      * @return utility instance, or {@code null} if not registered
      */
     default <T> T utility(Class<T> type) {
-        return run().utilities().get(type);
+        return run().utilityRegistry().get(type);
     }
 }

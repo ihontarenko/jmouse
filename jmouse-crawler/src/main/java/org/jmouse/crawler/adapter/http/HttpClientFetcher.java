@@ -1,5 +1,7 @@
 package org.jmouse.crawler.adapter.http;
 
+import org.jmouse.core.MediaType;
+import org.jmouse.core.MimeParser;
 import org.jmouse.core.Verify;
 import org.jmouse.crawler.api.FetchRequest;
 import org.jmouse.crawler.api.FetchResult;
@@ -32,7 +34,7 @@ import java.util.Map;
  */
 public final class HttpClientFetcher implements Fetcher {
 
-    private static final String HEADER_USER_AGENT  = "User-Agent";
+    private static final String HEADER_USER_AGENT   = "User-Agent";
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
 
     private final HttpClient        client;
@@ -94,12 +96,14 @@ public final class HttpClientFetcher implements Fetcher {
      * Convert the Java {@link HttpResponse} to a framework {@link FetchResult}.
      */
     private static FetchResult toResult(HttpResponse<byte[]> response) {
+        String contentType = firstHeaderValue(response, HEADER_CONTENT_TYPE);
         return new FetchResult(
                 response.uri(),
                 response.statusCode(),
                 flattenHeaders(response.headers().map()),
                 response.body(),
-                firstHeaderValue(response, HEADER_CONTENT_TYPE)
+                MediaType.forString(contentType),
+                contentType
         );
     }
 

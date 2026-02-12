@@ -81,7 +81,7 @@ public final class FacadeBuilder {
         ProcessingEngine engine    = new SimpleProcessingEngine(runContext);
 
         Frontier    frontier = runContext.frontier();
-        TaskFactory tasks    = runContext.tasks();
+        TaskFactory tasks    = runContext.taskFactory();
 
         for (SeedSpecification seed : seeds) {
             frontier.offer(

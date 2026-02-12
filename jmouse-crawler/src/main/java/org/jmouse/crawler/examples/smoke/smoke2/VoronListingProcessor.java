@@ -24,9 +24,9 @@ public final class VoronListingProcessor implements PipelineStep {
     public PipelineResult execute(ProcessingContext ctx) {
         RunContext runContext = ctx.run();
 
-        URI base = ctx.fetchResult() != null && ctx.fetchResult().finalUrl() != null
-                ? ctx.fetchResult().finalUrl()
-                : ctx.task().url();
+        URI base = ctx.fetchResult() != null && ctx.fetchResult().uri() != null
+                ? ctx.fetchResult().uri()
+                : ctx.processingTask().url();
 
         CssSelector cssSelector = ctx.utility(CssSelector.class);
 //        cssSelector.links(ctx.document(), "a[href^='/uk/catalog/']");
@@ -34,7 +34,7 @@ public final class VoronListingProcessor implements PipelineStep {
         List<URI> uris = cssSelector.links(ctx.document(), "a[href^='/uk/catalog/']");
 
 //        // 1) product pages
-        for (URI u : uris.subList(10, 13)) {
+        for (URI u : uris.subList(10, 11)) {
             URI site = runContext.attributes().getAttribute("site");
             ctx.enqueue(site.resolve(u), VoronHint.PRODUCT);
         }

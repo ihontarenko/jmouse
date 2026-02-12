@@ -27,7 +27,7 @@ import java.time.Instant;
  * <p>Key behaviors:</p>
  * <ul>
  *   <li>Scope and duplicate checks are performed before pipeline execution.</li>
- *   <li>Routes are resolved through {@link RunContext#routes()}.</li>
+ *   <li>Routes are resolved through {@link RunContext#routeResolver()}.</li>
  *   <li>Pipeline may request routing hops via {@link PipelineResult.Route}, bounded by {@link #MAX_ROUTE_HOPS}.</li>
  *   <li>Failures are translated via {@link RetryPolicy} into retry/discard/dead-letter dispositions.</li>
  * </ul>
@@ -82,8 +82,8 @@ public final class SimpleProcessingEngine implements ProcessingEngine {
         Verify.nonNull(task, "task");
 
         Instant     now   = run.clock().instant();
-        ScopePolicy scope = run.scope();
-        SeenStore   seen  = run.seen();
+        ScopePolicy scope = run.scopePolicy();
+        SeenStore   seen  = run.seenStore();
 
         if (scope.isDisallowed(task)) {
             LOGGER.info("Disallowed execution of task {}", task);
@@ -102,10 +102,10 @@ public final class SimpleProcessingEngine implements ProcessingEngine {
      * Resolve route and execute its pipeline, including bounded route hops.
      */
     private TaskDisposition executePipeline(ProcessingTask task, Instant now) {
-        SeenStore seen = run.seen();
+        SeenStore seen = run.seenStore();
 
-        DefaultProcessingContext processingContext = new DefaultProcessingContext(task, run);
-        ProcessingRoute          route             = run.routes().resolve(task, run);
+        ProcessingContext processingContext = new DefaultProcessingContext(task, run);
+        ProcessingRoute   route             = run.routeResolver().resolve(task, run);
 
         if (route == null) {
             LOGGER.error("No route found for task {}", task);
@@ -123,7 +123,7 @@ public final class SimpleProcessingEngine implements ProcessingEngine {
 
             return TaskDisposition.completed(result);
         } catch (Throwable error) {
-            RetryDecision decision = run.retry().onFailure(task, error, now);
+            RetryDecision decision = run.retryPolicy().onFailure(task, error, now);
             return toDisposition(decision, error, processingContext.routeId(), STAGE_PIPELINE);
         }
     }
@@ -137,7 +137,9 @@ public final class SimpleProcessingEngine implements ProcessingEngine {
      *
      * @throws Exception if a downstream pipeline throws
      */
-    private PipelineResult followRouteHops(DefaultProcessingContext processingContext, PipelineResult initialResult) throws Exception {
+    private PipelineResult followRouteHops(
+            ProcessingContext processingContext, PipelineResult initialResult
+    ) throws Exception {
         PipelineResult result = initialResult;
 
         for (int hop = 1; hop <= MAX_ROUTE_HOPS; hop++) {
@@ -148,7 +150,7 @@ public final class SimpleProcessingEngine implements ProcessingEngine {
             String nextRouteId = routeInstruction.routeId();
 
             ProcessingRouteRegistry registry = Verify.instanceOf(
-                    run.routes(), ProcessingRouteRegistry.class, "run.routes"
+                    run.routeResolver(), ProcessingRouteRegistry.class, "run.routes"
             );
 
             ProcessingRoute nextRoute = registry.byId(nextRouteId);

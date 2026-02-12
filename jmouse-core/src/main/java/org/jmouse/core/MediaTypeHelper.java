@@ -43,6 +43,26 @@ public final class MediaTypeHelper {
     }
 
     /**
+     * 🔁 Resolve a preferred file extension for the given {@link MimeType}.
+     *
+     * <p>This is a reverse lookup using a lazily populated cache derived from
+     * the extension → media types registry.</p>
+     *
+     * <p><b>Notes:</b></p>
+     * <ul>
+     *   <li>If multiple extensions are associated with the same {@link MimeType},
+     *       the last registered extension wins.</li>
+     *   <li>If no extension is registered for the given type, {@code null} is returned.</li>
+     * </ul>
+     *
+     * @param type MIME type to resolve
+     * @return file extension without dot (e.g. {@code "png"}), or {@code null} if unknown
+     */
+    public static String getExtensionFor(MimeType type) {
+        return FACTORY.getReversedCache().get(type);
+    }
+
+    /**
      * 🧩 Generate a multipart boundary string.
      *
      * @param includeTitle whether to prefix the boundary with {@code "jMouse_"}

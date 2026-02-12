@@ -95,7 +95,7 @@ public final class DefaultRunContext implements RunContext {
     }
 
     @Override
-    public ProcessingRouteResolver routes() {
+    public ProcessingRouteResolver routeResolver() {
         return routes;
     }
 
@@ -105,22 +105,22 @@ public final class DefaultRunContext implements RunContext {
     }
 
     @Override
-    public ParserRegistry parsers() {
+    public ParserRegistry parserRegistry() {
         return parsers;
     }
 
     @Override
-    public SeenStore seen() {
+    public SeenStore seenStore() {
         return seen;
     }
 
     @Override
-    public ScopePolicy scope() {
+    public ScopePolicy scopePolicy() {
         return scope;
     }
 
     @Override
-    public RetryPolicy retry() {
+    public RetryPolicy retryPolicy() {
         return retry;
     }
 
@@ -130,17 +130,17 @@ public final class DefaultRunContext implements RunContext {
     }
 
     @Override
-    public UtilityRegistry utilities() {
+    public UtilityRegistry utilityRegistry() {
         return utilities;
     }
 
     @Override
-    public PolitenessPolicy politeness() {
+    public PolitenessPolicy politenessPolicy() {
         return politeness;
     }
 
     @Override
-    public TaskFactory tasks() {
+    public TaskFactory taskFactory() {
         return tasks;
     }
 

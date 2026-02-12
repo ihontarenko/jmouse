@@ -10,7 +10,6 @@ import org.jmouse.crawler.api.ScopePolicy;
 import org.jmouse.crawler.runtime.state.DecisionCodes;
 
 import java.net.URI;
-import java.time.Instant;
 
 /**
  * Default {@link ProcessingContext} implementation used during execution of a single {@link ProcessingTask}. 🧠
@@ -49,7 +48,7 @@ public final class DefaultProcessingContext implements ProcessingContext {
     }
 
     @Override
-    public ProcessingTask task() {
+    public ProcessingTask processingTask() {
         return task;
     }
 
@@ -79,7 +78,7 @@ public final class DefaultProcessingContext implements ProcessingContext {
     }
 
     @Override
-    public DecisionLog decisions() {
+    public DecisionLog decisionLog() {
         return decisions;
     }
 
@@ -119,8 +118,8 @@ public final class DefaultProcessingContext implements ProcessingContext {
             return;
         }
 
-        ScopePolicy scope    = run.scope();
-        SeenStore   seen     = run.seen();
+        ScopePolicy scope    = run.scopePolicy();
+        SeenStore   seen     = run.seenStore();
         Frontier    frontier = run.frontier();
 
         ProcessingTask parent = this.task;
@@ -136,7 +135,7 @@ public final class DefaultProcessingContext implements ProcessingContext {
                 parent.id()
         );
 
-        ProcessingTask next = run.tasks().childOf(parent, url, hint, origin);
+        ProcessingTask next = run.taskFactory().childOf(parent, url, hint, origin);
 
         if (scope.isDisallowed(next)) {
             decisions.reject(DecisionCodes.SCOPE_DENY, "out of scope");

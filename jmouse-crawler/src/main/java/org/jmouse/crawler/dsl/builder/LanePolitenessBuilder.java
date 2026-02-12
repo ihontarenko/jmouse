@@ -14,8 +14,8 @@ public final class LanePolitenessBuilder {
 
     private PolitenessKeyResolver<PolitenessKey> resolver;
 
-    private final Map<String, Duration> lanes = new LinkedHashMap<>();
-    private Duration fallback = Duration.ZERO;
+    private final Map<String, Duration> lanes    = new LinkedHashMap<>();
+    private       Duration              fallback = Duration.ZERO;
 
     public LanePolitenessBuilder keyResolver(PolitenessKeyResolver<PolitenessKey> resolver) {
         this.resolver = nonNull(resolver, "resolver");

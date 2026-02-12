@@ -34,9 +34,9 @@ import java.util.Map;
  *
  * @param id step identifier (used for diagnostics when embedded into a larger pipeline)
  */
-public record FetchParsePipeline(String id) implements PipelineStep {
+public record FetchParseStep(String id) implements PipelineStep {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(FetchParsePipeline.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(FetchParseStep.class);
 
     /**
      * Execute the fetch+parse step.
@@ -47,11 +47,11 @@ public record FetchParsePipeline(String id) implements PipelineStep {
      */
     @Override
     public PipelineResult execute(ProcessingContext context) throws Exception {
-        RunContext run = context.run();
+        RunContext runContext = context.run();
 
         // Fetch the resource for the current task.
-        FetchResult fetched = run.fetcher()
-                .fetch(new FetchRequest(context.task().url(), Map.of()));
+        FetchResult fetched = runContext.fetcher()
+                .fetch(new FetchRequest(context.processingTask().url(), Map.of()));
 
         LOGGER.debug("Fetched: {}", fetched);
 
@@ -59,7 +59,7 @@ public record FetchParsePipeline(String id) implements PipelineStep {
         context.setFetchResult(fetched);
 
         // Resolve and run a content-type-aware parser (optional).
-        Parser parser = run.parsers().resolve(fetched.contentType());
+        Parser parser = runContext.parserRegistry().resolve(fetched.contentType());
         if (parser != null) {
             ParsedDocument parsed = parser.parse(fetched);
             LOGGER.debug("Parsed: {}", Reflections.getUserClass(parsed));

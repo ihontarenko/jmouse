@@ -18,7 +18,7 @@ public final class JsoupHtmlParser implements Parser {
     @Override
     public ParsedDocument parse(FetchResult result) {
         String   html     = new String(result.body(), StandardCharsets.UTF_8);
-        Document document = Jsoup.parse(html, result.finalUrl().toString());
+        Document document = Jsoup.parse(html, result.uri().toString());
         return new JsoupParsedDocument(document);
     }
 }

@@ -17,25 +17,25 @@ public interface RunContext {
 
     DynamicAttributes attributes();
 
-    ProcessingRouteResolver routes();
+    ProcessingRouteResolver routeResolver();
 
     Fetcher fetcher();
 
-    ParserRegistry parsers();
+    ParserRegistry parserRegistry();
 
-    SeenStore seen();
+    SeenStore seenStore();
 
-    ScopePolicy scope();
+    ScopePolicy scopePolicy();
 
-    RetryPolicy retry();
+    RetryPolicy retryPolicy();
 
     Clock clock();
 
-    UtilityRegistry utilities();
+    UtilityRegistry utilityRegistry();
 
-    PolitenessPolicy politeness();
+    PolitenessPolicy politenessPolicy();
 
-    TaskFactory tasks();
+    TaskFactory taskFactory();
 
     InFlightBuffer inFlight();
 

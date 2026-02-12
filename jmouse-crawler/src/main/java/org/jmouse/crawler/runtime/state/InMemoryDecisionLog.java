@@ -31,7 +31,12 @@ public final class InMemoryDecisionLog implements DecisionLog {
      * @param code     machine-readable decision code
      * @param message  human-readable explanation
      */
-    public record Entry(boolean accepted, String code, String message) {}
+    public record Entry(boolean accepted, String code, String message) {
+        @Override
+        public String toString() {
+            return "[%s]: [%s] - %s".formatted((accepted ? "ACCEPTED" : "REJECTED"), code, message);
+        }
+    }
 
     private final List<Entry> entries = new ArrayList<>();
 

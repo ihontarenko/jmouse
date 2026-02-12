@@ -3,9 +3,11 @@ package org.jmouse.core.mapping.examples;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
+import org.jmouse.core.reflection.InferredType;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.Map;
 
 public class Smoke3 {
 
@@ -36,8 +38,49 @@ public class Smoke3 {
         UserB userB = mapper.map(userA, UserB.class);
         UserA user = mapper.map(userB, UserA.class);
 
+        DataObject dataObject = new DataObject("parent_url");
+        dataObject.setDepth(1);
+        dataObject.setUrl("https://google.com/");
+
+        mapper.map(user, InferredType.forParametrizedClass(Map.class, String.class, Object.class));
+
         System.out.println(userB);
 
+    }
+
+    public static class DataObject {
+
+        private String url;
+        private String parent;
+        private int    depth;
+
+        public DataObject(String parent) {
+            this.parent = parent;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getParent() {
+            return parent;
+        }
+
+        public void setParent(String parent) {
+            this.parent = parent;
+        }
+
+        public int getDepth() {
+            return depth;
+        }
+
+        public void setDepth(int depth) {
+            this.depth = depth;
+        }
     }
 
     public static class UserA {

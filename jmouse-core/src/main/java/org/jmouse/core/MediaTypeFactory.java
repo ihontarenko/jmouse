@@ -27,9 +27,24 @@ public final class MediaTypeFactory {
     private static final String MIME_TYPES_FILE = "/org/jmouse/core/mime.types";
 
     /**
-     * ⚡ Cached mapping of file extension → media types.
+     * ⚡ Cached mapping of file extension → supported media types.
+     *
+     * <p>This map is populated eagerly at class initialization time and represents
+     * the authoritative source of MIME type associations.</p>
+     *
+     * <p>Keys are file extensions (without dot), values are ordered lists of
+     * {@link MediaType}s associated with that extension.</p>
      */
     private static final Map<String, List<MediaType>> CACHE = parseMIMETypes();
+
+    /**
+     * Mutable reverse cache used by {@link #getReversedCache()}.
+     *
+     * <p>This map is populated lazily and is intended as a derived view of {@link #CACHE}.</p>
+     *
+     * <p><b>⚠ Note:</b> This map is mutable and not synchronized.</p>
+     */
+    private static final Map<MimeType, String> REVERSED_CACHE = new HashMap<>();
 
     /**
      * 🏗️ Construct a new factory (re-parses mime types).
@@ -125,5 +140,38 @@ public final class MediaTypeFactory {
         }
 
         return CACHE.get(extension);
+    }
+
+    /**
+     * Reverse lookup cache mapping {@link MimeType} → file extension.
+     *
+     * <p>This cache is derived from {@link #CACHE} and allows resolving a preferred
+     * file extension for a given {@link MimeType}.</p>
+     *
+     * <p><b>Initialization:</b></p>
+     * <ul>
+     *   <li>The map is populated lazily on first access.</li>
+     *   <li>All {@link MediaType}s associated with an extension are registered.</li>
+     *   <li>If the same {@link MimeType} appears under multiple extensions,
+     *       the last one encountered wins.</li>
+     * </ul>
+     *
+     * <p><b>⚠ Thread-safety note:</b><br>
+     * This implementation is <em>not thread-safe</em>. Concurrent access during
+     * the first initialization may lead to race conditions.
+     * Consider eager initialization or synchronization if used in multi-threaded contexts.</p>
+     *
+     * @return mutable map of {@link MimeType} to file extension
+     */
+    public Map<MimeType, String> getReversedCache() {
+        if (REVERSED_CACHE.isEmpty()) {
+            for (Map.Entry<String, List<MediaType>> entry : CACHE.entrySet()) {
+                String extension = entry.getKey();
+                for (MediaType mediaType : entry.getValue()) {
+                    REVERSED_CACHE.put(mediaType, extension);
+                }
+            }
+        }
+        return REVERSED_CACHE;
     }
 }
