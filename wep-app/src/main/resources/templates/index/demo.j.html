@@ -1,9 +1,10 @@
-{% extends 'jmouse' %}
-{% block 'main' %}
+{% extends 'jmouse-internal' %}
+{% block 'mainContent' %}
     demo hello!
     <h2>User-Agent: <b>{{ userAgent }}</b></h2>
     <h4>Request-Method: {{ method }}</h4>
     <h4>lang: {{ lang }}</h4>
+    <h1>externalId: {{ externalId }}</h1>
     id: {{ ID }}
     <p>
         {{ ID | double / 77 }}

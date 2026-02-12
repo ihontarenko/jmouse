@@ -211,7 +211,7 @@ public class MatcherCriteria implements MappingMatcher<RequestRoute> {
     }
 
     public static MatcherCriteria POST(String pattern) {
-        return new MatcherCriteria().pathPattern(pattern).httpMethod(HttpMethod.GET);
+        return new MatcherCriteria().pathPattern(pattern).httpMethod(HttpMethod.POST);
     }
 
     public static MatcherCriteria PUT(String pattern) {

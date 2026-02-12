@@ -22,11 +22,29 @@ public final class AuthorityPolicyAuthorizationManager<T> implements Authorizati
     }
 
     public static <T> AuthorizationManager<T> permitAll() {
-        return (Authentication authentication, T t) -> AccessResult.PERMIT;
+        return new AuthorizationManager<T>() {
+            @Override
+            public AccessResult check(Authentication authentication, T target) {
+                return AccessResult.PERMIT;
+            }
+            @Override
+            public String toString() {
+                return "permitAll()";
+            }
+        };
     }
 
     public static <T> AuthorizationManager<T> denyAll() {
-        return (Authentication authentication, T t) -> AccessResult.DENY;
+        return new AuthorizationManager<T>() {
+            @Override
+            public AccessResult check(Authentication authentication, T target) {
+                return AccessResult.DENY;
+            }
+            @Override
+            public String toString() {
+                return "denyAll()";
+            }
+        };
     }
 
     public static <T> AuthorizationManager<T> not(AuthorizationManager<T> delegate) {

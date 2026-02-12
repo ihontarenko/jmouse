@@ -31,9 +31,9 @@ public final class KeyedPolitenessPolicy<K extends PolitenessKey>
 
     @Override
     public Instant eligibleAt(ProcessingTask task, Instant now) {
-        K        key  = keyOf(task);
-        TimeGate gate = gates.computeIfAbsent(key, gateFactory);
-        Instant eligible = gate.acquire(now);
+        K        key      = keyOf(task);
+        TimeGate gate     = gates.computeIfAbsent(key, gateFactory);
+        Instant  eligible = gate.acquire(now);
 
         LOGGER.debug(
                 "politeness.check key={} task={} now={} eligibleAt={}",

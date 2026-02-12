@@ -60,7 +60,7 @@ public final class StepsPipeline implements ProcessingPipeline {
     public PipelineResult execute(ProcessingContext context) throws Exception {
         Verify.nonNull(context, "context");
 
-        DecisionLog decisions = context.decisionLog();
+        DecisionLog    decisions  = context.decisionLog();
         PipelineResult lastResult = null;
 
         for (StepHolder stepHolder : steps) {

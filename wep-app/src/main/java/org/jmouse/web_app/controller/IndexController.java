@@ -1,5 +1,6 @@
 package org.jmouse.web_app.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.web.mvc.HandlerMappingException;
 import org.jmouse.web.mvc.Model;
@@ -30,25 +31,28 @@ public class IndexController {
         return "view:jmouse/video";
     }
 
-    @GetMapping(
-            requestPath = "/demo/{id}",
+    @Mapping(
+            path = "/demo/{id}",
             queryParameters = {
                     @QueryParameter(name = "lang", value = "uk")
-            }
+            },
+            httpMethod = HttpMethod.POST
     )
     @MethodDescription("Demo Endpoint!")
     @ViewMapping("index/demo")
     public String demo(
-            @PathVariable("id") Long id, Model model,
+           @PathVariable("id") Long id, Model model,
            @RequestHeader(HttpHeader.USER_AGENT) String userAgent,
            @RequestMethod HttpMethod method,
            @RequestParameter("lang") String lang,
-           @RequestParameter("externalId") Long externalId
+           @RequestParameter("externalId") Long externalId,
+           HttpServletRequest request
     ) {
         model.addAttribute("ID", id);
         model.addAttribute("userAgent", userAgent);
         model.addAttribute("method", method);
         model.addAttribute("lang", lang);
+        model.addAttribute("externalId", externalId);
         return "view:index/demo";
     }
 
