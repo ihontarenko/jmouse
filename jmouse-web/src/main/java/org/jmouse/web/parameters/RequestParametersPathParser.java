@@ -12,8 +12,8 @@ public final class RequestParametersPathParser {
 
         List<RequestParametersPathToken> tokens = new ArrayList<>();
         StringBuilder                    buffer = new StringBuilder();
+        int                              index  = 0;
 
-        int index = 0;
         while (index < rawParameterName.length()) {
             char character = rawParameterName.charAt(index);
 
@@ -57,7 +57,7 @@ public final class RequestParametersPathParser {
     }
 
     private static void flushPropertyName(StringBuilder buffer, List<RequestParametersPathToken> tokens) {
-        if (buffer.length() == 0) {
+        if (buffer.isEmpty()) {
             return;
         }
 
@@ -81,9 +81,11 @@ public final class RequestParametersPathParser {
 
     private static int parseInt(String digits) {
         int value = 0;
+
         for (int i = 0; i < digits.length(); i++) {
             value = value * 10 + (digits.charAt(i) - '0');
         }
+
         return value;
     }
 }

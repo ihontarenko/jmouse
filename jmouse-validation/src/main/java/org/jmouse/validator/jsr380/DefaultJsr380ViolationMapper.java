@@ -36,7 +36,9 @@ public final class DefaultJsr380ViolationMapper implements Jsr380ViolationMapper
         StringBuilder buffer = new StringBuilder();
 
         for (Path.Node node : path) {
-            if (node == null) continue;
+            if (node == null) {
+                continue;
+            }
 
             String name = node.getName();
 

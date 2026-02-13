@@ -1,15 +1,17 @@
 package org.jmouse.web.binding.smoke;
 
+import org.jmouse.core.context.ContextScope;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.validator.*;
+import org.jmouse.validator.jsr380.*;
 import org.jmouse.web.binding.*;
 
 import java.util.List;
 import java.util.Map;
 
-public class SmokeWebBinding {
+public class Smoke {
 
     public static void main(String... args) {
 
@@ -21,6 +23,8 @@ public class SmokeWebBinding {
             }
         }));
 
+        Jsr380Support.registerInto(registry);
+
         ValidationProcessor validationProcessor = ValidationProcessors.builder()
                 .validatorRegistry(registry)
                 .validationPolicy(ValidationPolicy.COLLECT_ALL)
@@ -30,7 +34,7 @@ public class SmokeWebBinding {
         ErrorsFactory errorsFactory = new DefaultErrorsFactory();
 
         // 3) Binding context scope (THE LINK binder -> plugin)
-        BindingContextScope bindingScope = new BindingContextScope();
+        ContextScope<BindingContext> bindingScope = new ContextScope<>();
 
         // 4) Mapping plugin (GLOBAL) - now reads BindingContextScope, not errorsScope::get
         BindingMappingPlugin bindingPlugin = new BindingMappingPlugin(
@@ -58,7 +62,8 @@ public class SmokeWebBinding {
         // 7) Input (already java map)
         Map<String, Object> input = Map.of(
                 "id", "555",
-                "name", ""
+                "name", "",
+                "password", "password"
         );
 
         BindingResult<UserForm> result = binder.bind(
@@ -82,9 +87,13 @@ public class SmokeWebBinding {
         }
     }
 
+    interface CreateOp { }
+
     // simple DTO for smoke
     public static class UserForm {
         public int id;
+        @StrongPassword(groups = {CreateOp.class})
+        public String password;
         public String name;
 
         @Override
@@ -97,5 +106,13 @@ public class SmokeWebBinding {
 
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
     }
 }

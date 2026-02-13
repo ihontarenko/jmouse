@@ -1,5 +1,6 @@
 package org.jmouse.web.binding;
 
+import org.jmouse.core.context.ContextScope;
 import org.jmouse.core.mapping.plugin.*;
 import org.jmouse.validator.Errors;
 
@@ -7,10 +8,10 @@ import java.util.List;
 
 public final class BindingMappingPlugin implements MappingPlugin {
 
-    private final BindingContextScope scope;
-    private final List<BindingProcessor> processors;
+    private final ContextScope<BindingContext> scope;
+    private final List<BindingProcessor>       processors;
 
-    public BindingMappingPlugin(BindingContextScope scope, List<BindingProcessor> processors) {
+    public BindingMappingPlugin(ContextScope<BindingContext> scope, List<BindingProcessor> processors) {
         this.scope = scope;
         this.processors = processors;
     }

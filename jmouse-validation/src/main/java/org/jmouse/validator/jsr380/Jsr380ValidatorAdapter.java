@@ -1,7 +1,6 @@
 package org.jmouse.validator.jsr380;
 
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Path;
 import jakarta.validation.Validator;
 
 import org.jmouse.validator.Errors;
@@ -35,7 +34,7 @@ public final class Jsr380ValidatorAdapter implements SmartValidator {
             return;
         }
 
-        Class<?>[]                       groups     = resolveGroups(hints);
+        Class<?>[]                       groups     = toGroups(hints);
         Set<ConstraintViolation<Object>> violations = validator.validate(target, groups);
 
         for (ConstraintViolation<?> violation : violations) {
@@ -43,7 +42,7 @@ public final class Jsr380ValidatorAdapter implements SmartValidator {
         }
     }
 
-    private static Class<?>[] resolveGroups(ValidationHints hints) {
+    private static Class<?>[] toGroups(ValidationHints hints) {
         if (hints == null) {
             return new Class<?>[0];
         }

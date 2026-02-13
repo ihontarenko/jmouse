@@ -16,15 +16,14 @@ public final class DefaultMappingFailureTranslator implements MappingFailureTran
             return;
         }
 
-        String code    = exception == null ? MAPPING_FAILED_CODE : exception.code();
-        String message = exception == null ? MAPPING_FAILED_MESSAGE : exception.getMessage();
+        String message     = exception == null ? MAPPING_FAILED_MESSAGE : exception.getMessage();
+        String code        = exception == null ? MAPPING_FAILED_CODE : exception.code();
+        String noramalized = path == null ? "" : path.path();
 
-        String p = path == null ? "" : path.path();
-
-        if (p.isBlank()) {
+        if (noramalized.isBlank()) {
             errors.reject(code, message);
         } else {
-            errors.rejectValue(p, code, message);
+            errors.rejectValue(noramalized, code, message);
         }
     }
 }
