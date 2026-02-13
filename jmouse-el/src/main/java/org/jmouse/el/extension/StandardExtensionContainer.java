@@ -3,6 +3,7 @@ package org.jmouse.el.extension;
 import org.jmouse.el.ObjectContainer;
 import org.jmouse.core.access.AttributeResolver;
 import org.jmouse.el.lexer.Token;
+import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContainer;
 import org.jmouse.el.parser.TagParser;
@@ -79,6 +80,20 @@ public class StandardExtensionContainer implements ExtensionContainer {
     @Override
     public Parser getParser(Class<? extends Parser> type) {
         return parsers.get(type);
+    }
+
+    @Override
+    public Parser getParser(TokenCursor cursor) {
+        Parser parser = null;
+
+        for (Parser candidate : parsers.values()) {
+            if (candidate.supports(cursor)) {
+                parser = candidate;
+                break;
+            }
+        }
+
+        return parser;
     }
 
     /**

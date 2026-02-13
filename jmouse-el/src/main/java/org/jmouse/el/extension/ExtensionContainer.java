@@ -2,6 +2,7 @@ package org.jmouse.el.extension;
 
 import org.jmouse.core.access.AttributeResolver;
 import org.jmouse.el.lexer.Token;
+import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.parser.TagParser;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.core.Sorter;
@@ -44,6 +45,10 @@ public interface ExtensionContainer {
      * @return the {@link Parser} instance, or {@code null} if not found
      */
     Parser getParser(Class<? extends Parser> type);
+
+    default Parser getParser(TokenCursor cursor) {
+        return null;
+    }
 
     /**
      * ➕ Adds a new expression parser to the container.

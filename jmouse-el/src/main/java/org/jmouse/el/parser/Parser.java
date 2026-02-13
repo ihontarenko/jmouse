@@ -44,4 +44,8 @@ public interface Parser {
         return container.getFirst();
     }
 
+    default boolean supports(TokenCursor cursor) {
+        return false;
+    }
+
 }

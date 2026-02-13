@@ -137,6 +137,8 @@ public class Expressions {
         el.evaluate("'a' .. strings[0]", context);
         el.evaluate("time - 2", context);
 
+//        el.newContext().getExtensions().addParser();
+
 
         Double d2 = el.evaluate("22f / 7", Double.class);
 

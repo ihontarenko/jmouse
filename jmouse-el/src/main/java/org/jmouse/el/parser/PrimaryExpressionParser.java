@@ -48,6 +48,8 @@ public class PrimaryExpressionParser implements Parser {
             cursor.ensure(T_CLOSE_PAREN);
         }
 
+        context.getParser(cursor);
+
         if (cursor.isCurrent(T_DECREMENT, T_INCREMENT)) {
             left = new PostfixUnaryOperation((Expression) left, context.getOperator(cursor.peek().type()));
             cursor.next();
