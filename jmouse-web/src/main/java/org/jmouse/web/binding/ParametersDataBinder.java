@@ -1,30 +1,43 @@
 package org.jmouse.web.binding;
 
-import org.jmouse.core.access.TypedValue;
+import org.jmouse.core.mapping.Mapper;
+import org.jmouse.validator.*;
 
-import java.util.Map;
+public final class ParametersDataBinder {
 
-public interface ParametersDataBinder {
+    private final ValidationProcessor validationProcessor;
+    private final Mapper              mapper;
+    private final ErrorsFactory       errorsFactory;
+    private final ErrorsScope         errorsScope;
 
-    /**
-     * 🎯 Logical object name used by plugins/diagnostics.
-     */
-    String getObjectName();
+    public ParametersDataBinder(
+            Mapper mapper,
+            ErrorsFactory errorsFactory,
+            ErrorsScope errorsScope,
+            ValidationProcessor validationProcessor
+    ) {
+        this.mapper = mapper;
+        this.errorsFactory = errorsFactory;
+        this.validationProcessor = validationProcessor;
+        this.errorsScope = errorsScope;
+    }
 
-    /**
-     * 🔎 Raw input parameters source.
-     */
-    Map<String, String[]> getParameters();
+    public <T> BindingResult<T> bind(Object source, Class<T> targetType, String objectName, ValidationHints hints) {
+        Errors errors = errorsFactory.create(null, objectName);
+        T      target;
 
-    /**
-     * 🧩 Bind parameters into a new target described by {@link TypedValue}.
-     */
-    <T> T bind(TypedValue<T> target);
+        try (ErrorsScope.ScopeToken ignored = errorsScope.open(errors)) {
+            target = mapper.map(source, targetType);
+        }
 
-    /**
-     * 🧩 Bind parameters into an existing target instance.
-     */
-    default <T> T bindInto(T instance) {
-        return bind(TypedValue.ofInstance(instance));
+        ValidationResult<T> validation = validationProcessor.validate(target, objectName, hints);
+
+        ErrorsMerging.merge(errors, validation.errors());
+
+        return new DefaultBindingResult<>(target, errors);
+    }
+
+    public <T> BindingResult<T> bind(Object source, Class<T> targetType, String objectName) {
+        return bind(source, targetType, objectName, ValidationHints.empty());
     }
 }

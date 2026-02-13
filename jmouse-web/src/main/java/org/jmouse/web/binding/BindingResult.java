@@ -4,19 +4,13 @@ import org.jmouse.validator.Errors;
 
 public interface BindingResult<T> {
 
-    String getObjectName();
+    T target();
 
-    /**
-     * ✅ Bound/validated target (may be null on early failures).
-     */
-    T getTarget();
-
-    /**
-     * ❌ Collected validation/binding errors.
-     */
-    Errors getErrors();
+    Errors errors();
 
     default boolean hasErrors() {
-        return getErrors().hasErrors() || getErrors().hasGlobalErrors();
+        Errors errors = errors();
+        return errors != null && (errors.hasErrors() || errors.hasGlobalErrors());
     }
+
 }
