@@ -3,7 +3,7 @@ package org.jmouse.validator;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class DefaultValidatorRegistry implements ValidatorRegistry {
+public final class DefaultValidatorRegistry implements ValidatorRegistry, ValidatorProvider {
 
     private final List<Validator> validators = new ArrayList<>();
 
@@ -30,6 +30,7 @@ public final class DefaultValidatorRegistry implements ValidatorRegistry {
         }
     }
 
+    @Override
     public List<Validator> getValidators() {
         return List.copyOf(validators);
     }

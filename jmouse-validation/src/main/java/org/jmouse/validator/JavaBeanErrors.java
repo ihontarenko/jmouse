@@ -1,65 +1,82 @@
 package org.jmouse.validator;
 
-import org.jmouse.core.access.descriptor.structured.DescriptorResolver;
-import org.jmouse.core.access.descriptor.structured.bean.JavaBeanDescriptor;
+import org.jmouse.core.Verify;
+import org.jmouse.core.access.AccessorWrapper;
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.ObjectAccessorWrapper;
+import org.jmouse.core.access.ValueNavigator;
 
 /**
- * {@link Errors} implementation for JavaBean targets using a {@link JavaBeanDescriptor}. 🫘
+ * {@link Errors} implementation backed by {@link ObjectAccessor} for JavaBean-like targets. 🫘
  *
- * <p>{@code JavaBeanErrors} enriches {@link FieldError} metadata by resolving:</p>
+ * <p>This implementation resolves:</p>
  * <ul>
- *   <li>current field value via bean property access</li>
- *   <li>field type via the resolved property descriptor</li>
+ *   <li>field values via {@link ValueNavigator} (supports simple and complex paths)</li>
+ *   <li>field types via {@link ObjectAccessor#navigate(String)} when available</li>
  * </ul>
  *
- * <p>If the target is {@code null}, or the requested field is unknown, value/type resolution
- * returns {@code null}.</p>
- *
- * <p>This class relies on {@link DescriptorResolver#ofBeanType(Class)} to obtain a descriptor
- * for the target bean type.</p>
+ * <p>Navigation is safe: unknown paths return {@code null}.</p>
  */
-@SuppressWarnings("unchecked")
 public final class JavaBeanErrors extends AbstractErrors {
 
-    private final JavaBeanDescriptor<Object> descriptor;
+    private static final AccessorWrapper WRAPPER = new ObjectAccessorWrapper();
 
     /**
-     * Create errors collector for a JavaBean target.
+     * Default navigator supports both simple and structured {@code PropertyPath}-style navigation.
+     */
+    private static final ValueNavigator NAVIGATOR = ValueNavigator.defaultNavigator();
+
+    private final ObjectAccessor accessor;
+
+    /**
+     * Create an errors collector for a JavaBean target.
      *
      * @param target validated bean instance (may be {@code null})
      * @param objectName logical object name used in error codes (may be {@code null})
      */
     public JavaBeanErrors(Object target, String objectName) {
         super(target, objectName);
-        this.descriptor = target == null
-                ? null : (JavaBeanDescriptor<Object>) DescriptorResolver.ofBeanType(target.getClass());
+        this.accessor = WRAPPER.wrap(target);
     }
 
     /**
-     * Resolve current field value from the target bean using {@link JavaBeanDescriptor}.
+     * Resolve current field value using {@link #NAVIGATOR}.
      *
-     * @param field field name/path (must match a bean property)
-     * @return current property value or {@code null} if unknown/unresolvable
+     * <p>If the field/path cannot be resolved, returns {@code null}.</p>
+     *
+     * @param field field name/path
+     * @return resolved field value or {@code null}
      */
     @Override
     protected Object tryGetValue(String field) {
-        if (descriptor == null || !descriptor.hasProperty(field)) {
+        if (field == null || field.isBlank() || accessor == null) {
             return null;
         }
-        return descriptor.obtainValue(field, getTarget());
+        return NAVIGATOR.navigate(accessor, field);
     }
 
     /**
-     * Resolve field type from the bean property descriptor.
+     * Resolve field type using accessor navigation.
+     *
+     * <p>If navigation fails or the field/path cannot be resolved, returns {@code null}.</p>
      *
      * @param field field name/path
-     * @return property type or {@code null} if unknown/unresolvable
+     * @return resolved field type or {@code null}
      */
     @Override
     protected Class<?> tryGetType(String field) {
-        if (descriptor == null || !descriptor.hasProperty(field)) {
+        if (field == null || field.isBlank() || accessor == null) {
             return null;
         }
-        return descriptor.getProperty(field).getType().getClassType();
+
+        try {
+            ObjectAccessor nested = accessor.navigate(field);
+            if (nested == null || nested.isNull()) {
+                return null;
+            }
+            return nested.getClassType();
+        } catch (RuntimeException ignore) {
+            return null;
+        }
     }
 }

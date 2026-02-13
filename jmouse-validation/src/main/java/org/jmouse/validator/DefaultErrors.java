@@ -10,4 +10,8 @@ public final class DefaultErrors extends AbstractErrors {
         super(target, objectName);
     }
 
+    public DefaultErrors(Object target, String objectName, MessageCodesResolver resolver) {
+        super(target, objectName, resolver);
+    }
+
 }

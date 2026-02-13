@@ -31,12 +31,12 @@ import org.jmouse.core.mapping.strategy.StrategyRegistry;
  */
 public final class MapperBuilder {
 
-    private StrategyRegistry strategyRegistry;
-    private AccessorWrapper  wrapper;
-    private Conversion       conversion;
-    private TypeMappingRegistry   mappingRegistry;
-    private MappingPolicy         policy;
-    private MappingConfig         config;
+    private StrategyRegistry    strategyRegistry;
+    private AccessorWrapper     wrapper;
+    private Conversion          conversion;
+    private TypeMappingRegistry mappingRegistry;
+    private MappingPolicy       policy;
+    private MappingConfig       config;
 
     /**
      * Set the plan registry used to resolve mapping plans.
