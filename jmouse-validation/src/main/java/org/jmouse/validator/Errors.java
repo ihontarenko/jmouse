@@ -1,171 +1,211 @@
 package org.jmouse.validator;
 
+import org.jmouse.core.access.PropertyPath;
+
 import java.util.List;
 import java.util.function.Function;
 
 /**
- * Represents an interface for handling validation errors.
- * <p>
- * This interface provides methods for rejecting errors related to specific fields
- * or general object-level errors, retrieving errors, and checking their presence.
- * </p>
+ * Collector for validation errors produced while validating an object. ✅
  *
- * @see FieldError
- * @see ObjectError
+ * <p>{@code Errors} is a Spring-like abstraction used by validators to record:</p>
+ * <ul>
+ *   <li><b>global errors</b> (object-level problems)</li>
+ *   <li><b>field errors</b> (property-level problems)</li>
+ * </ul>
+ *
+ * <p>Implementations typically keep the validated target (optional), expose current field values/types,
+ * and provide error code resolution (message codes).</p>
+ *
+ * <p>Error reporting is done via:</p>
+ * <ul>
+ *   <li>{@link #reject(String, String, Object...)} for global errors</li>
+ *   <li>{@link #rejectValue(String, String, String, Object...)} for field errors</li>
+ * </ul>
  */
 public interface Errors {
 
     /**
-     * Registers a parser error with the given error code, default message, and optional arguments.
+     * Logical name of the validated object (Spring-like: {@code "user"}, {@code "filter"}).
      *
-     * @param errorCode      the error code identifying the validation issue
-     * @param defaultMessage the default message if no localized message is found
-     * @param arguments      optional arguments for message formatting
+     * @return object name used for reporting (never {@code null})
+     */
+    String getObjectName();
+
+    /**
+     * Validated target object.
+     *
+     * <p>May be {@code null} when validation happens before instantiation or when only
+     * metadata-based validation is performed.</p>
+     *
+     * @return validated target (may be {@code null})
+     */
+    Object getTarget();
+
+    /**
+     * Register a global (object-level) error.
+     *
+     * @param errorCode stable error code key
+     * @param defaultMessage fallback message (may be {@code null})
+     * @param arguments optional arguments for message formatting/interpolation
      */
     void reject(String errorCode, String defaultMessage, Object... arguments);
 
     /**
-     * Registers a parser error with the given error code, using {@code null} as the default message.
+     * Register a global error with no default message.
      *
-     * @param errorCode the error code identifying the validation issue
+     * @param errorCode stable error code key
      */
     default void reject(String errorCode) {
         reject(errorCode, null);
     }
 
     /**
-     * Registers a field-specific error with the given field name, error code, default message,
-     * and optional arguments.
+     * Register a field (property-level) error.
      *
-     * @param field          the name of the field that has the validation error
-     * @param errorCode      the error code identifying the validation issue
-     * @param defaultMessage the default message if no localized message is found
-     * @param arguments      optional arguments for message formatting
+     * @param field field name or path (e.g. {@code "email"}, {@code "address.city"}, {@code "items[0].name"})
+     * @param errorCode stable error code key
+     * @param defaultMessage fallback message (may be {@code null})
+     * @param arguments optional arguments for message formatting/interpolation
      */
     void rejectValue(String field, String errorCode, String defaultMessage, Object... arguments);
 
     /**
-     * Registers a field-specific error with the given field name and error code, using {@code null}
-     * as the default message.
+     * Register a field error with no default message.
      *
-     * @param field     the name of the field that has the validation error
-     * @param errorCode the error code identifying the validation issue
+     * @param field field name/path
+     * @param errorCode stable error code key
      */
     default void rejectValue(String field, String errorCode) {
         rejectValue(field, errorCode, null);
     }
 
     /**
-     * Retrieves the current value of a specific field in the validated object.
-     * <p>
-     * This method allows access to the actual value being validated, which can be useful
-     * for debugging or advanced validation logic.
-     * </p>
+     * Path-aware {@link #rejectValue(String, String, String, Object...)} overload.
      *
-     * @param field the name of the field
-     * @return the value of the field, or {@code null} if unavailable
+     * <p>If {@code path} is {@code null} or empty, this method falls back to {@link #reject(String, String, Object...)}
+     * (global error).</p>
+     *
+     * @param path property path (may be {@code null})
+     * @param errorCode stable error code key
+     * @param defaultMessage fallback message (may be {@code null})
+     * @param arguments optional arguments for message formatting/interpolation
+     */
+    default void rejectValue(PropertyPath path, String errorCode, String defaultMessage, Object... arguments) {
+        if (path == null || path.isEmpty()) {
+            reject(errorCode, defaultMessage, arguments);
+            return;
+        }
+        rejectValue(path.path(), errorCode, defaultMessage, arguments);
+    }
+
+    /**
+     * Path-aware field reject with no default message.
+     *
+     * @param path property path (may be {@code null})
+     * @param errorCode stable error code key
+     */
+    default void rejectValue(PropertyPath path, String errorCode) {
+        rejectValue(path, errorCode, null);
+    }
+
+    /**
+     * Read current field value from the underlying target/binding model.
+     *
+     * @param field field name/path
+     * @return current field value (may be {@code null})
      */
     Object getFieldValue(String field);
 
     /**
-     * Retrieves the type of a specific field in the validated object.
-     * <p>
-     * This method provides insight into the expected data type of a field, which can be useful
-     * for dynamic validation rules.
-     * </p>
+     * Read the declared/known field type.
      *
-     * @param field the name of the field
-     * @return the {@link Class} representing the field type, or {@code null} if unknown
+     * @param field field name/path
+     * @return field type (may be {@code null} if unknown)
      */
     Class<?> getFieldType(String field);
 
     /**
-     * Resolves error codes based on a given error code.
-     * <p>
-     * This method allows for error code expansion, which can be used in hierarchical
-     * validation error handling. Implementations may append additional codes
-     * to provide more contextual validation messages.
-     * </p>
+     * Resolve message codes for the given error code (message resolution chain).
      *
-     * @param code the base error code
-     * @return an array of error codes, where the first one is typically the most specific
+     * @param code base error code
+     * @return ordered array of message codes (never {@code null})
      */
     String[] getErrorCodes(String code);
 
     /**
-     * Returns a list of all field errors associated with this validation instance.
+     * All recorded field errors.
      *
-     * @return a list of {@link FieldError} instances
+     * @return list of field errors (never {@code null})
      */
     List<FieldError> getErrors();
 
     /**
-     * Retrieves the first error associated with the specified field.
+     * First field error for the given {@code field}, or {@code null} when none exist.
      *
-     * @param field the name of the field
-     * @return the first {@link FieldError} for the field, or {@code null} if none exist
+     * @param field field name/path
+     * @return first field error or {@code null}
      */
     default FieldError getError(String field) {
         return getErrors(field).isEmpty() ? null : getErrors(field).getFirst();
     }
 
     /**
-     * Retrieves all errors associated with the specified field.
+     * All field errors for the given {@code field}.
      *
-     * @param field the name of the field
-     * @return a list of {@link FieldError} instances for the specified field
+     * @param field field name/path
+     * @return list of matching field errors (never {@code null})
      */
     default List<FieldError> getErrors(String field) {
         return getErrors().stream().filter(e -> e.getField().equals(field)).toList();
     }
 
     /**
-     * Checks if there are any validation errors.
+     * Whether any field errors are present.
      *
-     * @return {@code true} if errors are present, {@code false} otherwise
+     * @return {@code true} if field errors exist
      */
     default boolean hasErrors() {
         return !getErrors().isEmpty();
     }
 
     /**
-     * Checks if there are any errors associated with the specified field.
+     * Whether any errors exist for the given field.
      *
-     * @param field the name of the field
-     * @return {@code true} if errors exist for the field, {@code false} otherwise
+     * @param field field name/path
+     * @return {@code true} if at least one error exists for the field
      */
     default boolean hasErrors(String field) {
         return !getErrors(field).isEmpty();
     }
 
     /**
-     * Returns a list of all parser (non-field-specific) errors.
+     * All recorded global (object-level) errors.
      *
-     * @return a list of {@link ObjectError} instances
+     * @return list of global errors (never {@code null})
      */
     List<ObjectError> getGlobalErrors();
 
     /**
-     * Checks if there are any parser (non-field-specific) validation errors.
+     * Whether any global (object-level) errors are present.
      *
-     * @return {@code true} if parser errors exist, {@code false} otherwise
+     * @return {@code true} if global errors exist
      */
     default boolean hasGlobalErrors() {
         return !getGlobalErrors().isEmpty();
     }
 
     /**
-     * Throws an exception generated by the provided function if validation errors exist.
-     * <p>
-     * This method allows custom exception handling based on validation results.
-     * </p>
+     * Throw an exception produced by {@code function} when any errors are present.
      *
-     * @param function a function that converts {@code Errors} into an exception
-     * @param <E>      the type of exception to be thrown
-     * @throws E if validation errors exist
+     * <p>The predicate is: {@code hasErrors() || hasGlobalErrors()}.</p>
+     *
+     * @param function exception factory (receives this {@link Errors})
+     * @param <E> exception type
+     * @throws E when any errors exist
      */
     default <E extends Throwable> void throwIfErrors(Function<Errors, E> function) throws E {
-        if (hasErrors()) {
+        if (hasErrors() || hasGlobalErrors()) {
             throw function.apply(this);
         }
     }

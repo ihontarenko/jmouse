@@ -235,20 +235,61 @@ final public class PropertyPath {
     }
 
     /**
-     * Returns the full path as a string.
+     * Returns the full property path in canonical string form.
      *
-     * @return the full property path
+     * <p>The returned value is the serialized representation of the underlying
+     * path entries (for example: {@code "user.address.street"} or {@code "items[0].name"}).</p>
+     *
+     * @return full property path string (never {@code null})
      */
     public String path() {
         return entries.toString();
     }
 
     /**
-     * @return true if simple of false if not
+     * Determine whether this path contains exactly one segment.
+     *
+     * <p>A simple path typically represents direct property access without nesting
+     * (for example: {@code "name"} or {@code "[0]"}).</p>
+     *
+     * @return {@code true} if path contains exactly one entry
      */
     public boolean isSimple() {
         return entries().size == 1;
     }
+
+    /**
+     * Determine whether this path contains multiple nested segments.
+     *
+     * <p>A complex path represents nested navigation (for example:
+     * {@code "user.address.street"} or {@code "items[0].name"}).</p>
+     *
+     * @return {@code true} if path is not empty and contains more than one entry
+     */
+    public boolean isComplex() {
+        return isNotEmpty() && !isSimple();
+    }
+
+    /**
+     * Determine whether this path contains no entries.
+     *
+     * <p>An empty path usually represents the root mapping scope.</p>
+     *
+     * @return {@code true} if path has no entries
+     */
+    public boolean isEmpty() {
+        return entries().size == 0;
+    }
+
+    /**
+     * Determine whether this path contains at least one entry.
+     *
+     * @return {@code true} if path is not empty
+     */
+    public boolean isNotEmpty() {
+        return !isEmpty();
+    }
+
 
     @Override
     public String toString() {

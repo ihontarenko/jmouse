@@ -106,7 +106,10 @@ public interface Validator {
          */
         @Override
         public void validate(Object object, Errors errors) {
-            // todo: Error.nullObjectRejection(errors);
+            if (object == null) {
+                errors.reject("validation.null", "Validated object must not be null");
+                return;
+            }
             validator.accept(type.cast(object), errors);
         }
 

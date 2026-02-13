@@ -1,9 +1,13 @@
 package org.jmouse.validator;
 
-public class DefaultErrors extends AbstractErrors {
+public final class DefaultErrors extends AbstractErrors {
 
     public DefaultErrors(Object target) {
-        super(target);
+        this(target, target == null ? "object" : target.getClass().getSimpleName());
+    }
+
+    public DefaultErrors(Object target, String objectName) {
+        super(target, objectName);
     }
 
 }

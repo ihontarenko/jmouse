@@ -1,159 +1,107 @@
 package org.jmouse.validator;
 
-import org.jmouse.core.access.descriptor.structured.bean.JavaBeanDescriptor;
-import org.jmouse.core.access.descriptor.structured.bean.JavaBeanIntrospector;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An abstract base class for managing validation errors.
- * <p>
- * This class provides a structured way to collect and retrieve validation errors
- * at both the object and field levels. It utilizes a {@link JavaBeanDescriptor}
- * for accessing the target object's metadata and properties.
- * </p>
+ * Base {@link Errors} implementation with in-memory storage for global and field errors. 🧩
  *
- * @see Errors
- * @see FieldError
- * @see ObjectError
+ * <p>{@code AbstractErrors} provides:</p>
+ * <ul>
+ *   <li>storage for {@link ObjectError} (global) and {@link FieldError} (field) errors</li>
+ *   <li>Spring-like error code expansion via {@link #getErrorCodes(String)}</li>
+ *   <li>optional hooks for resolving rejected field values/types for richer diagnostics</li>
+ * </ul>
+ *
+ * <p>Subclasses may override {@link #tryGetValue(String)} and {@link #tryGetType(String)}
+ * to integrate with a binder, accessor, or reflection-based resolver.</p>
  */
-abstract public class AbstractErrors implements Errors {
-
-    public static final String ERROR_CODE_PATH_SEPARATOR = ".";
-
-    private final Object                     target;
-    private final JavaBeanDescriptor<Object> descriptor;
-    private final String                     objectName;
-
-    private final List<ObjectError> errors      = new ArrayList<>();
-    private final List<FieldError>  fieldErrors = new ArrayList<>();
+public abstract class AbstractErrors implements Errors {
 
     /**
-     * Constructs an {@code AbstractErrors} instance for a given target object.
-     * <p>
-     * The constructor initializes the object descriptor and extracts the object name
-     * for error reporting purposes.
-     * </p>
-     *
-     * @param target the object being validated (must not be null)
-     * @throws NullPointerException if {@code target} is null
+     * Separator used when composing hierarchical error codes.
      */
-    @SuppressWarnings("unchecked")
-    public AbstractErrors(Object target) {
+    public static final String ERROR_CODE_PATH_SEPARATOR = ".";
+
+    private final Object target;
+    private final String objectName;
+
+    private final List<ObjectError> globalErrors = new ArrayList<>();
+    private final List<FieldError>  fieldErrors  = new ArrayList<>();
+
+    /**
+     * Create an {@link Errors} instance bound to a specific target and logical object name.
+     *
+     * @param target validated target object (may be {@code null})
+     * @param objectName logical object name used in error codes (defaults to {@code "object"} when {@code null})
+     */
+    protected AbstractErrors(Object target, String objectName) {
         this.target = target;
-        this.descriptor = (JavaBeanDescriptor<Object>) new JavaBeanIntrospector<>(target.getClass()).introspect().toDescriptor();
-        this.objectName = descriptor.getName();
+        this.objectName = objectName == null ? "object" : objectName;
     }
 
     /**
-     * Registers a parser error with the given error code, default message, and optional arguments.
-     * <p>
-     * The error is associated with the entire object rather than a specific field.
-     * </p>
+     * {@inheritDoc}
+     */
+    @Override
+    public final String getObjectName() {
+        return objectName;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Object getTarget() {
+        return target;
+    }
+
+    /**
+     * {@inheritDoc}
      *
-     * @param errorCode      the error code identifying the validation issue
-     * @param defaultMessage the default message if no localized message is found
-     * @param arguments      optional arguments for message formatting
+     * <p>Stores an {@link ObjectError} in {@link #getGlobalErrors()}.</p>
      */
     @Override
     public void reject(String errorCode, String defaultMessage, Object... arguments) {
-        errors.add(new ObjectError(this.objectName, getErrorCodes(errorCode), defaultMessage, (Object) arguments));
+        globalErrors.add(new ObjectError(objectName, getErrorCodes(errorCode), defaultMessage, arguments));
     }
 
     /**
-     * Registers a validation error for a specific field.
-     * <p>
-     * If the field exists in the target object, the error is recorded along with
-     * the field's current value. If the field is not found, an exception is thrown.
-     * </p>
+     * {@inheritDoc}
      *
-     * @param field          the name of the field that has the validation error
-     * @param errorCode      the error code identifying the validation issue
-     * @param defaultMessage the default message if no localized message is found
-     * @param arguments      optional arguments for message formatting
-     * @throws IllegalArgumentException if the field does not exist in the validated object
+     * <p>Stores a {@link FieldError} in {@link #getErrors()} and attempts to resolve
+     * the rejected value using {@link #tryGetValue(String)}.</p>
      */
     @Override
     public void rejectValue(String field, String errorCode, String defaultMessage, Object... arguments) {
-        Object fieldValue = null;
-
-/*        if (descriptor.hasProperty(field)) {
-            fieldValue = getFieldValue(field);
-        } else {
-            throw new IllegalArgumentException(
-                    "Validated object '%s' does not contain field: '%s'".formatted(objectName, field));
-        }*/
-
-        String[] errorCodes = getErrorCodes(errorCode);
-        fieldErrors.add(new FieldError(objectName, field, fieldValue, errorCodes, defaultMessage, arguments));
+        Object rejected = tryGetValue(field);
+        fieldErrors.add(new FieldError(objectName, field, rejected, getErrorCodes(errorCode), defaultMessage, arguments));
     }
 
     /**
-     * Retrieves the current value of a specific field in the validated object.
-     * <p>
-     * This method allows access to the actual value being validated, which can be useful
-     * for debugging or advanced validation logic.
-     * </p>
+     * Build an ordered list of message codes for a given error code.
      *
-     * @param field the name of the field
-     * @return the value of the field, or {@code null} if unavailable
-     */
-    @Override
-    public Object getFieldValue(String field) {
-        Object value = null;
-
-//        if (descriptor.hasProperty(field)) {
-//            value = descriptor.getPropertyAccessor(field).obtainValue(target);
-//        }
-
-        return value;
-    }
-
-    /**
-     * Retrieves the type of a specific field in the validated object.
-     * <p>
-     * This method provides insight into the expected data type of a field, which can be useful
-     * for dynamic validation rules.
-     * </p>
+     * <p>Default chain:</p>
+     * <ul>
+     *   <li>{@code objectName + "." + code}</li>
+     *   <li>{@code code}</li>
+     * </ul>
      *
-     * @param field the name of the field
-     * @return the {@link Class} representing the field type, or {@code null} if unknown
-     */
-    @Override
-    public Class<?> getFieldType(String field) {
-        Class<?> type = null;
-
-//        if (descriptor.hasProperty(field)) {
-//            type = descriptor.getProperty(field).getClassType();
-//        }
-
-        return type;
-    }
-
-    /**
-     * Resolves error codes based on a given error code.
-     * <p>
-     * This method allows for error code expansion, which can be used in hierarchical
-     * validation error handling. Implementations may append additional codes
-     * to provide more contextual validation messages.
-     * </p>
-     *
-     * @param code the base error code
-     * @return an array of error codes, where the first one is typically the most specific
+     * @param code base error code
+     * @return ordered array of message codes
      */
     @Override
     public String[] getErrorCodes(String code) {
         return new String[]{
                 objectName + ERROR_CODE_PATH_SEPARATOR + code,
-                code,
+                code
         };
     }
 
     /**
-     * Returns a list of all field-specific validation errors.
+     * Return collected field errors.
      *
-     * @return a list of {@link FieldError} instances
+     * @return mutable list backing this errors instance
      */
     @Override
     public List<FieldError> getErrors() {
@@ -161,12 +109,50 @@ abstract public class AbstractErrors implements Errors {
     }
 
     /**
-     * Returns a list of all parser (non-field-specific) validation errors.
+     * Return collected global (object-level) errors.
      *
-     * @return a list of {@link ObjectError} instances
+     * @return mutable list backing this errors instance
      */
     @Override
     public List<ObjectError> getGlobalErrors() {
-        return errors;
+        return globalErrors;
+    }
+
+    /**
+     * Optional field value resolver for richer {@link FieldError} metadata.
+     *
+     * <p>Called by {@link #rejectValue(String, String, String, Object...)} to obtain the rejected value.</p>
+     *
+     * @param field field name/path
+     * @return rejected value, or {@code null} when not resolvable
+     */
+    protected Object tryGetValue(String field) {
+        return null;
+    }
+
+    /**
+     * Optional field type resolver for validation logic that depends on runtime/declared field types.
+     *
+     * @param field field name/path
+     * @return field type, or {@code null} when not resolvable
+     */
+    protected Class<?> tryGetType(String field) {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Object getFieldValue(String field) {
+        return tryGetValue(field);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Class<?> getFieldType(String field) {
+        return tryGetType(field);
     }
 }
