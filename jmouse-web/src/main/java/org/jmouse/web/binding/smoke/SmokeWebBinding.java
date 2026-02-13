@@ -3,7 +3,6 @@ package org.jmouse.web.binding.smoke;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.mapping.config.MappingConfig;
-
 import org.jmouse.validator.*;
 import org.jmouse.web.binding.*;
 
@@ -14,7 +13,7 @@ public class SmokeWebBinding {
 
     public static void main(String... args) {
 
-        // 1) ValidationProcessor (мінімально)
+        // 1) ValidatorRegistry + ValidationProcessor
         DefaultValidatorRegistry registry = new DefaultValidatorRegistry();
         registry.register(Validator.forInstance(UserForm.class, (form, errors) -> {
             if (form.name == null || form.name.isBlank()) {
@@ -28,38 +27,46 @@ public class SmokeWebBinding {
                 .build();
 
         // 2) Errors infrastructure
-        ErrorsFactory errorsFactory = new DefaultErrorsFactory(); // твій
-        ErrorsScope errorsScope = new ErrorsScope();
+        ErrorsFactory errorsFactory = new DefaultErrorsFactory();
 
-        // 3) Mapping plugin (GLOBAL)
-        BindingMappingPlugin bindingPlugin =
-                new BindingMappingPlugin(errorsScope::get, new DefaultMappingFailureTranslator());
+        // 3) Binding context scope (THE LINK binder -> plugin)
+        BindingContextScope bindingScope = new BindingContextScope();
 
-        // 4) Build mapper with GLOBAL plugin
+        // 4) Mapping plugin (GLOBAL) - now reads BindingContextScope, not errorsScope::get
+        BindingMappingPlugin bindingPlugin = new BindingMappingPlugin(
+                bindingScope,
+                List.of(
+                        new FailureToErrorsProcessor(new DefaultMappingFailureTranslator()),
+                        new ValidationBindingProcessor(validationProcessor)
+                )
+        );
+
+        // 5) Build mapper with GLOBAL plugin
         Mapper mapper = Mappers.builder()
                 .config(MappingConfig.builder()
                                 .plugins(List.of(bindingPlugin))
                                 .build())
                 .build();
 
-        // 5) DataBinder (mapper singleton)
+        // 6) DataBinder (mapper singleton) - opens BindingContextScope per bind() call
         ParametersDataBinder binder = new ParametersDataBinder(
                 mapper,
                 errorsFactory,
-                errorsScope,
-                validationProcessor
+                bindingScope
         );
 
-        // 6) Input: pretend it is query/form structure already converted to java map
-        // Let's craft data so it triggers BOTH:
-        // - mapping error: id is "abc" but target is int (causes MappingException in conversion/mapping)
-        // - validation error: name is blank
+        // 7) Input (already java map)
         Map<String, Object> input = Map.of(
                 "id", "555",
                 "name", ""
         );
 
-        BindingResult<UserForm> result = binder.bind(input, UserForm.class, "userForm");
+        BindingResult<UserForm> result = binder.bind(
+                input,
+                UserForm.class,
+                "userForm",
+                ValidationHints.empty()
+        );
 
         System.out.println("Target: " + result.target());
         System.out.println("Has errors: " + result.hasErrors());
@@ -85,20 +92,10 @@ public class SmokeWebBinding {
             return "UserForm{id=" + id + ", name='" + name + "'}";
         }
 
-        public int getId() {
-            return id;
-        }
+        public int getId() { return id; }
+        public void setId(int id) { this.id = id; }
 
-        public void setId(int id) {
-            this.id = id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
     }
 }

@@ -6,6 +6,7 @@ import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.access.descriptor.structured.DescriptorResolver;
 import org.jmouse.core.access.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.access.descriptor.structured.PropertyDescriptor;
+import org.jmouse.core.mapping.MappingDestination;
 import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.strategy.support.AbstractObjectStrategy;
@@ -78,7 +79,10 @@ public final class JavaBeanStrategy<T> extends AbstractObjectStrategy<T> {
             Object adapted;
 
             try {
-                adapted = adaptValue(value, getTypedValue(target, propertyName, propertyType), mappingContext);
+                MappingDestination destination = new MappingDestination.BeanProperty(
+                        instance, mappingContext.currentPath(), property
+                );
+                adapted = adaptValue(value, getTypedValue(target, propertyName, propertyType), mappingContext, destination);
             } catch (Exception exception) {
                 throw toMappingException(
                         ErrorCodes.BEAN_PROPERTY_ADAPT_FAILED,

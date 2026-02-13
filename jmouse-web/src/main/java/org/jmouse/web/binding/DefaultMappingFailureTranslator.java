@@ -1,5 +1,7 @@
 package org.jmouse.web.binding;
 
+import org.jmouse.core.access.PropertyPath;
+import org.jmouse.core.mapping.errors.MappingException;
 import org.jmouse.core.mapping.plugin.MappingFailure;
 import org.jmouse.validator.Errors;
 
@@ -9,19 +11,20 @@ public final class DefaultMappingFailureTranslator implements MappingFailureTran
     public static final String MAPPING_FAILED_CODE    = "mapping.failed";
 
     @Override
-    public void translate(MappingFailure failure, Errors errors) {
-        if (failure == null || errors == null) {
+    public void translate(MappingException exception, PropertyPath path, Errors errors) {
+        if (errors == null) {
             return;
         }
 
-        String code    = failure.error() == null ? MAPPING_FAILED_CODE : failure.error().code();
-        String message = failure.error() == null ? MAPPING_FAILED_MESSAGE : failure.error().getMessage();
-        String path    = failure.path() == null ? "" : failure.path().path();
+        String code    = exception == null ? MAPPING_FAILED_CODE : exception.code();
+        String message = exception == null ? MAPPING_FAILED_MESSAGE : exception.getMessage();
 
-        if (path.isBlank()) {
+        String p = path == null ? "" : path.path();
+
+        if (p.isBlank()) {
             errors.reject(code, message);
         } else {
-            errors.rejectValue(path, code, message);
+            errors.rejectValue(p, code, message);
         }
     }
 }

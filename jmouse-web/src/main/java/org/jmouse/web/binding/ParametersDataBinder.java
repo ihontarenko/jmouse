@@ -5,34 +5,30 @@ import org.jmouse.validator.*;
 
 public final class ParametersDataBinder {
 
-    private final ValidationProcessor validationProcessor;
     private final Mapper              mapper;
     private final ErrorsFactory       errorsFactory;
-    private final ErrorsScope         errorsScope;
+    private final BindingContextScope bindingScope;
 
     public ParametersDataBinder(
             Mapper mapper,
             ErrorsFactory errorsFactory,
-            ErrorsScope errorsScope,
-            ValidationProcessor validationProcessor
+            BindingContextScope bindingScope
     ) {
         this.mapper = mapper;
         this.errorsFactory = errorsFactory;
-        this.validationProcessor = validationProcessor;
-        this.errorsScope = errorsScope;
+        this.bindingScope = bindingScope;
     }
 
     public <T> BindingResult<T> bind(Object source, Class<T> targetType, String objectName, ValidationHints hints) {
         Errors errors = errorsFactory.create(null, objectName);
-        T      target;
 
-        try (ErrorsScope.ScopeToken ignored = errorsScope.open(errors)) {
+        BindingContext context = new BindingContext(errors, objectName, hints);
+
+        T target;
+
+        try (BindingContextScope.ScopeToken ignored = bindingScope.open(context)) {
             target = mapper.map(source, targetType);
         }
-
-        ValidationResult<T> validation = validationProcessor.validate(target, objectName, hints);
-
-        ErrorsMerging.merge(errors, validation.errors());
 
         return new DefaultBindingResult<>(target, errors);
     }
