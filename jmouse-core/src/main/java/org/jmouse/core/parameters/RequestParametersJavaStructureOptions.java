@@ -1,4 +1,4 @@
-package org.jmouse.web.parameters;
+package org.jmouse.core.parameters;
 
 public record RequestParametersJavaStructureOptions(
         boolean unwrapSingleScalarValue,

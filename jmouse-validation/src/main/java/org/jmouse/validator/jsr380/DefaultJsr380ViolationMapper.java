@@ -2,6 +2,7 @@ package org.jmouse.validator.jsr380;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Path;
+import org.jmouse.util.Strings;
 import org.jmouse.validator.Errors;
 
 public final class DefaultJsr380ViolationMapper implements Jsr380ViolationMapper {
@@ -20,6 +21,8 @@ public final class DefaultJsr380ViolationMapper implements Jsr380ViolationMapper
                 .getAnnotation()
                 .annotationType()
                 .getSimpleName();
+
+        code = Strings.underscored(code, true);
 
         if (fieldPath.isBlank()) {
             errors.reject(code, message);

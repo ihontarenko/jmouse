@@ -1,5 +1,6 @@
-package org.jmouse.web.parameters.support;
+package org.jmouse.core.parameters.support;
 
+import org.jmouse.core.parameters.*;
 import org.jmouse.web.parameters.*;
 
 import java.util.ArrayList;

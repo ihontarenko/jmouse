@@ -19,6 +19,12 @@ public class Smoke1 {
             }
         }));
 
+        Validator.forInstance(User.class, (u, e) -> {
+            if (u.name() == null || !u.name().isBlank()) {
+                e.rejectValue("name", "notBlank", "Name is required");
+            }
+        }).validate(user).getErrors().getFirst().getDefaultMessage();
+
         ValidationProcessor processor = ValidationProcessors.builder()
                 .validatorRegistry(registry)     // registry == provider тут автоматично ок
                 .errorsFactory(new DefaultErrorsFactory())

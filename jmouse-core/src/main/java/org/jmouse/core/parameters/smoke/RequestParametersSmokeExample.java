@@ -1,10 +1,10 @@
-package org.jmouse.web.parameters.smoke;
+package org.jmouse.core.parameters.smoke;
 
-import org.jmouse.web.parameters.RequestParametersJavaStructureConverter;
-import org.jmouse.web.parameters.RequestParametersJavaStructureOptions;
-import org.jmouse.web.parameters.RequestParametersTree;
-import org.jmouse.web.parameters.RequestParametersTreeParser;
-import org.jmouse.web.parameters.support.RequestParametersTreePrinter;
+import org.jmouse.core.parameters.RequestParametersJavaStructureConverter;
+import org.jmouse.core.parameters.RequestParametersJavaStructureOptions;
+import org.jmouse.core.parameters.RequestParametersTree;
+import org.jmouse.core.parameters.RequestParametersTreeParser;
+import org.jmouse.core.parameters.support.RequestParametersTreePrinter;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

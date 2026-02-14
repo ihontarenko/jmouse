@@ -16,7 +16,7 @@ public class Smoke {
     public static void main(String... args) {
 
         // 1) ValidatorRegistry + ValidationProcessor
-        DefaultValidatorRegistry registry = new DefaultValidatorRegistry();
+        ValidatorRegistry registry = new DefaultValidatorRegistry();
         registry.register(Validator.forInstance(UserForm.class, (form, errors) -> {
             if (form.name == null || form.name.isBlank()) {
                 errors.rejectValue("name", "notBlank", "name is required");
@@ -92,7 +92,7 @@ public class Smoke {
     // simple DTO for smoke
     public static class UserForm {
         public int id;
-        @StrongPassword(groups = {CreateOp.class})
+        @StrongPassword(/*groups = {CreateOp.class}*/)
         public String password;
         public String name;
 
