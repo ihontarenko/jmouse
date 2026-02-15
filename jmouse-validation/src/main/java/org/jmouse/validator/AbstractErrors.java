@@ -2,6 +2,7 @@ package org.jmouse.validator;
 
 import org.jmouse.core.Verify;
 import org.jmouse.core.access.PropertyPath;
+import org.jmouse.util.Strings;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import java.util.List;
  *   <li>convenience queries: counts, first error, field filtering, and error-code checks</li>
  * </ul>
  *
- * <p>Subclasses may override {@link #tryGetFieldValue(String)} and {@link #tryGetFieldType(String)}
+ * <p>Subclasses may override {@link #tryGetValue(String)} and {@link #tryGetType(String)}
  * to enrich {@link FieldError} with rejected value/type metadata.</p>
  */
 public abstract class AbstractErrors implements Errors {
@@ -58,7 +59,7 @@ public abstract class AbstractErrors implements Errors {
     protected AbstractErrors(Object target, String objectName, MessageCodesResolver resolver) {
         this.target = target;
         this.codesResolver = Verify.nonNull(resolver, "resolver");
-        this.objectName = isBlank(objectName) ? DEFAULT_OBJECT_NAME : objectName;
+        this.objectName = Strings.isEmpty(objectName) ? DEFAULT_OBJECT_NAME : objectName;
     }
 
     /** {@inheritDoc} */
@@ -125,12 +126,12 @@ public abstract class AbstractErrors implements Errors {
      */
     @Override
     public void rejectValue(String field, String errorCode, String defaultMessage, Object... arguments) {
-        String resolvedField = resolveNestedField(field);
+        String resolved = resolveNestedField(field);
 
-        Object   rejected = tryGetFieldValue(resolvedField);
-        String[] codes    = codesResolver.resolveCodes(objectName, resolvedField, errorCode);
+        Object   rejected = tryGetValue(resolved);
+        String[] codes    = codesResolver.resolveCodes(objectName, resolved, errorCode);
 
-        fieldErrors.add(new FieldError(objectName, resolvedField, rejected, codes, defaultMessage, arguments));
+        fieldErrors.add(new FieldError(objectName, resolved, rejected, codes, defaultMessage, arguments));
     }
 
     /**
@@ -267,18 +268,18 @@ public abstract class AbstractErrors implements Errors {
      * @return {@code true} if at least one error contains the code
      */
     public final boolean hasErrorCode(String code) {
-        if (isBlank(code)) {
+        if (Strings.isEmpty(code)) {
             return false;
         }
 
-        for (ObjectError e : objectErrors) {
-            if (containsCode(e, code)) {
+        for (ObjectError error : objectErrors) {
+            if (containsCode(error, code)) {
                 return true;
             }
         }
 
-        for (FieldError e : fieldErrors) {
-            if (containsCode(e, code)) {
+        for (FieldError error : fieldErrors) {
+            if (containsCode(error, code)) {
                 return true;
             }
         }
@@ -294,7 +295,7 @@ public abstract class AbstractErrors implements Errors {
      * @return {@code true} if at least one matching field error contains the code
      */
     public final boolean hasFieldErrorCode(String field, String code) {
-        if (isBlank(code)) {
+        if (Strings.isEmpty(code)) {
             return false;
         }
 
@@ -313,7 +314,7 @@ public abstract class AbstractErrors implements Errors {
      * @param field resolved field path
      * @return rejected field value, or {@code null} if unavailable
      */
-    protected Object tryGetFieldValue(String field) {
+    protected Object tryGetValue(String field) {
         return null;
     }
 
@@ -323,33 +324,34 @@ public abstract class AbstractErrors implements Errors {
      * @param field resolved field path
      * @return field type, or {@code null} if unavailable
      */
-    protected Class<?> tryGetFieldType(String field) {
+    protected Class<?> tryGetType(String field) {
         return null;
     }
 
     /** {@inheritDoc} */
     @Override
     public final Object getFieldValue(String field) {
-        return tryGetFieldValue(field);
+        return tryGetValue(field);
     }
 
     /** {@inheritDoc} */
     @Override
     public final Class<?> getFieldType(String field) {
-        return tryGetFieldType(field);
+        return tryGetType(field);
     }
 
     private String resolveNestedField(String field) {
-        String f = field == null ? "" : field;
+        String normalized = field == null ? "" : field;
 
         if (nestedPath == null || nestedPath.isEmpty()) {
-            return f;
+            return normalized;
         }
-        if (f.isBlank()) {
+
+        if (normalized.isBlank()) {
             return nestedPath.path();
         }
 
-        return nestedPath.append(f).path();
+        return nestedPath.append(normalized).path();
     }
 
     private static boolean containsCode(ObjectError error, String code) {
@@ -366,9 +368,5 @@ public abstract class AbstractErrors implements Errors {
         }
 
         return false;
-    }
-
-    private static boolean isBlank(String value) {
-        return value == null || value.isBlank();
     }
 }

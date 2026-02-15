@@ -75,6 +75,7 @@ public class CoreExtension implements Extension {
                 new DefaultFilter(),
                 new TrimFilter(),
                 new TypeFilter(),
+                new ClassFilter(),
                 new LengthFilter(),
                 new SplitFilter(),
                 new JoinFilter(),

@@ -9,7 +9,7 @@ import org.jmouse.core.parameters.support.RequestParametersTreePrinter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public final class RequestParametersSmokeExample {
+public final class Smoke1 {
 
     public static void main(String[] args) {
         Map<String, String[]> parameters = new LinkedHashMap<>();

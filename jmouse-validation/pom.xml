@@ -26,6 +26,10 @@
         </dependency>
         <dependency>
             <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-el</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jmouse</groupId>
             <artifactId>jmouse-common</artifactId>
         </dependency>
         <dependency>

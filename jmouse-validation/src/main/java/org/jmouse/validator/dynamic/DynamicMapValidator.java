@@ -18,7 +18,7 @@ public final class DynamicMapValidator implements Validator {
 
     @Override
     public void validate(Object object, Errors errors) {
-        if (!(object instanceof java.util.Map<?, ?> map)) {
+        if (!(object instanceof Map<?, ?> map)) {
             errors.reject("type", "Expected Map");
             return;
         }

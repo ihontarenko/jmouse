@@ -46,10 +46,10 @@ public class LambdaParser implements Parser {
 
         // Parse optional parameter list
         if (cursor.isCurrent(T_IDENTIFIER)) {
-            Expression params = (Expression)
+            Expression parameters = (Expression)
                     context.getParser(ParametersParser.class)
                             .parse(cursor, context);
-            lambda.setParameters((ParameterSetNode) params);
+            lambda.setParameters((ParameterSetNode) parameters);
         }
 
         // Expect closing parenthesis and arrow token
