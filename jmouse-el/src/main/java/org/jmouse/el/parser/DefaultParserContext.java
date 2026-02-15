@@ -3,6 +3,7 @@ package org.jmouse.el.parser;
 import org.jmouse.el.extension.*;
 import org.jmouse.core.access.AttributeResolver;
 import org.jmouse.el.lexer.Token;
+import org.jmouse.el.lexer.TokenCursor;
 
 import java.util.List;
 
@@ -37,6 +38,11 @@ public class DefaultParserContext implements ParserContext {
     @Override
     public Parser getParser(Class<? extends Parser> type) {
         return extensions.getParser(type);
+    }
+
+    @Override
+    public Parser getParser(TokenCursor cursor) {
+        return extensions.getParser(cursor);
     }
 
     @Override

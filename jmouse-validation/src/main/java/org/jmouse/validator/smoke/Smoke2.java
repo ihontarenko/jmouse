@@ -1,19 +1,19 @@
 package org.jmouse.validator.smoke;
 
+import org.jmouse.core.mapping.Mapper;
+import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.parameters.RequestParametersJavaStructureConverter;
 import org.jmouse.core.parameters.RequestParametersJavaStructureOptions;
 import org.jmouse.core.parameters.RequestParametersTree;
 import org.jmouse.core.parameters.RequestParametersTreeParser;
 import org.jmouse.core.parameters.support.RequestParametersTreePrinter;
 import org.jmouse.el.ExpressionLanguage;
-import org.jmouse.el.node.Expression;
-import org.jmouse.el.node.expression.FunctionNode;
 import org.jmouse.validator.*;
-import org.jmouse.validator.dynamic.ValidationSchema;
-import org.jmouse.validator.dynamic.ValidationSchemas;
+import org.jmouse.validator.constraint.constraint.MinMaxConstraint;
+import org.jmouse.validator.constraint.model.ValidationDefinition;
+import org.jmouse.validator.constraint.adapter.el.ValidatorDefinitionParser;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public final class Smoke2 {
@@ -57,50 +57,25 @@ public final class Smoke2 {
 
 
         ExpressionLanguage expressionLanguage = new ExpressionLanguage();
-//
-        Map<String,Object> map = parseExpression(expressionLanguage, "max({'class': 'org.jmouse.validator.dynamic.constraints.MinMaxConstraint'|class, 'min':3, 'msg':'range.. bla'})");
 
-        // temporary test for example
-        // non prod version
-        String validatorName = (String) map.get("name");
-        Map<String, Object> arguments = (Map<String, Object>) map.get("arguments");
+        expressionLanguage.getExtensions()
+                .addParser(new ValidatorDefinitionParser());
 
-        System.out.println(validatorName);
-    }
+        Object evaluated = expressionLanguage.evaluate("@MinMax('min':3, 'message':'out of range', 'mode':'min')");
 
-    public static Map<String,Object> parseExpression(ExpressionLanguage el, String expression) {
-        if (el.compile(expression) instanceof FunctionNode functionNode) {
-            String name = functionNode.getName();
-            if (functionNode.getArguments().getFirst() instanceof Expression e) {
-                if (e.evaluate(el.newContext()) instanceof Map<?,?> map) {
-                    return Map.of(
-                            "name", name,
-                            "arguments", map
-                    );
-                }
+        if (evaluated instanceof ValidationDefinition definition) {
+
+
+            if (definition.getName().equalsIgnoreCase("minmax")) {
+                MinMaxConstraint constraint = getMapper().map(definition, MinMaxConstraint.class);
             }
-        }
 
-        return null;
+        }
     }
 
 
-    public static ValidationSchema smokeA(ValidatorRegistry registry) {
-
-        ValidationSchema schema = ValidationSchemas.builder("dynamicForm")
-                .field("lang")
-                    .use("oneOf").argument("values", List.of("uk", "en")).message("lang must be uk/en").add()
-                    .done()
-                .field("filter.admin.accesses[0]")
-                    .use("minMax")
-                        .argument("mode", "min")
-                        .argument("min", -1)
-                        .message("must be >= -1")
-                        .add()
-                    .done()
-                .build();
-
-        return schema;
+    public static Mapper getMapper() {
+        return Mappers.builder().build();
     }
 
     public record User(Profile profile, String name) {

@@ -2,6 +2,7 @@ package org.jmouse.util;
 
 import java.net.URL;
 import java.nio.file.FileSystems;
+import java.util.function.Function;
 
 import static java.lang.Character.*;
 
@@ -219,5 +220,13 @@ public final class Strings {
         String relative = Files.getRelativePath(url, basePath);
 
         return Files.removeExtension(relative).replace(Files.SLASH.charAt(0), '.');
+    }
+
+    public static String emptyIfNull(String value) {
+        return value == null ? "" : value;
+    }
+
+    public static String normalize(String value, Function<String, String> mapper) {
+        return mapper.apply(emptyIfNull(value));
     }
 }

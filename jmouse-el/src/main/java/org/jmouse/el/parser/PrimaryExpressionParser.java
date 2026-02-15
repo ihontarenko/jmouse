@@ -46,6 +46,8 @@ public class PrimaryExpressionParser implements Parser {
             cursor.ensure(T_OPEN_PAREN);
             left = context.getParser(ExpressionParser.class).parse(cursor, context);
             cursor.ensure(T_CLOSE_PAREN);
+        } else if (context.getParser(cursor) instanceof Parser parser){
+            left = parser.parse(cursor, context);
         }
 
         context.getParser(cursor);

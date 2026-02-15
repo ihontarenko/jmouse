@@ -48,4 +48,8 @@ public record ValidationHints(List<Object> values) {
         return null;
     }
 
+    public boolean contains(Object hint) {
+        return values != null && values.contains(hint);
+    }
+
 }
