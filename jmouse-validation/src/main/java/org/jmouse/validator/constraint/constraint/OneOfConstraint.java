@@ -11,7 +11,7 @@ public final class OneOfConstraint implements Constraint {
     /**
      * Allowed values. Stored as strings for stable comparison across scalar types.
      */
-    private List<String> values = new ArrayList<>();
+    private List<String> allowed;
 
     private String message;
 
@@ -25,12 +25,12 @@ public final class OneOfConstraint implements Constraint {
         return getMessage();
     }
 
-    public List<String> getValues() {
-        return values;
+    public List<String> getAllowed() {
+        return allowed;
     }
 
-    public void setValues(List<String> values) {
-        this.values = (values == null) ? new ArrayList<>() : new ArrayList<>(values);
+    public void setAllowed(List<String> allowed) {
+        this.allowed = (allowed == null) ? new ArrayList<>() : new ArrayList<>(allowed);
     }
 
     public String getMessage() {
@@ -57,12 +57,12 @@ public final class OneOfConstraint implements Constraint {
             if (value == null) {
                 return true;
             }
-            if (c.values == null || c.values.isEmpty()) {
+            if (c.allowed == null || c.allowed.isEmpty()) {
                 return true; // MVP: no allowed list => pass (or choose strict later)
             }
 
             String normalized = String.valueOf(value);
-            return c.values.contains(normalized);
+            return c.allowed.contains(normalized);
         }
     }
 }

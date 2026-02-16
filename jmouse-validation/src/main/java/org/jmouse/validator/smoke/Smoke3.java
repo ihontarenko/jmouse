@@ -2,6 +2,7 @@ package org.jmouse.validator.smoke;
 
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.Mappers;
+import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.el.ExpressionLanguage;
 
 import org.jmouse.validator.*;
@@ -21,6 +22,7 @@ import org.jmouse.validator.constraint.registry.InMemoryConstraintSchemaRegistry
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -116,7 +118,7 @@ public final class Smoke3 {
     private static ConstraintSchema buildProgrammaticSchema() {
 
         OneOfConstraint oneOfLang = new OneOfConstraint();
-        oneOfLang.setValues(List.of("uk", "en"));
+        oneOfLang.setAllowed(List.of("uk", "en"));
         oneOfLang.setMessage("lang must be uk/en");
 
         MinMaxConstraint minAccess = new MinMaxConstraint();
@@ -145,7 +147,11 @@ public final class Smoke3 {
                 .register("oneof", OneOfConstraint.class);
 
         ExpressionLanguage el = new ExpressionLanguage();
-        Mapper mapper = Mappers.defaultMapper();
+        Mapper mapper = Mappers.builder()
+                .config(MappingConfig.builder()
+                        .listFactory(LinkedList::new)
+                        .build())
+                .build();
 
         ConstraintExpressionSupport support = ConstraintELModule.create(el, typeRegistry, mapper);
 
