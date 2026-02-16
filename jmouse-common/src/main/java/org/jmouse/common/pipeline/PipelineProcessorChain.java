@@ -15,79 +15,128 @@ public record PipelineProcessorChain(
         Map<String, ProcessorProperties> properties
 ) implements PipelineChain {
 
-    private static final Logger            LOGGER             = getLogger(PipelineProcessorChain.class);
-    private static final PipelineProcessor FALLBACK_PROCESSOR = new DefaultFallbackProcessor();
+    private static final Logger LOGGER = getLogger(PipelineProcessorChain.class);
 
+    private static final PipelineProcessor DEFAULT_FALLBACK = new FallbackProcessor();
+
+    @Override
     public void proceed(PipelineContext context) throws Exception {
-        String              processorName = initial;
-        Map<String, Object> visitor       = new HashMap<>();
+        String currentLink = initial;
+
+        PipelineResult       previous = null;
+        Map<String, Boolean> visited  = new HashMap<>();
 
         LOGGER.info("[PIPELINE-CHAIN]: INITIAL PROCESS {}", initial);
 
-        do {
-            Enum<?>             returnCode;
-            ProcessorProperties currentProperties = properties.get(processorName);
-            PipelineProcessor   currentProcessor  = processors.get(processorName);
+        while (currentLink != null) {
 
-            if (currentProcessor == null) {
+            PipelineProcessor   processor           = processors.get(currentLink);
+            ProcessorProperties processorProperties = properties.get(currentLink);
+
+            if (processor == null) {
                 throw new MissingProcessorLinkException(
-                        "No processor with the link name '%s' was located. Check the pipeline file for correct linking."
-                                .formatted(processorName));
+                        "No processor with the link name '%s' was located. Check pipeline definition."
+                                .formatted(currentLink));
             }
 
-            if (visitor.containsValue(processorName)) {
+            if (visited.containsKey(currentLink)) {
                 throw new CyclicInvocationDetected(
-                        "Processor '%s' encountered a recursive call".formatted(processorName));
+                        "Processor '%s' encountered a recursive call".formatted(currentLink));
             }
+
+            PipelineResult result;
 
             try {
-                returnCode = currentProcessor.process(context);
-            } catch (Exception exception) {
+                result = processor.process(context, context.getArgumentsContext(), previous);
+            } catch (Exception ex) {
 
                 if (context.getValue("EXCEPTION") == null) {
-                    context.setValue("EXCEPTION", exception);
+                    context.setValue("EXCEPTION", ex);
                 }
 
-                handleFallback(context, currentProperties, exception);
+                handleFallback(context, processorProperties, ex);
                 break;
             }
 
+            previous = result;
+
+            // if you already have a stop flag in context — respect it
             if (context.isProcessingStopped()) {
-                LOGGER.info("[PIPELINE-CHAIN]: PROCESSOR '{}' STOPPED THE PROCESSOR-CHAIN", processorName);
+                LOGGER.info("[PIPELINE-CHAIN]: STOPPED BY CONTEXT FLAG at '{}'", currentLink);
                 break;
             }
 
-            if (returnCode == null) {
+            if (result == null) {
                 throw new InvalidProcessorReturnException(
-                        "Processor '%s' must return a valid code; null is unacceptable".formatted(processorName));
+                        "Processor '%s' returned null PipelineResult".formatted(currentLink));
             }
 
-            visitor.put(processorName, true);
+            if (result.error() != null) {
+                Throwable err = result.error();
+                Exception ex = (err instanceof Exception e) ? e : new PipelineRuntimeException(err);
+                handleFallback(context, processorProperties, ex);
+                break;
+            }
 
-            processorName = currentProperties.getNext(returnCode.name());
+            if (result.stop()) {
+                LOGGER.info("[PIPELINE-CHAIN]: STOPPED BY RESULT at '{}'", currentLink);
+                break;
+            }
 
-            LOGGER.info("[PIPELINE-CHAIN]: RETURN: '{}' -> NEXT: '{}'", returnCode, processorName);
+            visited.put(currentLink, true);
 
-        } while (processorName != null);
+            if (result.hasJump()) {
+                String jumpTo = result.jumpTo();
+                LOGGER.info("[PIPELINE-CHAIN]: JUMP '{}' -> '{}'", currentLink, jumpTo);
+                currentLink = jumpTo;
+                continue;
+            }
+
+            String codeKey = result.codeKey();
+            if (codeKey == null) {
+                throw new InvalidProcessorReturnException(
+                        "Processor '%s' returned PipelineResult with null code and no jump"
+                                .formatted(currentLink));
+            }
+
+            String next = (processorProperties == null) ? null : processorProperties.getNext(codeKey);
+
+            LOGGER.info("[PIPELINE-CHAIN]: RETURN '{}' -> NEXT '{}'", codeKey, next);
+
+            if (next == null) {
+                throw new InvalidProcessorReturnException(
+                        "No transition mapping for return '%s' at link '%s'".formatted(codeKey, currentLink));
+            }
+
+            currentLink = next;
+        }
     }
 
-    private void handleFallback(PipelineContext context, ProcessorProperties properties, Exception exception)
-            throws Exception {
-        PipelineProcessor    fallback = FALLBACK_PROCESSOR;
+    private void handleFallback(
+            PipelineContext context, ProcessorProperties properties, Exception exception) throws Exception {
+
+        PipelineProcessor    fallback = DEFAULT_FALLBACK;
         MutableResultContext result   = context.getResultContext();
 
+        // If link-level fallback points to another processor link - use it
         if (properties != null && properties.fallback() != null) {
-            fallback = processors.get(properties.fallback());
+            PipelineProcessor processor = processors.get(properties.fallback());
+            if (processor != null) {
+                fallback = processor;
+            }
         }
 
+        // record error in result context (your real API)
         result.addError("EXCEPTION", exception.getMessage());
+
+        // keep your existing exception propagation style
         context.setValue("EXCEPTION", exception);
         context.setValue(Throwable.class, exception);
 
+        // execute fallback (it may throw)
         fallback.process(context);
 
-        LOGGER.error("[PIPELINE-CHAIN]: ERROR OCCURRED: '{}', FALLBACK PROCESSOR: '{}'",
-                exception.getMessage(), fallback.getClass().getName());
+        LOGGER.error("[PIPELINE-CHAIN]: ERROR: '{}', FALLBACK: '{}'",
+                     exception.getMessage(), fallback.getClass().getName());
     }
-
 }

@@ -19,4 +19,6 @@ public interface FieldRules {
     }
 
     List<ConstraintRule> rules();
+
+    FieldRules add(ConstraintRule constraintRule);
 }

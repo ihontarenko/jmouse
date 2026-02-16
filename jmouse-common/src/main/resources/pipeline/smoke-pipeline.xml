@@ -1,0 +1,33 @@
+<pipeline name="DEFAULT">
+
+    <processor-chain name="smoke-xml" initial="start">
+
+        <processor-link name="start">
+            <processor class="org.jmouse.common.pipeline.smoke.PipelineXmlSmoke$XmlStartProcessor">
+                <parameter name="message" value="Hello from XML" resolver="BASIC"/>
+            </processor>
+            <properties>
+                <transition return="NEXT" link="jump"/>
+            </properties>
+        </processor-link>
+
+        <processor-link name="jump">
+            <processor class="org.jmouse.common.pipeline.smoke.PipelineXmlSmoke$XmlJumpProcessor"/>
+            <properties>
+                <!-- This transition is not used because processor returns PipelineResult.jump("finish") -->
+                <transition return="NEXT" link="finish"/>
+            </properties>
+        </processor-link>
+
+        <processor-link name="finish">
+            <processor class="org.jmouse.common.pipeline.smoke.PipelineXmlSmoke$XmlFinishProcessor"/>
+        </processor-link>
+
+        <!-- Optional: shows fallback-link usage if an exception happens -->
+        <processor-link name="fallback">
+            <processor class="org.jmouse.common.pipeline.smoke.PipelineXmlSmoke$XmlFallbackProcessor"/>
+        </processor-link>
+
+    </processor-chain>
+
+</pipeline>

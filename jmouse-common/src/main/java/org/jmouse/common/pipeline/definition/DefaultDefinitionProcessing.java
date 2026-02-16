@@ -11,7 +11,7 @@ public final class DefaultDefinitionProcessing {
 
     private DefaultDefinitionProcessing() {}
 
-    public static DefinitionPostProcessor create() {
+    public static DefinitionPostProcessor defaults() {
         return new DefinitionProcessorChain(
                 List.of(
                         new NormalizeProcessor(),

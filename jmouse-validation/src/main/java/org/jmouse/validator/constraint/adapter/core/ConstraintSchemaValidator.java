@@ -6,17 +6,17 @@ import org.jmouse.validator.ValidationHints;
 import org.jmouse.validator.constraint.handler.ConstraintHandler;
 import org.jmouse.validator.constraint.handler.SchemaSelector;
 import org.jmouse.validator.constraint.model.ConstraintSchema;
-import org.jmouse.validator.constraint.registry.InMemoryConstraintSchemaRegistry;
+import org.jmouse.validator.constraint.registry.ConstraintSchemaRegistry;
 
 public final class ConstraintSchemaValidator implements Validator {
 
-    private final InMemoryConstraintSchemaRegistry schemaRegistry;
-    private final ConstraintHandler                handler;
-    private final SchemaSelector           selector;
-    private final ValidationHintsSupplier  hintsSupplier;
+    private final ConstraintSchemaRegistry schemaRegistry;
+    private final ConstraintHandler        handler;
+    private final SchemaSelector                   selector;
+    private final ValidationHintsSupplier          hintsSupplier;
 
     public ConstraintSchemaValidator(
-            InMemoryConstraintSchemaRegistry schemaRegistry,
+            ConstraintSchemaRegistry schemaRegistry,
             ConstraintHandler handler,
             SchemaSelector selector,
             ValidationHintsSupplier hintsSupplier
@@ -59,4 +59,5 @@ public final class ConstraintSchemaValidator implements Validator {
     public interface ValidationHintsSupplier {
         ValidationHints get();
     }
+
 }

@@ -1,10 +1,7 @@
 package org.jmouse.validator.constraint.dsl;
 
 import org.jmouse.validator.constraint.api.Constraint;
-import org.jmouse.validator.constraint.model.ConstraintRule;
-import org.jmouse.validator.constraint.model.ConstraintSchema;
-import org.jmouse.validator.constraint.model.DefaultConstraintSchema;
-import org.jmouse.validator.constraint.model.DefaultFieldRules;
+import org.jmouse.validator.constraint.model.*;
 
 public final class ConstraintSchemas {
 
@@ -34,8 +31,8 @@ public final class ConstraintSchemas {
 
     public static final class FieldBuilder {
 
-        private final Builder           parent;
-        private final DefaultFieldRules rules;
+        private final Builder    parent;
+        private final FieldRules rules;
 
         private FieldBuilder(Builder parent, DefaultFieldRules rules) {
             this.parent = parent;

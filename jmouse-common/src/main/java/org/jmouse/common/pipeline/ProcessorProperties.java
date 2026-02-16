@@ -5,9 +5,11 @@ import java.util.Map;
 
 import static java.util.Objects.requireNonNullElseGet;
 
-public record ProcessorProperties(Map<String, String> transitions,
-                                  Map<String, String> configurations,
-                                  String fallback) {
+public record ProcessorProperties(
+        Map<String, String> transitions,
+        Map<String, String> configurations,
+        String fallback
+) {
 
     public String configuration(Configuration parameter) {
         return (String) requireNonNullElseGet(configurations(), HashMap::new)
@@ -19,8 +21,13 @@ public record ProcessorProperties(Map<String, String> transitions,
                 .get(returnCode);
     }
 
+    public boolean isTerminal() {
+        return Boolean.parseBoolean(configuration(Configuration.TERMINAL));
+    }
+
     public enum Configuration {
-        MAX_PROCESSOR_CALLS("max-processor-calls");
+        MAX_PROCESSOR_CALLS("max-processor-calls"),
+        TERMINAL("terminal");
 
         private final String parameter;
 
@@ -28,5 +35,4 @@ public record ProcessorProperties(Map<String, String> transitions,
             this.parameter = parameter;
         }
     }
-
 }

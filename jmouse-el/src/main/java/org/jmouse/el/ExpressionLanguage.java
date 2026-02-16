@@ -25,6 +25,8 @@ import java.util.Map;
  */
 public class ExpressionLanguage {
 
+    private final static ExpressionLanguage SINGLETON = new ExpressionLanguage();
+
     private final ParserContext                context;
     private final Lexer                        lexer;
     private final ExpressionParser             parser;
@@ -151,4 +153,9 @@ public class ExpressionLanguage {
     public Object evaluate(String expression) {
         return evaluate(expression, Object.class);
     }
+
+    public static ExpressionLanguage getSingleton() {
+        return SINGLETON;
+    }
+
 }

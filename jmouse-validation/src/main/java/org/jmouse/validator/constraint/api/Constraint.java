@@ -20,4 +20,10 @@ public interface Constraint {
      * Executor that evaluates this constraint.
      */
     ConstraintExecutor<? extends Constraint> executor();
+
+    default boolean execute(Object value) {
+        @SuppressWarnings("unchecked")
+        ConstraintExecutor<Constraint> executor = (ConstraintExecutor<Constraint>) executor();
+        return executor.test(value, this);
+    }
 }

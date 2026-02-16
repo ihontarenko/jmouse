@@ -53,16 +53,17 @@ public final class OneOfConstraint implements Constraint {
         private Executor() {}
 
         @Override
-        public boolean test(Object value, OneOfConstraint c) {
+        public boolean test(Object value, OneOfConstraint constraint) {
             if (value == null) {
                 return true;
             }
-            if (c.allowed == null || c.allowed.isEmpty()) {
+
+            if (constraint.allowed == null || constraint.allowed.isEmpty()) {
                 return true; // MVP: no allowed list => pass (or choose strict later)
             }
 
             String normalized = String.valueOf(value);
-            return c.allowed.contains(normalized);
+            return constraint.allowed.contains(normalized);
         }
     }
 }

@@ -11,7 +11,4 @@ public interface SchemaSelector {
      */
     String select(String objectName, ValidationHints hints);
 
-    static SchemaSelector byObjectName() {
-        return (objectName, hints) -> objectName;
-    }
 }

@@ -22,9 +22,10 @@ public final class DefaultFieldRules implements FieldRules {
         return rules;
     }
 
-    public DefaultFieldRules add(ConstraintRule rule) {
-        if (rule != null) {
-            rules.add(rule);
+    @Override
+    public DefaultFieldRules add(ConstraintRule constraintRule) {
+        if (constraintRule != null) {
+            rules.add(constraintRule);
         }
         return this;
     }

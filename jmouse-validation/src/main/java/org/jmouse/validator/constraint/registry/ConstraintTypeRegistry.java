@@ -16,6 +16,11 @@ public final class ConstraintTypeRegistry {
         return this;
     }
 
+    public ConstraintTypeRegistry alias(String name, String alias) {
+        resolve(name).ifPresent(type -> types.put(alias, type));
+        return this;
+    }
+
     public Optional<Class<? extends Constraint>> resolve(String name) {
         return Optional.ofNullable(types.get(Strings.normalize(name, String::toLowerCase)));
     }
