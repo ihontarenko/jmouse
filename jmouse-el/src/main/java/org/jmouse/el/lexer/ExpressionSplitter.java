@@ -89,6 +89,9 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
             index = matcher.end();
         }
 
+        LOGGER.info("Segment '{}' at offset '{}' and length '{}' splitted to: {} tokens",
+                    segment, offset, length, tokens.size());
+
         return tokens;
     }
 }
