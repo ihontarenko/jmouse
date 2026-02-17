@@ -1,7 +1,7 @@
-package org.jmouse.dom.old_builder;
+package org.jmouse.common.dom.old_builder;
 
 import org.jmouse.core.scope.AbstractAttributesContext;
-import org.jmouse.dom.PostDataProvider;
+import org.jmouse.common.dom.PostDataProvider;
 
 public class NodeBuilderContext extends AbstractAttributesContext {
 

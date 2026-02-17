@@ -1,12 +1,17 @@
 package org.jmouse.dom;
 
+/**
+ * Renders a node into the output provided by {@link NodeContext}.
+ */
 public interface Renderer {
 
-    String render(Node node, NodeContext context);
-
-    default String indentation(int depth) {
-        return "\t".repeat(Math.max(0, depth));
-    }
+    /**
+     * Render the given node into the context output.
+     *
+     * @param node node to render
+     * @param context rendering context
+     */
+    void render(Node node, NodeContext context);
 
 }
 

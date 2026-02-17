@@ -2,12 +2,12 @@ package org.jmouse.dom;
 
 import org.jmouse.dom.node.TextNode;
 
-public class NbspReplacerCorrector implements Corrector{
+public class NbspReplacerCorrector implements Corrector {
 
     @Override
     public void accept(Node node) {
        if (node instanceof TextNode textNode) {
-           textNode.setText(textNode.getText().replaceAll("\s+", "&nbsp;"));
+           textNode.setText(textNode.getText().replaceAll("\\s+", "&nbsp;"));
        }
     }
 

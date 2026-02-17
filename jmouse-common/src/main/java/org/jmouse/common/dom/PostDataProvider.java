@@ -1,4 +1,4 @@
-package org.jmouse.dom;
+package org.jmouse.common.dom;
 
 import org.jmouse.core.scope.ErrorDetails;
 import org.jmouse.common.support.provider.data.DataProvider;

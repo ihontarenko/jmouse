@@ -1,8 +1,8 @@
-package org.jmouse.dom;
+package org.jmouse.common.dom;
 
-import org.jmouse.dom.node.CommentNode;
+import org.jmouse.common.dom.node.CommentNode;
 
-public class CommentInfoCorrector implements Corrector {
+public class CommentInfoCorrector implements Corrector{
 
     @Override
     public void accept(Node node) {

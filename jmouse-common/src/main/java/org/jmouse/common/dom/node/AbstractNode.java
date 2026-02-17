@@ -1,14 +1,12 @@
-package org.jmouse.dom.node;
+package org.jmouse.common.dom.node;
 
-import org.jmouse.core.Verify;
-import org.jmouse.dom.Node;
-import org.jmouse.dom.NodeContext;
-import org.jmouse.dom.NodeType;
-import org.jmouse.dom.TagName;
+import org.jmouse.common.dom.Node;
+import org.jmouse.common.dom.NodeContext;
+import org.jmouse.common.dom.NodeType;
+import org.jmouse.common.dom.TagName;
 
 import java.util.*;
 
-// todo: need to refactor this code
 abstract public class AbstractNode implements Node {
 
     public static final String CHILD_NODE_MUST_BE_NON_NULL = "Child node must be non-null";
@@ -38,15 +36,15 @@ abstract public class AbstractNode implements Node {
 
     @Override
     public void prepend(Node child) {
-        Verify.nonNull(child, CHILD_NODE_MUST_BE_NON_NULL);
+        Objects.requireNonNull(child, CHILD_NODE_MUST_BE_NON_NULL);
         child.setDepth(this.depth + 1);
         child.setParent(this);
-        children.add(0, child);
+        children.addFirst(child);
     }
 
     @Override
     public void append(Node child) {
-        Verify.nonNull(child, CHILD_NODE_MUST_BE_NON_NULL);
+        Objects.requireNonNull(child, CHILD_NODE_MUST_BE_NON_NULL);
         child.setDepth(this.depth + 1);
         child.setParent(this);
         children.add(child);
@@ -54,7 +52,7 @@ abstract public class AbstractNode implements Node {
 
     @Override
     public void removeChild(Node child) {
-        Verify.nonNull(child, CHILD_NODE_MUST_BE_NON_NULL);
+        Objects.requireNonNull(child, CHILD_NODE_MUST_BE_NON_NULL);
         children.remove(child);
     }
 
@@ -178,8 +176,7 @@ abstract public class AbstractNode implements Node {
     @Override
     public String interpret(NodeContext context) {
         try {
-            return null;
-//            return context.registry().resolve(this, context);
+            return context.rendererFactory().getRenderer(this).render(this, context);
         } catch (Exception e) {
             throw new RuntimeException("Error during rendering", e);
         }

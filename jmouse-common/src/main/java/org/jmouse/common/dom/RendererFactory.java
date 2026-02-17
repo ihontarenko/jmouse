@@ -1,8 +1,8 @@
-package org.jmouse.dom;
+package org.jmouse.common.dom;
 
-import org.jmouse.dom.rendering.CommentRenderer;
-import org.jmouse.dom.rendering.ElementRenderer;
-import org.jmouse.dom.rendering.TextRenderer;
+import org.jmouse.common.dom.old_renderer.CommentRenderer;
+import org.jmouse.common.dom.old_renderer.ElementRenderer;
+import org.jmouse.common.dom.old_renderer.TextRenderer;
 
 import java.util.HashMap;
 import java.util.Map;

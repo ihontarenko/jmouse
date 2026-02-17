@@ -1,9 +1,9 @@
-package org.jmouse.dom.old_renderer;
+package org.jmouse.common.dom.old_renderer;
 
-import org.jmouse.dom.Node;
-import org.jmouse.dom.NodeContext;
-import org.jmouse.dom.NodeType;
-import org.jmouse.dom.Renderer;
+import org.jmouse.common.dom.Node;
+import org.jmouse.common.dom.NodeContext;
+import org.jmouse.common.dom.NodeType;
+import org.jmouse.common.dom.Renderer;
 
 import java.util.ConcurrentModificationException;
 import java.util.Map;

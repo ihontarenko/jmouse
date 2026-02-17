@@ -1,8 +1,8 @@
-package org.jmouse.dom;
+package org.jmouse.common.dom;
 
-import org.jmouse.dom.node.CommentNode;
-import org.jmouse.dom.node.ElementNode;
-import org.jmouse.dom.node.TextNode;
+import org.jmouse.common.dom.node.CommentNode;
+import org.jmouse.common.dom.node.ElementNode;
+import org.jmouse.common.dom.node.TextNode;
 
 public class Example {
 

@@ -1,4 +1,4 @@
-package org.jmouse.dom.old_builder;
+package org.jmouse.common.dom.old_builder;
 
 import java.util.HashMap;
 import java.util.Map;

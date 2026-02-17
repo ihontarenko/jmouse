@@ -1,15 +1,16 @@
 package org.jmouse.dom;
 
-public record NodeContext(RendererFactory rendererFactory) {
+import org.jmouse.core.Verify;
+import org.jmouse.dom.rendering.RendererRegistry;
 
-    public static final ReorderNodeCorrector  REORDER_NODE_CORRECTOR;
-    public static final CommentInfoCorrector  COMMENT_INFO_CORRECTOR;
-    public static final NbspReplacerCorrector NBSP_REPLACER_CORRECTOR;
+/**
+ * Rendering context that holds shared output and renderer resolution.
+ */
+public record NodeContext(StringBuilder output, RendererRegistry registry) {
 
-    static {
-        REORDER_NODE_CORRECTOR = new ReorderNodeCorrector();
-        COMMENT_INFO_CORRECTOR = new CommentInfoCorrector();
-        NBSP_REPLACER_CORRECTOR = new NbspReplacerCorrector();
+    public NodeContext(StringBuilder output, RendererRegistry registry) {
+        this.output = Verify.nonNull(output, "output");
+        this.registry = Verify.nonNull(registry, "registry");
     }
 
 }

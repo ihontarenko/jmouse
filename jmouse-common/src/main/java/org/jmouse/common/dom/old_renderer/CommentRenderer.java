@@ -1,9 +1,9 @@
-package org.jmouse.dom.old_renderer;
+package org.jmouse.common.dom.old_renderer;
 
-import org.jmouse.dom.Node;
-import org.jmouse.dom.NodeContext;
-import org.jmouse.dom.Renderer;
-import org.jmouse.dom.node.CommentNode;
+import org.jmouse.common.dom.Node;
+import org.jmouse.common.dom.NodeContext;
+import org.jmouse.common.dom.Renderer;
+import org.jmouse.common.dom.node.CommentNode;
 
 public class CommentRenderer implements Renderer {
 
