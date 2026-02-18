@@ -2,6 +2,7 @@ package org.jmouse.dom.node;
 
 import org.jmouse.core.Verify;
 import org.jmouse.dom.Node;
+import org.jmouse.dom.NodeContext;
 import org.jmouse.dom.NodeType;
 import org.jmouse.dom.TagName;
 
@@ -171,6 +172,15 @@ abstract public class AbstractNode implements Node {
         }
 
         return siblings;
+    }
+
+    @Override
+    public String interpret(NodeContext context) {
+        try {
+            return context.rendererFactory().getRenderer(this).render(this, context);
+        } catch (Exception e) {
+            throw new RuntimeException("Error during rendering", e);
+        }
     }
 
     @Override

@@ -2,7 +2,7 @@ package org.jmouse.dom.blueprint.standard;
 
 import org.jmouse.dom.blueprint.Blueprint;
 
-import static org.jmouse.dom.blueprint.dsl.Blueprints.*;
+import static org.jmouse.dom.blueprint.build.Blueprints.*;
 
 public final class StandardBlueprints {
 

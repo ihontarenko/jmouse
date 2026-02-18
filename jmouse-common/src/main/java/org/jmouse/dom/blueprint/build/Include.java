@@ -1,9 +1,9 @@
-package org.jmouse.dom.blueprint.dsl;
+package org.jmouse.dom.blueprint.build;
 
 import org.jmouse.dom.blueprint.Blueprint;
 import org.jmouse.dom.blueprint.BlueprintValue;
 
-import static org.jmouse.dom.blueprint.dsl.Blueprints.*;
+import static org.jmouse.dom.blueprint.build.Blueprints.*;
 
 public final class Include {
 

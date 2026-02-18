@@ -4,12 +4,14 @@ import org.jmouse.core.Verify;
 import org.jmouse.core.access.AccessorWrapper;
 import org.jmouse.core.access.ObjectAccessorWrapper;
 import org.jmouse.dom.Node;
+import org.jmouse.dom.NodeContext;
 import org.jmouse.dom.blueprint.*;
-import org.jmouse.dom.blueprint.dsl.Blueprints;
-import org.jmouse.dom.blueprint.dsl.Include;
+import org.jmouse.dom.blueprint.build.Blueprints;
+import org.jmouse.dom.blueprint.build.Include;
 import org.jmouse.dom.blueprint.hooks.RenderingHook;
 import org.jmouse.dom.blueprint.modules.BootstrapThemeModule;
 import org.jmouse.dom.blueprint.modules.ThemeAssembly;
+import org.jmouse.dom.node.ElementNode;
 
 import java.util.*;
 
@@ -40,7 +42,7 @@ public final class SmokeB {
         BlueprintCatalog catalog = assembly.catalog();
         registerBlueprints(catalog);
 
-        RenderingPipeline pipeline = assembly.buildPipeline(accessorWrapper);
+        RenderingPipeline pipeline = assembly.build(accessorWrapper);
 
         // ---------------------------------------------------------------------
         // Client input: FormDto "arrives from request"
@@ -77,7 +79,19 @@ public final class SmokeB {
 
         Node node = pipeline.render("smokeB/form", formDto, r -> merge(r, request));
 
-        // System.out.println(node.interpret(new NodeContext()));
+        node.execute(NodeContext.REORDER_NODE_CORRECTOR);
+
+        new RenderingHook() {
+            @Override
+            public void afterMaterialize(Node root, RenderingExecution execution) {
+                if (root instanceof ElementNode elementNode && elementNode.getAttribute("name").equalsIgnoreCase("email")) {
+                    // execution.dataProvider().hasError("email")
+                    root.addAttribute("style", "border: 3px solid red;");
+                }
+            }
+        };
+
+        System.out.println(node.interpret(NodeContext.defaults()));
     }
 
     private static void registerBlueprints(BlueprintCatalog catalog) {

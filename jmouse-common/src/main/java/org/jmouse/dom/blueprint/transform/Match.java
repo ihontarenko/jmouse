@@ -54,7 +54,7 @@ public final class Match {
             String expectedConstant
     ) {
         BlueprintValue value = attributes.get(attributeName);
-        if (value instanceof BlueprintValue.ConstantBlueprintValue(Object constant)) {
+        if (value instanceof BlueprintValue.ConstantValue(Object constant)) {
             return expectedConstant.equals(String.valueOf(constant));
         }
         return false;

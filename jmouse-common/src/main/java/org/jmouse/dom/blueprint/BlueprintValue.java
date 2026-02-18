@@ -4,16 +4,16 @@ package org.jmouse.dom.blueprint;
  * A blueprint value that can be either constant or bound to a data path.
  */
 public sealed interface BlueprintValue
-        permits BlueprintValue.ConstantBlueprintValue,
-                BlueprintValue.PathBlueprintValue,
-                BlueprintValue.RequestAttributeBlueprintValue{
+        permits BlueprintValue.ConstantValue,
+                BlueprintValue.PathValue,
+                BlueprintValue.RequestAttributeValue {
 
     /**
      * Constant value.
      *
      * @param value constant value
      */
-    record ConstantBlueprintValue(Object value) implements BlueprintValue {
+    record ConstantValue(Object value) implements BlueprintValue {
     }
 
     /**
@@ -21,7 +21,7 @@ public sealed interface BlueprintValue
      *
      * @param path path expression (for example "user.name")
      */
-    record PathBlueprintValue(String path) implements BlueprintValue {
+    record PathValue(String path) implements BlueprintValue {
     }
 
     /**
@@ -29,6 +29,6 @@ public sealed interface BlueprintValue
      *
      * @param name request attribute name
      */
-    record RequestAttributeBlueprintValue(String name) implements BlueprintValue {}
+    record RequestAttributeValue(String name) implements BlueprintValue {}
 
 }

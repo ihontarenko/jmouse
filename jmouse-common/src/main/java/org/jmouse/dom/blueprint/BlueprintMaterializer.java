@@ -168,13 +168,13 @@ public interface BlueprintMaterializer {
         }
 
         private Object resolveValue(BlueprintValue value, RenderingExecution execution) {
-            if (value instanceof BlueprintValue.ConstantBlueprintValue(Object constantValue)) {
+            if (value instanceof BlueprintValue.ConstantValue(Object constantValue)) {
                 return constantValue;
             }
-            if (value instanceof BlueprintValue.PathBlueprintValue(String pathExpression)) {
+            if (value instanceof BlueprintValue.PathValue(String pathExpression)) {
                 return valueResolver.resolve(pathExpression, execution);
             }
-            if (value instanceof BlueprintValue.RequestAttributeBlueprintValue(String name)) {
+            if (value instanceof BlueprintValue.RequestAttributeValue(String name)) {
                 return execution.request().attributes().get(name);
             }
             throw new IllegalStateException("Unsupported BlueprintValue type: " + value.getClass().getName());

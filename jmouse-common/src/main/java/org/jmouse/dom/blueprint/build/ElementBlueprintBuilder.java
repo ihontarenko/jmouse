@@ -1,4 +1,4 @@
-package org.jmouse.dom.blueprint.dsl;
+package org.jmouse.dom.blueprint.build;
 
 import org.jmouse.core.Verify;
 import org.jmouse.dom.blueprint.Blueprint;
@@ -14,9 +14,9 @@ import java.util.Map;
  */
 public final class ElementBlueprintBuilder {
 
-    private final String tagName;
+    private final String                      tagName;
     private final Map<String, BlueprintValue> attributes = new LinkedHashMap<>();
-    private final List<Blueprint> children = new ArrayList<>();
+    private final List<Blueprint>             children   = new ArrayList<>();
 
     public ElementBlueprintBuilder(String tagName) {
         this.tagName = Verify.nonNull(tagName, "tagName");

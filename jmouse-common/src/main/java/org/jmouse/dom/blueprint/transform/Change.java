@@ -36,7 +36,7 @@ public final class Change {
     }
 
     public static BlueprintChange setAttribute(String name, Object constantValue) {
-        return setAttribute(name, new BlueprintValue.ConstantBlueprintValue(constantValue));
+        return setAttribute(name, new BlueprintValue.ConstantValue(constantValue));
     }
 
     public static BlueprintChange addClass(String className) {
@@ -49,7 +49,7 @@ public final class Change {
                 BlueprintValue              current    = attributes.get("class");
                 String                      merged     = mergeClass(current, className);
 
-                attributes.put("class", new BlueprintValue.ConstantBlueprintValue(merged));
+                attributes.put("class", new BlueprintValue.ConstantValue(merged));
 
                 return new Blueprint.ElementBlueprint(tagName, Map.copyOf(attributes), children);
             }
@@ -108,7 +108,7 @@ public final class Change {
     }
 
     private static String mergeClass(BlueprintValue current, String add) {
-        if (current instanceof BlueprintValue.ConstantBlueprintValue(Object constant)) {
+        if (current instanceof BlueprintValue.ConstantValue(Object constant)) {
             String existing = String.valueOf(constant).trim();
             if (existing.isEmpty()) {
                 return add;

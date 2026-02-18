@@ -1,4 +1,4 @@
-package org.jmouse.dom.blueprint.dsl;
+package org.jmouse.dom.blueprint.build;
 
 import org.jmouse.dom.blueprint.*;
 
@@ -14,11 +14,11 @@ public final class Blueprints {
     private Blueprints() {}
 
     public static BlueprintValue constant(Object value) {
-        return new BlueprintValue.ConstantBlueprintValue(value);
+        return new BlueprintValue.ConstantValue(value);
     }
 
     public static BlueprintValue path(String path) {
-        return new BlueprintValue.PathBlueprintValue(path);
+        return new BlueprintValue.PathValue(path);
     }
 
     public static BlueprintPredicate pathBoolean(String path) {
@@ -34,7 +34,7 @@ public final class Blueprints {
     }
 
     public static BlueprintValue requestAttribute(String name) {
-        return new BlueprintValue.RequestAttributeBlueprintValue(name);
+        return new BlueprintValue.RequestAttributeValue(name);
     }
 
     public static Blueprint.ElementBlueprint element(String tagName, Consumer<ElementBlueprintBuilder> consumer) {

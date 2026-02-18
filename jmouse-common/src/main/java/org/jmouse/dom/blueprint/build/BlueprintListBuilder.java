@@ -1,4 +1,4 @@
-package org.jmouse.dom.blueprint.dsl;
+package org.jmouse.dom.blueprint.build;
 
 import org.jmouse.core.Verify;
 import org.jmouse.dom.blueprint.Blueprint;

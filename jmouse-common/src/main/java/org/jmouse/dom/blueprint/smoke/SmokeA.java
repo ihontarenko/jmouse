@@ -5,8 +5,8 @@ import org.jmouse.core.access.AccessorWrapper;
 import org.jmouse.core.access.ObjectAccessorWrapper;
 import org.jmouse.dom.Node;
 import org.jmouse.dom.blueprint.*;
-import org.jmouse.dom.blueprint.dsl.Blueprints;
-import org.jmouse.dom.blueprint.dsl.Include;
+import org.jmouse.dom.blueprint.build.Blueprints;
+import org.jmouse.dom.blueprint.build.Include;
 import org.jmouse.dom.blueprint.hooks.RenderingHook;
 import org.jmouse.dom.blueprint.modules.BootstrapThemeModule;
 import org.jmouse.dom.blueprint.modules.ThemeAssembly;
@@ -47,7 +47,7 @@ public final class SmokeA {
         registerSmokeBlueprints(catalog);
 
         // 3) Create pipeline
-        RenderingPipeline pipeline = assembly.buildPipeline(accessorWrapper);
+        RenderingPipeline pipeline = assembly.build(accessorWrapper);
 
         // --- AUTHORIZATION ---
         Map<String, Object> loginModel = model(

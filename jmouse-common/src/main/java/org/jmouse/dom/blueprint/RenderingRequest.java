@@ -14,9 +14,11 @@ public final class RenderingRequest {
 
     public RenderingRequest attribute(String name, Object value) {
         Verify.nonNull(name, "name");
+
         if (value != null) {
             attributes.put(name, value);
         }
+
         return this;
     }
 

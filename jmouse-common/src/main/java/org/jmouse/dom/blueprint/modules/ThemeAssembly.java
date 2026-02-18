@@ -17,15 +17,12 @@ public final class ThemeAssembly {
 
     private final List<ThemeModule.OrderedTransformer> additionalTransformers = new ArrayList<>();
     private final List<RenderingHook>                  additionalHooks        = new ArrayList<>();
-
-    private final BlueprintCatalog baseCatalog;
-    private final BlueprintCatalog overlayCatalog;
+    private final BlueprintCatalog                     overlayCatalog;
 
     private ThemeAssembly(ThemeModule themeModule) {
         this.themeModule = Verify.nonNull(themeModule, "themeModule");
-        this.baseCatalog = BlueprintCatalog.create();
+        BlueprintCatalog baseCatalog = BlueprintCatalog.create();
         this.overlayCatalog = BlueprintCatalog.overlay(baseCatalog);
-
         themeModule.contributeBlueprints(baseCatalog);
     }
 
@@ -57,22 +54,24 @@ public final class ThemeAssembly {
         return this;
     }
 
-    public RenderingPipeline buildPipeline(AccessorWrapper accessorWrapper) {
+    public RenderingPipeline build(AccessorWrapper accessorWrapper) {
         Verify.nonNull(accessorWrapper, "accessorWrapper");
 
         RenderingPipeline.Builder builder = RenderingPipeline.builder().catalog(overlayCatalog)
                 .accessorWrapper(accessorWrapper);
 
-        for (ThemeModule.OrderedTransformer t : themeModule.transformers()) {
-            builder.addTransformer(t.order(), t.transformer());
+        for (ThemeModule.OrderedTransformer transformer : themeModule.transformers()) {
+            builder.addTransformer(transformer.order(), transformer.transformer());
         }
-        for (ThemeModule.OrderedTransformer t : additionalTransformers) {
-            builder.addTransformer(t.order(), t.transformer());
+
+        for (ThemeModule.OrderedTransformer transformer : additionalTransformers) {
+            builder.addTransformer(transformer.order(), transformer.transformer());
         }
 
         for (RenderingHook hook : themeModule.hooks()) {
             builder.addHook(hook);
         }
+
         for (RenderingHook hook : additionalHooks) {
             builder.addHook(hook);
         }
