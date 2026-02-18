@@ -43,10 +43,11 @@ public final class Blueprints {
         return builder.build();
     }
 
-    public static Blueprint.ConditionalBlueprint when(BlueprintPredicate predicate,
-                                                      Consumer<BlueprintListBuilder> whenTrue,
-                                                      Consumer<BlueprintListBuilder> whenFalse) {
-
+    public static Blueprint.ConditionalBlueprint when(
+            BlueprintPredicate predicate,
+            Consumer<BlueprintListBuilder> whenTrue,
+            Consumer<BlueprintListBuilder> whenFalse
+    ) {
         BlueprintListBuilder trueBuilder = new BlueprintListBuilder();
         BlueprintListBuilder falseBuilder = new BlueprintListBuilder();
 
@@ -56,8 +57,10 @@ public final class Blueprints {
         return new Blueprint.ConditionalBlueprint(predicate, trueBuilder.build(), falseBuilder.build());
     }
 
-    public static Blueprint.ConditionalBlueprint when(BlueprintPredicate predicate,
-                                                      Consumer<BlueprintListBuilder> whenTrue) {
+    public static Blueprint.ConditionalBlueprint when(
+            BlueprintPredicate predicate,
+            Consumer<BlueprintListBuilder> whenTrue
+    ) {
 
         BlueprintListBuilder trueBuilder = new BlueprintListBuilder();
         whenTrue.accept(trueBuilder);

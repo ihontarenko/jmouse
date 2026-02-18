@@ -84,10 +84,12 @@ public interface ObjectAccessor extends TypeClassifier {
      * @throws UnsupportedOperationException if this accessor is not map-like
      */
     default ObjectAccessor get(Object key) {
-        if (key instanceof String keyString) {
-            return get(keyString);
-        }
-        throw new UnsupportedOperationException("Supported only for map-like accessors.");
+        return switch (key) {
+            case String stringKey -> get(stringKey);
+            case Integer integerKey -> get(integerKey.intValue());
+            default ->
+                throw new UnsupportedOperationException("Unsupported key: " + key);
+        };
     }
 
     /**

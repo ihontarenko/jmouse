@@ -11,7 +11,7 @@ public sealed interface Blueprint
                 Blueprint.TextBlueprint,
                 Blueprint.ConditionalBlueprint,
                 Blueprint.RepeatBlueprint,
-                Blueprint.IncludeBlueprint{
+                Blueprint.IncludeBlueprint {
 
     /**
      * Represents an element node in a blueprint tree.

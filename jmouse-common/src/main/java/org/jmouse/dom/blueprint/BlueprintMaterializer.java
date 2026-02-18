@@ -4,6 +4,7 @@ import org.jmouse.core.Verify;
 import org.jmouse.core.access.ObjectAccessor;
 import org.jmouse.core.access.PropertyPath;
 import org.jmouse.core.access.ValueNavigator;
+import org.jmouse.core.access.accessor.ScalarValueAccessor;
 import org.jmouse.dom.Node;
 import org.jmouse.dom.TagName;
 import org.jmouse.dom.node.ElementNode;
@@ -97,28 +98,28 @@ public interface BlueprintMaterializer {
         }
 
         private Node materializeRepeat(Blueprint.RepeatBlueprint repeat, RenderingExecution execution) {
-            Object collectionValue = resolveValue(repeat.collection(), execution);
-
+            Object         collectionValue    = resolveValue(repeat.collection(), execution);
             ObjectAccessor collectionAccessor = execution.accessorWrapper().wrap(collectionValue);
 
             if (!(collectionAccessor.isCollection() || collectionAccessor.isList() || collectionAccessor.isMap())) {
                 return new TextNode("");
             }
 
-            ElementNode container = new ElementNode(TagName.DIV);
+            ElementNode                 container = new ElementNode(TagName.DIV);
+            Set<Object>                 keys      = collectionAccessor.keySet();
+            Map<String, ObjectAccessor> variables = execution.variables();
 
-            Set<Object> keys = collectionAccessor.keySet();
             for (Object key : keys) {
-                Object item = collectionAccessor.get(key);
-                ObjectAccessor itemAccessor = execution.accessorWrapper().wrap(item);
+                Object         item           = collectionAccessor.get(key);
+                ObjectAccessor objectAccessor = execution.accessorWrapper().wrapIfNecessary(item);
 
-                execution.variables().put(repeat.itemVariableName(), itemAccessor);
+                variables.put(repeat.itemVariableName(), objectAccessor);
 
                 for (Blueprint bodyNode : repeat.body()) {
                     container.append(materializeInternal(bodyNode, execution));
                 }
 
-                execution.variables().remove(repeat.itemVariableName());
+                variables.remove(repeat.itemVariableName());
             }
 
             return container;
@@ -133,7 +134,7 @@ public interface BlueprintMaterializer {
 
             String         key           = String.valueOf(keyValue);
             Object         modelValue    = resolveValue(include.model(), execution);
-            ObjectAccessor modelAccessor = execution.accessorWrapper().wrap(modelValue);
+            ObjectAccessor modelAccessor = execution.accessorWrapper().wrapIfNecessary(modelValue);
 
             RenderingExecution nested = new RenderingExecution(
                     execution.accessorWrapper(),
@@ -155,7 +156,7 @@ public interface BlueprintMaterializer {
                 RenderingExecution execution
         ) {
             for (Map.Entry<String, BlueprintValue> entry : attributes.entrySet()) {
-                String name = entry.getKey();
+                String name  = entry.getKey();
                 Object value = resolveValue(entry.getValue(), execution);
 
                 if (value == null) {
@@ -214,7 +215,7 @@ public interface BlueprintMaterializer {
             if (scoped != null) {
                 PropertyPath remainder = path.sub(1);
                 if (remainder.isEmpty()) {
-                    return unwrap(navigator.navigate(scoped, head));
+                    return unwrap(scoped);
                 }
                 return unwrap(navigator.navigate(scoped, remainder.toString()));
             }
@@ -223,7 +224,7 @@ public interface BlueprintMaterializer {
         }
 
         private Object unwrap(Object value) {
-            if (value instanceof org.jmouse.core.access.accessor.ScalarValueAccessor scalar) {
+            if (value instanceof ScalarValueAccessor scalar) {
                 return scalar.unwrap();
             }
             if (value instanceof ObjectAccessor accessor) {

@@ -49,6 +49,7 @@ public final class RuleBasedBlueprintTransformer implements BlueprintTransformer
                 yield new RepeatBlueprint(repeat.collection(), repeat.itemVariableName(), body);
             }
             case TextBlueprint text -> text;
+            case IncludeBlueprint include -> include;
             case null -> throw new IllegalStateException("Unsupported blueprint node.");
         };
     }

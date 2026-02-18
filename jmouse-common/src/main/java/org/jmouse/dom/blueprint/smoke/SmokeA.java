@@ -224,13 +224,12 @@ public final class SmokeA {
                             .attribute("value", Blueprints.path("value"))
                             .attribute("placeholder", Blueprints.path("label"))
                     ))
-                    .child(Blueprints.conditional(
+                    .child(Blueprints.when(
                             Blueprints.pathBoolean("hasError"),
                             whenTrue -> whenTrue.add(Include.blueprint(
                                     Blueprints.constant("smoke/feedback/invalid"),
                                     Blueprints.path("")
-                            )),
-                            whenFalse -> whenFalse
+                            ))
                     ))
             );
         }
@@ -246,13 +245,12 @@ public final class SmokeA {
                             .attribute("id", Blueprints.path("name"))
                             .child(Blueprints.text(Blueprints.path("value")))
                     ))
-                    .child(Blueprints.conditional(
+                    .child(Blueprints.when(
                             Blueprints.pathBoolean("hasError"),
                             whenTrue -> whenTrue.add(Include.blueprint(
                                     Blueprints.constant("smoke/feedback/invalid"),
                                     Blueprints.path("")
-                            )),
-                            whenFalse -> whenFalse
+                            ))
                     ))
             );
         }
@@ -275,13 +273,12 @@ public final class SmokeA {
                                     ))
                             ))
                     ))
-                    .child(Blueprints.conditional(
+                    .child(Blueprints.when(
                             Blueprints.pathBoolean("hasError"),
                             whenTrue -> whenTrue.add(Include.blueprint(
                                     Blueprints.constant("smoke/feedback/invalid"),
                                     Blueprints.path("")
-                            )),
-                            whenFalse -> whenFalse
+                            ))
                     ))
             );
         }
@@ -300,13 +297,12 @@ public final class SmokeA {
                                     .child(Blueprints.text(Blueprints.path("label")))
                             ))
                     ))
-                    .child(Blueprints.conditional(
+                    .child(Blueprints.when(
                             Blueprints.pathBoolean("hasError"),
                             whenTrue -> whenTrue.add(Include.blueprint(
                                     Blueprints.constant("smoke/feedback/invalid"),
                                     Blueprints.path("")
-                            )),
-                            whenFalse -> whenFalse
+                            ))
                     ))
             );
         }
@@ -330,13 +326,12 @@ public final class SmokeA {
                                     ))
                             ))
                     ))
-                    .child(Blueprints.conditional(
+                    .child(Blueprints.when(
                             Blueprints.pathBoolean("hasError"),
                             whenTrue -> whenTrue.add(Include.blueprint(
                                     Blueprints.constant("smoke/feedback/invalid"),
                                     Blueprints.path("")
-                            )),
-                            whenFalse -> whenFalse
+                            ))
                     ))
             );
         }
