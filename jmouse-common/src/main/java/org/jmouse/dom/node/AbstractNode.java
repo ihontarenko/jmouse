@@ -2,13 +2,11 @@ package org.jmouse.dom.node;
 
 import org.jmouse.core.Verify;
 import org.jmouse.dom.Node;
-import org.jmouse.dom.NodeContext;
 import org.jmouse.dom.NodeType;
 import org.jmouse.dom.TagName;
 
 import java.util.*;
 
-// todo: need to refactor this code
 abstract public class AbstractNode implements Node {
 
     public static final String CHILD_NODE_MUST_BE_NON_NULL = "Child node must be non-null";
@@ -173,16 +171,6 @@ abstract public class AbstractNode implements Node {
         }
 
         return siblings;
-    }
-
-    @Override
-    public String interpret(NodeContext context) {
-        try {
-            return null;
-//            return context.registry().resolve(this, context);
-        } catch (Exception e) {
-            throw new RuntimeException("Error during rendering", e);
-        }
     }
 
     @Override

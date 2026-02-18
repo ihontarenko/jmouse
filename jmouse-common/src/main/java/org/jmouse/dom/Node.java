@@ -52,8 +52,6 @@ public interface Node /*extends df.base.common.libs.parser.node.Node*/ {
 
     Map<String, String> getAttributes();
 
-    String interpret(NodeContext context);
-
     default void execute(Consumer<Node> executor) {
         executor.accept(this);
 

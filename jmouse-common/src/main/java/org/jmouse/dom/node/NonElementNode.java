@@ -15,16 +15,6 @@ abstract public class NonElementNode extends AbstractNode {
     }
 
     @Override
-    public int getDepth() {
-        return depth;
-    }
-
-    @Override
-    public void setDepth(int depth) {
-        this.depth = depth;
-    }
-
-    @Override
     public void prepend(Node child) {
         throw new UnsupportedOperationException("Node [%s] can to have child nodes".formatted(this));
     }
