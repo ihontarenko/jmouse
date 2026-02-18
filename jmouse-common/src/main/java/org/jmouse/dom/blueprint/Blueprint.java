@@ -23,7 +23,8 @@ public sealed interface Blueprint
     record ElementBlueprint(
             String tagName,
             Map<String, BlueprintValue> attributes,
-            List<Blueprint> children
+            List<Blueprint> children,
+            List<BlueprintDirective> directives
     ) implements Blueprint {
     }
 

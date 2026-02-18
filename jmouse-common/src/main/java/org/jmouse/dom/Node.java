@@ -62,5 +62,40 @@ public interface Node /*extends df.base.common.libs.parser.node.Node*/ {
         }
     }
 
+    default void addClass(String className) {
+        addClass(this, className);
+    }
+
+    default boolean containsClass(String required) {
+        return containsClass(getAttribute("class"), required);
+    }
+
+    static void addClass(Node node, String className) {
+        String existing = node.getAttribute("class");
+
+        if (existing == null || existing.isBlank()) {
+            node.addAttribute("class", className);
+            return;
+        }
+
+        if (containsClass(existing, className)) {
+            return;
+        }
+
+        node.addAttribute("class", existing + " " + className);
+    }
+
+    static boolean containsClass(String classValue, String required) {
+        String[] parts = classValue.trim().split("\\s+");
+
+        for (String string : parts) {
+            if (string.equals(required)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }
 

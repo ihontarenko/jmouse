@@ -22,7 +22,9 @@ public final class Blueprints {
     }
 
     public static BlueprintPredicate pathBoolean(String path) {
-        return new BlueprintPredicate.PathBooleanPredicate(path);
+        return new BlueprintPredicate.BooleanValuePredicate(
+                path(path)
+        );
     }
 
     public static Blueprint.TextBlueprint text(BlueprintValue value) {
@@ -61,21 +63,20 @@ public final class Blueprints {
             BlueprintPredicate predicate,
             Consumer<BlueprintListBuilder> whenTrue
     ) {
-
         BlueprintListBuilder trueBuilder = new BlueprintListBuilder();
         whenTrue.accept(trueBuilder);
 
         return new Blueprint.ConditionalBlueprint(predicate, trueBuilder.build(), List.of());
     }
 
-    public static Blueprint.RepeatBlueprint repeat(BlueprintValue collection,
-                                                   String itemVariableName,
-                                                   Consumer<BlueprintListBuilder> body) {
-
-        BlueprintListBuilder bodyBuilder = new BlueprintListBuilder();
-        body.accept(bodyBuilder);
-
-        return new Blueprint.RepeatBlueprint(collection, itemVariableName, bodyBuilder.build());
+    public static Blueprint.RepeatBlueprint repeat(
+            BlueprintValue collection,
+            String itemVariableName,
+            Consumer<BlueprintListBuilder> body
+    ) {
+        BlueprintListBuilder builder = new BlueprintListBuilder();
+        body.accept(builder);
+        return new Blueprint.RepeatBlueprint(collection, itemVariableName, builder.build());
     }
 
     public static List<Blueprint> list(Consumer<BlueprintListBuilder> consumer) {
@@ -89,4 +90,33 @@ public final class Blueprints {
         consumer.accept(builder);
         return builder.build();
     }
+
+    public static BlueprintPredicate truthy(BlueprintValue value) {
+        return new BlueprintPredicate.BooleanValuePredicate(value);
+    }
+
+    public static BlueprintPredicate present(BlueprintValue value) {
+        return new BlueprintPredicate.PresentPredicate(value);
+    }
+
+    public static BlueprintPredicate equals(BlueprintValue left, BlueprintValue right) {
+        return new BlueprintPredicate.EqualityPredicate(left, right);
+    }
+
+    public static BlueprintPredicate not(BlueprintPredicate inner) {
+        return new BlueprintPredicate.NotPredicate(inner);
+    }
+
+    public static BlueprintPredicate all(BlueprintPredicate... predicates) {
+        return new BlueprintPredicate.AllPredicate(List.of(predicates));
+    }
+
+    public static BlueprintPredicate any(BlueprintPredicate... predicates) {
+        return new BlueprintPredicate.AnyPredicate(List.of(predicates));
+    }
+
+    public static BlueprintPredicate contains(BlueprintValue collection, BlueprintValue value) {
+        return new BlueprintPredicate.ContainsPredicate(collection, value);
+    }
+
 }

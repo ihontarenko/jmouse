@@ -50,7 +50,7 @@ public final class Smoke4 {
         // 3) Simulate POST submission: values + error on "resistance"
         // ---------------------------------------------------------------------
         RenderingRequest request = new RenderingRequest()
-                .attribute(SubmissionState.REQUEST_ATTRIBUTE,
+                .putAttribute(SubmissionState.REQUEST_ATTRIBUTE,
                            SubmissionState.of(
                                    Map.of(
                                            "element_name", "R12",
