@@ -85,12 +85,12 @@ public final class Change {
         Verify.nonNull(child, "child");
         return (blueprint, execution) -> {
             if (blueprint instanceof Blueprint.ElementBlueprint(
-                    String tagName, Map<String, BlueprintValue> attributes, List<Blueprint> elementChildren
+                    String tagName, Map<String, BlueprintValue> attributes, List<Blueprint> elementChildren, List<BlueprintDirective> directives
             )) {
                 List<Blueprint> children = new ArrayList<>();
                 children.add(child);
                 children.addAll(elementChildren);
-                return new Blueprint.ElementBlueprint(tagName, attributes, List.copyOf(children));
+                return new Blueprint.ElementBlueprint(tagName, attributes, List.copyOf(children), List.copyOf(directives));
             }
             return blueprint;
         };

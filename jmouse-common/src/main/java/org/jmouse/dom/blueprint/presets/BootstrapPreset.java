@@ -176,6 +176,7 @@ public final class BootstrapPreset {
             input.attribute("type", constant("checkbox"));
             input.attribute("class", constant("form-check-input"));
             input.attribute("name", path(namePath));
+            input.attributeIf(same(constant("a"), constant("a")), "type", constant("checkbox"));
             input.attribute("value", path(keyPath));
             if (checked) {
                 input.attribute("checked", constant("checked"));

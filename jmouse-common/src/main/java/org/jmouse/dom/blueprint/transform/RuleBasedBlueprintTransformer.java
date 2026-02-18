@@ -37,7 +37,7 @@ public final class RuleBasedBlueprintTransformer implements BlueprintTransformer
                 for (Blueprint child : element.children()) {
                     children.add(transformNode(child, execution));
                 }
-                yield new ElementBlueprint(element.tagName(), element.attributes(), List.copyOf(children));
+                yield new ElementBlueprint(element.tagName(), element.attributes(), List.copyOf(children), List.copyOf(element.directives()));
             }
             case ConditionalBlueprint conditional -> {
                 List<Blueprint> whenTrue = mapList(conditional.whenTrue(), execution);

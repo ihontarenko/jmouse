@@ -39,7 +39,7 @@ public final class ContextRuleBasedBlueprintTransformer implements BlueprintTran
                     children.add(transformNode(child, execution, context));
                 }
                 context.popAncestor();
-                yield new ElementBlueprint(element.tagName(), element.attributes(), List.copyOf(children));
+                yield new ElementBlueprint(element.tagName(), element.attributes(), List.copyOf(children), List.copyOf(element.directives()));
             }
             case ConditionalBlueprint conditional -> {
                 List<Blueprint> whenTrue = mapList(conditional.whenTrue(), execution, context);

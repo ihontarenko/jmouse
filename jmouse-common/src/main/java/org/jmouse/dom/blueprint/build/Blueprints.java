@@ -99,7 +99,7 @@ public final class Blueprints {
         return new BlueprintPredicate.PresentPredicate(value);
     }
 
-    public static BlueprintPredicate equals(BlueprintValue left, BlueprintValue right) {
+    public static BlueprintPredicate same(BlueprintValue left, BlueprintValue right) {
         return new BlueprintPredicate.EqualityPredicate(left, right);
     }
 
