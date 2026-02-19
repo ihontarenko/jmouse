@@ -82,22 +82,6 @@ public final class Smoke4 {
 
         System.out.println("\n=== BOOTSTRAP THEME ===");
         System.out.println(bootstrapNode.interpret(NodeContext.defaults()));
-
-        // HTML5-like theme (no Bootstrap classes, simpler layout)
-/*        ThemeAssembly htmlAssembly = ThemeAssembly.forTheme(new BootstrapThemeModule())
-                .addHook(new SubmissionDecorationHook())
-                .addHook(new RadioCheckedHook());
-
-        BlueprintCatalog htmlCatalog = htmlAssembly.catalog();
-        registerHtml5Blueprints(htmlCatalog);
-
-        RenderingPipeline htmlPipeline = htmlAssembly.build(accessorWrapper);
-
-        Node htmlNode = htmlPipeline.render("smoke4/form", formModel, r -> merge(r, request));
-        htmlNode.execute(NodeContext.REORDER_NODE_CORRECTOR);
-
-        System.out.println("\n=== HTML5 THEME ===");
-        System.out.println(htmlNode.interpret(NodeContext.defaults()));*/
     }
 
     // ---------------------------------------------------------------------
@@ -113,16 +97,6 @@ public final class Smoke4 {
         catalog.register("smoke4/control/input-number", BootstrapBlueprints.inputNumber());
         catalog.register("smoke4/control/radio-group", BootstrapBlueprints.radioGroup());
         catalog.register("smoke4/control/button", BootstrapBlueprints.submitButton());
-    }
-
-    private static void registerHtml5Blueprints(BlueprintCatalog catalog) {
-        catalog.register("smoke4/form", Html5Blueprints.form());
-        catalog.register("smoke4/fragment", CommonBlueprints.fragment());
-
-        catalog.register("smoke4/control/input-text", Html5Blueprints.inputText());
-        catalog.register("smoke4/control/input-number", Html5Blueprints.inputNumber());
-        catalog.register("smoke4/control/radio-group", Html5Blueprints.radioGroup());
-        catalog.register("smoke4/control/button", Html5Blueprints.submitButton());
     }
 
     // ---------------------------------------------------------------------

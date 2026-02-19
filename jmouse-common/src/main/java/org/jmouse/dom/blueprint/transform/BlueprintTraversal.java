@@ -37,6 +37,7 @@ public final class BlueprintTraversal {
                 context.enter(element);
 
                 List<Blueprint> children = new ArrayList<>(element.children().size());
+
                 for (Blueprint child : element.children()) {
                     Blueprint mapped = traverse(child, execution, rewrite, context);
                     if (mapped != null) {
@@ -54,16 +55,16 @@ public final class BlueprintTraversal {
                 );
             }
             case ConditionalBlueprint conditional -> {
-                List<Blueprint> whenTrue  = mapList(conditional.whenTrue(), execution, rewrite, context);
-                List<Blueprint> whenFalse = mapList(conditional.whenFalse(), execution, rewrite, context);
-                yield new ConditionalBlueprint(conditional.predicate(), whenTrue, whenFalse);
+                List<Blueprint> ift = mapList(conditional.whenTrue(), execution, rewrite, context);
+                List<Blueprint> iff = mapList(conditional.whenFalse(), execution, rewrite, context);
+                yield new ConditionalBlueprint(conditional.predicate(), ift, iff);
             }
             case RepeatBlueprint repeat -> {
                 List<Blueprint> body = mapList(repeat.body(), execution, rewrite, context);
                 yield new RepeatBlueprint(repeat.collection(), repeat.itemVariableName(), body);
             }
             case TextBlueprint text -> text;
-            case IncludeBlueprint include -> include; // include розкриваємо у rewrite
+            case IncludeBlueprint include -> include;
         };
     }
 

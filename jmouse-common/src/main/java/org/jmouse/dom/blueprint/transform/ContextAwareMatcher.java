@@ -3,19 +3,30 @@ package org.jmouse.dom.blueprint.transform;
 import org.jmouse.dom.blueprint.Blueprint;
 
 /**
- * Matcher that can use traversal context (ancestors, depth).
+ * Matcher that can use traversal context (ancestors, depth, parent).
  */
 @FunctionalInterface
 public interface ContextAwareMatcher {
 
     /**
      * @param blueprint current node
-     * @param context traversal context
-     * @return true if matched
+     * @param context traversal context (never null)
      */
     boolean matches(Blueprint blueprint, TraversalContext context);
 
-    static ContextAwareMatcher of(BlueprintMatcher matcher) {
-        return (blueprint, context) -> matcher.matches(blueprint);
+    /**
+     * Convenience: treat as root-scope match.
+     */
+    default boolean matches(Blueprint blueprint) {
+        return matches(blueprint, TraversalContext.empty());
     }
+
+    static ContextAwareMatcher any() {
+        return (blueprint, context) -> true;
+    }
+
+    static ContextAwareMatcher never() {
+        return (blueprint, context) -> false;
+    }
+
 }

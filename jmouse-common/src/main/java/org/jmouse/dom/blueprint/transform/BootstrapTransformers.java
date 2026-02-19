@@ -13,17 +13,29 @@ public final class BootstrapTransformers {
     private BootstrapTransformers() {}
 
     public static BlueprintTransformer create() {
-        return RuleBasedBlueprintTransformer.builder()
+        return RuleBasedTransformer.builder()
 
-                .rule(100, tagName("input"), addClass("form-control " + BootstrapTransformers.class.getSimpleName()))
+                .rule(100, tagName("input"), addClass("form-control"))
                 .rule(100, tagName("select"), addClass("form-select"))
                 .rule(100, tagName("textarea"), addClass("form-control"))
                 .rule(100, tagName("label"), addClass("form-label bootstrap-label"))
                 .rule(100, tagName("form"), addClass("dynamic-form"))
 
-                // Example: wrap select into spacing block
                 .rule(50, tagName("select"),
                       wrapWith("div", addClass("mb-3 extended-select")))
+
+                .rule(
+                        100,
+                        and(and(
+                                tagName("input"),
+                                attributeValue("type", "radio")
+                        ), not(insideAncestor(a -> a.tagName().equalsIgnoreCase("div")
+                                && constantAttributeValues(a, "data-jm-wrap", "radio")))),
+                        wrapWith("div", chain(
+                                addClass("mb-3 extended-radio"),
+                                setAttribute("data-jm-wrap", "radio")
+                        ))
+                )
 
                 .build();
     }

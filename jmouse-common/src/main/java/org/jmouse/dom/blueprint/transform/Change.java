@@ -1,135 +1,324 @@
 package org.jmouse.dom.blueprint.transform;
 
-import org.jmouse.core.Verify;
-import org.jmouse.dom.blueprint.*;
+import org.jmouse.dom.blueprint.Blueprint;
+import org.jmouse.dom.blueprint.BlueprintDirective;
+import org.jmouse.dom.blueprint.BlueprintValue;
+import org.jmouse.util.Strings;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.jmouse.core.Verify.nonNull;
+import static org.jmouse.util.Strings.normalize;
 
 /**
  * Factory for common blueprint changes.
+ *
+ * <p>Design goals:</p>
+ * <ul>
+ *   <li>Immutable rewrites (new blueprint instances returned)</li>
+ *   <li>No regex for class token operations</li>
+ *   <li>Readable control flow (no short-circuit one-liners)</li>
+ * </ul>
  */
 public final class Change {
 
-    private Change() {}
+    private static final String CLASS_ATTRIBUTE_NAME = "class";
+
+    private Change() {
+    }
 
     public static BlueprintChange renameTag(String newTagName) {
-        Verify.nonNull(newTagName, "newTagName");
+        nonNull(newTagName, "newTagName");
+
         return (blueprint, execution) -> {
-            if (blueprint instanceof Blueprint.ElementBlueprint element) {
-                return new Blueprint.ElementBlueprint(
-                        newTagName, element.attributes(), element.children(), element.directives());
+            if (blueprint == null) {
+                return null;
             }
+
+            if (blueprint instanceof Blueprint.ElementBlueprint elementBlueprint) {
+                return new Blueprint.ElementBlueprint(
+                        newTagName,
+                        elementBlueprint.attributes(),
+                        elementBlueprint.children(),
+                        elementBlueprint.directives()
+                );
+            }
+
             return blueprint;
         };
     }
 
-    public static BlueprintChange setAttribute(String name, BlueprintValue value) {
-        Verify.nonNull(name, "name");
-        Verify.nonNull(value, "value");
+    public static BlueprintChange setAttribute(String attributeName, BlueprintValue attributeValue) {
+        nonNull(attributeName, "attributeName");
+        nonNull(attributeValue, "attributeValue");
+
         return (blueprint, execution) -> {
-            if (blueprint instanceof Blueprint.ElementBlueprint element) {
-                Map<String, BlueprintValue> attributes = new LinkedHashMap<>(element.attributes());
-                attributes.put(name, value);
-                return new Blueprint.ElementBlueprint(
-                        element.tagName(), Map.copyOf(attributes), element.children(), element.directives());
+            if (blueprint == null) {
+                return null;
             }
+
+            if (blueprint instanceof Blueprint.ElementBlueprint(
+                    String tagName,
+                    Map<String, BlueprintValue> attributes,
+                    List<Blueprint> children,
+                    List<BlueprintDirective> directives
+            )) {
+                Map<String, BlueprintValue> copy = new LinkedHashMap<>(attributes);
+
+                copy.put(attributeName, attributeValue);
+
+                return new Blueprint.ElementBlueprint(
+                        tagName,
+                        Map.copyOf(copy),
+                        children,
+                        directives
+                );
+            }
+
             return blueprint;
         };
     }
 
-    public static BlueprintChange setAttribute(String name, Object constantValue) {
-        return setAttribute(name, new BlueprintValue.ConstantValue(constantValue));
+    public static BlueprintChange setAttribute(String attributeName, Object constantValue) {
+        nonNull(attributeName, "attributeName");
+        BlueprintValue attributeValue = new BlueprintValue.ConstantValue(constantValue);
+        return setAttribute(attributeName, attributeValue);
     }
 
     public static BlueprintChange addClass(String className) {
-        Verify.nonNull(className, "className");
+        nonNull(className, "className");
+
         return (blueprint, execution) -> {
-            if (blueprint instanceof Blueprint.ElementBlueprint(
-                    String tagName, Map<String, BlueprintValue> elementAttributes, List<Blueprint> children, List<BlueprintDirective> directives
-            )) {
-                Map<String, BlueprintValue> attributes = new LinkedHashMap<>(elementAttributes);
-                BlueprintValue              current    = attributes.get("class");
-                String                      merged     = mergeClass(current, className);
-
-                attributes.put("class", new BlueprintValue.ConstantValue(merged));
-
-                return new Blueprint.ElementBlueprint(tagName, Map.copyOf(attributes), children, directives);
+            if (blueprint == null) {
+                return null;
             }
-            return blueprint;
+
+            if (!(blueprint instanceof Blueprint.ElementBlueprint(
+                    String tagName,
+                    Map<String, BlueprintValue> attributes,
+                    List<Blueprint> children,
+                    List<BlueprintDirective> directives
+            ))) {
+                return blueprint;
+            }
+
+            Map<String, BlueprintValue> attributesCopy = new LinkedHashMap<>(attributes);
+
+            BlueprintValue existingClassValue = attributesCopy.get(CLASS_ATTRIBUTE_NAME);
+            String mergedClassAttribute = mergeClass(existingClassValue, className);
+
+            attributesCopy.put(CLASS_ATTRIBUTE_NAME, new BlueprintValue.ConstantValue(mergedClassAttribute));
+
+            return new Blueprint.ElementBlueprint(
+                    tagName,
+                    Map.copyOf(attributesCopy),
+                    children,
+                    directives
+            );
         };
     }
 
-    public static BlueprintChange wrapWith(String wrapperTagName, BlueprintChange wrapperChange) {
-        Verify.nonNull(wrapperTagName, "wrapperTagName");
-        Verify.nonNull(wrapperChange, "wrapperChange");
+    public static BlueprintChange wrapWith(String tagName, BlueprintChange change) {
+        nonNull(tagName, "tagName");
+        nonNull(change, "change");
+
         return (blueprint, execution) -> {
-            Blueprint.ElementBlueprint wrapper        = new Blueprint.ElementBlueprint(
-                    wrapperTagName, Map.of(), List.of(blueprint), List.of());
-            Blueprint                  changed = wrapperChange.apply(wrapper, execution);
-            return changed;
+            if (blueprint == null) {
+                return null;
+            }
+
+            Blueprint.ElementBlueprint wrapper = new Blueprint.ElementBlueprint(
+                    tagName,
+                    Map.of(),
+                    List.of(blueprint),
+                    List.of()
+            );
+
+            return change.apply(wrapper, execution);
         };
     }
 
     public static BlueprintChange appendChild(Blueprint child) {
-        Verify.nonNull(child, "child");
+        nonNull(child, "child");
+
         return (blueprint, execution) -> {
-            if (blueprint instanceof Blueprint.ElementBlueprint(
-                    String tagName, Map<String, BlueprintValue> attributes, List<Blueprint> elementChildren, List<BlueprintDirective> directives
-            )) {
-                List<Blueprint> children = new ArrayList<>(elementChildren);
-                children.add(child);
-                return new Blueprint.ElementBlueprint(tagName, attributes, List.copyOf(children), directives);
+            if (blueprint == null) {
+                return null;
             }
-            return blueprint;
+
+            if (!(blueprint instanceof Blueprint.ElementBlueprint(
+                    String tagName,
+                    Map<String, BlueprintValue> attributes,
+                    List<Blueprint> children,
+                    List<BlueprintDirective> directives
+            ))) {
+                return blueprint;
+            }
+
+            List<Blueprint> copy = new ArrayList<>(children);
+
+            copy.add(child);
+
+            return new Blueprint.ElementBlueprint(
+                    tagName,
+                    attributes,
+                    List.copyOf(copy),
+                    directives
+            );
         };
     }
 
     public static BlueprintChange prependChild(Blueprint child) {
-        Verify.nonNull(child, "child");
+        nonNull(child, "child");
+
         return (blueprint, execution) -> {
-            if (blueprint instanceof Blueprint.ElementBlueprint(
-                    String tagName, Map<String, BlueprintValue> attributes, List<Blueprint> elementChildren, List<BlueprintDirective> directives
-            )) {
-                List<Blueprint> children = new ArrayList<>();
-                children.add(child);
-                children.addAll(elementChildren);
-                return new Blueprint.ElementBlueprint(tagName, attributes, List.copyOf(children), List.copyOf(directives));
+            if (blueprint == null) {
+                return null;
             }
-            return blueprint;
+
+            if (!(blueprint instanceof Blueprint.ElementBlueprint(
+                    String tagName,
+                    Map<String, BlueprintValue> attributes,
+                    List<Blueprint> children,
+                    List<BlueprintDirective> directives
+            ))) {
+                return blueprint;
+            }
+
+            List<Blueprint> copy = new ArrayList<>(children.size() + 1);
+
+            copy.add(child);
+            copy.addAll(children);
+
+            return new Blueprint.ElementBlueprint(
+                    tagName,
+                    attributes,
+                    List.copyOf(copy),
+                    directives
+            );
         };
     }
 
     public static BlueprintChange chain(BlueprintChange... changes) {
-        Verify.nonNull(changes, "changes");
+        nonNull(changes, "changes");
+
         return (blueprint, execution) -> {
-            Blueprint current = blueprint;
+            Blueprint currentBlueprint = blueprint;
+
             for (BlueprintChange change : changes) {
-                current = change.apply(current, execution);
+                if (currentBlueprint == null) {
+                    return null;
+                }
+                if (change == null) {
+                    continue;
+                }
+                currentBlueprint = change.apply(currentBlueprint, execution);
             }
-            return current;
+
+            return currentBlueprint;
         };
     }
 
-    private static String mergeClass(BlueprintValue current, String add) {
-        if (current instanceof BlueprintValue.ConstantValue(Object constant)) {
-            String existing = String.valueOf(constant).trim();
-            if (existing.isEmpty()) {
-                return add;
-            }
-            if (containsToken(existing, add)) {
-                return existing;
-            }
-            return "%s %s".formatted(existing, add);
+    // ---------------------------------------------------------------------
+    // Class attribute merge helpers
+    // ---------------------------------------------------------------------
+
+    private static String mergeClass(BlueprintValue existing, String classNames) {
+        String normalizedToken = normalize(classNames, String::trim);;
+
+        if (normalizedToken.isEmpty()) {
+            return readExistingClassAsString(existing);
         }
-        return add;
+
+        String existingClasses = readExistingClassAsString(existing);
+
+        if (existingClasses.isEmpty()) {
+            return normalizedToken;
+        }
+
+        boolean alreadyPresent = containsToken(existingClasses, normalizedToken);
+
+        if (alreadyPresent) {
+            return existingClasses;
+        }
+
+        return existingClasses + " " + normalizedToken;
     }
 
-    private static boolean containsToken(String classes, String token) {
-        for (String chunk : classes.split("\\s+")) {
-            if (chunk.equals(token)) {
+    private static String readExistingClassAsString(BlueprintValue existing) {
+        if (existing == null) {
+            return "";
+        }
+
+        if (existing instanceof BlueprintValue.ConstantValue(Object value)) {
+            return value == null ? "" : String.valueOf(value).trim();
+        }
+
+        return "";
+    }
+
+    /**
+     * Token search in whitespace-separated class attribute without regex.
+     */
+    private static boolean containsToken(String token, String expected) {
+        String haystack = normalize(token, String::trim);
+        String needle   = normalize(expected, String::trim);
+
+        if (haystack.isEmpty()) {
+            return false;
+        }
+
+        if (needle.isEmpty()) {
+            return false;
+        }
+
+        int index  = 0;
+        int length = haystack.length();
+
+        while (index < length) {
+            while (index < length && Character.isWhitespace(haystack.charAt(index))) {
+                index++;
+            }
+
+            if (index >= length) {
+                break;
+            }
+
+            int tokenStart = index;
+
+            while (index < length && !Character.isWhitespace(haystack.charAt(index))) {
+                index++;
+            }
+
+            int tokenEnd = index;
+
+            if (equalsRegion(haystack, tokenStart, tokenEnd, needle)) {
                 return true;
             }
         }
+
         return false;
     }
+
+    private static boolean equalsRegion(String text, int startIndex, int endIndex, String token) {
+        int segmentLength = endIndex - startIndex;
+
+        if (segmentLength != token.length()) {
+            return false;
+        }
+
+        for (int i = 0; i < segmentLength; i++) {
+            char lc = text.charAt(startIndex + i);
+            char rc = token.charAt(i);
+            if (lc != rc) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 }

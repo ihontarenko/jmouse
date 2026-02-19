@@ -5,7 +5,7 @@ import org.jmouse.dom.blueprint.*;
 
 import java.util.*;
 
-public final class RuleBasedBlueprintTransformer implements BlueprintTransformer {
+public final class RuleBasedTransformer implements BlueprintTransformer {
 
     private static final Comparator<Rule> ORDERING =
             Comparator.comparingInt(Rule::order).reversed();
@@ -13,7 +13,7 @@ public final class RuleBasedBlueprintTransformer implements BlueprintTransformer
     private final List<Rule>         rules;
     private final BlueprintTraversal traversal = new BlueprintTraversal();
 
-    private RuleBasedBlueprintTransformer(List<Rule> rules) {
+    private RuleBasedTransformer(List<Rule> rules) {
         this.rules = rules;
     }
 
@@ -54,8 +54,8 @@ public final class RuleBasedBlueprintTransformer implements BlueprintTransformer
             return this;
         }
 
-        public RuleBasedBlueprintTransformer build() {
-            return new RuleBasedBlueprintTransformer(List.copyOf(rules));
+        public RuleBasedTransformer build() {
+            return new RuleBasedTransformer(List.copyOf(rules));
         }
     }
 

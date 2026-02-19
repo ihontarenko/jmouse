@@ -1,62 +1,95 @@
 package org.jmouse.dom.blueprint.transform;
 
-import org.jmouse.core.Verify;
 import org.jmouse.dom.blueprint.Blueprint;
 import org.jmouse.dom.blueprint.BlueprintValue;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
-/**
- * Factory for common blueprint matchers.
- */
+import static org.jmouse.core.Verify.nonNull;
+
 public final class Match {
 
     private Match() {}
 
     public static ContextAwareMatcher tagName(String tagName) {
-        Verify.nonNull(tagName, "tagName");
-        return (blueprint, c) -> blueprint instanceof Blueprint.ElementBlueprint element
-                && element.tagName().equalsIgnoreCase(tagName);
+        nonNull(tagName, "tagName");
+        return (blueprint, context) ->
+                blueprint instanceof Blueprint.ElementBlueprint element
+                        && element.tagName().equalsIgnoreCase(tagName);
     }
 
     public static ContextAwareMatcher element(Predicate<Blueprint.ElementBlueprint> predicate) {
-        Verify.nonNull(predicate, "predicate");
-        return (blueprint, c) -> blueprint instanceof Blueprint.ElementBlueprint element && predicate.test(element);
+        nonNull(predicate, "predicate");
+        return (blueprint, context) ->
+                blueprint instanceof Blueprint.ElementBlueprint element
+                        && predicate.test(element);
     }
 
     public static ContextAwareMatcher hasAttribute(String attributeName) {
-        Verify.nonNull(attributeName, "attributeName");
+        nonNull(attributeName, "attributeName");
         return element(e -> e.attributes().containsKey(attributeName));
     }
 
-    public static ContextAwareMatcher attributeEquals(String attributeName, String expectedConstant) {
-        Verify.nonNull(attributeName, "attributeName");
-        Verify.nonNull(expectedConstant, "expectedConstant");
-        return element(e -> constantAttributeEquals(e.attributes(), attributeName, expectedConstant));
+    public static ContextAwareMatcher attributeValue(String attributeName, String constant) {
+        nonNull(attributeName, "attributeName");
+        nonNull(constant, "constant");
+        return element(e -> constantAttributeValues(e.attributes(), attributeName, constant));
     }
 
-    public static ContextAwareMatcher and(BlueprintMatcher left, BlueprintMatcher right) {
-        Verify.nonNull(left, "left");
-        Verify.nonNull(right, "right");
-        return (blueprint, c) -> left.matches(blueprint) && right.matches(blueprint);
+    // ---------- Context-aware helpers ----------
+    public static ContextAwareMatcher insideAncestor(String ancestorTagName) {
+        nonNull(ancestorTagName, "ancestorTagName");
+        return (blueprint, context) -> context != null && context.hasAncestor(ancestorTagName);
     }
 
-    public static ContextAwareMatcher or(BlueprintMatcher left, BlueprintMatcher right) {
-        Verify.nonNull(left, "left");
-        Verify.nonNull(right, "right");
-        return (blueprint, c) -> left.matches(blueprint) || right.matches(blueprint);
+    public static ContextAwareMatcher insideAncestor(Predicate<Blueprint.ElementBlueprint> predicate) {
+        nonNull(predicate, "predicate");
+        return (blueprint, context) -> {
+            if (context == null) {
+                return false;
+            }
+            return context.hasAncestor(predicate);
+        };
     }
 
-    private static boolean constantAttributeEquals(
-            Map<String, BlueprintValue> attributes,
-            String attributeName,
-            String expectedConstant
-    ) {
-        BlueprintValue value = attributes.get(attributeName);
+    public static ContextAwareMatcher parentTag(String parentTagName) {
+        return (blueprint, context) -> {
+            if (context == null) {
+                return false;
+            }
+            Blueprint.ElementBlueprint parent = context.ancestor();
+            return parent != null && parent.tagName().equalsIgnoreCase(nonNull(parentTagName, "parentTagName"));
+        };
+    }
+
+    // ---------- Boolean algebra ----------
+    public static ContextAwareMatcher and(ContextAwareMatcher left, ContextAwareMatcher right) {
+        return (blueprint, context) -> nonNull(left, "left").matches(blueprint, context)
+                && nonNull(right, "right").matches(blueprint, context);
+    }
+
+    public static ContextAwareMatcher or(ContextAwareMatcher left, ContextAwareMatcher right) {
+        return (blueprint, context) -> nonNull(left, "left").matches(blueprint, context)
+                || nonNull(right, "right").matches(blueprint, context);
+    }
+
+    public static ContextAwareMatcher not(ContextAwareMatcher matcher) {
+        nonNull(matcher, "matcher");
+        return (blueprint, context) -> !matcher.matches(blueprint, context);
+    }
+
+    public static boolean constantAttributeValues(Map<String, BlueprintValue> attributes, String name, String expected) {
+        BlueprintValue value = attributes.get(name);
         if (value instanceof BlueprintValue.ConstantValue(Object constant)) {
-            return expectedConstant.equals(String.valueOf(constant));
+            return Objects.equals(expected, String.valueOf(constant));
         }
         return false;
     }
+
+    public static boolean constantAttributeValues(Blueprint.ElementBlueprint element, String name, String expected) {
+        return constantAttributeValues(element.attributes(), name, expected);
+    }
+
 }

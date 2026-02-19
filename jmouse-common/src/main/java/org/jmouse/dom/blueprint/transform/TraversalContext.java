@@ -5,10 +5,17 @@ import org.jmouse.dom.blueprint.Blueprint;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
+import java.util.function.Predicate;
 
 public final class TraversalContext {
 
     private final Deque<Blueprint.ElementBlueprint> ancestors = new ArrayDeque<>();
+
+    private static final TraversalContext EMPTY = new TraversalContext();
+
+    public static TraversalContext empty() {
+        return EMPTY;
+    }
 
     public void enter(Blueprint.ElementBlueprint element) {
         ancestors.push(element);
@@ -40,13 +47,22 @@ public final class TraversalContext {
         return List.copyOf(ancestors);
     }
 
-    public Blueprint.ElementBlueprint nearestAncestor() {
+    public Blueprint.ElementBlueprint ancestor() {
         return ancestors.peek();
     }
 
     public boolean hasAncestor(String tagName) {
-        for (Blueprint.ElementBlueprint a : ancestors) {
-            if (a.tagName().equalsIgnoreCase(tagName)) {
+        for (Blueprint.ElementBlueprint element : ancestors) {
+            if (element.tagName().equalsIgnoreCase(tagName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasAncestor(Predicate<Blueprint.ElementBlueprint> predicate) {
+        for (Blueprint.ElementBlueprint ancestor : ancestors) {
+            if (predicate.test(ancestor)) {
                 return true;
             }
         }
