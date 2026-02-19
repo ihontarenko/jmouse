@@ -1,9 +1,11 @@
-package org.jmouse.template.hooks;
+package org.jmouse.dom.meterializer.hooks;
 
+import org.jmouse.common.dom.Node;
 import org.jmouse.core.access.ObjectAccessor;
 import org.jmouse.template.RenderingExecution;
 import org.jmouse.template.RenderingRequest;
 import org.jmouse.template.SubmissionState;
+import org.jmouse.template.hooks.RenderingHook;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -21,7 +23,7 @@ import java.util.Set;
  *   <li>Option checked flag: "checked"</li>
  * </ul>
  */
-public final class OptionSelectionHook implements RenderingHook {
+public final class OptionSelectionHook implements RenderingHook<Node> {
 
     @Override
     public int order() {

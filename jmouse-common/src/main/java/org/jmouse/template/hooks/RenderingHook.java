@@ -1,6 +1,5 @@
 package org.jmouse.template.hooks;
 
-import org.jmouse.dom.Node;
 import org.jmouse.template.NodeTemplate;
 import org.jmouse.template.RenderingExecution;
 import org.jmouse.template.RenderingRequest;
@@ -8,7 +7,7 @@ import org.jmouse.template.RenderingRequest;
 /**
  * Intercepts the rendering pipeline.
  */
-public interface RenderingHook {
+public interface RenderingHook<T> {
 
     /**
      * @return hook ordering. Higher value means higher precedence.
@@ -38,7 +37,7 @@ public interface RenderingHook {
     /**
      * Called after materialization.
      */
-    default void afterMaterialize(Node root, RenderingExecution execution) {
+    default void afterMaterialize(T root, RenderingExecution execution) {
     }
 
     /**

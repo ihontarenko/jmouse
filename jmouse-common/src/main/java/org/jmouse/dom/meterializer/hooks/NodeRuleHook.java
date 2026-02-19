@@ -1,15 +1,16 @@
-package org.jmouse.template.hooks;
+package org.jmouse.dom.meterializer.hooks;
 
 import org.jmouse.core.Verify;
 import org.jmouse.dom.Node;
 import org.jmouse.template.RenderingExecution;
-import org.jmouse.template.rules.NodeRuleSet;
-import org.jmouse.template.rules.NodeRule;
+import org.jmouse.dom.meterializer.rules.NodeRuleSet;
+import org.jmouse.dom.meterializer.rules.NodeRule;
+import org.jmouse.template.hooks.RenderingHook;
 
 /**
  * Applies {@link NodeRule} rules after materialization.
  */
-public final class NodeRuleHook implements RenderingHook {
+public final class NodeRuleHook implements RenderingHook<Node> {
 
     private final NodeRuleSet ruleSet;
 

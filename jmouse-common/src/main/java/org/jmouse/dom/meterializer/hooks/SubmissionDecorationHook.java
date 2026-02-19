@@ -1,4 +1,4 @@
-package org.jmouse.template.hooks;
+package org.jmouse.dom.meterializer.hooks;
 
 import org.jmouse.dom.Node;
 import org.jmouse.dom.NodeType;
@@ -7,6 +7,7 @@ import org.jmouse.template.RenderingExecution;
 import org.jmouse.template.SubmissionState;
 import org.jmouse.dom.node.ElementNode;
 import org.jmouse.dom.node.TextNode;
+import org.jmouse.template.hooks.RenderingHook;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,7 @@ import java.util.Map;
  *   </li>
  * </ul>
  */
-public final class SubmissionDecorationHook implements RenderingHook {
+public final class SubmissionDecorationHook implements RenderingHook<Node> {
 
     @Override
     public int order() {

@@ -1,4 +1,4 @@
-package org.jmouse.template.smoke;
+package org.jmouse.dom.meterializer.smoke;
 
 import org.jmouse.core.access.ObjectAccessorWrapper;
 import org.jmouse.dom.Node;
@@ -8,8 +8,8 @@ import org.jmouse.template.RenderingPipeline;
 import org.jmouse.template.TemplateRegistry;
 import org.jmouse.template.build.Include;
 import org.jmouse.template.defaults.BootstrapTemplates;
-import org.jmouse.template.modules.BootstrapThemeModule;
-import org.jmouse.template.modules.ThemeAssembly;
+import org.jmouse.dom.meterializer.modules.BootstrapThemeModule;
+import org.jmouse.dom.meterializer.modules.ThemeAssembly;
 
 import java.util.LinkedHashMap;
 import java.util.List;

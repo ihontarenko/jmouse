@@ -1,29 +1,27 @@
-package org.jmouse.template.modules;
+package org.jmouse.dom.meterializer.modules;
 
 import org.jmouse.core.Verify;
 import org.jmouse.core.access.AccessorWrapper;
-import org.jmouse.dom.template.*;
+import org.jmouse.dom.Node;
+import org.jmouse.dom.meterializer.DOMMaterializer;
 import org.jmouse.template.*;
 import org.jmouse.template.hooks.RenderingHook;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Assembles a pipeline from a theme module and user overrides.
- */
 public final class ThemeAssembly {
 
     private final ThemeModule themeModule;
 
     private final List<RenderingHook>                  hooks        = new ArrayList<>();
+    private final TemplateRegistry                     templateRegistry;
     private final List<ThemeModule.OrderedTransformer> transformers = new ArrayList<>();
-    private final TemplateRegistry                     catalog;
 
     private ThemeAssembly(ThemeModule themeModule) {
         this.themeModule = Verify.nonNull(themeModule, "themeModule");
         TemplateRegistry baseCatalog = TemplateRegistry.create();
-        this.catalog = TemplateRegistry.overlay(baseCatalog);
+        this.templateRegistry = TemplateRegistry.overlay(baseCatalog);
         themeModule.contributeBlueprints(baseCatalog);
     }
 
@@ -31,25 +29,16 @@ public final class ThemeAssembly {
         return new ThemeAssembly(themeModule);
     }
 
-    /**
-     * Registers or overrides a blueprint by key.
-     */
     public ThemeAssembly overrideBlueprint(String key, NodeTemplate blueprint) {
-        catalog.register(key, blueprint);
+        templateRegistry.register(key, blueprint);
         return this;
     }
 
-    /**
-     * Adds a transformer with an explicit order.
-     */
     public ThemeAssembly addTransformer(int order, TemplateTransformer transformer) {
         transformers.add(new ThemeModule.OrderedTransformer(order, transformer));
         return this;
     }
 
-    /**
-     * Adds a hook.
-     */
     public ThemeAssembly addHook(RenderingHook hook) {
         hooks.add(hook);
         return this;
@@ -58,7 +47,8 @@ public final class ThemeAssembly {
     public RenderingPipeline build(AccessorWrapper accessorWrapper) {
         Verify.nonNull(accessorWrapper, "accessorWrapper");
 
-        RenderingPipeline.Builder builder = RenderingPipeline.builder().catalog(catalog)
+        PipelineBuilder<Node, RenderingPipeline> builder = RenderingPipeline.builder()
+                .templateRegistry(templateRegistry)
                 .accessorWrapper(accessorWrapper);
 
         for (ThemeModule.OrderedTransformer transformer : themeModule.transformers()) {
@@ -77,12 +67,12 @@ public final class ThemeAssembly {
             builder.hook(hook);
         }
 
-        builder.materializer(new TemplateMaterializer.Implementation());
+        builder.materializer(new DOMMaterializer());
 
         return builder.build();
     }
 
     public TemplateRegistry catalog() {
-        return catalog;
+        return templateRegistry;
     }
 }
