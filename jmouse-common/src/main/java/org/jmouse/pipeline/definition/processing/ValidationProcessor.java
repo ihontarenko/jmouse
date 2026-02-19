@@ -1,6 +1,5 @@
 package org.jmouse.pipeline.definition.processing;
 
-import org.jmouse.common.pipeline.definition.model.*;
 import org.jmouse.core.Verify;
 import org.jmouse.pipeline.definition.model.ChainDefinition;
 import org.jmouse.pipeline.definition.model.LinkDefinition;

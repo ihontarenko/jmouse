@@ -2,7 +2,7 @@ package org.jmouse.dom.meterializer.rules;
 
 import org.jmouse.core.Verify;
 import org.jmouse.dom.Node;
-import org.jmouse.template.RenderingExecution;
+import org.jmouse.meterializer.RenderingExecution;
 
 import java.util.ArrayList;
 import java.util.Comparator;

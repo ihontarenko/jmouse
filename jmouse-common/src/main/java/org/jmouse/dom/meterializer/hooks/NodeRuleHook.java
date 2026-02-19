@@ -2,10 +2,10 @@ package org.jmouse.dom.meterializer.hooks;
 
 import org.jmouse.core.Verify;
 import org.jmouse.dom.Node;
-import org.jmouse.template.RenderingExecution;
+import org.jmouse.meterializer.RenderingExecution;
 import org.jmouse.dom.meterializer.rules.NodeRuleSet;
 import org.jmouse.dom.meterializer.rules.NodeRule;
-import org.jmouse.template.hooks.RenderingHook;
+import org.jmouse.meterializer.hooks.RenderingHook;
 
 /**
  * Applies {@link NodeRule} rules after materialization.

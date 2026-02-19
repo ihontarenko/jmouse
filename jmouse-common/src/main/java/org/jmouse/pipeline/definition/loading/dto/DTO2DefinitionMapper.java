@@ -1,6 +1,5 @@
 package org.jmouse.pipeline.definition.loading.dto;
 
-import org.jmouse.common.pipeline.definition.model.*;
 import org.jmouse.pipeline.definition.model.*;
 
 import java.util.LinkedHashMap;

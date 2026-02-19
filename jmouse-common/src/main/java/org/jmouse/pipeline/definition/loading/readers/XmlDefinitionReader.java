@@ -1,7 +1,6 @@
 package org.jmouse.pipeline.definition.loading.readers;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import org.jmouse.common.pipeline.definition.loading.*;
 import org.jmouse.pipeline.definition.loading.DefinitionSource;
 import org.jmouse.pipeline.definition.loading.PipelineDefinitionReader;
 import org.jmouse.pipeline.definition.loading.dto.XmlDTO2DefinitionMapper;

@@ -2,10 +2,10 @@ package org.jmouse.dom.meterializer.hooks;
 
 import org.jmouse.common.dom.Node;
 import org.jmouse.core.access.ObjectAccessor;
-import org.jmouse.template.RenderingExecution;
-import org.jmouse.template.RenderingRequest;
-import org.jmouse.template.SubmissionState;
-import org.jmouse.template.hooks.RenderingHook;
+import org.jmouse.meterializer.RenderingExecution;
+import org.jmouse.meterializer.RenderingRequest;
+import org.jmouse.meterializer.SubmissionState;
+import org.jmouse.meterializer.hooks.RenderingHook;
 
 import java.lang.reflect.Array;
 import java.util.Collection;

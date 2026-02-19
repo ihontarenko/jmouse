@@ -4,8 +4,9 @@ import org.jmouse.core.Verify;
 import org.jmouse.core.access.AccessorWrapper;
 import org.jmouse.dom.Node;
 import org.jmouse.dom.meterializer.DOMMaterializer;
-import org.jmouse.template.*;
-import org.jmouse.template.hooks.RenderingHook;
+import org.jmouse.dom.meterializer.RenderingPipeline;
+import org.jmouse.meterializer.*;
+import org.jmouse.meterializer.hooks.RenderingHook;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ public final class ThemeAssembly {
 
     private final ThemeModule themeModule;
 
-    private final List<RenderingHook>                  hooks        = new ArrayList<>();
+    private final List<RenderingHook<Node>>                  hooks        = new ArrayList<>();
     private final TemplateRegistry                     templateRegistry;
     private final List<ThemeModule.OrderedTransformer> transformers = new ArrayList<>();
 
@@ -39,11 +40,12 @@ public final class ThemeAssembly {
         return this;
     }
 
-    public ThemeAssembly addHook(RenderingHook hook) {
+    public ThemeAssembly addHook(RenderingHook<Node> hook) {
         hooks.add(hook);
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public RenderingPipeline build(AccessorWrapper accessorWrapper) {
         Verify.nonNull(accessorWrapper, "accessorWrapper");
 
@@ -59,12 +61,12 @@ public final class ThemeAssembly {
             builder.transformer(transformer.order(), transformer.transformer());
         }
 
-        for (RenderingHook hook : themeModule.hooks()) {
-            builder.hook(hook);
+        for (RenderingHook<?> hook : themeModule.hooks()) {
+            builder.hook((RenderingHook<Node>) hook);
         }
 
-        for (RenderingHook hook : hooks) {
-            builder.hook(hook);
+        for (RenderingHook<?> hook : hooks) {
+            builder.hook((RenderingHook<Node>) hook);
         }
 
         builder.materializer(new DOMMaterializer());

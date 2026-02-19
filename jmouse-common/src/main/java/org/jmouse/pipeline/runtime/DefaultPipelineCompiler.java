@@ -1,7 +1,5 @@
 package org.jmouse.pipeline.runtime;
 
-import org.jmouse.common.pipeline.*;
-import org.jmouse.common.pipeline.definition.model.*;
 import org.jmouse.core.proxy.ProxyFactory;
 import org.jmouse.pipeline.*;
 import org.jmouse.pipeline.definition.model.*;

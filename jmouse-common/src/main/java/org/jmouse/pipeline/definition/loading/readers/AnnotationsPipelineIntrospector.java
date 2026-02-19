@@ -1,7 +1,6 @@
 package org.jmouse.pipeline.definition.loading.readers;
 
 import org.jmouse.pipeline.PipelineProcessor;
-import org.jmouse.common.pipeline.definition.annotations.*;
 import org.jmouse.pipeline.definition.annotations.*;
 import org.jmouse.pipeline.definition.dsl.PipelineBuilder;
 import org.jmouse.pipeline.definition.dsl.ChainBuilder;

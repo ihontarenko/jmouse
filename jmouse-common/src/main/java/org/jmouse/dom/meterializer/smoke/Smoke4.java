@@ -3,11 +3,11 @@ package org.jmouse.dom.meterializer.smoke;
 import org.jmouse.core.access.ObjectAccessorWrapper;
 import org.jmouse.dom.Node;
 import org.jmouse.dom.NodeContext;
-import org.jmouse.template.NodeTemplate;
-import org.jmouse.template.RenderingPipeline;
-import org.jmouse.template.TemplateRegistry;
-import org.jmouse.template.build.Include;
-import org.jmouse.template.defaults.BootstrapTemplates;
+import org.jmouse.meterializer.NodeTemplate;
+import org.jmouse.dom.meterializer.RenderingPipeline;
+import org.jmouse.meterializer.TemplateRegistry;
+import org.jmouse.meterializer.build.Include;
+import org.jmouse.dom.meterializer.BootstrapTemplates;
 import org.jmouse.dom.meterializer.modules.BootstrapThemeModule;
 import org.jmouse.dom.meterializer.modules.ThemeAssembly;
 
@@ -15,10 +15,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.jmouse.template.NodeTemplate.element;
-import static org.jmouse.template.NodeTemplate.text;
-import static org.jmouse.template.ValueExpression.constant;
-import static org.jmouse.template.ValueExpression.path;
+import static org.jmouse.meterializer.NodeTemplate.element;
+import static org.jmouse.meterializer.NodeTemplate.text;
+import static org.jmouse.meterializer.ValueExpression.constant;
+import static org.jmouse.meterializer.ValueExpression.path;
 
 public final class Smoke4 {
 

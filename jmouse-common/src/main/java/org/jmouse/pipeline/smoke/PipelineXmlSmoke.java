@@ -1,7 +1,6 @@
 package org.jmouse.pipeline.smoke;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import org.jmouse.common.pipeline.*;
 import org.jmouse.pipeline.PipelineManager;
 import org.jmouse.pipeline.PipelineProcessor;
 import org.jmouse.pipeline.PipelineProcessorFactory;

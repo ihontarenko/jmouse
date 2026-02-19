@@ -1,7 +1,7 @@
 package org.jmouse.dom.meterializer.rules;
 
 import org.jmouse.dom.Node;
-import org.jmouse.template.RenderingExecution;
+import org.jmouse.meterializer.RenderingExecution;
 
 /**
  * Imperative rule applied to a materialized node tree.

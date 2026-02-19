@@ -3,11 +3,11 @@ package org.jmouse.dom.meterializer.hooks;
 import org.jmouse.dom.Node;
 import org.jmouse.dom.NodeType;
 import org.jmouse.dom.TagName;
-import org.jmouse.template.RenderingExecution;
-import org.jmouse.template.SubmissionState;
+import org.jmouse.meterializer.RenderingExecution;
+import org.jmouse.meterializer.SubmissionState;
 import org.jmouse.dom.node.ElementNode;
 import org.jmouse.dom.node.TextNode;
-import org.jmouse.template.hooks.RenderingHook;
+import org.jmouse.meterializer.hooks.RenderingHook;
 
 import java.util.ArrayList;
 import java.util.List;

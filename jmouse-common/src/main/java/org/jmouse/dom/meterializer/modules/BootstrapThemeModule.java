@@ -1,10 +1,10 @@
 package org.jmouse.dom.meterializer.modules;
 
-import org.jmouse.template.TemplateRegistry;
-import org.jmouse.template.TemplateTransformer;
-import org.jmouse.template.hooks.RenderingHook;
-import org.jmouse.template.transform.BootstrapTransformers;
-import org.jmouse.template.defaults.StandardBlueprints;
+import org.jmouse.meterializer.TemplateRegistry;
+import org.jmouse.meterializer.TemplateTransformer;
+import org.jmouse.meterializer.hooks.RenderingHook;
+import org.jmouse.meterializer.transform.BootstrapTransformers;
+import org.jmouse.dom.meterializer.StandardBlueprints;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public final class BootstrapThemeModule implements ThemeModule {
     }
 
     @Override
-    public List<RenderingHook> hooks() {
+    public List<RenderingHook<?>> hooks() {
         return List.of();
     }
 }
