@@ -15,14 +15,14 @@ public final class ThemeAssembly {
 
     private final ThemeModule themeModule;
 
-    private final List<ThemeModule.OrderedTransformer> additionalTransformers = new ArrayList<>();
-    private final List<RenderingHook>                  additionalHooks        = new ArrayList<>();
-    private final BlueprintCatalog                     overlayCatalog;
+    private final List<RenderingHook>                  hooks        = new ArrayList<>();
+    private final List<ThemeModule.OrderedTransformer> transformers = new ArrayList<>();
+    private final BlueprintCatalog                     catalog;
 
     private ThemeAssembly(ThemeModule themeModule) {
         this.themeModule = Verify.nonNull(themeModule, "themeModule");
         BlueprintCatalog baseCatalog = BlueprintCatalog.create();
-        this.overlayCatalog = BlueprintCatalog.overlay(baseCatalog);
+        this.catalog = BlueprintCatalog.overlay(baseCatalog);
         themeModule.contributeBlueprints(baseCatalog);
     }
 
@@ -34,7 +34,7 @@ public final class ThemeAssembly {
      * Registers or overrides a blueprint by key.
      */
     public ThemeAssembly overrideBlueprint(String key, Blueprint blueprint) {
-        overlayCatalog.register(key, blueprint);
+        catalog.register(key, blueprint);
         return this;
     }
 
@@ -42,7 +42,7 @@ public final class ThemeAssembly {
      * Adds a transformer with an explicit order.
      */
     public ThemeAssembly addTransformer(int order, BlueprintTransformer transformer) {
-        additionalTransformers.add(new ThemeModule.OrderedTransformer(order, transformer));
+        transformers.add(new ThemeModule.OrderedTransformer(order, transformer));
         return this;
     }
 
@@ -50,38 +50,38 @@ public final class ThemeAssembly {
      * Adds a hook.
      */
     public ThemeAssembly addHook(RenderingHook hook) {
-        additionalHooks.add(hook);
+        hooks.add(hook);
         return this;
     }
 
     public RenderingPipeline build(AccessorWrapper accessorWrapper) {
         Verify.nonNull(accessorWrapper, "accessorWrapper");
 
-        RenderingPipeline.Builder builder = RenderingPipeline.builder().catalog(overlayCatalog)
+        RenderingPipeline.Builder builder = RenderingPipeline.builder().catalog(catalog)
                 .accessorWrapper(accessorWrapper);
 
         for (ThemeModule.OrderedTransformer transformer : themeModule.transformers()) {
-            builder.addTransformer(transformer.order(), transformer.transformer());
+            builder.transformer(transformer.order(), transformer.transformer());
         }
 
-        for (ThemeModule.OrderedTransformer transformer : additionalTransformers) {
-            builder.addTransformer(transformer.order(), transformer.transformer());
+        for (ThemeModule.OrderedTransformer transformer : transformers) {
+            builder.transformer(transformer.order(), transformer.transformer());
         }
 
         for (RenderingHook hook : themeModule.hooks()) {
-            builder.addHook(hook);
+            builder.hook(hook);
         }
 
-        for (RenderingHook hook : additionalHooks) {
-            builder.addHook(hook);
+        for (RenderingHook hook : hooks) {
+            builder.hook(hook);
         }
 
-        builder.materializer(new BlueprintMaterializer.Implementation(overlayCatalog));
+        builder.materializer(new BlueprintMaterializer.Implementation(catalog));
 
         return builder.build();
     }
 
     public BlueprintCatalog catalog() {
-        return overlayCatalog;
+        return catalog;
     }
 }

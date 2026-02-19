@@ -16,10 +16,15 @@ public final class AdvancedChange {
     public static BlueprintChange removeAttribute(String name) {
         Verify.nonNull(name, "name");
         return (blueprint, execution) -> {
-            if (blueprint instanceof ElementBlueprint element) {
-                Map<String, BlueprintValue> attributes = new LinkedHashMap<>(element.attributes());
+            if (blueprint instanceof ElementBlueprint(
+                    String tagName, Map<String,
+                    BlueprintValue> elementAttributes,
+                    List<Blueprint> children,
+                    List<BlueprintDirective> directives
+            )) {
+                Map<String, BlueprintValue> attributes = new LinkedHashMap<>(elementAttributes);
                 attributes.remove(name);
-                return new ElementBlueprint(element.tagName(), Map.copyOf(attributes), element.children());
+                return new ElementBlueprint(tagName, Map.copyOf(attributes), children, directives);
             }
             return blueprint;
         };
@@ -28,10 +33,16 @@ public final class AdvancedChange {
     public static BlueprintChange mergeAttributes(Map<String, BlueprintValue> addOrReplace) {
         Verify.nonNull(addOrReplace, "addOrReplace");
         return (blueprint, execution) -> {
-            if (blueprint instanceof ElementBlueprint element) {
-                Map<String, BlueprintValue> attributes = new LinkedHashMap<>(element.attributes());
+            if (blueprint instanceof ElementBlueprint(
+                    String tagName,
+                    Map<String, BlueprintValue> elementAttributes,
+                    List<Blueprint> children,
+                    List<BlueprintDirective> directives
+            )) {
+                Map<String, BlueprintValue> attributes = new LinkedHashMap<>(elementAttributes);
                 attributes.putAll(addOrReplace);
-                return new ElementBlueprint(element.tagName(), Map.copyOf(attributes), element.children());
+                return new ElementBlueprint(
+                        tagName, Map.copyOf(attributes), children, directives);
             }
             return blueprint;
         };
@@ -41,7 +52,8 @@ public final class AdvancedChange {
         Verify.nonNull(children, "children");
         return (blueprint, execution) -> {
             if (blueprint instanceof ElementBlueprint element) {
-                return new ElementBlueprint(element.tagName(), element.attributes(), List.copyOf(children));
+                return new ElementBlueprint(
+                        element.tagName(), element.attributes(), List.copyOf(children), element.directives());
             }
             return blueprint;
         };
@@ -51,10 +63,15 @@ public final class AdvancedChange {
         Verify.nonNull(wrapperTagName, "wrapperTagName");
         Verify.nonNull(wrapperChange, "wrapperChange");
         return (blueprint, execution) -> {
-            if (blueprint instanceof ElementBlueprint element) {
-                ElementBlueprint wrapper = new ElementBlueprint(wrapperTagName, Map.of(), element.children());
-                Blueprint changedWrapper = wrapperChange.apply(wrapper, execution);
-                return new ElementBlueprint(element.tagName(), element.attributes(), List.of(changedWrapper));
+            if (blueprint instanceof ElementBlueprint(
+                    String tagName,
+                    Map<String, BlueprintValue> attributes,
+                    List<Blueprint> children,
+                    List<BlueprintDirective> directives
+            )) {
+                ElementBlueprint wrapper = new ElementBlueprint(wrapperTagName, Map.of(), children, directives);
+                Blueprint        changed = wrapperChange.apply(wrapper, execution);
+                return new ElementBlueprint(tagName, attributes, List.of(changed), directives);
             }
             return blueprint;
         };
@@ -64,7 +81,7 @@ public final class AdvancedChange {
         return (blueprint, execution) -> {
             if (blueprint instanceof ElementBlueprint element) {
                 if (element.children().size() == 1) {
-                    return element.children().get(0);
+                    return element.children().getFirst();
                 }
             }
             return blueprint;

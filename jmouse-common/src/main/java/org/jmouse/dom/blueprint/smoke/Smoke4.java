@@ -12,8 +12,8 @@ import org.jmouse.dom.blueprint.hooks.SubmissionDecorationHook;
 import org.jmouse.dom.blueprint.model.*;
 import org.jmouse.dom.blueprint.modules.BootstrapThemeModule;
 import org.jmouse.dom.blueprint.modules.ThemeAssembly;
+import org.jmouse.dom.blueprint.presets.BootstrapPreset;
 import org.jmouse.dom.node.ElementNode;
-import org.jmouse.dom.node.TextNode;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -84,7 +84,7 @@ public final class Smoke4 {
         System.out.println(bootstrapNode.interpret(NodeContext.defaults()));
 
         // HTML5-like theme (no Bootstrap classes, simpler layout)
-        ThemeAssembly htmlAssembly = ThemeAssembly.forTheme(new BootstrapThemeModule())
+/*        ThemeAssembly htmlAssembly = ThemeAssembly.forTheme(new BootstrapThemeModule())
                 .addHook(new SubmissionDecorationHook())
                 .addHook(new RadioCheckedHook());
 
@@ -97,7 +97,7 @@ public final class Smoke4 {
         htmlNode.execute(NodeContext.REORDER_NODE_CORRECTOR);
 
         System.out.println("\n=== HTML5 THEME ===");
-        System.out.println(htmlNode.interpret(NodeContext.defaults()));
+        System.out.println(htmlNode.interpret(NodeContext.defaults()));*/
     }
 
     // ---------------------------------------------------------------------
@@ -108,7 +108,8 @@ public final class Smoke4 {
         catalog.register("smoke4/form", BootstrapBlueprints.form());
         catalog.register("smoke4/fragment", CommonBlueprints.fragment());
 
-        catalog.register("smoke4/control/input-text", BootstrapBlueprints.inputText());
+//        catalog.register("smoke4/control/input-text", BootstrapBlueprints.inputText());
+        catalog.register("smoke4/control/input-text", BootstrapPreset.inputText("name", "label", null));
         catalog.register("smoke4/control/input-number", BootstrapBlueprints.inputNumber());
         catalog.register("smoke4/control/radio-group", BootstrapBlueprints.radioGroup());
         catalog.register("smoke4/control/button", BootstrapBlueprints.submitButton());

@@ -30,18 +30,6 @@ public interface RenderingHook {
     }
 
     /**
-     * Called before transform chain is applied.
-     */
-    default void beforeTransform(Blueprint blueprint, RenderingExecution execution) {
-    }
-
-    /**
-     * Called after transform chain is applied.
-     */
-    default void afterTransform(Blueprint transformed, RenderingExecution execution) {
-    }
-
-    /**
      * Called before materialization.
      */
     default void beforeMaterialize(Blueprint transformed, RenderingExecution execution) {

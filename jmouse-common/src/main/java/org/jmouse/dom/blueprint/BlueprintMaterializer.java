@@ -31,8 +31,8 @@ public interface BlueprintMaterializer {
      */
     final class Implementation implements BlueprintMaterializer {
 
-        private final PathValueResolver  valueResolver      = new PathValueResolver();
-        private final PredicateEvaluator predicateEvaluator = new PredicateEvaluator(this::resolveValue);
+        private final ValueResolver      valueResolver      = new DefaultValueResolver(new PathValueResolver());
+        private final PredicateEvaluator predicateEvaluator = new PredicateEvaluator(valueResolver);
         private final BlueprintCatalog   catalog;
 
         public Implementation(BlueprintCatalog catalog) {
@@ -68,12 +68,12 @@ public interface BlueprintMaterializer {
                 return null;
             }
 
-            ElementNode effective = outcome.node();
+            ElementNode contentNode = outcome.node();
 
             for (Blueprint child : element.children()) {
                 Node childNode = materializeInternal(child, execution);
                 if (childNode != null) {
-                    effective.append(childNode);
+                    contentNode.append(childNode);
                 }
             }
 
@@ -81,7 +81,7 @@ public interface BlueprintMaterializer {
         }
 
         private Node materializeText(Blueprint.TextBlueprint text, RenderingExecution execution) {
-            Object value = resolveValue(text.value(), execution);
+            Object value = valueResolver.resolve(text.value(), execution);
             return new TextNode(value == null ? "" : String.valueOf(value));
         }
 
@@ -108,7 +108,7 @@ public interface BlueprintMaterializer {
         }
 
         private Node materializeRepeat(Blueprint.RepeatBlueprint repeat, RenderingExecution execution) {
-            Object         collectionValue    = resolveValue(repeat.collection(), execution);
+            Object         collectionValue    = valueResolver.resolve(repeat.collection(), execution);
             ObjectAccessor collectionAccessor = execution.accessorWrapper().wrapIfNecessary(collectionValue);
 
             if (!(collectionAccessor.isCollection() || collectionAccessor.isList() || collectionAccessor.isMap())) {
@@ -136,26 +136,26 @@ public interface BlueprintMaterializer {
         }
 
         private Node materializeInclude(Blueprint.IncludeBlueprint include, RenderingExecution execution) {
-            Object keyValue = resolveValue(include.blueprintKey(), execution);
+            Object keyValue = valueResolver.resolve(include.blueprintKey(), execution);
 
             if (keyValue == null) {
                 return new TextNode("");
             }
 
-            String         key           = String.valueOf(keyValue);
-            Object         modelValue    = resolveValue(include.model(), execution);
-            ObjectAccessor modelAccessor = execution.accessorWrapper().wrapIfNecessary(modelValue);
+            String         key        = String.valueOf(keyValue);
+            Object         modelValue = valueResolver.resolve(include.model(), execution);
+            ObjectAccessor accessor   = execution.accessorWrapper().wrapIfNecessary(modelValue);
 
             RenderingExecution nested = new RenderingExecution(
                     execution.accessorWrapper(),
-                    modelAccessor,
+                    accessor,
                     execution.request(),
-                    execution.valueNavigator()
+                    execution.valueNavigator(),
+                    execution.resolver()
             );
             nested.variables().putAll(execution.variables());
-            nested.diagnostics().putAll(execution.diagnostics());
 
-            Blueprint blueprint = catalog.resolve(key);
+            Blueprint blueprint = execution.resolver().resolve(key, nested);
 
             return materializeInternal(blueprint, nested);
         }
@@ -180,7 +180,7 @@ public interface BlueprintMaterializer {
                     }
                     case BlueprintDirective.SetAttributeIf attributeIf -> {
                         if (predicateEvaluator.evaluate(attributeIf.predicate(), execution)) {
-                            Object value = resolveValue(attributeIf.value(), execution);
+                            Object value = valueResolver.resolve(attributeIf.value(), execution);
                             if (value != null) {
                                 node.addAttribute(attributeIf.name(), String.valueOf(value));
                             }
@@ -193,7 +193,7 @@ public interface BlueprintMaterializer {
                     }
                     case BlueprintDirective.AddClassIf classIf -> {
                         if (predicateEvaluator.evaluate(classIf.predicate(), execution)) {
-                            Object value = resolveValue(classIf.classValue(), execution);
+                            Object value = valueResolver.resolve(classIf.classValue(), execution);
                             if (value != null) {
                                 String additional = String.valueOf(value).trim();
                                 Node.addClass(node, additional);
@@ -221,7 +221,7 @@ public interface BlueprintMaterializer {
         ) {
             for (Map.Entry<String, BlueprintValue> entry : attributes.entrySet()) {
                 String name  = entry.getKey();
-                Object value = resolveValue(entry.getValue(), execution);
+                Object value = valueResolver.resolve(entry.getValue(), execution);
 
                 if (value == null) {
                     continue;
@@ -231,72 +231,12 @@ public interface BlueprintMaterializer {
             }
         }
 
-        private Object resolveValue(BlueprintValue value, RenderingExecution execution) {
-            if (value instanceof BlueprintValue.ConstantValue(Object constantValue)) {
-                return constantValue;
-            }
-            if (value instanceof BlueprintValue.PathValue(String pathExpression)) {
-                return valueResolver.resolve(pathExpression, execution);
-            }
-            if (value instanceof BlueprintValue.RequestAttributeValue(String name)) {
-                return execution.request().attributes().get(name);
-            }
-            throw new IllegalStateException("Unsupported BlueprintValue type: " + value.getClass().getName());
-        }
-
         private TagName toTagName(String tagName) {
             return TagName.valueOf(tagName.toUpperCase());
         }
     }
 
-    /**
-     * Resolves path expressions against root accessor and scoped variables using {@link PropertyPath}.
-     *
-     * <p>Rules:</p>
-     * <ul>
-     *   <li>If the first path segment matches a scoped variable name, resolve against that variable accessor.</li>
-     *   <li>Otherwise resolve against the root accessor.</li>
-     *   <li>Resolution is delegated to {@link ValueNavigator}.</li>
-     * </ul>
-     */
-    final class PathValueResolver {
 
-        public Object resolve(String expression, RenderingExecution execution) {
-            Verify.nonNull(expression, "expression");
-            Verify.nonNull(execution, "execution");
-
-            String trimmed = expression.trim();
-
-            if (trimmed.isEmpty()) {
-                return null;
-            }
-
-            ValueNavigator navigator = execution.valueNavigator();
-            PropertyPath   path      = PropertyPath.forPath(trimmed);
-            String         head      = path.head().toString();
-            ObjectAccessor scoped    = execution.variables().get(head);
-
-            if (scoped != null) {
-                PropertyPath remainder = path.sub(1);
-                if (remainder.isEmpty()) {
-                    return unwrap(scoped);
-                }
-                return unwrap(navigator.navigate(scoped, remainder.toString()));
-            }
-
-            return unwrap(navigator.navigate(execution.rootAccessor(), path.toString()));
-        }
-
-        private Object unwrap(Object value) {
-            if (value instanceof ScalarValueAccessor scalar) {
-                return scalar.unwrap();
-            }
-            if (value instanceof ObjectAccessor accessor) {
-                return accessor;
-            }
-            return value;
-        }
-    }
 
     /**
      * The result of directive application.

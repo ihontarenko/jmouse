@@ -14,38 +14,38 @@ public final class Match {
 
     private Match() {}
 
-    public static BlueprintMatcher tagName(String tagName) {
+    public static ContextAwareMatcher tagName(String tagName) {
         Verify.nonNull(tagName, "tagName");
-        return blueprint -> blueprint instanceof Blueprint.ElementBlueprint element
+        return (blueprint, c) -> blueprint instanceof Blueprint.ElementBlueprint element
                 && element.tagName().equalsIgnoreCase(tagName);
     }
 
-    public static BlueprintMatcher element(Predicate<Blueprint.ElementBlueprint> predicate) {
+    public static ContextAwareMatcher element(Predicate<Blueprint.ElementBlueprint> predicate) {
         Verify.nonNull(predicate, "predicate");
-        return blueprint -> blueprint instanceof Blueprint.ElementBlueprint element && predicate.test(element);
+        return (blueprint, c) -> blueprint instanceof Blueprint.ElementBlueprint element && predicate.test(element);
     }
 
-    public static BlueprintMatcher hasAttribute(String attributeName) {
+    public static ContextAwareMatcher hasAttribute(String attributeName) {
         Verify.nonNull(attributeName, "attributeName");
         return element(e -> e.attributes().containsKey(attributeName));
     }
 
-    public static BlueprintMatcher attributeEquals(String attributeName, String expectedConstant) {
+    public static ContextAwareMatcher attributeEquals(String attributeName, String expectedConstant) {
         Verify.nonNull(attributeName, "attributeName");
         Verify.nonNull(expectedConstant, "expectedConstant");
         return element(e -> constantAttributeEquals(e.attributes(), attributeName, expectedConstant));
     }
 
-    public static BlueprintMatcher and(BlueprintMatcher left, BlueprintMatcher right) {
+    public static ContextAwareMatcher and(BlueprintMatcher left, BlueprintMatcher right) {
         Verify.nonNull(left, "left");
         Verify.nonNull(right, "right");
-        return blueprint -> left.matches(blueprint) && right.matches(blueprint);
+        return (blueprint, c) -> left.matches(blueprint) && right.matches(blueprint);
     }
 
-    public static BlueprintMatcher or(BlueprintMatcher left, BlueprintMatcher right) {
+    public static ContextAwareMatcher or(BlueprintMatcher left, BlueprintMatcher right) {
         Verify.nonNull(left, "left");
         Verify.nonNull(right, "right");
-        return blueprint -> left.matches(blueprint) || right.matches(blueprint);
+        return (blueprint, c) -> left.matches(blueprint) || right.matches(blueprint);
     }
 
     private static boolean constantAttributeEquals(

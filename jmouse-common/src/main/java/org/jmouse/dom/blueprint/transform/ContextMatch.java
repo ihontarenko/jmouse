@@ -25,18 +25,18 @@ public final class ContextMatch {
     }
 
     public static ContextAwareMatcher depthAtLeast(int depth) {
-        return (blueprint, context) -> context.depth() >= depth;
+        return (blueprint, context) -> context.getDepth() >= depth;
     }
 
     public static ContextAwareMatcher insideAncestor(String ancestorTagName) {
         Verify.nonNull(ancestorTagName, "ancestorTagName");
-        return (blueprint, context) -> context.hasAncestorTagName(ancestorTagName);
+        return (blueprint, context) -> context.hasAncestor(ancestorTagName);
     }
 
     public static ContextAwareMatcher parentTagName(String parentTagName) {
         Verify.nonNull(parentTagName, "parentTagName");
         return (blueprint, context) -> {
-            ElementBlueprint parent = context.parentOrNull();
+            ElementBlueprint parent = context.isParent();
             return parent != null && parent.tagName().equalsIgnoreCase(parentTagName);
         };
     }

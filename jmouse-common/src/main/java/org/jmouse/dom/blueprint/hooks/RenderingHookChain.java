@@ -37,18 +37,6 @@ public record RenderingHookChain(List<RenderingHook> hooks) {
         }
     }
 
-    public void beforeTransform(Blueprint blueprint, RenderingExecution execution) {
-        for (RenderingHook hook : hooks) {
-            hook.beforeTransform(blueprint, execution);
-        }
-    }
-
-    public void afterTransform(Blueprint transformed, RenderingExecution execution) {
-        for (RenderingHook hook : hooks) {
-            hook.afterTransform(transformed, execution);
-        }
-    }
-
     public void beforeMaterialize(Blueprint transformed, RenderingExecution execution) {
         for (RenderingHook hook : hooks) {
             hook.beforeMaterialize(transformed, execution);

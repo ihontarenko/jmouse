@@ -1,6 +1,5 @@
 package org.jmouse.dom.blueprint;
 
-import org.jmouse.core.Verify;
 import org.jmouse.core.access.AccessorWrapper;
 import org.jmouse.core.access.ObjectAccessor;
 import org.jmouse.dom.Node;
@@ -13,20 +12,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
-/**
- * Pipeline that resolves a blueprint by key, applies transformers, then materializes into a node tree.
- */
+import static org.jmouse.core.Verify.nonNull;
+
 public final class RenderingPipeline {
 
-    private final BlueprintCatalog          catalog;
-    private final BlueprintTransformerChain transformerChain;
-    private final BlueprintMaterializer     materializer;
-    private final AccessorWrapper           accessorWrapper;
-    private final RenderingHookChain        hookChain;
+    private final BlueprintCatalog      catalog;
+    private final BlueprintResolver     resolver;
+    private final BlueprintMaterializer materializer;
+    private final AccessorWrapper       accessorWrapper;
+    private final RenderingHookChain    hookChain;
 
     private RenderingPipeline(Builder builder) {
         this.catalog = builder.catalog;
-        this.transformerChain = builder.transformerChain;
+        this.resolver = builder.resolver;
         this.materializer = builder.materializer;
         this.accessorWrapper = builder.accessorWrapper;
         this.hookChain = new RenderingHookChain(builder.hooks);
@@ -37,28 +35,28 @@ public final class RenderingPipeline {
     }
 
     public Node render(String blueprintKey, Object data, UnaryOperator<RenderingRequest> requestCustomizer) {
-        Verify.nonNull(blueprintKey, "blueprintKey");
-        Verify.nonNull(requestCustomizer, "requestCustomizer");
+        nonNull(blueprintKey, "blueprintKey");
+        nonNull(requestCustomizer, "requestCustomizer");
 
         RenderingRequest request = requestCustomizer.apply(new RenderingRequest());
+        ObjectAccessor   rootAccessor = accessorWrapper.wrap(data);
 
-        ObjectAccessor rootAccessor = accessorWrapper.wrap(data);
-        RenderingExecution execution = new RenderingExecution(accessorWrapper, rootAccessor, request);
+        RenderingExecution execution = new RenderingExecution(
+                accessorWrapper,
+                rootAccessor,
+                request,
+                resolver
+        );
 
         try {
             hookChain.beforeBlueprintResolve(blueprintKey, data, request, execution);
 
-            Blueprint blueprint = catalog.resolve(blueprintKey);
+            Blueprint blueprint = resolver.resolve(blueprintKey, execution);
 
             hookChain.afterBlueprintResolve(blueprintKey, blueprint, execution);
-            hookChain.beforeTransform(blueprint, execution);
+            hookChain.beforeMaterialize(blueprint, execution);
 
-            Blueprint transformed = transformerChain.apply(blueprint, execution);
-
-            hookChain.afterTransform(transformed, execution);
-            hookChain.beforeMaterialize(transformed, execution);
-
-            Node node = materializer.materialize(transformed, execution);
+            Node node = materializer.materialize(blueprint, execution);
 
             hookChain.afterMaterialize(node, execution);
 
@@ -66,19 +64,14 @@ public final class RenderingPipeline {
         } catch (RenderingShortCircuit shortCircuit) {
             return shortCircuit.result();
         } catch (Throwable exception) {
-            // We try to notify hooks, but do not hide the original exception.
             try {
                 hookChain.onFailure(exception, guessStage(exception), execution);
-            } catch (Throwable ignored) {
-                // ignored by design
-            }
+            } catch (Throwable ignored) {}
             throw exception;
         }
     }
 
     private RenderingStage guessStage(Throwable exception) {
-        // Minimal: no stage tracking yet.
-        // If you want exact stage tracking, add a variable in execution diagnostics like "stage".
         return RenderingStage.BEFORE_BLUEPRINT_RESOLVE;
     }
 
@@ -86,23 +79,14 @@ public final class RenderingPipeline {
         return new Builder();
     }
 
-    public Builder toBuilder() {
-        Builder builder = new Builder();
-        builder.catalog = this.catalog;
-        builder.transformerChain = this.transformerChain;
-        builder.materializer = this.materializer;
-        builder.accessorWrapper = this.accessorWrapper;
-        builder.hooks = new ArrayList<>(this.hookChain.hooks());
-        return builder;
-    }
-
     public static final class Builder {
 
-        private BlueprintCatalog          catalog;
-        private BlueprintTransformerChain transformerChain = new BlueprintTransformerChain();
-        private BlueprintMaterializer     materializer;
-        private AccessorWrapper           accessorWrapper;
-        private List<RenderingHook>       hooks = new ArrayList<>();
+        private final List<RenderingHook>       hooks            = new ArrayList<>();
+        private       BlueprintCatalog          catalog;
+        private       BlueprintTransformerChain transformerChain = new BlueprintTransformerChain();
+        private       BlueprintResolver         resolver;
+        private       BlueprintMaterializer     materializer;
+        private       AccessorWrapper           accessorWrapper;
 
         public Builder catalog(BlueprintCatalog catalog) {
             this.catalog = catalog;
@@ -113,14 +97,19 @@ public final class RenderingPipeline {
             return this.catalog;
         }
 
-        public Builder addTransformer(int order, BlueprintTransformer transformer) {
-            Verify.nonNull(transformer, "transformer");
+        public Builder transformer(int order, BlueprintTransformer transformer) {
+            nonNull(transformer, "transformer");
             this.transformerChain.add(order, transformer);
             return this;
         }
 
         public Builder transformerChain(BlueprintTransformerChain chain) {
-            this.transformerChain = Verify.nonNull(chain, "chain");
+            this.transformerChain = nonNull(chain, "chain");
+            return this;
+        }
+
+        public Builder blueprintResolver(BlueprintResolver resolver) {
+            this.resolver = nonNull(resolver, "resolver");
             return this;
         }
 
@@ -134,18 +123,24 @@ public final class RenderingPipeline {
             return this;
         }
 
-        public Builder addHook(RenderingHook hook) {
-            Verify.nonNull(hook, "hook");
+        public Builder hook(RenderingHook hook) {
+            nonNull(hook, "hook");
             this.hooks.add(hook);
             return this;
         }
 
         public RenderingPipeline build() {
-            Verify.nonNull(accessorWrapper, "accessorWrapper");
-            Verify.nonNull(catalog, "catalog");
-            Verify.nonNull(materializer, "materializer");
-            Verify.nonNull(transformerChain, "transformerChain");
+            nonNull(accessorWrapper, "accessorWrapper");
+            nonNull(catalog, "catalog");
+            nonNull(materializer, "materializer");
+            nonNull(transformerChain, "transformerChain");
+
+            if (resolver == null) {
+                resolver = BlueprintResolver.of(catalog, transformerChain);
+            }
+
             return new RenderingPipeline(this);
         }
     }
 }
+

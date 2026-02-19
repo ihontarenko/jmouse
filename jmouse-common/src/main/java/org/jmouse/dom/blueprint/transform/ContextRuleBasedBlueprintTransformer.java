@@ -33,12 +33,12 @@ public final class ContextRuleBasedBlueprintTransformer implements BlueprintTran
 
         return switch (current) {
             case ElementBlueprint element -> {
-                context.pushAncestor(element);
+                context.enter(element);
                 List<Blueprint> children = new ArrayList<>(element.children().size());
                 for (Blueprint child : element.children()) {
                     children.add(transformNode(child, execution, context));
                 }
-                context.popAncestor();
+                context.exit();
                 yield new ElementBlueprint(element.tagName(), element.attributes(), List.copyOf(children), List.copyOf(element.directives()));
             }
             case ConditionalBlueprint conditional -> {
@@ -93,7 +93,7 @@ public final class ContextRuleBasedBlueprintTransformer implements BlueprintTran
         }
 
         public Builder rule(int order, BlueprintMatcher matcher, BlueprintChange change) {
-            return rule(order, ContextAwareMatcher.from(matcher), change);
+            return rule(order, ContextAwareMatcher.of(matcher), change);
         }
 
         public ContextRuleBasedBlueprintTransformer build() {

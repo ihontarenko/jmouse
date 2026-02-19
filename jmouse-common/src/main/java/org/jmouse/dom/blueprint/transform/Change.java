@@ -16,7 +16,8 @@ public final class Change {
         Verify.nonNull(newTagName, "newTagName");
         return (blueprint, execution) -> {
             if (blueprint instanceof Blueprint.ElementBlueprint element) {
-                return new Blueprint.ElementBlueprint(newTagName, element.attributes(), element.children());
+                return new Blueprint.ElementBlueprint(
+                        newTagName, element.attributes(), element.children(), element.directives());
             }
             return blueprint;
         };
@@ -29,7 +30,8 @@ public final class Change {
             if (blueprint instanceof Blueprint.ElementBlueprint element) {
                 Map<String, BlueprintValue> attributes = new LinkedHashMap<>(element.attributes());
                 attributes.put(name, value);
-                return new Blueprint.ElementBlueprint(element.tagName(), Map.copyOf(attributes), element.children());
+                return new Blueprint.ElementBlueprint(
+                        element.tagName(), Map.copyOf(attributes), element.children(), element.directives());
             }
             return blueprint;
         };
@@ -43,7 +45,7 @@ public final class Change {
         Verify.nonNull(className, "className");
         return (blueprint, execution) -> {
             if (blueprint instanceof Blueprint.ElementBlueprint(
-                    String tagName, Map<String, BlueprintValue> elementAttributes, List<Blueprint> children
+                    String tagName, Map<String, BlueprintValue> elementAttributes, List<Blueprint> children, List<BlueprintDirective> directives
             )) {
                 Map<String, BlueprintValue> attributes = new LinkedHashMap<>(elementAttributes);
                 BlueprintValue              current    = attributes.get("class");
@@ -51,7 +53,7 @@ public final class Change {
 
                 attributes.put("class", new BlueprintValue.ConstantValue(merged));
 
-                return new Blueprint.ElementBlueprint(tagName, Map.copyOf(attributes), children);
+                return new Blueprint.ElementBlueprint(tagName, Map.copyOf(attributes), children, directives);
             }
             return blueprint;
         };
@@ -61,7 +63,8 @@ public final class Change {
         Verify.nonNull(wrapperTagName, "wrapperTagName");
         Verify.nonNull(wrapperChange, "wrapperChange");
         return (blueprint, execution) -> {
-            Blueprint.ElementBlueprint wrapper        = new Blueprint.ElementBlueprint(wrapperTagName, Map.of(), List.of(blueprint));
+            Blueprint.ElementBlueprint wrapper        = new Blueprint.ElementBlueprint(
+                    wrapperTagName, Map.of(), List.of(blueprint), List.of());
             Blueprint                  changed = wrapperChange.apply(wrapper, execution);
             return changed;
         };
@@ -71,11 +74,11 @@ public final class Change {
         Verify.nonNull(child, "child");
         return (blueprint, execution) -> {
             if (blueprint instanceof Blueprint.ElementBlueprint(
-                    String tagName, Map<String, BlueprintValue> attributes, List<Blueprint> elementChildren
+                    String tagName, Map<String, BlueprintValue> attributes, List<Blueprint> elementChildren, List<BlueprintDirective> directives
             )) {
                 List<Blueprint> children = new ArrayList<>(elementChildren);
                 children.add(child);
-                return new Blueprint.ElementBlueprint(tagName, attributes, List.copyOf(children));
+                return new Blueprint.ElementBlueprint(tagName, attributes, List.copyOf(children), directives);
             }
             return blueprint;
         };

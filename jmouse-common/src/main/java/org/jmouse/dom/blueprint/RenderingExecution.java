@@ -16,28 +16,38 @@ import java.util.Map;
  */
 public final class RenderingExecution {
 
-    private final AccessorWrapper  accessorWrapper;
-    private final ObjectAccessor   rootAccessor;
-    private final RenderingRequest request;
-    private final ValueNavigator   valueNavigator;
-
+    private final AccessorWrapper             accessorWrapper;
+    private final ObjectAccessor              rootAccessor;
+    private final RenderingRequest            request;
+    private final ValueNavigator              valueNavigator;
+    private final BlueprintResolver           resolver;
     private final Map<String, ObjectAccessor> variables = new LinkedHashMap<>();
-    private final Map<String, Object>         diagnostics = new LinkedHashMap<>();
 
-    public RenderingExecution(AccessorWrapper accessorWrapper, ObjectAccessor rootAccessor, RenderingRequest request) {
-        this(accessorWrapper, rootAccessor, request, ValueNavigator.defaultNavigator());
+    public RenderingExecution(
+            AccessorWrapper accessorWrapper,
+            ObjectAccessor rootAccessor,
+            RenderingRequest request,
+            BlueprintResolver resolver
+    ) {
+        this(accessorWrapper, rootAccessor, request, ValueNavigator.defaultNavigator(), resolver);
     }
 
     public RenderingExecution(
             AccessorWrapper accessorWrapper,
             ObjectAccessor rootAccessor,
             RenderingRequest request,
-            ValueNavigator valueNavigator
+            ValueNavigator valueNavigator,
+            BlueprintResolver resolver
     ) {
         this.accessorWrapper = Verify.nonNull(accessorWrapper, "accessorWrapper");
         this.rootAccessor = Verify.nonNull(rootAccessor, "rootAccessor");
         this.request = Verify.nonNull(request, "request");
         this.valueNavigator = Verify.nonNull(valueNavigator, "valueNavigator");
+        this.resolver = Verify.nonNull(resolver, "resolver");
+    }
+
+    public BlueprintResolver resolver() {
+        return resolver;
     }
 
     public AccessorWrapper accessorWrapper() {
@@ -54,10 +64,6 @@ public final class RenderingExecution {
 
     public Map<String, ObjectAccessor> variables() {
         return variables;
-    }
-
-    public Map<String, Object> diagnostics() {
-        return diagnostics;
     }
 
     public ValueNavigator valueNavigator() {

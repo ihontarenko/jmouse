@@ -17,7 +17,7 @@ public class StandardPlaceholderReplacer implements PlaceholderReplacer {
     private final CyclicReferenceDetector<String> detector;
 
     private final static IllegalStateException ILLEGAL_STATE_EXCEPTION
-            = new IllegalStateException("Circular placeholder reference");;
+            = new IllegalStateException("Circular placeholder reference");
 
     /**
      * Creates a {@code StandardPlaceholderReplacer} with custom delimiters.

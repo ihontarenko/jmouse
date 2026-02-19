@@ -15,7 +15,7 @@ public interface ContextAwareMatcher {
      */
     boolean matches(Blueprint blueprint, TraversalContext context);
 
-    static ContextAwareMatcher from(BlueprintMatcher matcher) {
+    static ContextAwareMatcher of(BlueprintMatcher matcher) {
         return (blueprint, context) -> matcher.matches(blueprint);
     }
 }

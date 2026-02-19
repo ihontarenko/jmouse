@@ -26,7 +26,7 @@ public final class BootstrapPreset {
                     input.attribute("type", constant(type.htmlValue()));
                     input.attribute("name", path(namePath));
                     input.attribute("id", path(namePath));
-                    input.attribute("class", constant("form-control"));
+                    input.attribute("class", constant("form-control preset-class"));
 
                     if (Strings.isNotEmpty(valuePath)) {
                         input.attribute("value", path(valuePath));

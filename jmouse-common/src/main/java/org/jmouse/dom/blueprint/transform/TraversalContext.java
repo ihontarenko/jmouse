@@ -1,44 +1,52 @@
 package org.jmouse.dom.blueprint.transform;
 
-import org.jmouse.dom.blueprint.Blueprint.ElementBlueprint;
+import org.jmouse.dom.blueprint.Blueprint;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
-import java.util.Objects;
 
-/**
- * Traversal context used during blueprint transformation.
- *
- * <p>Provides access to the current node, its ancestors, and traversal depth.</p>
- */
 public final class TraversalContext {
 
-    private final Deque<ElementBlueprint> ancestors = new ArrayDeque<>();
+    private final Deque<Blueprint.ElementBlueprint> ancestors = new ArrayDeque<>();
 
-    void pushAncestor(ElementBlueprint ancestor) {
-        ancestors.push(Objects.requireNonNull(ancestor, "ancestor"));
+    public void enter(Blueprint.ElementBlueprint element) {
+        ancestors.push(element);
     }
 
-    void popAncestor() {
+    public void exit() {
         ancestors.pop();
     }
 
-    public int depth() {
+    /**
+     * Current depth in traversal.
+     *
+     * <p>0 means "root level" (no ancestors yet), 1 means "inside 1 element", etc.</p>
+     */
+    public int getDepth() {
         return ancestors.size();
     }
 
-    public List<ElementBlueprint> ancestors() {
-        return List.copyOf(ancestors);
-    }
-
-    public ElementBlueprint parentOrNull() {
+    /**
+     * Parent element of the currently visited node (nearest ancestor).
+     *
+     * <p>Name kept as-is because your ContextMatch already calls context.isParent().</p>
+     */
+    public Blueprint.ElementBlueprint isParent() {
         return ancestors.peek();
     }
 
-    public boolean hasAncestorTagName(String tagName) {
-        for (ElementBlueprint ancestor : ancestors) {
-            if (ancestor.tagName().equalsIgnoreCase(tagName)) {
+    public List<Blueprint.ElementBlueprint> ancestors() {
+        return List.copyOf(ancestors);
+    }
+
+    public Blueprint.ElementBlueprint nearestAncestor() {
+        return ancestors.peek();
+    }
+
+    public boolean hasAncestor(String tagName) {
+        for (Blueprint.ElementBlueprint a : ancestors) {
+            if (a.tagName().equalsIgnoreCase(tagName)) {
                 return true;
             }
         }
