@@ -1,4 +1,69 @@
 package org.jmouse.dom.meterializer.smoke;
 
-public class DemoModels {
+import org.jmouse.meterializer.ViewBlock;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+public final class DemoModels {
+
+    private DemoModels() {}
+
+    /**
+     * Universal demo model for smoke tests.
+     *
+     * Structure:
+     *
+     * {
+     *   title,
+     *   description,
+     *   fields: [ ViewBlock ],
+     *   submit: { ... }
+     * }
+     */
+    public static Map<String, Object> bootstrapFormDemo() {
+
+        Map<String, Object> root = new LinkedHashMap<>();
+
+        root.put("title", "Add Resistor!");
+        root.put("description", "Universal dynamic form.");
+
+        // ---- dynamic blocks ----
+
+        List<ViewBlock> fields = List.of(
+
+                ViewBlock.of(
+                        "field/text",
+                        Map.of(
+                                "name", "element_name",
+                                "label", "Name Of Component:",
+                                "value", "R12"
+                        )
+                ),
+
+                ViewBlock.of(
+                        "field/select",
+                        Map.of(
+                                "name", "vendor",
+                                "label", "Vendor:",
+                                "selected", "ti",
+                                "options", List.of(
+                                        Map.of("key", "vishay", "label", "Vishay"),
+                                        Map.of("key", "ti", "label", "Texas Instruments")
+                                )
+                        )
+                )
+        );
+
+        root.put("fields", fields);
+
+        // ---- submit ----
+
+        root.put("submit",
+                 Map.of("caption", "Submit")
+        );
+
+        return root;
+    }
 }

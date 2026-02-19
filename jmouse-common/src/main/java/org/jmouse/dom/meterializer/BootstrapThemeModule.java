@@ -1,4 +1,4 @@
-package org.jmouse.dom.meterializer.modules;
+package org.jmouse.dom.meterializer;
 
 import org.jmouse.dom.Node;
 import org.jmouse.meterializer.TemplateRegistry;

@@ -1,4 +1,4 @@
-package org.jmouse.dom.meterializer.rules;
+package org.jmouse.dom.meterializer;
 
 import org.jmouse.dom.Node;
 import org.jmouse.meterializer.RenderingExecution;

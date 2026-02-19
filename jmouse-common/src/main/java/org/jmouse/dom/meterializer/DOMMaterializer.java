@@ -12,30 +12,54 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class DOMMaterializer implements TemplateMaterializer<Node> {
+public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
 
-    private final ValueResolver      valueResolver      = new DefaultValueResolver(new PathValueResolver());
-    private final PredicateEvaluator predicateEvaluator = new PredicateEvaluator(valueResolver);
+    public DOMMaterializer() {
+        super(new DefaultValueResolver(new PathValueResolver()));
+    }
+
+    public DOMMaterializer(ValueResolver valueResolver) {
+        super(Verify.nonNull(valueResolver, "valueResolver"));
+    }
 
     @Override
-    public Node materialize(NodeTemplate template, RenderingExecution execution) {
-        Verify.nonNull(template, "template");
+    protected Node createElementNode(String tagName) {
+        Verify.nonNull(tagName, "tagName");
+        return new ElementNode(toTagName(tagName));
+    }
+
+    @Override
+    protected Node createTextNode(String text) {
+        return new TextNode(text == null ? "" : text);
+    }
+
+    @Override
+    protected Node createContainerNode() {
+        return new ElementNode(TagName.DIV);
+    }
+
+    @Override
+    protected Node emptyNode() {
+        return new TextNode("");
+    }
+
+    @Override
+    protected void appendChild(Node parent, Node child) {
+        Verify.nonNull(parent, "parent");
+        Verify.nonNull(child, "child");
+
+        if (!(parent instanceof ElementNode element)) {
+            throw new IllegalStateException("Cannot append child to non-element node: " + parent.getClass().getName());
+        }
+
+        element.append(child);
+    }
+
+    @Override
+    protected Node materializeElement(NodeTemplate.Element element, RenderingExecution execution) {
+        Verify.nonNull(element, "element");
         Verify.nonNull(execution, "execution");
-        return materializeInternal(template, execution);
-    }
 
-    private Node materializeInternal(NodeTemplate template, RenderingExecution execution) {
-        return switch (template) {
-            case NodeTemplate.Element element -> materializeElement(element, execution);
-            case NodeTemplate.Text text -> materializeText(text, execution);
-            case NodeTemplate.Conditional conditional -> materializeConditional(conditional, execution);
-            case NodeTemplate.Repeat repeat -> materializeRepeat(repeat, execution);
-            case NodeTemplate.Include include -> materializeInclude(include, execution);
-            case null -> null;
-        };
-    }
-
-    private Node materializeElement(NodeTemplate.Element element, RenderingExecution execution) {
         ElementNode node = new ElementNode(toTagName(element.tagName()));
 
         applyAttributes(node, element.attributes(), execution);
@@ -58,84 +82,34 @@ public class DOMMaterializer implements TemplateMaterializer<Node> {
         return outcome.root();
     }
 
-    private Node materializeText(NodeTemplate.Text text, RenderingExecution execution) {
-        Object value = valueResolver.resolve(text.value(), execution);
-        return new TextNode(value == null ? "" : String.valueOf(value));
-    }
-
-    private Node materializeConditional(NodeTemplate.Conditional conditional, RenderingExecution execution) {
-        boolean predicate = predicateEvaluator.evaluate(conditional.predicate(), execution);
-
-        List<NodeTemplate> branch = predicate ? conditional.whenTrue() : conditional.whenFalse();
-
-        if (branch.isEmpty()) {
-            return new TextNode("");
+    private void applyAttributes(
+            ElementNode node,
+            Map<String, ValueExpression> attributes,
+            RenderingExecution execution
+    ) {
+        if (attributes == null || attributes.isEmpty()) {
+            return;
         }
 
-        if (branch.size() == 1) {
-            return materializeInternal(branch.getFirst(), execution);
-        }
+        for (Map.Entry<String, ValueExpression> entry : attributes.entrySet()) {
+            String name = entry.getKey();
+            ValueExpression expression = entry.getValue();
 
-        ElementNode container = new ElementNode(TagName.DIV);
-
-        for (NodeTemplate child : branch) {
-            container.append(materializeInternal(child, execution));
-        }
-
-        return container;
-    }
-
-    private Node materializeRepeat(NodeTemplate.Repeat repeat, RenderingExecution execution) {
-        Object         collectionValue    = valueResolver.resolve(repeat.collection(), execution);
-        ObjectAccessor collectionAccessor = execution.accessorWrapper().wrapIfNecessary(collectionValue);
-
-        if (!(collectionAccessor.isCollection() || collectionAccessor.isList() || collectionAccessor.isMap())) {
-            return new TextNode("");
-        }
-
-        ElementNode                 container = new ElementNode(toTagName(repeat.tagName()));
-        Set<Object>                 keys      = collectionAccessor.keySet();
-        Map<String, ObjectAccessor> variables = execution.variables();
-
-        for (Object key : keys) {
-            Object         entry         = collectionAccessor.get(key);
-            ObjectAccessor entryAccessor = execution.accessorWrapper().wrapIfNecessary(entry);
-
-            variables.put(repeat.itemVariableName(), entryAccessor);
-
-            for (NodeTemplate bodyNode : repeat.body()) {
-                container.append(materializeInternal(bodyNode, execution));
+            if (name == null || name.isBlank()) {
+                continue;
+            }
+            if (expression == null) {
+                continue;
             }
 
-            variables.remove(repeat.itemVariableName());
+            Object value = valueResolver.resolve(expression, execution);
+
+            if (value == null) {
+                continue;
+            }
+
+            node.addAttribute(name, String.valueOf(value));
         }
-
-        return container;
-    }
-
-    private Node materializeInclude(NodeTemplate.Include include, RenderingExecution execution) {
-        Object keyValue = valueResolver.resolve(include.blueprintKey(), execution);
-
-        if (keyValue == null) {
-            return new TextNode("");
-        }
-
-        String         key        = String.valueOf(keyValue);
-        Object         modelValue = valueResolver.resolve(include.model(), execution);
-        ObjectAccessor accessor   = execution.accessorWrapper().wrapIfNecessary(modelValue);
-
-        RenderingExecution nested = new RenderingExecution(
-                execution.accessorWrapper(),
-                accessor,
-                execution.request(),
-                execution.valueNavigator(),
-                execution.resolver()
-        );
-        nested.variables().putAll(execution.variables());
-
-        NodeTemplate blueprint = execution.resolver().resolve(key, nested);
-
-        return materializeInternal(blueprint, nested);
     }
 
     private DirectiveOutcome<Node> applyDirectives(
@@ -173,8 +147,10 @@ public class DOMMaterializer implements TemplateMaterializer<Node> {
                     if (predicateEvaluator.evaluate(classIf.predicate(), execution)) {
                         Object value = valueResolver.resolve(classIf.classValue(), execution);
                         if (value != null) {
-                            String additional = String.valueOf(value).trim();
-                            Node.addClass(node, additional);
+                            String classNames = String.valueOf(value).trim();
+                            if (!classNames.isEmpty()) {
+                                Node.addClass(node, classNames);
+                            }
                         }
                     }
                 }
@@ -186,31 +162,21 @@ public class DOMMaterializer implements TemplateMaterializer<Node> {
                         root = wrapper;
                     }
                 }
+                case null -> {
+                    // ignore
+                }
             }
         }
 
         return DirectiveOutcome.wrapped(node, root);
     }
 
-    private void applyAttributes(
-            ElementNode node,
-            Map<String, ValueExpression> attributes,
-            RenderingExecution execution
-    ) {
-        for (Map.Entry<String, ValueExpression> entry : attributes.entrySet()) {
-            String name  = entry.getKey();
-            Object value = valueResolver.resolve(entry.getValue(), execution);
-
-            if (value == null) {
-                continue;
-            }
-
-            node.addAttribute(name, String.valueOf(value));
-        }
-    }
-
     private TagName toTagName(String tagName) {
-        return TagName.valueOf(tagName.toUpperCase());
+        String normalized = Verify.nonNull(tagName, "tagName").trim();
+        if (normalized.isEmpty()) {
+            throw new IllegalArgumentException("tagName is blank");
+        }
+        return TagName.valueOf(normalized.toUpperCase());
     }
 
 }

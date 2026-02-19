@@ -1,6 +1,6 @@
 package org.jmouse.dom;
 
-public class ReorderNodeCorrector implements Corrector {
+public class CorrectNodeDepth implements Corrector {
 
     @Override
     public void accept(Node node) {

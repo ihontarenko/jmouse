@@ -1,18 +1,16 @@
-package org.jmouse.dom.meterializer.modules;
+package org.jmouse.meterializer;
 
-import org.jmouse.meterializer.TemplateRegistry;
-import org.jmouse.meterializer.TemplateTransformer;
 import org.jmouse.meterializer.hooks.RenderingHook;
 
 import java.util.List;
 
-public interface ThemeModule {
+public interface ThemeModule<T> {
 
-    void contributeBlueprints(TemplateRegistry catalog);
+    void contributeBlueprints(TemplateRegistry templateRegistry);
 
     List<OrderedTransformer> transformers();
 
-    List<RenderingHook<?>> hooks();
+    List<RenderingHook<T>> hooks();
 
     record OrderedTransformer(int order, TemplateTransformer transformer) {}
 
