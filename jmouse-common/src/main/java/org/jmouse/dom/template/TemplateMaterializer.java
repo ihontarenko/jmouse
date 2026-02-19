@@ -32,11 +32,6 @@ public interface TemplateMaterializer {
 
         private final ValueResolver      valueResolver      = new DefaultValueResolver(new PathValueResolver());
         private final PredicateEvaluator predicateEvaluator = new PredicateEvaluator(valueResolver);
-        private final TemplateRegistry   catalog;
-
-        public Implementation(TemplateRegistry catalog) {
-            this.catalog = catalog;
-        }
 
         @Override
         public Node materialize(NodeTemplate blueprint, RenderingExecution execution) {
@@ -45,13 +40,13 @@ public interface TemplateMaterializer {
             return materializeInternal(blueprint, execution);
         }
 
-        private Node materializeInternal(NodeTemplate blueprint, RenderingExecution execution) {
-            return switch (blueprint) {
-                case NodeTemplate.Element element -> materializeElement(element, execution);
-                case NodeTemplate.Text text -> materializeText(text, execution);
-                case NodeTemplate.Conditional conditional -> materializeConditional(conditional, execution);
-                case NodeTemplate.Repeat repeat -> materializeRepeat(repeat, execution);
-                case NodeTemplate.Include include -> materializeInclude(include, execution);
+        private Node materializeInternal(NodeTemplate template, RenderingExecution execution) {
+            return switch (template) {
+                case NodeTemplate.Element element           -> materializeElement(element, execution);
+                case NodeTemplate.Text text                 -> materializeText(text, execution);
+                case NodeTemplate.Conditional conditional   -> materializeConditional(conditional, execution);
+                case NodeTemplate.Repeat repeat             -> materializeRepeat(repeat, execution);
+                case NodeTemplate.Include include           -> materializeInclude(include, execution);
                 case null -> null;
             };
         }
@@ -114,15 +109,15 @@ public interface TemplateMaterializer {
                 return new TextNode("");
             }
 
-            ElementNode                 container = new ElementNode(TagName.DIV);
+            ElementNode                 container = new ElementNode(toTagName(repeat.tagName()));
             Set<Object>                 keys      = collectionAccessor.keySet();
             Map<String, ObjectAccessor> variables = execution.variables();
 
             for (Object key : keys) {
-                Object         item           = collectionAccessor.get(key);
-                ObjectAccessor objectAccessor = execution.accessorWrapper().wrapIfNecessary(item);
+                Object         entry         = collectionAccessor.get(key);
+                ObjectAccessor entryAccessor = execution.accessorWrapper().wrapIfNecessary(entry);
 
-                variables.put(repeat.itemVariableName(), objectAccessor);
+                variables.put(repeat.itemVariableName(), entryAccessor);
 
                 for (NodeTemplate bodyNode : repeat.body()) {
                     container.append(materializeInternal(bodyNode, execution));

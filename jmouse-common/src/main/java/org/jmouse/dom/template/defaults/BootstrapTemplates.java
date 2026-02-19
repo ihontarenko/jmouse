@@ -1,18 +1,41 @@
-package org.jmouse.dom.template.standard;
+package org.jmouse.dom.template.defaults;
 
 import org.jmouse.dom.template.NodeTemplate;
 import org.jmouse.util.Strings;
 
-import static org.jmouse.dom.template.build.Blueprints.*;
+import static org.jmouse.dom.template.NodeTemplate.*;
+import static org.jmouse.dom.template.TemplatePredicate.contains;
+import static org.jmouse.dom.template.TemplatePredicate.same;
+import static org.jmouse.dom.template.ValueExpression.constant;
+import static org.jmouse.dom.template.ValueExpression.path;
 
 /**
  * Bootstrap-styled presets.
  *
  * <p>Uses HTML5Preset primitives but adds Bootstrap class names and wrappers.</p>
  */
-public final class BootstrapPreset {
+public final class BootstrapTemplates {
 
-    private BootstrapPreset() {}
+    private BootstrapTemplates() {}
+
+    public static NodeTemplate button(String type, String caption) {
+        return element("div", block -> block
+                .attribute("class", constant("mt-3"))
+                .child(element("button", button -> button
+                        .attribute("type", constant(type))
+                        .attribute("class", constant("btn btn-primary"))
+                        .child(text(constant(caption)))
+                ))
+        );
+    }
+
+    public static NodeTemplate submitButton(String caption) {
+        return button("submit", caption);
+    }
+
+    public static NodeTemplate inputButton(String caption) {
+        return button("button", caption);
+    }
 
     public static NodeTemplate input(InputType type, String namePath, String labelPath, String valuePath) {
         return element("div", group -> group
@@ -77,7 +100,8 @@ public final class BootstrapPreset {
                                                 .attribute("value", path(keyPath))
                                                 .child(text(path(valuePath)))
                                         )
-                                )
+                                ),
+                                "FOOTER"
                         ))
                 ))
         );

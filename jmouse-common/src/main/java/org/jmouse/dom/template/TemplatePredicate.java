@@ -4,6 +4,8 @@ import org.jmouse.core.Verify;
 
 import java.util.List;
 
+import static org.jmouse.dom.template.ValueExpression.path;
+
 /**
  * A predicate used by blueprint nodes.
  */
@@ -15,6 +17,40 @@ public sealed interface TemplatePredicate
                 TemplatePredicate.All,
                 TemplatePredicate.Any,
                 TemplatePredicate.Contains {
+
+    static TemplatePredicate truthy(ValueExpression value) {
+        return new TemplatePredicate.BooleanValue(value);
+    }
+
+    static TemplatePredicate present(ValueExpression value) {
+        return new TemplatePredicate.Present(value);
+    }
+
+    static TemplatePredicate same(ValueExpression left, ValueExpression right) {
+        return new TemplatePredicate.Equality(left, right);
+    }
+
+    static TemplatePredicate not(TemplatePredicate inner) {
+        return new TemplatePredicate.Not(inner);
+    }
+
+    static TemplatePredicate all(TemplatePredicate... predicates) {
+        return new TemplatePredicate.All(List.of(predicates));
+    }
+
+    static TemplatePredicate any(TemplatePredicate... predicates) {
+        return new TemplatePredicate.Any(List.of(predicates));
+    }
+
+    static TemplatePredicate contains(ValueExpression collection, ValueExpression value) {
+        return new TemplatePredicate.Contains(collection, value);
+    }
+
+    static TemplatePredicate pathBoolean(String path) {
+        return new TemplatePredicate.BooleanValue(
+                path(path)
+        );
+    }
 
     /**
      * Evaluates a boolean-like value resolved from {@link ValueExpression}.
@@ -81,7 +117,8 @@ public sealed interface TemplatePredicate
     /**
      * Contains predicates.
      */
-    record Contains(ValueExpression collection, ValueExpression value) implements TemplatePredicate {}
+    record Contains(ValueExpression collection, ValueExpression value) implements TemplatePredicate {
+    }
 
 }
 

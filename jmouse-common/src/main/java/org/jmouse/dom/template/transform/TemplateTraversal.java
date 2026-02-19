@@ -1,12 +1,12 @@
 package org.jmouse.dom.template.transform;
 
 import org.jmouse.core.Verify;
-import org.jmouse.dom.template.*;
+import org.jmouse.dom.template.NodeTemplate;
+import org.jmouse.dom.template.RenderingExecution;
+import org.jmouse.dom.template.TemplateRewrite;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.jmouse.dom.template.NodeTemplate.*;
 
 public final class TemplateTraversal {
 
@@ -26,46 +26,37 @@ public final class TemplateTraversal {
             TemplateRewrite rewrite,
             TraversalContext context
     ) {
-        NodeTemplate rewritten = rewrite.rewrite(node, execution, context);
-
-        if (rewritten == null) {
+        if (node == null) {
             return null;
         }
 
-        return switch (rewritten) {
-            case Element element -> {
+        NodeTemplate transformed = switch (node) {
+            case NodeTemplate.Element element -> {
                 context.enter(element);
-
-                List<NodeTemplate> children = new ArrayList<>(element.children().size());
-
-                for (NodeTemplate child : element.children()) {
-                    NodeTemplate mapped = traverse(child, execution, rewrite, context);
-                    if (mapped != null) {
-                        children.add(mapped);
-                    }
-                }
-
+                List<NodeTemplate> children = mapList(element.children(), execution, rewrite, context);
                 context.exit();
 
-                yield new Element(
+                yield new NodeTemplate.Element(
                         element.tagName(),
                         element.attributes(),
-                        List.copyOf(children),
-                        List.copyOf(element.directives())
+                        children,
+                        element.directives()
                 );
             }
-            case Conditional conditional -> {
-                List<NodeTemplate> ift = mapList(conditional.whenTrue(), execution, rewrite, context);
-                List<NodeTemplate> iff = mapList(conditional.whenFalse(), execution, rewrite, context);
-                yield new Conditional(conditional.predicate(), ift, iff);
+            case NodeTemplate.Conditional conditional -> {
+                List<NodeTemplate> branchA = mapList(conditional.whenTrue(), execution, rewrite, context);
+                List<NodeTemplate> branchB = mapList(conditional.whenFalse(), execution, rewrite, context);
+                yield new NodeTemplate.Conditional(conditional.predicate(), branchA, branchB);
             }
-            case Repeat repeat -> {
-                List<NodeTemplate> body = mapList(repeat.body(), execution, rewrite, context);
-                yield new Repeat(repeat.collection(), repeat.itemVariableName(), body);
+            case NodeTemplate.Repeat repeat -> {
+                List<NodeTemplate> nodeTemplates = mapList(repeat.body(), execution, rewrite, context);
+                yield new NodeTemplate.Repeat(repeat.collection(), repeat.itemVariableName(), nodeTemplates, repeat.tagName());
             }
-            case Text text -> text;
-            case Include include -> include;
+            case NodeTemplate.Text text -> text;
+            case NodeTemplate.Include include -> include;
         };
+
+        return rewrite.rewrite(transformed, execution, context);
     }
 
     private List<NodeTemplate> mapList(
@@ -74,10 +65,14 @@ public final class TemplateTraversal {
             TemplateRewrite rewrite,
             TraversalContext context
     ) {
+        if (nodes == null || nodes.isEmpty()) {
+            return List.of();
+        }
+
         List<NodeTemplate> result = new ArrayList<>(nodes.size());
 
-        for (NodeTemplate node : nodes) {
-            NodeTemplate mapped = traverse(node, execution, rewrite, context);
+        for (NodeTemplate child : nodes) {
+            NodeTemplate mapped = traverse(child, execution, rewrite, context);
             if (mapped != null) {
                 result.add(mapped);
             }

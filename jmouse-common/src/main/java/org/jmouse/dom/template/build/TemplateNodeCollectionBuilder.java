@@ -9,17 +9,17 @@ import java.util.List;
 /**
  * Builder for lists of blueprint nodes.
  */
-public final class BlueprintListBuilder {
+public final class TemplateNodeCollectionBuilder {
 
     private final List<NodeTemplate> nodes = new ArrayList<>();
 
-    public BlueprintListBuilder add(NodeTemplate blueprint) {
+    public TemplateNodeCollectionBuilder add(NodeTemplate blueprint) {
         Verify.nonNull(blueprint, "blueprint");
         nodes.add(blueprint);
         return this;
     }
 
-    public BlueprintListBuilder addAll(List<NodeTemplate> blueprints) {
+    public TemplateNodeCollectionBuilder addAll(List<NodeTemplate> blueprints) {
         Verify.nonNull(blueprints, "blueprints");
         nodes.addAll(blueprints);
         return this;

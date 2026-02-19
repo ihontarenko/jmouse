@@ -1,7 +1,11 @@
 package org.jmouse.dom.template;
 
+import org.jmouse.dom.template.build.ElementBlueprintBuilder;
+import org.jmouse.dom.template.build.TemplateNodeCollectionBuilder;
+
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Intermediate representation of a markup tree that can be transformed before materialization.
@@ -12,6 +16,68 @@ public sealed interface NodeTemplate
                 NodeTemplate.Conditional,
                 NodeTemplate.Repeat,
                 NodeTemplate.Include {
+
+    public static List<NodeTemplate> list(Consumer<TemplateNodeCollectionBuilder> consumer) {
+        TemplateNodeCollectionBuilder builder = new TemplateNodeCollectionBuilder();
+        consumer.accept(builder);
+        return builder.build();
+    }
+
+    static NodeTemplate.Element element(String tagName, Consumer<ElementBlueprintBuilder> consumer) {
+        ElementBlueprintBuilder builder = new ElementBlueprintBuilder(tagName);
+        consumer.accept(builder);
+        return builder.build();
+    }
+
+    static NodeTemplate.Conditional when(
+            TemplatePredicate predicate,
+            Consumer<TemplateNodeCollectionBuilder> branchA,
+            Consumer<TemplateNodeCollectionBuilder> branchB
+    ) {
+        TemplateNodeCollectionBuilder builderA  = new TemplateNodeCollectionBuilder();
+        TemplateNodeCollectionBuilder builderB = new TemplateNodeCollectionBuilder();
+
+        branchA.accept(builderA);
+        branchB.accept(builderB);
+
+        return new NodeTemplate.Conditional(predicate, builderA.build(), builderB.build());
+    }
+
+    static NodeTemplate.Conditional when(
+            TemplatePredicate predicate,
+            Consumer<TemplateNodeCollectionBuilder> branchA
+    ) {
+        TemplateNodeCollectionBuilder builder = new TemplateNodeCollectionBuilder();
+        branchA.accept(builder);
+        return new NodeTemplate.Conditional(predicate, builder.build(), List.of());
+    }
+
+    static NodeTemplate.Repeat repeat(
+            ValueExpression collection,
+            String itemVariableName,
+            Consumer<TemplateNodeCollectionBuilder> body
+    ) {
+        return repeat(collection, itemVariableName, body, "div");
+    }
+
+    static NodeTemplate.Repeat repeat(
+            ValueExpression collection,
+            String itemVariableName,
+            Consumer<TemplateNodeCollectionBuilder> body,
+            String tagName
+    ) {
+        TemplateNodeCollectionBuilder builder = new TemplateNodeCollectionBuilder();
+        body.accept(builder);
+        return new NodeTemplate.Repeat(collection, itemVariableName, builder.build(), tagName);
+    }
+
+    static NodeTemplate.Text text(ValueExpression value) {
+        return new NodeTemplate.Text(value);
+    }
+
+    static NodeTemplate.Text text(String constantText) {
+        return new NodeTemplate.Text(ValueExpression.constant(constantText));
+    }
 
     /**
      * Represents an element node in a blueprint tree.
@@ -60,7 +126,8 @@ public sealed interface NodeTemplate
     record Repeat(
             ValueExpression collection,
             String itemVariableName,
-            List<NodeTemplate> body
+            List<NodeTemplate> body,
+            String tagName
     ) implements NodeTemplate {
     }
 

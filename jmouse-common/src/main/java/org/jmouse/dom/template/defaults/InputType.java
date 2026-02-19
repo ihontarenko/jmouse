@@ -1,4 +1,4 @@
-package org.jmouse.dom.template.standard;
+package org.jmouse.dom.template.defaults;
 
 public enum InputType {
 
@@ -7,7 +7,10 @@ public enum InputType {
     EMAIL("email"),
     PASSWORD("password"),
     DATE("date"),
-    URL("url");
+    URL("url"),
+
+    BUTTON("button"),
+    SUBMIT("submit");
 
     private final String htmlValue;
 

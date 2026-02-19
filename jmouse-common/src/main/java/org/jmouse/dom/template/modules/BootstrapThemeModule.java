@@ -4,7 +4,7 @@ import org.jmouse.dom.template.TemplateRegistry;
 import org.jmouse.dom.template.TemplateTransformer;
 import org.jmouse.dom.template.hooks.RenderingHook;
 import org.jmouse.dom.template.transform.BootstrapTransformers;
-import org.jmouse.dom.template.standard.StandardBlueprints;
+import org.jmouse.dom.template.defaults.StandardBlueprints;
 
 import java.util.List;
 

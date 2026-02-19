@@ -76,7 +76,7 @@ public final class ThemeAssembly {
             builder.hook(hook);
         }
 
-        builder.materializer(new TemplateMaterializer.Implementation(catalog));
+        builder.materializer(new TemplateMaterializer.Implementation());
 
         return builder.build();
     }

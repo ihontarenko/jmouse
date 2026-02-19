@@ -1,9 +1,10 @@
 package org.jmouse.dom.template.transform;
 
-import org.jmouse.core.Verify;
 import org.jmouse.dom.template.*;
 
 import java.util.*;
+
+import static org.jmouse.core.Verify.nonNull;
 
 public final class RuleBasedTransformer implements TemplateTransformer {
 
@@ -19,8 +20,8 @@ public final class RuleBasedTransformer implements TemplateTransformer {
 
     @Override
     public NodeTemplate transform(NodeTemplate blueprint, RenderingExecution execution) {
-        Verify.nonNull(blueprint, "blueprint");
-        Verify.nonNull(execution, "execution");
+        nonNull(blueprint, "blueprint");
+        nonNull(execution, "execution");
         return traversal.traverse(blueprint, execution, this::rewriteNode);
     }
 
@@ -46,10 +47,10 @@ public final class RuleBasedTransformer implements TemplateTransformer {
 
         private final List<Rule> rules = new ArrayList<>();
 
-        public Builder rule(int order, ContextAwareMatcher matcher, TemplateChange change) {
-            Verify.nonNull(matcher, "matcher");
-            Verify.nonNull(change, "change");
-            rules.add(new Rule(order, matcher, change));
+        public Builder rule(int order, ContextAwareMatcher matcher, TemplateChange changer) {
+            nonNull(matcher, "matcher");
+            nonNull(changer, "changer");
+            rules.add(new Rule(order, matcher, changer));
             rules.sort(ORDERING);
             return this;
         }

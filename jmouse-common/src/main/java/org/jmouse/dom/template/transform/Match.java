@@ -64,7 +64,6 @@ public final class Match {
         };
     }
 
-    // ---------- Boolean algebra ----------
     public static ContextAwareMatcher and(ContextAwareMatcher left, ContextAwareMatcher right) {
         return (blueprint, context) -> nonNull(left, "left").matches(blueprint, context)
                 && nonNull(right, "right").matches(blueprint, context);

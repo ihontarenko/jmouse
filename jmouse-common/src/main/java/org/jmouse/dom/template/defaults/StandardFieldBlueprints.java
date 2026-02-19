@@ -1,8 +1,10 @@
-package org.jmouse.dom.template.standard;
+package org.jmouse.dom.template.defaults;
 
 import org.jmouse.dom.template.NodeTemplate;
+import org.jmouse.dom.template.ValueExpression;
 
-import static org.jmouse.dom.template.build.Blueprints.*;
+import static org.jmouse.dom.template.NodeTemplate.*;
+import static org.jmouse.dom.template.ValueExpression.*;
 
 public final class StandardFieldBlueprints {
 

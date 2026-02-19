@@ -6,6 +6,8 @@ import org.jmouse.dom.template.ValueExpression;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static org.jmouse.dom.template.ValueExpression.constant;
+
 /**
  * Builder for blueprint attributes.
  */
@@ -21,7 +23,7 @@ public final class AttributeMapBuilder {
     }
 
     public AttributeMapBuilder attribute(String name, Object constantValue) {
-        return attribute(name, Blueprints.constant(constantValue));
+        return attribute(name, constant(constantValue));
     }
 
     public Map<String, ValueExpression> build() {

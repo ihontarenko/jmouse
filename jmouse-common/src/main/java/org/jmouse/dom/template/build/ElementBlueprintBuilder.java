@@ -33,7 +33,7 @@ public final class ElementBlueprintBuilder {
     }
 
     public ElementBlueprintBuilder attribute(String name, Object constantValue) {
-        return attribute(name, Blueprints.constant(constantValue));
+        return attribute(name, ValueExpression.constant(constantValue));
     }
 
     public ElementBlueprintBuilder child(NodeTemplate child) {
