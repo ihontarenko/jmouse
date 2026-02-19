@@ -4,7 +4,7 @@ import org.jmouse.core.Verify;
 import org.jmouse.core.access.AccessorWrapper;
 import org.jmouse.dom.Node;
 import org.jmouse.dom.meterializer.DOMMaterializer;
-import org.jmouse.dom.meterializer.RenderingPipeline;
+import org.jmouse.dom.meterializer.DOMRenderingPipeline;
 import org.jmouse.meterializer.*;
 import org.jmouse.meterializer.hooks.RenderingHook;
 
@@ -46,10 +46,10 @@ public final class ThemeAssembly {
     }
 
     @SuppressWarnings("unchecked")
-    public RenderingPipeline build(AccessorWrapper accessorWrapper) {
+    public DOMRenderingPipeline build(AccessorWrapper accessorWrapper) {
         Verify.nonNull(accessorWrapper, "accessorWrapper");
 
-        PipelineBuilder<Node, RenderingPipeline> builder = RenderingPipeline.builder()
+        PipelineBuilder<Node, DOMRenderingPipeline> builder = DOMRenderingPipeline.builder()
                 .templateRegistry(templateRegistry)
                 .accessorWrapper(accessorWrapper);
 
