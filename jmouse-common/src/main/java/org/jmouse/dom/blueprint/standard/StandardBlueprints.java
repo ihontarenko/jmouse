@@ -19,8 +19,6 @@ public final class StandardBlueprints {
                 .child(repeat(path("fields"), "field", body -> body
                         .add(element("div", container -> container
                                 .attribute("data-field", path("field.name"))
-                                // delegate: field blueprint key chosen by "field.kind"
-                                // In Step 6.4 we introduce blueprint inclusion.
                                 .child(text("TODO: include field blueprint here"))
                         ))
                 ))

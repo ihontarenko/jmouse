@@ -8,6 +8,7 @@ public final class TransformValueResolver implements ValueResolver {
             case BlueprintValue.ConstantValue constant -> constant.value();
             case BlueprintValue.PathValue ignored -> null;
             case BlueprintValue.RequestAttributeValue ignored -> null;
+            case BlueprintValue.FormatValue ignored -> null;
             case null -> null;
         };
     }

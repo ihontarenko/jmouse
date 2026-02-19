@@ -21,6 +21,10 @@ public final class Blueprints {
         return new BlueprintValue.PathValue(path);
     }
 
+    public static BlueprintValue format(String pattern, BlueprintValue... arguments) {
+        return new BlueprintValue.FormatValue(pattern, List.of(arguments));
+    }
+
     public static BlueprintPredicate pathBoolean(String path) {
         return new BlueprintPredicate.BooleanValuePredicate(
                 path(path)

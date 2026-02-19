@@ -1,5 +1,8 @@
 package org.jmouse.dom.blueprint;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class ConfigurableValueResolver implements ValueResolver {
 
     private final ResolutionMode    mode;
@@ -26,6 +29,14 @@ public final class ConfigurableValueResolver implements ValueResolver {
 
         if (value instanceof BlueprintValue.RequestAttributeValue(String name)) {
             return execution.request().attributes().get(name);
+        }
+
+        if (value instanceof BlueprintValue.FormatValue(String pattern, List<BlueprintValue> formatArguments)) {
+            List<Object> arguments = new ArrayList<>();
+            for (BlueprintValue argument : formatArguments) {
+                arguments.add(resolve(argument, execution));
+            }
+            return String.format(pattern, arguments.toArray());
         }
 
         throw new IllegalStateException("Unsupported value: " + value.getClass());

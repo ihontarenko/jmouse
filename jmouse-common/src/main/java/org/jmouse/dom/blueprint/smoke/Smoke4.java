@@ -12,7 +12,7 @@ import org.jmouse.dom.blueprint.hooks.SubmissionDecorationHook;
 import org.jmouse.dom.blueprint.model.*;
 import org.jmouse.dom.blueprint.modules.BootstrapThemeModule;
 import org.jmouse.dom.blueprint.modules.ThemeAssembly;
-import org.jmouse.dom.blueprint.presets.BootstrapPreset;
+import org.jmouse.dom.blueprint.standard.BootstrapPreset;
 import org.jmouse.dom.node.ElementNode;
 
 import java.util.ArrayList;

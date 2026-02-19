@@ -1,12 +1,15 @@
 package org.jmouse.dom.blueprint;
 
+import java.util.List;
+
 /**
  * A blueprint value that can be either constant or bound to a data path.
  */
 public sealed interface BlueprintValue
         permits BlueprintValue.ConstantValue,
                 BlueprintValue.PathValue,
-                BlueprintValue.RequestAttributeValue {
+                BlueprintValue.RequestAttributeValue,
+                BlueprintValue.FormatValue {
 
     /**
      * Constant value.
@@ -30,5 +33,8 @@ public sealed interface BlueprintValue
      * @param name request attribute name
      */
     record RequestAttributeValue(String name) implements BlueprintValue {}
+
+    record FormatValue(String pattern, List<BlueprintValue> arguments) implements BlueprintValue {}
+
 
 }

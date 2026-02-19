@@ -1,4 +1,4 @@
-package org.jmouse.dom.blueprint.presets;
+package org.jmouse.dom.blueprint.standard;
 
 public enum InputType {
 

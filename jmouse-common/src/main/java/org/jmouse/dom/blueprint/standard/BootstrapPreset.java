@@ -1,4 +1,4 @@
-package org.jmouse.dom.blueprint.presets;
+package org.jmouse.dom.blueprint.standard;
 
 import org.jmouse.dom.blueprint.Blueprint;
 import org.jmouse.util.Strings;
