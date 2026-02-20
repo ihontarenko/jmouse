@@ -1,6 +1,5 @@
 package org.jmouse.dom.meterializer;
 
-import org.jmouse.core.Verify;
 import org.jmouse.dom.Node;
 import org.jmouse.dom.TagName;
 import org.jmouse.dom.node.ElementNode;
@@ -10,6 +9,8 @@ import org.jmouse.meterializer.*;
 import java.util.List;
 import java.util.Map;
 
+import static org.jmouse.core.Verify.nonNull;
+
 public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
 
     public DOMMaterializer() {
@@ -17,13 +18,12 @@ public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
     }
 
     public DOMMaterializer(ValueResolver valueResolver) {
-        super(Verify.nonNull(valueResolver, "valueResolver"));
+        super(nonNull(valueResolver, "valueResolver"));
     }
 
     @Override
     protected Node createElementNode(String tagName) {
-        Verify.nonNull(tagName, "qName");
-        return new ElementNode(toTagName(tagName));
+        return new ElementNode(toTagName(nonNull(tagName, "qName")));
     }
 
     @Override
@@ -43,8 +43,8 @@ public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
 
     @Override
     protected void appendChild(Node parent, Node child) {
-        Verify.nonNull(parent, "parent");
-        Verify.nonNull(child, "child");
+        nonNull(parent, "parent");
+        nonNull(child, "child");
 
         if (!(parent instanceof ElementNode element)) {
             throw new IllegalStateException("Cannot append child to non-element node: " + parent.getClass().getName());
@@ -55,8 +55,8 @@ public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
 
     @Override
     protected Node materializeElement(NodeTemplate.Element element, RenderingExecution execution) {
-        Verify.nonNull(element, "element");
-        Verify.nonNull(execution, "execution");
+        nonNull(element, "element");
+        nonNull(execution, "execution");
 
         ElementNode node = new ElementNode(toTagName(element.tagName()));
 
@@ -170,7 +170,7 @@ public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
     }
 
     private TagName toTagName(String tagName) {
-        String normalized = Verify.nonNull(tagName, "qName").trim();
+        String normalized = nonNull(tagName, "qName").trim();
         if (normalized.isEmpty()) {
             throw new IllegalArgumentException("qName is blank");
         }
