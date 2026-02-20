@@ -26,15 +26,6 @@ final public class NamespaceScope {
         stack.pop();
     }
 
-    public boolean isDeclared(String prefix, String namespaceUri) {
-        if (namespaceUri == null || namespaceUri.isBlank()) {
-            return true; // "no namespace" does not require declaration
-        }
-        String p = normalizePrefix(prefix);
-        String existing = current().get(p);
-        return namespaceUri.equals(existing);
-    }
-
     public void declareIfNeeded(Element element, String prefix, String namespace) {
         if (namespace == null || namespace.isBlank()) {
             return;
