@@ -3,6 +3,7 @@ package org.jmouse.dom.meterializer;
 import org.jmouse.meterializer.NodeTemplate;
 import org.jmouse.util.Strings;
 
+import static org.jmouse.meterializer.NodeTemplate.*;
 import static org.jmouse.meterializer.TemplatePredicate.contains;
 import static org.jmouse.meterializer.TemplatePredicate.same;
 import static org.jmouse.meterializer.ValueExpression.constant;

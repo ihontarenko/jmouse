@@ -7,6 +7,10 @@ import org.jmouse.dom.meterializer.DOMMaterializer;
 import org.jmouse.dom.meterializer.DOMRenderingPipeline;
 import org.jmouse.dom.meterializer.BootstrapTemplates;
 import org.jmouse.dom.meterializer.BootstrapThemeModule;
+import org.jmouse.meterializer.PipelineBuilder;
+import org.jmouse.meterializer.TemplateRegistry;
+import org.jmouse.meterializer.Templates;
+import org.jmouse.meterializer.ThemeAssembly;
 
 import java.util.List;
 import java.util.Map;

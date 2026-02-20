@@ -1,7 +1,7 @@
 package org.jmouse.dom.meterializer.hooks;
 
-import org.jmouse.common.dom.Node;
 import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.dom.Node;
 import org.jmouse.meterializer.RenderingExecution;
 import org.jmouse.meterializer.RenderingRequest;
 import org.jmouse.meterializer.SubmissionState;
