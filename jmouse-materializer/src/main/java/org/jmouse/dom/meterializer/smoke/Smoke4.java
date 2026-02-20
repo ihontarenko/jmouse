@@ -1,16 +1,18 @@
 package org.jmouse.dom.meterializer.smoke;
 
 import org.jmouse.core.access.ObjectAccessorWrapper;
-import org.jmouse.dom.Node;
-import org.jmouse.dom.NodeContext;
-import org.jmouse.dom.meterializer.DOMMaterializer;
-import org.jmouse.dom.meterializer.DOMRenderingPipeline;
+//import org.jmouse.dom.Node;
+//import org.jmouse.dom.NodeContext;
+//import org.jmouse.dom.meterializer.DOMMaterializer;
+//import org.jmouse.dom.meterializer.DOMRenderingPipeline;
 import org.jmouse.dom.meterializer.BootstrapTemplates;
 import org.jmouse.dom.meterializer.BootstrapThemeModule;
-import org.jmouse.meterializer.PipelineBuilder;
-import org.jmouse.meterializer.TemplateRegistry;
-import org.jmouse.meterializer.Templates;
-import org.jmouse.meterializer.ThemeAssembly;
+import org.jmouse.meterializer.*;
+import org.jmouse.xml.XmlPrinter;
+import org.jmouse.xml.materializer.XmlDomMaterializer;
+import org.jmouse.xml.materializer.XmlRenderingPipeline;
+import org.jmouse.xml.materializer.XmlThemeModule;
+import org.w3c.dom.Node;
 
 import java.util.List;
 import java.util.Map;
@@ -18,34 +20,38 @@ import java.util.Map;
 public final class Smoke4 {
 
     public static void main(String[] args) {
-        ThemeAssembly<Node, DOMRenderingPipeline>   assembler = ThemeAssembly.forTheme(new BootstrapThemeModule());
-        PipelineBuilder<Node, DOMRenderingPipeline> builder   = new PipelineBuilder<>();
+        ThemeAssembly<org.w3c.dom.Node, XmlRenderingPipeline> assembler = ThemeAssembly.forTheme(new XmlThemeModule());
+        PipelineBuilder<org.w3c.dom.Node, XmlRenderingPipeline>           builder   = new PipelineBuilder<>();
 
         registerTemplates(assembler.templateRegistry());
-        builder.instanceFactory(DOMRenderingPipeline::new);
+        builder.instanceFactory(XmlRenderingPipeline::new);
 
-        DOMRenderingPipeline pipeline = assembler.build(new ObjectAccessorWrapper(), builder, new DOMMaterializer());
+        ValueResolver valueResolver = new DefaultValueResolver(new PathValueResolver());
+
+        XmlRenderingPipeline pipeline = assembler.build(new ObjectAccessorWrapper(), builder, new XmlDomMaterializer(valueResolver));
 
         Map<String, Object> model = DemoModels.bootstrapFormDemo();
 
         Node node = pipeline.render("smoke4/form", model);
 
-        node.execute(NodeContext.CORRECT_NODE_DEPTH);
+        XmlPrinter.toString(node);
 
-        Node text = pipeline.render("field/select", Map.of(
-                "name", "vendor",
-                "label", "Vendor:",
-                "selected", "ti",
-                "options", List.of(
-                        Map.of("key", "vishay", "label", "Vishay"),
-                        Map.of("key", "ti", "label", "Texas Instruments")
-                )
-        ));
-
-        text.execute(NodeContext.CORRECT_NODE_DEPTH);
-
-        System.out.println(node.interpret(NodeContext.defaults()));
-        System.out.println(text.interpret(NodeContext.defaults()));
+//        node.execute(NodeContext.CORRECT_NODE_DEPTH);
+//
+//        Node text = pipeline.render("field/select", Map.of(
+//                "name", "vendor",
+//                "label", "Vendor:",
+//                "selected", "ti",
+//                "options", List.of(
+//                        Map.of("key", "vishay", "label", "Vishay"),
+//                        Map.of("key", "ti", "label", "Texas Instruments")
+//                )
+//        ));
+//
+//        text.execute(NodeContext.CORRECT_NODE_DEPTH);
+//
+//        System.out.println(node.interpret(NodeContext.defaults()));
+//        System.out.println(text.interpret(NodeContext.defaults()));
     }
 
     private static void registerTemplates(TemplateRegistry registry) {

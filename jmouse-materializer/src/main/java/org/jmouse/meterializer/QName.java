@@ -23,15 +23,19 @@ public record QName(String namespace, String prefix, String name) {
         prefix = Strings.normalize(prefix, String::trim);
     }
 
-    public static QName of(String name) {
-        return new QName(null, null, name);
+    public static QName local(String name) {
+        return of(null, null, name);
     }
 
     public static QName of(String namespace, String prefix, String name) {
         return new QName(namespace, prefix, name);
     }
 
-    public String qualifiedName() {
+    public static QName namespace(String namespace, String name) {
+        return of(namespace, null, name);
+    }
+
+    public String qualified() {
         return prefix == null ? name : (prefix + ":" + name);
     }
 

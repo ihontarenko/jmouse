@@ -72,7 +72,7 @@ public final class AdvancedChange {
                     List<NodeTemplate> children,
                     List<NodeDirective> directives
             )) {
-                Element      wrapper = new Element(QName.of(wrapperTagName), Map.of(), children, directives);
+                Element      wrapper = new Element(QName.local(wrapperTagName), Map.of(), children, directives);
                 NodeTemplate changed = wrapperChange.apply(wrapper, execution);
                 return new Element(qName, attributes, List.of(changed), directives);
             }

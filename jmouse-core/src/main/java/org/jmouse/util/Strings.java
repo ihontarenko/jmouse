@@ -226,6 +226,10 @@ public final class Strings {
         return value == null ? "" : value;
     }
 
+    public static String nullIfEmpty(String value) {
+        return isEmpty(value) ? null : value;
+    }
+
     public static String normalize(String value, Function<String, String> mapper) {
         return mapper.apply(emptyIfNull(value));
     }

@@ -16,7 +16,7 @@ public final class Templates {
                 .attribute("method", constant("POST"))
                 .attribute("class", constant("p-3"))
 
-                .child(element("h3", h -> h.child(text(path("title")))))
+                .child(element(QName.of("https://prom.ua/ua/", "ns1", "h3"), h -> h.child(text(path("title")))))
 
                 .child(element("p", p -> p
                         .attribute("class", constant("text-muted"))

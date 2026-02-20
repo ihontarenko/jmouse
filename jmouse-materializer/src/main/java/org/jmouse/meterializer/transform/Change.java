@@ -40,7 +40,7 @@ public final class Change {
 
             if (blueprint instanceof NodeTemplate.Element elementBlueprint) {
                 return new NodeTemplate.Element(
-                        QName.of(newTagName),
+                        QName.local(newTagName),
                         elementBlueprint.attributes(),
                         elementBlueprint.children(),
                         elementBlueprint.directives()
@@ -131,7 +131,7 @@ public final class Change {
             }
 
             NodeTemplate.Element wrapper = new NodeTemplate.Element(
-                    QName.of(tagName),
+                    QName.local(tagName),
                     Map.of(),
                     List.of(blueprint),
                     List.of()

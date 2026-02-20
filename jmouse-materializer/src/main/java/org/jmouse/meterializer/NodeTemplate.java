@@ -23,10 +23,14 @@ public sealed interface NodeTemplate
         return builder.build();
     }
 
-    static NodeTemplate.Element element(String tagName, Consumer<ElementBlueprintBuilder> consumer) {
-        ElementBlueprintBuilder builder = new ElementBlueprintBuilder(tagName);
+    static NodeTemplate.Element element(QName qName, Consumer<ElementBlueprintBuilder> consumer) {
+        ElementBlueprintBuilder builder = new ElementBlueprintBuilder(qName);
         consumer.accept(builder);
         return builder.build();
+    }
+
+    static NodeTemplate.Element element(String tagName, Consumer<ElementBlueprintBuilder> consumer) {
+        return element(QName.local(tagName), consumer);
     }
 
     static NodeTemplate.Conditional when(

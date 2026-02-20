@@ -13,13 +13,13 @@ import java.util.Map;
  */
 public final class ElementBlueprintBuilder {
 
-    private final String                       tagName;
+    private final QName                        qName;
     private final Map<String, ValueExpression> attributes = new LinkedHashMap<>();
     private final List<NodeTemplate>           children   = new ArrayList<>();
     private final List<NodeDirective>          directives = new ArrayList<>();
 
-    public ElementBlueprintBuilder(String tagName) {
-        this.tagName = Verify.nonNull(tagName, "qName");
+    public ElementBlueprintBuilder(QName qName) {
+        this.qName = Verify.nonNull(qName, "qName");
     }
 
     public ElementBlueprintBuilder attribute(String name, ValueExpression value) {
@@ -74,7 +74,7 @@ public final class ElementBlueprintBuilder {
 
     public NodeTemplate.Element build() {
         return new NodeTemplate.Element(
-                QName.of(tagName), Map.copyOf(attributes), List.copyOf(children), List.copyOf(directives)
+                qName, Map.copyOf(attributes), List.copyOf(children), List.copyOf(directives)
         );
     }
 }
