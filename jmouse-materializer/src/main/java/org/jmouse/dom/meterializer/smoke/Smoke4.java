@@ -5,7 +5,6 @@ import org.jmouse.dom.Node;
 import org.jmouse.dom.NodeContext;
 import org.jmouse.dom.meterializer.DOMMaterializer;
 import org.jmouse.dom.meterializer.DOMRenderingPipeline;
-import org.jmouse.meterializer.*;
 import org.jmouse.dom.meterializer.BootstrapTemplates;
 import org.jmouse.dom.meterializer.BootstrapThemeModule;
 

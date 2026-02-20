@@ -10,10 +10,10 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <packaging>jar</packaging>
-    <artifactId>jmouse-common</artifactId>
-    <name>jMouse - Common</name>
-    <description>jMouse Framework - Common Library (Helpers, etc.)</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-common</url>
+    <artifactId>jmouse-materializer</artifactId>
+    <name>jMouse - Materializer</name>
+    <description>jMouse Framework - Materializer</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-materializer</url>
 
     <licenses>
         <license>
@@ -33,7 +33,7 @@
     <scm>
         <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
         <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-common</url>
+        <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-materializer</url>
     </scm>
 
     <properties>
@@ -47,24 +47,6 @@
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.jmouse</groupId>
-            <artifactId>jmouse-materializer</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-xml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-yaml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-properties</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

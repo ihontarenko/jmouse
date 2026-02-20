@@ -84,6 +84,11 @@
             </dependency>
             <dependency>
                 <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-materializer</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-jdbc</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>

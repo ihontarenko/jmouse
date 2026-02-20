@@ -1,16 +1,13 @@
 package org.jmouse.dom.meterializer;
 
 import org.jmouse.core.Verify;
-import org.jmouse.core.access.ObjectAccessor;
 import org.jmouse.dom.Node;
 import org.jmouse.dom.TagName;
 import org.jmouse.dom.node.ElementNode;
 import org.jmouse.dom.node.TextNode;
-import org.jmouse.meterializer.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
 
