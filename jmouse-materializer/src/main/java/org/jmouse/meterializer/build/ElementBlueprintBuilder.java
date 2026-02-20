@@ -1,10 +1,7 @@
 package org.jmouse.meterializer.build;
 
 import org.jmouse.core.Verify;
-import org.jmouse.meterializer.NodeTemplate;
-import org.jmouse.meterializer.NodeDirective;
-import org.jmouse.meterializer.TemplatePredicate;
-import org.jmouse.meterializer.ValueExpression;
+import org.jmouse.meterializer.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -22,7 +19,7 @@ public final class ElementBlueprintBuilder {
     private final List<NodeDirective>          directives = new ArrayList<>();
 
     public ElementBlueprintBuilder(String tagName) {
-        this.tagName = Verify.nonNull(tagName, "tagName");
+        this.tagName = Verify.nonNull(tagName, "qName");
     }
 
     public ElementBlueprintBuilder attribute(String name, ValueExpression value) {
@@ -77,7 +74,7 @@ public final class ElementBlueprintBuilder {
 
     public NodeTemplate.Element build() {
         return new NodeTemplate.Element(
-                tagName, Map.copyOf(attributes), List.copyOf(children), List.copyOf(directives)
+                QName.of(tagName), Map.copyOf(attributes), List.copyOf(children), List.copyOf(directives)
         );
     }
 }

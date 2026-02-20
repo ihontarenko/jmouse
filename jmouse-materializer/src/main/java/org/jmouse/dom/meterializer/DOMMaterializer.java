@@ -22,7 +22,7 @@ public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
 
     @Override
     protected Node createElementNode(String tagName) {
-        Verify.nonNull(tagName, "tagName");
+        Verify.nonNull(tagName, "qName");
         return new ElementNode(toTagName(tagName));
     }
 
@@ -170,9 +170,9 @@ public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
     }
 
     private TagName toTagName(String tagName) {
-        String normalized = Verify.nonNull(tagName, "tagName").trim();
+        String normalized = Verify.nonNull(tagName, "qName").trim();
         if (normalized.isEmpty()) {
-            throw new IllegalArgumentException("tagName is blank");
+            throw new IllegalArgumentException("qName is blank");
         }
         return TagName.valueOf(normalized.toUpperCase());
     }

@@ -37,7 +37,7 @@ public final class TemplateTraversal {
                 context.exit();
 
                 yield new NodeTemplate.Element(
-                        element.tagName(),
+                        element.qName(),
                         element.attributes(),
                         children,
                         element.directives()

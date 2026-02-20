@@ -20,7 +20,7 @@ public final class Renderers {
     }
 
     public static Predicate<Node> tagName(TagName tagName) {
-        Verify.nonNull(tagName, "tagName");
+        Verify.nonNull(tagName, "qName");
         return node -> node.getTagName() == tagName;
     }
 

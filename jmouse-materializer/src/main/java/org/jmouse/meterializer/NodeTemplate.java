@@ -17,7 +17,7 @@ public sealed interface NodeTemplate
                 NodeTemplate.Repeat,
                 NodeTemplate.Include {
 
-    public static List<NodeTemplate> list(Consumer<TemplateNodeCollectionBuilder> consumer) {
+    static List<NodeTemplate> list(Consumer<TemplateNodeCollectionBuilder> consumer) {
         TemplateNodeCollectionBuilder builder = new TemplateNodeCollectionBuilder();
         consumer.accept(builder);
         return builder.build();
@@ -82,16 +82,21 @@ public sealed interface NodeTemplate
     /**
      * Represents an element node in a blueprint tree.
      *
-     * @param tagName element tag name (for example "div", "input", "select")
+     * @param qName element tag name (for example "div", "input", "select")
      * @param attributes element attributes; values can be constant or bound to a data path
      * @param children child blueprint nodes
      */
     record Element(
-            String tagName,
+            QName qName,
             Map<String, ValueExpression> attributes,
             List<NodeTemplate> children,
             List<NodeDirective> directives
     ) implements NodeTemplate {
+
+        public String tagName() {
+            return qName.name();
+        }
+
     }
 
     /**

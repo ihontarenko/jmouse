@@ -14,7 +14,7 @@ public final class ContextMatch {
     private ContextMatch() {}
 
     public static ContextAwareMatcher tagName(String tagName) {
-        nonNull(tagName, "tagName");
+        nonNull(tagName, "qName");
         return (blueprint, context) -> blueprint instanceof Element element
                 && element.tagName().equalsIgnoreCase(tagName);
     }

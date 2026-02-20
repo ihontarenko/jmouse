@@ -86,7 +86,7 @@ public final class TemplateTraversal {
      */
     public static List<NodeTemplate.Element> findElementsByTag(NodeTemplate root, String tagName) {
         nonNull(root, "root");
-        nonNull(tagName, "tagName");
+        nonNull(tagName, "qName");
 
         String                     expected = tagName.trim().toLowerCase(Locale.ROOT);
         List<NodeTemplate.Element> result   = new ArrayList<>();

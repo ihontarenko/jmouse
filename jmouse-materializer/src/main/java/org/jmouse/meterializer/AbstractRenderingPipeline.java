@@ -44,12 +44,12 @@ abstract public class AbstractRenderingPipeline<T, R extends AbstractRenderingPi
         try {
             hookChain.beforeTemplateResolve(templateKey, data, request, execution);
 
-            NodeTemplate blueprint = resolver.resolve(templateKey, execution);
+            NodeTemplate template = resolver.resolve(templateKey, execution);
 
-            hookChain.afterTemplateResolve(templateKey, blueprint, execution);
-            hookChain.beforeMaterialize(blueprint, execution);
+            hookChain.afterTemplateResolve(templateKey, template, execution);
+            hookChain.beforeMaterialize(template, execution);
 
-            T node = materializer.materialize(blueprint, execution);
+            T node = materializer.materialize(template, execution);
 
             hookChain.afterMaterialize(node, execution);
 

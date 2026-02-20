@@ -4,6 +4,7 @@ import org.jmouse.core.Verify;
 import org.jmouse.meterializer.NodeDirective;
 import org.jmouse.meterializer.NodeTemplate;
 import org.jmouse.meterializer.NodeTemplate.Element;
+import org.jmouse.meterializer.QName;
 import org.jmouse.meterializer.ValueExpression;
 
 import java.util.*;
@@ -19,14 +20,14 @@ public final class AdvancedChange {
         Verify.nonNull(name, "name");
         return (blueprint, execution) -> {
             if (blueprint instanceof Element(
-                    String tagName, Map<String,
-                    ValueExpression> elementAttributes,
+                    QName qName,
+                    Map<String, ValueExpression> elementAttributes,
                     List<NodeTemplate> children,
                     List<NodeDirective> directives
             )) {
                 Map<String, ValueExpression> attributes = new LinkedHashMap<>(elementAttributes);
                 attributes.remove(name);
-                return new Element(tagName, Map.copyOf(attributes), children, directives);
+                return new Element(qName, Map.copyOf(attributes), children, directives);
             }
             return blueprint;
         };
@@ -36,7 +37,7 @@ public final class AdvancedChange {
         Verify.nonNull(addOrReplace, "addOrReplace");
         return (blueprint, execution) -> {
             if (blueprint instanceof Element(
-                    String tagName,
+                    QName qName,
                     Map<String, ValueExpression> elementAttributes,
                     List<NodeTemplate> children,
                     List<NodeDirective> directives
@@ -44,7 +45,7 @@ public final class AdvancedChange {
                 Map<String, ValueExpression> attributes = new LinkedHashMap<>(elementAttributes);
                 attributes.putAll(addOrReplace);
                 return new Element(
-                        tagName, Map.copyOf(attributes), children, directives);
+                        qName, Map.copyOf(attributes), children, directives);
             }
             return blueprint;
         };
@@ -52,12 +53,12 @@ public final class AdvancedChange {
 
     public static TemplateChange replaceChildren(List<NodeTemplate> children) {
         Verify.nonNull(children, "children");
-        return (blueprint, execution) -> {
-            if (blueprint instanceof Element element) {
+        return (template, execution) -> {
+            if (template instanceof Element element) {
                 return new Element(
-                        element.tagName(), element.attributes(), List.copyOf(children), element.directives());
+                        element.qName(), element.attributes(), List.copyOf(children), element.directives());
             }
-            return blueprint;
+            return template;
         };
     }
 
@@ -66,14 +67,14 @@ public final class AdvancedChange {
         Verify.nonNull(wrapperChange, "wrapperChange");
         return (blueprint, execution) -> {
             if (blueprint instanceof Element(
-                    String tagName,
+                    QName qName,
                     Map<String, ValueExpression> attributes,
                     List<NodeTemplate> children,
                     List<NodeDirective> directives
             )) {
-                Element      wrapper = new Element(wrapperTagName, Map.of(), children, directives);
+                Element      wrapper = new Element(QName.of(wrapperTagName), Map.of(), children, directives);
                 NodeTemplate changed = wrapperChange.apply(wrapper, execution);
-                return new Element(tagName, attributes, List.of(changed), directives);
+                return new Element(qName, attributes, List.of(changed), directives);
             }
             return blueprint;
         };

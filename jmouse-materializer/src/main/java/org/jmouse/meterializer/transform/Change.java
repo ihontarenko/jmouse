@@ -2,6 +2,7 @@ package org.jmouse.meterializer.transform;
 
 import org.jmouse.meterializer.NodeTemplate;
 import org.jmouse.meterializer.NodeDirective;
+import org.jmouse.meterializer.QName;
 import org.jmouse.meterializer.ValueExpression;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public final class Change {
 
             if (blueprint instanceof NodeTemplate.Element elementBlueprint) {
                 return new NodeTemplate.Element(
-                        newTagName,
+                        QName.of(newTagName),
                         elementBlueprint.attributes(),
                         elementBlueprint.children(),
                         elementBlueprint.directives()
@@ -60,7 +61,7 @@ public final class Change {
             }
 
             if (blueprint instanceof NodeTemplate.Element(
-                    String tagName,
+                    QName qName,
                     Map<String, ValueExpression> attributes,
                     List<NodeTemplate> children,
                     List<NodeDirective> directives
@@ -70,7 +71,7 @@ public final class Change {
                 copy.put(attributeName, attributeValue);
 
                 return new NodeTemplate.Element(
-                        tagName,
+                        qName,
                         Map.copyOf(copy),
                         children,
                         directives
@@ -96,7 +97,7 @@ public final class Change {
             }
 
             if (!(blueprint instanceof NodeTemplate.Element(
-                    String tagName,
+                    QName qName,
                     Map<String, ValueExpression> attributes,
                     List<NodeTemplate> children,
                     List<NodeDirective> directives
@@ -112,7 +113,7 @@ public final class Change {
             attributesCopy.put(CLASS_ATTRIBUTE_NAME, new ValueExpression.ConstantValue(mergedClassAttribute));
 
             return new NodeTemplate.Element(
-                    tagName,
+                    qName,
                     Map.copyOf(attributesCopy),
                     children,
                     directives
@@ -121,7 +122,7 @@ public final class Change {
     }
 
     public static TemplateChange wrapWith(String tagName, TemplateChange change) {
-        nonNull(tagName, "tagName");
+        nonNull(tagName, "qName");
         nonNull(change, "change");
 
         return (blueprint, execution) -> {
@@ -130,7 +131,7 @@ public final class Change {
             }
 
             NodeTemplate.Element wrapper = new NodeTemplate.Element(
-                    tagName,
+                    QName.of(tagName),
                     Map.of(),
                     List.of(blueprint),
                     List.of()
@@ -149,7 +150,7 @@ public final class Change {
             }
 
             if (!(blueprint instanceof NodeTemplate.Element(
-                    String tagName,
+                    QName qName,
                     Map<String, ValueExpression> attributes,
                     List<NodeTemplate> children,
                     List<NodeDirective> directives
@@ -162,7 +163,7 @@ public final class Change {
             copy.add(child);
 
             return new NodeTemplate.Element(
-                    tagName,
+                    qName,
                     attributes,
                     List.copyOf(copy),
                     directives
@@ -179,7 +180,7 @@ public final class Change {
             }
 
             if (!(blueprint instanceof NodeTemplate.Element(
-                    String tagName,
+                    QName qName,
                     Map<String, ValueExpression> attributes,
                     List<NodeTemplate> children,
                     List<NodeDirective> directives
@@ -193,7 +194,7 @@ public final class Change {
             copy.addAll(children);
 
             return new NodeTemplate.Element(
-                    tagName,
+                    qName,
                     attributes,
                     List.copyOf(copy),
                     directives
