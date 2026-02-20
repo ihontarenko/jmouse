@@ -13,15 +13,15 @@ public final class TemplateNodeCollectionBuilder {
 
     private final List<NodeTemplate> nodes = new ArrayList<>();
 
-    public TemplateNodeCollectionBuilder add(NodeTemplate blueprint) {
-        Verify.nonNull(blueprint, "blueprint");
-        nodes.add(blueprint);
+    public TemplateNodeCollectionBuilder add(NodeTemplate template) {
+        Verify.nonNull(template, "template");
+        nodes.add(template);
         return this;
     }
 
-    public TemplateNodeCollectionBuilder addAll(List<NodeTemplate> blueprints) {
-        Verify.nonNull(blueprints, "blueprints");
-        nodes.addAll(blueprints);
+    public TemplateNodeCollectionBuilder addAll(List<NodeTemplate> templates) {
+        Verify.nonNull(templates, "templates");
+        nodes.addAll(templates);
         return this;
     }
 
