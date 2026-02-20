@@ -11,12 +11,12 @@ public final class Templates {
 
     private Templates() {}
 
-    public static NodeTemplate bootstrapForm() {
+    public static NodeTemplate defaultForm() {
         return element("form", form -> form
                 .attribute("method", constant("POST"))
                 .attribute("class", constant("p-3"))
 
-                .child(element(QName.of("https://prom.ua/ua/", "ns1", "h3"), h -> h.child(text(path("title")))))
+                .child(element("h3", h -> h.child(text(path("title")))))
 
                 .child(element("p", p -> p
                         .attribute("class", constant("text-muted"))

@@ -9,7 +9,6 @@ import org.jmouse.dom.meterializer.BootstrapTemplates;
 import org.jmouse.dom.meterializer.BootstrapThemeModule;
 import org.jmouse.meterializer.*;
 
-import java.util.List;
 import java.util.Map;
 
 public final class Smoke4 {
@@ -35,7 +34,7 @@ public final class Smoke4 {
     }
 
     private static void registerTemplates(TemplateRegistry registry) {
-        registry.register("smoke4/form", Templates.bootstrapForm());
+        registry.register("smoke4/form", Templates.defaultForm());
 
         registry.register("field/text",
                           BootstrapTemplates.inputText("name", "label", "value"));
