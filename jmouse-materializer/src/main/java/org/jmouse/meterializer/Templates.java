@@ -1,9 +1,6 @@
 package org.jmouse.meterializer;
 
-import org.jmouse.meterializer.build.Include;
-
-import static org.jmouse.meterializer.NodeTemplate.element;
-import static org.jmouse.meterializer.NodeTemplate.text;
+import static org.jmouse.meterializer.NodeTemplate.*;
 import static org.jmouse.meterializer.ValueExpression.constant;
 import static org.jmouse.meterializer.ValueExpression.path;
 
@@ -24,11 +21,11 @@ public final class Templates {
                 ))
 
                 // Universal: repeat blocks, include per-field template
-                .child(NodeTemplate.repeat(
+                .child(repeat(
                         path("fields"),
                         "field",
                         body -> body.add(
-                                Include.template(
+                                include(
                                         path("field.templateKey"),
                                         path("field.model")
                                 )
@@ -36,7 +33,7 @@ public final class Templates {
                 ))
 
                 // Submit
-                .child(Include.template(
+                .child(include(
                         constant("uni/button/submit"),
                         path("submit")
                 ))
@@ -58,11 +55,11 @@ public final class Templates {
                 .child(element("p", p -> p.child(text(path("description")))))
 
                 // Universal: same contract as bootstrap
-                .child(NodeTemplate.repeat(
+                .child(repeat(
                         path("fields"),
                         "field",
                         body -> body.add(
-                                Include.template(
+                                include(
                                         path("field.templateKey"),
                                         path("field.model")
                                 )
@@ -70,7 +67,7 @@ public final class Templates {
                 ))
 
                 // Submit (same key so you can swap only the submit template per theme in registry)
-                .child(Include.template(
+                .child(include(
                         constant("uni/button/submit"),
                         path("submit")
                 ))

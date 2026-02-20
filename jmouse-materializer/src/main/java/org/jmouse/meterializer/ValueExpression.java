@@ -43,9 +43,9 @@ import java.util.function.Consumer;
  */
 public sealed interface ValueExpression
         permits ValueExpression.ConstantValue,
-        ValueExpression.PathValue,
-        ValueExpression.RequestAttributeValue,
-        ValueExpression.FormatValue {
+                ValueExpression.PathValue,
+                ValueExpression.RequestAttributeValue,
+                ValueExpression.FormatValue {
 
     /**
      * Creates a constant value expression.
