@@ -69,10 +69,6 @@ public class RenderingRequest {
         return Collections.unmodifiableMap(attributes);
     }
 
-    // ---------------------------------------------------------------------
-    // Read accessors
-    // ---------------------------------------------------------------------
-
     public Optional<Object> findAttribute(String attributeName) {
         Verify.nonNull(attributeName, "attributeName");
 

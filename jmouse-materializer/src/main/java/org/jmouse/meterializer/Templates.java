@@ -1,8 +1,7 @@
 package org.jmouse.meterializer;
 
 import static org.jmouse.meterializer.NodeTemplate.*;
-import static org.jmouse.meterializer.ValueExpression.constant;
-import static org.jmouse.meterializer.ValueExpression.path;
+import static org.jmouse.meterializer.ValueExpression.*;
 
 public final class Templates {
 
@@ -32,10 +31,11 @@ public final class Templates {
                         )
                 ))
 
-                // Submit
+                .child(element("hr", __ -> {}))
+
                 .child(include(
                         constant("uni/button/submit"),
-                        path("submit")
+                        root()
                 ))
 
                 .child(element("script", s -> s
@@ -69,7 +69,7 @@ public final class Templates {
                 // Submit (same key so you can swap only the submit template per theme in registry)
                 .child(include(
                         constant("uni/button/submit"),
-                        path("submit")
+                        path("")
                 ))
         );
     }

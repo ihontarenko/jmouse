@@ -68,6 +68,24 @@ public sealed interface ValueExpression
     }
 
     /**
+     * Creates a root value expression.
+     *
+     * <p>
+     * Represents the entire root model object.
+     * Equivalent to a path that points to the root context.
+     * </p>
+     *
+     * <pre>{@code
+     * ValueExpression v = ValueExpression.root();
+     * }</pre>
+     *
+     * @return root expression
+     */
+    static ValueExpression root() {
+        return new ValueExpression.PathValue(null);
+    }
+
+    /**
      * Creates a formatted value expression.
      *
      * <p>

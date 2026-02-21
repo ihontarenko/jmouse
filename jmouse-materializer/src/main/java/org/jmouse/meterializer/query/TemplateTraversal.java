@@ -151,8 +151,8 @@ public final class TemplateTraversal {
             case NodeTemplate.Element element ->
                     element.children() == null ? List.of() : element.children();
             case NodeTemplate.Conditional conditional -> merge(
-                    conditional.whenTrue(),
-                    conditional.whenFalse()
+                    conditional.branchA(),
+                    conditional.branchB()
             );
             case NodeTemplate.Repeat repeat ->
                     repeat.body() == null ? List.of() : repeat.body();

@@ -26,7 +26,9 @@ public final class Smoke4 {
 
         Map<String, Object> model = DemoModels.bootstrapFormDemo();
 
-        Node node = pipeline.render("smoke4/form", model);
+        model.put("submitCaption", "Submit Demo!");
+
+        Node node = pipeline.render("smoke4/form", model, r -> r.putAttribute("submitCaption2", "Submit Request!"));
 
         node.execute(NodeContext.CORRECT_NODE_DEPTH);
 

@@ -4,10 +4,9 @@ import org.jmouse.meterializer.NodeTemplate;
 import org.jmouse.util.Strings;
 
 import static org.jmouse.meterializer.NodeTemplate.*;
-import static org.jmouse.meterializer.TemplatePredicate.contains;
-import static org.jmouse.meterializer.TemplatePredicate.same;
-import static org.jmouse.meterializer.ValueExpression.constant;
-import static org.jmouse.meterializer.ValueExpression.path;
+import static org.jmouse.meterializer.NodeTemplate.when;
+import static org.jmouse.meterializer.TemplatePredicate.*;
+import static org.jmouse.meterializer.ValueExpression.*;
 
 /**
  * Bootstrap-styled presets.
@@ -18,13 +17,22 @@ public final class BootstrapTemplates {
 
     private BootstrapTemplates() {}
 
-    public static NodeTemplate button(String type, String caption) {
+    public static NodeTemplate button(String type, String defaultCaption) {
         return element("div", block -> block
                 .attribute("class", constant("mt-3"))
                 .child(element("button", button -> button
                         .attribute("type", constant(type))
                         .attribute("class", constant("btn btn-primary"))
-                        .child(text(constant(caption)))
+                        .child(when(
+                                present(request("submitCaption")),
+                                t -> t.add(text(request("submitCaption"))),
+                                f -> f.add(when(
+                                        present(path("submitCaption")),
+                                        t -> t.add(text(path("submitCaption"))).add(text(constant("Hi!"))),
+                                        k -> k.add(text(constant(defaultCaption))),
+                                        "div"
+                                ))
+                        ))
                 ))
         );
     }

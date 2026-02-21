@@ -132,17 +132,52 @@ public sealed interface NodeTemplate
     static NodeTemplate.Element element(String tagName, Consumer<ElementBlueprintBuilder> consumer) {
         return element(QName.local(tagName), consumer);
     }
-
     /**
-     * Creates a conditional node with both branches.
+     * Creates a conditional node with both branches and an optional wrapper tag. 🔀
+     *
+     * <p>
+     * The {@code tagName} may be used by the materializer to wrap the resulting
+     * branch into a container element. If {@code null}, the materializer decides
+     * how to group multiple nodes (e.g. default container).
+     * </p>
      *
      * <pre>{@code
      * NodeTemplate node = NodeTemplate.when(
      *     TemplatePredicate.present(ValueExpression.path("user.name")),
      *     t -> t.text("Hello "),
-     *     f -> f.text("Anonymous")
+     *     f -> f.text("Anonymous"),
+     *     "div"
      * );
      * }</pre>
+     *
+     * @param predicate condition deciding which branch to materialize
+     * @param branchA nodes materialized when predicate is {@code true}
+     * @param branchB nodes materialized when predicate is {@code false}
+     * @param tagName optional wrapper tag name (may be {@code null})
+     * @return conditional node
+     */
+    static NodeTemplate.Conditional when(
+            TemplatePredicate predicate,
+            Consumer<TemplateNodeCollectionBuilder> branchA,
+            Consumer<TemplateNodeCollectionBuilder> branchB,
+            String tagName
+    ) {
+        TemplateNodeCollectionBuilder builderA  = new TemplateNodeCollectionBuilder();
+        TemplateNodeCollectionBuilder builderB = new TemplateNodeCollectionBuilder();
+
+        branchA.accept(builderA);
+        branchB.accept(builderB);
+
+        return new NodeTemplate.Conditional(predicate, builderA.build(), builderB.build(), tagName);
+    }
+
+    /**
+     * Creates a conditional node with both branches and no explicit wrapper.
+     *
+     * <p>
+     * Equivalent to calling {@link #when(TemplatePredicate, Consumer, Consumer, String)}
+     * with {@code tagName = null}.
+     * </p>
      *
      * @param predicate condition deciding which branch to materialize
      * @param branchA nodes materialized when predicate is {@code true}
@@ -154,13 +189,7 @@ public sealed interface NodeTemplate
             Consumer<TemplateNodeCollectionBuilder> branchA,
             Consumer<TemplateNodeCollectionBuilder> branchB
     ) {
-        TemplateNodeCollectionBuilder builderA  = new TemplateNodeCollectionBuilder();
-        TemplateNodeCollectionBuilder builderB = new TemplateNodeCollectionBuilder();
-
-        branchA.accept(builderA);
-        branchB.accept(builderB);
-
-        return new NodeTemplate.Conditional(predicate, builderA.build(), builderB.build());
+        return when(predicate, branchA, branchB, null);
     }
 
     /**
@@ -168,7 +197,15 @@ public sealed interface NodeTemplate
      *
      * <p>
      * The {@code false} branch is represented as an empty list.
+     * No explicit wrapper tag is defined.
      * </p>
+     *
+     * <pre>{@code
+     * NodeTemplate node = NodeTemplate.when(
+     *     TemplatePredicate.pathBoolean("user.enabled"),
+     *     t -> t.text("Enabled")
+     * );
+     * }</pre>
      *
      * @param predicate condition deciding whether branch is materialized
      * @param branchA nodes materialized when predicate is {@code true}
@@ -178,9 +215,7 @@ public sealed interface NodeTemplate
             TemplatePredicate predicate,
             Consumer<TemplateNodeCollectionBuilder> branchA
     ) {
-        TemplateNodeCollectionBuilder builder = new TemplateNodeCollectionBuilder();
-        branchA.accept(builder);
-        return new NodeTemplate.Conditional(predicate, builder.build(), List.of());
+        return when(predicate, branchA, b -> {}, null);
     }
 
     /**
@@ -296,13 +331,14 @@ public sealed interface NodeTemplate
      * Represents a conditional branch in a blueprint tree.
      *
      * @param predicate predicate that decides which branch to materialize
-     * @param whenTrue nodes materialized when predicate is true
-     * @param whenFalse nodes materialized when predicate is false
+     * @param branchA nodes materialized when predicate is true
+     * @param branchB nodes materialized when predicate is false
      */
     record Conditional(
             TemplatePredicate predicate,
-            List<NodeTemplate> whenTrue,
-            List<NodeTemplate> whenFalse
+            List<NodeTemplate> branchA,
+            List<NodeTemplate> branchB,
+            String tagName
     ) implements NodeTemplate {
     }
 
@@ -332,15 +368,15 @@ public sealed interface NodeTemplate
      * Includes another blueprint by key.
      *
      * <p>
-     * {@code blueprintKey} may be constant or dynamically resolved.
+     * {@code templateReference} may be constant or dynamically resolved.
      * The {@code model} expression defines a new root object for the included scope.
      * </p>
      *
-     * @param blueprintKey key expression (can be constant or path-bound)
+     * @param templateReference key expression (can be constant or path-bound)
      * @param model model expression (object to pass as new root; can be path-bound)
      */
     record Include(
-            ValueExpression blueprintKey,
+            ValueExpression templateReference,
             ValueExpression model
     ) implements NodeTemplate {}
 

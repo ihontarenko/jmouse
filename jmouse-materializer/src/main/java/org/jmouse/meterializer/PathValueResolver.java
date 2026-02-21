@@ -19,8 +19,9 @@ import org.jmouse.core.access.accessor.ScalarValueAccessor;
 public final class PathValueResolver {
 
     public Object resolve(String expression, RenderingExecution execution) {
-        Verify.nonNull(expression, "expression");
-        Verify.nonNull(execution, "execution");
+        if (expression == null) {
+            return execution.rootAccessor();
+        }
 
         String trimmed = expression.trim();
 

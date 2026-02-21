@@ -44,9 +44,9 @@ public final class TemplateTraversal {
                 );
             }
             case NodeTemplate.Conditional conditional -> {
-                List<NodeTemplate> branchA = mapList(conditional.whenTrue(), execution, rewrite, context);
-                List<NodeTemplate> branchB = mapList(conditional.whenFalse(), execution, rewrite, context);
-                yield new NodeTemplate.Conditional(conditional.predicate(), branchA, branchB);
+                List<NodeTemplate> branchA = mapList(conditional.branchA(), execution, rewrite, context);
+                List<NodeTemplate> branchB = mapList(conditional.branchB(), execution, rewrite, context);
+                yield new NodeTemplate.Conditional(conditional.predicate(), branchA, branchB, conditional.tagName());
             }
             case NodeTemplate.Repeat repeat -> {
                 List<NodeTemplate> nodeTemplates = mapList(repeat.body(), execution, rewrite, context);
