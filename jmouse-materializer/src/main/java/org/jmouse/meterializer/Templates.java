@@ -12,7 +12,7 @@ public final class Templates {
                 .attribute("method", constant("POST"))
                 .attribute("class", constant("p-3"))
 
-                .child(element("h3", h -> h.child(text(path("title")))))
+                .child(element("h3", h -> h.child(text(path("description")))))
 
                 .child(element("p", p -> p
                         .attribute("class", constant("text-muted"))
@@ -25,8 +25,8 @@ public final class Templates {
                         "field",
                         body -> body.add(
                                 include(
-                                        path("field.templateKey"),
-                                        path("field.model")
+                                        format("field.type.%s", path("field.elementType")),
+                                        path("field")
                                 )
                         )
                 ))
@@ -34,7 +34,7 @@ public final class Templates {
                 .child(element("hr", __ -> {}))
 
                 .child(include(
-                        constant("uni/button/submit"),
+                        constant("default/button/submit"),
                         root()
                 ))
 
@@ -60,7 +60,7 @@ public final class Templates {
                         "field",
                         body -> body.add(
                                 include(
-                                        path("field.templateKey"),
+                                        path("field.templateReference"),
                                         path("field.model")
                                 )
                         )
@@ -68,7 +68,7 @@ public final class Templates {
 
                 // Submit (same key so you can swap only the submit template per theme in registry)
                 .child(include(
-                        constant("uni/button/submit"),
+                        constant("default/button/submit"),
                         path("")
                 ))
         );

@@ -27,8 +27,8 @@ public final class BootstrapTemplates {
                                 present(request("submitCaption")),
                                 t -> t.add(text(request("submitCaption"))),
                                 f -> f.add(when(
-                                        present(path("submitCaption")),
-                                        t -> t.add(text(path("submitCaption"))).add(text(constant("Hi!"))),
+                                        present(path("description")),
+                                        t -> t.add(text(constant("Submit: "))).add(text(path("description"))),
                                         k -> k.add(text(constant(defaultCaption))),
                                         "div"
                                 ))
@@ -60,7 +60,7 @@ public final class BootstrapTemplates {
                     input.attribute("class", constant("form-control preset-class"));
 
                     if (Strings.isNotEmpty(valuePath)) {
-                        input.attribute("value", path(valuePath));
+                        input.attribute("value", request(valuePath));
                     }
                 }))
         );

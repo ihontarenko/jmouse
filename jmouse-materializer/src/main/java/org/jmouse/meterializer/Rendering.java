@@ -47,27 +47,75 @@ import java.util.function.UnaryOperator;
 public interface Rendering<T> {
 
     /**
-     * Renders a template using the provided data model.
-     *
-     * <p>Equivalent to calling {@link #render(String, Object, UnaryOperator)}
-     * with an identity request customizer.</p>
-     *
-     * @param templateKey logical template identifier
-     * @param data        data model object
-     * @return rendered result
-     */
-    default T render(String templateKey, Object data) {
-        return render(templateKey, data, request -> request);
-    }
-
-    /**
      * Renders a template with request customization.
      *
-     * @param templateKey        logical template identifier
-     * @param data               data model object
-     * @param requestCustomizer  customization callback applied before rendering
+     * @param templateKey       logical template identifier
+     * @param data              data model object
+     * @param requestCustomizer customization callback applied before rendering
      * @return rendered result
      */
     T render(String templateKey, Object data, UnaryOperator<RenderingRequest> requestCustomizer);
+
+    /**
+     * Renders a template using a {@link ModelReference}.
+     *
+     * <p>
+     * Convenience overload that extracts template key and model
+     * from the given reference and delegates to
+     * {@link #render(String, Object, UnaryOperator)}.
+     * </p>
+     *
+     * <pre>{@code
+     * ModelReference ref = ModelReference.of("user/profile", userDto);
+     *
+     * T result = rendering.render(ref, request ->
+     *     request.attribute("locale", "en_US")
+     * );
+     * }</pre>
+     *
+     * @param reference         template reference containing key and model
+     * @param requestCustomizer customization callback applied before rendering
+     * @return rendered result
+     */
+    default T render(ModelReference reference, UnaryOperator<RenderingRequest> requestCustomizer) {
+        return render(reference.templateReference(), reference.model(), requestCustomizer);
+    }
+
+    /**
+     * Renders a template using the provided data model.
+     *
+     * <p>
+     * Equivalent to calling {@link #render(String, Object, UnaryOperator)}
+     * with an identity request customizer.
+     * </p>
+     *
+     * @param templateReference logical template identifier
+     * @param data        data model object
+     * @return rendered result
+     */
+    default T render(String templateReference, Object data) {
+        return render(ModelReference.of(templateReference, data), request -> request);
+    }
+
+    /**
+     * Renders a template using the provided {@link ModelReference}.
+     *
+     * <p>
+     * Equivalent to calling {@link #render(ModelReference, UnaryOperator)}
+     * with an identity request customizer.
+     * </p>
+     *
+     * <pre>{@code
+     * ModelReference ref = ModelReference.of("user/profile", userDto);
+     *
+     * T result = rendering.render(ref);
+     * }</pre>
+     *
+     * @param reference template reference containing key and model
+     * @return rendered result
+     */
+    default T render(ModelReference reference) {
+        return render(reference, request -> request);
+    }
 
 }

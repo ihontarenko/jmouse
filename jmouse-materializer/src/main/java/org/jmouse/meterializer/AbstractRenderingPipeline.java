@@ -75,12 +75,12 @@ abstract public class AbstractRenderingPipeline<T, R extends AbstractRenderingPi
      *
      * <p>Equivalent to calling {@link #render(String, Object, UnaryOperator)} with identity customizer.</p>
      *
-     * @param templateKey template identifier
+     * @param templateReference template identifier
      * @param data model/root object
      * @return materialized result
      */
-    public T render(String templateKey, Object data) {
-        return render(templateKey, data, request -> request);
+    public T render(String templateReference, Object data) {
+        return render(templateReference, data, request -> request);
     }
 
     /**
@@ -107,7 +107,7 @@ abstract public class AbstractRenderingPipeline<T, R extends AbstractRenderingPi
      * @return materialized result
      */
     public T render(String templateKey, Object data, UnaryOperator<RenderingRequest> requestCustomizer) {
-        nonNull(templateKey, "templateKey");
+        nonNull(templateKey, "templateReference");
         nonNull(requestCustomizer, "requestCustomizer");
 
         RenderingRequest request      = requestCustomizer.apply(new RenderingRequest());

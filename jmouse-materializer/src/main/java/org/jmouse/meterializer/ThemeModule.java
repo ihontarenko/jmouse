@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface ThemeModule<T> {
 
-    void contributeBlueprints(TemplateRegistry templateRegistry);
+    void contributeTemplates(TemplateRegistry templateRegistry);
 
     List<OrderedTransformer> transformers();
 

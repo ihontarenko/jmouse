@@ -32,7 +32,7 @@ public final class TemplateKeyMapping {
         private final Map<ElementType, String> mapping = new EnumMap<>(ElementType.class);
 
         public Builder map(ElementType type, String templateKey) {
-            mapping.put(nonNull(type, "type"), nonNull(templateKey, "templateKey"));
+            mapping.put(nonNull(type, "type"), nonNull(templateKey, "templateReference"));
             return this;
         }
 

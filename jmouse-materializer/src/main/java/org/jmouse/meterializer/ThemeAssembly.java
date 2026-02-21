@@ -20,7 +20,7 @@ public final class ThemeAssembly<T, R extends Rendering<T>> {
         this.themeModule = nonNull(themeModule, "themeModule");
         TemplateRegistry baseCatalog = TemplateRegistry.create();
         this.templateRegistry = TemplateRegistry.overlay(baseCatalog);
-        themeModule.contributeBlueprints(baseCatalog);
+        themeModule.contributeTemplates(baseCatalog);
     }
 
     public static <T, R extends Rendering<T>> ThemeAssembly<T, R> forTheme(ThemeModule<T> themeModule) {

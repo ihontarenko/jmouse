@@ -1,6 +1,6 @@
 package org.jmouse.dom.meterializer.smoke;
 
-import org.jmouse.meterializer.ViewBlock;
+import org.jmouse.meterializer.ModelReference;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,9 +31,9 @@ public final class DemoModels {
 
         // ---- dynamic blocks ----
 
-        List<ViewBlock> fields = List.of(
+        List<ModelReference> fields = List.of(
 
-                ViewBlock.of(
+                ModelReference.of(
                         "field/text",
                         Map.of(
                                 "name", "element_name",
@@ -42,7 +42,7 @@ public final class DemoModels {
                         )
                 ),
 
-                ViewBlock.of(
+                ModelReference.of(
                         "field/select",
                         Map.of(
                                 "name", "vendor",

@@ -12,7 +12,7 @@ import java.util.List;
 public final class BootstrapThemeModule implements ThemeModule<Node> {
 
     @Override
-    public void contributeBlueprints(TemplateRegistry templateRegistry) {
+    public void contributeTemplates(TemplateRegistry templateRegistry) {
 
     }
 

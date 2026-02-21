@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Catalog that resolves blueprints by key.
+ * Catalog that resolves templates by key.
  */
 public interface TemplateRegistry {
 
@@ -19,20 +19,20 @@ public interface TemplateRegistry {
     }
 
     /**
-     * Resolve a blueprint by key.
+     * Resolve a template by key.
      *
-     * @param key blueprint key
-     * @return blueprint
+     * @param key template key
+     * @return template
      */
     NodeTemplate resolve(String key);
 
     /**
-     * Register a blueprint under the given key.
+     * Register a template under the given key.
      *
-     * @param key       blueprint key
-     * @param blueprint blueprint
+     * @param key       template key
+     * @param template template
      */
-    void register(String key, NodeTemplate blueprint);
+    void register(String key, NodeTemplate template);
 
     final class Implementation implements TemplateRegistry {
 
@@ -41,18 +41,18 @@ public interface TemplateRegistry {
         @Override
         public NodeTemplate resolve(String key) {
             Verify.nonNull(key, "key");
-            NodeTemplate blueprint = storage.get(key);
-            if (blueprint == null) {
-                throw new IllegalStateException("No blueprint registered for key: " + key);
+            NodeTemplate template = storage.get(key);
+            if (template == null) {
+                throw new IllegalStateException("No template registered for key: " + key);
             }
-            return blueprint;
+            return template;
         }
 
         @Override
-        public void register(String key, NodeTemplate blueprint) {
+        public void register(String key, NodeTemplate template) {
             Verify.nonNull(key, "key");
-            Verify.nonNull(blueprint, "blueprint");
-            storage.put(key, blueprint);
+            Verify.nonNull(template, "template");
+            storage.put(key, template);
         }
     }
 
@@ -68,18 +68,18 @@ public interface TemplateRegistry {
         @Override
         public NodeTemplate resolve(String key) {
             Verify.nonNull(key, "key");
-            NodeTemplate blueprint = local.get(key);
-            if (blueprint != null) {
-                return blueprint;
+            NodeTemplate template = local.get(key);
+            if (template != null) {
+                return template;
             }
             return base.resolve(key);
         }
 
         @Override
-        public void register(String key, NodeTemplate blueprint) {
+        public void register(String key, NodeTemplate template) {
             Verify.nonNull(key, "key");
-            Verify.nonNull(blueprint, "blueprint");
-            local.put(key, blueprint);
+            Verify.nonNull(template, "template");
+            local.put(key, template);
         }
 
         public TemplateRegistry base() {

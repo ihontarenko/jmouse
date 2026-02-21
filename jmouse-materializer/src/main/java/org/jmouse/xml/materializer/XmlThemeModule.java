@@ -10,7 +10,7 @@ import java.util.List;
 public class XmlThemeModule implements ThemeModule<Node> {
 
     @Override
-    public void contributeBlueprints(TemplateRegistry templateRegistry) {
+    public void contributeTemplates(TemplateRegistry templateRegistry) {
 
     }
 
