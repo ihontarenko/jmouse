@@ -1,5 +1,6 @@
 package org.jmouse.core.access;
 
+import org.jmouse.core.access.descriptor.ClassTypeDescriptor;
 import org.jmouse.core.access.descriptor.structured.PropertyDescriptor;
 
 /**
@@ -56,9 +57,16 @@ public class DirectPropertyAccess<T> implements PropertyAccessor<T> {
      */
     @Override
     public Object readValue(T instance) {
-        Object value = null;
+        Object              value        = null;
+        ClassTypeDescriptor owner        = property.getOwner().getType();
+        Class<?>            instanceType = instance.getClass();
 
         if (isReadable()) {
+
+            if (!owner.is(instanceType)) {
+                throw new IllegalStateException("Instance is not root-type: %s, actual: %s".formatted(owner.getClassType(), instanceType));
+            }
+
             value = property.getGetter().get(instance);
         }
 

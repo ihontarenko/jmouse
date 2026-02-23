@@ -9,14 +9,53 @@ import static org.jmouse.meterializer.TemplatePredicate.*;
 import static org.jmouse.meterializer.ValueExpression.*;
 
 /**
- * Bootstrap-styled presets.
+ * Bootstrap-styled template presets built on top of {@link NodeTemplate}. 🎨
  *
- * <p>Uses HTML5Preset primitives but adds Bootstrap class names and wrappers.</p>
+ * <p>
+ * This class provides small, composable building blocks for creating form controls and buttons
+ * with Bootstrap-compatible class names and common markup structure.
+ * </p>
+ *
+ * <p>
+ * The templates produced here are still <b>declarative</b> (intermediate representation).
+ * Actual DOM creation happens later during materialization.
+ * </p>
+ *
+ * <h3>Typical usage</h3>
+ *
+ * <pre>{@code
+ * NodeTemplate form = NodeTemplate.element("form", f -> f
+ *     .child(BootstrapTemplates.inputEmail("name", "label", "value"))
+ *     .child(BootstrapTemplates.submitButton("Send"))
+ * );
+ * }</pre>
+ *
+ * <h3>Integration note</h3>
+ * <p>
+ * For submission re-population and error decoration you typically combine these presets with
+ * hooks like {@code SubmissionDecorationHook} and option-selection helpers. 🧩
+ * </p>
  */
 public final class BootstrapTemplates {
 
     private BootstrapTemplates() {}
 
+    /**
+     * Creates a Bootstrap-styled {@code <button>} wrapped with a margin container.
+     *
+     * <p>
+     * Caption resolution priority:
+     * </p>
+     * <ol>
+     *     <li>{@code request("submitCaption")} if present</li>
+     *     <li>{@code path("description")} if present → "Submit: {description}"</li>
+     *     <li>{@code defaultCaption}</li>
+     * </ol>
+     *
+     * @param type button type attribute (e.g. {@code "submit"} or {@code "button"})
+     * @param defaultCaption fallback caption text
+     * @return button template
+     */
     public static NodeTemplate button(String type, String defaultCaption) {
         return element("div", block -> block
                 .attribute("class", constant("mt-3"))
@@ -37,14 +76,41 @@ public final class BootstrapTemplates {
         );
     }
 
+    /**
+     * Shortcut for {@code type="submit"} button.
+     *
+     * @param caption default caption
+     * @return submit button template
+     */
     public static NodeTemplate submitButton(String caption) {
         return button("submit", caption);
     }
 
+    /**
+     * Shortcut for {@code type="button"} button.
+     *
+     * @param caption default caption
+     * @return input/button template
+     */
     public static NodeTemplate inputButton(String caption) {
         return button("button", caption);
     }
 
+    /**
+     * Creates a Bootstrap input group ({@code label + input}) inside {@code mb-3} wrapper.
+     *
+     * <p>
+     * The {@code namePath} is used both for {@code name}, {@code id}, and {@code for}.
+     * If {@code valuePath} is non-empty, the input's {@code value} is taken from request attributes
+     * via {@code request(valuePath)}.
+     * </p>
+     *
+     * @param type input type
+     * @param namePath path to control name/id
+     * @param labelPath path to label text
+     * @param valuePath request-attribute key for value (optional; empty disables)
+     * @return input template
+     */
     public static NodeTemplate input(InputType type, String namePath, String labelPath, String valuePath) {
         return element("div", group -> group
                 .attribute("class", constant("mb-3"))
@@ -57,7 +123,7 @@ public final class BootstrapTemplates {
                     input.attribute("type", constant(type.htmlValue()));
                     input.attribute("name", path(namePath));
                     input.attribute("id", path(namePath));
-                    input.attribute("class", constant("form-control preset-class"));
+                    input.attribute("class", constant("form-control"));
 
                     if (Strings.isNotEmpty(valuePath)) {
                         input.attribute("value", request(valuePath));
@@ -66,22 +132,49 @@ public final class BootstrapTemplates {
         );
     }
 
+    /**
+     * Convenience for {@link InputType#TEXT}.
+     */
     public static NodeTemplate inputText(String namePath, String labelPath, String valuePath) {
         return input(InputType.TEXT, namePath, labelPath, valuePath);
     }
 
+    /**
+     * Convenience for {@link InputType#NUMBER}.
+     */
     public static NodeTemplate inputNumber(String namePath, String labelPath, String valuePath) {
         return input(InputType.NUMBER, namePath, labelPath, valuePath);
     }
 
+    /**
+     * Convenience for {@link InputType#EMAIL}.
+     */
     public static NodeTemplate inputEmail(String namePath, String labelPath, String valuePath) {
         return input(InputType.EMAIL, namePath, labelPath, valuePath);
     }
 
+    /**
+     * Convenience for {@link InputType#PASSWORD}.
+     */
     public static NodeTemplate inputPassword(String namePath, String labelPath, String valuePath) {
         return input(InputType.PASSWORD, namePath, labelPath, valuePath);
     }
 
+    /**
+     * Creates a Bootstrap {@code <select>} control with repeated {@code <option>} children.
+     *
+     * <p>
+     * The options are expected at {@code optionsPath} and iterated via {@link NodeTemplate#repeat}.
+     * Within the repeat body, the current item is bound to variable {@code "option"}.
+     * </p>
+     *
+     * @param namePath path to control name/id
+     * @param labelPath path to label text
+     * @param optionsPath path to options collection
+     * @param keyPath path to option key (used for {@code value} attribute)
+     * @param valuePath path to option label/value text
+     * @return select template
+     */
     public static NodeTemplate select(
             String namePath,
             String labelPath,
@@ -115,6 +208,14 @@ public final class BootstrapTemplates {
         );
     }
 
+    /**
+     * Creates a single Bootstrap checkbox ({@code input + label}) inside {@code form-check}.
+     *
+     * @param namePath path to control name/id
+     * @param labelPath path to label text
+     * @param valuePath path to checkbox value (optional; empty disables)
+     * @return checkbox template
+     */
     public static NodeTemplate checkboxSingle(String namePath, String labelPath, String valuePath) {
         return element("div", group -> group
                 .attribute("class", constant("mb-3"))
@@ -138,6 +239,16 @@ public final class BootstrapTemplates {
         );
     }
 
+    /**
+     * Creates a radio group as repeated {@code form-check} rows.
+     *
+     * @param namePath path to control name
+     * @param labelPath path to group label text
+     * @param optionsPath path to options collection
+     * @param keyPath path to option key (used as input value)
+     * @param valuePath path to option label text
+     * @return radio group template
+     */
     public static NodeTemplate radioGroup(
             String namePath,
             String labelPath,
@@ -171,6 +282,21 @@ public final class BootstrapTemplates {
         );
     }
 
+    /**
+     * Creates a checkbox group as repeated {@code form-check} rows.
+     *
+     * <p>
+     * The current implementation chooses between {@code checked=true/false} inputs
+     * using a predicate (see {@link #checkboxInput(String, String, boolean)}).
+     * </p>
+     *
+     * @param namePath path to control name
+     * @param labelPath path to group label text
+     * @param optionsPath path to options collection
+     * @param keyPath path to option key (used as input value)
+     * @param valuePath path to option label text
+     * @return checkbox group template
+     */
     public static NodeTemplate checkbox(
             String namePath,
             String labelPath,
@@ -203,6 +329,18 @@ public final class BootstrapTemplates {
         );
     }
 
+    /**
+     * Builds a checkbox input template and optionally marks it as checked.
+     *
+     * <p>
+     * This is an internal helper used by checkbox group templates.
+     * </p>
+     *
+     * @param namePath path to input name
+     * @param keyPath path to input value
+     * @param checked whether to add {@code checked="checked"}
+     * @return checkbox input template
+     */
     private static NodeTemplate checkboxInput(String namePath, String keyPath, boolean checked) {
         return element("input", input -> {
             input.attribute("type", constant("checkbox"));

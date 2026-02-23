@@ -18,8 +18,9 @@ public final class BootstrapThemeModule implements ThemeModule<Node> {
 
     @Override
     public List<OrderedTransformer> transformers() {
-        TemplateTransformer transformer = BootstrapTransformers.create();
-        return List.of(new OrderedTransformer(100, transformer));
+        return List.of(
+                new OrderedTransformer(100, BootstrapTransformers.create())
+        );
     }
 
     @Override

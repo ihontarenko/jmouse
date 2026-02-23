@@ -1,12 +1,15 @@
 package org.jmouse.dom.meterializer.smoke;
 
 import org.jmouse.core.access.ObjectAccessorWrapper;
+import org.jmouse.dom.CorrectNodeDepth;
 import org.jmouse.dom.Node;
-import org.jmouse.dom.NodeContext;
 import org.jmouse.dom.meterializer.DOMMaterializer;
 import org.jmouse.dom.meterializer.DOMRenderingPipeline;
 import org.jmouse.dom.meterializer.BootstrapTemplates;
 import org.jmouse.dom.meterializer.BootstrapThemeModule;
+import org.jmouse.dom.renderer.RendererContext;
+import org.jmouse.dom.renderer.Renderers;
+import org.jmouse.dom.renderer.RenderingProcessor;
 import org.jmouse.meterializer.*;
 
 import java.util.Map;
@@ -30,9 +33,12 @@ public final class Smoke4 {
 
         Node node = pipeline.render("smoke4/form", model, r -> r.putAttribute("submitCaption2", "Submit Request!"));
 
-        node.execute(NodeContext.CORRECT_NODE_DEPTH);
+        node.execute(new CorrectNodeDepth());
 
-        System.out.println(node.interpret(NodeContext.defaults()));
+        RenderingProcessor engine = new RenderingProcessor(Renderers.html());
+        String             out    = engine.render(node, RendererContext.defaultsHtmlPretty());
+
+        System.out.println(out);
     }
 
     private static void registerTemplates(TemplateRegistry registry) {

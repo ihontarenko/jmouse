@@ -230,10 +230,10 @@ public final class Change {
         String normalizedToken = normalize(classNames, String::trim);;
 
         if (normalizedToken.isEmpty()) {
-            return readExistingClassAsString(existing);
+            return readExistingClass(existing);
         }
 
-        String existingClasses = readExistingClassAsString(existing);
+        String existingClasses = readExistingClass(existing);
 
         if (existingClasses.isEmpty()) {
             return normalizedToken;
@@ -248,7 +248,7 @@ public final class Change {
         return existingClasses + " " + normalizedToken;
     }
 
-    private static String readExistingClassAsString(ValueExpression existing) {
+    private static String readExistingClass(ValueExpression existing) {
         if (existing == null) {
             return "";
         }

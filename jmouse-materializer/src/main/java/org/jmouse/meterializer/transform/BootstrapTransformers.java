@@ -22,7 +22,7 @@ public final class BootstrapTransformers {
                 .rule(100, tagName("form"), addClass("dynamic-form"))
 
                 .rule(50, tagName("select"),
-                      wrapWith("div", addClass("mb-3 extended-select")))
+                      wrapWith("div", addClass("mb-3 extended-select xx-1")))
 
                 .rule(
                         100,
