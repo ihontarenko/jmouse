@@ -11,6 +11,8 @@ import java.io.StringWriter;
 
 public final class XmlPrinter {
 
+    public static final String XSLT_INDENT_AMOUNT = "{http://xml.apache.org/xslt}indent-amount";
+
     private XmlPrinter() {
     }
 
@@ -34,12 +36,13 @@ public final class XmlPrinter {
             StringWriter       writer  = new StringWriter();
 
             Transformer transformer = factory.newTransformer();
+
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+            transformer.setOutputProperty(XSLT_INDENT_AMOUNT, "2");
             transformer.transform(new DOMSource(node), new StreamResult(writer));
 
             return writer.toString();

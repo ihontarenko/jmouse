@@ -8,8 +8,13 @@ public final class Templates {
     private Templates() {}
 
     public static NodeTemplate defaultForm() {
+        return defaultForm("POST", "");
+    }
+
+    public static NodeTemplate defaultForm(String action, String method) {
         return element("form", form -> form
-                .attribute("method", constant("POST"))
+                .attribute("method", constant(method.toUpperCase()))
+                .attribute("action", constant(action))
                 .attribute("class", constant("p-3"))
 
                 .child(element("h3", h -> h.child(text(path("description")))))
