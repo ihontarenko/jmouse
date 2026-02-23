@@ -1,9 +1,11 @@
 package org.jmouse.dom.meterializer;
 
 import org.jmouse.dom.Node;
+import org.jmouse.dom.NodeType;
 import org.jmouse.dom.TagName;
 import org.jmouse.dom.node.ElementNode;
 import org.jmouse.dom.node.TextNode;
+import org.jmouse.dom.node.WrapperNode;
 import org.jmouse.meterializer.*;
 
 import java.util.List;
@@ -114,7 +116,8 @@ public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
      */
     @Override
     protected Node createContainerNode() {
-        return new ElementNode(TagName.DIV);
+        return new WrapperNode();
+//        return new ElementNode(TagName.DIV);
     }
 
     /**
@@ -193,10 +196,16 @@ public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
 
         ElementNode contentNode = (ElementNode) outcome.node();
 
-        for (NodeTemplate child : element.children()) {
-            Node childNode = materializeInternal(child, execution);
+        for (NodeTemplate childTemplate : element.children()) {
+            Node childNode = materializeInternal(childTemplate, execution);
             if (childNode != null) {
-                contentNode.append(childNode);
+                if (childNode instanceof WrapperNode wrapper) {
+                    for (Node inner : wrapper.getChildren()) {
+                        contentNode.append(inner);
+                    }
+                } else {
+                    contentNode.append(childNode);
+                }
             }
         }
 

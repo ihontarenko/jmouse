@@ -37,12 +37,6 @@ public final class Templates {
                         constant("default/button/submit"),
                         root()
                 ))
-
-                .child(element("script", s -> s
-                        .attribute("src", constant("https://code.jquery.com/jquery-4.0.0.js"))
-                        .attribute("integrity", constant("sha256-9fsHeVnKBvqh3FB2HYu7g2xseAZ5MlN6Kz/qnkASV8U="))
-                        .attribute("crossorigin", constant("anonymous"))
-                ))
         );
     }
 

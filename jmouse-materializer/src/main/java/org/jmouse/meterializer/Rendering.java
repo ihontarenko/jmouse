@@ -49,12 +49,12 @@ public interface Rendering<T> {
     /**
      * Renders a template with request customization.
      *
-     * @param templateKey       logical template identifier
+     * @param templateReference       logical template identifier
      * @param data              data model object
      * @param requestCustomizer customization callback applied before rendering
      * @return rendered result
      */
-    T render(String templateKey, Object data, UnaryOperator<RenderingRequest> requestCustomizer);
+    T render(String templateReference, Object data, UnaryOperator<RenderingRequest> requestCustomizer);
 
     /**
      * Renders a template using a {@link ModelReference}.

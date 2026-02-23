@@ -31,27 +31,23 @@ public final class DemoModels {
 
         // ---- dynamic blocks ----
 
-        List<ModelReference> fields = List.of(
+        List<Map<String, Object>> fields = List.of(
 
-                ModelReference.of(
-                        "field/text",
-                        Map.of(
-                                "name", "element_name",
-                                "label", "Name Of Component:",
-                                "value", "R12"
-                        )
+                Map.of(
+                        "elementType", "text",
+                        "name", "element_name",
+                        "label", "Name Of Component:",
+                        "value", "R12"
                 ),
 
-                ModelReference.of(
-                        "field/select",
-                        Map.of(
-                                "name", "vendor",
-                                "label", "Vendor:",
-                                "selected", "ti",
-                                "options", List.of(
-                                        Map.of("key", "vishay", "label", "Vishay"),
-                                        Map.of("key", "ti", "label", "Texas Instruments")
-                                )
+                Map.of(
+                        "elementType", "select",
+                        "name", "vendor",
+                        "label", "Vendor:",
+                        "selected", "ti",
+                        "options", List.of(
+                                Map.of("key", "vishay", "label", "Vishay"),
+                                Map.of("key", "ti", "label", "Texas Instruments")
                         )
                 )
         );

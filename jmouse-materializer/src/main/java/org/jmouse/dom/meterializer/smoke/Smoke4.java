@@ -44,10 +44,10 @@ public final class Smoke4 {
     private static void registerTemplates(TemplateRegistry registry) {
         registry.register("smoke4/form", Templates.defaultForm());
 
-        registry.register("field/text",
+        registry.register("field.type.text",
                           BootstrapTemplates.inputText("name", "label", "value"));
 
-        registry.register("field/select",
+        registry.register("field.type.select",
                           BootstrapTemplates.select(
                                   "name",
                                   "label",
@@ -56,7 +56,7 @@ public final class Smoke4 {
                                   "option.label"
                           ));
 
-        registry.register("uni/button/submit",
+        registry.register("default/button/submit",
                           BootstrapTemplates.submitButton("SUBMIT!!!"));
     }
 

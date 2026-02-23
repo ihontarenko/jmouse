@@ -1,6 +1,7 @@
 package org.jmouse.meterializer;
 
 import org.jmouse.core.Verify;
+import org.jmouse.core.access.AccessorWrapper;
 import org.jmouse.core.access.ObjectAccessor;
 
 import java.util.List;
@@ -254,11 +255,12 @@ public abstract class AbstractTemplateMaterializer<R> implements TemplateMateria
 
         String key = String.valueOf(keyValue);
 
-        Object         modelValue = valueResolver.resolve(include.model(), execution);
-        ObjectAccessor accessor   = execution.accessorWrapper().wrapIfNecessary(modelValue);
+        AccessorWrapper wrapper    = execution.accessorWrapper();
+        Object          modelValue = valueResolver.resolve(include.model(), execution);
+        ObjectAccessor  accessor   = wrapper.wrapIfNecessary(modelValue);
 
         RenderingExecution nested = new RenderingExecution(
-                execution.accessorWrapper(),
+                wrapper,
                 accessor,
                 execution.request(),
                 execution.valueNavigator(),

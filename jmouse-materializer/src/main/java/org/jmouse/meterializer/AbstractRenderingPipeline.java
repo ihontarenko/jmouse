@@ -101,13 +101,13 @@ abstract public class AbstractRenderingPipeline<T, R extends AbstractRenderingPi
      * Exceptions thrown from failure hooks are ignored.
      * </p>
      *
-     * @param templateKey template identifier
+     * @param templateReference template identifier
      * @param data model/root object (may be {@code null} depending on {@link AccessorWrapper})
      * @param requestCustomizer request customization callback
      * @return materialized result
      */
-    public T render(String templateKey, Object data, UnaryOperator<RenderingRequest> requestCustomizer) {
-        nonNull(templateKey, "templateReference");
+    public T render(String templateReference, Object data, UnaryOperator<RenderingRequest> requestCustomizer) {
+        nonNull(templateReference, "templateReference");
         nonNull(requestCustomizer, "requestCustomizer");
 
         RenderingRequest request      = requestCustomizer.apply(new RenderingRequest());
@@ -121,11 +121,11 @@ abstract public class AbstractRenderingPipeline<T, R extends AbstractRenderingPi
         );
 
         try {
-            hookChain.beforeTemplateResolve(templateKey, data, request, execution);
+            hookChain.beforeTemplateResolve(templateReference, data, request, execution);
 
-            NodeTemplate template = resolver.resolve(templateKey, execution);
+            NodeTemplate template = resolver.resolve(templateReference, execution);
 
-            hookChain.afterTemplateResolve(templateKey, template, execution);
+            hookChain.afterTemplateResolve(templateReference, template, execution);
             hookChain.beforeMaterialize(template, execution);
 
             T node = materializer.materialize(template, execution);

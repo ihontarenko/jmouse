@@ -68,8 +68,7 @@ public final class BootstrapTemplates {
                                 f -> f.add(when(
                                         present(path("description")),
                                         t -> t.add(text(constant("Submit: "))).add(text(path("description"))),
-                                        k -> k.add(text(constant(defaultCaption))),
-                                        "div"
+                                        k -> k.add(text(constant(defaultCaption)))
                                 ))
                         ))
                 ))
