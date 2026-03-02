@@ -1,7 +1,7 @@
 package org.jmouse.validator.constraint;
 
 import org.jmouse.validator.Validator;
-import org.jmouse.validator.ValidationHints;
+import org.jmouse.validator.Hints;
 import org.jmouse.validator.constraint.adapter.core.ConstraintSchemaValidator;
 import org.jmouse.validator.constraint.handler.ConstraintHandler;
 import org.jmouse.validator.constraint.handler.SchemaSelector;
@@ -20,7 +20,7 @@ public final class ConstraintValidationSupport {
     public static Validator validator(
             ConstraintSchemaRegistry schemaRegistry,
             SchemaSelector selector,
-            Supplier<ValidationHints> hintsSupplier
+            Supplier<Hints> hintsSupplier
     ) {
         ConstraintProcessor processor = new ConstraintProcessor();
         ConstraintHandler   handler   = new ConstraintHandler(processor);
@@ -37,7 +37,7 @@ public final class ConstraintValidationSupport {
             ConstraintSchemaRegistry schemaRegistry,
             ConstraintHandler handler,
             SchemaSelector selector,
-            Supplier<ValidationHints> hintsSupplier
+            Supplier<Hints> hintsSupplier
     ) {
         return new ConstraintSchemaValidator(
                 schemaRegistry,

@@ -20,7 +20,7 @@ public final class ParametersDataBinder {
         this.scope = scope;
     }
 
-    public <T> BindingResult<T> bind(Object source, Class<T> targetType, String objectName, ValidationHints hints) {
+    public <T> BindingResult<T> bind(Object source, Class<T> targetType, String objectName, Hints hints) {
         Errors         errors  = errorsFactory.create(null, objectName);
         BindingContext context = new BindingContext(errors, objectName, hints);
         T              target;
@@ -33,6 +33,6 @@ public final class ParametersDataBinder {
     }
 
     public <T> BindingResult<T> bind(Object source, Class<T> targetType, String objectName) {
-        return bind(source, targetType, objectName, ValidationHints.empty());
+        return bind(source, targetType, objectName, Hints.empty());
     }
 }

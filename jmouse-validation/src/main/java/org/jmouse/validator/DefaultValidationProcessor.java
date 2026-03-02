@@ -16,11 +16,11 @@ public final class DefaultValidationProcessor implements ValidationProcessor {
 
     @Override
     public <T> ValidationResult<T> validate(T target, String objectName) {
-        return validate(target, objectName, ValidationHints.empty());
+        return validate(target, objectName, Hints.empty());
     }
 
     @Override
-    public <T> ValidationResult<T> validate(T target, String objectName, ValidationHints hints) {
+    public <T> ValidationResult<T> validate(T target, String objectName, Hints hints) {
         Errors errors = errorsFactory.create(target, objectName);
 
         doValidate(target, errors, hints);
@@ -32,7 +32,7 @@ public final class DefaultValidationProcessor implements ValidationProcessor {
         return new DefaultValidationResult<>(objectName, target, errors);
     }
 
-    private void doValidate(Object target, Errors errors, ValidationHints hints) {
+    private void doValidate(Object target, Errors errors, Hints hints) {
         if (target == null) {
             return;
         }

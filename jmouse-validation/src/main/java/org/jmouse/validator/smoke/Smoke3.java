@@ -59,10 +59,10 @@ public final class Smoke3 {
         };
 
         // -------- run #1: PROGRAMMATIC
-        runOnce("PROGRAMMATIC", form, schemaRegistry, constraintHandler, selector, ValidationHints.of(SchemaHint.PROGRAMMATIC));
+        runOnce("PROGRAMMATIC", form, schemaRegistry, constraintHandler, selector, Hints.of(SchemaHint.PROGRAMMATIC));
 
         // -------- run #2: EXPRESSION
-        runOnce("EXPRESSION", form, schemaRegistry, constraintHandler, selector, ValidationHints.of(SchemaHint.EXPRESSION));
+        runOnce("EXPRESSION", form, schemaRegistry, constraintHandler, selector, Hints.of(SchemaHint.EXPRESSION));
     }
 
     private static void runOnce(
@@ -71,7 +71,7 @@ public final class Smoke3 {
             InMemoryConstraintSchemaRegistry schemaRegistry,
             ConstraintHandler handler,
             SchemaSelector selector,
-            ValidationHints hints
+            Hints hints
     ) {
         // Important: ConstraintSchemaValidator needs hintsSupplier because Validator#validate(...) doesn't have hints.
         ConstraintSchemaValidator.ValidationHintsSupplier hintsSupplier = () -> hints;

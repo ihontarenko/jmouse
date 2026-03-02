@@ -31,7 +31,7 @@ public class Smoke1 {
                 .validationPolicy(ValidationPolicy.COLLECT_ALL)
                 .build();
 
-        ValidationResult<User> result = processor.validate(user, "user", ValidationHints.of("create"));
+        ValidationResult<User> result = processor.validate(user, "user", Hints.of("create"));
 
     }
 

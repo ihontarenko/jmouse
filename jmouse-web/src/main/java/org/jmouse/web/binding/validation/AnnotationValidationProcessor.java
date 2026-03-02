@@ -2,7 +2,7 @@ package org.jmouse.web.binding.validation;
 
 import org.jmouse.core.access.PropertyPath;
 import org.jmouse.core.mapping.MappingDestination;
-import org.jmouse.validator.ValidationHints;
+import org.jmouse.validator.Hints;
 import org.jmouse.web.binding.*;
 import org.jmouse.validator.ValidationProcessor;
 import org.jmouse.validator.ValidationResult;
@@ -37,9 +37,8 @@ public final class AnnotationValidationProcessor implements BindingProcessor {
             return null;
         }
 
-        ValidationHints     validationHints = hintsResolver.resolve(validate.groups());
-        ValidationResult<?> result          = validationProcessor.validate(
-                current, session.objectName(), validationHints);
+        Hints               hints  = hintsResolver.resolve(validate.groups());
+        ValidationResult<?> result = validationProcessor.validate(current, session.objectName(), hints);
 
         ErrorsMerging.merge(session.errors(), result.errors());
 
@@ -60,9 +59,9 @@ public final class AnnotationValidationProcessor implements BindingProcessor {
             return;
         }
 
-        ValidationHints     validationHints = hintsResolver.resolve(validate.groups());
+        Hints hints = hintsResolver.resolve(validate.groups());
         ValidationResult<?> result          = validationProcessor.validate(
-                target, session.objectName(), validationHints);
+                target, session.objectName(), hints);
 
         ErrorsMerging.merge(session.errors(), result.errors());
     }

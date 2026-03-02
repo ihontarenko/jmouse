@@ -70,7 +70,7 @@ public class Smoke {
                 input,
                 UserForm.class,
                 "userForm",
-                ValidationHints.empty()
+                Hints.empty()
         );
 
         System.out.println("Target: " + result.target());

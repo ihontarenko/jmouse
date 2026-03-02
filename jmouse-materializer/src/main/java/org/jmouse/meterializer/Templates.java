@@ -42,6 +42,8 @@ public final class Templates {
                         constant("default/button/submit"),
                         root()
                 ))
+
+                .child(element("hr", __ -> {}))
         );
     }
 

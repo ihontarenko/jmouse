@@ -1,13 +1,13 @@
 package org.jmouse.web.binding.validation;
 
-import org.jmouse.validator.ValidationHints;
+import org.jmouse.validator.Hints;
 
 public interface ValidationHintsResolver {
 
-    ValidationHints resolve(Class<?>[] groups);
+    Hints resolve(Class<?>[] groups);
 
     static ValidationHintsResolver defaults() {
         return groups -> groups == null || groups.length == 0
-                ? ValidationHints.empty() : ValidationHints.of(groups);
+                ? Hints.empty() : Hints.of(groups);
     }
 }

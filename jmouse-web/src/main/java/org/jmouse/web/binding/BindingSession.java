@@ -1,7 +1,7 @@
 package org.jmouse.web.binding;
 
 import org.jmouse.validator.Errors;
-import org.jmouse.validator.ValidationHints;
+import org.jmouse.validator.Hints;
 
 public final class BindingSession {
 
@@ -23,7 +23,7 @@ public final class BindingSession {
         return objectName;
     }
 
-    public ValidationHints hints() {
-        return hints == null ? ValidationHints.empty() : hints.get();
+    public Hints hints() {
+        return hints == null ? Hints.empty() : hints.get();
     }
 }

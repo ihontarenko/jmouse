@@ -23,9 +23,9 @@ import static org.jmouse.web.http.HttpStatus.OK;
 
 public final class DefaultLoginPageGeneratingFilter implements BeanFilter, HeaderWriter {
 
-    private final String         action;
-    private final View           view;
-    private final String         usernameParameter;
+    private final String          action;
+    private final View            view;
+    private final String          usernameParameter;
     private final String          passwordParameter;
     private final MatcherCriteria matcherCriteria;
 

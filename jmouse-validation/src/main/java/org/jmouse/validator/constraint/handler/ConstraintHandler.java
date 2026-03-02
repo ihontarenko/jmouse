@@ -11,10 +11,10 @@ import org.jmouse.validator.constraint.processor.ConstraintProcessor;
 
 public final class ConstraintHandler {
 
-    private final ConstraintProcessor     processor;
-    private final AccessorWrapper         wrapper;
-    private final ValueNavigator          navigator;
-    private final ConstraintMessagePolicy messagePolicy;
+    private final ConstraintProcessor       processor;
+    private final AccessorWrapper           wrapper;
+    private final ValueNavigator            navigator;
+    private final ConstraintMessageProvider messageProvider;
 
     public ConstraintHandler(ConstraintProcessor processor) {
         this(
@@ -29,12 +29,12 @@ public final class ConstraintHandler {
             ConstraintProcessor processor,
             AccessorWrapper wrapper,
             ValueNavigator navigator,
-            ConstraintMessagePolicy messagePolicy
+            ConstraintMessageProvider messageProvider
     ) {
         this.processor = processor;
         this.wrapper = wrapper;
         this.navigator = navigator;
-        this.messagePolicy = messagePolicy;
+        this.messageProvider = messageProvider;
     }
 
     public void validate(Object target, ConstraintSchema schema, Errors errors) {
@@ -54,12 +54,8 @@ public final class ConstraintHandler {
                     continue;
                 }
 
-                String code = constraint.code();
-
-                String message =
-                        (rule.messageOverride() != null && !rule.messageOverride().isBlank())
-                                ? rule.messageOverride()
-                                : messagePolicy.message(constraint);
+                String code    = constraint.code();
+                String message = messageProvider.provideMessage(constraint, rule.messageOverride());
 
                 errors.rejectValue(field.path(), code, message);
             }
