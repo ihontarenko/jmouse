@@ -7,7 +7,8 @@ public sealed interface NodeDirective
                 NodeDirective.RemoveAttributeIf,
                 NodeDirective.AddClassIf,
                 NodeDirective.WrapIf,
-                NodeDirective.OmitIf {
+                NodeDirective.OmitIf,
+                NodeDirective.ApplyAttributes {
 
     record SetAttributeIf(TemplatePredicate predicate, String name, ValueExpression value)
             implements NodeDirective {
@@ -26,6 +27,10 @@ public sealed interface NodeDirective
     }
 
     record OmitIf(TemplatePredicate predicate)
+            implements NodeDirective {
+    }
+
+    record ApplyAttributes(ValueExpression source, String keyValue, String valueKey)
             implements NodeDirective {
     }
 

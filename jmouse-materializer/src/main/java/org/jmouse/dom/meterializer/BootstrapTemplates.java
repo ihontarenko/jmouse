@@ -115,7 +115,7 @@ public final class BootstrapTemplates {
                 .attribute("class", constant("mb-3"))
                 .child(element("label", label -> label
                         .attribute("for", path(namePath))
-                        .attribute("class", constant("form-label"))
+                        .attribute("class", constant("form-label " + labelPath))
                         .child(text(path(labelPath)))
                 ))
                 .child(element("input", input -> {

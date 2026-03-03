@@ -1,6 +1,6 @@
 package org.jmouse.meterializer;
 
-import org.jmouse.meterializer.build.ElementBlueprintBuilder;
+import org.jmouse.meterializer.build.ElementTemplateBuilder;
 import org.jmouse.meterializer.build.TemplateNodeCollectionBuilder;
 
 import java.util.List;
@@ -110,14 +110,14 @@ public sealed interface NodeTemplate
     }
 
     /**
-     * Creates an {@link Element} node using {@link ElementBlueprintBuilder}.
+     * Creates an {@link Element} node using {@link ElementTemplateBuilder}.
      *
      * @param qName element name
      * @param consumer builder customization callback
      * @return element node
      */
-    static NodeTemplate.Element element(QName qName, Consumer<ElementBlueprintBuilder> consumer) {
-        ElementBlueprintBuilder builder = new ElementBlueprintBuilder(qName);
+    static NodeTemplate.Element element(QName qName, Consumer<ElementTemplateBuilder> consumer) {
+        ElementTemplateBuilder builder = new ElementTemplateBuilder(qName);
         consumer.accept(builder);
         return builder.build();
     }
@@ -129,7 +129,7 @@ public sealed interface NodeTemplate
      * @param consumer builder customization callback
      * @return element node
      */
-    static NodeTemplate.Element element(String tagName, Consumer<ElementBlueprintBuilder> consumer) {
+    static NodeTemplate.Element element(String tagName, Consumer<ElementTemplateBuilder> consumer) {
         return element(QName.local(tagName), consumer);
     }
     /**

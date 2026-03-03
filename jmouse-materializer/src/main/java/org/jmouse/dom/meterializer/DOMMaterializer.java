@@ -1,13 +1,15 @@
 package org.jmouse.dom.meterializer;
 
+import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.ValueNavigator;
 import org.jmouse.dom.Node;
-import org.jmouse.dom.NodeType;
 import org.jmouse.dom.TagName;
 import org.jmouse.dom.node.ElementNode;
 import org.jmouse.dom.node.TextNode;
 import org.jmouse.dom.node.WrapperNode;
 import org.jmouse.meterializer.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -240,13 +242,10 @@ public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
         }
 
         for (Map.Entry<String, ValueExpression> entry : attributes.entrySet()) {
-            String name = entry.getKey();
+            String          name       = entry.getKey();
             ValueExpression expression = entry.getValue();
 
-            if (name == null || name.isBlank()) {
-                continue;
-            }
-            if (expression == null) {
+            if (name == null || name.isBlank() || expression == null) {
                 continue;
             }
 
@@ -334,11 +333,58 @@ public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
                         root = wrapper;
                     }
                 }
+                case NodeDirective.ApplyAttributes applyAttributes ->
+                        applyAttributes(node, applyAttributes, execution);
                 case null -> { }
             }
         }
 
         return DirectiveOutcome.wrapped(node, root);
+    }
+
+    private void applyAttributes(
+            ElementNode node,
+            NodeDirective.ApplyAttributes directive,
+            RenderingExecution execution
+    ) {
+        Object resolved = valueResolver.resolve(directive.source(), execution);
+
+        if (resolved == null || (resolved instanceof ObjectAccessor accessor && accessor.length() == 0)) {
+            return;
+        }
+
+        ObjectAccessor               accessor   = execution.accessorWrapper().wrapIfNecessary(resolved);
+        Map<String, ValueExpression> attributes = new LinkedHashMap<>();
+
+        if (accessor.isMap()) {
+            for (Object key : accessor.keySet()) {
+                Object valueKey = accessor.get(key);
+                String keyValue = String.valueOf(key);
+
+                if (keyValue.isBlank()) {
+                    continue;
+                }
+
+                attributes.put(keyValue, ValueExpression.constant(valueKey));
+            }
+
+            applyAttributes(node, attributes, execution);
+            return;
+        }
+
+        if (accessor.isCollection() || accessor.isList()) {
+            ValueNavigator navigator = execution.valueNavigator();
+
+            for (Object key : accessor.keySet()) {
+                if (accessor.get(key) instanceof ObjectAccessor item && !item.isNull()) {
+                    Object keyValue = navigator.navigate(item, directive.keyValue());
+                    Object valueKey = navigator.navigate(item, directive.valueKey());
+                    attributes.put(String.valueOf(keyValue), ValueExpression.constant(valueKey));
+                }
+            }
+
+            applyAttributes(node, attributes, execution);
+        }
     }
 
     /**

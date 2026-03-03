@@ -71,7 +71,6 @@ public class RenderingRequest {
 
     public Optional<Object> findAttribute(String attributeName) {
         Verify.nonNull(attributeName, "attributeName");
-
         Object value = attributes.get(attributeName);
         return Optional.ofNullable(value);
     }
@@ -85,6 +84,7 @@ public class RenderingRequest {
         }
 
         Object value = found.get();
+
         if (expectedType.isInstance(value)) {
             return Optional.of(expectedType.cast(value));
         }
@@ -103,61 +103,6 @@ public class RenderingRequest {
         throw new IllegalStateException(
                 "Missing request attribute '" + attributeName + "' of type " + expectedType.getName());
     }
-
-    public String getStringAttribute(String attributeName) {
-        Optional<Object> found = findAttribute(attributeName);
-
-        if (found.isEmpty()) {
-            return null;
-        }
-
-        Object value = found.get();
-        return String.valueOf(value);
-    }
-
-    public Integer getIntegerAttribute(String attributeName) {
-        Optional<Object> found = findAttribute(attributeName);
-
-        if (found.isEmpty()) {
-            return null;
-        }
-
-        Object value = found.get();
-
-        if (value instanceof Integer integerValue) {
-            return integerValue;
-        }
-
-        if (value instanceof Number numberValue) {
-            return numberValue.intValue();
-        }
-
-        return Integer.valueOf(String.valueOf(value));
-    }
-
-    public boolean getBooleanAttribute(String attributeName) {
-        Optional<Object> found = findAttribute(attributeName);
-
-        if (found.isEmpty()) {
-            return false;
-        }
-
-        Object value = found.get();
-
-        if (value instanceof Boolean booleanValue) {
-            return booleanValue;
-        }
-
-        if (value instanceof Number numberValue) {
-            return numberValue.intValue() != 0;
-        }
-
-        return Boolean.parseBoolean(String.valueOf(value));
-    }
-
-    // ---------------------------------------------------------------------
-    // Overlay
-    // ---------------------------------------------------------------------
 
     /**
      * Returns a request that reads from this request first and falls back to the parent request.

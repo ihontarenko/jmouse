@@ -8,7 +8,7 @@ public final class Templates {
     private Templates() {}
 
     public static NodeTemplate defaultForm() {
-        return defaultForm("POST", "");
+        return defaultForm("", "POST");
     }
 
     public static NodeTemplate defaultForm(String action, String method) {
@@ -39,7 +39,7 @@ public final class Templates {
                 .child(element("hr", __ -> {}))
 
                 .child(include(
-                        constant("default/button/submit"),
+                        constant("default.button.submit"),
                         root()
                 ))
 
@@ -55,7 +55,6 @@ public final class Templates {
 
                 .child(element("p", p -> p.child(text(path("description")))))
 
-                // Universal: same contract as bootstrap
                 .child(repeat(
                         path("fields"),
                         "field",
@@ -67,9 +66,8 @@ public final class Templates {
                         )
                 ))
 
-                // Submit (same key so you can swap only the submit template per theme in registry)
                 .child(include(
-                        constant("default/button/submit"),
+                        constant("default.button.submit"),
                         path("")
                 ))
         );

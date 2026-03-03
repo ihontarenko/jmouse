@@ -15,15 +15,15 @@ public final class Match {
 
     public static ContextAwareMatcher tagName(String tagName) {
         nonNull(tagName, "qName");
-        return (blueprint, context) ->
-                blueprint instanceof NodeTemplate.Element element
+        return (t, context) ->
+                t instanceof NodeTemplate.Element element
                         && element.tagName().equalsIgnoreCase(tagName);
     }
 
     public static ContextAwareMatcher element(Predicate<NodeTemplate.Element> predicate) {
         nonNull(predicate, "predicate");
-        return (blueprint, context) ->
-                blueprint instanceof NodeTemplate.Element element
+        return (t, context) ->
+                t instanceof NodeTemplate.Element element
                         && predicate.test(element);
     }
 
@@ -41,12 +41,12 @@ public final class Match {
     // ---------- Context-aware helpers ----------
     public static ContextAwareMatcher insideAncestor(String ancestorTagName) {
         nonNull(ancestorTagName, "ancestorTagName");
-        return (blueprint, context) -> context != null && context.hasAncestor(ancestorTagName);
+        return (t, context) -> context != null && context.hasAncestor(ancestorTagName);
     }
 
     public static ContextAwareMatcher insideAncestor(Predicate<NodeTemplate.Element> predicate) {
         nonNull(predicate, "predicate");
-        return (blueprint, context) -> {
+        return (t, context) -> {
             if (context == null) {
                 return false;
             }
@@ -55,7 +55,7 @@ public final class Match {
     }
 
     public static ContextAwareMatcher parentTag(String parentTagName) {
-        return (blueprint, context) -> {
+        return (t, context) -> {
             if (context == null) {
                 return false;
             }
@@ -65,18 +65,18 @@ public final class Match {
     }
 
     public static ContextAwareMatcher and(ContextAwareMatcher left, ContextAwareMatcher right) {
-        return (blueprint, context) -> nonNull(left, "left").matches(blueprint, context)
-                && nonNull(right, "right").matches(blueprint, context);
+        return (t, context) -> nonNull(left, "left").matches(t, context)
+                && nonNull(right, "right").matches(t, context);
     }
 
     public static ContextAwareMatcher or(ContextAwareMatcher left, ContextAwareMatcher right) {
-        return (blueprint, context) -> nonNull(left, "left").matches(blueprint, context)
-                || nonNull(right, "right").matches(blueprint, context);
+        return (t, context) -> nonNull(left, "left").matches(t, context)
+                || nonNull(right, "right").matches(t, context);
     }
 
     public static ContextAwareMatcher not(ContextAwareMatcher matcher) {
         nonNull(matcher, "matcher");
-        return (blueprint, context) -> !matcher.matches(blueprint, context);
+        return (t, context) -> !matcher.matches(t, context);
     }
 
     public static boolean constantAttributeValues(Map<String, ValueExpression> attributes, String name, String expected) {

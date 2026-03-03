@@ -14,11 +14,11 @@ import static org.jmouse.core.Verify.nonNull;
 import static org.jmouse.util.Strings.normalize;
 
 /**
- * Factory for common blueprint changes.
+ * Factory for common template changes.
  *
  * <p>Design goals:</p>
  * <ul>
- *   <li>Immutable rewrites (new blueprint instances returned)</li>
+ *   <li>Immutable rewrites (new template instances returned)</li>
  *   <li>No regex for class token operations</li>
  *   <li>Readable control flow (no short-circuit one-liners)</li>
  * </ul>
@@ -33,21 +33,16 @@ public final class Change {
     public static TemplateChange renameTag(String newTagName) {
         nonNull(newTagName, "newTagName");
 
-        return (blueprint, execution) -> {
-            if (blueprint == null) {
-                return null;
-            }
-
-            if (blueprint instanceof NodeTemplate.Element elementBlueprint) {
+        return (template, execution) -> {
+            if (template instanceof NodeTemplate.Element element) {
                 return new NodeTemplate.Element(
                         QName.local(newTagName),
-                        elementBlueprint.attributes(),
-                        elementBlueprint.children(),
-                        elementBlueprint.directives()
+                        element.attributes(),
+                        element.children(),
+                        element.directives()
                 );
             }
-
-            return blueprint;
+            return template;
         };
     }
 
@@ -55,12 +50,12 @@ public final class Change {
         nonNull(attributeName, "attributeName");
         nonNull(attributeValue, "attributeValue");
 
-        return (blueprint, execution) -> {
-            if (blueprint == null) {
+        return (template, execution) -> {
+            if (template == null) {
                 return null;
             }
 
-            if (blueprint instanceof NodeTemplate.Element(
+            if (template instanceof NodeTemplate.Element(
                     QName qName,
                     Map<String, ValueExpression> attributes,
                     List<NodeTemplate> children,
@@ -78,7 +73,7 @@ public final class Change {
                 );
             }
 
-            return blueprint;
+            return template;
         };
     }
 
@@ -91,18 +86,18 @@ public final class Change {
     public static TemplateChange addClass(String className) {
         nonNull(className, "className");
 
-        return (blueprint, execution) -> {
-            if (blueprint == null) {
+        return (template, execution) -> {
+            if (template == null) {
                 return null;
             }
 
-            if (!(blueprint instanceof NodeTemplate.Element(
+            if (!(template instanceof NodeTemplate.Element(
                     QName qName,
                     Map<String, ValueExpression> attributes,
                     List<NodeTemplate> children,
                     List<NodeDirective> directives
             ))) {
-                return blueprint;
+                return template;
             }
 
             Map<String, ValueExpression> attributesCopy = new LinkedHashMap<>(attributes);
@@ -125,15 +120,15 @@ public final class Change {
         nonNull(tagName, "qName");
         nonNull(change, "change");
 
-        return (blueprint, execution) -> {
-            if (blueprint == null) {
+        return (template, execution) -> {
+            if (template == null) {
                 return null;
             }
 
             NodeTemplate.Element wrapper = new NodeTemplate.Element(
                     QName.local(tagName),
                     Map.of(),
-                    List.of(blueprint),
+                    List.of(template),
                     List.of()
             );
 
@@ -144,18 +139,18 @@ public final class Change {
     public static TemplateChange appendChild(NodeTemplate child) {
         nonNull(child, "child");
 
-        return (blueprint, execution) -> {
-            if (blueprint == null) {
+        return (template, execution) -> {
+            if (template == null) {
                 return null;
             }
 
-            if (!(blueprint instanceof NodeTemplate.Element(
+            if (!(template instanceof NodeTemplate.Element(
                     QName qName,
                     Map<String, ValueExpression> attributes,
                     List<NodeTemplate> children,
                     List<NodeDirective> directives
             ))) {
-                return blueprint;
+                return template;
             }
 
             List<NodeTemplate> copy = new ArrayList<>(children);
@@ -174,18 +169,18 @@ public final class Change {
     public static TemplateChange prependChild(NodeTemplate child) {
         nonNull(child, "child");
 
-        return (blueprint, execution) -> {
-            if (blueprint == null) {
+        return (template, execution) -> {
+            if (template == null) {
                 return null;
             }
 
-            if (!(blueprint instanceof NodeTemplate.Element(
+            if (!(template instanceof NodeTemplate.Element(
                     QName qName,
                     Map<String, ValueExpression> attributes,
                     List<NodeTemplate> children,
                     List<NodeDirective> directives
             ))) {
-                return blueprint;
+                return template;
             }
 
             List<NodeTemplate> copy = new ArrayList<>(children.size() + 1);
@@ -205,8 +200,8 @@ public final class Change {
     public static TemplateChange chain(TemplateChange... changes) {
         nonNull(changes, "changes");
 
-        return (blueprint, execution) -> {
-            NodeTemplate currentBlueprint = blueprint;
+        return (template, execution) -> {
+            NodeTemplate currentBlueprint = template;
 
             for (TemplateChange change : changes) {
                 if (currentBlueprint == null) {

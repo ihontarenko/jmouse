@@ -27,8 +27,8 @@ public final class ThemeAssembly<T, R extends Rendering<T>> {
         return new ThemeAssembly<>(themeModule);
     }
 
-    public ThemeAssembly<T, R> overrideBlueprint(String key, NodeTemplate blueprint) {
-        templateRegistry.register(key, blueprint);
+    public ThemeAssembly<T, R> overrideTemplate(String key, NodeTemplate template) {
+        templateRegistry.register(key, template);
         return this;
     }
 

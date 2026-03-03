@@ -203,7 +203,7 @@ public abstract class AbstractTemplateMaterializer<R> implements TemplateMateria
             return emptyNode();
         }
 
-        R container = createElementNode(repeat.tagName());
+        R container = isNotEmpty(repeat.tagName()) ? createElementNode(repeat.tagName()) : createContainerNode();
 
         Set<Object>                 keys      = collectionAccessor.keySet();
         Map<String, ObjectAccessor> variables = execution.variables();
