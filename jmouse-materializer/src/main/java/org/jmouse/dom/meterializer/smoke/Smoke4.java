@@ -56,7 +56,7 @@ public final class Smoke4 {
                                   "option.label"
                           ));
 
-        registry.register("default/button/submit",
+        registry.register("default.button.submit",
                           BootstrapTemplates.submitButton("SUBMIT!!!"));
     }
 

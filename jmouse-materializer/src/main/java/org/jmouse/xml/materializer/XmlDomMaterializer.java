@@ -66,16 +66,23 @@ public final class XmlDomMaterializer extends AbstractTemplateMaterializer<Node>
 
             applyAttributes(node, element.attributes(), execution);
 
+            DirectiveOutcome<Node> outcome = applyDirectives(node, element.directives(), execution);
+            if (outcome.isOmitted()) {
+                return null;
+            }
+
+            Node contentNode = outcome.node();
+
             if (element.children() != null) {
                 for (NodeTemplate child : element.children()) {
                     Node childNode = materializeInternal(child, execution);
                     if (childNode != null) {
-                        appendChild(node, childNode);
+                        appendChild(contentNode, childNode);
                     }
                 }
             }
 
-            return node;
+            return outcome.root();
         } finally {
             namespaces.pop();
         }
@@ -150,6 +157,67 @@ public final class XmlDomMaterializer extends AbstractTemplateMaterializer<Node>
     }
 
     private record ResolvedQName(String namespace, String prefix, String localName, String qualifiedName) {
+    }
+
+    @Override
+    protected void setAttribute(Node node, String name, String value) {
+        nonNull(node, "node");
+        nonNull(name, "name");
+
+        if (!(node instanceof Element element)) {
+            throw new IllegalStateException("Cannot set attribute on non-Element: " + node.getClass().getName());
+        }
+
+        element.setAttribute(name, value);
+    }
+
+    @Override
+    protected void removeAttribute(Node node, String name) {
+        nonNull(node, "node");
+        nonNull(name, "name");
+
+        if (!(node instanceof Element element)) {
+            throw new IllegalStateException("Cannot remove attribute on non-Element: " + node.getClass().getName());
+        }
+
+        element.removeAttribute(name);
+    }
+
+    @Override
+    protected void addClass(Node node, String classNames) {
+        nonNull(node, "node");
+        nonNull(classNames, "classNames");
+
+        if (!(node instanceof Element element)) {
+            throw new IllegalStateException("Cannot add class on non-Element: " + node.getClass().getName());
+        }
+
+        String current = element.getAttribute("class");
+        String normalizedCurrent = current == null ? "" : current.trim();
+
+        if (normalizedCurrent.isEmpty()) {
+            element.setAttribute("class", classNames.trim());
+            return;
+        }
+
+        // simple concat, без "contains token" (бо ти класами можеш передавати пачку)
+        element.setAttribute("class", normalizedCurrent + " " + classNames.trim());
+    }
+
+    @Override
+    protected Node wrapElement(Node node, String wrapperTagName) {
+        nonNull(node, "node");
+        nonNull(wrapperTagName, "wrapperTagName");
+
+        if (!(node instanceof Element element)) {
+            throw new IllegalStateException("Cannot wrap non-Element: " + node.getClass().getName());
+        }
+
+        Element wrapper = document.createElement(wrapperTagName);
+
+        wrapper.appendChild(element);
+
+        return wrapper;
     }
 
 }

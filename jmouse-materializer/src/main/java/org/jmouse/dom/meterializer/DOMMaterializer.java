@@ -1,75 +1,30 @@
 package org.jmouse.dom.meterializer;
 
-import org.jmouse.core.access.ObjectAccessor;
-import org.jmouse.core.access.ValueNavigator;
 import org.jmouse.dom.Node;
 import org.jmouse.dom.TagName;
 import org.jmouse.dom.node.ElementNode;
 import org.jmouse.dom.node.TextNode;
 import org.jmouse.dom.node.WrapperNode;
 import org.jmouse.meterializer.*;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import org.jmouse.util.Strings;
 
 import static org.jmouse.core.Verify.nonNull;
 
 /**
- * {@link TemplateMaterializer} implementation that produces jMouse DOM {@link Node}s. 🌳
+ * DOM-oriented {@link TemplateMaterializer} that turns {@link NodeTemplate}s into jMouse {@link Node}s.
  *
  * <p>
- * This materializer converts {@link NodeTemplate} blueprints into concrete DOM nodes:
- * {@link ElementNode} for elements and {@link TextNode} for text.
- * It inherits the traversal logic (conditional, repeat, include) from
- * {@link AbstractTemplateMaterializer} and provides DOM-specific node construction.
- * </p>
- *
- * <h3>What it does</h3>
- * <ul>
- *     <li>creates DOM elements/text nodes</li>
- *     <li>applies element attributes resolved via {@link ValueResolver}</li>
- *     <li>applies {@link NodeDirective}s (omit, wrap, attribute/class mutations)</li>
- *     <li>materializes children recursively</li>
- * </ul>
- *
- * <h3>Default configuration</h3>
- * <p>
- * The no-args constructor uses:
- * </p>
- * <ul>
- *     <li>{@link DefaultValueResolver}</li>
- *     <li>{@link PathValueResolver}</li>
- * </ul>
- *
- * <h3>Example</h3>
- *
- * <pre>{@code
- * DOMMaterializer materializer = new DOMMaterializer();
- *
- * NodeTemplate template = NodeTemplate.element("div", div -> div
- *     .attribute("class", ValueExpression.constant("card"))
- *     .children(children -> children
- *         .text("Hello ")
- *         .text(ValueExpression.path("user.name"))
- *     )
- * );
- *
- * Node dom = materializer.materialize(template, execution);
- * }</pre>
- *
- * <p>
- * Note: {@link #toTagName(String)} maps names to {@link TagName} via {@code valueOf(...)}.
- * This implies tag names must exist in {@link TagName} enum.
+ * Produces {@link ElementNode}/{@link TextNode} and uses {@link WrapperNode} as a temporary container
+ * for multi-node branches (e.g. directive-expanded output), flattening it into the parent.
  * </p>
  */
 public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
 
     /**
-     * Creates a DOM materializer using the default resolver stack.
+     * Creates a materializer with a default resolver stack.
      *
      * <p>
-     * Equivalent to {@code new DOMMaterializer(new DefaultValueResolver(new PathValueResolver()))}.
+     * Uses {@link ConfigurableValueResolver} in {@link ResolutionMode#FULL} mode with {@link PathValueResolver}.
      * </p>
      */
     public DOMMaterializer() {
@@ -77,19 +32,19 @@ public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
     }
 
     /**
-     * Creates a DOM materializer with a custom {@link ValueResolver}.
+     * Creates a materializer with a custom {@link ValueResolver}.
      *
-     * @param valueResolver resolver used for resolving {@link ValueExpression}s
+     * @param valueResolver resolver used to evaluate {@link ValueExpression}s
      */
     public DOMMaterializer(ValueResolver valueResolver) {
         super(nonNull(valueResolver, "valueResolver"));
     }
 
     /**
-     * Creates a DOM {@link ElementNode} for the given tag name.
+     * Creates a DOM element node for the given tag name.
      *
-     * @param tagName element tag name
-     * @return element node
+     * @param tagName element tag name (non-blank)
+     * @return created element node
      */
     @Override
     protected Node createElementNode(String tagName) {
@@ -97,10 +52,10 @@ public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
     }
 
     /**
-     * Creates a DOM {@link TextNode} from the given text.
+     * Creates a text node for the given text.
      *
-     * @param text text content (nullable; treated as empty string)
-     * @return text node
+     * @param text text content (nullable; treated as empty)
+     * @return created text node
      */
     @Override
     protected Node createTextNode(String text) {
@@ -108,25 +63,24 @@ public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
     }
 
     /**
-     * Creates a container node used for multi-node branches.
+     * Creates a container node for multi-node branches.
      *
      * <p>
-     * The current implementation uses a {@code <div>} element.
+     * Used as an internal wrapper so branches can return multiple nodes and still be appended as a unit.
      * </p>
      *
-     * @return container node
+     * @return wrapper container node
      */
     @Override
     protected Node createContainerNode() {
         return new WrapperNode();
-//        return new ElementNode(TagName.DIV);
     }
 
     /**
-     * Returns an empty DOM node representation.
+     * Returns an "empty" node representation.
      *
      * <p>
-     * Used for empty branches and other non-rendering outcomes.
+     * Used for empty branches and non-rendering outcomes.
      * </p>
      *
      * @return empty text node
@@ -137,49 +91,32 @@ public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
     }
 
     /**
-     * Appends {@code child} node to {@code parent}.
+     * Appends a child to a parent node.
      *
      * <p>
-     * Only {@link ElementNode} can accept children. Attempting to append to a
-     * non-element node results in {@link IllegalStateException}.
+     * Only {@link ElementNode} can accept children.
      * </p>
      *
-     * @param parent parent node (must be {@link ElementNode})
-     * @param child child node
+     * @param parent parent node
+     * @param child  child node
+     * @throws IllegalStateException if {@code parent} is not an {@link ElementNode}
      */
     @Override
     protected void appendChild(Node parent, Node child) {
-        nonNull(parent, "parent");
-        nonNull(child, "child");
-
-        if (!(parent instanceof ElementNode element)) {
-            throw new IllegalStateException("Cannot append child to non-element node: " + parent.getClass().getName());
-        }
-
-        element.append(child);
+        nonNull(parent, "parent").append(nonNull(child, "child"));
     }
 
     /**
-     * Materializes an {@link NodeTemplate.Element} into a DOM {@link ElementNode}.
+     * Materializes an {@link NodeTemplate.Element} into an {@link ElementNode}.
      *
      * <p>
-     * Steps:
-     * </p>
-     * <ol>
-     *     <li>create element node</li>
-     *     <li>apply resolved attributes</li>
-     *     <li>apply directives (may omit/wrap/mutate node)</li>
-     *     <li>materialize children into the effective content node</li>
-     * </ol>
-     *
-     * <p>
-     * If directives produce {@code omitted} outcome, {@code null} is returned and
-     * the caller should skip appending this node.
+     * Applies attributes and directives; if directives omit the node, returns {@code null}.
+     * If a child materializes into {@link WrapperNode}, its children are flattened into the content node.
      * </p>
      *
-     * @param element element blueprint node
-     * @param execution active rendering execution context
-     * @return rendered DOM node or {@code null} if omitted by directive
+     * @param element    element template
+     * @param execution  current rendering execution
+     * @return root node produced by directives, or {@code null} if omitted
      */
     @Override
     protected Node materializeElement(NodeTemplate.Element element, RenderingExecution execution) {
@@ -215,196 +152,67 @@ public class DOMMaterializer extends AbstractTemplateMaterializer<Node> {
     }
 
     /**
-     * Applies resolved attributes to a DOM element. 🏷️
+     * Sets an attribute on the given node.
      *
-     * <p>
-     * Rules:
-     * </p>
-     * <ul>
-     *     <li>skip null/empty attribute maps</li>
-     *     <li>skip blank attribute names</li>
-     *     <li>skip null expressions</li>
-     *     <li>skip null resolved values</li>
-     *     <li>values are stringified via {@link String#valueOf(Object)}</li>
-     * </ul>
-     *
-     * @param node target DOM element node
-     * @param attributes blueprint attributes
-     * @param execution active rendering execution context
+     * @param node  target node
+     * @param name  attribute name
+     * @param value attribute value
      */
-    private void applyAttributes(
-            ElementNode node,
-            Map<String, ValueExpression> attributes,
-            RenderingExecution execution
-    ) {
-        if (attributes == null || attributes.isEmpty()) {
-            return;
-        }
-
-        for (Map.Entry<String, ValueExpression> entry : attributes.entrySet()) {
-            String          name       = entry.getKey();
-            ValueExpression expression = entry.getValue();
-
-            if (name == null || name.isBlank() || expression == null) {
-                continue;
-            }
-
-            Object value = valueResolver.resolve(expression, execution);
-
-            if (value == null) {
-                continue;
-            }
-
-            node.addAttribute(name, String.valueOf(value));
-        }
+    @Override
+    protected void setAttribute(Node node, String name, String value) {
+        node.addAttribute(name, value);
     }
 
     /**
-     * Applies {@link NodeDirective}s to an element node. 🧰
+     * Removes an attribute from the given node.
      *
-     * <p>
-     * Supported directives (behavior depends on predicate evaluation and resolver):
-     * </p>
-     * <ul>
-     *     <li>{@link NodeDirective.OmitIf} — omit node completely</li>
-     *     <li>{@link NodeDirective.SetAttributeIf} — conditionally set attribute</li>
-     *     <li>{@link NodeDirective.RemoveAttributeIf} — conditionally remove attribute</li>
-     *     <li>{@link NodeDirective.AddClassIf} — conditionally add CSS classes</li>
-     *     <li>{@link NodeDirective.WrapIf} — conditionally wrap the node</li>
-     * </ul>
-     *
-     * <p>
-     * Wrapping may change the returned root: the original {@code node} becomes nested,
-     * while {@code root} points to the outer wrapper.
-     * </p>
-     *
-     * @param node element node to mutate
-     * @param directives directive list (nullable/empty means no-op)
-     * @param execution active rendering execution context
-     * @return directive outcome describing whether node is kept/omitted/wrapped
+     * @param node target node
+     * @param name attribute name
      */
-    private DirectiveOutcome<Node> applyDirectives(
-            ElementNode node,
-            List<NodeDirective> directives,
-            RenderingExecution execution
-    ) {
-        if (directives == null || directives.isEmpty()) {
-            return DirectiveOutcome.keep(node);
-        }
-
-        Node root = node;
-
-        for (NodeDirective directive : directives) {
-            switch (directive) {
-                case NodeDirective.OmitIf omitIf -> {
-                    if (predicateEvaluator.evaluate(omitIf.predicate(), execution)) {
-                        return DirectiveOutcome.omit();
-                    }
-                }
-                case NodeDirective.SetAttributeIf attributeIf -> {
-                    if (predicateEvaluator.evaluate(attributeIf.predicate(), execution)) {
-                        Object value = valueResolver.resolve(attributeIf.value(), execution);
-                        if (value != null) {
-                            node.addAttribute(attributeIf.name(), String.valueOf(value));
-                        }
-                    }
-                }
-                case NodeDirective.RemoveAttributeIf removeIf -> {
-                    if (predicateEvaluator.evaluate(removeIf.predicate(), execution)) {
-                        node.getAttributes().remove(removeIf.attributeName());
-                    }
-                }
-                case NodeDirective.AddClassIf classIf -> {
-                    if (predicateEvaluator.evaluate(classIf.predicate(), execution)) {
-                        Object value = valueResolver.resolve(classIf.classValue(), execution);
-                        if (value != null) {
-                            String classNames = String.valueOf(value).trim();
-                            if (!classNames.isEmpty()) {
-                                Node.addClass(node, classNames);
-                            }
-                        }
-                    }
-                }
-                case NodeDirective.WrapIf wrapIf -> {
-                    if (predicateEvaluator.evaluate(wrapIf.predicate(), execution)) {
-                        ElementNode wrapper = new ElementNode(toTagName(wrapIf.wrapperTagName()));
-                        applyAttributes(wrapper, wrapIf.wrapperAttributes(), execution);
-                        node.wrap(wrapper);
-                        root = wrapper;
-                    }
-                }
-                case NodeDirective.ApplyAttributes applyAttributes ->
-                        applyAttributes(node, applyAttributes, execution);
-                case null -> { }
-            }
-        }
-
-        return DirectiveOutcome.wrapped(node, root);
-    }
-
-    private void applyAttributes(
-            ElementNode node,
-            NodeDirective.ApplyAttributes directive,
-            RenderingExecution execution
-    ) {
-        Object resolved = valueResolver.resolve(directive.source(), execution);
-
-        if (resolved == null || (resolved instanceof ObjectAccessor accessor && accessor.length() == 0)) {
-            return;
-        }
-
-        ObjectAccessor               accessor   = execution.accessorWrapper().wrapIfNecessary(resolved);
-        Map<String, ValueExpression> attributes = new LinkedHashMap<>();
-
-        if (accessor.isMap()) {
-            for (Object key : accessor.keySet()) {
-                Object valueKey = accessor.get(key);
-                String keyValue = String.valueOf(key);
-
-                if (keyValue.isBlank()) {
-                    continue;
-                }
-
-                attributes.put(keyValue, ValueExpression.constant(valueKey));
-            }
-
-            applyAttributes(node, attributes, execution);
-            return;
-        }
-
-        if (accessor.isCollection() || accessor.isList()) {
-            ValueNavigator navigator = execution.valueNavigator();
-
-            for (Object key : accessor.keySet()) {
-                if (accessor.get(key) instanceof ObjectAccessor item && !item.isNull()) {
-                    Object keyValue = navigator.navigate(item, directive.keyValue());
-                    Object valueKey = navigator.navigate(item, directive.valueKey());
-                    attributes.put(String.valueOf(keyValue), ValueExpression.constant(valueKey));
-                }
-            }
-
-            applyAttributes(node, attributes, execution);
-        }
+    @Override
+    protected void removeAttribute(Node node, String name) {
+        node.getAttributes().remove(name);
     }
 
     /**
-     * Converts a raw tag name string into {@link TagName}. 🔤
+     * Adds one or more CSS class names to the node.
      *
-     * <p>
-     * Normalizes input by trimming and converting to upper case,
-     * then calls {@link TagName#valueOf(String)}.
-     * </p>
+     * @param node       target node
+     * @param classNames space-separated classes
+     */
+    @Override
+    protected void addClass(Node node, String classNames) {
+        Node.addClass(node, classNames);
+    }
+
+    /**
+     * Wraps a node into a newly created element wrapper.
+     *
+     * @param node           target node to wrap
+     * @param wrapTo wrapper tag name (non-blank)
+     * @return wrapper element
+     */
+    @Override
+    protected Node wrapElement(Node node, String wrapTo) {
+        ElementNode wrapper = new ElementNode(toTagName(wrapTo));
+        node.wrap(wrapper);
+        return wrapper;
+    }
+
+    /**
+     * Normalizes and converts a string tag into {@link TagName}.
      *
      * @param tagName raw tag name
-     * @return resolved {@link TagName}
-     *
-     * @throws IllegalArgumentException if tag name is blank or not present in {@link TagName}
+     * @return enum tag name
+     * @throws IllegalArgumentException if blank or unknown
      */
     private TagName toTagName(String tagName) {
-        String normalized = nonNull(tagName, "qName").trim();
-        if (normalized.isEmpty()) {
+        String normalized = Strings.normalize(tagName, String::trim);
+
+        if (Strings.isEmpty(normalized)) {
             throw new IllegalArgumentException("qName is blank");
         }
+
         return TagName.valueOf(normalized.toUpperCase());
     }
 

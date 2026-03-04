@@ -3,74 +3,41 @@ package org.jmouse.meterializer;
 import org.jmouse.core.Verify;
 import org.jmouse.core.access.AccessorWrapper;
 import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.ValueNavigator;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.jmouse.core.Verify.nonNull;
 import static org.jmouse.util.Strings.isNotEmpty;
 
 /**
- * Base implementation of {@link TemplateMaterializer} with built-in traversal logic. 🧱
+ * Base {@link TemplateMaterializer} with built-in traversal algorithm over {@link NodeTemplate}.
  *
  * <p>
- * This class implements a generic materialization algorithm for {@link NodeTemplate}
- * and delegates concrete node creation to subclass hooks.
+ * This class is format-agnostic: it knows how to walk template structures (element/text/conditional/repeat/include)
+ * and delegates concrete node creation and mutation to subclass hooks (create/set/append/wrap, etc.).
  * </p>
  *
- * <h3>Responsibilities</h3>
- * <ul>
- *     <li>Resolves {@link ValueExpression} via provided {@link ValueResolver}</li>
- *     <li>Evaluates {@link TemplatePredicate} via {@link PredicateEvaluator}</li>
- *     <li>Traverses blueprint nodes (text, conditional, repeat, include)</li>
- *     <li>Delegates element materialization and node construction to subclass</li>
- * </ul>
- *
- * <h3>Extending</h3>
  * <p>
- * Subclasses implement the target representation {@code R} (e.g. DOM node, HTML builder, custom UI model)
- * by providing implementations for:
+ * Core responsibilities:
  * </p>
  * <ul>
- *     <li>{@link #createElementNode(String)}</li>
- *     <li>{@link #createTextNode(String)}</li>
- *     <li>{@link #createContainerNode()}</li>
- *     <li>{@link #emptyNode()}</li>
- *     <li>{@link #appendChild(Object, Object)}</li>
- *     <li>{@link #materializeElement(NodeTemplate.Element, RenderingExecution)}</li>
+ *   <li>value resolution via {@link ValueResolver}</li>
+ *   <li>predicate evaluation via {@link PredicateEvaluator}</li>
+ *   <li>directive application via {@link NodeDirective} set</li>
+ *   <li>standard branching semantics for conditional/repeat/include</li>
  * </ul>
  *
- * <h3>Example</h3>
- *
- * <pre>{@code
- * final class HtmlStringMaterializer extends AbstractTemplateMaterializer<StringBuilder> {
- *
- *     HtmlStringMaterializer(ValueResolver resolver) {
- *         super(resolver);
- *     }
- *
- *     @Override protected StringBuilder createElementNode(String tagName) { ... }
- *     @Override protected StringBuilder createTextNode(String text) { ... }
- *     @Override protected StringBuilder createContainerNode() { ... }
- *     @Override protected StringBuilder emptyNode() { return new StringBuilder(); }
- *     @Override protected void appendChild(StringBuilder parent, StringBuilder child) { ... }
- *     @Override protected StringBuilder materializeElement(NodeTemplate.Element element, RenderingExecution execution) { ... }
- * }
- * }</pre>
- *
- * <p>
- * The materializer itself is mostly stateless; thread-safety depends on the concrete {@code R}
- * type and the provided {@link ValueResolver}/{@link NodeTemplateResolver} implementations.
- * </p>
- *
- * @param <R> resulting node type produced by this materializer
+ * @param <R> concrete node representation (DOM, XML, HTML string builder nodes, etc.)
  */
 public abstract class AbstractTemplateMaterializer<R> implements TemplateMaterializer<R> {
 
     /**
      * Resolves runtime values from {@link ValueExpression}s. 🧩
      */
-    protected final ValueResolver      valueResolver;
+    protected final ValueResolver valueResolver;
 
     /**
      * Evaluates template predicates using the configured {@link #valueResolver}. 🧠
@@ -83,55 +50,50 @@ public abstract class AbstractTemplateMaterializer<R> implements TemplateMateria
      * @param valueResolver resolver used for all value expression evaluation
      */
     protected AbstractTemplateMaterializer(ValueResolver valueResolver) {
-        this.valueResolver = Verify.nonNull(valueResolver, "valueResolver");
+        this.valueResolver = nonNull(valueResolver, "valueResolver");
         this.predicateEvaluator = new PredicateEvaluator(this.valueResolver);
     }
 
     /**
-     * Materializes the given blueprint node.
+     * Materializes the given template root into a concrete result.
      *
      * <p>
-     * This method performs basic argument validation and delegates to
-     * {@link #materializeInternal(NodeTemplate, RenderingExecution)}.
+     * Performs argument validation and delegates to {@link #materializeInternal(NodeTemplate, RenderingExecution)}.
      * </p>
      *
-     * @param template blueprint node
+     * @param template template root node
      * @param execution active rendering execution context
-     * @return materialized result (may be {@code null} depending on node type)
+     * @return materialized result (may be {@code null} depending on node type/outcome)
      */
     @Override
     public final R materialize(NodeTemplate template, RenderingExecution execution) {
-        Verify.nonNull(template, "template");
-        Verify.nonNull(execution, "execution");
-        return materializeInternal(template, execution);
+        return materializeInternal(nonNull(template, "template"), nonNull(execution, "execution"));
     }
 
     /**
-     * Dispatches materialization to node-specific handlers.
+     * Dispatches materialization based on the concrete {@link NodeTemplate} kind.
      *
-     * @param template blueprint node
+     * @param template template node (may be {@code null})
      * @param execution active rendering execution context
      * @return materialized node or {@code null}
      */
     protected R materializeInternal(NodeTemplate template, RenderingExecution execution) {
         return switch (template) {
-            case NodeTemplate.Element element -> materializeElement(element, execution);
-            case NodeTemplate.Text text -> materializeText(text, execution);
-            case NodeTemplate.Conditional conditional -> materializeConditional(conditional, execution);
-            case NodeTemplate.Repeat repeat -> materializeRepeat(repeat, execution);
-            case NodeTemplate.Include include -> materializeInclude(include, execution);
+            case NodeTemplate.Element element           -> materializeElement(element, execution);
+            case NodeTemplate.Text text                 -> materializeText(text, execution);
+            case NodeTemplate.Conditional conditional   -> materializeConditional(conditional, execution);
+            case NodeTemplate.Repeat repeat             -> materializeRepeat(repeat, execution);
+            case NodeTemplate.Include include           -> materializeInclude(include, execution);
             case null -> null;
         };
     }
 
     /**
-     * Materializes a text node by resolving its value and converting it to a string.
+     * Materializes a text template by resolving its value and converting it to a string.
      *
-     * <p>
-     * {@code null} resolved values are converted to empty string.
-     * </p>
+     * <p>{@code null} resolved values are converted to an empty string.</p>
      *
-     * @param text text blueprint node
+     * @param text text template node
      * @param execution active rendering execution context
      * @return created text node
      */
@@ -141,15 +103,18 @@ public abstract class AbstractTemplateMaterializer<R> implements TemplateMateria
     }
 
     /**
-     * Materializes a conditional node by evaluating its predicate and picking a branch.
+     * Materializes a conditional template by selecting a branch using its predicate.
      *
      * <p>
-     * If the selected branch is empty, {@link #emptyNode()} is returned.
-     * If the branch contains exactly one node, it is materialized directly.
-     * Otherwise, a container is created and all child nodes are appended.
+     * Branch semantics:
      * </p>
+     * <ul>
+     *   <li>empty branch → {@link #emptyNode()}</li>
+     *   <li>single node → materialize directly</li>
+     *   <li>multiple nodes → materialize into a container and append children</li>
+     * </ul>
      *
-     * @param conditional conditional blueprint node
+     * @param conditional conditional template node
      * @param execution active rendering execution context
      * @return materialized branch result
      */
@@ -179,21 +144,21 @@ public abstract class AbstractTemplateMaterializer<R> implements TemplateMateria
     }
 
     /**
-     * Materializes a repeat node by iterating over a resolved collection-like value. 🔁
+     * Materializes a repeat template by iterating over a resolved container value. 🔁
      *
      * <p>
-     * The collection is wrapped into an {@link ObjectAccessor} to support lists/maps/collections uniformly.
-     * For each entry, the current item is bound into {@link RenderingExecution#variables()}
-     * under {@link NodeTemplate.Repeat#itemVariableName()} and the body is materialized.
+     * Input is wrapped into an {@link ObjectAccessor} so lists/maps/collections can be iterated uniformly.
+     * Each iteration binds the current item accessor into {@link RenderingExecution#variables()}
+     * under {@link NodeTemplate.Repeat#itemVariableName()}.
      * </p>
      *
      * <p>
-     * If the resolved value is not a supported container type, {@link #emptyNode()} is returned.
+     * If the resolved value is not an iterable container, returns {@link #emptyNode()}.
      * </p>
      *
-     * @param repeat repeat blueprint node
+     * @param repeat repeat template node
      * @param execution active rendering execution context
-     * @return materialized container node
+     * @return container node holding rendered items
      */
     protected R materializeRepeat(NodeTemplate.Repeat repeat, RenderingExecution execution) {
         Object         collectionValue    = valueResolver.resolve(repeat.collection(), execution);
@@ -209,7 +174,7 @@ public abstract class AbstractTemplateMaterializer<R> implements TemplateMateria
         Map<String, ObjectAccessor> variables = execution.variables();
 
         for (Object key : keys) {
-            Object         entry         = collectionAccessor.get(key);
+            Object entry = collectionAccessor.get(key);
             ObjectAccessor entryAccessor = execution.accessorWrapper().wrapIfNecessary(entry);
 
             variables.put(repeat.itemVariableName(), entryAccessor);
@@ -228,21 +193,21 @@ public abstract class AbstractTemplateMaterializer<R> implements TemplateMateria
     }
 
     /**
-     * Materializes an include node by resolving a referenced blueprint and materializing it
+     * Materializes an include template by resolving a referenced template and rendering it
      * under a nested execution context. 🧬
      *
      * <p>
-     * Behavior:
+     * Steps:
      * </p>
      * <ul>
-     *     <li>resolve {@code templateReference}; if {@code null} → {@link #emptyNode()}</li>
-     *     <li>resolve {@code model} and wrap as new root accessor</li>
-     *     <li>create a nested {@link RenderingExecution}</li>
-     *     <li>copy parent variables into nested execution</li>
-     *     <li>resolve included blueprint via {@link NodeTemplateResolver} and materialize it</li>
+     *   <li>resolve {@code templateReference}; if {@code null} → {@link #emptyNode()}</li>
+     *   <li>resolve {@code model} and wrap it as a new root {@link ObjectAccessor}</li>
+     *   <li>create nested {@link RenderingExecution} and copy variables</li>
+     *   <li>resolve included template via {@link NodeTemplateResolver}</li>
+     *   <li>materialize resolved subtree using nested execution</li>
      * </ul>
      *
-     * @param include include blueprint node
+     * @param include include template node
      * @param execution active rendering execution context
      * @return materialized included subtree
      */
@@ -274,6 +239,224 @@ public abstract class AbstractTemplateMaterializer<R> implements TemplateMateria
     }
 
     /**
+     * Applies resolved attributes to the given node.
+     *
+     * <p>
+     * Skips invalid entries (blank name / null expression) and ignores {@code null} resolved values.
+     * Values are converted using {@link String#valueOf(Object)}.
+     * </p>
+     *
+     * @param node target node
+     * @param attributes attribute expressions map (name → expression)
+     * @param execution active rendering execution context
+     */
+    protected final void applyAttributes(
+            R node,
+            Map<String, ValueExpression> attributes,
+            RenderingExecution execution
+    ) {
+        if (attributes == null || attributes.isEmpty()) {
+            return;
+        }
+
+        for (Map.Entry<String, ValueExpression> entry : attributes.entrySet()) {
+            String          name       = entry.getKey();
+            ValueExpression expression = entry.getValue();
+
+            if (name == null || name.isBlank() || expression == null) {
+                continue;
+            }
+
+            Object resolved = valueResolver.resolve(expression, execution);
+
+            if (resolved == null) {
+                continue;
+            }
+
+            setAttribute(node, name, String.valueOf(resolved));
+        }
+    }
+
+    /**
+     * Applies directives to an element node. 🧰
+     *
+     * <p>
+     * Supported directives:
+     * omit, conditional set/remove attribute, conditional class append, conditional wrapping,
+     * and dynamic attribute application.
+     * </p>
+     *
+     * @param node target node
+     * @param directives directives list
+     * @param execution active rendering execution context
+     * @return directive outcome (keep / wrap / omit)
+     */
+    protected final DirectiveOutcome<R> applyDirectives(
+            R node,
+            List<NodeDirective> directives,
+            RenderingExecution execution
+    ) {
+        if (directives == null || directives.isEmpty()) {
+            return DirectiveOutcome.keep(node);
+        }
+
+        R root = node;
+
+        for (NodeDirective directive : directives) {
+            switch (directive) {
+                case NodeDirective.OmitIf omitIf -> {
+                    if (predicateEvaluator.evaluate(omitIf.predicate(), execution)) {
+                        return DirectiveOutcome.omit();
+                    }
+                }
+                case NodeDirective.SetAttributeIf attributeIf -> {
+                    if (predicateEvaluator.evaluate(attributeIf.predicate(), execution)) {
+                        Object value = valueResolver.resolve(attributeIf.value(), execution);
+                        if (value != null) {
+                            setAttribute(node, attributeIf.name(), String.valueOf(value));
+                        }
+                    }
+                }
+                case NodeDirective.RemoveAttributeIf removeIf -> {
+                    if (predicateEvaluator.evaluate(removeIf.predicate(), execution)) {
+                        removeAttribute(node, removeIf.attributeName());
+                    }
+                }
+                case NodeDirective.AddClassIf classIf -> {
+                    if (predicateEvaluator.evaluate(classIf.predicate(), execution)) {
+                        Object value = valueResolver.resolve(classIf.classValue(), execution);
+                        if (value != null) {
+                            String classNames = String.valueOf(value).trim();
+                            if (!classNames.isEmpty()) {
+                                addClass(node, classNames);
+                            }
+                        }
+                    }
+                }
+                case NodeDirective.WrapIf wrapIf -> {
+                    if (predicateEvaluator.evaluate(wrapIf.predicate(), execution)) {
+                        R wrapper = wrapElement(node, wrapIf.wrapperTagName());
+                        applyAttributes(wrapper, wrapIf.wrapperAttributes(), execution);
+                        root = wrapper;
+                    }
+                }
+                case NodeDirective.ApplyAttributes applyAttributes ->
+                        applyAttributes(node, applyAttributes, execution);
+                case null -> { }
+            }
+        }
+
+        return DirectiveOutcome.wrapped(node, root);
+    }
+
+    /**
+     * Applies {@link NodeDirective.ApplyAttributes} by reading attribute pairs from resolved data.
+     *
+     * <p>
+     * Supported sources:
+     * </p>
+     * <ul>
+     *   <li>map: key → value becomes attributeName → attributeValue</li>
+     *   <li>collection/list: each item is treated as a record; keys are extracted via {@link ValueNavigator}</li>
+     * </ul>
+     *
+     * @param node target node
+     * @param directive apply-attributes directive
+     * @param execution active rendering execution context
+     */
+    protected final void applyAttributes(
+            R node,
+            NodeDirective.ApplyAttributes directive,
+            RenderingExecution execution
+    ) {
+        Object resolved = valueResolver.resolve(directive.source(), execution);
+
+        if (resolved == null) {
+            return;
+        }
+
+        ObjectAccessor accessor = execution.accessorWrapper().wrapIfNecessary(resolved);
+
+        if (accessor.length() == 0) {
+            return;
+        }
+
+        Map<String, ValueExpression> attributes = new java.util.LinkedHashMap<>();
+
+        if (accessor.isMap()) {
+            for (Object key : accessor.keySet()) {
+                Object valueKey = accessor.get(key);
+                String keyValue = String.valueOf(key);
+
+                if (keyValue.isBlank()) {
+                    continue;
+                }
+
+                attributes.put(keyValue, ValueExpression.constant(valueKey));
+            }
+
+            applyAttributes(node, attributes, execution);
+            return;
+        }
+
+        if (accessor.isCollection() || accessor.isList()) {
+            ValueNavigator navigator = execution.valueNavigator();
+
+            for (Object key : accessor.keySet()) {
+                if (accessor.get(key) instanceof ObjectAccessor item && !item.isNull()) {
+                    Object keyValue = navigator.navigate(item, directive.keyValue());
+                    Object valueKey = navigator.navigate(item, directive.valueKey());
+
+                    String attributeName = String.valueOf(keyValue);
+                    if (attributeName.isBlank()) {
+                        continue;
+                    }
+
+                    attributes.put(attributeName, ValueExpression.constant(valueKey));
+                }
+            }
+
+            applyAttributes(node, attributes, execution);
+        }
+    }
+
+    /**
+     * Sets an attribute on a concrete element representation.
+     *
+     * @param node target node
+     * @param name attribute name
+     * @param value attribute value
+     */
+    protected abstract void setAttribute(R node, String name, String value);
+
+    /**
+     * Removes an attribute from a concrete element representation.
+     *
+     * @param node target node
+     * @param name attribute name
+     */
+    protected abstract void removeAttribute(R node, String name);
+
+    /**
+     * Adds one or multiple CSS classes (implementation decides how to parse).
+     *
+     * @param node target node
+     * @param classNames class value (often space-separated)
+     */
+    protected abstract void addClass(R node, String classNames);
+
+    /**
+     * Wraps the current node with a new wrapper element and returns wrapper as a new root.
+     *
+     * <p>Implementation must also make {@code node} become a child of the wrapper.</p>
+     *
+     * @param node node to wrap
+     * @param wrapperTagName wrapper tag name
+     * @return wrapper node (new root)
+     */
+    protected abstract R wrapElement(R node, String wrapperTagName);
+
+    /**
      * Creates an element node with the given tag name.
      *
      * @param tagName element tag name (e.g. {@code "div"})
@@ -299,10 +482,6 @@ public abstract class AbstractTemplateMaterializer<R> implements TemplateMateria
     /**
      * Returns an "empty" node representation.
      *
-     * <p>
-     * Used for non-rendering results (empty branches, invalid repeat inputs, etc.).
-     * </p>
-     *
      * @return empty node representation
      */
     protected abstract R emptyNode();
@@ -316,19 +495,9 @@ public abstract class AbstractTemplateMaterializer<R> implements TemplateMateria
     protected abstract void appendChild(R parent, R child);
 
     /**
-     * Materializes an {@link NodeTemplate.Element} node.
+     * Materializes an {@link NodeTemplate.Element} template node.
      *
-     * <p>
-     * Subclasses usually:
-     * </p>
-     * <ul>
-     *     <li>create element node</li>
-     *     <li>resolve/apply attributes</li>
-     *     <li>materialize children</li>
-     *     <li>apply directives (if supported)</li>
-     * </ul>
-     *
-     * @param element element blueprint node
+     * @param element element template node
      * @param execution active rendering execution context
      * @return materialized element node representation
      */
