@@ -1,4 +1,4 @@
-package org.jmouse.dom.util;
+package org.jmouse.dom.helper;
 
 import org.jmouse.dom.Node;
 import org.jmouse.dom.TagName;
