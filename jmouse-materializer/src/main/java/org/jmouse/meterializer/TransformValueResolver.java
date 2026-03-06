@@ -50,6 +50,9 @@ public final class TransformValueResolver implements ValueResolver {
             case ValueExpression.PathValue ignored -> null;
             case ValueExpression.RequestAttributeValue ignored -> null;
             case ValueExpression.FormatValue ignored -> null;
+            case ValueExpression.OptionalValue ignored -> null;
+            case ValueExpression.MapValue ignored -> null;
+            case ValueExpression.ObjectValue ignored -> null;
             case null -> null;
         };
     }

@@ -1,7 +1,9 @@
 package org.jmouse.meterializer;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Default {@link ValueResolver} implementation with configurable resolution scope. 🧩
@@ -85,12 +87,34 @@ public final class ConfigurableValueResolver implements ValueResolver {
             return null;
         }
 
+        if (value instanceof ValueExpression.MapValue(Map<String, Object> map)) {
+            return map;
+        }
+
+        if (value instanceof ValueExpression.OptionalValue(ValueExpression optional)) {
+            try {
+                return resolve(optional, execution);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
         if (value instanceof ValueExpression.PathValue(String path)) {
             return pathResolver.resolve(path, execution);
         }
 
         if (value instanceof ValueExpression.RequestAttributeValue(String name)) {
             return execution.request().attributes().get(name);
+        }
+
+        if (value instanceof ValueExpression.ObjectValue objectValue) {
+            Map<String, Object> resolved = new LinkedHashMap<>();
+
+            for (Map.Entry<String, ValueExpression> entry : objectValue.entries().entrySet()) {
+                resolved.put(entry.getKey(), resolve(entry.getValue(), execution));
+            }
+
+            return resolved;
         }
 
         if (value instanceof ValueExpression.FormatValue(String pattern, List<ValueExpression> formatArguments)) {

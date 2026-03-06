@@ -1,159 +1,175 @@
 package org.jmouse.meterializer;
 
-import org.jmouse.core.Verify;
-
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.jmouse.core.Verify.nonNull;
+
 /**
- * Rendering request carrying user-provided attributes and options.
+ * Rendering request context used during template materialization.
  *
- * <p>This object is mutable by design and is expected to be created per rendering call.</p>
- *
- * <p>Supports:</p>
- * <ul>
- *   <li>typed read accessors</li>
- *   <li>overlay behavior without manual attribute merging</li>
- * </ul>
+ * <p>Provides a lightweight attribute map for passing runtime data
+ * (submission state, helpers, configuration, etc.) through rendering.</p>
  */
 public class RenderingRequest {
 
+    /**
+     * Request attributes available during rendering.
+     */
     private final Map<String, Object> attributes;
 
+    /**
+     * Creates an empty rendering request.
+     */
     public RenderingRequest() {
         this.attributes = new LinkedHashMap<>();
     }
 
+    /**
+     * Creates a request with predefined attributes.
+     *
+     * @param attributes attribute map
+     */
     protected RenderingRequest(Map<String, Object> attributes) {
-        this.attributes = Verify.nonNull(attributes, "attributes");
+        this.attributes = nonNull(attributes, "attributes");
     }
 
-    public RenderingRequest putAttribute(String attributeName, Object attributeValue) {
-        Verify.nonNull(attributeName, "attributeName");
+    /**
+     * Adds or replaces an attribute.
+     *
+     * <p>{@code null} values are ignored.</p>
+     *
+     * @param key attribute name
+     * @param value attribute value
+     * @return this request instance
+     */
+    public RenderingRequest setAttribute(String key, Object value) {
+        nonNull(key, "key");
 
-        if (attributeValue == null) {
+        if (value == null) {
             return this;
         }
 
-        attributes.put(attributeName, attributeValue);
+        attributes.put(key, value);
         return this;
     }
 
-    public RenderingRequest putAllAttributes(Map<String, ?> attributesToAdd) {
-        Verify.nonNull(attributesToAdd, "attributesToAdd");
-
-        for (Map.Entry<String, ?> entry : attributesToAdd.entrySet()) {
-            String name  = entry.getKey();
-            Object value = entry.getValue();
-
-            if (name == null) {
-                continue;
-            }
-            if (value == null) {
-                continue;
-            }
-
-            attributes.put(name, value);
-        }
-
-        return this;
-    }
-
+    /**
+     * Returns the underlying attributes map.
+     */
     public Map<String, Object> attributes() {
         return attributes;
     }
 
-    public Map<String, Object> unmodifiableAttributes() {
-        return Collections.unmodifiableMap(attributes);
-    }
-
+    /**
+     * Finds an attribute by name.
+     *
+     * @param attributeName attribute key
+     * @return optional attribute value
+     */
     public Optional<Object> findAttribute(String attributeName) {
-        Verify.nonNull(attributeName, "attributeName");
+        nonNull(attributeName, "attributeName");
         Object value = attributes.get(attributeName);
         return Optional.ofNullable(value);
     }
 
-    public <T> Optional<T> findAttribute(String attributeName, Class<T> expectedType) {
-        Verify.nonNull(expectedType, "expectedType");
+    /**
+     * Finds an attribute and casts it to the expected type.
+     *
+     * @param key attribute name
+     * @param type expected type
+     * @return optional typed attribute
+     *
+     * @throws IllegalArgumentException if attribute exists but type mismatch occurs
+     */
+    public <T> Optional<T> findAttribute(String key, Class<T> type) {
+        nonNull(type, "expectedType");
 
-        Optional<Object> found = findAttribute(attributeName);
+        Optional<Object> found = findAttribute(key);
+
         if (found.isEmpty()) {
             return Optional.empty();
         }
 
         Object value = found.get();
 
-        if (expectedType.isInstance(value)) {
-            return Optional.of(expectedType.cast(value));
+        if (type.isInstance(value)) {
+            return Optional.of(type.cast(value));
         }
 
-        throw new IllegalArgumentException("Request attribute '" + attributeName + "' has type " + value.getClass()
-                .getName() + ", but expected " + expectedType.getName());
-    }
-
-    public <T> T requireAttribute(String attributeName, Class<T> expectedType) {
-        Optional<T> found = findAttribute(attributeName, expectedType);
-
-        if (found.isPresent()) {
-            return found.get();
-        }
-
-        throw new IllegalStateException(
-                "Missing request attribute '" + attributeName + "' of type " + expectedType.getName());
+        throw new IllegalArgumentException(
+                "Request attribute '%s' has type %s, but expected %s"
+                        .formatted(key, value.getClass().getName(), type.getName()));
     }
 
     /**
-     * Returns a request that reads from this request first and falls back to the parent request.
+     * Creates an overlay request that falls back to the given parent request.
      *
-     * <p>Local attributes override parent attributes.</p>
+     * <p>
+     * Attributes defined in the current request take precedence over the parent.
+     * </p>
+     *
+     * @param parent parent request
+     * @return overlay request
      */
-    public RenderingRequest overlayOn(RenderingRequest parentRequest) {
-        Verify.nonNull(parentRequest, "parentRequest");
-        return new OverlayRenderingRequest(this, parentRequest);
+    public RenderingRequest overlayOn(RenderingRequest parent) {
+        return new Overlay(this, nonNull(parent, "parent"));
     }
 
     /**
-     * Overlay implementation: local request overrides parent request.
+     * Overlay request implementation.
+     *
+     * <p>
+     * Resolves attributes from the local request first,
+     * then falls back to the parent request.
+     * </p>
      */
-    private static final class OverlayRenderingRequest extends RenderingRequest {
+    private static final class Overlay extends RenderingRequest {
 
-        private final RenderingRequest localRequest;
-        private final RenderingRequest parentRequest;
+        private final RenderingRequest local;
+        private final RenderingRequest parent;
 
-        private OverlayRenderingRequest(RenderingRequest localRequest, RenderingRequest parentRequest) {
+        private Overlay(RenderingRequest local, RenderingRequest parent) {
             super(new LinkedHashMap<>());
-            this.localRequest = Verify.nonNull(localRequest, "localRequest");
-            this.parentRequest = Verify.nonNull(parentRequest, "parentRequest");
+            this.local = nonNull(local, "local");
+            this.parent = nonNull(parent, "parent");
         }
 
+        /**
+         * Returns local attributes only.
+         */
         @Override
         public Map<String, Object> attributes() {
-            // Expose local map for mutation.
-            return localRequest.attributes();
+            return local.attributes();
         }
 
+        /**
+         * Resolves attribute from local request, falling back to parent.
+         */
         @Override
         public Optional<Object> findAttribute(String attributeName) {
-            Optional<Object> local = localRequest.findAttribute(attributeName);
+            Optional<Object> local = this.local.findAttribute(attributeName);
 
             if (local.isPresent()) {
                 return local;
             }
 
-            return parentRequest.findAttribute(attributeName);
+            return parent.findAttribute(attributeName);
         }
 
+        /**
+         * Resolves typed attribute from local request, falling back to parent.
+         */
         @Override
-        public <T> Optional<T> findAttribute(String attributeName, Class<T> expectedType) {
-            Optional<T> local = localRequest.findAttribute(attributeName, expectedType);
+        public <T> Optional<T> findAttribute(String key, Class<T> type) {
+            Optional<T> local = this.local.findAttribute(key, type);
 
             if (local.isPresent()) {
                 return local;
             }
 
-            return parentRequest.findAttribute(attributeName, expectedType);
+            return parent.findAttribute(key, type);
         }
     }
 }

@@ -31,7 +31,7 @@ public final class Smoke4 {
 
         model.put("submitCaption", "Submit Demo!");
 
-        Node node = pipeline.render("smoke4/form", model, r -> r.putAttribute("submitCaption2", "Submit Request!"));
+        Node node = pipeline.render("smoke4/form", model, r -> r.setAttribute("submitCaption2", "Submit Request!"));
 
         node.execute(new CorrectNodeDepth());
 

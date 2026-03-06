@@ -1,7 +1,9 @@
 package org.jmouse.meterializer;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Default implementation of {@link ValueResolver}. ⚙️
@@ -68,9 +70,26 @@ public final class DefaultValueResolver implements ValueResolver {
     public Object resolve(ValueExpression value, RenderingExecution execution) {
         return switch (value) {
             case ValueExpression.ConstantValue constant -> constant.value();
+            case ValueExpression.MapValue mapValue -> mapValue.map();
             case ValueExpression.PathValue pathValue -> pathResolver.resolve(pathValue.path(), execution);
+            case ValueExpression.OptionalValue optionalValue -> {
+                try {
+                    yield resolve(optionalValue.value(), execution);
+                } catch (Exception e) {
+                    yield null;
+                }
+            }
             case ValueExpression.RequestAttributeValue attributeValue ->
                     execution.request().attributes().get(attributeValue.name());
+            case ValueExpression.ObjectValue objectValue -> {
+                Map<String, Object>         resolved    = new LinkedHashMap<>();
+
+                for (Map.Entry<String, ValueExpression> entry : objectValue.entries().entrySet()) {
+                    resolved.put(entry.getKey(), resolve(entry.getValue(), execution));
+                }
+
+                yield resolved;
+            }
             case ValueExpression.FormatValue formatValue -> {
                 List<Object> arguments = new ArrayList<>();
                 for (ValueExpression argument : formatValue.arguments()) {

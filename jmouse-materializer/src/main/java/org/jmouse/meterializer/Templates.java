@@ -13,6 +13,9 @@ public final class Templates {
 
     public static NodeTemplate defaultForm(String action, String method) {
         return element("form", form -> form
+                .child(element("style", s -> s
+                        .child(text(".composite-items .composite-item {min-width: 160px;} .composite-items .composite-item:last-child {flex: 1 1 220px;}"))
+                ))
                 .attribute("method", constant(method.toUpperCase()))
                 .attribute("action", constant(action))
                 .attribute("class", constant("p-3"))

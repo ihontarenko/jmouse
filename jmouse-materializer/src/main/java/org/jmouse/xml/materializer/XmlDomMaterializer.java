@@ -193,7 +193,7 @@ public final class XmlDomMaterializer extends AbstractTemplateMaterializer<Node>
         }
 
         String current = element.getAttribute("class");
-        String normalizedCurrent = current == null ? "" : current.trim();
+        String normalizedCurrent = current.trim();
 
         if (normalizedCurrent.isEmpty()) {
             element.setAttribute("class", classNames.trim());

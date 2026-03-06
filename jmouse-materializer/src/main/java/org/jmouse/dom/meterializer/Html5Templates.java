@@ -1,6 +1,7 @@
 package org.jmouse.dom.meterializer;
 
 import org.jmouse.meterializer.NodeTemplate;
+import org.jmouse.meterializer.ValueExpression;
 import org.jmouse.util.Strings;
 
 import static org.jmouse.meterializer.NodeTemplate.*;
@@ -15,6 +16,7 @@ public final class Html5Templates {
         return element("p", block -> block
                 .child(element("button", button -> button
                         .attribute("type", constant(type))
+                        .attribute("class", constant("btn btn-sm btn-dark"))
                         .child(when(
                                 present(request("submitCaption")),
                                 t -> t.add(text(request("submitCaption"))),
@@ -37,16 +39,17 @@ public final class Html5Templates {
     }
 
     public static NodeTemplate input(InputType type, String namePath, String labelPath, String valuePath) {
-        return element("p", block -> block
+        return element("div", block -> block
                 .child(element("label", l -> l
-                        .attribute("for", path(namePath))
+                        .attribute("for", path("id"))
+                        .attribute("class", constant("form-label"))
                         .child(text(path(labelPath)))
                 ))
-                .child(element("br", br -> {}))
                 .child(element("input", b -> b
                         .attribute("type", constant(type.htmlValue()))
-                        .attribute("id", path(namePath))
+                        .attribute("id", path("id"))
                         .attribute("name", path(namePath))
+                        .attribute("class", constant("form-control"))
                         .attributeIf(present(constant(valuePath)), "value", request(valuePath))
                         .attributes(path("attributes"), "name", "value")
                 ))
@@ -76,16 +79,17 @@ public final class Html5Templates {
             String keyPath,
             String valuePath
     ) {
-        return element("p", block -> block
+        return element("div", block -> block
                 .child(element("label", label -> label
-                        .attribute("for", path(namePath))
+                        .attribute("for", path("id"))
+                        .attribute("class", constant("form-label"))
                         .child(text(path(labelPath)))
                 ))
-                .child(element("br", br -> {}))
                 .child(element("select", select -> select
                         .attributes(path("attributes"), "name", "value")
-                        .attribute("id", path(namePath))
+                        .attribute("id", path("id"))
                         .attribute("name", path(namePath))
+                        .attribute("class", constant("form-select"))
                         .child(repeat(
                                 path(optionsPath),
                                 "option",
@@ -143,6 +147,69 @@ public final class Html5Templates {
                             label.child(text(path(valuePath)));
                             label.child(element("br", br -> {}));
                         }))
+                ))
+        );
+    }
+
+    public static NodeTemplate group(String childrenPath) {
+        return element("div", root -> root
+                .attribute("class", constant("field-group"))
+                .child(when(
+                        present(path("description")),
+                        t -> t.add(
+                                element("label", label -> label
+                                        .attribute("class", constant("form-label"))
+                                        .child(text(path("description")))
+                                )
+                        )
+                ))
+                .child(repeat(
+                        path(childrenPath),
+                        "c",
+                        inner -> inner.add(
+                                include(
+                                        format("field.type.%s", path("c.elementType")),
+                                        path("c")
+                                )
+                        ),
+                        ""
+                ))
+        );
+    }
+
+    public static NodeTemplate composite(String childrenPath) {
+        return element("div", root -> root
+                .attribute("class", constant("mb-3"))
+                .child(element("label", label -> label
+                        .attribute("class", constant("form-label"))
+                        .child(text(path("description")))
+                ))
+                .child(element("div", row -> row
+                        .attribute("class", constant("d-flex flex-wrap gap-2 align-items-end"))
+                        .attributes(optional(path("attributes")), "name", "value")
+                        .child(repeat(
+                                path(childrenPath),
+                                "c",
+                                inner -> inner.add(
+                                        element("div", item -> item
+                                                .attribute("class", constant("d-flex flex-column justify-content-end"))
+                                                .attribute("style", constant("min-width: 180px;"))
+                                                .child(include(
+                                                        format("field.type.%s", path("c.elementType")),
+                                                        object(
+                                                                "name", format("%s[%s]", path("name"), path("c.name")),
+                                                                "id", format("%s_%s", path("name"), path("c.name")),
+                                                                "description", path("c.description"),
+                                                                "label", path("c.label"),
+                                                                "options", optional(path("c.options")),
+                                                                "attributes", optional(path("c.attributes")),
+                                                                "elementType", path("c.elementType")
+                                                        )
+                                                ))
+                                        )
+                                ),
+                                ""
+                        ))
                 ))
         );
     }

@@ -2,8 +2,10 @@ package org.jmouse.meterializer;
 
 import org.jmouse.meterializer.build.AttributeMapBuilder;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -44,8 +46,11 @@ import java.util.function.Consumer;
 public sealed interface ValueExpression
         permits ValueExpression.ConstantValue,
                 ValueExpression.PathValue,
+                ValueExpression.OptionalValue,
                 ValueExpression.RequestAttributeValue,
-                ValueExpression.FormatValue {
+                ValueExpression.FormatValue,
+                ValueExpression.MapValue,
+                ValueExpression.ObjectValue {
 
     /**
      * Creates a constant value expression.
@@ -100,6 +105,47 @@ public sealed interface ValueExpression
      */
     static ValueExpression format(String pattern, ValueExpression... arguments) {
         return new ValueExpression.FormatValue(pattern, List.of(arguments));
+    }
+
+    /**
+     * Creates an object-like expression resolved into Map<String, Object>. 🧩
+     *
+     * <pre>{@code
+     * ValueExpression model = ValueExpression.object(
+     *     "name", ValueExpression.format("%s.%s", path("name"), path("c.name")),
+     *     "id", ValueExpression.format("%s_%s", path("name"), path("c.name")),
+     *     "description", path("c.description")
+     * );
+     * }</pre>
+     *
+     * @param keyValues alternating key/value pairs: String, ValueExpression, ...
+     * @return object expression
+     */
+    static ValueExpression object(Object... keyValues) {
+        return new ValueExpression.ObjectValue(keyValues);
+    }
+
+    /**
+     * Creates a {@link ValueExpression} representing a constant map value.
+     *
+     * @param map map value
+     * @return map expression
+     */
+    static ValueExpression map(Map<String, Object> map) {
+        return new MapValue(map);
+    }
+
+    /**
+     * Wraps an expression as optional.
+     *
+     * <p>If the value cannot be resolved or resolves to {@code null},
+     * the resolver may treat it as an absent value instead of failing.</p>
+     *
+     * @param optional wrapped expression
+     * @return optional expression
+     */
+    static ValueExpression optional(ValueExpression optional) {
+        return new ValueExpression.OptionalValue(optional);
     }
 
     /**
@@ -170,6 +216,68 @@ public sealed interface ValueExpression
      * @param arguments nested value expressions
      */
     record FormatValue(String pattern, List<ValueExpression> arguments) implements ValueExpression {
+    }
+
+    /**
+     * {@link ValueExpression} representing a constant map value.
+     *
+     * <p>The map is returned as-is during value resolution.</p>
+     */
+    record MapValue(Map<String, Object> map) implements ValueExpression {
+    }
+
+    /**
+     * {@link ValueExpression} representing an inline object definition.
+     *
+     * <p>
+     * Accepts alternating key/value pairs:
+     * <pre>{@code
+     * new ObjectValue(
+     *     "name", ValueExpression.constant("John"),
+     *     "age",  ValueExpression.constant(30)
+     * )
+     * }</pre>
+     *
+     * <p>Keys must be {@link String} and values must be {@link ValueExpression}.</p>
+     */
+    record ObjectValue(Object... keyValues) implements ValueExpression {
+
+        /**
+         * Validates that key/value pairs are provided.
+         */
+        public ObjectValue {
+            if (keyValues.length % 2 != 0) {
+                throw new IllegalArgumentException("keyValues.length % 2 != 0");
+            }
+        }
+
+        /**
+         * Converts key/value pairs into an ordered map of entries.
+         *
+         * @return map of attribute name → value expression
+         */
+        public Map<String, ValueExpression> entries() {
+            Map<String, ValueExpression> entries = new LinkedHashMap<>();
+
+            for (int index = 0; index < keyValues.length; index += 2) {
+                String key = (String) keyValues[index];
+                ValueExpression value = (ValueExpression) keyValues[index + 1];
+                entries.put(key, value);
+            }
+
+            return entries;
+        }
+    }
+
+    /**
+     * {@link ValueExpression} wrapper indicating that the inner expression is optional.
+     *
+     * <p>
+     * If the wrapped value resolves to {@code null} or is missing, the resolver
+     * may ignore the value instead of treating it as an error.
+     * </p>
+     */
+    record OptionalValue(ValueExpression value) implements ValueExpression {
     }
 
 }
