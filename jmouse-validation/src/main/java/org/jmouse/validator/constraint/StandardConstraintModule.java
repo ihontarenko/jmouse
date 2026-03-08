@@ -27,7 +27,6 @@ public final class StandardConstraintModule implements ConstraintTypeContributor
 
 
         // ---- enum/allowed values
-        registry.register("oneof", OneOfConstraint.class);
         registry.register("oneOf", OneOfConstraint.class);
 
         // ---- null/blank

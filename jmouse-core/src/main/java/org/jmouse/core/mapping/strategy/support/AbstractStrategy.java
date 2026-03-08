@@ -264,7 +264,7 @@ public abstract class AbstractStrategy<T> implements MappingStrategy<T> {
             }
             return null;
         } catch (RuntimeException exception) {
-            LOGGER.error("Getting safety value for '{}' failed. Cause: {}", name, exception.getMessage());
+            LOGGER.warn("Getting safety value for '{}' failed. Cause: {}", name, exception.getMessage());
             return null;
         }
     }

@@ -29,7 +29,7 @@ public final class DefaultValidationProcessor implements ValidationProcessor {
             throw new ValidationException(errors);
         }
 
-        return new DefaultValidationResult<>(objectName, target, errors);
+        return new ObjectValidationResult<>(objectName, target, errors);
     }
 
     private void doValidate(Object target, Errors errors, Hints hints) {

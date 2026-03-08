@@ -1,16 +1,58 @@
 package org.jmouse.dom.meterializer;
 
 import org.jmouse.meterializer.NodeTemplate;
-import org.jmouse.meterializer.ValueExpression;
 import org.jmouse.util.Strings;
 
 import static org.jmouse.meterializer.NodeTemplate.*;
 import static org.jmouse.meterializer.TemplatePredicate.present;
 import static org.jmouse.meterializer.ValueExpression.*;
 
-public final class Html5Templates {
+public final class DefaultTemplates {
 
-    private Html5Templates() {}
+    private DefaultTemplates() {}
+
+    public static NodeTemplate defaultForm() {
+        return defaultForm("", "POST");
+    }
+
+    public static NodeTemplate defaultForm(String action, String method) {
+        return element("form", form -> form
+                .child(element("style", s -> s
+                        .child(text(".composite-items .composite-item {min-width: 160px;} .composite-items .composite-item:last-child {flex: 1 1 220px;}"))
+                ))
+                .attribute("method", constant(method.toUpperCase()))
+                .attribute("action", constant(action))
+                .attribute("class", constant("p-3"))
+
+                .child(element("h3", h -> h.child(text(path("description")))))
+
+                .child(element("p", p -> p
+                        .attribute("class", constant("text-muted"))
+                        .child(text(path("description")))
+                ))
+
+                // Universal: repeat blocks, include per-field template
+                .child(repeat(
+                        path("fields"),
+                        "field",
+                        body -> body.add(
+                                include(
+                                        format("field.type.%s", path("field.elementType")),
+                                        path("field")
+                                )
+                        )
+                ))
+
+                .child(element("hr", __ -> {}))
+
+                .child(include(
+                        constant("default.button.submit"),
+                        root()
+                ))
+
+                .child(element("hr", __ -> {}))
+        );
+    }
 
     public static NodeTemplate button(String type, String defaultCaption) {
         return element("p", block -> block

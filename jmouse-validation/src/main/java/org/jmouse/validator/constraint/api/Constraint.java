@@ -87,4 +87,13 @@ public interface Constraint {
                 (ConstraintExecutor<Constraint>) executor();
         return executor.test(value, this);
     }
+
+    /**
+     * Returns message arguments used for message interpolation.
+     *
+     * @return constraint arguments (never {@code null})
+     */
+    default Object[] arguments() {
+        return new Object[0];
+    }
 }

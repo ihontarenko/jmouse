@@ -174,7 +174,7 @@ public abstract class AbstractTemplateMaterializer<R> implements TemplateMateria
         Map<String, ObjectAccessor> variables = execution.variables();
 
         for (Object key : keys) {
-            Object entry = collectionAccessor.get(key);
+            Object         entry         = collectionAccessor.get(key);
             ObjectAccessor entryAccessor = execution.accessorWrapper().wrapIfNecessary(entry);
 
             variables.put(repeat.itemVariableName(), entryAccessor);

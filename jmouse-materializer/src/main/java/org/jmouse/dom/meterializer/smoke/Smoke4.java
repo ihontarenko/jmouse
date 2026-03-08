@@ -3,10 +3,7 @@ package org.jmouse.dom.meterializer.smoke;
 import org.jmouse.core.access.ObjectAccessorWrapper;
 import org.jmouse.dom.CorrectNodeDepth;
 import org.jmouse.dom.Node;
-import org.jmouse.dom.meterializer.DOMMaterializer;
-import org.jmouse.dom.meterializer.DOMRenderingPipeline;
-import org.jmouse.dom.meterializer.BootstrapTemplates;
-import org.jmouse.dom.meterializer.BootstrapThemeModule;
+import org.jmouse.dom.meterializer.*;
 import org.jmouse.dom.renderer.RendererContext;
 import org.jmouse.dom.renderer.Renderers;
 import org.jmouse.dom.renderer.RenderingProcessor;
@@ -42,7 +39,7 @@ public final class Smoke4 {
     }
 
     private static void registerTemplates(TemplateRegistry registry) {
-        registry.register("smoke4/form", Templates.defaultForm());
+        registry.register("smoke4/form", DefaultTemplates.defaultForm());
 
         registry.register("field.type.text",
                           BootstrapTemplates.inputText("name", "label", "value"));

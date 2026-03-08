@@ -137,8 +137,6 @@ public interface Errors {
         rejectValue(path, errorCode, null);
     }
 
-    // ===== field metadata =====
-
     /**
      * Read current field value from the underlying target/binding model.
      *

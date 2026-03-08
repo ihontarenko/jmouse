@@ -121,6 +121,11 @@ public enum ComparisonCalculator implements Calculator<Boolean> {
     public static class EqualOperation implements BiPredicate<Object, Object> {
         @Override
         public boolean test(Object left, Object right) {
+            if (left == null && right == null) {
+                return true;
+            } else if (left == null) {
+                return false;
+            }
             return left.equals(right);
         }
     }

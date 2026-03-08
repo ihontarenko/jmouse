@@ -90,6 +90,16 @@ public final class MinMaxConstraint implements Constraint {
     }
 
     /**
+     * Returns message arguments used during interpolation.
+     *
+     * @return constraint arguments (min, max)
+     */
+    @Override
+    public Object[] arguments() {
+        return new Object[]{min, max};
+    }
+
+    /**
      * Returns the shared executor instance.
      */
     @Override

@@ -7,7 +7,7 @@ import org.jmouse.web.mvc.WebApplicationLauncher;
 @BeanScan(MatchableSecurityFilterChain.class)
 public class Application {
 
-    public static void main(String[] arguments) {
+    static void main(String[] arguments) {
         new WebApplicationLauncher(Application.class).launch(arguments);
     }
 

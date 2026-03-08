@@ -83,7 +83,9 @@ public class BinaryOperation extends AbstractExpression {
         if (operator instanceof ComparisonOperator) {
             // aligning data types to a single one for comparisons
             Conversion conversion = context.getConversion();
-            right = conversion.convert(right, left.getClass());
+            if (left != null) {
+                right = conversion.convert(right, left.getClass());
+            }
         }
 
         return operator.getCalculator().calculate(left, right);
