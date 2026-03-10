@@ -54,7 +54,7 @@ public final class SelectSelected implements NodeRule {
         SubmissionState submissionState = submission.orElseThrow();
 
         String name      = select.getAttribute("name");
-        Object submitted = submissionState.value(name);
+        Object submitted = submissionState.getValue(name);
         String expected  = String.valueOf(submitted);
 
         for (Node child : select.getChildren()) {

@@ -22,6 +22,8 @@ import java.util.List;
  */
 public class ObjectAccessorWrapper extends AbstractAccessorWrapper {
 
+    private static final AccessorWrapper WRAPPER = new ObjectAccessorWrapper();
+
     /**
      * Constructs a {@code ObjectAccessorWrapper} with a default set of {@link ObjectAccessorProvider} instances.
      * <p>
@@ -49,5 +51,9 @@ public class ObjectAccessorWrapper extends AbstractAccessorWrapper {
      */
     public ObjectAccessorWrapper(List<ObjectAccessorProvider> providers) {
         super(providers);
+    }
+
+    public static AccessorWrapper defaults() {
+        return WRAPPER;
     }
 }

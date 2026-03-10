@@ -1,5 +1,9 @@
 package org.jmouse.meterializer;
 
+import org.jmouse.core.access.AccessorWrapper;
+import org.jmouse.core.access.ObjectAccessorWrapper;
+import org.jmouse.core.access.ValueNavigator;
+
 import java.util.Map;
 
 /**
@@ -16,6 +20,9 @@ public record SubmissionState(
      * Request attribute key used to expose {@link SubmissionState}.
      */
     public static final String REQUEST_ATTRIBUTE = SubmissionState.class.getName() + ".request";
+
+    private static final ValueNavigator  NAVIGATOR = ValueNavigator.defaultNavigator();
+    private static final AccessorWrapper WRAPPER   = new ObjectAccessorWrapper();
 
     /**
      * Canonical constructor with defensive copies.
@@ -38,14 +45,23 @@ public record SubmissionState(
      * Returns {@code true} if a value for the field exists.
      */
     public boolean hasValue(String fieldName) {
-        return values.containsKey(fieldName);
+        if (values.containsKey(fieldName)) {
+            return true;
+        }
+        return NAVIGATOR.navigate(WRAPPER.wrap(values), fieldName) != null;
     }
 
     /**
      * Returns submitted value for the field or {@code null}.
      */
-    public Object value(String fieldName) {
-        return values.get(fieldName);
+    public Object getValue(String fieldName) {
+        Object value = values.get(fieldName);
+
+        if (value == null) {
+            value = NAVIGATOR.navigate(WRAPPER.wrap(values), fieldName);
+        }
+
+        return value;
     }
 
     /**

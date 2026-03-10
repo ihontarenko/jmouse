@@ -23,7 +23,7 @@ public final class BootstrapTransformers {
                                 not(insideAncestor(a -> constantAttributeValues(a, "data-jm-wrap", "select")))
                         ),
                         chain(
-                                addClass("mb-3"),
+                                // addClass("mb-3"),
                                 setAttribute("data-jm-wrap", "select")
                         )
                 )

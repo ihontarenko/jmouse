@@ -18,34 +18,16 @@ public final class StandardConstraintModule implements ConstraintTypeContributor
 
     public static void registerDefaults(ConstraintTypeRegistry registry) {
         Verify.nonNull(registry, "registry");
+        registry.register("MinMax", MinMaxConstraint.class)
+                .alias("MinMax", "Min")
+                .alias("MinMax", "Max")
+                .alias("MinMax", "Range")
+                .register("oneOf", OneOfConstraint.class)
+                .register("required", RequiredConstraint.class)
+                .register("notBlank", NotBlankConstraint.class)
+                .alias("notBlank", "notEmpty")
+                .register("webLink", WebLinkConstraint.class);
 
-        // ---- numeric/range
-        registry.register("MinMax", MinMaxConstraint.class);
-        registry.alias("MinMax", "Min");
-        registry.alias("MinMax", "Max");
-        registry.alias("MinMax", "Range");
-
-
-        // ---- enum/allowed values
-        registry.register("oneOf", OneOfConstraint.class);
-
-        // ---- null/blank
-//        registry.register("notnull",  NotNullConstraint.class);
-//        registry.register("notNull",  NotNullConstraint.class);
-//
-//        registry.register("notblank", NotBlankConstraint.class);
-//        registry.register("notBlank", NotBlankConstraint.class);
-//
-//        // ---- size/length
-//        registry.register("size",   SizeConstraint.class);
-//        registry.register("length", SizeConstraint.class);
-//
-//        // ---- pattern/email
-//        registry.register("pattern", PatternConstraint.class);
-//        registry.register("email",   EmailConstraint.class);
-//
-//        // ---- numeric sign
-//        registry.register("positive", PositiveConstraint.class);
     }
 
     private StandardConstraintModule() {}

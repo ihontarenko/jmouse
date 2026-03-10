@@ -77,6 +77,7 @@ public final class SubmissionDecorationHook implements RenderingHook<Node> {
     @Override
     public void afterMaterialize(Node root, RenderingExecution execution) {
         SubmissionState submission = readSubmission(execution.request().attributes());
+
         if (submission == null) {
             return;
         }
@@ -138,7 +139,7 @@ public final class SubmissionDecorationHook implements RenderingHook<Node> {
             return;
         }
 
-        Object value = submission.value(fieldName);
+        Object value = submission.getValue(fieldName);
         String text  = value == null ? "" : String.valueOf(value);
 
         if (tagName == TagName.INPUT) {
@@ -164,6 +165,8 @@ public final class SubmissionDecorationHook implements RenderingHook<Node> {
      * @param submission submission state
      */
     private void applyError(Node node, String fieldName, SubmissionState submission) {
+        fieldName = canonicalName(fieldName);
+
         if (!submission.hasError(fieldName)) {
             return;
         }
@@ -223,5 +226,29 @@ public final class SubmissionDecorationHook implements RenderingHook<Node> {
                 child.addAttribute("selected", "selected");
             }
         }
+    }
+
+    private String canonicalName(String fieldName) {
+        if (fieldName == null || fieldName.isBlank()) {
+            return fieldName;
+        }
+
+        String canonical = fieldName
+                .replace("[", ".")
+                .replace("]", "");
+
+        while (canonical.contains("..")) {
+            canonical = canonical.replace("..", ".");
+        }
+
+        if (canonical.startsWith(".")) {
+            canonical = canonical.substring(1);
+        }
+
+        if (canonical.endsWith(".")) {
+            canonical = canonical.substring(0, canonical.length() - 1);
+        }
+
+        return canonical;
     }
 }
