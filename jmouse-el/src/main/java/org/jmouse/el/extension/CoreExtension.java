@@ -55,7 +55,9 @@ public class CoreExtension implements Extension {
                 new UclastFunction(),
                 new UcfirstFunction(),
                 new LclastFunction(),
-                new LcfirstFunction()
+                new LcfirstFunction(),
+                // extra-functions
+                new ClassFunction()
         );
     }
 

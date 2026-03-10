@@ -1,11 +1,9 @@
 package org.jmouse.action.smoke;
 
-import org.jmouse.action.ActionExecutor;
-import org.jmouse.action.ActionRegistry;
-import org.jmouse.action.DefaultActionExecutor;
-import org.jmouse.action.DefaultActionRegistry;
+import org.jmouse.action.*;
 import org.jmouse.action.adapter.el.ActionELModule;
 import org.jmouse.action.adapter.el.ActionExpressionAdapter;
+import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.scope.AbstractContext;
 import org.jmouse.core.scope.BeanProvider;
 import org.jmouse.core.scope.Context;
@@ -19,18 +17,27 @@ public class SmokeA {
         ExpressionLanguage el = new ExpressionLanguage();
         ActionELModule.configure(el);
 
-        ActionRegistry registry = new DefaultActionRegistry();
+//        ActionRegistry registry = new DefaultActionRegistry();
+//
+//        registry.register("autoload", request -> {
+//            System.out.println("executing autoload");
+//
+//            request.arguments().forEach(
+//                    (k,v) -> System.out.println(k + " = " + v));
+//
+//            return null;
+//        });
 
-        registry.register("autoload", request -> {
-            System.out.println("executing autoload");
+        ActionRegistry registryB = new ConfigurableActionRegistry(new DefaultActionRegistry(), Mappers.defaultMapper())
+                .register("autoload", request -> {
+                    System.out.println("executing autoload");
+                    System.out.println(request.arguments());
+                    return null;
+                })
+                .register("loadEnum", EnumDataLoader.class)
+                .unwrap();
 
-            request.arguments().forEach(
-                    (k,v) -> System.out.println(k + " = " + v));
-
-            return null;
-        });
-
-        ActionExecutor executor = new DefaultActionExecutor(registry);
+        ActionExecutor executor = new DefaultActionExecutor(registryB);
 
         ActionExpressionAdapter adapter =
                 new ActionExpressionAdapter(el, executor);
@@ -44,6 +51,11 @@ public class SmokeA {
 
         adapter.execute(
                 "@Action[autoload]{'source':'user'}",
+                context
+        );
+
+        adapter.execute(
+                "@Action[loadEnum]{'source':'org.jmouse.action.ActionDefinition' | class,'target':class('org.jmouse.action.ActionDefinition')}",
                 context
         );
     }
