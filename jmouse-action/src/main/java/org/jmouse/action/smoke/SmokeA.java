@@ -55,7 +55,7 @@ public class SmokeA {
         );
 
         adapter.execute(
-                "@Action[loadEnum]{'source':'org.jmouse.action.ActionDefinition' | class,'target':class('org.jmouse.action.ActionDefinition')}",
+                "@Action[loadEnum]{'source' : 'org.jmouse.action.ActionDefinition' | class, 'target' : class('org.jmouse.action.ActionDefinition')}",
                 context
         );
     }

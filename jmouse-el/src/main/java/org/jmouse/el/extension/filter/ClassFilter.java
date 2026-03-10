@@ -43,7 +43,7 @@ public class ClassFilter extends AbstractFilter {
     @Override
     public Object apply(Object input, Arguments arguments, EvaluationContext context, TypeClassifier type) {
         try {
-            String classType = Verify.notBlank(String.valueOf(arguments.getFirst()), "class value");
+            String classType = Verify.notBlank(String.valueOf(input), "class value");
             return Class.forName(classType, false, Thread.currentThread().getContextClassLoader());
         } catch (ClassNotFoundException ignored) { }
         return null;
