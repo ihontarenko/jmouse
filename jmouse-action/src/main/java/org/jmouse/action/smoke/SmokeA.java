@@ -3,30 +3,30 @@ package org.jmouse.action.smoke;
 import org.jmouse.action.*;
 import org.jmouse.action.adapter.el.ActionELModule;
 import org.jmouse.action.adapter.el.ActionExpressionAdapter;
+import org.jmouse.action.adapter.mapper.ActionDefinitionMapper;
+import org.jmouse.action.annotation.Action;
+import org.jmouse.action.support.ActionAnnotationProcessor;
+import org.jmouse.core.annotation.*;
+import org.jmouse.core.invoke.ContextMethodArgumentResolver;
+import org.jmouse.core.invoke.InvocationRequestMethodArgumentResolver;
+import org.jmouse.core.invoke.MethodArgumentResolverComposite;
+import org.jmouse.core.invoke.MethodInvoker;
+import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.scope.AbstractContext;
 import org.jmouse.core.scope.BeanProvider;
 import org.jmouse.core.scope.Context;
 import org.jmouse.el.ExpressionLanguage;
 
+import java.util.List;
+
 public class SmokeA {
 
 
     public static void main(String... arguments) {
-4
+
         ExpressionLanguage el = new ExpressionLanguage();
         ActionELModule.configure(el);
-
-//        ActionRegistry registry = new DefaultActionRegistry();
-//
-//        registry.register("autoload", request -> {
-//            System.out.println("executing autoload");
-//
-//            request.arguments().forEach(
-//                    (k,v) -> System.out.println(k + " = " + v));
-//
-//            return null;
-//        });
 
         ActionRegistry registryB = new ConfigurableActionRegistry(new SimpleActionRegistry(), Mappers.defaultMapper())
                 .register("autoload", request -> {
@@ -49,8 +49,29 @@ public class SmokeA {
             }
         };
 
+        AnnotationProcessingContext annotationContext = new AnnotationProcessingContext.Default();
+
+        AnnotationBootstrapper bootstrapper =
+                new AnnotationBootstrapper.Default(new AnnotationDiscovery.Default());
+
+        bootstrapper.bootstrap(
+                annotationContext,
+                List.of(new ActionAnnotationProcessor.Default(registryB, getMethodInvoker(Mappers.defaultMapper()))),
+                SmokeA.class
+        );
+
         adapter.execute(
                 "@Action[autoload]{'source':'user'}",
+                context
+        );
+
+        adapter.execute(
+                "@Action[autoloadA]{'source':'A'}",
+                context
+        );
+
+        adapter.execute(
+                "@Action[autoloadB]{'source':'B'}",
                 context
         );
 
@@ -58,6 +79,28 @@ public class SmokeA {
                 "@Action[loadEnum]{'source' : 'org.jmouse.action.ActionDefinition' | class, 'target' : class('org.jmouse.action.ActionDefinition')}",
                 context
         );
+    }
+
+    public static MethodInvoker getMethodInvoker(Mapper objectMapper) {
+        ActionDefinitionMapper mapper = new ActionDefinitionMapper(objectMapper);
+
+        MethodArgumentResolverComposite resolvers = new MethodArgumentResolverComposite()
+                .addResolver(new ActionRequestMethodArgumentResolver())
+                .addResolver(new ContextMethodArgumentResolver())
+                .addResolver(new InvocationRequestMethodArgumentResolver())
+                .addResolver(new MappedActionArgumentResolver(mapper));
+
+        return new MethodInvoker.Default(resolvers);
+    }
+
+    @Action("autoloadA")
+    public void autoload(ActionRequest request) {
+        System.out.println("A");
+    }
+
+    @Action("autoloadB")
+    public void autoload(ActionRequest request, Context context) {
+        System.out.println("B");
     }
 
 }
