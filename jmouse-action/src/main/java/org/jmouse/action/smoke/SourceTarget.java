@@ -3,7 +3,7 @@ package org.jmouse.action.smoke;
 import org.jmouse.action.TypedAction;
 import org.jmouse.core.scope.Context;
 
-public class EnumDataLoader implements TypedAction<Object> {
+public class SourceTarget implements TypedAction<Object> {
 
     private Object source;
     private Object target;

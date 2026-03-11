@@ -5,7 +5,10 @@ import org.jmouse.core.MethodParameter;
 import org.jmouse.core.Verify;
 import org.jmouse.core.invoke.InvocationRequest;
 import org.jmouse.core.invoke.MethodArgumentResolver;
+import org.jmouse.core.reflection.TypeMatchers;
 import org.jmouse.core.scope.Context;
+
+import static org.jmouse.core.reflection.TypeMatchers.isSubtype;
 
 /**
  * {@link MethodArgumentResolver} that maps action definition data
@@ -43,11 +46,11 @@ public class MappedActionArgumentResolver implements MethodArgumentResolver {
      */
     @Override
     public boolean supports(MethodParameter parameter) {
-        Class<?> type = parameter.getParameterType();
-
-        return !Context.class.isAssignableFrom(type)
-                && !ActionRequest.class.isAssignableFrom(type)
-                && !InvocationRequest.class.isAssignableFrom(type);
+        return isSubtype(Context.class)
+                .and(isSubtype(ActionRequest.class))
+                .and(isSubtype(InvocationRequest.class))
+                .not()
+                .matches(parameter.getParameterType());
     }
 
     /**

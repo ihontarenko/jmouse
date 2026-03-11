@@ -34,7 +34,7 @@ public class SmokeA {
                     System.out.println(request.arguments());
                     return null;
                 })
-                .register("loadEnum", EnumDataLoader.class)
+                .register("loadEnum", SourceTarget.class)
                 .unwrap();
 
         ActionExecutor executor = ActionExecutor.defaults(registryB);
@@ -71,7 +71,7 @@ public class SmokeA {
         );
 
         adapter.execute(
-                "@Action[autoloadB]{'source':'B'}",
+                "@Action[autoloadB]{'source':'B','target':[1, 2, 4, {'a':33D/9}]|list}",
                 context
         );
 
@@ -90,17 +90,19 @@ public class SmokeA {
                 .addResolver(new InvocationRequestMethodArgumentResolver())
                 .addResolver(new MappedActionArgumentResolver(mapper));
 
-        return new MethodInvoker.Default(resolvers);
+        return new MethodInvoker.Default(new ArrayArgumentsMethodArgumentResolver(
+                1, 2, 3, List.of("a", "b", "c")
+        ));
     }
 
     @Action("autoloadA")
-    public void autoload(ActionRequest request, EnumDataLoader loader) {
+    public void autoload(int a, int b, int c, Object d) {
         System.out.println("A");
     }
 
-    @Action("autoloadB")
-    public void autoload(ActionRequest request, Context context) {
-        System.out.println("B");
-    }
+//    @Action("autoloadB")
+//    public void autoload(ActionRequest request, Context context, SourceTarget sourceTarget) {
+//        System.out.println("B");
+//    }
 
 }
