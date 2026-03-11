@@ -7,6 +7,10 @@ import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.parser.sub.KeyValueParser;
 
+import static org.jmouse.el.lexer.BasicToken.*;
+import static org.jmouse.el.lexer.BasicToken.T_CLOSE_CURLY;
+import static org.jmouse.el.lexer.BasicToken.T_OPEN_CURLY;
+
 /**
  * EL parser that recognizes action definition expressions starting with '{@code @}'. ⚙️
  *
@@ -15,7 +19,7 @@ import org.jmouse.el.parser.sub.KeyValueParser;
  * </p>
  *
  * <pre>{@code
- * @Action[name]{ key:value }
+ * @Action[name]{key:value}
  * }</pre>
  *
  * <p>
@@ -67,20 +71,20 @@ public class ActionDefinitionParser implements Parser {
      */
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
-        cursor.ensure(BasicToken.T_AT);
-        cursor.ensure(BasicToken.T_IDENTIFIER);
+        cursor.ensure(T_AT);
+        cursor.ensure(T_IDENTIFIER);
 
-        cursor.ensure(BasicToken.T_OPEN_BRACKET);
+        cursor.ensure(T_OPEN_BRACKET);
         Node definition = new ActionDefinitionNode(
-                cursor.ensure(BasicToken.T_IDENTIFIER).value()
+                cursor.ensure(T_IDENTIFIER).value()
         );
         cursor.ensure(BasicToken.T_CLOSE_BRACKET);
 
-        cursor.ensure(BasicToken.T_OPEN_CURLY);
-        if (!cursor.isCurrent(BasicToken.T_CLOSE_CURLY)) {
+        cursor.ensure(T_OPEN_CURLY);
+        if (!cursor.isCurrent(T_CLOSE_CURLY)) {
             context.getParser(KeyValueParser.class).parse(cursor, definition, context);
         }
-        cursor.ensure(BasicToken.T_CLOSE_CURLY);
+        cursor.ensure(T_CLOSE_CURLY);
 
         parent.add(definition);
     }
@@ -93,7 +97,9 @@ public class ActionDefinitionParser implements Parser {
      */
     @Override
     public boolean supports(TokenCursor cursor) {
-        return cursor.matchesSequence(BasicToken.T_AT, BasicToken.T_IDENTIFIER, BasicToken.T_OPEN_BRACKET);
+        return cursor.matchesSequence(
+                T_AT, T_IDENTIFIER, T_OPEN_BRACKET, T_IDENTIFIER
+        );
     }
 
 }

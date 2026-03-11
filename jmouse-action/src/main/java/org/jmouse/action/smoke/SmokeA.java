@@ -13,7 +13,7 @@ public class SmokeA {
 
 
     public static void main(String... arguments) {
-
+4
         ExpressionLanguage el = new ExpressionLanguage();
         ActionELModule.configure(el);
 
@@ -28,7 +28,7 @@ public class SmokeA {
 //            return null;
 //        });
 
-        ActionRegistry registryB = new ConfigurableActionRegistry(new DefaultActionRegistry(), Mappers.defaultMapper())
+        ActionRegistry registryB = new ConfigurableActionRegistry(new SimpleActionRegistry(), Mappers.defaultMapper())
                 .register("autoload", request -> {
                     System.out.println("executing autoload");
                     System.out.println(request.arguments());
@@ -37,7 +37,7 @@ public class SmokeA {
                 .register("loadEnum", EnumDataLoader.class)
                 .unwrap();
 
-        ActionExecutor executor = new DefaultActionExecutor(registryB);
+        ActionExecutor executor = new ActionExecutor.Default(registryB);
 
         ActionExpressionAdapter adapter =
                 new ActionExpressionAdapter(el, executor);
