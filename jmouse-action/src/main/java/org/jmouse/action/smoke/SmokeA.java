@@ -37,7 +37,7 @@ public class SmokeA {
                 .register("loadEnum", EnumDataLoader.class)
                 .unwrap();
 
-        ActionExecutor executor = new ActionExecutor.Default(registryB);
+        ActionExecutor executor = ActionExecutor.defaults(registryB);
 
         ActionExpressionAdapter adapter =
                 new ActionExpressionAdapter(el, executor);
@@ -52,7 +52,7 @@ public class SmokeA {
         AnnotationProcessingContext annotationContext = new AnnotationProcessingContext.Default();
 
         AnnotationBootstrapper bootstrapper =
-                new AnnotationBootstrapper.Default(new AnnotationDiscovery.Default());
+                AnnotationBootstrapper.defaults(AnnotationDiscovery.defaults());
 
         bootstrapper.bootstrap(
                 annotationContext,
@@ -66,7 +66,7 @@ public class SmokeA {
         );
 
         adapter.execute(
-                "@Action[autoloadA]{'source':'A'}",
+                "@Action[autoloadA]{'source':'A', 'target':22d/7}",
                 context
         );
 
@@ -94,7 +94,7 @@ public class SmokeA {
     }
 
     @Action("autoloadA")
-    public void autoload(ActionRequest request) {
+    public void autoload(ActionRequest request, EnumDataLoader loader) {
         System.out.println("A");
     }
 

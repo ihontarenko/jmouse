@@ -4,22 +4,31 @@ import org.jmouse.core.Verify;
 import org.jmouse.core.scope.Context;
 
 /**
- * Runtime request for method invocation. ⚙️
+ * Describes a runtime request for method invocation. ⚙️
+ *
+ * <p>
+ * Encapsulates the {@link InvocableMethod} to execute and the
+ * associated {@link Context} used during argument resolution.
+ * </p>
  */
 public interface InvocationRequest {
 
     /**
-     * Returns target invocable method.
+     * Returns the target invocable method.
+     *
+     * @return invocable method
      */
     InvocableMethod method();
 
     /**
      * Returns invocation context.
+     *
+     * @return invocation context
      */
     Context context();
 
     /**
-     * Default {@link InvocationRequest} implementation. 🧱
+     * Default immutable {@link InvocationRequest} implementation. 🧱
      */
     record Default(
             InvocableMethod method,

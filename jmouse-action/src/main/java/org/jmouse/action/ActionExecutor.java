@@ -39,6 +39,10 @@ public interface ActionExecutor {
      */
     <T> T execute(ActionRequest request);
 
+    static ActionExecutor defaults(ActionRegistry registry) {
+        return new Default(registry);
+    }
+
     /**
      * Default {@link ActionExecutor} implementation backed by an {@link ActionRegistry}. ⚙️
      *

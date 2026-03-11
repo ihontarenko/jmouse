@@ -16,10 +16,12 @@ public class ActionRequestMethodArgumentResolver implements MethodArgumentResolv
 
     @Override
     public Object resolve(MethodParameter parameter, InvocationRequest request) {
-        if (request instanceof ActionInvocationRequest actionInvocationRequest) {
-            return actionInvocationRequest.actionRequest();
+        if (request instanceof ActionInvocationRequest invocationRequest) {
+            return invocationRequest.actionRequest();
         }
 
-        throw new IllegalStateException("InvocationRequest is not ActionInvocationRequest.");
+        throw new IllegalStateException("Invocation request is not '%s'.".formatted(
+                ActionInvocationRequest.class.getName()
+        ));
     }
 }

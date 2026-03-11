@@ -13,7 +13,7 @@ import java.util.function.Supplier;
  * <p>
  * This component adapts the generic {@link Mapper} infrastructure for the
  * action subsystem. It converts the {@link ActionDefinition#arguments()}
- * map into a concrete {@link TypedAction} configuration object.
+ * map into a concrete {@link org.jmouse.action.TypedAction} configuration object.
  * </p>
  *
  * <p>

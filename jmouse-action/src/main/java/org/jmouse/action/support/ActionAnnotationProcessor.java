@@ -3,7 +3,6 @@ package org.jmouse.action.support;
 import org.jmouse.action.ActionRegistry;
 import org.jmouse.action.MethodActionHandlerAdapter;
 import org.jmouse.action.annotation.Action;
-import org.jmouse.core.Verify;
 import org.jmouse.core.annotation.AnnotationProcessingContext;
 import org.jmouse.core.annotation.support.AbstractMethodAnnotationProcessor;
 import org.jmouse.core.invoke.InvocableMethod;
@@ -12,18 +11,20 @@ import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Method;
 
+import static org.jmouse.core.Verify.nonNull;
+
 /**
  * Registers {@link Action}-annotated methods into {@link ActionRegistry}. 🚀
  */
 public abstract class ActionAnnotationProcessor extends AbstractMethodAnnotationProcessor<Action> {
 
-    private final ActionRegistry actionRegistry;
+    private final ActionRegistry registry;
     private final MethodInvoker  methodInvoker;
 
-    protected ActionAnnotationProcessor(ActionRegistry actionRegistry, MethodInvoker methodInvoker) {
+    protected ActionAnnotationProcessor(ActionRegistry registry, MethodInvoker methodInvoker) {
         super(Action.class);
-        this.actionRegistry = Verify.nonNull(actionRegistry, "registry");
-        this.methodInvoker = Verify.nonNull(methodInvoker, "methodInvoker");
+        this.registry = nonNull(registry, "registry");
+        this.methodInvoker = nonNull(methodInvoker, "methodInvoker");
     }
 
     @Override
@@ -31,7 +32,7 @@ public abstract class ActionAnnotationProcessor extends AbstractMethodAnnotation
         Object          target    = resolveTarget(method, annotation, context);
         InvocableMethod invocable = new InvocableMethod(target, method);
 
-        actionRegistry.register(
+        registry.register(
                 annotation.value(),
                 new MethodActionHandlerAdapter(invocable, methodInvoker)
         );

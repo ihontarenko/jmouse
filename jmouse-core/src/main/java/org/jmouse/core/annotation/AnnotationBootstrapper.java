@@ -7,11 +7,17 @@ import java.util.List;
 
 /**
  * Bootstraps annotation processors against scan roots. 🚀
+ *
+ * <p>
+ * Coordinates annotation discovery and processor execution.
+ * For each registered {@link AnnotationProcessor}, the bootstrapper
+ * finds matching candidates and delegates them to the processor.
+ * </p>
  */
 public interface AnnotationBootstrapper {
 
     /**
-     * Applies all registered processors to discovered candidates.
+     * Applies all processors to discovered candidates.
      *
      * @param context     processing context
      * @param processors  processors to execute
@@ -24,6 +30,17 @@ public interface AnnotationBootstrapper {
     );
 
     /**
+     * Returns default bootstrapper implementation.
+     *
+     * @param discovery annotation discovery strategy
+     *
+     * @return default bootstrapper
+     */
+    static AnnotationBootstrapper defaults(AnnotationDiscovery discovery) {
+        return new Default(discovery);
+    }
+
+    /**
      * Default {@link AnnotationBootstrapper} implementation. 🧱
      */
     class Default implements AnnotationBootstrapper {
@@ -34,6 +51,9 @@ public interface AnnotationBootstrapper {
             this.discovery = Verify.nonNull(discovery, "discovery");
         }
 
+        /**
+         * Runs all processors against discovered annotation candidates.
+         */
         @Override
         public void bootstrap(
                 AnnotationProcessingContext context,
@@ -48,6 +68,9 @@ public interface AnnotationBootstrapper {
             }
         }
 
+        /**
+         * Discovers and processes candidates for a single processor.
+         */
         private <A extends Annotation> void processProcessor(
                 AnnotationProcessingContext context,
                 AnnotationProcessor<A> processor,

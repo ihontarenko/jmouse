@@ -6,32 +6,54 @@ import java.lang.reflect.AnnotatedElement;
 import static org.jmouse.core.Verify.nonNull;
 
 /**
- * Represents a discovered annotated element. 🔎
+ * Describes a discovered annotated element. 🔎
+ *
+ * <p>
+ * Combines the annotation instance, target element, declaring class,
+ * and element kind into a single processing model.
+ * </p>
  *
  * @param <A> annotation type
  */
 public interface AnnotationCandidate<A extends Annotation> {
 
     /**
-     * Returns discovered annotation instance.
+     * Returns the discovered annotation instance.
+     *
+     * @return annotation instance
      */
     A annotation();
 
     /**
-     * Returns annotated element.
+     * Returns the annotated element.
+     *
+     * @return annotated element
      */
     AnnotatedElement element();
 
     /**
-     * Returns declaring/owning class.
+     * Returns the declaring or owning class.
+     *
+     * @return declaring class
      */
     Class<?> declaringClass();
 
     /**
-     * Returns candidate kind.
+     * Returns the candidate kind.
+     *
+     * @return element kind
      */
     AnnotationElementKind kind();
 
+    /**
+     * Default immutable {@link AnnotationCandidate} implementation. 🧱
+     *
+     * @param annotation     discovered annotation
+     * @param element        annotated element
+     * @param declaringClass declaring or owning class
+     * @param kind           element kind
+     * @param <A>            annotation type
+     */
     record Default<A extends Annotation>(
             A annotation,
             AnnotatedElement element,

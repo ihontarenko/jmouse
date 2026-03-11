@@ -8,26 +8,50 @@ import java.util.List;
 import static org.jmouse.core.Verify.nonNull;
 
 /**
- * Invokes bound methods. ▶️
+ * Strategy for invoking bound methods. ▶️
+ *
+ * <p>
+ * Responsible for resolving method arguments and executing the target method.
+ * Implementations may use reflection, bytecode generation, or other invocation
+ * mechanisms.
+ * </p>
  */
 public interface MethodInvoker {
 
     /**
-     * Invokes method for the given request.
+     * Invokes a method using the provided request.
+     *
+     * @param request invocation request
+     * @param <T>     expected return type
+     *
+     * @return invocation result
      */
     <T> T invoke(InvocationRequest request);
 
     /**
      * Default reflection-based {@link MethodInvoker}. 🧱
+     *
+     * <p>
+     * Resolves method parameters via {@link MethodArgumentResolver}
+     * and invokes the method using standard Java reflection.
+     * </p>
      */
     class Default implements MethodInvoker {
 
         private final MethodArgumentResolver argumentResolver;
 
+        /**
+         * Creates invoker with the given argument resolver.
+         *
+         * @param argumentResolver argument resolver
+         */
         public Default(MethodArgumentResolver argumentResolver) {
             this.argumentResolver = nonNull(argumentResolver, "argumentResolver");
         }
 
+        /**
+         * Resolves arguments and invokes the target method.
+         */
         @Override
         @SuppressWarnings("unchecked")
         public <T> T invoke(InvocationRequest request) {

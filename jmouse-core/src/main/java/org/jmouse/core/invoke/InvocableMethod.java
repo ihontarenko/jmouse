@@ -20,12 +20,10 @@ public class InvocableMethod {
     private final List<MethodParameter> parameters;
 
     public InvocableMethod(Object target, Method method) {
+        this.descriptor = new MethodIntrospector(method).introspect().toDescriptor();
         this.target = target;
         this.method = method;
-        this.descriptor = new MethodIntrospector(method).introspect().toDescriptor();
-        this.parameters = Stream.of(method.getParameters())
-                .map(MethodParameter::forParameter)
-                .toList();
+        this.parameters = Stream.of(method.getParameters()).map(MethodParameter::forParameter).toList();
     }
 
     public Object getTarget() {

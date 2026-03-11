@@ -10,25 +10,47 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Discovers annotated elements in classpath. 🔍
+ * Discovers annotation candidates in the classpath. 🔍
+ *
+ * <p>
+ * Scans provided base classes and inspects discovered types, methods,
+ * and fields for the requested annotation.
+ * </p>
  */
 public interface AnnotationDiscovery {
 
     /**
-     * Finds all candidates for the given annotation type.
+     * Finds candidates for the given annotation type.
      *
-     * @param annotationType annotation type
+     * @param annotationType annotation type to search for
      * @param baseClasses    scan roots
      * @param <A>            annotation type
-     * @return discovered candidates
+     *
+     * @return immutable list of discovered candidates
      */
     <A extends Annotation> List<AnnotationCandidate<A>> findCandidates(
             Class<A> annotationType,
             Class<?>... baseClasses
     );
 
+    /**
+     * Returns default discovery implementation.
+     *
+     * @return default discovery
+     */
+    static AnnotationDiscovery defaults() {
+        return new Default();
+    }
+
+    /**
+     * Default {@link AnnotationDiscovery} implementation. 🧱
+     */
     class Default implements AnnotationDiscovery {
 
+        /**
+         * Scans classes reachable from the given roots and collects
+         * type, method, and field annotation candidates.
+         */
         @Override
         public <A extends Annotation> List<AnnotationCandidate<A>> findCandidates(
                 Class<A> annotationType,
@@ -47,6 +69,9 @@ public interface AnnotationDiscovery {
             return List.copyOf(candidates);
         }
 
+        /**
+         * Collects type-level candidate.
+         */
         private <A extends Annotation> void collectTypeCandidate(
                 Class<A> annotationType,
                 Class<?> type,
@@ -64,6 +89,9 @@ public interface AnnotationDiscovery {
             }
         }
 
+        /**
+         * Collects method-level candidates.
+         */
         private <A extends Annotation> void collectMethodCandidates(
                 Class<A> annotationType,
                 Class<?> type,
@@ -83,6 +111,9 @@ public interface AnnotationDiscovery {
             }
         }
 
+        /**
+         * Collects field-level candidates.
+         */
         private <A extends Annotation> void collectFieldCandidates(
                 Class<A> annotationType,
                 Class<?> type,
