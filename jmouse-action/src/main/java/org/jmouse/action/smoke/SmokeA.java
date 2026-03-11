@@ -51,14 +51,7 @@ public class SmokeA {
 
         AnnotationProcessingContext annotationContext = new AnnotationProcessingContext.Default();
 
-        AnnotationBootstrapper bootstrapper =
-                AnnotationBootstrapper.defaults(AnnotationDiscovery.defaults());
 
-        bootstrapper.bootstrap(
-                annotationContext,
-                List.of(new ActionAnnotationProcessor.Default(registryB, getMethodInvoker(Mappers.defaultMapper()))),
-                SmokeA.class
-        );
 
         adapter.execute(
                 "@Action[autoload]{'source':'user'}",

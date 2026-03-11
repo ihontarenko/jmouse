@@ -2,9 +2,10 @@ package org.jmouse.action.adapter.el;
 
 import org.jmouse.action.ActionDefinition;
 import org.jmouse.action.ActionExecutor;
-import org.jmouse.core.Verify;
 import org.jmouse.core.scope.Context;
 import org.jmouse.el.ExpressionLanguage;
+
+import static org.jmouse.core.Verify.nonNull;
 
 /**
  * Adapter that executes actions defined as EL expressions. ⚙️
@@ -24,19 +25,19 @@ import org.jmouse.el.ExpressionLanguage;
  */
 public class ActionExpressionAdapter {
 
-    private final ExpressionLanguage el;
-    private final ActionExecutor     executor;
+    private final ExpressionLanguage expressionLanguage;
+    private final ActionExecutor     actionExecutor;
 
-    public ActionExpressionAdapter(ExpressionLanguage el, ActionExecutor executor) {
-        this.el = Verify.nonNull(el, "el");
-        this.executor = Verify.nonNull(executor, "executor");
+    public ActionExpressionAdapter(ExpressionLanguage expressionLanguage, ActionExecutor actionExecutor) {
+        this.expressionLanguage = nonNull(expressionLanguage, "el");
+        this.actionExecutor = nonNull(actionExecutor, "executor");
     }
 
     /**
      * Executes the given EL action expression.
      */
     public <T> T execute(String expression, Context context) {
-        Object result = el.evaluate(expression);
+        Object result = expressionLanguage.evaluate(expression);
 
         if (!(result instanceof ActionDefinition definition)) {
             throw new IllegalArgumentException(
@@ -44,6 +45,6 @@ public class ActionExpressionAdapter {
             );
         }
 
-        return executor.execute(definition, context);
+        return actionExecutor.execute(definition, context);
     }
 }
