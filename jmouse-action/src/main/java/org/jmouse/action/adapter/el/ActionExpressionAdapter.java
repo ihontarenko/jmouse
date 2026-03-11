@@ -4,6 +4,7 @@ import org.jmouse.action.ActionDefinition;
 import org.jmouse.action.ActionExecutor;
 import org.jmouse.core.scope.Context;
 import org.jmouse.el.ExpressionLanguage;
+import org.jmouse.el.evaluation.EvaluationContext;
 
 import static org.jmouse.core.Verify.nonNull;
 
@@ -37,7 +38,9 @@ public class ActionExpressionAdapter {
      * Executes the given EL action expression.
      */
     public <T> T execute(String expression, Context context) {
-        Object result = expressionLanguage.evaluate(expression);
+        EvaluationContext evaluationContext = expressionLanguage.newContext();
+        context.getProperties().forEach((k, value) -> evaluationContext.setValue((String) k, value));
+        Object result = expressionLanguage.evaluate(expression, evaluationContext);
 
         if (!(result instanceof ActionDefinition definition)) {
             throw new IllegalArgumentException(
