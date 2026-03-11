@@ -86,7 +86,7 @@ public class ValidatorDefinitionParser implements Parser {
      */
     @Override
     public boolean supports(TokenCursor cursor) {
-        return cursor.matchesSequence(BasicToken.T_AT, BasicToken.T_IDENTIFIER);
+        return cursor.matchesSequence(BasicToken.T_AT, BasicToken.T_IDENTIFIER, BasicToken.T_OPEN_PAREN);
     }
 
 }

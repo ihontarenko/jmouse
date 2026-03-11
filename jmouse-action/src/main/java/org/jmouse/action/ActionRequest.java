@@ -49,7 +49,6 @@ public interface ActionRequest {
      * Default {@link ActionRequest} implementation. 🧱
      */
     record Default(ActionDefinition definition, Context context) implements ActionRequest {
-
         public Default {
             Verify.nonNull(definition, "definition");
             Verify.nonNull(context, "context");

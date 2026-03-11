@@ -30,11 +30,7 @@ public interface InvocationRequest {
     /**
      * Default immutable {@link InvocationRequest} implementation. 🧱
      */
-    record Default(
-            InvocableMethod method,
-            Context context
-    ) implements InvocationRequest {
-
+    record Default(InvocableMethod method, Context context) implements InvocationRequest {
         public Default {
             Verify.nonNull(method, "method");
             Verify.nonNull(context, "context");

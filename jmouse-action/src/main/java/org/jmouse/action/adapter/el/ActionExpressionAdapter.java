@@ -14,7 +14,7 @@ import org.jmouse.el.ExpressionLanguage;
  * </p>
  *
  * <pre>
- * @Action[autoload]{'source':'user'}
+ * {@code @Action[autoload]{'source':'user'}}
  * </pre>
  *
  * <p>
