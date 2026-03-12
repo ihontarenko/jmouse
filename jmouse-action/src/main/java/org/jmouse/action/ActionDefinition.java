@@ -38,6 +38,14 @@ public interface ActionDefinition {
         return (T) arguments().get(name);
     }
 
+    static ActionDefinition simple(String name) {
+        return create(name, Map.of());
+    }
+
+    static ActionDefinition create(String name, Map<String, Object> arguments) {
+        return new Default(name, arguments);
+    }
+
     /**
      * Default immutable {@link ActionDefinition} implementation. 🧱
      */

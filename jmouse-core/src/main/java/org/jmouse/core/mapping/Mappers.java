@@ -1,5 +1,6 @@
 package org.jmouse.core.mapping;
 
+import org.jmouse.core.SingletonSupplier;
 import org.jmouse.core.access.ObjectAccessorWrapper;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
 import org.jmouse.core.mapping.config.MappingConfig;
@@ -16,6 +17,7 @@ import org.jmouse.core.mapping.strategy.record.RecordStrategyContributor;
 import org.jmouse.core.mapping.strategy.scalar.ScalarStrategyContributor;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Entry point factory for creating {@link Mapper} instances and pre-configured {@link MapperBuilder}s. 🧰
@@ -35,6 +37,8 @@ import java.util.List;
  * before building the final {@link Mapper}.</p>
  */
 public class Mappers {
+
+    private static final Supplier<Mapper> SINGLETON = SingletonSupplier.of(() -> builder().build());
 
     /**
      * Default set of plan contributors used by {@link #builder()}.
@@ -59,7 +63,7 @@ public class Mappers {
      * @return default mapper instance
      */
     public static Mapper defaultMapper() {
-        return builder().build();
+        return SINGLETON.get();
     }
 
     /**

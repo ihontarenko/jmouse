@@ -58,9 +58,14 @@ public class WebLinkConstraint implements Constraint {
                 return false;
             }
 
-            URI uri = URI.create(string);
+            URI    uri  = URI.create(string);
+            String host = uri.getHost();
 
-            return constraint.getHost().endsWith(uri.getHost());
+            if (host == null) {
+                return false;
+            }
+
+            return constraint.getHost().endsWith(host);
         }
 
     }

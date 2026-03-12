@@ -17,6 +17,7 @@ public class Smoke {
 
         // 1) ValidatorRegistry + ValidationProcessor
         ValidatorRegistry registry = new DefaultValidatorRegistry();
+
         registry.register(Validator.forInstance(UserForm.class, (form, errors) -> {
             if (form.name == null || form.name.isBlank()) {
                 errors.rejectValue("name", "notBlank", "name is required");

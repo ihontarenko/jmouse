@@ -1,9 +1,14 @@
 package org.jmouse.core.events;
 
+import org.jmouse.core.annotation.AnnotationBootstrapper;
+import org.jmouse.core.annotation.AnnotationDiscovery;
+import org.jmouse.core.annotation.AnnotationProcessingContext;
+import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.reflection.TypeMatchers;
 import org.jmouse.core.events.annotation.Listener;
 import org.jmouse.core.reflection.ClassFinder;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import static org.jmouse.core.reflection.Reflections.findFirstConstructor;
@@ -52,21 +57,12 @@ public class EventManagerFactory {
      * @throws ObserverException if an annotated class does not implement {@link EventListener}.
      */
     public static EventManager create(Class<?>... baseClasses) {
-        return create(eventManager -> {
-            for (Class<?> annotatedClass : ClassFinder.findAnnotatedClasses(Listener.class, baseClasses)) {
-                if (TypeMatchers.isSupertype(EventListener.class).matches(annotatedClass)) {
-                    EventListener<?> eventListener = (EventListener<?>) instantiate(findFirstConstructor(annotatedClass));
-                    Listener annotation = annotatedClass.getAnnotation(Listener.class);
-                    for (String event : annotation.events()) {
-                        eventManager.subscribe(EventName.of(event, EventCategory.UNCATEGORIZED), eventListener);
-                    }
-                } else {
-                    throw new ObserverException(
-                            "Annotated event-listener '%s' is required to implement the interface '%s'"
-                                    .formatted(annotatedClass, EventListener.class));
-                }
-            }
-        });
+        AnnotationBootstrapper bootstrapper = AnnotationBootstrapper.defaults(AnnotationDiscovery.defaults());
+        return create(eventManager -> bootstrapper.bootstrap(
+                new AnnotationProcessingContext.Default(),
+                List.of(new ListenerTypeAnnotationProcessor(eventManager)),
+                baseClasses
+        ));
     }
 
     /**

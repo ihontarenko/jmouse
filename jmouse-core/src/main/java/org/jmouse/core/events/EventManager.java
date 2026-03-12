@@ -299,7 +299,7 @@ public final class EventManager {
     }
 
     private static String formatTraceMessage(TraceContext t) {
-        return "[%s :: %s :: %s :: %d]"
+        return "[CID:%s :: SID:%s :: PID:%s :: %d]"
                 .formatted(
                         t.correlationId(),
                         t.spanId(),

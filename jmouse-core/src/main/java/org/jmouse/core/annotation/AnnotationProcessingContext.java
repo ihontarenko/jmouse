@@ -48,6 +48,10 @@ public interface AnnotationProcessingContext {
         attributes().put(name, value);
     }
 
+    static AnnotationProcessingContext defaults() {
+        return new Default();
+    }
+
     /**
      * Default in-memory {@link AnnotationProcessingContext} implementation. 🧱
      */

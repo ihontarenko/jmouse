@@ -5,6 +5,8 @@ import org.jmouse.core.Verify;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
+import static org.jmouse.core.Verify.nonNull;
+
 /**
  * Bootstraps annotation processors against scan roots. 🚀
  *
@@ -48,7 +50,7 @@ public interface AnnotationBootstrapper {
         private final AnnotationDiscovery discovery;
 
         public Default(AnnotationDiscovery discovery) {
-            this.discovery = Verify.nonNull(discovery, "discovery");
+            this.discovery = nonNull(discovery, "discovery");
         }
 
         /**
@@ -60,10 +62,8 @@ public interface AnnotationBootstrapper {
                 Iterable<? extends AnnotationProcessor<?>> processors,
                 Class<?>... baseClasses
         ) {
-            Verify.nonNull(context, "context");
-            Verify.nonNull(processors, "processors");
-
-            for (AnnotationProcessor<?> processor : processors) {
+            nonNull(context, "context");
+            for (AnnotationProcessor<?> processor : nonNull(processors, "processors")) {
                 processProcessor(context, processor, baseClasses);
             }
         }

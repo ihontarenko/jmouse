@@ -19,6 +19,7 @@ import org.jmouse.core.scope.Context;
 import org.jmouse.el.ExpressionLanguage;
 
 import java.util.List;
+import java.util.Map;
 
 public class SmokeA {
 
@@ -37,6 +38,18 @@ public class SmokeA {
                 .register("loadEnum", SourceTarget.class)
                 .unwrap();
 
+        AnnotationProcessingContext annotationContext = AnnotationProcessingContext.defaults();
+
+        AnnotationProcessor<Action> annotationProcessor = new ActionAnnotationProcessor.Default(
+                registryB, getMethodInvoker(Mappers.defaultMapper())
+        );
+
+        AnnotationBootstrapper.defaults(AnnotationDiscovery.defaults()).bootstrap(
+                annotationContext,
+                List.of(annotationProcessor),
+                SmokeA.class
+        );
+
         ActionExecutor executor = ActionExecutor.defaults(registryB);
 
         ActionExpressionAdapter adapter =
@@ -49,9 +62,16 @@ public class SmokeA {
             }
         };
 
-        AnnotationProcessingContext annotationContext = new AnnotationProcessingContext.Default();
+        executor.execute(ActionDefinition.create("autoload", Map.of("a", "b")), context);
 
 
+
+
+//
+//        adapter.execute(
+//                "@[action:autoload]{'source':'user'}",
+//                context
+//        );
 
         adapter.execute(
                 "@Action[autoload]{'source':'user'}",
@@ -83,7 +103,7 @@ public class SmokeA {
                 .addResolver(new InvocationRequestMethodArgumentResolver())
                 .addResolver(new MappedActionArgumentResolver(mapper));
 
-        return new MethodInvoker.Default(new ArrayArgumentsMethodArgumentResolver(
+        return new MethodInvoker.Default(new org.jmouse.core.invoke.ArrayArgumentsMethodArgumentResolver(
                 1, 2, 3, List.of("a", "b", "c")
         ));
     }
