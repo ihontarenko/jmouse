@@ -13,8 +13,6 @@ import org.jmouse.core.invoke.MethodArgumentResolverComposite;
 import org.jmouse.core.invoke.MethodInvoker;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.Mappers;
-import org.jmouse.core.scope.AbstractContext;
-import org.jmouse.core.scope.BeanProvider;
 import org.jmouse.core.scope.Context;
 import org.jmouse.el.ExpressionLanguage;
 
@@ -30,7 +28,7 @@ public class SmokeA {
         ActionELModule.configure(el);
 
         ActionRegistry registryB = new ConfigurableActionRegistry(new SimpleActionRegistry(), Mappers.defaultMapper())
-                .register("autoload", request -> {
+                .register("default:autoload", request -> {
                     System.out.println("executing autoload");
                     System.out.println(request.arguments());
                     return null;
@@ -55,17 +53,9 @@ public class SmokeA {
         ActionExpressionAdapter adapter =
                 new ActionExpressionAdapter(el, executor);
 
-        Context context = new AbstractContext() {
-            @Override
-            public void setBeanProvider(BeanProvider beanProvider) {
-                super.setBeanProvider(beanProvider);
-            }
-        };
+        Context context = new ActionExecutionContext();
 
-        executor.execute(ActionDefinition.create("autoload", Map.of("a", "b")), context);
-
-
-
+        executor.execute(ActionDefinition.create("default:autoload", Map.of("a", "b")), context);
 
 //
 //        adapter.execute(
@@ -74,24 +64,24 @@ public class SmokeA {
 //        );
 
         adapter.execute(
-                "@Action[autoload]{'source':'user'}",
+                "@[default:autoload]{'source':'user'}",
                 context
         );
 
         adapter.execute(
-                "@Action[autoloadA]{'source':'A', 'target':22d/7}",
+                "@[default:autoloadB]{'source':'A', 'target':22d/7}",
                 context
         );
 
         adapter.execute(
-                "@Action[autoloadB]{'source':'B','target':[1, 2, 4, {'a':33D/9}]|list}",
+                "@[default:autoloadB]{'source':'B','target':[1, 2, 4, {'a':33D/9}]|list}",
                 context
         );
-
-        adapter.execute(
-                "@Action[loadEnum]{'source' : 'org.jmouse.action.ActionDefinition' | class, 'target' : class('org.jmouse.action.ActionDefinition')}",
-                context
-        );
+//
+//        adapter.execute(
+//                "@Action[loadEnum]{'source' : 'org.jmouse.action.ActionDefinition' | class, 'target' : class('org.jmouse.action.ActionDefinition')}",
+//                context
+//        );
     }
 
     public static MethodInvoker getMethodInvoker(Mapper objectMapper) {
@@ -103,19 +93,13 @@ public class SmokeA {
                 .addResolver(new InvocationRequestMethodArgumentResolver())
                 .addResolver(new MappedActionArgumentResolver(mapper));
 
-        return new MethodInvoker.Default(new org.jmouse.core.invoke.ArrayArgumentsMethodArgumentResolver(
-                1, 2, 3, List.of("a", "b", "c")
-        ));
+        return new MethodInvoker.Default(resolvers);
     }
 
-    @Action("autoloadA")
-    public void autoload(int a, int b, int c, Object d) {
-        System.out.println("A");
-    }
 
-//    @Action("autoloadB")
-//    public void autoload(ActionRequest request, Context context, SourceTarget sourceTarget) {
-//        System.out.println("B");
-//    }
+    @Action("default:autoloadB")
+    public void autoload(ActionRequest request, SourceTarget sourceTarget) {
+        System.out.println("B");
+    }
 
 }

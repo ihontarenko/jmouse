@@ -10,66 +10,55 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * AST node representing an action definition declared in EL. ⚙️
+ * AST node representing an action definition expression. ⚙️
  *
  * <p>
- * This node stores:
+ * Supported form:
+ * </p>
+ *
+ * <pre>{@code
+ * @[namespace:name]{'key':'value'}
+ * }</pre>
+ *
+ * <p>
+ * The node stores:
  * </p>
  * <ul>
+ *     <li>action namespace</li>
  *     <li>action name</li>
- *     <li>raw argument child nodes, usually {@link KeyValueNode}</li>
+ *     <li>argument child nodes, usually {@link KeyValueNode}</li>
  * </ul>
  *
  * <p>
- * During evaluation, all child key-value nodes are evaluated and collected into
- * an ordered argument map, which is then used to create an {@link ActionDefinition}.
+ * During evaluation, child key-value nodes are resolved into an ordered
+ * argument map and wrapped into an {@link ActionDefinition}.
  * </p>
  *
  * <h3>Example</h3>
  *
  * <pre>{@code
- * @Action[autoload]{'source':'user','mode':'lazy'}
- * }</pre>
- *
- * <p>
- * After evaluation, this node produces:
- * </p>
- *
- * <pre>{@code
- * new ActionDefinition.Default("autoload", Map.of(
- *     "source", "user",
- *     "mode", "lazy"
- * ))
+ * @[default:autoload]{'source':'user','mode':'lazy'}
  * }</pre>
  */
 public class ActionDefinitionNode extends AbstractExpression {
 
     /**
-     * Action name declared in the expression.
+     * Action name.
      */
     private String name;
 
     /**
-     * Optional preconfigured arguments map.
-     *
-     * <p>
-     * In normal parsing flow, arguments are usually derived from child nodes
-     * during {@link #evaluate(EvaluationContext)}.
-     * </p>
+     * Action namespace.
+     */
+    private String namespace;
+
+    /**
+     * Optional preconfigured arguments.
      */
     private Map<String, Object> arguments;
 
     /**
-     * Creates an action definition node for the given action name.
-     *
-     * @param name action name
-     */
-    public ActionDefinitionNode(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Returns the action name.
+     * Returns action name.
      *
      * @return action name
      */
@@ -78,12 +67,30 @@ public class ActionDefinitionNode extends AbstractExpression {
     }
 
     /**
-     * Sets the action name.
+     * Sets action name.
      *
      * @param name action name
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Returns action namespace.
+     *
+     * @return action namespace
+     */
+    public String getNamespace() {
+        return namespace;
+    }
+
+    /**
+     * Sets action namespace.
+     *
+     * @param namespace action namespace
+     */
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 
     /**
@@ -108,13 +115,14 @@ public class ActionDefinitionNode extends AbstractExpression {
      * Evaluates this node into an {@link ActionDefinition}.
      *
      * <p>
-     * Each child {@link KeyValueNode} is evaluated and converted into a map entry.
-     * All resolved entries are collected into a {@link LinkedHashMap} to preserve
-     * declaration order.
+     * Each child {@link KeyValueNode} is evaluated into a map entry.
+     * Resolved entries are collected into a {@link LinkedHashMap}
+     * to preserve declaration order.
      * </p>
      *
      * @param context evaluation context
-     * @return evaluated {@link ActionDefinition}
+     *
+     * @return evaluated action definition
      */
     @Override
     public Object evaluate(EvaluationContext context) {
@@ -130,7 +138,9 @@ public class ActionDefinitionNode extends AbstractExpression {
             }
         }
 
-        return new ActionDefinition.Default(getName(), arguments);
+        String name = getNamespace() + ":" + getName();
+
+        return new ActionDefinition.Default(name, arguments);
     }
 
 }

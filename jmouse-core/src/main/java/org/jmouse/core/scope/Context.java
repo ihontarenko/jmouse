@@ -1,10 +1,13 @@
 package org.jmouse.core.scope;
 
+import org.jmouse.core.context.beans.BeanLookup;
+import org.jmouse.core.context.beans.BeanLookupContext;
+
 import java.util.Map;
 
 /**
  * Interface defining a generic context for managing properties and beans.
- * Provides methods to manipulate key-value properties and integrate with {@link BeanProvider}.
+ * Provides methods to manipulate key-value properties and integrate with {@link BeanLookup}.
  *
  * <p>Example usage:
  * <pre>{@code
@@ -15,7 +18,7 @@ import java.util.Map;
  * }</pre>
  */
 @SuppressWarnings({"unused"})
-public interface Context extends BeanProvider, BeanProviderAware {
+public interface Context extends BeanLookup, BeanLookupContext {
 
     /**
      * Retrieves all properties as a map.
@@ -31,7 +34,7 @@ public interface Context extends BeanProvider, BeanProviderAware {
      */
     default void copyFrom(Context context) {
         context.getProperties().forEach(this::setProperty);
-        setBeanProvider(context.getBeanProvider());
+        setBeanLookup(context.getBeanLookup());
     }
 
     /**
@@ -41,7 +44,7 @@ public interface Context extends BeanProvider, BeanProviderAware {
      */
     default void copyTo(Context context) {
         getProperties().forEach(context::setProperty);
-        context.setBeanProvider(getBeanProvider());
+        context.setBeanLookup(getBeanLookup());
     }
 
     /**

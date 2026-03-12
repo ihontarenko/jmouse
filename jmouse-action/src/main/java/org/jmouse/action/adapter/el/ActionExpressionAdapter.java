@@ -16,7 +16,7 @@ import static org.jmouse.core.Verify.nonNull;
  * </p>
  *
  * <pre>
- * {@code @Action[autoload]{'source':'user'}}
+ * {@code @[scope:autoload]{'source':'user'}}
  * </pre>
  *
  * <p>

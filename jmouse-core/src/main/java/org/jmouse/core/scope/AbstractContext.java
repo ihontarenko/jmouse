@@ -1,5 +1,7 @@
 package org.jmouse.core.scope;
 
+import org.jmouse.core.context.beans.BeanLookup;
+import org.jmouse.core.context.beans.MissingBeanLookupException;
 import org.jmouse.core.reflection.Reflections;
 
 import java.util.HashMap;
@@ -10,7 +12,7 @@ import static java.util.Optional.ofNullable;
 
 /**
  * An abstract implementation of the {@link Context} interface.
- * Provides a base for managing key-value properties and integrating with a {@link BeanProvider}.
+ * Provides a base for managing key-value properties and integrating with a {@link BeanLookup}.
  *
  * <p>Example usage:
  * <pre>{@code
@@ -23,43 +25,43 @@ import static java.util.Optional.ofNullable;
 public abstract class AbstractContext implements Context {
 
     private final Map<Object, Object> properties = new HashMap<>();
-    private       BeanProvider        beanProvider;
+    private       BeanLookup          lookup;
     private       boolean             stopped    = false;
 
     /**
-     * DirectAccess constructor. Initializes the context without a {@link BeanProvider}.
+     * DirectAccess constructor. Initializes the context without a {@link org.jmouse.core.context.beans.BeanLookup}.
      */
     public AbstractContext() {
         this(null);
     }
 
     /**
-     * Constructor with a specified {@link BeanProvider}.
+     * Constructor with a specified {@link BeanLookup}.
      *
-     * @param beanProvider the structured valueProvider to associate with this context.
+     * @param lookup the structured valueProvider to associate with this context.
      */
-    public AbstractContext(BeanProvider beanProvider) {
-        this.beanProvider = beanProvider;
+    public AbstractContext(BeanLookup lookup) {
+        this.lookup = lookup;
     }
 
     /**
-     * Sets the {@link BeanProvider} for this context.
+     * Sets the {@link BeanLookup} for this context.
      *
-     * @param beanProvider the structured valueProvider to set.
+     * @param lookup the structured valueProvider to set.
      */
     @Override
-    public void setBeanProvider(BeanProvider beanProvider) {
-        this.beanProvider = beanProvider;
+    public void setBeanLookup(BeanLookup lookup) {
+        this.lookup = lookup;
     }
 
     /**
-     * Retrieves the current {@link BeanProvider}.
+     * Retrieves the current {@link BeanLookup}.
      *
      * @return the associated structured valueProvider.
      */
     @Override
-    public BeanProvider getBeanProvider() {
-        return beanProvider;
+    public BeanLookup getBeanLookup() {
+        return lookup;
     }
 
     /**
@@ -68,12 +70,12 @@ public abstract class AbstractContext implements Context {
      * @param beanClass the class of the structured to retrieve.
      * @param <T>       the type of the structured.
      * @return the structured instance.
-     * @throws MissingBeanProviderException if the {@link BeanProvider} is not set.
+     * @throws MissingBeanLookupException if the {@link BeanLookup} is not set.
      */
     @Override
     public <T> T getBean(Class<T> beanClass) {
-        return ofNullable(beanProvider).orElseThrow(() -> new MissingBeanProviderException(
-                "The BeanProvider has not been provided in this context. Ensure it is set before usage."
+        return ofNullable(lookup).orElseThrow(() -> new MissingBeanLookupException(
+                "The BeanLookup has not been provided in this context. Ensure it is set before usage."
         )).getBean(beanClass);
     }
 
@@ -84,12 +86,12 @@ public abstract class AbstractContext implements Context {
      * @param beanClass the class of the structured to retrieve.
      * @param <T>       the type of the structured.
      * @return the structured instance.
-     * @throws MissingBeanProviderException if the {@link BeanProvider} is not set.
+     * @throws MissingBeanLookupException if the {@link BeanLookup} is not set.
      */
     @Override
     public <T> T getBean(String beanName, Class<T> beanClass) {
-        return ofNullable(beanProvider).orElseThrow(() -> new MissingBeanProviderException(
-                "The BeanProvider has not been provided in this context. Ensure it is set before usage."
+        return ofNullable(lookup).orElseThrow(() -> new MissingBeanLookupException(
+                "The BeanLookup has not been provided in this context. Ensure it is set before usage."
         )).getBean(beanName, beanClass);
     }
 

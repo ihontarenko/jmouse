@@ -2,7 +2,7 @@ package org.jmouse.pipeline.context;
 
 import org.jmouse.core.Streamable;
 import org.jmouse.core.context.beans.BeanLookup;
-import org.jmouse.core.context.beans.MissingBeanProviderException;
+import org.jmouse.core.context.beans.MissingBeanLookupException;
 import org.jmouse.core.context.keys.ContextKeyResolver;
 import org.jmouse.core.context.keys.UserClassContextKeyResolver;
 import org.jmouse.core.context.mutable.MutableArgumentsContext;
@@ -34,7 +34,7 @@ public final class DefaultPipelineContext implements PipelineContext {
     @Override
     public BeanLookup getBeanLookup() {
         if (beanLookup == null) {
-            throw new MissingBeanProviderException(
+            throw new MissingBeanLookupException(
                     "BeanProvider is not configured for this pipeline context."
             );
         }

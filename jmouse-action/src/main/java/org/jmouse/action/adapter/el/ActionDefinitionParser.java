@@ -12,70 +12,56 @@ import static org.jmouse.el.lexer.BasicToken.T_CLOSE_CURLY;
 import static org.jmouse.el.lexer.BasicToken.T_OPEN_CURLY;
 
 /**
- * EL parser that recognizes action definition expressions starting with '{@code @}'. ⚙️
+ * Parses action definitions like {@code @[namespace:name]{...}}. ⚙️
  *
- * <p>
- * Supported syntax:
- * </p>
+ * <p>Example:</p>
  *
  * <pre>{@code
- * @Action[name]{key:value}
+ * @[default:autoload]{'source':'user'}
+ * @[db:persist]{'target':'users'}
+ * @[notify:email]{'template':'welcome'}
  * }</pre>
  *
  * <p>
- * Where:
+ * The bracket part contains:
  * </p>
  * <ul>
- *     <li>{@code @} marks the start of an action definition.</li>
- *     <li>{@code Action} is the action type identifier.</li>
- *     <li>{@code [name]} identifies the action instance.</li>
- *     <li>{@code {...}} is an optional configuration block parsed by {@link KeyValueParser}.</li>
+ *     <li>namespace</li>
+ *     <li>action name</li>
  * </ul>
  *
- * <h3>Examples</h3>
- *
- * <pre>{@code
- * @Action[autoload]{'source':'user'}
- * @Action[persist]{'target':'database','mode':'insert'}
- * @Action[notify]{'channel':'email'}
- * }</pre>
- *
- * <h3>AST output</h3>
- *
  * <p>
- * This parser creates an {@link ActionDefinitionNode} and attaches it to the provided
- * {@code parent} AST node. Any key-value pairs inside the configuration block are
- * parsed and added as children of that node.
- * </p>
- *
- * <p>
- * The parser is typically registered during EL bootstrap for the action module.
+ * The curly block is optional and parsed via {@link KeyValueParser}.
  * </p>
  */
 public class ActionDefinitionParser implements Parser {
 
     /**
-     * Parses '{@code @Identifier[name]{...}}' into an {@link ActionDefinitionNode}.
-     *
-     * <p>
-     * Grammar (simplified):
-     * </p>
+     * Parses action definition into {@link ActionDefinitionNode}.
      *
      * <pre>{@code
-     * ActionDefinition := '@' IDENTIFIER '[' IDENTIFIER ']' '{' [ KeyValueList ] '}'
+     * ActionDefinition :=
+     *     '@' '[' Namespace ':' Name ']' '{' [ KeyValueList ] '}'
+     *
+     * Namespace := IDENTIFIER
+     * Name      := IDENTIFIER
      * }</pre>
      *
-     * @param cursor  token cursor positioned at '{@code @}'
-     * @param parent  AST parent node to attach parsed node to
-     * @param context parser context used to obtain sub-parsers
+     * @param cursor  token cursor positioned at {@code @}
+     * @param parent  parent AST node
+     * @param context parser context
      */
     @Override
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
-        cursor.ensure(T_AT);
-        cursor.ensure(T_IDENTIFIER);
+        ActionDefinitionNode definition = new ActionDefinitionNode();
 
+        cursor.ensure(T_AT);
         cursor.ensure(T_OPEN_BRACKET);
-        Node definition = new ActionDefinitionNode(
+        definition.setNamespace(
+                cursor.ensure(T_IDENTIFIER).value()
+        );
+        cursor.ensure(T_COLON);
+        definition.setName(
                 cursor.ensure(T_IDENTIFIER).value()
         );
         cursor.ensure(BasicToken.T_CLOSE_BRACKET);
@@ -90,15 +76,17 @@ public class ActionDefinitionParser implements Parser {
     }
 
     /**
-     * Checks whether the cursor is at the start of an action definition.
-     *
-     * @param cursor token cursor
-     * @return {@code true} if the next tokens match '{@code @Identifier[}'
+     * Returns {@code true} if the cursor points to an action definition start.
      */
     @Override
     public boolean supports(TokenCursor cursor) {
         return cursor.matchesSequence(
-                T_AT, T_IDENTIFIER, T_OPEN_BRACKET, T_IDENTIFIER
+                T_AT,
+                T_OPEN_BRACKET,
+                T_IDENTIFIER,
+                T_COLON,
+                T_IDENTIFIER,
+                T_CLOSE_BRACKET
         );
     }
 

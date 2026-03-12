@@ -38,10 +38,25 @@ public interface ActionDefinition {
         return (T) arguments().get(name);
     }
 
+    /**
+     * Creates simple action definition without arguments. ⚙️
+     *
+     * @param name action name
+     *
+     * @return action definition
+     */
     static ActionDefinition simple(String name) {
         return create(name, Map.of());
     }
 
+    /**
+     * Creates action definition with arguments. ⚙️
+     *
+     * @param name      action name
+     * @param arguments action arguments
+     *
+     * @return action definition
+     */
     static ActionDefinition create(String name, Map<String, Object> arguments) {
         return new Default(name, arguments);
     }

@@ -6,21 +6,6 @@ import java.util.stream.Collectors;
 
 /**
  * 🌍 Country — ISO 3166-1 dataset (без залежності від {@code java.util.Locale}).
- *
- * <p>Формат константи: {@code XX("alpha2","alpha3","currency", callingCode, "English", "Local")}.</p>
- *
- * <p>Пошук:
- * <ul>
- *   <li>{@link #ofIso2(String)} — за ISO α2 (UA, US, DE)</li>
- *   <li>{@link #ofIso3(String)} — за ISO α3 (UKR, USA, DEU)</li>
- *   <li>{@link #ofCallingCode(int)} — за E.164 кодом (380, 1, 44)</li>
- *   <li>{@link #ofCurrency(String)} — за ISO-4217 (UAH, USD, EUR)</li>
- *   <li>{@link #ofName(String)} / {@link #ofLocalName(String)} — за назвою</li>
- *   <li>{@link #of(String)} — "розумний" пошук: спробує α2 → α3 → англ.назву (точний збіг)</li>
- * </ul>
- * </p>
- *
- * <p>⚠️ Заувага: {@link #ofCurrency(String)} може повертати кілька країн (напр., EUR).</p>
  */
 public enum Country {
 
