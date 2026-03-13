@@ -5,9 +5,9 @@ import org.jmouse.el.ExpressionLanguage;
 /**
  * Registers EL extensions required for action expressions. 🧩
  */
-public final class ActionELModule {
+public final class ActionExpressionConfigurer {
 
-    private ActionELModule() {
+    private ActionExpressionConfigurer() {
     }
 
     /**

@@ -1,8 +1,11 @@
 package org.jmouse.validator.constraint.adapter.el;
 
 import org.jmouse.el.ExpressionLanguage;
+import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.validator.constraint.api.Constraint;
 import org.jmouse.validator.constraint.model.ValidationDefinition;
+
+import java.util.Map;
 
 /**
  * Facade for parsing EL-based constraint definitions into typed {@link Constraint} instances. 🧠
@@ -61,15 +64,59 @@ public final class ConstraintExpressionSupport {
      *
      * <p>
      * The expression must evaluate to a {@link ValidationDefinition}.
+     * A fresh {@link EvaluationContext} is created automatically.
      * </p>
      *
      * @param expression EL constraint expression
+     *
      * @return mapped constraint instance
      *
      * @throws IllegalArgumentException if expression does not produce a {@link ValidationDefinition}
      */
     public Constraint parse(String expression) {
-        Object evaluated = expressionLanguage.evaluate(expression);
+        return parse(expression, expressionLanguage.newContext());
+    }
+
+    /**
+     * Parses and converts an EL expression into a {@link Constraint}
+     * using the provided evaluation values.
+     *
+     * <p>
+     * A fresh {@link EvaluationContext} is created and populated
+     * from the given value map before evaluation.
+     * </p>
+     *
+     * @param expression EL constraint expression
+     * @param values     values exposed to the evaluation context
+     *
+     * @return mapped constraint instance
+     *
+     * @throws IllegalArgumentException if expression does not produce a {@link ValidationDefinition}
+     */
+    public Constraint parse(String expression, Map<String, Object> values) {
+        EvaluationContext evaluationContext = expressionLanguage.newContext();
+        values.forEach(evaluationContext::setValue);
+        return parse(expression, evaluationContext);
+    }
+
+    /**
+     * Parses and converts an EL expression into a {@link Constraint}
+     * using the given evaluation context.
+     *
+     * <p>
+     * The evaluated result must be a {@link ValidationDefinition},
+     * which is then adapted to a concrete {@link Constraint}.
+     * </p>
+     *
+     * @param expression        EL constraint expression
+     * @param evaluationContext evaluation context
+     *
+     * @return mapped constraint instance
+     *
+     * @throws IllegalArgumentException if expression does not produce a {@link ValidationDefinition}
+     */
+    public Constraint parse(String expression, EvaluationContext evaluationContext) {
+        Object evaluated = expressionLanguage.evaluate(expression, evaluationContext);
 
         if (!(evaluated instanceof ValidationDefinition definition)) {
             throw new IllegalArgumentException(
@@ -79,4 +126,5 @@ public final class ConstraintExpressionSupport {
 
         return adapter.toConstraint(definition);
     }
+
 }

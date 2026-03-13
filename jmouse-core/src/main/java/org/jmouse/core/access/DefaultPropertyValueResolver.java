@@ -70,8 +70,8 @@ public class DefaultPropertyValueResolver implements PropertyValueResolver, Virt
         } catch (Exception ignored) {
             // If the direct value is null, try resolving it as a virtual property.
             if (getVirtualProperties() != null) {
-                PropertyPath path = PropertyPath.forPath(name);
-                PropertyPath tail = path.tail();
+                PropertyPath            path     = PropertyPath.forPath(name);
+                PropertyPath            tail     = path.tail();
                 VirtualPropertyResolver resolver = getVirtualProperties();
                 Object                  relative = getAccessor().navigate(path, 1).asObject();
 

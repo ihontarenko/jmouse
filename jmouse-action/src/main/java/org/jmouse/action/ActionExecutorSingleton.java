@@ -1,6 +1,6 @@
 package org.jmouse.action;
 
-import org.jmouse.action.adapter.el.ActionELModule;
+import org.jmouse.action.adapter.el.ActionExpressionConfigurer;
 import org.jmouse.action.adapter.el.ActionExpressionAdapter;
 import org.jmouse.action.adapter.mapper.ActionDefinitionMapper;
 import org.jmouse.action.annotation.Action;
@@ -28,7 +28,7 @@ final public class ActionExecutorSingleton {
         ExpressionLanguage expressionLanguage = ExpressionLanguage.getSingleton();
         Mapper             mapper             = Mappers.defaultMapper();
 
-        ActionELModule.configure(expressionLanguage);
+        ActionExpressionConfigurer.configure(expressionLanguage);
 
         ActionRegistry              registry  = new ConfigurableActionRegistry(
                 new SimpleActionRegistry(), mapper).unwrap();

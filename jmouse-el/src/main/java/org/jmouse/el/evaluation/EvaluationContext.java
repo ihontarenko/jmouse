@@ -21,7 +21,7 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
     /**
      * The default AccessorWrapper used to wrap object access operations.
      */
-    AccessorWrapper WRAPPER = new ObjectAccessorWrapper();
+    AccessorWrapper WRAPPER = ObjectAccessorWrapper.defaults();
 
     /**
      * Returns the current inheritance chain that manages variable scope hierarchy.
@@ -113,11 +113,11 @@ public interface EvaluationContext extends VirtualPropertyResolver.Aware {
         Entries      entries = path.entries();
         Object       value   = null;
 
-        if (entries.size() == 1) {
+        if (path.isSimple()) {
             value = getScopedChain().getValue(name);
         } else if (entries.size() == 2 && !entries.type(1).isNumeric()) {
-            String key       = entries.first().toString();
             String last      = entries.last().toString();
+            String key       = entries.first().toString();
             Object container = getScopedChain().getValue(key);
 
             for (AttributeResolver resolver : getAttributeResolvers()) {

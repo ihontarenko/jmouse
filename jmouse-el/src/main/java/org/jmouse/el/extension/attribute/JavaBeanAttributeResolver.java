@@ -3,18 +3,34 @@ package org.jmouse.el.extension.attribute;
 import org.jmouse.core.access.AttributeResolver;
 import org.jmouse.core.access.descriptor.Describer;
 import org.jmouse.core.access.descriptor.structured.ObjectDescriptor;
+import org.jmouse.core.invoke.*;
 import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.core.Priority;
+import org.jmouse.core.scope.Context;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.jmouse.core.Verify.nonNull;
+import static org.jmouse.core.invoke.InvocationMethodContext.createDefault;
+
 @Priority(-10)
 public class JavaBeanAttributeResolver implements AttributeResolver {
 
-    private static final Map<String, Method> CACHE = new HashMap<>();
+    private static final Map<String, InvocableMethod> CACHE = new HashMap<>();
+
+    private final Context       context;
+    private final MethodInvoker invoker;
+
+    public JavaBeanAttributeResolver(Context context, MethodInvoker invoker) {
+        this.context = context;
+        this.invoker = invoker;
+    }
+
+    public JavaBeanAttributeResolver() {
+        this(createDefault(), new MethodInvoker.Default(new ArrayArgumentsMethodArgumentResolver()));
+    }
 
     /**
      * Determines whether this resolver can handle the specified instance.
@@ -30,33 +46,25 @@ public class JavaBeanAttributeResolver implements AttributeResolver {
 
     @Override
     public Object resolve(Object instance, String name) {
-        Method getter = null;
-        Object value  = null;
+        InvocableMethod getter = null;
 
         if (instance != null) {
-            Class<?> clazz = instance.getClass();
-            String   key   = clazz.getName() + "." + name;
+            Class<?> type = instance.getClass();
+            String   key  = type.getName() + ":" + name;
 
             getter = CACHE.get(key);
 
             if (getter == null) {
-                ObjectDescriptor<?> descriptor = Describer.forObjectDescriptor(clazz);
-                if (descriptor.hasProperty(name)) {
-                    getter = descriptor.getProperty(name).getGetterMethod().unwrap();
+                ObjectDescriptor<?> descriptor = Describer.forObjectDescriptor(type);
+                if (descriptor.hasProperty(name) && descriptor.getProperty(name).isReadable()) {
+                    Method method = descriptor.getProperty(name).getGetterMethod().unwrap();
+                    getter = new InvocableMethod(instance, method);
                     CACHE.put(key, getter);
                 }
             }
         }
 
-        if (getter != null) {
-            try {
-                value = getter.invoke(instance);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return value;
+        return invoker.invoke(new InvocationRequest.Default(nonNull(getter, "getter"), context));
     }
 
 }
