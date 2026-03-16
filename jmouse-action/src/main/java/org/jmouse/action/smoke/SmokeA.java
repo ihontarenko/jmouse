@@ -1,22 +1,10 @@
 package org.jmouse.action.smoke;
 
 import org.jmouse.action.*;
-import org.jmouse.action.adapter.el.ActionELModule;
 import org.jmouse.action.adapter.el.ActionExpressionAdapter;
-import org.jmouse.action.adapter.mapper.ActionDefinitionMapper;
 import org.jmouse.action.annotation.Action;
-import org.jmouse.action.support.ActionAnnotationProcessor;
-import org.jmouse.core.annotation.*;
-import org.jmouse.core.invoke.ContextMethodArgumentResolver;
-import org.jmouse.core.invoke.InvocationRequestMethodArgumentResolver;
-import org.jmouse.core.invoke.MethodArgumentResolverComposite;
-import org.jmouse.core.invoke.MethodInvoker;
-import org.jmouse.core.mapping.Mapper;
-import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.scope.Context;
-import org.jmouse.el.ExpressionLanguage;
 
-import java.util.List;
 import java.util.Map;
 
 public class SmokeA {
@@ -24,44 +12,12 @@ public class SmokeA {
 
     public static void main(String... arguments) {
 
-        ExpressionLanguage el = new ExpressionLanguage();
-        ActionELModule.configure(el);
-
-        ActionRegistry registryB = new ConfigurableActionRegistry(new SimpleActionRegistry(), Mappers.defaultMapper())
-                .register("default:autoload", request -> {
-                    System.out.println("executing autoload");
-                    System.out.println(request.arguments());
-                    return null;
-                })
-                .register("loadEnum", SourceTarget.class)
-                .unwrap();
-
-        AnnotationProcessingContext annotationContext = AnnotationProcessingContext.defaults();
-
-        AnnotationProcessor<Action> annotationProcessor = new ActionAnnotationProcessor.Default(
-                registryB, getMethodInvoker(Mappers.defaultMapper())
-        );
-
-        AnnotationBootstrapper.defaults(AnnotationDiscovery.defaults()).bootstrap(
-                annotationContext,
-                List.of(annotationProcessor),
-                SmokeA.class
-        );
-
-        ActionExecutor executor = ActionExecutor.defaults(registryB);
-
-        ActionExpressionAdapter adapter =
-                new ActionExpressionAdapter(el, executor);
+        ActionExecutor executor = ActionExecutorSingleton.getActionExecutor(SmokeA.class);
+        ActionExpressionAdapter adapter = ActionExecutorSingleton.getActionExpressionAdapter(executor);
 
         Context context = new ActionExecutionContext();
 
         executor.execute(ActionDefinition.create("default:autoload", Map.of("a", "b")), context);
-
-//
-//        adapter.execute(
-//                "@[action:autoload]{'source':'user'}",
-//                context
-//        );
 
         adapter.execute(
                 "@[default:autoload]{'source':'user'}",
@@ -83,19 +39,6 @@ public class SmokeA {
 //                context
 //        );
     }
-
-    public static MethodInvoker getMethodInvoker(Mapper objectMapper) {
-        ActionDefinitionMapper mapper = new ActionDefinitionMapper(objectMapper);
-
-        MethodArgumentResolverComposite resolvers = new MethodArgumentResolverComposite()
-                .addResolver(new ActionRequestMethodArgumentResolver())
-                .addResolver(new ContextMethodArgumentResolver())
-                .addResolver(new InvocationRequestMethodArgumentResolver())
-                .addResolver(new MappedActionArgumentResolver(mapper));
-
-        return new MethodInvoker.Default(resolvers);
-    }
-
 
     @Action("default:autoloadB")
     public void autoload(ActionRequest request, SourceTarget sourceTarget) {

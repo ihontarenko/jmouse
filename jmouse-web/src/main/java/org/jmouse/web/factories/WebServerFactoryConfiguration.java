@@ -14,7 +14,7 @@ import org.jmouse.web.server.tomcat.TomcatWebServerFactory;
 import java.util.Map;
 
 @BeanFactories(name = "webServerFactoryConfiguration")
-@BeanConditionExpression("jmouse.web.app | sout")
+@BeanConditionExpression("('--- Application Name: ' ~ jmouse.web.app ~ ', WebServer: ' ~ jmouse.web.server.default) | sout")
 public class WebServerFactoryConfiguration {
 
     @Bean("webServerFactory")

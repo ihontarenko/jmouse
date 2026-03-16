@@ -6,6 +6,9 @@ import org.jmouse.core.scope.Context;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.jmouse.core.Verify.nonNull;
 
 /**
@@ -30,7 +33,7 @@ public class ActionExpressionAdapter {
     private final ActionExecutor     actionExecutor;
 
     public ActionExpressionAdapter(ExpressionLanguage expressionLanguage, ActionExecutor actionExecutor) {
-        this.expressionLanguage = nonNull(expressionLanguage, "el");
+        this.expressionLanguage = nonNull(expressionLanguage, "expressionLanguage");
         this.actionExecutor = nonNull(actionExecutor, "executor");
     }
 
@@ -38,8 +41,10 @@ public class ActionExpressionAdapter {
      * Executes the given EL action expression.
      */
     public <T> T execute(String expression, Context context) {
-        EvaluationContext evaluationContext = expressionLanguage.newContext();
-        context.getProperties().forEach((k, value) -> evaluationContext.setValue((String) k, value));
+        EvaluationContext   evaluationContext = expressionLanguage.newContext();
+        Map<String, Object> properties        = new HashMap<>();
+        context.getProperties().forEach((key, value) -> properties.put((String) key, value));
+        properties.forEach(evaluationContext::setValue);
         Object result = expressionLanguage.evaluate(expression, evaluationContext);
 
         if (!(result instanceof ActionDefinition definition)) {
