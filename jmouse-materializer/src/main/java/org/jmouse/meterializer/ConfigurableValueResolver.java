@@ -1,5 +1,7 @@
 package org.jmouse.meterializer;
 
+import org.jmouse.core.access.PropertyPath;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -99,7 +101,7 @@ public final class ConfigurableValueResolver implements ValueResolver {
             }
         }
 
-        if (value instanceof ValueExpression.PathValue(String path)) {
+        if (value instanceof ValueExpression.PathValue(PropertyPath path)) {
             return pathResolver.resolve(path, execution);
         }
 

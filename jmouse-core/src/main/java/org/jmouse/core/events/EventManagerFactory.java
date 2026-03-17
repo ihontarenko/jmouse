@@ -74,9 +74,7 @@ public class EventManagerFactory {
      */
     public static EventManager create(Consumer<EventManager> configurator) {
         EventManager eventManager = createDefault();
-
         configurator.accept(eventManager);
-
         return eventManager;
     }
 

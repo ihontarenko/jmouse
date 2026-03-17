@@ -1,10 +1,11 @@
 package org.jmouse.meterializer;
 
-import org.jmouse.core.Verify;
 import org.jmouse.core.access.ObjectAccessor;
 import org.jmouse.core.access.PropertyPath;
 import org.jmouse.core.access.ValueNavigator;
 import org.jmouse.core.access.accessor.ScalarValueAccessor;
+
+import static org.jmouse.core.Verify.nonNull;
 
 /**
  * Resolves path expressions against root accessor and scoped variables using {@link PropertyPath}.
@@ -18,7 +19,16 @@ import org.jmouse.core.access.accessor.ScalarValueAccessor;
  */
 public final class PathValueResolver {
 
+    /**
+     * Resolve a textual expression against the current rendering execution.
+     *
+     * @param expression propertyPath expression
+     * @param execution rendering execution
+     * @return resolved value or {@code null}
+     */
     public Object resolve(String expression, RenderingExecution execution) {
+        nonNull(execution, "execution");
+
         if (expression == null) {
             return execution.rootAccessor();
         }
@@ -29,29 +39,44 @@ public final class PathValueResolver {
             return null;
         }
 
-        ValueNavigator navigator = execution.valueNavigator();
-        PropertyPath   path      = PropertyPath.forPath(trimmed);
-        String         head      = path.head().toString();
+        return resolve(PropertyPath.forPath(trimmed), execution);
+    }
+
+    /**
+     * Resolve a pre-parsed property propertyPath against the current rendering execution.
+     *
+     * @param path parsed propertyPath
+     * @param execution rendering execution
+     * @return resolved value or {@code null}
+     */
+    public Object resolve(PropertyPath path, RenderingExecution execution) {
+        if (path.isEmpty()) {
+            return execution.rootAccessor();
+        }
+
+        String         head      = nonNull(path, "propertyPath").getFirst();
+        ValueNavigator navigator = nonNull(execution, "execution").valueNavigator();
         ObjectAccessor scoped    = execution.variables().get(head);
 
         if (scoped != null) {
-            PropertyPath remainder = path.sub(1);
-            if (remainder.isEmpty()) {
+            if (path.isSimple()) {
                 return unwrap(scoped);
             }
-            return unwrap(navigator.navigate(scoped, remainder.toString()));
+            return unwrap(navigator.navigate(scoped, path, 1));
         }
 
-        return unwrap(navigator.navigate(execution.rootAccessor(), path.toString()));
+        return unwrap(navigator.navigate(execution.rootAccessor(), path));
     }
 
     private Object unwrap(Object value) {
         if (value instanceof ScalarValueAccessor scalar) {
             return scalar.unwrap();
         }
+
         if (value instanceof ObjectAccessor accessor) {
             return accessor;
         }
+
         return value;
     }
 }

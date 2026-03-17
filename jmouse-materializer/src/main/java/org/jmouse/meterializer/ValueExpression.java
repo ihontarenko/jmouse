@@ -1,5 +1,6 @@
 package org.jmouse.meterializer;
 
+import org.jmouse.core.access.PropertyPath;
 import org.jmouse.meterializer.build.AttributeMapBuilder;
 
 import java.util.LinkedHashMap;
@@ -87,7 +88,7 @@ public sealed interface ValueExpression
      * @return root expression
      */
     static ValueExpression root() {
-        return new ValueExpression.PathValue(null);
+        return new ValueExpression.PathValue((PropertyPath) null);
     }
 
     /**
@@ -191,9 +192,12 @@ public sealed interface ValueExpression
      *
      * <p>Example: {@code "user.name"}.</p>
      *
-     * @param path path expression
+     * @param propertyPath path expression
      */
-    record PathValue(String path) implements ValueExpression {
+    record PathValue(PropertyPath propertyPath) implements ValueExpression {
+        public PathValue(String path) {
+            this(PropertyPath.forPath(path));
+        }
     }
 
     /**

@@ -1,5 +1,6 @@
 package org.jmouse.xml;
 
+import org.jmouse.util.Strings;
 import org.w3c.dom.Element;
 
 import java.util.ArrayDeque;
@@ -31,34 +32,32 @@ final public class NamespaceScope {
             return;
         }
 
-        String p = normalizePrefix(prefix);
+        String normalized = normalizePrefix(prefix);
 
-        if (namespace.equals(current().get(p))) {
+        if (namespace.equals(current().get(normalized))) {
             return;
         }
 
-        if (p.isEmpty()) {
+        if (normalized.isEmpty()) {
             element.setAttributeNS(XMLNS_NS, XMLNS, namespace);
         } else {
-            element.setAttributeNS(XMLNS_NS, XMLNS + ":" + p, namespace);
+            element.setAttributeNS(XMLNS_NS, XMLNS + ":" + normalized, namespace);
         }
 
-        current().put(p, namespace);
+        current().put(normalized, namespace);
     }
 
     private Map<String, String> current() {
         Map<String, String> top = stack.peek();
+
         if (top == null) {
             throw new IllegalStateException("NamespaceScope stack is empty");
         }
+
         return top;
     }
 
     private static String normalizePrefix(String prefix) {
-        if (prefix == null) {
-            return "";
-        }
-        String p = prefix.trim();
-        return p.isEmpty() ? "" : p;
+        return Strings.normalize(prefix, String::trim);
     }
 }

@@ -71,7 +71,7 @@ public final class DefaultValueResolver implements ValueResolver {
         return switch (value) {
             case ValueExpression.ConstantValue constant -> constant.value();
             case ValueExpression.MapValue mapValue -> mapValue.map();
-            case ValueExpression.PathValue pathValue -> pathResolver.resolve(pathValue.path(), execution);
+            case ValueExpression.PathValue pathValue -> pathResolver.resolve(pathValue.propertyPath(), execution);
             case ValueExpression.OptionalValue optionalValue -> {
                 try {
                     yield resolve(optionalValue.value(), execution);

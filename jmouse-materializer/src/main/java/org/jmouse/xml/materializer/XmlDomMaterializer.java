@@ -37,20 +37,6 @@ public final class XmlDomMaterializer extends AbstractTemplateMaterializer<Node>
         }
     }
 
-    private ResolvedQName resolveQName(QName qName) {
-        String localName = qName.name();
-        String prefix    = nullIfEmpty(normalize(qName.prefix(), String::trim));
-        String namespace = nullIfEmpty(normalize(qName.namespace(), String::trim));
-
-        if (namespace == null && prefix != null) {
-            namespace = nullIfEmpty(normalize(namespaceConfig.getNamespaceFor(prefix), String::trim));
-        }
-
-        String qualifiedName = prefix == null ? localName : ("%s:%s".formatted(prefix, localName));
-
-        return new ResolvedQName(namespace, prefix, localName, qualifiedName);
-    }
-
     public Document document() {
         return document;
     }

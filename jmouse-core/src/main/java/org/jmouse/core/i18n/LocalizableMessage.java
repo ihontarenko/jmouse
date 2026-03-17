@@ -94,9 +94,9 @@ public interface LocalizableMessage {
      */
     class Default implements LocalizableMessage {
 
-        private final String   defaultMessage;
-        private final String[] codes;
-        private final Object[] arguments;
+        protected final String   defaultMessage;
+        protected final String[] codes;
+        protected final Object[] arguments;
 
         /**
          * Constructs a new {@code DirectAccess} instance of {@link LocalizableMessage}.

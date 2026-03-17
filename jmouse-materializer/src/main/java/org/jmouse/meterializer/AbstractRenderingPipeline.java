@@ -1,6 +1,7 @@
 package org.jmouse.meterializer;
 
 import org.jmouse.core.access.AccessorWrapper;
+import org.jmouse.core.access.FastValueNavigator;
 import org.jmouse.core.access.ObjectAccessor;
 import org.jmouse.meterializer.hooks.RenderingHookChain;
 import org.jmouse.meterializer.hooks.RenderingStage;
@@ -117,6 +118,7 @@ abstract public class AbstractRenderingPipeline<T, R extends AbstractRenderingPi
                 accessorWrapper,
                 rootAccessor,
                 request,
+                new FastValueNavigator(),
                 resolver
         );
 

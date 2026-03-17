@@ -90,6 +90,17 @@ final public class PropertyPath {
     }
 
     /**
+     * Creates a new {@link PropertyPath} using the provided entries.
+     *
+     * @param entries path entries
+     *
+     * @return new property path instance
+     */
+    public static PropertyPath of(Entries entries) {
+        return new PropertyPath(entries);
+    }
+
+    /**
      * Creates a PropertyPath instance from a given name.
      *
      * @param name the property path to parse
@@ -237,13 +248,43 @@ final public class PropertyPath {
     /**
      * Returns the full property path in canonical string form.
      *
-     * <p>The returned value is the serialized representation of the underlying
-     * path entries (for example: {@code "user.address.street"} or {@code "items[0].name"}).</p>
+     * <p>
+     * The value represents the serialized form of the underlying
+     * path entries (for example: {@code "user.address.street"}
+     * or {@code "items[0].name"}).
+     * </p>
      *
-     * @return full property path string (never {@code null})
+     * @return canonical property path (never {@code null})
      */
     public String path() {
         return entries.toString();
+    }
+
+    /**
+     * Returns the number of path segments.
+     *
+     * @return path size
+     */
+    public int size() {
+        return entries.size();
+    }
+
+    /**
+     * Returns the first path segment.
+     *
+     * @return first path entry
+     */
+    public String getFirst() {
+        return entries.first().toString();
+    }
+
+    /**
+     * Returns the last path segment.
+     *
+     * @return last path entry
+     */
+    public String getLast() {
+        return entries.last().toString();
     }
 
     /**
