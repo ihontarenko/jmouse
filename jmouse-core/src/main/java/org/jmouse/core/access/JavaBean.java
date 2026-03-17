@@ -65,14 +65,14 @@ public final class JavaBean<T> extends Bean<T> {
     /**
      * Creates a factory for constructing instances of this bindable.
      *
-     * @param bindable the bindable
+     * @param typedValue the bindable
      * @return a factory that creates instances of the bindable
      */
     @SuppressWarnings("unchecked")
-    public Factory<T> getFactory(TypedValue<T> bindable) {
+    public Factory<T> getFactory(TypedValue<T> typedValue) {
         return Factory.of(new CachedSupplier<>(() -> {
             T           instance = null;
-            Supplier<T> supplier = bindable.getValue();
+            Supplier<T> supplier = typedValue.getValue();
 
             if (supplier != null) {
                 instance = supplier.get();
