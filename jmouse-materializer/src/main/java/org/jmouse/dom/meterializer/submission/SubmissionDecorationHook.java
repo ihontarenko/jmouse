@@ -14,12 +14,38 @@ import java.util.*;
 
 import static org.jmouse.meterializer.SubmissionState.REQUEST_ATTRIBUTE;
 
+/**
+ * {@link RenderingHook} that decorates form controls using submission state. 🧩
+ *
+ * <p>
+ * After materialization, this hook reads {@link SubmissionState} from request
+ * attributes and applies:
+ * </p>
+ * <ul>
+ *     <li>submitted values to supported controls</li>
+ *     <li>validation error styling</li>
+ *     <li>invalid feedback nodes with error messages</li>
+ * </ul>
+ *
+ * <p>
+ * Value binding is delegated to registered {@link ControlValueApplier appliers}.
+ * Error placement is controlled by {@link ErrorTargetSelector}, while field keys
+ * are resolved through {@link FieldKeyResolver}.
+ * </p>
+ */
 public final class SubmissionDecorationHook implements RenderingHook<Node> {
 
     private final FieldKeyResolver          keyResolver;
     private final ErrorTargetSelector       targetSelector;
     private final List<ControlValueApplier> valueAppliers;
 
+    /**
+     * Creates hook with required submission decoration components.
+     *
+     * @param targetSelector selector for error target nodes
+     * @param keyResolver    resolver for value and error keys
+     * @param valueAppliers  control value appliers
+     */
     public SubmissionDecorationHook(
             ErrorTargetSelector targetSelector,
             FieldKeyResolver keyResolver,
@@ -30,11 +56,17 @@ public final class SubmissionDecorationHook implements RenderingHook<Node> {
         this.valueAppliers = List.copyOf(valueAppliers);
     }
 
+    /**
+     * Returns hook execution order.
+     */
     @Override
     public int order() {
         return 1000;
     }
 
+    /**
+     * Applies submitted values and validation errors to form controls.
+     */
     @Override
     public void afterMaterialize(Node root, RenderingExecution execution) {
         SubmissionState submission = readSubmission(execution.request().attributes());
@@ -55,6 +87,9 @@ public final class SubmissionDecorationHook implements RenderingHook<Node> {
         });
     }
 
+    /**
+     * Applies submitted value to the given control node.
+     */
     private void applyValue(Node node, SubmissionState submission) {
         String valueKey = keyResolver.resolveValueKey(node);
 
@@ -72,6 +107,9 @@ public final class SubmissionDecorationHook implements RenderingHook<Node> {
         }
     }
 
+    /**
+     * Applies validation error state and feedback message to the given control node.
+     */
     private void applyError(
             Node node,
             SubmissionState submission,
@@ -104,6 +142,9 @@ public final class SubmissionDecorationHook implements RenderingHook<Node> {
         target.insertAfter(feedback);
     }
 
+    /**
+     * Returns whether the node is a supported form control.
+     */
     private boolean isControlNode(Node node) {
         if (node.getNodeType() != NodeType.ELEMENT) {
             return false;
@@ -111,13 +152,19 @@ public final class SubmissionDecorationHook implements RenderingHook<Node> {
 
         TagName tag = node.getTagName();
 
-        return List.of(TagName.INPUT, TagName.TEXTAREA, TagName.SELECT).contains(tag);
+        return tag == TagName.INPUT || tag == TagName.TEXTAREA || tag == TagName.SELECT;
     }
 
+    /**
+     * Reads submission state from request attributes.
+     */
     private SubmissionState readSubmission(Map<String, Object> attributes) {
         return attributes.get(REQUEST_ATTRIBUTE) instanceof SubmissionState submission ? submission : null;
     }
 
+    /**
+     * Creates an invalid feedback node for the given message.
+     */
     private Node invalidFeedback(String message) {
         Node div = new ElementNode(TagName.DIV);
         div.addAttribute("class", "invalid-feedback");
