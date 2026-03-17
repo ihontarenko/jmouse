@@ -27,17 +27,15 @@ import java.util.function.Supplier;
  */
 public sealed interface PropertyMapping
         permits PropertyMapping.Ignore,
-        PropertyMapping.Constant,
-        PropertyMapping.Reference,
-        PropertyMapping.Provider,
-        PropertyMapping.Compute,
-        PropertyMapping.DefaultValue,
-        PropertyMapping.Transform,
-        PropertyMapping.When,
-        PropertyMapping.Coalesce,
-        PropertyMapping.Required {
-
-    // ===== static factories (ergonomic) =====
+                PropertyMapping.Constant,
+                PropertyMapping.Reference,
+                PropertyMapping.Provider,
+                PropertyMapping.Compute,
+                PropertyMapping.DefaultValue,
+                PropertyMapping.Transform,
+                PropertyMapping.When,
+                PropertyMapping.Coalesce,
+                PropertyMapping.Required {
 
     /**
      * Create an ignore mapping.
