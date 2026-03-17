@@ -27,17 +27,17 @@ public final class BootstrapTransformers {
                                 setAttribute("data-jm-wrap", "select")
                         )
                 )
-                .rule(
-                        60,
-                        and(
-                                and(tagName("input"), attributeValue("type", "radio")),
-                                not(insideAncestor(a -> constantAttributeValues(a, "data-jm-wrap", "radio")))
-                        ),
-                        wrapWith("div", chain(
-                                addClass("form-check"),
-                                setAttribute("data-jm-wrap", "radio")
-                        ))
-                )
+//                .rule(
+//                        60,
+//                        and(
+//                                and(tagName("input"), attributeValue("type", "radio")),
+//                                not(insideAncestor(a -> constantAttributeValues(a, "data-jm-wrap", "radio")))
+//                        ),
+//                        wrapWith("div", chain(
+////                                addClass("form-check"),
+//                                setAttribute("data-jm-wrap", "radio")
+//                        ))
+//                )
                 .rule(
                         70,
                         and(tagName("input"), attributeValue("type", "radio")),

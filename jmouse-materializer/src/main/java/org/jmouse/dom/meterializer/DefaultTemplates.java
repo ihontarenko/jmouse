@@ -1,5 +1,6 @@
 package org.jmouse.dom.meterializer;
 
+import org.jmouse.dom.InputType;
 import org.jmouse.meterializer.NodeTemplate;
 import org.jmouse.util.Strings;
 
@@ -148,20 +149,82 @@ public final class DefaultTemplates {
     }
 
     public static NodeTemplate checkboxSingle(String namePath, String labelPath, String valuePath) {
-        return element("p", block -> block
-                .child(element("label", label -> {
-                    label.child(element("input", input -> {
-                        input.attribute("type", constant("checkbox"));
-                        input.attribute("name", path(namePath));
-                        input.attribute("id", path(namePath));
+        return element("div", block -> block
+                .attribute("class", constant("form-check mb-3"))
+                .child(element("input", input -> {
+                    input.attribute("type", constant("checkbox"));
+                    input.attribute("class", constant("form-check-input"));
+                    input.attribute("id", path("id"));
+                    input.attribute("name", path(namePath));
 
-                        if (Strings.isNotEmpty(valuePath)) {
-                            input.attribute("value", path(valuePath));
-                        }
-                    }));
-                    label.child(text(constant(" ")));
-                    label.child(text(path(labelPath)));
+                    if (Strings.isNotEmpty(valuePath)) {
+                        input.attribute("value", path(valuePath));
+                    }
                 }))
+                .child(element("label", label -> label
+                        .attribute("class", constant("form-check-label"))
+                        .attribute("for", path("id"))
+                        .child(text(path(labelPath)))
+                ))
+        );
+    }
+
+    public static NodeTemplate checkboxInline(String namePath, String labelPath, String valuePath) {
+        return element("div", block -> block
+                .attribute("class", constant("form-check form-check-inline"))
+                .child(element("input", input -> {
+                    input.attribute("type", constant("checkbox"));
+                    input.attribute("class", constant("form-check-input"));
+                    input.attribute("id", path("id"));
+                    input.attribute("name", path(namePath));
+
+                    if (Strings.isNotEmpty(valuePath)) {
+                        input.attribute("value", path(valuePath));
+                    }
+                }))
+                .child(element("label", label -> label
+                        .attribute("class", constant("form-check-label"))
+                        .attribute("for", path("id"))
+                        .child(text(path(labelPath)))
+                ))
+        );
+    }
+
+    public static NodeTemplate checkboxGroup(
+            String namePath,
+            String labelPath,
+            String optionsPath,
+            String keyPath,
+            String valuePath
+    ) {
+        return element("div", block -> block
+                .attribute("class", constant("mb-3"))
+                .child(element("label", label -> label
+                        .attribute("class", constant("form-label d-block"))
+                        .child(text(path(labelPath)))
+                ))
+                .child(repeat(
+                        path(optionsPath),
+                        "option",
+                        inner -> inner.add(
+                                element("div", item -> item
+                                        .attribute("class", constant("form-check"))
+                                        .child(element("input", input -> input
+                                                .attribute("type", constant("checkbox"))
+                                                .attribute("class", constant("form-check-input"))
+                                                .attribute("id", format("%s_%s", path("id"), path(keyPath)))
+                                                .attribute("name", path(namePath))
+                                                .attribute("value", path(keyPath))
+                                        ))
+                                        .child(element("label", label -> label
+                                                .attribute("class", constant("form-check-label"))
+                                                .attribute("for", format("%s_%s", path("id"), path(keyPath)))
+                                                .child(text(path(valuePath)))
+                                        ))
+                                )
+                        ),
+                        ""
+                ))
         );
     }
 
@@ -173,22 +236,36 @@ public final class DefaultTemplates {
             String valuePath
     ) {
         return element("fieldset", fieldset -> fieldset
+                .attribute("class", constant("mb-3"))
+
                 .child(element("legend", legend -> legend
+                        .attribute("class", constant("form-label"))
                         .child(text(path(labelPath)))
                 ))
+
                 .child(repeat(
                         path(optionsPath),
                         "option",
-                        inner -> inner.add(element("label", label -> {
-                            label.child(element("input", input -> input
-                                    .attribute("type", constant("radio"))
-                                    .attribute("name", path(namePath))
-                                    .attribute("value", path(keyPath))
-                            ));
-                            label.child(text(constant(" ")));
-                            label.child(text(path(valuePath)));
-                            label.child(element("br", br -> {}));
-                        }))
+                        inner -> inner.add(
+                                element("div", wrapper -> wrapper
+                                        .attribute("class", constant("form-check"))
+
+                                        .child(element("input", input -> input
+                                                .attribute("type", constant("radio"))
+                                                .attribute("class", constant("form-check-input"))
+                                                .attribute("name", path(namePath))
+                                                .attribute("value", path(keyPath))
+                                                .attribute("id", format("%s_%s", path("id"), path(keyPath)))
+                                        ))
+
+                                        .child(element("label", label -> label
+                                                .attribute("class", constant("form-check-label"))
+                                                .attribute("for", format("%s_%s", path("id"), path(keyPath)))
+                                                .child(text(path(valuePath)))
+                                        ))
+                                )
+                        ),
+                        ""
                 ))
         );
     }

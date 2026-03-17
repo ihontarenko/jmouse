@@ -52,10 +52,10 @@ import java.util.function.Consumer;
  */
 public sealed interface NodeTemplate
         permits NodeTemplate.Element,
-        NodeTemplate.Text,
-        NodeTemplate.Conditional,
-        NodeTemplate.Repeat,
-        NodeTemplate.Include {
+                NodeTemplate.Text,
+                NodeTemplate.Conditional,
+                NodeTemplate.Repeat,
+                NodeTemplate.Include {
 
     /**
      * Includes another blueprint by a constant key.

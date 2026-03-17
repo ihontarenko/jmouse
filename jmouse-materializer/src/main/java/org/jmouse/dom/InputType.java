@@ -1,4 +1,4 @@
-package org.jmouse.dom.meterializer;
+package org.jmouse.dom;
 
 /**
  * Enumeration of supported HTML {@code <input>} types. ⌨️

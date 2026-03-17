@@ -79,7 +79,15 @@ public interface Visitor<T> {
      */
     class Default<T> implements Visitor<T> {
 
-        private final Set<T> visited = new HashSet<>();
+        private final Set<T> visited;
+
+        public Default() {
+            this(new HashSet<>());
+        }
+
+        public Default(Set<T> collection) {
+            this.visited = collection;
+        }
 
         /**
          * Checks if the given element has been visited before.

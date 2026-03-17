@@ -1,5 +1,6 @@
 package org.jmouse.dom.meterializer;
 
+import org.jmouse.dom.InputType;
 import org.jmouse.meterializer.NodeTemplate;
 import org.jmouse.util.Strings;
 
