@@ -29,14 +29,14 @@ import static org.jmouse.meterializer.SubmissionState.REQUEST_ATTRIBUTE;
  *
  * <p>
  * Value binding is delegated to registered {@link ControlValueApplier appliers}.
- * Error placement is controlled by {@link ErrorTargetSelector}, while field keys
+ * Error placement is controlled by {@link TargetSelector}, while field keys
  * are resolved through {@link FieldKeyResolver}.
  * </p>
  */
 public final class SubmissionDecorationHook implements RenderingHook<Node> {
 
     private final FieldKeyResolver          keyResolver;
-    private final ErrorTargetSelector       targetSelector;
+    private final TargetSelector            targetSelector;
     private final List<ControlValueApplier> valueAppliers;
 
     /**
@@ -47,7 +47,7 @@ public final class SubmissionDecorationHook implements RenderingHook<Node> {
      * @param valueAppliers  control value appliers
      */
     public SubmissionDecorationHook(
-            ErrorTargetSelector targetSelector,
+            TargetSelector targetSelector,
             FieldKeyResolver keyResolver,
             List<ControlValueApplier> valueAppliers
     ) {

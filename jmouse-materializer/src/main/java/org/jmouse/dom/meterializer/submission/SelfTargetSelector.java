@@ -3,7 +3,7 @@ package org.jmouse.dom.meterializer.submission;
 import org.jmouse.dom.Node;
 
 /**
- * {@link ErrorTargetSelector} that returns the control node itself. 🎯
+ * {@link TargetSelector} that returns the control node itself. 🎯
  *
  * <p>
  * This selector does not perform any traversal or lookup.
@@ -15,7 +15,7 @@ import org.jmouse.dom.Node;
  * error target can be determined.
  * </p>
  */
-public final class SelfErrorTargetSelector implements ErrorTargetSelector {
+public final class SelfTargetSelector implements TargetSelector {
 
     /**
      * Returns the control node as the error target.

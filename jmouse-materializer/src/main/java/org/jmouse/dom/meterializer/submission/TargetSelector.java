@@ -10,7 +10,7 @@ import org.jmouse.dom.Node;
  * should be rendered in the DOM tree.
  * </p>
  */
-public interface ErrorTargetSelector {
+public interface TargetSelector {
 
     /**
      * Resolves the node that should receive the error state

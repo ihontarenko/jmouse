@@ -1,12 +1,13 @@
 package org.jmouse.meterializer.build;
 
-import org.jmouse.core.Verify;
 import org.jmouse.meterializer.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.jmouse.core.Verify.nonNull;
 
 /**
  * Builder for {@link NodeTemplate.Element}.
@@ -19,22 +20,21 @@ public final class ElementTemplateBuilder {
     private final List<NodeDirective>          directives = new ArrayList<>();
 
     public ElementTemplateBuilder(QName qName) {
-        this.qName = Verify.nonNull(qName, "qName");
+        this.qName = nonNull(qName, "qName");
     }
 
     public ElementTemplateBuilder attributes(
             ValueExpression source, String keyValue, String valueKey
     ) {
-        Verify.nonNull(source, "source");
-        Verify.nonNull(keyValue, "keyValue");
-        Verify.nonNull(valueKey, "valueKey");
-        return directive(new NodeDirective.ApplyAttributes(source, keyValue, valueKey));
+        return directive(new NodeDirective.ApplyAttributes(
+                nonNull(source, "source"),
+                nonNull(keyValue, "keyValue"),
+                nonNull(valueKey, "valueKey")
+        ));
     }
 
     public ElementTemplateBuilder attribute(String name, ValueExpression value) {
-        Verify.nonNull(name, "name");
-        Verify.nonNull(value, "value");
-        attributes.put(name, value);
+        attributes.put(nonNull(name, "name"), nonNull(value, "value"));
         return this;
     }
 
@@ -43,19 +43,19 @@ public final class ElementTemplateBuilder {
     }
 
     public ElementTemplateBuilder child(NodeTemplate child) {
-        Verify.nonNull(child, "child");
+        nonNull(child, "child");
         children.add(child);
         return this;
     }
 
     public ElementTemplateBuilder children(List<NodeTemplate> children) {
-        Verify.nonNull(children, "children");
+        nonNull(children, "children");
         this.children.addAll(children);
         return this;
     }
 
     public ElementTemplateBuilder directive(NodeDirective directive) {
-        Verify.nonNull(directive, "directive");
+        nonNull(directive, "directive");
         directives.add(directive);
         return this;
     }

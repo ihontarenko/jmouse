@@ -5,7 +5,7 @@ import org.jmouse.dom.Node;
 import java.util.function.Predicate;
 
 /**
- * {@link ErrorTargetSelector} that searches for an ancestor node
+ * {@link TargetSelector} that searches for an ancestor node
  * matching the given predicate. 🔎
  *
  * <p>
@@ -15,7 +15,7 @@ import java.util.function.Predicate;
  * is returned.
  * </p>
  */
-public final class AncestorErrorTargetSelector implements ErrorTargetSelector {
+public final class AncestorTargetSelector implements TargetSelector {
 
     private final Predicate<Node> predicate;
 
@@ -24,7 +24,7 @@ public final class AncestorErrorTargetSelector implements ErrorTargetSelector {
      *
      * @param predicate node matching predicate
      */
-    public AncestorErrorTargetSelector(Predicate<Node> predicate) {
+    public AncestorTargetSelector(Predicate<Node> predicate) {
         this.predicate = predicate;
     }
 

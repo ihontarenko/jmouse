@@ -32,7 +32,6 @@ public final class DefaultTemplates {
                         .child(text(path("description")))
                 ))
 
-                // Universal: repeat blocks, include per-field template
                 .child(repeat(
                         path("fields"),
                         "field",
@@ -41,7 +40,7 @@ public final class DefaultTemplates {
                                         format("field.type.%s", path("field.elementType")),
                                         path("field")
                                 )
-                        )
+                        ).add(element("hr", __ -> {}))
                 ))
 
                 .child(element("hr", __ -> {}))
@@ -235,10 +234,10 @@ public final class DefaultTemplates {
             String keyPath,
             String valuePath
     ) {
-        return element("fieldset", fieldset -> fieldset
+        return element("div", fieldset -> fieldset
                 .attribute("class", constant("mb-3"))
 
-                .child(element("legend", legend -> legend
+                .child(element("label", label -> label
                         .attribute("class", constant("form-label"))
                         .child(text(path(labelPath)))
                 ))

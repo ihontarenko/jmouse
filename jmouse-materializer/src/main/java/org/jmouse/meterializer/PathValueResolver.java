@@ -50,7 +50,7 @@ public final class PathValueResolver {
      * @return resolved value or {@code null}
      */
     public Object resolve(PropertyPath path, RenderingExecution execution) {
-        if (path.isEmpty()) {
+        if (path == null || path.isEmpty()) {
             return execution.rootAccessor();
         }
 

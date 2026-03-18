@@ -65,7 +65,7 @@ public class WebLinkConstraint implements Constraint {
                 return false;
             }
 
-            return constraint.getHost().endsWith(host);
+            return host.endsWith(constraint.getHost());
         }
 
     }

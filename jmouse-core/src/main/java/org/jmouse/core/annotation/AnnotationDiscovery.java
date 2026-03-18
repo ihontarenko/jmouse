@@ -1,6 +1,7 @@
 package org.jmouse.core.annotation;
 
 import org.jmouse.core.Verify;
+import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.reflection.ClassFinder;
 
 import java.lang.annotation.Annotation;
@@ -60,7 +61,7 @@ public interface AnnotationDiscovery {
 
             List<AnnotationCandidate<A>> candidates = new ArrayList<>();
 
-            for (Class<?> type : ClassFinder.findAll(clazz -> true, baseClasses)) {
+            for (Class<?> type : ClassFinder.findAll(Matcher.constant(true), baseClasses)) {
                 collectTypeCandidate(annotationType, type, candidates);
                 collectMethodCandidates(annotationType, type, candidates);
                 collectFieldCandidates(annotationType, type, candidates);
