@@ -177,8 +177,6 @@ public sealed interface PropertyMapping
      */
     <R> R accept(PropertyMappingVisitor<R> visitor);
 
-    // ===== mapping node types =====
-
     /**
      * Mapping that ignores the target property.
      */

@@ -1,29 +1,29 @@
 package org.jmouse.dom.meterializer.submission;
 
 import org.jmouse.dom.Node;
-import org.jmouse.dom.NodeType;
+import org.jmouse.util.Strings;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link TargetSelector} that places feedback after the last sibling block
+ * {@link TargetSelector} that places feedback after the last sibling branch
  * representing the same logical field. 🧭
  *
  * <p>
- * Useful for grouped controls such as radio/checkbox collections where multiple
- * DOM branches share the same logical field key.
+ * Useful for grouped controls such as radio buttons or checkbox collections,
+ * where multiple DOM branches correspond to the same logical error key.
  * </p>
  *
  * <p>
  * Resolution algorithm:
  * </p>
  * <ol>
- *     <li>Resolve logical error key for the control</li>
- *     <li>Walk ancestors upward</li>
- *     <li>Find the nearest parent having multiple child branches for that key</li>
- *     <li>Return the last matching child branch</li>
- *     <li>Fallback to delegate if no grouped branch is found</li>
+ *     <li>Resolve the logical error key for the control</li>
+ *     <li>Walk ancestor nodes upward</li>
+ *     <li>For each parent, collect child branches containing that key</li>
+ *     <li>If multiple matching branches exist, return the last one</li>
+ *     <li>Otherwise fallback to the configured selector</li>
  * </ol>
  */
 public final class LastSiblingTargetSelector implements TargetSelector {
@@ -31,10 +31,21 @@ public final class LastSiblingTargetSelector implements TargetSelector {
     private final FieldKeyResolver keyResolver;
     private final TargetSelector   fallback;
 
+    /**
+     * Creates selector with {@link SelfTargetSelector} fallback.
+     *
+     * @param keyResolver field key resolver
+     */
     public LastSiblingTargetSelector(FieldKeyResolver keyResolver) {
         this(keyResolver, new SelfTargetSelector());
     }
 
+    /**
+     * Creates selector with explicit fallback.
+     *
+     * @param keyResolver field key resolver
+     * @param fallback    fallback selector
+     */
     public LastSiblingTargetSelector(
             FieldKeyResolver keyResolver,
             TargetSelector fallback
@@ -43,6 +54,13 @@ public final class LastSiblingTargetSelector implements TargetSelector {
         this.fallback = fallback;
     }
 
+    /**
+     * Resolves the last sibling branch matching the same logical error key.
+     *
+     * @param control control node
+     *
+     * @return target node for feedback placement
+     */
     @Override
     public Node resolve(Node control) {
         String errorKey = keyResolver.resolveErrorKey(control);
@@ -72,11 +90,15 @@ public final class LastSiblingTargetSelector implements TargetSelector {
         return fallback.resolve(control);
     }
 
+    /**
+     * Collects direct child branches that contain a control
+     * with the given logical error key.
+     */
     private List<Node> matchingChildren(Node parent, String errorKey) {
         List<Node> matches = new ArrayList<>();
 
         for (Node child : parent.getChildren()) {
-            if (containsControlWithErrorKey(child, errorKey)) {
+            if (containsNeeded(child, errorKey)) {
                 matches.add(child);
             }
         }
@@ -84,20 +106,25 @@ public final class LastSiblingTargetSelector implements TargetSelector {
         return matches;
     }
 
-    private boolean containsControlWithErrorKey(Node node, String errorKey) {
+    /**
+     * Returns whether the given subtree contains a control node
+     * matching the requested error key.
+     */
+    private boolean containsNeeded(Node node, String errorKey) {
         if (node == null) {
             return false;
         }
 
         if (isControlNode(node)) {
             String candidate = keyResolver.resolveErrorKey(node);
+
             if (errorKey.equals(candidate)) {
                 return true;
             }
         }
 
         for (Node child : node.getChildren()) {
-            if (containsControlWithErrorKey(child, errorKey)) {
+            if (containsNeeded(child, errorKey)) {
                 return true;
             }
         }
@@ -105,9 +132,15 @@ public final class LastSiblingTargetSelector implements TargetSelector {
         return false;
     }
 
+    /**
+     * Returns whether the node looks like a form control.
+     *
+     * <p>
+     * The default heuristic treats nodes with a non-empty {@code name}
+     * attribute as controls.
+     * </p>
+     */
     private boolean isControlNode(Node node) {
-        return node.getNodeType() == NodeType.ELEMENT
-                && node.getAttribute("name") != null
-                && !node.getAttribute("name").isBlank();
+        return Strings.isNotEmpty(node.getAttribute("name"));
     }
 }

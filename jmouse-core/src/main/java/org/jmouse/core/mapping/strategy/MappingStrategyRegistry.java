@@ -45,7 +45,14 @@ public final class MappingStrategyRegistry implements StrategyRegistry {
     public MappingStrategyRegistry(List<MappingStrategyContributor> contributors) {
         List<MappingStrategyContributor> sorted = new ArrayList<>(Verify.nonNull(contributors, "contributors"));
         Sorter.sort(sorted);
-        this.contributors = List.copyOf(sorted);
+        this.contributors = new ArrayList<>(List.copyOf(sorted));
+        Sorter.sort(this.contributors);
+    }
+
+    public MappingStrategyRegistry register(MappingStrategyContributor contributor) {
+        contributors.add(contributor);
+        Sorter.sort(contributors);
+        return this;
     }
 
     /**

@@ -44,7 +44,7 @@ public final class MapperBuilder {
      * @param strategyRegistry plan registry
      * @return this builder
      */
-    public MapperBuilder planRegistry(StrategyRegistry strategyRegistry) {
+    public MapperBuilder strategyRegistry(StrategyRegistry strategyRegistry) {
         this.strategyRegistry = strategyRegistry;
         return this;
     }

@@ -7,7 +7,7 @@ import org.jmouse.core.mapping.strategy.MappingStrategyContributor;
 import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.reflection.InferredType;
 
-@Priority(Integer.MIN_VALUE)
+@Priority(Integer.MIN_VALUE + 1)
 public final class JavaBeanStrategyContributor implements MappingStrategyContributor {
 
     @Override

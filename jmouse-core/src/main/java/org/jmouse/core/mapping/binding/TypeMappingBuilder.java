@@ -1,10 +1,12 @@
 package org.jmouse.core.mapping.binding;
 
 import org.jmouse.core.Customizer;
-import org.jmouse.core.Verify;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static org.jmouse.core.Verify.nonNull;
+import static org.jmouse.core.Verify.notBlank;
 
 /**
  * Fluent builder for defining a {@link TypeMappingRule} between {@code S -> T}. 🧱
@@ -31,8 +33,8 @@ public final class TypeMappingBuilder<S, T> {
      * @param targetType target type (never {@code null})
      */
     public TypeMappingBuilder(Class<S> sourceType, Class<T> targetType) {
-        this.sourceType = Verify.nonNull(sourceType, "sourceType");
-        this.targetType = Verify.nonNull(targetType, "targetType");
+        this.sourceType = nonNull(sourceType, "sourceType");
+        this.targetType = nonNull(targetType, "targetType");
     }
 
     /**
@@ -46,13 +48,9 @@ public final class TypeMappingBuilder<S, T> {
      * @return this builder (fluent)
      */
     public TypeMappingBuilder<S, T> property(String name, Customizer<PropertyMappingBuilder> customizer) {
-        Verify.notBlank(name, "name");
-        Verify.nonNull(customizer, "customizer");
-
-        PropertyMappingBuilder builder = new PropertyMappingBuilder(name);
-        customizer.customize(builder);
+        PropertyMappingBuilder builder = new PropertyMappingBuilder(notBlank(name, "name"));
+        nonNull(customizer, "customizer").customize(builder);
         bindings.put(name, builder.build());
-
         return this;
     }
 

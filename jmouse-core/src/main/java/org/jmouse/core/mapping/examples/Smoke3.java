@@ -8,10 +8,15 @@ import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.mapping.errors.ErrorAction;
 import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.mapping.errors.ErrorsPolicy;
-import org.jmouse.core.mapping.plugin.*;
+import org.jmouse.core.mapping.strategy.MappingStrategy;
+import org.jmouse.core.mapping.strategy.MappingStrategyContributor;
+import org.jmouse.core.mapping.strategy.MappingStrategyRegistry;
+import org.jmouse.core.mapping.strategy.direct.TypeMapperStrategyContributor;
+import org.jmouse.core.mapping.typed.TypeMapper;
 import org.jmouse.core.reflection.InferredType;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -22,29 +27,6 @@ public class Smoke3 {
         Mapper mapper = Mappers.builder()
                 .config(
                         MappingConfig.builder()
-                                .plugins(List.of(
-                                        new MappingPlugin() {
-                                            @Override
-                                            public void onStart(MappingCall call) {
-                                                MappingPlugin.super.onStart(call);
-                                            }
-
-                                            @Override
-                                            public Object onValue(MappingValue value) {
-                                                return MappingPlugin.super.onValue(value);
-                                            }
-
-                                            @Override
-                                            public void onFinish(MappingResult result) {
-                                                MappingPlugin.super.onFinish(result);
-                                            }
-
-                                            @Override
-                                            public void onError(MappingFailure failure) {
-                                                MappingPlugin.super.onError(failure);
-                                            }
-                                        }
-                                ))
                                 .errorsPolicy(
                                         ErrorsPolicy.builder()
                                                 .onCode(ErrorCodes.STRATEGY_NO_CONTRIBUTOR, ErrorAction.THROW)
@@ -57,6 +39,7 @@ public class Smoke3 {
                 )
                 // mapping settings
                 .registry(TypeMappingRegistry.builder()
+                                  .mapping("user", new UserBA())
                                   .mapping(UserA.class, UserB.class, m -> m
                                           .property("birthDay", builder -> builder
                                                   .reference("dateOfBirth")
@@ -71,6 +54,12 @@ public class Smoke3 {
                                           )
                                   )
                                   .build())
+                .strategyRegistry(
+                        new MappingStrategyRegistry(Mappers.DEFAULT_CONTRIBUTORS)
+                                .register(new TypeMapperStrategyContributor(
+                                        new UserBA()
+                                ))
+                )
                 .build();
 
         UserA userA = new UserA();
@@ -79,7 +68,7 @@ public class Smoke3 {
         userA.setName("John Doe");
 
         UserB userB = mapper.map(userA, UserB.class);
-        UserA user = mapper.map(userB, UserA.class);
+        UserA user = mapper.map(userB, new UserA());
 
         DataObject dataObject = new DataObject("parent_url");
         dataObject.setDepth(1);
@@ -91,6 +80,39 @@ public class Smoke3 {
 
         System.out.println(userB);
 
+    }
+
+    public static class UserBA implements TypeMapper<UserB, UserA> {
+
+        @Override
+        public Class<UserB> sourceType() {
+            return UserB.class;
+        }
+
+        @Override
+        public Class<UserA> targetType() {
+            return UserA.class;
+        }
+
+        @Override
+        public UserA map(UserB source) {
+            UserA target = new UserA();
+
+            map(source, target);
+
+            return target;
+        }
+
+        @Override
+        public void map(UserB source, UserA target) {
+            target.setId(source.getId());
+            target.setName(source.getName());
+        }
+
+        @Override
+        public boolean supportsInPlace() {
+            return true;
+        }
     }
 
     public static class DataObject {

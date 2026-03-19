@@ -17,6 +17,7 @@ package org.jmouse.core.mapping.errors;
 public final class ErrorCodes {
 
     // strategy.*
+    public static final String STRATEGY_EXECUTION_FAILED  = "strategy.execution_failed";
     public static final String STRATEGY_NO_CONTRIBUTOR    = "strategy.no_contributor";
     public static final String STRATEGY_INCOMPATIBLE_TYPE = "strategy.incompatible_type";
 

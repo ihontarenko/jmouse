@@ -3,9 +3,12 @@ package org.jmouse.core.mapping.binding;
 import org.jmouse.core.Customizer;
 import org.jmouse.core.Verify;
 import org.jmouse.core.mapping.MappingContext;
+import org.jmouse.core.mapping.typed.TypeMapper;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.jmouse.core.Verify.nonNull;
 
 public final class TypeMappingRegistry {
 
@@ -20,9 +23,9 @@ public final class TypeMappingRegistry {
     }
 
     public List<TypeMappingRule> find(Class<?> sourceType, Class<?> targetType, MappingContext context) {
-        Verify.nonNull(sourceType, "sourceType");
-        Verify.nonNull(targetType, "targetType");
-        Verify.nonNull(context, "context");
+        nonNull(sourceType, "sourceType");
+        nonNull(targetType, "targetType");
+        nonNull(context, "context");
 
         List<TypeMappingRule> mappingRules = new ArrayList<>();
 
@@ -52,7 +55,7 @@ public final class TypeMappingRegistry {
          * Tip: add annotation source AFTER DSL registration if you want DSL to win.
          */
         public Builder ruleSource(TypeMappingRuleSource source) {
-            sources.add(Verify.nonNull(source, "source"));
+            sources.add(nonNull(source, "source"));
             return this;
         }
 
@@ -65,15 +68,22 @@ public final class TypeMappingRegistry {
         }
 
         public <S, T> Builder mapping(Class<S> sourceType, Class<T> targetType, Customizer<TypeMappingBuilder<S, T>> customizer) {
-            Verify.nonNull(customizer, "customizer");
+            nonNull(customizer, "customizer");
             TypeMappingBuilder<S, T> builder = defaultSource.mapping(sourceType, targetType);
             customizer.customize(builder);
             defaultSource.register(builder.build());
             return this;
         }
 
+        @SuppressWarnings("unchecked")
+        public <S, T> Builder mapping(String name, TypeMapper<S, T> typeMapper) {
+            return mapping(typeMapper.sourceType(), typeMapper.targetType(), b -> b
+                    .property(name, builder -> builder.provider(source -> typeMapper.map((S) source)))
+            );
+        }
+
         public Builder register(TypeMappingRule rule) {
-            defaultSource.register(Verify.nonNull(rule, "rule"));
+            defaultSource.register(nonNull(rule, "rule"));
             return this;
         }
 
