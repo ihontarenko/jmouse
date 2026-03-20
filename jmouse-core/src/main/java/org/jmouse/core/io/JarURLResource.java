@@ -25,9 +25,9 @@ public class JarURLResource extends URLResource {
             int    separator = path.indexOf("!/");
 
             if (separator != -1) {
-                String filePart = path.substring(0, separator);
-                URL    fileUrl  = new URI(filePart).toURL();
-                return new File(fileUrl.toURI()).lastModified();
+                String part = path.substring(0, separator);
+                URL    file = new URI(part).toURL();
+                return new File(file.toURI()).lastModified();
             }
 
             return super.getLastModified();

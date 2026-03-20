@@ -50,14 +50,15 @@ public final class ObjectToMapStrategyContributor implements MappingStrategyCont
     /**
      * Build a mapping plan for the given target type.
      *
+     * @param <T>        plan output type
+     * @param source
      * @param typedValue typed value target
-     * @param context mapping context
-     * @param <T> plan output type
+     * @param context    mapping context
      * @return mapping plan instance
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> MappingStrategy<T> build(TypedValue<T> typedValue, MappingContext context) {
+    public <T> MappingStrategy<T> build(Object source, TypedValue<T> typedValue, MappingContext context) {
         return (MappingStrategy<T>) new ObjectToMapStrategy();
     }
 

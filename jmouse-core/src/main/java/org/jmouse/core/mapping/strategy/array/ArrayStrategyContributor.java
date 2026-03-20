@@ -17,7 +17,7 @@ public final class ArrayStrategyContributor implements MappingStrategyContributo
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> MappingStrategy<T> build(TypedValue<T> typedValue, MappingContext context) {
+    public <T> MappingStrategy<T> build(Object source, TypedValue<T> typedValue, MappingContext context) {
         return (MappingStrategy<T>) new ArrayStrategy();
     }
 }

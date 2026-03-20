@@ -85,7 +85,7 @@ public final class MappingStrategyRegistry implements StrategyRegistry {
      *
      * <p>Contributors are consulted in registry order. The first contributor that returns {@code true}
      * from {@link MappingStrategyContributor#supports(Object, InferredType, MappingContext)} is responsible
-     * for building the plan via {@link MappingStrategyContributor#build(TypedValue, MappingContext)}.</p>
+     * for building the plan via {@link MappingStrategyContributor#build(Object, TypedValue, MappingContext)}.</p>
      *
      * @param source source object
      * @param typedValue typed target descriptor (type metadata + optional instance holder)
@@ -99,7 +99,7 @@ public final class MappingStrategyRegistry implements StrategyRegistry {
 
         for (MappingStrategyContributor contributor : contributors) {
             if (contributor.supports(source, targetType, context)) {
-                return contributor.build(typedValue, context);
+                return contributor.build(source, typedValue, context);
             }
         }
 

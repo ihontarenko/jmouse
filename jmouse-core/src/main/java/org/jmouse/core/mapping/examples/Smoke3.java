@@ -4,39 +4,19 @@ import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.mapping.binding.TypeMappingRegistry;
-import org.jmouse.core.mapping.config.MappingConfig;
-import org.jmouse.core.mapping.errors.ErrorAction;
-import org.jmouse.core.mapping.errors.ErrorCodes;
-import org.jmouse.core.mapping.errors.ErrorsPolicy;
-import org.jmouse.core.mapping.strategy.MappingStrategy;
-import org.jmouse.core.mapping.strategy.MappingStrategyContributor;
 import org.jmouse.core.mapping.strategy.MappingStrategyRegistry;
 import org.jmouse.core.mapping.strategy.direct.TypeMapperStrategyContributor;
 import org.jmouse.core.mapping.typed.TypeMapper;
 import org.jmouse.core.reflection.InferredType;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 public class Smoke3 {
 
     public static void main(String... arguments) {
         Mapper mapper = Mappers.builder()
-                .config(
-                        MappingConfig.builder()
-                                .errorsPolicy(
-                                        ErrorsPolicy.builder()
-                                                .onCode(ErrorCodes.STRATEGY_NO_CONTRIBUTOR, ErrorAction.THROW)
-                                                .onPrefix("map.", ErrorAction.WARNING)
-                                                .onPrefix("scalar.", ErrorAction.THROW)
-                                                .defaultAction(ErrorAction.THROW)
-                                                .build()
-                                )
-                                .build()
-                )
                 // mapping settings
                 .registry(TypeMappingRegistry.builder()
                                   .mapping("user", new UserBA())

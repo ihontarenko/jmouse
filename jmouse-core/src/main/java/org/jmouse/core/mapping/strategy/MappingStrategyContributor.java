@@ -10,10 +10,10 @@ import org.jmouse.core.reflection.InferredType;
  * <p>A {@code MappingStrategyContributor} participates in plan resolution by:</p>
  * <ol>
  *   <li>declaring support for a mapping request via {@link #supports(Object, InferredType, MappingContext)}</li>
- *   <li>building a concrete {@link MappingStrategy} via {@link #build(TypedValue, MappingContext)}</li>
+ *   <li>building a concrete {@link MappingStrategy} via {@link #build(Object, TypedValue, MappingContext)}</li>
  * </ol>
  *
- * <p>The {@link TypedValue} provided to {@link #build(TypedValue, MappingContext)} may carry:</p>
+ * <p>The {@link TypedValue} provided to {@link #build(Object, TypedValue, MappingContext)} may carry:</p>
  * <ul>
  *   <li>the inferred target type</li>
  *   <li>an existing target instance for in-place mapping</li>
@@ -42,10 +42,11 @@ public interface MappingStrategyContributor {
     /**
      * Build a {@link MappingStrategy} for the given typed target value.
      *
+     * @param <T>        plan output type
+     * @param source     source object
      * @param typedValue typed target descriptor (type metadata + optional instance holder)
-     * @param context mapping context
-     * @param <T> plan output type
+     * @param context    mapping context
      * @return mapping plan instance
      */
-    <T> MappingStrategy<T> build(TypedValue<T> typedValue, MappingContext context);
+    <T> MappingStrategy<T> build(Object source, TypedValue<T> typedValue, MappingContext context);
 }

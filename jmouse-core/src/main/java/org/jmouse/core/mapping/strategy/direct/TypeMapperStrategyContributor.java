@@ -53,8 +53,7 @@ public final class TypeMapperStrategyContributor implements MappingStrategyContr
     }
 
     @Override
-    public <T> MappingStrategy<T> build(TypedValue<T> typedValue, MappingContext context) {
-        Object   source     = context.scope().sourceRoot();
+    public <T> MappingStrategy<T> build(Object source, TypedValue<T> typedValue, MappingContext context) {
         Class<?> sourceType = source != null ? source.getClass() : null;
         Class<?> targetType = typedValue.getType().getClassType();
 

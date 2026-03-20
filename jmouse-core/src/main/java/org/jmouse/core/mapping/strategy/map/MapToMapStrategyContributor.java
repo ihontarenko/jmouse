@@ -20,7 +20,7 @@ public final class MapToMapStrategyContributor implements MappingStrategyContrib
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> MappingStrategy<T> build(TypedValue<T> typedValue, MappingContext context) {
+    public <T> MappingStrategy<T> build(Object source, TypedValue<T> typedValue, MappingContext context) {
         return (MappingStrategy<T>) new MapToMapStrategy();
     }
 
