@@ -21,8 +21,12 @@ public class SmokeDeepMapping {
         Mapper mapper = Mappers.builder()
                 .registry(TypeMappingRegistry.builder()
                                   .mapping(AddressFlat.class, AddressView.class, mapping -> mapping
-                                          .property("line1", property -> property.reference("street"))
-                                          .property("postalCode", property -> property.reference("zip"))
+                                          .reference("street", "line1")
+                                          .reference("zip", "postalCode")
+                                  )
+                                  .mapping(Map.class, AddressView.class, mapping -> mapping
+                                          .reference("street", "line1")
+                                          .reference("zip", "postalCode")
                                   )
                                   .mapping(AddressView.class, AddressFlat.class, mapping -> mapping
                                           .property("street", property -> property.reference("line1"))
@@ -47,13 +51,14 @@ public class SmokeDeepMapping {
                                           .property("status", property -> property.constant("CREATED"))
                                   )
                                   .mapping(OrderTarget.class, OrderSource.class, mapping -> mapping
-                                          .property("id", property -> property.reference("orderId"))
-                                          .property("createdAt", property -> property.reference("orderedAt"))
-                                          .property("buyer", property -> property.reference("customer"))
-                                          .property("deliveryAddress", property -> property.reference("shipping"))
-                                          .property("items", property -> property.reference("lines"))
+                                          .reference("orderId", "id")
+                                          .reference("orderedAt", "createdAt")
+                                          .reference("customer", "buyer")
+                                          .reference("shipping", "deliveryAddress")
+                                          .reference("lines", "items")
                                   )
-                                  .build())
+                                  .build()
+                )
                 .strategyRegistry(
                         new MappingStrategyRegistry(Mappers.DEFAULT_CONTRIBUTORS)
                                 .register(new TypeMapperStrategyContributor(
