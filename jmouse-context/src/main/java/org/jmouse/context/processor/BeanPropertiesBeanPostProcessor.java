@@ -44,8 +44,8 @@ public class BeanPropertiesBeanPostProcessor implements BeanPostProcessor {
             definition.setScope(BeanScope.SINGLETON);
 
             // Bind the environment properties at the specified path into this bean
-            TypedValue<?> bindable = TypedValue.ofInstance(bean);
-            String        path     = annotation.value();
+            TypedValue<?> typedValue = TypedValue.ofInstance(bean);
+            String        path       = annotation.value();
 
             if (path == null || path.isBlank()) {
                 throw new IllegalStateException("@BeanProperties path must not be null or blank");
@@ -57,7 +57,7 @@ public class BeanPropertiesBeanPostProcessor implements BeanPostProcessor {
                 throw new IllegalStateException("No environment Binder available in ApplicationBeanContext");
             }
 
-            binder.bind(path, bindable);
+            binder.bind(path, typedValue);
         }
 
         return bean;

@@ -18,6 +18,7 @@ public class PropertyParser implements Parser {
 
         while (cursor.isCurrent(T_DOT, T_OPEN_BRACKET)) {
             boolean openBracket = cursor.isCurrent(T_OPEN_BRACKET);
+
             builder.append(cursor.peek().value());
             cursor.next();
             builder.append(cursor.peek().value());

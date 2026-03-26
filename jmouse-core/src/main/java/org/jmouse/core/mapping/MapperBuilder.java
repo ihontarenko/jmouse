@@ -77,7 +77,7 @@ public final class MapperBuilder {
      * @param mappingRegistry type mapping registry
      * @return this builder
      */
-    public MapperBuilder registry(TypeMappingRegistry mappingRegistry) {
+    public MapperBuilder mappingRegistry(TypeMappingRegistry mappingRegistry) {
         this.mappingRegistry = mappingRegistry;
         return this;
     }

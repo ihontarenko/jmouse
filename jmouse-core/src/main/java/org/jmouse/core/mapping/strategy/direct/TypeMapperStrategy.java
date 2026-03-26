@@ -16,12 +16,12 @@ import org.jmouse.core.mapping.typed.TypeMapper;
  *
  * @param <T> target type
  */
-public final class DirectTypeMapperStrategy<T> implements MappingStrategy<T> {
+public final class TypeMapperStrategy<T> implements MappingStrategy<T> {
 
     private final TypeMapper<Object, T> typeMapper;
 
     @SuppressWarnings("unchecked")
-    public DirectTypeMapperStrategy(TypeMapper<?, ?> typeMapper) {
+    public TypeMapperStrategy(TypeMapper<?, ?> typeMapper) {
         this.typeMapper = (TypeMapper<Object, T>) Verify.nonNull(typeMapper, "typeMapper");
     }
 

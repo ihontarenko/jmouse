@@ -42,8 +42,16 @@ public record MappingContext(
     }
 
     public MappingContext withScope(MappingScope scope) {
-        return new MappingContext(mapperProvider, strategyRegistry, wrapper, conversion,
-                                  mappingRegistry, policy, config, scope);
+        return new MappingContext(
+                mapperProvider,
+                strategyRegistry,
+                wrapper,
+                conversion,
+                mappingRegistry,
+                policy,
+                config,
+                scope
+        );
     }
 
     public MappingContext withPath(PropertyPath path) {

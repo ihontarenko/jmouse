@@ -1,6 +1,10 @@
 package org.jmouse.web.mvc.method.argument;
 
+import org.jmouse.core.Verify;
+import org.jmouse.util.Strings;
 import org.jmouse.web.annotation.RequestParameter;
+import org.jmouse.web.http.RequestAttributesHolder;
+import org.jmouse.web.http.RequestParameters;
 import org.jmouse.web.mvc.method.AbstractArgumentResolver;
 import org.jmouse.core.MethodParameter;
 import org.jmouse.web.http.RequestContext;
@@ -49,10 +53,15 @@ public class RequestParameterArgumentResolver extends AbstractArgumentResolver {
     public Object resolveArgument(MethodParameter parameter, RequestContext requestContext,
                                   MappingResult mappingResult) {
         Object           value            = null;
-        RequestParameter requestParameter = parameter.getParameter().getAnnotation(RequestParameter.class);
+        RequestParameter requestParameter = Verify.nonNull(
+                parameter.getParameter().getAnnotation(RequestParameter.class), "request parameter");
+        String           parameterName    = requestParameter.value();
 
-        if (requestParameter != null && requestParameter.value() != null) {
-            value = requestContext.request().getParameter(requestParameter.value());
+        if (Strings.isNotEmpty(parameterName)) {
+            value = requestContext.request().getParameter(parameterName);
+            if (value == null) {
+                value = RequestAttributesHolder.getRequestParameters().getParameter(parameterName, Object.class);
+            }
         }
 
         return conversion.convert(value, parameter.getParameterType());

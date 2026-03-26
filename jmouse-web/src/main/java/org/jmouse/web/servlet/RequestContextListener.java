@@ -48,6 +48,8 @@ public class RequestContextListener implements ServletRequestListener {
                    RequestAttributesHolder.getRequestRoute().queryParameters(), QueryParameters.QUERY_PARAMETERS_ATTRIBUTE);
             attach(servletRequest, RequestAttributesHolder::setRequestHeaders,
                    RequestHeaders.ofRequest(servletRequest), RequestHeaders.REQUEST_HEADERS_ATTRIBUTE);
+            attach(servletRequest, RequestAttributesHolder::setRequestParameters,
+                   RequestParameters.ofRequest(servletRequest), RequestParameters.REQUEST_PARAMETERS_ATTRIBUTE);
 
             // Set core request attributes (used as fallback context container)
             RequestAttributesHolder.setRequestAttributes(
@@ -70,6 +72,7 @@ public class RequestContextListener implements ServletRequestListener {
         remove(RequestAttributesHolder::removeQueryParameters, QueryParameters.class);
         remove(RequestAttributesHolder::removeRequestRoute, RequestRoute.class);
         remove(RequestAttributesHolder::removeRequestHeaders, RequestHeaders.class);
+        remove(RequestAttributesHolder::removeRequestParameters, RequestParameters.class);
 
         LOGGER.debug("🧹 Cleaned up request context for [{}]",
                 ((HttpServletRequest) event.getServletRequest()).getRequestURI());

@@ -3,6 +3,7 @@ package org.jmouse.validator.smoke;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.mapping.config.MappingConfig;
+import org.jmouse.core.reflection.InferredType;
 import org.jmouse.el.ExpressionLanguage;
 
 import org.jmouse.validator.*;
@@ -158,6 +159,8 @@ public final class Smoke3 {
         Constraint oneOf = support.parse(
                 "@OneOf('values':['uk','en'],'message':'lang must be uk/en (expr)')"
         );
+
+        mapper.map(oneOf, InferredType.forParametrizedClass(Map.class, String.class, Object.class));
 
         Constraint minConstraint = support.parse(
                 "@MinMax('mode':'min','min':-1,'message':'must be >= -1 (expr)')"

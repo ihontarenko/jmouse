@@ -136,16 +136,7 @@ public interface WebBeanContext extends ApplicationBeanContext {
      * @return map of local bean names to instances
      */
     static <T> Map<String, T> getLocalBeansOfType(Class<T> type, WebBeanContext context) {
-        Map<String, T> beans = context.getBeansOfType(type);
-        Map<String, T> local = new LinkedHashMap<>(4);
-
-        beans.forEach((name, bean) -> {
-            if (context.isLocalBean(name)) {
-                local.put(name, bean);
-            }
-        });
-
-        return local;
+        return BeanContext.getLocalBeansOfType(type, context);
     }
 
     /**

@@ -56,7 +56,7 @@ public class SecurityConfiguration {
 
         http.exceptionHandling(e -> e
                 .accessDeniedHandler((request, response, exception) -> {
-                    response.getWriter().println("forbidden!");
+                    response.getWriter().println(STR."forbidden! class \{getClass().getName()}");
                     response.getWriter().println(exception.getMessage());
                     response.setStatus(403);
                 })
@@ -68,7 +68,13 @@ public class SecurityConfiguration {
     private void authorizationConfiguration(AuthorizeRequestConfigurer<?>.AuthorizationRequestMatchCriterion configurer) {
         configurer
                 .matcherCriteria(c -> c.pathPattern("/shared/**")).permitAll()
-                .mappingMatcher(POST("/**"), GET("/health/**")).permitAll()
+                .mappingMatcher(
+                        POST("/**"),
+                        GET("/health/**"),
+                        GET("/video"),
+                        GET("/laptop/**"),
+                        GET("/*/assets/**")
+                ).permitAll()
                 .anyRequest().authenticated()
                 .rolePrefix("R_")
                 .roleHierarchy(RoleHierarchy.parse("R_ADMIN > R_OWNER, R_USER"));

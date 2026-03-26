@@ -25,11 +25,12 @@ package org.jmouse.web.http;
  */
 public class RequestAttributesHolder {
 
-    private static final ThreadLocal<RequestAttributes> ATTRIBUTES_THREAD_LOCAL       = new InheritableThreadLocal<>();
-    private static final ThreadLocal<RequestPath>       REQUEST_PATH_THREAD_LOCAL     = new InheritableThreadLocal<>();
-    private static final ThreadLocal<QueryParameters>   QUERY_PARAMETERS_THREAD_LOCAL = new InheritableThreadLocal<>();
-    private static final ThreadLocal<RequestRoute>      REQUEST_ROUTE_THREAD_LOCAL    = new InheritableThreadLocal<>();
-    private static final ThreadLocal<RequestHeaders>    REQUEST_HEADERS_THREAD_LOCAL  = new InheritableThreadLocal<>();
+    private static final ThreadLocal<RequestAttributes> ATTRIBUTES_THREAD_LOCAL         = new InheritableThreadLocal<>();
+    private static final ThreadLocal<RequestPath>       REQUEST_PATH_THREAD_LOCAL       = new InheritableThreadLocal<>();
+    private static final ThreadLocal<QueryParameters>   QUERY_PARAMETERS_THREAD_LOCAL   = new InheritableThreadLocal<>();
+    private static final ThreadLocal<RequestRoute>      REQUEST_ROUTE_THREAD_LOCAL      = new InheritableThreadLocal<>();
+    private static final ThreadLocal<RequestHeaders>    REQUEST_HEADERS_THREAD_LOCAL    = new InheritableThreadLocal<>();
+    private static final ThreadLocal<RequestParameters> REQUEST_PARAMETERS_THREAD_LOCAL = new InheritableThreadLocal<>();
 
     /**
      * 🧵 Get the current {@link RequestAttributes} bound to the thread.
@@ -204,6 +205,51 @@ public class RequestAttributesHolder {
         }
 
         return queryParameters;
+    }
+
+    /**
+     * Binds {@link RequestParameters} to the current thread. 🧵
+     *
+     * <p>Overrides any existing value in thread-local storage.</p>
+     *
+     * @param requestParameters parameters to bind (may be {@code null})
+     */
+    public static void setRequestParameters(RequestParameters requestParameters) {
+        REQUEST_PARAMETERS_THREAD_LOCAL.set(requestParameters);
+    }
+
+    /**
+     * Clears thread-bound {@link RequestParameters}. 🧹
+     *
+     * <p>Removes value from thread-local storage to prevent leakage
+     * across request boundaries.</p>
+     */
+    public static void removeRequestParameters() {
+        REQUEST_PARAMETERS_THREAD_LOCAL.remove();
+    }
+
+    /**
+     * Returns {@link RequestParameters} for the current request. 📥
+     *
+     * <p>Resolution order:</p>
+     * <ol>
+     *     <li>Thread-local storage</li>
+     *     <li>Request attributes fallback</li>
+     * </ol>
+     *
+     * <p>May return {@code null} if no parameters are available.</p>
+     *
+     * @return current {@link RequestParameters} or {@code null}
+     */
+    public static RequestParameters getRequestParameters() {
+        RequestParameters requestParameters = REQUEST_PARAMETERS_THREAD_LOCAL.get();
+
+        if (requestParameters == null) {
+            requestParameters = (RequestParameters) getRequestAttributes()
+                    .getAttribute(RequestParameters.REQUEST_PARAMETERS_ATTRIBUTE);
+        }
+
+        return requestParameters;
     }
 
     /**

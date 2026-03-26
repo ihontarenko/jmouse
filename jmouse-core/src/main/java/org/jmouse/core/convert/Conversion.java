@@ -45,4 +45,34 @@ public interface Conversion extends ConverterFactory {
         }
         return converted;
     }
+
+    /**
+     * Converts the given {@code value} only if required. ⚙️
+     *
+     * <p>Behavior:</p>
+     * <ul>
+     *     <li>returns {@code value} if {@code value == null} or {@code targetType == null}</li>
+     *     <li>returns {@code value} if already assignable to {@code targetType}</li>
+     *     <li>otherwise delegates to {@link #convert(Object, Class)}</li>
+     * </ul>
+     *
+     * @param <T>        target type
+     * @param value      input value (may be {@code null})
+     * @param targetType target type (may be {@code null})
+     *
+     * @return original or converted value
+     */
+    @SuppressWarnings("unchecked")
+    default <T> T convertIfNeeded(Object value, Class<T> targetType) {
+        if (value == null || targetType == null) {
+            return (T) value;
+        }
+
+        if (targetType.isInstance(value)) {
+            return targetType.cast(value);
+        }
+
+        return convert(value, targetType);
+    }
+
 }

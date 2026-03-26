@@ -74,7 +74,7 @@ public class PluginBus {
      * @param result mapping result descriptor
      */
     public void onFinish(MappingResult result) {
-        for (var mappingPlugin : plugins) {
+        for (MappingPlugin mappingPlugin : plugins) {
             mappingPlugin.onFinish(result);
         }
     }

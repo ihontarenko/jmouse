@@ -5,6 +5,7 @@ import org.jmouse.beans.naming.BeanNameResolver;
 import org.jmouse.beans.definition.BeanDefinitionFactory;
 import org.jmouse.beans.processor.BeanPostProcessorAware;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -241,4 +242,24 @@ public interface BeanContext extends BeanContainer, BeanContainerRegistry,
      * <p>
      */
     void cleanup();
+
+    /**
+     * 🔍 Finds local beans (not inherited) by type.
+     *
+     * @param type    the bean type
+     * @param context the web context
+     * @return map of local bean names to instances
+     */
+    static <T> Map<String, T> getLocalBeansOfType(Class<T> type, BeanContext context) {
+        Map<String, T> beans = context.getBeansOfType(type);
+        Map<String, T> local = new LinkedHashMap<>(4);
+
+        beans.forEach((name, bean) -> {
+            if (context.isLocalBean(name)) {
+                local.put(name, bean);
+            }
+        });
+
+        return local;
+    }
 }

@@ -131,6 +131,7 @@ public class SimplePathPattern implements PathPattern {
             }
 
             Element element = elements.get(j);
+
             if (!part.matches(element.value())) {
                 return null;
             }

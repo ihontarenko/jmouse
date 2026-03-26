@@ -71,6 +71,7 @@ public final class ObjectMapper implements Mapper {
         MappingStrategy<T> strategy      = scopedContext.strategyRegistry().strategyFor(source, typedValue, scopedContext);
 
         try {
+            LOGGER.debug("Mapping strategy: {}", strategy.getClass().getSimpleName());
             T value = strategy.execute(source, typedValue, scopedContext);
             return invocation.finish(source, value, type);
         } catch (MappingException mappingException) {

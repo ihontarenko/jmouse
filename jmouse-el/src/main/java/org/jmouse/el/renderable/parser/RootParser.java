@@ -73,6 +73,14 @@ public class RootParser implements Parser {
 
             cursor.ensure(T_CLOSE_EXPRESSION);
             parent.add(tagNode);
+        } else if (cursor.isCurrent(T_OPEN_COMMENT)) {
+            // just consume comment block
+            while (!cursor.isCurrent(T_CLOSE_COMMENT)) {
+                cursor.next();
+            }
+
+            cursor.ensure(T_CLOSE_COMMENT);
+            parent.add(new EmptyNode());
         } else {
             // Unexpected token; expect end-of-line.
             cursor.expect(BasicToken.T_EOL);

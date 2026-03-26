@@ -133,6 +133,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
         MappingResult mappingResult = MappingResult.of(match, route);
         MappedHandler mappedHandler = new RouteMappedHandler(handler, mappingResult, getReturnParameter(handler));
 
+        request.setAttribute(MATCHED_ROUTE_ATTRIBUTE, route);
         request.setAttribute(ROUTE_MATCH_ATTRIBUTE, match);
         request.setAttribute(ROUTE_PRODUCIBLE_ATTRIBUTE, route.produces());
 

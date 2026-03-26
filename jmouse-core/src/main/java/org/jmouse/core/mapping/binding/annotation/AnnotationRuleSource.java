@@ -65,7 +65,7 @@ public final class AnnotationRuleSource implements TypeMappingRuleSource {
         ObjectDescriptor<Object>     descriptor = (ObjectDescriptor<Object>) DescriptorResolver.describe(targetType);
 
         descriptor.getProperties().forEach((name, property) -> {
-            PropertyMapping propertyMapping = readMapping(name, property.getGetterMethod().unwrap().getAnnotations());
+            PropertyMapping propertyMapping = readMapping(name, property.getSetterMethod().unwrap().getAnnotations());
             if (propertyMapping != null) {
                 mappings.put(property.getName(), propertyMapping);
             }

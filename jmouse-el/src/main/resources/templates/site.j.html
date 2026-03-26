@@ -60,6 +60,13 @@
             </li>
         {% endfor %}
     </ul>
+<ul>
+    {% for key in underscored('underScoredStringForTest123Abc', true)|split('_') %}
+    <li>
+        <b>{{ key }}</b>
+    </li>
+    {% endfor %}
+</ul>
     <hr>
     {% embed 'extension/card' %}
         {% block 'card_content' %}

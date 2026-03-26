@@ -2,6 +2,13 @@ package org.jmouse.web_app.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.annotation.BeanConstructor;
+import org.jmouse.core.parameters.RequestParametersJavaStructureConverter;
+import org.jmouse.core.parameters.RequestParametersJavaStructureOptions;
+import org.jmouse.core.parameters.RequestParametersTree;
+import org.jmouse.core.parameters.RequestParametersTreeParser;
+import org.jmouse.core.parameters.support.RequestParametersTreePrinter;
+import org.jmouse.core.throttle.RateLimit;
+import org.jmouse.web.http.RequestParameters;
 import org.jmouse.web.mvc.HandlerMappingException;
 import org.jmouse.web.mvc.Model;
 import org.jmouse.web.annotation.*;
@@ -9,6 +16,7 @@ import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.mvc.resource.ResourceUrlResolver;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Controller
@@ -40,12 +48,14 @@ public class IndexController {
     )
     @MethodDescription("Demo Endpoint!")
     @ViewMapping("index/demo")
+    @RateLimit(max = 10, per = ChronoUnit.SECONDS, amount = 1)
     public String demo(
            @PathVariable("id") Long id, Model model,
            @RequestHeader(HttpHeader.USER_AGENT) String userAgent,
            @RequestMethod HttpMethod method,
            @RequestParameter("lang") String lang,
            @RequestParameter("externalId") Long externalId,
+           @RequestParameter("filter") Object filter,
            HttpServletRequest request
     ) {
         model.addAttribute("ID", id);
@@ -53,6 +63,9 @@ public class IndexController {
         model.addAttribute("method", method);
         model.addAttribute("lang", lang);
         model.addAttribute("externalId", externalId);
+
+        RequestParameters parameters = RequestParameters.ofRequest(request);
+
         return "view:index/demo";
     }
 

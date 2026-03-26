@@ -1,6 +1,7 @@
 package org.jmouse.web.mvc.method.argument;
 
 import org.jmouse.web.annotation.PathVariable;
+import org.jmouse.web.mvc.HandlerMapping;
 import org.jmouse.web.mvc.method.AbstractArgumentResolver;
 import org.jmouse.core.MethodParameter;
 import org.jmouse.web.http.RequestContext;
@@ -8,6 +9,8 @@ import org.jmouse.web.mvc.MappingResult;
 import org.jmouse.web.match.RouteMatch;
 
 import java.lang.reflect.Parameter;
+
+import static org.jmouse.web.mvc.HandlerMapping.ROUTE_MATCH_ATTRIBUTE;
 
 /**
  * 🛣️ Resolver for method arguments annotated with {@link PathVariable}.
@@ -49,7 +52,7 @@ public class PathVariableArgumentResolver extends AbstractArgumentResolver {
             MappingResult mappingResult) {
         Parameter    parameter     = methodParameter.getParameter();
         PathVariable pathVariable  = parameter.getAnnotation(PathVariable.class);
-        RouteMatch   match         = mappingResult.match();
+        RouteMatch   match         = requestContext.getRequestAttribute(ROUTE_MATCH_ATTRIBUTE, RouteMatch.class, true);
         Object       argumentValue = null;
         String       variableName  = pathVariable.value();
 
@@ -58,6 +61,6 @@ public class PathVariableArgumentResolver extends AbstractArgumentResolver {
         }
 
         // Convert the argument value to the parameter's declared type
-        return conversion.convert(argumentValue, methodParameter.getParameterType());
+        return conversion.convertIfNeeded(argumentValue, methodParameter.getParameterType());
     }
 }

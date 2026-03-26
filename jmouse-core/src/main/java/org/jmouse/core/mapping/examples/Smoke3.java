@@ -18,7 +18,7 @@ public class Smoke3 {
     public static void main(String... arguments) {
         Mapper mapper = Mappers.builder()
                 // mapping settings
-                .registry(TypeMappingRegistry.builder()
+                .mappingRegistry(TypeMappingRegistry.builder()
                                   .mapping("user", new UserBA())
                                   .mapping(UserA.class, UserB.class, m -> m
                                           .property("birthDay", builder -> builder

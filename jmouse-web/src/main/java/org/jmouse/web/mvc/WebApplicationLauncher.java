@@ -59,7 +59,7 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
     @Override
     public WebBeanContext launch(String... arguments) {
         ApplicationFactory<WebBeanContext> factory = new WebApplicationFactory();
-        WebBeanContext context = factory.createRootContext();
+        WebBeanContext                     context = factory.createRootContext();
 
         context.addInitializer(new BeanScanAnnotatedContextInitializer());
         context.addInitializer(new ApplicationContextBeansScanner());

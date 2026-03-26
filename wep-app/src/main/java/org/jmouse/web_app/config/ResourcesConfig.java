@@ -2,6 +2,7 @@ package org.jmouse.web_app.config;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanConstructor;
+import org.jmouse.web.http.CacheControl;
 import org.jmouse.web.mvc.BeanConfigurer;
 import org.jmouse.web.mvc.resource.*;
 
@@ -32,13 +33,13 @@ public class ResourcesConfig implements BeanConfigurer<ResourceHandlerRegistry> 
 //                                .addStrategy(new QueryParameterVersionStrategy("v"), "/laptop/**"),
 //                        new LocationScanningResolver()
 //                );
-        /*VersionalResourceResolver resolver = new VersionalResourceResolver()
+        VersionalResourceResolver resolver = new VersionalResourceResolver()
                 .addStrategy(new FixedVersionStrategy("v2025.09"), "/static/**")
                 .addStrategy(new FixedVersionStrategy(properties.getIconPrefix()), "/icon/**")
                 .addStrategy(new ContentHashVersionStrategy("SHA-256", 16), "/assets/**");
 
         registry.registerHandler("/laptop/{*filepath}")
-                .addResourceLocations("file:/C:/Users/Ivan_Hontarenko/Media")
+                .addResourceLocations("file:/C:/Users/Ivan_Hontarenko/Downloads")
                 .setCacheControl(CacheControl.empty().cachePublic())
                 .getChainRegistration()
                 .addResolvers(
@@ -47,7 +48,7 @@ public class ResourcesConfig implements BeanConfigurer<ResourceHandlerRegistry> 
                                 .addStrategy(new QueryParameterVersionStrategy("v"), "/laptop/**"),
                         new LocationScanningResolver()
                 );
-
+/*
         registry.registerHandler("/assets/{*filepath}")
                 .addResourceLocations("classpath:static/", "file:/C:/Users/Ivan_Hontarenko/Git/")
                 .setCacheControl(CacheControl.empty().cachePublic())

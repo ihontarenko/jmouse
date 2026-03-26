@@ -1,6 +1,5 @@
 package org.jmouse.web.mvc.method.argument;
 
-import org.jmouse.web.http.RequestAttributes;
 import org.jmouse.web.mvc.method.AbstractArgumentResolver;
 import org.jmouse.core.MethodParameter;
 import org.jmouse.web.http.RequestContext;
@@ -8,7 +7,7 @@ import org.jmouse.web.mvc.MVCResult;
 import org.jmouse.web.mvc.MappingResult;
 import org.jmouse.web.mvc.Model;
 
-import static org.jmouse.web.http.RequestAttributesHolder.getAttribute;
+import static org.jmouse.web.http.RequestAttributes.MVC_RESULT_ATTRIBUTE;
 
 public class ModelArgumentResolver extends AbstractArgumentResolver {
 
@@ -37,10 +36,6 @@ public class ModelArgumentResolver extends AbstractArgumentResolver {
             RequestContext requestContext,
             MappingResult mappingResult
     ) {
-        if (getAttribute(RequestAttributes.MVC_RESULT_ATTRIBUTE) instanceof MVCResult mvcResult) {
-            return mvcResult.getModel();
-        }
-
-        return null;
+        return requestContext.getRequestAttribute(MVC_RESULT_ATTRIBUTE, MVCResult.class, true).getModel();
     }
 }

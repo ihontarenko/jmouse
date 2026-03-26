@@ -87,7 +87,7 @@ public class Mappers {
                 .conversion(new MapperConversion())
                 .policy(MappingPolicy.defaults())
                 .config(MappingConfig.builder().build())
-                .registry(TypeMappingRegistry.builder().build())
+                .mappingRegistry(TypeMappingRegistry.builder().build())
                 .strategyRegistry(new MappingStrategyRegistry(DEFAULT_CONTRIBUTORS));
     }
 

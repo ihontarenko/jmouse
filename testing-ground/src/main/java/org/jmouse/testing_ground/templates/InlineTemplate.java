@@ -6,6 +6,7 @@ import org.jmouse.el.evaluation.ReflectionClassPropertyResolver;
 import org.jmouse.el.extension.MethodImporter;
 import org.jmouse.el.renderable.*;
 import org.jmouse.el.renderable.loader.ClasspathLoader;
+import org.jmouse.el.renderable.loader.StringLoader;
 import org.jmouse.el.renderable.loader.TemplateLoader;
 import org.jmouse.testing_ground.binder.dto.Book;
 import org.jmouse.util.Strings;
@@ -14,25 +15,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Templates {
+public class InlineTemplate {
 
     public static void main(String[] arguments) {
-        TemplateLoader<String> loader = new ClasspathLoader();
-
-        loader.setPrefix("templates/");
-        loader.setSuffix(".j.html");
+        TemplateLoader<String> loader = new StringLoader();
 
         Engine engine = new TemplateEngine();
 
         engine.setLoader(loader);
 
-
-        Template          template = engine.getTemplate("site");
-//        Template          view = engine.getTemplate("benchmark");
+//        Template          template = engine.getTemplate("All stocks: ->{# comment here !!! #}<- {{ items|map(i -> i.name2)|join(' :: ', '[', ']') ~ book.title|upper }}");
+        Template          template = engine.getTemplate("{{ (2..9)|map(n -> n|string)|join(',', '[', ']') }}");
+//        Template          template = engine.getTemplate("{{ map[keyX.subA] }}");
         Renderer          renderer = new TemplateRenderer(engine);
         EvaluationContext context  = template.newContext();
 
-        MethodImporter.importMethod(Strings.class, context);
+        context.setValue("host", "google.com");
+        context.setValue("schema", "https");
+        context.setValue("path", "search?_=java");
 
         context.setValue("book", getBook("Stephen King", "The Shining"));
         context.setValue("books", getBookList());
@@ -40,6 +40,7 @@ public class Templates {
         context.setValue("map", new HashMap<>() {{
             put("key1", "valueA");
             put("key2", "valueB");
+            put("keyX.subA", "subA");
         }});
         context.setValue("list", new ArrayList<>() {{
             add(123);
@@ -48,15 +49,13 @@ public class Templates {
         }});
         context.setValue("string", "Hello World");
         context.setValue("items", Stock.dummyItems());
-        context.setValue("stock", Stock.dummyItems().get(0));
+        context.setValue("stock", Stock.dummyItems().getFirst());
 
         context.getVirtualProperties().addVirtualProperty(new ReflectionClassPropertyResolver());
 
         Content content = renderer.render(template, context);
 
-        String html = content.toString();
-
-        System.out.println(content);
+        System.out.println(content.toString());
         System.out.println(PropertyPath.CACHE);
     }
 

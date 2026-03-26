@@ -71,7 +71,7 @@ public final class TypeMapperStrategyContributor implements MappingStrategyContr
             );
         }
 
-        return new DirectTypeMapperStrategy<>(mapper);
+        return new TypeMapperStrategy<>(mapper);
     }
 
     private record Key(Class<?> sourceType, Class<?> targetType) {

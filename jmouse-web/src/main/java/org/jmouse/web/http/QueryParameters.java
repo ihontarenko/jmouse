@@ -36,7 +36,7 @@ public final class QueryParameters {
     /**
      * ✅ Factory method for creating {@code QueryParameters}.
      *
-     * @param source the raw parameter map (usually from servlet API)
+     * @param request the raw request (usually from servlet API)
      * @return a new {@code QueryParameters} instance
      */
     public static QueryParameters ofRequest(HttpServletRequest request) {

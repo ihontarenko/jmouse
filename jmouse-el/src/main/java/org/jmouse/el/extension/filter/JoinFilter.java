@@ -1,9 +1,13 @@
 package org.jmouse.el.extension.filter;
 
 import org.jmouse.core.reflection.TypeClassifier;
+import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.StringJoiner;
 import java.util.stream.StreamSupport;
 
@@ -26,9 +30,12 @@ public class JoinFilter extends AbstractFilter {
             suffix = after;
         }
 
-        if (type.isIterable()) {
-            result = StreamSupport.stream(((Iterable<?>) input).spliterator(), false)
+        if (type.is(Iterator.class)) {
+            Iterator<?> iterator = (Iterator<?>) input;
+            result = StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false)
                     .map(String::valueOf).collect(joining(separator, prefix, suffix));
+        } else if (type.isIterable()) {
+            return apply(((Iterable<?>)input).iterator(), arguments, context, TypeInformation.forClass(Iterator.class));
         } else if (type.isArray()) {
             StringJoiner joiner = new StringJoiner(separator, prefix, suffix);
 

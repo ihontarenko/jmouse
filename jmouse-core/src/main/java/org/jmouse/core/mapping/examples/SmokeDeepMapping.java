@@ -11,6 +11,7 @@ import org.jmouse.core.reflection.InferredType;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ public class SmokeDeepMapping {
 
     public static void main(String... arguments) {
         Mapper mapper = Mappers.builder()
-                .registry(TypeMappingRegistry.builder()
+                .mappingRegistry(TypeMappingRegistry.builder()
                                   .mapping(AddressFlat.class, AddressView.class, mapping -> mapping
                                           .reference("street", "line1")
                                           .reference("zip", "postalCode")
@@ -105,7 +106,8 @@ public class SmokeDeepMapping {
                         "country", "Ukraine",
                         "city", "Lviv",
                         "street", "Svobody Ave 10",
-                        "zip", "79000"
+                        "zip", "79000",
+                        "allowed", List.of("M1", "M2", "M3")
                 ),
                 TypedValue.of(AddressView.class)
         );
@@ -334,6 +336,7 @@ public class SmokeDeepMapping {
         private String city;
         private String street;
         private String zip;
+        private List<String> allowed = List.of("A", "B", "C");
 
         public String getCountry() {
             return country;
@@ -568,6 +571,15 @@ public class SmokeDeepMapping {
         private String city;
         private String line1;
         private String postalCode;
+        private String[] allowed;
+
+        public String[] getAllowed() {
+            return allowed;
+        }
+
+        public void setAllowed(String[] allowed) {
+            this.allowed = allowed;
+        }
 
         public String getCountry() {
             return country;
@@ -608,6 +620,7 @@ public class SmokeDeepMapping {
                     ", city='" + city + '\'' +
                     ", line1='" + line1 + '\'' +
                     ", postalCode='" + postalCode + '\'' +
+                    ", allowed='" + Arrays.deepToString(allowed) + '\'' +
                     '}';
         }
     }

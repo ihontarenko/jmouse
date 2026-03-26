@@ -24,6 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public interface HandlerMapping {
 
+    String MATCHED_ROUTE_ATTRIBUTE    = HandlerMapping.class.getName() + ".MATCHED_ROUTE_ATTRIBUTE";
     String ROUTE_MATCH_ATTRIBUTE      = HandlerMapping.class.getName() + ".ROUTE_MATCH_ATTRIBUTE";
     String ROUTE_PRODUCIBLE_ATTRIBUTE = HandlerMapping.class.getName() + ".ROUTE_PRODUCIBLE_ATTRIBUTE";
 
