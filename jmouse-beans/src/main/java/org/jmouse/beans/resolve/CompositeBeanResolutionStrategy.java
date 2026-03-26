@@ -2,48 +2,37 @@ package org.jmouse.beans.resolve;
 
 import java.util.List;
 
-import static org.jmouse.core.Verify.nonNull;
-
-/**
- * Composite {@link BeanResolutionStrategy} backed by ordered resolvers. 🔗
- *
- * <p>The first resolver that supports the context is used.</p>
- */
 public class CompositeBeanResolutionStrategy implements BeanResolutionStrategy {
 
     private final List<BeanResolver> resolvers;
 
     public CompositeBeanResolutionStrategy(List<BeanResolver> resolvers) {
-        this.resolvers = List.copyOf(nonNull(resolvers, "resolvers"));
+        this.resolvers = List.copyOf(resolvers);
     }
 
     @Override
-    public boolean supports(BeanResolutionContext context) {
-        return resolvers.stream().anyMatch(resolver -> resolver.supports(context));
+    public boolean supports(BeanResolutionRequest request) {
+        return resolvers.stream().anyMatch(resolver -> resolver.supports(request));
     }
 
     @Override
-    public Object resolve(BeanResolutionContext context) {
+    public Object resolve(BeanResolutionRequest request) {
         for (BeanResolver resolver : resolvers) {
-            if (resolver.supports(context)) {
-                Object resolved = resolver.resolve(context);
-
-                if (resolved != null || context.required()) {
+            if (resolver.supports(request)) {
+                Object resolved = resolver.resolve(request);
+                if (resolved != null || !request.required()) {
                     return resolved;
                 }
             }
         }
 
-        if (context.required()) {
-            throw new IllegalStateException(getErrorMessage(context));
+        if (request.required()) {
+            throw new IllegalStateException(
+                    "No bean resolver could resolve type '%s'".formatted(request.beanType())
+            );
         }
 
         return null;
-    }
-
-    protected String getErrorMessage(BeanResolutionContext context) {
-        return "No bean resolver could resolve type '%s'"
-                .formatted(context.type().getTypeName());
     }
 
 }

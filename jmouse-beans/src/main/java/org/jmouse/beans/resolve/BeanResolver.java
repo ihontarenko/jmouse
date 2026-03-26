@@ -12,7 +12,7 @@ public interface BeanResolver {
      *
      * @return {@code true} if supported
      */
-    boolean supports(BeanResolutionContext context);
+    boolean supports(BeanResolutionRequest context);
 
     /**
      * Resolves a value for the given context. ⚙️
@@ -21,6 +21,6 @@ public interface BeanResolver {
      *
      * @return resolved value
      */
-    Object resolve(BeanResolutionContext context);
+    Object resolve(BeanResolutionRequest context);
 
 }

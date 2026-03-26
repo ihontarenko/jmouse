@@ -4,6 +4,8 @@ import org.jmouse.beans.definition.BeanDefinitionFactory;
 import org.jmouse.beans.definition.SimpleBeanDefinitionFactory;
 import org.jmouse.beans.instantiation.*;
 import org.jmouse.beans.processor.BeanNameKeeperBeanPostProcessor;
+import org.jmouse.beans.resolve.BeanResolutionStrategies;
+import org.jmouse.beans.resolve.BeanResolutionStrategy;
 import org.slf4j.Logger;
 import org.jmouse.beans.definition.strategy.ConstructorBeanDefinitionCreationStrategy;
 import org.jmouse.beans.definition.strategy.MethodBeanDefinitionCreationStrategy;
@@ -99,7 +101,8 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
         BeanContextAware contextAware = (BeanContextAware) factory;
         contextAware.setBeanContext(context);
 
-        DependencyResolver dependencyResolver = new DefaultDependencyResolver();
+        BeanResolutionStrategy strategy           = BeanResolutionStrategies.defaultStrategy();
+        DependencyResolver     dependencyResolver = new SimpleDependencyResolver(strategy);
 
         BeanInstantiationFactory             instantiation               = (BeanInstantiationFactory) factory;
         MethodBeanInstantiationStrategy      methodInstantiationStrategy = new MethodBeanInstantiationStrategy();

@@ -6,12 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Default {@link BeanCandidateProvider} backed by {@link BeanContext}. 🏭
- *
- * <p>This adapter may be adjusted to match the exact {@link BeanContext}
- * API available in the project.</p>
- */
 public class BeanContextCandidateProvider implements BeanCandidateProvider {
 
     private final BeanContext beanContext;

@@ -12,7 +12,7 @@ public interface BeanResolutionStrategy {
      *
      * @return {@code true} if at least one resolver can resolve the context
      */
-    boolean supports(BeanResolutionContext context);
+    boolean supports(BeanResolutionRequest context);
 
     /**
      * Resolves a value for the given context. ⚙️
@@ -21,6 +21,6 @@ public interface BeanResolutionStrategy {
      *
      * @return resolved value or {@code null} if not required and unresolved
      */
-    Object resolve(BeanResolutionContext context);
+    Object resolve(BeanResolutionRequest context);
 
 }

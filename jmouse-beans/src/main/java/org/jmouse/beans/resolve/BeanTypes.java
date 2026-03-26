@@ -1,9 +1,11 @@
 package org.jmouse.beans.resolve;
 
+import jakarta.inject.Provider;
 import org.jmouse.core.reflection.InferredType;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 
 public final class BeanTypes {
@@ -23,8 +25,20 @@ public final class BeanTypes {
         return Collection.class.isAssignableFrom(rawType(type));
     }
 
-    public static Type getGenericArgument(Type type) {
-        return InferredType.forType(type).getFirst().getType();
+    public static boolean isProvider(Type type) {
+        return Provider.class.isAssignableFrom(rawType(type));
+    }
+
+    public static boolean isMap(Type type) {
+        return Map.class.isAssignableFrom(rawType(type));
+    }
+
+    public static Type getFirstGeneric(Type type) {
+        return getGenericArgument(type, 0);
+    }
+
+    public static Type getGenericArgument(Type type, int index) {
+        return InferredType.forType(type).getGeneric(index).getType();
     }
 
 }

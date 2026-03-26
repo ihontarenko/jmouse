@@ -3,7 +3,7 @@ package org.jmouse.web.mvc.method.argument;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanContextAware;
 import org.jmouse.beans.annotation.Qualifier;
-import org.jmouse.beans.resolve.BeanResolutionContext;
+import org.jmouse.beans.resolve.BeanResolutionRequest;
 import org.jmouse.beans.resolve.BeanResolutionStrategies;
 import org.jmouse.beans.resolve.BeanResolutionStrategy;
 import org.jmouse.core.MethodParameter;
@@ -28,7 +28,7 @@ import java.lang.reflect.Parameter;
 public class TryGetBeanArgumentResolver extends AbstractArgumentResolver implements BeanContextAware {
 
     private       BeanContext            beanContext;
-    private final BeanResolutionStrategy resolutionStrategy = BeanResolutionStrategies.defaultStrategy();
+    private final BeanResolutionStrategy strategy = BeanResolutionStrategies.defaultStrategy();
 
     /**
      * Checks whether the parameter can be resolved from {@link BeanContext}. 🔎
@@ -40,8 +40,8 @@ public class TryGetBeanArgumentResolver extends AbstractArgumentResolver impleme
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         Parameter source = parameter.getParameter();
-        return resolutionStrategy.supports(
-                BeanResolutionContext.forParameter(getBeanContext(), source, false)
+        return strategy.supports(
+                BeanResolutionRequest.forParameter(getBeanContext(), source)
         );
 
 //        return !beanContext.getBeans(parameter.getParameterType()).isEmpty();
@@ -61,8 +61,8 @@ public class TryGetBeanArgumentResolver extends AbstractArgumentResolver impleme
      */
     @Override
     public Object resolveArgument(MethodParameter methodParameter, RequestContext requestContext, MappingResult mappingResult) {
-        return resolutionStrategy.resolve(
-                BeanResolutionContext.forParameter(getBeanContext(), methodParameter.getParameter(), true)
+        return strategy.resolve(
+                BeanResolutionRequest.forParameter(getBeanContext(), methodParameter.getParameter())
         );
 
 //        Parameter   parameter = methodParameter.getParameter();
