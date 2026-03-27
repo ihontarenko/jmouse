@@ -7,17 +7,34 @@ import org.jmouse.beans.resolve.BeanResolutionRequest;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Resolves {@link Optional} dependencies. 🎯
+ *
+ * <p>Prefers a primary candidate, otherwise falls back to single-candidate resolution.</p>
+ */
 public class OptionalBeanResolver extends AbstractBeanResolver {
 
+    /**
+     * Checks whether the requested dependency is an {@link Optional}.
+     *
+     * @param request resolution request
+     * @return {@code true} if supported
+     */
     @Override
     public boolean supports(BeanResolutionRequest request) {
         return request.beanType().is(Optional.class);
     }
 
+    /**
+     * Resolves the wrapped dependency and returns it as {@link Optional}.
+     *
+     * @param request resolution request
+     * @return optional bean value
+     */
     @Override
     public Object resolve(BeanResolutionRequest request) {
         Class<?>            type       = request.beanType().getFirst().getClassType();
-        List<BeanCandidate> candidates = candidates(request).getCandidates(type);
+        List<BeanCandidate> candidates = getCandidateProvider(request).getCandidates(type);
         BeanCandidate       primary    = BeanCandidate.primary(candidates, type);
 
         if (primary != null) {

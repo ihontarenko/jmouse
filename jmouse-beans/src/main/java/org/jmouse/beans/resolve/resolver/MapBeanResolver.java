@@ -9,8 +9,34 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * {@link AbstractBeanResolver} implementation that resolves map-based dependencies. 🗺️
+ *
+ * <p>
+ * This resolver supports injection of {@link Map} where:
+ * <ul>
+ *     <li>key type is {@link String}</li>
+ *     <li>value type represents bean type</li>
+ * </ul>
+ * </p>
+ *
+ * <p><b>Example:</b></p>
+ * <pre>{@code
+ * public class Service {
+ *
+ *     private Map<String, Handler> handlers;
+ *
+ * }
+ * }</pre>
+ */
 public class MapBeanResolver extends AbstractBeanResolver {
 
+    /**
+     * Checks whether the requested dependency is a {@link Map} with {@link String} keys. 🔎
+     *
+     * @param request the resolution request
+     * @return {@code true} if supported map type
+     */
     @Override
     public boolean supports(BeanResolutionRequest request) {
         InferredType type = request.beanType();
@@ -22,11 +48,18 @@ public class MapBeanResolver extends AbstractBeanResolver {
         return type.getFirst().isString();
     }
 
+    /**
+     * Resolves all beans matching the map value type and returns them
+     * as a {@link Map} keyed by bean names. ⚙️
+     *
+     * @param request the resolution request
+     * @return map of bean name → bean instance
+     */
     @Override
     public Object resolve(BeanResolutionRequest request) {
         InferredType        type       = request.beanType();
         Class<?>            valueClass = type.getLast().getClassType();
-        List<BeanCandidate> candidates = candidates(request).getCandidates(valueClass);
+        List<BeanCandidate> candidates = getCandidateProvider(request).getCandidates(valueClass);
 
         Map<String, Object> values = new LinkedHashMap<>();
 

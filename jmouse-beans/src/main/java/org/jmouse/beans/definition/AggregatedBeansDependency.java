@@ -2,6 +2,9 @@ package org.jmouse.beans.definition;
 
 import org.jmouse.core.reflection.InferredType;
 
-public record AggregatedBeansDependency(InferredType javaType, String name, Object dependant) implements BeanDependency {
+import java.lang.reflect.AnnotatedElement;
+
+public record AggregatedBeansDependency(
+        InferredType javaType, String name, AnnotatedElement dependant) implements BeanDependency {
 
 }

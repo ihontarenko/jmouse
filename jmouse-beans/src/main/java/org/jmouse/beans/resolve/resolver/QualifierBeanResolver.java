@@ -5,15 +5,30 @@ import org.jmouse.beans.resolve.support.AnnotatedBeanResolver;
 import org.jmouse.beans.resolve.BeanCandidate;
 import org.jmouse.beans.resolve.BeanResolutionRequest;
 
+/**
+ * Resolves dependencies annotated with {@link Qualifier}. 🏷️
+ *
+ * <p>Performs name-based lookup and validates type compatibility.</p>
+ */
 public class QualifierBeanResolver extends AnnotatedBeanResolver<Qualifier> {
 
+    /**
+     * Creates resolver for {@link Qualifier}.
+     */
     public QualifierBeanResolver() {
         super(Qualifier.class);
     }
 
+    /**
+     * Resolves a bean by qualifier value.
+     *
+     * @param request   resolution request
+     * @param qualifier qualifier annotation
+     * @return resolved bean or {@code null} if not required and not found
+     */
     @Override
     protected Object resolve(BeanResolutionRequest request, Qualifier qualifier) {
-        BeanCandidate candidate = candidates(request).getCandidate(qualifier.value());
+        BeanCandidate candidate = getCandidateProvider(request).getCandidate(qualifier.value());
 
         if (candidate == null) {
             if (request.required()) {

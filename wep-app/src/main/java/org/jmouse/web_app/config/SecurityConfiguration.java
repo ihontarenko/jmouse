@@ -2,6 +2,8 @@ package org.jmouse.web_app.config;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
+import org.jmouse.beans.annotation.Dependency;
+import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.security.UserPrincipal;
 import org.jmouse.security.UserPrincipalService;
 import org.jmouse.security.access.RoleHierarchy;
@@ -10,12 +12,16 @@ import org.jmouse.security.web.MatchableSecurityFilterChain;
 import org.jmouse.security.web.configuration.builder.HttpSecurity;
 import org.jmouse.security.web.configuration.configurer.AuthorizeRequestConfigurer;
 import org.jmouse.web.http.HttpMethod;
+import org.jmouse.web.server.WebServerFactory;
 
 import static org.jmouse.web.match.routing.MatcherCriteria.GET;
 import static org.jmouse.web.match.routing.MatcherCriteria.POST;
 
 @BeanFactories
 public class SecurityConfiguration {
+
+    private @Dependency            WebServerFactory factoryA;
+    private @Dependency @Qualifier("webServerFactory") WebServerFactory factoryB;
 
     @Bean
     public UserPrincipalService principalService() {

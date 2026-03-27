@@ -2,9 +2,12 @@ package org.jmouse.web_app.config;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanConstructor;
+import org.jmouse.beans.annotation.Lazy;
 import org.jmouse.web.http.CacheControl;
 import org.jmouse.web.mvc.BeanConfigurer;
 import org.jmouse.web.mvc.resource.*;
+
+import java.util.function.Supplier;
 
 @Bean
 public class ResourcesConfig implements BeanConfigurer<ResourceHandlerRegistry> {
@@ -18,6 +21,7 @@ public class ResourcesConfig implements BeanConfigurer<ResourceHandlerRegistry> 
 
     @Override
     public void configure(ResourceHandlerRegistry registry) {
+        System.out.println();
 //        VersionalResourceResolver resolver = new VersionalResourceResolver()
 //                .addStrategy(new FixedVersionStrategy("v2025.09"), "/static/**")
 //                .addStrategy(new FixedVersionStrategy(properties.getIconPrefix()), "/icon/**")

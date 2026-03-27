@@ -19,14 +19,16 @@ public final class BeanResolutionStrategies {
 
         resolvers.add(new OptionalBeanResolver());
         resolvers.add(new ProviderBeanResolver(strategy));
-        resolvers.add(new BeansBeanResolver());
+
+        resolvers.add(new QualifierBeanResolver());
+        resolvers.add(new JakartaNamedBeanResolver());
+
+        resolvers.add(new MapBeanResolver());
         resolvers.add(new CollectionBeanResolver());
         resolvers.add(new ArrayBeanResolver());
-        resolvers.add(new MapBeanResolver());
-        resolvers.add(new QualifierBeanResolver());
-        resolvers.add(new NamedBeanResolver());
+        resolvers.add(new BeansBeanResolver());
+
         resolvers.add(new PrimaryBeanResolver());
-        resolvers.add(new LazyBeanResolver(strategy));
         resolvers.add(new TypeBeanResolver());
 
         return new CompositeBeanResolutionStrategy(resolvers);

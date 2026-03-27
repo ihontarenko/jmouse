@@ -2,6 +2,8 @@ package org.jmouse.beans.definition;
 
 import org.jmouse.core.reflection.InferredType;
 
+import java.lang.reflect.AnnotatedElement;
+
 /**
  * A simple implementation of the {@link BeanDependency} interface.
  * Represents a dependency required by a bean, defined by its type and optional name.
@@ -10,6 +12,6 @@ import org.jmouse.core.reflection.InferredType;
  * @param name the optional name of the dependency.
  * @param dependant the dependant object.
  */
-public record SimpleBeanDependency(InferredType javaType, String name, Object dependant) implements BeanDependency {
+public record SimpleBeanDependency(InferredType javaType, String name, AnnotatedElement dependant) implements BeanDependency {
 
 }

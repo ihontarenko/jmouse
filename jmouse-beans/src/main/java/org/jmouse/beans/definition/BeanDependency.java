@@ -2,6 +2,8 @@ package org.jmouse.beans.definition;
 
 import org.jmouse.core.reflection.InferredType;
 
+import java.lang.reflect.AnnotatedElement;
+
 /**
  * Represents a dependency required by a bean.
  * <p>
@@ -20,7 +22,7 @@ public interface BeanDependency {
     /**
      * Dependant target object
      */
-    Object dependant();
+    AnnotatedElement dependant();
 
     /**
      * Gets the type of the dependency.

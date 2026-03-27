@@ -6,14 +6,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * {@link BeanCandidateProvider} backed by {@link BeanContext}. 🏗️
+ *
+ * <p>Extracts beans from context and wraps them into {@link BeanCandidate}.</p>
+ */
 public class BeanContextCandidateProvider implements BeanCandidateProvider {
 
     private final BeanContext beanContext;
 
+    /**
+     * Creates provider for given {@link BeanContext}.
+     *
+     * @param beanContext bean context
+     */
     public BeanContextCandidateProvider(BeanContext beanContext) {
         this.beanContext = beanContext;
     }
 
+    /**
+     * Returns all candidates matching the given type.
+     *
+     * @param type target type
+     * @return list of candidates (never {@code null})
+     */
     @Override
     public List<BeanCandidate> getCandidates(Class<?> type) {
         List<BeanCandidate> candidates = new ArrayList<>();
@@ -33,6 +49,12 @@ public class BeanContextCandidateProvider implements BeanCandidateProvider {
         return candidates;
     }
 
+    /**
+     * Returns a candidate by bean name.
+     *
+     * @param name bean name
+     * @return candidate or {@code null} if not found
+     */
     @Override
     public BeanCandidate getCandidate(String name) {
         if (!beanContext.containsBean(name)) {
@@ -49,6 +71,12 @@ public class BeanContextCandidateProvider implements BeanCandidateProvider {
         );
     }
 
+    /**
+     * Determines whether the bean is marked as primary.
+     *
+     * @param name bean name
+     * @return {@code true} if primary
+     */
     protected boolean isPrimary(String name) {
         return beanContext.getDefinition(name).isPrimary();
     }

@@ -10,8 +10,16 @@ import org.jmouse.util.Strings;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Resolves a single primary bean for a given type. ⭐
+ *
+ * <p>Applies only when no explicit name is provided and the type is not a wrapper/collection.</p>
+ */
 public class PrimaryBeanResolver extends AbstractBeanResolver {
 
+    /**
+     * Checks whether a primary candidate exists for the requested type.
+     */
     @Override
     public boolean supports(BeanResolutionRequest request) {
         if (Strings.isNotEmpty(request.beanName())) {
@@ -29,14 +37,17 @@ public class PrimaryBeanResolver extends AbstractBeanResolver {
             return false;
         }
 
-        List<BeanCandidate> candidates = candidates(request).getCandidates(request.classType());
+        List<BeanCandidate> candidates = getCandidateProvider(request).getCandidates(request.classType());
 
         return BeanCandidate.primary(candidates, request.classType()) != null;
     }
 
+    /**
+     * Returns the primary bean instance if present.
+     */
     @Override
     public Object resolve(BeanResolutionRequest request) {
-        List<BeanCandidate> candidates = candidates(request).getCandidates(request.classType());
+        List<BeanCandidate> candidates = getCandidateProvider(request).getCandidates(request.classType());
         BeanCandidate       candidate  = BeanCandidate.primary(candidates, request.classType());
         return candidate != null ? candidate.bean() : null;
     }

@@ -53,16 +53,16 @@ public class TryGetBeanArgumentResolver extends AbstractArgumentResolver impleme
      * <p>If {@link Qualifier} is present on the parameter, resolves by name.
      * Otherwise resolves by type.</p>
      *
-     * @param methodParameter parameter metadata
+     * @param parameter parameter metadata
      * @param requestContext  current request context
      * @param mappingResult   mapping result (not used)
      *
      * @return resolved bean instance
      */
     @Override
-    public Object resolveArgument(MethodParameter methodParameter, RequestContext requestContext, MappingResult mappingResult) {
+    public Object resolveArgument(MethodParameter parameter, RequestContext requestContext, MappingResult mappingResult) {
         return strategy.resolve(
-                BeanResolutionRequest.forParameter(getBeanContext(), methodParameter.getParameter())
+                BeanResolutionRequest.forParameter(getBeanContext(), parameter.getParameter())
         );
 
 //        Parameter   parameter = methodParameter.getParameter();
