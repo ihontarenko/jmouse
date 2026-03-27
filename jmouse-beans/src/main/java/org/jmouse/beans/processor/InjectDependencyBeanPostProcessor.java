@@ -30,24 +30,6 @@ public class InjectDependencyBeanPostProcessor implements BeanPostProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InjectDependencyBeanPostProcessor.class);
 
-    private final BeanResolutionStrategy strategy;
-
-    /**
-     * Creates processor with default bean resolution strategy.
-     */
-    public InjectDependencyBeanPostProcessor() {
-        this(BeanResolutionStrategies.defaultStrategy());
-    }
-
-    /**
-     * Creates processor with custom bean resolution strategy.
-     *
-     * @param strategy resolution strategy to use
-     */
-    public InjectDependencyBeanPostProcessor(BeanResolutionStrategy strategy) {
-        this.strategy = strategy;
-    }
-
     /**
      * Resolves and injects dependencies into annotated fields before bean initialization.
      *
@@ -58,7 +40,8 @@ public class InjectDependencyBeanPostProcessor implements BeanPostProcessor {
      */
     @Override
     public Object postProcessBeforeInitialize(Object bean, BeanDefinition definition, BeanContext context) {
-        Field[] fields = FieldFinder.getAnnotatedWith(bean.getClass(), Dependency.class, Inject.class);
+        Field[]                fields   = FieldFinder.getAnnotatedWith(bean.getClass(), Dependency.class, Inject.class);
+        BeanResolutionStrategy strategy = context.getBean(BeanResolutionStrategy.class);
 
         for (Field field : fields) {
             BeanResolutionRequest request = createBeanRequest(context, field);

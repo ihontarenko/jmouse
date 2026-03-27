@@ -30,6 +30,8 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
 
     private static final Logger LOGGER = getLogger(BeanContextInitializer.class.getName() + ".DEFAULT_INITIALIZER");
 
+    private final BeanResolutionStrategy strategy = BeanResolutionStrategies.defaultStrategy();
+
     /**
      * Initializes the provided {@link BeanContext} with default settings.
      *
@@ -50,6 +52,7 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
         LOGGER.info("Self referencing: Bean type '{}' -> Bean bean '{}'",
                     getShortName(BeanContext.class), getShortName(context.getClass()));
         context.registerBean(context.getContextId(), context);
+        context.registerBean(BeanResolutionStrategy.class, strategy);
         context.getDefinition(context.getContextId()).setPrimary(true);
 
         if (context.getParentContext() != null) {
@@ -101,14 +104,14 @@ final class RequiredBeanContextInitializer implements BeanContextInitializer {
         BeanContextAware contextAware = (BeanContextAware) factory;
         contextAware.setBeanContext(context);
 
-        BeanResolutionStrategy strategy           = BeanResolutionStrategies.defaultStrategy();
-        DependencyResolver     dependencyResolver = new SimpleDependencyResolver(strategy);
-
+        DependencyResolver                   dependencyResolver          = new SimpleDependencyResolver(strategy);
         BeanInstantiationFactory             instantiation               = (BeanInstantiationFactory) factory;
-        MethodBeanInstantiationStrategy      methodInstantiationStrategy = new MethodBeanInstantiationStrategy();
         ConstructorBeanInstantiationStrategy constructorStrategy         = new ConstructorBeanInstantiationStrategy();
+        MethodBeanInstantiationStrategy      methodInstantiationStrategy = new MethodBeanInstantiationStrategy();
+
         methodInstantiationStrategy.setDependencyResolver(dependencyResolver);
         constructorStrategy.setDependencyResolver(dependencyResolver);
+
         instantiation.addStrategy(constructorStrategy);
         instantiation.addStrategy(methodInstantiationStrategy);
         instantiation.addStrategy(new ObjectFactoryBeanInstantiationStrategy());

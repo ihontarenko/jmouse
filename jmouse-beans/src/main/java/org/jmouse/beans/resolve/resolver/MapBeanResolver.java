@@ -19,15 +19,6 @@ import java.util.Map;
  *     <li>value type represents bean type</li>
  * </ul>
  * </p>
- *
- * <p><b>Example:</b></p>
- * <pre>{@code
- * public class Service {
- *
- *     private Map<String, Handler> handlers;
- *
- * }
- * }</pre>
  */
 public class MapBeanResolver extends AbstractBeanResolver {
 

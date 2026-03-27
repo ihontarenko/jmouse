@@ -4,14 +4,11 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanContextAware;
 import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.beans.resolve.BeanResolutionRequest;
-import org.jmouse.beans.resolve.BeanResolutionStrategies;
 import org.jmouse.beans.resolve.BeanResolutionStrategy;
 import org.jmouse.core.MethodParameter;
 import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.mvc.MappingResult;
 import org.jmouse.web.mvc.method.AbstractArgumentResolver;
-
-import java.lang.reflect.Parameter;
 
 /**
  * Argument resolver that attempts to resolve method parameters from {@link BeanContext}. 🧩
@@ -27,8 +24,8 @@ import java.lang.reflect.Parameter;
  */
 public class TryGetBeanArgumentResolver extends AbstractArgumentResolver implements BeanContextAware {
 
-    private       BeanContext            beanContext;
-    private final BeanResolutionStrategy strategy = BeanResolutionStrategies.defaultStrategy();
+    private BeanContext            context;
+    private BeanResolutionStrategy strategy;
 
     /**
      * Checks whether the parameter can be resolved from {@link BeanContext}. 🔎
@@ -39,12 +36,9 @@ public class TryGetBeanArgumentResolver extends AbstractArgumentResolver impleme
      */
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        Parameter source = parameter.getParameter();
         return strategy.supports(
-                BeanResolutionRequest.forParameter(getBeanContext(), source)
+                BeanResolutionRequest.forParameter(getBeanContext(), parameter.getParameter())
         );
-
-//        return !beanContext.getBeans(parameter.getParameterType()).isEmpty();
     }
 
     /**
@@ -64,16 +58,6 @@ public class TryGetBeanArgumentResolver extends AbstractArgumentResolver impleme
         return strategy.resolve(
                 BeanResolutionRequest.forParameter(getBeanContext(), parameter.getParameter())
         );
-
-//        Parameter   parameter = methodParameter.getParameter();
-//        Qualifier   qualifier = parameter.getAnnotation(Qualifier.class);
-//        BeanContext context   = getBeanContext();
-//
-//        if (qualifier == null) {
-//            return context.getBean(methodParameter.getParameterType());
-//        }
-//
-//        return context.getBean(qualifier.value());
     }
 
     /**
@@ -83,7 +67,8 @@ public class TryGetBeanArgumentResolver extends AbstractArgumentResolver impleme
      */
     @Override
     public void setBeanContext(BeanContext context) {
-        this.beanContext = context;
+        this.context = context;
+        this.strategy = context.getBean(BeanResolutionStrategy.class);
     }
 
     /**
@@ -93,7 +78,7 @@ public class TryGetBeanArgumentResolver extends AbstractArgumentResolver impleme
      */
     @Override
     public BeanContext getBeanContext() {
-        return beanContext;
+        return context;
     }
 
 }
