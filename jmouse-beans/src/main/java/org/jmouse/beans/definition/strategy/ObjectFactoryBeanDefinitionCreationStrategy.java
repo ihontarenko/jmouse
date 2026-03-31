@@ -6,6 +6,7 @@ import org.jmouse.beans.ObjectFactory;
 import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.ObjectFactoryBeanDefinition;
+import org.jmouse.core.Priority;
 
 /**
  * A strategy for creating {@link BeanDefinition} instances from {@link ObjectFactory} objects.
@@ -13,6 +14,7 @@ import org.jmouse.beans.definition.ObjectFactoryBeanDefinition;
  * This strategy supports creating bean definitions where the bean instance is provided by a factory.
  * The default bean scope for such definitions is {@link BeanScope#PROTOTYPE}.
  */
+@Priority(Integer.MIN_VALUE + 3000)
 public class ObjectFactoryBeanDefinitionCreationStrategy implements BeanDefinitionCreationStrategy<ObjectFactory<Object>> {
 
     /**

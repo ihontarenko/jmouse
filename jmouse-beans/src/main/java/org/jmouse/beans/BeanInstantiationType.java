@@ -8,7 +8,7 @@ import org.jmouse.beans.instantiation.ObjectFactoryBeanInstantiationStrategy;
  * Enumeration representing the types of bean instantiation strategies.
  * Defines how a bean instance can be created in the container.
  */
-public enum BeanInstantiationType {
+public enum BeanInstantiationType implements InstantiationType {
     /**
      * Indicates that the bean is created using a {@link ConstructorBeanInstantiationStrategy}.
      */
@@ -23,9 +23,4 @@ public enum BeanInstantiationType {
      * Indicates that the bean is created using a {@link ObjectFactoryBeanInstantiationStrategy}.
      */
     OBJECT_FACTORY,
-
-    /**
-     * Indicates the simple bean creation type.
-     */
-    SIMPLE,
 }

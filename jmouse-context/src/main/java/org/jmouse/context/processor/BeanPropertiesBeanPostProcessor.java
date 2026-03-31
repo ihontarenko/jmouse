@@ -8,6 +8,8 @@ import org.jmouse.context.ApplicationBeanContext;
 import org.jmouse.context.BeanProperties;
 import org.jmouse.core.access.TypedValue;
 import org.jmouse.core.binding.Binder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link BeanPostProcessor} that binds external configuration properties into beans
@@ -18,6 +20,8 @@ import org.jmouse.core.binding.Binder;
  * @see ApplicationBeanContext#getEnvironmentBinder()
  */
 public class BeanPropertiesBeanPostProcessor implements BeanPostProcessor {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(BeanPropertiesBeanPostProcessor.class);
 
     /**
      * Inspect the {@link BeanDefinition} for a {@code @BeanProperties} annotation. If present,
@@ -34,10 +38,16 @@ public class BeanPropertiesBeanPostProcessor implements BeanPostProcessor {
     @Override
     public Object postProcessBeforeInitialize(Object bean, BeanDefinition definition, BeanContext context) {
         BeanProperties annotation = definition.getAnnotation(BeanProperties.class);
+        Class<?>       type       = definition.getBeanClass();
 
         if (annotation != null) {
             if (!(context instanceof ApplicationBeanContext beanContext)) {
                 throw new IllegalStateException("BeanProperties can only be processed in an ApplicationBeanContext");
+            }
+
+            if (type.isRecord()) {
+                LOGGER.warn("@BeanProperties '{}' should have already been processed by instantiation strategy", type.getSimpleName());
+                return bean;
             }
 
             // Force bean to be singleton so that bound properties persist throughout application

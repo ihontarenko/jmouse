@@ -13,7 +13,7 @@ import org.jmouse.validator.constraint.adapter.el.ConstraintExpressionSupport;
 import org.jmouse.validator.constraint.api.Constraint;
 import org.jmouse.validator.constraint.constraint.MinMaxConstraint;
 import org.jmouse.validator.constraint.constraint.OneOfConstraint;
-import org.jmouse.validator.constraint.dsl.ConstraintSchemas;
+import org.jmouse.validator.constraint.builder.ConstraintSchemas;
 import org.jmouse.validator.constraint.handler.ConstraintHandler;
 import org.jmouse.validator.constraint.handler.SchemaSelector;
 import org.jmouse.validator.constraint.model.ConstraintSchema;

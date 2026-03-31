@@ -11,69 +11,50 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 🚦 Abstract interceptor enforcing {@link RateLimit} constraints.
+ * Base interceptor for {@link RateLimit}. 🚦
  *
- * <p>Intercepts method calls and ensures they respect declared rate limits.
- * Each invocation attempts to acquire a token from the appropriate {@link RateLimiter}
- * bucket (derived from method/class/instance/custom scope).</p>
- *
- * <h3>Flow</h3>
- * <ol>
- *   <li>🔎 Resolve {@link RateLimit} annotation (method → class).</li>
- *   <li>⚙️ Convert to {@link RateLimitConfiguration} with period in nanoseconds.</li>
- *   <li>🗝️ Compute {@link BucketKey} based on scope.</li>
- *   <li>🪣 Fetch/create a {@link RateLimiter} bucket and attempt token acquisition.</li>
- *   <li>⛔ Throw {@link RateLimitExceededException} if bucket is exhausted.</li>
- * </ol>
- *
- * <h3>Features</h3>
- * <ul>
- *   <li>🧵 Thread-safe buckets via {@link ConcurrentHashMap}.</li>
- *   <li>⚡ Default custom scope resolver: {@link MethodArgumentsHashKeyResolver}.</li>
- *   <li>🔧 Override methods to plug in custom annotation resolution or keying.</li>
- * </ul>
+ * <p>Checks rate limits before method invocation.</p>
  */
 public abstract class AbstractRateLimitMethodInterceptor implements MethodInterceptor {
 
     /**
-     * 🔑 Resolver for custom keys (used when {@link RateLimit.Scope#CUSTOM}).
-     * Defaults to {@link MethodArgumentsHashKeyResolver}.
+     * Resolver used for {@link RateLimit.Scope#CUSTOM} keys.
      */
     private final RateLimitKeyResolver keyResolver;
 
     /**
-     * 🪣 Map of active buckets keyed by {@link BucketKey}.
+     * Active rate-limit buckets.
      */
     private final Map<BucketKey, RateLimiter> buckets = new ConcurrentHashMap<>();
 
     /**
-     * 🏗️ Create an interceptor with a default
-     * {@link MethodArgumentsHashKeyResolver} for custom scopes.
+     * Creates interceptor with default custom key resolver.
      */
     public AbstractRateLimitMethodInterceptor() {
         this(new MethodArgumentsHashKeyResolver());
     }
 
     /**
-     * 🏗️ Create an interceptor with a given custom key resolver.
+     * Creates interceptor with custom key resolver.
      *
-     * @param keyResolver resolver for custom scope keys
+     * @param keyResolver custom bucket key resolver
      */
     public AbstractRateLimitMethodInterceptor(RateLimitKeyResolver keyResolver) {
         this.keyResolver = keyResolver;
     }
 
     /**
-     * ⛔ Invoked before method execution.
+     * Applies rate-limit check before method execution.
      *
-     * <p>Checks the rate limit and either allows the call or throws
-     * {@link RateLimitExceededException}.</p>
+     * @param context   invocation context
+     * @param method    invoked method
+     * @param arguments invocation arguments
      *
-     * @throws RateLimitExceededException if limit exceeded
+     * @throws RateLimitExceededException when limit is exceeded
      */
     @Override
     public void before(InvocationContext context, Method method, Object[] arguments) {
-        if (isSupportedType(context.target().getClass()) && isSupportedMethod(method)) {
+        if (isSupportedType(context.target().getClass()) || isSupportedMethod(method)) {
             RateLimit              annotation = resolveAnnotation(method, context.target().getClass());
             RateLimitConfiguration config     = toConfiguration(annotation);
             BucketKey              key        = keyOf(config, context.target(), method, arguments);
@@ -90,18 +71,36 @@ public abstract class AbstractRateLimitMethodInterceptor implements MethodInterc
         }
     }
 
+    /**
+     * Checks whether the target type supports rate limiting.
+     *
+     * @param type target type
+     * @return {@code true} if supported
+     */
     private boolean isSupportedType(Class<?> type) {
         return RateLimited.class.isAssignableFrom(type)
                 || type.isAnnotationPresent(RateLimitEnable.class)
                 || type.isAnnotationPresent(RateLimit.class);
     }
 
+    /**
+     * Checks whether the method supports rate limiting.
+     *
+     * @param method target method
+     * @return {@code true} if supported
+     */
     private boolean isSupportedMethod(Method method) {
         return method.isAnnotationPresent(RateLimit.class);
     }
 
     /**
-     * 🔎 Resolve {@link RateLimit} from method or fallback to target class.
+     * Resolves effective {@link RateLimit} annotation.
+     *
+     * <p>Method annotation has priority over class annotation.</p>
+     *
+     * @param method      invoked method
+     * @param targetClass target class
+     * @return resolved annotation
      */
     protected RateLimit resolveAnnotation(Method method, Class<?> targetClass) {
         RateLimit annotation = method.getAnnotation(RateLimit.class);
@@ -114,7 +113,13 @@ public abstract class AbstractRateLimitMethodInterceptor implements MethodInterc
     }
 
     /**
-     * 🗝️ Build a {@link BucketKey} for the given configuration and context.
+     * Builds bucket key for current invocation.
+     *
+     * @param config    resolved rate-limit config
+     * @param target    invocation target
+     * @param method    invoked method
+     * @param arguments invocation arguments
+     * @return bucket key
      */
     protected BucketKey keyOf(RateLimitConfiguration config, Object target, Method method, Object[] arguments) {
         return switch (config.scope()) {
@@ -126,7 +131,10 @@ public abstract class AbstractRateLimitMethodInterceptor implements MethodInterc
     }
 
     /**
-     * ⚙️ Convert {@link RateLimit} annotation into an immutable config.
+     * Converts annotation to immutable runtime configuration.
+     *
+     * @param annotation rate-limit annotation
+     * @return resolved configuration
      */
     protected RateLimitConfiguration toConfiguration(RateLimit annotation) {
         ChronoUnit      chronoUnit  = annotation.per();
@@ -138,16 +146,25 @@ public abstract class AbstractRateLimitMethodInterceptor implements MethodInterc
     }
 
     /**
-     * 📦 Immutable resolved configuration for a rate limit.
+     * Resolved runtime configuration for a rate limit.
+     *
+     * @param max         maximum allowed calls
+     * @param per         time unit
+     * @param amount      unit amount
+     * @param periodNanos period in nanoseconds
+     * @param name        logical limit name
+     * @param scope       bucket scope
      */
     public record RateLimitConfiguration(
             long max, ChronoUnit per, long amount, long periodNanos, String name, RateLimit.Scope scope) {
     }
 
     /**
-     * 🪪 Key identifying a unique bucket.
+     * Key of a single rate-limit bucket.
      *
-     * <p>Format: {@code scope:id:name}</p>
+     * @param scope bucket scope marker
+     * @param id    bucket identity
+     * @param name  logical limit name
      */
     public record BucketKey(String scope, Object id, String name) {
         @Override

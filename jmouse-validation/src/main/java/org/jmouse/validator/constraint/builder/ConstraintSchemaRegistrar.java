@@ -1,4 +1,4 @@
-package org.jmouse.validator.constraint.dsl;
+package org.jmouse.validator.constraint.builder;
 
 import org.jmouse.validator.constraint.model.ConstraintSchema;
 import org.jmouse.validator.constraint.registry.InMemoryConstraintSchemaRegistry;

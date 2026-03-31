@@ -1,4 +1,4 @@
-package org.jmouse.validator.constraint.dsl;
+package org.jmouse.validator.constraint.builder;
 
 import org.jmouse.validator.constraint.api.Constraint;
 import org.jmouse.validator.constraint.model.*;

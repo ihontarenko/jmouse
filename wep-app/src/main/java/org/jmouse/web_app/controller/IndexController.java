@@ -2,6 +2,7 @@ package org.jmouse.web_app.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.beans.annotation.BeanConstructor;
+import org.jmouse.beans.annotation.ProxiedBean;
 import org.jmouse.core.parameters.RequestParametersJavaStructureConverter;
 import org.jmouse.core.parameters.RequestParametersJavaStructureOptions;
 import org.jmouse.core.parameters.RequestParametersTree;
@@ -20,6 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Controller
+@ProxiedBean
 public class IndexController {
 
     private ResourceUrlResolver resourceUrlResolver;
@@ -48,7 +50,7 @@ public class IndexController {
     )
     @MethodDescription("Demo Endpoint!")
     @ViewMapping("index/demo")
-    @RateLimit(max = 10, per = ChronoUnit.SECONDS, amount = 1)
+    @RateLimit(max = 4, per = ChronoUnit.SECONDS, amount = 10)
     public String demo(
            @PathVariable("id") Long id, Model model,
            @RequestHeader(HttpHeader.USER_AGENT) String userAgent,

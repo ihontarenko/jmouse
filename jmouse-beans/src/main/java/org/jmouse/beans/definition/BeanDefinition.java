@@ -1,7 +1,7 @@
 package org.jmouse.beans.definition;
 
-import org.jmouse.beans.BeanInstantiationType;
 import org.jmouse.beans.BeanScope;
+import org.jmouse.beans.InstantiationType;
 import org.jmouse.beans.Scope;
 import org.jmouse.beans.instantiation.BeanInstantiationStrategy;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
@@ -191,9 +191,9 @@ public interface BeanDefinition {
     /**
      * Retrieves the creation type for this bean, indicating how it should be instantiated.
      *
-     * @return a {@link BeanInstantiationType} value.
+     * @return a {@link InstantiationType} value.
      */
-    BeanInstantiationType getInstantiationType();
+    InstantiationType getInstantiationType();
 
     /**
      * Retrieves the actual bean instance if one has been created.

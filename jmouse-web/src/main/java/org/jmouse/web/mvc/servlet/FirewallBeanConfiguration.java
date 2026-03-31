@@ -40,7 +40,7 @@ public class FirewallBeanConfiguration {
      * @return configured firewall
      */
     @Bean
-    public Firewall firewallBean(Properties properties) {
+    public Firewall firewallBean(Properties properties, RateLimitProperties limitProperties) {
         InspectionPolicies inspection = properties.getInspectionPolicy();
         return new Firewall(List.of(
                 new PathTraversalPolicy(),

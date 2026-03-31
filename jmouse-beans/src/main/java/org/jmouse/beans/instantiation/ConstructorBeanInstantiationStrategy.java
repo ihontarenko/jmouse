@@ -6,6 +6,7 @@ import org.jmouse.beans.definition.BeanDependency;
 import org.jmouse.beans.BeanInstantiationException;
 import org.jmouse.beans.definition.ConstructorBeanDefinition;
 import org.jmouse.beans.definition.BeanDefinition;
+import org.jmouse.core.Priority;
 import org.jmouse.core.reflection.Reflections;
 
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.List;
  * Object userService = strategy.create(definition, beanContext);
  * }</pre>
  */
+@Priority(Integer.MIN_VALUE + 1000)
 public class ConstructorBeanInstantiationStrategy extends AbstractBeanInstantiationStrategy {
 
     /**
@@ -68,6 +70,6 @@ public class ConstructorBeanInstantiationStrategy extends AbstractBeanInstantiat
      */
     @Override
     public boolean supports(BeanDefinition definition) {
-        return definition.getInstantiationType() == BeanInstantiationType.CONSTRUCTOR;
+        return definition.getInstantiationType().isTheSame(BeanInstantiationType.CONSTRUCTOR);
     }
 }

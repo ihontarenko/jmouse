@@ -3,12 +3,13 @@ package org.jmouse.web.mvc.method.argument;
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanContextAware;
 import org.jmouse.beans.annotation.Qualifier;
-import org.jmouse.beans.resolve.BeanResolutionRequest;
 import org.jmouse.beans.resolve.BeanResolutionStrategy;
 import org.jmouse.core.MethodParameter;
 import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.mvc.MappingResult;
 import org.jmouse.web.mvc.method.AbstractArgumentResolver;
+
+import static org.jmouse.beans.resolve.BeanResolutionRequest.forParameter;
 
 /**
  * Argument resolver that attempts to resolve method parameters from {@link BeanContext}. 🧩
@@ -36,9 +37,13 @@ public class TryGetBeanArgumentResolver extends AbstractArgumentResolver impleme
      */
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return strategy.supports(
-                BeanResolutionRequest.forParameter(getBeanContext(), parameter.getParameter())
-        );
+        Class<?> type = parameter.getParameterType();
+
+        if (type == Object.class || type.isPrimitive()) {
+            return false;
+        }
+
+        return strategy.supports(forParameter(getBeanContext(), parameter.getParameter()));
     }
 
     /**
@@ -55,9 +60,7 @@ public class TryGetBeanArgumentResolver extends AbstractArgumentResolver impleme
      */
     @Override
     public Object resolveArgument(MethodParameter parameter, RequestContext requestContext, MappingResult mappingResult) {
-        return strategy.resolve(
-                BeanResolutionRequest.forParameter(getBeanContext(), parameter.getParameter())
-        );
+        return strategy.resolve(forParameter(getBeanContext(), parameter.getParameter()));
     }
 
     /**

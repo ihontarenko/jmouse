@@ -32,7 +32,6 @@ public interface TypeAnnotationProcessor<A extends Annotation> extends Annotatio
         if (candidate.kind() != AnnotationElementKind.TYPE) {
             return;
         }
-
         process((Class<?>) candidate.element(), candidate.annotation(), context);
     }
 }

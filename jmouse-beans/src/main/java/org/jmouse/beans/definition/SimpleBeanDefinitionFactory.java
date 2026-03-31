@@ -1,5 +1,6 @@
 package org.jmouse.beans.definition;
 
+import org.jmouse.core.Sorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jmouse.beans.BeanContext;
@@ -39,6 +40,7 @@ public class SimpleBeanDefinitionFactory implements BeanDefinitionFactory {
     public void addStrategy(BeanDefinitionCreationStrategy<?> strategy) {
         LOGGER.info("Registering new strategy '{}'", getShortName(strategy.getClass()));
         strategies.add(strategy);
+        Sorter.sort(strategies);
     }
 
     /**
@@ -79,10 +81,15 @@ public class SimpleBeanDefinitionFactory implements BeanDefinitionFactory {
                     continue;
                 }
 
+                @SuppressWarnings("unchecked")
                 BeanDefinitionCreationStrategy<Object> typedStrategy = ((BeanDefinitionCreationStrategy<Object>)strategy);
 
                 definition = preferredName == null
                         ? typedStrategy.create(object, context) : typedStrategy.create(preferredName, object, context);
+
+                if (definition != null) {
+                    break;
+                }
             }
         }
 

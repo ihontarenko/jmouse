@@ -7,16 +7,15 @@ import org.jmouse.core.reflection.ClassFinder;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Discovers annotation candidates in the classpath. 🔍
  *
- * <p>
- * Scans provided base classes and inspects discovered types, methods,
- * and fields for the requested annotation.
- * </p>
+ * <p>Scans provided base classes and inspects discovered types, methods,
+ * fields, and method parameters for the requested annotation.</p>
  */
 public interface AnnotationDiscovery {
 
@@ -50,7 +49,13 @@ public interface AnnotationDiscovery {
 
         /**
          * Scans classes reachable from the given roots and collects
-         * type, method, and field annotation candidates.
+         * matching annotation candidates.
+         *
+         * @param annotationType annotation type to search for
+         * @param baseClasses    scan roots
+         * @param <A>            annotation type
+         *
+         * @return immutable list of discovered candidates
          */
         @Override
         public <A extends Annotation> List<AnnotationCandidate<A>> findCandidates(
@@ -71,7 +76,12 @@ public interface AnnotationDiscovery {
         }
 
         /**
-         * Collects type-level candidate.
+         * Collects a type-level annotation candidate.
+         *
+         * @param annotationType annotation type
+         * @param type           inspected class
+         * @param candidates     target collection
+         * @param <A>            annotation type
          */
         private <A extends Annotation> void collectTypeCandidate(
                 Class<A> annotationType,
@@ -91,7 +101,12 @@ public interface AnnotationDiscovery {
         }
 
         /**
-         * Collects method-level candidates.
+         * Collects method-level candidates and delegates parameter scanning.
+         *
+         * @param annotationType annotation type
+         * @param type           inspected class
+         * @param candidates     target collection
+         * @param <A>            annotation type
          */
         private <A extends Annotation> void collectMethodCandidates(
                 Class<A> annotationType,
@@ -109,11 +124,47 @@ public interface AnnotationDiscovery {
                             AnnotationElementKind.METHOD
                     ));
                 }
+
+                collectMethodParametersCandidates(annotationType, method, candidates);
+            }
+        }
+
+        /**
+         * Collects parameter-level candidates for the given method.
+         *
+         * @param annotationType annotation type
+         * @param method         inspected method
+         * @param candidates     target collection
+         * @param <A>            annotation type
+         */
+        private <A extends Annotation> void collectMethodParametersCandidates(
+                Class<A> annotationType,
+                Method method,
+                List<AnnotationCandidate<A>> candidates
+        ) {
+            Class<?> declaringClass = method.getDeclaringClass();
+
+            for (Parameter parameter : method.getParameters()) {
+                A annotation = parameter.getAnnotation(annotationType);
+
+                if (annotation != null) {
+                    candidates.add(new AnnotationCandidate.Default<>(
+                            annotation,
+                            parameter,
+                            declaringClass,
+                            AnnotationElementKind.PARAMETER
+                    ));
+                }
             }
         }
 
         /**
          * Collects field-level candidates.
+         *
+         * @param annotationType annotation type
+         * @param type           inspected class
+         * @param candidates     target collection
+         * @param <A>            annotation type
          */
         private <A extends Annotation> void collectFieldCandidates(
                 Class<A> annotationType,

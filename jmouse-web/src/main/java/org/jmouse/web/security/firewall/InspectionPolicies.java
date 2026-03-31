@@ -34,10 +34,14 @@ import java.util.regex.Pattern;
  */
 public class InspectionPolicies {
 
-    /** Inspection rules for SQL Injection detection. */
+    /**
+     * Inspection rules for SQL Injection detection.
+     */
     private InspectionGroup injection = new InspectionGroup();
 
-    /** Inspection rules for XSS detection. */
+    /**
+     * Inspection rules for XSS detection.
+     */
     private InspectionGroup xss = new InspectionGroup();
 
     public InspectionGroup getInjection() {

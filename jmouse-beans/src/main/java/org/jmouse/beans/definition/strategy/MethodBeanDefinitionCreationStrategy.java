@@ -5,6 +5,7 @@ import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDefinitionFactory;
 import org.jmouse.beans.definition.MethodBeanDefinition;
 import org.jmouse.beans.naming.BeanNameResolver;
+import org.jmouse.core.Priority;
 import org.jmouse.core.Streamable;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.reflection.ClassMatchers;
@@ -22,6 +23,7 @@ import java.util.Set;
  * This strategy processes methods annotated with specific annotations to create bean definitions
  * and resolve dependencies required for method-based bean instantiation.
  */
+@Priority(Integer.MIN_VALUE + 2000)
 public class MethodBeanDefinitionCreationStrategy extends AbstractBeanDefinitionCreationStrategy<Method> {
 
     /**

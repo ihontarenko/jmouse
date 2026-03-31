@@ -1,6 +1,7 @@
 package org.jmouse.beans.definition;
 
 import org.jmouse.beans.BeanInstantiationType;
+import org.jmouse.beans.InstantiationType;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
@@ -31,7 +32,7 @@ public class ConstructorBeanDefinition extends AbstractBeanDefinition {
      * 🎯 Instantiation strategy — always CONSTRUCTOR.
      */
     @Override
-    public BeanInstantiationType getInstantiationType() {
+    public InstantiationType getInstantiationType() {
         return BeanInstantiationType.CONSTRUCTOR;
     }
 
