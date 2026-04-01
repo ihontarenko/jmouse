@@ -4,6 +4,9 @@ import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.conditions.BeanCondition;
 import org.jmouse.beans.conditions.BeanRegistrationCondition;
 import org.jmouse.beans.conditions.ConditionalMetadata;
+import org.jmouse.util.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -38,20 +41,35 @@ public @interface BeanConditionExists {
     String value() default "";
 
     /**
+     * The message will be present in log if bean already registered
+     */
+    String message() default "";
+
+    /**
      * 🔍 Condition logic that checks for absence of the given bean in context.
      * <p>
      * Returns {@code true} if the named bean is <b>not</b> present.
      */
     class OnBeanAbsences implements BeanRegistrationCondition {
 
+        private static final Logger LOGGER = LoggerFactory.getLogger(OnBeanAbsences.class);
+
         @Override
         public boolean match(ConditionalMetadata metadata, BeanContext context) {
             try {
                 BeanConditionExists annotation = metadata.getAnnotation(BeanConditionExists.class);
                 String              value      = annotation.value();
+                String              beanName   = metadata.getBeanDefinition().getBeanName();
 
                 if (value != null && !value.isBlank()) {
-                    return !context.containsDefinition(value);
+                    boolean present = context.containsDefinition(value);
+                    String  message = annotation.message();
+                    LOGGER.info(
+                            "📦 Bean [{}] → {}",
+                            beanName,
+                            present ? Strings.isNotEmpty(message) ? message : "already present 🔁" : "new registration 🆕"
+                    );
+                    return !present;
                 }
 
                 return true;

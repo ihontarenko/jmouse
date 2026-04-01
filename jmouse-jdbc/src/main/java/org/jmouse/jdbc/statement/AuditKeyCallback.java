@@ -10,9 +10,9 @@ public final class AuditKeyCallback<K> implements KeyUpdateCallback<K> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public K doStatementExecute(PreparedStatement stmt, ResultSet keys)
+    public K doStatementExecute(PreparedStatement statement, ResultSet keys)
             throws SQLException {
-        affected = stmt.executeUpdate();
+        affected = statement.executeUpdate();
         return keys.next() ? (K) keys.getObject(1) : null;
     }
 

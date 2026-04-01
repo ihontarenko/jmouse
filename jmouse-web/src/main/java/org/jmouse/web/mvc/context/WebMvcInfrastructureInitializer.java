@@ -3,6 +3,7 @@ package org.jmouse.web.mvc.context;
 import org.jmouse.beans.BeanScanner;
 import org.jmouse.beans.ScannerBeanContextInitializer;
 import org.jmouse.core.Bits;
+import org.jmouse.core.Priority;
 import org.jmouse.core.reflection.ClassFinder;
 import org.jmouse.web.mvc.*;
 import org.jmouse.web.mvc.exception.ExceptionMappingRegistry;
@@ -39,6 +40,7 @@ import java.util.Map;
  *
  * @author Ivan
  */
+@Priority(-900)
 public class WebMvcInfrastructureInitializer extends ScannerBeanContextInitializer {
 
     // ── flag constants (short is enough for 10 bits) ──────────────────────────

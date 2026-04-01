@@ -9,7 +9,7 @@ import org.jmouse.context.instantiation.RecordPropertiesInstantiationStrategy;
 import org.jmouse.core.Priority;
 
 @Priority(Integer.MIN_VALUE + 10)
-public class RequiredContextComponentsBeanContextInitializer implements BeanContextInitializer {
+public class ContextComponentsBeanContextInitializer implements BeanContextInitializer {
 
     @Override
     public void initialize(BeanContext context) {

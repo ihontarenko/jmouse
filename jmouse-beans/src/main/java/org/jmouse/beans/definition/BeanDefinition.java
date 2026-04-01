@@ -75,6 +75,22 @@ public interface BeanDefinition {
     void setPrimary(boolean primary);
 
     /**
+     * Returns whether this bean should be eagerly initialized. ⚡
+     *
+     * @return {@code true} if eager initialization is enabled
+     */
+    boolean isEager();
+
+    /**
+     * Sets whether this bean should be eagerly initialized. ⚡
+     *
+     * <p>Eager beans are created during context startup rather than lazily.</p>
+     *
+     * @param eager {@code true} to enable eager initialization
+     */
+    void setEager(boolean eager);
+
+    /**
      * Indicates whether the bean represented by this definition is proxied.
      * <p>
      * A proxied bean typically wraps the actual bean instance with additional functionality,

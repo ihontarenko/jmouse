@@ -55,9 +55,8 @@ public class EnvironmentValueBeanPostProcessor implements BeanPostProcessor {
 
         LOGGER.info("🔍 Processing @EnvironmentValue fields for bean '{}'", definition.getBeanName());
 
-        Environment      environment = applicationContext.getEnvironment();
-        Binder           binder      = new Binder(ObjectAccessor.wrapObject(environment));
-        JavaBeanAccessor accessor    = new JavaBeanAccessor(bean);
+        Binder           binder   = applicationContext.getEnvironmentBinder();
+        JavaBeanAccessor accessor = new JavaBeanAccessor(bean);
 
         for (Field field : fields) {
             EnvironmentValue annotation  = MergedAnnotation.wrapWithSynthetic(field)

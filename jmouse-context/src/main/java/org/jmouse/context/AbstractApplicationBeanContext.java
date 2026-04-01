@@ -78,7 +78,7 @@ public class AbstractApplicationBeanContext extends DefaultBeanContext implement
         addBeanPostProcessor(new BeanPropertiesBeanPostProcessor());
         addBeanPostProcessor(new EnvironmentValueBeanPostProcessor());
 
-        addInitializer(new RequiredContextComponentsBeanContextInitializer());
+        addInitializer(new ContextComponentsBeanContextInitializer());
     }
 
     /**

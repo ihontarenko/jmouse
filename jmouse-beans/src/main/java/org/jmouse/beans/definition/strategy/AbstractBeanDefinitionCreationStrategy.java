@@ -87,8 +87,10 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
         if (element.isAnnotationPresent(Bean.class)) {
             definition.setProxied(Reflections.getAnnotationValue(element, Bean.class, Bean::proxied));
             definition.setScope(Reflections.getAnnotationValue(element, Bean.class, Bean::scope));
-            definition.setPrimary(element.isAnnotationPresent(PrimaryBean.class));
         }
+
+        definition.setPrimary(element.isAnnotationPresent(PrimaryBean.class));
+        definition.setEager(element.isAnnotationPresent(Eager.class));
 
         if (!definition.isProxied()) {
             definition.setProxied(element.isAnnotationPresent(ProxiedBean.class));

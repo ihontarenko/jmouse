@@ -1,6 +1,7 @@
 package org.jmouse.web;
 
 import org.jmouse.beans.BeanScanAnnotatedContextInitializer;
+import org.jmouse.beans.WarmupEagerBeansContextInitializer;
 import org.jmouse.context.AbstractApplicationFactory;
 import org.jmouse.context.ApplicationContextBeansScanner;
 import org.jmouse.context.ApplicationFactory;
@@ -111,6 +112,7 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
 
         // Add common application initializers
         context.addInitializer(new BeanScanAnnotatedContextInitializer());
+        context.addInitializer(new WarmupEagerBeansContextInitializer());
         context.addInitializer(new ApplicationContextBeansScanner());
         context.addInitializer(new StartupApplicationContextInitializer(rootContext.getEnvironment()));
         context.addInitializer(new WebMvcControllersInitializer());
