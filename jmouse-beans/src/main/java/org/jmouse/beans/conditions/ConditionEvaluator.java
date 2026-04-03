@@ -64,6 +64,11 @@ public final class ConditionEvaluator {
                                      metadata.getAnnotatedElement());
                         return false;
                     }
+
+                    LOGGER.info("\uD83C\uDF89 Condition @{} satisfied for bean '{}'",
+                                mergedAnnotation.getAnnotationType().getSimpleName(),
+                                definition.getBeanName()
+                    );
                 }
             }
         }

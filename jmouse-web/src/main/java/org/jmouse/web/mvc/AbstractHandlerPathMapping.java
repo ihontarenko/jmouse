@@ -136,6 +136,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
         request.setAttribute(MATCHED_ROUTE_ATTRIBUTE, route);
         request.setAttribute(ROUTE_MATCH_ATTRIBUTE, match);
         request.setAttribute(ROUTE_PRODUCIBLE_ATTRIBUTE, route.produces());
+        request.setAttribute(ROUTE_CONSUMABLE_ATTRIBUTE, route.consumes());
 
         LOGGER.info(AnsiColors.colorize(
                 "✅🔥 ${BLUE_BOLD_BRIGHT}MATCHED:${RESET} ${GREEN_BOLD_BRIGHT}%s${RESET}", winner.match(requestRoute)));
@@ -241,7 +242,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
      *
      * @param requestRoute parsed request route from the incoming HTTP request
      * @return list of path-matching {@link MappingCriteria} (possibly empty, never {@code null})
-     * @see RequestPathMatcher#matches(RequestRoute)
+     * @see RequestPathMatcher#matches
      */
     private List<MappingCriteria> getRequestPathMappings(RequestRoute requestRoute) {
         List<MappingCriteria> candidates = new ArrayList<>();

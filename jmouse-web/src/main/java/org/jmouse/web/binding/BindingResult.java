@@ -4,6 +4,8 @@ import org.jmouse.validator.Errors;
 
 public interface BindingResult<T> {
 
+    String BINDING_RESULT_ATTRIBUTE = BindingResult.class.getName() + ".BINDING_RESULT_ATTRIBUTE";
+
     T target();
 
     Errors errors();

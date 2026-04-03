@@ -24,9 +24,8 @@ public record RequestParameters(Map<String, Object> parameters) {
         return new RequestParameters(parameters);
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T getParameter(String name, Class<T> type) {
-        return (T) parameters.get(name);
+        return type.cast(parameters.get(name));
     }
 
 }

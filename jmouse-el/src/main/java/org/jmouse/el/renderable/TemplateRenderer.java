@@ -1,5 +1,8 @@
 package org.jmouse.el.renderable;
 
+import org.jmouse.core.CyclicReferenceDetector;
+import org.jmouse.core.DefaultCyclicReferenceDetector;
+import org.jmouse.core.binding.BindException;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.Node;
 import org.slf4j.Logger;
@@ -7,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Default implementation of the Renderer interface.
@@ -23,8 +27,12 @@ import java.util.Map;
  */
 public class TemplateRenderer implements Renderer {
 
+    public final static Supplier<? extends RuntimeException> EXCEPTION_SUPPLIER = () -> new BindException(
+            "Self-reference template linking detected!");
     private final static Logger LOGGER = LoggerFactory.getLogger(TemplateRenderer.class);
-    private final        Engine engine;
+
+    private final Engine                          engine;
+    private final CyclicReferenceDetector<String> detector;
 
     /**
      * Constructs a Default renderer with the specified engine.
@@ -33,6 +41,7 @@ public class TemplateRenderer implements Renderer {
      */
     public TemplateRenderer(Engine engine) {
         this.engine = engine;
+        this.detector = new DefaultCyclicReferenceDetector<>();
     }
 
     /**
@@ -44,6 +53,8 @@ public class TemplateRenderer implements Renderer {
      */
     @Override
     public Content render(Template template, EvaluationContext context) {
+        CyclicReferenceDetector.Identifier<String> identifier = template::getName;
+
         // Linking: process macros, blocks and other pre-processing steps.
         initialize(template, context);
 
@@ -60,7 +71,9 @@ public class TemplateRenderer implements Renderer {
         Content content = Content.array();
 
         // Render the node using RendererVisitor.
-        node.accept(new RendererVisitor(content, registry, context));
+        detector.detect(identifier, EXCEPTION_SUPPLIER);
+        node.accept(new RendererVisitor(content, registry, context, detector));
+        detector.remove(identifier);
 
         return content;
     }
@@ -103,6 +116,8 @@ public class TemplateRenderer implements Renderer {
      * @param context  the evaluation context
      */
     private void initialize(Template template, EvaluationContext context) {
+        detector.detect(template::getName, EXCEPTION_SUPPLIER);
+
         Node root = template.getRoot();
 
         // Link macros, blocks and perform pre-processing.
@@ -116,5 +131,7 @@ public class TemplateRenderer implements Renderer {
             initialize(parent, context);
             inheritance.descend();
         }
+
+        detector.remove(template::getName);
     }
 }

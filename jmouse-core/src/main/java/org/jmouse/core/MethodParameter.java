@@ -181,6 +181,11 @@ public final class MethodParameter {
     public Class<?> getParameterType() {
         Class<?> parameterType = this.parameterType;
 
+        if (parameterIndex == -1) {
+            parameterType = getReturnType();
+            this.parameterType = parameterType;
+        }
+
         if (parameterType == null && isParameter()) {
             parameterType = getExecutable().getParameterTypes()[this.parameterIndex];
             this.parameterType = parameterType;
