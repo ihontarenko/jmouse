@@ -6,6 +6,7 @@ import org.jmouse.beans.resolve.BeanResolutionRequest;
 import org.jmouse.beans.resolve.BeanResolutionStrategies;
 import org.jmouse.beans.resolve.BeanResolutionStrategy;
 import org.jmouse.core.reflection.InferredType;
+import org.jmouse.core.reflection.annotation.AnnotationRepository;
 
 import java.lang.reflect.AnnotatedElement;
 
@@ -47,7 +48,7 @@ public class SimpleDependencyResolver implements DependencyResolver {
         String                beanName = dependency.name();
         AnnotatedElement      element  = dependency.dependant();
         BeanResolutionRequest request  = BeanResolutionRequest.forDependency(
-                context, javaType, beanName, element, true);
+                context, javaType, beanName, AnnotationRepository.ofAnnotatedElement(element), true);
         return strategy.resolve(request);
     }
 

@@ -74,6 +74,6 @@ public class ProviderBeanResolver extends AbstractDelegatingBeanResolver {
      * @return resolved bean instance
      */
     protected Object resolveNested(BeanResolutionRequest request, InferredType innerType) {
-        return getDelegate().resolve(BeanResolutionRequest.forType(request.context(), innerType, true));
+        return getDelegate().resolve(BeanResolutionRequest.forDependency(request.context(), innerType, true));
     }
 }

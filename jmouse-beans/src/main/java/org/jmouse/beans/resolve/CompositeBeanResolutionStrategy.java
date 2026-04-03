@@ -1,6 +1,7 @@
 package org.jmouse.beans.resolve;
 
 import org.jmouse.core.Sorter;
+import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +58,7 @@ public class CompositeBeanResolutionStrategy implements BeanResolutionStrategy {
             if (resolver.supports(request)) {
                 Object resolved = resolver.resolve(request);
                 if (resolved != null || !request.required()) {
-                    AnnotatedElement source = request.repository();
+                    AnnotationRepository source = request.repository();
                     LOGGER.debug(
                             "✅ resolve [{}] 🧩 via '{}' → \uD83D\uDCCC type='{}' \uD83D\uDD0E source='{}'",
                             request.beanName() != null ? request.beanName() : "<by-type>",

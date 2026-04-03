@@ -18,11 +18,11 @@ public interface BeanResolutionRequest {
     /**
      * Creates request for dependency-based resolution.
      *
-     * @param context   bean context
-     * @param beanType  requested bean type
-     * @param beanName  optional bean name
-     * @param element   source annotated element
-     * @param required  whether dependency is required
+     * @param context       bean context
+     * @param beanType      requested bean type
+     * @param beanName      optional bean name
+     * @param repository    source annotated element
+     * @param required      whether dependency is required
      * @return resolution request
      */
     static BeanResolutionRequest forDependency(BeanContext context, InferredType beanType, String beanName, AnnotationRepository repository, boolean required) {
