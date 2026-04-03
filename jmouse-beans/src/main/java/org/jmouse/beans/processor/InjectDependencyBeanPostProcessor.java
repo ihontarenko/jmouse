@@ -13,6 +13,7 @@ import org.jmouse.beans.resolve.NullableSupport;
 import org.jmouse.core.reflection.FieldFinder;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.reflection.Reflections;
+import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +51,8 @@ public class InjectDependencyBeanPostProcessor implements BeanPostProcessor {
             Reflections.setFieldValue(bean, field, value);
 
             if (value != null) {
-                LOGGER.info("Dependency '{}' injected into '{}' field", getShortName(value.getClass()),
-                            getFieldName(field));
+                LOGGER.info("Dependency '{}' injected into '{}' field", getShortName(
+                        value.getClass()), getFieldName(field));
             }
         }
 
@@ -66,23 +67,20 @@ public class InjectDependencyBeanPostProcessor implements BeanPostProcessor {
      * @return resolution request
      */
     private BeanResolutionRequest createBeanRequest(BeanContext context, Field field) {
-        boolean      isRequired = NullableSupport.isRequired(field);
-        InferredType beanType   = InferredType.forField(field);
+        boolean              isRequired           = NullableSupport.isRequired(field);
+        InferredType         beanType             = InferredType.forField(field);
+        AnnotationRepository annotationRepository = AnnotationRepository.ofAnnotatedElement(field);
+        String               beanName             = null;
 
-        if (field.isAnnotationPresent(Dependency.class)) {
-            String beanName = null;
-            if (field.isAnnotationPresent(Qualifier.class)) {
-                beanName = Reflections.getAnnotationValue(field, Qualifier.class, Qualifier::value);
-            }
-            return BeanResolutionRequest.forDependency(context, beanType, beanName, field, isRequired);
+        if (field.isAnnotationPresent(Qualifier.class)) {
+            beanName = Reflections.getAnnotationValue(field, Qualifier.class, Qualifier::value);
         }
 
         if (field.isAnnotationPresent(Named.class)) {
-            Named named = field.getAnnotation(Named.class);
-            return BeanResolutionRequest.forDependency(context, beanType, named.value(), field, isRequired);
+            beanName = field.getAnnotation(Named.class).value();
         }
 
-        return BeanResolutionRequest.forDependency(context, beanType, null, field, isRequired);
+        return BeanResolutionRequest.forDependency(context, beanType, beanName, annotationRepository, isRequired);
     }
 
 }

@@ -4,6 +4,7 @@ import jakarta.inject.Provider;
 import org.jmouse.beans.resolve.support.AbstractBeanResolver;
 import org.jmouse.beans.resolve.BeanCandidate;
 import org.jmouse.beans.resolve.BeanResolutionRequest;
+import org.jmouse.core.Priority;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.util.Strings;
 
@@ -15,6 +16,7 @@ import java.util.Optional;
  *
  * <p>Applies only when no explicit name is provided and the type is not a wrapper/collection.</p>
  */
+@Priority(Integer.MIN_VALUE + 8000)
 public class PrimaryBeanResolver extends AbstractBeanResolver {
 
     /**

@@ -5,7 +5,10 @@ import org.jmouse.beans.BeanContextAware;
 import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.beans.resolve.BeanResolutionRequest;
 import org.jmouse.beans.resolve.BeanResolutionStrategy;
+import org.jmouse.beans.resolve.NullableSupport;
 import org.jmouse.core.MethodParameter;
+import org.jmouse.core.reflection.InferredType;
+import org.jmouse.core.reflection.annotation.AnnotationRepository;
 import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.mvc.MappingResult;
 import org.jmouse.web.mvc.method.AbstractArgumentResolver;
@@ -37,7 +40,13 @@ public class TryGetBeanArgumentResolver extends AbstractArgumentResolver impleme
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return strategy.supports(
-                BeanResolutionRequest.forParameter(getBeanContext(), parameter.getParameter())
+                BeanResolutionRequest.forDependency(
+                        getBeanContext(),
+                        InferredType.forParameter(parameter.getParameter()),
+                        null,
+                        AnnotationRepository.ofAnnotatedElement(parameter.getParameter()),
+                        NullableSupport.isNullable(parameter.getParameter())
+                )
         );
     }
 
@@ -56,7 +65,13 @@ public class TryGetBeanArgumentResolver extends AbstractArgumentResolver impleme
     @Override
     public Object resolveArgument(MethodParameter parameter, RequestContext requestContext, MappingResult mappingResult) {
         return strategy.resolve(
-                BeanResolutionRequest.forParameter(getBeanContext(), parameter.getParameter())
+                BeanResolutionRequest.forDependency(
+                        getBeanContext(),
+                        InferredType.forParameter(parameter.getParameter()),
+                        null,
+                        AnnotationRepository.ofAnnotatedElement(parameter.getParameter()),
+                        NullableSupport.isNullable(parameter.getParameter())
+                )
         );
     }
 

@@ -68,7 +68,7 @@ public final class AnnotationRepository {
      * @param type the annotation class
      * @return list of merged annotations (possibly empty)
      */
-    public List<MergedAnnotation> getAll(Class<? extends Annotation> type) {
+    public List<MergedAnnotation> asList(Class<? extends Annotation> type) {
         return index.getOrDefault(type, List.of());
     }
 
@@ -77,7 +77,7 @@ public final class AnnotationRepository {
      *
      * @return flattened list of all annotations including meta-annotations
      */
-    public List<MergedAnnotation> all() {
+    public List<MergedAnnotation> asList() {
         return index.values().stream().flatMap(List::stream).toList();
     }
 

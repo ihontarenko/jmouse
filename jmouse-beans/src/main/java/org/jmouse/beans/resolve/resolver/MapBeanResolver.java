@@ -3,6 +3,7 @@ package org.jmouse.beans.resolve.resolver;
 import org.jmouse.beans.resolve.support.AbstractBeanResolver;
 import org.jmouse.beans.resolve.BeanCandidate;
 import org.jmouse.beans.resolve.BeanResolutionRequest;
+import org.jmouse.core.Priority;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.LinkedHashMap;
@@ -20,6 +21,7 @@ import java.util.Map;
  * </ul>
  * </p>
  */
+@Priority(Integer.MIN_VALUE + 5000)
 public class MapBeanResolver extends AbstractBeanResolver {
 
     /**

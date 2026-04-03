@@ -2,13 +2,11 @@ package org.jmouse.beans.resolve;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.core.reflection.InferredType;
+import org.jmouse.core.reflection.annotation.AnnotationRepository;
+import org.jmouse.core.reflection.annotation.MergedAnnotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Field;
-import java.lang.reflect.Parameter;
-
-import static org.jmouse.beans.resolve.NullableSupport.isNullable;
+import java.util.Optional;
 
 /**
  * Describes a bean resolution request. 🧩
@@ -27,8 +25,8 @@ public interface BeanResolutionRequest {
      * @param required  whether dependency is required
      * @return resolution request
      */
-    static BeanResolutionRequest forDependency(BeanContext context, InferredType beanType, String beanName, AnnotatedElement element, boolean required) {
-        return new Default(context, beanType, beanName, element, required);
+    static BeanResolutionRequest forDependency(BeanContext context, InferredType beanType, String beanName, AnnotationRepository repository, boolean required) {
+        return new Default(context, beanType, beanName, repository, required);
     }
 
     /**
@@ -39,44 +37,8 @@ public interface BeanResolutionRequest {
      * @param required  whether dependency is required
      * @return resolution request
      */
-    static BeanResolutionRequest forType(BeanContext context, InferredType beanType, boolean required) {
+    static BeanResolutionRequest forDependency(BeanContext context, InferredType beanType, boolean required) {
         return new Default(context, beanType, null, null, required);
-    }
-
-    /**
-     * Creates request for name-based resolution.
-     *
-     * @param context   bean context
-     * @param beanType  requested bean type
-     * @param beanName  bean name
-     * @param required  whether dependency is required
-     * @return resolution request
-     */
-    static BeanResolutionRequest forName(BeanContext context, InferredType beanType, String beanName, boolean required) {
-        return new Default(context, beanType, beanName, null, required);
-    }
-
-    /**
-     * Creates request for parameter injection.
-     *
-     * @param context    bean context
-     * @param parameter  source parameter
-     * @return resolution request
-     */
-    static BeanResolutionRequest forParameter(BeanContext context, Parameter parameter) {
-        return new Default(context, InferredType.forParameter(parameter), null, parameter, !isNullable(parameter));
-    }
-
-    /**
-     * Creates request for field injection.
-     *
-     * @param context   bean context
-     * @param field     source field
-     * @param beanName  optional bean name
-     * @return resolution request
-     */
-    static BeanResolutionRequest forField(BeanContext context, Field field, String beanName) {
-        return new Default(context, InferredType.forField(field), beanName, field, !isNullable(field));
     }
 
     /**
@@ -85,14 +47,14 @@ public interface BeanResolutionRequest {
      * @param context   bean context
      * @param beanType  requested bean type
      * @param beanName  optional bean name
-     * @param source    source annotated element
+     * @param repository    source annotated element
      * @param required  whether dependency is required
      */
     record Default(
             BeanContext context,
             InferredType beanType,
             String beanName,
-            AnnotatedElement source,
+            AnnotationRepository repository,
             boolean required
     ) implements BeanResolutionRequest { }
 
@@ -119,7 +81,7 @@ public interface BeanResolutionRequest {
     /**
      * Returns source annotated element.
      */
-    AnnotatedElement source();
+    AnnotationRepository repository();
 
     /**
      * Returns raw requested class type.
@@ -138,7 +100,9 @@ public interface BeanResolutionRequest {
      * @return annotation instance or {@code null}
      */
     default <A extends Annotation> A get(Class<A> annotationType) {
-        return source() != null ? source().getAnnotation(annotationType) : null;
+        Optional<MergedAnnotation> annotation = repository().get(annotationType);
+        return annotation.map(a -> a.getNativeAnnotation(annotationType)).orElse(null);
+
     }
 
     /**
@@ -148,7 +112,7 @@ public interface BeanResolutionRequest {
      * @return {@code true} if present
      */
     default boolean has(Class<? extends Annotation> annotationType) {
-        return source() != null && source().isAnnotationPresent(annotationType);
+        return get(annotationType) != null;
     }
 
 }

@@ -3,6 +3,7 @@ package org.jmouse.beans.resolve.resolver;
 import org.jmouse.beans.resolve.BeanCandidate;
 import org.jmouse.beans.resolve.BeanResolutionRequest;
 import org.jmouse.beans.resolve.support.AbstractBeanResolver;
+import org.jmouse.core.Priority;
 
 import java.lang.reflect.Array;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
  *
  * <p>Collects all matching beans and returns them as an array.</p>
  */
+@Priority(Integer.MIN_VALUE + 7000)
 public class ArrayBeanResolver extends AbstractBeanResolver {
 
     /**

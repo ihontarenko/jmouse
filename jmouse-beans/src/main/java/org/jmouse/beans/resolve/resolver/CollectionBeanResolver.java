@@ -3,6 +3,7 @@ package org.jmouse.beans.resolve.resolver;
 import org.jmouse.beans.resolve.support.AbstractBeanResolver;
 import org.jmouse.beans.resolve.BeanCandidate;
 import org.jmouse.beans.resolve.BeanResolutionRequest;
+import org.jmouse.core.Priority;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.LinkedHashSet;
@@ -17,6 +18,7 @@ import java.util.List;
  * for the declared generic element type.
  * </p>
  */
+@Priority(Integer.MIN_VALUE + 6000)
 public class CollectionBeanResolver extends AbstractBeanResolver {
 
     /**

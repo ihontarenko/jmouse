@@ -57,7 +57,7 @@ public class CompositeBeanResolutionStrategy implements BeanResolutionStrategy {
             if (resolver.supports(request)) {
                 Object resolved = resolver.resolve(request);
                 if (resolved != null || !request.required()) {
-                    AnnotatedElement source = request.source();
+                    AnnotatedElement source = request.repository();
                     LOGGER.debug(
                             "✅ resolve [{}] 🧩 via '{}' → \uD83D\uDCCC type='{}' \uD83D\uDD0E source='{}'",
                             request.beanName() != null ? request.beanName() : "<by-type>",

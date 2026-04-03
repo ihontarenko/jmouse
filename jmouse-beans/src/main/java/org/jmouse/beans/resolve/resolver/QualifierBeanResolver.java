@@ -4,12 +4,14 @@ import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.beans.resolve.support.AnnotatedBeanResolver;
 import org.jmouse.beans.resolve.BeanCandidate;
 import org.jmouse.beans.resolve.BeanResolutionRequest;
+import org.jmouse.core.Priority;
 
 /**
  * Resolves dependencies annotated with {@link Qualifier}. 🏷️
  *
  * <p>Performs name-based lookup and validates type compatibility.</p>
  */
+@Priority(Integer.MIN_VALUE + 3000)
 public class QualifierBeanResolver extends AnnotatedBeanResolver<Qualifier> {
 
     /**

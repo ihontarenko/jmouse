@@ -4,6 +4,7 @@ import org.jmouse.beans.Beans;
 import org.jmouse.beans.resolve.BeanCandidate;
 import org.jmouse.beans.resolve.BeanResolutionRequest;
 import org.jmouse.beans.resolve.support.AbstractBeanResolver;
+import org.jmouse.core.Priority;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.Set;
  * them into a {@link Beans} container.
  * </p>
  */
+@Priority(Integer.MIN_VALUE + 7500)
 public class BeansBeanResolver extends AbstractBeanResolver {
 
     /**

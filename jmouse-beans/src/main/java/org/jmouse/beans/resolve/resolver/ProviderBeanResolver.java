@@ -5,6 +5,7 @@ import org.jmouse.beans.ObjectFactory;
 import org.jmouse.beans.resolve.support.AbstractDelegatingBeanResolver;
 import org.jmouse.beans.resolve.BeanResolutionRequest;
 import org.jmouse.beans.resolve.BeanResolutionStrategy;
+import org.jmouse.core.Priority;
 import org.jmouse.core.reflection.InferredType;
 
 import java.util.function.Supplier;
@@ -14,6 +15,7 @@ import java.util.function.Supplier;
  *
  * <p>Supports {@link Provider}, {@link Supplier}, and {@link ObjectFactory}.</p>
  */
+@Priority(Integer.MIN_VALUE + 2000)
 public class ProviderBeanResolver extends AbstractDelegatingBeanResolver {
 
     /**

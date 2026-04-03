@@ -3,6 +3,7 @@ package org.jmouse.beans.resolve.resolver;
 import org.jmouse.beans.resolve.support.AbstractBeanResolver;
 import org.jmouse.beans.resolve.BeanCandidate;
 import org.jmouse.beans.resolve.BeanResolutionRequest;
+import org.jmouse.core.Priority;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import java.util.Optional;
  *
  * <p>Prefers a primary candidate, otherwise falls back to single-candidate resolution.</p>
  */
+@Priority(Integer.MIN_VALUE + 1000)
 public class OptionalBeanResolver extends AbstractBeanResolver {
 
     /**

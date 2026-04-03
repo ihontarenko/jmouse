@@ -1,21 +1,18 @@
 package org.jmouse.beans.resolve.resolver;
 
-import jakarta.inject.Named;
-import jakarta.inject.Provider;
-import org.jmouse.beans.annotation.Qualifier;
 import org.jmouse.beans.resolve.BeanCandidate;
 import org.jmouse.beans.resolve.BeanResolutionRequest;
 import org.jmouse.beans.resolve.support.AbstractBeanResolver;
-import org.jmouse.core.reflection.InferredType;
+import org.jmouse.core.Priority;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Resolves a bean by requested type. 🧩
  *
  * <p>Used for plain single-bean lookup when no qualifier, name, or wrapper type is involved.</p>
  */
+@Priority(Integer.MIN_VALUE + 9000)
 public class TypeBeanResolver extends AbstractBeanResolver {
 
     /**
@@ -29,20 +26,6 @@ public class TypeBeanResolver extends AbstractBeanResolver {
         if (request.beanName() != null && !request.beanName().isBlank()) {
             return false;
         }
-
-        InferredType type = request.beanType();
-
-        if (request.has(Qualifier.class)
-                || request.has(Named.class)
-                || type.is(Optional.class)
-                || type.isCollection()
-                || type.is(Provider.class)
-                || type.isMap()
-                || type.isArray()
-        ) {
-            return false;
-        }
-
         return !getCandidateProvider(request).getCandidates(request.classType()).isEmpty();
     }
 

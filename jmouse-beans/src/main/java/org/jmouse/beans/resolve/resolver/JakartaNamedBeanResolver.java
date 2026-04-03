@@ -4,6 +4,7 @@ import jakarta.inject.Named;
 import org.jmouse.beans.resolve.support.AnnotatedBeanResolver;
 import org.jmouse.beans.resolve.BeanCandidate;
 import org.jmouse.beans.resolve.BeanResolutionRequest;
+import org.jmouse.core.Priority;
 
 /**
  * {@link AnnotatedBeanResolver} implementation that resolves dependencies
@@ -39,6 +40,7 @@ import org.jmouse.beans.resolve.BeanResolutionRequest;
  * }
  * }</pre>
  */
+@Priority(Integer.MIN_VALUE + 000)
 public class JakartaNamedBeanResolver extends AnnotatedBeanResolver<Named> {
 
     /**
