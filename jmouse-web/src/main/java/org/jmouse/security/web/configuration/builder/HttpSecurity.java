@@ -14,24 +14,25 @@ import org.jmouse.web.match.routing.MatcherCriteria;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public final class HttpSecurity
         extends AbstractConfiguredSecurityBuilder<MatchableSecurityFilterChain, HttpSecurity>
         implements HttpSecurityBuilder<HttpSecurity> {
 
+    private final static Supplier<SecurityFilterOrder> DEFAULT_ORDER_SUPPLIER = SecurityFilterOrder::new;
+
     private final List<Filter>                 filters = new ArrayList<>();
     private       MappingMatcher<RequestRoute> matcher = MatcherCriteria.any();
 
-    public HttpSecurity() {
-        setSharedObject(SecurityFilterOrder.class, new SecurityFilterOrder());
-    }
+    public HttpSecurity() { }
 
     @Override
     public HttpSecurity addFilter(Filter filter) {
         Filter ordered = filter;
 
         if (!(ordered instanceof OrderedFilter)) {
-            SecurityFilterOrder orders = getSharedObject(SharedAttributes.SECURITY_FILTER_ORDER);
+            SecurityFilterOrder orders = getObject(SharedAttributes.SECURITY_FILTER_ORDER, DEFAULT_ORDER_SUPPLIER);
             ordered = new OrderedFilter(ordered, orders.getOrder(filter.getClass()));
         }
 
@@ -51,7 +52,7 @@ public final class HttpSecurity
     }
 
     private HttpSecurity addFilterOfOffset(Filter filter, int offset, Class<? extends Filter> registered) {
-        SecurityFilterOrder orders          = getSharedObject(SharedAttributes.SECURITY_FILTER_ORDER);
+        SecurityFilterOrder orders          = getObject(SharedAttributes.SECURITY_FILTER_ORDER, DEFAULT_ORDER_SUPPLIER);
         Filter              unwrappedFilter = filter;
 
         if (filter instanceof OrderedFilter orderedFilter) {

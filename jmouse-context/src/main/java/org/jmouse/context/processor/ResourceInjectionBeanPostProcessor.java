@@ -47,7 +47,7 @@ public class ResourceInjectionBeanPostProcessor implements BeanPostProcessor {
 
         Conversion conversion = context.getBean(Conversion.class);
 
-        return conversion.convert(value, targetType);
+        return conversion.convertIfNeeded(value, targetType);
     }
 
 }

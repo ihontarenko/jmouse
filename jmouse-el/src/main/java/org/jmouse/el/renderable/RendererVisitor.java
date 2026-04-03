@@ -1,5 +1,7 @@
 package org.jmouse.el.renderable;
 
+import org.jmouse.core.CyclicReferenceDetector;
+import org.jmouse.core.DefaultCyclicReferenceDetector;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.StringSource;
 import org.jmouse.el.evaluation.EvaluationContext;
@@ -33,21 +35,35 @@ public class RendererVisitor implements NodeVisitor {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(RendererVisitor.class);
 
-    private final EvaluationContext         context;
-    private final TemplateRegistry          registry;
-    private final Content                   content;
+    private final EvaluationContext               context;
+    private final TemplateRegistry                registry;
+    private final Content                         content;
+    private final CyclicReferenceDetector<String> detector;
 
     /**
-     * Constructs a RendererVisitor with the specified content accumulator, view registry, and evaluation context.
+     * Creates a renderer with explicit cyclic reference detector. 🧩
      *
-     * @param content  the content accumulator for the rendered output
-     * @param registry the view registry containing block and macro definitions
-     * @param context  the evaluation context used for expression evaluation and variable scope resolution
+     * @param content   output accumulator
+     * @param registry  template registry (blocks/macros)
+     * @param context   evaluation context (variables, expressions)
+     * @param detector  cyclic reference detector
      */
-    public RendererVisitor(Content content, TemplateRegistry registry, EvaluationContext context) {
+    public RendererVisitor(Content content, TemplateRegistry registry, EvaluationContext context, CyclicReferenceDetector<String> detector) {
         this.context = context;
         this.registry = registry;
         this.content = content;
+        this.detector = detector;
+    }
+
+    /**
+     * Creates a renderer with default cyclic reference detector. 🔄
+     *
+     * @param content  output accumulator
+     * @param registry template registry (blocks/macros)
+     * @param context  evaluation context
+     */
+    public RendererVisitor(Content content, TemplateRegistry registry, EvaluationContext context) {
+        this(content, registry, context, new DefaultCyclicReferenceDetector<>());
     }
 
     /**
@@ -245,13 +261,15 @@ public class RendererVisitor implements NodeVisitor {
     public void visit(IncludeNode include) {
         if (include.getPath().evaluate(context) instanceof String name) {
             Template          included = registry.getEngine().getTemplate(name);
-            EvaluationContext ctx      = included.newContext();
             Node              root     = included.getRoot();
+            EvaluationContext context  = included.newContext();
 
             LOGGER.info("Include '{}' view", name);
 
-            root.accept(new InitializerVisitor(included, ctx));
-            root.accept(new RendererVisitor(content, included.getRegistry(), ctx));
+            detector.detect(included::getName, TemplateRenderer.EXCEPTION_SUPPLIER);
+            root.accept(new InitializerVisitor(included, context));
+            root.accept(new RendererVisitor(content, included.getRegistry(), context, detector));
+            detector.remove(included::getName);
         }
     }
 
@@ -411,7 +429,7 @@ public class RendererVisitor implements NodeVisitor {
             Object evaluated = node.evaluate(context);
 
             if (evaluated != null) {
-                content.append(conversion.convert(evaluated, String.class));
+                content.append(conversion.convertIfNeeded(evaluated, String.class));
             }
 
             LOGGER.info("{} '{}' evaluated", context.getValue(node.getName()) != null ? "Lambda" : "Function", name);

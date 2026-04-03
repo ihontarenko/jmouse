@@ -1,6 +1,7 @@
 package org.jmouse.web.mvc;
 
 import org.jmouse.beans.BeanScanAnnotatedContextInitializer;
+import org.jmouse.beans.WarmupEagerBeansContextInitializer;
 import org.jmouse.context.ApplicationContextBeansScanner;
 import org.jmouse.context.ApplicationFactory;
 import org.jmouse.web.WebLauncher;
@@ -62,6 +63,7 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
         WebBeanContext                     context = factory.createRootContext();
 
         context.addInitializer(new BeanScanAnnotatedContextInitializer());
+        context.addInitializer(new WarmupEagerBeansContextInitializer());
         context.addInitializer(new ApplicationContextBeansScanner());
         context.addInitializer(new StartupApplicationContextInitializer(context.getEnvironment()));
         context.addInitializer(new WebMvcControllersInitializer());
@@ -93,13 +95,4 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
         return factory.createWebServer(registrationBeans.toArray(WebApplicationInitializer[]::new));
     }
 
-    /**
-     * 🔥 Warm up critical MVC infrastructure (e.g. {@link HandlerDispatcher}).
-     *
-     * @param context active web bean context
-     */
-    @Override
-    public void warmup(WebBeanContext context) {
-        context.getBean(HandlerDispatcher.class);
-    }
 }

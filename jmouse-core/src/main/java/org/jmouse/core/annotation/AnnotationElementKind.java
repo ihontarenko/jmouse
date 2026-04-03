@@ -1,13 +1,9 @@
 package org.jmouse.core.annotation;
 
 /**
- * Enumeration describing the kind of annotated program element. 🧩
+ * Kind of annotated program element. 🧩
  *
- * <p>
- * Used by the annotation processing infrastructure to classify
- * {@link AnnotationCandidate candidates} and route them to the
- * appropriate {@link AnnotationProcessor}.
- * </p>
+ * <p>Used to route {@link AnnotationCandidate} to appropriate processors.</p>
  */
 public enum AnnotationElementKind {
 
@@ -20,6 +16,11 @@ public enum AnnotationElementKind {
      * Method-level annotation. 🔧
      */
     METHOD,
+
+    /**
+     * Parameter-level annotation. 🎯
+     */
+    PARAMETER,
 
     /**
      * Field-level annotation. 🧷

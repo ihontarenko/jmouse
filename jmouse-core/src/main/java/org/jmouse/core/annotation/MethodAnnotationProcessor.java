@@ -34,7 +34,6 @@ public interface MethodAnnotationProcessor<A extends Annotation> extends Annotat
         if (candidate.kind() != AnnotationElementKind.METHOD) {
             return;
         }
-
         process((Method) candidate.element(), candidate.annotation(), candidate.declaringClass(), context);
     }
 }

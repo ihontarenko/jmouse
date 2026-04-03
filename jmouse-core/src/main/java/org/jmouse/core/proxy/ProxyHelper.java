@@ -1,8 +1,10 @@
 package org.jmouse.core.proxy;
 
+import org.jmouse.core.Exceptions;
 import org.jmouse.core.WrappedException;
 import org.jmouse.core.reflection.Reflections;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
@@ -78,9 +80,13 @@ public final class ProxyHelper {
      * 🔎 Check if type is a ByteBuddy proxy class (heuristic: name contains {@code ByteBuddy} or {@code $$ByteBuddy$$}).
      */
     public static boolean isByteBuddyProxy(Class<?> type) {
-        if (type == null) return false;
-        String n = type.getName();
-        return n.contains("ByteBuddy") || n.contains("$$ByteBuddy$$");
+        if (type == null) {
+            return false;
+        }
+
+        String typeName = type.getName();
+
+        return typeName.contains("ByteBuddy") || typeName.contains("$" + ByteBuddyProxyEngine.BYTE_BUDDY_SUFFIX + "$");
     }
 
     /**
@@ -108,7 +114,9 @@ public final class ProxyHelper {
                 return interceptable.internalInvoke(method, arguments);
             }
         } catch (Throwable exception) {
-            throw new WrappedException(exception);
+            throw new WrappedException(Exceptions.unwrapIf(
+                    exception, InvocationTargetException.class
+            ));
         }
 
         return Reflections.invokeMethod(proxy, method, arguments);

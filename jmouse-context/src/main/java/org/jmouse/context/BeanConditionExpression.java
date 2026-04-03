@@ -87,9 +87,10 @@ public @interface BeanConditionExpression {
                 } else if (result instanceof String string) {
                     match = switch (annotation.operator()) {
                         case EQ -> string.equals(annotation.expected());
+                        case EQ_IGNORE_CASE -> string.equalsIgnoreCase(annotation.expected());
                         case CONTAINS -> string.contains(annotation.expected());
-                        case STARTS -> string.startsWith(annotation.expected());
                         case ENDS -> string.endsWith(annotation.expected());
+                        case STARTS -> string.startsWith(annotation.expected());
                     };
 
                     if (match) {

@@ -28,7 +28,7 @@ import java.util.Map;
  *
  * ⚙️ Stores filters as a {@link Map} of class name → order index.
  */
-@BeanProperties
+@BeanProperties("jmouse.web.security.filter")
 public class SecurityFilterOrder {
 
     /** 📑 Registered filter orders (class name → index). */

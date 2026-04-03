@@ -21,6 +21,8 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public final class ByteBuddyProxyEngine implements ProxyEngine {
 
+    public static final String BYTE_BUDDY_SUFFIX = "jMouse_BB";
+
     /**
      * 🛡️ Matcher excluding final classes.
      */
@@ -64,7 +66,7 @@ public final class ByteBuddyProxyEngine implements ProxyEngine {
 
         try {
             Class<?> proxyClass = new ByteBuddy()
-                    .with(new NamingStrategy.SuffixingRandom("BB"))
+                    .with(new NamingStrategy.SuffixingRandom(BYTE_BUDDY_SUFFIX))
                     .subclass(definition.targetClass())
 
                     // === InterceptableProxy: internalInvoke(Method, Object[]) ===

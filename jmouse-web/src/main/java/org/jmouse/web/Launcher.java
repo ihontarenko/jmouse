@@ -25,5 +25,5 @@ public interface Launcher<C extends BeanContext> {
      *
      * @param context current bean context
      */
-    void warmup(C context);
+    default void warmup(C context) {}
 }

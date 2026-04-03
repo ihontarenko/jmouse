@@ -1,7 +1,7 @@
 package org.jmouse.beans.definition;
 
-import org.jmouse.beans.BeanInstantiationType;
 import org.jmouse.beans.BeanScope;
+import org.jmouse.beans.InstantiationType;
 import org.jmouse.beans.Scope;
 import org.jmouse.beans.instantiation.BeanInstantiationStrategy;
 import org.jmouse.core.reflection.annotation.MergedAnnotation;
@@ -73,6 +73,22 @@ public interface BeanDefinition {
      * @param primary {@code true} if the bean should be primary, {@code false} otherwise.
      */
     void setPrimary(boolean primary);
+
+    /**
+     * Returns whether this bean should be eagerly initialized. ⚡
+     *
+     * @return {@code true} if eager initialization is enabled
+     */
+    boolean isEager();
+
+    /**
+     * Sets whether this bean should be eagerly initialized. ⚡
+     *
+     * <p>Eager beans are created during context startup rather than lazily.</p>
+     *
+     * @param eager {@code true} to enable eager initialization
+     */
+    void setEager(boolean eager);
 
     /**
      * Indicates whether the bean represented by this definition is proxied.
@@ -191,9 +207,9 @@ public interface BeanDefinition {
     /**
      * Retrieves the creation type for this bean, indicating how it should be instantiated.
      *
-     * @return a {@link BeanInstantiationType} value.
+     * @return a {@link InstantiationType} value.
      */
-    BeanInstantiationType getInstantiationType();
+    InstantiationType getInstantiationType();
 
     /**
      * Retrieves the actual bean instance if one has been created.

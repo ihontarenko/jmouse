@@ -3,6 +3,7 @@ package org.jmouse.web.mvc;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.EagerBean;
 import org.jmouse.beans.InitializingBean;
 import org.jmouse.context.FrameworkFactories;
 import org.jmouse.core.WrappedException;
@@ -32,7 +33,7 @@ import java.util.List;
  * @see ExceptionResolver
  * @see HandlerAdapter
  */
-public class HandlerDispatcher implements InitializingBean {
+public class HandlerDispatcher implements InitializingBean, EagerBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HandlerDispatcher.class);
 

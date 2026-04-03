@@ -3,6 +3,7 @@ package org.jmouse.web;
 import org.jmouse.beans.BeanContextInitializer;
 import org.jmouse.beans.BeanScanAnnotatedContextInitializer;
 import org.jmouse.beans.BeanScope;
+import org.jmouse.beans.WarmupEagerBeansContextInitializer;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.context.ApplicationContextBeansScanner;
@@ -166,6 +167,7 @@ public class WebApplicationContextBuilder implements WebContextBuilder {
 
         if (useDefault) {
             context.addInitializer(new BeanScanAnnotatedContextInitializer());
+            context.addInitializer(new WarmupEagerBeansContextInitializer());
             context.addInitializer(new ApplicationContextBeansScanner());
             context.addInitializer(new StartupApplicationContextInitializer(context.getEnvironment()));
         }

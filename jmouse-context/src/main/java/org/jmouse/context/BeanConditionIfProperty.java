@@ -58,6 +58,7 @@ public @interface BeanConditionIfProperty {
                 if (value != null) {
                     match = switch (annotation.operator()) {
                         case EQ -> value.equals(annotation.value());
+                        case EQ_IGNORE_CASE -> value.equalsIgnoreCase(annotation.value());
                         case CONTAINS -> value.contains(annotation.value());
                         case ENDS -> value.endsWith(annotation.value());
                         case STARTS -> value.startsWith(annotation.value());

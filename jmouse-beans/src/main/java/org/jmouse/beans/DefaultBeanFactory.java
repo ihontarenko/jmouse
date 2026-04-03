@@ -1,5 +1,6 @@
 package org.jmouse.beans;
 
+import org.jmouse.core.Sorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jmouse.beans.instantiation.BeanInstantiationFactory;
@@ -124,6 +125,7 @@ public class DefaultBeanFactory implements BeanFactory, BeanInstantiationFactory
     public void addStrategy(BeanInstantiationStrategy strategy) {
         LOGGER.info("Register new strategy '{}'", getShortName(strategy.getClass()));
         strategies.add(strategy);
+        Sorter.sort(strategies);
     }
 
     /**

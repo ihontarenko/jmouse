@@ -28,7 +28,7 @@ import static org.slf4j.LoggerFactory.getLogger;
  * }</pre>
  */
 @Priority(-1000)
-public class ScannerBeanContextInitializer implements BeanContextInitializer {
+abstract public class ScannerBeanContextInitializer implements BeanContextInitializer {
 
     private static final Logger LOGGER = getLogger(getShortName(BeanContextInitializer.class) + ".SCANNER");
 

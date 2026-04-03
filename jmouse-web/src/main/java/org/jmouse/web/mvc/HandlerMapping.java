@@ -27,6 +27,7 @@ public interface HandlerMapping {
     String MATCHED_ROUTE_ATTRIBUTE    = HandlerMapping.class.getName() + ".MATCHED_ROUTE_ATTRIBUTE";
     String ROUTE_MATCH_ATTRIBUTE      = HandlerMapping.class.getName() + ".ROUTE_MATCH_ATTRIBUTE";
     String ROUTE_PRODUCIBLE_ATTRIBUTE = HandlerMapping.class.getName() + ".ROUTE_PRODUCIBLE_ATTRIBUTE";
+    String ROUTE_CONSUMABLE_ATTRIBUTE = HandlerMapping.class.getName() + ".ROUTE_CONSUMABLE_ATTRIBUTE";
 
     /**
      * Returns a handler object for the given request.

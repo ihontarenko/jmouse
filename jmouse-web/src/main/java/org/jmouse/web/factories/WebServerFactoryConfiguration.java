@@ -18,7 +18,7 @@ import java.util.Map;
 public class WebServerFactoryConfiguration {
 
     @Bean("webServerFactory")
-    @BeanConditionExists("webServerFactory")
+    @BeanConditionExists(value = "webServerFactory", message = "web server factory already registered in client code")
     public WebServerFactory createWebServerFactory() {
         return new TomcatWebServerFactory();
     }

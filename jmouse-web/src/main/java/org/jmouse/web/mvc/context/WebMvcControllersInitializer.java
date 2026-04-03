@@ -1,6 +1,7 @@
 package org.jmouse.web.mvc.context;
 
 import org.jmouse.beans.ScannerBeanContextInitializer;
+import org.jmouse.core.Priority;
 import org.jmouse.web.annotation.Controller;
 import org.jmouse.core.reflection.ClassFinder;
 
@@ -33,6 +34,7 @@ import java.util.ArrayList;
  * @see Controller
  * @see ScannerBeanContextInitializer
  */
+@Priority(-950)
 public class WebMvcControllersInitializer extends ScannerBeanContextInitializer {
 
     /**

@@ -7,6 +7,7 @@ import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.BeanDefinitionException;
 import org.jmouse.beans.definition.ConstructorBeanDefinition;
+import org.jmouse.core.Priority;
 import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Constructor;
@@ -33,16 +34,14 @@ import java.util.Set;
  * }
  * }</pre>
  */
+@Priority(Integer.MIN_VALUE + 1000)
 public class ConstructorBeanDefinitionCreationStrategy extends AbstractBeanDefinitionCreationStrategy<Class<?>> {
-
 
     @Override
     public BeanDefinition create(String name, Class<?> klass, BeanContext context) {
-        ConstructorBeanDefinition definition = new ConstructorBeanDefinition(name, klass);
-//        JavaBeanDescriptor<?>     descriptor = JavaBeanDescriptor.forBean(klass);
-
-        Constructor<?> constructor;
-        Class<?>[]     parameterTypes = new Class[0];
+        ConstructorBeanDefinition definition     = new ConstructorBeanDefinition(name, klass);
+        Constructor<?>            constructor;
+        Class<?>[]                parameterTypes = new Class[0];
 
         if (klass.isRecord()) {
             RecordComponent[] components  = klass.getRecordComponents();

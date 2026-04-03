@@ -2,6 +2,7 @@ package org.jmouse.el.node.expression;
 
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.extension.OperationException;
 import org.jmouse.el.extension.Operator;
 import org.jmouse.el.extension.operator.ComparisonOperator;
 import org.jmouse.el.node.AbstractExpression;
@@ -88,7 +89,15 @@ public class BinaryOperation extends AbstractExpression {
             }
         }
 
-        return operator.getCalculator().calculate(left, right);
+        try {
+            return operator.getCalculator().calculate(left, right);
+        } catch (Exception exception) {
+            String expression = "%s %s %s".formatted(getLeft(), operator, getRight());
+            String evaluated  = "%s %s %s".formatted(left, operator, right);
+            throw new OperationException("Binary operation (%s) execution failed. Expression: [%s]".formatted(
+                    evaluated, expression
+            ), exception);
+        }
     }
 
     /**

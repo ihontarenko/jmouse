@@ -1,7 +1,8 @@
 package org.jmouse.beans.definition;
 
-import org.jmouse.beans.BeanInstantiationType;
 import org.jmouse.beans.BeanScope;
+import org.jmouse.beans.EagerBean;
+import org.jmouse.beans.InstantiationType;
 import org.jmouse.beans.Scope;
 import org.jmouse.beans.instantiation.BeanInstantiationStrategy;
 
@@ -71,6 +72,11 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
      * Indicates whether the bean is primary.
      */
     protected boolean primary = false;
+
+    /**
+     * Indicates whether this bean should be eagerly initialized. ⚡
+     */
+    protected boolean eager = false;
 
     /**
      * The parent bean definition, if any.
@@ -243,12 +249,34 @@ public abstract class AbstractBeanDefinition implements BeanDefinition {
     }
 
     /**
-     * Retrieves the creation type for this bean, indicating how it should be instantiated.
+     * Returns whether this bean should be eagerly initialized. ⚡
      *
-     * @return a {@link BeanInstantiationType} value.
+     * @return {@code true} if eager initialization is enabled
      */
     @Override
-    public BeanInstantiationType getInstantiationType() {
+    public boolean isEager() {
+        return eager || EagerBean.class.isAssignableFrom(type);
+    }
+
+    /**
+     * Sets whether this bean should be eagerly initialized. ⚡
+     *
+     * <p>Eager beans are created during context startup rather than lazily.</p>
+     *
+     * @param eager {@code true} to enable eager initialization
+     */
+    @Override
+    public void setEager(boolean eager) {
+        this.eager = eager;
+    }
+
+    /**
+     * Retrieves the creation type for this bean, indicating how it should be instantiated.
+     *
+     * @return a {@link InstantiationType} value.
+     */
+    @Override
+    public InstantiationType getInstantiationType() {
         return null;
     }
 

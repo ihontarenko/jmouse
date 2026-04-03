@@ -29,7 +29,7 @@ public final class ParametersDataBinder {
             target = mapper.map(source, targetType);
         }
 
-        return new DefaultBindingResult<>(target, errors);
+        return new SimpleBindingResult<>(target, errors);
     }
 
     public <T> BindingResult<T> bind(Object source, Class<T> targetType, String objectName) {

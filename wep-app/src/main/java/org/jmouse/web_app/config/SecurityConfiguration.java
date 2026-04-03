@@ -76,6 +76,7 @@ public class SecurityConfiguration {
                 .matcherCriteria(c -> c.pathPattern("/shared/**")).permitAll()
                 .mappingMatcher(
                         POST("/**"),
+                        GET("/public/**"),
                         GET("/health/**"),
                         GET("/video"),
                         GET("/laptop/**"),

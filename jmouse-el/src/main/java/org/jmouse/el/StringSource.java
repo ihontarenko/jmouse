@@ -1,8 +1,8 @@
 package org.jmouse.el;
 
+import org.jmouse.core.Verify;
 import org.jmouse.el.lexer.Token.Type;
 import org.jmouse.el.lexer.TokenizableSource;
-import org.jmouse.core.Exceptions;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -222,7 +222,7 @@ public class StringSource implements TokenizableSource {
      */
     private void ensureIndex(int index) {
         if (index < 0 || index >= size()) {
-            Exceptions.throwIfOutOfRange(index, 0, encounters, "Index: %d, Size: %d".formatted(index, encounters));
+            Verify.inRange(index, 0, encounters, "encounters");
         }
     }
 

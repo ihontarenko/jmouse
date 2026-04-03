@@ -34,7 +34,6 @@ public interface FieldAnnotationProcessor<A extends Annotation> extends Annotati
         if (candidate.kind() != AnnotationElementKind.FIELD) {
             return;
         }
-
         process((Field) candidate.element(), candidate.annotation(), candidate.declaringClass(), context);
     }
 }

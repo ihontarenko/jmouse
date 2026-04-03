@@ -2,6 +2,7 @@ package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.context.BeanConditionIfProperty;
+import org.jmouse.core.MediaType;
 import org.jmouse.web.annotation.*;
 import org.jmouse.web.http.*;
 import org.jmouse.web.mvc.resource.ResourceNotFoundException;
@@ -19,14 +20,14 @@ import java.util.Map;
  * <p>Maps common framework exceptions to a branded error view and populates
  * a minimal diagnostics model (method, path, query, status, message, stack traces).</p>
  *
- * <p>Enabled when property {@code jmouse.mvc.frameworkController.enabled=true}.</p>
+ * <p>Enabled when property {@code jmouse.mvc.internal-controller.enabled=true}.</p>
  *
  * @see Controller
  * @see ExceptionHandler
  * @see HttpStatus
  */
 @Controller
-@BeanConditionIfProperty(name = "jmouse.mvc.frameworkController.enabled", value = "true")
+@BeanConditionIfProperty(name = "jmouse.mvc.internal-controller.enabled", value = "true")
 public class InternalFrameworkController {
 
     /**
@@ -125,12 +126,15 @@ public class InternalFrameworkController {
         QueryParameters queryParameters = RequestAttributesHolder.getQueryParameters();
         RequestPath     requestPath     = RequestAttributesHolder.getRequestPath();
 
+        // overwrite content type for unified response
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
         model.addAttribute("userAgent", headers.getUserAgent());
         model.addAttribute("httpStatus", httpStatus);
         model.addAttribute("statusCode", httpStatus.getCode());
         model.addAttribute("requestMethod", headers.getMethod());
         model.addAttribute("requestPath", requestPath.path());
-        model.addAttribute("queryString", queryParameters.toString());
+        model.addAttribute("queryString", queryParameters.getQueryString().toQueryString());
         model.addAttribute("message", getExceptionMessage(exception));
         model.addAttribute("stackTrace", getDetailedStackTrace(exception));
         model.addAttribute("timestamp", Instant.now().toString());
@@ -179,6 +183,6 @@ public class InternalFrameworkController {
      * @return concise message string
      */
     private String getExceptionMessage(Throwable throwable) {
-        return "%s :[%s]".formatted(throwable.getClass().getSimpleName(), throwable.getMessage());
+        return throwable.getMessage();
     }
 }

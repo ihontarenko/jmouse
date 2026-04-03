@@ -55,6 +55,6 @@ public final class RateLimitMethodInterceptor extends AbstractRateLimitMethodInt
     @Override
     public void after(InvocationContext context, Method method, Object[] arguments, Object result) {
         MethodInvocation invocation = context.invocation();
-        System.out.println("proxyInvocation.getReturnValue() : " + invocation.getReturnValue());
+        System.out.println("proxyInvocation.getReturnValue() : " + " " + method + " " + invocation.getReturnValue());
     }
 }

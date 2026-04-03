@@ -6,11 +6,13 @@ import org.jmouse.beans.BeanInstantiationType;
 import org.jmouse.beans.ObjectFactory;
 import org.jmouse.beans.definition.BeanDefinition;
 import org.jmouse.beans.definition.ObjectFactoryBeanDefinition;
+import org.jmouse.core.Priority;
 
 /**
  * A {@link BeanInstantiationStrategy} implementation for beans defined by an {@link ObjectFactory}.
  * This strategy creates bean instances using the provided {@link ObjectFactory}.
  */
+@Priority(Integer.MIN_VALUE + 3000)
 public class ObjectFactoryBeanInstantiationStrategy extends AbstractBeanInstantiationStrategy {
 
     /**
@@ -43,6 +45,6 @@ public class ObjectFactoryBeanInstantiationStrategy extends AbstractBeanInstanti
      */
     @Override
     public boolean supports(BeanDefinition definition) {
-        return definition.getInstantiationType() == BeanInstantiationType.OBJECT_FACTORY;
+        return definition.getInstantiationType().isTheSame(BeanInstantiationType.OBJECT_FACTORY);
     }
 }

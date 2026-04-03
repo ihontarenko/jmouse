@@ -15,9 +15,8 @@ public class ExtendsParser implements TagParser {
     public Node parse(TokenCursor cursor, ParserContext context) {
         cursor.ensure(TemplateToken.T_EXTENDS);
 
-        ExtendsNode    node  = new ExtendsNode();
-        Expression value = (Expression) context.getParser(LiteralParser.class)
-                .parse(cursor, context);
+        ExtendsNode node = new ExtendsNode();
+        Expression value = (Expression) context.getParser(LiteralParser.class).parse(cursor, context);
 
         node.setPath(value);
 

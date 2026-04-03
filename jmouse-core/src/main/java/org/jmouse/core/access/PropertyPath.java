@@ -1,7 +1,7 @@
 package org.jmouse.core.access;
 
-import org.jmouse.core.Exceptions;
 import org.jmouse.core.Streamable;
+import org.jmouse.core.Verify;
 import org.jmouse.util.Arrays;
 
 import java.util.HashMap;
@@ -691,7 +691,7 @@ final public class PropertyPath {
 
         private void ensureIndexBounds(int index) {
             if (index < 0 || index >= size()) {
-                Exceptions.throwIfOutOfRange(index, 0, size, "Index: %d, Size: %d".formatted(index, size));
+                Verify.inRange(index, 0, size, "size");
             }
         }
 
