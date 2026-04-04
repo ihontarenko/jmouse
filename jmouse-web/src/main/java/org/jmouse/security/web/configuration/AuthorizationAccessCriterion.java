@@ -86,7 +86,9 @@ public class AuthorizationAccessCriterion<T, C> {
 
         private final String variable;
 
-        private AuthorizedVariable(String variable) { this.variable = variable; }
+        private AuthorizedVariable(String variable) {
+            this.variable = variable;
+        }
 
         public T equalTo(Function<Authentication, String> extractor) {
             return access((authentication, context) -> {

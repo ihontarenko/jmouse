@@ -56,7 +56,7 @@ public class SecurityConfiguration {
                         .processing()
                         .formAction("/login/process")
                         .httpMethod(HttpMethod.POST)
-                        .redirect(r -> r.url("/asd"))
+                        .redirect(r -> r.url("/login/success"))
                 )
         );
 
@@ -77,11 +77,13 @@ public class SecurityConfiguration {
                 .mappingMatcher(
                         POST("/**"),
                         GET("/public/**"),
+                        GET("/web"),
                         GET("/health/**"),
                         GET("/video"),
                         GET("/laptop/**"),
                         GET("/*/assets/**")
                 ).permitAll()
+                .matcherCriteria(c -> c.servletPattern("/api")).permitAll()
                 .anyRequest().authenticated()
                 .rolePrefix("R_")
                 .roleHierarchy(RoleHierarchy.parse("R_ADMIN > R_OWNER, R_USER"));

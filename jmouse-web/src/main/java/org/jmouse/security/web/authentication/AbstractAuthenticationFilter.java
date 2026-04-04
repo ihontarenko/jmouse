@@ -44,6 +44,7 @@ public abstract class AbstractAuthenticationFilter implements SecurityFilter {
     @Override
     public void doFilterInternal(RequestContext requestContext, FilterChain chain)
             throws IOException, ServletException {
+
         HttpServletRequest  request      = requestContext.request();
         RequestRoute        requestRoute = RequestRoute.ofRequest(request);
         HttpServletResponse response     = requestContext.response();
@@ -64,25 +65,66 @@ public abstract class AbstractAuthenticationFilter implements SecurityFilter {
             Authentication after = authenticationManager.authenticate(before);
 
             if (after != null && after.isAuthenticated()) {
-                SecurityContext      securityContext = SecurityContext.ofAuthentication(after);
-                RequestContextKeeper keeper          = RequestContextKeeper.ofRequestContext(requestContext);
-
-                SecurityContextHolder.setContext(securityContext);
-
-                contextRepository.save(securityContext, keeper);
-
-                if (continueChainBeforeSuccess) {
-                    chain.doFilter(request, response);
-                    return;
-                }
-
-                successHandler.onSuccess(keeper.request(), keeper.response());
+                doHandleSuccess(requestContext, chain, after);
+                return;
             }
 
+            chain.doFilter(request, response);
+
         } catch (Exception exception) {
-            SecurityContextHolder.clearContext();
-            failureHandler.onFailure(request, response, exception);
+            doHandleFailure(requestContext, chain, exception);
         }
+    }
+
+    /**
+     * Handles successful authentication.
+     *
+     * <p>Default behavior:</p>
+     * <ul>
+     *     <li>stores authentication into {@link SecurityContextHolder}</li>
+     *     <li>saves context via {@link SecurityContextRepository}</li>
+     *     <li>either continues the chain or invokes success handler</li>
+     * </ul>
+     */
+    protected void doHandleSuccess(
+            RequestContext requestContext, FilterChain chain, Authentication authentication
+    ) throws IOException, ServletException {
+        HttpServletRequest  request  = requestContext.request();
+        HttpServletResponse response = requestContext.response();
+
+        SecurityContext      securityContext = SecurityContext.ofAuthentication(authentication);
+        RequestContextKeeper keeper          = RequestContextKeeper.ofRequestContext(requestContext);
+
+        SecurityContextHolder.setContext(securityContext);
+        contextRepository.save(securityContext, keeper);
+
+        if (continueChainBeforeSuccess) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        successHandler.onSuccess(keeper.request(), keeper.response());
+    }
+
+    /**
+     * Handles authentication failure.
+     *
+     * <p>Default behavior:</p>
+     * <ul>
+     *     <li>clears {@link SecurityContextHolder}</li>
+     *     <li>delegates to configured failure handler</li>
+     * </ul>
+     *
+     * <p>
+     * Subclasses may override this method for passive strategies,
+     * for example to ignore invalid auto-login cookies and continue the chain.
+     * </p>
+     */
+    protected void doHandleFailure(
+            RequestContext requestContext, FilterChain chain, Exception exception
+    ) throws IOException, ServletException {
+        SecurityContextHolder.clearContext();
+        failureHandler.onFailure(requestContext.request(), requestContext.response(), exception);
     }
 
     public void setContinueChainBeforeSuccess(boolean flag) {

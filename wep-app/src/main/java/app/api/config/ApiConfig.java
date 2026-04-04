@@ -2,7 +2,10 @@ package app.api.config;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
+import org.jmouse.web.http.RequestAttributesHolder;
 import org.jmouse.web.match.Route;
+import org.jmouse.web.match.RouteMatch;
+import org.jmouse.web.mvc.HandlerMapping;
 import org.jmouse.web.mvc.mapping.RequestHttpHandlerRegistration;
 
 @BeanFactories
@@ -28,8 +31,11 @@ public class ApiConfig {
 
     @Bean
     public RequestHttpHandlerRegistration userIdRegistration() {
-        return new RequestHttpHandlerRegistration(Route.GET("/user/{id}/{status:REGISTERED|BLOCKED}"), (request, response)
-                -> response.getWriter().write("user id"));
+        return new RequestHttpHandlerRegistration(Route.GET("/user/{id}/{status:REGISTERED|BLOCKED}"), (request, response) -> {
+            System.out.println(request);
+            RouteMatch match = (RouteMatch) RequestAttributesHolder.getAttribute(HandlerMapping.ROUTE_MATCH_ATTRIBUTE);
+            response.getWriter().write(STR."user id \{match.variables().get("id")}");
+        });
     }
 
 }

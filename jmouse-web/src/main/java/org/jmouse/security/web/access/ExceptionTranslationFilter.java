@@ -28,7 +28,15 @@ public class ExceptionTranslationFilter implements BeanFilter {
     }
 
     /**
-     * ⚡ Implement filter logic with type-safe {@link RequestContext}.
+     * ⚡ Executes the filter chain and translates security exceptions.
+     *
+     * <p>
+     * Delegates request further down the chain and intercepts:
+     * </p>
+     * <ul>
+     *     <li>{@link AuthenticationException} → triggers authentication flow</li>
+     *     <li>{@link AuthorizationException} → triggers access denied handling</li>
+     * </ul>
      *
      * @param requestContext wrapper around HTTP request/response
      * @param chain          filter chain to continue processing
@@ -41,15 +49,57 @@ public class ExceptionTranslationFilter implements BeanFilter {
 
         try {
             chain.doFilter(request, response);
-        } catch (AuthorizationException authorizationException) {
-            failureHandler.onFailure(request, response, authorizationException);
-        } catch (AuthenticationException authenticationException) {
-            SecurityContextHolder.clearContext();
-            if (requestCache != null) {
-                requestCache.saveRequest(request, response);
-            }
-            entryPoint.initiate(request, response, authenticationException);
+        } catch (AuthenticationException exception) {
+            handleAuthenticationFailure(request, response, exception);
+        } catch (AuthorizationException exception) {
+            handleAuthorizationFailure(request, response, exception);
         }
+    }
+
+    /**
+     * 🔐 Handles authentication failures.
+     *
+     * <p>
+     * Clears current {@link org.jmouse.security.SecurityContext}, optionally saves the request,
+     * and delegates to {@link AuthenticationEntryPoint}.
+     * </p>
+     *
+     * @param request   current HTTP request
+     * @param response  current HTTP response
+     * @param exception authentication failure cause
+     */
+    protected void handleAuthenticationFailure(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AuthenticationException exception
+    ) throws IOException {
+        SecurityContextHolder.clearContext();
+
+        if (requestCache != null) {
+            requestCache.saveRequest(request, response);
+        }
+
+        entryPoint.initiate(request, response, exception);
+    }
+
+    /**
+     * 🚫 Handles authorization failures.
+     *
+     * <p>
+     * Delegates to {@link AuthorizationFailureHandler}, typically resulting
+     * in HTTP 403 or custom access denied response.
+     * </p>
+     *
+     * @param request   current HTTP request
+     * @param response  current HTTP response
+     * @param exception authorization failure cause
+     */
+    protected void handleAuthorizationFailure(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AuthorizationException exception
+    ) throws IOException {
+        failureHandler.onFailure(request, response, exception);
     }
 
 }

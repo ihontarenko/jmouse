@@ -130,6 +130,86 @@ public class MatcherCriteria implements MappingMatcher<RequestRoute> {
     }
 
     /**
+     * 🧭 Registers a context-path matcher.
+     *
+     * <p>Compiles the given raw context path expression into a {@link PathPattern}
+     * and registers it as a matcher for incoming {@link RequestRoute}s.</p>
+     *
+     * <p>Unlike {@link #pathPattern(String)}, this matcher is evaluated against
+     * {@code requestPath().contextPath()}, making it suitable for applications
+     * deployed under a specific base path (e.g. {@code "/api"}).</p>
+     *
+     * <p>Supports standard template syntax such as:
+     * <pre>{@code
+     * /api
+     * /tenant/{tenantId}
+     * }</pre>
+     *
+     * @param path raw context path expression (supports templates)
+     * @return this criteria instance for chaining
+     * @see #contextPattern(PathPattern)
+     */
+    public MatcherCriteria contextPattern(String path) {
+        return contextPattern(PathPatternCompiler.compile(path));
+    }
+
+    /**
+     * 🧩 Registers a context-path matcher using a precompiled {@link PathPattern}.
+     *
+     * <p>This overload is useful when context path patterns are pre-parsed or cached
+     * for reuse, avoiding repeated compilation.</p>
+     *
+     * <p>The matcher evaluates {@code requestPath().contextPath()} and attaches
+     * matching facets via {@link ContextPathMatcher}.</p>
+     *
+     * @param pathPattern compiled {@link PathPattern} to match against context path
+     * @return this criteria instance for chaining
+     */
+    public MatcherCriteria contextPattern(PathPattern pathPattern) {
+        return set(new ContextPathMatcher(pathPattern));
+    }
+
+    /**
+     * 🚏 Registers a servlet-path matcher.
+     *
+     * <p>Compiles the given raw servlet path expression into a {@link PathPattern}
+     * and registers it as a matcher for incoming {@link RequestRoute}s.</p>
+     *
+     * <p>Unlike {@link #pathPattern(String)}, this matcher is evaluated against
+     * {@code requestPath().servletPath()}, making it suitable for matching the
+     * request path within the current servlet mapping.</p>
+     *
+     * <p>Supports standard template syntax such as:
+     * <pre>{@code
+     * /users/{id}
+     * /assets/**
+     * }</pre>
+     *
+     * @param path raw servlet path expression (supports wildcards or templates)
+     * @return this criteria instance for chaining
+     * @see #servletPattern(PathPattern)
+     */
+    public MatcherCriteria servletPattern(String path) {
+        return servletPattern(PathPatternCompiler.compile(path));
+    }
+
+    /**
+     * 🧩 Registers a servlet-path matcher using a precompiled {@link PathPattern}.
+     *
+     * <p>This overload is useful when servlet path patterns are pre-parsed or cached
+     * for reuse, avoiding repeated compilation.</p>
+     *
+     * <p>The matcher evaluates {@code requestPath().servletPath()} and attaches
+     * matching facets via {@link ServletPathMatcher}.</p>
+     *
+     * @param pathPattern compiled {@link PathPattern} to match against servlet path
+     * @return this criteria instance for chaining
+     */
+    public MatcherCriteria servletPattern(PathPattern pathPattern) {
+        return set(new ServletPathMatcher(pathPattern));
+    }
+
+    /**
      * ⚙️ Registers an HTTP method matcher by name.
      *
      * @param methods HTTP method names (e.g. "GET", "POST")
