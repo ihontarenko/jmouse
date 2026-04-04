@@ -42,6 +42,7 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
 
     public static final String ROUTE_REPLACER_BEAN_NAME   = "routeReplacer";
     public static final String DEFAULT_REPLACER_BEAN_NAME = "defaultReplacer";
+    public static final String PRIMARY_EXPRESSION_LANGUAGE_BEAN_NAME = "primaryExpressionLanguage";
 
     /**
      * Creates a new {@link WebBeanContext} with no parent.
@@ -89,10 +90,12 @@ public class WebApplicationFactory extends AbstractApplicationFactory<WebBeanCon
         context.registerBean(ApplicationFactory.class, this);
         context.registerBean(Conversion.class, new ContextConversion());
         context.registerBean(ResourceLoader.class, new CompositeResourceLoader());
-        context.registerBean(ExpressionLanguage.class, new ExpressionLanguage());
+        context.registerBean(PRIMARY_EXPRESSION_LANGUAGE_BEAN_NAME, new ExpressionLanguage());
         context.registerBean(DEFAULT_REPLACER_BEAN_NAME, new StandardPlaceholderReplacer());
         context.registerBean(ROUTE_REPLACER_BEAN_NAME, new StandardPlaceholderReplacer("{", "}", ":"));
         context.registerBean(EventManager.class, context.getEventManager());
+
+        context.getDefinition(PRIMARY_EXPRESSION_LANGUAGE_BEAN_NAME).setPrimary(true);
 
         return context;
     }

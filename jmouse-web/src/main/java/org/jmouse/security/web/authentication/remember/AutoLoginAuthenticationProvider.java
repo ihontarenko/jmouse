@@ -1,4 +1,4 @@
-package org.jmouse.security.web.authentication.auto;
+package org.jmouse.security.web.authentication.remember;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

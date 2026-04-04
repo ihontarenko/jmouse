@@ -1,6 +1,7 @@
 package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.jmouse.beans.BeanInitializationException;
 import org.jmouse.context.BeanConditionIfProperty;
 import org.jmouse.core.MediaType;
 import org.jmouse.web.annotation.*;
@@ -94,6 +95,7 @@ public class InternalFrameworkController {
      * @return view name of the framework error page
      */
     @ExceptionHandler({
+            BeanInitializationException.class,
             IllegalStateException.class,
             IllegalArgumentException.class,
     })
@@ -136,7 +138,6 @@ public class InternalFrameworkController {
         model.addAttribute("requestPath", requestPath.path());
         model.addAttribute("queryString", queryParameters.getQueryString().toQueryString());
         model.addAttribute("message", getExceptionMessage(exception));
-        model.addAttribute("stackTrace", getDetailedStackTrace(exception));
         model.addAttribute("timestamp", Instant.now().toString());
 
         response.setStatus(httpStatus.getCode());

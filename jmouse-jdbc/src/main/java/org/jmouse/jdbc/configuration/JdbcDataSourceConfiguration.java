@@ -1,5 +1,6 @@
 package org.jmouse.jdbc.configuration;
 
+import org.jmouse.beans.BeanScope;
 import org.jmouse.beans.annotation.AggregatedBeans;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
@@ -69,7 +70,7 @@ public class JdbcDataSourceConfiguration {
         return new SimpleDataSourceResolver(specifications, resolved, factories);
     }
 
-    @Bean
+    @Bean(scope = BeanScope.PROTOTYPE)
     public DataSourceKey dataSourceKey() {
         return DataSourceKeyHolder::current;
     }

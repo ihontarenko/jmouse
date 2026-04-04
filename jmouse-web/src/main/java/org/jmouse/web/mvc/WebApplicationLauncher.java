@@ -4,6 +4,7 @@ import org.jmouse.beans.BeanScanAnnotatedContextInitializer;
 import org.jmouse.beans.WarmupEagerBeansContextInitializer;
 import org.jmouse.context.ApplicationContextBeansScanner;
 import org.jmouse.context.ApplicationFactory;
+import org.jmouse.context.FeatureSelectorBeanContextInitializer;
 import org.jmouse.web.WebLauncher;
 import org.jmouse.web.initializer.WebApplicationInitializer;
 import org.jmouse.web.WebApplicationFactory;
@@ -68,6 +69,7 @@ public class WebApplicationLauncher implements WebLauncher<WebBeanContext> {
         context.addInitializer(new StartupApplicationContextInitializer(context.getEnvironment()));
         context.addInitializer(new WebMvcControllersInitializer());
         context.addInitializer(new WebMvcInfrastructureInitializer());
+        context.addInitializer(new FeatureSelectorBeanContextInitializer());
 
         context.addBaseClasses(applicationClasses);
         context.refresh();

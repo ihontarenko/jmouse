@@ -41,12 +41,7 @@ public class SubmitFormRequestAuthenticationFilter extends AbstractAuthenticatio
         AuthenticationProvider provider = getAuthenticationProvider();
 
         if (provider == null) {
-            provider = new SubmitFormRequestAuthenticationProvider(
-                    getUsernameParameter() == null
-                            ? JMOUSE_USER_IDENTITY_USERNAME : getUsernameParameter(),
-                    getPasswordParameter() == null
-                            ? JMOUSE_USER_IDENTITY_PASSWORD : getPasswordParameter()
-            );
+            provider = defaultAuthenticationProvider();
         }
 
         return provider.provide(request);
@@ -75,4 +70,14 @@ public class SubmitFormRequestAuthenticationFilter extends AbstractAuthenticatio
     public void setAuthenticationProvider(AuthenticationProvider authenticationProvider) {
         this.authenticationProvider = authenticationProvider;
     }
+
+    private AuthenticationProvider defaultAuthenticationProvider() {
+        return new SubmitFormRequestAuthenticationProvider(
+                getUsernameParameter() == null
+                        ? JMOUSE_USER_IDENTITY_USERNAME : getUsernameParameter(),
+                getPasswordParameter() == null
+                        ? JMOUSE_USER_IDENTITY_PASSWORD : getPasswordParameter()
+        );
+    }
+
 }

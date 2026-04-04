@@ -4,6 +4,7 @@ import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.Dependency;
 import org.jmouse.beans.annotation.Qualifier;
+import org.jmouse.core.Customizer;
 import org.jmouse.security.UserPrincipal;
 import org.jmouse.security.UserPrincipalService;
 import org.jmouse.security.access.RoleHierarchy;
@@ -58,6 +59,7 @@ public class SecurityConfiguration {
                         .httpMethod(HttpMethod.POST)
                         .redirect(r -> r.url("/login/success"))
                 )
+                .autoLogin(Customizer.noop())
         );
 
         http.exceptionHandling(e -> e

@@ -26,6 +26,11 @@ public class AuthenticationConfigurer<B extends HttpSecurityBuilder<B>>
         return this;
     }
 
+    public AuthenticationConfigurer<B> autoLogin(Customizer<AutoLoginConfigurer<HttpSecurity>> customizer) {
+        customizer.customize(attacher.attach(new AutoLoginConfigurer<>()));
+        return this;
+    }
+
     public AuthenticationConfigurer<B> httpBasic(Customizer<HttpBasicConfigurer<HttpSecurity>> customizer) {
         customizer.customize(attacher.attach(new HttpBasicConfigurer<>()));
         return this;

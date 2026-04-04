@@ -1,4 +1,4 @@
-package org.jmouse.web.mvc.context;
+package org.jmouse.context;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.conditions.BeanCondition;
