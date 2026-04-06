@@ -1,5 +1,9 @@
 package org.jmouse.core;
 
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.List;
 
@@ -25,6 +29,20 @@ public final class Sorter {
     public static final PriorityComparator PRIORITY_COMPARATOR = new PriorityComparator();
 
     /**
+     * A comparator that orders reflection elements by their kind.
+     *
+     * <p>The default order is:
+     * <ol>
+     *   <li>{@link Class}</li>
+     *   <li>{@link Method}</li>
+     *   <li>{@link Constructor}</li>
+     *   <li>{@link Field}</li>
+     *   <li>any other type</li>
+     * </ol>
+     */
+    public static final ReflectionTypeComparator REFLECTION_TYPE_COMPARATOR = new ReflectionTypeComparator();
+
+    /**
      * Sorts the given list of objects by priority, then by hash code if priorities
      * are equal.
      *
@@ -33,6 +51,21 @@ public final class Sorter {
      */
     public static <T> void sort(List<T> collection) {
         collection.sort(PRIORITY_COMPARATOR.thenComparing(Object::hashCode));
+    }
+
+    /**
+     * Sorts the given reflection elements by their runtime reflection type.
+     *
+     * <p>The sort order is defined by {@link ReflectionTypeComparator}.
+     *
+     * @param collection the reflection elements to sort
+     * @param <T>        the reflection element type
+     */
+    public static <T extends AnnotatedElement> void sortReflection(List<T> collection) {
+        collection.sort(
+                REFLECTION_TYPE_COMPARATOR
+                        .thenComparing(Object::toString)
+        );
     }
 
     /**
@@ -75,6 +108,46 @@ public final class Sorter {
             }
 
             return order;
+        }
+
+    }
+
+    /**
+     * Compares reflection objects by their kind.
+     *
+     * <p>This comparator is useful when a collection contains mixed reflection elements
+     * such as classes, methods, constructors, and fields, and they must be grouped
+     * in a deterministic order before further processing.
+     */
+    public static final class ReflectionTypeComparator implements Comparator<Object> {
+
+        @Override
+        public int compare(Object a, Object b) {
+            return Integer.compare(extractor(a), extractor(b));
+        }
+
+        /**
+         * Extracts a numeric rank for the given reflection object.
+         *
+         * <p>Lower values are sorted first.
+         *
+         * @param object the object to inspect
+         * @return the reflection-type rank
+         */
+        public static int extractor(Object object) {
+            if (object instanceof Class<?>) {
+                return 0;
+            }
+            if (object instanceof Method) {
+                return 1;
+            }
+            if (object instanceof Constructor<?>) {
+                return 2;
+            }
+            if (object instanceof Field) {
+                return 3;
+            }
+            return Integer.MAX_VALUE;
         }
 
     }

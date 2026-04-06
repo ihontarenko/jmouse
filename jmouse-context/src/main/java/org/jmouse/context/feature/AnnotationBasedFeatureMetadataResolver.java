@@ -9,12 +9,12 @@ public class AnnotationBasedFeatureMetadataResolver implements FeatureMetadataRe
 
     @Override
     public FeatureMetadata resolve(Class<? extends Annotation> annotationType) {
-        Set<Class<?>>                         imports       = new LinkedHashSet<>();
-        Set<Class<? extends FeatureSelector>> selectors     = new LinkedHashSet<>();
-        FeatureImport                         featureImport = annotationType.getAnnotation(FeatureImport.class);
+        Set<Class<?>>                         imports   = new LinkedHashSet<>();
+        Set<Class<? extends FeatureSelector>> selectors = new LinkedHashSet<>();
+        FeatureImport                         feature   = annotationType.getAnnotation(FeatureImport.class);
 
-        if (featureImport != null) {
-            imports.addAll(Arrays.asList(featureImport.value()));
+        if (feature != null) {
+            imports.addAll(Arrays.asList(feature.value()));
         }
 
         FeatureSelectorBinding binding = annotationType.getAnnotation(FeatureSelectorBinding.class);

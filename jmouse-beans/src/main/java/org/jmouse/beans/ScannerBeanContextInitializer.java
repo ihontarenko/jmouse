@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.jmouse.core.reflection.Reflections.getAnnotationValue;
@@ -66,8 +67,13 @@ abstract public class ScannerBeanContextInitializer implements BeanContextInitia
 
             LOGGER.info("\uD83D\uDD0E Running scanner: {}", scanner.getClass().getSimpleName());
 
+            Collection<AnnotatedElement> scanned  = scanner.scan(baseClasses);
+            List<AnnotatedElement>       elements = new ArrayList<>(scanned);
+
+            elements.sort(Sorter.REFLECTION_TYPE_COMPARATOR);
+
             SCAN:
-            for (AnnotatedElement element : scanner.scan(baseClasses)) {
+            for (AnnotatedElement element : elements) {
                 counter++;
 
                 try {

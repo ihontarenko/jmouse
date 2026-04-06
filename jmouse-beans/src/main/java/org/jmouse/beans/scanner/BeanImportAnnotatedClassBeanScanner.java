@@ -66,17 +66,52 @@ public class BeanImportAnnotatedClassBeanScanner implements BeanScanner<Annotate
         List<AnnotatedElement> elements = new ArrayList<>();
 
         for (Class<?> klass : ClassFinder.findAnnotatedClasses(BeanImport.class, baseClasses)) {
-            Class<?>[] imports = Reflections.getAnnotationValue(
-                    klass,
-                    BeanImport.class,
-                    BeanImport::value
-            );
-
-            if (imports != null && imports.length > 0) {
-                elements.addAll(BEAN_SCANNER.scan(imports));
-            }
+            elements.addAll(getElements(klass));
         }
 
         return elements;
     }
+
+    /**
+     * 📦 Resolves bean elements declared through a {@link BeanImport} source.
+     *
+     * <p>
+     * Reads imported classes from the given {@link BeanImport}-annotated element
+     * and delegates their processing to the nested {@link #BEAN_SCANNER}.
+     * </p>
+     *
+     * <p>
+     * This method does not scan the given element itself as a bean factory source.
+     * Instead, it treats it as an import holder that contributes bean-producing
+     * elements indirectly through its declared imports.
+     * </p>
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * @BeanImport(WebConfig.class)
+     * class RootConfig {}
+     *
+     * // Result:
+     * // - bean factory elements discovered from WebConfig
+     * }</pre>
+     *
+     * @param element source element annotated with {@link BeanImport}
+     * @return imported bean-producing elements, or an empty collection if no imports are declared
+     */
+    public Collection<AnnotatedElement> getElements(AnnotatedElement element) {
+        List<AnnotatedElement> elements = new ArrayList<>();
+
+        Class<?>[] imports = Reflections.getAnnotationValue(
+                element,
+                BeanImport.class,
+                BeanImport::value
+        );
+
+        if (imports != null && imports.length > 0) {
+            elements.addAll(BEAN_SCANNER.scan(imports));
+        }
+
+        return elements;
+    }
+
 }

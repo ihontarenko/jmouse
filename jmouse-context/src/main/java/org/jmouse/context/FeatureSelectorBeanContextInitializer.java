@@ -2,25 +2,36 @@ package org.jmouse.context;
 
 import org.jmouse.beans.BeanContext;
 import org.jmouse.beans.BeanContextInitializer;
-import org.jmouse.context.feature.*;
-
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import org.jmouse.context.feature.AnnotationBasedFeatureMetadataResolver;
+import org.jmouse.context.feature.AnnotationFeatureSelectionResolver;
+import org.jmouse.context.feature.FeatureSelectionResolver;
+import org.jmouse.context.feature.FeatureSelectorContext;
+import org.jmouse.context.feature.ReflectionFeatureSelectorFactory;
+import org.jmouse.context.feature.scanner.ExplicitFeatureClassBeanScanner;
 
 public class FeatureSelectorBeanContextInitializer implements BeanContextInitializer {
 
     private final FeatureSelectionResolver resolver;
+    private final FeatureSelectionImporter importer;
 
     public FeatureSelectorBeanContextInitializer() {
-        this(new AnnotationFeatureSelectionResolver(
-                new AnnotationBasedFeatureMetadataResolver(),
-                new ReflectionFeatureSelectorFactory()
-        ));
+        this(
+                new AnnotationFeatureSelectionResolver(
+                        new AnnotationBasedFeatureMetadataResolver(),
+                        new ReflectionFeatureSelectorFactory()
+                ),
+                new FeatureSelectionImporter.Default(
+                        new ExplicitFeatureClassBeanScanner()
+                )
+        );
     }
 
-    public FeatureSelectorBeanContextInitializer(FeatureSelectionResolver resolver) {
+    public FeatureSelectorBeanContextInitializer(
+            FeatureSelectionResolver resolver,
+            FeatureSelectionImporter importer
+    ) {
         this.resolver = resolver;
+        this.importer = importer;
     }
 
     @Override
@@ -34,22 +45,10 @@ public class FeatureSelectorBeanContextInitializer implements BeanContextInitial
         FeatureSelectorContext selectorContext = new FeatureSelectorContext.Default(context, baseClasses);
         Class<?>[]             selectedClasses = resolver.resolve(selectorContext);
 
-        if (selectedClasses.length == 0) {
+        if (selectedClasses == null || selectedClasses.length == 0) {
             return;
         }
 
-        Set<Class<?>> additions = new LinkedHashSet<>();
-        Set<Class<?>> existing  = new LinkedHashSet<>(Arrays.asList(baseClasses));
-
-        for (Class<?> selectedClass : selectedClasses) {
-            if (selectedClass != null && !existing.contains(selectedClass)) {
-                additions.add(selectedClass);
-            }
-        }
-
-        if (!additions.isEmpty()) {
-            context.addBaseClasses(additions.toArray(Class<?>[]::new));
-        }
+        importer.importClasses(context, selectedClasses);
     }
-
 }

@@ -43,12 +43,51 @@ public class BeanFactoriesAnnotatedClassBeanScanner implements BeanScanner<Annot
 
         // Find classes annotated with @Factories
         for (Class<?> klass : ClassFinder.findAnnotatedClasses(BeanFactories.class, baseClasses)) {
-            // Add factory @Factories annotated class
-            elements.add(klass);
-            // Find methods annotated with @Bean in each @Configuration class
-            elements.addAll(new MethodFinder().filter(klass).annotated(Bean.class).find());
+            elements.addAll(getElements(klass));
         }
 
         return elements;
     }
+
+    /**
+     * 📦 Extracts all bean-related elements from the given factory source.
+     *
+     * <p>This method collects:</p>
+     * <ul>
+     *     <li>the factory class itself (annotated with {@link BeanFactories})</li>
+     *     <li>all methods annotated with {@link Bean} declared within that class</li>
+     * </ul>
+     *
+     * <p>Effectively, it represents a single "bean factory unit" — combining
+     * the configuration class and its factory methods into a unified set
+     * of {@link AnnotatedElement}s for further processing.</p>
+     *
+     * <p>Example:</p>
+     * <pre>{@code
+     * @BeanFactories
+     * class AppConfig {
+     *
+     *     @Bean
+     *     Service service() { ... }
+     * }
+     *
+     * // Result:
+     * // - AppConfig.class
+     * // - Method: service()
+     * }</pre>
+     *
+     * @param element the factory class (expected to be annotated with {@link BeanFactories})
+     * @return collection containing the class and its {@link Bean}-annotated methods
+     */
+    public Collection<AnnotatedElement> getElements(AnnotatedElement element) {
+        List<AnnotatedElement> elements = new ArrayList<>();
+
+        // Add factory @Factories annotated class
+        elements.add(element);
+        // Find methods annotated with @Bean in each @Configuration class
+        elements.addAll(new MethodFinder().filter((Class<?>) element).annotated(Bean.class).find());
+
+        return elements;
+    }
+
 }
