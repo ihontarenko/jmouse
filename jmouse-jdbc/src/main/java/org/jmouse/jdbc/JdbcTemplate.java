@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Default implementation of {@link SimpleOperations} built on top of {@link JdbcExecutor}.
+ * Default implementation of {@link JdbcOperations} built on top of {@link JdbcExecutor}.
  * <p>
- * {@code SimpleTemplate} represents the <b>high-level JDBC template layer</b> in jMouse.
+ * {@code JdbcTemplate} represents the <b>high-level JDBC template layer</b> in jMouse.
  * It translates user-oriented operations (query / update / call) into
  * executor-level invocations with the appropriate callbacks and extractors.
  *
@@ -31,7 +31,7 @@ import java.util.Optional;
  *
  * <h3>Usage example</h3>
  * <pre>{@code
- * SimpleOperations jdbc = new SimpleTemplate(executor);
+ * JdbcOperations jdbc = new JdbcTemplate(executor);
  *
  * Optional<User> user = jdbc.querySingle(
  *     "select * from users where id = ?",
@@ -42,7 +42,7 @@ import java.util.Optional;
  *
  * @author jMouse
  */
-public class SimpleTemplate implements SimpleOperations {
+public class JdbcTemplate implements JdbcOperations {
 
     /**
      * Backing executor responsible for actual JDBC interaction.
@@ -50,11 +50,11 @@ public class SimpleTemplate implements SimpleOperations {
     private final JdbcExecutor executor;
 
     /**
-     * Creates a new {@code SimpleTemplate} delegating to the given {@link JdbcExecutor}.
+     * Creates a new {@code JdbcTemplate} delegating to the given {@link JdbcExecutor}.
      *
      * @param executor JDBC executor to use
      */
-    public SimpleTemplate(JdbcExecutor executor) {
+    public JdbcTemplate(JdbcExecutor executor) {
         this.executor = executor;
     }
 

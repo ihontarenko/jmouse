@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-public final class NamedTemplate extends SimpleTemplate implements NamedOperations {
+public final class NamedTemplate extends JdbcTemplate implements NamedOperations {
 
     private final ConcurrentHashMap<String, SQLCompiled> cache = new ConcurrentHashMap<>();
     private final ExpressionLanguage expressionLanguage;

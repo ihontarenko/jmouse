@@ -1,5 +1,7 @@
 package org.jmouse.context.feature;
 
+import org.jmouse.core.Visitor;
+
 import java.lang.annotation.Annotation;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -59,12 +61,12 @@ public class AnnotationFeatureSelectionResolver implements FeatureSelectionResol
      */
     @Override
     public Class<?>[] resolve(FeatureSelectorContext context) {
-        Set<Class<?>>                    selected = new LinkedHashSet<>();
-        Set<Class<? extends Annotation>> visited  = new LinkedHashSet<>();
+        Set<Class<?>>                        selected = new LinkedHashSet<>();
+        Visitor<Class<? extends Annotation>> visitor  = new Visitor.Default<>();
 
         for (Class<?> sourceClass : context.sourceClasses()) {
             if (sourceClass != null) {
-                resolveElement(sourceClass, context, selected, visited);
+                resolveElement(sourceClass, context, selected, visitor);
             }
         }
 
@@ -93,20 +95,22 @@ public class AnnotationFeatureSelectionResolver implements FeatureSelectionResol
      * @param element      class whose annotations should be processed
      * @param rootContext  root feature selector context
      * @param selected     accumulator for resolved feature classes
-     * @param visited      already processed annotation types
+     * @param visitor      already processed annotation types
      */
     protected void resolveElement(
             Class<?> element,
             FeatureSelectorContext rootContext,
             Set<Class<?>> selected,
-            Set<Class<? extends Annotation>> visited
+            Visitor<Class<? extends Annotation>> visitor
     ) {
         for (Annotation annotation : element.getAnnotations()) {
             Class<? extends Annotation> annotationType = annotation.annotationType();
 
-            if (!visited.add(annotationType)) {
+            if (visitor.familiar(annotationType)) {
                 continue;
             }
+
+            visitor.visit(annotationType);
 
             FeatureMetadata metadata = metadataResolver.resolve(annotationType);
 
@@ -131,7 +135,7 @@ public class AnnotationFeatureSelectionResolver implements FeatureSelectionResol
                 }
             }
 
-            resolveElement(annotationType, rootContext, selected, visited);
+            resolveElement(annotationType, rootContext, selected, visitor);
         }
     }
 

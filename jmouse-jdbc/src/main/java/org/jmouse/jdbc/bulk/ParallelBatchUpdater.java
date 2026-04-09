@@ -2,7 +2,7 @@ package org.jmouse.jdbc.bulk;
 
 import org.jmouse.core.Chunker;
 import org.jmouse.core.Verify;
-import org.jmouse.jdbc.SimpleTemplate;
+import org.jmouse.jdbc.JdbcTemplate;
 import org.jmouse.jdbc.statement.BinderFactory;
 import org.jmouse.jdbc.statement.StatementBinder;
 import org.jmouse.transaction.TransactionCallback;
@@ -16,13 +16,13 @@ import java.util.stream.IntStream;
 
 public final class ParallelBatchUpdater<T> {
 
-    private final SimpleTemplate        template;
-    private final TransactionCallback   transactionCallback;
+    private final JdbcTemplate        template;
+    private final TransactionCallback transactionCallback;
     private final ExecutorService       executor;
     private final TransactionDefinition definition;
 
     public ParallelBatchUpdater(
-            SimpleTemplate template,
+            JdbcTemplate template,
             ExecutorService executor,
             TransactionCallback transactionCallback,
             TransactionDefinition definition

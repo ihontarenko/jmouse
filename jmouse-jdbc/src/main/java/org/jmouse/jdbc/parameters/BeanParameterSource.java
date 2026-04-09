@@ -7,13 +7,13 @@ import org.jmouse.core.access.descriptor.structured.ObjectDescriptor;
 public final class BeanParameterSource implements ParameterSource {
 
     private final Object                   instance;
-    private final ObjectDescriptor<Object> bean;
+    private final ObjectDescriptor<Object> descriptor;
 
     @SuppressWarnings("unchecked")
     public BeanParameterSource(Object instance) {
         this.instance = Verify.nonNull(instance, "bean-instance");
         Class<?> beanType = instance.getClass();
-        this.bean = Describer.forObjectDescriptor((Class<Object>) beanType);
+        this.descriptor = Describer.forObjectDescriptor((Class<Object>) beanType);
     }
 
     @Override
@@ -23,7 +23,7 @@ public final class BeanParameterSource implements ParameterSource {
 
     @Override
     public boolean hasValue(String name) {
-        return bean.hasProperty(name);
+        return descriptor.hasProperty(name);
     }
 
     @Override
@@ -33,6 +33,6 @@ public final class BeanParameterSource implements ParameterSource {
 
     @Override
     public Object getValue(String name) {
-        return bean.obtainValue(name, instance);
+        return descriptor.obtainValue(name, instance);
     }
 }

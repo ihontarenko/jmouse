@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.beans.annotation.ProxiedBean;
 import org.jmouse.core.throttle.RateLimit;
-import org.jmouse.jdbc.SimpleOperations;
+import org.jmouse.jdbc.JdbcOperations;
 import org.jmouse.web.binding.BindingResult;
 import org.jmouse.web.binding.WebModel;
 import org.jmouse.web.context.WebBeanContext;
@@ -74,7 +74,7 @@ public class IndexController {
 
     @GetMapping(requestPath = "/public/favicon", produces = {"text/plain", "application/json"})
     public String favicon(WebBeanContext context) {
-        SimpleOperations simple = context.getBean(SimpleOperations.class);
+        JdbcOperations simple = context.getBean(JdbcOperations.class);
         return resourceUrlResolver.lookupResourceUrl("/internal/assets/icon/favicon.ico");
     }
 

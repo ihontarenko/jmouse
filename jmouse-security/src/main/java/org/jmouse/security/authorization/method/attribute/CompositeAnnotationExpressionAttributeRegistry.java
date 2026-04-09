@@ -70,7 +70,7 @@ public class CompositeAnnotationExpressionAttributeRegistry
     private ExpressionAttribute<?> tryResolveOn(AnnotatedElement element, Method method, Class<?> targetClass) {
         for (AttributeResolver<? extends Annotation> resolver : resolvers) {
             Class<Annotation>                               type       = (Class<Annotation>) resolver.annotationType();
-            Function<AnnotatedElement, Map<String, Object>> values = Annotations.attributes(type);
+            Function<AnnotatedElement, Map<String, Object>> values     = Annotations.attributes(type);
             Function<AnnotatedElement, Annotation>          lookup     = Annotations.lookup(type);
             Annotation                                      annotation = lookup.apply(element);
 

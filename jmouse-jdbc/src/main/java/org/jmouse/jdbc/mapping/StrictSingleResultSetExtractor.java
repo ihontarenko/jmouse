@@ -35,7 +35,7 @@ import org.jmouse.jdbc.exception.NonUniqueResultException;
  *
  * <p>
  * This extractor is commonly used by higher-level APIs such as
- * {@code SimpleOperations.querySingle(...)} where strict cardinality
+ * {@code JdbcOperations.querySingle(...)} where strict cardinality
  * guarantees are required.
  *
  * @param <T> mapped element type

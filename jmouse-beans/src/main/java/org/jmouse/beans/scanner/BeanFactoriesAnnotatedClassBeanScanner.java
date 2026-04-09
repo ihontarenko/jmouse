@@ -43,7 +43,7 @@ public class BeanFactoriesAnnotatedClassBeanScanner implements BeanScanner<Annot
 
         // Find classes annotated with @Factories
         for (Class<?> klass : ClassFinder.findAnnotatedClasses(BeanFactories.class, baseClasses)) {
-            elements.addAll(getElements(klass));
+            elements.addAll(handleAnnotatedElement(klass));
         }
 
         return elements;
@@ -79,7 +79,8 @@ public class BeanFactoriesAnnotatedClassBeanScanner implements BeanScanner<Annot
      * @param element the factory class (expected to be annotated with {@link BeanFactories})
      * @return collection containing the class and its {@link Bean}-annotated methods
      */
-    public Collection<AnnotatedElement> getElements(AnnotatedElement element) {
+    @Override
+    public Collection<AnnotatedElement> handleAnnotatedElement(AnnotatedElement element) {
         List<AnnotatedElement> elements = new ArrayList<>();
 
         // Add factory @Factories annotated class

@@ -2,6 +2,7 @@ package org.jmouse.jdbc.configuration;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
+import org.jmouse.beans.annotation.Eager;
 import org.jmouse.beans.annotation.PrimaryBean;
 import org.jmouse.jdbc.*;
 import org.jmouse.jdbc.parameters.MissingParameterPolicy;
@@ -19,10 +20,11 @@ public class JdbcTemplateConfiguration {
         return new SQLExpressionLanguage();
     }
 
+    @Eager
     @Bean
     @PrimaryBean
-    public SimpleOperations simpleTemplate(JdbcExecutor executor) {
-        return new SimpleTemplate(executor);
+    public JdbcOperations simpleTemplate(JdbcExecutor executor) {
+        return new JdbcTemplate(executor);
     }
 
     @Bean

@@ -45,6 +45,7 @@ public final class JoinTransactionValidator {
         }
 
         int timeoutSeconds = requested.getTimeoutSeconds();
+
         if (timeoutSeconds > 0) {
             if (!effective.hasTimeout()) {
                 handlePolicy(timeoutPolicy,

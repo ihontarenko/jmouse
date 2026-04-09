@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public interface NamedOperations extends SimpleOperations {
+public interface NamedOperations extends JdbcOperations {
 
     default <T> Optional<T> querySingle(String sql, Map<String, ?> parameters, RowMapper<T> mapper) throws SQLException {
         return querySingle(sql, new MapParameterSource(parameters), mapper);

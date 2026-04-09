@@ -1,7 +1,6 @@
 package org.jmouse.jdbc.configuration;
 
 import org.jmouse.beans.BeanScope;
-import org.jmouse.beans.annotation.AggregatedBeans;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.core.Priority;
@@ -31,7 +30,7 @@ public class JdbcExecutorConfiguration {
 
     @Bean(scope = BeanScope.PROTOTYPE)
     public Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> jdbcChainBuilder(
-            @AggregatedBeans List<JdbcChainContributor> contributors
+            List<JdbcChainContributor> contributors
     ) {
         Chain.Builder<JdbcExecutionContext, JdbcCall<?>, Object> builder = Chain.builder();
         List<JdbcChainContributor>                               sorted  = new ArrayList<>(contributors);
@@ -49,7 +48,6 @@ public class JdbcExecutorConfiguration {
     public JdbcChainContributor jdbcCallExecutorLinkContributor() {
         return new JdbcCallExecutorLinkContributor();
     }
-
 
     @Bean
     public SQLExceptionTranslator sqlExceptionTranslator() {

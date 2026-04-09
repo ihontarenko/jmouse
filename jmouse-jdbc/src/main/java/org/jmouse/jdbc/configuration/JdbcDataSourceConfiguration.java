@@ -1,7 +1,6 @@
 package org.jmouse.jdbc.configuration;
 
 import org.jmouse.beans.BeanScope;
-import org.jmouse.beans.annotation.AggregatedBeans;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.core.Sorter;
@@ -10,6 +9,7 @@ import org.jmouse.jdbc.connection.datasource.*;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @BeanFactories
 public class JdbcDataSourceConfiguration {
@@ -21,7 +21,7 @@ public class JdbcDataSourceConfiguration {
 
     @Bean
     public DataSourceSpecificationRegistry dataSourceSpecificationRegistry(
-            @AggregatedBeans List<DataSourceContributor> contributors
+            Set<DataSourceContributor> contributors
     ) {
         DataSourceSpecificationRegistry registry = new DataSourceSpecificationRegistry();
         List<DataSourceContributor>     sorted   = new ArrayList<>(contributors);
@@ -42,7 +42,7 @@ public class JdbcDataSourceConfiguration {
 
     @Bean
     public DataSourceFactoryRegistry dataSourceFactoryRegistry(
-            @AggregatedBeans List<DataSourceFactory> factories
+            List<DataSourceFactory> factories
     ) {
         DataSourceFactoryRegistry registry = new DataSourceFactoryRegistry();
         List<DataSourceFactory>   sorted   = new ArrayList<>(factories);

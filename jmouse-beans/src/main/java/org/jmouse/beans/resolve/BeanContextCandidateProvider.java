@@ -1,6 +1,7 @@
 package org.jmouse.beans.resolve;
 
 import org.jmouse.beans.BeanContext;
+import org.jmouse.beans.definition.BeanDefinition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +58,9 @@ public class BeanContextCandidateProvider implements BeanCandidateProvider {
      */
     @Override
     public BeanCandidate getCandidate(String name) {
-        if (!beanContext.containsBean(name)) {
+        BeanDefinition definition = beanContext.getDefinition(name);
+
+        if (definition == null) {
             return null;
         }
 

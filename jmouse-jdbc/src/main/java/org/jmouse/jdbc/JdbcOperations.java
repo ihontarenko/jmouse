@@ -11,7 +11,7 @@ import java.util.Optional;
 /**
  * High-level JDBC operations facade.
  * <p>
- * {@code SimpleOperations} defines a compact, user-facing API for the most common
+ * {@code JdbcOperations} defines a compact, user-facing API for the most common
  * JDBC use cases, while delegating the actual execution mechanics to a lower-level
  * {@link JdbcExecutor}.
  *
@@ -55,7 +55,7 @@ import java.util.Optional;
  *
  * @author jMouse
  */
-public interface SimpleOperations {
+public interface JdbcOperations {
 
     /**
      * Executes a query expected to return <b>at most one</b> row.

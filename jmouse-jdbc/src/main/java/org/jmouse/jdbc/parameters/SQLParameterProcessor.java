@@ -20,7 +20,7 @@ public final class SQLParameterProcessor {
 
     public SQLParsed parse(String name, String sql) {
         StringSource source = SQLParameterTokenizer.source(name, sql);
-        List<Token> tokens = tokenizer.tokenize(source);
+        List<Token>  tokens = tokenizer.tokenize(source);
         return new SQLParsed(name, source, List.copyOf(tokens));
     }
 

@@ -84,6 +84,8 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
      * @param element    the annotated element (class or method) that may hold the {@link Bean} annotation
      */
     protected void updateBeanDefinition(BeanDefinition definition, AnnotatedElement element) {
+        definition.setProxied(element.isAnnotationPresent(ProxiedBean.class));
+
         if (element.isAnnotationPresent(Bean.class)) {
             definition.setProxied(Reflections.getAnnotationValue(element, Bean.class, Bean::proxied));
             definition.setScope(Reflections.getAnnotationValue(element, Bean.class, Bean::scope));
@@ -91,10 +93,6 @@ public abstract class AbstractBeanDefinitionCreationStrategy<T extends Annotated
 
         definition.setPrimary(element.isAnnotationPresent(PrimaryBean.class));
         definition.setEager(element.isAnnotationPresent(Eager.class));
-
-        if (!definition.isProxied()) {
-            definition.setProxied(element.isAnnotationPresent(ProxiedBean.class));
-        }
     }
 
     /**

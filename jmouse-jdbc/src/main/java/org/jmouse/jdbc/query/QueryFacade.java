@@ -1,6 +1,6 @@
 package org.jmouse.jdbc.query;
 
-import org.jmouse.jdbc.SimpleOperations;
+import org.jmouse.jdbc.JdbcOperations;
 import org.jmouse.jdbc.database.DatabasePlatform;
 import org.jmouse.jdbc.database.PaginationStrategy;
 import org.jmouse.jdbc.database.PaginationStrategy.PaginationBind;
@@ -15,15 +15,15 @@ import java.sql.SQLException;
 
 public final class QueryFacade {
 
-    private final SimpleOperations simple;
+    private final JdbcOperations   simple;
     private final DatabasePlatform platform;
 
-    public QueryFacade(SimpleOperations simple, DatabasePlatform platform) {
+    public QueryFacade(JdbcOperations simple, DatabasePlatform platform) {
         this.simple = simple;
         this.platform = platform;
     }
 
-    public static QueryFacade of(SimpleOperations simple, DatabasePlatform platform) {
+    public static QueryFacade of(JdbcOperations simple, DatabasePlatform platform) {
         return new QueryFacade(simple, platform);
     }
 

@@ -7,10 +7,6 @@ import org.jmouse.core.events.EventPublishPolicy;
 import org.jmouse.jdbc.connection.datasource.DataSourceContributor;
 import org.jmouse.jdbc.connection.datasource.DataSourceKeyHolder;
 import org.jmouse.jdbc.connection.datasource.DataSourceSpecification;
-import org.jmouse.jdbc.connection.datasource.DataSourceSpecificationRegistry;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 final public class Demo {
 
@@ -40,7 +36,7 @@ final public class Demo {
                 "mysql", null, "aaa:aaa", "username", "password", "catalog", "mysql", null, null
         )));
 
-        SimpleOperations simple = context.getBean(SimpleOperations.class);
+        JdbcOperations simple = context.getBean(JdbcOperations.class);
 
         System.out.println(context);
     }

@@ -66,7 +66,7 @@ public class BeanImportAnnotatedClassBeanScanner implements BeanScanner<Annotate
         List<AnnotatedElement> elements = new ArrayList<>();
 
         for (Class<?> klass : ClassFinder.findAnnotatedClasses(BeanImport.class, baseClasses)) {
-            elements.addAll(getElements(klass));
+            elements.addAll(handleAnnotatedElement(klass));
         }
 
         return elements;
@@ -98,7 +98,8 @@ public class BeanImportAnnotatedClassBeanScanner implements BeanScanner<Annotate
      * @param element source element annotated with {@link BeanImport}
      * @return imported bean-producing elements, or an empty collection if no imports are declared
      */
-    public Collection<AnnotatedElement> getElements(AnnotatedElement element) {
+    @Override
+    public Collection<AnnotatedElement> handleAnnotatedElement(AnnotatedElement element) {
         List<AnnotatedElement> elements = new ArrayList<>();
 
         Class<?>[] imports = Reflections.getAnnotationValue(

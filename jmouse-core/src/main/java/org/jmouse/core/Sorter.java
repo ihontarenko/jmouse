@@ -135,19 +135,13 @@ public final class Sorter {
          * @return the reflection-type rank
          */
         public static int extractor(Object object) {
-            if (object instanceof Class<?>) {
-                return 0;
-            }
-            if (object instanceof Method) {
-                return 1;
-            }
-            if (object instanceof Constructor<?>) {
-                return 2;
-            }
-            if (object instanceof Field) {
-                return 3;
-            }
-            return Integer.MAX_VALUE;
+            return switch (object) {
+                case Class<?> ignored       -> 0;
+                case Method ignored         -> 1;
+                case Constructor<?> ignored -> 2;
+                case Field ignored          -> 3;
+                default                     -> Integer.MAX_VALUE;
+            };
         }
 
     }
