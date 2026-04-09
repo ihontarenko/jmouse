@@ -46,10 +46,10 @@ public class DefaultSqlOperationTextResolver implements SqlOperationTextResolver
         }
 
         Class<?> operationType = operation.getClass();
-        Sql      sql           = operationType.getAnnotation(Sql.class);
+        Sql      inline        = operationType.getAnnotation(Sql.class);
 
-        if (sql != null) {
-            return notBlank(sql.value(), "sql");
+        if (inline != null) {
+            return notBlank(inline.value(), "sql");
         }
 
         if (operation instanceof ResourceSqlOperation resourceOperation) {

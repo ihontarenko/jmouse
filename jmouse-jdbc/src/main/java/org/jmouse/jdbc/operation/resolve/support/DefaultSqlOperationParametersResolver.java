@@ -1,7 +1,8 @@
-package org.jmouse.jdbc.operation.resolve;
+package org.jmouse.jdbc.operation.resolve.support;
 
 import org.jmouse.core.Verify;
 import org.jmouse.jdbc.operation.SqlOperation;
+import org.jmouse.jdbc.operation.resolve.SqlOperationParametersResolver;
 import org.jmouse.jdbc.parameters.BeanParameterSource;
 import org.jmouse.jdbc.parameters.EmptyParameterSource;
 import org.jmouse.jdbc.parameters.ParameterSource;
@@ -14,7 +15,7 @@ import org.jmouse.jdbc.parameters.ParameterSource;
  *
  * @author Ivan Hontarenko
  */
-public class DefaultSqlOperationParameterSourceResolver implements SqlOperationParametersResolver {
+public class DefaultSqlOperationParametersResolver implements SqlOperationParametersResolver {
 
     @Override
     public ParameterSource resolveParameters(SqlOperation operation) {
@@ -34,7 +35,7 @@ public class DefaultSqlOperationParameterSourceResolver implements SqlOperationP
             return operationType.getRecordComponents().length == 0;
         }
 
-        return false;
+        return operationType.getDeclaredFields().length == 0;
     }
 
 }

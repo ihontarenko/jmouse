@@ -1,17 +1,10 @@
 package org.jmouse.jdbc.operation.template;
 
 import org.jmouse.core.Verify;
-import org.jmouse.core.reflection.Reflections;
 import org.jmouse.jdbc.operation.SqlOperation;
 
 import java.lang.reflect.Constructor;
 
-/**
- * Reflection-based {@link SqlOperationInstantiator} that uses a no-argument
- * constructor.
- *
- * @author Ivan Hontarenko
- */
 public class ReflectionSqlOperationInstantiator implements SqlOperationInstantiator {
 
     @Override
@@ -19,13 +12,19 @@ public class ReflectionSqlOperationInstantiator implements SqlOperationInstantia
         Verify.nonNull(operationType, "operationType");
 
         try {
-            @SuppressWarnings("unchecked")
-            Constructor<O> constructor = (Constructor<O>) Reflections.findFirstConstructor(operationType);
+            Constructor<O> constructor = operationType.getDeclaredConstructor();
             constructor.setAccessible(true);
-            return Reflections.instantiate(constructor);
+            return constructor.newInstance();
+        } catch (NoSuchMethodException exception) {
+            throw new IllegalStateException(
+                    "SQL operation must declare a no-argument constructor for class-based execution: "
+                            + operationType.getName(),
+                    exception
+            );
         } catch (Exception exception) {
             throw new IllegalStateException(
-                    "Failed to instantiate SQL operation: " + operationType.getName(), exception
+                    "Failed to instantiate SQL operation: " + operationType.getName(),
+                    exception
             );
         }
     }

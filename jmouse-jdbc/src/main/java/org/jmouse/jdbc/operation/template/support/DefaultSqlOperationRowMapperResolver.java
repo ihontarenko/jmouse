@@ -1,25 +1,43 @@
 package org.jmouse.jdbc.operation.template.support;
 
+import org.jmouse.core.Verify;
 import org.jmouse.jdbc.mapping.BeanRowMapper;
 import org.jmouse.jdbc.mapping.RowMapper;
+import org.jmouse.jdbc.mapping.RowMappers;
 import org.jmouse.jdbc.operation.template.SqlOperationRowMapperResolver;
 
-import static org.jmouse.core.Verify.nonNull;
-
 /**
- * Default {@link SqlOperationRowMapperResolver} implementation.
+ * Default {@link org.jmouse.jdbc.operation.template.SqlOperationRowMapperResolver} implementation.
  *
- * <p>This implementation uses bean mapping as the default strategy.
- * Scalar-specialized mapping may be added later or integrated through a
- * pluggable resolver chain.</p>
+ * <p>Scalar element types are mapped using predefined single-column mappers.
+ * All other types are mapped using {@link BeanRowMapper}.</p>
  *
  * @author Ivan Hontarenko
  */
 public class DefaultSqlOperationRowMapperResolver implements SqlOperationRowMapperResolver {
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> RowMapper<T> resolveRowMapper(Class<T> elementType) {
-        return BeanRowMapper.of(nonNull(elementType, "elementType"));
+        Verify.nonNull(elementType, "elementType");
+
+        if (elementType == String.class) {
+            return (RowMapper<T>) RowMappers.stringColumn(1);
+        }
+
+        if (elementType == Long.class) {
+            return (RowMapper<T>) RowMappers.longColumn(1);
+        }
+
+        if (elementType == Integer.class) {
+            return (RowMapper<T>) RowMappers.integerColumn(1);
+        }
+
+        if (elementType == Boolean.class) {
+            return (RowMapper<T>) RowMappers.booleanColumn(1);
+        }
+
+        return BeanRowMapper.of(elementType);
     }
 
 }

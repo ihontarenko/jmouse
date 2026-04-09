@@ -14,12 +14,14 @@ import java.util.Optional;
 
 /**
  * Default {@link SqlOperationResolver} implementation.
+ *
+ * @author Ivan Hontarenko
  */
 public class DefaultSqlOperationResolver implements SqlOperationResolver {
 
     private final SqlOperationNameResolver       nameResolver;
-    private final SqlOperationParametersResolver parametersResolver;
     private final SqlOperationTextResolver       textResolver;
+    private final SqlOperationParametersResolver parametersResolver;
 
     public DefaultSqlOperationResolver(
             SqlOperationNameResolver nameResolver,
@@ -35,16 +37,16 @@ public class DefaultSqlOperationResolver implements SqlOperationResolver {
     public ResolvedSqlOperation resolve(SqlOperation operation) {
         Verify.nonNull(operation, "operation");
 
-        if (operation instanceof ListQuery<?> listQuery) {
-            return resolveUncheckedList(listQuery);
+        if (operation instanceof ListQuery<?> query) {
+            return resolveListUnchecked(query);
         }
 
-        if (operation instanceof OptionalQuery<?> optionalQuery) {
-            return resolveUncheckedOptional(optionalQuery);
+        if (operation instanceof OptionalQuery<?> query) {
+            return resolveOptionalUnchecked(query);
         }
 
-        if (operation instanceof SingleQuery<?> singleQuery) {
-            return resolveUncheckedSingle(singleQuery);
+        if (operation instanceof SingleQuery<?> query) {
+            return resolveSingleUnchecked(query);
         }
 
         if (operation instanceof SqlUpdate update) {
@@ -56,6 +58,8 @@ public class DefaultSqlOperationResolver implements SqlOperationResolver {
 
     @Override
     public <T, Q extends ListQuery<T>> ResolvedSqlQuery<T, List<T>> resolve(Q operation) {
+        Verify.nonNull(operation, "operation");
+
         return new DefaultResolvedSqlQuery<>(
                 operation,
                 resolveName(operation),
@@ -68,6 +72,8 @@ public class DefaultSqlOperationResolver implements SqlOperationResolver {
 
     @Override
     public <T, Q extends OptionalQuery<T>> ResolvedSqlQuery<T, Optional<T>> resolve(Q operation) {
+        Verify.nonNull(operation, "operation");
+
         return new DefaultResolvedSqlQuery<>(
                 operation,
                 resolveName(operation),
@@ -80,6 +86,8 @@ public class DefaultSqlOperationResolver implements SqlOperationResolver {
 
     @Override
     public <T, Q extends SingleQuery<T>> ResolvedSqlQuery<T, T> resolve(Q operation) {
+        Verify.nonNull(operation, "operation");
+
         return new DefaultResolvedSqlQuery<>(
                 operation,
                 resolveName(operation),
@@ -92,6 +100,8 @@ public class DefaultSqlOperationResolver implements SqlOperationResolver {
 
     @Override
     public ResolvedSqlUpdate resolve(SqlUpdate operation) {
+        Verify.nonNull(operation, "operation");
+
         return new DefaultResolvedSqlUpdate(
                 operation,
                 resolveName(operation),
@@ -101,17 +111,17 @@ public class DefaultSqlOperationResolver implements SqlOperationResolver {
     }
 
     @SuppressWarnings("unchecked")
-    protected ResolvedSqlOperation resolveUncheckedList(ListQuery<?> operation) {
+    protected ResolvedSqlOperation resolveListUnchecked(ListQuery<?> operation) {
         return resolve((ListQuery<Object>) operation);
     }
 
     @SuppressWarnings("unchecked")
-    protected ResolvedSqlOperation resolveUncheckedOptional(OptionalQuery<?> operation) {
+    protected ResolvedSqlOperation resolveOptionalUnchecked(OptionalQuery<?> operation) {
         return resolve((OptionalQuery<Object>) operation);
     }
 
     @SuppressWarnings("unchecked")
-    protected ResolvedSqlOperation resolveUncheckedSingle(SingleQuery<?> operation) {
+    protected ResolvedSqlOperation resolveSingleUnchecked(SingleQuery<?> operation) {
         return resolve((SingleQuery<Object>) operation);
     }
 

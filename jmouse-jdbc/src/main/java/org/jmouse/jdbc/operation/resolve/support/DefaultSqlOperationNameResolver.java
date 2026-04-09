@@ -6,19 +6,6 @@ import org.jmouse.jdbc.operation.SqlOperation;
 import org.jmouse.jdbc.operation.annotation.SqlName;
 import org.jmouse.jdbc.operation.resolve.SqlOperationNameResolver;
 
-/**
- * Default {@link SqlOperationNameResolver} implementation.
- *
- * <p>Name resolution order:</p>
- *
- * <ol>
- *     <li>{@link NamedSqlOperation#operationName()}</li>
- *     <li>{@link SqlName} annotation</li>
- *     <li>derived class-based name</li>
- * </ol>
- *
- * @author Ivan Hontarenko
- */
 public class DefaultSqlOperationNameResolver implements SqlOperationNameResolver {
 
     @Override

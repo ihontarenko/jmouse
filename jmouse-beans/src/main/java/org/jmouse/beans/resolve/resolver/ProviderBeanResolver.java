@@ -35,8 +35,8 @@ public class ProviderBeanResolver extends AbstractDelegatingBeanResolver {
      */
     @Override
     public boolean supports(BeanResolutionRequest request) {
-        InferredType type = request.beanType();
-        return type.is(Provider.class) || type.is(Supplier.class) || type.is(ObjectFactory.class);
+        Class<?> type = request.beanType().getClassType();
+        return type == Provider.class || type == Supplier.class || type == ObjectFactory.class;
     }
 
     /**
@@ -55,12 +55,12 @@ public class ProviderBeanResolver extends AbstractDelegatingBeanResolver {
             return (Provider<?>) () -> resolveNested(request, innerType);
         }
 
-        if (Supplier.class == outerType) {
-            return (Supplier<?>) () -> resolveNested(request, innerType);
-        }
-
         if (ObjectFactory.class == outerType) {
             return (ObjectFactory<?>) () -> resolveNested(request, innerType);
+        }
+
+        if (Supplier.class == outerType) {
+            return (Supplier<?>) () -> resolveNested(request, innerType);
         }
 
         throw new IllegalStateException("Unsupported provider type '%s'".formatted(outerType.getName()));

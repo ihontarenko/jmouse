@@ -105,6 +105,27 @@ public interface NameStrategy {
         };
     }
 
+    static NameStrategy toKebabCase() {
+        return column -> {
+            StringBuilder builder = new StringBuilder(column.length() + 8);
+
+            for (int index = 0; index < column.length(); index++) {
+                char character = column.charAt(index);
+
+                if (Character.isUpperCase(character)) {
+                    if (index > 0) {
+                        builder.append('-');
+                    }
+                    builder.append(Character.toLowerCase(character));
+                } else {
+                    builder.append(character);
+                }
+            }
+
+            return builder.toString();
+        };
+    }
+
     /**
      * Transforms the given column label or name into a target name.
      *
