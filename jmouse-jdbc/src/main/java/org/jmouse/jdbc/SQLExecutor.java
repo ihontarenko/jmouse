@@ -4,7 +4,6 @@ import java.sql.*;
 import java.util.List;
 
 import org.jmouse.jdbc.connection.ConnectionProvider;
-import org.jmouse.jdbc.database.DatabasePlatform;
 import org.jmouse.jdbc.mapping.ResultSetExtractor;
 import org.jmouse.jdbc.statement.*;
 
@@ -49,18 +48,12 @@ public final class SQLExecutor implements JdbcExecutor {
     private final ConnectionProvider connectionProvider;
 
     /**
-     * Provides DatabasePlatform corresponding to current connection
-     */
-    private final DatabasePlatform databasePlatform;
-
-    /**
      * Creates a new {@code SQLExecutor}.
      *
      * @param connectionProvider connection valueProvider used for all executions
      */
-    public SQLExecutor(ConnectionProvider connectionProvider, DatabasePlatform databasePlatform) {
+    public SQLExecutor(ConnectionProvider connectionProvider) {
         this.connectionProvider = connectionProvider;
-        this.databasePlatform = databasePlatform;
     }
 
     /**

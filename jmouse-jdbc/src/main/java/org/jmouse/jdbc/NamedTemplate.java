@@ -37,30 +37,30 @@ public final class NamedTemplate extends JdbcTemplate implements NamedOperations
     }
 
     @Override
-    public <T> Optional<T> querySingle(String sql, ParameterSource params, RowMapper<T> mapper) throws SQLException {
+    public <T> Optional<T> querySingle(String sql, ParameterSource parameterSource, RowMapper<T> mapper) throws SQLException {
         SQLCompiled     compiled = compile(sql);
-        StatementBinder binder   = binder(compiled, params);
+        StatementBinder binder   = binder(compiled, parameterSource);
         return super.querySingle(compiled.compiled(), binder, mapper);
     }
 
     @Override
-    public <T> T queryOne(String sql, ParameterSource params, RowMapper<T> mapper) throws SQLException {
+    public <T> T queryOne(String sql, ParameterSource parameterSource, RowMapper<T> mapper) throws SQLException {
         SQLCompiled     compiled = compile(sql);
-        StatementBinder binder   = binder(compiled, params);
+        StatementBinder binder   = binder(compiled, parameterSource);
         return super.queryOne(compiled.compiled(), binder, mapper);
     }
 
     @Override
-    public <T> List<T> query(String sql, ParameterSource params, RowMapper<T> mapper) throws SQLException {
+    public <T> List<T> query(String sql, ParameterSource parameterSource, RowMapper<T> mapper) throws SQLException {
         SQLCompiled     compiled = compile(sql);
-        StatementBinder binder   = binder(compiled, params);
+        StatementBinder binder   = binder(compiled, parameterSource);
         return super.query(compiled.compiled(), binder, mapper);
     }
 
     @Override
-    public int update(String sql, ParameterSource params) throws SQLException {
+    public int update(String sql, ParameterSource parameterSource) throws SQLException {
         SQLCompiled     compiled = compile(sql);
-        StatementBinder binder   = binder(compiled, params);
+        StatementBinder binder   = binder(compiled, parameterSource);
         return super.update(compiled.compiled(), binder);
     }
 
@@ -90,7 +90,7 @@ public final class NamedTemplate extends JdbcTemplate implements NamedOperations
         });
     }
 
-    private StatementBinder binder(SQLCompiled compiled, ParameterSource params) {
-        return new SQLPlanPreparedStatementBinder(expressionLanguage, compiled.plan(), params, missingPolicy);
+    private StatementBinder binder(SQLCompiled compiled, ParameterSource parameterSource) {
+        return new SQLPlanPreparedStatementBinder(expressionLanguage, compiled.plan(), parameterSource, missingPolicy);
     }
 }

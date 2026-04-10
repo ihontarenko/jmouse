@@ -6,6 +6,7 @@ import org.jmouse.jdbc.statement.StatementHandler;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class TimingSinkStatementHandler<R> implements StatementHandler<R> {
@@ -43,4 +44,16 @@ public final class TimingSinkStatementHandler<R> implements StatementHandler<R> 
     public interface Sink {
         List<Record> records();
     }
+
+    public static final class InMemoryTimingSink implements TimingSinkStatementHandler.Sink {
+
+        private final List<TimingSinkStatementHandler.Record> records = new ArrayList<>();
+
+        @Override
+        public List<TimingSinkStatementHandler.Record> records() {
+            return records;
+        }
+
+    }
+
 }

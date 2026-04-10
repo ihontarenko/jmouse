@@ -71,6 +71,31 @@ services:
     volumes:
       - h2_data:/opt/h2-data
 
+  pgadmin:
+      image: dpage/pgadmin4:8
+      container_name: jm-pgadmin
+      restart: unless-stopped
+      environment:
+        PGADMIN_DEFAULT_EMAIL: admin@local
+        PGADMIN_DEFAULT_PASSWORD: admin
+      ports:
+        - "8081:80"
+      depends_on:
+        - postgres
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: jm-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: jmouse
+      PMA_PASSWORD: jmouse
+    ports:
+      - "8083:80"
+    depends_on:
+      - mysql
+
   adminer:
     image: adminer:4
     container_name: jm-adminer

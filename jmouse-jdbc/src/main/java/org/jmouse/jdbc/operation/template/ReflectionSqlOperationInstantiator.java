@@ -5,6 +5,18 @@ import org.jmouse.jdbc.operation.SqlOperation;
 
 import java.lang.reflect.Constructor;
 
+/**
+ * Reflection-based {@link SqlOperationInstantiator} that uses a no-argument constructor.
+ *
+ * <p>This instantiator is used for class-based execution of parameterless
+ * operations such as:</p>
+ *
+ * <pre>{@code
+ * template.query(MyOperation.class);
+ * }</pre>
+ *
+ * @author Ivan Hontarenko
+ */
 public class ReflectionSqlOperationInstantiator implements SqlOperationInstantiator {
 
     @Override

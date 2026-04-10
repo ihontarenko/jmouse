@@ -7,9 +7,9 @@ import org.jmouse.jdbc.mapping.RowMappers;
 import org.jmouse.jdbc.operation.template.SqlOperationRowMapperResolver;
 
 /**
- * Default {@link org.jmouse.jdbc.operation.template.SqlOperationRowMapperResolver} implementation.
+ * Default {@link SqlOperationRowMapperResolver} implementation.
  *
- * <p>Scalar element types are mapped using predefined single-column mappers.
+ * <p>Scalar element types are mapped using predefined single-column row mappers.
  * All other types are mapped using {@link BeanRowMapper}.</p>
  *
  * @author Ivan Hontarenko

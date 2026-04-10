@@ -3,7 +3,7 @@ package org.jmouse.jdbc.operation.template;
 import org.jmouse.jdbc.mapping.RowMapper;
 
 /**
- * Resolves a {@link org.jmouse.jdbc.mapping.RowMapper} for a mapped SQL row element type.
+ * Resolves a {@link RowMapper} for a mapped SQL row element type.
  *
  * @author Ivan Hontarenko
  */

@@ -7,22 +7,22 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Declares a classpath resource that contains SQL text for a typed SQL operation.
+ * Declares inline SQL text for a typed SQL operation.
  *
- * <p>This annotation is intended for operations whose SQL is stored in a
- * dedicated {@code .sql} file.</p>
+ * <p>This annotation is intended for operations whose SQL is short, stable,
+ * and convenient to keep directly on the operation type.</p>
  *
  * @author Ivan Hontarenko
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface SqlResource {
+public @interface InlineSql {
 
     /**
-     * Returns the classpath SQL resource location.
+     * Returns inline SQL text.
      *
-     * @return classpath SQL resource location
+     * @return inline SQL text
      */
     String value();
 
