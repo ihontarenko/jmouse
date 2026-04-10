@@ -70,8 +70,9 @@ public final class InterceptableJdbcExecutor implements JdbcExecutor {
      * @param delegate underlying JDBC executor
      * @param chain    interceptor chain
      */
-    public InterceptableJdbcExecutor(JdbcExecutor delegate,
-                                     Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain) {
+    public InterceptableJdbcExecutor(
+            JdbcExecutor delegate, Chain<JdbcExecutionContext, JdbcCall<?>, Object> chain
+    ) {
         this.delegate = Verify.nonNull(delegate, "executor");
         this.chain = Verify.nonNull(chain, "chain");
     }

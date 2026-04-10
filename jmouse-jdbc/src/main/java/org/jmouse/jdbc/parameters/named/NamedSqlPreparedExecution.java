@@ -1,4 +1,4 @@
-package org.jmouse.jdbc.operation.execution;
+package org.jmouse.jdbc.parameters.named;
 
 import org.jmouse.core.Verify;
 import org.jmouse.jdbc.statement.StatementBinder;

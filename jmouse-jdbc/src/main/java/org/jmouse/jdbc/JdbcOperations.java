@@ -2,6 +2,8 @@ package org.jmouse.jdbc;
 
 import org.jmouse.jdbc.mapping.*;
 import org.jmouse.jdbc.statement.*;
+import org.jmouse.jdbc.template.QueryOperation;
+import org.jmouse.jdbc.template.SingleQueryOperation;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -144,6 +146,17 @@ public interface JdbcOperations {
             StatementHandler<ResultSet> handler,
             RowMapper<T> mapper
     ) throws SQLException;
+
+    // new one mthod that should consome execution descriptor
+    default <T> T queryOne(QueryOperation<T> operation) throws SQLException {
+        return queryOne(
+                operation.sql(),
+                operation.statementBinder(),
+                operation.statementConfigurer(),
+                operation.statementHandler(),
+                operation.mapper()
+        );
+    }
 
     /**
      * Convenience overload: uses {@link StatementHandler#noop()}.

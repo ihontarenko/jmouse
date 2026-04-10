@@ -11,7 +11,7 @@ import java.util.List;
 public final class SlowQueryDetectorHandler<R> implements StatementHandler<R> {
 
     private final Duration threshold;
-    private final Sink sink;
+    private final Sink     sink;
 
     public SlowQueryDetectorHandler(Duration threshold, Sink sink) {
         this.threshold = threshold;

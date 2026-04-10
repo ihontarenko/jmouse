@@ -158,7 +158,7 @@ public final class SmokeB {
 
         @Override
         public SqlSource sqlSource() {
-            return new InlineSqlSource("select id from users");
+            return new InlineSqlSource("select id from users where name like :name or :name is null and active = :status");
         }
 
         @Override

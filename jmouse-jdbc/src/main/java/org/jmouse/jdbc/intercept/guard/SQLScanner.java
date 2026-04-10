@@ -2,8 +2,22 @@ package org.jmouse.jdbc.intercept.guard;
 
 import java.util.Locale;
 
+/**
+ * Lightweight SQL analyzer used for safety checks.
+ *
+ * <p>Performs normalization (removes literals and comments) and extracts
+ * simple structural signals such as DDL, multi-statement, and WHERE presence.</p>
+ */
 public final class SQLScanner {
 
+    /**
+     * Scans SQL and produces a {@link SQLScan} with detected characteristics.
+     *
+     * <p>Analysis is heuristic and does not perform full SQL parsing.</p>
+     *
+     * @param sql raw SQL string
+     * @return scan result with extracted flags
+     */
     public SQLScan scan(String sql) {
         if (sql == null || sql.isBlank()) {
             return new SQLScan(false, false, false, false);
@@ -20,10 +34,23 @@ public final class SQLScanner {
         return new SQLScan(hasSeparator, ddl, isUD, hasWhere);
     }
 
+    /**
+     * Checks if SQL contains a statement separator ({@code ;}).
+     *
+     * @param sql normalized SQL
+     * @return {@code true} if separator is present
+     */
     private boolean containsStatementSeparator(String sql) {
         return sql.indexOf(';') >= 0;
     }
 
+    /**
+     * Checks if SQL starts with any of the given tokens.
+     *
+     * @param sql normalized SQL
+     * @param tokens tokens to match
+     * @return {@code true} if any token matches
+     */
     private boolean startsWithAny(String sql, String... tokens) {
         String trimmed = sql.stripLeading();
 
@@ -36,14 +63,23 @@ public final class SQLScanner {
         return false;
     }
 
+    /**
+     * Checks if SQL contains a standalone word.
+     *
+     * <p>Matches only whole tokens (not substrings).</p>
+     *
+     * @param sql normalized SQL
+     * @param word word to search
+     * @return {@code true} if word is present
+     */
     private boolean containsWord(String sql, String word) {
         int i = -1;
 
         while ((i = sql.indexOf(word, i + 1)) >= 0) {
-            boolean leftOk = (i == 0) || !Character.isLetterOrDigit(sql.charAt(i - 1));
-            int end = i + word.length();
-            boolean rightOk = (end >= sql.length()) || !Character.isLetterOrDigit(sql.charAt(end));
-            if (leftOk && rightOk) {
+            boolean lok = (i == 0) || !Character.isLetterOrDigit(sql.charAt(i - 1));
+            int     end = (i + word.length());
+            boolean rok = (end >= sql.length()) || !Character.isLetterOrDigit(sql.charAt(end));
+            if (lok && rok) {
                 return true;
             }
         }
@@ -52,12 +88,17 @@ public final class SQLScanner {
     }
 
     /**
-     * Removes:
-     * - single-quoted and double-quoted string literals
-     * - line comments (-- ... \n)
-     * - block comments (/* ... *\/)
+     * Normalizes SQL by removing:
+     * <ul>
+     *     <li>string literals (single and double quoted)</li>
+     *     <li>line comments ({@code -- ...})</li>
+     *     <li>block comments ({@code /* ... *\/})</li>
+     * </ul>
      *
-     * Keeps spacing so token boundaries remain mostly stable.
+     * <p>Preserves spacing to keep token boundaries stable.</p>
+     *
+     * @param sql raw SQL
+     * @return normalized SQL
      */
     private String normalize(String sql) {
         StringBuilder buffer = new StringBuilder(sql.length());
@@ -85,35 +126,34 @@ public final class SQLScanner {
             if (inBlockComment) {
                 if (character == '*' && n == '/') {
                     inBlockComment = false;
-                    index++; // skip '/'
+                    index++;
                     buffer.append(' ');
                 }
                 continue;
             }
 
-            // begin comments (only if not inside strings)
+            // begin comments
             if (!inSingle && !inDouble) {
                 if (character == '-' && n == '-') {
                     inLineComment = true;
-                    index++; // skip second '-'
+                    index++;
                     buffer.append(' ');
                     continue;
                 }
                 if (character == '/' && n == '*') {
                     inBlockComment = true;
-                    index++; // skip '*'
+                    index++;
                     buffer.append(' ');
                     continue;
                 }
             }
 
-            // handle single quotes
+            // single quotes
             if (!inDouble && character == '\'') {
                 if (inSingle) {
-                    // SQL escaping '' inside single-quoted strings
                     if (n == '\'') {
-                        index++; // skip escaped quote
-                        buffer.append(' '); // keep neutral
+                        index++;
+                        buffer.append(' ');
                         continue;
                     }
                     inSingle = false;
@@ -124,10 +164,9 @@ public final class SQLScanner {
                 continue;
             }
 
-            // handle double quotes
+            // double quotes
             if (!inSingle && character == '"') {
                 if (inDouble) {
-                    // escape "" inside identifier strings for some dialects
                     if (n == '"') {
                         index++;
                         buffer.append(' ');
@@ -141,13 +180,11 @@ public final class SQLScanner {
                 continue;
             }
 
-            // inside string: neutralize
             if (inSingle || inDouble) {
                 buffer.append(' ');
                 continue;
             }
 
-            // default
             buffer.append(character);
         }
 

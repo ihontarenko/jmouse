@@ -6,19 +6,14 @@ import org.jmouse.beans.annotation.Eager;
 import org.jmouse.beans.annotation.PrimaryBean;
 import org.jmouse.jdbc.*;
 import org.jmouse.jdbc.parameters.MissingParameterPolicy;
-import org.jmouse.jdbc.parameters.SQLExpressionLanguage;
 import org.jmouse.jdbc.parameters.SQLParameterProcessor;
 import org.jmouse.jdbc.parameters.compile.SQLPlanCompiler;
 import org.jmouse.jdbc.parameters.lexer.SQLParameterSplitter;
 import org.jmouse.jdbc.parameters.lexer.SQLParameterTokenizer;
+import org.jmouse.jdbc.parameters.named.NamedSqlPreparedExecutionFactory;
 
 @BeanFactories
 public class JdbcTemplateConfiguration {
-
-    @Bean
-    public SQLExpressionLanguage sqlExpressionLanguage() {
-        return new SQLExpressionLanguage();
-    }
 
     @Eager
     @Bean
@@ -38,8 +33,8 @@ public class JdbcTemplateConfiguration {
     }
 
     @Bean
-    public SQLPlanCompiler sqlPlanCompiler(SQLExpressionLanguage expressionLanguage) {
-        return new SQLPlanCompiler(expressionLanguage);
+    public SQLPlanCompiler sqlPlanCompiler() {
+        return new SQLPlanCompiler();
     }
 
     @Bean
@@ -48,13 +43,18 @@ public class JdbcTemplateConfiguration {
     }
 
     @Bean
-    public NamedOperations namedTemplate(
-            JdbcExecutor executor,
-            SQLExpressionLanguage expressionLanguage,
-            SQLParameterProcessor sqlParameterProcessor,
-            MissingParameterPolicy policy
+    public NamedSqlPreparedExecutionFactory namedSqlPreparedExecutionFactory(
+            SQLParameterProcessor processor,
+            MissingParameterPolicy missingPolicy
     ) {
-        return new NamedTemplate(executor, expressionLanguage, sqlParameterProcessor, policy);
+        return new NamedSqlPreparedExecutionFactory(processor, missingPolicy);
+    }
+
+    @Bean
+    public NamedOperations namedTemplate(
+            JdbcExecutor executor, NamedSqlPreparedExecutionFactory executionFactory
+    ) {
+        return new NamedTemplate(executor, executionFactory);
     }
 
 }

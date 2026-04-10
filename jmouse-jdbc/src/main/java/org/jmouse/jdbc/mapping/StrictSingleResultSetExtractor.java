@@ -84,9 +84,11 @@ public final class StrictSingleResultSetExtractor<T> implements ResultSetExtract
 
         if (resultSet.next()) {
             int count = 2;
+
             while (resultSet.next()) {
                 count++;
             }
+
             throw new NonUniqueResultException(
                     count,
                     "Expected 1 row but got " + count + " for SQL: " + sqlForMessage

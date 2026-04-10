@@ -21,12 +21,12 @@ public final class SQLParameterTokenizer implements Tokenizer<TokenizableSource,
 
     @Override
     public List<Token> tokenize(TokenizableSource source) {
-        List<RawToken> raws   = splitter.split(source);
-        List<Token>    tokens = new ArrayList<>(raws.size());
+        List<RawToken> split  = splitter.split(source);
+        List<Token>    tokens = new ArrayList<>(split.size());
 
         int ordinal = 0;
 
-        for (RawToken raw : raws) {
+        for (RawToken raw : split) {
             SQLParameterToken type  = classify(raw);
             Token             token = new Token(raw.value(), type, ordinal++, raw.offset(), raw.line());
 

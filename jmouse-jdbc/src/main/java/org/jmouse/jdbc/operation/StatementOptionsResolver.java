@@ -20,9 +20,9 @@ public interface StatementOptionsResolver {
         public StatementOptions resolve(SqlOperation operation) {
             Verify.nonNull(operation, "operation");
 
-            StatementConfigurer         configurer    = StatementConfigurer.NOOP;
-            StatementHandler<ResultSet> queryHandler  = StatementHandler.noop();
+            StatementConfigurer         configurer    = StatementConfigurer.noop();
             StatementHandler<Integer>   updateHandler = StatementHandler.noop();
+            StatementHandler<ResultSet> queryHandler  = StatementHandler.noop();
 
             if (operation instanceof StatementConfigurerProvider provider) {
                 configurer = Verify.nonNull(provider.statementConfigurer(), "statementConfigurer");

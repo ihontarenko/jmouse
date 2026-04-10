@@ -70,7 +70,6 @@ import static java.lang.String.valueOf;
  */
 public final class SQLPlanPreparedStatementBinder implements StatementBinder {
 
-    private final ExpressionLanguage     expressionLanguage;
     private final SQLPlan                plan;
     private final ParameterSource        parameterSource;
     private final MissingParameterPolicy missingPolicy;
@@ -78,14 +77,11 @@ public final class SQLPlanPreparedStatementBinder implements StatementBinder {
     /**
      * Creates a new binder for the given plan and parameter source.
      *
-     * @param expressionLanguage expression language used for optional value transformations
      * @param plan               precompiled SQL plan containing binding descriptors
      * @param parameterSource    parameter source used to resolve named/positional values
      * @param missingPolicy      missing-parameter handling policy
      */
-    public SQLPlanPreparedStatementBinder(
-            ExpressionLanguage expressionLanguage, SQLPlan plan, ParameterSource parameterSource, MissingParameterPolicy missingPolicy) {
-        this.expressionLanguage = Verify.nonNull(expressionLanguage, "expressionLanguage");
+    public SQLPlanPreparedStatementBinder(SQLPlan plan, ParameterSource parameterSource, MissingParameterPolicy missingPolicy) {
         this.plan = Verify.nonNull(plan, "plan");
         this.parameterSource = Verify.nonNull(parameterSource, "parameterSource");
         this.missingPolicy = Verify.nonNull(missingPolicy, "missingPolicy");
@@ -105,14 +101,9 @@ public final class SQLPlanPreparedStatementBinder implements StatementBinder {
         for (Binding binding : plan.bindings()) {
             Object value;
 
-            if (binding instanceof Binding.Named(String name, String ignored, Expression expression, Kind kind)) {
+            if (binding instanceof Binding.Named(String name, String ignored, Kind kind)) {
                 value = !parameterSource.hasValue(name)
                         ? handleMissing(kind.name(), name, parameterPosition) : parameterSource.getValue(name);
-                if (expression != null) {
-                    EvaluationContext evaluationContext = expressionLanguage.newContext();
-                    evaluationContext.setValue(name, value);
-                    value = expression.evaluate(evaluationContext);
-                }
             } else if (binding instanceof Binding.Positional(int position, Kind kind)) {
                 value = !parameterSource.hasValue(position)
                         ? handleMissing(kind.name(), valueOf(position), parameterPosition) : parameterSource.getValue(position);

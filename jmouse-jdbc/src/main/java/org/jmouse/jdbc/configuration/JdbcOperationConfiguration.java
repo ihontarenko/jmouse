@@ -2,10 +2,9 @@ package org.jmouse.jdbc.configuration;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
-import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.jdbc.JdbcOperations;
 import org.jmouse.jdbc.operation.StatementOptionsResolver;
-import org.jmouse.jdbc.operation.execution.NamedSqlPreparedExecutionFactory;
+import org.jmouse.jdbc.parameters.named.NamedSqlPreparedExecutionFactory;
 import org.jmouse.jdbc.operation.resolve.SqlOperationParametersResolver;
 import org.jmouse.jdbc.operation.resolve.SqlOperationResolver;
 import org.jmouse.jdbc.operation.resolve.SqlTextLoader;
@@ -15,8 +14,6 @@ import org.jmouse.jdbc.operation.template.SqlOperationInstantiator;
 import org.jmouse.jdbc.operation.template.SqlOperationRowMapperResolver;
 import org.jmouse.jdbc.operation.template.SqlOperationTemplate;
 import org.jmouse.jdbc.operation.template.support.DefaultSqlOperationRowMapperResolver;
-import org.jmouse.jdbc.parameters.MissingParameterPolicy;
-import org.jmouse.jdbc.parameters.SQLParameterProcessor;
 
 @BeanFactories
 public class JdbcOperationConfiguration {
@@ -42,15 +39,6 @@ public class JdbcOperationConfiguration {
     @Bean
     public StatementOptionsResolver statementOptionsResolver() {
         return new StatementOptionsResolver.Default();
-    }
-
-    @Bean
-    public NamedSqlPreparedExecutionFactory namedSqlPreparedExecutionFactory(
-            ExpressionLanguage expressionLanguage,
-            SQLParameterProcessor processor,
-            MissingParameterPolicy missingPolicy
-    ) {
-        return new NamedSqlPreparedExecutionFactory(expressionLanguage, processor, missingPolicy);
     }
 
     @Bean

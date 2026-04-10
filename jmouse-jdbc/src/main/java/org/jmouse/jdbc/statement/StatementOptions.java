@@ -16,8 +16,8 @@ public record StatementOptions(
 ) {
 
     public StatementOptions {
-        Verify.nonNull(statementConfigurer, "statementConfigurer");
         Verify.nonNull(queryStatementHandler, "queryStatementHandler");
+        Verify.nonNull(statementConfigurer, "statementConfigurer");
         Verify.nonNull(updateStatementHandler, "updateStatementHandler");
     }
 
