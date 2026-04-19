@@ -4,7 +4,7 @@ import org.jmouse.beans.*;
 import org.jmouse.beans.events.BeanEventDeduplicateKeyStrategy;
 import org.jmouse.core.events.DeduplicatingPublishPolicy;
 import org.jmouse.core.events.EventPublishPolicy;
-import org.jmouse.jdbc.JdbcOperations;
+import org.jmouse.jdbc.JdbcTemplate;
 import org.jmouse.jdbc.JdbcSupport;
 import org.jmouse.jdbc.connection.datasource.DataSourceContributor;
 import org.jmouse.jdbc.connection.datasource.DataSourceKeyHolder;
@@ -38,7 +38,7 @@ final public class SmokeA {
                 "mysql", null, "aaa:aaa", "username", "password", "catalog", "mysql", null, null
         )));
 
-        JdbcOperations simple = context.getBean(JdbcOperations.class);
+        JdbcTemplate simple = context.getBean(JdbcTemplate.class);
 
         System.out.println(context);
     }

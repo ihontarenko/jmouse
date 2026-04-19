@@ -3,6 +3,9 @@ package org.jmouse.web_app.config;
 import app.api.WebConfig;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.beans.annotation.Bean;
+import org.jmouse.jdbc.connection.datasource.DataSourceContributor;
+import org.jmouse.jdbc.connection.datasource.DataSourceSpecification;
+import org.jmouse.jdbc.connection.datasource.DataSourceSpecificationRegistry;
 import org.jmouse.web.mvc.FrameworkDispatcherRegistration;
 import org.jmouse.web.WebContextBuilder;
 import org.jmouse.web.context.WebBeanContext;
@@ -38,6 +41,21 @@ public class DemoWebApplication {
         registration.addMappings("/api/*");
 
         return registration;
+    }
+
+    @Bean
+    public DataSourceContributor dataSourceContributor() {
+        return registry -> registry.register(new DataSourceSpecification(
+                "mysql",
+                null,
+                "jdbc:mysql://127.0.0.1:3306/jmouse?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC",
+                "jmouse",
+                "jmouse",
+                "jmouse",
+                "mysql",
+                null,
+                null
+        ));
     }
 
 }

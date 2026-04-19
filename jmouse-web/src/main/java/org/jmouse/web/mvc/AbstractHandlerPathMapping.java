@@ -1,6 +1,9 @@
 package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jmouse.core.LogBox;
+import org.jmouse.core.MediaType;
+import org.jmouse.core.matcher.Match;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.match.PathPattern;
 import org.jmouse.web.match.Route;
@@ -17,10 +20,7 @@ import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.condition.HttpMethodMatcher;
 import org.jmouse.web.match.routing.condition.RequestPathMatcher;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.jmouse.core.Streamable.of;
 
@@ -138,10 +138,60 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
         request.setAttribute(ROUTE_PRODUCIBLE_ATTRIBUTE, route.produces());
         request.setAttribute(ROUTE_CONSUMABLE_ATTRIBUTE, route.consumes());
 
-        LOGGER.info(AnsiColors.colorize(
-                "✅🔥 ${BLUE_BOLD_BRIGHT}MATCHED:${RESET} ${GREEN_BOLD_BRIGHT}%s${RESET}", winner.match(requestRoute)));
+        logMatchResult(winner.match(requestRoute));
 
         return mappedHandler;
+    }
+
+    /**
+     * Logs a structured match result in a formatted ASCII block. 🚀
+     * Displays all resolved types and their associated values.
+     *
+     * @param match resolved handler match containing typed attributes
+     */
+    private void logMatchResult(Match match) {
+        LogBox.box("MATCH RESULT")
+                .formatter(value ->
+                        AnsiColors.colorize(prettyValue(
+                                unwrap((Optional<?>) value)
+                        ))
+                )
+
+                .section("Routing")
+                    .row("Path Pattern", match.get(PathPattern.class))
+                    .row("Route Match", match.get(RouteMatch.class))
+
+                .section("HTTP")
+                    .row("Method", match.get(HttpMethod.class))
+                    .row("Produces", match.get(MediaType.class))
+
+                .build()
+                .render(LOGGER::info);
+    }
+
+    /**
+     * Formats a value for safe and readable log output. 🎨
+     * Handles nulls, strings, and generic objects.
+     *
+     * @param value raw value from match
+     * @return formatted string representation
+     */
+    private String prettyValue(Object value) {
+        if (value == null) {
+            return "${RED_BG_BRIGHT}${BLACK_BOLD_BRIGHT}<null>${RESET}";
+        }
+        return "\"${GREEN_BOLD_BRIGHT}" + value + "${RESET}\"";
+    }
+
+    /**
+     * Unwraps an Optional value safely for logging purposes. 📦
+     *
+     * @param value optional container
+     * @return contained value or "-" if empty
+     */
+    @SuppressWarnings({"unchecked", "rawtype"})
+    private Object unwrap(Optional<?> value) {
+        return ((Optional<Object>) value).orElse("-");
     }
 
     /**

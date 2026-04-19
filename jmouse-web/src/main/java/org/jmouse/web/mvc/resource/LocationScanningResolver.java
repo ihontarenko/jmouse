@@ -37,8 +37,8 @@ public class LocationScanningResolver extends AbstractResourceResolver {
             ResourceQuery resourceQuery,
             Chain<HttpServletRequest, ResourceQuery, Resource> next) {
 
-        String relativePath = resourceQuery.path();
-        Resource resource   = getResource(relativePath, resourceQuery.locations());
+        String   relativePath = resourceQuery.path();
+        Resource resource     = getResource(relativePath, resourceQuery.locations());
 
         if (resource != null) {
             return Outcome.done(resource);

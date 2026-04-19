@@ -8,4 +8,5 @@ public record JdbcExecutionContext(JdbcExecutor executor) {
     public JdbcExecutionContext {
         Verify.nonNull(executor, "executor");
     }
+
 }

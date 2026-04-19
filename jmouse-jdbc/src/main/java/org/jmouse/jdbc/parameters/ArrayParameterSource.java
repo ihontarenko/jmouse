@@ -1,5 +1,7 @@
 package org.jmouse.jdbc.parameters;
 
+import org.jmouse.core.Verify;
+
 import java.util.Objects;
 
 /**
@@ -34,15 +36,15 @@ public final class ArrayParameterSource implements ParameterSource {
     /**
      * Backing array holding positional parameter values.
      */
-    private final Object[] arrayValues;
+    private final Object[] array;
 
     /**
      * Creates a new {@code ArrayParameterSource}.
      *
-     * @param arrayValues array of parameter values (1-based JDBC positions)
+     * @param array array of parameter values (1-based JDBC positions)
      */
-    public ArrayParameterSource(Object[] arrayValues) {
-        this.arrayValues = Objects.requireNonNull(arrayValues, "arrayValues");
+    public ArrayParameterSource(Object[] array) {
+        this.array = Verify.nonNull(array, "array");
     }
 
     /**
@@ -53,8 +55,7 @@ public final class ArrayParameterSource implements ParameterSource {
      */
     @Override
     public boolean hasValue(int position) {
-        int index = position - 1;
-        return index >= 0 && index < arrayValues.length;
+        return (position - 1) >= 0 && (position - 1) < array.length;
     }
 
     /**
@@ -77,7 +78,7 @@ public final class ArrayParameterSource implements ParameterSource {
      */
     @Override
     public Object getValue(int position) {
-        return arrayValues[position - 1];
+        return array[position - 1];
     }
 
     /**

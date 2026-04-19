@@ -77,9 +77,9 @@ public interface JdbcExecutor {
      * and the result extractor.
      *
      * @param sql        SQL to execute
-     * @param binder     binds statement parameters (may be {@link StatementBinder#NOOP})
-     * @param configurer configures statement options (may be {@link StatementConfigurer#NOOP})
-     * @param handler    execution hook for statement lifecycle/metadata (may be {@link StatementHandler#NOOP})
+     * @param binder     binds statement parameters (may be {@link StatementBinder#noop()})
+     * @param configurer configures statement options (may be {@link StatementConfigurer#noop()})
+     * @param handler    execution hook for statement lifecycle/metadata (may be {@link StatementHandler#noop()})
      * @param callback   performs the JDBC operation and returns a {@link ResultSet}
      * @param extractor  maps the {@link ResultSet} to the target result
      * @param <T>        result type

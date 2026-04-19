@@ -7,7 +7,7 @@ import org.jmouse.beans.EventBridgeContextInitializer;
 import org.jmouse.beans.events.BeanEventDeduplicateKeyStrategy;
 import org.jmouse.core.events.DeduplicatingPublishPolicy;
 import org.jmouse.core.events.EventPublishPolicy;
-import org.jmouse.jdbc.JdbcOperations;
+import org.jmouse.jdbc.JdbcTemplate;
 import org.jmouse.jdbc.JdbcSupport;
 import org.jmouse.jdbc.connection.datasource.DataSourceContributor;
 import org.jmouse.jdbc.connection.datasource.DataSourceKeyHolder;
@@ -48,7 +48,7 @@ public final class SmokeSeedMySql {
                 ))
         );
 
-        JdbcOperations jdbc = context.getBean(JdbcOperations.class);
+        JdbcTemplate jdbc = context.getBean(JdbcTemplate.class);
 
         jdbc.update("""
                 create table if not exists users (

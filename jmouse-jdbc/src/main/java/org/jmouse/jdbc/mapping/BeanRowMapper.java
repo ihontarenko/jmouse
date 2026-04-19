@@ -92,7 +92,7 @@ public final class BeanRowMapper<T> implements RowMapper<T> {
     public T map(ResultSet resultSet, int rowIndex) {
         ObjectAccessor accessor = JdbcAccessorWrapper.WRAPPER.wrap(resultSet);
         binder.setObjectAccessor(accessor);
-        BindResult<T> result = binder.bind(null, toBindable(type));
+        BindResult<T> result = binder.bind(null, toTypedValue(type));
         Verify.state(result.isPresent(), "Failed to map bean-type: '" + type + "'.");
         return result.getValue();
     }
@@ -103,7 +103,7 @@ public final class BeanRowMapper<T> implements RowMapper<T> {
      * @param type target type
      * @return bindable metadata for the target type
      */
-    private TypedValue<T> toBindable(Class<T> type) {
+    private TypedValue<T> toTypedValue(Class<T> type) {
         return TypedValue.of(InferredType.forClass(type));
     }
 

@@ -8,11 +8,13 @@ import org.jmouse.beans.events.BeanEventDeduplicateKeyStrategy;
 import org.jmouse.core.events.DeduplicatingPublishPolicy;
 import org.jmouse.core.events.EventPublishPolicy;
 import org.jmouse.jdbc.JdbcSupport;
-import org.jmouse.jdbc.NamedOperations;
+import org.jmouse.jdbc.NamedTemplate;
 import org.jmouse.jdbc.connection.datasource.DataSourceContributor;
 import org.jmouse.jdbc.connection.datasource.DataSourceKeyHolder;
 import org.jmouse.jdbc.connection.datasource.DataSourceSpecification;
+import org.jmouse.jdbc.mapping.RowMappers;
 import org.jmouse.jdbc.parameters.BeanParameterSource;
+import org.jmouse.jdbc.statement.StatementBinder;
 
 import java.util.List;
 
@@ -49,7 +51,7 @@ public final class SmokeNamedQueryMySql {
                 ))
         );
 
-        NamedOperations named = context.getBean(NamedOperations.class);
+        NamedTemplate named = context.getBean(NamedTemplate.class);
 
         Filter filter = new Filter(true, 10);
 
@@ -62,8 +64,11 @@ public final class SmokeNamedQueryMySql {
                 order by id
                 """,
                 new BeanParameterSource(filter),
-                (rs, index) -> rs.getString(1)
+                // new JustTimingStatementHandler<>(System.out::println),
+                RowMappers.stringColumn(1)
         );
+
+        named.query("select * from groups", StatementBinder.noop(), RowMappers.stringColumn(1));
 
         System.out.println("MATCHED: " + usernames);
     }

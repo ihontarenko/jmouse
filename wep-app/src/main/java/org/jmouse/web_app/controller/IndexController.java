@@ -5,8 +5,13 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.beans.annotation.ProxiedBean;
+import org.jmouse.core.mapping.binding.annotation.MappingReference;
 import org.jmouse.core.throttle.RateLimit;
-import org.jmouse.jdbc.JdbcOperations;
+import org.jmouse.jdbc.JdbcTemplate;
+import org.jmouse.jdbc.connection.datasource.DataSourceKeyHolder;
+import org.jmouse.jdbc.mapping.BeanRowMapper;
+import org.jmouse.jdbc.mapping.MapRowMapper;
+import org.jmouse.jdbc.statement.StatementBinder;
 import org.jmouse.web.binding.BindingResult;
 import org.jmouse.web.binding.WebModel;
 import org.jmouse.web.context.WebBeanContext;
@@ -17,7 +22,12 @@ import org.jmouse.web.http.HttpHeader;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.mvc.resource.ResourceUrlResolver;
 
+import java.sql.SQLException;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @ProxiedBean
@@ -74,8 +84,23 @@ public class IndexController {
 
     @GetMapping(requestPath = "/public/favicon", produces = {"text/plain", "application/json"})
     public String favicon(WebBeanContext context) {
-        JdbcOperations simple = context.getBean(JdbcOperations.class);
         return resourceUrlResolver.lookupResourceUrl("/internal/assets/icon/favicon.ico");
+    }
+
+    @GetMapping(requestPath = "/public/users", produces = {"text/plain", "application/json"})
+    public List<UserDTO> users(WebBeanContext context) {
+        JdbcTemplate simple = context.getBean(JdbcTemplate.class);
+        List<UserDTO>         users  = new ArrayList<>();
+
+        DataSourceKeyHolder.use("mysql");
+
+        try {
+            users = simple.query("select * from users", StatementBinder.noop(), new BeanRowMapper<>(UserDTO.class));
+        } catch (SQLException ignored) {
+
+        }
+
+        return users;
     }
 
     @Mapping(
@@ -88,11 +113,12 @@ public class IndexController {
         throw new IllegalStateException("An some error occurred");
     }
 
-    public record UserDTO(String name, @Email String email, @NotBlank String password) {}
+    public record UserDTO(String username) {}
 
     public static class User {
 
         @NotBlank(message = "name must not blank!")
+        //@MappingReference("username")
         private String name;
         @NotBlank
         private String password;

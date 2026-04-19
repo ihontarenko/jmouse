@@ -14,7 +14,6 @@ import org.jmouse.web.mvc.WebApplicationLauncher;
 public class Application {
 
     static void main(String[] arguments) {
-        DataSourceKeyHolder.use("mysql");
         new WebApplicationLauncher(Application.class).launch(arguments);
     }
 

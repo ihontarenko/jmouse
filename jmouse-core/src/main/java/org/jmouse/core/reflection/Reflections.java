@@ -1069,6 +1069,22 @@ abstract public class Reflections {
         return JAVA_MODULE_NAMES.contains(clazz.getModule().getName());
     }
 
+    /**
+     * Performs unchecked cast with a type hint.
+     *
+     * <p>The {@code type} parameter is not used for runtime checking,
+     * but serves as documentation and future extension point.</p>
+     *
+     * @param value value to cast
+     * @param type expected type (hint)
+     * @param <T> target type
+     * @return casted value
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T cast(Object value, Class<?> ignored) {
+        return (T) value;
+    }
+
     public static String describe(Object instance) {
         if (instance == null) {
             return "NULL";
