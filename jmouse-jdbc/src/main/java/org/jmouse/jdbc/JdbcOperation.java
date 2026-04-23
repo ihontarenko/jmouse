@@ -1,4 +1,4 @@
-package org.jmouse.jdbc.intercept;
+package org.jmouse.jdbc;
 
 /**
  * Logical classification of JDBC operations executed by jMouse.

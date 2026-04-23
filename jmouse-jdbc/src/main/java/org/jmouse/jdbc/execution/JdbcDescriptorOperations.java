@@ -11,28 +11,21 @@ import java.sql.SQLException;
 public interface JdbcDescriptorOperations extends NamedTemplate, JdbcTemplate {
 
     @SuppressWarnings("unchecked")
-    default <T> T query(QueryExecutionDescriptor<T> descriptor) throws SQLException {
-        return descriptor.rowMapper() == null ? query(
-                descriptor.sql(),
-                descriptor.binder(),
+    default <T> T queryOperation(ExecutionDescriptor descriptor) throws SQLException {
+
+        switch (descriptor.operation()) {
+            case QUERY -> {}
+            case UPDATE -> {}
+            case CALL -> {}
+            case UPDATE_RETURNING_KEYS -> {}
+            case BATCH_UPDATE -> {}
+        }
+
+        return query(
+                descriptor.sql(), descriptor.binder(),
                 descriptor.statementConfigurer(),
                 Reflections.cast(descriptor.statementHandler(), StatementHandler.class),
                 (ResultSetExtractor<T>) descriptor.resultSetExtractor()
-        ) : (T) query(
-                descriptor.sql(),
-                descriptor.binder(),
-                descriptor.statementConfigurer(),
-                Reflections.cast(descriptor.statementHandler(), StatementHandler.class),
-                descriptor.rowMapper()
-        );
-    }
-
-    @SuppressWarnings("unchecked")
-    default <T> T query(Class<? extends QueryExecutionDescriptor<T>> type) throws SQLException {
-        return query(
-                (QueryExecutionDescriptor<T>) Reflections.instantiate(
-                        Reflections.findFirstConstructor(type)
-                )
         );
     }
 

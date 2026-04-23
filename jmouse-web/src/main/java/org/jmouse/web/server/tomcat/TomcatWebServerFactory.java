@@ -44,7 +44,7 @@ public class TomcatWebServerFactory implements WebServerFactory, BeanContextAwar
         WebServer                    webServer  = new TomcatWebServer();
         WebServerConfig              config     = configuration.getWebServerConfig(WebServers.TOMCAT);
         WebServer.Configurer<Tomcat> configurer = new TomcatWebServerConfigurer(
-                config.port(), new jMouseServletContainerInitializer(initializers));
+                config, new jMouseServletContainerInitializer(initializers));
 
         if (webServer.server() != null) {
             webServer.configure(configurer);

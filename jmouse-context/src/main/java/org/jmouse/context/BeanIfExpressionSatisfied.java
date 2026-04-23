@@ -21,12 +21,12 @@ import java.util.Map;
  * </p>
  *
  * <pre>{@code
- * @BeanConditionExpression(
+ * @BeanIfExpressionSatisfied(
  *     value = "application.feature.enabled",
  *     expected = "true",
  *     operator = ComparisonOperator.EQ
  * )
- * @BeanConditionExpression("jmouse.service.nodeNumber % 3 is odd")
+ * @BeanIfExpressionSatisfied("jmouse.service.nodeNumber % 3 is odd")
  * }</pre>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
@@ -34,8 +34,8 @@ import java.util.Map;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@BeanCondition(BeanConditionExpression.ExpressionCondition.class)
-public @interface BeanConditionExpression {
+@BeanCondition(BeanIfExpressionSatisfied.ExpressionCondition.class)
+public @interface BeanIfExpressionSatisfied {
 
     /**
      * ✏️ Expression to evaluate (e.g. property key, EL condition).
@@ -61,8 +61,8 @@ public @interface BeanConditionExpression {
 
         @Override
         public boolean match(ConditionalMetadata metadata, BeanContext context) {
-            BeanConditionExpression annotation = metadata.getAnnotation(BeanConditionExpression.class);
-            String                  expression = annotation.value();
+            BeanIfExpressionSatisfied annotation = metadata.getAnnotation(BeanIfExpressionSatisfied.class);
+            String                    expression = annotation.value();
             boolean                 match      = true;
 
             if (context instanceof ApplicationBeanContext applicationContext &&

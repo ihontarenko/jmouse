@@ -1,9 +1,8 @@
 package org.jmouse.jdbc.intercept;
 
+import org.jmouse.jdbc.JdbcOperation;
 import org.jmouse.jdbc.statement.StatementConfigurer;
 import org.jmouse.jdbc.statement.StatementHandler;
-
-import java.sql.ResultSet;
 
 /**
  * Immutable descriptor of a single JDBC invocation.

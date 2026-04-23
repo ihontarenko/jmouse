@@ -21,13 +21,19 @@ import static org.jmouse.util.Files.removeExtension;
  */
 abstract public class AbstractApplicationFactory<T extends ApplicationBeanContext> implements ApplicationFactory<T> {
 
-    /** Property source name for system properties. */
+    /**
+     * Property source name for system properties.
+     */
     public static final String SYSTEM_PROPERTIES = "system-properties";
 
-    /** Property source name for system environment variables. */
+    /**
+     * Property source name for system environment variables.
+     */
     public static final String SYSTEM_ENV_PROPERTIES = "system-env";
 
-    /** A resource loader for scanning and loading application properties. */
+    /**
+     * A resource loader for scanning and loading application properties.
+     */
     protected PatternMatcherResourceLoader resourceLoader = new CompositeResourceLoader();
 
     /**

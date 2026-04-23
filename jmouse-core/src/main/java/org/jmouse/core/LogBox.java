@@ -19,13 +19,11 @@ import java.util.function.Consumer;
  */
 public class LogBox {
 
-    private final String title;
-    private final List<Section> sections;
     private final ValueFormatter formatter;
+    private final String         title;
+    private final List<Section>  sections;
 
-    private LogBox(String title,
-                   List<Section> sections,
-                   ValueFormatter formatter) {
+    private LogBox(String title, List<Section> sections, ValueFormatter formatter) {
         this.title = title;
         this.sections = sections;
         this.formatter = formatter;
@@ -35,8 +33,8 @@ public class LogBox {
         return new Builder(title);
     }
 
-    public void render(Consumer<String> out) {
-        Renderer.render(this, out);
+    public void render(Consumer<String> output) {
+        Renderer.render(this, output);
     }
 
     public record Section(String name, List<Row> rows) { }
@@ -102,25 +100,25 @@ public class LogBox {
         private static final String H_LINE =
                 "────────────────────────────────────────────";
 
-        static void render(LogBox box, Consumer<String> out) {
+        static void render(LogBox box, Consumer<String> output) {
 
-            out.accept("┌" + H_LINE);
-            out.accept("│ 🚀 " + box.title);
-            out.accept("├" + H_LINE);
+            output.accept("┌" + H_LINE);
+            output.accept("│ 🚀 " + box.title);
+            output.accept("├" + H_LINE);
 
             for (Section section : box.sections) {
 
-                out.accept("│");
-                out.accept("│ ▶ " + section.name());
+                output.accept("│");
+                output.accept("│ ▶ " + section.name());
 
                 int pad = calculatePadding(section);
 
                 for (Row row : section.rows()) {
-                    out.accept("│   " + format(row, pad, box.formatter));
+                    output.accept("│   " + format(row, pad, box.formatter));
                 }
             }
 
-            out.accept("└" + H_LINE);
+            output.accept("└" + H_LINE);
         }
 
         private static int calculatePadding(Section section) {

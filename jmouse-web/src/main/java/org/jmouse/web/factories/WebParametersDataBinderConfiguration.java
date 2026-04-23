@@ -2,7 +2,7 @@ package org.jmouse.web.factories;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
-import org.jmouse.context.BeanConditionExpression;
+import org.jmouse.context.BeanIfExpressionSatisfied;
 import org.jmouse.core.context.ContextScope;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.Mappers;
@@ -10,7 +10,7 @@ import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.validator.*;
 import org.jmouse.validator.jsr380.Jsr380Support;
 import org.jmouse.web.binding.*;
-import org.jmouse.context.BeanConditionExists;
+import org.jmouse.context.BeanIfNameAbsent;
 
 import java.util.List;
 
@@ -18,16 +18,16 @@ import java.util.List;
 public class WebParametersDataBinderConfiguration {
 
     @Bean("parametersDataBinder")
-    @BeanConditionExpression("10 % 2 == 0")
-    @BeanConditionExists(value = "parametersDataBinder", message = "parameters data binder already registered in client code")
+    @BeanIfExpressionSatisfied("10 % 2 == 0")
+    @BeanIfNameAbsent(value = "parametersDataBinder", message = "parameters data binder already registered in client code")
     public ParametersDataBinder parametersDataBinder() {
         ValidatorRegistry registry = new DefaultValidatorRegistry();
 
         Jsr380Support.registerInto(registry);
 
         ValidationProcessor validationProcessor = ValidationProcessors.builder()
-                .validatorRegistry(registry)
                 .validationPolicy(ValidationPolicy.COLLECT_ALL)
+                .validatorRegistry(registry)
                 .build();
 
         ContextScope<BindingContext> bindingScope = new ContextScope<>();

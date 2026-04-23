@@ -1,5 +1,9 @@
 package org.jmouse.jdbc.execution;
 
+import org.jmouse.jdbc.JdbcOperation;
+import org.jmouse.jdbc.mapping.ListResultSetExtractor;
+import org.jmouse.jdbc.mapping.ResultSetExtractor;
+import org.jmouse.jdbc.mapping.RowMapper;
 import org.jmouse.jdbc.statement.StatementBinder;
 import org.jmouse.jdbc.statement.StatementConfigurer;
 import org.jmouse.jdbc.statement.StatementHandler;
@@ -16,10 +20,14 @@ import org.jmouse.jdbc.statement.StatementHandler;
  */
 public interface ExecutionDescriptor {
 
+    JdbcOperation operation();
+
     /**
      * Final SQL (ready for JDBC).
      */
-    String sql();
+    default String sql() {
+        return null;
+    }
 
     /**
      * Parameter binder.
@@ -41,5 +49,16 @@ public interface ExecutionDescriptor {
     default StatementHandler<?> statementHandler() {
         return StatementHandler.noop();
     }
+
+    /**
+     * Low-level extractor (optional alternative to mapper).
+     */
+    default ResultSetExtractor<?> resultSetExtractor() {
+        return new ListResultSetExtractor<>(
+                rowMapper()
+        );
+    }
+
+    RowMapper<?> rowMapper();
 
 }

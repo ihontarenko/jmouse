@@ -16,7 +16,7 @@ import org.jmouse.web.servlet.registration.ServletListenerRegistrationBean;
 import org.jmouse.web.servlet.registration.ServletRegistrationBean;
 
 @BeanFactories
-@BeanConditionIfProperty(name = "jmouse.web.enable", value = "true")
+@BeanIfPropertyMatch(name = "jmouse.web.enable", value = "true")
 public class ServletDispatcherConfiguration {
 
     public static final String REQUEST_CONTEXT_NAME              = "requestContextListener";

@@ -5,9 +5,12 @@ import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.jmouse.web.server.WebServer;
+import org.jmouse.web.server.WebServerConfig;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.Objects;
+import java.util.Optional;
 
 
 /**
@@ -51,21 +54,19 @@ public class TomcatWebServerConfigurer implements WebServer.Configurer<Tomcat> {
     public static final int DEFAULT_PORT = 8080;
 
     private final ServletContainerInitializer containerInitializer;
+    private       String                      temporary;
     private       int                         port;
     private       String                      document    = DOCUMENT_DEFAULT;
     private       String                      contextRoot = CONTEXT_DEFAULT;
-    private       String                      temporary   = TEMPORARY_DEFAULT;
 
     /**
      * Constructs a {@code TomcatWebServerConfigurer} with a specified port,
      * {@link ServletContainerInitializer}, and optional initializer classes.
-     *
-     * @param port                the port on which Tomcat listens
-     * @param containerInitializer the {@link ServletContainerInitializer} to configure the servlet container
      */
-    public TomcatWebServerConfigurer(int port, ServletContainerInitializer containerInitializer) {
+    public TomcatWebServerConfigurer(WebServerConfig config, ServletContainerInitializer containerInitializer) {
         this.containerInitializer = containerInitializer;
-        this.port = port;
+        this.port = config.port();
+        this.temporary = Optional.ofNullable(config.temporary()).orElse(TEMPORARY_DEFAULT);
     }
 
     /**

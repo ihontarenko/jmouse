@@ -5,4 +5,5 @@ public interface ValidationProcessor {
     <T> ValidationResult<T> validate(T target, String objectName);
 
     <T> ValidationResult<T> validate(T target, String objectName, Hints hints);
+
 }

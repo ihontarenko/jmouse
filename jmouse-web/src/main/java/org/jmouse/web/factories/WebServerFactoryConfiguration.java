@@ -2,10 +2,10 @@ package org.jmouse.web.factories;
 
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
-import org.jmouse.context.BeanConditionExpression;
+import org.jmouse.context.BeanIfExpressionSatisfied;
 import org.jmouse.context.BeanProperties;
 import org.jmouse.core.binding.BindName;
-import org.jmouse.context.BeanConditionExists;
+import org.jmouse.context.BeanIfNameAbsent;
 import org.jmouse.web.server.WebServerConfig;
 import org.jmouse.web.server.WebServerFactory;
 import org.jmouse.web.server.WebServers;
@@ -14,11 +14,11 @@ import org.jmouse.web.server.tomcat.TomcatWebServerFactory;
 import java.util.Map;
 
 @BeanFactories(name = "webServerFactoryConfiguration")
-@BeanConditionExpression("('--- Application Name: ' ~ jmouse.web.app ~ ', WebServer: ' ~ jmouse.web.server.default) | sout")
+@BeanIfExpressionSatisfied("('--- Application Name: ' ~ jmouse.web.app ~ ', WebServer: ' ~ jmouse.web.server.default) | sout")
 public class WebServerFactoryConfiguration {
 
     @Bean("webServerFactory")
-    @BeanConditionExists(value = "webServerFactory", message = "web server factory already registered in client code")
+    @BeanIfNameAbsent(value = "webServerFactory", message = "web server factory already registered in client code")
     public WebServerFactory createWebServerFactory() {
         return new TomcatWebServerFactory();
     }

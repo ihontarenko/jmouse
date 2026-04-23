@@ -51,10 +51,14 @@ public final class SQLParameterSplitter implements Splitter<List<RawToken>, Toke
                 flushText(source, buffer, textStart, index);
 
                 int start = index;
+
                 index += 2;
+
                 while (index < end) {
                     char c = source.charAt(index);
-                    if (c == NEW_LINE || c == NEW_LINE_R) break;
+                    if (c == NEW_LINE || c == NEW_LINE_R) {
+                        break;
+                    }
                     index++;
                 }
 

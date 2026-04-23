@@ -6,7 +6,7 @@ import org.jmouse.core.chain.Link;
 import org.jmouse.core.chain.Outcome;
 import org.jmouse.jdbc.intercept.JdbcCall;
 import org.jmouse.jdbc.intercept.JdbcExecutionContext;
-import org.jmouse.jdbc.intercept.JdbcOperation;
+import org.jmouse.jdbc.JdbcOperation;
 
 /**
  * Guard link that validates SQL before execution.

@@ -2,7 +2,7 @@ package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.beans.BeanInitializationException;
-import org.jmouse.context.BeanConditionIfProperty;
+import org.jmouse.context.BeanIfPropertyMatch;
 import org.jmouse.core.MediaType;
 import org.jmouse.web.annotation.*;
 import org.jmouse.web.http.*;
@@ -28,7 +28,7 @@ import java.util.Map;
  * @see HttpStatus
  */
 @Controller
-@BeanConditionIfProperty(name = "jmouse.mvc.internal-controller.enabled", value = "true")
+@BeanIfPropertyMatch(name = "jmouse.mvc.internal-controller.enabled", value = "true")
 public class InternalFrameworkController {
 
     /**

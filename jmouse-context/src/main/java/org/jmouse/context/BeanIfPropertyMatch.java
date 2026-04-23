@@ -16,8 +16,8 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@BeanCondition(BeanConditionIfProperty.PropertyCondition.class)
-public @interface BeanConditionIfProperty {
+@BeanCondition(BeanIfPropertyMatch.PropertyCondition.class)
+public @interface BeanIfPropertyMatch {
 
     /**
      * 🔑 Property key to check.
@@ -48,8 +48,8 @@ public @interface BeanConditionIfProperty {
 
         @Override
         public boolean match(ConditionalMetadata metadata, BeanContext context) {
-            BeanConditionIfProperty annotation = metadata.getAnnotation(BeanConditionIfProperty.class);
-            boolean                 match      = annotation.matchIfMissing();
+            BeanIfPropertyMatch annotation = metadata.getAnnotation(BeanIfPropertyMatch.class);
+            boolean             match      = annotation.matchIfMissing();
 
             if (context instanceof ApplicationBeanContext applicationContext) {
                 Environment environment = applicationContext.getEnvironment();

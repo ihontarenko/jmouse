@@ -1,5 +1,6 @@
 package org.jmouse.jdbc.intercept;
 
+import org.jmouse.jdbc.JdbcOperation;
 import org.jmouse.jdbc.statement.CallableCallback;
 import org.jmouse.jdbc.statement.CallableStatementBinder;
 import org.jmouse.jdbc.statement.StatementConfigurer;

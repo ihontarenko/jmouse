@@ -8,6 +8,7 @@ import org.jmouse.beans.events.BeanEventDeduplicateKeyStrategy;
 import org.jmouse.core.events.DeduplicatingPublishPolicy;
 import org.jmouse.core.events.EventPublishPolicy;
 import org.jmouse.jdbc.JdbcSupport;
+import org.jmouse.jdbc.JdbcTemplate;
 import org.jmouse.jdbc.NamedTemplate;
 import org.jmouse.jdbc.connection.datasource.DataSourceContributor;
 import org.jmouse.jdbc.connection.datasource.DataSourceKeyHolder;
@@ -52,6 +53,7 @@ public final class SmokeNamedQueryMySql {
         );
 
         NamedTemplate named = context.getBean(NamedTemplate.class);
+        JdbcTemplate template = context.getBean(JdbcTemplate.class);
 
         Filter filter = new Filter(true, 10);
 
@@ -59,7 +61,7 @@ public final class SmokeNamedQueryMySql {
                 """
                 select username
                 from users
-                where active = :active
+                where active in (:active, :days, :active)
                   and last_login_days <= :days
                 order by id
                 """,
