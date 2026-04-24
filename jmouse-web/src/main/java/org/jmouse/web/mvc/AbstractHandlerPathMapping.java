@@ -1,9 +1,8 @@
 package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.core.LogBox;
-import org.jmouse.core.MediaType;
 import org.jmouse.core.matcher.Match;
+import org.jmouse.util.Commons;
 import org.jmouse.web.http.HttpMethod;
 import org.jmouse.web.match.PathPattern;
 import org.jmouse.web.match.Route;
@@ -22,7 +21,9 @@ import org.jmouse.web.match.routing.condition.RequestPathMatcher;
 
 import java.util.*;
 
+import static org.jmouse.core.AnsiColors.colorize;
 import static org.jmouse.core.Streamable.of;
+import static org.jmouse.util.Commons.unwrap;
 
 /**
  * 🧭 Abstract base class for route-based handler mappings.
@@ -115,7 +116,7 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
                                 requestRoute.method(), requestRoute.requestPath().path(), of(methods).joining(", ")));
             }
 
-            LOGGER.info(AnsiColors.colorize(
+            LOGGER.info(colorize(
                     "❌\uD83E\uDD7A ${RED_BOLD_BRIGHT}UNMATCHED:${RESET} ${YELLOW_BOLD_BRIGHT}%s${RESET}", requestRoute));
 
             return null;
@@ -144,54 +145,32 @@ public abstract class AbstractHandlerPathMapping<H> extends AbstractHandlerMappi
     }
 
     /**
-     * Logs a structured match result in a formatted ASCII block. 🚀
-     * Displays all resolved types and their associated values.
+     * Logs resolved match result as a single structured line.
      *
-     * @param match resolved handler match containing typed attributes
+     * @param match resolved handler match
      */
     private void logMatchResult(Match match) {
-        LogBox.box("MATCH RESULT")
-                .formatter(value ->
-                        AnsiColors.colorize(prettyValue(
-                                unwrap((Optional<?>) value)
-                        ))
-                )
+        HttpMethod method = unwrap(match.get(HttpMethod.class));
+        RouteMatch route  = unwrap(match.get(RouteMatch.class));
 
-                .section("Routing")
-                    .row("Path Pattern", match.get(PathPattern.class))
-                    .row("Route Match", match.get(RouteMatch.class))
+        StringBuilder message = new StringBuilder(128);
 
-                .section("HTTP")
-                    .row("Method", match.get(HttpMethod.class))
-                    .row("Produces", match.get(MediaType.class))
+        message.append(colorize("🚀 ${RED_BOLD_BRIGHT}MATCH${RESET} "))
+                .append(method).append(" ").append(route).append(" ");
 
-                .build()
-                .render(LOGGER::info);
-    }
+        message.append("\n\t").append("${BLUE_BOLD_BRIGHT}VARIABLES:${RESET} ").append(route.variables());
 
-    /**
-     * Formats a value for safe and readable log output. 🎨
-     * Handles nulls, strings, and generic objects.
-     *
-     * @param value raw value from match
-     * @return formatted string representation
-     */
-    private String prettyValue(Object value) {
-        if (value == null) {
-            return "${RED_BG_BRIGHT}${BLACK_BOLD_BRIGHT}<null>${RESET}";
+        for (Class<?> type : match.types()) {
+            message.append("\n\t").append(switch (type.getSimpleName()) {
+                case "PathPattern" -> colorize("${PURPLE_BOLD_BRIGHT}PATH_PATTERN${RESET}");
+                case "RouteMatch" -> colorize("${CYAN_BOLD_BRIGHT}ROUTE${RESET}");
+                case "MediaType" -> colorize("${YELLOW_BOLD_BRIGHT}PRODUCES${RESET}");
+                case "HttpMethod" -> colorize("${BLUE_BOLD_BRIGHT}METHOD${RESET}");
+                default -> colorize("${GREEN_BOLD_BRIGHT}%s${RESET}".formatted(type.getSimpleName()));
+            }).append("=").append(unwrap(match.get(type))).append(" ");
         }
-        return "\"${GREEN_BOLD_BRIGHT}" + value + "${RESET}\"";
-    }
 
-    /**
-     * Unwraps an Optional value safely for logging purposes. 📦
-     *
-     * @param value optional container
-     * @return contained value or "-" if empty
-     */
-    @SuppressWarnings({"unchecked", "rawtype"})
-    private Object unwrap(Optional<?> value) {
-        return ((Optional<Object>) value).orElse("-");
+        LOGGER.info(colorize("${BLUE_BOLD_BRIGHT}%s${RESET}", message.toString().trim()));
     }
 
     /**
