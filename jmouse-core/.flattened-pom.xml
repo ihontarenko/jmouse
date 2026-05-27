@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-core</artifactId>
-  <version>1.0.0-Beta</version>
+  <version>1.0.0-Release</version>
   <name>jMouse - Core API</name>
   <description>jMouse Framework - Core Library</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-core</url>
@@ -27,6 +27,18 @@
     <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-core</url>
   </scm>
   <dependencies>
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy</artifactId>
+      <version>1.17.6</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.objenesis</groupId>
+      <artifactId>objenesis</artifactId>
+      <version>3.3</version>
+      <scope>compile</scope>
+    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>

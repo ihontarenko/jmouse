@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
-        <version>1.0.0-Beta</version>
+        <version>1.0.0-Release</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -15,6 +15,18 @@
     <name>jMouse - JDBC</name>
     <description>jMouse Framework - JDBC</description>
     <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-jdbc</url>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <licenses>
         <license>

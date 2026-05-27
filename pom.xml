@@ -7,7 +7,7 @@
     <groupId>org.jmouse</groupId>
     <artifactId>jmouse-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-Beta</version>
+    <version>1.0.0-Release</version>
 
     <description>jMouse Framework</description>
     <url>https://github.com/ihontarenko/jmouse</url>
@@ -51,6 +51,7 @@
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven-source.version>3.2.1</maven-source.version>
         <maven-gpg.version>3.0.1</maven-gpg.version>
+        <maven-compiler.version>3.15.0</maven-compiler.version>
         <maven-javadoc.version>3.11.2</maven-javadoc.version>
         <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
         <flatten-maven-plugin.version>1.2.7</flatten-maven-plugin.version>
@@ -58,13 +59,15 @@
 
     <dependencyManagement>
         <dependencies>
+            <!--
             <dependency>
                 <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-dependencies</artifactId>
-                <version>1.0.0-Beta</version>
+                <version>1.0.0-Release</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            -->
         </dependencies>
     </dependencyManagement>
 
@@ -85,8 +88,6 @@
         <module>jmouse-context</module>
         <module>jmouse-web</module>
         <module>jmouse-crawler</module>
-        <module>wep-app</module>
-        <module>testing-ground</module>
     </modules>
 
     <build>
@@ -95,6 +96,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler.version}</version>
                     <configuration>
                         <source>${maven.compiler.source}</source>
                         <target>${maven.compiler.target}</target>
@@ -132,7 +134,10 @@
                     <artifactId>maven-gpg-plugin</artifactId>
                     <version>${maven-gpg.version}</version>
                     <configuration>
-
+<!--                        <gpgArguments>-->
+<!--                            <arg>&#45;&#45;pinentry-mode</arg>-->
+<!--                            <arg>loopback</arg>-->
+<!--                        </gpgArguments>-->
                     </configuration>
                     <executions>
                         <execution>

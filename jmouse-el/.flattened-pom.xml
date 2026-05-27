@@ -3,11 +3,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
-  <artifactId>jmouse-beans</artifactId>
+  <artifactId>jmouse-el</artifactId>
   <version>1.0.0-Release</version>
-  <name>jMouse - Beans</name>
-  <description>jMouse Framework - Beans</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-beans</url>
+  <name>jMouse - Expression Language</name>
+  <description>jMouse Framework - Expression Language &amp; Renderable Engine</description>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-el</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -24,7 +24,7 @@
   <scm>
     <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
     <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-beans</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-el</url>
   </scm>
   <dependencies>
     <dependency>
@@ -37,12 +37,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>2.0.13</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>jakarta.inject</groupId>
-      <artifactId>jakarta.inject-api</artifactId>
-      <version>2.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

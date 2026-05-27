@@ -6,12 +6,24 @@
     <parent>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
-        <version>1.0.0-Beta</version>
+        <version>1.0.0-Release</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <name>jMouse - Expression</name>
     <artifactId>jmouse-expression</artifactId>
     <packaging>jar</packaging>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <properties>
         <java.version>21</java.version>

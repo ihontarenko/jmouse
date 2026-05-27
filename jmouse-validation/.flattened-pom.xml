@@ -3,11 +3,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
-  <artifactId>jmouse-beans</artifactId>
+  <artifactId>jmouse-validation</artifactId>
   <version>1.0.0-Release</version>
-  <name>jMouse - Beans</name>
-  <description>jMouse Framework - Beans</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-beans</url>
+  <name>jMouse - Validation</name>
+  <description>jMouse Framework</description>
+  <url>https://github.com/ihontarenko/jmouse/jmouse-validation</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -22,9 +22,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
-    <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-beans</url>
+    <connection>scm:git:git://github.com/ihontarenko/jmouse.git/jmouse-validation</connection>
+    <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git/jmouse-validation</developerConnection>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-core/jmouse-validation</url>
   </scm>
   <dependencies>
     <dependency>
@@ -34,15 +34,33 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>2.0.13</version>
+      <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-el</artifactId>
+      <version>1.0.0-Release</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>jakarta.inject</groupId>
-      <artifactId>jakarta.inject-api</artifactId>
-      <version>2.0.1</version>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <version>3.1.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>8.0.1.Final</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>jakarta.el</artifactId>
+      <version>4.0.2</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>2.0.13</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
