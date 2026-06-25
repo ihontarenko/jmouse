@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
-        <version>1.0.0-Release</version>
+        <version>1.0.0-Stable1</version>
     </parent>
 
     <artifactId>jmouse-security</artifactId>

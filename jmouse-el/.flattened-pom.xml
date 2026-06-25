@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-el</artifactId>
-  <version>1.0.0-Release</version>
+  <version>1.0.0-Stable1</version>
   <name>jMouse - Expression Language</name>
   <description>jMouse Framework - Expression Language &amp; Renderable Engine</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-el</url>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-core</artifactId>
-      <version>1.0.0-Release</version>
+      <version>1.0.0-Stable1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

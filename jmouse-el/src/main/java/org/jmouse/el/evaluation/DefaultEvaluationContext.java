@@ -4,6 +4,8 @@ import org.jmouse.core.access.AccessorWrapper;
 import org.jmouse.core.access.ObjectAccessor;
 import org.jmouse.core.access.VirtualPropertyResolver;
 import org.jmouse.core.access.AttributeResolver;
+import org.jmouse.core.context.beans.BeanLookup;
+import org.jmouse.core.context.beans.BeanLookupContext;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.extension.StandardExtensionContainer;
@@ -13,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DefaultEvaluationContext implements EvaluationContext {
+public class DefaultEvaluationContext implements EvaluationContext, BeanLookupContext {
 
     private final Conversion              conversion;
     private final Map<Object, Object>     objects;
@@ -21,6 +23,7 @@ public class DefaultEvaluationContext implements EvaluationContext {
     private       ExtensionContainer      extensions;
     private       ScopedChain             chain;
     private       VirtualPropertyResolver resolver;
+    private       BeanLookup              lookup;
     private       ObjectAccessor          accessor;
 
     public DefaultEvaluationContext(ScopedChain chain, ExtensionContainer extensions, Conversion conversion) {
@@ -113,5 +116,25 @@ public class DefaultEvaluationContext implements EvaluationContext {
     @Override
     public void setVirtualProperties(VirtualPropertyResolver resolver) {
         this.resolver = resolver;
+    }
+
+    @Override
+    public <T> T getBean(Class<T> beanClass) {
+        return lookup.getBean(beanClass);
+    }
+
+    @Override
+    public <T> T getBean(String beanName, Class<T> beanClass) {
+        return lookup.getBean(beanName, beanClass);
+    }
+
+    @Override
+    public void setBeanLookup(BeanLookup beanLookup) {
+        this.lookup = beanLookup;
+    }
+
+    @Override
+    public BeanLookup getBeanLookup() {
+        return lookup;
     }
 }

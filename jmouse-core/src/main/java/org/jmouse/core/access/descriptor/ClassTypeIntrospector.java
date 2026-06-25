@@ -87,7 +87,7 @@ public class ClassTypeIntrospector extends AnnotatedElementIntrospector<ClassTyp
      * Introspects and registers all public fields.
      */
     public ClassTypeIntrospector fields() {
-        for (Field field : container.getTarget().getFields()) {
+        for (Field field : container.getTarget().getDeclaredFields()) {
             field(new FieldIntrospector(field).introspect().toDescriptor());
         }
         return self();

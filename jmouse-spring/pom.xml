@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-parent</artifactId>
+        <version>1.0.0-Stable1</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>jmouse-spring</artifactId>
+    <packaging>pom</packaging>
+    <name>jMouse - Spring Integration (Parent)</name>
+    <description>Parent POM for jMouse Spring Boot integration modules</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring</url>
+
+    <properties>
+        <spring-boot.version>3.3.5</spring-boot.version>
+    </properties>
+
+    <modules>
+        <module>jmouse-el-spring-boot</module>
+    </modules>
+
+</project>

@@ -46,7 +46,7 @@ public class ClassTypeData extends AnnotatedElementData<Class<?>> {
     }
 
     public void addField(FieldDescriptor field) {
-        fields.put(field.getName(), field);
+        fields.put(field.unwrap().getName(), field);
     }
 
     public void addMethod(MethodDescriptor method) {

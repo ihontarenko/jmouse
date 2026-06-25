@@ -27,15 +27,46 @@ public class CursorMatcher {
         return new SequnceMatcher(types);
     }
 
+    public static Matcher<TokenCursor> bean() {
+        return new BeanMatcher();
+    }
+
+    public record BeanMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            return methodCall(cursor) || fieldAccess(cursor) || constantAccess(cursor);
+        }
+
+        public boolean methodCall(TokenCursor cursor) {
+            return cursor.matchesSequence(
+                    T_AT, T_IDENTIFIER, T_DOT, T_IDENTIFIER, T_OPEN_PAREN
+            );
+        }
+
+        public boolean fieldAccess(TokenCursor cursor) {
+            return cursor.matchesSequence(
+                    T_AT, T_IDENTIFIER, T_COLON, T_DOLLAR, T_IDENTIFIER
+            );
+        }
+
+        public boolean constantAccess(TokenCursor cursor) {
+            return cursor.matchesSequence(
+                    T_AT, T_IDENTIFIER, T_HASH, T_IDENTIFIER
+            );
+        }
+
+    }
+
     record LambdaMatcher() implements Matcher<TokenCursor> {
 
         @Override
         public boolean matches(TokenCursor cursor) {
-            return cursor.matchesSequence(BasicToken.T_OPEN_PAREN, T_IDENTIFIER, T_CLOSE_PAREN)
-                    || cursor.matchesSequence(BasicToken.T_OPEN_PAREN, T_IDENTIFIER, T_COLON)
-                    || cursor.matchesSequence(BasicToken.T_OPEN_PAREN, T_IDENTIFIER, T_COMMA, T_IDENTIFIER)
-                    || cursor.matchesSequence(BasicToken.T_IDENTIFIER, T_ARROW)
-                    || cursor.matchesSequence(BasicToken.T_OPEN_PAREN, T_CLOSE_PAREN, T_ARROW);
+            return cursor.matchesSequence(T_OPEN_PAREN, T_IDENTIFIER, T_CLOSE_PAREN)
+                    || cursor.matchesSequence(T_OPEN_PAREN, T_IDENTIFIER, T_COLON)
+                    || cursor.matchesSequence(T_OPEN_PAREN, T_IDENTIFIER, T_COMMA, T_IDENTIFIER)
+                    || cursor.matchesSequence(T_IDENTIFIER, T_ARROW)
+                    || cursor.matchesSequence(T_OPEN_PAREN, T_CLOSE_PAREN, T_ARROW);
         }
 
     }
@@ -54,8 +85,8 @@ public class CursorMatcher {
 
         @Override
         public boolean matches(TokenCursor cursor) {
-            return cursor.matchesSequence(T_IDENTIFIER, BasicToken.T_OPEN_PAREN)
-                    || cursor.matchesSequence(T_IDENTIFIER, T_COLON, T_IDENTIFIER, BasicToken.T_OPEN_PAREN);
+            return cursor.matchesSequence(T_IDENTIFIER, T_OPEN_PAREN)
+                    || cursor.matchesSequence(T_IDENTIFIER, T_COLON, T_IDENTIFIER, T_OPEN_PAREN);
         }
 
     }

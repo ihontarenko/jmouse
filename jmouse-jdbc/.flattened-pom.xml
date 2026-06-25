@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-jdbc</artifactId>
-  <version>1.0.0-Release</version>
+  <version>1.0.0-Stable1</version>
   <name>jMouse - JDBC</name>
   <description>jMouse Framework - JDBC</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-jdbc</url>
@@ -30,25 +30,25 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-core</artifactId>
-      <version>1.0.0-Release</version>
+      <version>1.0.0-Stable1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-el</artifactId>
-      <version>1.0.0-Release</version>
+      <version>1.0.0-Stable1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-context</artifactId>
-      <version>1.0.0-Release</version>
+      <version>1.0.0-Stable1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-transaction</artifactId>
-      <version>1.0.0-Release</version>
+      <version>1.0.0-Stable1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

@@ -18,9 +18,9 @@ public interface BeanLookupContext extends BeanLookup {
     /**
      * 🔌 Attach bean valueProvider.
      *
-     * @param beanProvider backing {@link BeanLookup}
+     * @param beanLookup backing {@link BeanLookup}
      */
-    void setBeanLookup(BeanLookup beanProvider);
+    void setBeanLookup(BeanLookup beanLookup);
 
     BeanLookup getBeanLookup();
 

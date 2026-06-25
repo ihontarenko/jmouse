@@ -152,7 +152,8 @@ public class CoreExtension implements Extension {
                 new ParenthesesParser(),
                 new ArgumentsParser(),
                 new NamesParser(),
-                new ParametersParser()
+                new ParametersParser(),
+                new BeanAccessParser()
         );
     }
 

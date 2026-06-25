@@ -1,11 +1,15 @@
 package org.jmouse.validator.smoke;
 
+import org.jmouse.core.context.beans.BeanLookup;
+import org.jmouse.core.context.beans.BeanLookupContext;
 import org.jmouse.core.mapping.Mapper;
 import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.mapping.config.MappingConfig;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.el.ExpressionLanguage;
 
+import org.jmouse.el.evaluation.DefaultEvaluationContext;
+import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.validator.*;
 import org.jmouse.validator.constraint.adapter.core.ConstraintSchemaValidator;
 import org.jmouse.validator.constraint.adapter.el.ConstraintELModule;
@@ -22,16 +26,61 @@ import org.jmouse.validator.constraint.registry.ConstraintTypeRegistry;
 import org.jmouse.validator.constraint.registry.InMemoryConstraintSchemaRegistry;
 
 import java.math.BigDecimal;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class Smoke3 {
 
     public enum SchemaHint { PROGRAMMATIC, EXPRESSION }
 
+    public static class SecurityPermission {
+
+        private String field = "SecurityPermission hello!";
+        private static final String TYPE = "constant hello!";
+
+        public String hasPermission(String privilege) {
+            return getClass().getSimpleName() + ":" + privilege;
+        }
+
+        public Integer getAccessLevel() {
+            return 337791;
+        }
+
+    }
+
     public static void main(String[] args) {
+
+        ExpressionLanguage el = new ExpressionLanguage();
+        EvaluationContext context = el.newContext();
+
+        if (context instanceof BeanLookupContext lookupContext) {
+            lookupContext.setBeanLookup(new BeanLookup() {
+                @Override
+                public <T> T getBean(Class<T> beanClass) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public <T> T getBean(String beanName, Class<T> beanClass) {
+                    Object object = new SecurityPermission();
+
+                    if (Objects.equals(beanName, "bean")) {
+                        return (T) object;
+                    }
+
+                    throw new UnsupportedOperationException();
+                }
+            });
+        }
+
+        el.evaluate("@bean.hasPermission('read')", context);
+        el.evaluate("@bean#TYPE", context);
+        el.evaluate("@bean:$field", context);
+
+        System.out.println(
+                el.evaluate("@bean.getAccessLevel() | double / 77", context)
+        );
+
+        System.exit(1);
 
         Map<String, Object> form = new LinkedHashMap<>();
         form.put("lang", "ru"); // invalid for uk/en

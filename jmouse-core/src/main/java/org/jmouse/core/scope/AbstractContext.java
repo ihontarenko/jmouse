@@ -47,11 +47,11 @@ public abstract class AbstractContext implements Context {
     /**
      * Sets the {@link BeanLookup} for this context.
      *
-     * @param lookup the structured valueProvider to set.
+     * @param beanLookup the structured valueProvider to set.
      */
     @Override
-    public void setBeanLookup(BeanLookup lookup) {
-        this.lookup = lookup;
+    public void setBeanLookup(BeanLookup beanLookup) {
+        this.lookup = beanLookup;
     }
 
     /**
