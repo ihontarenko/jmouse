@@ -51,6 +51,7 @@ public class CoreExtension implements Extension {
                 new MinFunction(),
                 new MaxFunction(),
                 new SetFunction(),
+                new GetFunction(),
                 // string functions
                 new UclastFunction(),
                 new UcfirstFunction(),
@@ -153,7 +154,8 @@ public class CoreExtension implements Extension {
                 new ArgumentsParser(),
                 new NamesParser(),
                 new ParametersParser(),
-                new BeanAccessParser()
+                new BeanAccessParser(),
+                new VariableAliasParser()
         );
     }
 

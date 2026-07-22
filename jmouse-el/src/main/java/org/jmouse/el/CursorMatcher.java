@@ -31,6 +31,21 @@ public class CursorMatcher {
         return new BeanMatcher();
     }
 
+    public static Matcher<TokenCursor> variableAlias() {
+        return new VariableAliasMatcher();
+    }
+
+    public record VariableAliasMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            return cursor.matchesSequence(
+                    T_DOLLAR, T_IDENTIFIER, T_COLON
+            );
+        }
+
+    }
+
     public record BeanMatcher() implements Matcher<TokenCursor> {
 
         @Override

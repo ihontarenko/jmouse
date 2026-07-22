@@ -81,6 +81,18 @@ map['key']                        // map subscript
 list[0]                           // list index
 ```
 
+### Variable Alias
+
+```
+$A1:long-variable-name
+```
+
+equivalent
+
+```
+set('A1', get('long-variable-name'))
+```
+
 ### Bean access — `@`
 
 Reach out to a container-managed bean by name and either call a method, read a
