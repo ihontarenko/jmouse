@@ -4,7 +4,7 @@ import org.jmouse.security.session.SessionRegistry;
 import org.jmouse.core.Customizer;
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.session.*;
-import org.jmouse.web.http.HttpStatus;
+import org.jmouse.http.HttpStatus;
 
 import java.util.ArrayList;
 import java.util.List;

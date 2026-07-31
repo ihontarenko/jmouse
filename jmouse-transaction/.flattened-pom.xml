@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-transaction</artifactId>
-  <version>1.0.0-Stable_20260728</version>
+  <version>1.0.0-Stable_20260801</version>
   <name>jMouse - TX</name>
   <description>jMouse Framework - TX</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-transaction</url>
@@ -30,13 +30,13 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-core</artifactId>
-      <version>1.0.0-Stable_20260728</version>
+      <version>1.0.0-Stable_20260801</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-beans</artifactId>
-      <version>1.0.0-Stable_20260728</version>
+      <version>1.0.0-Stable_20260801</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

@@ -1,14 +1,14 @@
 package org.jmouse.web.mvc.cors;
 
 import org.jmouse.core.Streamable;
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.http.HttpHeader;
+import org.jmouse.http.HttpMethod;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.jmouse.web.http.HttpMethod.*;
+import static org.jmouse.http.HttpMethod.*;
 
 
 /**
@@ -178,8 +178,8 @@ public class CorsConfiguration {
      *
      * @param privateNetwork whether to allow private network access
      * @return this config (for chaining)
-     * @see org.jmouse.web.http.HttpHeader#ACCESS_CONTROL_REQUEST_PRIVATE_NETWORK
-     * @see org.jmouse.web.http.HttpHeader#ACCESS_CONTROL_ALLOW_PRIVATE_NETWORK
+     * @see org.jmouse.http.HttpHeader#ACCESS_CONTROL_REQUEST_PRIVATE_NETWORK
+     * @see org.jmouse.http.HttpHeader#ACCESS_CONTROL_ALLOW_PRIVATE_NETWORK
      */
     public CorsConfiguration allowPrivateNetwork(boolean privateNetwork) {
         this.allowPrivateNetwork = privateNetwork;

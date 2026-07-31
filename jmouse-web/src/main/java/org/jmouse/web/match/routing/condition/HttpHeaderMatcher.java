@@ -3,7 +3,7 @@ package org.jmouse.web.match.routing.condition;
 import org.jmouse.core.matcher.Match;
 import org.jmouse.web.match.routing.MappingMatcher;
 import org.jmouse.web.http.RequestRoute;
-import org.jmouse.web.http.HttpHeader;
+import org.jmouse.http.HttpHeader;
 
 /**
  * 📡 Matches a specific HTTP header and its expected value.

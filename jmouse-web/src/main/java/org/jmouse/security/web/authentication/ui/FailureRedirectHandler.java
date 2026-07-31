@@ -3,8 +3,8 @@ package org.jmouse.security.web.authentication.ui;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.security.web.authentication.AuthenticationFailureHandler;
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.HttpStatus;
+import org.jmouse.http.HttpHeader;
+import org.jmouse.http.HttpStatus;
 
 import java.io.IOException;
 

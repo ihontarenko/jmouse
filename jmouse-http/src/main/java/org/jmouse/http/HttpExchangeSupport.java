@@ -1,4 +1,4 @@
-package org.jmouse.web.http;
+package org.jmouse.http;
 
 /**
  * 🧩 Thin adapter that mirrors Spring's ServletWebRequest "conditional" behavior

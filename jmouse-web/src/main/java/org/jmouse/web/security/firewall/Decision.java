@@ -1,8 +1,8 @@
 package org.jmouse.web.security.firewall;
 
-import org.jmouse.web.http.HttpStatus;
+import org.jmouse.http.HttpStatus;
 
-import static org.jmouse.web.http.HttpStatus.OK;
+import static org.jmouse.http.HttpStatus.OK;
 
 /**
  * 🛡️ Represents the result of a firewall evaluation.

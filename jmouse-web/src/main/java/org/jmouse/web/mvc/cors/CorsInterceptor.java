@@ -2,7 +2,7 @@ package org.jmouse.web.mvc.cors;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.web.http.Headers;
+import org.jmouse.http.Headers;
 import org.jmouse.web.http.RequestAttributesHolder;
 import org.jmouse.web.http.response.HttpServletHeadersBuffer;
 import org.jmouse.web.mvc.HandlerInterceptor;
@@ -23,7 +23,7 @@ import org.jmouse.web.mvc.HandlerInterceptor;
  *
  * @see CorsConfiguration
  * @see CorsProcessor
- * @see org.jmouse.web.http.HttpHeader
+ * @see org.jmouse.http.HttpHeader
  */
 public class CorsInterceptor implements HandlerInterceptor {
 

@@ -2,6 +2,7 @@ package org.jmouse.web.http;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jmouse.http.HttpHeader;
 
 /**
  * 📝 {@code HeaderWriter}

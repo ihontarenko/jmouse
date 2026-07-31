@@ -5,6 +5,7 @@ import org.jmouse.beans.BeanInitializationException;
 import org.jmouse.context.BeanIfPropertyMatch;
 import org.jmouse.core.MediaType;
 import org.jmouse.web.annotation.*;
+import org.jmouse.http.*;
 import org.jmouse.web.http.*;
 import org.jmouse.web.mvc.resource.ResourceNotFoundException;
 import org.jmouse.web.mvc.resource.ResourceValidationFailedException;

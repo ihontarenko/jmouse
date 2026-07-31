@@ -2,7 +2,7 @@ package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.matcher.Match;
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.http.HttpMethod;
 import org.jmouse.web.match.PathPattern;
 import org.jmouse.web.match.Route;
 import org.jmouse.web.match.RouteMatch;

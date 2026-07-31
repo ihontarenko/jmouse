@@ -4,8 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.Part;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.matcher.TextMatchers;
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.ContentDisposition;
+import org.jmouse.http.HttpHeader;
+import org.jmouse.http.ContentDisposition;
 
 import java.util.*;
 

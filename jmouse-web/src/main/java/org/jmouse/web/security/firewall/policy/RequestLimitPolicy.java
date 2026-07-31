@@ -2,7 +2,7 @@ package org.jmouse.web.security.firewall.policy;
 
 import org.jmouse.core.net.CIDR;
 import org.jmouse.core.throttle.RateLimiter;
-import org.jmouse.web.http.HttpStatus;
+import org.jmouse.http.HttpStatus;
 import org.jmouse.web.http.WebRequest;
 import org.jmouse.web.security.firewall.Decision;
 import org.jmouse.web.security.firewall.EvaluationInput;

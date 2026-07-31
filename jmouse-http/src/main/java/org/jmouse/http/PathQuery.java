@@ -1,4 +1,4 @@
-package org.jmouse.web.http;
+package org.jmouse.http;
 
 /**
  * 🌐 Represents a parsed HTTP request target.

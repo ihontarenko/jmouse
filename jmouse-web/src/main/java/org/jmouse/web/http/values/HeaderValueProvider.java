@@ -1,8 +1,8 @@
 package org.jmouse.web.http.values;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.Headers;
+import org.jmouse.http.HttpHeader;
+import org.jmouse.http.Headers;
 import org.jmouse.web.http.WebRequest;
 
 import java.util.HashSet;

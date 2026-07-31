@@ -1,6 +1,6 @@
 package org.jmouse.web.mvc;
 
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.http.HttpMethod;
 
 import java.util.Set;
 

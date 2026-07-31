@@ -5,7 +5,7 @@ import org.jmouse.core.MediaType;
 import org.jmouse.core.MimeParser;
 import org.jmouse.core.Priority;
 import org.jmouse.core.Streamable;
-import org.jmouse.web.http.HttpHeader;
+import org.jmouse.http.HttpHeader;
 import org.jmouse.web.http.RequestAttributesHolder;
 import org.jmouse.web.http.RequestHeaders;
 

@@ -8,6 +8,7 @@ import org.jmouse.core.Streamable;
 import org.jmouse.core.io.PatternMatcherResourceLoader;
 import org.jmouse.core.io.Resource;
 import org.jmouse.core.io.ResourceSegment;
+import org.jmouse.http.*;
 import org.jmouse.web.http.*;
 import org.jmouse.web.match.RouteMatch;
 import org.jmouse.web.mvc.*;

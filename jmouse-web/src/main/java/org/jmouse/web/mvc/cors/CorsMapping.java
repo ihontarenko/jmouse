@@ -1,7 +1,7 @@
 package org.jmouse.web.mvc.cors;
 
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.http.HttpHeader;
+import org.jmouse.http.HttpMethod;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

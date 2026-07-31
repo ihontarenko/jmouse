@@ -10,7 +10,7 @@ import org.jmouse.security.web.jwt.JacksonJsonMapper;
 import org.jmouse.web.annotation.Controller;
 import org.jmouse.web.annotation.Mapping;
 import org.jmouse.web.annotation.PathVariable;
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.http.HttpMethod;
 import org.jmouse.web.mvc.method.converter.JacksonObjectMapperResolver;
 
 import java.time.Instant;

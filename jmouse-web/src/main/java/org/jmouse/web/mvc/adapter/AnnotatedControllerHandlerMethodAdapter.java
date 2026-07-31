@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.Sorter;
 import org.jmouse.web.context.WebBeanContext;
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.http.HttpMethod;
 import org.jmouse.web.http.RequestAttributes;
 import org.jmouse.web.http.RequestAttributesHolder;
 import org.jmouse.web.mvc.method.ArgumentResolver;

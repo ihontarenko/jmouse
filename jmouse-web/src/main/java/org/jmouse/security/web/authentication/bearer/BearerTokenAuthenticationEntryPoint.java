@@ -1,8 +1,8 @@
 package org.jmouse.security.web.authentication.bearer;
 
 import org.jmouse.security.web.authentication.AbstractRealmAuthenticationEntryPoint;
-import org.jmouse.web.http.WWWAuthenticate;
-import org.jmouse.web.http.WWWAuthenticate.Bearer;
+import org.jmouse.http.WWWAuthenticate;
+import org.jmouse.http.WWWAuthenticate.Bearer;
 
 /**
  * 🪙 BearerTokenAuthenticationEntryPoint

@@ -12,7 +12,7 @@ import org.jmouse.web.security.firewall.Firewall;
 
 import java.io.IOException;
 
-import static org.jmouse.web.http.HttpHeader.X_FIREWALL_REASON;
+import static org.jmouse.http.HttpHeader.X_FIREWALL_REASON;
 
 /**
  * 🛡️ Servlet {@link Filter} that integrates the jMouse {@link Firewall}.

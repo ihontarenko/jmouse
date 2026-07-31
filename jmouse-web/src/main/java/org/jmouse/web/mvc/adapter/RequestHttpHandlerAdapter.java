@@ -2,7 +2,7 @@ package org.jmouse.web.mvc.adapter;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.web.http.HttpStatus;
+import org.jmouse.http.HttpStatus;
 import org.jmouse.web.mvc.HandlerAdapter;
 import org.jmouse.web.mvc.HandlerAdapterException;
 import org.jmouse.web.mvc.MVCResult;

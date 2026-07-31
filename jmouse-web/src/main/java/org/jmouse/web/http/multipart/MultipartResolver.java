@@ -2,7 +2,7 @@ package org.jmouse.web.http.multipart;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.MediaType;
-import org.jmouse.web.http.Headers;
+import org.jmouse.http.Headers;
 import org.jmouse.web.http.RequestAttributesHolder;
 
 /**

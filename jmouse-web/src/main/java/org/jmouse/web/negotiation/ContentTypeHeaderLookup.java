@@ -3,7 +3,7 @@ package org.jmouse.web.negotiation;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.MediaType;
 import org.jmouse.core.Priority;
-import org.jmouse.web.http.Headers;
+import org.jmouse.http.Headers;
 import org.jmouse.web.http.RequestAttributesHolder;
 
 import java.util.Collections;
@@ -18,7 +18,7 @@ import java.util.List;
  * <p>Priority is set relatively low so that more specific resolvers (e.g., route metadata)
  * can override it when applicable.</p>
  *
- * @see org.jmouse.web.http.HttpHeader#CONTENT_TYPE
+ * @see org.jmouse.http.HttpHeader#CONTENT_TYPE
  * @see MediaTypeLookup
  */
 @Priority(Integer.MIN_VALUE + 3000)

@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * 🚦 Bind the HTTP request method to a controller method parameter.
  *
- * <p>Injects the current {@link org.jmouse.web.http.HttpMethod}
+ * <p>Injects the current {@link org.jmouse.http.HttpMethod}
  * (e.g. {@code GET}, {@code POST}) into the annotated parameter.</p>
  *
  * <p>💡 Example:</p>

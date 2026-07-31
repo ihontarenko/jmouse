@@ -1,18 +1,18 @@
 package org.jmouse.web.mvc.cors;
 
 import org.jmouse.core.matcher.Matcher;
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.HttpMethod;
-import org.jmouse.web.http.HttpStatus;
-import org.jmouse.web.http.Allow;
-import org.jmouse.web.http.Headers;
-import org.jmouse.web.http.Vary;
+import org.jmouse.http.HttpHeader;
+import org.jmouse.http.HttpMethod;
+import org.jmouse.http.HttpStatus;
+import org.jmouse.http.Allow;
+import org.jmouse.http.Headers;
+import org.jmouse.http.Vary;
 
 import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNullElse;
-import static org.jmouse.web.http.HttpHeader.*;
+import static org.jmouse.http.HttpHeader.*;
 
 /**
  * 🌐 CORS processor for jMouse MVC.

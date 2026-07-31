@@ -1,7 +1,7 @@
 package org.jmouse.web.match.routing.condition;
 
 import org.jmouse.core.matcher.Match;
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.http.HttpMethod;
 import org.jmouse.web.http.RequestRoute;
 import org.jmouse.web.match.routing.MappingMatcher;
 

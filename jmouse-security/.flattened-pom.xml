@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-security</artifactId>
-  <version>1.0.0-Stable_20260728</version>
+  <version>1.0.0-Stable_20260801</version>
   <name>jMouse - Security Pipeline</name>
   <description>jMouse Framework - Security Pipeline</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-security</url>
@@ -30,19 +30,19 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-core</artifactId>
-      <version>1.0.0-Stable_20260728</version>
+      <version>1.0.0-Stable_20260801</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-el</artifactId>
-      <version>1.0.0-Stable_20260728</version>
+      <version>1.0.0-Stable_20260801</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-context</artifactId>
-      <version>1.0.0-Stable_20260728</version>
+      <version>1.0.0-Stable_20260801</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

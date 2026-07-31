@@ -2,16 +2,16 @@ package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.web.http.HttpMethod;
-import org.jmouse.web.http.Allow;
+import org.jmouse.http.HttpMethod;
+import org.jmouse.http.Allow;
 import org.jmouse.web.mvc.adapter.RequestHttpHandler;
 
 import java.io.IOException;
 import java.util.Set;
 
-import static org.jmouse.web.http.HttpHeader.ALLOW;
-import static org.jmouse.web.http.HttpHeader.X_JMOUSE_DEBUG;
-import static org.jmouse.web.http.HttpStatus.NO_CONTENT;
+import static org.jmouse.http.HttpHeader.ALLOW;
+import static org.jmouse.http.HttpHeader.X_JMOUSE_DEBUG;
+import static org.jmouse.http.HttpStatus.NO_CONTENT;
 
 /**
  * HTTP {@code OPTIONS} handler that responds with {@code 204 No Content}

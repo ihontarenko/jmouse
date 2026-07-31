@@ -1,6 +1,6 @@
 package org.jmouse.web.mvc.resource;
 
-import org.jmouse.web.http.PathQuery;
+import org.jmouse.http.PathQuery;
 
 import java.util.Locale;
 import java.util.regex.Matcher;

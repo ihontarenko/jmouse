@@ -12,7 +12,7 @@ import org.jmouse.security.service.InMemoryUserPrincipalService;
 import org.jmouse.security.web.MatchableSecurityFilterChain;
 import org.jmouse.security.web.configuration.builder.HttpSecurity;
 import org.jmouse.security.web.configuration.configurer.AuthorizeRequestConfigurer;
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.http.HttpMethod;
 import org.jmouse.web.server.WebServerFactory;
 
 import static org.jmouse.web.match.routing.MatcherCriteria.GET;

@@ -1,9 +1,9 @@
 package org.jmouse.web.mvc.cors;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.HttpMethod;
-import org.jmouse.web.http.Headers;
+import org.jmouse.http.HttpHeader;
+import org.jmouse.http.HttpMethod;
+import org.jmouse.http.Headers;
 import org.jmouse.web.http.RequestAttributesHolder;
 
 import java.util.HashSet;
@@ -139,7 +139,7 @@ public final class Cors {
      *
      * @param headers request headers abstraction
      * @return the {@code Origin} value (or the literal {@code "null"} if missing)
-     * @see org.jmouse.web.http.HttpHeader#ORIGIN
+     * @see org.jmouse.http.HttpHeader#ORIGIN
      */
     public static String origin(Headers headers) {
         return String.valueOf(headers.getHeader(HttpHeader.ORIGIN));
@@ -153,7 +153,7 @@ public final class Cors {
      *
      * @param headers request headers abstraction
      * @return requested method value (or the literal {@code "null"} if missing)
-     * @see org.jmouse.web.http.HttpHeader#ACCESS_CONTROL_REQUEST_METHOD
+     * @see org.jmouse.http.HttpHeader#ACCESS_CONTROL_REQUEST_METHOD
      */
     public static String requestedMethod(Headers headers) {
         return String.valueOf(headers.getHeader(HttpHeader.ACCESS_CONTROL_REQUEST_METHOD));
@@ -167,7 +167,7 @@ public final class Cors {
      *
      * @param headers request headers abstraction
      * @return requested headers value (comma-separated; or the literal {@code "null"} if missing)
-     * @see org.jmouse.web.http.HttpHeader#ACCESS_CONTROL_REQUEST_HEADERS
+     * @see org.jmouse.http.HttpHeader#ACCESS_CONTROL_REQUEST_HEADERS
      */
     public static String requestedHeaders(Headers headers) {
         return String.valueOf(headers.getHeader(HttpHeader.ACCESS_CONTROL_REQUEST_HEADERS));

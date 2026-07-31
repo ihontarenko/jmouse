@@ -12,7 +12,7 @@ import org.jmouse.security.web.authentication.ui.SavedRequestAwareAuthentication
 import org.jmouse.security.web.configuration.HttpSecurityBuilder;
 import org.jmouse.security.web.configuration.SharedAttributes;
 import org.jmouse.security.web.context.SecurityContextRepository;
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.http.HttpMethod;
 import org.jmouse.web.http.cache.HttpSessionRequestCache;
 import org.jmouse.web.http.cache.RequestCache;
 import org.jmouse.web.match.routing.MatcherCriteria;

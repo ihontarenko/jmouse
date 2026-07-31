@@ -4,7 +4,7 @@ import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanFactories;
 import org.jmouse.context.BeanProperties;
 import org.jmouse.core.binding.BindName;
-import org.jmouse.web.http.HttpStatus;
+import org.jmouse.http.HttpStatus;
 import org.jmouse.web.security.firewall.*;
 import org.jmouse.web.security.firewall.policy.*;
 

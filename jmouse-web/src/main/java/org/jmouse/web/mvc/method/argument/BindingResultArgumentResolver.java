@@ -2,7 +2,7 @@ package org.jmouse.web.mvc.method.argument;
 
 import org.jmouse.core.MethodParameter;
 import org.jmouse.web.binding.BindingResult;
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.http.HttpMethod;
 import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.mvc.MappingResult;
 import org.jmouse.web.mvc.method.AbstractArgumentResolver;

@@ -2,7 +2,7 @@ package org.jmouse.security.web.authentication;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.web.http.HttpStatus;
+import org.jmouse.http.HttpStatus;
 
 public class NoopHttp200SuccessHandler implements AuthenticationSuccessHandler {
 

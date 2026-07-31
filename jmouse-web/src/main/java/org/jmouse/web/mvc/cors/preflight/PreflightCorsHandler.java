@@ -6,7 +6,7 @@ import org.jmouse.web.mvc.adapter.RequestHttpHandler;
 
 import java.io.IOException;
 
-import static org.jmouse.web.http.HttpHeader.X_JMOUSE_DEBUG;
+import static org.jmouse.http.HttpHeader.X_JMOUSE_DEBUG;
 
 /**
  * No-op handler used for CORS preflight exchanges.

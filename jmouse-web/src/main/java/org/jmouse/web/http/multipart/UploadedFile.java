@@ -1,7 +1,7 @@
 package org.jmouse.web.http.multipart;
 
 import jakarta.servlet.http.Part;
-import org.jmouse.web.http.ContentDisposition;
+import org.jmouse.http.ContentDisposition;
 
 /**
  * 📎 Simple implementation of {@link MultipartFile} backed by a servlet {@link Part}.

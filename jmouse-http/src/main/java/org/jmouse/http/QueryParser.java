@@ -1,4 +1,4 @@
-package org.jmouse.web.http;
+package org.jmouse.http;
 
 import java.util.HashMap;
 import java.util.List;

@@ -6,8 +6,8 @@ import org.jmouse.security.web.AuthorizationFailureHandler;
 
 import java.io.IOException;
 
-import static org.jmouse.web.http.HttpHeader.X_SECURITY_REASON;
-import static org.jmouse.web.http.HttpStatus.FORBIDDEN;
+import static org.jmouse.http.HttpHeader.X_SECURITY_REASON;
+import static org.jmouse.http.HttpStatus.FORBIDDEN;
 
 public class ForbiddenAuthorizationFailureHandler implements AuthorizationFailureHandler {
 

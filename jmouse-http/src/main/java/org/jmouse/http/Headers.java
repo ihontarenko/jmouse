@@ -1,4 +1,4 @@
-package org.jmouse.web.http;
+package org.jmouse.http;
 
 import org.jmouse.core.MediaType;
 import org.jmouse.core.MimeParser;

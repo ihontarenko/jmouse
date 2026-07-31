@@ -8,7 +8,7 @@ import org.jmouse.core.MediaType;
 import org.jmouse.web.mvc.NotFoundException;
 import org.jmouse.web.match.Route;
 import org.jmouse.web.mvc.mapping.RequestHttpHandlerRegistration;
-import org.jmouse.web.http.HttpHeader;
+import org.jmouse.http.HttpHeader;
 
 @BeanFactories
 @BeanScan(EmailCfg.class)

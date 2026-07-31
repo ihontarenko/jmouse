@@ -63,9 +63,14 @@ jmouse-jdbc           JDBC abstraction — named-parameter SQL, bulk ops, statem
 jmouse-validation     Validation — integrates jakarta.validation / Hibernate Validator
 jmouse-security       Security pipeline — authentication (DAO, JWT), authorization
                       (method-level, JSR-250 voting), password encoding, sessions
+jmouse-http           HTTP protocol values, servlet-free — headers, status codes,
+                      methods, content disposition, ranges, cache control, entity tags
+                      and conditional requests. Depends on jmouse-core alone, so code
+                      that only speaks HTTP need not pull a servlet container
 jmouse-web            Web MVC + embedded Tomcat — dispatcher, adapters, view engine,
                       argument resolution, interceptors, content negotiation, CORS,
-                      resource handling, web security filter chain
+                      resource handling, web security filter chain. Keeps the
+                      servlet-bound wrappers (request/response/session/context)
 jmouse-crawler        Web crawler/scraper — JSoup, JsonPath, DLQ, politeness scheduler
 wep-app               Demo application (references all major subsystems)
 ```

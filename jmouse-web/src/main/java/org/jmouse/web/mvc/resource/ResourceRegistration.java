@@ -1,9 +1,9 @@
 package org.jmouse.web.mvc.resource;
 
-import org.jmouse.web.http.Allow;
-import org.jmouse.web.http.CacheControl;
-import org.jmouse.web.http.ETag;
-import org.jmouse.web.http.Vary;
+import org.jmouse.http.Allow;
+import org.jmouse.http.CacheControl;
+import org.jmouse.http.ETag;
+import org.jmouse.http.Vary;
 import org.jmouse.web.mvc.ETagGenerator;
 
 import java.util.ArrayList;
@@ -74,7 +74,7 @@ public class ResourceRegistration {
      * Preconfigured {@code Vary} policy applied by {@link ResourceHttpHandler#prepareResponse()}.
      * <p>Use {@link Vary#empty()} to suppress emission; {@code null} means “no configured policy”.</p>
      *
-     * @see org.jmouse.web.http.HttpHeader#VARY
+     * @see org.jmouse.http.HttpHeader#VARY
      */
     private Vary vary = Vary.empty();
 
@@ -82,7 +82,7 @@ public class ResourceRegistration {
      * Model used to render the {@code Allow} header (e.g., for {@code OPTIONS} responses).
      * <p>Usually computed from the supported methods; use {@link Allow#empty()} to emit nothing.</p>
      *
-     * @see org.jmouse.web.http.HttpHeader#ALLOW
+     * @see org.jmouse.http.HttpHeader#ALLOW
      */
     private Allow allow = Allow.empty();
 
@@ -193,7 +193,7 @@ public class ResourceRegistration {
      * Returns the configured {@link Vary} header model.
      *
      * @return current {@code Vary} configuration, or {@code null} if none
-     * @see org.jmouse.web.http.HttpHeader#VARY
+     * @see org.jmouse.http.HttpHeader#VARY
      */
     public Vary getVary() {
         return vary;
@@ -206,7 +206,7 @@ public class ResourceRegistration {
      *
      * @param vary the {@code Vary} configuration to use, or {@code null} to clear
      * @return this registration
-     * @see org.jmouse.web.http.HttpHeader#VARY
+     * @see org.jmouse.http.HttpHeader#VARY
      */
     public ResourceRegistration setVary(Vary vary) {
         this.vary = vary;
@@ -217,7 +217,7 @@ public class ResourceRegistration {
      * Returns the {@link Allow} model used to render the {@code Allow} header.
      *
      * @return current {@code Allow} configuration; may be {@code null}
-     * @see org.jmouse.web.http.HttpHeader#ALLOW
+     * @see org.jmouse.http.HttpHeader#ALLOW
      */
     public Allow getAllow() {
         return allow;
@@ -230,7 +230,7 @@ public class ResourceRegistration {
      *
      * @param allow the {@code Allow} configuration to use; may be {@code null}
      * @return this registration
-     * @see org.jmouse.web.http.HttpHeader#ALLOW
+     * @see org.jmouse.http.HttpHeader#ALLOW
      */
     public ResourceRegistration setAllow(Allow allow) {
         this.allow = allow;

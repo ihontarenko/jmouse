@@ -1,6 +1,6 @@
 package org.jmouse.web.mvc.method.converter;
 
-import org.jmouse.web.http.Headers;
+import org.jmouse.http.Headers;
 
 /**
  * 📦 Represents the common contract for HTTP input/output messages.

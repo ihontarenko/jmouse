@@ -19,7 +19,7 @@ import java.util.Map;
 import static java.util.Objects.requireNonNull;
 import static org.jmouse.security.web.authentication.form.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_PASSWORD;
 import static org.jmouse.security.web.authentication.form.SubmitFormRequestAuthenticationFilter.JMOUSE_USER_IDENTITY_USERNAME;
-import static org.jmouse.web.http.HttpStatus.OK;
+import static org.jmouse.http.HttpStatus.OK;
 
 public final class DefaultLoginPageGeneratingFilter implements BeanFilter, HeaderWriter {
 

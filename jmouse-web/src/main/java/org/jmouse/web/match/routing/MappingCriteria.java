@@ -1,7 +1,7 @@
 package org.jmouse.web.match.routing;
 
 import org.jmouse.core.MediaType;
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.http.HttpMethod;
 import org.jmouse.web.match.Route;
 import org.jmouse.web.http.RequestRoute;
 

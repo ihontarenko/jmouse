@@ -2,7 +2,7 @@ package org.jmouse.web.http.writers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jmouse.web.http.Header;
+import org.jmouse.http.Header;
 import org.jmouse.web.http.HeaderWriter;
 
 public class AbstractHeaderWriter implements HeaderWriter {

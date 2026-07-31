@@ -1,7 +1,7 @@
 package org.jmouse.web.http.values;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.jmouse.web.http.HttpHeader;
+import org.jmouse.http.HttpHeader;
 
 import java.util.*;
 

@@ -1,4 +1,4 @@
-package org.jmouse.web.http;
+package org.jmouse.http;
 
 import org.jmouse.helpers.StringHelper;
 
@@ -231,7 +231,7 @@ public final class Allow {
      * Callers should avoid emitting an {@code Allow} header with an empty value.</p>
      *
      * @return comma-separated list of HTTP methods, or an empty string if none
-     * @see org.jmouse.web.http.HttpHeader#ALLOW
+     * @see org.jmouse.http.HttpHeader#ALLOW
      */
     public String toHeaderValue() {
         if (allow.isEmpty()) {

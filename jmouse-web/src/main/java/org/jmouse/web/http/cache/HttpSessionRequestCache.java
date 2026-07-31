@@ -3,7 +3,7 @@ package org.jmouse.web.http.cache;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.http.HttpMethod;
 import org.jmouse.web.http.RequestRoute;
 
 import java.util.Set;

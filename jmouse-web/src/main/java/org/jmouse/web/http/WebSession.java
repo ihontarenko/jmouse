@@ -1,6 +1,7 @@
 package org.jmouse.web.http;
 
 import jakarta.servlet.http.HttpSession;
+import org.jmouse.http.Session;
 
 public interface WebSession extends RequestAttributes, Session {
 

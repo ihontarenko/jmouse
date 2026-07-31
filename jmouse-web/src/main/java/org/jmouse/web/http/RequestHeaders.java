@@ -1,6 +1,9 @@
 package org.jmouse.web.http;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.jmouse.http.Headers;
+import org.jmouse.http.HttpHeader;
+import org.jmouse.http.HttpMethod;
 
 import java.util.Enumeration;
 

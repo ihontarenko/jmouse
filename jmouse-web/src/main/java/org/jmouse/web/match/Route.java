@@ -1,9 +1,9 @@
 package org.jmouse.web.match;
 
 import org.jmouse.core.MediaType;
-import org.jmouse.web.http.Headers;
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.http.Headers;
+import org.jmouse.http.HttpHeader;
+import org.jmouse.http.HttpMethod;
 
 import java.util.*;
 

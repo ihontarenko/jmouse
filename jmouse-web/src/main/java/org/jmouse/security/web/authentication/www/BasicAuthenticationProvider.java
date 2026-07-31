@@ -5,8 +5,8 @@ import org.jmouse.security.BadCredentialsException;
 import org.jmouse.security.authentication.UsernamePasswordAuthentication;
 import org.jmouse.security.Authentication;
 import org.jmouse.security.web.authentication.AbstractAuthenticationProvider;
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.Headers;
+import org.jmouse.http.HttpHeader;
+import org.jmouse.http.Headers;
 import org.jmouse.web.http.RequestHeaders;
 
 import java.nio.charset.StandardCharsets;

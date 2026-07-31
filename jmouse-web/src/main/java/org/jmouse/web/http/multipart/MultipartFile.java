@@ -2,7 +2,7 @@ package org.jmouse.web.http.multipart;
 
 import jakarta.servlet.http.Part;
 import org.jmouse.core.MediaType;
-import org.jmouse.web.http.ContentDisposition;
+import org.jmouse.http.ContentDisposition;
 
 import java.io.IOException;
 import java.io.InputStream;

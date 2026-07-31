@@ -1,7 +1,7 @@
 package org.jmouse.web.http.cache;
 
-import org.jmouse.web.http.Headers;
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.http.Headers;
+import org.jmouse.http.HttpMethod;
 import org.jmouse.web.http.QueryParameters;
 import org.jmouse.web.http.RequestRoute;
 

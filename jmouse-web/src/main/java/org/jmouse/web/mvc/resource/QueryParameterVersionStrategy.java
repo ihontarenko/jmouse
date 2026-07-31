@@ -1,9 +1,9 @@
 package org.jmouse.web.mvc.resource;
 
-import org.jmouse.web.http.PathQuery;
-import org.jmouse.web.http.QueryParser;
-import org.jmouse.web.http.QueryParser.QueryParameter;
-import org.jmouse.web.http.QueryParser.QueryString;
+import org.jmouse.http.PathQuery;
+import org.jmouse.http.QueryParser;
+import org.jmouse.http.QueryParser.QueryParameter;
+import org.jmouse.http.QueryParser.QueryString;
 
 /**
  * ❓ Query-parameter based {@link VersionStrategy}.

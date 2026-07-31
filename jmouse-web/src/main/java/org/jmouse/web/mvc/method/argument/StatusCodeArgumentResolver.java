@@ -2,7 +2,7 @@ package org.jmouse.web.mvc.method.argument;
 
 import org.jmouse.core.MethodParameter;
 import org.jmouse.web.annotation.StatusCode;
-import org.jmouse.web.http.HttpStatus;
+import org.jmouse.http.HttpStatus;
 import org.jmouse.web.http.RequestContext;
 import org.jmouse.web.mvc.MappingResult;
 import org.jmouse.web.mvc.method.AbstractArgumentResolver;

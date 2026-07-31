@@ -2,11 +2,11 @@ package org.jmouse.web.mvc;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.core.MethodParameter;
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.HttpStatus;
+import org.jmouse.http.HttpHeader;
+import org.jmouse.http.HttpStatus;
 import org.jmouse.web.http.RequestContext;
 
-import static org.jmouse.web.http.Allow.of;
+import static org.jmouse.http.Allow.of;
 
 /**
  * Resolves {@link MethodNotAllowedException} into an HTTP {@code 405 Method Not Allowed} response.

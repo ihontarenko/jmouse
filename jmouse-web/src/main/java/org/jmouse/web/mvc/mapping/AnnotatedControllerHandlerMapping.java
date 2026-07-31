@@ -10,7 +10,7 @@ import org.jmouse.web.annotation.QueryParameter;
 import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.mvc.method.HandlerMethod;
 import org.jmouse.core.MethodParameter;
-import org.jmouse.web.http.HttpHeader;
+import org.jmouse.http.HttpHeader;
 import org.jmouse.web.mvc.AbstractHandlerPathMapping;
 import org.jmouse.web.match.Route;
 

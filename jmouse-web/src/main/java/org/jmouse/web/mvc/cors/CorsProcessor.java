@@ -1,6 +1,6 @@
 package org.jmouse.web.mvc.cors;
 
-import org.jmouse.web.http.Headers;
+import org.jmouse.http.Headers;
 
 /**
  * 🔐 Strategy for applying a CORS policy to an HTTP exchange.
@@ -10,14 +10,14 @@ import org.jmouse.web.http.Headers;
  * {@link CorsConfiguration}. May short-circuit preflight requests.</p>
  *
  * @see CorsConfiguration
- * @see org.jmouse.web.http.HttpHeader#ORIGIN
- * @see org.jmouse.web.http.HttpHeader#ACCESS_CONTROL_REQUEST_METHOD
- * @see org.jmouse.web.http.HttpHeader#ACCESS_CONTROL_ALLOW_ORIGIN
- * @see org.jmouse.web.http.HttpHeader#ACCESS_CONTROL_ALLOW_METHODS
- * @see org.jmouse.web.http.HttpHeader#ACCESS_CONTROL_ALLOW_HEADERS
- * @see org.jmouse.web.http.HttpHeader#ACCESS_CONTROL_EXPOSE_HEADERS
- * @see org.jmouse.web.http.HttpHeader#ACCESS_CONTROL_ALLOW_CREDENTIALS
- * @see org.jmouse.web.http.HttpHeader#ACCESS_CONTROL_MAX_AGE
+ * @see org.jmouse.http.HttpHeader#ORIGIN
+ * @see org.jmouse.http.HttpHeader#ACCESS_CONTROL_REQUEST_METHOD
+ * @see org.jmouse.http.HttpHeader#ACCESS_CONTROL_ALLOW_ORIGIN
+ * @see org.jmouse.http.HttpHeader#ACCESS_CONTROL_ALLOW_METHODS
+ * @see org.jmouse.http.HttpHeader#ACCESS_CONTROL_ALLOW_HEADERS
+ * @see org.jmouse.http.HttpHeader#ACCESS_CONTROL_EXPOSE_HEADERS
+ * @see org.jmouse.http.HttpHeader#ACCESS_CONTROL_ALLOW_CREDENTIALS
+ * @see org.jmouse.http.HttpHeader#ACCESS_CONTROL_MAX_AGE
  */
 public interface CorsProcessor {
 

@@ -1,6 +1,6 @@
 package org.jmouse.web.http.writers;
 
-import org.jmouse.web.http.WWWAuthenticate;
+import org.jmouse.http.WWWAuthenticate;
 
 public class WWWAuthenticateWriter extends AbstractHeaderWriter {
 

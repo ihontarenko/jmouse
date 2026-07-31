@@ -3,7 +3,7 @@ package org.jmouse.web_app.config;
 import org.jmouse.beans.annotation.Bean;
 import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.beans.annotation.Lazy;
-import org.jmouse.web.http.CacheControl;
+import org.jmouse.http.CacheControl;
 import org.jmouse.web.mvc.BeanConfigurer;
 import org.jmouse.web.mvc.resource.*;
 

@@ -1,6 +1,6 @@
 package org.jmouse.web.annotation;
 
-import org.jmouse.web.http.HttpHeader;
+import org.jmouse.http.HttpHeader;
 import org.jmouse.web.match.Route;
 
 /**

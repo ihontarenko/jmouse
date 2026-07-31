@@ -4,8 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.security.authentication.BearerTokenAuthentication;
 import org.jmouse.security.Authentication;
 import org.jmouse.security.web.authentication.AbstractAuthenticationProvider;
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.Headers;
+import org.jmouse.http.HttpHeader;
+import org.jmouse.http.Headers;
 import org.jmouse.web.http.RequestHeaders;
 
 public class BearerTokenAuthenticationProvider extends AbstractAuthenticationProvider {

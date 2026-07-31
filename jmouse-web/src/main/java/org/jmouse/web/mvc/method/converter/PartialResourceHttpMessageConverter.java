@@ -6,9 +6,9 @@ import org.jmouse.core.MediaTypeHelper;
 import org.jmouse.core.StreamHelper;
 import org.jmouse.core.io.Resource;
 import org.jmouse.core.io.ResourceSegment;
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.HttpStatus;
-import org.jmouse.web.http.Headers;
+import org.jmouse.http.HttpHeader;
+import org.jmouse.http.HttpStatus;
+import org.jmouse.http.Headers;
 import org.jmouse.web.http.response.HeadersBuffer;
 
 import java.io.IOException;

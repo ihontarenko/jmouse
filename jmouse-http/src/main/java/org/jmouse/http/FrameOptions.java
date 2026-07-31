@@ -1,4 +1,4 @@
-package org.jmouse.web.http;
+package org.jmouse.http;
 
 /**
  * 🖼️ X-Frame-Options header builder.

@@ -18,8 +18,8 @@ import org.jmouse.web.context.WebBeanContext;
 import org.jmouse.web.http.RequestParameters;
 import org.jmouse.web.mvc.Model;
 import org.jmouse.web.annotation.*;
-import org.jmouse.web.http.HttpHeader;
-import org.jmouse.web.http.HttpMethod;
+import org.jmouse.http.HttpHeader;
+import org.jmouse.http.HttpMethod;
 import org.jmouse.web.mvc.resource.ResourceUrlResolver;
 
 import java.sql.SQLException;
