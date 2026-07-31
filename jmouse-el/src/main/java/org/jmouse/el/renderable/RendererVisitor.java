@@ -16,7 +16,7 @@ import org.jmouse.el.node.expression.literal.StringLiteralNode;
 import org.jmouse.el.renderable.evaluation.LoopVariables;
 import org.jmouse.el.renderable.node.*;
 import org.jmouse.el.renderable.node.sub.ConditionBranch;
-import org.jmouse.util.Iterables;
+import org.jmouse.helpers.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -337,7 +337,14 @@ public class RendererVisitor implements NodeVisitor {
 
             if (when != null) {
                 // Evaluate the condition and convert it to a Boolean.
-                satisfied = Boolean.parseBoolean((String) when.evaluate(context));
+                Object evaluated = when.evaluate(context);
+                if (evaluated instanceof Boolean booleanValue) {
+                    satisfied = booleanValue;
+                } else if (evaluated instanceof String stringValue) {
+                    satisfied = Boolean.parseBoolean(stringValue);
+                } else if (evaluated instanceof Number numberValue) {
+                    satisfied = numberValue.doubleValue() > 0;
+                }
             }
 
             // Process the "then" block if the condition is satisfied and a branch exists.

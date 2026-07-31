@@ -46,10 +46,10 @@ public class DoubleOperationHandler implements OperationHandler<Double, Number> 
      */
     @Override
     public Object execute(OperationType type, Double x, Number operand) {
-        double y = (operand == null ? 0.0 : operand.doubleValue());
+        double y = (operand == null ? 0.0D : operand.doubleValue());
 
         // Check division/modulus by zero
-        if ((type == DIVIDE || type == MODULUS) && (int) y == 0) {
+        if ((type == DIVIDE || type == MODULUS) && y == 0D) {
             throw new IllegalOperationException("%s by zero".formatted(type));
         } else if (type == EXPONENTIAL && y < 0) {
             throw new IllegalOperationException(

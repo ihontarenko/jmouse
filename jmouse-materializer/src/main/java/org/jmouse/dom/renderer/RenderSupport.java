@@ -2,7 +2,7 @@ package org.jmouse.dom.renderer;
 
 import org.jmouse.dom.TagName;
 
-import static org.jmouse.util.Strings.emptyIfNull;
+import static org.jmouse.helpers.Strings.emptyIfNull;
 
 /**
  * Internal rendering utilities for DOM serialization. 🛠️

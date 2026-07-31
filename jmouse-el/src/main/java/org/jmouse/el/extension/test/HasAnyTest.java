@@ -5,6 +5,7 @@ import org.jmouse.core.support.ArraySupport;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
@@ -25,12 +26,16 @@ import java.util.LinkedHashSet;
  * containsAny(value: 42,                    1, 2, 42) => true
  * </pre>
  */
-public class ContainsAny extends AbstractContainsTest {
+public class HasAnyTest extends AbstractContainsTest {
 
     @Override
     public boolean test(Object value, Arguments arguments, EvaluationContext context, TypeClassifier type) {
         Collection<?> expected = toExpected(arguments);
         Collection<?> actual   = ArraySupport.toCollection(value);
+
+        if (value instanceof String string) {
+            actual = new ArrayList<>() {{ add(string); }};
+        }
 
         if (expected.isEmpty() || actual.isEmpty()) {
             return false;
@@ -49,9 +54,7 @@ public class ContainsAny extends AbstractContainsTest {
 
     @Override
     public String getName() {
-        return "containsAny";
+        return "hasAny";
     }
-
-
 
 }

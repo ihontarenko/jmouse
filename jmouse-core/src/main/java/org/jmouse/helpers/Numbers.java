@@ -1,4 +1,4 @@
-package org.jmouse.util;
+package org.jmouse.helpers;
 
 import java.math.BigDecimal;
 

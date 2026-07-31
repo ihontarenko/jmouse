@@ -1,7 +1,7 @@
 package org.jmouse.meterializer.query;
 
 import org.jmouse.meterializer.NodeTemplate;
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Strings;
 
 import java.util.*;
 import java.util.function.Consumer;

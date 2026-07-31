@@ -1,6 +1,5 @@
 package org.jmouse.meterializer;
 
-import org.jmouse.core.Verify;
 import org.jmouse.core.access.AccessorWrapper;
 import org.jmouse.core.access.ObjectAccessor;
 import org.jmouse.core.access.ValueNavigator;
@@ -10,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.jmouse.core.Verify.nonNull;
-import static org.jmouse.util.Strings.isNotEmpty;
+import static org.jmouse.helpers.Strings.isNotEmpty;
 
 /**
  * Base {@link TemplateMaterializer} with built-in traversal algorithm over {@link NodeTemplate}.

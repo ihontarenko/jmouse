@@ -6,7 +6,7 @@ import org.jmouse.core.mapping.errors.ErrorCodes;
 import org.jmouse.core.mapping.strategy.support.AbstractIterableStrategy;
 import org.jmouse.core.mapping.strategy.support.IterableSource;
 import org.jmouse.core.reflection.InferredType;
-import org.jmouse.util.Arrays;
+import org.jmouse.helpers.Arrays;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
 package org.jmouse.dom.meterializer.submission;
 
 import org.jmouse.dom.Node;
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Strings;
 
 import java.util.ArrayList;
 import java.util.List;

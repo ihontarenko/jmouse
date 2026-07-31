@@ -11,7 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.util.Map;
 
 import static org.jmouse.core.Verify.nonNull;
-import static org.jmouse.util.Strings.*;
+import static org.jmouse.helpers.Strings.*;
 
 public final class XmlDomMaterializer extends AbstractTemplateMaterializer<Node> {
 

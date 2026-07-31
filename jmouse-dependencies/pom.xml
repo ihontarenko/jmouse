@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
-        <version>1.0.0-StableB</version>
+        <version>1.0.0-Stable_20260728</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <name>jMouse - Dependencies</name>
     <artifactId>jmouse-dependencies</artifactId>
-    <version>1.0.0-StableB</version>
+    <version>1.0.0-Stable_20260728</version>
     <packaging>pom</packaging>
 
     <description>jMouse Framework - BOM-POM</description>
@@ -46,7 +46,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven-gpg.version>3.0.1</maven-gpg.version>
         <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
-        <jmouse.version>1.0.0-StableB</jmouse.version>
+        <jmouse.version>1.0.0-Stable_20260728</jmouse.version>
         <asm.version>9.7.1</asm.version>
         <bytebuddy.version>1.17.6</bytebuddy.version>
         <objenesis.version>3.3</objenesis.version>

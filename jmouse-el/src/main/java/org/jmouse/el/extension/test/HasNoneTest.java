@@ -5,6 +5,7 @@ import org.jmouse.core.support.ArraySupport;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
@@ -19,12 +20,16 @@ import java.util.LinkedHashSet;
  *   <li>Actual is empty ⇒ {@code true} (no elements present).</li>
  * </ul>
  */
-public class ContainsNone extends AbstractContainsTest {
+public class HasNoneTest extends AbstractContainsTest {
 
     @Override
     public boolean test(Object value, Arguments arguments, EvaluationContext context, TypeClassifier type) {
         Collection<?> expected = toExpected(arguments);
         Collection<?> actual   = ArraySupport.toCollection(value);
+
+        if (value instanceof String string) {
+            actual = new ArrayList<>() {{ add(string); }};
+        }
 
         if (expected.isEmpty() || actual.isEmpty()) {
             return true;
@@ -43,7 +48,7 @@ public class ContainsNone extends AbstractContainsTest {
 
     @Override
     public String getName() {
-        return "containsNone";
+        return "hasNone";
     }
 
 }

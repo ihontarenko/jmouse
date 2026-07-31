@@ -16,7 +16,7 @@ import org.jmouse.el.extension.Function;
  * After setting the variable, it returns the value that was assigned.
  * </p>
  */
-public class SetFunction implements Function {
+public class SetVariableFunction implements Function {
 
     /**
      * Executes the set function.
@@ -47,6 +47,6 @@ public class SetFunction implements Function {
      */
     @Override
     public String getName() {
-        return "set";
+        return "setVariable";
     }
 }

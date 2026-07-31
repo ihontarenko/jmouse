@@ -4,7 +4,7 @@ import org.jmouse.core.access.AccessorWrapper;
 import org.jmouse.core.access.ObjectAccessor;
 import org.jmouse.core.access.ObjectAccessorWrapper;
 import org.jmouse.core.access.ValueNavigator;
-import org.jmouse.util.Arrays;
+import org.jmouse.helpers.Arrays;
 import org.jmouse.validator.Errors;
 import org.jmouse.validator.constraint.api.Constraint;
 import org.jmouse.validator.constraint.model.*;

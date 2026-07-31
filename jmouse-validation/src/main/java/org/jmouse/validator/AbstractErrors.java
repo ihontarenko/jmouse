@@ -2,7 +2,7 @@ package org.jmouse.validator;
 
 import org.jmouse.core.Verify;
 import org.jmouse.core.access.PropertyPath;
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Strings;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

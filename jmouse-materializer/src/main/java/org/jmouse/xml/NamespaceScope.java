@@ -1,6 +1,6 @@
 package org.jmouse.xml;
 
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Strings;
 import org.w3c.dom.Element;
 
 import java.util.ArrayDeque;

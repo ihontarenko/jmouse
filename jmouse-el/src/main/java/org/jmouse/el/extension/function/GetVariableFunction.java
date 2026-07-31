@@ -4,7 +4,7 @@ import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 import org.jmouse.el.extension.Function;
 
-public class GetFunction implements Function {
+public class GetVariableFunction implements Function {
 
     @Override
     public Object execute(Arguments arguments, EvaluationContext context) {
@@ -14,6 +14,6 @@ public class GetFunction implements Function {
 
     @Override
     public String getName() {
-        return "get";
+        return "getVariable";
     }
 }

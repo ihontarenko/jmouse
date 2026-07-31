@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-dependencies</artifactId>
-  <version>1.0.0-StableB</version>
+  <version>1.0.0-Stable_20260728</version>
   <packaging>pom</packaging>
   <name>jMouse - Dependencies</name>
   <description>jMouse Framework - BOM-POM</description>
@@ -73,7 +73,7 @@
     <java.version>21</java.version>
     <jakarta-tx.version>2.0.1</jakarta-tx.version>
     <jdbc-postgresql>42.7.3</jdbc-postgresql>
-    <jmouse.version>1.0.0-StableB</jmouse.version>
+    <jmouse.version>1.0.0-Stable_20260728</jmouse.version>
     <maven.compiler.target>21</maven.compiler.target>
     <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
     <jdbc-mssql>12.6.1.jre11</jdbc-mssql>

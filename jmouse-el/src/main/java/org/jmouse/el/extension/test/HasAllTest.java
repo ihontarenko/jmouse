@@ -5,6 +5,7 @@ import org.jmouse.core.support.ArraySupport;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
@@ -23,12 +24,16 @@ import java.util.LinkedHashSet;
  *   <li>Actual is empty and expected non-empty ⇒ {@code false}.</li>
  * </ul>
  */
-public class ContainsAll extends AbstractContainsTest {
+public class HasAllTest extends AbstractContainsTest {
 
     @Override
     public boolean test(Object value, Arguments arguments, EvaluationContext context, TypeClassifier type) {
         Collection<?> expected = toExpected(arguments);
         Collection<?> actual   = ArraySupport.toCollection(value);
+
+        if (value instanceof String string) {
+            actual = new ArrayList<>() {{ add(string); }};
+        }
 
         if (expected.isEmpty()) {
             return true;
@@ -51,7 +56,7 @@ public class ContainsAll extends AbstractContainsTest {
 
     @Override
     public String getName() {
-        return "containsAll";
+        return "hasAll";
     }
 
 }

@@ -1,7 +1,7 @@
 package org.jmouse.common.ast.compiler;
 
-import org.jmouse.util.Booleans;
-import org.jmouse.util.Maths;
+import org.jmouse.helpers.Booleans;
+import org.jmouse.helpers.Maths;
 import org.jmouse.core.reflection.Reflections;
 
 import java.util.Arrays;

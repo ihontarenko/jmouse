@@ -6,7 +6,7 @@ import org.jmouse.beans.resolve.BeanCandidate;
 import org.jmouse.beans.resolve.BeanResolutionRequest;
 import org.jmouse.core.Priority;
 import org.jmouse.core.reflection.InferredType;
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Strings;
 
 import java.util.List;
 import java.util.Optional;

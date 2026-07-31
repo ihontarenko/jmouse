@@ -2,7 +2,7 @@ package org.jmouse.security.authorization.method.attribute.jsr250;
 
 import jakarta.annotation.security.RolesAllowed;
 import org.jmouse.core.Streamable;
-import org.jmouse.util.StringHelper;
+import org.jmouse.helpers.StringHelper;
 
 /**
  * 🧩 Resolver for the {@link RolesAllowed} JSR-250 annotation.

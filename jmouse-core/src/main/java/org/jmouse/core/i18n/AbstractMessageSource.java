@@ -1,6 +1,6 @@
 package org.jmouse.core.i18n;
 
-import org.jmouse.util.Arrays;
+import org.jmouse.helpers.Arrays;
 
 import java.text.MessageFormat;
 import java.util.Locale;

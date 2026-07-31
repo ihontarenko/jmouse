@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-el-spring-boot</artifactId>
-  <version>1.0.0-StableB</version>
+  <version>1.0.0-Stable_20260728</version>
   <name>jMouse - EL Spring Boot Starter</name>
   <description>Spring Boot auto-configuration for jMouse EL as a Spring MVC view engine</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-el-spring-boot</url>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-el</artifactId>
-      <version>1.0.0-StableB</version>
+      <version>1.0.0-Stable_20260728</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

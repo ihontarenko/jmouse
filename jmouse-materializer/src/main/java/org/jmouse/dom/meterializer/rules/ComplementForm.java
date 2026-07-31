@@ -7,7 +7,7 @@ import org.jmouse.dom.TagName;
 import org.jmouse.dom.node.ElementNode;
 import org.jmouse.dom.meterializer.NodeRule;
 import org.jmouse.meterializer.RenderingExecution;
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Strings;
 
 import java.util.Map;
 

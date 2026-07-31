@@ -1,6 +1,6 @@
 package org.jmouse.validator.constraint.constraint;
 
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Strings;
 import org.jmouse.validator.constraint.api.Constraint;
 import org.jmouse.validator.constraint.api.ConstraintExecutor;
 

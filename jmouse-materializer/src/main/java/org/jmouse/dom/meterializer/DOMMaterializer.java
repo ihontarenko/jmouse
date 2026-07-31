@@ -6,7 +6,7 @@ import org.jmouse.dom.node.ElementNode;
 import org.jmouse.dom.node.TextNode;
 import org.jmouse.dom.node.WrapperNode;
 import org.jmouse.meterializer.*;
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Strings;
 
 import static org.jmouse.core.Verify.nonNull;
 

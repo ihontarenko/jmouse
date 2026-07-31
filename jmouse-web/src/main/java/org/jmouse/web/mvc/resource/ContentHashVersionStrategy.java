@@ -7,7 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
-import static org.jmouse.util.StringHelper.*;
+import static org.jmouse.helpers.StringHelper.*;
 
 /**
  * 📦 Content-hash versioning strategy: file name contains "/{hex}/app.js" before extension.

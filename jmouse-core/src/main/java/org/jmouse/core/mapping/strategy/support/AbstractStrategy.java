@@ -16,7 +16,7 @@ import org.jmouse.core.mapping.MappingContext;
 import org.jmouse.core.mapping.plugin.MappingValue;
 import org.jmouse.core.mapping.plugin.PluginBus;
 import org.jmouse.core.reflection.InferredType;
-import org.jmouse.util.Arrays;
+import org.jmouse.helpers.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

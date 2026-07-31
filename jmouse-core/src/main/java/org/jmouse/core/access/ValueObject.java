@@ -6,7 +6,7 @@ import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.core.CachedSupplier;
 import org.jmouse.core.Factory;
-import org.jmouse.util.Arrays;
+import org.jmouse.helpers.Arrays;
 
 import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;

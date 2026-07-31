@@ -2,7 +2,7 @@ package org.jmouse.el.renderable;
 
 import java.util.Arrays;
 
-import static org.jmouse.util.Arrays.expand;
+import static org.jmouse.helpers.Arrays.expand;
 
 /**
  * 📋 ArrayContent is an implementation of the Content interface using a dynamically expandable character array.

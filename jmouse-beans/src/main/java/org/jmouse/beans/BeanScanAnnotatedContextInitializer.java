@@ -4,7 +4,7 @@ import org.jmouse.beans.annotation.BeanScan;
 import org.jmouse.core.reflection.ClassFinder;
 import org.jmouse.core.reflection.Reflections;
 import org.jmouse.core.Priority;
-import org.jmouse.util.Arrays;
+import org.jmouse.helpers.Arrays;
 
 /**
  * 🔁 Initializes the context with additional scan targets from {@link BeanScan}.

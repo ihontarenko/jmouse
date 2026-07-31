@@ -1,9 +1,9 @@
 package org.jmouse.core.io;
 
 import org.jmouse.core.matcher.Matcher;
-import org.jmouse.util.Files;
-import org.jmouse.util.JavaIO;
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Files;
+import org.jmouse.helpers.JavaIO;
+import org.jmouse.helpers.Strings;
 
 import java.lang.module.ModuleReader;
 import java.lang.module.ResolvedModule;

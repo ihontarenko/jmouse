@@ -9,7 +9,7 @@ import org.jmouse.core.access.descriptor.structured.PropertyDescriptor;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.core.Factory;
 import org.jmouse.core.Priority;
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Strings;
 
 import java.lang.reflect.Method;
 import java.util.function.Supplier;

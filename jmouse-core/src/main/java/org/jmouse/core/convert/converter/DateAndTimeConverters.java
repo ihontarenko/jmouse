@@ -1,6 +1,7 @@
 package org.jmouse.core.convert.converter;
 
 import org.jmouse.core.convert.GenericConverter;
+import org.jmouse.helpers.DateTimeHelper;
 
 import java.time.*;
 import java.util.Date;
@@ -39,7 +40,7 @@ public class DateAndTimeConverters {
                         return Instant.ofEpochSecond(Long.parseLong(value));
                     }
 
-                    return Instant.parse(value);
+                    return DateTimeHelper.parseInstant(value);
                 }),
                 of(Instant.class, String.class, source -> {
                     // ISO-8601 in UTC, e.g. "2026-01-29T16:45:12.345Z"

@@ -2,7 +2,7 @@ package org.jmouse.validator.jsr380;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Path;
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Strings;
 import org.jmouse.validator.Errors;
 
 /**

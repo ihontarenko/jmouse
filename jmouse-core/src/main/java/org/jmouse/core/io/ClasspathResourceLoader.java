@@ -1,9 +1,9 @@
 package org.jmouse.core.io;
 
 import org.jmouse.core.matcher.Matcher;
-import org.jmouse.util.Files;
-import org.jmouse.util.Jars;
-import org.jmouse.util.JavaIO;
+import org.jmouse.helpers.Files;
+import org.jmouse.helpers.Jars;
+import org.jmouse.helpers.JavaIO;
 
 import java.net.URL;
 import java.nio.file.Paths;

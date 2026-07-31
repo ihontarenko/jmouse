@@ -1,7 +1,7 @@
 package org.jmouse.beans.naming;
 
 import org.jmouse.core.reflection.Reflections;
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Strings;
 
 import java.lang.reflect.AnnotatedElement;
 

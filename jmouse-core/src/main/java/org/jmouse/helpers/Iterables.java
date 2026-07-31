@@ -1,4 +1,4 @@
-package org.jmouse.util;
+package org.jmouse.helpers;
 
 import org.jmouse.core.reflection.TypeClassifier;
 import org.jmouse.core.reflection.TypeInformation;

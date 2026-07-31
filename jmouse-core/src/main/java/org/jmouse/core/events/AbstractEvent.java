@@ -1,6 +1,6 @@
 package org.jmouse.core.events;
 
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Strings;
 
 import java.util.Objects;
 

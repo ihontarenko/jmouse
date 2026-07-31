@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.core.reflection.ReflectionException;
 import org.jmouse.core.reflection.Reflections;
-import org.jmouse.util.Files;
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Files;
+import org.jmouse.helpers.Strings;
 
 import java.util.Collection;
 import java.util.HashSet;

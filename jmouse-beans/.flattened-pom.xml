@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-beans</artifactId>
-  <version>1.0.0-StableB</version>
+  <version>1.0.0-Stable_20260728</version>
   <name>jMouse - Beans</name>
   <description>jMouse Framework - Beans</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-beans</url>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-core</artifactId>
-      <version>1.0.0-StableB</version>
+      <version>1.0.0-Stable_20260728</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

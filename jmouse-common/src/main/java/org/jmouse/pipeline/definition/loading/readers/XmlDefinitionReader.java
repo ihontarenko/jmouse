@@ -9,7 +9,7 @@ import org.jmouse.pipeline.definition.model.PipelineDefinition;
 
 import java.io.InputStream;
 
-import static org.jmouse.util.StringHelper.extension;
+import static org.jmouse.helpers.StringHelper.extension;
 
 public final class XmlDefinitionReader implements PipelineDefinitionReader {
 

@@ -1,6 +1,6 @@
 package org.jmouse.web.http;
 
-import org.jmouse.util.StringHelper;
+import org.jmouse.helpers.StringHelper;
 
 import java.util.ArrayList;
 import java.util.List;

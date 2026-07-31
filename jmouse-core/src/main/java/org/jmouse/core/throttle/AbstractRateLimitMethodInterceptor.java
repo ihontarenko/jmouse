@@ -3,7 +3,7 @@ package org.jmouse.core.throttle;
 import org.jmouse.core.proxy.InvocationContext;
 import org.jmouse.core.proxy.MethodInterceptor;
 import org.jmouse.core.reflection.Reflections;
-import org.jmouse.util.TimeHelper;
+import org.jmouse.helpers.DateTimeHelper;
 
 import java.lang.reflect.Method;
 import java.time.temporal.ChronoUnit;
@@ -139,7 +139,7 @@ public abstract class AbstractRateLimitMethodInterceptor implements MethodInterc
     protected RateLimitConfiguration toConfiguration(RateLimit annotation) {
         ChronoUnit      chronoUnit  = annotation.per();
         long            amount      = Math.abs(annotation.amount());
-        long            periodNanos = TimeHelper.toNanos(chronoUnit, amount);
+        long            periodNanos = DateTimeHelper.toNanos(chronoUnit, amount);
         String          name        = annotation.name() == null ? "NO_NAME" : annotation.name();
         RateLimit.Scope scope       = annotation.scope() == null ? RateLimit.Scope.METHOD : annotation.scope();
         return new RateLimitConfiguration(annotation.max(), chronoUnit, amount, periodNanos, name, scope);

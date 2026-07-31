@@ -6,7 +6,7 @@ import org.jmouse.pipeline.definition.loading.PipelineDefinitionReader;
 import org.jmouse.pipeline.definition.loading.dto.DTO2DefinitionMapper;
 import org.jmouse.pipeline.definition.loading.dto.PipelineDTO;
 import org.jmouse.pipeline.definition.model.PipelineDefinition;
-import org.jmouse.util.StringHelper;
+import org.jmouse.helpers.StringHelper;
 
 import java.io.InputStream;
 

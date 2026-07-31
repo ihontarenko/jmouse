@@ -1,14 +1,13 @@
 package org.jmouse.core.io;
 
 import org.jmouse.core.matcher.Matcher;
-import org.jmouse.util.Files;
+import org.jmouse.helpers.Files;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import static org.jmouse.core.io.Resource.FILE_PROTOCOL;
-import static org.jmouse.core.io.Resource.LOCAL_PROTOCOL;
 
 /**
  * A composite {@link ResourceLoader} that aggregates multiple loaders and delegates resource loading

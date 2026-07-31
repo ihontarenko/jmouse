@@ -1,7 +1,6 @@
 package org.jmouse.core.proxy;
 
 import org.jmouse.core.reflection.Executables;
-import org.jmouse.util.Arrays;
 
 import java.lang.reflect.Method;
 import java.util.Optional;

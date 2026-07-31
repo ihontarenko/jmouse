@@ -1,4 +1,4 @@
-package org.jmouse.util;
+package org.jmouse.helpers;
 
 import org.jmouse.core.reflection.Reflections;
 

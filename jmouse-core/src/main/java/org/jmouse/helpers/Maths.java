@@ -1,4 +1,4 @@
-package org.jmouse.util;
+package org.jmouse.helpers;
 
 /**
  * Utility class Maths for performing basic mathematical operations.

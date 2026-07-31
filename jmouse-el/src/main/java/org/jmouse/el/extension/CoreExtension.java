@@ -6,7 +6,12 @@ import org.jmouse.el.extension.attribute.ListAttributeResolver;
 import org.jmouse.el.extension.attribute.MapAttributeResolver;
 import org.jmouse.el.extension.filter.*;
 import org.jmouse.el.extension.filter.converter.*;
+import org.jmouse.el.extension.filter.datetime.MinusDaysFilter;
+import org.jmouse.el.extension.filter.datetime.PlusDaysFilter;
 import org.jmouse.el.extension.function.*;
+import org.jmouse.el.extension.function.datetime.NowFunction;
+import org.jmouse.el.extension.function.mathematic.ExponentaFunction;
+import org.jmouse.el.extension.function.mathematic.SquareRootFunction;
 import org.jmouse.el.extension.function.string.*;
 import org.jmouse.el.extension.operator.*;
 import org.jmouse.el.extension.test.*;
@@ -50,15 +55,20 @@ public class CoreExtension implements Extension {
         return List.of(
                 new MinFunction(),
                 new MaxFunction(),
-                new SetFunction(),
-                new GetFunction(),
+                new SetVariableFunction(),
+                new GetVariableFunction(),
                 // string functions
                 new UclastFunction(),
                 new UcfirstFunction(),
                 new LclastFunction(),
                 new LcfirstFunction(),
                 // extra-functions
-                new ClassFunction()
+                new ClassFunction(),
+                // math functions
+                new SquareRootFunction(),
+                new ExponentaFunction(),
+                // data-time
+                new NowFunction()
         );
     }
 
@@ -99,8 +109,12 @@ public class CoreExtension implements Extension {
                 new ToListFilter(),
                 new ToArrayFilter(),
                 new ToIteratorFilter(),
+                new ToInstantFilter(),
                 // specific
-                new SoutFilter()
+                new SoutFilter(),
+                // date-time
+                new PlusDaysFilter(),
+                new MinusDaysFilter()
         );
     }
 
@@ -118,13 +132,14 @@ public class CoreExtension implements Extension {
                 new CollectionTest(),
                 new MapTest(),
                 new IterableTest(),
-                new ContainsAll(),
-                new ContainsAny(),
-                new ContainsNone(),
+                new HasAllTest(),
+                new HasAnyTest(),
+                new HasNoneTest(),
                 new NullTest(),
                 new TypeTest(),
                 new StartsTest(),
-                new EndsTest()
+                new EndsTest(),
+                new ContainsTest()
         );
     }
 
@@ -176,6 +191,7 @@ public class CoreExtension implements Extension {
         operators.add(FilterOperator.FILTER);
         // operators.add(AttributeAccessOperator.ACCESS);
         operators.add(TestOperator.IS);
+        operators.add(InOperator.IN);
         operators.add(NullCoalesceOperator.NULL_COALESCE);
         operators.add(RangeOperator.RANGE);
         operators.add(ConcatOperator.CONCAT);

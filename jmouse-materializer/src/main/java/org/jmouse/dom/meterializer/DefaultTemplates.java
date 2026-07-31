@@ -2,7 +2,7 @@ package org.jmouse.dom.meterializer;
 
 import org.jmouse.dom.InputType;
 import org.jmouse.meterializer.NodeTemplate;
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Strings;
 
 import static org.jmouse.meterializer.NodeTemplate.*;
 import static org.jmouse.meterializer.TemplatePredicate.present;

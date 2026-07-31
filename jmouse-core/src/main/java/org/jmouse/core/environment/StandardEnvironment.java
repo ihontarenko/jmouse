@@ -1,6 +1,6 @@
 package org.jmouse.core.environment;
 
-import org.jmouse.util.Arrays;
+import org.jmouse.helpers.Arrays;
 
 import java.util.Collection;
 import java.util.HashSet;

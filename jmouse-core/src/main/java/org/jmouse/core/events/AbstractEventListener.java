@@ -1,6 +1,6 @@
 package org.jmouse.core.events;
 
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Strings;
 
 abstract public class AbstractEventListener<T> implements EventListener<T> {
 

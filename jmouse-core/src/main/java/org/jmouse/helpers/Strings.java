@@ -1,4 +1,4 @@
-package org.jmouse.util;
+package org.jmouse.helpers;
 
 import java.net.URL;
 import java.nio.file.FileSystems;

@@ -7,6 +7,7 @@ import org.jmouse.el.extension.Arguments;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 public class LastFilter extends AbstractFilter {
@@ -21,6 +22,12 @@ public class LastFilter extends AbstractFilter {
             last = new ArrayList<>(((Map<?, ?>)input).values()).getLast();
         } else if (input instanceof String string) {
             last = string.substring(string.length() - 1);
+        } else if (type.is(Iterator.class)) {
+            if (input instanceof Iterator<?> iterator) {
+                while (iterator.hasNext()) {
+                    last = iterator.next();
+                }
+            }
         } else if (input instanceof Object[] array && array.length > 0) {
             last = Array.get(array, array.length - 1);
         }

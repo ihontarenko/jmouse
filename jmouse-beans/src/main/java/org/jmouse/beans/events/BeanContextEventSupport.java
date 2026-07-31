@@ -5,7 +5,7 @@ import org.jmouse.core.events.Event;
 import org.jmouse.core.events.EventListener;
 import org.jmouse.core.events.EventManager;
 import org.jmouse.core.events.EventName;
-import org.jmouse.util.Strings;
+import org.jmouse.helpers.Strings;
 
 import java.util.function.Consumer;
 

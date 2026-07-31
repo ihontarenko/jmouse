@@ -10,7 +10,7 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import static org.jmouse.util.Arrays.expand;
+import static org.jmouse.helpers.Arrays.expand;
 
 /**
  * Represents a tokenized string, allowing efficient access to tokenized segments.

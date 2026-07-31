@@ -23,7 +23,7 @@ import org.jmouse.beans.naming.BeanNameResolver;
 import org.jmouse.beans.processor.BeanPostProcessor;
 import org.jmouse.core.reflection.ClassMatchers;
 import org.jmouse.core.reflection.Reflections;
-import org.jmouse.util.Arrays;
+import org.jmouse.helpers.Arrays;
 import org.jmouse.core.Sorter;
 
 import java.lang.reflect.Method;

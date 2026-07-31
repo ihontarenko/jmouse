@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.core.chain.Chain;
 import org.jmouse.core.chain.Outcome;
 import org.jmouse.core.io.Resource;
-import org.jmouse.util.PathHelper;
+import org.jmouse.helpers.PathHelper;
 
 /**
  * 🧹 Resource resolver that normalizes incoming request paths.

@@ -10,7 +10,7 @@ import org.jmouse.core.reflection.ClassFinder;
 
 import java.util.Collection;
 
-import static org.jmouse.util.StringHelper.blankToNull;
+import static org.jmouse.helpers.StringHelper.blankToNull;
 
 public final class AnnotationsPipelineIntrospector {
 

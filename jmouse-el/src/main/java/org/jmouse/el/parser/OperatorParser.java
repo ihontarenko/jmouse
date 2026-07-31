@@ -2,16 +2,14 @@ package org.jmouse.el.parser;
 
 import org.jmouse.el.extension.Operator;
 import org.jmouse.el.extension.operator.FilterOperator;
+import org.jmouse.el.extension.operator.InOperator;
 import org.jmouse.el.extension.operator.NullCoalesceOperator;
 import org.jmouse.el.extension.operator.TestOperator;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
-import org.jmouse.el.node.expression.BinaryOperation;
-import org.jmouse.el.node.expression.FilterNode;
-import org.jmouse.el.node.expression.NullSafeFallbackNode;
-import org.jmouse.el.node.expression.TestNode;
+import org.jmouse.el.node.expression.*;
 
 import static org.jmouse.el.lexer.BasicToken.*;
 
@@ -57,6 +55,12 @@ public class OperatorParser implements Parser {
             cursor.next();
 
             switch (operator) {
+                case InOperator.IN -> {
+                    InOperationNode inNode = new InOperationNode();
+                    inNode.setLeft(left);
+                    inNode.setRight((Expression) parse(cursor, context));
+                    left = inNode;
+                }
                 case TestOperator.IS -> {
                     TestNode test = (TestNode) context.getParser(TestParser.class).parse(cursor, context);
                     test.setLeft(left);

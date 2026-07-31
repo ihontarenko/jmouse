@@ -2,7 +2,7 @@ package org.jmouse.core.access;
 
 import org.jmouse.core.Streamable;
 import org.jmouse.core.Verify;
-import org.jmouse.util.Arrays;
+import org.jmouse.helpers.Arrays;
 
 import java.util.HashMap;
 import java.util.Iterator;

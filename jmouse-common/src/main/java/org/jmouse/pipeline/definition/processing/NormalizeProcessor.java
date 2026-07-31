@@ -5,7 +5,7 @@ import org.jmouse.pipeline.definition.model.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static org.jmouse.util.StringHelper.trim;
+import static org.jmouse.helpers.StringHelper.trim;
 
 public final class NormalizeProcessor implements DefinitionPostProcessor {
 

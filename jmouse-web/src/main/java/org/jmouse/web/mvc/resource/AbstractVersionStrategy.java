@@ -5,7 +5,7 @@ import org.jmouse.core.io.Resource;
 import java.io.InputStream;
 import java.util.Locale;
 
-import static org.jmouse.util.StringHelper.*;
+import static org.jmouse.helpers.StringHelper.*;
 
 /**
  * 🏗️ Base class for content-hash based {@link VersionStrategy} implementations.
