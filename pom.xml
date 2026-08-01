@@ -85,6 +85,7 @@
         <module>jmouse-beans</module>
         <module>jmouse-context</module>
         <module>jmouse-http</module>
+        <module>jmouse-storage</module>
         <module>jmouse-web</module>
         <module>jmouse-crawler</module>
         <module>jmouse-spring</module>

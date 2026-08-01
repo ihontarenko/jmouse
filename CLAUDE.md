@@ -24,7 +24,9 @@ mvn clean deploy -pl jmouse-beans,jmouse-context
 
 ## Tests
 
-There are **no JUnit tests**. Integration tests live as `smoke` classes inside `src/main/java` under `*/smoke/` sub-packages (e.g., `PipelineSmoke`, `Smoke1`, `SmokeA`). These are run manually by executing their `main` methods.
+There are **no JUnit tests**. Integration tests live as `smoke` classes inside `src/main/java` under `*/smoke/` sub-packages (e.g., `PipelineSmoke`, `Smoke1`, `SmokeA`, `StorageSmoke`). These are run manually by executing their `main` methods.
+
+Note that `mvn install` needs `-Dgpg.skip=true` unless a GPG key is configured, since the parent binds `maven-gpg-plugin` to `verify`.
 
 ## Running the Demo App
 
@@ -67,6 +69,10 @@ jmouse-http           HTTP protocol values, servlet-free — headers, status cod
                       methods, content disposition, ranges, cache control, entity tags
                       and conditional requests. Depends on jmouse-core alone, so code
                       that only speaks HTTP need not pull a servlet container
+jmouse-storage        File storage — FileStore SPI, StorageKey value object, key-layout
+                      strategy, upload acceptance policy, local-disk backend, and a
+                      read-only ResourceLoader over a store. Depends on jmouse-core and
+                      jmouse-http only: no Spring, no servlet API, no persistence
 jmouse-web            Web MVC + embedded Tomcat — dispatcher, adapters, view engine,
                       argument resolution, interceptors, content negotiation, CORS,
                       resource handling, web security filter chain. Keeps the
