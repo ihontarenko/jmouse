@@ -7,7 +7,7 @@
     <groupId>org.jmouse</groupId>
     <artifactId>jmouse-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-Stable_20260801</version>
+    <version>1.0.0-b20260802</version>
 
     <description>jMouse Framework</description>
     <url>https://github.com/ihontarenko/jmouse</url>
@@ -62,7 +62,7 @@
             <!-- <dependency>
                 <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-dependencies</artifactId>
-                <version>1.0.0-Stable_20260801</version>
+                <version>1.0.0-b20260802</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency> -->

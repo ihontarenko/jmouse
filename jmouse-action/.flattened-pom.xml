@@ -3,11 +3,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
-  <artifactId>jmouse-storage</artifactId>
+  <artifactId>jmouse-action</artifactId>
   <version>1.0.0-b20260802</version>
-  <name>jMouse - Storage</name>
-  <description>jMouse Framework - File Storage (FileStore SPI, storage keys, upload policy, local-disk backend)</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-storage</url>
+  <name>jMouse - Action Executor</name>
+  <description>jMouse Framework</description>
+  <url>https://github.com/ihontarenko/jmouse/jmouse-action</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -22,9 +22,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
-    <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-storage</url>
+    <connection>scm:git:git://github.com/ihontarenko/jmouse.git/jmouse-action</connection>
+    <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git/jmouse-action</developerConnection>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-core/jmouse-action</url>
   </scm>
   <dependencies>
     <dependency>
@@ -35,7 +35,7 @@
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
-      <artifactId>jmouse-http</artifactId>
+      <artifactId>jmouse-el</artifactId>
       <version>1.0.0-b20260802</version>
       <scope>compile</scope>
     </dependency>

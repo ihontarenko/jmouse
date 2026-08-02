@@ -3,11 +3,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
-  <artifactId>jmouse-storage</artifactId>
+  <artifactId>jmouse-vendor</artifactId>
   <version>1.0.0-b20260802</version>
-  <name>jMouse - Storage</name>
-  <description>jMouse Framework - File Storage (FileStore SPI, storage keys, upload policy, local-disk backend)</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-storage</url>
+  <name>jMouse - Vendors (CGLIB, ASM)</name>
+  <description>jMouse Framework - Vendors Library</description>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-vendor</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -24,33 +24,20 @@
   <scm>
     <connection>scm:git:git://github.com/ihontarenko/jmouse.git</connection>
     <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git</developerConnection>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-storage</url>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-vendor</url>
   </scm>
   <dependencies>
     <dependency>
-      <groupId>org.jmouse</groupId>
-      <artifactId>jmouse-core</artifactId>
-      <version>1.0.0-b20260802</version>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
+      <version>9.7.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.jmouse</groupId>
-      <artifactId>jmouse-http</artifactId>
-      <version>1.0.0-b20260802</version>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-commons</artifactId>
+      <version>9.7.1</version>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>2.0.13</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>1.5.6</version>
-      <scope>compile</scope>
-      <optional>true</optional>
     </dependency>
   </dependencies>
   <build>

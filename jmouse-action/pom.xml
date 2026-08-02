@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
-        <version>1.0.0-Stable_20260801</version>
+        <version>1.0.0-b20260802</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 

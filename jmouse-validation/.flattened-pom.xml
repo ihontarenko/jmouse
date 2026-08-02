@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-validation</artifactId>
-  <version>1.0.0-Stable_20260801</version>
+  <version>1.0.0-b20260802</version>
   <name>jMouse - Validation</name>
   <description>jMouse Framework</description>
   <url>https://github.com/ihontarenko/jmouse/jmouse-validation</url>
@@ -30,13 +30,13 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-core</artifactId>
-      <version>1.0.0-Stable_20260801</version>
+      <version>1.0.0-b20260802</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-el</artifactId>
-      <version>1.0.0-Stable_20260801</version>
+      <version>1.0.0-b20260802</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
