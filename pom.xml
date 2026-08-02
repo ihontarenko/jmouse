@@ -86,6 +86,7 @@
         <module>jmouse-context</module>
         <module>jmouse-http</module>
         <module>jmouse-storage</module>
+        <module>jmouse-storage-s3</module>
         <module>jmouse-web</module>
         <module>jmouse-crawler</module>
         <module>jmouse-spring</module>

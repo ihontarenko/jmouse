@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-dependencies</artifactId>
-  <version>1.0.0-Stable_20260801</version>
+  <version>1.0.0-b20260802</version>
   <packaging>pom</packaging>
   <name>jMouse - Dependencies</name>
   <description>jMouse Framework - BOM-POM</description>
@@ -55,6 +55,7 @@
     <maven-javadoc.version>3.11.2</maven-javadoc.version>
     <jdbc-mariadb>3.3.3</jdbc-mariadb>
     <jdbc-mysql>8.3.0</jdbc-mysql>
+    <awssdk.version>2.28.29</awssdk.version>
     <jmh.version>1.37</jmh.version>
     <maven-source.version>3.2.1</maven-source.version>
     <jdbc-oracle11>23.3.0.23.09</jdbc-oracle11>
@@ -73,7 +74,7 @@
     <java.version>21</java.version>
     <jakarta-tx.version>2.0.1</jakarta-tx.version>
     <jdbc-postgresql>42.7.3</jdbc-postgresql>
-    <jmouse.version>1.0.0-Stable_20260801</jmouse.version>
+    <jmouse.version>1.0.0-b20260802</jmouse.version>
     <maven.compiler.target>21</maven.compiler.target>
     <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
     <jdbc-mssql>12.6.1.jre11</jdbc-mssql>
@@ -81,6 +82,13 @@
   </properties>
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>${awssdk.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-core</artifactId>
@@ -149,6 +157,11 @@
       <dependency>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-storage</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-storage-s3</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>

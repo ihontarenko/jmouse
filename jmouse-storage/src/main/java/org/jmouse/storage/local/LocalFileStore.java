@@ -15,19 +15,17 @@ import org.jmouse.storage.configuration.StorageSettings;
 import org.jmouse.storage.exception.ObjectNotFoundException;
 import org.jmouse.storage.exception.StorageException;
 import org.jmouse.storage.exception.StorageKeyException;
+import org.jmouse.storage.support.ByteRanges;
+import org.jmouse.storage.support.ContentDigests;
+import org.jmouse.storage.support.Digested;
+import org.jmouse.storage.support.TemporaryFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HexFormat;
 
 /**
  * 💾 The reference {@link FileStore}: objects on local disk, the storage key being their path
@@ -48,7 +46,6 @@ public class LocalFileStore implements FileStore {
     public static final String BACKEND_NAME = "local";
 
     private static final Logger LOGGER           = LoggerFactory.getLogger(LocalFileStore.class);
-    private static final String DIGEST_ALGORITHM = "SHA-256";
     private static final String TEMPORARY_PREFIX = ".jmouse-storage-";
     private static final String TEMPORARY_SUFFIX = ".part";
 
@@ -88,7 +85,7 @@ public class LocalFileStore implements FileStore {
             Files.createDirectories(directory);
             temporary = Files.createTempFile(directory, TEMPORARY_PREFIX, TEMPORARY_SUFFIX);
 
-            Digested digested = copyDigesting(content, temporary);
+            Digested digested = ContentDigests.copyTo(content, temporary);
 
             // REPLACE_EXISTING without ATOMIC_MOVE: the two together are rejected on Windows, and
             // a same-directory move is already atomic enough that no reader sees a partial object.
@@ -100,7 +97,7 @@ public class LocalFileStore implements FileStore {
         } catch (IOException exception) {
             throw new StorageException("Failed to write '%s': %s".formatted(key, exception.getMessage()), exception);
         } finally {
-            discard(temporary);
+            TemporaryFiles.discard(temporary);
         }
     }
 
@@ -111,17 +108,10 @@ public class LocalFileStore implements FileStore {
 
     @Override
     public ResourceSegment readRange(StorageKey key, Range range) {
-        Resource resource = read(key);
-        long     length   = resource.getLength();
-        long     start    = range.getStart(length);
-        long     end      = Math.min(range.getEnd(length), length - 1);
+        Resource                resource = read(key);
+        ByteRanges.ByteRange    resolved = ByteRanges.resolve(range, key, resource.getLength());
 
-        if (start < 0 || start >= length || end < start) {
-            throw new StorageException(
-                    "Range %s cannot be satisfied by '%s' of %d bytes".formatted(range.toHeaderValue(), key, length));
-        }
-
-        return ResourceSegment.ofRange(start, resource, end - start + 1);
+        return ResourceSegment.ofRange(resolved.start(), resource, resolved.length());
     }
 
     @Override
@@ -179,27 +169,6 @@ public class LocalFileStore implements FileStore {
     }
 
     /**
-     * 📥 Copy content into a file while digesting it, so identity costs no second read.
-     *
-     * @param content content to copy
-     * @param target  file to write
-     * @return the size and digest of what actually arrived
-     * @throws IOException on read or write failure
-     */
-    private Digested copyDigesting(Content content, Path target) throws IOException {
-        MessageDigest digest = newDigest();
-        long          sizeBytes;
-
-        try (InputStream source = content.stream().open();
-             DigestInputStream digesting = new DigestInputStream(source, digest);
-             OutputStream sink = Files.newOutputStream(target)) {
-            sizeBytes = digesting.transferTo(sink);
-        }
-
-        return new Digested(sizeBytes, HexFormat.of().formatHex(digest.digest()));
-    }
-
-    /**
      * 📂 Resolve a key against the root, refusing anything that lands outside it.
      *
      * <p>{@link StorageKey} has already rejected every malformed shape; this re-checks the
@@ -234,39 +203,5 @@ public class LocalFileStore implements FileStore {
         }
 
         return path;
-    }
-
-    /**
-     * 🧹 Remove a temporary file left over from a failed write.
-     *
-     * @param temporary the file to remove, or {@code null} when the write succeeded
-     */
-    private void discard(Path temporary) {
-        if (temporary == null) {
-            return;
-        }
-
-        try {
-            Files.deleteIfExists(temporary);
-        } catch (IOException exception) {
-            LOGGER.warn("Could not discard partial write at {}", temporary, exception);
-        }
-    }
-
-    private static MessageDigest newDigest() {
-        try {
-            return MessageDigest.getInstance(DIGEST_ALGORITHM);
-        } catch (NoSuchAlgorithmException exception) {
-            throw new StorageException("Algorithm '%s' is unavailable".formatted(DIGEST_ALGORITHM), exception);
-        }
-    }
-
-    /**
-     * 📊 What one digesting copy established about the bytes.
-     *
-     * @param sizeBytes number of bytes that actually arrived
-     * @param sha256    lower-case hex digest of those bytes
-     */
-    private record Digested(long sizeBytes, String sha256) {
     }
 }
