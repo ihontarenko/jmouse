@@ -12,7 +12,6 @@ import org.jmouse.storage.jpa.sweeper.OrphanSweeper;
 import org.jmouse.storage.key.StorageKeyStrategy;
 import org.jmouse.storage.policy.UploadPolicy;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -55,7 +54,6 @@ public class StorageJpaAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnBean(EntityManager.class)
     public StoredFileRegistry storedFileRegistry(EntityManager entityManager, FileStore fileStore) {
         return new JpaStoredFileRegistry(entityManager, fileStore);
     }
@@ -71,7 +69,6 @@ public class StorageJpaAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnBean(StoredFileRegistry.class)
     public StoredFileIngestion storedFileIngestion(FileStores fileStores, StoredFileRegistry registry,
                                                    StorageKeyStrategy keyStrategy,
                                                    UploadPolicy uploadPolicy) {
@@ -93,7 +90,6 @@ public class StorageJpaAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnBean(StoredFileRegistry.class)
     public OrphanSweeper orphanSweeper(StoredFileRegistry registry, FileStore fileStore,
                                        List<StoredFileReferences> referenceSources,
                                        StorageSettings settings) {

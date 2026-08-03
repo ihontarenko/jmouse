@@ -155,15 +155,33 @@ public interface TypeClassifier {
     }
 
     /**
+     * Checks if the inspected type is an amount of time — {@link java.time.Duration} or
+     * {@link java.time.Period}.
+     * <p>
+     * Both are indivisible values written as a single string ({@code PT15M}, {@code P365D}), not
+     * structures to walk into. Without this they classify as beans, and anything binding one goes
+     * looking for a no-argument constructor that does not exist — a confusing reflection failure
+     * standing in for "this should have gone through a converter".
+     * </p>
+     *
+     * @return {@code true} if the class type is a temporal amount, otherwise {@code false}
+     */
+    default boolean isTemporalAmount() {
+        return is(java.time.Duration.class) || is(java.time.Period.class);
+    }
+
+    /**
      * Checks if the inspected type is a scalar type.
      * <p>
-     * A scalar type is defined as a primitive, a string, a number, a boolean, a byte, or a character.
+     * A scalar type is defined as a primitive, a string, a number, a boolean, a byte, a character,
+     * or an amount of time.
      * </p>
      *
      * @return {@code true} if the class type is scalar, otherwise {@code false}
      */
     default boolean isScalar() {
-        return isString() || isNumber() || isBoolean() || isByte() || isCharacter() || isPrimitive();
+        return isString() || isNumber() || isBoolean() || isByte() || isCharacter() || isPrimitive()
+                || isTemporalAmount();
     }
 
     /**

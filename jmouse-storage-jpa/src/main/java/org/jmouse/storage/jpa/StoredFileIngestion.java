@@ -116,6 +116,35 @@ public class StoredFileIngestion {
     }
 
     /**
+     * ♻️ Overwrite an object in place, keeping its key and its registry row.
+     *
+     * <p>For content whose address is meant to stay fixed while its contents change: a document
+     * saved repeatedly, a generated report refreshed on a schedule. Composing a new key each time
+     * would strand the old object and break every link already handed out.</p>
+     *
+     * <p>Deduplication does not apply here and must not — the caller has said which object to
+     * replace, and quietly pointing the binding at somebody else's identical bytes instead would
+     * make the next save overwrite <em>their</em> file.</p>
+     *
+     * @param existing the row whose bytes are being replaced
+     * @param content  the new content
+     * @return the same row, updated to match what was written
+     */
+    public StoredFile reingest(StoredFile existing, Content content) {
+        uploadPolicy.accept(content);
+
+        FileStore    fileStore = fileStores.require(existing.getBackend());
+        StoredObject stored    = fileStore.write(existing.getStorageKey(), content);
+
+        uploadPolicy.ensureNotEmpty(stored.sizeBytes());
+        uploadPolicy.ensureWithinSizeLimit(stored.sizeBytes());
+
+        existing.rewrittenAs(stored);
+
+        return existing;
+    }
+
+    /**
      * 📝 Write the bytes, verify what actually arrived, and record the object.
      *
      * @param fileStore backend to write through

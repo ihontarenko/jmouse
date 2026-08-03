@@ -72,17 +72,60 @@ public final class StorageSettingsBinder {
      * @return the settings, defaulted wherever configuration said nothing
      */
     public static StorageSettings bind(ConfigurableEnvironment environment) {
-        String              prefix = prefixOf(environment);
-        Map<String, Object> nested = new HashMap<>();
+        String              prefix         = prefixOf(environment);
+        Set<String>         durationPaths  = SpringDurations.durationPathsOf(StorageSettings.class);
+        Map<String, Object> nested         = new HashMap<>();
 
         for (String propertyName : propertyNamesUnder(environment, prefix)) {
-            String relative = propertyName.substring(prefix.length() + SEPARATOR.length());
+            String relative = camelCasePath(propertyName.substring(prefix.length() + SEPARATOR.length()));
             Object value    = environment.getProperty(propertyName);
 
-            place(nested, relative, value);
+            place(nested, relative, isDuration(relative, durationPaths) && value != null
+                    ? SpringDurations.normalize(value.toString())
+                    : value);
         }
 
         return StorageSettings.bind(Map.of(ROOT_KEY, nested), ROOT_KEY);
+    }
+
+    /**
+     * ⏱️ Whether a property holds a duration and so needs Spring's shorthand translating.
+     *
+     * <p>Matched on the tail as well as the whole path, because a named backend's settings sit
+     * under a key nobody can know up front — {@code backends.archive.s3.linkTimeToLive} is the same
+     * setting as {@code s3.linkTimeToLive} and must be read the same way.</p>
+     *
+     * @param path          camelCased property path, prefix already removed
+     * @param durationPaths paths the settings record declares as durations
+     * @return {@code true} when the value should be normalised
+     */
+    private static boolean isDuration(String path, Set<String> durationPaths) {
+        if (durationPaths.contains(path)) {
+            return true;
+        }
+
+        return durationPaths.stream().anyMatch(candidate -> path.endsWith(SEPARATOR + candidate));
+    }
+
+    /**
+     * 🐫 A whole dotted path with every segment converted to its Java component name.
+     *
+     * @param relative property path with the prefix removed
+     * @return the camelCased path
+     */
+    private static String camelCasePath(String relative) {
+        String[]      segments  = relative.split(SEPARATOR_EXPRESSION);
+        StringBuilder converted = new StringBuilder(relative.length());
+
+        for (String segment : segments) {
+            if (!converted.isEmpty()) {
+                converted.append(SEPARATOR);
+            }
+
+            converted.append(camelCase(segment));
+        }
+
+        return converted.toString();
     }
 
     /**
@@ -115,14 +158,14 @@ public final class StorageSettingsBinder {
     }
 
     /**
-     * 🪆 Place one flat dotted key into the nested map, converting each segment to camelCase.
+     * 🪆 Place one already-camelCased dotted key into the nested map.
      *
      * <p>A segment that collides with an already-placed scalar is dropped rather than allowed to
      * overwrite a branch: {@code s3=x} alongside {@code s3.bucket=y} is a configuration mistake,
      * and silently letting either win would hide it.</p>
      *
      * @param root     map being assembled
-     * @param relative key with the prefix already removed
+     * @param relative camelCased key with the prefix already removed
      * @param value    the property's value
      */
     @SuppressWarnings("unchecked")
@@ -131,7 +174,7 @@ public final class StorageSettingsBinder {
         Map<String, Object> current  = root;
 
         for (int index = 0; index < segments.length - 1; index++) {
-            Object existing = current.computeIfAbsent(camelCase(segments[index]),
+            Object existing = current.computeIfAbsent(segments[index],
                                                       branch -> new HashMap<String, Object>());
 
             if (!(existing instanceof Map)) {
@@ -141,7 +184,7 @@ public final class StorageSettingsBinder {
             current = (Map<String, Object>) existing;
         }
 
-        current.put(camelCase(segments[segments.length - 1]), value);
+        current.put(segments[segments.length - 1], value);
     }
 
     /**

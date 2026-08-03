@@ -8,7 +8,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -31,9 +30,17 @@ import java.util.List;
  * with. Depending on the bean <em>name</em>, which did not change, keeps one jar working on both.</p>
  *
  * <p>If a product has no Flyway of its own, there is nothing to order and nothing happens.</p>
+ *
+ * <h3>Why nothing here is conditional on a bean</h3>
+ *
+ * <p>{@code @ConditionalOnBean} looks tempting for the data source and is a trap: autoconfiguration
+ * conditions are evaluated in registration order, so a data source contributed by a later
+ * autoconfiguration simply is not there yet and the condition quietly fails. The bean vanishes, no
+ * error is logged, and the first sign of trouble is a product migration failing on a table that
+ * was never created. Requiring the classes and letting injection do the rest fails loudly instead.</p>
  */
 @AutoConfiguration
-@ConditionalOnClass({Flyway.class, StorageMigrations.class})
+@ConditionalOnClass({Flyway.class, StorageMigrations.class, DataSource.class})
 @ConditionalOnProperty(name = "jmouse.storage.migrations.enabled", havingValue = "true",
                        matchIfMissing = true)
 public class StorageFlywayAutoConfiguration {
@@ -54,7 +61,6 @@ public class StorageFlywayAutoConfiguration {
      */
     @Bean(name = StorageMigrations.MIGRATOR_BEAN_NAME)
     @ConditionalOnMissingBean(StorageFlywayMigrator.class)
-    @ConditionalOnBean(DataSource.class)
     public StorageFlywayMigrator storageFlywayMigrator(DataSource dataSource) {
         return new StorageFlywayMigrator(dataSource);
     }

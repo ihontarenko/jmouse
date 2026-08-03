@@ -25,7 +25,16 @@ public class StringToNumberConverter implements GenericConverter<String, Number>
         converters.put(Short.class, Short::valueOf);
         converters.put(Byte.class, Byte::valueOf);
 
+        // Primitives are separate entries because a primitive Class is not its wrapper: binding a
+        // record component declared `long` looks up `long.class` and finds nothing unless it is
+        // here. Missing ones do not fail as "no converter" either — they fall through to whichever
+        // narrower converter answers first, and surface as a NumberFormatException about a value
+        // being out of range, which points at the value rather than at the gap that caused it.
+        converters.put(byte.class, Byte::parseByte);
+        converters.put(short.class, Short::parseShort);
         converters.put(int.class, Integer::parseInt);
+        converters.put(long.class, Long::parseLong);
+        converters.put(float.class, Float::parseFloat);
         converters.put(double.class, Double::parseDouble);
     }
 
@@ -50,8 +59,13 @@ public class StringToNumberConverter implements GenericConverter<String, Number>
                 new ClassPair(String.class, Float.class),
                 new ClassPair(String.class, BigInteger.class),
                 new ClassPair(String.class, BigDecimal.class),
+                new ClassPair(String.class, Byte.class),
                 // primitives
+                new ClassPair(String.class, byte.class),
+                new ClassPair(String.class, short.class),
                 new ClassPair(String.class, int.class),
+                new ClassPair(String.class, long.class),
+                new ClassPair(String.class, float.class),
                 new ClassPair(String.class, double.class)
         );
     }

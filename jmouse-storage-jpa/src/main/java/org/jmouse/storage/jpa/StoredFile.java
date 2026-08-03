@@ -8,6 +8,7 @@ import org.jmouse.core.MediaType;
 import org.jmouse.storage.ContentTypes;
 import org.jmouse.storage.ObjectDescription;
 import org.jmouse.storage.StorageKey;
+import org.jmouse.storage.StoredObject;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -190,6 +191,21 @@ public class StoredFile {
      */
     public void backfillSha256(String sha256) {
         this.sha256 = sha256;
+    }
+
+    /**
+     * ♻️ Bring the row back in line with bytes that were overwritten at the same key.
+     *
+     * <p>For content whose address is meant to stay fixed while its contents change — a document
+     * saved repeatedly under one key. The key and the backend are untouched, because neither
+     * moved; everything measured about the bytes is replaced, because all of it did.</p>
+     *
+     * @param stored receipt from the rewrite
+     */
+    public void rewrittenAs(StoredObject stored) {
+        this.contentType = ContentTypes.baseType(stored.contentType());
+        this.sizeBytes   = stored.sizeBytes();
+        this.sha256      = stored.sha256();
     }
 
     /**
