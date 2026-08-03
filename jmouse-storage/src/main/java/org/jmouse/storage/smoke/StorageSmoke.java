@@ -351,8 +351,8 @@ public final class StorageSmoke {
         check("bound size", 1024L, settings.maxSizeBytes());
         check("absent groups default", true, settings.cache() != null && settings.sweeper() != null);
         check("default link lifetime", "PT15M", settings.s3().linkTimeToLive().toString());
-        check("provider drives path-style addressing", true, settings.resolvePathStyleAccess());
-        check("provider supplies the fallback region", "us-east-1", settings.resolveRegion());
+        check("provider drives path-style addressing", true, settings.defaultBackend().resolvePathStyleAccess());
+        check("provider supplies the fallback region", "us-east-1", settings.defaultBackend().resolveRegion());
         rejects("object store validates at startup", StorageException.class, settings::validate);
 
         StorageSettings defaults = StorageSettings.defaults();
@@ -364,7 +364,7 @@ public final class StorageSmoke {
     // ---------------------------------------------------------------- helpers
 
     private static StorageSettings settingsWith(UploadSettings upload) {
-        return new StorageSettings(StorageProvider.LOCAL, null, 0, upload, null, null, null);
+        return new StorageSettings(StorageProvider.LOCAL, null, 0, upload, null, null, false, false, null, null);
     }
 
     private static Content pdf() {

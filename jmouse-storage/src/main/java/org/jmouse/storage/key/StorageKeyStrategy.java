@@ -11,7 +11,6 @@ import org.jmouse.storage.StorageKey;
  * caller or a backend. It is also the single mechanism: an application must not have one layout
  * for uploads and a different one for documents, which is the situation this replaces.</p>
  */
-@FunctionalInterface
 public interface StorageKeyStrategy {
 
     /**
@@ -21,4 +20,21 @@ public interface StorageKeyStrategy {
      * @return the key to write at
      */
     StorageKey compose(StorageKeyRequest request);
+
+    /**
+     * 🔐 Whether this layout needs the content's digest before it can place it.
+     *
+     * <p>Content-addressed layouts do, and that reverses the usual order: the bytes have to be
+     * read once before anything knows where they go. A caller that sees {@code true} spools and
+     * digests first, which is also what makes deduplication possible — by then the digest is in
+     * hand and the registry can be asked whether these exact bytes are already stored.</p>
+     *
+     * <p>Layouts that place content by owner, category or anything else known up front return
+     * {@code false} and cost no extra pass.</p>
+     *
+     * @return {@code true} when {@link StorageKeyRequest#contentDigest()} must be set
+     */
+    default boolean requiresContentDigest() {
+        return false;
+    }
 }

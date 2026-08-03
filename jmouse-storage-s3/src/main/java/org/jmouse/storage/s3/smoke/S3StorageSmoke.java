@@ -11,12 +11,9 @@ import org.jmouse.storage.ObjectDescription;
 import org.jmouse.storage.Presentation;
 import org.jmouse.storage.StorageKey;
 import org.jmouse.storage.StoredObject;
-import org.jmouse.storage.configuration.CacheSettings;
 import org.jmouse.storage.configuration.S3Settings;
 import org.jmouse.storage.configuration.StorageProvider;
-import org.jmouse.storage.configuration.StorageSettings;
-import org.jmouse.storage.configuration.SweeperSettings;
-import org.jmouse.storage.configuration.UploadSettings;
+import org.jmouse.storage.configuration.BackendSettings;
 import org.jmouse.storage.exception.ObjectNotFoundException;
 import org.jmouse.storage.exception.StorageException;
 import org.jmouse.storage.key.OwnerNamespacedKeyStrategy;
@@ -87,11 +84,11 @@ public final class S3StorageSmoke {
     public static void main(String[] arguments) throws IOException {
         verifyStartupValidation();
 
-        StorageSettings settings = settings(arguments, null);
+        BackendSettings backend = backend(arguments, null);
 
-        System.out.println("Against " + settings.resolveEndpoint() + " bucket " + settings.s3().bucket());
+        System.out.println("Against " + backend.resolveEndpoint() + " bucket " + backend.s3().bucket());
 
-        try (S3FileStore fileStore = new S3FileStore(settings)) {
+        try (S3FileStore fileStore = new S3FileStore(backend)) {
             StorageKey key = keyFor("payload.txt");
 
             verifyBackendName(fileStore);
@@ -127,24 +124,24 @@ public final class S3StorageSmoke {
                 null, "us-east-1", DEFAULT_ENDPOINT, null, "key", "secret", null, null, null);
 
         rejects("a missing bucket is refused at construction", "s3.bucket",
-                () -> new S3FileStore(settings(StorageProvider.MINIO, withoutBucket)));
+                () -> new S3FileStore(backend(StorageProvider.MINIO, withoutBucket)));
 
         S3Settings withoutEndpoint = new S3Settings(
                 DEFAULT_BUCKET, "us-east-1", null, null, "key", "secret", null, null, null);
 
         rejects("MinIO without an endpoint is refused at construction", "s3.endpoint",
-                () -> new S3FileStore(settings(StorageProvider.MINIO, withoutEndpoint)));
+                () -> new S3FileStore(backend(StorageProvider.MINIO, withoutEndpoint)));
 
         S3Settings withoutSecret = new S3Settings(
                 DEFAULT_BUCKET, "us-east-1", DEFAULT_ENDPOINT, null, "key", null, null, null, null);
 
         rejects("a missing secret key is refused at construction", "s3.secret-key",
-                () -> new S3FileStore(settings(StorageProvider.MINIO, withoutSecret)));
+                () -> new S3FileStore(backend(StorageProvider.MINIO, withoutSecret)));
     }
 
     private static void verifyBackendName(S3FileStore fileStore) {
         System.out.println("\nIdentity");
-        check("backend names itself", "s3", fileStore.backendName());
+        check("backend takes its name from configuration", "minio", fileStore.backendName());
     }
 
     private static void verifyWrite(S3FileStore fileStore, StorageKey key) {
@@ -288,7 +285,7 @@ public final class S3StorageSmoke {
                 argument(arguments, 2, DEFAULT_ACCESS_KEY), argument(arguments, 3, DEFAULT_SECRET_KEY),
                 null, null, Duration.ofDays(8));
 
-        try (S3FileStore fileStore = new S3FileStore(settings(StorageProvider.MINIO, unsignableLifetime))) {
+        try (S3FileStore fileStore = new S3FileStore(backend(StorageProvider.MINIO, unsignableLifetime))) {
             Presentation presentation = new Presentation(MediaType.forString("text/plain"), null);
 
             Optional<DirectLink> link = fileStore.resolveDirectLink(keyFor("payload.txt"), presentation);
@@ -306,7 +303,7 @@ public final class S3StorageSmoke {
     private static void verifySigningEndpointIsSeparate(String[] arguments) {
         System.out.println("\nSeparate signing endpoint");
 
-        try (S3FileStore fileStore = new S3FileStore(settings(arguments, PUBLIC_ENDPOINT))) {
+        try (S3FileStore fileStore = new S3FileStore(backend(arguments, PUBLIC_ENDPOINT))) {
             Presentation presentation = new Presentation(MediaType.forString("text/plain"), null);
             Optional<DirectLink> link = fileStore.resolveDirectLink(keyFor("payload.txt"), presentation);
 
@@ -358,7 +355,7 @@ public final class S3StorageSmoke {
                                         .build());
     }
 
-    private static StorageSettings settings(String[] arguments, String publicEndpoint) {
+    private static BackendSettings backend(String[] arguments, String publicEndpoint) {
         String endpoint  = argument(arguments, 0, DEFAULT_ENDPOINT);
         String bucket    = argument(arguments, 1, DEFAULT_BUCKET);
         String accessKey = argument(arguments, 2, DEFAULT_ACCESS_KEY);
@@ -368,12 +365,11 @@ public final class S3StorageSmoke {
         S3Settings s3 = new S3Settings(bucket, null, endpoint, publicEndpoint, accessKey, secretKey,
                                        null, null, null);
 
-        return settings(StorageProvider.valueOf(provider.toUpperCase()), s3);
+        return backend(StorageProvider.valueOf(provider.toUpperCase()), s3);
     }
 
-    private static StorageSettings settings(StorageProvider provider, S3Settings s3) {
-        return new StorageSettings(provider, null, 0, UploadSettings.permissive(), s3,
-                                   CacheSettings.defaults(), SweeperSettings.defaults());
+    private static BackendSettings backend(StorageProvider provider, S3Settings s3) {
+        return new BackendSettings(null, provider, null, s3);
     }
 
     private static String argument(String[] arguments, int index, String fallback) {

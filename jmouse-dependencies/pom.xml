@@ -52,6 +52,7 @@
         <objenesis.version>3.3</objenesis.version>
         <jakarta-servlet.version>6.1.0</jakarta-servlet.version>
         <jakarta-validation.version>3.1.1</jakarta-validation.version>
+        <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
         <hibernate-validation.version>8.0.1.Final</hibernate-validation.version>
         <jakarta-el.version>4.0.2</jakarta-el.version>
         <jackson.version>2.17.1</jackson.version>
@@ -167,6 +168,11 @@
             </dependency>
             <dependency>
                 <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-storage-jpa</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-web</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>
@@ -209,6 +215,11 @@
                 <groupId>jakarta.validation</groupId>
                 <artifactId>jakarta.validation-api</artifactId>
                 <version>${jakarta-validation.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.persistence</groupId>
+                <artifactId>jakarta.persistence-api</artifactId>
+                <version>${jakarta-persistence.version}</version>
             </dependency>
 
             <!-- Hibernate Validator -->

@@ -11,7 +11,7 @@ import org.jmouse.storage.FileStore;
 import org.jmouse.storage.ObjectDescription;
 import org.jmouse.storage.StorageKey;
 import org.jmouse.storage.StoredObject;
-import org.jmouse.storage.configuration.StorageSettings;
+import org.jmouse.storage.configuration.BackendSettings;
 import org.jmouse.storage.exception.ObjectNotFoundException;
 import org.jmouse.storage.exception.StorageException;
 import org.jmouse.storage.exception.StorageKeyException;
@@ -41,38 +41,53 @@ import java.nio.file.StandardCopyOption;
 public class LocalFileStore implements FileStore {
 
     /**
-     * 🏷️ Name recorded against every object this backend writes.
+     * 🏷️ Name recorded against objects when configuration does not name the backend.
      */
-    public static final String BACKEND_NAME = "local";
+    public static final String DEFAULT_BACKEND_NAME = "local";
 
     private static final Logger LOGGER           = LoggerFactory.getLogger(LocalFileStore.class);
     private static final String TEMPORARY_PREFIX = ".jmouse-storage-";
     private static final String TEMPORARY_SUFFIX = ".part";
 
-    private final Path root;
+    private final String backendName;
+    private final Path   root;
 
     /**
-     * 🏗️ Store objects under the configured storage directory.
+     * 🏗️ Store objects under a backend's configured directory, named as that backend is.
      *
-     * @param settings the active storage settings
+     * @param backend the backend definition
      */
-    public LocalFileStore(StorageSettings settings) {
-        this(Path.of(settings.storageDirectory()));
+    public LocalFileStore(BackendSettings backend) {
+        this(backend.name(), Path.of(backend.storageDirectory()));
     }
 
     /**
-     * 🏗️ Store objects under an explicit root.
+     * 🏗️ Store objects under an explicit root, with the default backend name.
      *
      * @param root directory every key resolves against
      */
     public LocalFileStore(Path root) {
-        this.root = root.toAbsolutePath().normalize();
-        LOGGER.info("Storage backend '{}' rooted at {}", BACKEND_NAME, this.root);
+        this(DEFAULT_BACKEND_NAME, root);
+    }
+
+    /**
+     * 🏗️ Store objects under an explicit root, under an explicit name.
+     *
+     * <p>The name is what every object this store writes records, and what routes a later read
+     * back here — so two local backends rooted at different directories stay distinguishable.</p>
+     *
+     * @param backendName name recorded against every object written here
+     * @param root        directory every key resolves against
+     */
+    public LocalFileStore(String backendName, Path root) {
+        this.backendName = backendName;
+        this.root        = root.toAbsolutePath().normalize();
+        LOGGER.info("Storage backend '{}' rooted at {}", backendName, this.root);
     }
 
     @Override
     public String backendName() {
-        return BACKEND_NAME;
+        return backendName;
     }
 
     @Override

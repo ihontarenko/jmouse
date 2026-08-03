@@ -21,9 +21,11 @@ import java.util.List;
  * @param segments        further path segments, e.g. a category slug; blanks are dropped
  * @param filenameBase    filename without extension; blank means "generate one"
  * @param extension       extension without its dot; blank means "no extension"
+ * @param contentDigest   lower-case hex SHA-256 of the bytes, for layouts that place content by
+ *                        what it is rather than by whose it is; {@code null} otherwise
  */
 public record StorageKeyRequest(String namespace, String ownerIdentifier, List<String> segments,
-                                String filenameBase, String extension) {
+                                String filenameBase, String extension, String contentDigest) {
 
     /**
      * 🏗️ Normalise the collection and enforce the one field a layout cannot do without.
@@ -39,6 +41,20 @@ public record StorageKeyRequest(String namespace, String ownerIdentifier, List<S
         segments = (segments == null) ? List.of() : segments.stream()
                 .filter(segment -> segment != null && !segment.isBlank())
                 .toList();
+    }
+
+    /**
+     * 🔐 This request with the content's digest filled in.
+     *
+     * <p>What a caller does once it has spooled the bytes: the request is assembled before the
+     * content is read, and a content-addressed layout only becomes composable afterwards.</p>
+     *
+     * @param contentDigest lower-case hex SHA-256
+     * @return a copy carrying the digest
+     */
+    public StorageKeyRequest withContentDigest(String contentDigest) {
+        return new StorageKeyRequest(namespace, ownerIdentifier, segments, filenameBase, extension,
+                                     contentDigest);
     }
 
     /**
@@ -72,6 +88,7 @@ public record StorageKeyRequest(String namespace, String ownerIdentifier, List<S
         private       String       namespace;
         private       String       filenameBase;
         private       String       extension;
+        private       String       contentDigest;
 
         private Builder(String ownerIdentifier) {
             this.ownerIdentifier = ownerIdentifier;
@@ -125,12 +142,24 @@ public record StorageKeyRequest(String namespace, String ownerIdentifier, List<S
         }
 
         /**
+         * 🔐 Set the digest of the bytes, for a layout that places content by what it is.
+         *
+         * @param contentDigest lower-case hex SHA-256
+         * @return this builder
+         */
+        public Builder contentDigest(String contentDigest) {
+            this.contentDigest = contentDigest;
+            return this;
+        }
+
+        /**
          * ✅ Produce the request.
          *
          * @return the assembled request
          */
         public StorageKeyRequest build() {
-            return new StorageKeyRequest(namespace, ownerIdentifier, segments, filenameBase, extension);
+            return new StorageKeyRequest(namespace, ownerIdentifier, segments, filenameBase, extension,
+                                         contentDigest);
         }
     }
 }

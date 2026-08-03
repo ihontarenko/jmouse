@@ -14,7 +14,7 @@ import org.jmouse.storage.Presentation;
 import org.jmouse.storage.StorageKey;
 import org.jmouse.storage.StoredObject;
 import org.jmouse.storage.configuration.S3Settings;
-import org.jmouse.storage.configuration.StorageSettings;
+import org.jmouse.storage.configuration.BackendSettings;
 import org.jmouse.storage.exception.ObjectNotFoundException;
 import org.jmouse.storage.exception.StorageException;
 import org.jmouse.storage.support.ByteRanges;
@@ -76,47 +76,49 @@ import java.util.Optional;
  */
 public class S3FileStore implements FileStore, AutoCloseable {
 
-    /**
-     * 🏷️ Name recorded against every object this backend writes.
-     */
-    public static final String BACKEND_NAME = "s3";
-
     private static final Logger LOGGER              = LoggerFactory.getLogger(S3FileStore.class);
     private static final String TEMPORARY_PREFIX    = "jmouse-storage-s3-";
     private static final String TEMPORARY_SUFFIX    = ".upload";
     private static final String RANGE_HEADER_FORMAT = "bytes=%d-%d";
     private static final int    NOT_FOUND           = 404;
 
+    private final String      backendName;
     private final S3Client    client;
     private final S3Presigner presigner;
     private final String      bucket;
     private final Duration    linkTimeToLive;
 
     /**
-     * 🏗️ Connect to the configured object store.
+     * 🏗️ Connect to the object store a backend describes.
      *
      * <p>Settings are validated before anything is built, so a deployment missing a bucket or a
      * secret key fails here — naming the setting — rather than hours later on the first upload,
      * where the same mistake surfaces as an opaque SDK error.</p>
      *
-     * @param settings the active storage settings
+     * <p>The backend's name is what every object written here records, and what routes a later
+     * read back to this store rather than to whichever store happens to be the default. Two object
+     * stores — a live bucket and an archive one — therefore coexist without either shadowing the
+     * other's objects.</p>
+     *
+     * @param backend the backend definition
      * @throws StorageException when the configuration could not possibly work
      */
-    public S3FileStore(StorageSettings settings) {
-        settings.validate();
+    public S3FileStore(BackendSettings backend) {
+        backend.validate();
 
-        S3Settings s3 = settings.s3();
+        S3Settings s3 = backend.s3();
 
+        this.backendName    = backend.name();
         this.bucket         = s3.bucket();
         this.linkTimeToLive = s3.linkTimeToLive();
 
         StaticCredentialsProvider credentials = StaticCredentialsProvider.create(
                 AwsBasicCredentials.create(s3.accessKey(), s3.secretKey()));
-        Region          region         = Region.of(settings.resolveRegion());
-        String          endpoint       = settings.resolveEndpoint();
-        String          publicEndpoint = settings.resolvePublicEndpoint();
+        Region          region         = Region.of(backend.resolveRegion());
+        String          endpoint       = backend.resolveEndpoint();
+        String          publicEndpoint = backend.resolvePublicEndpoint();
         S3Configuration serviceConfiguration = S3Configuration.builder()
-                .pathStyleAccessEnabled(settings.resolvePathStyleAccess())
+                .pathStyleAccessEnabled(backend.resolvePathStyleAccess())
                 .build();
 
         S3ClientBuilder clientBuilder = S3Client.builder()
@@ -140,15 +142,15 @@ public class S3FileStore implements FileStore, AutoCloseable {
 
         LOGGER.info("Storage backend '{}' provider={} bucket={} region={} endpoint={} publicEndpoint={} "
                             + "pathStyle={} linkTimeToLive={}",
-                    BACKEND_NAME, settings.provider(), bucket, region,
+                    backendName, backend.provider(), bucket, region,
                     (endpoint != null) ? endpoint : "<sdk default>",
                     (publicEndpoint != null) ? publicEndpoint : "<same as endpoint>",
-                    settings.resolvePathStyleAccess(), linkTimeToLive);
+                    backend.resolvePathStyleAccess(), linkTimeToLive);
     }
 
     @Override
     public String backendName() {
-        return BACKEND_NAME;
+        return backendName;
     }
 
     /**

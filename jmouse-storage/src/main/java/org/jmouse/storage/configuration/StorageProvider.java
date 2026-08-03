@@ -13,29 +13,45 @@ public enum StorageProvider {
     /**
      * 💾 Local disk. Cannot produce direct links — the application streams every byte.
      */
-    LOCAL(false, null),
+    LOCAL(false, null, "local"),
 
     /**
      * ☁️ Amazon S3. Region is required; the SDK derives the endpoint.
      */
-    AWS(false, null),
+    AWS(false, null, "aws"),
 
     /**
      * 🪣 Self-hosted MinIO. Requires an explicit endpoint; region is a formality.
      */
-    MINIO(true, "us-east-1"),
+    MINIO(true, "us-east-1", "minio"),
 
     /**
      * ⚡ Supabase Storage. Endpoint is derived from the project URL.
      */
-    SUPABASE(true, null);
+    SUPABASE(true, null, "supabase");
 
     private final boolean pathStyleAccess;
     private final String  defaultRegion;
+    private final String  defaultBackendName;
 
-    StorageProvider(boolean pathStyleAccess, String defaultRegion) {
-        this.pathStyleAccess = pathStyleAccess;
-        this.defaultRegion   = defaultRegion;
+    StorageProvider(boolean pathStyleAccess, String defaultRegion, String defaultBackendName) {
+        this.pathStyleAccess    = pathStyleAccess;
+        this.defaultRegion      = defaultRegion;
+        this.defaultBackendName = defaultBackendName;
+    }
+
+    /**
+     * 🏷️ What a backend of this kind is called when configuration does not name it.
+     *
+     * <p>Per provider rather than per family, so an application running MinIO alongside AWS gets
+     * two distinguishable names without having to invent either. The name is recorded against
+     * every object the backend writes and is what routes a later read back to it — so renaming a
+     * backend that already holds objects strands them, and is not a thing to do casually.</p>
+     *
+     * @return the default backend name
+     */
+    public String getDefaultBackendName() {
+        return defaultBackendName;
     }
 
     /**
