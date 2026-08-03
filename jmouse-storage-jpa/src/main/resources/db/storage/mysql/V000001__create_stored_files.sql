@@ -31,7 +31,10 @@ CREATE TABLE stored_files
     -- Computed during the write, in the same pass as the bytes. Doubles as a strong entity tag and
     -- as the identity deduplication matches on. NULL for an object stored before this table
     -- existed and not yet backfilled.
-    sha256        CHAR(64)     NULL,
+    -- VARCHAR rather than CHAR even though the length is fixed: CHAR pads with trailing spaces on
+    -- comparison, and Hibernate schema validation reports a CHAR column as a type mismatch against
+    -- a plain String mapping, failing startup under ddl-auto: validate.
+    sha256        VARCHAR(64)  NULL,
 
     -- Which backend wrote it. Recorded although moving objects between backends is out of scope,
     -- so that building it later is a feature rather than a schema change to negotiate.

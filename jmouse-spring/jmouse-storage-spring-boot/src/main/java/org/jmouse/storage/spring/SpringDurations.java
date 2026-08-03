@@ -1,11 +1,7 @@
 package org.jmouse.storage.spring;
 
-import java.lang.reflect.RecordComponent;
 import java.time.Duration;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,18 +29,6 @@ public final class SpringDurations {
     private static final String SEPARATOR = ".";
 
     private SpringDurations() {
-    }
-
-    /**
-     * 🔎 Every dotted path under a settings type that holds a {@link Duration}.
-     *
-     * @param settingsType the record to walk
-     * @return the paths, relative to the record's own root
-     */
-    public static Set<String> durationPathsOf(Class<?> settingsType) {
-        Set<String> paths = new HashSet<>();
-        collect(settingsType, "", paths, new HashSet<>());
-        return paths;
     }
 
     /**
@@ -81,36 +65,4 @@ public final class SpringDurations {
         };
     }
 
-    /**
-     * 🪆 Walk a record's components, recording duration paths and descending into nested records.
-     *
-     * @param type    record type being walked
-     * @param prefix  path accumulated so far
-     * @param paths   collected duration paths
-     * @param visited types already walked, so a self-referential shape cannot loop forever
-     */
-    private static void collect(Class<?> type, String prefix, Set<String> paths, Set<Class<?>> visited) {
-        if (!type.isRecord() || !visited.add(type)) {
-            return;
-        }
-
-        for (RecordComponent component : type.getRecordComponents()) {
-            String path = prefix.isEmpty() ? component.getName() : prefix + SEPARATOR + component.getName();
-
-            if (component.getType() == Duration.class) {
-                paths.add(path);
-                continue;
-            }
-
-            // A map of nested settings — every entry is a record of its own, so the path continues
-            // through a key nobody can know up front and is matched with a wildcard segment.
-            if (Map.class.isAssignableFrom(component.getType())) {
-                continue;
-            }
-
-            collect(component.getType(), path, paths, visited);
-        }
-
-        visited.remove(type);
-    }
 }

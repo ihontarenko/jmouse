@@ -6,6 +6,7 @@ import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -51,6 +52,7 @@ public final class StorageSettingsBinder {
     private static final char   KEBAB_HYPHEN   = '-';
     private static final char   SNAKE_UNDERSCORE = '_';
     private static final String ROOT_KEY       = "storage";
+    private static final String LIST_SEPARATOR = ",";
 
     private StorageSettingsBinder() {
     }
@@ -72,39 +74,48 @@ public final class StorageSettingsBinder {
      * @return the settings, defaulted wherever configuration said nothing
      */
     public static StorageSettings bind(ConfigurableEnvironment environment) {
-        String              prefix         = prefixOf(environment);
-        Set<String>         durationPaths  = SpringDurations.durationPathsOf(StorageSettings.class);
-        Map<String, Object> nested         = new HashMap<>();
+        String              prefix = prefixOf(environment);
+        SettingsShape       shape  = SettingsShape.of(StorageSettings.class);
+        Map<String, Object> nested = new HashMap<>();
 
         for (String propertyName : propertyNamesUnder(environment, prefix)) {
             String relative = camelCasePath(propertyName.substring(prefix.length() + SEPARATOR.length()));
-            Object value    = environment.getProperty(propertyName);
 
-            place(nested, relative, isDuration(relative, durationPaths) && value != null
-                    ? SpringDurations.normalize(value.toString())
-                    : value);
+            place(nested, relative, translate(environment.getProperty(propertyName), relative, shape));
         }
 
         return StorageSettings.bind(Map.of(ROOT_KEY, nested), ROOT_KEY);
     }
 
     /**
-     * ⏱️ Whether a property holds a duration and so needs Spring's shorthand translating.
+     * 🔄 Turn one configured value into what the settings record expects at that path.
      *
-     * <p>Matched on the tail as well as the whole path, because a named backend's settings sit
-     * under a key nobody can know up front — {@code backends.archive.s3.linkTimeToLive} is the same
-     * setting as {@code s3.linkTimeToLive} and must be read the same way.</p>
+     * <p>Both translations are Spring conventions rather than universal truths, which is why they
+     * happen here and are applied only where the record says they belong: a duration written
+     * {@code 15m} becomes {@code PT15M}, and a list written {@code a, b, c} becomes three values.</p>
      *
-     * @param path          camelCased property path, prefix already removed
-     * @param durationPaths paths the settings record declares as durations
-     * @return {@code true} when the value should be normalised
+     * @param value the configured value
+     * @param path  camelCased property path, prefix already removed
+     * @param shape what the settings record expects where
+     * @return the translated value
      */
-    private static boolean isDuration(String path, Set<String> durationPaths) {
-        if (durationPaths.contains(path)) {
-            return true;
+    private static Object translate(String value, String path, SettingsShape shape) {
+        if (value == null) {
+            return null;
         }
 
-        return durationPaths.stream().anyMatch(candidate -> path.endsWith(SEPARATOR + candidate));
+        if (shape.isDuration(path)) {
+            return SpringDurations.normalize(value);
+        }
+
+        if (shape.isCollection(path)) {
+            return Arrays.stream(value.split(LIST_SEPARATOR))
+                    .map(String::trim)
+                    .filter(entry -> !entry.isEmpty())
+                    .toList();
+        }
+
+        return value;
     }
 
     /**

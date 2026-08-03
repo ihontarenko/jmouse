@@ -57,7 +57,7 @@ public final class UploadPolicy {
      * @return the configured policy
      */
     public static UploadPolicy of(StorageSettings settings) {
-        UploadSettings upload = settings.upload();
+        UploadSettings upload = settings.upload().resolve();
         return new UploadPolicy(upload.mode(), upload.contentTypes(), upload.extensions(),
                                 settings.maxSizeBytes());
     }

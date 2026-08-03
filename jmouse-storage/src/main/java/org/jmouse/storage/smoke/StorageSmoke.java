@@ -14,6 +14,7 @@ import org.jmouse.storage.StorageKey;
 import org.jmouse.storage.StoredObject;
 import org.jmouse.storage.configuration.StorageProvider;
 import org.jmouse.storage.configuration.StorageSettings;
+import org.jmouse.storage.configuration.UploadProfile;
 import org.jmouse.storage.configuration.UploadSettings;
 import org.jmouse.storage.exception.ObjectNotFoundException;
 import org.jmouse.storage.exception.StorageException;
@@ -278,7 +279,7 @@ public final class StorageSmoke {
      */
     private static void verifyPolicyModes() {
         UploadPolicy denying = UploadPolicy.of(settingsWith(
-                new UploadSettings(AcceptanceMode.DENYLIST, Set.of("text/html", "image/svg+xml"),
+                new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.DENYLIST, Set.of("text/html", "image/svg+xml"),
                                    Set.of("exe", "svg"))));
 
         accepts("denylist admits a PDF", denying, pdf());
@@ -290,7 +291,7 @@ public final class StorageSmoke {
         accepts("denylist admits no extension at all", denying, named("README", null));
 
         UploadPolicy allowing = UploadPolicy.of(settingsWith(
-                new UploadSettings(AcceptanceMode.ALLOWLIST, Set.of("application/pdf", "image/png"),
+                new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.ALLOWLIST, Set.of("application/pdf", "image/png"),
                                    Set.of("pdf", "png"))));
 
         accepts("allowlist admits a PDF", allowing, pdf());

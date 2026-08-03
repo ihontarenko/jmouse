@@ -25,6 +25,15 @@ import javax.sql.DataSource;
  * <p>Migrating in {@link InitializingBean#afterPropertiesSet()} rather than lazily is deliberate:
  * the product's own Flyway is ordered after this bean by name, and that ordering only means
  * anything if the table exists by the time this bean is done.</p>
+ *
+ * <h3>One thing to check when adopting this</h3>
+ *
+ * <p>Running first means the product's schema is <em>no longer empty</em> by the time the product's
+ * own Flyway starts. A product using {@code baseline-on-migrate} therefore baselines instead of
+ * starting from nothing — and Flyway's default baseline version is {@code 1}, so a product whose
+ * migrations begin at {@code V000001} has that first migration silently skipped, failing on the
+ * next one with a missing table. Set {@code spring.flyway.baseline-version: 0} and it runs
+ * correctly. A product numbering from higher than 1 never notices.</p>
  */
 public class StorageFlywayMigrator implements InitializingBean {
 

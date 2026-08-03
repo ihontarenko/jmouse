@@ -21,11 +21,28 @@ import java.util.Set;
  * configurations already in production, so adopting the library does not mean re-typing sixty
  * extensions into a YAML file and getting one of them wrong.</p>
  *
+ * <h3>Choosing one</h3>
+ *
+ * <p>Set {@link #profile} and you are done — the two profiles are the configurations already in
+ * production, and picking one is a single line rather than sixty extensions retyped into a YAML
+ * file with one of them wrong:</p>
+ *
+ * <pre>{@code
+ * innoventa.file.upload.profile: BLOCK_DANGEROUS_CONTENT
+ * moneta.file.upload.profile: ALLOW_DOCUMENTS_AND_IMAGES
+ * }</pre>
+ *
+ * <p>{@link UploadProfile#CUSTOM} reads {@link #mode}, {@link #contentTypes} and
+ * {@link #extensions} instead, for a product whose answer is genuinely its own.</p>
+ *
+ * @param profile      a shipped configuration, or {@link UploadProfile#CUSTOM} to spell one out
  * @param mode         how {@link #contentTypes} and {@link #extensions} are read
  * @param contentTypes bare {@code type/subtype} values, without parameters
  * @param extensions   extensions without their dot
  */
-public record UploadSettings(@BindDefault("DENYLIST") AcceptanceMode mode, Set<String> contentTypes,
+public record UploadSettings(@BindDefault("CUSTOM") UploadProfile profile,
+                             @BindDefault("DENYLIST") AcceptanceMode mode,
+                             Set<String> contentTypes,
                              Set<String> extensions) {
 
     /**
@@ -33,9 +50,24 @@ public record UploadSettings(@BindDefault("DENYLIST") AcceptanceMode mode, Set<S
      * than a null dereference on first upload.
      */
     public UploadSettings {
+        profile      = (profile == null) ? UploadProfile.CUSTOM : profile;
         mode         = (mode == null) ? AcceptanceMode.DENYLIST : mode;
         contentTypes = (contentTypes == null) ? Set.of() : Set.copyOf(contentTypes);
         extensions   = (extensions == null) ? Set.of() : Set.copyOf(extensions);
+    }
+
+    /**
+     * ✅ These settings as the policy actually applies them: a named profile when one was chosen,
+     * otherwise exactly what was configured.
+     *
+     * @return the effective settings
+     */
+    public UploadSettings resolve() {
+        return switch (profile) {
+            case BLOCK_DANGEROUS_CONTENT -> blockingDangerousContent();
+            case ALLOW_DOCUMENTS_AND_IMAGES -> allowingDocumentsAndImages();
+            case CUSTOM -> this;
+        };
     }
 
     /**
@@ -44,7 +76,7 @@ public record UploadSettings(@BindDefault("DENYLIST") AcceptanceMode mode, Set<S
      * @return a permissive denylist
      */
     public static UploadSettings permissive() {
-        return new UploadSettings(AcceptanceMode.DENYLIST, Set.of(), Set.of());
+        return new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.DENYLIST, Set.of(), Set.of());
     }
 
     /**
@@ -96,7 +128,7 @@ public record UploadSettings(@BindDefault("DENYLIST") AcceptanceMode mode, Set<S
                 "lnk", "url", "desktop"
         );
 
-        return new UploadSettings(AcceptanceMode.DENYLIST, contentTypes, extensions);
+        return new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.DENYLIST, contentTypes, extensions);
     }
 
     /**
@@ -122,6 +154,6 @@ public record UploadSettings(@BindDefault("DENYLIST") AcceptanceMode mode, Set<S
                 "pdf", "doc", "docx", "xls", "xlsx"
         );
 
-        return new UploadSettings(AcceptanceMode.ALLOWLIST, contentTypes, extensions);
+        return new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.ALLOWLIST, contentTypes, extensions);
     }
 }
