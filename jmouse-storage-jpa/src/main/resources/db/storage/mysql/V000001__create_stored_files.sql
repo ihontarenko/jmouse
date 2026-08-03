@@ -43,13 +43,13 @@ CREATE TABLE stored_files
     created_at    DATETIME(6)  NOT NULL,
 
     PRIMARY KEY (id),
-    CONSTRAINT uq_stored_files_storage_key UNIQUE (storage_key)
+    CONSTRAINT unique_stored_files_storage_key UNIQUE (storage_key)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
 -- Deduplication asks this on every write, so it cannot be a scan.
-CREATE INDEX ix_stored_files_sha256 ON stored_files (sha256);
+CREATE INDEX index_stored_files_sha256 ON stored_files (sha256);
 
 -- The sweeper walks rows older than the grace period, resuming by identifier.
-CREATE INDEX ix_stored_files_created_at ON stored_files (created_at);
+CREATE INDEX index_stored_files_created_at ON stored_files (created_at);

@@ -89,6 +89,26 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Transaction demarcation for the scheduled sweep, and scheduling itself. Optional: an
+             application with no transaction manager gets every other bean and simply no sweep. -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Servlet API, for reading a delivery intent off a request. Provided by the container. -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

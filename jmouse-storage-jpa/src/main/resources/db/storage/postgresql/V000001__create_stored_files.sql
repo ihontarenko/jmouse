@@ -41,12 +41,12 @@ CREATE TABLE stored_files
 
     created_at    TIMESTAMP(6) NOT NULL,
 
-    CONSTRAINT pk_stored_files PRIMARY KEY (id),
-    CONSTRAINT uq_stored_files_storage_key UNIQUE (storage_key)
+    CONSTRAINT primary_stored_files PRIMARY KEY (id),
+    CONSTRAINT unique_stored_files_storage_key UNIQUE (storage_key)
 );
 
 -- Deduplication asks this on every write, so it cannot be a scan.
-CREATE INDEX ix_stored_files_sha256 ON stored_files (sha256);
+CREATE INDEX index_stored_files_sha256 ON stored_files (sha256);
 
 -- The sweeper walks rows older than the grace period, resuming by identifier.
-CREATE INDEX ix_stored_files_created_at ON stored_files (created_at);
+CREATE INDEX index_stored_files_created_at ON stored_files (created_at);

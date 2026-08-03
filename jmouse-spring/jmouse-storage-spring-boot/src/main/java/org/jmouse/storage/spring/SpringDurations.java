@@ -26,7 +26,6 @@ public final class SpringDurations {
     private static final Pattern SHORTHAND = Pattern.compile("^([+-]?\\d+)\\s*(ns|us|ms|s|m|h|d)$",
                                                              Pattern.CASE_INSENSITIVE);
 
-    private static final String SEPARATOR = ".";
 
     private SpringDurations() {
     }

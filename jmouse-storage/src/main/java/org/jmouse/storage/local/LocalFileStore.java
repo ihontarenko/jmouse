@@ -108,7 +108,7 @@ public class LocalFileStore implements FileStore {
             temporary = null;
 
             return new StoredObject(key, digested.sizeBytes(), ContentTypes.resolve(content, key),
-                                    digested.sha256());
+                                    digested.sha256(), backendName);
         } catch (IOException exception) {
             throw new StorageException("Failed to write '%s': %s".formatted(key, exception.getMessage()), exception);
         } finally {

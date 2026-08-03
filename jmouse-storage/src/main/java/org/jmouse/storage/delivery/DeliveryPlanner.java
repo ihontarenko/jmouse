@@ -149,7 +149,7 @@ public class DeliveryPlanner {
         }
 
         PreconditionResult result = ConditionalRequest.evaluate(
-                intent.requestHeadersOrEmpty(), new Headers(), 0, entityTag);
+                intent.resolveRequestHeaders(), new Headers(), 0, entityTag);
 
         return result == PreconditionResult.NOT_MODIFIED_304;
     }

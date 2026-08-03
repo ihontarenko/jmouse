@@ -108,14 +108,14 @@ public record DeliveryIntent(boolean forceDownload, Audience audience, Headers r
     }
 
     /**
-     * 📨 The request headers, or an empty {@code GET} when the caller supplied none.
+     * 📨 The request headers, defaulting to an empty {@code GET} when the caller supplied none.
      *
      * <p>Defaulting to {@code GET} rather than to nothing keeps precondition evaluation — which
      * treats safe and unsafe methods differently — from having to special-case an absent method.</p>
      *
      * @return headers safe to hand to a precondition evaluator
      */
-    public Headers requestHeadersOrEmpty() {
+    public Headers resolveRequestHeaders() {
         if (requestHeaders != null) {
             return requestHeaders;
         }

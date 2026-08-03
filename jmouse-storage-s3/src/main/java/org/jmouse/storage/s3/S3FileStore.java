@@ -180,7 +180,7 @@ public class S3FileStore implements FileStore, AutoCloseable {
                             .build(),
                     RequestBody.fromFile(temporary));
 
-            return new StoredObject(key, digested.sizeBytes(), contentType, digested.sha256());
+            return new StoredObject(key, digested.sizeBytes(), contentType, digested.sha256(), backendName);
         } catch (IOException | SdkException exception) {
             throw new StorageException("Failed to write '%s': %s".formatted(key, exception.getMessage()), exception);
         } finally {

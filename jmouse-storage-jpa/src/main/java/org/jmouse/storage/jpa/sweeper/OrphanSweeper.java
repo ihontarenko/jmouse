@@ -1,6 +1,6 @@
 package org.jmouse.storage.jpa.sweeper;
 
-import org.jmouse.storage.FileStore;
+import org.jmouse.storage.FileStores;
 import org.jmouse.storage.configuration.SweeperSettings;
 import org.jmouse.storage.jpa.StoredFileRegistry;
 import org.jmouse.storage.jpa.StoredFileReferences;
@@ -43,39 +43,39 @@ public class OrphanSweeper {
      */
     public static final int DEFAULT_BATCH_SIZE = 500;
 
-    private final StoredFileRegistry                 registry;
-    private final FileStore                          fileStore;
-    private final Collection<StoredFileReferences>   referenceSources;
-    private final SweeperSettings                    settings;
-    private final int                                batchSize;
+    private final StoredFileRegistry               registry;
+    private final FileStores                       fileStores;
+    private final Collection<StoredFileReferences> referenceSources;
+    private final SweeperSettings                  settings;
+    private final int                              batchSize;
 
     /**
      * 🏗️ Build a sweeper over every reference source the application registered.
      *
      * @param registry         registry to sweep
-     * @param fileStore        store whose bytes are reclaimed
+     * @param fileStores       every backend, so each orphan is reclaimed through the one holding it
      * @param referenceSources one per table that points at the registry
      * @param settings         whether the sweeper runs, and how long an object is left alone
      */
-    public OrphanSweeper(StoredFileRegistry registry, FileStore fileStore,
+    public OrphanSweeper(StoredFileRegistry registry, FileStores fileStores,
                          Collection<StoredFileReferences> referenceSources, SweeperSettings settings) {
-        this(registry, fileStore, referenceSources, settings, DEFAULT_BATCH_SIZE);
+        this(registry, fileStores, referenceSources, settings, DEFAULT_BATCH_SIZE);
     }
 
     /**
      * 🏗️ Build a sweeper with an explicit batch size.
      *
      * @param registry         registry to sweep
-     * @param fileStore        store whose bytes are reclaimed
+     * @param fileStores       every backend, so each orphan is reclaimed through the one holding it
      * @param referenceSources one per table that points at the registry
      * @param settings         whether the sweeper runs, and how long an object is left alone
      * @param batchSize        how many rows one batch examines
      */
-    public OrphanSweeper(StoredFileRegistry registry, FileStore fileStore,
+    public OrphanSweeper(StoredFileRegistry registry, FileStores fileStores,
                          Collection<StoredFileReferences> referenceSources, SweeperSettings settings,
                          int batchSize) {
         this.registry         = registry;
-        this.fileStore        = fileStore;
+        this.fileStores       = fileStores;
         this.referenceSources = List.copyOf(referenceSources);
         this.settings         = settings;
         this.batchSize        = batchSize;
@@ -97,7 +97,7 @@ public class OrphanSweeper {
         LOGGER.info("🧹 Sweeping objects registered before {} — {} reference(s) across {} source(s)",
                     cutOff, referenced.size(), referenceSources.size());
 
-        return new SweepRun(registry, fileStore, referenced, referenceSources.size(), cutOff, batchSize);
+        return new SweepRun(registry, fileStores, referenced, referenceSources.size(), cutOff, batchSize);
     }
 
     /**

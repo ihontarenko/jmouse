@@ -1,6 +1,6 @@
 package org.jmouse.storage.jpa.sweeper;
 
-import org.jmouse.storage.FileStore;
+import org.jmouse.storage.FileStores;
 import org.jmouse.storage.jpa.StoredFile;
 import org.jmouse.storage.jpa.StoredFileRegistry;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public class SweepRun {
     private static final Logger LOGGER = LoggerFactory.getLogger(SweepRun.class);
 
     private final StoredFileRegistry registry;
-    private final FileStore          fileStore;
+    private final FileStores         fileStores;
     private final Set<String>        referencedIdentifiers;
     private final LocalDateTime      cutOff;
     private final LocalDateTime      startedAt;
@@ -61,16 +61,17 @@ public class SweepRun {
      * 🏗️ Start a run over a union that has already been collected.
      *
      * @param registry              registry being swept
-     * @param fileStore             store whose bytes are reclaimed
+     * @param fileStores            every backend, so each orphan is reclaimed through the one
+     *                              that actually holds it
      * @param referencedIdentifiers union of everything every source still points at
      * @param sourcesConsulted      how many sources contributed to that union
      * @param cutOff                only objects registered strictly before this are candidates
      * @param batchSize             how many rows one batch examines
      */
-    SweepRun(StoredFileRegistry registry, FileStore fileStore, Set<String> referencedIdentifiers,
+    SweepRun(StoredFileRegistry registry, FileStores fileStores, Set<String> referencedIdentifiers,
              int sourcesConsulted, LocalDateTime cutOff, int batchSize) {
         this.registry              = registry;
-        this.fileStore             = fileStore;
+        this.fileStores            = fileStores;
         this.referencedIdentifiers = referencedIdentifiers;
         this.sourcesConsulted      = sourcesConsulted;
         this.cutOff                = cutOff;
@@ -137,19 +138,24 @@ public class SweepRun {
     /**
      * 🗑️ Remove one orphan's bytes and then its row.
      *
-     * <p>A backend that refuses to delete leaves the row alone: a registry row pointing at bytes
-     * that still exist is a state the next sweep can fix, whereas bytes with no row is a state
-     * nothing can.</p>
+     * <p>Through the backend the object <em>recorded</em>, never through a default. Deleting an
+     * absent object is a success on every backend, so asking the wrong one would report cheerful
+     * progress while removing the row that was the last thing able to name the bytes — the exact
+     * leak this component exists to stop, caused by the component itself.</p>
+     *
+     * <p>A backend that refuses to delete, or is no longer configured at all, leaves the row alone:
+     * a registry row pointing at bytes that still exist is a state the next sweep can fix, whereas
+     * bytes with no row is a state nothing can.</p>
      *
      * @param orphan the unreferenced row
      * @return {@code true} when the object was reclaimed
      */
     private boolean reclaim(StoredFile orphan) {
         try {
-            fileStore.delete(orphan.getStorageKey());
+            fileStores.require(orphan.getBackend()).delete(orphan.getStorageKey());
         } catch (RuntimeException exception) {
-            LOGGER.warn("🧹 Leaving '{}' registered — its bytes could not be removed",
-                        orphan.getStorageKey(), exception);
+            LOGGER.warn("🧹 Leaving '{}' registered — its bytes could not be removed from backend '{}'",
+                        orphan.getStorageKey(), orphan.getBackend(), exception);
             failures++;
             return false;
         }

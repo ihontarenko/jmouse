@@ -47,36 +47,35 @@ public class JpaStoredFileRegistry implements StoredFileRegistry {
     private static final String BEFORE_EVERY_IDENTIFIER = "";
 
     private final EntityManager               entityManager;
-    private final String                      backendName;
     private final IdGenerator<String, String> idGenerator;
 
     /**
-     * 🏗️ Register objects written by a given store, with generated identifiers.
-     *
-     * <p>Takes the {@link FileStore} rather than its name so that the backend recorded on a row
-     * cannot drift from the backend that actually wrote it.</p>
+     * 🏗️ Record writes into a persistence context, with generated identifiers.
      *
      * @param entityManager persistence context to work in
-     * @param fileStore     the store whose writes are being recorded
      */
-    public JpaStoredFileRegistry(EntityManager entityManager, FileStore fileStore) {
-        this(entityManager, fileStore, PrefixedIdGenerator.prefixedGenerator(IDENTIFIER_PREFIX));
+    public JpaStoredFileRegistry(EntityManager entityManager) {
+        this(entityManager, PrefixedIdGenerator.prefixedGenerator(IDENTIFIER_PREFIX));
     }
 
     /**
-     * 🏗️ Register objects written by a given store, with caller-chosen identifiers.
+     * 🏗️ Record writes into a persistence context, with caller-chosen identifiers.
      *
      * @param entityManager persistence context to work in
-     * @param fileStore     the store whose writes are being recorded
      * @param idGenerator   produces registry identifiers
      */
-    public JpaStoredFileRegistry(EntityManager entityManager, FileStore fileStore,
-                                 IdGenerator<String, String> idGenerator) {
+    public JpaStoredFileRegistry(EntityManager entityManager, IdGenerator<String, String> idGenerator) {
         this.entityManager = entityManager;
-        this.backendName   = fileStore.backendName();
         this.idGenerator   = idGenerator;
     }
 
+    /**
+     * ✅ Record an object, taking the backend from the write receipt itself.
+     *
+     * <p>Deliberately not from a store this registry was constructed with. An application may run
+     * several backends, and a caller may name one per write, so the only source that cannot be
+     * wrong is the receipt handed back by whichever store actually did the writing.</p>
+     */
     @Override
     public StoredFile register(StoredObject object, String originalName) {
         StoredFile storedFile = new StoredFile(
@@ -86,7 +85,7 @@ public class JpaStoredFileRegistry implements StoredFileRegistry {
                 ContentTypes.baseType(object.contentType()),
                 object.sizeBytes(),
                 object.sha256(),
-                backendName,
+                object.backendName(),
                 LocalDateTime.now()
         );
 

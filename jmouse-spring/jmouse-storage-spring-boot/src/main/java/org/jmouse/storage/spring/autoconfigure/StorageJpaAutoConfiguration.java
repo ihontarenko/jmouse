@@ -11,10 +11,12 @@ import org.jmouse.storage.jpa.StoredFileRegistry;
 import org.jmouse.storage.jpa.sweeper.OrphanSweeper;
 import org.jmouse.storage.key.StorageKeyStrategy;
 import org.jmouse.storage.policy.UploadPolicy;
+import org.jmouse.storage.spring.ScheduledOrphanSweep;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
@@ -49,13 +51,12 @@ public class StorageJpaAutoConfiguration {
      * demarcating any of its own.</p>
      *
      * @param entityManager the application's persistence context
-     * @param fileStore     the default backend, whose name is recorded against what it writes
      * @return the registry
      */
     @Bean
     @ConditionalOnMissingBean
-    public StoredFileRegistry storedFileRegistry(EntityManager entityManager, FileStore fileStore) {
-        return new JpaStoredFileRegistry(entityManager, fileStore);
+    public StoredFileRegistry storedFileRegistry(EntityManager entityManager) {
+        return new JpaStoredFileRegistry(entityManager);
     }
 
     /**
@@ -83,16 +84,37 @@ public class StorageJpaAutoConfiguration {
      * has to turn it on: enabling it is also the moment to check that the sources exist.</p>
      *
      * @param registry         registry to sweep
-     * @param fileStore        default backend, whose bytes are reclaimed
+     * @param fileStores       every backend, so each orphan is reclaimed through the one holding it
      * @param referenceSources one per table pointing at the registry
      * @param settings         whether the sweeper runs, and how long an object is left alone
      * @return the sweeper
      */
     @Bean
     @ConditionalOnMissingBean
-    public OrphanSweeper orphanSweeper(StoredFileRegistry registry, FileStore fileStore,
+    public OrphanSweeper orphanSweeper(StoredFileRegistry registry, FileStores fileStores,
                                        List<StoredFileReferences> referenceSources,
                                        StorageSettings settings) {
-        return new OrphanSweeper(registry, fileStore, referenceSources, settings.sweeper());
+        return new OrphanSweeper(registry, fileStores, referenceSources, settings.sweeper());
+    }
+
+    /**
+     * ⏰ The scheduled sweep, one transaction per batch.
+     *
+     * <p>Shipped rather than left to each product, because a product that binds through the registry
+     * has already stopped deleting bytes when it deletes a row — so a product without a sweep leaks
+     * every file it has ever deleted, and finding that out later is expensive. Scheduling still
+     * needs {@code @EnableScheduling} in the application, and the sweeper itself still ships
+     * disabled.</p>
+     *
+     * @param sweeper             the sweeper to drive
+     * @param transactionTemplate what each batch runs inside
+     * @return the scheduled sweep
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnClass(TransactionTemplate.class)
+    public ScheduledOrphanSweep scheduledOrphanSweep(OrphanSweeper sweeper,
+                                                     TransactionTemplate transactionTemplate) {
+        return new ScheduledOrphanSweep(sweeper, transactionTemplate);
     }
 }
