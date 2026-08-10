@@ -1,0 +1,2 @@
+org.jmouse.access.spring.AccessAutoConfiguration
+org.jmouse.access.spring.policy.AccessPolicyAutoConfiguration

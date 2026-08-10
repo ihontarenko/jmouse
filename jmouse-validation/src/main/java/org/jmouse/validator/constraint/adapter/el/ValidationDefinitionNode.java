@@ -80,7 +80,7 @@ public class ValidationDefinitionNode extends AbstractExpression {
      * @return populated {@link ValidationDefinition}
      */
     @Override
-    public Object evaluate(EvaluationContext context) {
+    public org.jmouse.access.policy.model.PolicyBundleEntry evaluate(EvaluationContext context) {
         ValidationDefinition definition = new ValidationDefinition(getName());
 
         for (Node child : getChildren()) {

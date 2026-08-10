@@ -1,7 +1,6 @@
 package org.jmouse.el.parser;
 
 import org.jmouse.el.CursorMatcher;
-import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.node.Expression;
@@ -50,11 +49,13 @@ public class PrimaryExpressionParser implements Parser {
             left = parser.parse(cursor, context);
         }
 
-        context.getParser(cursor);
-
         if (cursor.isCurrent(T_DECREMENT, T_INCREMENT)) {
             left = new PostfixUnaryOperation((Expression) left, context.getOperator(cursor.peek().type()));
             cursor.next();
+        }
+
+        if (left == null && cursor.consumeIf(T_NEW_LINE)) {
+            left = parse(cursor, context);
         }
 
         if (left == null) {

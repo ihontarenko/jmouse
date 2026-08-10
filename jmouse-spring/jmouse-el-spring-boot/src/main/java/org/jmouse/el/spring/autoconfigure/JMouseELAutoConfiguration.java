@@ -1,7 +1,7 @@
 package org.jmouse.el.spring.autoconfigure;
 
-import org.jmouse.el.renderable.TemplateEngine;
-import org.jmouse.el.renderable.loader.ClasspathLoader;
+import org.jmouse.el.template.TemplateEngine;
+import org.jmouse.el.template.loader.ClasspathLoader;
 import org.jmouse.el.spring.JMouseELProperties;
 import org.jmouse.el.spring.JMouseViewResolver;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

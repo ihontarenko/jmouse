@@ -9,7 +9,7 @@ import org.jmouse.core.context.beans.BeanLookupContext;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.extension.StandardExtensionContainer;
-import org.jmouse.el.renderable.Inheritance;
+import org.jmouse.el.template.Inheritance;
 
 import java.util.HashMap;
 import java.util.List;

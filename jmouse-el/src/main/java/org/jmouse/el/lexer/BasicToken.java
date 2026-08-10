@@ -91,6 +91,8 @@ public enum BasicToken implements Token.Type {
     T_FLOAT(4400),
     T_DOUBLE(4500),
 
+    T_NEW_LINE(5000),
+
     // Keywords and constants (Group 9000)
     T_FALSE(9000, "false"),
     T_TRUE(9001, "true"),

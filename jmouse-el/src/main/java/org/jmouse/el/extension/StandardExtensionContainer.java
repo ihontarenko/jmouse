@@ -79,7 +79,13 @@ public class StandardExtensionContainer implements ExtensionContainer {
      */
     @Override
     public Parser getParser(Class<? extends Parser> type) {
-        return parsers.get(type);
+        Parser parser = parsers.get(type);
+
+        if (parser == null) {
+            throw new ExtensionException("Unsupported parser type '%s'.".formatted(type.getName()));
+        }
+
+        return parser;
     }
 
     @Override

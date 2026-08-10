@@ -1,5 +1,6 @@
 package org.jmouse.el.parser;
 
+import org.jmouse.core.context.ContextScope;
 import org.jmouse.el.extension.*;
 import org.jmouse.core.access.AttributeResolver;
 import org.jmouse.el.lexer.Token;
@@ -9,8 +10,9 @@ import java.util.List;
 
 public class DefaultParserContext implements ParserContext {
 
-    private final ExtensionContainer extensions;
-    private       ParserOptions      options;
+    private final ExtensionContainer                    extensions;
+    private final ContextScope<Class<? extends Parser>> scope = new ContextScope<>();
+    private       ParserOptions                         options;
 
     public DefaultParserContext() {
         this(new StandardExtensionContainer());
@@ -18,6 +20,11 @@ public class DefaultParserContext implements ParserContext {
 
     public DefaultParserContext(ExtensionContainer extensions) {
         this.extensions = extensions;
+    }
+
+    @Override
+    public ContextScope<Class<? extends Parser>> getContextScope() {
+        return scope;
     }
 
     @Override

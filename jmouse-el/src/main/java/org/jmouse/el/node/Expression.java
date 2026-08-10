@@ -23,4 +23,16 @@ public interface Expression extends Node {
                         .formatted(this.getClass().getName()));
     }
 
+    /**
+     * Returns the source representation of this expression.
+     *
+     * @return the expression as source code
+     * @throws UnsupportedOperationException if source rendering is not supported
+     */
+    default String toSource() {
+        throw new UnsupportedOperationException(
+                "Source rendering is not supported for expression '%s'"
+                        .formatted(getClass().getName()));
+    }
+
 }

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ pet.name }} — Pet Gallery</title>
+    <link rel="stylesheet" href="/assets/css/pet-gallery.css">
+</head>
+<body>
+<main class="detail-page"><a class="back-link" href="/">← Back to gallery</a>
+    <article class="detail-card">
+        <div class="detail-portrait {{ pet.accent }}"><span>{{ pet.emoji }}</span></div>
+        <div class="detail-copy"><p class="eyebrow">READY TO MEET YOU</p>
+            <h1>{{ pet.name }}</h1>
+            <p class="detail-meta">{{ pet.breed }} · {{ pet.age }} years old · {{ pet.location }}</p>
+            <p class="detail-description">{{ pet.description }}</p><a class="meet-button"
+                                                                      href="mailto:hello@petgallery.local?subject=Meet%20{{ pet.name }}">I’d
+                like to meet {{ pet.name }} <span>↗</span></a></div>
+    </article>
+</main>
+</body>
+</html>

@@ -1,9 +1,8 @@
 package org.jmouse.el;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.jmouse.core.Sorter;
+
+import java.util.*;
 
 /**
  * 🏗️ Abstract implementation of {@link ObjectContainer}, providing a basic storage mechanism
@@ -21,6 +20,8 @@ public abstract class AbstractObjectContainer<K, E> implements ObjectContainer<K
      * 🗂️ Stores registered extensions mapped by their corresponding keys.
      */
     private final Map<K, E> extensions;
+
+    private List<E> sortedValues;
 
     /**
      * 🏗️ Constructs an empty extension container.
@@ -69,7 +70,14 @@ public abstract class AbstractObjectContainer<K, E> implements ObjectContainer<K
      */
     @Override
     public List<E> values() {
-        return List.copyOf(extensions.values());
+        List<E> values = List.copyOf(extensions.values());
+
+        if (sortedValues == null) {
+            sortedValues = new ArrayList<>(values);
+            sortedValues.sort(Sorter.PRIORITY_COMPARATOR);
+        }
+
+        return sortedValues;
     }
 
     /**

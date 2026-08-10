@@ -24,6 +24,7 @@
     <modules>
         <module>jmouse-el-spring-boot</module>
         <module>jmouse-storage-spring-boot</module>
+        <module>jmouse-access-spring-boot</module>
     </modules>
 
 </project>

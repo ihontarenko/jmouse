@@ -1,5 +1,6 @@
 package org.jmouse.el.parser;
 
+import org.jmouse.core.context.ContextScope;
 import org.jmouse.el.extension.ExtensionContainer;
 
 /**
@@ -16,6 +17,8 @@ public interface ParserContext extends ExtensionContainer {
     ExtensionContainer getExtensionContainer();
 
     ParserOptions getOptions();
+
+    ContextScope<Class<? extends Parser>> getContextScope();
 
     void setOptions(ParserOptions options);
 

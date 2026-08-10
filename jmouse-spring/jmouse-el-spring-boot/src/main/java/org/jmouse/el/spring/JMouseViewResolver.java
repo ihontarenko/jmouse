@@ -1,7 +1,7 @@
 package org.jmouse.el.spring;
 
-import org.jmouse.el.renderable.Engine;
-import org.jmouse.el.renderable.Template;
+import org.jmouse.el.template.Engine;
+import org.jmouse.el.template.Template;
 import org.springframework.core.Ordered;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;

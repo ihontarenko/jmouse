@@ -64,4 +64,10 @@ public class PropertyNode extends AbstractExpression {
     public String toString() {
         return "PROPERTY_PATH['%s']".formatted(path);
     }
+
+    @Override
+    public String toSource() {
+        return path;
+    }
+
 }

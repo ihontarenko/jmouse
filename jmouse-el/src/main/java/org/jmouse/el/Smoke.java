@@ -2,10 +2,10 @@ package org.jmouse.el;
 
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.MethodImporter;
-import org.jmouse.el.renderable.Template;
-import org.jmouse.el.renderable.TemplateEngine;
-import org.jmouse.el.renderable.TemplateRenderer;
-import org.jmouse.el.renderable.loader.StringLoader;
+import org.jmouse.el.template.Template;
+import org.jmouse.el.template.TemplateEngine;
+import org.jmouse.el.template.TemplateRenderer;
+import org.jmouse.el.template.loader.StringLoader;
 
 import java.util.List;
 

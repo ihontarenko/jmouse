@@ -15,6 +15,22 @@ import java.util.List;
 public interface TokenCursor extends Streamable<Token> {
 
     /**
+     * Returns the source these tokens were read from, when the cursor knows it.
+     *
+     * <p>Tokens carry an offset but not the text around it, so a parser that needs the source
+     * verbatim — to quote a slice of it, or to turn an offset into a line and column — has no way
+     * back to the characters. This is that way back.</p>
+     *
+     * <p>The default implementation returns {@code null}: a cursor is free not to have a source,
+     * and callers are expected to degrade rather than fail when it does not.</p>
+     *
+     * @return the tokenizable source, or {@code null} when the cursor has none
+     */
+    default TokenizableSource source() {
+        return null;
+    }
+
+    /**
      * Returns true if there is at least one more token in the stream.
      *
      * @return true if tokens remain, false otherwise
@@ -36,25 +52,6 @@ public interface TokenCursor extends Streamable<Token> {
     Token next();
 
     /**
-     * Attempts to consume the next token if it matches any of the expected types.
-     * If the next token matches one of the provided types, it is consumed and the cursor advances.
-     * Otherwise, the cursor remains unchanged.
-     *
-     * @param expected an array of token types to check against
-     * @return {@code true} if the token was consumed, {@code false} otherwise
-     */
-    default boolean nextIf(Token.Type... expected) {
-        boolean advanced = false;
-
-        if (isNext(expected)) {
-            next();
-            advanced = true;
-        }
-
-        return advanced;
-    }
-
-    /**
      * Attempts to consume the current token if it matches any of the expected types.
      * If the current token matches one of the provided types, it is consumed and the cursor advances.
      * Otherwise, the cursor remains unchanged.
@@ -62,7 +59,7 @@ public interface TokenCursor extends Streamable<Token> {
      * @param expected an array of token types to check against
      * @return {@code true} if the token was consumed, {@code false} otherwise
      */
-    default boolean currentIf(Token.Type... expected) {
+    default boolean consumeIf(Token.Type... expected) {
         boolean advanced = false;
 
         if (isCurrent(expected)) {
@@ -95,6 +92,26 @@ public interface TokenCursor extends Streamable<Token> {
      * @return the Token object at the given offset
      */
     Token lookAt(int offset);
+
+    /**
+     * Looks for the first token after a token of the given type
+     * without moving the cursor.
+     *
+     * @param type the token type to look after
+     * @return the token immediately following the matching token,
+     *         or {@code null} if no such token exists
+     */
+    Token lookAfter(Token.Type type);
+
+    /**
+     * Looks for the first token before a token of the given type
+     * without moving the cursor.
+     *
+     * @param type the token type to look before
+     * @return the token immediately preceding the matching token,
+     *         or {@code null} if no such token exists
+     */
+    Token lookBefore(Token.Type type);
 
     /**
      * Advances the cursor by the specified number of tokens (consumes them).

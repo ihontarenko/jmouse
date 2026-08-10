@@ -3,11 +3,11 @@ package org.jmouse.el.spring;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.renderable.Content;
-import org.jmouse.el.renderable.Engine;
-import org.jmouse.el.renderable.Renderer;
-import org.jmouse.el.renderable.Template;
-import org.jmouse.el.renderable.TemplateRenderer;
+import org.jmouse.el.template.Content;
+import org.jmouse.el.template.Engine;
+import org.jmouse.el.template.Renderer;
+import org.jmouse.el.template.Template;
+import org.jmouse.el.template.TemplateRenderer;
 import org.springframework.web.servlet.View;
 
 import java.util.Map;

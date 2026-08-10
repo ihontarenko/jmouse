@@ -64,6 +64,7 @@ public class DefaultTokenizer implements Tokenizer<TokenizableSource, Token> {
             // Determine type entry based on the type
             Token token = switch (type) {
                 case STRING -> entry(BasicToken.T_STRING, rawToken, counter);
+                case NEW_LINE -> entry(BasicToken.T_NEW_LINE, rawToken, counter);
                 case OPEN_TAG, CLOSE_TAG, IDENTIFIER, OPERATOR, UNKNOWN, RAW_TEXT -> {
                     Token.Type tokenType = BasicToken.T_IDENTIFIER;
 

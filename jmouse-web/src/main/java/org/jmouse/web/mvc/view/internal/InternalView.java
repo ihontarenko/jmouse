@@ -3,8 +3,8 @@ package org.jmouse.web.mvc.view.internal;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.renderable.Renderer;
-import org.jmouse.el.renderable.Template;
+import org.jmouse.el.template.Renderer;
+import org.jmouse.el.template.Template;
 import org.jmouse.web.mvc.view.AbstractView;
 import org.jmouse.web.mvc.View;
 

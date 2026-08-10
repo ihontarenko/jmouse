@@ -1,0 +1,90 @@
+package org.jmouse.el.template.parser;
+
+import org.jmouse.el.lexer.BasicToken;
+import org.jmouse.el.lexer.Token;
+import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.node.Expression;
+import org.jmouse.el.node.Node;
+import org.jmouse.el.parser.*;
+import org.jmouse.el.template.EmptyNode;
+import org.jmouse.el.template.node.ContainerNode;
+import org.jmouse.el.template.node.PrintNode;
+import org.jmouse.el.template.node.TextNode;
+
+import static org.jmouse.el.template.lexer.TemplateToken.*;
+
+/**
+ * 🏗️ The sourceRoot parser responsible for processing the entire view.
+ * <p>
+ * Parses:
+ * <ul>
+ *   <li>Plain text as {@link TextNode}</li>
+ *   <li>Print expressions (e.g. <code>{{ expression }}</code>) as {@link PrintNode}</li>
+ *   <li>Execution expressions (e.g. <code>{% expression %}</code>) as {@link ContainerNode}</li>
+ * </ul>
+ * </p>
+ * <p>
+ * Delegates expression parser to {@link ExpressionParser} and tag parser to appropriate {@link TagParser} implementations.
+ * </p>
+ *
+ * @author Ivan Hontarenko (Mr. Jerry Mouse)
+ * @author ihontarenko@gmail.com
+ */
+public class RootParser implements Parser {
+
+    /**
+     * Parses the view content from the token stream and attaches the resulting nodes to the parent.
+     *
+     * @param cursor  the token cursor
+     * @param parent  the parent node to which parsed nodes are added
+     * @param context the parser context for retrieving sub-parsers
+     */
+    @Override
+    public void parse(TokenCursor cursor, Node parent, ParserContext context) {
+
+        if (cursor.isCurrent(T_RAW_TEXT)) {
+            // Raw text node
+            parent.add(new TextNode(cursor.peek().value()));
+            cursor.next();
+        } else if (cursor.isCurrent(T_OPEN_PRINT)) {
+            // Print expression: {{ expression }}
+            cursor.ensure(T_OPEN_PRINT);
+
+            if (context.getParser(ExpressionParser.class).parse(cursor, context) instanceof Expression expression) {
+                parent.add(new PrintNode(expression));
+            }
+
+            cursor.ensure(T_CLOSE_PRINT);
+
+        } else if (cursor.isCurrent(T_OPEN_EXPRESSION)) {
+            // Execution expression: {% expression %}
+            cursor.ensure(T_OPEN_EXPRESSION);
+
+            Token token = cursor.peek();
+
+            // Retrieve tag parser based on the token value.
+            TagParser tagParser = context.getTagParser(token.value());
+
+            if (tagParser == null) {
+                throw new ParseException("No tag parser found: '%s'".formatted(token.value()));
+            }
+
+            Node tagNode = tagParser.parse(cursor, context);
+
+            cursor.ensure(T_CLOSE_EXPRESSION);
+            parent.add(tagNode);
+        } else if (cursor.isCurrent(T_OPEN_COMMENT)) {
+            // just consume comment block
+            while (!cursor.isCurrent(T_CLOSE_COMMENT)) {
+                cursor.next();
+            }
+
+            cursor.ensure(T_CLOSE_COMMENT);
+            parent.add(new EmptyNode());
+        } else {
+            // Unexpected token; expect end-of-line.
+            cursor.expect(BasicToken.T_EOL);
+            parent.add(new EmptyNode());
+        }
+    }
+}

@@ -11,7 +11,7 @@ import org.jmouse.el.node.expression.literal.NullLiteralNode;
 import org.jmouse.el.parser.DefaultParserContext;
 import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.el.parser.ParserContext;
-import org.jmouse.el.renderable.Cache;
+import org.jmouse.el.template.Cache;
 
 import java.util.Collections;
 import java.util.Map;
@@ -34,19 +34,167 @@ public class ExpressionLanguage {
     private final ExtensionContainer           extensions;
 
     /**
-     * Constructs a new ExpressionLanguage with default extensions, lexer, parser context, and cache.
-     * <p>
-     * Automatically imports the core expression-language extension ({@link CoreExtension}).
-     * </p>
+     * Creates an expression language with fully customized components.
+     */
+    public ExpressionLanguage(
+            ExtensionContainer extensions,
+            Lexer lexer,
+            ParserContext context,
+            Cache<Cache.Key, Expression> cache,
+            ExpressionParser parser
+    ) {
+        this.extensions = extensions;
+        this.lexer = lexer;
+        this.context = context;
+        this.cache = cache;
+        this.parser = parser;
+    }
+
+    /**
+     * Creates an expression language using the specified parser type * resolved from the parser context.
+     */
+    public ExpressionLanguage(
+            ExtensionContainer extensions,
+            Lexer lexer, ParserContext context,
+            Cache<Cache.Key, Expression> cache,
+            Class<? extends ExpressionParser> parserType
+    ) {
+        this(extensions, lexer, context, cache, (ExpressionParser) context.getParser(parserType));
+    }
+
+    /**
+     * Creates an expression language using the default ExpressionParser * resolved from the parser context.
+     */
+    public ExpressionLanguage(
+            ExtensionContainer extensions, Lexer lexer, ParserContext context, Cache<Cache.Key, Expression> cache
+    ) {
+        this(extensions, lexer, context, cache, ExpressionParser.class);
+    }
+
+    /**
+     * Creates an expression language with custom extensions, lexer, * parser context and parser type.
+     */
+    public ExpressionLanguage(ExtensionContainer extensions, Lexer lexer, ParserContext context, Class<? extends ExpressionParser> parserType) {
+        this(extensions, lexer, context, Cache.memory(), parserType);
+    }
+
+    /**
+     * Creates an expression language with custom extensions, lexer * and parser context.
+     */
+    public ExpressionLanguage(ExtensionContainer extensions, Lexer lexer, ParserContext context) {
+        this(extensions, lexer, context, Cache.memory(), ExpressionParser.class);
+    }
+
+    /**
+     * Creates an expression language with custom extensions, lexer * and parser type.
+     */
+    public ExpressionLanguage(ExtensionContainer extensions, Lexer lexer, Class<? extends ExpressionParser> parserType) {
+        this(extensions, lexer, new DefaultParserContext(extensions), Cache.memory(), parserType);
+    }
+
+    /**
+     * Creates an expression language with custom extensions and lexer.
+     */
+    public ExpressionLanguage(ExtensionContainer extensions, Lexer lexer) {
+        this(extensions, lexer, new DefaultParserContext(extensions), Cache.memory(), ExpressionParser.class);
+    }
+
+    /**
+     * Creates an expression language with custom extensions * and parser type.
+     */
+    public ExpressionLanguage(ExtensionContainer extensions, Class<? extends ExpressionParser> parserType) {
+        this(extensions, defaultLexer(), new DefaultParserContext(extensions), Cache.memory(), parserType);
+    }
+
+    /**
+     * Creates an expression language with custom extensions.
+     */
+    public ExpressionLanguage(ExtensionContainer extensions) {
+        this(extensions, defaultLexer(), new DefaultParserContext(extensions), Cache.memory(), ExpressionParser.class);
+    }
+
+    /**
+     * Creates an expression language with custom lexer and parser type.
+     */
+    public ExpressionLanguage(Lexer lexer, Class<? extends ExpressionParser> parserType) {
+        this(defaultExtensions(), lexer, new DefaultParserContext(defaultExtensions()), Cache.memory(), parserType);
+    }
+
+    /**
+     * Creates an expression language with custom lexer.
+     */
+    public ExpressionLanguage(Lexer lexer) {
+        this(defaultExtensions(), lexer, new DefaultParserContext(defaultExtensions()), Cache.memory(), ExpressionParser.class);
+    }
+
+    /**
+     * Creates an expression language with custom parser context * and parser type.
+     */
+    public ExpressionLanguage(ParserContext context, Class<? extends ExpressionParser> parserType) {
+        this(context.getExtensionContainer(), defaultLexer(), context, Cache.memory(), parserType);
+    }
+
+    /**
+     * Creates an expression language with custom parser context.
+     */
+    public ExpressionLanguage(ParserContext context) {
+        this(context, ExpressionParser.class);
+    }
+
+    /**
+     * Creates an expression language with custom cache * and parser type.
+     */
+    public ExpressionLanguage(Cache<Cache.Key, Expression> cache, Class<? extends ExpressionParser> parserType) {
+        this(defaultExtensions(), defaultLexer(), new DefaultParserContext(defaultExtensions()), cache, parserType);
+    }
+
+    /**
+     * Creates an expression language with custom cache.
+     */
+    public ExpressionLanguage(Cache<Cache.Key, Expression> cache) {
+        this(defaultExtensions(), defaultLexer(), new DefaultParserContext(defaultExtensions()), cache, ExpressionParser.class);
+    }
+
+    /**
+     * Creates an expression language with custom extensions, * cache and parser type.
+     */
+    public ExpressionLanguage(ExtensionContainer extensions, Cache<Cache.Key, Expression> cache, Class<? extends ExpressionParser> parserType) {
+        this(extensions, defaultLexer(), new DefaultParserContext(extensions), cache, parserType);
+    }
+
+    /**
+     * Creates an expression language with custom extensions and cache.
+     */
+    public ExpressionLanguage(ExtensionContainer extensions, Cache<Cache.Key, Expression> cache) {
+        this(extensions, defaultLexer(), new DefaultParserContext(extensions), cache, ExpressionParser.class);
+    }
+
+    /**
+     * Creates an expression language with default configuration * and custom parser type.
+     */
+    public ExpressionLanguage(Class<? extends ExpressionParser> parserType) {
+        this(defaultExtensions(), defaultLexer(), new DefaultParserContext(defaultExtensions()), Cache.memory(), parserType);
+    }
+
+    /**
+     * Creates an expression language with default configuration.
      */
     public ExpressionLanguage() {
-        this.extensions = new StandardExtensionContainer() {{
-            importExtension(new CoreExtension());
-        }};
-        this.lexer = new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), new ExpressionRecognizer()));
-        this.context = new DefaultParserContext(getExtensions());
-        this.cache = Cache.memory();
-        this.parser = (ExpressionParser) context.getParser(ExpressionParser.class);
+        this(defaultExtensions(), defaultLexer(), new DefaultParserContext(defaultExtensions()), Cache.memory(), ExpressionParser.class);
+    }
+
+    private static ExtensionContainer defaultExtensions() {
+        StandardExtensionContainer container = new StandardExtensionContainer();
+        container.importExtension(new CoreExtension());
+        return container;
+    }
+
+    private static Lexer defaultLexer() {
+        return new DefaultLexer(new DefaultTokenizer(new ExpressionSplitter(), new ExpressionRecognizer()));
+    }
+
+    public static ExpressionLanguage getSingleton() {
+        return SINGLETON;
     }
 
     /**
@@ -86,10 +234,9 @@ public class ExpressionLanguage {
         }
 
         if (cached == null) {
-            TokenizableSource source =
-                    new StringSource("EXPRESSION(" + expression + ")", expression);
+            TokenizableSource source = new StringSource("EXPRESSION(" + expression + ")", expression);
             TokenCursor cursor = lexer.tokenize(source);
-            cursor.currentIf(BasicToken.T_SOL);
+            cursor.consumeIf(BasicToken.T_SOL);
             cached = (Expression) parser.parse(cursor, context);
             cache.put(key, cached);
         }
@@ -152,10 +299,6 @@ public class ExpressionLanguage {
      */
     public Object evaluate(String expression) {
         return evaluate(expression, Object.class);
-    }
-
-    public static ExpressionLanguage getSingleton() {
-        return SINGLETON;
     }
 
 }

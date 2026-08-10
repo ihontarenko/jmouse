@@ -1,7 +1,6 @@
 package org.jmouse.el;
 
 import org.jmouse.core.matcher.Matcher;
-import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 
@@ -33,6 +32,21 @@ public class CursorMatcher {
 
     public static Matcher<TokenCursor> variableAlias() {
         return new VariableAliasMatcher();
+    }
+
+    public static Matcher<TokenCursor> placeholder() {
+        return new PlaceholderMatcher();
+    }
+
+    public record PlaceholderMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            return cursor.matchesSequence(
+                    T_DOLLAR, T_OPEN_CURLY, T_IDENTIFIER
+            );
+        }
+
     }
 
     public record VariableAliasMatcher() implements Matcher<TokenCursor> {

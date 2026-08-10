@@ -21,6 +21,28 @@ public interface TokenizableSource extends CharSequence, Streamable<TokenizableS
     int getLineNumber(int offset);
 
     /**
+     * Calculates the 1-based column of a given offset within its own line.
+     *
+     * <p>The column counts characters from the start of the line, so the first character of every
+     * line reports {@code 1} regardless of indentation. Unlike {@link #getLineNumber(int)} this is
+     * a position <em>within</em> a line rather than within the whole source, which is what a
+     * diagnostic message needs in order to point at a token.</p>
+     *
+     * @param offset the character offset in the source text
+     * @return the 1-based column of that offset
+     */
+    default int getColumnNumber(int offset) {
+        int position = Math.max(0, Math.min(offset, length()));
+        int start    = position;
+
+        while (start > 0 && charAt(start - 1) != '\n' && charAt(start - 1) != '\r') {
+            start--;
+        }
+
+        return position - start + 1;
+    }
+
+    /**
      * Returns the name of the string-view.
      *
      * @return the view name

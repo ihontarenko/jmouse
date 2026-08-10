@@ -53,6 +53,11 @@ abstract public class LiteralNode<T> extends AbstractExpression {
         return value == null ? "NULL" : value.toString();
     }
 
+    @Override
+    public String toSource() {
+        return toString();
+    }
+
     /**
      * Evaluates the literal node within the given evaluation context.
      * <p>

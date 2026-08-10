@@ -42,7 +42,7 @@ public class LambdaParser implements Parser {
         LambdaNode lambda = new LambdaNode();
 
         // Expect opening parenthesis for parameters
-        cursor.currentIf(T_OPEN_PAREN);
+        cursor.consumeIf(T_OPEN_PAREN);
 
         // Parse optional parameter list
         if (cursor.isCurrent(T_IDENTIFIER)) {
@@ -53,18 +53,18 @@ public class LambdaParser implements Parser {
         }
 
         // Expect closing parenthesis and arrow token
-        cursor.currentIf(T_CLOSE_PAREN);
+        cursor.consumeIf(T_CLOSE_PAREN);
         cursor.ensure(T_ARROW);
 
         // Optional block braces around body
-        cursor.currentIf(T_OPEN_CURLY);
+        cursor.consumeIf(T_OPEN_CURLY);
         if (!cursor.isCurrent(T_CLOSE_CURLY)) {
             Expression body = (Expression)
                     context.getParser(ExpressionParser.class)
                             .parse(cursor, context);
             lambda.setBody(body);
         }
-        cursor.currentIf(T_CLOSE_CURLY);
+        cursor.consumeIf(T_CLOSE_CURLY);
 
         parent.add(lambda);
     }

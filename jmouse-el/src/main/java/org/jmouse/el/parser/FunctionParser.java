@@ -65,7 +65,7 @@ public class FunctionParser implements Parser {
         // Ensure that the current token is a function name
         cursor.ensure(BasicToken.T_IDENTIFIER);
 
-        if (cursor.currentIf(BasicToken.T_COLON)) {
+        if (cursor.consumeIf(BasicToken.T_COLON)) {
             builder.append(':').append(cursor.peek().value());
             // Ensure that the current token is a function name
             cursor.ensure(BasicToken.T_IDENTIFIER);

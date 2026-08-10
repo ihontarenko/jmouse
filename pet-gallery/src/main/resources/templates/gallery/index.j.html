@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pet Gallery — find a new friend</title>
+    <link rel="stylesheet" href="{{ jMouseAsset('/assets/css/pet-gallery.css') }}">
+</head>
+<body>
+<main class="page-shell">
+    <section class="hero"><p class="eyebrow">PET GALLERY</p>
+        <h1>Small friends.<br><em>Big stories.</em></h1>
+        <p class="hero-copy">Meet {{ totalPets }} lovely animals waiting for a warm home.</p><a class="hero-link"
+                                                                                                href="#gallery">Explore
+            the gallery <span>↓</span></a>
+        <div class="hero-paws" aria-hidden="true">🐾</div>
+    </section>
+    <section class="gallery" id="gallery">
+        <div class="gallery-heading">
+            <div><p class="eyebrow">MEET THE CREW</p>
+                <h2>Who will steal your heart?</h2></div>
+            <p class="results">{{ pets | length }} matching friends</p></div>
+        <form class="filters" method="get" action="/">
+            <label class="search-field">
+                <span>⌕</span>
+                <input name="q"
+                       value="{{ query }}"
+                       placeholder="Search by name, breed or city">
+            </label>
+            <div class="type-pills">
+                <button name="type" value="" class="{% if selectedType == '' %}active{% endif %}">All</button>
+                <button name="type" value="Dog" class="{% if selectedType == 'Dog' %}active{% endif %}">Dogs</button>
+                <button name="type" value="Cat" class="{% if selectedType == 'Cat' %}active{% endif %}">Cats</button>
+                <button name="type" value="Rabbit" class="{% if selectedType == 'Rabbit' %}active{% endif %}">Rabbits
+                </button>
+                <button name="type" value="Bird" class="{% if selectedType == 'Bird' %}active{% endif %}">Birds</button>
+            </div>
+        </form>
+        <div class="pet-grid">{% for pet in pets %}
+            <article class="pet-card"><a class="pet-portrait {{ pet.accent }}" href="/pets/{{ pet.id }}"
+                                         aria-label="Read about {{ pet.name }}"><span>{{ pet.emoji }}</span><small>{{
+                pet.type }}</small></a>
+                <div class="pet-copy">
+                    <div class="pet-title"><h3>{{ pet.name }}</h3><span>{{ pet.age }} y.o.</span></div>
+                    <p>{{ pet.breed }} · {{ pet.location }}</p><a href="/pets/{{ pet.id }}">Meet {{ pet.name }}
+                    <span>↗</span></a></div>
+            </article>
+            {% endfor %}
+        </div>
+        {% if pets | length == 0 %}
+        <div class="empty-state"><span>🐾</span>
+            <h3>No pets found</h3>
+            <p>Try another search or choose a different type.</p><a href="/">Show every friend</a></div>
+        {% endif %}
+    </section>
+</main>
+<footer>Built with <strong>jMouse</strong> · Pet Gallery sample</footer>
+</body>
+</html>

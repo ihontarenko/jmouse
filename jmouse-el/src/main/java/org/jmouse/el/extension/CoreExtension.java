@@ -154,6 +154,7 @@ public class CoreExtension implements Extension {
                 new ExpressionParser(),
                 new OperatorParser(),
                 new PrimaryExpressionParser(),
+                new AutodetectFirstParser(),
                 new RangeParser(),
                 new FunctionParser(),
                 new LambdaParser(),
@@ -170,7 +171,8 @@ public class CoreExtension implements Extension {
                 new NamesParser(),
                 new ParametersParser(),
                 new BeanAccessParser(),
-                new VariableAliasParser()
+                new VariableAliasParser(),
+                new PlaceholderParser()
         );
     }
 

@@ -4,7 +4,7 @@ import org.jmouse.core.access.*;
 import org.jmouse.core.access.PropertyPath.Entries;
 import org.jmouse.core.convert.Conversion;
 import org.jmouse.el.extension.ExtensionContainer;
-import org.jmouse.el.renderable.Inheritance;
+import org.jmouse.el.template.Inheritance;
 
 import java.util.List;
 

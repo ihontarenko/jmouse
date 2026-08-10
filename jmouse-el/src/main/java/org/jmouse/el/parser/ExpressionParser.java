@@ -22,7 +22,7 @@ public class ExpressionParser implements Parser {
         Expression     left           = (Expression) operatorParser.parse(cursor, context);
 
         // ternary conditional “? trueExpression : falseExpression”
-        if (cursor.currentIf(T_QUESTION)) {
+        if (cursor.consumeIf(T_QUESTION)) {
             TernaryNode ternary = new TernaryNode();
             ternary.setCondition(left);
             ternary.setThenBranch((Expression) parse(cursor, context));

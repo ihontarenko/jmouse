@@ -94,7 +94,7 @@ public final class Sorter {
          *         no priority could be determined
          */
         public static int extractor(Object object) {
-            int order = Integer.MIN_VALUE;
+            int order = Integer.MAX_VALUE;
 
             if (object != null) {
                 if (object instanceof Class<?> klass) {

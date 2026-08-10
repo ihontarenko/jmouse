@@ -29,6 +29,16 @@ public class Cursor implements TokenCursor {
     }
 
     /**
+     * Returns the source these tokens were read from.
+     *
+     * @return the tokenizable source backing this cursor
+     */
+    @Override
+    public TokenizableSource source() {
+        return source;
+    }
+
+    /**
      * Checks if there are more tokens available to read.
      *
      * @return {@code true} if there are remaining tokens, otherwise {@code false}
@@ -88,6 +98,44 @@ public class Cursor implements TokenCursor {
     public Token lookAt(int offset) {
         int position = Math.min(cursor + offset, tokens.size() - 1);
         return position < tokens.size() ? tokens.get(position) : null;
+    }
+
+    /**
+     * Looks for the first token after a token of the given type
+     * without moving the cursor.
+     *
+     * @param type the token type to look after
+     * @return the token immediately following the matching token,
+     *         or {@code null} if no such token exists
+     */
+    @Override
+    public Token lookAfter(Token.Type type) {
+        for (int i = cursor; i < tokens.size() - 1; i++) {
+            if (tokens.get(i).type() == type) {
+                return tokens.get(i + 1);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Looks for the first token before a token of the given type
+     * without moving the cursor.
+     *
+     * @param type the token type to look before
+     * @return the token immediately preceding the matching token,
+     *         or {@code null} if no such token exists
+     */
+    @Override
+    public Token lookBefore(Token.Type type) {
+        for (int i = cursor; i > 0; i--) {
+            if (tokens.get(i).type() == type) {
+                return tokens.get(i - 1);
+            }
+        }
+
+        return null;
     }
 
     /**

@@ -23,27 +23,30 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
     private final static Logger LOGGER = LoggerFactory.getLogger(ExpressionSplitter.class);
 
     private static final Pattern EXPRESSION_PATTERN = Pattern.compile(
-            "\\s*(?:(?<IDENTIFIER>[a-zA-Z_][a-zA-Z0-9_]*)" +
+            "[^\\S\\r\\n]*(?:(?<IDENTIFIER>[a-zA-Z_][a-zA-Z0-9_]*)" +
             "|(?<NUMBER>(?<!\\d)([+-]?\\d+(\\.\\d+)?([Ee][+-]?\\d+)?[FLIDSBClfidsbc]?))" +
-            "|(?<STRING>'[^']*'|\"[^\"]*\")" +
+            "|(?<STRING>'[^'|\\n\\r]*'|\"[^\"|\\n\\r]*\")" +
             "|(?<OPERATOR>\\?\\?|->|\\.\\.|<=|>=|!=|==|&&|\\|\\||-=|\\+=|\\+\\+|--|\\*\\*|[-+*/%^><=!])" +
+            "|(?<NL>[\\n\\r]+)" +
             "|(?<OTHER>\\S))"
     );
 
     public static final String IDENTIFIER = "IDENTIFIER";
     public static final String NUMBER     = "NUMBER";
     public static final String STRING     = "STRING";
+    public static final String NEW_LINE   = "NL";
     public static final String OPERATOR   = "OPERATOR";
     public static final String OTHER      = "OTHER";
 
     // Define group names and their corresponding type types.
-    private static final String[]                   GROUP_NAMES         = {IDENTIFIER, NUMBER, STRING, OPERATOR, OTHER};
+    private static final String[]                   GROUP_NAMES         = {IDENTIFIER, NUMBER, STRING, NEW_LINE, OPERATOR, OTHER};
     private static final Map<String, RawToken.Type> GROUP_TO_TOKEN_TYPE = new HashMap<>();
 
     static {
         GROUP_TO_TOKEN_TYPE.put(IDENTIFIER, RawToken.Type.IDENTIFIER);
         GROUP_TO_TOKEN_TYPE.put(NUMBER, RawToken.Type.NUMBER);
         GROUP_TO_TOKEN_TYPE.put(STRING, RawToken.Type.STRING);
+        GROUP_TO_TOKEN_TYPE.put(NEW_LINE, RawToken.Type.NEW_LINE);
         GROUP_TO_TOKEN_TYPE.put(OPERATOR, RawToken.Type.OPERATOR);
         GROUP_TO_TOKEN_TYPE.put(OTHER, RawToken.Type.UNKNOWN);
     }
@@ -86,7 +89,14 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
                 tokens.add(new RawToken(tokenValue, text.getLineNumber(startOffset), startOffset, tokenType));
             }
 
-            index = matcher.end();
+            // protection of infinite loop
+            int end = matcher.end();
+
+            if (end == index) {
+                index++;
+            } else {
+                index = end;
+            }
         }
 
         LOGGER.info("Segment '{}' at offset '{}' and length '{}' splitted to: {} tokens",

@@ -24,7 +24,7 @@ public class ParametersParser implements Parser {
 
             parameter.setName(token.value());
 
-            if (cursor.currentIf(BasicToken.T_COLON)) {
+            if (cursor.consumeIf(BasicToken.T_COLON)) {
                 parameter.setDefaultValue((Expression) parser.parse(cursor, context));
             }
 

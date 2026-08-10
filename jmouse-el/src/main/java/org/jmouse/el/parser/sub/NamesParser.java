@@ -7,7 +7,7 @@ import org.jmouse.el.node.expression.NameNode;
 import org.jmouse.el.node.expression.NameSetNode;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.el.parser.ParserContext;
-import org.jmouse.el.renderable.lexer.TemplateToken;
+import org.jmouse.el.template.lexer.TemplateToken;
 
 public class NamesParser implements Parser {
 
@@ -20,7 +20,7 @@ public class NamesParser implements Parser {
 
             name.setName(cursor.ensure(BasicToken.T_IDENTIFIER).value());
 
-            if (cursor.currentIf(TemplateToken.T_AS)) {
+            if (cursor.consumeIf(TemplateToken.T_AS)) {
                 name.setAlias(cursor.ensure(BasicToken.T_IDENTIFIER).value());
             }
 

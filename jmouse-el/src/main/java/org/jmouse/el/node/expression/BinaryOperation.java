@@ -113,6 +113,11 @@ public class BinaryOperation extends AbstractExpression {
     }
 
     @Override
+    public String toSource() {
+        return "( %s %s %s )".formatted(left.toSource(), operator.getName(), right.toSource());
+    }
+
+    @Override
     public String toString() {
         return "( %s %s %s )".formatted(left.toString(), operator.getName(), right.toString());
     }
