@@ -1,0 +1,103 @@
+package org.jmouse.access.jpa;
+
+import org.jmouse.access.ScopeReference;
+import org.jmouse.access.spi.BundledPermission;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * The question the runtime never asks: <em>who holds this</em>, rather than <em>does this person
+ * hold it</em>.
+ *
+ * <h2>⚠️ This is a disclosure surface, and it is a third port on purpose</h2>
+ *
+ * <p>{@code GrantStore} is the engine's and answers about <strong>one</strong> subject, because
+ * <em>"a store that could list every account would be a store the engine could walk"</em>.
+ * {@link AccessAdministration} writes, and lists roles — a bounded vocabulary — and nothing else. Both
+ * refusals are deliberate and neither is relaxed here.
+ *
+ * <p>What is also true is that an administration screen genuinely has to answer <em>"who can do this,
+ * and who took it away from them"</em>, and a rehearsal has to know whom a candidate policy could
+ * possibly affect. Those are real needs, they are unbounded by nature, and the honest response is a
+ * separate interface that says so in its name — <strong>not</strong> a method quietly added to one of
+ * the other two, where the engine would then be holding a store it could walk.
+ *
+ * <p>⚠️ <strong>Nothing on the decision path may take one of these.</strong> A product exposing it puts
+ * it behind a permission of its own and records the reading, which is what the word <em>disclosure</em>
+ * is here to keep in mind. It enumerates <em>grants</em> rather than accounts — an account that holds
+ * nothing never appears — but every account that holds anything does, which is the whole installation
+ * for any product where holding something is what having an account means.
+ */
+public interface AccessDisclosure {
+
+    /**
+     * Every role anybody holds anywhere, each with the bundle its role carries.
+     *
+     * <p>⚠️ The bundle is <strong>unioned with what a policy document declares</strong>, exactly as the
+     * engine's own store unions it. A screen reading only the table would answer "nobody" for every
+     * permission the declared roles carry — which is most of them, and the one answer a screen built to
+     * explain authorization must never give wrongly.
+     */
+    List<RoleHolding> roleHoldings();
+
+    /** Every personal allow and deny anybody holds anywhere. */
+    List<DirectHolding> directHoldings();
+
+    /** The same, narrowed to one permission — what a screen about a single power asks. */
+    List<DirectHolding> directHoldingsOf(String permission);
+
+    /**
+     * How many subjects hold one role at one place — a number, never a list.
+     *
+     * <p>⚠️ This is the <em>last owner</em> guard, and it is the one question about holders that
+     * discloses nothing: a workspace whose only owner is about to leave has no way back that does not
+     * involve somebody with installation-wide access, and the whole point of a workspace is that it
+     * does not need one.
+     *
+     * <p>⚠️ It counts <strong>rows</strong>. A holder a policy document names is not in the answer,
+     * which is correct here: a guard about whether a revocation would strand a place must not be
+     * satisfied by a holder no revocation could produce.
+     */
+    long holdersOf(String roleName, ScopeReference at);
+
+    /**
+     * One subject's role, where they hold it, and what it carries.
+     *
+     * @param at where the <em>assignment</em> was made, which is never the bundle's own reach
+     */
+    record RoleHolding(
+            String                  subjectId,
+            String                  roleName,
+            ScopeReference          at,
+            String                  grantedBy,
+            LocalDateTime           since,
+            List<BundledPermission> bundle
+    ) {
+
+        /** How far this holding carries one permission, or null where it does not carry it at all. */
+        public BundledPermission carrying(String permission) {
+            return bundle.stream()
+                    .filter(entry -> entry.permission().equals(permission))
+                    .findFirst()
+                    .orElse(null);
+        }
+    }
+
+    /**
+     * One subject's personal allow or deny.
+     *
+     * <p>⚠️ {@code reason} is what makes a deny answerable a year later, and it is the field the whole
+     * record exists for: a permission somebody took away is not the same fact as one nobody ever gave.
+     */
+    record DirectHolding(
+            String         subjectId,
+            String         permission,
+            boolean        allowed,
+            ScopeReference at,
+            String         grantedBy,
+            String         reason,
+            LocalDateTime  since
+    ) {
+    }
+}

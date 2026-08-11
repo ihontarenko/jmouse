@@ -1,2 +1,4 @@
 org.jmouse.access.spring.AccessAutoConfiguration
 org.jmouse.access.spring.policy.AccessPolicyAutoConfiguration
+org.jmouse.access.spring.migration.AccessFlywayAutoConfiguration
+org.jmouse.access.spring.jpa.AccessJpaAutoConfiguration

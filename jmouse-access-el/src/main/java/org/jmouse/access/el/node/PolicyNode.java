@@ -64,11 +64,14 @@ public class PolicyNode extends PolicyBlockNode {
      *                                                   cannot hold it
      */
     public PolicyDocument toDocument() {
-        List<PolicyInclude>               includes    = new ArrayList<>();
-        List<PolicyScopeDeclaration>      scopes      = new ArrayList<>();
-        List<PolicyPermissionDeclaration> permissions = new ArrayList<>();
-        List<PolicyRole>                  roles       = new ArrayList<>();
-        List<PolicySubject>               subjects    = new ArrayList<>();
+        List<PolicyInclude>               includes     = new ArrayList<>();
+        List<PolicyScopeDeclaration>      scopes       = new ArrayList<>();
+        List<PolicyPermissionDeclaration> permissions  = new ArrayList<>();
+        List<PolicyCapabilityDeclaration> capabilities = new ArrayList<>();
+        List<PolicyRole>                  roles        = new ArrayList<>();
+        List<PolicyPlan>                  plans        = new ArrayList<>();
+        List<PolicySubject>               subjects     = new ArrayList<>();
+        List<PolicyEntitlement>           entitlements = new ArrayList<>();
 
         for (Expression expression : getExpressions()) {
             if (expression instanceof IncludeNode include) {
@@ -77,17 +80,25 @@ public class PolicyNode extends PolicyBlockNode {
                 scopes.addAll(block.toScopeDeclarations());
             } else if (expression instanceof PermissionsNode block) {
                 permissions.addAll(block.toPermissionDeclarations());
+            } else if (expression instanceof CapabilitiesNode block) {
+                capabilities.addAll(block.toCapabilityDeclarations());
             } else if (expression instanceof RoleNode role) {
                 roles.add(role.toRole());
+            } else if (expression instanceof PlansNode block) {
+                plans.addAll(block.toPlans());
             } else if (expression instanceof SubjectNode subject) {
                 subjects.add(subject.toSubject());
+            } else if (expression instanceof EntitlementsNode block) {
+                entitlements.addAll(block.toEntitlements());
             } else {
                 throw reject(expression, "a policy holds 'include', 'scopes', 'permissions', "
-                        + "'role' and 'subject' declarations");
+                        + "'capabilities', 'role', 'plans', 'subject' and 'entitlements' "
+                        + "declarations");
             }
         }
 
-        return new PolicyDocument(getName(), includes, scopes, permissions, roles, subjects);
+        return new PolicyDocument(getName(), includes, scopes, permissions, capabilities,
+                                  roles, plans, subjects, entitlements);
     }
 
     @Override

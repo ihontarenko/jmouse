@@ -63,6 +63,13 @@ public class StorageFlywayMigrator implements InitializingBean {
                 // business. Baselining on migrate stops an existing schema reading as "not empty,
                 // refusing to run" the first time the library is added.
                 .baselineOnMigrate(true)
+                // ⚠️ ZERO, and the default of 1 is a silent data-loss bug rather than a preference.
+                // Baselining inserts a marker row and SKIPS every migration at or below it — so with
+                // the default this library would baseline at 1 and never run its own V000001, leaving
+                // the product to fail later on a table that was never created. It only bites when
+                // something else made the schema non-empty first, which is exactly what happens the
+                // moment a second self-migrating library is added beside this one.
+                .baselineVersion("0")
                 .validateOnMigrate(true)
                 .load();
 

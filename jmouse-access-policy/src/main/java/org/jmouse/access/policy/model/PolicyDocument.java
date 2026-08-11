@@ -61,26 +61,34 @@ public record PolicyDocument(
         List<PolicyInclude>               includes,
         List<PolicyScopeDeclaration>      scopes,
         List<PolicyPermissionDeclaration> permissions,
+        List<PolicyCapabilityDeclaration> capabilities,
         List<PolicyRole>                  roles,
-        List<PolicySubject>               subjects
+        List<PolicyPlan>                  plans,
+        List<PolicySubject>               subjects,
+        List<PolicyEntitlement>           entitlements
 ) {
 
     public PolicyDocument {
-        includes    = includes    == null ? List.of() : List.copyOf(includes);
-        scopes      = scopes      == null ? List.of() : List.copyOf(scopes);
-        permissions = permissions == null ? List.of() : List.copyOf(permissions);
-        roles       = roles       == null ? List.of() : List.copyOf(roles);
-        subjects    = subjects    == null ? List.of() : List.copyOf(subjects);
+        includes     = includes     == null ? List.of() : List.copyOf(includes);
+        scopes       = scopes       == null ? List.of() : List.copyOf(scopes);
+        permissions  = permissions  == null ? List.of() : List.copyOf(permissions);
+        capabilities = capabilities == null ? List.of() : List.copyOf(capabilities);
+        roles        = roles        == null ? List.of() : List.copyOf(roles);
+        plans        = plans        == null ? List.of() : List.copyOf(plans);
+        subjects     = subjects     == null ? List.of() : List.copyOf(subjects);
+        entitlements = entitlements == null ? List.of() : List.copyOf(entitlements);
     }
 
     /** An empty document, for a file that declared nothing. */
     public static PolicyDocument empty(String name) {
-        return new PolicyDocument(name, List.of(), List.of(), List.of(), List.of(), List.of());
+        return new PolicyDocument(name, List.of(), List.of(), List.of(), List.of(),
+                                  List.of(), List.of(), List.of(), List.of());
     }
 
     /** A document that grants but states no vocabulary — the common case, and every file today. */
     public static PolicyDocument of(String name, List<PolicyRole> roles, List<PolicySubject> subjects) {
-        return new PolicyDocument(name, List.of(), List.of(), List.of(), roles, subjects);
+        return new PolicyDocument(name, List.of(), List.of(), List.of(), List.of(),
+                                  roles, List.of(), subjects, List.of());
     }
 
     /**
@@ -92,11 +100,27 @@ public record PolicyDocument(
      * it.
      */
     public boolean declaresVocabulary() {
-        return !scopes.isEmpty() || !permissions.isEmpty();
+        return !scopes.isEmpty() || !permissions.isEmpty() || !capabilities.isEmpty();
+    }
+
+    /**
+     * Whether this file says anything about the entitlement axis.
+     *
+     * <p>⚠️ What decides whether a store is <strong>required</strong>. A document declaring
+     * capabilities or plans where nothing can resolve them is the same class of hole as a condition
+     * nothing evaluates: a rule that is written down and does nothing is worse than no rule, because
+     * somebody has read it and believes it.
+     */
+    public boolean declaresEntitlements() {
+        return !capabilities.isEmpty() || !plans.isEmpty() || !entitlements.isEmpty();
     }
 
     public Optional<PolicyRole> role(String roleName) {
         return roles.stream().filter(role -> role.name().equals(roleName)).findFirst();
+    }
+
+    public Optional<PolicyPlan> plan(String planCode) {
+        return plans.stream().filter(plan -> plan.code().equals(planCode)).findFirst();
     }
 
     public Optional<PolicySubject> subject(String subjectId) {

@@ -73,6 +73,35 @@ jmouse-storage        File storage — FileStore SPI, StorageKey value object, k
                       strategy, upload acceptance policy, local-disk backend, and a
                       read-only ResourceLoader over a store. Depends on jmouse-core and
                       jmouse-http only: no Spring, no servlet API, no persistence
+jmouse-access         Authorization engine. Five ordered axes, first refusal wins, and
+                      ONE rule everywhere: deny wins, the subtraction runs last, at
+                      every level — most-specific deliberately does not win. Knows no
+                      product vocabulary: a place is a ScopeReference whose kinds the
+                      product registers, a permission and a capability are strings.
+                      Two read-only SPIs because the tuples differ — GrantStore for
+                      permissions (boolean, memoisable) and EntitlementStore for
+                      capabilities (a number, a window, a provenance). Depends on
+                      almost nothing on purpose
+jmouse-access-policy  The .jmp document: parser-facing model, composition, LivePolicy,
+                      PolicyWriter, projection. Deliberately near-dependency-free —
+                      "not even jmouse-core", which is why QuantityScale exists rather
+                      than the engine knowing what GB means
+jmouse-access-el      The .jmp grammar itself, on jmouse-common's lexer/parser
+jmouse-access-jpa     The tables, the entities AND the queries — whoever owns the table
+                      owns the mapping. Two read stores (GrantStore, EntitlementStore)
+                      plus four ports a product administers through: AccessAdministration
+                      (roles, assignments, personal grants), EntitlementAdministration
+                      (capability grants and switches), PolicyRevisions (the editable
+                      document's history) and ⚠️ AccessDisclosure — the installation-wide
+                      "who holds this", a SEPARATE port precisely so the engine never
+                      holds a store it could walk. Every write answers with what it
+                      changed, which is how an adopting product keeps its own audit trail
+                      while the row belongs here. ⚠️ It ships and runs its OWN migrations
+                      (db/access/{mysql,postgresql}) into its own history table, the
+                      arrangement jmouse-storage-jpa already proves — so those files are
+                      APPEND-ONLY, unlike a product's
+jmouse-access-enforcement
+                      Method/endpoint enforcement built on the engine
 jmouse-web            Web MVC + embedded Tomcat — dispatcher, adapters, view engine,
                       argument resolution, interceptors, content negotiation, CORS,
                       resource handling, web security filter chain. Keeps the
@@ -94,3 +123,7 @@ wep-app               Demo application (references all major subsystems)
 **Java 21 preview features** — `wep-app` enables `--enable-preview`; STR template literals appear in source files.
 
 **Typo in package name** — `jmouse-materializer` uses `org.jmouse.meterializer` (not `materializer`). Do not fix without confirming intent.
+
+**A seam is declared by whoever needs it, implemented by whoever owns the thing** — and in `jmouse-access` this is the rule that keeps the engine free of product vocabulary. `ScopeHierarchy` says which places contain which; `ScopeCatalog` says which kinds exist; `CapabilityCatalog` says what can be granted; `EntitlementStore` and `GrantStore` say where grants are kept. None of them names a workspace, a seat or a plan.
+
+⚠️ **What a product has not adopted must cost it nothing.** `EntitlementStore.empty()` and `ScopeHierarchy.flat()` exist for exactly this: an application whose authorization is *"these people hold these roles"*, with no places and no metering at all, boots with every axis working and writes no adapter. Adding a capability to that engine must never mean a flat installation has to implement something to say it has none.

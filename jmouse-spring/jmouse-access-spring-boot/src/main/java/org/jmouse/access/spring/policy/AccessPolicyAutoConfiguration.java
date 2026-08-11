@@ -1,21 +1,32 @@
 package org.jmouse.access.spring.policy;
 
+import org.jmouse.access.CapabilityCatalog;
+import org.jmouse.access.CapabilityResolver;
 import org.jmouse.access.PermissionCatalog;
 import org.jmouse.access.ScopeCatalog;
 import org.jmouse.access.el.loader.PolicyLoader;
 import org.jmouse.access.el.loader.PolicySources;
+import org.jmouse.access.policy.CompositeEntitlementStore;
 import org.jmouse.access.policy.CompositeGrantStore;
 import org.jmouse.access.policy.ConditionCompiler;
 import org.jmouse.access.policy.LivePolicy;
 import org.jmouse.access.policy.PlaceholderResolver;
 import org.jmouse.access.policy.PolicyBinder;
 import org.jmouse.access.policy.PolicyException;
+import org.jmouse.access.policy.LivePolicyEntitlements;
+import org.jmouse.access.policy.PolicyEntitlementStore;
+import org.jmouse.access.policy.PolicyEntitlementStore.SubjectHandleResolver;
 import org.jmouse.access.policy.PolicyGrantStore;
+import org.jmouse.access.policy.QuantityScale;
 import org.jmouse.access.policy.model.PolicyDocument;
+import org.jmouse.access.spi.CapabilitySwitchStore;
+import org.jmouse.access.spi.EntitlementStore;
 import org.jmouse.access.spi.GrantStore;
+import org.jmouse.access.spi.ScopeHierarchy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -29,6 +40,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +77,12 @@ public class AccessPolicyAutoConfiguration {
 
     /** The policy's own store, which is composed rather than composed with. */
     static final String POLICY_STORE = "livePolicy";
+
+    /** The composed entitlement store's name, excluded from its own composition for the same reason. */
+    static final String COMPOSED_ENTITLEMENTS = "accessEntitlementStore";
+
+    /** The document's own capability grants, composed rather than composed with. */
+    static final String POLICY_ENTITLEMENTS = "policyEntitlementStore";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AccessPolicyAutoConfiguration.class);
 
@@ -178,5 +196,152 @@ public class AccessPolicyAutoConfiguration {
         LOGGER.info("Access grants are read from {} stores, policy first", stores.size());
 
         return new CompositeGrantStore(stores);
+    }
+
+    // ── The capability half ───────────────────────────────────────────────────
+
+    /**
+     * The document's {@code entitlements &#123; &#125;}, as a store.
+     *
+     * <p>⚠️ <strong>A block that parses and is never read is worse than no block.</strong> That is not
+     * hypothetical: {@code PolicyEntitlementStore} existed, nothing wired it, and every entitlement
+     * anybody wrote into a document was parsed, projected, and silently ignored at decision time. This
+     * bean is what makes the block mean something, and it is why the requirement below refuses a
+     * context rather than logging.
+     *
+     * <p>{@code SubjectHandleResolver} is the product's: a document says {@code @ORGANIZATION:acme}
+     * because a slug is what a person can write down, and only the product knows what {@code acme} is.
+     * Without one the handle is the identifier, which is right for an installation that writes
+     * identifiers and wrong silently for one that does not — hence the default is the identity and the
+     * javadoc says so rather than the code guessing.
+     */
+    @Bean(POLICY_ENTITLEMENTS)
+    @ConditionalOnMissingBean(name = POLICY_ENTITLEMENTS)
+    public EntitlementStore policyEntitlementStore(
+            LivePolicy live,
+            ScopeCatalog scopes,
+            ObjectProvider<SubjectHandleResolver> handles,
+            ObjectProvider<QuantityScale> scale) {
+
+        // ⚠️ Over LivePolicy, never over the startup document. The reference moves when something
+        // adopts a candidate, and a store built once would go on answering from the policy that was in
+        // force at boot — see LivePolicyEntitlements for why that is the failure nobody would notice.
+        return new LivePolicyEntitlements(
+                live,
+                scopes,
+                handles.getIfAvailable(() -> (kind, handle) -> handle),
+                scale.getIfAvailable(() -> QuantityScale.PLAIN));
+    }
+
+    /**
+     * Every source of capability grants, read as one — {@link #accessGrantStore} for the other axis.
+     *
+     * <p>Assembled by bean name for the identical reason, and it is the same circularity: asking the
+     * container for all {@code EntitlementStore} beans while building one asks it for this one.
+     *
+     * <p>⚠️ <strong>Primary, and that is not tidiness.</strong> A product contributing its own store
+     * has two beans of the type before this makes a third, and every injection point is then ambiguous
+     * — a context that refuses to start, which is the right failure and still a failure. A declared
+     * preference is what fixes it once; a qualifier at each use would leave the next injection point
+     * somebody adds silently reading one half of the answer.
+     */
+    @Bean(COMPOSED_ENTITLEMENTS)
+    @Primary
+    @ConditionalOnMissingBean(name = COMPOSED_ENTITLEMENTS)
+    public EntitlementStore accessEntitlementStore(
+            @Qualifier(POLICY_ENTITLEMENTS) EntitlementStore declared,
+            ListableBeanFactory beans) {
+
+        List<EntitlementStore> stores = new ArrayList<>();
+
+        stores.add(declared);
+
+        for (String name : beans.getBeanNamesForType(EntitlementStore.class, true, false)) {
+            if (!COMPOSED_ENTITLEMENTS.equals(name) && !POLICY_ENTITLEMENTS.equals(name)) {
+                stores.add(beans.getBean(name, EntitlementStore.class));
+            }
+        }
+
+        if (stores.size() == 1) {
+            return declared;
+        }
+
+        LOGGER.info("Capability grants are read from {} stores, the document first", stores.size());
+
+        return new CompositeEntitlementStore(stores);
+    }
+
+    /**
+     * Where a capability stands — the third axis, resolved by the engine.
+     *
+     * <p>⚠️ <strong>Registered unconditionally, and the first attempt to condition it on a
+     * {@code CapabilityCatalog} was a mistake worth recording.</strong> {@code @ConditionalOnBean} over
+     * a type the *product* declares is evaluated against whatever has been registered by the time this
+     * auto-configuration is processed, and it silently does not match often enough that Spring's own
+     * documentation warns against it. The failure mode is the worst available: no resolver, and a
+     * context that dies naming a bean nobody can see why is missing.
+     *
+     * <p>Registering it always is also simply correct. A resolver needs a store and a containment, not
+     * a catalogue — and over an empty store it answers {@code UNGRANTED} for everything, which nothing
+     * asks, because a product with no capability vocabulary has no entitlement axis to ask. Opting in
+     * happens by *declaring a vocabulary*, which is where it belongs; this bean costs an object.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public CapabilityResolver capabilityResolver(
+            @Qualifier(COMPOSED_ENTITLEMENTS) EntitlementStore entitlements,
+            ObjectProvider<ScopeHierarchy> hierarchy,
+            ObjectProvider<Clock> clock) {
+
+        return new CapabilityResolver(
+                entitlements,
+                // ⚠️ Flat by default: an application whose authorization is "these people hold these
+                // roles", with no places at all, must not have to write a class with two empty methods
+                // to say so. What a product has not adopted costs it nothing.
+                hierarchy.getIfAvailable(ScopeHierarchy::flat),
+                clock.getIfAvailable(Clock::systemUTC));
+    }
+
+    /**
+     * What a place has switched <strong>off</strong> — axis 4's seam, defaulted to nothing.
+     *
+     * <p>Default-on is the engine's assumption and the store names the exceptions, so an application
+     * with no switches at all registers nothing and every capability it has is simply on. A store that
+     * listed what was <em>on</em> would have to know the catalogue to be complete, and would answer
+     * wrongly for every capability introduced after its rows were written.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public CapabilitySwitchStore capabilitySwitchStore() {
+        return CapabilitySwitchStore.allOn();
+    }
+
+    /**
+     * ⚠️ <strong>A document that declares capabilities and has nowhere to resolve them refuses to
+     * start.</strong>
+     *
+     * <p>The asymmetry with the paragraph above is deliberate and is the whole rule: <em>saying
+     * nothing</em> is a product that has not adopted the axis, and <em>saying something nothing
+     * reads</em> is a rule written down that does nothing. The first is fine. The second is the same
+     * class of hole as a condition nobody evaluates, and it is the one that actually happened here.
+     */
+    @Bean
+    public PolicyEntitlementRequirement policyEntitlementRequirement(
+            PolicyDocument document, ObjectProvider<CapabilityCatalog> catalogue) {
+
+        if (!document.capabilities().isEmpty() && catalogue.getIfAvailable() == null) {
+            throw new PolicyException(
+                    "'" + document.name() + "' declares " + document.capabilities().size()
+                    + " capability/capabilities, and this application registers no CapabilityCatalog "
+                    + "for them to be resolved against. A capabilities block with nothing reading it "
+                    + "parses, projects, and decides nothing — which is worse than not writing one. "
+                    + "Register a CapabilityCatalog bean, or remove the block.");
+        }
+
+        return new PolicyEntitlementRequirement();
+    }
+
+    /** Nothing but a hook for the check above to run inside — it holds no state and answers nothing. */
+    public static final class PolicyEntitlementRequirement {
     }
 }

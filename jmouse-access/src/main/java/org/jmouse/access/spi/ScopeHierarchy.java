@@ -45,4 +45,30 @@ public interface ScopeHierarchy {
 
     /** Every narrower place these ones contain — what a listing needs, and in one query. */
     Set<ScopeReference> within(Collection<ScopeReference> places);
+
+    /**
+     * Containment for a product that has none — <strong>nothing is inside anything.</strong>
+     *
+     * <p>The engine's floor case, and it has to be free. An application whose authorization is
+     * <em>"these people hold these roles"</em>, with no places at all, must not have to write a class
+     * with two empty methods to say so; every axis above works unchanged, because a covering chain of
+     * one place and a filter that widens to nothing are exactly what a flat installation means.
+     *
+     * <p>The mirror of {@code EntitlementStore.empty()}, and for the same reason: what a product has
+     * not adopted must cost it nothing.
+     */
+    static ScopeHierarchy flat() {
+        return new ScopeHierarchy() {
+
+            @Override
+            public List<ScopeReference> containing(ScopeReference place) {
+                return List.of();
+            }
+
+            @Override
+            public Set<ScopeReference> within(Collection<ScopeReference> places) {
+                return Set.of();
+            }
+        };
+    }
 }

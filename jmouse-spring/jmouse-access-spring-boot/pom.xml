@@ -28,7 +28,6 @@
              application. Boot's own Flyway classes are deliberately NOT referenced: those did move
              package in 4, and ordering is expressed by bean name instead. -->
         <spring-boot.version>4.0.7</spring-boot.version>
-        <flyway.version>11.7.2</flyway.version>
     </properties>
 
     <dependencyManagement>
@@ -107,6 +106,38 @@
             <artifactId>spring-web</artifactId>
             <optional>true</optional>
         </dependency>
+        <!--
+          ⚠️ Optional, and the auto-configuration is @ConditionalOnClass over it: a product that keeps
+          its grants in tables it manages itself, or in the policy document alone, never needs the
+          engine to migrate anything and must not inherit a migration tool for the privilege.
+        -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!--
+            ⚠️ For SharedEntityManagerCreator, and it is not optional-with-a-fallback: Boot registers
+            an EntityManagerFactory and never a plain EntityManager, so every bean in
+            AccessJpaAutoConfiguration would otherwise fail to wire in any application that has JPA.
+        -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

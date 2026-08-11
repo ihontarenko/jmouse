@@ -1,10 +1,14 @@
 package org.jmouse.access.policy;
 
 import org.jmouse.access.policy.model.PolicyBundleEntry;
+import org.jmouse.access.policy.model.PolicyCapabilityDeclaration;
 import org.jmouse.access.policy.model.PolicyDocument;
+import org.jmouse.access.policy.model.PolicyEntitlement;
 import org.jmouse.access.policy.model.PolicyGrant;
 import org.jmouse.access.policy.model.PolicyInclude;
 import org.jmouse.access.policy.model.PolicyPermissionDeclaration;
+import org.jmouse.access.policy.model.PolicyPlan;
+import org.jmouse.access.policy.model.PolicyPlanGrant;
 import org.jmouse.access.policy.model.PolicyRole;
 import org.jmouse.access.policy.model.PolicyRoleAssignment;
 import org.jmouse.access.policy.model.PolicyScopeDeclaration;
@@ -48,10 +52,21 @@ public final class PolicyDocuments {
      * @throws PolicyException where two files state a vocabulary that does not agree
      */
     public static PolicyDocument merge(String name, List<PolicyDocument> documents) {
-        List<PolicyRole>    roles    = new ArrayList<>();
-        List<PolicySubject> subjects = new ArrayList<>();
+        List<PolicyRole>        roles        = new ArrayList<>();
+        List<PolicySubject>     subjects     = new ArrayList<>();
+        List<PolicyPlan>        plans        = new ArrayList<>();
+        List<PolicyEntitlement> entitlements = new ArrayList<>();
 
         for (PolicyDocument document : documents) {
+            /*
+             * Plans and entitlements concatenate, like roles and subjects and for the same reason.
+             * Two files declaring one plan code is a real disagreement rather than something to
+             * resolve by file order; binding refuses it. Two files entitling the same subject is not
+             * a disagreement at all — deny wins over both, wherever either was written.
+             */
+            plans.addAll(document.plans());
+            entitlements.addAll(document.entitlements());
+
             // ⚠️ Attributed here or nowhere. Before the merge each document knows its own name; after
             // it every declaration belongs to one document with one name, and "which file grants
             // this" — the question the control room exists to answer — has no answer left.
@@ -68,8 +83,11 @@ public final class PolicyDocuments {
                 List.of(),
                 mergeScopes(documents),
                 mergePermissions(documents),
+                mergeCapabilities(documents),
                 roles,
-                subjects);
+                plans,
+                subjects,
+                entitlements);
     }
 
     /**
@@ -98,12 +116,41 @@ public final class PolicyDocuments {
                         .map(permission -> new PolicyPermissionDeclaration(
                                 permission.name(), permission.description(), SourceSpan.none()))
                         .toList(),
+                document.capabilities().stream()
+                        .map(capability -> new PolicyCapabilityDeclaration(
+                                capability.key(), capability.displayName(), capability.kind(),
+                                capability.scopes(), capability.paid(), SourceSpan.none()))
+                        .toList(),
                 document.roles().stream()
+                        .map(PolicyDocuments::withoutSourcePositions)
+                        .toList(),
+                document.plans().stream()
                         .map(PolicyDocuments::withoutSourcePositions)
                         .toList(),
                 document.subjects().stream()
                         .map(PolicyDocuments::withoutSourcePositions)
+                        .toList(),
+                document.entitlements().stream()
+                        .map(entitlement -> new PolicyEntitlement(
+                                entitlement.at(), entitlement.kind(), entitlement.subject(),
+                                entitlement.quantity(), entitlement.unlimited(), entitlement.from(),
+                                entitlement.until(), entitlement.reason(), SourceSpan.none()))
                         .toList());
+    }
+
+    private static PolicyPlan withoutSourcePositions(PolicyPlan plan) {
+        return new PolicyPlan(
+                plan.code(),
+                plan.displayName(),
+                plan.order(),
+                plan.note(),
+                plan.extendsCode(),
+                plan.grants().stream()
+                        .map(grant -> new PolicyPlanGrant(
+                                grant.capability(), grant.quantity(), grant.period(),
+                                grant.unlimited(), SourceSpan.none()))
+                        .toList(),
+                SourceSpan.none());
     }
 
     // ── Vocabulary ────────────────────────────────────────────────────────────
@@ -178,6 +225,55 @@ public final class PolicyDocuments {
         }
 
         return List.copyOf(declared.values());
+    }
+
+    /**
+     * The capabilities the load declares, where the files agree about them.
+     *
+     * <p>Merged the way permissions are rather than the way scopes are: these carry no order, so
+     * several files may each declare their own and a product's features can ship their capabilities
+     * beside themselves.
+     *
+     * <p>⚠️ What they may not do is describe the same key <em>differently</em>. A capability declared
+     * as a {@code limit} in one file and a {@code quota} in another is not a merge conflict to
+     * resolve — it is two incompatible statements about whether the number can be recounted, and
+     * picking one would make the other file's reader wrong without telling them.
+     */
+    private static List<PolicyCapabilityDeclaration> mergeCapabilities(List<PolicyDocument> documents) {
+        Map<String, PolicyCapabilityDeclaration> declared   = new LinkedHashMap<>();
+        Map<String, String>                      declaredBy = new LinkedHashMap<>();
+
+        for (PolicyDocument document : documents) {
+            for (PolicyCapabilityDeclaration capability : document.capabilities()) {
+                PolicyCapabilityDeclaration existing = declared.get(capability.key());
+
+                if (existing == null) {
+                    declared.put(capability.key(), capability);
+                    declaredBy.put(capability.key(), document.name());
+                    continue;
+                }
+
+                if (!statesTheSameCapability(existing, capability)) {
+                    throw new PolicyException(
+                            "'" + capability.key() + "' is declared in '" + declaredBy.get(capability.key())
+                            + "' and again in '" + document.name() + "', and the two do not agree. A "
+                            + "capability has one shape and one set of places it may be granted at; two "
+                            + "answers means whichever file loaded last decides what a plan containing "
+                            + "it actually gives.");
+                }
+            }
+        }
+
+        return List.copyOf(declared.values());
+    }
+
+    private static boolean statesTheSameCapability(
+            PolicyCapabilityDeclaration first, PolicyCapabilityDeclaration other) {
+
+        return Objects.equals(first.kind(), other.kind())
+                && Objects.equals(first.scopes(), other.scopes())
+                && first.paid() == other.paid()
+                && Objects.equals(first.displayName(), other.displayName());
     }
 
     // ── Attribution ───────────────────────────────────────────────────────────

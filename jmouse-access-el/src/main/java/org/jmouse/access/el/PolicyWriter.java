@@ -1,6 +1,14 @@
 package org.jmouse.access.el;
 
+import org.jmouse.access.el.node.CapabilitiesNode;
+import org.jmouse.access.el.node.CapabilityDeclarationNode;
+import org.jmouse.access.el.node.EntitlementNode;
+import org.jmouse.access.el.node.EntitlementsNode;
 import org.jmouse.access.el.node.GrantNode;
+import org.jmouse.access.el.node.PaidCapabilitiesNode;
+import org.jmouse.access.el.node.PlanGrantNode;
+import org.jmouse.access.el.node.PlanNode;
+import org.jmouse.access.el.node.PlansNode;
 import org.jmouse.access.el.node.IncludeNode;
 import org.jmouse.access.el.node.PermissionDeclarationNode;
 import org.jmouse.access.el.node.PermissionsNode;
@@ -13,6 +21,10 @@ import org.jmouse.access.el.node.ScopesNode;
 import org.jmouse.access.el.node.SingleScopeNode;
 import org.jmouse.access.el.node.SubjectNode;
 import org.jmouse.access.policy.model.PolicyBundleEntry;
+import org.jmouse.access.policy.model.PolicyCapabilityDeclaration;
+import org.jmouse.access.policy.model.PolicyEntitlement;
+import org.jmouse.access.policy.model.PolicyPlan;
+import org.jmouse.access.policy.model.PolicyPlanGrant;
 import org.jmouse.access.policy.model.PolicyDocument;
 import org.jmouse.access.policy.model.PolicyEffect;
 import org.jmouse.access.policy.model.PolicyGrant;
@@ -23,6 +35,9 @@ import org.jmouse.access.policy.model.PolicyRoleAssignment;
 import org.jmouse.access.policy.model.PolicyScope;
 import org.jmouse.access.policy.model.PolicyScopeDeclaration;
 import org.jmouse.access.policy.model.PolicySubject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A {@link PolicyDocument} written as {@code .jmp} — including one that was never a file.
@@ -105,15 +120,131 @@ public final class PolicyWriter {
             policy.addExpression(toPermissionsNode(document));
         }
 
+        if (!document.capabilities().isEmpty()) {
+            policy.addExpression(toCapabilitiesNode(document));
+        }
+
         for (PolicyRole role : document.roles()) {
             policy.addExpression(toNode(role));
+        }
+
+        if (!document.plans().isEmpty()) {
+            policy.addExpression(toPlansNode(document));
         }
 
         for (PolicySubject subject : document.subjects()) {
             policy.addExpression(toNode(subject));
         }
 
+        if (!document.entitlements().isEmpty()) {
+            policy.addExpression(toEntitlementsNode(document));
+        }
+
         return policy;
+    }
+
+    /**
+     * ⚠️ {@code paid} lines are regrouped into one, not restored where they were written.
+     *
+     * <p>Nothing in the model records how many lines the original used or which keys shared one, so
+     * inventing a layout would be a rendering pretending to be the file. A single line naming every
+     * paid key says exactly what the document means — and this is where "a projection is a rendering,
+     * not a source file" stops being an abstract warning.
+     */
+    private static PolicyBlockNode toCapabilitiesNode(PolicyDocument document) {
+        CapabilitiesNode block = new CapabilitiesNode();
+        List<String>     paid  = new ArrayList<>();
+
+        for (PolicyCapabilityDeclaration capability : document.capabilities()) {
+            if (capability.paid()) {
+                paid.add(capability.key());
+            }
+        }
+
+        if (!paid.isEmpty()) {
+            PaidCapabilitiesNode line = new PaidCapabilitiesNode();
+
+            line.setKeys(paid);
+            block.addExpression(line);
+        }
+
+        for (PolicyCapabilityDeclaration capability : document.capabilities()) {
+            block.addExpression(toNode(capability));
+        }
+
+        return block;
+    }
+
+    private static CapabilityDeclarationNode toNode(PolicyCapabilityDeclaration capability) {
+        CapabilityDeclarationNode node = new CapabilityDeclarationNode();
+
+        node.setKey(capability.key());
+        node.setKind(capability.kind());
+        node.setDisplayName(capability.displayName());
+        node.setScopes(new ArrayList<>(capability.scopes()));
+
+        return node;
+    }
+
+    private static PolicyBlockNode toPlansNode(PolicyDocument document) {
+        PlansNode block = new PlansNode();
+
+        for (PolicyPlan plan : document.plans()) {
+            block.addExpression(toNode(plan));
+        }
+
+        return block;
+    }
+
+    private static PlanNode toNode(PolicyPlan plan) {
+        PlanNode node = new PlanNode(plan.code());
+
+        node.setDisplayName(plan.displayName());
+        node.setOrder(plan.order());
+        node.setNote(plan.note());
+        node.setExtendsCode(plan.extendsCode());
+
+        for (PolicyPlanGrant grant : plan.grants()) {
+            node.addExpression(toNode(grant));
+        }
+
+        return node;
+    }
+
+    private static PlanGrantNode toNode(PolicyPlanGrant grant) {
+        PlanGrantNode node = new PlanGrantNode();
+
+        node.setCapability(grant.capability());
+        node.setQuantity(grant.quantity());
+        node.setPeriod(grant.period());
+        node.setUnlimited(grant.unlimited());
+
+        return node;
+    }
+
+    private static PolicyBlockNode toEntitlementsNode(PolicyDocument document) {
+        EntitlementsNode block = new EntitlementsNode();
+
+        for (PolicyEntitlement entitlement : document.entitlements()) {
+            block.addExpression(toNode(entitlement));
+        }
+
+        return block;
+    }
+
+    private static EntitlementNode toNode(PolicyEntitlement entitlement) {
+        EntitlementNode node = new EntitlementNode();
+
+        node.setPlace(entitlement.at());
+        node.setKind(entitlement.kind());
+        node.setSubject(entitlement.subject());
+        node.setQuantity(entitlement.quantity());
+        node.setUnlimited(entitlement.unlimited());
+        node.setFrom(entitlement.from());
+        node.setUntil(entitlement.until());
+        node.setReason(entitlement.reason());
+
+        return node;
     }
 
     private static IncludeNode toNode(PolicyInclude include) {

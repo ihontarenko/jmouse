@@ -76,6 +76,46 @@ public final class CursorMatcher {
         return new PermissionValueMatcher();
     }
 
+    /** {@code capabilities { … }} */
+    public static Matcher<TokenCursor> capabilities() {
+        return new CapabilitiesMatcher();
+    }
+
+    /** {@code limit seat "Seats" per organization} — one line of a {@code capabilities} block. */
+    public static Matcher<TokenCursor> capabilityDeclaration() {
+        return new CapabilityDeclarationMatcher();
+    }
+
+    /** {@code paid custody, parametric-search} */
+    public static Matcher<TokenCursor> paidCapabilities() {
+        return new PaidCapabilitiesMatcher();
+    }
+
+    /** {@code plans { … }} */
+    public static Matcher<TokenCursor> plans() {
+        return new PlansMatcher();
+    }
+
+    /** {@code plan business "Business" order 30 … { … }} */
+    public static Matcher<TokenCursor> plan() {
+        return new PlanMatcher();
+    }
+
+    /** {@code storage-byte 100GB per month} — one line of a plan's body. */
+    public static Matcher<TokenCursor> planGrant() {
+        return new PlanGrantMatcher();
+    }
+
+    /** {@code entitlements { … }} */
+    public static Matcher<TokenCursor> entitlements() {
+        return new EntitlementsMatcher();
+    }
+
+    /** {@code @ORGANIZATION:acme plan team} — one line of an {@code entitlements} block. */
+    public static Matcher<TokenCursor> entitlement() {
+        return new EntitlementMatcher();
+    }
+
     /** {@code role NAME { … }} */
     public static Matcher<TokenCursor> role() {
         return new RoleMatcher();
@@ -122,6 +162,126 @@ public final class CursorMatcher {
         @Override
         public boolean matches(TokenCursor cursor) {
             return cursor.matchesSequence(T_PERMISSIONS, T_OPEN_CURLY);
+        }
+    }
+
+    private record CapabilitiesMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            return cursor.matchesSequence(T_CAPABILITIES, T_OPEN_CURLY);
+        }
+    }
+
+    /**
+     * A capability declaration is pinned by its leading kind word, which nothing else in the language
+     * begins with — so no lookahead beyond one token is needed to tell it from a {@code paid} line or
+     * from anything a block might hold by mistake.
+     */
+    private record CapabilityDeclarationMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            return checkAt(cursor, 0, T_GATE, T_LIMIT, T_QUOTA)
+                    && hyphenatedNameLength(cursor, 1) != NO_MATCH;
+        }
+    }
+
+    private record PaidCapabilitiesMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            return checkAt(cursor, 0, T_PAID) && hyphenatedNameLength(cursor, 1) != NO_MATCH;
+        }
+    }
+
+    private record EntitlementsMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            return cursor.matchesSequence(T_ENTITLEMENTS, T_OPEN_CURLY);
+        }
+    }
+
+    /**
+     * An entitlement opens like a grant — {@code @SCOPE[:instance]} — and is told apart from one by
+     * the word that follows: a grant names a permission, which always brings a colon, and this always
+     * names one of four effects. Disjoint by construction, so priority never has to break the tie.
+     */
+    private record EntitlementMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            int place = placeLength(cursor);
+
+            return place != NO_MATCH && checkAt(cursor, place, T_PLAN, T_TRIAL, T_ALLOW, T_DENY);
+        }
+
+        /**
+         * ⚠️ Measures {@code @SCOPE[:instance]} with a <strong>hyphen-tolerant</strong> instance, which
+         * is what {@code scopeReferenceLength} deliberately is not.
+         *
+         * <p>A grant's instance may be quoted where it needs a hyphen — {@code @SPACE:'my-space'} — and
+         * that is a fair price for a rule written once. An entitlement's instance is a <em>slug</em>,
+         * and slugs are hyphenated by nature: {@code acme-warehouse} is the normal case rather than the
+         * exception, and a block where every second line needs quotes is a block nobody proofreads.
+         */
+        private int placeLength(TokenCursor cursor) {
+            if (!checkAt(cursor, 0, T_AT) || !checkAt(cursor, 1, T_IDENTIFIER)) {
+                return NO_MATCH;
+            }
+
+            if (!checkAt(cursor, 2, T_COLON)) {
+                return 2;
+            }
+
+            int instance = hyphenatedNameLength(cursor, 3);
+
+            return instance == NO_MATCH ? NO_MATCH : 3 + instance;
+        }
+    }
+
+    private record PlansMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            return cursor.matchesSequence(T_PLANS, T_OPEN_CURLY);
+        }
+    }
+
+    /**
+     * A bundle header runs from {@code plan} to the brace and may hold three optional clauses in any
+     * order, so it is anchored on the keyword and the code rather than measured to the end.
+     */
+    private record PlanMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            return checkAt(cursor, 0, T_PLAN)
+                    && hyphenatedNameLength(cursor, 1) != NO_MATCH;
+        }
+    }
+
+    /**
+     * A plan-body line is a capability and, optionally, how much of it.
+     *
+     * <p>⚠️ It is the one shape in the language opening with a bare name, so it is made disjoint by
+     * what may <em>follow</em>: an amount, {@code unlimited}, {@code per}, or the end of the line. A
+     * colon is excluded because that is a permission, which is the only other bare-name shape and
+     * lives in a different block.
+     */
+    private record PlanGrantMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            int name = hyphenatedNameLength(cursor, 0);
+
+            if (name == NO_MATCH || checkAt(cursor, name, T_COLON)) {
+                return false;
+            }
+
+            return checkAt(cursor, name, T_NUMERIC, T_INT, T_LONG, T_UNLIMITED, T_PER,
+                           T_NEW_LINE, T_EOL, T_SEMICOLON, T_CLOSE_CURLY);
         }
     }
 
@@ -275,6 +435,36 @@ public final class CursorMatcher {
         while (!checkAt(cursor, start + length - 1, T_MULTIPLY)
                && checkAt(cursor, start + length, T_COLON)
                && checkAt(cursor, start + length + 1, AccessToken.namesKeywordsAndWildcard())) {
+
+            length += 2;
+        }
+
+        return length;
+    }
+
+    /**
+     * Measures a name that may carry hyphens — {@code storage-byte} — or a quoted string.
+     *
+     * <p>The counterpart of {@code SourceReader.hyphenatedName}, and the same run: the lexer gives
+     * {@code storage}, {@code -}, {@code byte}, exactly as it gives a permission's colons separately.
+     * The run cannot overshoot, because nothing that may follow a capability key begins with a hyphen.
+     *
+     * @param cursor the cursor to read from
+     * @param start  the lookahead offset the name is expected to begin at
+     * @return how many tokens it occupies, or {@link #NO_MATCH}
+     */
+    private static int hyphenatedNameLength(TokenCursor cursor, int start) {
+        if (checkAt(cursor, start, T_STRING)) {
+            return 1;
+        }
+        if (!checkAt(cursor, start, AccessToken.namesAndKeywords())) {
+            return NO_MATCH;
+        }
+
+        int length = 1;
+
+        while (checkAt(cursor, start + length, T_MINUS)
+               && checkAt(cursor, start + length + 1, AccessToken.namesAndKeywords())) {
 
             length += 2;
         }

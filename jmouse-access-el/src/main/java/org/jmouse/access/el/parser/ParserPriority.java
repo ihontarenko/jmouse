@@ -34,11 +34,15 @@ public final class ParserPriority {
      * <p>Blocks — each opens with a keyword of its own, so none of them can be confused with another
      * and their relative order carries no meaning beyond reading order.</p>
      */
-    public static final int POLICY      = Integer.MIN_VALUE + 1000;
-    public static final int SCOPES      = Integer.MIN_VALUE + 1100;
-    public static final int PERMISSIONS = Integer.MIN_VALUE + 1200;
-    public static final int ROLE        = Integer.MIN_VALUE + 1300;
-    public static final int SUBJECT     = Integer.MIN_VALUE + 1400;
+    public static final int POLICY       = Integer.MIN_VALUE + 1000;
+    public static final int SCOPES       = Integer.MIN_VALUE + 1100;
+    public static final int PERMISSIONS  = Integer.MIN_VALUE + 1200;
+    public static final int ROLE         = Integer.MIN_VALUE + 1300;
+    public static final int SUBJECT      = Integer.MIN_VALUE + 1400;
+    public static final int CAPABILITIES = Integer.MIN_VALUE + 1500;
+    public static final int PLANS        = Integer.MIN_VALUE + 1600;
+    public static final int PLAN         = Integer.MIN_VALUE + 1700;
+    public static final int ENTITLEMENTS = Integer.MIN_VALUE + 1800;
 
     /** Statements written inside a block, longest shape first. */
     public static final int GRANT                  = Integer.MIN_VALUE + 2000;
@@ -46,6 +50,16 @@ public final class ParserPriority {
     public static final int SCOPE_DECLARATION      = Integer.MIN_VALUE + 2200;
     public static final int PERMISSION_DECLARATION = Integer.MIN_VALUE + 2300;
     public static final int INCLUDE                = Integer.MIN_VALUE + 2400;
+    public static final int CAPABILITY_DECLARATION = Integer.MIN_VALUE + 2500;
+    public static final int PAID_CAPABILITIES      = Integer.MIN_VALUE + 2600;
+    public static final int ENTITLEMENT            = Integer.MIN_VALUE + 2700;
+
+    /**
+     * ⚠️ Asked last of all the statements, because it is the only shape opening with a bare name and
+     * therefore the only one that could be offered somebody else's line. Everything with a keyword,
+     * an {@code @} or a colon in front of it gets first refusal.
+     */
+    public static final int PLAN_GRANT = Integer.MIN_VALUE + 2800;
 
     /**
      * Fragments — a statement parser calls these directly by type. They are registered so a fragment

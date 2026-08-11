@@ -1,5 +1,6 @@
 package org.jmouse.access.policy;
 
+import org.jmouse.access.CapabilityCatalog;
 import org.jmouse.access.PermissionCatalog;
 import org.jmouse.access.ScopeCatalog;
 import org.jmouse.access.ScopeKind;
@@ -54,6 +55,16 @@ public final class PolicyBinder {
     private final ConditionCompiler   conditions;
     private final PlaceholderResolver placeholders;
 
+    /**
+     * ⚠️ Empty unless a product registers one, and an empty catalogue checks nothing.
+     *
+     * <p>Not a constructor parameter, deliberately: every product that has not adopted the entitlement
+     * axis keeps compiling and keeps behaving exactly as before. A capability block in a file where
+     * nothing registers capabilities is caught by the wiring instead — see issue 11 — because *that*
+     * is where the difference between "no axis" and "an axis with nowhere to resolve" is known.
+     */
+    private CapabilityCatalog capabilities = CapabilityCatalog.empty();
+
     public PolicyBinder(ScopeCatalog scopes, PermissionCatalog permissions) {
         this(scopes, permissions, null, PlaceholderResolver.none());
     }
@@ -89,11 +100,21 @@ public final class PolicyBinder {
                 PolicyVocabulary.scopesOf(document), PolicyVocabulary.permissionsOf(document));
     }
 
+    /**
+     * The same binder, also checking the entitlement axis's vocabulary.
+     *
+     * @param registered what this installation registers as grantable
+     */
+    public PolicyBinder checking(CapabilityCatalog registered) {
+        this.capabilities = registered == null ? CapabilityCatalog.empty() : registered;
+        return this;
+    }
+
     public AccessPolicy bind(PolicyDocument document) {
         // A file may also state the vocabulary it is written against. Where it does, it is checked
         // rather than believed: this installation's scopes come from code, and a file that quietly
         // described different ones would be documentation that had stopped being true.
-        PolicyVocabulary.checkAgainst(document, scopes, permissions);
+        PolicyVocabulary.checkAgainst(document, scopes, permissions, capabilities);
 
         List<PolicyProblem> problems = new ArrayList<>();
 

@@ -1,7 +1,9 @@
 package org.jmouse.access.el;
 
+import org.jmouse.access.el.lexer.AccessToken;
 import org.jmouse.access.el.node.SourceSpanNode;
 import org.jmouse.core.MimeParser;
+import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
 import org.jmouse.el.lexer.TokenizableSource;
@@ -94,5 +96,37 @@ public final class SourceReader {
      */
     public static String literal(Token token) {
         return MimeParser.unquote(token.value());
+    }
+
+    /**
+     * Reads a name that may contain hyphens — {@code storage-byte}, {@code parametric-search} — or a
+     * quoted string.
+     *
+     * <p>⚠️ <strong>The lexer does not produce these as one token.</strong> {@code storage-byte}
+     * arrives as {@code storage}, {@code -}, {@code byte}, exactly as {@code form:read} arrives as
+     * three tokens and is joined by a run of the same kind. Quoting would also work — {@code 'own-rows'}
+     * in a scopes block already does — but a capability key appears on every line of every bundle, and
+     * a catalogue in quotes is a catalogue nobody enjoys proofreading, which is the whole reason it
+     * moved out of a migration and into a document.
+     *
+     * <p>The run cannot swallow what follows: nothing that may come after a key — a description, a
+     * number, {@code per}, a comma, the end of the line — begins with a hyphen.
+     *
+     * @param cursor the cursor, positioned on the first token of the name
+     * @return the name, hyphens included and quotes removed
+     */
+    public static String hyphenatedName(TokenCursor cursor) {
+        if (cursor.isCurrent(BasicToken.T_STRING)) {
+            return literal(cursor.ensure(BasicToken.T_STRING));
+        }
+
+        StringBuilder name = new StringBuilder(cursor.ensure(AccessToken.namesAndKeywords()).value());
+
+        while (cursor.isCurrent(BasicToken.T_MINUS) && cursor.isNext(AccessToken.namesAndKeywords())) {
+            cursor.ensure(BasicToken.T_MINUS);
+            name.append('-').append(cursor.ensure(AccessToken.namesAndKeywords()).value());
+        }
+
+        return name.toString();
     }
 }

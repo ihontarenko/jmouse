@@ -1,9 +1,13 @@
 package org.jmouse.access.policy;
 
+import org.jmouse.access.CapabilityCatalog;
+import org.jmouse.access.CapabilityDefinition;
+import org.jmouse.access.CapabilityKind;
 import org.jmouse.access.PermissionCatalog;
 import org.jmouse.access.ScopeCatalog;
 import org.jmouse.access.ScopeKind;
 import org.jmouse.access.ScopeNature;
+import org.jmouse.access.policy.model.PolicyCapabilityDeclaration;
 import org.jmouse.access.policy.model.PolicyDocument;
 import org.jmouse.access.policy.model.PolicyPermissionDeclaration;
 import org.jmouse.access.policy.model.PolicyScopeDeclaration;
@@ -46,7 +50,42 @@ public final class PolicyVocabulary {
             "own-rows",   ScopeNature.OWN_ROWS,
             "own_rows",   ScopeNature.OWN_ROWS);
 
+    /** The words a {@code capabilities} block writes, and the shapes they mean. */
+    private static final Map<String, CapabilityKind> KINDS = Map.of(
+            "gate",  CapabilityKind.GATE,
+            "limit", CapabilityKind.LIMIT,
+            "quota", CapabilityKind.QUOTA);
+
     private PolicyVocabulary() {
+    }
+
+    /**
+     * The capabilities a document declares, as a catalogue.
+     *
+     * <p>The <em>built-from</em> mode, for a product that states its vocabulary in the file rather
+     * than in code — the same choice {@link #scopesOf} offers for floors.
+     *
+     * @throws PolicyException where a kind is not one of the three
+     */
+    public static CapabilityCatalog capabilitiesOf(PolicyDocument document) {
+        List<CapabilityDefinition> definitions = new ArrayList<>();
+
+        for (PolicyCapabilityDeclaration declared : document.capabilities()) {
+            CapabilityKind kind = KINDS.get(declared.kind());
+
+            if (kind == null) {
+                throw new PolicyException(
+                        "'" + declared.key() + "' is declared '" + declared.kind() + "', which is not "
+                        + "a shape a capability can have. Write 'gate' for something that is open or "
+                        + "closed, 'limit' for a standing count, or 'quota' for something consumed "
+                        + "over a period.");
+            }
+
+            definitions.add(new CapabilityDefinition(
+                    declared.key(), declared.displayName(), kind, declared.scopes(), declared.paid()));
+        }
+
+        return new CapabilityCatalog(definitions);
     }
 
     /**
@@ -113,6 +152,19 @@ public final class PolicyVocabulary {
     public static void checkAgainst(
             PolicyDocument document, ScopeCatalog scopes, PermissionCatalog permissions) {
 
+        checkAgainst(document, scopes, permissions, CapabilityCatalog.empty());
+    }
+
+    /**
+     * The same, including the entitlement axis's vocabulary.
+     *
+     * @param capabilities what the application registers as grantable, or
+     *                     {@link CapabilityCatalog#empty()} where it has not adopted the axis
+     */
+    public static void checkAgainst(
+            PolicyDocument document, ScopeCatalog scopes, PermissionCatalog permissions,
+            CapabilityCatalog capabilities) {
+
         if (!document.declaresVocabulary()) {
             return;
         }
@@ -121,6 +173,7 @@ public final class PolicyVocabulary {
 
         checkScopes(document, scopes, problems);
         checkPermissions(document, permissions, problems);
+        checkCapabilities(document, capabilities, scopes, problems);
         refuse(document, problems);
     }
 
@@ -184,6 +237,93 @@ public final class PolicyVocabulary {
                              + declared.name() + "' that the application does not register."));
             }
         }
+    }
+
+    /**
+     * Checks the capability catalogue in both directions, and the places each one may be granted at.
+     *
+     * <p>⚠️ <strong>The second direction is the one that earns its keep.</strong> A capability the
+     * code registers and the file never declares is not a harmless omission: bundles are written in
+     * this file, so a capability missing from it is one no tier can ever include — the feature ships,
+     * nobody can buy it, and nothing says why. That is exactly how a catalogue goes stale one feature
+     * at a time.
+     *
+     * <p>⚠️ A capability whose {@code per} names a scope this installation does not have is refused
+     * here rather than at the first grant. A grant addressed at a place that cannot exist would be
+     * accepted, stored, and then silently never read.
+     */
+    private static void checkCapabilities(
+            PolicyDocument document, CapabilityCatalog capabilities, ScopeCatalog scopes,
+            List<PolicyProblem> problems) {
+
+        if (capabilities.isEmpty()) {
+            return;
+        }
+
+        Set<String> declared = new TreeSet<>();
+
+        for (PolicyCapabilityDeclaration capability : document.capabilities()) {
+            declared.add(capability.key());
+            checkOneCapability(capability, capabilities, scopes, problems);
+        }
+
+        capabilities.all().stream()
+                .filter(key -> !declared.contains(key))
+                .forEach(key -> problems.add(PolicyProblem.anywhere(
+                        "the application registers a capability '" + key + "' that this file does not "
+                        + "declare, so no plan here can ever include it.")));
+    }
+
+    private static void checkOneCapability(
+            PolicyCapabilityDeclaration capability, CapabilityCatalog capabilities,
+            ScopeCatalog scopes, List<PolicyProblem> problems) {
+
+        CapabilityDefinition registered = capabilities.find(capability.key()).orElse(null);
+
+        if (registered == null) {
+            problems.add(PolicyProblem.at(capability.at(), "this file declares a capability '"
+                         + capability.key() + "' that the application does not register. A plan "
+                         + "including it would give nothing."));
+            return;
+        }
+
+        CapabilityKind expected = KINDS.get(capability.kind());
+
+        if (expected != null && registered.kind() != expected) {
+            problems.add(PolicyProblem.at(capability.at(), "'" + capability.key() + "' is declared "
+                         + capability.kind() + " here and " + registered.kind() + " in the "
+                         + "application. Whether a number can be recounted is not a detail — a limit "
+                         + "is answered by counting what exists and a quota is not."));
+        }
+
+        capability.scopes().stream()
+                .filter(scope -> scopes.byName(scope).isEmpty())
+                .forEach(scope -> problems.add(PolicyProblem.at(
+                        capability.at(), unknownScope(capability, scope, scopes))));
+    }
+
+    /**
+     * ⚠️ A scope name is written one way, and {@code per organization} is not it.
+     *
+     * <p>Matching case-insensitively was the obvious kindness and is the wrong one: it would make
+     * {@code ORGANIZATION} and {@code organization} two spellings of one name, so a renamed scope
+     * would keep matching and the file would keep looking right. Instead the mismatch is refused and
+     * the message says exactly what to type — the failure a reader can fix in one keystroke, rather
+     * than a rule they have to be told twice.
+     */
+    private static String unknownScope(
+            PolicyCapabilityDeclaration capability, String written, ScopeCatalog scopes) {
+
+        String message = "'" + capability.key() + "' may be granted 'per " + written + "', which is "
+                         + "not a scope this installation has";
+
+        return scopes.all().stream()
+                .map(ScopeKind::name)
+                .filter(name -> name.equalsIgnoreCase(written))
+                .findFirst()
+                .map(name -> message + " — it is written '" + name + "' everywhere else, and one name "
+                             + "spelled two ways is a rename waiting to go unnoticed.")
+                .orElse(message + ".");
     }
 
     private static void refuse(PolicyDocument document, List<PolicyProblem> problems) {

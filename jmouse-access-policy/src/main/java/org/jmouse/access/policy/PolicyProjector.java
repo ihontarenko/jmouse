@@ -1,7 +1,9 @@
 package org.jmouse.access.policy;
 
+import org.jmouse.access.Allowance;
 import org.jmouse.access.ScopeReference;
 import org.jmouse.access.policy.model.PolicyBundleEntry;
+import org.jmouse.access.policy.model.PolicyEntitlement;
 import org.jmouse.access.policy.model.PolicyDocument;
 import org.jmouse.access.policy.model.PolicyEffect;
 import org.jmouse.access.policy.model.PolicyGrant;
@@ -11,10 +13,14 @@ import org.jmouse.access.policy.model.PolicyScope;
 import org.jmouse.access.policy.model.PolicySubject;
 import org.jmouse.access.policy.model.SourceSpan;
 import org.jmouse.access.spi.BundledPermission;
+import org.jmouse.access.spi.CapabilityGrant;
 import org.jmouse.access.spi.DirectGrant;
+import org.jmouse.access.spi.EntitlementStore;
 import org.jmouse.access.spi.GrantStore;
 import org.jmouse.access.spi.RoleGrant;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -171,6 +177,89 @@ public final class PolicyProjector {
         return where.type().namesAnInstance()
                 ? PolicyScope.of(where.type().name(), where.id())
                 : PolicyScope.kind(where.type().name());
+    }
+
+    // ── Entitlements ──────────────────────────────────────────────────────────
+
+    /**
+     * What an {@link EntitlementStore} says about these subjects, as an {@code entitlements { }} block.
+     *
+     * <p>The capability half of the same idea, and it earns its place more here than for permissions.
+     * <em>"Why can this account use custody"</em> has four possible answers — their bundle, a trial, a
+     * gift, or nothing — and a control room that renders all four in one notation is one where the
+     * question has a single answer rather than one answer per source.
+     *
+     * <p>⚠️ <strong>Expired grants are rendered, not dropped.</strong> The store returns them
+     * deliberately, and a projection that filtered them would destroy the difference between
+     * <em>"ran until 12 September"</em> and <em>"never had it"</em> — which is the difference between
+     * a sentence somebody can act on and one they cannot.
+     *
+     * <p>⚠️ <strong>A bundle comes back as its capabilities, never as {@code plan team}.</strong> A
+     * store holds what a bundle <em>issued</em>; which bundle that was is provenance carried on each
+     * grant. Reconstructing the bundle line would mean matching a set of grants against a catalogue
+     * and guessing, and would then read as a fact when it was an inference.
+     *
+     * @param documentName what the derived document is called
+     * @param store        where the capability grants come from
+     * @param places       the places to report on, in the order they should be written. ⚠️ Named
+     *                     rather than discovered: a store that could enumerate every account would be
+     *                     a store the engine could walk, and whoever opens an administration screen
+     *                     already knows which accounts they are looking at
+     */
+    public static PolicyDocument projectEntitlements(
+            String documentName, EntitlementStore store, List<ScopeReference> places) {
+
+        List<PolicyEntitlement> entitlements = new ArrayList<>();
+
+        for (ScopeReference place : places) {
+            for (CapabilityGrant grant : store.heldAt(place)) {
+                entitlements.add(toEntitlement(grant));
+            }
+        }
+
+        return new PolicyDocument(documentName, List.of(), List.of(), List.of(), List.of(),
+                                  List.of(), List.of(), List.of(), entitlements);
+    }
+
+    /**
+     * One capability grant, written the way somebody would have written it.
+     *
+     * <p>⚠️ A refusal becomes a visible {@code deny} carrying its reason, never a missing line. A
+     * capability withheld by hand and one nobody ever granted are the same absence to the engine and
+     * completely different sentences to whoever reads the refusal — and only one of the two is
+     * something they can go and argue with.
+     */
+    private static PolicyEntitlement toEntitlement(CapabilityGrant grant) {
+        Allowance allowance = grant.allowance();
+
+        return new PolicyEntitlement(
+                toScope(grant.at()),
+                grant.allowed() ? PolicyEntitlement.Kind.ALLOW : PolicyEntitlement.Kind.DENY,
+                grant.capability(),
+                quantityOf(allowance),
+                allowance != null && allowance.isUnlimited(),
+                asDay(grant.validity().from()),
+                asDay(grant.validity().until()),
+                grant.reason(),
+                SourceSpan.none());
+    }
+
+    private static String quantityOf(Allowance allowance) {
+        if (allowance == null || allowance.isUnlimited()) {
+            return null;
+        }
+
+        return String.valueOf(allowance.quantity());
+    }
+
+    /**
+     * ⚠️ Rendered as a day in UTC — the same reading the loader used when it turned
+     * {@code until 2026-09-12} into an instant. A projection printing a local date would round-trip
+     * into a different grant on a machine in another timezone, and the two would differ by one day in
+     * whichever direction nobody tested.
+     */
+    private static String asDay(Instant moment) {
+        return moment == null ? null : moment.atZone(ZoneOffset.UTC).toLocalDate().toString();
     }
 
     /** One of the two questions a store answers about one subject — held-by, or covering a chain. */

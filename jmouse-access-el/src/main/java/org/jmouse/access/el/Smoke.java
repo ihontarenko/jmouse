@@ -45,6 +45,29 @@ public final class Smoke {
                     form:read     "Read forms"
                     form:write    "Create and edit forms"
                 }
+                capabilities {
+                    paid parametric-search
+                    gate   parametric-search  "Parametric search"
+                    limit  workspace          "Workspaces"  per ORGANIZATION
+                    quota  storage-byte       "Storage"     per ORGANIZATION, SPACE
+                }
+                plans {
+                    plan free "Free" order 10 note "Room to try the product properly." {
+                        workspace     1
+                        storage-byte  200MB per month
+                    }
+                    plan business "Business" order 30 extends free {
+                        workspace     25
+                        storage-byte  unlimited
+                        parametric-search
+                    }
+                }
+                entitlements {
+                    @ORGANIZATION:acme  plan business
+                    @ORGANIZATION:beta  trial business until 2026-09-12 reason "evaluating"
+                    @SPACE:kyiv         allow workspace 5 from 2026-08-01
+                    @SPACE:kyiv         deny parametric-search reason "not paid for here"
+                }
                 role INSTALLATION_OWNER {
                     @INSTALLATION  space:write
                     @INSTALLATION  user:manage
@@ -89,8 +112,101 @@ public final class Smoke {
         verifyIncludes(document.includes(), verification);
         verifyScopes(document.scopes(), verification);
         verifyPermissions(document.permissions(), verification);
+        verifyCapabilities(document.capabilities(), verification);
+        verifyPlans(document.plans(), verification);
         verifyRoles(document.roles(), verification);
         verifySubjects(document.subjects(), verification);
+        verifyEntitlements(document.entitlements(), verification);
+    }
+
+    private static void verifyCapabilities(
+            List<PolicyCapabilityDeclaration> capabilities, Verification verification) {
+
+        if (!verification.size("capabilities", 3, capabilities)) {
+            return;
+        }
+
+        verification.equal("capability 1", "parametric-search", capabilities.get(0).key());
+        verification.equal("capability 1 name", "Parametric search", capabilities.get(0).displayName());
+        verification.equal("capability 1 paid", true, capabilities.get(0).paid());
+        // ⚠️ As WRITTEN, not normalised. The engine keeps the word the file used so a message can quote
+        // the line back; turning `limit` into a constant is the product's job, at the boundary where it
+        // registers its catalogue.
+        verification.equal("capability 2 kind", "limit", capabilities.get(1).kind());
+        verification.equal("capability 2 scopes", List.of("ORGANIZATION"), capabilities.get(1).scopes());
+        verification.equal("capability 3 kind", "quota", capabilities.get(2).kind());
+
+        // ⚠️ A capability the file does not call `paid` is FREE, and the absence is the statement.
+        // Writing `free` would make every module in a real catalogue carry a word that says nothing.
+        verification.equal("capability 2 paid", false, capabilities.get(1).paid());
+    }
+
+    /**
+     * Checks {@code plans}, including the two things about it that are easy to get quietly wrong.
+     *
+     * <p><strong>A derived tier keeps only its own lines.</strong> {@code business extends free} writes
+     * three, and resolving the lineage is a reader's job — a parser that flattened it would turn
+     * inheritance into a copy that drifts from its base at the first edit.
+     *
+     * <p><strong>{@code unlimited} is not a quantity.</strong> It arrives as a flag with a null amount,
+     * because a ceiling that exists and one that does not are different facts and every screen above
+     * has to tell them apart.
+     */
+    private static void verifyPlans(List<PolicyPlan> plans, Verification verification) {
+        if (!verification.size("plans", 2, plans)) {
+            return;
+        }
+
+        PolicyPlan free     = plans.get(0);
+        PolicyPlan business = plans.get(1);
+
+        verification.equal("plan 1 code", "free", free.code());
+        verification.equal("plan 1 name", "Free", free.displayName());
+        verification.equal("plan 1 order", 10, free.order());
+        verification.equal("plan 1 note", "Room to try the product properly.", free.note());
+        verification.equal("plan 1 derived", false, free.isDerived());
+        verification.equal("plan 1 lines", 2, free.grants().size());
+        verification.equal("plan 1 line 2 quantity", "200MB", free.grants().get(1).quantity());
+        verification.equal("plan 1 line 2 period", "month", free.grants().get(1).period());
+
+        verification.equal("plan 2 extends", "free", business.extendsCode());
+        verification.equal("plan 2 keeps only its own lines", 3, business.grants().size());
+        verification.equal("plan 2 unlimited flag", true, business.grants().get(1).unlimited());
+        verification.equal("plan 2 unlimited has no amount", null, business.grants().get(1).quantity());
+        verification.equal("plan 2 gate is not metered", false, business.grants().get(2).isMetered());
+    }
+
+    /**
+     * Checks {@code entitlements}, whose whole point is that a window is a <em>qualifier</em> rather
+     * than a predicate: {@code from} and {@code until} arrive as fields, so an expired grant stays
+     * legible instead of becoming an opaque condition that merely returns false.
+     */
+    private static void verifyEntitlements(
+            List<PolicyEntitlement> entitlements, Verification verification) {
+
+        if (!verification.size("entitlements", 4, entitlements)) {
+            return;
+        }
+
+        verification.equal("entitlement 1 kind", PolicyEntitlement.Kind.PLAN, entitlements.get(0).kind());
+        verification.equal("entitlement 1 at", "ORGANIZATION", entitlements.get(0).at().kind());
+        verification.equal("entitlement 1 instance", "acme", entitlements.get(0).at().instance());
+        verification.equal("entitlement 1 subject", "business", entitlements.get(0).subject());
+        verification.equal("entitlement 1 is a bundle", true, entitlements.get(0).isBundle());
+
+        verification.equal("entitlement 2 kind", PolicyEntitlement.Kind.TRIAL, entitlements.get(1).kind());
+        verification.equal("entitlement 2 until", "2026-09-12", entitlements.get(1).until());
+        verification.equal("entitlement 2 reason", "evaluating", entitlements.get(1).reason());
+        verification.equal("entitlement 2 is bounded", true, entitlements.get(1).isBounded());
+
+        verification.equal("entitlement 3 kind", PolicyEntitlement.Kind.ALLOW, entitlements.get(2).kind());
+        verification.equal("entitlement 3 subject", "workspace", entitlements.get(2).subject());
+        verification.equal("entitlement 3 quantity", "5", entitlements.get(2).quantity());
+        verification.equal("entitlement 3 from", "2026-08-01", entitlements.get(2).from());
+
+        verification.equal("entitlement 4 kind", PolicyEntitlement.Kind.DENY, entitlements.get(3).kind());
+        verification.equal("entitlement 4 reason", "not paid for here", entitlements.get(3).reason());
+        verification.equal("entitlement 4 is not a bundle", false, entitlements.get(3).isBundle());
     }
 
     private static void verifyIncludes(List<PolicyInclude> includes, Verification verification) {

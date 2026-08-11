@@ -34,6 +34,18 @@ public enum AccessToken implements Token.Type {
     /** {@code subject id { … }} — one account's assignments and personal grants. */
     T_SUBJECT(10400, "subject"),
 
+    /** {@code capabilities { … }} — the vocabulary of what a grant can be about. */
+    T_CAPABILITIES(10500, "capabilities"),
+
+    /** {@code plans { … }} — the named bundles of capabilities. */
+    T_PLANS(10600, "plans"),
+
+    /** {@code plan code "Name" { … }} — one bundle. */
+    T_PLAN(10700, "plan"),
+
+    /** {@code entitlements { … }} — who is on what, and until when. */
+    T_ENTITLEMENTS(10800, "entitlements"),
+
     /** {@code grants ROLE @SCOPE} — assigns a role to the enclosing subject. */
     T_GRANTS(20000, "grants"),
 
@@ -45,6 +57,45 @@ public enum AccessToken implements Token.Type {
 
     /** {@code when <expression>} — a condition, kept as raw text and compiled by stage 2. */
     T_WHEN(20300, "when"),
+
+    /** {@code paid a, b} — capabilities that are closed until something grants them. */
+    T_PAID(20400, "paid"),
+
+    /** {@code limit seat "Seats"} — a capability carrying a standing count. */
+    T_LIMIT(20500, "limit"),
+
+    /** {@code quota storage-byte "…"} — a capability consumed over a window. */
+    T_QUOTA(20600, "quota"),
+
+    /** {@code gate custody "Custody"} — a capability that is open or closed, with no number. */
+    T_GATE(20700, "gate"),
+
+    /** {@code per organization, space} — where a capability may be granted; also {@code per month}. */
+    T_PER(20800, "per"),
+
+    /** {@code order 20} — display order of a bundle. */
+    T_ORDER(20900, "order"),
+
+    /** {@code note "…"} — the sentence a screen shows beside a bundle. */
+    T_NOTE(22000, "note"),
+
+    /** {@code extends business} — the bundle this one starts from. */
+    T_EXTENDS(22100, "extends"),
+
+    /** ⚠️ No ceiling — never a very large number. */
+    T_UNLIMITED(22200, "unlimited"),
+
+    /** {@code trial business until …} — a bundle with an end and a provenance of its own. */
+    T_TRIAL(22300, "trial"),
+
+    /** {@code from 2026-08-01} — when a grant starts applying. */
+    T_FROM(22400, "from"),
+
+    /** {@code until 2026-09-01} — when it stops. */
+    T_UNTIL(22500, "until"),
+
+    /** {@code reason "…"} — why, and the words a refusal repeats back. */
+    T_REASON(22600, "reason"),
 
     /** {@code include 'path'} — records a path; the loader, not the parser, follows it. */
     T_INCLUDE(21000, "include");
