@@ -82,6 +82,12 @@ public final class Smoke {
                     @SCOPE:*  form:*         # a direct grant, allow implied
                     @SCOPE:instance  form:read  allow
                     @SCOPE:instance  form:delete  deny when resource.status == 'DRAFT'
+                    # ⚠️ Every name in this condition is a KEYWORD of this grammar, and that is the
+                    # whole reason the line exists. The end of a condition used to be found by running
+                    # the expression parser over these tokens — so a name like `caller` or `plan`
+                    # reached it already lexed as a keyword, and the file failed to PARSE over a word
+                    # that is not a keyword at this position at all. Keep a condition made of them.
+                    @SCOPE:instance  form:share  deny when caller.plan != null
                 }
             }
             """;
@@ -323,7 +329,7 @@ public final class Smoke {
     }
 
     private static void verifyGrants(List<PolicyGrant> grants, Verification verification) {
-        if (!verification.size("grants", 5, grants)) {
+        if (!verification.size("grants", 6, grants)) {
             return;
         }
 
@@ -334,6 +340,9 @@ public final class Smoke {
         verifyGrant(grants.get(3), "form:read", "SCOPE", "instance", PolicyEffect.ALLOW, null, verification);
         verifyGrant(grants.get(4), "form:delete", "SCOPE", "instance", PolicyEffect.DENY,
                 "resource.status == 'DRAFT'", verification);
+        // The condition made entirely of this grammar's keywords — see the fixture.
+        verifyGrant(grants.get(5), "form:share", "SCOPE", "instance", PolicyEffect.DENY,
+                "caller.plan != null", verification);
     }
 
     private static void verifyGrant(

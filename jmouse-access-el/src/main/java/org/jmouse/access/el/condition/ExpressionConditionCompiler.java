@@ -66,10 +66,21 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
     /**
      * One compiled condition, and the three things it is allowed to see.
      *
-     * <p>The subject, the place and the resource are bound as variables per evaluation. Nothing else
+     * <p>The caller, the place and the resource are bound as variables per evaluation. Nothing else
      * is reachable: a predicate that could read a repository or a clock would be a predicate whose
      * answer depends on something the file does not mention, and a rule nobody can read from its own
      * text is worse than no rule.</p>
+     *
+     * <h2>⚠️ Why it is {@code caller} and not {@code subject}</h2>
+     *
+     * <p>Because {@code subject} is a keyword of the language these conditions are written inside, and
+     * a variable named after a keyword is a variable nobody can use: it lexes as {@code T_SUBJECT}
+     * before anything looks at what it means, and the file then fails to <em>parse</em> over a word
+     * that is not a keyword at that position at all.
+     *
+     * <p>{@code caller} is also the truer word. What is bound here is who is <em>asking</em>;
+     * {@code subject} in this grammar is who a block of grants is <em>about</em>, and the two are the
+     * same only by coincidence — never for an agent, and never for an impersonated session.</p>
      */
     private record ExpressionCondition(
             String source, ExpressionLanguage expressionLanguage, Expression compiled
@@ -93,7 +104,7 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
             try {
                 EvaluationContext evaluation = expressionLanguage.newContext();
 
-                evaluation.setValue("subject", context.subject());
+                evaluation.setValue("caller", context.subject());
                 evaluation.setValue("place", context.place());
                 evaluation.setValue("resource", context.resource());
 
