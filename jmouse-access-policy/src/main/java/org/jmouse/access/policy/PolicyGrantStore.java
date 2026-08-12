@@ -79,21 +79,16 @@ public final class PolicyGrantStore implements GrantStore {
      * <p>The bundle is looked up rather than stored per assignment, so a role held in nine places is
      * one bundle and nine references to it.
      *
-     * <p>{@code grantedBy} and {@code since} are the policy's name and its load time, never null, and
-     * the {@code origin} names the file and the line. The control room renders provenance verbatim; a
-     * grant whose origin is nothing reads as a defect to whoever is trying to explain a permission,
-     * and one that points at a table nobody can find is worse.
+     * <p>The attribution was settled at binding and is passed through untouched: it names the policy,
+     * the file and the line, and carries whatever narrows <em>this</em> handing-out. The control room
+     * renders provenance verbatim; a grant whose origin is nothing reads as a defect to whoever is
+     * trying to explain a permission, and one that points at a table nobody can find is worse.
      */
     private RoleGrant toRoleGrant(BoundAssignment assignment) {
         List<BundledPermission> bundle = policy.roles().getOrDefault(assignment.roleName(), List.of());
 
         return new RoleGrant(
-                assignment.roleName(),
-                assignment.at(),
-                policy.provenance(),
-                policy.loadedAt(),
-                bundle,
-                assignment.origin());
+                assignment.roleName(), assignment.at(), bundle, assignment.attribution());
     }
 
     private BoundSubject subject(String subjectId) {

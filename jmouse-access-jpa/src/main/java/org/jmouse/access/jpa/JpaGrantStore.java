@@ -8,9 +8,12 @@ import org.jmouse.access.jpa.entity.AccessRoleAssignment;
 import org.jmouse.access.jpa.entity.AccessSubjectPermission;
 import org.jmouse.access.spi.BundledPermission;
 import org.jmouse.access.spi.DirectGrant;
+import org.jmouse.access.spi.GrantAttribution;
 import org.jmouse.access.spi.GrantStore;
 import org.jmouse.access.spi.RoleGrant;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
@@ -151,12 +154,11 @@ public class JpaGrantStore implements GrantStore {
         return new RoleGrant(
                 roleName,
                 placeOf(assignment.getScopeType(), assignment.getScopeId()),
-                assignment.getGrantedBy(),
-                assignment.getCreatedAt() == null
-                        ? null
-                        : assignment.getCreatedAt().atZone(ZoneId.systemDefault()).toLocalDateTime(),
                 bundle,
-                null);
+                // ⚠️ A stored assignment carries no condition, and there is no column for one. A
+                // predicate in a row is a predicate nobody can find — conditions exist only where they
+                // can be READ, which is the document.
+                GrantAttribution.stored(assignment.getGrantedBy(), writtenAt(assignment.getCreatedAt())));
     }
 
     private DirectGrant toDirectGrant(AccessSubjectPermission override) {
@@ -164,16 +166,13 @@ public class JpaGrantStore implements GrantStore {
                 override.getPermission(),
                 override.allows(),
                 placeOf(override.getScopeType(), override.getScopeId()),
-                override.getGrantedBy(),
-                override.getReason(),
-                override.getCreatedAt() == null
-                        ? null
-                        : override.getCreatedAt().atZone(ZoneId.systemDefault()).toLocalDateTime(),
-                null,
-                // ⚠️ A stored grant carries no condition, and there is no column for one. A predicate in
-                // a row is a predicate nobody can find — conditions exist only where they can be READ,
-                // which is the document.
-                null);
+                GrantAttribution.stored(
+                        override.getGrantedBy(), override.getReason(), writtenAt(override.getCreatedAt())));
+    }
+
+    /** When a row says it was written, in the engine's words — or nothing, where it does not say. */
+    private static LocalDateTime writtenAt(Instant created) {
+        return created == null ? null : created.atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
 
     private ScopeReference placeOf(String kind, String instance) {

@@ -30,6 +30,7 @@ import org.jmouse.access.policy.PolicyProjector;
 import org.jmouse.access.policy.model.PolicyDocument;
 import org.jmouse.access.spi.BundledPermission;
 import org.jmouse.access.spi.DirectGrant;
+import org.jmouse.access.spi.GrantAttribution;
 import org.jmouse.access.spi.GrantOrigin;
 import org.jmouse.access.spi.GrantStore;
 import org.jmouse.access.spi.ResolutionCache;
@@ -199,13 +200,15 @@ public final class ExchangeSmoke {
     private static GrantStore storedGrants() {
         return new StubGrantStore(
                 List.of(
-                        new RoleGrant("SPACE_ADMIN", ScopeReference.of(SPACE, "kyiv"), "petro",
-                                LocalDateTime.now(), List.of(new BundledPermission("space:write", SPACE))),
-                        new RoleGrant("SPACE_ADMIN", ScopeReference.of(SPACE, "kyiv"), "policy:roles",
-                                LocalDateTime.now(), List.of(new BundledPermission("form:read", INSTALLATION)))),
+                        new RoleGrant("SPACE_ADMIN", ScopeReference.of(SPACE, "kyiv"),
+                                List.of(new BundledPermission("space:write", SPACE)),
+                                GrantAttribution.stored("petro", LocalDateTime.now())),
+                        new RoleGrant("SPACE_ADMIN", ScopeReference.of(SPACE, "kyiv"),
+                                List.of(new BundledPermission("form:read", INSTALLATION)),
+                                GrantAttribution.stored("policy:roles", LocalDateTime.now()))),
                 List.of(
                         new DirectGrant("form:write", false, ScopeReference.of(SELF, ScopeKind.NO_INSTANCE),
-                                "petro", "left the team", LocalDateTime.now())));
+                                GrantAttribution.stored("petro", "left the team", LocalDateTime.now()))));
     }
 
     // ── The loader ────────────────────────────────────────────────────────────
@@ -281,8 +284,8 @@ public final class ExchangeSmoke {
     private static void verifyAttributesEveryFile(ExpressionEvaluator evaluator, Verification verification) {
         AccessPolicy policy = boundPolicy(evaluator, new ExpressionConditionCompiler());
 
-        GrantOrigin fromBootstrap = policy.subjects().get("u-1").roles().getFirst().origin();
-        GrantOrigin fromRoles     = policy.subjects().get("u-2").grants().getFirst().origin();
+        GrantOrigin fromBootstrap = policy.subjects().get("u-1").roles().getFirst().attribution().origin();
+        GrantOrigin fromRoles     = policy.subjects().get("u-2").grants().getFirst().attribution().origin();
 
         verification.equal("an assignment names the file it was written in",
                 "bootstrap", fromBootstrap.document());

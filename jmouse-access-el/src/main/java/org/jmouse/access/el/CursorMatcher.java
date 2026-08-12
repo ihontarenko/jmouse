@@ -151,11 +151,42 @@ public final class CursorMatcher {
         return new GrantMatcher();
     }
 
+    /**
+     * How many tokens the optional {@code declare} / {@code assign} prefix occupies here — 1 or 0.
+     *
+     * <p>⚠️ <strong>Learned once, in this one method.</strong> The alternative is an {@code if} inside
+     * nine matchers and nine parsers, which is the shape where one of them is eventually forgotten and
+     * a block quietly stops being writable in the canonical form.
+     *
+     * <p>It is a prefix only where a block keyword follows it, and that qualifier is not optional:
+     * {@link AccessToken#nameTokens()} reads every keyword of this grammar as a name wherever a name
+     * belongs, so {@code declare} is also an ordinary permission segment, capability key or property
+     * name. A rule reading {@code resource.declare} must not be mistaken for the start of a block.
+     */
+    private static int blockPrefixLength(TokenCursor cursor) {
+        boolean prefixed = checkAt(cursor, 0, T_DECLARE, T_ASSIGN)
+                && checkAt(cursor, 1, T_POLICY, T_SCOPES, T_PERMISSIONS, T_ACTIONS, T_CAPABILITIES,
+                           T_PLANS, T_ENTITLEMENTS, T_ROLE, T_SUBJECT);
+
+        return prefixed ? 1 : 0;
+    }
+
+    /** {@code [declare|assign] KEYWORD &#123;} — a block opened by one word and a brace. */
+    private static boolean opensBlock(TokenCursor cursor, Token.Type keyword) {
+        int prefix = blockPrefixLength(cursor);
+
+        return checkAt(cursor, prefix, keyword) && checkAt(cursor, prefix + 1, T_OPEN_CURLY);
+    }
+
     private record PolicyMatcher() implements Matcher<TokenCursor> {
 
         @Override
         public boolean matches(TokenCursor cursor) {
-            return cursor.matchesSequence(T_POLICY, T_STRING, T_OPEN_CURLY);
+            int prefix = blockPrefixLength(cursor);
+
+            return checkAt(cursor, prefix, T_POLICY)
+                    && checkAt(cursor, prefix + 1, T_STRING)
+                    && checkAt(cursor, prefix + 2, T_OPEN_CURLY);
         }
     }
 
@@ -163,7 +194,7 @@ public final class CursorMatcher {
 
         @Override
         public boolean matches(TokenCursor cursor) {
-            return cursor.matchesSequence(T_SCOPES, T_OPEN_CURLY);
+            return opensBlock(cursor, T_SCOPES);
         }
     }
 
@@ -171,7 +202,7 @@ public final class CursorMatcher {
 
         @Override
         public boolean matches(TokenCursor cursor) {
-            return cursor.matchesSequence(T_PERMISSIONS, T_OPEN_CURLY);
+            return opensBlock(cursor, T_PERMISSIONS);
         }
     }
 
@@ -179,7 +210,7 @@ public final class CursorMatcher {
 
         @Override
         public boolean matches(TokenCursor cursor) {
-            return cursor.matchesSequence(T_ACTIONS, T_OPEN_CURLY);
+            return opensBlock(cursor, T_ACTIONS);
         }
     }
 
@@ -212,7 +243,7 @@ public final class CursorMatcher {
 
         @Override
         public boolean matches(TokenCursor cursor) {
-            return cursor.matchesSequence(T_CAPABILITIES, T_OPEN_CURLY);
+            return opensBlock(cursor, T_CAPABILITIES);
         }
     }
 
@@ -242,7 +273,7 @@ public final class CursorMatcher {
 
         @Override
         public boolean matches(TokenCursor cursor) {
-            return cursor.matchesSequence(T_ENTITLEMENTS, T_OPEN_CURLY);
+            return opensBlock(cursor, T_ENTITLEMENTS);
         }
     }
 
@@ -288,7 +319,7 @@ public final class CursorMatcher {
 
         @Override
         public boolean matches(TokenCursor cursor) {
-            return cursor.matchesSequence(T_PLANS, T_OPEN_CURLY);
+            return opensBlock(cursor, T_PLANS);
         }
     }
 
@@ -332,8 +363,11 @@ public final class CursorMatcher {
 
         @Override
         public boolean matches(TokenCursor cursor) {
-            return cursor.matchesSequence(T_ROLE, T_IDENTIFIER, T_OPEN_CURLY)
-                    || cursor.matchesSequence(T_ROLE, T_STRING, T_OPEN_CURLY);
+            int prefix = blockPrefixLength(cursor);
+
+            return checkAt(cursor, prefix, T_ROLE)
+                    && checkAt(cursor, prefix + 1, T_IDENTIFIER, T_STRING)
+                    && checkAt(cursor, prefix + 2, T_OPEN_CURLY);
         }
     }
 
@@ -341,9 +375,11 @@ public final class CursorMatcher {
 
         @Override
         public boolean matches(TokenCursor cursor) {
-            int name = nameLength(cursor, 1);
-            return checkAt(cursor, 0, T_SUBJECT) && name != NO_MATCH
-                    && checkAt(cursor, 1 + name, T_OPEN_CURLY);
+            int prefix = blockPrefixLength(cursor);
+            int name   = nameLength(cursor, prefix + 1);
+
+            return checkAt(cursor, prefix, T_SUBJECT) && name != NO_MATCH
+                    && checkAt(cursor, prefix + 1 + name, T_OPEN_CURLY);
         }
     }
 

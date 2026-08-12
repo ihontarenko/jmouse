@@ -55,6 +55,47 @@ public record EffectivePermissions(
         return provenance != null && provenance.held();
     }
 
+    /**
+     * Held, and <strong>nothing left that could still take it away</strong> once there is a row to
+     * ask about.
+     *
+     * <p>⚠️ <strong>For the checks that are about protection rather than about permission.</strong>
+     * {@link #contains} is the right reading almost everywhere: a conditionally granted permission
+     * <em>is</em> held, and the condition narrows the particular request later. But a guard asking
+     * <em>"would anybody still be able to do this after I save?"</em> is asking something else, and
+     * {@code contains} answers it wrongly in the one direction that matters — it counts a route that
+     * may never hold as a live holder.
+     *
+     * <p>The concrete failure: save a policy whose only remaining route to {@code access:policy:write}
+     * is conditional, the rehearsal reports somebody still holds it, the condition fails at request
+     * time, and the editor is shut to everybody — recoverable only through a database session.
+     *
+     * <p>Stated here rather than at the call site on purpose. A product writing
+     * {@code held() && !isConditional()} inline is a product re-deriving an authorization rule, and
+     * the second place it gets written is where the two spellings drift.
+     */
+    public boolean holdsUnconditionally(String permission) {
+        PermissionProvenance provenance = byPermission.get(permission);
+        return provenance != null && provenance.held() && !provenance.isConditional();
+    }
+
+    /**
+     * Every route that granted this permission but might still not hold — empty where it is held
+     * outright or not at all.
+     *
+     * <p>What a refusal quotes so that "nobody would still hold it" does not read as a lie to somebody
+     * looking straight at a grant in the file.
+     */
+    public List<PermissionSource> conditionalRoutesTo(String permission) {
+        PermissionProvenance provenance = byPermission.get(permission);
+
+        if (provenance == null || holdsUnconditionally(permission)) {
+            return List.of();
+        }
+
+        return provenance.grantedBy().stream().filter(PermissionSource::isConditional).toList();
+    }
+
     /** The permissions actually held, sorted so two renderings of one answer read alike. */
     public Set<String> names() {
         return byPermission.entrySet().stream()

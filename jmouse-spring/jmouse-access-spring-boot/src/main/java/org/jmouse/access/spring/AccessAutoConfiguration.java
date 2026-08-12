@@ -123,10 +123,14 @@ public class AccessAutoConfiguration {
             ObjectProvider<PlaceholderResolver>  placeholders,
             ObjectProvider<AmbientAccessValues>  ambient) {
 
+        // ⚠️ `all`, never `getIfAvailable`. Attaching values is naturally spread across a product —
+        // one bean per thing it knows about the surrounding request — so the moment it grows a second
+        // contributor `getIfAvailable` stops the application from starting, with a message about bean
+        // ambiguity rather than about access control. Contributing is many; consuming is one.
         return new AccessContextDeclarations(
                 naming,
                 placeholders.getIfAvailable(PlaceholderResolver::none),
-                ambient.getIfAvailable(AmbientAccessValues::none));
+                AmbientAccessValues.all(ambient.stream().toList()));
     }
 
     @Bean

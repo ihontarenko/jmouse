@@ -27,6 +27,23 @@ package org.jmouse.access.policy.model;
  *                   at binding rather than matched per request
  * @param scope      the scope <strong>name</strong> only. A bundle never names an instance: which one
  *                   is decided by where the role is assigned
+ * @param condition  ⚠️ <strong>the condition source, verbatim, or null.</strong> The parser does not
+ *                   tokenise it, validate it, or know that an expression language exists.
+ *                   <p>A role still carries no {@code deny}, which is what makes this safe: with no
+ *                   way to write a denial in a bundle, a {@code when} here can only ever subtract
+ *                   from an allow. ⚠️ It subtracts for <em>everybody holding the role</em>, though —
+ *                   a condition that can never hold is a mass denial rather than one person's
+ *                   missing permission, which is why an unresolvable name is refused at load
  */
-public record PolicyBundleEntry(String permission, String scope, SourceSpan at) {
+public record PolicyBundleEntry(String permission, String scope, String condition, SourceSpan at) {
+
+    /** The ordinary entry: nothing narrows it beyond the reach it is carried at. */
+    public PolicyBundleEntry(String permission, String scope, SourceSpan at) {
+        this(permission, scope, null, at);
+    }
+
+    /** Whether anything narrows this entry. */
+    public boolean isConditional() {
+        return condition != null && !condition.isBlank();
+    }
 }

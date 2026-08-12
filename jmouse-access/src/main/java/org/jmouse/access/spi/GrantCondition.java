@@ -1,5 +1,9 @@
 package org.jmouse.access.spi;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * A predicate attached to one grant — opaque on purpose.
  *
@@ -41,4 +45,64 @@ public interface GrantCondition {
 
     /** The source exactly as written. */
     String source();
+
+    /**
+     * Every one of these, or null where there is nothing to narrow with.
+     *
+     * <p>One route can be narrowed twice: a role assigned {@code when caller.isServiceAccount}
+     * carrying a bundle entry written {@code when resource.status == 'DRAFT'}. Both were written down
+     * and both apply, so they compose — <strong>a narrowing composed of narrowings is still a
+     * narrowing</strong>, which is what keeps this inside the one rule the axis is allowed to follow.
+     *
+     * <p>⚠️ <strong>The composed {@link #source()} joins the halves verbatim.</strong> Each half is
+     * still a line somebody can search for in the file, which is the only property {@code source()}
+     * has to keep. Re-rendering a combined syntax tree would give <em>a</em> spelling of the rule and
+     * send whoever read a refusal looking for a line that is not there.
+     *
+     * @param conditions the conditions to compose; nulls are ignored, which is what makes this safe
+     *                   to call with an unconditional rule on either side
+     * @return null where every argument was null, the single condition where exactly one was not, and
+     *         a composition otherwise
+     */
+    static GrantCondition all(GrantCondition... conditions) {
+        List<GrantCondition> present = new ArrayList<>();
+
+        for (GrantCondition condition : conditions) {
+            if (condition != null) {
+                present.add(condition);
+            }
+        }
+
+        if (present.size() < 2) {
+            return present.isEmpty() ? null : present.getFirst();
+        }
+
+        return new All(List.copyOf(present));
+    }
+
+    /**
+     * Several conditions that must all hold.
+     *
+     * <p>⚠️ Short-circuits, and the order is the order they were composed in — assignment before
+     * bundle entry. A condition that reads a lazily attached value therefore does not pay for it when
+     * an earlier half has already answered false.
+     */
+    record All(List<GrantCondition> conditions) implements GrantCondition {
+
+        @Override
+        public boolean holds(ConditionContext context) {
+            for (GrantCondition condition : conditions) {
+                if (!condition.holds(context)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        @Override
+        public String source() {
+            return conditions.stream().map(GrantCondition::source).collect(Collectors.joining(" and "));
+        }
+    }
 }

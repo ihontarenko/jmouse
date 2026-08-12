@@ -1,0 +1,49 @@
+{
+  "name": "jmp-textmate",
+  "displayName": "jMouse Policy (.jmp)",
+  "description": "Syntax highlighting for jMouse access-policy documents.",
+  "version": "1.0.0",
+  "publisher": "jmouse",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "jmp",
+        "aliases": [
+          "jMouse Policy",
+          "jmp"
+        ],
+        "extensions": [
+          ".jmp"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "jmp",
+        "scopeName": "source.jmp",
+        "path": "./syntaxes/jmp.tmLanguage.json"
+      }
+    ],
+    "configurationDefaults": {
+      "editor.tokenColorCustomizations": {
+        "textMateRules": [
+          {
+            "_comment": "declare | assign say what KIND of statement follows — structure, or a case. They are not blocks; they qualify one. So they deliberately do NOT get a colour of their own: whatever hue the theme gives a keyword, plus italic and bold. A reader scanning the left margin should be able to tell a prefix from the block it labels without reading the word, and a second colour would have made the label look like a thing.",
+            "scope": "keyword.control.statement-kind.jmp",
+            "settings": {
+              "fontStyle": "italic bold"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

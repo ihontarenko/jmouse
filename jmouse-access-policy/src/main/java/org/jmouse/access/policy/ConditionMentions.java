@@ -1,5 +1,6 @@
 package org.jmouse.access.policy;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,17 +31,35 @@ import java.util.Set;
  * @param values  every other bare name it reads, which is what it expects to have been published
  * @param certain whether the reading is exhaustive. False disables pair-checking for this rule rather
  *                than failing it: a rule nobody can analyse is not a rule that is wrong
+ * @param paths   the <strong>property paths</strong> it reads, as head → the members written after
+ *                the dot: {@code caller.name} contributes {@code caller → [name]}.
+ *                <p>⚠️ Deliberately separate from {@link #values}, and not governed by
+ *                {@link #certain}. A bare name is a <em>question about a catalogue</em> — is anything
+ *                publishing this? — and can only be answered where one exists. A path is a question
+ *                about a type this engine owns, so it is answerable on its own, always, and a rule
+ *                naming a member that does not exist is wrong whatever else is configured
  */
-public record ConditionMentions(Set<String> actions, Set<String> values, boolean certain) {
+public record ConditionMentions(
+        Set<String>              actions,
+        Set<String>              values,
+        boolean                  certain,
+        Map<String, Set<String>> paths
+) {
 
     public ConditionMentions {
         actions = actions == null ? Set.of() : Set.copyOf(actions);
         values  = values  == null ? Set.of() : Set.copyOf(values);
+        paths   = paths   == null ? Map.of() : Map.copyOf(paths);
+    }
+
+    /** A reading that found names but no paths — what a compiler written before paths existed gives. */
+    public ConditionMentions(Set<String> actions, Set<String> values, boolean certain) {
+        this(actions, values, certain, Map.of());
     }
 
     /** What a compiler that cannot read its own source answers — and the default, so none must. */
     public static ConditionMentions unknown() {
-        return new ConditionMentions(Set.of(), Set.of(), false);
+        return new ConditionMentions(Set.of(), Set.of(), false, Map.of());
     }
 
     /** Whether this rule can be checked against a catalogue at all. */

@@ -1,9 +1,8 @@
 package org.jmouse.access;
 
+import org.jmouse.access.spi.GrantAttribution;
 import org.jmouse.access.spi.GrantCondition;
 import org.jmouse.access.spi.GrantOrigin;
-
-import java.time.LocalDateTime;
 
 /**
  * One route by which a subject came to hold — or to lose — a permission.
@@ -17,31 +16,23 @@ import java.time.LocalDateTime;
  * a workspace role and a permission held because of {@code ROLE_MANAGER} resolve identically and are
  * told apart by where they came from, not by which check reads them.
  *
- * @param kind      how it arrived
- * @param roleName  the role that bundled it, where {@link Kind#ROLE_ASSIGNMENT}; null otherwise
- * @param scope     where the assignment or override applies
- * @param grantedBy who did this, where anybody did
- * @param reason    what they typed at the time — the column that exists so a vanished power can be
- *                  explained eight months later, when asking the person who did it is not an answer
- * @param since     when it was written
- * @param origin    ⚠️ <strong>whether a row or a line holds the rule.</strong> How a permission
- *                  arrived and where the rule is written down are two questions, and only the second
- *                  answers <em>"may this screen change it"</em> — a role assignment can be either, and
- *                  so can a denial. See {@link org.jmouse.access.spi.GrantOrigin}
+ * @param kind        how it arrived
+ * @param roleName    the role that bundled it, where {@link Kind#ROLE_ASSIGNMENT}; null otherwise
+ * @param scope       where the assignment or override applies
+ * @param attribution who did this and when, where the rule is written down, and what narrows it.
+ *                    ⚠️ <strong>Where the rule lives is a different question from how the permission
+ *                    arrived</strong>, and only the first answers <em>"may this screen change it"</em>
+ *                    — a role assignment can be either, and so can a denial
  */
 public record PermissionSource(
-        Kind           kind,
-        String         roleName,
-        ScopeReference scope,
-        String         grantedBy,
-        String         reason,
-        LocalDateTime  since,
-        GrantOrigin    origin,
-        GrantCondition condition
+        Kind             kind,
+        String           roleName,
+        ScopeReference   scope,
+        GrantAttribution attribution
 ) {
 
     public PermissionSource {
-        origin = origin == null ? GrantOrigin.stored() : origin;
+        attribution = attribution == null ? GrantAttribution.none() : attribution;
     }
 
     /**
@@ -53,7 +44,17 @@ public record PermissionSource(
      * permission axis may subtract with.
      */
     public boolean isConditional() {
-        return condition != null;
+        return attribution.isConditional();
+    }
+
+    /** What narrows this route, or null. */
+    public GrantCondition condition() {
+        return attribution.condition();
+    }
+
+    /** Where the rule is written down. */
+    public GrantOrigin origin() {
+        return attribution.origin();
     }
 
     public enum Kind {
@@ -85,29 +86,29 @@ public record PermissionSource(
         SHARE_LINK
     }
 
+    /**
+     * A role assignment, as one entry of its bundle lands.
+     *
+     * @param narrowing what narrows <em>this entry</em> beyond the assignment's own condition, or
+     *                  null. Composed with the assignment's, because a role handed out conditionally
+     *                  may also bundle a permission conditionally and both were written down
+     */
     public static PermissionSource role(
-            String         roleName,
-            ScopeReference scope,
-            String         grantedBy,
-            LocalDateTime  since,
-            GrantOrigin    origin) {
+            String           roleName,
+            ScopeReference   scope,
+            GrantAttribution attribution,
+            GrantCondition   narrowing) {
 
         return new PermissionSource(
-                Kind.ROLE_ASSIGNMENT, roleName, scope, grantedBy, null, since, origin, null);
+                Kind.ROLE_ASSIGNMENT, roleName, scope, attribution.narrowedBy(narrowing));
     }
 
+    /** A personal allow or deny. */
     public static PermissionSource override(
-            boolean        allow,
-            ScopeReference scope,
-            String         grantedBy,
-            String         reason,
-            LocalDateTime  since,
-            GrantOrigin    origin,
-            GrantCondition condition) {
+            boolean allow, ScopeReference scope, GrantAttribution attribution) {
 
         return new PermissionSource(
-                allow ? Kind.DIRECT_ALLOW : Kind.DIRECT_DENY,
-                null, scope, grantedBy, reason, since, origin, condition);
+                allow ? Kind.DIRECT_ALLOW : Kind.DIRECT_DENY, null, scope, attribution);
     }
 
     /**
@@ -118,17 +119,13 @@ public record PermissionSource(
      *              about a vocabulary and this type does not have one
      */
     public static PermissionSource share(ScopeReference where) {
-        return new PermissionSource(
-                Kind.SHARE_LINK, null, where, null,
-                "Whoever holds the link, and only over the resource it names.",
-                null, GrantOrigin.stored(), null);
+        return new PermissionSource(Kind.SHARE_LINK, null, where, GrantAttribution.derived(
+                "Whoever holds the link, and only over the resource it names."));
     }
 
     public static PermissionSource agentCap(ScopeReference scope) {
-        return new PermissionSource(
-                Kind.AGENT_CAP, null, scope, null,
-                "The account that owns this agent does not hold it here.",
-                null, GrantOrigin.stored(), null);
+        return new PermissionSource(Kind.AGENT_CAP, null, scope, GrantAttribution.derived(
+                "The account that owns this agent does not hold it here."));
     }
 
     /** Whether this source takes the permission away rather than giving it. */
@@ -152,6 +149,6 @@ public record PermissionSource(
             case SHARE_LINK      -> "share link " + scope.describe();
         };
 
-        return origin.isDeclared() ? route + " (declared in " + origin.describe() + ")" : route;
+        return origin().isDeclared() ? route + " (declared in " + origin().describe() + ")" : route;
     }
 }

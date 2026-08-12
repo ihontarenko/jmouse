@@ -1,5 +1,8 @@
 package org.jmouse.access.el.condition;
 
+import org.jmouse.access.CallerView;
+import org.jmouse.access.PlaceView;
+import org.jmouse.access.spi.DeferredValue;
 import org.jmouse.access.spi.GrantCondition;
 import org.jmouse.access.policy.ConditionCompiler;
 import org.jmouse.access.policy.ConditionMentions;
@@ -12,6 +15,8 @@ import org.jmouse.el.extension.StandardExtensionContainer;
 import org.jmouse.el.node.Expression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * Compiles a policy condition through jMouse EL, in the restricted dialect and nothing wider.
@@ -51,7 +56,11 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
         ConditionVocabulary.verify(source);
 
         try {
-            return new ExpressionCondition(source, expressionLanguage, expressionLanguage.compile(source));
+            // ⚠️ The names are read here and kept, not read again per decision. They are what makes a
+            // deferred value cost nothing: a rule binds the names it mentions and no others, so a
+            // supplier behind a name this rule never writes is never asked.
+            return new ExpressionCondition(
+                    source, expressionLanguage, expressionLanguage.compile(source), mentions(source));
         } catch (RuntimeException exception) {
             throw new PolicyException(
                     "condition '%s' will not compile: %s".formatted(source, exception.getMessage()), exception);
@@ -125,7 +134,10 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
      * same only by coincidence — never for an agent, and never for an impersonated session.</p>
      */
     private record ExpressionCondition(
-            String source, ExpressionLanguage expressionLanguage, Expression compiled
+            String             source,
+            ExpressionLanguage expressionLanguage,
+            Expression         compiled,
+            ConditionMentions  mentions
     ) implements GrantCondition {
 
         /**
@@ -146,10 +158,14 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
             try {
                 EvaluationContext evaluation = expressionLanguage.newContext();
 
-                context.values().forEach(evaluation::setValue);
+                bindPublishedValues(evaluation, context);
 
-                evaluation.setValue("caller", context.subject());
-                evaluation.setValue("place", context.place());
+                // ⚠️ Views rather than the engine's own records. `Subject` carries `description` and
+                // has never carried `name`, so binding it directly made `caller.name` a rule that
+                // loads clean and never holds. A view turns the members into a declared vocabulary,
+                // which is what lets a typo be refused at load instead of discovered in production.
+                evaluation.setValue("caller", CallerView.of(context.subject()));
+                evaluation.setValue("place", PlaceView.of(context.place()));
                 evaluation.setValue("resource", context.resource());
                 evaluation.setValue("action", context.action());
 
@@ -163,6 +179,34 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
 
                 return false;
             }
+        }
+
+        /**
+         * Binds what the call published — <strong>only the names this rule actually writes</strong>.
+         *
+         * <p>⚠️ This is what makes {@link org.jmouse.access.spi.DeferredValue} worth having. Binding
+         * the whole bag would resolve every deferred value on every decision, which is precisely the
+         * query-per-call this rule language is careful to avoid; binding the mentioned names resolves
+         * what the rule reads and nothing else.
+         *
+         * <p>⚠️ <strong>An unreadable rule binds everything.</strong> Where the source could not be
+         * reduced to a set of names — a value reached through something the reader cannot follow —
+         * there is no safe subset, so the whole bag is bound and any laziness in it is paid for. That
+         * is the correct trade: a rule that works and costs a query beats a rule that quietly stops
+         * seeing a value.
+         */
+        private void bindPublishedValues(EvaluationContext evaluation, ConditionContext context) {
+            Map<String, Object> published = context.values();
+
+            if (!mentions.isCheckable()) {
+                DeferredValue.resolveAll(published).forEach(evaluation::setValue);
+                return;
+            }
+
+            mentions.values().stream()
+                    .filter(published::containsKey)
+                    .forEach(name -> evaluation.setValue(
+                            name, DeferredValue.resolve(published.get(name))));
         }
 
         @Override

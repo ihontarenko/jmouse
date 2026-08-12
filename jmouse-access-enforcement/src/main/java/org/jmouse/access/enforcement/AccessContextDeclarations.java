@@ -310,10 +310,14 @@ public class AccessContextDeclarations {
          * absent value — the open direction for a conditional deny. That is the same trade
          * {@code ExpressionConditionCompiler} makes when a condition blows up, and it is made here for
          * the same reason: an authorization mechanism must not be able to take a product down.
+         *
+         * <p>⚠️ This now catches a failure to <em>register</em>, which is rare and is a defect. A
+         * failure to <em>work a value out</em> never reaches here at all: it happens later, on first
+         * read, and {@link org.jmouse.access.spi.DeferredValue} answers it as an absent value.
          */
         private Map<String, Object> ambientValues() {
             try {
-                return ambient.published();
+                return AmbientValues.publishedBy(ambient);
             } catch (RuntimeException failed) {
                 LOGGER.warn("The ambient access values could not be read for {}, so no rule about one "
                             + "will hold for this call: {}", where, failed.toString());

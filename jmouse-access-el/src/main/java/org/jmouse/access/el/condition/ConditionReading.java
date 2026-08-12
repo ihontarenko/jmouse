@@ -14,7 +14,10 @@ import org.jmouse.el.lexer.TokenCursor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -62,10 +65,11 @@ final class ConditionReading {
      * @return the names it talks about, and whether the reading was exhaustive
      */
     static ConditionMentions of(String source) {
-        List<Token> tokens  = tokensOf(source);
-        Set<String> actions = new TreeSet<>();
-        Set<String> values  = new TreeSet<>();
-        boolean     certain = true;
+        List<Token>              tokens  = tokensOf(source);
+        Set<String>              actions = new TreeSet<>();
+        Set<String>              values  = new TreeSet<>();
+        Map<String, Set<String>> paths   = new TreeMap<>();
+        boolean                  certain = true;
 
         for (int index = 0; index < tokens.size(); index++) {
             Token token = tokens.get(index);
@@ -80,6 +84,12 @@ final class ConditionReading {
 
             String name = token.value();
 
+            // Read whatever this name has a dot after it, whether or not the name is one anybody
+            // publishes: a path is checkable on its own, against a type, and is worth knowing even
+            // where the reading of the rest turns out uncertain.
+            memberAfter(tokens, index).ifPresent(
+                    member -> paths.computeIfAbsent(name, head -> new TreeSet<>()).add(member));
+
             if (ACTION.equals(name)) {
                 String compared = comparedLiteral(tokens, index);
 
@@ -92,12 +102,36 @@ final class ConditionReading {
                 continue;
             }
 
+            // ⚠️ A name with a dot after it is BOTH a value and a path, and excluding it from one
+            // because it appears in the other is a silent regression: the evaluator binds the names
+            // this reports as values, so `purpose.code` would have named a variable nothing bound and
+            // the rule would have read null forever. Paths and values are two questions about one
+            // word — is this published, and does that member exist — and only the second is answered
+            // by looking at a type.
             if (!BOUND.contains(name)) {
                 values.add(name);
             }
         }
 
-        return new ConditionMentions(actions, values, certain);
+        return new ConditionMentions(actions, values, certain, paths);
+    }
+
+    /**
+     * The member written directly after this name, where there is one — the {@code name} in
+     * {@code caller.name}.
+     *
+     * <p>⚠️ <strong>Only the first hop.</strong> {@code caller.owner.name} yields {@code owner} and
+     * stops, because what {@code owner} is has left the vocabulary this can check. Reading further
+     * would mean guessing at types, and a checker that guesses refuses rules that work.
+     */
+    private static Optional<String> memberAfter(List<Token> tokens, int index) {
+        if (!isAt(tokens, index + 1, BasicToken.T_DOT)
+            || !isAt(tokens, index + 2, BasicToken.T_IDENTIFIER)) {
+
+            return Optional.empty();
+        }
+
+        return Optional.of(tokens.get(index + 2).value());
     }
 
     /**

@@ -344,6 +344,7 @@ public final class PolicyWriter {
 
         node.setScope(toNode(PolicyScope.kind(entry.scope())));
         node.setPermission(entry.permission());
+        node.setCondition(entry.condition());
 
         return node;
     }
@@ -367,6 +368,7 @@ public final class PolicyWriter {
 
         node.setRoleName(assignment.roleName());
         node.setScope(toNode(assignment.scope()));
+        node.setCondition(assignment.condition());
 
         return node;
     }

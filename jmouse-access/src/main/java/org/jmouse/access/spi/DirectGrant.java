@@ -2,8 +2,6 @@ package org.jmouse.access.spi;
 
 import org.jmouse.access.ScopeReference;
 
-import java.time.LocalDateTime;
-
 /**
  * One permission given to — or taken away from — a subject personally, at a scope.
  *
@@ -11,66 +9,35 @@ import java.time.LocalDateTime;
  * extra thing, and one person who must not have something their role gives everybody.
  *
  * <p><strong>A denial is a grant with {@link #allowed} false, not an absence.</strong> That is the
- * whole reason this record carries {@link #reason} and {@link #grantedBy}: a permission somebody took
- * away is not the same fact as one nobody ever gave, and the difference is the only way anyone finds
- * out why a power vanished.
+ * whole reason an {@link #attribution} rides along: a permission somebody took away is not the same
+ * fact as one nobody ever gave, and the difference is the only way anyone finds out why a power
+ * vanished.
  *
- * @param permission what the grant is about
- * @param allowed    true to give, false to take away — and taking away wins, at every level
- * @param at         where it applies
- * @param grantedBy  who recorded it, where that was recorded
- * @param reason     why, where that was recorded
- * @param since      when, where that was recorded
- * @param origin     whether a row or a line holds this — what decides which editor a screen may offer
- * @param condition  ⚠️ <strong>carried, never evaluated here</strong>, or null for the ordinary
- *                   unconditional grant. Resolution stays row-independent and cacheable; the
- *                   condition is read afterwards by an axis that may only narrow. See
- *                   {@link GrantCondition}
+ * @param permission  what the grant is about
+ * @param allowed     true to give, false to take away — and taking away wins, at every level
+ * @param at          where it applies
+ * @param attribution who recorded it, where the rule is written, and what narrows it. ⚠️ The
+ *                    condition inside it is <strong>carried, never evaluated</strong> during
+ *                    resolution — see {@link GrantAttribution}
  */
 public record DirectGrant(
-        String         permission,
-        boolean        allowed,
-        ScopeReference at,
-        String         grantedBy,
-        String         reason,
-        LocalDateTime  since,
-        GrantOrigin    origin,
-        GrantCondition condition
+        String           permission,
+        boolean          allowed,
+        ScopeReference   at,
+        GrantAttribution attribution
 ) {
 
     public DirectGrant {
-        origin = origin == null ? GrantOrigin.stored() : origin;
+        attribution = attribution == null ? GrantAttribution.none() : attribution;
     }
 
     /** Whether anything narrows this grant beyond the scope it applies at. */
     public boolean isConditional() {
-        return condition != null;
+        return attribution.isConditional();
     }
 
-    public DirectGrant(
-            String         permission,
-            boolean        allowed,
-            ScopeReference at,
-            String         grantedBy,
-            String         reason,
-            LocalDateTime  since,
-            GrantOrigin    origin) {
-
-        this(permission, allowed, at, grantedBy, reason, since, origin, null);
-    }
-
-    /**
-     * An unconditional grant a table holds — the ordinary case, and the reason a store that has never
-     * heard of {@link GrantOrigin} or {@link GrantCondition} keeps compiling.
-     */
-    public DirectGrant(
-            String         permission,
-            boolean        allowed,
-            ScopeReference at,
-            String         grantedBy,
-            String         reason,
-            LocalDateTime  since) {
-
-        this(permission, allowed, at, grantedBy, reason, since, GrantOrigin.stored(), null);
+    /** What narrows it, or null — read often enough by the resolver to be worth naming here. */
+    public GrantCondition condition() {
+        return attribution.condition();
     }
 }

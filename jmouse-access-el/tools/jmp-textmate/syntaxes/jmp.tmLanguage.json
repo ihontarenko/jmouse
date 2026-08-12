@@ -1,0 +1,589 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "jMouse Policy",
+  "scopeName": "source.jmp",
+  "fileTypes": ["jmp"],
+
+  "patterns": [
+    { "include": "#document" }
+  ],
+
+  "repository": {
+
+    "document": {
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#policy-block" },
+        { "include": "#declaration" }
+      ]
+    },
+
+    "declaration": {
+      "comment": "Everything a policy document may hold, inside the wrapper or without one.",
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#statement-kind" },
+        { "include": "#include-statement" },
+        { "include": "#scopes-block" },
+        { "include": "#permissions-block" },
+        { "include": "#actions-block" },
+        { "include": "#capabilities-block" },
+        { "include": "#plans-block" },
+        { "include": "#entitlements-block" },
+        { "include": "#role-block" },
+        { "include": "#subject-wildcard-block" },
+        { "include": "#subject-block" },
+        { "include": "#string" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "statement-kind": {
+      "comment": "declare | assign — which KIND of statement the block after it is: structure, or a case. ⚠️ Matched on its own rather than folded into every block's `begin`, so the eight block rules keep their capture numbering and a ninth cannot be added without one. Consuming just the word leaves the cursor exactly where the block rule expects to begin. The lookahead is what keeps it a prefix: `declare` is also an ordinary permission segment or property name, and one written anywhere else must stay a plain word.",
+      "match": "\\b(declare|assign)\\b(?=\\s+(?:policy|scopes|permissions|actions|capabilities|plans|entitlements|role|subject)\\b)",
+      "captures": {
+        "1": { "name": "keyword.control.statement-kind.jmp" }
+      }
+    },
+
+    "policy-block": {
+      "comment": "policy \"name\" { … } — the optional document wrapper.",
+      "begin": "\\b(policy)\\b(?:\\s+(\"[^\"\\n]*\"|'[^'\\n]*')|\\s+([A-Za-z_][\\w-]*))?\\s*(\\{)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.policy.jmp" },
+        "2": { "name": "entity.name.type.policy.jmp" },
+        "3": { "name": "entity.name.type.policy.jmp" },
+        "4": { "name": "punctuation.section.block.begin.jmp" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.section.block.end.jmp" }
+      },
+      "patterns": [
+        { "include": "#declaration" }
+      ]
+    },
+
+    "include-statement": {
+      "comment": "include 'path' — the parser records it, the loader follows it.",
+      "match": "\\b(include)\\b\\s*(\"[^\"\\n]*\"|'[^'\\n]*')?",
+      "captures": {
+        "1": { "name": "keyword.control.import.jmp" },
+        "2": { "name": "string.quoted.other.include.jmp" }
+      }
+    },
+
+    "scopes-block": {
+      "comment": "scopes { … } — declaration order is width, so nothing here carries a rank.",
+      "begin": "\\b(scopes)\\b\\s*(\\{)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.block.scopes.jmp" },
+        "2": { "name": "punctuation.section.block.begin.jmp" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.section.block.end.jmp" }
+      },
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#scope-declaration" },
+        { "include": "#string" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "scope-declaration": {
+      "comment": "@SPACE place parameter=spaceId — the nature is a bare word the parser does not interpret.",
+      "match": "(@)([A-Za-z_][\\w]*)(?:\\s+(\"[^\"\\n]*\"|'[^'\\n]*')|\\s+([A-Za-z_][\\w-]*))?(?:\\s+(parameter)\\s*(=)\\s*(?:(\"[^\"\\n]*\"|'[^'\\n]*')|([A-Za-z_][\\w-]*)))?",
+      "captures": {
+        "1": { "name": "punctuation.definition.scope.jmp" },
+        "2": { "name": "entity.name.type.scope.jmp" },
+        "3": { "name": "storage.type.nature.jmp" },
+        "4": { "name": "storage.type.nature.jmp" },
+        "5": { "name": "entity.other.attribute-name.jmp" },
+        "6": { "name": "keyword.operator.assignment.jmp" },
+        "7": { "name": "variable.parameter.route.jmp" },
+        "8": { "name": "variable.parameter.route.jmp" }
+      }
+    },
+
+    "permissions-block": {
+      "comment": "permissions { … } — what may be held at all, each with the sentence a screen shows.",
+      "begin": "\\b(permissions)\\b\\s*(\\{)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.block.permissions.jmp" },
+        "2": { "name": "punctuation.section.block.begin.jmp" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.section.block.end.jmp" }
+      },
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#permission" },
+        { "include": "#string" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "actions-block": {
+      "comment": "actions { … } — dots, never colons: entry:read is a permission, entry.read is an action.",
+      "begin": "\\b(actions)\\b\\s*(\\{)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.block.actions.jmp" },
+        "2": { "name": "punctuation.section.block.begin.jmp" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.section.block.end.jmp" }
+      },
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#publishes-clause" },
+        { "include": "#action-name" },
+        { "include": "#string" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "action-name": {
+      "match": "\\b[a-z][\\w-]*(?:\\.[\\w-]+)+",
+      "name": "support.function.action.jmp"
+    },
+
+    "publishes-clause": {
+      "comment": "publishes purpose, tier — the values this action carries into a condition.",
+      "begin": "\\b(publishes)\\b",
+      "beginCaptures": {
+        "1": { "name": "keyword.other.publishes.jmp" }
+      },
+      "end": "$",
+      "patterns": [
+        { "include": "#comment" },
+        { "match": "[A-Za-z_][\\w-]*", "name": "variable.parameter.published.jmp" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "capabilities-block": {
+      "comment": "capabilities { … } — the half of the vocabulary that refuses with 402 rather than 403.",
+      "begin": "\\b(capabilities)\\b\\s*(\\{)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.block.capabilities.jmp" },
+        "2": { "name": "punctuation.section.block.begin.jmp" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.section.block.end.jmp" }
+      },
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#paid-clause" },
+        { "include": "#capability-declaration" },
+        { "include": "#per-clause" },
+        { "include": "#string" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "paid-clause": {
+      "comment": "paid a, b — names keys, declares none; every one of them still needs its own line.",
+      "begin": "\\b(paid)\\b",
+      "beginCaptures": {
+        "1": { "name": "keyword.other.paid.jmp" }
+      },
+      "end": "$",
+      "patterns": [
+        { "include": "#comment" },
+        { "match": "[A-Za-z_][\\w-]*", "name": "support.type.capability.jmp" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "capability-declaration": {
+      "match": "\\b(gate|limit|quota)\\b(?:\\s+([a-z][\\w-]*))?(?:\\s+(\"[^\"\\n]*\"|'[^'\\n]*'))?",
+      "captures": {
+        "1": { "name": "storage.type.capability-shape.jmp" },
+        "2": { "name": "support.type.capability.jmp" },
+        "3": { "name": "string.quoted.other.description.jmp" }
+      }
+    },
+
+    "per-clause": {
+      "comment": "per ORGANIZATION, SPACE — where it may be granted; per month — over what window.",
+      "begin": "\\b(per)\\b",
+      "beginCaptures": {
+        "1": { "name": "keyword.other.per.jmp" }
+      },
+      "end": "$",
+      "patterns": [
+        { "include": "#comment" },
+        { "match": "\\b(?i:day|month|year)\\b", "name": "constant.language.period.jmp" },
+        { "match": "[A-Za-z_][\\w-]*", "name": "entity.name.type.scope.jmp" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "plans-block": {
+      "begin": "\\b(plans)\\b\\s*(\\{)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.block.plans.jmp" },
+        "2": { "name": "punctuation.section.block.begin.jmp" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.section.block.end.jmp" }
+      },
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#plan-block" },
+        { "include": "#string" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "plan-block": {
+      "comment": "plan business \"Business\" order 30 extends free note \"…\" { … }",
+      "begin": "\\b(plan)\\b(?:\\s+(\"[^\"\\n]*\"|'[^'\\n]*')|\\s+([a-z][\\w-]*))?",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.plan.jmp" },
+        "2": { "name": "entity.name.class.plan.jmp" },
+        "3": { "name": "entity.name.class.plan.jmp" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.section.block.end.jmp" }
+      },
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#plan-modifier" },
+        { "include": "#per-clause" },
+        { "include": "#plan-grant" },
+        { "include": "#string" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "plan-modifier": {
+      "patterns": [
+        {
+          "match": "\\b(order)\\b(?:\\s+(\\d+))?",
+          "captures": {
+            "1": { "name": "keyword.other.order.jmp" },
+            "2": { "name": "constant.numeric.order.jmp" }
+          }
+        },
+        {
+          "comment": "extends does NOT flatten — a derived plan keeps only its own lines.",
+          "match": "\\b(extends)\\b(?:\\s+([a-z][\\w-]*))?",
+          "captures": {
+            "1": { "name": "keyword.other.extends.jmp" },
+            "2": { "name": "entity.name.class.plan.jmp" }
+          }
+        },
+        { "match": "\\b(note)\\b", "name": "keyword.other.note.jmp" }
+      ]
+    },
+
+    "plan-grant": {
+      "comment": "One body line: storage-byte 100GB per month · seat unlimited · parametric-search",
+      "match": "^[ \\t]*([a-z][\\w-]*)(?:[ \\t]+(unlimited)|[ \\t]+(\\d[\\d_]*[A-Za-z]*))?",
+      "captures": {
+        "1": { "name": "support.type.capability.jmp" },
+        "2": { "name": "constant.language.unlimited.jmp" },
+        "3": { "name": "constant.numeric.quantity.jmp" }
+      }
+    },
+
+    "entitlements-block": {
+      "comment": "entitlements { … } — who is on what, from when, until when and why.",
+      "begin": "\\b(entitlements)\\b\\s*(\\{)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.block.entitlements.jmp" },
+        "2": { "name": "punctuation.section.block.begin.jmp" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.section.block.end.jmp" }
+      },
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#scope-reference" },
+        { "include": "#plan-assignment" },
+        { "include": "#capability-grant" },
+        { "include": "#date-clause" },
+        { "include": "#per-clause" },
+        { "match": "\\b(reason)\\b", "name": "keyword.other.reason.jmp" },
+        { "include": "#date" },
+        { "include": "#string" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "plan-assignment": {
+      "match": "\\b(plan|trial)\\b(?:\\s+([a-z][\\w-]*))?",
+      "captures": {
+        "1": { "name": "keyword.other.plan-assignment.jmp" },
+        "2": { "name": "entity.name.class.plan.jmp" }
+      }
+    },
+
+    "capability-grant": {
+      "match": "\\b(allow|deny)\\b(?:\\s+([a-z][\\w-]*))?(?:\\s+(unlimited)|\\s+(\\d[\\d_]*[A-Za-z]*))?",
+      "captures": {
+        "1": { "name": "keyword.control.effect.jmp" },
+        "2": { "name": "support.type.capability.jmp" },
+        "3": { "name": "constant.language.unlimited.jmp" },
+        "4": { "name": "constant.numeric.quantity.jmp" }
+      }
+    },
+
+    "date-clause": {
+      "match": "\\b(from|until)\\b(?:\\s+(\\d{4}-\\d{2}-\\d{2}))?",
+      "captures": {
+        "1": { "name": "keyword.other.window.jmp" },
+        "2": { "name": "constant.numeric.date.jmp" }
+      }
+    },
+
+    "role-block": {
+      "comment": "role NAME { … } — a role has no instance, no effect and no condition, by design.",
+      "begin": "\\b(role)\\b(?:\\s+(\"[^\"\\n]*\"|'[^'\\n]*')|\\s+([A-Za-z_][\\w-]*))?\\s*(\\{)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.role.jmp" },
+        "2": { "name": "entity.name.class.role.jmp" },
+        "3": { "name": "entity.name.class.role.jmp" },
+        "4": { "name": "punctuation.section.block.begin.jmp" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.section.block.end.jmp" }
+      },
+      "patterns": [
+        { "include": "#comment" },
+        {
+          "comment": "A role says what a permission is WORTH. Which instance, whether it is taken back and under what circumstances are decisions about an account, and the role body refuses to read them.",
+          "match": "\\b(deny|allow|when|grants)\\b",
+          "name": "invalid.illegal.not-allowed-in-role.jmp"
+        },
+        { "include": "#scope-reference" },
+        { "include": "#permission" },
+        { "include": "#string" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "subject-wildcard-block": {
+      "comment": "subject * { … } — may only TAKE AWAY. An allow here would grant something to every account that exists and every one that ever will, from a file no screen can undo.",
+      "begin": "\\b(subject)\\b\\s+(\\*)\\s*(\\{)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.subject.jmp" },
+        "2": { "name": "constant.language.wildcard.jmp" },
+        "3": { "name": "punctuation.section.block.begin.jmp" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.section.block.end.jmp" }
+      },
+      "patterns": [
+        { "include": "#comment" },
+        {
+          "match": "\\b(allow|grants)\\b",
+          "name": "invalid.illegal.grant-to-everybody.jmp"
+        },
+        { "include": "#subject-body" }
+      ]
+    },
+
+    "subject-block": {
+      "comment": "subject 'usr_a19be' { … } — a bare name, a quoted id, or ${placeholder}.",
+      "begin": "\\b(subject)\\b(?:\\s+(\\$\\{[^}\\n]*\\})|\\s+(\"[^\"\\n]*\"|'[^'\\n]*')|\\s+([A-Za-z_][\\w-]*))?\\s*(\\{)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.subject.jmp" },
+        "2": { "name": "variable.other.placeholder.jmp" },
+        "3": { "name": "entity.name.tag.subject.jmp" },
+        "4": { "name": "entity.name.tag.subject.jmp" },
+        "5": { "name": "punctuation.section.block.begin.jmp" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.section.block.end.jmp" }
+      },
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#subject-body" }
+      ]
+    },
+
+    "subject-body": {
+      "patterns": [
+        { "include": "#condition-block" },
+        { "include": "#condition-line" },
+        { "include": "#grants-statement" },
+        { "include": "#scope-reference" },
+        { "include": "#permission" },
+        { "include": "#effect" },
+        { "include": "#placeholder" },
+        { "include": "#string" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "grants-statement": {
+      "match": "\\b(grants)\\b(?:\\s+([A-Za-z_][\\w-]*))?",
+      "captures": {
+        "1": { "name": "keyword.other.grants.jmp" },
+        "2": { "name": "entity.name.class.role.jmp" }
+      }
+    },
+
+    "effect": {
+      "patterns": [
+        {
+          "comment": "Always written out, because a denial is never accidental.",
+          "match": "\\b(deny)\\b",
+          "name": "keyword.control.effect.deny.jmp"
+        },
+        {
+          "comment": "Implied when nothing is written.",
+          "match": "\\b(allow)\\b",
+          "name": "keyword.control.effect.allow.jmp"
+        }
+      ]
+    },
+
+    "condition-block": {
+      "comment": "when { … } — the same condition, allowed to breathe over several lines.",
+      "begin": "\\b(when)\\b\\s*(\\{)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.when.jmp" },
+        "2": { "name": "punctuation.section.block.begin.jmp" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.section.block.end.jmp" }
+      },
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#condition-expression" }
+      ]
+    },
+
+    "condition-line": {
+      "comment": "⚠️ The single-line form is read TO THE END OF THE LINE, and no further.",
+      "begin": "\\b(when)\\b(?!\\s*\\{)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.when.jmp" }
+      },
+      "end": "$",
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#condition-expression" }
+      ]
+    },
+
+    "condition-expression": {
+      "comment": "The dialect a condition may be written in — anything outside it refuses to load.",
+      "patterns": [
+        { "include": "#string" },
+        { "match": "\\b(true|false|null)\\b", "name": "constant.language.jmp" },
+        { "match": "\\b\\d+(?:\\.\\d+)?\\b", "name": "constant.numeric.jmp" },
+        { "match": "\\b(and|or|not|is)\\b", "name": "keyword.operator.word.jmp" },
+        {
+          "comment": "The five things a condition can see. Everything else is a published value.",
+          "match": "\\b(caller|place|resource|action)\\b",
+          "name": "variable.language.jmp"
+        },
+        {
+          "comment": "Deliberately absent from the dialect — arithmetic, the filter pipe, `in`, `..`, `~`, the lambda arrow, `@` bean access. Left unregistered they are not refused, they are SILENT.",
+          "match": "\\bin\\b|\\*\\*|\\+\\+|--|\\.\\.|\\|(?!\\|)|->|~|[+\\-*/%](?![\\w])",
+          "name": "invalid.illegal.outside-condition-dialect.jmp"
+        },
+        { "match": "==|!=|>=|<=|>|<|\\?\\?|\\?|!", "name": "keyword.operator.comparison.jmp" },
+        {
+          "match": "(\\.)([A-Za-z_][\\w]*)",
+          "captures": {
+            "1": { "name": "punctuation.accessor.jmp" },
+            "2": { "name": "variable.other.property.jmp" }
+          }
+        },
+        { "match": "\\b[A-Za-z_][\\w]*\\b", "name": "variable.other.published.jmp" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "scope-reference": {
+      "comment": "@GLOBAL · @SPACE:kyiv · @SPACE:* · @ORGANIZATION:${property}",
+      "match": "(@)([A-Za-z_][\\w]*)(?:(:)(?:(\\*)|(\\$\\{[^}\\n]*\\})|(\"[^\"\\n]*\"|'[^'\\n]*')|([\\w-]+)))?",
+      "captures": {
+        "1": { "name": "punctuation.definition.scope.jmp" },
+        "2": { "name": "entity.name.type.scope.jmp" },
+        "3": { "name": "punctuation.separator.scope.jmp" },
+        "4": { "name": "constant.language.wildcard.jmp" },
+        "5": { "name": "variable.other.placeholder.jmp" },
+        "6": { "name": "variable.other.instance.jmp" },
+        "7": { "name": "variable.other.instance.jmp" }
+      }
+    },
+
+    "permission": {
+      "comment": "COLONS, never dots. Matched before any keyword rule, so `role:read` stays a permission — a keyword is only a keyword where the grammar expects one, and the lexer cannot know that either.",
+      "patterns": [
+        {
+          "match": "\\b([a-z][\\w-]*(?::[\\w-]+)*)(:)(\\*)",
+          "captures": {
+            "1": { "name": "entity.name.function.permission.jmp" },
+            "2": { "name": "punctuation.separator.permission.jmp" },
+            "3": { "name": "constant.language.wildcard.jmp" }
+          }
+        },
+        {
+          "match": "\\b[a-z][\\w-]*(?::[\\w-]+)+",
+          "name": "entity.name.function.permission.jmp"
+        }
+      ]
+    },
+
+    "placeholder": {
+      "match": "\\$\\{[^}\\n]*\\}",
+      "name": "variable.other.placeholder.jmp"
+    },
+
+    "date": {
+      "match": "\\b\\d{4}-\\d{2}-\\d{2}\\b",
+      "name": "constant.numeric.date.jmp"
+    },
+
+    "string": {
+      "patterns": [
+        {
+          "match": "\"[^\"\\n]*\"",
+          "name": "string.quoted.double.jmp"
+        },
+        {
+          "match": "'[^'\\n]*'",
+          "name": "string.quoted.single.jmp"
+        }
+      ]
+    },
+
+    "comment": {
+      "match": "(#).*$",
+      "name": "comment.line.number-sign.jmp",
+      "captures": {
+        "1": { "name": "punctuation.definition.comment.jmp" }
+      }
+    },
+
+    "punctuation": {
+      "patterns": [
+        { "match": "\\{", "name": "punctuation.section.block.begin.jmp" },
+        { "match": "\\}", "name": "punctuation.section.block.end.jmp" },
+        { "match": ",", "name": "punctuation.separator.comma.jmp" },
+        { "match": ":", "name": "punctuation.separator.colon.jmp" },
+        { "match": "[\\[\\]]", "name": "punctuation.section.brackets.jmp" },
+        { "match": "[()]", "name": "punctuation.section.parens.jmp" }
+      ]
+    }
+  }
+}

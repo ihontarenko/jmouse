@@ -22,6 +22,31 @@ public enum AccessToken implements Token.Type {
     /** {@code policy "name" { … }} — the optional document wrapper. */
     T_POLICY(10000, "policy"),
 
+    /**
+     * {@code declare scopes { … }} — the optional prefix on a block stating <em>structure</em>: what
+     * exists at all.
+     *
+     * <p>⚠️ <strong>Optional in the grammar, canonical in the writer.</strong> Policy revisions are
+     * stored as source text and the control room can revert to one, so a hard break would make every
+     * revision written before this unparseable — turning revert into a way to break an installation.
+     * Both spellings produce the same node, and {@code toSource()} always writes the prefix, so a
+     * document converges on the canonical form the first time it is saved through the editor.
+     */
+    T_DECLARE(11000, "declare"),
+
+    /**
+     * {@code assign subject 'usr' { … }} — the optional prefix on a block stating a <em>case</em>:
+     * who has what.
+     *
+     * <p>The pair with {@link #T_DECLARE} is not decoration. It is ADR-0018's line — <em>the document
+     * owns structure, the row owns the case</em> — made visible at the left margin, so a reader who
+     * learns the distinction once never has to look a block up again.
+     *
+     * <p>⚠️ {@code include} is deliberately left bare: it is an operation on the file rather than a
+     * statement about access, and being the one unprefixed keyword is a useful signal in itself.
+     */
+    T_ASSIGN(11100, "assign"),
+
     /** {@code scopes { … }} — the vocabulary of floors. */
     T_SCOPES(10100, "scopes"),
 

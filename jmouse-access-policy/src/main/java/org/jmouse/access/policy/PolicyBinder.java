@@ -21,6 +21,7 @@ import org.jmouse.access.policy.model.PolicySubject;
 import org.jmouse.access.policy.model.SourceSpan;
 import org.jmouse.access.spi.BundledPermission;
 import org.jmouse.access.spi.DirectGrant;
+import org.jmouse.access.spi.GrantAttribution;
 import org.jmouse.access.spi.GrantCondition;
 import org.jmouse.access.spi.GrantOrigin;
 
@@ -188,8 +189,18 @@ public final class PolicyBinder {
                 continue;
             }
 
+            GrantCondition condition = compiled(entry.condition(), entry.at(), problems);
+
+            // ⚠️ A conditional entry whose condition will not compile is dropped rather than bound
+            // unconditionally. A bundle carries no `deny`, so this `when` can only subtract from an
+            // allow — and binding it without its condition would hand the permission to everybody
+            // holding the role, which is the opposite of what the line says.
+            if (entry.isConditional() && condition == null) {
+                continue;
+            }
+
             for (String permission : expand(entry.permission(), entry.at(), problems)) {
-                bundle.add(new BundledPermission(permission, carriedAt));
+                bundle.add(new BundledPermission(permission, carriedAt, condition));
             }
         }
 
@@ -219,7 +230,7 @@ public final class PolicyBinder {
             }
 
             bound.put(identifier, new BoundSubject(
-                    bindAssignments(subject, declaredRoles, problems),
+                    bindAssignments(subject, document.name(), declaredRoles, problems),
                     bindGrants(subject, document.name(), problems)));
         }
 
@@ -265,7 +276,10 @@ public final class PolicyBinder {
     }
 
     private List<BoundAssignment> bindAssignments(
-            PolicySubject subject, Set<String> declaredRoles, List<PolicyProblem> problems) {
+            PolicySubject       subject,
+            String              policyName,
+            Set<String>         declaredRoles,
+            List<PolicyProblem> problems) {
 
         List<BoundAssignment> assignments = new ArrayList<>();
 
@@ -276,9 +290,19 @@ public final class PolicyBinder {
                 continue;
             }
 
-            placed(assignment.scope(), assignment.at(), problems)
-                    .ifPresent(where -> assignments.add(new BoundAssignment(
-                            assignment.roleName(), where, writtenAt(assignment.at()))));
+            GrantCondition condition = compiled(assignment.condition(), assignment.at(), problems);
+
+            // ⚠️ Same rule as a conditional grant: a condition that will not compile drops the whole
+            // assignment. Handing the role out unconditionally would grant more than the file said.
+            if (assignment.isConditional() && condition == null) {
+                continue;
+            }
+
+            GrantAttribution attribution =
+                    declared(policyName, assignment.at()).narrowedBy(condition);
+
+            placed(assignment.scope(), assignment.at(), problems).ifPresent(where ->
+                    assignments.add(new BoundAssignment(assignment.roleName(), where, attribution)));
         }
 
         return assignments;
@@ -296,22 +320,17 @@ public final class PolicyBinder {
                 continue;
             }
 
-            GrantCondition condition = compiled(grant, problems);
+            GrantCondition condition = compiled(grant.condition(), grant.at(), problems);
 
             if (grant.isConditional() && condition == null) {
                 continue;
             }
 
-            boolean allowed = grant.effect() == PolicyEffect.ALLOW;
+            boolean          allowed     = grant.effect() == PolicyEffect.ALLOW;
+            GrantAttribution attribution = declared(policyName, grant.at()).narrowedBy(condition);
 
             for (String permission : expand(grant.permission(), grant.at(), problems)) {
-                grants.add(new DirectGrant(
-                        permission, allowed, where,
-                        "policy:" + policyName,
-                        "declared at " + grant.at(),
-                        LocalDateTime.now(),
-                        writtenAt(grant.at()),
-                        condition));
+                grants.add(new DirectGrant(permission, allowed, where, attribution));
             }
         }
 
@@ -326,32 +345,45 @@ public final class PolicyBinder {
      * and not "drop the grant" either, because a conditional <em>deny</em> silently dropped grants
      * more than the file said — the same failure wearing the opposite sign.
      */
-    private GrantCondition compiled(PolicyGrant grant, List<PolicyProblem> problems) {
-        if (!grant.isConditional()) {
+    private GrantCondition compiled(String source, SourceSpan at, List<PolicyProblem> problems) {
+        if (source == null || source.isBlank()) {
             return null;
         }
 
         if (conditions == null) {
-            problems.add(PolicyProblem.at(grant.at(), conditionsUnsupported(grant.condition())));
+            problems.add(PolicyProblem.at(at, conditionsUnsupported(source)));
             return null;
         }
 
         GrantCondition compiled;
 
         try {
-            compiled = conditions.compile(grant.condition());
+            compiled = conditions.compile(source);
         } catch (RuntimeException broken) {
-            problems.add(PolicyProblem.at(grant.at(), "the condition `" + grant.condition()
-                         + "` will not compile: " + broken.getMessage()));
+            problems.add(PolicyProblem.at(
+                    at, "the condition `" + source + "` will not compile: " + broken.getMessage()));
             return null;
         }
 
         // ⚠️ Outside the catch above, deliberately. Reading a condition for names and compiling one
         // are different questions, and a compiler whose `mentions` throws would otherwise be reported
         // as a condition that will not compile — sending somebody to fix a rule that is fine.
-        checkTheRuleCanEverFire(grant, problems);
+        checkTheRuleCanEverFire(source, at, problems);
 
         return compiled;
+    }
+
+    /**
+     * How a rule written in this document names itself.
+     *
+     * <p>One place, so that a grant, an assignment and a bundle entry cannot come to describe their
+     * own provenance three slightly different ways.
+     */
+    private GrantAttribution declared(String policyName, SourceSpan at) {
+        GrantOrigin origin = writtenAt(at);
+
+        return new GrantAttribution(
+                "policy:" + policyName, "declared at " + at, LocalDateTime.now(), origin, null);
     }
 
     /**
@@ -377,27 +409,27 @@ public final class PolicyBinder {
      *       that work, and a validator that refuses correct rules is one somebody switches off.
      * </ul>
      */
-    private void checkTheRuleCanEverFire(PolicyGrant grant, List<PolicyProblem> problems) {
-        if (actions.publishedValuesByAction().isEmpty()) {
-            return;
-        }
+    private void checkTheRuleCanEverFire(String source, SourceSpan at, List<PolicyProblem> problems) {
+        ConditionMentions mentions = conditions.mentions(source);
 
-        ConditionMentions mentions = conditions.mentions(grant.condition());
+        // ⚠️ Runs whatever the action catalogue holds. A path is wrong or right on its own — it is
+        // checked against a type this engine owns, not against what some route happens to publish.
+        checkEveryPathResolves(mentions, at, problems);
 
-        if (!mentions.isCheckable()) {
+        if (actions.publishedValuesByAction().isEmpty() || !mentions.isCheckable()) {
             return;
         }
 
         for (String action : mentions.actions()) {
             if (!actions.contains(action)) {
-                problems.add(PolicyProblem.at(grant.at(), "this rule is scoped to the action '" + action
+                problems.add(PolicyProblem.at(at, "this rule is scoped to the action '" + action
                              + "', which no route publishes, so it can never fire. Known actions: "
                              + actions.all() + "."));
             }
         }
 
         if (!mentions.namesAnAction()) {
-            checkEveryValueIsPublishedBySomething(grant, mentions, problems);
+            checkEveryValueIsPublishedBySomething(source, at, mentions, problems);
             return;
         }
 
@@ -406,7 +438,7 @@ public final class PolicyBinder {
                 continue;
             }
 
-            problems.add(PolicyProblem.at(grant.at(), "this rule reads '" + value + "' and is scoped to "
+            problems.add(PolicyProblem.at(at, "this rule reads '" + value + "' and is scoped to "
                          + describe(mentions.actions()) + ", which publishes " + publishedBy(mentions.actions())
                          + ". Both names exist, so nothing else would object — and the rule would never "
                          + "fire, which reads exactly like a rule that works."));
@@ -414,17 +446,56 @@ public final class PolicyBinder {
     }
 
     /**
+     * ⚠️ <strong>A property nobody declares is a rule that loads clean and never holds.</strong>
+     *
+     * <p>The failure this check exists for, in one line:
+     *
+     * <pre>{@code @GLOBAL user:write when caller.name is contains ('GOD')}</pre>
+     *
+     * <p>Every token is legal, so the vocabulary passes it. It compiles. It names no action, so the
+     * pair check above lets it through. It boots. And it can never hold, because whatever
+     * {@code caller} is bound to has no such member — which costs one person a permission on a
+     * personal grant, and is a <em>silent mass denial</em> inside a role, since a conditional allow
+     * that cannot hold subtracts from everybody who holds it.
+     *
+     * <p>It is the same shape as the quoted index {@code ConditionVocabulary} already refuses: a rule
+     * that survives load and answers wrongly on every request is the worst way to be wrong, so it is
+     * caught here, where the message can name the members that do exist.
+     *
+     * <p>⚠️ <strong>{@code resource} is deliberately not checked and must never be.</strong> It is a
+     * product's own row, polymorphic across every route that resolves one, and a checker that guessed
+     * would refuse rules that work — which is how a validator gets switched off.
+     */
+    private void checkEveryPathResolves(
+            ConditionMentions mentions, SourceSpan at, List<PolicyProblem> problems) {
+
+        mentions.paths().forEach((head, members) -> {
+            List<String> declared = ConditionHeads.membersOf(head);
+
+            if (declared == null) {
+                return;
+            }
+
+            members.stream().filter(member -> !declared.contains(member)).forEach(member ->
+                    problems.add(PolicyProblem.at(at, "this rule reads '" + head + "." + member
+                                 + "', and " + head + " has no '" + member + "'. It would load and never "
+                                 + "hold, which reads exactly like a rule that works. Known members: "
+                                 + declared + ".")));
+        });
+    }
+
+    /**
      * The weaker half, for a rule that bounds itself to nothing: every name it reads must at least be
      * published by <em>something</em>, or it is a typo nobody would ever see.
      */
     private void checkEveryValueIsPublishedBySomething(
-            PolicyGrant grant, ConditionMentions mentions, List<PolicyProblem> problems) {
+            String source, SourceSpan at, ConditionMentions mentions, List<PolicyProblem> problems) {
 
         Set<String> anywhere = actions.everyPublishedValue();
 
         for (String value : mentions.values()) {
             if (!anywhere.contains(value)) {
-                problems.add(PolicyProblem.at(grant.at(), "this rule reads '" + value + "', which no "
+                problems.add(PolicyProblem.at(at, "this rule reads '" + value + "', which no "
                              + "route publishes anywhere. Published values: " + anywhere + "."));
             }
         }

@@ -151,24 +151,20 @@ public class EffectivePermissionsResolver {
                     continue;
                 }
 
+                // ⚠️ Two narrowings may apply and both were written down: the assignment's ("you hold
+                // this role when …") rides in the attribution, the entry's ("the role carries this
+                // one only when …") is passed alongside, and PermissionSource.role composes them.
                 resolved.granted(entry.permission(), PermissionSource.role(
                         role.roleName(),
                         conferredAt,
-                        role.grantedBy(),
-                        role.since(),
-                        role.origin()));
+                        role.attribution(),
+                        entry.condition()));
             }
         }
 
         for (DirectGrant direct : grants.directCovering(subjectId, chain)) {
             PermissionSource source = PermissionSource.override(
-                    direct.allowed(),
-                    direct.at(),
-                    direct.grantedBy(),
-                    direct.reason(),
-                    direct.since(),
-                    direct.origin(),
-                    direct.condition());
+                    direct.allowed(), direct.at(), direct.attribution());
 
             if (!direct.allowed() && direct.isConditional()) {
                 // ⚠️ A conditional denial is not a denial yet, and recording it as one would take the

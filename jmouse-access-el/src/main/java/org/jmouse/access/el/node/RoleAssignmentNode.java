@@ -19,9 +19,23 @@ public class RoleAssignmentNode extends AbstractExpression {
 
     private String          roleName;
     private SingleScopeNode scope;
+    private String          condition;
 
     public String getRoleName() {
         return roleName;
+    }
+
+    /** What narrows this handing-out, verbatim as it was typed, or null. */
+    public String getCondition() {
+        return condition;
+    }
+
+    public void setCondition(String condition) {
+        this.condition = condition;
+    }
+
+    public boolean isConditional() {
+        return condition != null && !condition.isBlank();
     }
 
     public void setRoleName(String roleName) {
@@ -39,10 +53,11 @@ public class RoleAssignmentNode extends AbstractExpression {
     /**
      * Returns this assignment as the record stage 2 receives.
      *
-     * @return the role name, the scope it lands in, and where it was written
+     * @return the role name, the scope it lands in, what narrows it, and where it was written
      */
     public PolicyRoleAssignment toRoleAssignment() {
-        return new PolicyRoleAssignment(getRoleName(), getScope().toPolicyScope(), SourceSpanNode.at(this));
+        return new PolicyRoleAssignment(
+                getRoleName(), getScope().toPolicyScope(), getCondition(), SourceSpanNode.at(this));
     }
 
     @Override
@@ -52,7 +67,11 @@ public class RoleAssignmentNode extends AbstractExpression {
 
     @Override
     public String toSource() {
-        return "grants %s %s".formatted(SourceWriter.name(getRoleName()), getScope().toSource());
+        String written = "grants %s %s".formatted(SourceWriter.name(getRoleName()), getScope().toSource());
+
+        // ⚠️ Verbatim, never re-rendered. The control room's revert writes this back, and a condition
+        // respelled is a line the administrator who wrote it cannot find again.
+        return isConditional() ? written + " when " + getCondition() : written;
     }
 
     @Override

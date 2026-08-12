@@ -57,7 +57,35 @@ public abstract class PolicyBlockNode extends ExpressionsNode {
      * @return the block as source
      */
     protected String renderBlock(String header) {
-        return header + " {" + LINE_BREAK + renderExpressions(INDENT.length()) + "}" + LINE_BREAK;
+        return prefixOf(header) + header + " {" + LINE_BREAK
+               + renderExpressions(INDENT.length()) + "}" + LINE_BREAK;
+    }
+
+    /**
+     * Which of {@code declare} / {@code assign} this block is written with.
+     *
+     * <p>⚠️ <strong>The grammar accepts both spellings; this writes only one.</strong> Stored policy
+     * revisions are source text and the control room can revert to any of them, so refusing the bare
+     * form would make every revision written before the prefix existed unloadable — turning revert
+     * into a way to break an installation. Accepting both and writing one means a document converges
+     * on the canonical form the first time it is saved through the editor: no migration, no backfill.
+     *
+     * <p>The split is ADR-0018's line and nothing else — <em>the document owns structure, the row owns
+     * the case</em>. A block saying what exists at all is {@code declare}; a block saying who has what
+     * is {@code assign}.
+     *
+     * <p>⚠️ Read off the header's first word rather than declared per subclass. Nine one-word overrides
+     * are nine places for the tenth block to be forgotten in, and the header is written by the very
+     * node being asked — so there is no second source of truth for it to disagree with.
+     */
+    private static String prefixOf(String header) {
+        return switch (header.split(" ", 2)[0]) {
+            case "subject", "entitlements" -> "assign ";
+            case "scopes", "permissions", "actions", "capabilities", "plans", "role" -> "declare ";
+            // `policy` wraps a document rather than stating anything in it, and `plan` is a line
+            // inside `declare plans` rather than a block of its own. Neither takes a prefix.
+            default -> "";
+        };
     }
 
     /**

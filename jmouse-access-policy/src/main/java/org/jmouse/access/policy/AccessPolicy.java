@@ -2,7 +2,7 @@ package org.jmouse.access.policy;
 
 import org.jmouse.access.ScopeReference;
 import org.jmouse.access.spi.BundledPermission;
-import org.jmouse.access.spi.GrantOrigin;
+import org.jmouse.access.spi.GrantAttribution;
 import org.jmouse.access.spi.DirectGrant;
 
 import java.time.LocalDateTime;
@@ -59,9 +59,16 @@ public record AccessPolicy(
     /**
      * A role held at a scope. The bundle is looked up by name, so a role is stored once.
      *
-     * @param origin which file said so, and on which line. The control room renders it, and it is
-     *               what tells a screen not to offer a row editor for something no row holds
+     * @param attribution what the document said and where — which file, which line, and what narrows
+     *                    <em>this handing-out</em>. The control room renders it, and the origin inside
+     *                    it is what tells a screen not to offer a row editor for something no row
+     *                    holds. ⚠️ A condition here belongs to the assignment, not to the role: the
+     *                    same role assigned elsewhere is unaffected
      */
-    public record BoundAssignment(String roleName, ScopeReference at, GrantOrigin origin) {
+    public record BoundAssignment(String roleName, ScopeReference at, GrantAttribution attribution) {
+
+        public BoundAssignment {
+            attribution = attribution == null ? GrantAttribution.none() : attribution;
+        }
     }
 }

@@ -11,11 +11,23 @@ import org.jmouse.el.parser.AbstractParser;
 import org.jmouse.el.parser.ParserContext;
 
 import static org.jmouse.access.el.lexer.AccessToken.T_GRANTS;
+import static org.jmouse.access.el.lexer.AccessToken.T_WHEN;
 import static org.jmouse.el.lexer.BasicToken.T_IDENTIFIER;
 import static org.jmouse.el.lexer.BasicToken.T_STRING;
 
 /**
- * Parses {@code grants SPACE_ADMIN @SPACE:kyiv} — a role assignment inside a subject.
+ * Parses {@code grants SPACE_ADMIN @SPACE:kyiv [when …]} — a role assignment inside a subject.
+ *
+ * <h2>⚠️ Why a condition is allowed <em>here</em></h2>
+ *
+ * <p>It reads as the sentence it is — <em>you hold this role when X</em> — and it lands exactly where
+ * the design already puts conditions: a role says what a permission is <strong>worth</strong>, and
+ * who holds it, where, and under what circumstances is a decision about <strong>one account</strong>.
+ * An assignment is that decision, so nothing about the role itself changes and the same role assigned
+ * to somebody else is untouched.
+ *
+ * <p>The condition distributes over every entry of the bundle, and composes with any condition an
+ * entry carries of its own — both were written down, so both apply.
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -34,6 +46,10 @@ public class RoleAssignmentParser extends AbstractParser {
 
         node.setRoleName(SourceReader.literal(cursor.ensure(T_IDENTIFIER, T_STRING)));
         node.setScope((SingleScopeNode) parser.parse(cursor, context));
+
+        if (cursor.consumeIf(T_WHEN)) {
+            node.setCondition(ConditionReader.read(cursor));
+        }
 
         parent.add(node);
     }
