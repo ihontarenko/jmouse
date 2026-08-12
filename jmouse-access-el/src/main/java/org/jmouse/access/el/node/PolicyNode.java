@@ -67,6 +67,7 @@ public class PolicyNode extends PolicyBlockNode {
         List<PolicyInclude>               includes     = new ArrayList<>();
         List<PolicyScopeDeclaration>      scopes       = new ArrayList<>();
         List<PolicyPermissionDeclaration> permissions  = new ArrayList<>();
+        List<PolicyActionDeclaration>     actions      = new ArrayList<>();
         List<PolicyCapabilityDeclaration> capabilities = new ArrayList<>();
         List<PolicyRole>                  roles        = new ArrayList<>();
         List<PolicyPlan>                  plans        = new ArrayList<>();
@@ -80,6 +81,8 @@ public class PolicyNode extends PolicyBlockNode {
                 scopes.addAll(block.toScopeDeclarations());
             } else if (expression instanceof PermissionsNode block) {
                 permissions.addAll(block.toPermissionDeclarations());
+            } else if (expression instanceof ActionsNode block) {
+                actions.addAll(block.toActionDeclarations());
             } else if (expression instanceof CapabilitiesNode block) {
                 capabilities.addAll(block.toCapabilityDeclarations());
             } else if (expression instanceof RoleNode role) {
@@ -92,12 +95,12 @@ public class PolicyNode extends PolicyBlockNode {
                 entitlements.addAll(block.toEntitlements());
             } else {
                 throw reject(expression, "a policy holds 'include', 'scopes', 'permissions', "
-                        + "'capabilities', 'role', 'plans', 'subject' and 'entitlements' "
+                        + "'actions', 'capabilities', 'role', 'plans', 'subject' and 'entitlements' "
                         + "declarations");
             }
         }
 
-        return new PolicyDocument(getName(), includes, scopes, permissions, capabilities,
+        return new PolicyDocument(getName(), includes, scopes, permissions, actions, capabilities,
                                   roles, plans, subjects, entitlements);
     }
 

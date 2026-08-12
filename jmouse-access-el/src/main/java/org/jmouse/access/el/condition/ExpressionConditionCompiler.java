@@ -2,6 +2,7 @@ package org.jmouse.access.el.condition;
 
 import org.jmouse.access.spi.GrantCondition;
 import org.jmouse.access.policy.ConditionCompiler;
+import org.jmouse.access.policy.ConditionMentions;
 import org.jmouse.access.spi.ConditionContext;
 import org.jmouse.access.policy.PolicyException;
 import org.jmouse.el.ExpressionLanguage;
@@ -57,6 +58,37 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
         }
     }
 
+    /**
+     * Which action and value names this condition talks about, read straight off the tokens.
+     *
+     * <p>⚠️ <strong>Off the tokens, not off the compiled tree, and that is not laziness.</strong>
+     * What a checker needs is the names a person <em>wrote</em>; a tree has already turned
+     * {@code action == 'x'} into an operator node whose operands are of no particular type, and
+     * walking it would be a second traversal of a grammar this class exists to own once. The lexer is
+     * already the thing {@link ConditionVocabulary} trusts to say what a condition is made of.
+     *
+     * <p>⚠️ <strong>Anything it cannot read exactly, it declines to read at all.</strong> An
+     * {@code action} compared against something other than a string literal — a ternary, another
+     * variable — makes the answer {@linkplain ConditionMentions#unknown() uncertain}, which switches
+     * the pair check off for that rule instead of guessing. A checker that guessed would refuse rules
+     * that work, and being refused for a rule that is correct is how a validator comes to be turned
+     * off entirely.
+     */
+    @Override
+    public ConditionMentions mentions(String source) {
+        if (source == null || source.isBlank()) {
+            return ConditionMentions.unknown();
+        }
+
+        try {
+            return ConditionReading.of(source);
+        } catch (RuntimeException unreadable) {
+            LOGGER.debug("The condition `{}` could not be read for names: {}", source, unreadable.toString());
+
+            return ConditionMentions.unknown();
+        }
+    }
+
     private static ExtensionContainer restrictedExtensions() {
         StandardExtensionContainer container = new StandardExtensionContainer();
         container.importExtension(new ConditionDialect());
@@ -64,12 +96,22 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
     }
 
     /**
-     * One compiled condition, and the three things it is allowed to see.
+     * One compiled condition, and the things it is allowed to see.
      *
-     * <p>The caller, the place and the resource are bound as variables per evaluation. Nothing else
-     * is reachable: a predicate that could read a repository or a clock would be a predicate whose
-     * answer depends on something the file does not mention, and a rule nobody can read from its own
-     * text is worse than no rule.</p>
+     * <p>The caller, the place and the resource are bound as variables per evaluation, and so are the
+     * action and every value the call published. Nothing else is reachable: a predicate that could
+     * read a repository or a clock would be a predicate whose answer depends on something the file
+     * does not mention, and a rule nobody can read from its own text is worse than no rule.</p>
+     *
+     * <h2>⚠️ A published value is bound by its own name</h2>
+     *
+     * <p>{@code purpose}, not {@code values.purpose}. A rule is read by somebody administering an
+     * installation, and one extra level of indirection is one more thing they have to be told about a
+     * notation that should read like a sentence.
+     *
+     * <p>What that costs is that a value called {@code place} would cover the scope, so the three
+     * bound names are written <em>after</em> the bag and win. A route publishing one of them is a
+     * route publishing a value no rule can reach, and the startup check is where that gets said.</p>
      *
      * <h2>⚠️ Why it is {@code caller} and not {@code subject}</h2>
      *
@@ -104,9 +146,12 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
             try {
                 EvaluationContext evaluation = expressionLanguage.newContext();
 
+                context.values().forEach(evaluation::setValue);
+
                 evaluation.setValue("caller", context.subject());
                 evaluation.setValue("place", context.place());
                 evaluation.setValue("resource", context.resource());
+                evaluation.setValue("action", context.action());
 
                 Boolean holds = evaluation.getConversion()
                         .convert(compiled.evaluate(evaluation), Boolean.class);

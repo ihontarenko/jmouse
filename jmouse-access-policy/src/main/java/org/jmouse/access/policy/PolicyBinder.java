@@ -1,7 +1,9 @@
 package org.jmouse.access.policy;
 
+import org.jmouse.access.ActionCatalog;
 import org.jmouse.access.CapabilityCatalog;
 import org.jmouse.access.PermissionCatalog;
+import org.jmouse.access.PlaceholderResolver;
 import org.jmouse.access.ScopeCatalog;
 import org.jmouse.access.ScopeKind;
 import org.jmouse.access.ScopeNature;
@@ -29,8 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.TreeSet;
 
 import static java.util.stream.Collectors.joining;
 
@@ -48,7 +49,13 @@ import static java.util.stream.Collectors.joining;
  */
 public final class PolicyBinder {
 
-    private static final Pattern PLACEHOLDER = Pattern.compile("\\$\\{([^}]+)}");
+    /**
+     * The subject id that means every account — {@code subject * { … }}.
+     *
+     * <p>⚠️ It cannot collide with a real one: no account identifier is a single asterisk, and the
+     * grammar reads {@code *} in a subject's position as this and nothing else.
+     */
+    public static final String EVERYBODY = "*";
 
     private final ScopeCatalog        scopes;
     private final PermissionCatalog   permissions;
@@ -64,6 +71,14 @@ public final class PolicyBinder {
      * is where the difference between "no axis" and "an axis with nowhere to resolve" is known.
      */
     private CapabilityCatalog capabilities = CapabilityCatalog.empty();
+
+    /**
+     * ⚠️ Empty unless a product publishes actions, and an empty catalogue checks nothing.
+     *
+     * <p>Not a constructor parameter, for the reason the capability catalogue is not: a product that
+     * has never written {@code @AccessContext} keeps compiling and keeps behaving exactly as before.
+     */
+    private ActionCatalog actions = ActionCatalog.empty();
 
     public PolicyBinder(ScopeCatalog scopes, PermissionCatalog permissions) {
         this(scopes, permissions, null, PlaceholderResolver.none());
@@ -110,11 +125,21 @@ public final class PolicyBinder {
         return this;
     }
 
+    /**
+     * The same binder, also checking what this installation's calls say they are doing.
+     *
+     * @param published every action the routes publish, and the values each carries
+     */
+    public PolicyBinder checking(ActionCatalog published) {
+        this.actions = published == null ? ActionCatalog.empty() : published;
+        return this;
+    }
+
     public AccessPolicy bind(PolicyDocument document) {
         // A file may also state the vocabulary it is written against. Where it does, it is checked
         // rather than believed: this installation's scopes come from code, and a file that quietly
         // described different ones would be documentation that had stopped being true.
-        PolicyVocabulary.checkAgainst(document, scopes, permissions, capabilities);
+        PolicyVocabulary.checkAgainst(document, scopes, permissions, capabilities, actions);
 
         List<PolicyProblem> problems = new ArrayList<>();
 
@@ -179,12 +204,18 @@ public final class PolicyBinder {
         Map<String, BoundSubject> bound = new LinkedHashMap<>();
 
         for (PolicySubject subject : document.subjects()) {
-            String identifier = fill(subject.id());
+            // ⚠️ The wildcard is not filled. A placeholder resolving to '*' would be a rule about
+            // everybody arriving from a property nobody reading the file can see.
+            String identifier = EVERYBODY.equals(subject.id()) ? EVERYBODY : fill(subject.id());
 
             if (bound.containsKey(identifier)) {
                 problems.add(PolicyProblem.at(
                         subject.at(), "subject '" + identifier + "' is declared twice."));
                 continue;
+            }
+
+            if (EVERYBODY.equals(identifier)) {
+                refuseAnythingButADenial(subject, problems);
             }
 
             bound.put(identifier, new BoundSubject(
@@ -193,6 +224,44 @@ public final class PolicyBinder {
         }
 
         return bound;
+    }
+
+    /**
+     * ⚠️ <strong>{@code subject *} may only take away.</strong>
+     *
+     * <p>A block about every account at once is the one place in this language where a mistake reaches
+     * everybody, so it is restricted to the one shape that cannot open a door: a denial.
+     *
+     * <ul>
+     *   <li><strong>An allow</strong> written here grants something to every account in the
+     *       installation, including ones that do not exist yet, and it does it from a file no screen
+     *       can revoke. That is not a rule, it is a hole with a comment explaining itself — and if it
+     *       genuinely is meant, it is a role, where it can be seen, audited and taken away.
+     *   <li><strong>A role assignment</strong> is the same hole wearing a bundle, and a worse one: what
+     *       it grants changes whenever somebody edits the role.
+     * </ul>
+     *
+     * <p>What is left is exactly what the wildcard is for — <em>nobody may do this here</em>, written
+     * once instead of once per account. It fits the model's own sentence: deny wins, and the
+     * subtraction runs last.
+     */
+    private void refuseAnythingButADenial(PolicySubject subject, List<PolicyProblem> problems) {
+        for (PolicyRoleAssignment assignment : subject.roles()) {
+            problems.add(PolicyProblem.at(assignment.at(), "'subject *' assigns the role '"
+                         + assignment.roleName() + "' to every account in the installation, from a file "
+                         + "nothing at runtime can revoke. A role everybody should hold is a role "
+                         + "everybody is given, where it can be seen and taken away."));
+        }
+
+        for (PolicyGrant grant : subject.grants()) {
+            if (grant.effect() != PolicyEffect.DENY) {
+                problems.add(PolicyProblem.at(grant.at(), "'subject *' allows '" + grant.permission()
+                             + "' to every account in the installation. A wildcard subject may only "
+                             + "deny: it is how a rule says 'nobody may do this here' once instead of "
+                             + "once per account, and an allow written the same way is a hole nobody "
+                             + "would notice reading."));
+            }
+        }
     }
 
     private List<BoundAssignment> bindAssignments(
@@ -267,13 +336,116 @@ public final class PolicyBinder {
             return null;
         }
 
+        GrantCondition compiled;
+
         try {
-            return conditions.compile(grant.condition());
+            compiled = conditions.compile(grant.condition());
         } catch (RuntimeException broken) {
             problems.add(PolicyProblem.at(grant.at(), "the condition `" + grant.condition()
                          + "` will not compile: " + broken.getMessage()));
             return null;
         }
+
+        // ⚠️ Outside the catch above, deliberately. Reading a condition for names and compiling one
+        // are different questions, and a compiler whose `mentions` throws would otherwise be reported
+        // as a condition that will not compile — sending somebody to fix a rule that is fine.
+        checkTheRuleCanEverFire(grant, problems);
+
+        return compiled;
+    }
+
+    /**
+     * ⚠️ The pair check — a rule naming an action and a value that action never carries.
+     *
+     * <pre>
+     * deny when action == 'label.print' and purpose != 'HOLDER'
+     * </pre>
+     *
+     * <p>Both names exist. {@code label.print} is a real action; {@code purpose} really is published —
+     * by a different route. So this rule never fires, and the administrator who wrote it believes
+     * printing is closed. Checking the names one at a time passes it; only checking them
+     * <strong>together</strong> catches it, and that is possible only because an action is its own
+     * member and there is therefore something to check the value against.
+     *
+     * <p>Two rules are deliberately let through:
+     *
+     * <ul>
+     *   <li><strong>A rule scoped to no action</strong> can only be name-checked, because a value is
+     *       legitimate wherever anything publishes it. That is the right incentive rather than a gap:
+     *       an unscoped rule holds everywhere in a call, which is almost never what anybody means.
+     *   <li><strong>A rule the compiler could not read exactly.</strong> Guessing would refuse rules
+     *       that work, and a validator that refuses correct rules is one somebody switches off.
+     * </ul>
+     */
+    private void checkTheRuleCanEverFire(PolicyGrant grant, List<PolicyProblem> problems) {
+        if (actions.publishedValuesByAction().isEmpty()) {
+            return;
+        }
+
+        ConditionMentions mentions = conditions.mentions(grant.condition());
+
+        if (!mentions.isCheckable()) {
+            return;
+        }
+
+        for (String action : mentions.actions()) {
+            if (!actions.contains(action)) {
+                problems.add(PolicyProblem.at(grant.at(), "this rule is scoped to the action '" + action
+                             + "', which no route publishes, so it can never fire. Known actions: "
+                             + actions.all() + "."));
+            }
+        }
+
+        if (!mentions.namesAnAction()) {
+            checkEveryValueIsPublishedBySomething(grant, mentions, problems);
+            return;
+        }
+
+        for (String value : mentions.values()) {
+            if (isPublishedByAny(mentions.actions(), value)) {
+                continue;
+            }
+
+            problems.add(PolicyProblem.at(grant.at(), "this rule reads '" + value + "' and is scoped to "
+                         + describe(mentions.actions()) + ", which publishes " + publishedBy(mentions.actions())
+                         + ". Both names exist, so nothing else would object — and the rule would never "
+                         + "fire, which reads exactly like a rule that works."));
+        }
+    }
+
+    /**
+     * The weaker half, for a rule that bounds itself to nothing: every name it reads must at least be
+     * published by <em>something</em>, or it is a typo nobody would ever see.
+     */
+    private void checkEveryValueIsPublishedBySomething(
+            PolicyGrant grant, ConditionMentions mentions, List<PolicyProblem> problems) {
+
+        Set<String> anywhere = actions.everyPublishedValue();
+
+        for (String value : mentions.values()) {
+            if (!anywhere.contains(value)) {
+                problems.add(PolicyProblem.at(grant.at(), "this rule reads '" + value + "', which no "
+                             + "route publishes anywhere. Published values: " + anywhere + "."));
+            }
+        }
+    }
+
+    private boolean isPublishedByAny(Set<String> named, String value) {
+        return named.stream().anyMatch(action -> actions.valuesOf(action).contains(value));
+    }
+
+    private String describe(Set<String> named) {
+        return named.size() == 1
+                ? "'" + named.iterator().next() + "'"
+                : named.stream().map(action -> "'" + action + "'").collect(joining(" or "));
+    }
+
+    private String publishedBy(Set<String> named) {
+        Set<String> published = new TreeSet<>();
+
+        named.forEach(action -> published.addAll(actions.valuesOf(action)));
+
+        return published.isEmpty() ? "nothing" : published.toString();
     }
 
     /**
@@ -355,19 +527,7 @@ public final class PolicyBinder {
     }
 
     private String fill(String text) {
-        if (text == null || !text.contains("${")) {
-            return text;
-        }
-
-        Matcher      matcher = PLACEHOLDER.matcher(text);
-        StringBuilder filled = new StringBuilder();
-
-        while (matcher.find()) {
-            matcher.appendReplacement(filled, Matcher.quoteReplacement(placeholders.resolve(matcher.group(1))));
-        }
-        matcher.appendTail(filled);
-
-        return filled.toString();
+        return PlaceholderResolver.fill(text, placeholders);
     }
 
     private String unknownScope(String name) {

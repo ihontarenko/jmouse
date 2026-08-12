@@ -1,6 +1,6 @@
 package org.jmouse.access.spring.policy;
 
-import org.jmouse.access.policy.PlaceholderResolver;
+import org.jmouse.access.PlaceholderResolver;
 import org.jmouse.access.policy.PolicyException;
 import org.springframework.core.env.Environment;
 

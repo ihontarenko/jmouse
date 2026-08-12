@@ -21,7 +21,7 @@ import org.jmouse.access.el.loader.PolicySources;
 import org.jmouse.access.policy.AccessPolicy;
 import org.jmouse.access.policy.ConditionCompiler;
 import org.jmouse.access.policy.DeclaredScope;
-import org.jmouse.access.policy.PlaceholderResolver;
+import org.jmouse.access.PlaceholderResolver;
 import org.jmouse.access.policy.PolicyBinder;
 import org.jmouse.access.policy.PolicyDocuments;
 import org.jmouse.access.policy.PolicyException;

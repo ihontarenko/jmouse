@@ -9,6 +9,7 @@ import org.jmouse.access.spi.GrantStore;
 import org.jmouse.access.spi.RoleGrant;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * A bound policy, answered as the engine's {@link GrantStore}.
@@ -48,9 +49,28 @@ public final class PolicyGrantStore implements GrantStore {
                 .toList();
     }
 
+    /**
+     * What this account holds directly, and what the installation withholds from everybody.
+     *
+     * <p>⚠️ <strong>{@code subject *} is read here rather than expanded at load.</strong> Expanding it
+     * would mean knowing every account, and a store that could enumerate them is a store the engine
+     * could walk — which is the one thing {@link GrantStore} is shaped to prevent. So the wildcard
+     * stays a block, and every answer carries it.
+     *
+     * <p>It is only ever a denial — {@link PolicyBinder} refuses anything else in that block — so
+     * concatenating it can subtract and can never add. Which is also why the order of the two lists
+     * does not matter: deny wins wherever it was written.
+     */
     @Override
     public List<DirectGrant> directHeldBy(String subjectId) {
-        return subject(subjectId).grants();
+        List<DirectGrant> withheldFromEverybody = subject(PolicyBinder.EVERYBODY).grants();
+
+        if (withheldFromEverybody.isEmpty() || PolicyBinder.EVERYBODY.equals(subjectId)) {
+            return subject(subjectId).grants();
+        }
+
+        return Stream.concat(subject(subjectId).grants().stream(), withheldFromEverybody.stream())
+                .toList();
     }
 
     /**

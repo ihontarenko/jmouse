@@ -61,6 +61,7 @@ public record PolicyDocument(
         List<PolicyInclude>               includes,
         List<PolicyScopeDeclaration>      scopes,
         List<PolicyPermissionDeclaration> permissions,
+        List<PolicyActionDeclaration>     actions,
         List<PolicyCapabilityDeclaration> capabilities,
         List<PolicyRole>                  roles,
         List<PolicyPlan>                  plans,
@@ -72,6 +73,7 @@ public record PolicyDocument(
         includes     = includes     == null ? List.of() : List.copyOf(includes);
         scopes       = scopes       == null ? List.of() : List.copyOf(scopes);
         permissions  = permissions  == null ? List.of() : List.copyOf(permissions);
+        actions      = actions      == null ? List.of() : List.copyOf(actions);
         capabilities = capabilities == null ? List.of() : List.copyOf(capabilities);
         roles        = roles        == null ? List.of() : List.copyOf(roles);
         plans        = plans        == null ? List.of() : List.copyOf(plans);
@@ -82,13 +84,13 @@ public record PolicyDocument(
     /** An empty document, for a file that declared nothing. */
     public static PolicyDocument empty(String name) {
         return new PolicyDocument(name, List.of(), List.of(), List.of(), List.of(),
-                                  List.of(), List.of(), List.of(), List.of());
+                                  List.of(), List.of(), List.of(), List.of(), List.of());
     }
 
     /** A document that grants but states no vocabulary — the common case, and every file today. */
     public static PolicyDocument of(String name, List<PolicyRole> roles, List<PolicySubject> subjects) {
         return new PolicyDocument(name, List.of(), List.of(), List.of(), List.of(),
-                                  roles, List.of(), subjects, List.of());
+                                  List.of(), roles, List.of(), subjects, List.of());
     }
 
     /**
@@ -100,7 +102,12 @@ public record PolicyDocument(
      * it.
      */
     public boolean declaresVocabulary() {
-        return !scopes.isEmpty() || !permissions.isEmpty() || !capabilities.isEmpty();
+        return !scopes.isEmpty() || !permissions.isEmpty() || !actions.isEmpty()
+               || !capabilities.isEmpty();
+    }
+
+    public Optional<PolicyActionDeclaration> action(String actionName) {
+        return actions.stream().filter(action -> action.name().equals(actionName)).findFirst();
     }
 
     /**

@@ -10,6 +10,7 @@ import org.jmouse.access.PermissionSource;
 import org.jmouse.access.RefusalReason;
 import org.jmouse.access.ScopeReference;
 import org.jmouse.access.Subject;
+import org.jmouse.access.spi.AccessContextScope;
 import org.jmouse.access.spi.ConditionContext;
 import org.jmouse.access.spi.GrantCondition;
 
@@ -43,6 +44,14 @@ import java.util.function.BiFunction;
  *       is supposed to make impossible.
  * </ol>
  *
+ * <h2>What a condition may also know: what is being done</h2>
+ *
+ * <p>Beside the caller, the place and the row, a condition reads the <strong>action</strong> and the
+ * <strong>values</strong> whoever made the call published — {@code when action == 'entry.listByPurpose'
+ * and purpose != 'HOLDER'}. Both are constant for a call, so a rule about them is evaluated once and
+ * decides whether the call happens: a 403, never a shorter list. That is why it is cheap, and it is
+ * also exactly its boundary — see {@link org.jmouse.access.spi.AccessContextScope}.
+ *
  * <h2>⚠️ What this axis does not reach</h2>
  *
  * <p>A listing. {@code visibilityFor} never comes through here, so a route that filters rows without
@@ -56,6 +65,7 @@ public class ConditionAxis implements AccessAxisEvaluator {
     private final EffectivePermissionsResolver resolver;
     private final RefusalReason                refusal;
     private final BiFunction<AccessTarget, ScopeReference, Object> resources;
+    private final AccessContextScope           published;
 
     /**
      * @param axis      which question this bean answers, and where it runs. Declare it <em>after</em>
@@ -66,25 +76,51 @@ public class ConditionAxis implements AccessAxisEvaluator {
      * @param resources how to reach the row a condition talks about, given the target and the scope a
      *                  grant applies at. ⚠️ May answer null, and a condition must tolerate that: most
      *                  routes are aimed at a place rather than at a row
+     * @param published what is being done, where the caller said. ⚠️ Read at <em>evaluation</em> time
+     *                  rather than held, which is what makes an action visible to a check made from
+     *                  code rather than from an annotation — the two paths differ in who opens the
+     *                  window and in nothing else
      */
+    public ConditionAxis(
+            AxisKind                                         axis,
+            EffectivePermissionsResolver                     resolver,
+            RefusalReason                                    refusal,
+            BiFunction<AccessTarget, ScopeReference, Object> resources,
+            AccessContextScope                               published) {
+
+        this.axis      = axis;
+        this.resolver  = resolver;
+        this.refusal   = refusal;
+        this.resources = resources;
+        this.published = published == null ? AccessContextScope.none() : published;
+    }
+
+    /** The wiring for a product whose conditions look at a row but publish no actions. */
     public ConditionAxis(
             AxisKind                                         axis,
             EffectivePermissionsResolver                     resolver,
             RefusalReason                                    refusal,
             BiFunction<AccessTarget, ScopeReference, Object> resources) {
 
-        this.axis      = axis;
-        this.resolver  = resolver;
-        this.refusal   = refusal;
-        this.resources = resources;
+        this(axis, resolver, refusal, resources, AccessContextScope.none());
     }
 
     /** The common wiring: a product whose conditions never look at a row passes no resolver for one. */
     public ConditionAxis(
             AxisKind axis, EffectivePermissionsResolver resolver, RefusalReason refusal) {
 
-        this(axis, resolver, refusal, (target, scope) -> null);
+        this(axis, resolver, refusal, (target, scope) -> null, AccessContextScope.none());
     }
+
+    /*
+     * ⚠️ There is deliberately NO (axis, resolver, refusal, AccessContextScope) overload.
+     *
+     * It would be a fourth constructor whose only difference from the one above is the type of its
+     * last parameter — so `new ConditionAxis(axis, resolver, refusal, null)` stops compiling for every
+     * existing caller, and the fix somebody reaches for is a cast. A product that publishes actions
+     * and reads no row writes the five-argument form with `(target, scope) -> null`, which says the
+     * same thing and can only be read one way.
+     */
 
     @Override
     public AxisKind axis() {
@@ -153,7 +189,11 @@ public class ConditionAxis implements AccessAxisEvaluator {
         GrantCondition condition = source.condition();
 
         return condition != null && condition.holds(ConditionContext.of(
-                subject, source.scope(), resources.apply(target, source.scope())));
+                subject,
+                source.scope(),
+                resources.apply(target, source.scope()),
+                published.action(),
+                published.values()));
     }
 
     /**

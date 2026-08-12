@@ -1,5 +1,6 @@
 package org.jmouse.access.policy;
 
+import org.jmouse.access.ActionCatalog;
 import org.jmouse.access.CapabilityCatalog;
 import org.jmouse.access.CapabilityDefinition;
 import org.jmouse.access.CapabilityKind;
@@ -9,6 +10,7 @@ import org.jmouse.access.ScopeKind;
 import org.jmouse.access.ScopeNature;
 import org.jmouse.access.policy.model.PolicyCapabilityDeclaration;
 import org.jmouse.access.policy.model.PolicyDocument;
+import org.jmouse.access.policy.model.PolicyActionDeclaration;
 import org.jmouse.access.policy.model.PolicyPermissionDeclaration;
 import org.jmouse.access.policy.model.PolicyScopeDeclaration;
 
@@ -165,6 +167,22 @@ public final class PolicyVocabulary {
             PolicyDocument document, ScopeCatalog scopes, PermissionCatalog permissions,
             CapabilityCatalog capabilities) {
 
+        checkAgainst(document, scopes, permissions, capabilities, ActionCatalog.empty());
+    }
+
+    /**
+     * The same, including what this installation's calls say they are doing.
+     *
+     * @param actions what the application publishes, or {@link ActionCatalog#empty()} where it
+     *                publishes nothing — in which case an {@code actions} block goes unchecked, for
+     *                the reason an empty capability catalogue does: an installation that registers no
+     *                vocabulary has not adopted the axis, and refusing its file would be refusing it
+     *                over a feature it is not using
+     */
+    public static void checkAgainst(
+            PolicyDocument document, ScopeCatalog scopes, PermissionCatalog permissions,
+            CapabilityCatalog capabilities, ActionCatalog actions) {
+
         if (!document.declaresVocabulary()) {
             return;
         }
@@ -173,8 +191,54 @@ public final class PolicyVocabulary {
 
         checkScopes(document, scopes, problems);
         checkPermissions(document, permissions, problems);
+        checkActions(document, actions, problems);
         checkCapabilities(document, capabilities, scopes, problems);
         refuse(document, problems);
+    }
+
+    /**
+     * Checks the action catalogue, and what each action is said to publish.
+     *
+     * <p>⚠️ <strong>An action written here that no route publishes is the dangerous direction.</strong>
+     * A rule scoped to it never fires — and a conditional allow that never holds is a refusal nobody
+     * ordered, while a conditional deny that never holds is a door somebody believes is closed. Both
+     * are silent, and both are indistinguishable from working.
+     *
+     * <p>The other direction — a route publishing something the file never mentions — is deliberately
+     * <em>not</em> a failure here. A route may legitimately publish a value no rule reads yet, and
+     * refusing to boot over one would make adding a declaration a two-repository change. A product
+     * that wants to hear about it warns, which is where "not yet used" can be told from "forgotten".
+     *
+     * <p>The {@code publishes} list is checked strictly, though. It is what an editor offers somebody
+     * writing a rule, so a value listed here that never arrives is a rule they will write and nobody
+     * will see fail.
+     */
+    private static void checkActions(
+            PolicyDocument document, ActionCatalog actions, List<PolicyProblem> problems) {
+
+        if (actions.publishedValuesByAction().isEmpty()) {
+            return;
+        }
+
+        for (PolicyActionDeclaration declared : document.actions()) {
+            if (!actions.contains(declared.name())) {
+                problems.add(PolicyProblem.at(declared.at(), "this file declares an action '"
+                             + declared.name() + "' that no route publishes. A rule scoped to it would "
+                             + "never fire, and a rule that never fires is indistinguishable from one "
+                             + "that works. Known actions: " + actions.all() + "."));
+                continue;
+            }
+
+            Set<String> published = actions.valuesOf(declared.name());
+
+            for (String value : declared.values()) {
+                if (!published.contains(value)) {
+                    problems.add(PolicyProblem.at(declared.at(), "'" + declared.name()
+                                 + "' is declared as publishing '" + value + "', and it does not. What "
+                                 + "it publishes is " + published + "."));
+                }
+            }
+        }
     }
 
     private static void checkScopes(

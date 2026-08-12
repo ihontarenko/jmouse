@@ -80,6 +80,56 @@
 
     <build>
         <plugins>
+            <!--
+              ⚠️ THIS MODULE'S DEPENDENCY LIST IS LOAD-BEARING, so the build states it rather than
+              trusting a reviewer to notice.
+
+              `@AccessContext(values = @AccessValue(from = "purposeCode"))` names a METHOD PARAMETER,
+              not a path variable, and that is the whole reason the same annotation gates an agent
+              tool, a scheduled job or a game as well as a controller. The moment anything here
+              imports a web framework that stops being true — silently, at the next release, for every
+              consumer who is not on that framework.
+
+              Transitive arrivals are banned too: the failure is about what reaches the classpath, not
+              about what somebody wrote in this file.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>enforcement-stays-framework-free</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <excludes>
+                                        <exclude>org.springframework:*</exclude>
+                                        <exclude>org.springframework.boot:*</exclude>
+                                        <exclude>jakarta.servlet:*</exclude>
+                                        <exclude>javax.servlet:*</exclude>
+                                        <exclude>jakarta.ws.rs:*</exclude>
+                                        <exclude>org.jmouse:jmouse-web</exclude>
+                                        <exclude>org.jmouse:jmouse-http</exclude>
+                                        <exclude>org.jmouse:jmouse-core</exclude>
+                                    </excludes>
+                                    <message>
+                                        jmouse-access-enforcement depends on jmouse-access and slf4j
+                                        and nothing else. Its annotations name method parameters,
+                                        never request parameters, which is what lets them gate an
+                                        agent tool or a job as well as a controller. Anything that
+                                        knows what a request is belongs in an adapter module.
+                                    </message>
+                                </bannedDependencies>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

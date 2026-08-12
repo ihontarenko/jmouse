@@ -1,5 +1,7 @@
 package org.jmouse.access.el;
 
+import org.jmouse.access.el.node.ActionDeclarationNode;
+import org.jmouse.access.el.node.ActionsNode;
 import org.jmouse.access.el.node.CapabilitiesNode;
 import org.jmouse.access.el.node.CapabilityDeclarationNode;
 import org.jmouse.access.el.node.EntitlementNode;
@@ -21,6 +23,7 @@ import org.jmouse.access.el.node.ScopesNode;
 import org.jmouse.access.el.node.SingleScopeNode;
 import org.jmouse.access.el.node.SubjectNode;
 import org.jmouse.access.policy.model.PolicyBundleEntry;
+import org.jmouse.access.policy.model.PolicyActionDeclaration;
 import org.jmouse.access.policy.model.PolicyCapabilityDeclaration;
 import org.jmouse.access.policy.model.PolicyEntitlement;
 import org.jmouse.access.policy.model.PolicyPlan;
@@ -118,6 +121,10 @@ public final class PolicyWriter {
 
         if (!document.permissions().isEmpty()) {
             policy.addExpression(toPermissionsNode(document));
+        }
+
+        if (!document.actions().isEmpty()) {
+            policy.addExpression(toActionsNode(document));
         }
 
         if (!document.capabilities().isEmpty()) {
@@ -271,6 +278,26 @@ public final class PolicyWriter {
         node.setName(scope.name());
         node.setNature(scope.nature());
         node.setParameter(scope.parameter());
+
+        return node;
+    }
+
+    private static PolicyBlockNode toActionsNode(PolicyDocument document) {
+        ActionsNode block = new ActionsNode();
+
+        for (PolicyActionDeclaration action : document.actions()) {
+            block.addExpression(toNode(action));
+        }
+
+        return block;
+    }
+
+    private static ActionDeclarationNode toNode(PolicyActionDeclaration action) {
+        ActionDeclarationNode node = new ActionDeclarationNode();
+
+        node.setName(action.name());
+        node.setDescription(action.description());
+        node.setValues(new ArrayList<>(action.values()));
 
         return node;
     }

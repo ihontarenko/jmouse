@@ -6,9 +6,9 @@ import org.jmouse.el.lexer.Token;
 /**
  * The keywords a {@code .jmp} policy file adds on top of the expression language.
  *
- * <p>Everything else a policy is made of — identifiers, strings, {@code @}, {@code :}, braces — is
- * already a {@link org.jmouse.el.lexer.BasicToken}. Only these ten words are the language's own,
- * which is a fair measure of how small it is.</p>
+ * <p>Everything else a policy is made of — identifiers, strings, {@code @}, {@code :}, {@code .},
+ * braces — is already a {@link org.jmouse.el.lexer.BasicToken}. Only the words below are the
+ * language's own, which is a fair measure of how small it is.</p>
  *
  * <p>Ids are grouped so a reader can tell what a token is for at a glance: {@code 10xxx} opens a
  * block, {@code 20xxx} is written inside one, {@code 21xxx} composes files. Every id is distinct —
@@ -45,6 +45,9 @@ public enum AccessToken implements Token.Type {
 
     /** {@code entitlements { … }} — who is on what, and until when. */
     T_ENTITLEMENTS(10800, "entitlements"),
+
+    /** {@code actions { … }} — the vocabulary of what calls are doing. */
+    T_ACTIONS(10900, "actions"),
 
     /** {@code grants ROLE @SCOPE} — assigns a role to the enclosing subject. */
     T_GRANTS(20000, "grants"),
@@ -97,6 +100,9 @@ public enum AccessToken implements Token.Type {
     /** {@code reason "…"} — why, and the words a refusal repeats back. */
     T_REASON(22600, "reason"),
 
+    /** {@code publishes purpose, tier} — the values one action carries into a condition. */
+    T_PUBLISHES(22700, "publishes"),
+
     /** {@code include 'path'} — records a path; the loader, not the parser, follows it. */
     T_INCLUDE(21000, "include");
 
@@ -136,7 +142,7 @@ public enum AccessToken implements Token.Type {
     }
 
     /**
-     * A plain identifier, or any of these ten words read as one.
+     * A plain identifier, or any of the words above read as one.
      *
      * <p>⚠️ <strong>A keyword is only a keyword where the grammar expects one.</strong> The lexer
      * cannot know that, so it turns {@code role} into {@link #T_ROLE} wherever it appears — including
@@ -152,7 +158,7 @@ public enum AccessToken implements Token.Type {
      *
      * @return the identifier token followed by every keyword
      */
-    public static Token.Type[] namesAndKeywords() {
+    public static Token.Type[] nameTokens() {
         AccessToken[]  keywords = values();
         Token.Type[]   names    = new Token.Type[keywords.length + 1];
 
@@ -163,8 +169,8 @@ public enum AccessToken implements Token.Type {
     }
 
     /** The same, plus the {@code *} that names a whole namespace. */
-    public static Token.Type[] namesKeywordsAndWildcard() {
-        Token.Type[] names    = namesAndKeywords();
+    public static Token.Type[] nameTokensWithWildcard() {
+        Token.Type[] names    = nameTokens();
         Token.Type[] extended = new Token.Type[names.length + 1];
 
         System.arraycopy(names, 0, extended, 0, names.length);

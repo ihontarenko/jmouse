@@ -76,6 +76,16 @@ public final class CursorMatcher {
         return new PermissionValueMatcher();
     }
 
+    /** {@code actions { … }} */
+    public static Matcher<TokenCursor> actions() {
+        return new ActionsMatcher();
+    }
+
+    /** {@code entry.listByPurpose "…" publishes purpose, tier} — one line of an {@code actions} block. */
+    public static Matcher<TokenCursor> actionDeclaration() {
+        return new ActionDeclarationMatcher();
+    }
+
     /** {@code capabilities { … }} */
     public static Matcher<TokenCursor> capabilities() {
         return new CapabilitiesMatcher();
@@ -162,6 +172,39 @@ public final class CursorMatcher {
         @Override
         public boolean matches(TokenCursor cursor) {
             return cursor.matchesSequence(T_PERMISSIONS, T_OPEN_CURLY);
+        }
+    }
+
+    private record ActionsMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            return cursor.matchesSequence(T_ACTIONS, T_OPEN_CURLY);
+        }
+    }
+
+    /**
+     * An action declaration is a <strong>dotted</strong> name followed by its description.
+     *
+     * <p>⚠️ <strong>The dot is required, and it is the whole of what makes this shape disjoint.</strong>
+     * Without it the shape is {@code NAME STRING} — which is also, exactly,
+     * {@code include 'startup.jmp'}. {@code include} is a keyword that {@link AccessToken#nameTokens()}
+     * deliberately reads as a name wherever a name belongs, so a dot-less matcher takes every include
+     * line in the language and reports the loss as "a policy cannot hold this statement".
+     *
+     * <p>That is the same pinning a permission already has, and it is not the grammar dictating a
+     * product's vocabulary. {@code form:read} is a permission <em>because of its colon</em> wherever it
+     * is written; {@code entry.list} is an action because of its dot. Both are asking a product to
+     * spell a thing the way this language spells that kind of thing — the same as a scope's {@code @}.
+     * A one-word action is the price, and "dots, never colons" was the convention before it was a rule.
+     */
+    private record ActionDeclarationMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            int name = dottedNameLength(cursor, 0);
+
+            return name > 1 && checkAt(cursor, name, T_STRING);
         }
     }
 
@@ -408,7 +451,7 @@ public final class CursorMatcher {
      *       dictating a product's vocabulary.
      *   <li><strong>Any segment may be one of the language's own words.</strong> {@code role:read}
      *       is ordinary wherever roles are administered, and the lexer has no way to know that this
-     *       {@code role} is not the block keyword — see {@link AccessToken#namesAndKeywords()}.
+     *       {@code role} is not the block keyword — see {@link AccessToken#nameTokens()}.
      * </ul>
      *
      * <p>Neither costs any ambiguity. The colon is what identifies this shape, and nothing that may
@@ -420,9 +463,9 @@ public final class CursorMatcher {
      * @return how many tokens it occupies, or {@link #NO_MATCH}
      */
     private static int permissionValueLength(TokenCursor cursor, int start) {
-        boolean opens = checkAt(cursor, start, AccessToken.namesAndKeywords())
+        boolean opens = checkAt(cursor, start, AccessToken.nameTokens())
                 && checkAt(cursor, start + 1, T_COLON)
-                && checkAt(cursor, start + 2, AccessToken.namesKeywordsAndWildcard());
+                && checkAt(cursor, start + 2, AccessToken.nameTokensWithWildcard());
 
         if (!opens) {
             return NO_MATCH;
@@ -434,7 +477,7 @@ public final class CursorMatcher {
         // measure a shape the binder is only going to refuse under a less helpful name.
         while (!checkAt(cursor, start + length - 1, T_MULTIPLY)
                && checkAt(cursor, start + length, T_COLON)
-               && checkAt(cursor, start + length + 1, AccessToken.namesKeywordsAndWildcard())) {
+               && checkAt(cursor, start + length + 1, AccessToken.nameTokensWithWildcard())) {
 
             length += 2;
         }
@@ -457,14 +500,14 @@ public final class CursorMatcher {
         if (checkAt(cursor, start, T_STRING)) {
             return 1;
         }
-        if (!checkAt(cursor, start, AccessToken.namesAndKeywords())) {
+        if (!checkAt(cursor, start, AccessToken.nameTokens())) {
             return NO_MATCH;
         }
 
         int length = 1;
 
         while (checkAt(cursor, start + length, T_MINUS)
-               && checkAt(cursor, start + length + 1, AccessToken.namesAndKeywords())) {
+               && checkAt(cursor, start + length + 1, AccessToken.nameTokens())) {
 
             length += 2;
         }
@@ -473,14 +516,53 @@ public final class CursorMatcher {
     }
 
     /**
-     * Measures a name written as a bare identifier, a quoted string or a {@code ${placeholder}}.
+     * Measures a name written with dots — {@code entry.listByPurpose}.
+     *
+     * <p>The counterpart of {@link #hyphenatedNameLength}, and the same run: the lexer gives
+     * {@code entry}, {@code .}, {@code listByPurpose} separately, exactly as it gives a permission's
+     * colons separately.
+     *
+     * <p>A single segment measures 1 here rather than being refused, because measuring is not
+     * deciding — {@link ActionDeclarationMatcher} is what requires the dot, and it says there why.
+     *
+     * <p>The run cannot overshoot: nothing that may follow an action name begins with a dot.
+     *
+     * @param cursor the cursor to read from
+     * @param start  the lookahead offset the name is expected to begin at
+     * @return how many tokens it occupies, or {@link #NO_MATCH}
+     */
+    private static int dottedNameLength(TokenCursor cursor, int start) {
+        if (!checkAt(cursor, start, AccessToken.nameTokens())) {
+            return NO_MATCH;
+        }
+
+        int length = 1;
+
+        while (checkAt(cursor, start + length, T_DOT)
+               && checkAt(cursor, start + length + 1, AccessToken.nameTokens())) {
+
+            length += 2;
+        }
+
+        return length;
+    }
+
+    /**
+     * Measures a name written as a bare identifier, a quoted string, a {@code ${placeholder}} — or the
+     * {@code *} that means <em>everybody</em>.
+     *
+     * <p>⚠️ Read only where a <strong>subject</strong> belongs, which is the whole of what makes the
+     * wildcard safe to admit here. {@code subject * { }} is how a rule is written about every account
+     * at once, and {@link org.jmouse.access.policy.PolicyBinder} refuses everything in such a block
+     * except a denial — a universal allow is a hole with a comment explaining itself, and a role
+     * assigned to everybody is the same hole wearing a bundle.
      *
      * @param cursor the cursor to read from
      * @param start  the lookahead offset the name is expected to begin at
      * @return how many tokens it occupies, or {@link #NO_MATCH}
      */
     private static int nameLength(TokenCursor cursor, int start) {
-        if (checkAt(cursor, start, T_IDENTIFIER, T_STRING)) {
+        if (checkAt(cursor, start, T_IDENTIFIER, T_STRING, T_MULTIPLY)) {
             return 1;
         }
 

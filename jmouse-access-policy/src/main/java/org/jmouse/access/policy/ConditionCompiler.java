@@ -37,4 +37,20 @@ public interface ConditionCompiler {
      * @throws PolicyException where the source will not compile — at load, naming the line
      */
     GrantCondition compile(String source);
+
+    /**
+     * Which action and value names this condition talks about.
+     *
+     * <p>Optional, and {@link ConditionMentions#unknown()} by default: a compiler that cannot read
+     * back its own source is not broken, it simply cannot help the checker. What it costs is the
+     * pair check — a rule scoped to an action that does not publish the value it compares — and a
+     * compiler that answered <em>wrongly</em> here would be far worse than one that answers nothing,
+     * because it would refuse rules that work.
+     *
+     * <p>Implemented by whoever owns the grammar, which is the only place that can read it without
+     * writing a second spelling of it.
+     */
+    default ConditionMentions mentions(String source) {
+        return ConditionMentions.unknown();
+    }
 }

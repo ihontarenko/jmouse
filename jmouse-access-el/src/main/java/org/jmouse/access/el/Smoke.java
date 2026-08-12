@@ -45,6 +45,10 @@ public final class Smoke {
                     form:read     "Read forms"
                     form:write    "Create and edit forms"
                 }
+                actions {
+                    entry.list           "List submissions"
+                    entry.listByPurpose  "List one purpose"  publishes purpose, tier
+                }
                 capabilities {
                     paid parametric-search
                     gate   parametric-search  "Parametric search"
@@ -88,6 +92,14 @@ public final class Smoke {
                     # reached it already lexed as a keyword, and the file failed to PARSE over a word
                     # that is not a keyword at this position at all. Keep a condition made of them.
                     @SCOPE:instance  form:share  deny when caller.plan != null
+                    # ⚠️ The braced form, and it exists because the one-line form TRUNCATES. A rule
+                    # broken across lines for readability parses as a rule ending after the first —
+                    # a weaker rule that still loads and still reads like the one somebody wrote.
+                    # The braces are only a delimiter: this must come back as ONE LINE of text.
+                    @SCOPE:instance  entry:read  deny when {
+                        action == 'entry.listByPurpose'
+                        and purpose != 'HOLDER'
+                    }
                 }
             }
             """;
@@ -118,11 +130,36 @@ public final class Smoke {
         verifyIncludes(document.includes(), verification);
         verifyScopes(document.scopes(), verification);
         verifyPermissions(document.permissions(), verification);
+        verifyActions(document.actions(), verification);
         verifyCapabilities(document.capabilities(), verification);
         verifyPlans(document.plans(), verification);
         verifyRoles(document.roles(), verification);
         verifySubjects(document.subjects(), verification);
         verifyEntitlements(document.entitlements(), verification);
+    }
+
+    /**
+     * Checks {@code actions}, and the two things about the block that are easy to get quietly wrong.
+     *
+     * <p><strong>A dotted name is one word.</strong> The lexer hands over {@code entry}, {@code .} and
+     * {@code listByPurpose} separately, exactly as it does a permission's colons, and a reader that
+     * kept only the first segment would produce an action every rule fails to match.
+     *
+     * <p><strong>{@code publishes} is optional, and an empty list is the statement.</strong> An action
+     * carrying nothing is still worth declaring — a rule may scope itself to it and compare nothing
+     * but its name — so absence has to arrive as "no values" rather than as a null nobody planned for.
+     */
+    private static void verifyActions(List<PolicyActionDeclaration> actions, Verification verification) {
+        if (!verification.size("actions", 2, actions)) {
+            return;
+        }
+
+        verification.equal("action 1", "entry.list", actions.get(0).name());
+        verification.equal("action 1 description", "List submissions", actions.get(0).description());
+        verification.equal("action 1 publishes nothing", List.of(), actions.get(0).values());
+
+        verification.equal("action 2", "entry.listByPurpose", actions.get(1).name());
+        verification.equal("action 2 publishes", List.of("purpose", "tier"), actions.get(1).values());
     }
 
     private static void verifyCapabilities(
@@ -329,7 +366,7 @@ public final class Smoke {
     }
 
     private static void verifyGrants(List<PolicyGrant> grants, Verification verification) {
-        if (!verification.size("grants", 6, grants)) {
+        if (!verification.size("grants", 7, grants)) {
             return;
         }
 
@@ -343,6 +380,11 @@ public final class Smoke {
         // The condition made entirely of this grammar's keywords — see the fixture.
         verifyGrant(grants.get(5), "form:share", "SCOPE", "instance", PolicyEffect.DENY,
                 "caller.plan != null", verification);
+        // ⚠️ Written across three lines and read back as one. The braces are a delimiter and nothing
+        // more: `when x and y` and `when { x and y }` produce the same condition, the same source()
+        // and therefore the same line quoted back in a refusal.
+        verifyGrant(grants.get(6), "entry:read", "SCOPE", "instance", PolicyEffect.DENY,
+                "action == 'entry.listByPurpose' and purpose != 'HOLDER'", verification);
     }
 
     private static void verifyGrant(

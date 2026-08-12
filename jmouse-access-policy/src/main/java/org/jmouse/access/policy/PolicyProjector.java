@@ -217,7 +217,7 @@ public final class PolicyProjector {
             }
         }
 
-        return new PolicyDocument(documentName, List.of(), List.of(), List.of(), List.of(),
+        return new PolicyDocument(documentName, List.of(), List.of(), List.of(), List.of(), List.of(),
                                   List.of(), List.of(), List.of(), entitlements);
     }
 

@@ -10,7 +10,8 @@ import org.jmouse.access.policy.CompositeEntitlementStore;
 import org.jmouse.access.policy.CompositeGrantStore;
 import org.jmouse.access.policy.ConditionCompiler;
 import org.jmouse.access.policy.LivePolicy;
-import org.jmouse.access.policy.PlaceholderResolver;
+import org.jmouse.access.ActionCatalog;
+import org.jmouse.access.PlaceholderResolver;
 import org.jmouse.access.policy.PolicyBinder;
 import org.jmouse.access.policy.PolicyException;
 import org.jmouse.access.policy.LivePolicyEntitlements;
@@ -130,6 +131,10 @@ public class AccessPolicyAutoConfiguration {
      *
      * @param permissions ⚠️ required, and the reason the whole feature is safe to use. Without a
      *                    catalogue {@code @SPACE frm:write} loads, matches nothing, and says nothing
+     * @param actions     optional, and the same argument one step further on. An action is a bare
+     *                    string too, and a rule scoped to one nothing publishes does not merely fail
+     *                    to grant — it fails to <em>deny</em>, silently. Absent where the application
+     *                    publishes none, in which case there is nothing to disagree with
      */
     @Bean
     @ConditionalOnMissingBean
@@ -137,6 +142,7 @@ public class AccessPolicyAutoConfiguration {
             ScopeCatalog                      scopes,
             ObjectProvider<PermissionCatalog> permissions,
             ObjectProvider<ConditionCompiler> conditions,
+            ObjectProvider<ActionCatalog>     actions,
             PlaceholderResolver               placeholders) {
 
         PermissionCatalog declared = permissions.getIfAvailable(() -> {
@@ -147,7 +153,8 @@ public class AccessPolicyAutoConfiguration {
                     + "— which is the one failure writing authorization down exists to prevent.");
         });
 
-        return new PolicyBinder(scopes, declared, conditions.getIfAvailable(), placeholders);
+        return new PolicyBinder(scopes, declared, conditions.getIfAvailable(), placeholders)
+                .checking(actions.getIfAvailable(ActionCatalog::empty));
     }
 
     /**

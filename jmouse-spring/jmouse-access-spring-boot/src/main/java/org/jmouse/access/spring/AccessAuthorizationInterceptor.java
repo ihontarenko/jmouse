@@ -44,6 +44,15 @@ public class AccessAuthorizationInterceptor implements MethodInterceptor {
         this.refusals = refusals;
     }
 
+    /**
+     * ⚠️ The window closes <em>after</em> the method has run, and that is the whole ordering.
+     *
+     * <p>What a route publishes about itself has to be in context for the check that gates it and for
+     * every check made inside it — a programmatic {@code engine.decide(…)} three layers down is where
+     * decisions are most often really made. Closing before {@code proceed()} would leave the
+     * annotation gating the door and nothing else, and a rule reading a value inside would silently
+     * never fire.
+     */
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
         Method   method      = invocation.getMethod();
@@ -51,14 +60,16 @@ public class AccessAuthorizationInterceptor implements MethodInterceptor {
                 ? AopUtils.getTargetClass(invocation.getThis())
                 : method.getDeclaringClass();
 
-        AccessRefusal refusal = guard.getObject()
-                .check(method, targetClass, invocation.getArguments(), subject.getObject().get())
-                .orElse(null);
+        try (MethodAccessGuard.GuardedCall call = guard.getObject()
+                .around(method, targetClass, invocation.getArguments(), subject.getObject().get())) {
 
-        if (refusal != null) {
-            refusals.getObject().onRefusal(refusal, method);
+            AccessRefusal refusal = call.refusal().orElse(null);
+
+            if (refusal != null) {
+                refusals.getObject().onRefusal(refusal, method);
+            }
+
+            return invocation.proceed();
         }
-
-        return invocation.proceed();
     }
 }

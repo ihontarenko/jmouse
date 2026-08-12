@@ -28,8 +28,8 @@ public class PermissionValueParser extends AbstractParser {
 
         node.setSpan(SourceReader.span(cursor));
         // Any segment may be one of the language's own words — `role:read` is an ordinary permission
-        // wherever roles are administered. See AccessToken#namesAndKeywords.
-        node.setNamespace(cursor.ensure(AccessToken.namesAndKeywords()).value());
+        // wherever roles are administered. See AccessToken#nameTokens.
+        node.setNamespace(cursor.ensure(AccessToken.nameTokens()).value());
 
         cursor.ensure(T_COLON);
 
@@ -57,7 +57,7 @@ public class PermissionValueParser extends AbstractParser {
      * @return the action, with any further segments joined back on
      */
     private static String action(TokenCursor cursor) {
-        Token         first  = cursor.ensure(AccessToken.namesKeywordsAndWildcard());
+        Token         first  = cursor.ensure(AccessToken.nameTokensWithWildcard());
         StringBuilder action = new StringBuilder(first.value());
 
         if (first.type() == T_MULTIPLY) {
@@ -66,7 +66,7 @@ public class PermissionValueParser extends AbstractParser {
 
         while (cursor.isCurrent(T_COLON)) {
             cursor.ensure(T_COLON);
-            action.append(':').append(cursor.ensure(AccessToken.namesAndKeywords()).value());
+            action.append(':').append(cursor.ensure(AccessToken.nameTokens()).value());
         }
 
         return action.toString();

@@ -120,11 +120,39 @@ public final class SourceReader {
             return literal(cursor.ensure(BasicToken.T_STRING));
         }
 
-        StringBuilder name = new StringBuilder(cursor.ensure(AccessToken.namesAndKeywords()).value());
+        StringBuilder name = new StringBuilder(cursor.ensure(AccessToken.nameTokens()).value());
 
-        while (cursor.isCurrent(BasicToken.T_MINUS) && cursor.isNext(AccessToken.namesAndKeywords())) {
+        while (cursor.isCurrent(BasicToken.T_MINUS) && cursor.isNext(AccessToken.nameTokens())) {
             cursor.ensure(BasicToken.T_MINUS);
-            name.append('-').append(cursor.ensure(AccessToken.namesAndKeywords()).value());
+            name.append('-').append(cursor.ensure(AccessToken.nameTokens()).value());
+        }
+
+        return name.toString();
+    }
+
+    /**
+     * Reads a dotted name — {@code entry.listByPurpose} — from the cursor's position.
+     *
+     * <p>The counterpart of {@link #hyphenatedName(TokenCursor)}, and it exists for the same reason:
+     * the lexer gives {@code entry}, {@code .} and {@code listByPurpose} separately, and an action is
+     * one word.
+     *
+     * <p>The run cannot swallow what follows: nothing that may come after an action name — its
+     * description, {@code publishes}, the end of the line — begins with a dot.
+     *
+     * @param cursor the cursor, positioned on the first token of the name
+     * @return the name, dots included and quotes removed
+     */
+    public static String dottedName(TokenCursor cursor) {
+        if (cursor.isCurrent(BasicToken.T_STRING)) {
+            return literal(cursor.ensure(BasicToken.T_STRING));
+        }
+
+        StringBuilder name = new StringBuilder(cursor.ensure(AccessToken.nameTokens()).value());
+
+        while (cursor.isCurrent(BasicToken.T_DOT) && cursor.isNext(AccessToken.nameTokens())) {
+            cursor.ensure(BasicToken.T_DOT);
+            name.append('.').append(cursor.ensure(AccessToken.nameTokens()).value());
         }
 
         return name.toString();

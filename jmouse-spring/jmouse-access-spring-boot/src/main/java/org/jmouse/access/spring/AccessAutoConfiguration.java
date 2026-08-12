@@ -1,9 +1,13 @@
 package org.jmouse.access.spring;
 
 import org.jmouse.access.AccessEngine;
+import org.jmouse.access.PlaceholderResolver;
 import org.jmouse.access.EngineRefusals;
 import org.jmouse.access.ScopeCatalog;
+import org.jmouse.access.enforcement.AccessContext;
+import org.jmouse.access.enforcement.AccessContextDeclarations;
 import org.jmouse.access.enforcement.AccessRequirements;
+import org.jmouse.access.enforcement.AmbientAccessValues;
 import org.jmouse.access.enforcement.AccessTargetBinding;
 import org.jmouse.access.enforcement.AmbientPlace;
 import org.jmouse.access.enforcement.CurrentSubject;
@@ -11,7 +15,9 @@ import org.jmouse.access.enforcement.MethodAccessGuard;
 import org.jmouse.access.enforcement.ParameterNaming;
 import org.jmouse.access.enforcement.RefusalHandler;
 import org.jmouse.access.enforcement.RequiresAccess;
+import org.jmouse.access.spi.AccessContextScope;
 import org.jmouse.access.spi.AccessTargetRegistry;
+import org.jmouse.access.spi.ThreadBoundAccessContextScope;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -87,15 +93,53 @@ public class AccessAutoConfiguration {
         return new AccessTargetBinding(targets, scopes, naming, ambient);
     }
 
+    /**
+     * Where a published action lives while a call runs.
+     *
+     * <p>Bound to the thread, which is the honest default and — for an ordinary servlet request —
+     * indistinguishable from being bound to the request. ⚠️ An application dispatching authorization
+     * onto another thread replaces this, because a publication does not travel and a rule that stops
+     * applying is a call that goes through.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public AccessContextScope accessContextScope() {
+        return new ThreadBoundAccessContextScope();
+    }
+
+    /**
+     * What a route publishes about itself.
+     *
+     * @param placeholders how a {@code ${…}} in an {@code @AccessValue(is = …)} is filled. Optional:
+     *                     it comes from the policy auto-configuration, which is only present where an
+     *                     installation has policy files — and a declaration using a placeholder in an
+     *                     installation with none refuses at startup rather than silently comparing
+     *                     against the literal text
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public AccessContextDeclarations accessContextDeclarations(
+            ParameterNaming                      naming,
+            ObjectProvider<PlaceholderResolver>  placeholders,
+            ObjectProvider<AmbientAccessValues>  ambient) {
+
+        return new AccessContextDeclarations(
+                naming,
+                placeholders.getIfAvailable(PlaceholderResolver::none),
+                ambient.getIfAvailable(AmbientAccessValues::none));
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public MethodAccessGuard methodAccessGuard(
-            AccessEngine        engine,
-            AccessRequirements  requirements,
-            AccessTargetBinding binding,
-            EngineRefusals      refusals) {
+            AccessEngine              engine,
+            AccessRequirements        requirements,
+            AccessTargetBinding       binding,
+            EngineRefusals            refusals,
+            AccessContextDeclarations contexts,
+            AccessContextScope        published) {
 
-        return new MethodAccessGuard(engine, requirements, binding, refusals);
+        return new MethodAccessGuard(engine, requirements, binding, refusals, contexts, published);
     }
 
     /**
@@ -119,9 +163,22 @@ public class AccessAutoConfiguration {
             ObjectProvider<CurrentSubject>    subject,
             ObjectProvider<RefusalHandler>    refusals) {
 
+        /*
+         * ⚠️ @AccessContext is part of the pointcut, not only @RequiresAccess.
+         *
+         * A route may publish what it is doing without being gated itself — an agent tool, a
+         * listing whose own permission is enough — and the publication still has to reach the
+         * programmatic checks made inside it. Left out, those routes would be un-advised and the
+         * values would silently never appear, which is the failure this whole cluster exists to
+         * remove rather than relocate.
+         */
         Pointcut pointcut = Pointcuts.union(
-                AnnotationMatchingPointcut.forClassAnnotation(RequiresAccess.class),
-                AnnotationMatchingPointcut.forMethodAnnotation(RequiresAccess.class));
+                Pointcuts.union(
+                        AnnotationMatchingPointcut.forClassAnnotation(RequiresAccess.class),
+                        AnnotationMatchingPointcut.forMethodAnnotation(RequiresAccess.class)),
+                Pointcuts.union(
+                        AnnotationMatchingPointcut.forClassAnnotation(AccessContext.class),
+                        AnnotationMatchingPointcut.forMethodAnnotation(AccessContext.class)));
 
         DefaultPointcutAdvisor advisor = new DefaultPointcutAdvisor(
                 pointcut, new AccessAuthorizationInterceptor(guard, subject, refusals));

@@ -6,6 +6,7 @@ import org.jmouse.access.policy.model.PolicyDocument;
 import org.jmouse.access.policy.model.PolicyEntitlement;
 import org.jmouse.access.policy.model.PolicyGrant;
 import org.jmouse.access.policy.model.PolicyInclude;
+import org.jmouse.access.policy.model.PolicyActionDeclaration;
 import org.jmouse.access.policy.model.PolicyPermissionDeclaration;
 import org.jmouse.access.policy.model.PolicyPlan;
 import org.jmouse.access.policy.model.PolicyPlanGrant;
@@ -83,6 +84,7 @@ public final class PolicyDocuments {
                 List.of(),
                 mergeScopes(documents),
                 mergePermissions(documents),
+                mergeActions(documents),
                 mergeCapabilities(documents),
                 roles,
                 plans,
@@ -115,6 +117,10 @@ public final class PolicyDocuments {
                 document.permissions().stream()
                         .map(permission -> new PolicyPermissionDeclaration(
                                 permission.name(), permission.description(), SourceSpan.none()))
+                        .toList(),
+                document.actions().stream()
+                        .map(action -> new PolicyActionDeclaration(
+                                action.name(), action.description(), action.values(), SourceSpan.none()))
                         .toList(),
                 document.capabilities().stream()
                         .map(capability -> new PolicyCapabilityDeclaration(
@@ -220,6 +226,44 @@ public final class PolicyDocuments {
                             + "' and again in '" + document.name() + "', with different descriptions. A "
                             + "permission means one thing, and a catalogue holding two answers is one an "
                             + "administration screen chooses between at random.");
+                }
+            }
+        }
+
+        return List.copyOf(declared.values());
+    }
+
+    /**
+     * Every action the load declares, by name.
+     *
+     * <p>Merged the way permissions are and refused for the same reason. Two files describing one
+     * action differently is a catalogue with two answers; two files disagreeing about what an action
+     * <em>publishes</em> is worse, because it is what a rule is checked against — one of the two
+     * spellings would silently make a rule legal and the other would make it a boot failure,
+     * depending on load order.
+     */
+    private static List<PolicyActionDeclaration> mergeActions(List<PolicyDocument> documents) {
+        Map<String, PolicyActionDeclaration> declared   = new LinkedHashMap<>();
+        Map<String, String>                  declaredBy = new LinkedHashMap<>();
+
+        for (PolicyDocument document : documents) {
+            for (PolicyActionDeclaration action : document.actions()) {
+                PolicyActionDeclaration existing = declared.get(action.name());
+
+                if (existing == null) {
+                    declared.put(action.name(), action);
+                    declaredBy.put(action.name(), document.name());
+                    continue;
+                }
+
+                if (!Objects.equals(existing.description(), action.description())
+                    || !Objects.equals(existing.values(), action.values())) {
+
+                    throw new PolicyException(
+                            "'" + action.name() + "' is declared in '" + declaredBy.get(action.name())
+                            + "' and again in '" + document.name() + "', and the two do not agree. An "
+                            + "action means one thing and publishes one set of values; whichever the "
+                            + "load happened to read first would decide which rules about it are legal.");
                 }
             }
         }

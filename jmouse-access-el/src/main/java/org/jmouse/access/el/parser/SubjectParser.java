@@ -21,6 +21,11 @@ import static org.jmouse.el.lexer.BasicToken.*;
  * verbatim: resolving one needs a property source, which is exactly the dependency this stage keeps
  * out.</p>
  *
+ * <p>It may also be {@code *}, which means <strong>every account</strong> — {@code subject * { … }}.
+ * ⚠️ The parser reports it and decides nothing about it: {@code PolicyBinder} is what refuses
+ * everything in such a block except a denial, because a rule that quietly applied to everybody is the
+ * one nobody would notice writing.</p>
+ *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
@@ -45,7 +50,7 @@ public class SubjectParser extends PolicyBlockParser<SubjectNode, AccessToken> {
             return placeholder.toSource();
         }
 
-        return SourceReader.literal(cursor.ensure(T_IDENTIFIER, T_STRING));
+        return SourceReader.literal(cursor.ensure(T_IDENTIFIER, T_STRING, T_MULTIPLY));
     }
 
     @Override
