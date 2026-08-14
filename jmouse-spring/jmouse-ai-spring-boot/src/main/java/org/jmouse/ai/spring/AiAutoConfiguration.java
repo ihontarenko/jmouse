@@ -52,18 +52,23 @@ import java.util.List;
  * every feature's name. That direction is the whole arrangement, and it is why this reads the
  * definitions rather than being handed a list.
  *
- * <h2>Two defaults that are deliberately permissive, and are said out loud</h2>
+ * <h2>Three defaults that are deliberately weak, and are said out loud</h2>
  *
- * <p>⚠️ {@link CallerResolver#anonymous()} and {@link ToolAuthorizer#permitAll()} are the defaults,
- * because an application with one tool definition and no configuration has to start and dispatch — that
+ * <p>⚠️ An anonymous caller, an authorizer that permits everything, and a trace that records nothing —
+ * because an application with one tool definition and no configuration has to start and dispatch, which
  * is what makes this adoptable in an afternoon. But an application that reaches production still holding
- * them has an assistant nobody is authorizing, so {@link AiDiagnostics} says so at every startup, at
- * warning level, naming both. A default that is dangerous and silent is a different thing from a default
- * that is dangerous and announced.
+ * them has an assistant nobody authenticates, nobody authorizes and nothing records, so
+ * {@link AiDiagnostics} says so at every startup, at warning level, naming each one that is still there.
+ * A default that is dangerous and silent is a different thing from a default that is dangerous and
+ * announced.
  *
- * <p>The one default that is <em>not</em> permissive is {@link ScopeResolver#refusing()}, and for the
- * matching reason: an action declared as running inside a scope, in an application with no way to
- * resolve one, must not quietly run everywhere.
+ * <p>They are registered as the named types in {@link StartingDefaults} rather than as
+ * {@link CallerResolver#anonymous()} and friends, precisely so that the warning can tell them apart from
+ * a product's own two-line implementation. Behaviour identical; recognisability is the whole difference.
+ *
+ * <p>The one default that is <em>not</em> weak is {@link ScopeResolver#refusing()}, and for the matching
+ * reason: an action declared as running inside a scope, in an application with no way to resolve one,
+ * must not quietly run everywhere.
  */
 @AutoConfiguration
 @ConditionalOnClass(ToolCatalog.class)
@@ -190,13 +195,13 @@ public class AiAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public CallerResolver aiCallerResolver() {
-        return new PermissiveDefaults.AnonymousCallers();
+        return new StartingDefaults.AnonymousCallers();
     }
 
     @Bean
     @ConditionalOnMissingBean
     public ToolAuthorizer aiToolAuthorizer() {
-        return new PermissiveDefaults.PermitEverything();
+        return new StartingDefaults.PermitEverything();
     }
 
     @Bean
@@ -208,7 +213,7 @@ public class AiAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public InvocationTrace aiInvocationTrace() {
-        return new PermissiveDefaults.NoTrace();
+        return new StartingDefaults.NoTrace();
     }
 
     // ── The catalogue, and the one door to a handler ─────────────────────────────

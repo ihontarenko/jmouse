@@ -86,16 +86,16 @@ public class AiDiagnostics {
 
         List<String> stillDefault = new ArrayList<>();
 
-        if (callerResolver instanceof PermissiveDefaults.AnonymousCallers) {
+        if (callerResolver instanceof StartingDefaults.AnonymousCallers) {
             stillDefault.add("no CallerResolver — every call runs as the same anonymous caller");
         }
 
-        if (authorizer instanceof PermissiveDefaults.PermitEverything) {
+        if (authorizer instanceof StartingDefaults.PermitEverything) {
             stillDefault.add("no ToolAuthorizer — every action's declared permission is ignored and "
                            + "every call is permitted");
         }
 
-        if (trace instanceof PermissiveDefaults.NoTrace) {
+        if (trace instanceof StartingDefaults.NoTrace) {
             stillDefault.add("no InvocationTrace — nothing that happens is written down anywhere");
         }
 

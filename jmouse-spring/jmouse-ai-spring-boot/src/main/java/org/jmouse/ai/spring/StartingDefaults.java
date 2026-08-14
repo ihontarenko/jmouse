@@ -10,23 +10,26 @@ import org.jmouse.ai.spi.InvocationTrace;
 import org.jmouse.ai.spi.ToolAuthorizer;
 
 /**
- * The two defaults that let an unconfigured application dispatch, wrapped so they can be recognised.
+ * What an application gets before it has configured anything, wrapped so it can be recognised again.
  *
- * <p>Both are needed: an application with one tool definition and no configuration has to start and work,
- * or nothing about this library can be tried out in an afternoon. Both are also exactly what must not
- * still be in place when that application reaches production — one authenticates nobody, the other
- * authorizes everything.
+ * <p>All three are needed: an application with one tool definition and no configuration has to start and
+ * work, or nothing about this library can be tried out in an afternoon. All three are also exactly what
+ * must not still be in place when that application reaches production — one authenticates nobody, one
+ * authorizes everything, and one writes nothing down.
  *
- * <p><strong>Named types rather than the lambdas the interfaces already offer, for one reason.</strong>
- * {@link CallerResolver#anonymous()} and {@link ToolAuthorizer#permitAll()} return lambdas, and a lambda
- * cannot be told apart from a product's own two-line implementation at startup. Wrapping them lets
+ * <p><strong>Named types rather than the lambdas and no-ops the interfaces already offer, for one
+ * reason.</strong> {@link CallerResolver#anonymous()}, {@link ToolAuthorizer#permitAll()} and
+ * {@link org.jmouse.ai.spi.InvocationTrace#none()} hand back a lambda or an anonymous class, and neither
+ * can be told apart from a product's own two-line implementation at startup. Wrapping them lets
  * {@link AiDiagnostics} say <em>which</em> of these is still in place, by name, in the one log line
- * somebody reads. A default that is dangerous and announced is a different thing from a default that is
- * dangerous and silent.
+ * somebody reads — without asking reflection what kind of anonymous class it is holding.
+ *
+ * <p>A default that is dangerous and announced is a different thing from a default that is dangerous and
+ * silent. This class is the difference.
  */
-final class PermissiveDefaults {
+final class StartingDefaults {
 
-    private PermissiveDefaults() {
+    private StartingDefaults() {
     }
 
     /** Everybody is the same anonymous caller. */
