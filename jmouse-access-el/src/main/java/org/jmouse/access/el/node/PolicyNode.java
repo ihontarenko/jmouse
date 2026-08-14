@@ -68,6 +68,7 @@ public class PolicyNode extends PolicyBlockNode {
         List<PolicyScopeDeclaration>      scopes       = new ArrayList<>();
         List<PolicyPermissionDeclaration> permissions  = new ArrayList<>();
         List<PolicyActionDeclaration>     actions      = new ArrayList<>();
+        List<PolicyVariableDeclaration>   variables    = new ArrayList<>();
         List<PolicyCapabilityDeclaration> capabilities = new ArrayList<>();
         List<PolicyRole>                  roles        = new ArrayList<>();
         List<PolicyPlan>                  plans        = new ArrayList<>();
@@ -83,6 +84,8 @@ public class PolicyNode extends PolicyBlockNode {
                 permissions.addAll(block.toPermissionDeclarations());
             } else if (expression instanceof ActionsNode block) {
                 actions.addAll(block.toActionDeclarations());
+            } else if (expression instanceof VariablesNode block) {
+                variables.addAll(block.toVariableDeclarations());
             } else if (expression instanceof CapabilitiesNode block) {
                 capabilities.addAll(block.toCapabilityDeclarations());
             } else if (expression instanceof RoleNode role) {
@@ -95,13 +98,13 @@ public class PolicyNode extends PolicyBlockNode {
                 entitlements.addAll(block.toEntitlements());
             } else {
                 throw reject(expression, "a policy holds 'include', 'scopes', 'permissions', "
-                        + "'actions', 'capabilities', 'role', 'plans', 'subject' and 'entitlements' "
-                        + "declarations");
+                        + "'actions', 'variables', 'capabilities', 'role', 'plans', 'subject' and "
+                        + "'entitlements' declarations");
             }
         }
 
-        return new PolicyDocument(getName(), includes, scopes, permissions, actions, capabilities,
-                                  roles, plans, subjects, entitlements);
+        return new PolicyDocument(getName(), includes, scopes, permissions, actions, variables,
+                                  capabilities, roles, plans, subjects, entitlements);
     }
 
     @Override

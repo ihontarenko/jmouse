@@ -141,6 +141,7 @@ final public class ExpressionEvaluator {
                 document.scopes(),
                 document.permissions(),
                 document.actions(),
+                document.variables(),
                 document.capabilities(),
                 document.roles(),
                 document.plans(),

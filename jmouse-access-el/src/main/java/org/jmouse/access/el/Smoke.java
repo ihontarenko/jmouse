@@ -1,5 +1,6 @@
 package org.jmouse.access.el;
 
+import org.jmouse.access.VariableKind;
 import org.jmouse.access.policy.model.*;
 
 import java.util.List;
@@ -47,7 +48,11 @@ public final class Smoke {
                 }
                 actions {
                     entry.list           "List submissions"
-                    entry.listByPurpose  "List one purpose"  publishes purpose, tier
+                    entry.listByPurpose  "List one purpose"  produces purpose, tier
+                }
+                variables {
+                    constant  deployment
+                    dynamic   ambientType  "What the workspace this call is in counts"
                 }
                 capabilities {
                     paid parametric-search
@@ -131,6 +136,7 @@ public final class Smoke {
         verifyScopes(document.scopes(), verification);
         verifyPermissions(document.permissions(), verification);
         verifyActions(document.actions(), verification);
+        verifyVariables(document.variables(), verification);
         verifyCapabilities(document.capabilities(), verification);
         verifyPlans(document.plans(), verification);
         verifyRoles(document.roles(), verification);
@@ -145,7 +151,7 @@ public final class Smoke {
      * {@code listByPurpose} separately, exactly as it does a permission's colons, and a reader that
      * kept only the first segment would produce an action every rule fails to match.
      *
-     * <p><strong>{@code publishes} is optional, and an empty list is the statement.</strong> An action
+     * <p><strong>{@code produces} is optional, and an empty list is the statement.</strong> An action
      * carrying nothing is still worth declaring — a rule may scope itself to it and compare nothing
      * but its name — so absence has to arrive as "no values" rather than as a null nobody planned for.
      */
@@ -156,10 +162,38 @@ public final class Smoke {
 
         verification.equal("action 1", "entry.list", actions.get(0).name());
         verification.equal("action 1 description", "List submissions", actions.get(0).description());
-        verification.equal("action 1 publishes nothing", List.of(), actions.get(0).values());
+        verification.equal("action 1 produces nothing", List.of(), actions.get(0).values());
 
         verification.equal("action 2", "entry.listByPurpose", actions.get(1).name());
-        verification.equal("action 2 publishes", List.of("purpose", "tier"), actions.get(1).values());
+        verification.equal("action 2 produces", List.of("purpose", "tier"), actions.get(1).values());
+    }
+
+    /**
+     * Checks {@code variables}, and the two things about the block that carry its meaning.
+     *
+     * <p><strong>The kind word is the statement.</strong> {@code constant} and {@code dynamic} are not
+     * two spellings of one thing: they say whether reading the name can do work and whether two calls
+     * can see two answers, and the publishing side is held to the same distinction.
+     *
+     * <p><strong>The description is optional</strong>, for the reason an action's {@code produces} list
+     * is: a name a rule may mention is worth declaring before anybody has written the sentence, and a
+     * grammar that refused the line would teach people to write a placeholder one.
+     */
+    private static void verifyVariables(
+            List<PolicyVariableDeclaration> variables, Verification verification) {
+
+        if (!verification.size("variables", 2, variables)) {
+            return;
+        }
+
+        verification.equal("variable 1", "deployment", variables.get(0).name());
+        verification.equal("variable 1 kind", VariableKind.CONSTANT, variables.get(0).kind());
+        verification.equal("variable 1 has no description", null, variables.get(0).description());
+
+        verification.equal("variable 2", "ambientType", variables.get(1).name());
+        verification.equal("variable 2 kind", VariableKind.DYNAMIC, variables.get(1).kind());
+        verification.equal("variable 2 description",
+                           "What the workspace this call is in counts", variables.get(1).description());
     }
 
     private static void verifyCapabilities(

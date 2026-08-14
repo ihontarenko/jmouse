@@ -36,12 +36,28 @@ public class AccessRolePermission {
     @Column(name = "scope_type", length = 64, nullable = false)
     private String scopeType;
 
+    /**
+     * ⚠️ The expression this entry only applies under, as <strong>source</strong>, or null.
+     *
+     * <p>Source rather than anything compiled, and the name says so on purpose. A compiled predicate
+     * cannot be written back out, diffed, reviewed or shown in a code pane — and every one of those is
+     * something this project does with a condition. Compiling is the reader's job and happens once per
+     * distinct expression, not once per row and never once per request.
+     */
+    @Column(name = "condition_source", length = 1024)
+    private String conditionSource;
+
     protected AccessRolePermission() {
     }
 
     public AccessRolePermission(String roleId, String permission, String scopeType) {
-        this.key       = new Key(roleId, permission);
-        this.scopeType = scopeType;
+        this(roleId, permission, scopeType, null);
+    }
+
+    public AccessRolePermission(String roleId, String permission, String scopeType, String conditionSource) {
+        this.key             = new Key(roleId, permission);
+        this.scopeType       = scopeType;
+        this.conditionSource = conditionSource;
     }
 
     public String getRoleId() {
@@ -56,9 +72,23 @@ public class AccessRolePermission {
         return scopeType;
     }
 
+    public String getConditionSource() {
+        return conditionSource;
+    }
+
     /** How far this entry reaches. Changing it is an edit to the entry, never a different entry. */
     public void carryAt(String scopeType) {
         this.scopeType = scopeType;
+    }
+
+    /**
+     * What this entry applies under, or null for always.
+     *
+     * <p>An edit for the same reason {@link #carryAt} is: {@code (role, permission)} is the identity,
+     * so changing when it applies changes this entry rather than making another one.
+     */
+    public void applyOnly(String conditionSource) {
+        this.conditionSource = conditionSource;
     }
 
     /**

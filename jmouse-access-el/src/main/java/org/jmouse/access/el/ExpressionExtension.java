@@ -158,6 +158,8 @@ public class ExpressionExtension implements Extension {
                 new PermissionValueParser(),
                 new ActionsParser(),
                 new ActionDeclarationParser(),
+                new VariablesParser(),
+                new VariableDeclarationParser(),
                 new CapabilitiesParser(),
                 new CapabilityDeclarationParser(),
                 new PaidCapabilitiesParser(),

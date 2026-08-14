@@ -8,11 +8,14 @@ import org.jmouse.access.PermissionCatalog;
 import org.jmouse.access.ScopeCatalog;
 import org.jmouse.access.ScopeKind;
 import org.jmouse.access.ScopeNature;
+import org.jmouse.access.VariableCatalog;
+import org.jmouse.access.VariableKind;
 import org.jmouse.access.policy.model.PolicyCapabilityDeclaration;
 import org.jmouse.access.policy.model.PolicyDocument;
 import org.jmouse.access.policy.model.PolicyActionDeclaration;
 import org.jmouse.access.policy.model.PolicyPermissionDeclaration;
 import org.jmouse.access.policy.model.PolicyScopeDeclaration;
+import org.jmouse.access.policy.model.PolicyVariableDeclaration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -183,6 +186,21 @@ public final class PolicyVocabulary {
             PolicyDocument document, ScopeCatalog scopes, PermissionCatalog permissions,
             CapabilityCatalog capabilities, ActionCatalog actions) {
 
+        checkAgainst(document, scopes, permissions, capabilities, actions, VariableCatalog.empty());
+    }
+
+    /**
+     * The same, including what is true of every call.
+     *
+     * @param variables what the application attaches to every decision, or
+     *                  {@link VariableCatalog#empty()} where it attaches nothing — in which case a
+     *                  {@code variables} block goes unchecked, for the reason an empty action
+     *                  catalogue does
+     */
+    public static void checkAgainst(
+            PolicyDocument document, ScopeCatalog scopes, PermissionCatalog permissions,
+            CapabilityCatalog capabilities, ActionCatalog actions, VariableCatalog variables) {
+
         if (!document.declaresVocabulary()) {
             return;
         }
@@ -192,8 +210,59 @@ public final class PolicyVocabulary {
         checkScopes(document, scopes, problems);
         checkPermissions(document, permissions, problems);
         checkActions(document, actions, problems);
+        checkVariables(document, variables, problems);
         checkCapabilities(document, capabilities, scopes, problems);
         refuse(document, problems);
+    }
+
+    /**
+     * Checks the variable catalogue, and where each variable is said to come from.
+     *
+     * <p>⚠️ <strong>A variable written here that nothing attaches is the dangerous direction</strong>,
+     * exactly as an undeclared action is. A rule reading it compiles, loads, and never holds — and a
+     * conditional allow that never holds is a refusal nobody ordered.
+     *
+     * <p>The kind is checked as strictly as the name, and it is the rarer kind of check: a statement
+     * about a value's <em>provenance</em> held against the code that provides it. A file calling
+     * something constant that is in fact worked out per call is not a cosmetic error — every rule
+     * mentioning it has been read as though two calls must see the same answer.
+     *
+     * <p>The other direction — something attached that the file never mentions — is left to the
+     * product, for the reason it is left alone for actions: a value may legitimately exist before any
+     * rule reads it, and refusing to boot over one would make adding a declaration a two-repository
+     * change. An installation that wants its file complete checks that itself, where "not yet used"
+     * can be told from "forgotten".
+     */
+    private static void checkVariables(
+            PolicyDocument document, VariableCatalog variables, List<PolicyProblem> problems) {
+
+        if (variables.kindsByName().isEmpty()) {
+            return;
+        }
+
+        for (PolicyVariableDeclaration declared : document.variables()) {
+            VariableKind attached = variables.kindOf(declared.name());
+
+            if (attached == null) {
+                problems.add(PolicyProblem.at(declared.at(), "this file declares a variable '"
+                             + declared.name() + "' that nothing attaches. A rule reading it would load "
+                             + "and never hold, which reads exactly like a rule that works. Known "
+                             + "variables: " + variables.all() + "."));
+                continue;
+            }
+
+            if (attached != declared.kind()) {
+                problems.add(PolicyProblem.at(declared.at(), "'" + declared.name() + "' is declared "
+                             + spelling(declared.kind()) + ", and it is attached " + spelling(attached)
+                             + ". The difference is whether two calls can see two answers, so every rule "
+                             + "mentioning it is currently readable the wrong way."));
+            }
+        }
+    }
+
+    /** The word the file writes a kind with — so a message reads like the line it is about. */
+    private static String spelling(VariableKind kind) {
+        return kind == VariableKind.DYNAMIC ? "dynamic" : "constant";
     }
 
     /**
@@ -209,14 +278,14 @@ public final class PolicyVocabulary {
      * refusing to boot over one would make adding a declaration a two-repository change. A product
      * that wants to hear about it warns, which is where "not yet used" can be told from "forgotten".
      *
-     * <p>The {@code publishes} list is checked strictly, though. It is what an editor offers somebody
+     * <p>The {@code produces} list is checked strictly, though. It is what an editor offers somebody
      * writing a rule, so a value listed here that never arrives is a rule they will write and nobody
      * will see fail.
      */
     private static void checkActions(
             PolicyDocument document, ActionCatalog actions, List<PolicyProblem> problems) {
 
-        if (actions.publishedValuesByAction().isEmpty()) {
+        if (actions.producedValuesByAction().isEmpty()) {
             return;
         }
 
@@ -229,13 +298,14 @@ public final class PolicyVocabulary {
                 continue;
             }
 
-            Set<String> published = actions.valuesOf(declared.name());
+            Set<String> produced = actions.valuesOf(declared.name());
 
             for (String value : declared.values()) {
-                if (!published.contains(value)) {
+                if (!produced.contains(value)) {
                     problems.add(PolicyProblem.at(declared.at(), "'" + declared.name()
-                                 + "' is declared as publishing '" + value + "', and it does not. What "
-                                 + "it publishes is " + published + "."));
+                                 + "' is declared as producing '" + value + "', and it does not. What "
+                                 + "it produces is " + produced + ". A value that is true of every call "
+                                 + "belongs in the variables block, not here."));
                 }
             }
         }

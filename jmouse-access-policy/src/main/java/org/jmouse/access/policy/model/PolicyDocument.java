@@ -62,6 +62,7 @@ public record PolicyDocument(
         List<PolicyScopeDeclaration>      scopes,
         List<PolicyPermissionDeclaration> permissions,
         List<PolicyActionDeclaration>     actions,
+        List<PolicyVariableDeclaration>   variables,
         List<PolicyCapabilityDeclaration> capabilities,
         List<PolicyRole>                  roles,
         List<PolicyPlan>                  plans,
@@ -74,6 +75,7 @@ public record PolicyDocument(
         scopes       = scopes       == null ? List.of() : List.copyOf(scopes);
         permissions  = permissions  == null ? List.of() : List.copyOf(permissions);
         actions      = actions      == null ? List.of() : List.copyOf(actions);
+        variables    = variables    == null ? List.of() : List.copyOf(variables);
         capabilities = capabilities == null ? List.of() : List.copyOf(capabilities);
         roles        = roles        == null ? List.of() : List.copyOf(roles);
         plans        = plans        == null ? List.of() : List.copyOf(plans);
@@ -83,14 +85,35 @@ public record PolicyDocument(
 
     /** An empty document, for a file that declared nothing. */
     public static PolicyDocument empty(String name) {
-        return new PolicyDocument(name, List.of(), List.of(), List.of(), List.of(),
+        return new PolicyDocument(name, List.of(), List.of(), List.of(), List.of(), List.of(),
                                   List.of(), List.of(), List.of(), List.of(), List.of());
     }
 
     /** A document that grants but states no vocabulary — the common case, and every file today. */
     public static PolicyDocument of(String name, List<PolicyRole> roles, List<PolicySubject> subjects) {
-        return new PolicyDocument(name, List.of(), List.of(), List.of(), List.of(),
+        return new PolicyDocument(name, List.of(), List.of(), List.of(), List.of(), List.of(),
                                   List.of(), roles, List.of(), subjects, List.of());
+    }
+
+    /** The same, with the tier catalogue as well — what a projection of every row comes to. */
+    public static PolicyDocument of(String name, List<PolicyRole> roles, List<PolicySubject> subjects,
+                                    List<PolicyPlan> plans) {
+
+        return new PolicyDocument(name, List.of(), List.of(), List.of(), List.of(), List.of(),
+                                  List.of(), roles, plans, subjects, List.of());
+    }
+
+    /**
+     * A document that is nothing but a tier catalogue.
+     *
+     * <p>⚠️ For a product whose tiers are <strong>rows</strong> and which still wants
+     * {@link org.jmouse.access.policy.PolicyPlans#contentsOf} to resolve {@code extends} — lineage
+     * walking and cycle detection written once rather than once per storage choice. The document is
+     * derived, used for the length of one call and thrown away; nothing edits it and nothing stores it.
+     */
+    public static PolicyDocument ofPlans(String name, List<PolicyPlan> plans) {
+        return new PolicyDocument(name, List.of(), List.of(), List.of(), List.of(), List.of(),
+                                  List.of(), List.of(), plans, List.of(), List.of());
     }
 
     /**
@@ -103,11 +126,15 @@ public record PolicyDocument(
      */
     public boolean declaresVocabulary() {
         return !scopes.isEmpty() || !permissions.isEmpty() || !actions.isEmpty()
-               || !capabilities.isEmpty();
+               || !variables.isEmpty() || !capabilities.isEmpty();
     }
 
     public Optional<PolicyActionDeclaration> action(String actionName) {
         return actions.stream().filter(action -> action.name().equals(actionName)).findFirst();
+    }
+
+    public Optional<PolicyVariableDeclaration> variable(String variableName) {
+        return variables.stream().filter(variable -> variable.name().equals(variableName)).findFirst();
     }
 
     /**

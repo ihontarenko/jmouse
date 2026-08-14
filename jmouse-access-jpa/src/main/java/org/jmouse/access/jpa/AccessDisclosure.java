@@ -72,8 +72,16 @@ public interface AccessDisclosure {
             ScopeReference          at,
             String                  grantedBy,
             LocalDateTime           since,
+            String                  condition,
             List<BundledPermission> bundle
     ) {
+
+        /** ⚠️ Kept for callers that predate conditions. A holding with none is the ordinary one. */
+        public RoleHolding(String subjectId, String roleName, ScopeReference at, String grantedBy,
+                           LocalDateTime since, List<BundledPermission> bundle) {
+
+            this(subjectId, roleName, at, grantedBy, since, null, bundle);
+        }
 
         /** How far this holding carries one permission, or null where it does not carry it at all. */
         public BundledPermission carrying(String permission) {
@@ -97,7 +105,20 @@ public interface AccessDisclosure {
             ScopeReference at,
             String         grantedBy,
             String         reason,
-            LocalDateTime  since
+            LocalDateTime  since,
+            String         condition
     ) {
+
+        /**
+         * ⚠️ <strong>The condition is source text and it has to be here.</strong> This record is what a
+         * screen renders and what a projection writes back out as a document — and a projection that
+         * dropped conditions would describe rows that grant more than they do, which anything reading
+         * that description back would then apply.
+         */
+        public DirectHolding(String subjectId, String permission, boolean allowed, ScopeReference at,
+                             String grantedBy, String reason, LocalDateTime since) {
+
+            this(subjectId, permission, allowed, at, grantedBy, reason, since, null);
+        }
     }
 }

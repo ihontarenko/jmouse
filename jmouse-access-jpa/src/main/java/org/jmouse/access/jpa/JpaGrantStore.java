@@ -43,19 +43,38 @@ import java.util.stream.Collectors;
  * costs one round trip — and the widened result that produces is filtered against the chain before it
  * leaves. An engine that had to know a store's queries were approximate would be an engine that knew
  * the store.
+ *
+ * <h2>⚠️ Two things a row carries that it once could not</h2>
+ *
+ * <p><strong>A condition.</strong> This class used to say, in so many words, that a stored grant
+ * carries none and that <em>"conditions exist only where they can be read, which is the document"</em>.
+ * That was true while a document was in the read path beside these tables. Where it is not, the
+ * sentence inverts: a condition has nowhere else to live, and a policy that narrows a permission by a
+ * rule would simply stop narrowing it. The column holds source; {@link StoredConditions} turns it into
+ * something askable, and refuses to be missing.
+ *
+ * <p><strong>Everybody.</strong> {@code subject_id = '*'} is a denial aimed at every account at once,
+ * matched by one extra predicate rather than expanded into a row per account — see
+ * {@link org.jmouse.access.jpa.entity.AccessSubjectPermission#EVERYBODY}. It is deliberately the same
+ * trick a policy document plays at read time, for the same reason: a store must not be able to
+ * enumerate accounts.
  */
 public class JpaGrantStore implements GrantStore {
 
-    private final EntityManager       entityManager;
-    private final ScopeCatalog        scopes;
-    private final DeclaredRoleBundles declaredBundles;
+    private final EntityManager    entityManager;
+    private final ScopeCatalog     scopes;
+    private final StoredConditions conditions;
+
+    public JpaGrantStore(EntityManager entityManager, ScopeCatalog scopes) {
+        this(entityManager, scopes, StoredConditions.none());
+    }
 
     public JpaGrantStore(EntityManager entityManager, ScopeCatalog scopes,
-                         DeclaredRoleBundles declaredBundles) {
+                         StoredConditions conditions) {
 
-        this.entityManager   = entityManager;
-        this.scopes          = scopes;
-        this.declaredBundles = declaredBundles;
+        this.entityManager = entityManager;
+        this.scopes        = scopes;
+        this.conditions    = conditions;
     }
 
     @Override
@@ -87,13 +106,17 @@ public class JpaGrantStore implements GrantStore {
             return List.of();
         }
 
+        // ⚠️ `IN (:subjectId, '*')` rather than a second query and a merge. The everybody-block is a
+        // row about this subject as much as their own rows are — it is only written once instead of
+        // once per account — so it belongs in the same predicate, ordered and filtered with them.
         List<AccessSubjectPermission> overrides = entityManager.createQuery("""
                         SELECT override FROM AccessSubjectPermission override
-                         WHERE override.subjectId = :subjectId
+                         WHERE override.subjectId IN (:subjectId, :everybody)
                            AND override.scopeType IN :kinds
                            AND override.scopeId   IN :instances
                         """, AccessSubjectPermission.class)
                 .setParameter("subjectId", subjectId)
+                .setParameter("everybody", AccessSubjectPermission.EVERYBODY)
                 .setParameter("kinds", kindsOf(chain))
                 .setParameter("instances", instancesOf(chain))
                 .getResultList();
@@ -116,25 +139,34 @@ public class JpaGrantStore implements GrantStore {
                 .toList();
     }
 
+    /**
+     * ⚠️ Includes the everybody-block, and it has to.
+     *
+     * <p>This is what a control room asks to show <em>what does this account hold</em>, and a denial
+     * written at everybody is part of that answer — it is what is taking something away. Left out, the
+     * screen would list a permission the engine then refuses, and the reason would be a row the screen
+     * knows about and did not mention.
+     */
     @Override
     public List<DirectGrant> directHeldBy(String subjectId) {
         return entityManager.createQuery("""
                         SELECT override FROM AccessSubjectPermission override
-                         WHERE override.subjectId = :subjectId
+                         WHERE override.subjectId IN (:subjectId, :everybody)
                         """, AccessSubjectPermission.class)
                 .setParameter("subjectId", subjectId)
+                .setParameter("everybody", AccessSubjectPermission.EVERYBODY)
                 .getResultList().stream()
                 .map(this::toDirectGrant)
                 .toList();
     }
 
     /**
-     * One assignment, with everything its role bundles — from the table <strong>and</strong> from a
-     * policy document.
+     * One assignment, with everything its role bundles — <strong>from the table, and only the table</strong>.
      *
-     * <p>⚠️ The union is what makes a declared bundle reach a stored assignment. The <em>assignment</em>
-     * is still a row, so nothing about where it may be revoked from changes; what a file owns here is
-     * the bundle.
+     * <p>⚠️ This used to union the row's bundle with one a policy document declared, so that a file
+     * could own what a role carries while the assignment stayed a row. That is gone: a bundle has one
+     * home now, and it is here. What the union cost was a question with two answers — <em>what does
+     * this role carry</em> — of which a screen could only show one.
      */
     private RoleGrant toRoleGrant(AccessRoleAssignment assignment) {
         AccessRole role = entityManager.find(AccessRole.class, assignment.getRoleId());
@@ -143,22 +175,24 @@ public class JpaGrantStore implements GrantStore {
 
         if (role != null) {
             role.getBundle().stream()
-                    .map(entry -> new BundledPermission(entry.getPermission(), kind(entry.getScopeType())))
+                    .map(entry -> new BundledPermission(
+                            entry.getPermission(),
+                            kind(entry.getScopeType()),
+                            conditions.of(entry.getConditionSource())))
                     .forEach(bundle::add);
         }
 
         String roleName = role == null ? assignment.getRoleId() : role.getRoleName();
 
-        bundle.addAll(declaredBundles.bundleOf(roleName));
-
         return new RoleGrant(
                 roleName,
                 placeOf(assignment.getScopeType(), assignment.getScopeId()),
                 bundle,
-                // ⚠️ A stored assignment carries no condition, and there is no column for one. A
-                // predicate in a row is a predicate nobody can find — conditions exist only where they
-                // can be READ, which is the document.
-                GrantAttribution.stored(assignment.getGrantedBy(), writtenAt(assignment.getCreatedAt())));
+                // ⚠️ The assignment's own condition narrows everything the role carries, and a bundle
+                // entry's narrows that one entry further. Both apply, which is what `narrowedBy`
+                // composes rather than replaces — a narrowing of a narrowing is still a narrowing.
+                GrantAttribution.stored(assignment.getGrantedBy(), writtenAt(assignment.getCreatedAt()))
+                        .narrowedBy(conditions.of(assignment.getConditionSource())));
     }
 
     private DirectGrant toDirectGrant(AccessSubjectPermission override) {
@@ -167,7 +201,8 @@ public class JpaGrantStore implements GrantStore {
                 override.allows(),
                 placeOf(override.getScopeType(), override.getScopeId()),
                 GrantAttribution.stored(
-                        override.getGrantedBy(), override.getReason(), writtenAt(override.getCreatedAt())));
+                                override.getGrantedBy(), override.getReason(), writtenAt(override.getCreatedAt()))
+                        .narrowedBy(conditions.of(override.getConditionSource())));
     }
 
     /** When a row says it was written, in the engine's words — or nothing, where it does not say. */

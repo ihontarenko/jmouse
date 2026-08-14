@@ -123,9 +123,17 @@ public class AccessRole {
 
         bundle.removeIf(held -> !wanted.containsKey(held));
 
-        // A survivor keeps its instance and takes the new reach — identity is the (role, permission)
-        // key, so an entry whose scope changed is this entry edited rather than a different one.
-        bundle.forEach(held -> held.carryAt(wanted.get(held).getScopeType()));
+        // A survivor keeps its instance and takes the new reach AND the new condition — identity is
+        // the (role, permission) key, so an entry whose scope or condition changed is this entry
+        // edited rather than a different one. ⚠️ Both, and forgetting the second is silent: the entry
+        // survives the reconciliation, the row keeps yesterday's predicate, and the only symptom is a
+        // rule that goes on applying after somebody removed it.
+        bundle.forEach(held -> {
+            AccessRolePermission asked = wanted.get(held);
+
+            held.carryAt(asked.getScopeType());
+            held.applyOnly(asked.getConditionSource());
+        });
 
         entries.stream()
                 .filter(entry -> !bundle.contains(entry))

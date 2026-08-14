@@ -71,11 +71,21 @@ CREATE TABLE access_roles
 --  by where the role is assigned. A role naming an instance would grant it there
 --  to everybody holding the role — the language refuses to express it, and this
 --  table has no column to hold it.
+--
+--  ⚠️ `condition_source` is the expression a bundle entry only applies under, in
+--  the policy dialect, or NULL where it always applies. Named for what it holds:
+--  SOURCE TEXT, compiled on the way in and never on the way out. A row whose
+--  condition names an action nothing publishes is refused at write time, because
+--  a grant that can never fire is worse than one that was refused — nothing
+--  anywhere says it is not working.
+--
+--  (`condition` alone is a reserved word in MySQL, which is the smaller reason.)
 CREATE TABLE access_role_permissions
 (
-    role_id    VARCHAR(36)  NOT NULL,
-    permission VARCHAR(128) NOT NULL,
-    scope_type VARCHAR(64)  NOT NULL DEFAULT 'GLOBAL',
+    role_id          VARCHAR(36)   NOT NULL,
+    permission       VARCHAR(128)  NOT NULL,
+    scope_type       VARCHAR(64)   NOT NULL DEFAULT 'GLOBAL',
+    condition_source VARCHAR(1024),
 
     CONSTRAINT access_role_permissions_pk      PRIMARY KEY (role_id, permission),
     CONSTRAINT access_role_permissions_fk_role FOREIGN KEY (role_id)
@@ -104,6 +114,9 @@ CREATE TABLE access_role_assignments
     -- from a mechanism this library has never heard of, and refusing the row would
     -- be the library legislating about the product's own provenance vocabulary.
     source     VARCHAR(32) NOT NULL DEFAULT 'DIRECT',
+    -- ⚠️ The expression this assignment only applies under, or NULL. See
+    -- access_role_permissions for why it is stored as source and compiled on write.
+    condition_source VARCHAR(1024),
     -- ⚠️ A plain identifier with nothing behind it. A granter whose account is
     -- deleted must leave the grant STANDING and legible — "granted by somebody who
     -- has since left" is the honest record, and a SET NULL would erase the one
@@ -132,6 +145,14 @@ CREATE INDEX index_access_role_assignments_scope   ON access_role_assignments (s
 --
 --  `reason` is not decoration: a denial nobody can explain is a support ticket
 --  that outlives whoever wrote it.
+--
+--  ⚠️ `subject_id` may be the reserved value '*', meaning EVERY subject. It is
+--  matched by one extra predicate when a subject is read, never expanded into a
+--  row per account — an expansion would grow with every registration and would
+--  have to be maintained by whatever creates accounts. The CHECK is what keeps it
+--  honest: '*' may only ever DENY. A universal allow written by accident appears
+--  on no screen that lists what one person holds, so the row is refused by the
+--  database rather than by whichever writer remembered.
 CREATE TABLE access_subject_permissions
 (
     id         VARCHAR(36)  NOT NULL,
@@ -141,10 +162,15 @@ CREATE TABLE access_subject_permissions
                    CHECK (effect IN ('ALLOW', 'DENY')),
     scope_type VARCHAR(64)  NOT NULL DEFAULT 'GLOBAL',
     scope_id   VARCHAR(36)  NOT NULL DEFAULT '*',
+    -- ⚠️ The expression this grant only applies under, or NULL. See
+    -- access_role_permissions for why it is stored as source and compiled on write.
+    condition_source VARCHAR(1024),
     reason     VARCHAR(512),
     granted_by VARCHAR(36),
     created_at TIMESTAMP    NOT NULL,
 
+    CONSTRAINT access_subject_permissions_everybody_denies_only
+        CHECK (subject_id <> '*' OR effect = 'DENY'),
     CONSTRAINT access_subject_permissions_pk     PRIMARY KEY (id),
     CONSTRAINT access_subject_permissions_unique UNIQUE (subject_id, permission, scope_type, scope_id)
 );
@@ -277,3 +303,62 @@ CREATE TABLE access_policy_revisions
 -- The only two reads there are: "what is in force" (the highest version) and
 -- "show me the history" (all of them, newest first). One index answers both.
 CREATE INDEX index_access_policy_revisions_version ON access_policy_revisions (version DESC);
+
+
+-- ── access_plans ──────────────────────────────────────────────────────────────
+--  The TEMPLATE catalogue: which tiers exist and what each one includes.
+--
+--  ⚠️ NOT a grant source and NOT a membership record. Nothing joins an account to
+--  a row here, and nothing here answers "what may this account do". Who is on a
+--  tier is an access_capability_grants row carrying the tier as its
+--  source_reference, which is exactly where ADR-0018 left it.
+--
+--  ⚠️ This does not resurrect what ADR-0018 deleted. The defect there was ONE FACT
+--  WRITTEN TWICE — the grants said who was on a tier and organizations.plan_id
+--  said it again. A catalogue of templates duplicates nothing, because no row
+--  anywhere points at it as an answer. The similar name is exactly why this
+--  paragraph exists.
+--
+--  ⚠️ Editing a tier does not reissue it. A grant is materialised from a template
+--  at the moment of assignment and is a row from then on; changing what Business
+--  includes changes what the NEXT account put on Business receives and nothing
+--  about the accounts already on it. Any screen editing this has to say so.
+CREATE TABLE access_plans
+(
+    code          VARCHAR(64)  NOT NULL,
+    display_name  VARCHAR(128) NOT NULL,
+    display_order INT          NOT NULL DEFAULT 0,
+    note          VARCHAR(512),
+    -- The tier this one is written as a difference from, or NULL. Resolved on
+    -- READ rather than flattened on write, so an editor can show an inherited
+    -- line as inherited — which flattening would destroy, and which is most of
+    -- what makes a ladder legible.
+    extends_code  VARCHAR(64),
+
+    CONSTRAINT access_plans_pk PRIMARY KEY (code)
+);
+
+
+-- ── access_plan_grants ────────────────────────────────────────────────────────
+--  One capability a tier includes, with its ceiling where it has one.
+--
+--  ⚠️ `quantity` is TEXT and not a number, deliberately. A tier says `storage-byte
+--  100GB` three lines from `workspace 25`, and only one of those is a size — what
+--  `GB` means is the product's to know, not this library's. Parsing it here would
+--  make the schema hold an opinion about units it cannot have.
+--
+--  No ceiling and no `unlimited` means a GATE: the capability is included and
+--  nothing counts it.
+CREATE TABLE access_plan_grants
+(
+    plan_code  VARCHAR(64) NOT NULL,
+    capability VARCHAR(64) NOT NULL,
+    quantity   VARCHAR(32),
+    period     VARCHAR(8)
+                   CHECK (period IN ('DAY', 'MONTH', 'YEAR', 'EVER')),
+    unlimited  BOOLEAN     NOT NULL DEFAULT FALSE,
+
+    CONSTRAINT access_plan_grants_pk      PRIMARY KEY (plan_code, capability),
+    CONSTRAINT access_plan_grants_fk_plan FOREIGN KEY (plan_code)
+        REFERENCES access_plans (code) ON DELETE CASCADE
+);

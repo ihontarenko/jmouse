@@ -56,6 +56,28 @@ public enum AccessToken implements Token.Type {
     /** {@code role NAME { … }} — a bundle of permissions and how far each reaches. */
     T_ROLE(10300, "role"),
 
+    /**
+     * {@code role SPACE_ADMIN assignable @SPACE { … }} — the widest scope this role may be handed out
+     * at.
+     *
+     * <p>⚠️ <strong>Not the same question as a bundle entry's reach, and the difference is the one this
+     * keyword exists for.</strong> A bundle entry says how far a permission travels <em>once somebody
+     * holds the role</em>; this says where the role may be <em>given</em>. Without it there is no way
+     * to stop an installation-wide role being handed out per workspace, or a workspace role being
+     * handed out installation-wide — and that second one is a live escalation rather than an
+     * inconvenience.
+     *
+     * <p>It was absent for as long as a declared role never became a row. The moment a document seeds
+     * {@code access_roles}, the column has to come from somewhere, and the choice was between stating
+     * it here and deriving it from the widest scope in the bundle. Deriving is wrong twice over: it is
+     * silently undefined for a role that bundles nothing — a membership marker carries no permissions
+     * and is still assignable at exactly one place — and it makes a limit on authority a side effect of
+     * an unrelated fact, so editing a bundle would quietly move it.
+     *
+     * <p>Optional in the grammar, because a document that never becomes rows does not need it.
+     */
+    T_ASSIGNABLE(11200, "assignable"),
+
     /** {@code subject id { … }} — one account's assignments and personal grants. */
     T_SUBJECT(10400, "subject"),
 
@@ -73,6 +95,17 @@ public enum AccessToken implements Token.Type {
 
     /** {@code actions { … }} — the vocabulary of what calls are doing. */
     T_ACTIONS(10900, "actions"),
+
+    /**
+     * {@code variables { … }} — the vocabulary of what is true of <em>every</em> call.
+     *
+     * <p>⚠️ <strong>The block that exists so an action stops being asked to own what it never
+     * produced.</strong> A value like {@code deployment} is attached to every decision an installation
+     * makes, including the ones no action names. Written into each action's {@link #T_PRODUCES} list it
+     * was the same word repeated per line and, worse, a false statement: the action does not produce
+     * it. Here it is stated once, as what it is.
+     */
+    T_VARIABLES(10950, "variables"),
 
     /** {@code grants ROLE @SCOPE} — assigns a role to the enclosing subject. */
     T_GRANTS(20000, "grants"),
@@ -125,8 +158,27 @@ public enum AccessToken implements Token.Type {
     /** {@code reason "…"} — why, and the words a refusal repeats back. */
     T_REASON(22600, "reason"),
 
-    /** {@code publishes purpose, tier} — the values one action carries into a condition. */
-    T_PUBLISHES(22700, "publishes"),
+    /** {@code produces purpose, tier} — the values one action carries into a condition. */
+    T_PRODUCES(22700, "produces"),
+
+    /**
+     * {@code constant deployment "…"} — a variable whose value is settled before any call arrives.
+     *
+     * <p>Configuration, in other words: which deployment this is, what the installation answers on.
+     * A rule reading one is reading something that cannot change while a request runs.
+     */
+    T_CONSTANT(22800, "constant"),
+
+    /**
+     * {@code dynamic ambientType "…"} — a variable worked out from the call being decided.
+     *
+     * <p>⚠️ The distinction is not decoration and is <strong>checked</strong>: it is exactly
+     * {@code attach} against {@code attachLazy} on the publishing side, so a file calling something
+     * constant that is in fact worked out per call is a file that has stopped being true. It also
+     * tells a reader the one thing they need about a rule's cost — a dynamic variable is work, done
+     * only where a rule names it.
+     */
+    T_DYNAMIC(22900, "dynamic"),
 
     /** {@code include 'path'} — records a path; the loader, not the parser, follows it. */
     T_INCLUDE(21000, "include");

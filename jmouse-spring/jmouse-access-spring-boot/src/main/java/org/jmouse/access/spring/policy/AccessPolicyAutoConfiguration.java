@@ -11,11 +11,13 @@ import org.jmouse.access.policy.CompositeGrantStore;
 import org.jmouse.access.policy.ConditionCompiler;
 import org.jmouse.access.policy.LivePolicy;
 import org.jmouse.access.ActionCatalog;
+import org.jmouse.access.VariableCatalog;
 import org.jmouse.access.PlaceholderResolver;
 import org.jmouse.access.policy.PolicyBinder;
 import org.jmouse.access.policy.PolicyException;
 import org.jmouse.access.policy.LivePolicyEntitlements;
 import org.jmouse.access.policy.PolicyEntitlementStore;
+import org.jmouse.access.policy.PolicyEntitlementStore.SubjectHandleResolver;
 import org.jmouse.access.policy.PolicyEntitlementStore.SubjectHandleResolver;
 import org.jmouse.access.policy.PolicyGrantStore;
 import org.jmouse.access.policy.QuantityScale;
@@ -135,6 +137,10 @@ public class AccessPolicyAutoConfiguration {
      *                    string too, and a rule scoped to one nothing publishes does not merely fail
      *                    to grant — it fails to <em>deny</em>, silently. Absent where the application
      *                    publishes none, in which case there is nothing to disagree with
+     * @param variables   optional, and the other half of what a condition may read: the values that
+     *                    are true of every call rather than of one action. Given separately because
+     *                    they are a different fact — folded into the action catalogue every action
+     *                    would have to claim to produce every one of them
      */
     @Bean
     @ConditionalOnMissingBean
@@ -143,6 +149,8 @@ public class AccessPolicyAutoConfiguration {
             ObjectProvider<PermissionCatalog> permissions,
             ObjectProvider<ConditionCompiler> conditions,
             ObjectProvider<ActionCatalog>     actions,
+            ObjectProvider<VariableCatalog>   variables,
+            ObjectProvider<SubjectHandleResolver> handles,
             PlaceholderResolver               placeholders) {
 
         PermissionCatalog declared = permissions.getIfAvailable(() -> {
@@ -153,8 +161,14 @@ public class AccessPolicyAutoConfiguration {
                     + "— which is the one failure writing authorization down exists to prevent.");
         });
 
+        // ⚠️ The same resolver PolicyEntitlementStore is given, and handing it to both is the point.
+        // The entitlement axis has taken one since it was written and this one had not, so
+        // `@ORGANIZATION:acme` resolved in an `entitlements` block and bound to the literal slug in a
+        // `grants` line — conferring nothing, and looking exactly like an assignment nobody had made.
         return new PolicyBinder(scopes, declared, conditions.getIfAvailable(), placeholders)
-                .checking(actions.getIfAvailable(ActionCatalog::empty));
+                .checking(actions.getIfAvailable(ActionCatalog::empty))
+                .checking(variables.getIfAvailable(VariableCatalog::empty))
+                .resolvingHandlesWith(handles.getIfAvailable());
     }
 
     /**

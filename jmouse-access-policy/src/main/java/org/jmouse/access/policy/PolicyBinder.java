@@ -8,6 +8,7 @@ import org.jmouse.access.ScopeCatalog;
 import org.jmouse.access.ScopeKind;
 import org.jmouse.access.ScopeNature;
 import org.jmouse.access.ScopeReference;
+import org.jmouse.access.VariableCatalog;
 import org.jmouse.access.policy.AccessPolicy.BoundAssignment;
 import org.jmouse.access.policy.AccessPolicy.BoundSubject;
 import org.jmouse.access.policy.model.PolicyBundleEntry;
@@ -16,6 +17,7 @@ import org.jmouse.access.policy.model.PolicyDocument;
 import org.jmouse.access.policy.model.PolicyGrant;
 import org.jmouse.access.policy.model.PolicyRole;
 import org.jmouse.access.policy.model.PolicyRoleAssignment;
+import org.jmouse.access.policy.PolicyEntitlementStore.SubjectHandleResolver;
 import org.jmouse.access.policy.model.PolicyScope;
 import org.jmouse.access.policy.model.PolicySubject;
 import org.jmouse.access.policy.model.SourceSpan;
@@ -27,6 +29,7 @@ import org.jmouse.access.spi.GrantOrigin;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +84,33 @@ public final class PolicyBinder {
      */
     private ActionCatalog actions = ActionCatalog.empty();
 
+    /**
+     * ⚠️ Empty unless a product attaches values to every decision, and an empty catalogue checks
+     * nothing.
+     *
+     * <p>Separate from {@link #actions} because the two answer different questions. An action's values
+     * are what <em>that call</em> is about; a variable is true of every call, including the ones no
+     * action names. Merged into one catalogue a variable has to be listed against every action —
+     * making the file say that a route produces the deployment name, which no route does.
+     */
+    private VariableCatalog variables = VariableCatalog.empty();
+
+    /**
+     * How {@code @SPACE:kyiv} becomes the identifier a row carries. Identity unless a product registers
+     * one, which is what every installation without slugs wants.
+     *
+     * <p>⚠️ <strong>The same resolver the entitlement axis already uses, and it was a real gap that
+     * this axis did not.</strong> {@code PolicyEntitlementStore} has taken one since it was written, so
+     * {@code @ORGANIZATION:acme} in an {@code entitlements} block resolved and the identical handle in
+     * a {@code grants} line did not — it bound to the literal slug, matched no place in the covering
+     * chain, and conferred nothing. Silently: an assignment that reaches nowhere looks exactly like an
+     * assignment nobody has been given yet.
+     *
+     * <p>Not a constructor parameter, for the reason the catalogues are not: every product that never
+     * writes a handle keeps compiling and keeps behaving exactly as before.
+     */
+    private SubjectHandleResolver handles = (scopeName, handle) -> handle;
+
     public PolicyBinder(ScopeCatalog scopes, PermissionCatalog permissions) {
         this(scopes, permissions, null, PlaceholderResolver.none());
     }
@@ -129,10 +159,35 @@ public final class PolicyBinder {
     /**
      * The same binder, also checking what this installation's calls say they are doing.
      *
-     * @param published every action the routes publish, and the values each carries
+     * @param published every action the routes publish, and the values each produces
      */
     public PolicyBinder checking(ActionCatalog published) {
         this.actions = published == null ? ActionCatalog.empty() : published;
+        return this;
+    }
+
+    /**
+     * The same binder, also checking what is true of every call.
+     *
+     * @param attached every value this installation attaches to a decision regardless of action, and
+     *                 where each one comes from
+     */
+    public PolicyBinder checking(VariableCatalog attached) {
+        this.variables = attached == null ? VariableCatalog.empty() : attached;
+        return this;
+    }
+
+    /**
+     * The same binder, reading a handle the way this product's rows are keyed.
+     *
+     * <p>Hand it the resolver {@code PolicyEntitlementStore} is given and the two axes read
+     * {@code @ORGANIZATION:acme} identically — which is the only behaviour anybody reading a document
+     * expects, and was not what happened.
+     *
+     * @param resolver how a slug becomes an identifier; null leaves handles as written
+     */
+    public PolicyBinder resolvingHandlesWith(SubjectHandleResolver resolver) {
+        this.handles = resolver == null ? (scopeName, handle) -> handle : resolver;
         return this;
     }
 
@@ -140,7 +195,7 @@ public final class PolicyBinder {
         // A file may also state the vocabulary it is written against. Where it does, it is checked
         // rather than believed: this installation's scopes come from code, and a file that quietly
         // described different ones would be documentation that had stopped being true.
-        PolicyVocabulary.checkAgainst(document, scopes, permissions, capabilities, actions);
+        PolicyVocabulary.checkAgainst(document, scopes, permissions, capabilities, actions, variables);
 
         List<PolicyProblem> problems = new ArrayList<>();
 
@@ -209,19 +264,48 @@ public final class PolicyBinder {
 
     // ── Subjects ──────────────────────────────────────────────────────────────
 
+    /**
+     * ⚠️ <strong>A subject block accumulates, so two <em>files</em> about one person is not a
+     * disagreement — two blocks in one file still is.</strong>
+     *
+     * <p>This is deliberately the opposite of the rule for roles, and the difference is in what the
+     * block does. A bundle <em>replaces</em>: two files describing {@code SPACE_ADMIN} leave "which
+     * one wins" to be settled by file order, and file order must not decide what anybody may do. A
+     * subject block <em>adds</em>: every line is another grant or another assignment, deny wins over
+     * all of them wherever either was written, and concatenating them in either order produces the
+     * same answer. {@link PolicyDocuments#merge} already says exactly this about the entitlement half.
+     *
+     * <p>Refusing it made the split by concern impossible: an installation's un-revokable bootstrap
+     * grants and its founding assignments are two different decisions about one account, reviewed on
+     * two different days, and putting them in one block to satisfy the binder would make the second
+     * set un-revokable too.
+     *
+     * <p>Within one file it stays a refusal, because there it is a copy-paste rather than a decision:
+     * one of the two blocks is invisible to whoever reads the file and neither is obviously the one
+     * that matters. The two cases are told apart by the document a span names, which
+     * {@code PolicyDocuments.merge} attributes before this ever runs.
+     */
     private Map<String, BoundSubject> bindSubjects(
             PolicyDocument document, Set<String> declaredRoles, List<PolicyProblem> problems) {
 
-        Map<String, BoundSubject> bound = new LinkedHashMap<>();
+        Map<String, BoundSubject> bound     = new LinkedHashMap<>();
+        Map<String, Set<String>>  writtenIn = new LinkedHashMap<>();
 
         for (PolicySubject subject : document.subjects()) {
             // ⚠️ The wildcard is not filled. A placeholder resolving to '*' would be a rule about
             // everybody arriving from a property nobody reading the file can see.
             String identifier = EVERYBODY.equals(subject.id()) ? EVERYBODY : fill(subject.id());
+            String origin     = subject.at().document();
 
-            if (bound.containsKey(identifier)) {
+            // ⚠️ Every file this subject was already read from, not just the last one — otherwise
+            // A, B, A reads the repeat in A as a different file and lets the copy-paste through.
+            Set<String> already = writtenIn.computeIfAbsent(identifier, subjectName -> new HashSet<>());
+
+            if (!already.add(origin)) {
                 problems.add(PolicyProblem.at(
-                        subject.at(), "subject '" + identifier + "' is declared twice."));
+                        subject.at(), "subject '" + identifier + "' is declared twice in the same "
+                                      + "file. Two blocks about one account hide one another; write "
+                                      + "one, or put the second in a file of its own."));
                 continue;
             }
 
@@ -229,12 +313,26 @@ public final class PolicyBinder {
                 refuseAnythingButADenial(subject, problems);
             }
 
-            bound.put(identifier, new BoundSubject(
+            BoundSubject alreadyBound = bound.get(identifier);
+            BoundSubject justBound    = new BoundSubject(
                     bindAssignments(subject, document.name(), declaredRoles, problems),
-                    bindGrants(subject, document.name(), problems)));
+                    bindGrants(subject, document.name(), problems));
+
+            bound.put(identifier, alreadyBound == null ? justBound : combine(alreadyBound, justBound));
         }
 
         return bound;
+    }
+
+    /** Two blocks about one account, read as the one block they add up to. */
+    private static BoundSubject combine(BoundSubject earlier, BoundSubject later) {
+        List<BoundAssignment> roles  = new ArrayList<>(earlier.roles());
+        List<DirectGrant>     grants = new ArrayList<>(earlier.grants());
+
+        roles.addAll(later.roles());
+        grants.addAll(later.grants());
+
+        return new BoundSubject(roles, grants);
     }
 
     /**
@@ -393,17 +491,23 @@ public final class PolicyBinder {
      * deny when action == 'label.print' and purpose != 'HOLDER'
      * </pre>
      *
-     * <p>Both names exist. {@code label.print} is a real action; {@code purpose} really is published —
+     * <p>Both names exist. {@code label.print} is a real action; {@code purpose} really is produced —
      * by a different route. So this rule never fires, and the administrator who wrote it believes
      * printing is closed. Checking the names one at a time passes it; only checking them
      * <strong>together</strong> catches it, and that is possible only because an action is its own
      * member and there is therefore something to check the value against.
      *
+     * <p>⚠️ <strong>A declared variable is exempt, and that is the point of declaring one.</strong>
+     * {@code deployment} is attached to every decision, so a rule reading it under {@code label.print}
+     * is correct and would be refused by a check that knew only what actions produce. Before there was
+     * a variables block the only way to say so was to list the name against every action — which made
+     * the file claim each route produces it, and each new route a place to forget.
+     *
      * <p>Two rules are deliberately let through:
      *
      * <ul>
      *   <li><strong>A rule scoped to no action</strong> can only be name-checked, because a value is
-     *       legitimate wherever anything publishes it. That is the right incentive rather than a gap:
+     *       legitimate wherever anything produces it. That is the right incentive rather than a gap:
      *       an unscoped rule holds everywhere in a call, which is almost never what anybody means.
      *   <li><strong>A rule the compiler could not read exactly.</strong> Guessing would refuse rules
      *       that work, and a validator that refuses correct rules is one somebody switches off.
@@ -412,11 +516,11 @@ public final class PolicyBinder {
     private void checkTheRuleCanEverFire(String source, SourceSpan at, List<PolicyProblem> problems) {
         ConditionMentions mentions = conditions.mentions(source);
 
-        // ⚠️ Runs whatever the action catalogue holds. A path is wrong or right on its own — it is
-        // checked against a type this engine owns, not against what some route happens to publish.
+        // ⚠️ Runs whatever the catalogues hold. A path is wrong or right on its own — it is checked
+        // against a type this engine owns, not against what some route happens to produce.
         checkEveryPathResolves(mentions, at, problems);
 
-        if (actions.publishedValuesByAction().isEmpty() || !mentions.isCheckable()) {
+        if (knowsNothing() || !mentions.isCheckable()) {
             return;
         }
 
@@ -429,20 +533,32 @@ public final class PolicyBinder {
         }
 
         if (!mentions.namesAnAction()) {
-            checkEveryValueIsPublishedBySomething(source, at, mentions, problems);
+            checkEveryValueIsProducedBySomething(at, mentions, problems);
             return;
         }
 
         for (String value : mentions.values()) {
-            if (isPublishedByAny(mentions.actions(), value)) {
+            if (variables.contains(value) || isProducedByAny(mentions.actions(), value)) {
                 continue;
             }
 
             problems.add(PolicyProblem.at(at, "this rule reads '" + value + "' and is scoped to "
-                         + describe(mentions.actions()) + ", which publishes " + publishedBy(mentions.actions())
+                         + describe(mentions.actions()) + ", which produces " + producedBy(mentions.actions())
+                         + ", and it is not a declared variable" + andTheseAre()
                          + ". Both names exist, so nothing else would object — and the rule would never "
                          + "fire, which reads exactly like a rule that works."));
         }
+    }
+
+    /**
+     * Whether this binder has been told anything at all about what a call carries.
+     *
+     * <p>⚠️ Both catalogues, not either. A product registering one of the two is telling the truth
+     * about half of what a rule may read, and refusing every name from the other half would be a
+     * validator that refuses correct rules — which is how a validator gets switched off.
+     */
+    private boolean knowsNothing() {
+        return actions.producedValuesByAction().isEmpty() && variables.kindsByName().isEmpty();
     }
 
     /**
@@ -486,22 +602,25 @@ public final class PolicyBinder {
 
     /**
      * The weaker half, for a rule that bounds itself to nothing: every name it reads must at least be
-     * published by <em>something</em>, or it is a typo nobody would ever see.
+     * produced by <em>something</em> or declared as a variable, or it is a typo nobody would ever see.
      */
-    private void checkEveryValueIsPublishedBySomething(
-            String source, SourceSpan at, ConditionMentions mentions, List<PolicyProblem> problems) {
+    private void checkEveryValueIsProducedBySomething(
+            SourceSpan at, ConditionMentions mentions, List<PolicyProblem> problems) {
 
-        Set<String> anywhere = actions.everyPublishedValue();
+        Set<String> anywhere = actions.everyProducedValue();
 
         for (String value : mentions.values()) {
-            if (!anywhere.contains(value)) {
-                problems.add(PolicyProblem.at(at, "this rule reads '" + value + "', which no "
-                             + "route publishes anywhere. Published values: " + anywhere + "."));
+            if (anywhere.contains(value) || variables.contains(value)) {
+                continue;
             }
+
+            problems.add(PolicyProblem.at(at, "this rule reads '" + value + "', which no route "
+                         + "produces anywhere and which nothing declares as a variable. Produced "
+                         + "values: " + anywhere + ". Variables: " + variables.all() + "."));
         }
     }
 
-    private boolean isPublishedByAny(Set<String> named, String value) {
+    private boolean isProducedByAny(Set<String> named, String value) {
         return named.stream().anyMatch(action -> actions.valuesOf(action).contains(value));
     }
 
@@ -511,12 +630,17 @@ public final class PolicyBinder {
                 : named.stream().map(action -> "'" + action + "'").collect(joining(" or "));
     }
 
-    private String publishedBy(Set<String> named) {
-        Set<String> published = new TreeSet<>();
+    private String producedBy(Set<String> named) {
+        Set<String> produced = new TreeSet<>();
 
-        named.forEach(action -> published.addAll(actions.valuesOf(action)));
+        named.forEach(action -> produced.addAll(actions.valuesOf(action)));
 
-        return published.isEmpty() ? "nothing" : published.toString();
+        return produced.isEmpty() ? "nothing" : produced.toString();
+    }
+
+    /** The variables a refusal lists, so the message names the other place the value could come from. */
+    private String andTheseAre() {
+        return variables.kindsByName().isEmpty() ? "" : " (the variables are " + variables.all() + ")";
     }
 
     /**
@@ -564,8 +688,10 @@ public final class PolicyBinder {
             return Optional.empty();
         }
 
+        // Placeholders first, handles second: `${innoventa.bootstrap.space}` has to become a slug
+        // before anything can look that slug up.
         return Optional.of(kind.nature() == ScopeNature.PLACE
-                ? ScopeReference.of(kind, fill(scope.instance()))
+                ? ScopeReference.of(kind, handles.resolve(kind.name(), fill(scope.instance())))
                 : ScopeReference.of(kind, ScopeKind.NO_INSTANCE));
     }
 

@@ -81,9 +81,19 @@ public final class CursorMatcher {
         return new ActionsMatcher();
     }
 
-    /** {@code entry.listByPurpose "…" publishes purpose, tier} — one line of an {@code actions} block. */
+    /** {@code entry.listByPurpose "…" produces purpose, tier} — one line of an {@code actions} block. */
     public static Matcher<TokenCursor> actionDeclaration() {
         return new ActionDeclarationMatcher();
+    }
+
+    /** {@code variables { … }} */
+    public static Matcher<TokenCursor> variables() {
+        return new VariablesMatcher();
+    }
+
+    /** {@code constant deployment "…"} — one line of a {@code variables} block. */
+    public static Matcher<TokenCursor> variableDeclaration() {
+        return new VariableDeclarationMatcher();
     }
 
     /** {@code capabilities { … }} */
@@ -165,8 +175,8 @@ public final class CursorMatcher {
      */
     private static int blockPrefixLength(TokenCursor cursor) {
         boolean prefixed = checkAt(cursor, 0, T_DECLARE, T_ASSIGN)
-                && checkAt(cursor, 1, T_POLICY, T_SCOPES, T_PERMISSIONS, T_ACTIONS, T_CAPABILITIES,
-                           T_PLANS, T_ENTITLEMENTS, T_ROLE, T_SUBJECT);
+                && checkAt(cursor, 1, T_POLICY, T_SCOPES, T_PERMISSIONS, T_ACTIONS, T_VARIABLES,
+                           T_CAPABILITIES, T_PLANS, T_ENTITLEMENTS, T_ROLE, T_SUBJECT);
 
         return prefixed ? 1 : 0;
     }
@@ -236,6 +246,32 @@ public final class CursorMatcher {
             int name = dottedNameLength(cursor, 0);
 
             return name > 1 && checkAt(cursor, name, T_STRING);
+        }
+    }
+
+    private record VariablesMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            return opensBlock(cursor, T_VARIABLES);
+        }
+    }
+
+    /**
+     * A variable declaration is pinned by its leading kind word, the same way a capability's is —
+     * {@code constant} and {@code dynamic} open no other shape in the language, so one token of
+     * lookahead tells this line from anything a block might hold by mistake.
+     *
+     * <p>The name is measured hyphen-tolerantly for one reason: it is the same measurement a
+     * capability key gets, and two vocabularies that are read differently are two vocabularies
+     * somebody eventually writes in the wrong dialect.
+     */
+    private record VariableDeclarationMatcher() implements Matcher<TokenCursor> {
+
+        @Override
+        public boolean matches(TokenCursor cursor) {
+            return checkAt(cursor, 0, T_CONSTANT, T_DYNAMIC)
+                    && hyphenatedNameLength(cursor, 1) != NO_MATCH;
         }
     }
 
@@ -359,6 +395,16 @@ public final class CursorMatcher {
         }
     }
 
+    /**
+     * {@code role NAME &#123;} — or {@code role NAME assignable @SCOPE &#123;}.
+     *
+     * <p>⚠️ <strong>The word after the name is looked at, and the scope after it is not.</strong> A
+     * matcher only has to answer "is this a role block"; what {@code assignable} takes is
+     * {@link org.jmouse.access.el.parser.RoleParser}'s to enforce, and it does so with a sentence
+     * explaining why {@code assignable @SPACE:kyiv} is wrong. Repeating the scope grammar here would
+     * mean a malformed one stops matching, falls through to the expression parser, and is reported as
+     * an unexpected {@code declare} several tokens earlier — which is exactly how this was found.
+     */
     private record RoleMatcher() implements Matcher<TokenCursor> {
 
         @Override
@@ -367,7 +413,7 @@ public final class CursorMatcher {
 
             return checkAt(cursor, prefix, T_ROLE)
                     && checkAt(cursor, prefix + 1, T_IDENTIFIER, T_STRING)
-                    && checkAt(cursor, prefix + 2, T_OPEN_CURLY);
+                    && checkAt(cursor, prefix + 2, T_OPEN_CURLY, T_ASSIGNABLE);
         }
     }
 

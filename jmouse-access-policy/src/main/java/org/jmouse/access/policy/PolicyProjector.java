@@ -16,6 +16,7 @@ import org.jmouse.access.spi.BundledPermission;
 import org.jmouse.access.spi.CapabilityGrant;
 import org.jmouse.access.spi.DirectGrant;
 import org.jmouse.access.spi.EntitlementStore;
+import org.jmouse.access.spi.GrantCondition;
 import org.jmouse.access.spi.GrantStore;
 import org.jmouse.access.spi.RoleGrant;
 
@@ -128,14 +129,23 @@ public final class PolicyProjector {
 
         for (BundledPermission permission : role.bundle()) {
             bundle.add(new PolicyBundleEntry(
-                    permission.permission(), permission.carriedAt().name(), SourceSpan.none()));
+                    permission.permission(), permission.carriedAt().name(),
+                    sourceOf(permission.condition()), SourceSpan.none()));
         }
     }
 
+    /**
+     * ⚠️ <strong>{@code assignableAt} is not projected, because a {@link org.jmouse.access.spi.RoleGrant}
+     * does not carry it.</strong> A store answers what a role <em>bundles</em>; where it may be handed
+     * out is a property of the role record rather than of any grant, so it is not in anything this
+     * projection can see. A rendering therefore prints {@code role X { … }} without the clause even
+     * where the row states one — which matters to anything that reads a projection back and applies it
+     * as row changes, and is why such a thing must not treat a missing clause as "unset it".
+     */
     private static List<PolicyRole> toRoles(Map<String, Set<PolicyBundleEntry>> bundles) {
         return bundles.entrySet().stream()
                 .map(bundle -> new PolicyRole(
-                        bundle.getKey(), List.copyOf(bundle.getValue()), SourceSpan.none()))
+                        bundle.getKey(), null, List.copyOf(bundle.getValue()), SourceSpan.none()))
                 .toList();
     }
 
@@ -151,7 +161,9 @@ public final class PolicyProjector {
         Set<PolicyRoleAssignment> assignments = new LinkedHashSet<>();
 
         for (RoleGrant role : held) {
-            assignments.add(new PolicyRoleAssignment(role.roleName(), toScope(role.at()), SourceSpan.none()));
+            assignments.add(new PolicyRoleAssignment(
+                    role.roleName(), toScope(role.at()),
+                    sourceOf(role.attribution().condition()), SourceSpan.none()));
         }
 
         return List.copyOf(assignments);
@@ -169,8 +181,21 @@ public final class PolicyProjector {
                 grant.permission(),
                 toScope(grant.at()),
                 grant.allowed() ? PolicyEffect.ALLOW : PolicyEffect.DENY,
-                null,
+                sourceOf(grant.attribution().condition()),
                 SourceSpan.none());
+    }
+
+    /**
+     * A condition as the text somebody wrote, or null where nothing narrows the grant.
+     *
+     * <p>⚠️ <strong>Source, and it has to survive the round trip.</strong> A projection that dropped
+     * conditions would render a policy that grants more than the rows do — and anything reading that
+     * rendering back as row changes would then <em>apply</em> the wider version. Every model here
+     * carries a condition as text for exactly this reason: text is the only form of a predicate that
+     * can be written out, read back, diffed and reviewed.
+     */
+    private static String sourceOf(GrantCondition condition) {
+        return condition == null ? null : condition.source();
     }
 
     private static PolicyScope toScope(ScopeReference where) {
@@ -218,7 +243,7 @@ public final class PolicyProjector {
         }
 
         return new PolicyDocument(documentName, List.of(), List.of(), List.of(), List.of(), List.of(),
-                                  List.of(), List.of(), List.of(), entitlements);
+                                  List.of(), List.of(), List.of(), List.of(), entitlements);
     }
 
     /**

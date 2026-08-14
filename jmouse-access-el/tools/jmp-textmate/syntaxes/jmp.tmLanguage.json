@@ -27,6 +27,7 @@
         { "include": "#scopes-block" },
         { "include": "#permissions-block" },
         { "include": "#actions-block" },
+        { "include": "#variables-block" },
         { "include": "#capabilities-block" },
         { "include": "#plans-block" },
         { "include": "#entitlements-block" },
@@ -39,8 +40,8 @@
     },
 
     "statement-kind": {
-      "comment": "declare | assign — which KIND of statement the block after it is: structure, or a case. ⚠️ Matched on its own rather than folded into every block's `begin`, so the eight block rules keep their capture numbering and a ninth cannot be added without one. Consuming just the word leaves the cursor exactly where the block rule expects to begin. The lookahead is what keeps it a prefix: `declare` is also an ordinary permission segment or property name, and one written anywhere else must stay a plain word.",
-      "match": "\\b(declare|assign)\\b(?=\\s+(?:policy|scopes|permissions|actions|capabilities|plans|entitlements|role|subject)\\b)",
+      "comment": "declare | assign — which KIND of statement the block after it is: structure, or a case.",
+      "match": "\\b(declare|assign)\\b(?=\\s+(?:policy|scopes|permissions|variables|actions|capabilities|plans|entitlements|role|subject)\\b)",
       "captures": {
         "1": { "name": "keyword.control.statement-kind.jmp" }
       }
@@ -139,7 +140,7 @@
       },
       "patterns": [
         { "include": "#comment" },
-        { "include": "#publishes-clause" },
+        { "include": "#produces-clause" },
         { "include": "#action-name" },
         { "include": "#string" },
         { "include": "#punctuation" }
@@ -151,18 +152,49 @@
       "name": "support.function.action.jmp"
     },
 
-    "publishes-clause": {
-      "comment": "publishes purpose, tier — the values this action carries into a condition.",
-      "begin": "\\b(publishes)\\b",
+    "produces-clause": {
+      "comment": "produces purpose, tier — the values this action carries into a condition.",
+      "begin": "\\b(produces)\\b",
       "beginCaptures": {
-        "1": { "name": "keyword.other.publishes.jmp" }
+        "1": { "name": "keyword.other.produces.jmp" }
       },
       "end": "$",
       "patterns": [
         { "include": "#comment" },
-        { "match": "[A-Za-z_][\\w-]*", "name": "variable.parameter.published.jmp" },
+        {
+          "match": "[A-Za-z_][\\w-]*",
+          "name": "variable.parameter.produced.jmp"
+        },
         { "include": "#punctuation" }
       ]
+    },
+
+    "variables-block": {
+      "comment": "declare variables { … } — constants come from configuration; dynamic values are derived from the call.",
+      "begin": "\\b(variables)\\b\\s*(\\{)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.block.variables.jmp" },
+        "2": { "name": "punctuation.section.block.begin.jmp" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.section.block.end.jmp" }
+      },
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#variable-declaration" },
+        { "include": "#string" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "variable-declaration": {
+      "match": "\\b(constant|dynamic)\\b\\s+([A-Za-z_][\\w-]*)(?:\\s+(\"[^\"\\n]*\"|'[^'\\n]*'))?",
+      "captures": {
+        "1": { "name": "storage.type.variable.jmp" },
+        "2": { "name": "variable.other.declaration.jmp" },
+        "3": { "name": "string.quoted.other.description.jmp" }
+      }
     },
 
     "capabilities-block": {
@@ -195,7 +227,10 @@
       "end": "$",
       "patterns": [
         { "include": "#comment" },
-        { "match": "[A-Za-z_][\\w-]*", "name": "support.type.capability.jmp" },
+        {
+          "match": "[A-Za-z_][\\w-]*",
+          "name": "support.type.capability.jmp"
+        },
         { "include": "#punctuation" }
       ]
     },
@@ -218,8 +253,14 @@
       "end": "$",
       "patterns": [
         { "include": "#comment" },
-        { "match": "\\b(?i:day|month|year)\\b", "name": "constant.language.period.jmp" },
-        { "match": "[A-Za-z_][\\w-]*", "name": "entity.name.type.scope.jmp" },
+        {
+          "match": "\\b(?i:day|month|year)\\b",
+          "name": "constant.language.period.jmp"
+        },
+        {
+          "match": "[A-Za-z_][\\w-]*",
+          "name": "entity.name.type.scope.jmp"
+        },
         { "include": "#punctuation" }
       ]
     },
@@ -281,7 +322,10 @@
             "2": { "name": "entity.name.class.plan.jmp" }
           }
         },
-        { "match": "\\b(note)\\b", "name": "keyword.other.note.jmp" }
+        {
+          "match": "\\b(note)\\b",
+          "name": "keyword.other.note.jmp"
+        }
       ]
     },
 
@@ -313,7 +357,10 @@
         { "include": "#capability-grant" },
         { "include": "#date-clause" },
         { "include": "#per-clause" },
-        { "match": "\\b(reason)\\b", "name": "keyword.other.reason.jmp" },
+        {
+          "match": "\\b(reason)\\b",
+          "name": "keyword.other.reason.jmp"
+        },
         { "include": "#date" },
         { "include": "#string" },
         { "include": "#punctuation" }
@@ -347,13 +394,17 @@
     },
 
     "role-block": {
-      "comment": "role NAME { … } — a role has no instance, no effect and no condition, by design.",
-      "begin": "\\b(role)\\b(?:\\s+(\"[^\"\\n]*\"|'[^'\\n]*')|\\s+([A-Za-z_][\\w-]*))?\\s*(\\{)",
+      "comment": "role NAME [assignable @SCOPE] { … } — a role has no instance, no effect and no condition, by design.",
+      "begin": "\\b(role)\\b(?:\\s+(\"[^\"\\n]*\"|'[^'\\n]*')|\\s+([A-Za-z_][\\w-]*))?(?:\\s+(assignable))?(?:\\s+(@)([A-Za-z_][\\w]*)(?::((?:\\*)|(?:\\$\\{[^}\\n]*\\})|(?:\"[^\"\\n]*\")|(?:'[^'\\n]*')|(?:[\\w-]+)))?)?\\s*(\\{)",
       "beginCaptures": {
         "1": { "name": "keyword.control.role.jmp" },
         "2": { "name": "entity.name.class.role.jmp" },
         "3": { "name": "entity.name.class.role.jmp" },
-        "4": { "name": "punctuation.section.block.begin.jmp" }
+        "4": { "name": "keyword.other.assignable.jmp" },
+        "5": { "name": "punctuation.definition.scope.jmp" },
+        "6": { "name": "entity.name.type.scope.jmp" },
+        "7": { "name": "variable.other.instance.jmp" },
+        "8": { "name": "punctuation.section.block.begin.jmp" }
       },
       "end": "\\}",
       "endCaptures": {
@@ -486,11 +537,20 @@
       "comment": "The dialect a condition may be written in — anything outside it refuses to load.",
       "patterns": [
         { "include": "#string" },
-        { "match": "\\b(true|false|null)\\b", "name": "constant.language.jmp" },
-        { "match": "\\b\\d+(?:\\.\\d+)?\\b", "name": "constant.numeric.jmp" },
-        { "match": "\\b(and|or|not|is)\\b", "name": "keyword.operator.word.jmp" },
         {
-          "comment": "The five things a condition can see. Everything else is a published value.",
+          "match": "\\b(true|false|null)\\b",
+          "name": "constant.language.jmp"
+        },
+        {
+          "match": "\\b\\d+(?:\\.\\d+)?\\b",
+          "name": "constant.numeric.jmp"
+        },
+        {
+          "match": "\\b(and|or|not|is)\\b",
+          "name": "keyword.operator.word.jmp"
+        },
+        {
+          "comment": "The five things a condition can see. Everything else is a produced value.",
           "match": "\\b(caller|place|resource|action)\\b",
           "name": "variable.language.jmp"
         },
@@ -499,7 +559,10 @@
           "match": "\\bin\\b|\\*\\*|\\+\\+|--|\\.\\.|\\|(?!\\|)|->|~|[+\\-*/%](?![\\w])",
           "name": "invalid.illegal.outside-condition-dialect.jmp"
         },
-        { "match": "==|!=|>=|<=|>|<|\\?\\?|\\?|!", "name": "keyword.operator.comparison.jmp" },
+        {
+          "match": "==|!=|>=|<=|>|<|\\?\\?|\\?|!",
+          "name": "keyword.operator.comparison.jmp"
+        },
         {
           "match": "(\\.)([A-Za-z_][\\w]*)",
           "captures": {
@@ -507,7 +570,10 @@
             "2": { "name": "variable.other.property.jmp" }
           }
         },
-        { "match": "\\b[A-Za-z_][\\w]*\\b", "name": "variable.other.published.jmp" },
+        {
+          "match": "\\b[A-Za-z_][\\w]*\\b",
+          "name": "variable.other.produced.jmp"
+        },
         { "include": "#punctuation" }
       ]
     },
@@ -577,12 +643,30 @@
 
     "punctuation": {
       "patterns": [
-        { "match": "\\{", "name": "punctuation.section.block.begin.jmp" },
-        { "match": "\\}", "name": "punctuation.section.block.end.jmp" },
-        { "match": ",", "name": "punctuation.separator.comma.jmp" },
-        { "match": ":", "name": "punctuation.separator.colon.jmp" },
-        { "match": "[\\[\\]]", "name": "punctuation.section.brackets.jmp" },
-        { "match": "[()]", "name": "punctuation.section.parens.jmp" }
+        {
+          "match": "\\{",
+          "name": "punctuation.section.block.begin.jmp"
+        },
+        {
+          "match": "\\}",
+          "name": "punctuation.section.block.end.jmp"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.comma.jmp"
+        },
+        {
+          "match": ":",
+          "name": "punctuation.separator.colon.jmp"
+        },
+        {
+          "match": "[\\[\\]]",
+          "name": "punctuation.section.brackets.jmp"
+        },
+        {
+          "match": "[()]",
+          "name": "punctuation.section.parens.jmp"
+        }
       ]
     }
   }

@@ -51,6 +51,7 @@ import java.util.List;
 public class RoleNode extends PolicyBlockNode {
 
     private final String name;
+    private       String assignableAt;
 
     public RoleNode(String name) {
         this.name = name;
@@ -58,6 +59,21 @@ public class RoleNode extends PolicyBlockNode {
 
     public String getName() {
         return name;
+    }
+
+    /**
+     * The widest scope kind this role may be handed out at, or {@code null} where unstated.
+     *
+     * <p>⚠️ A different question from any bundle entry's scope: that one says how far a permission
+     * travels once somebody holds the role, this one says where the role may be given. See
+     * {@link org.jmouse.access.el.lexer.AccessToken#T_ASSIGNABLE}.
+     */
+    public String getAssignableAt() {
+        return assignableAt;
+    }
+
+    public void setAssignableAt(String assignableAt) {
+        this.assignableAt = assignableAt;
     }
 
     /**
@@ -77,7 +93,7 @@ public class RoleNode extends PolicyBlockNode {
             }
         }
 
-        return new PolicyRole(getName(), bundle, SourceSpanNode.at(this));
+        return new PolicyRole(getName(), getAssignableAt(), bundle, SourceSpanNode.at(this));
     }
 
     @Override
@@ -115,7 +131,13 @@ public class RoleNode extends PolicyBlockNode {
 
     @Override
     public String toSource() {
-        return renderBlock("role " + SourceWriter.name(getName()));
+        String header = "role " + SourceWriter.name(getName());
+
+        if (getAssignableAt() != null && !getAssignableAt().isBlank()) {
+            header += " assignable @" + getAssignableAt();
+        }
+
+        return renderBlock(header);
     }
 
     @Override

@@ -81,7 +81,8 @@ public abstract class PolicyBlockNode extends ExpressionsNode {
     private static String prefixOf(String header) {
         return switch (header.split(" ", 2)[0]) {
             case "subject", "entitlements" -> "assign ";
-            case "scopes", "permissions", "actions", "capabilities", "plans", "role" -> "declare ";
+            case "scopes", "permissions", "actions", "variables",
+                 "capabilities", "plans", "role" -> "declare ";
             // `policy` wraps a document rather than stating anything in it, and `plan` is a line
             // inside `declare plans` rather than a block of its own. Neither takes a prefix.
             default -> "";

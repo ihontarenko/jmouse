@@ -14,6 +14,7 @@ import org.jmouse.access.policy.model.PolicyRole;
 import org.jmouse.access.policy.model.PolicyRoleAssignment;
 import org.jmouse.access.policy.model.PolicyScopeDeclaration;
 import org.jmouse.access.policy.model.PolicySubject;
+import org.jmouse.access.policy.model.PolicyVariableDeclaration;
 import org.jmouse.access.policy.model.SourceSpan;
 
 import java.util.ArrayList;
@@ -43,10 +44,14 @@ public final class PolicyDocuments {
      * {@code include 'bootstrap.jmp'} would, written back out and reloaded, hold bootstrap's rules
      * twice.
      *
-     * <p>Roles and subjects are concatenated rather than combined. Two files declaring the same role
-     * is a real disagreement — {@link PolicyBinder} refuses it, and refusing is right, because which
-     * bundle wins would be a question about file order and file order must not decide what anybody may
-     * do.
+     * <p>Roles and subjects are concatenated rather than combined, and {@link PolicyBinder} then does
+     * two different things with them. Two files declaring the same <em>role</em> is a real
+     * disagreement and is refused, because a bundle replaces and "which one wins" would be a question
+     * about file order — file order must not decide what anybody may do. Two files about the same
+     * <em>subject</em> is not a disagreement at all: a subject block adds, deny wins over all of it,
+     * and either order gives the same answer, so the binder reads them as the one block they add up
+     * to. It still refuses two blocks within one file, where the second is invisible to whoever reads
+     * the first.
      *
      * @param name      what the merged document is called; every grant reports it as provenance
      * @param documents the parsed files, in load order
@@ -85,6 +90,7 @@ public final class PolicyDocuments {
                 mergeScopes(documents),
                 mergePermissions(documents),
                 mergeActions(documents),
+                mergeVariables(documents),
                 mergeCapabilities(documents),
                 roles,
                 plans,
@@ -121,6 +127,11 @@ public final class PolicyDocuments {
                 document.actions().stream()
                         .map(action -> new PolicyActionDeclaration(
                                 action.name(), action.description(), action.values(), SourceSpan.none()))
+                        .toList(),
+                document.variables().stream()
+                        .map(variable -> new PolicyVariableDeclaration(
+                                variable.name(), variable.kind(), variable.description(),
+                                SourceSpan.none()))
                         .toList(),
                 document.capabilities().stream()
                         .map(capability -> new PolicyCapabilityDeclaration(
@@ -238,7 +249,7 @@ public final class PolicyDocuments {
      *
      * <p>Merged the way permissions are and refused for the same reason. Two files describing one
      * action differently is a catalogue with two answers; two files disagreeing about what an action
-     * <em>publishes</em> is worse, because it is what a rule is checked against — one of the two
+     * <em>produces</em> is worse, because it is what a rule is checked against — one of the two
      * spellings would silently make a rule legal and the other would make it a boot failure,
      * depending on load order.
      */
@@ -262,8 +273,48 @@ public final class PolicyDocuments {
                     throw new PolicyException(
                             "'" + action.name() + "' is declared in '" + declaredBy.get(action.name())
                             + "' and again in '" + document.name() + "', and the two do not agree. An "
-                            + "action means one thing and publishes one set of values; whichever the "
+                            + "action means one thing and produces one set of values; whichever the "
                             + "load happened to read first would decide which rules about it are legal.");
+                }
+            }
+        }
+
+        return List.copyOf(declared.values());
+    }
+
+    /**
+     * Every variable the load declares, by name.
+     *
+     * <p>Merged the way permissions and actions are, so a product's features can declare the values
+     * they attach beside themselves rather than in one central block.
+     *
+     * <p>⚠️ What two files may not do is disagree about a variable's <em>kind</em>. {@code constant}
+     * and {@code dynamic} are a statement about whether reading the name can do work and whether two
+     * calls can see two answers — a reader who has believed the wrong one has misread every rule that
+     * mentions it, and which one they read would come down to load order.
+     */
+    private static List<PolicyVariableDeclaration> mergeVariables(List<PolicyDocument> documents) {
+        Map<String, PolicyVariableDeclaration> declared   = new LinkedHashMap<>();
+        Map<String, String>                    declaredBy = new LinkedHashMap<>();
+
+        for (PolicyDocument document : documents) {
+            for (PolicyVariableDeclaration variable : document.variables()) {
+                PolicyVariableDeclaration existing = declared.get(variable.name());
+
+                if (existing == null) {
+                    declared.put(variable.name(), variable);
+                    declaredBy.put(variable.name(), document.name());
+                    continue;
+                }
+
+                if (existing.kind() != variable.kind()
+                    || !Objects.equals(existing.description(), variable.description())) {
+
+                    throw new PolicyException(
+                            "'" + variable.name() + "' is declared in '" + declaredBy.get(variable.name())
+                            + "' and again in '" + document.name() + "', and the two do not agree. A "
+                            + "variable comes from one place and means one thing; two answers about "
+                            + "whether it is constant leaves every rule mentioning it readable two ways.");
                 }
             }
         }
@@ -325,6 +376,7 @@ public final class PolicyDocuments {
     private static PolicyRole writtenIn(PolicyRole role, String document) {
         return new PolicyRole(
                 role.name(),
+                role.assignableAt(),
                 role.bundle().stream()
                         .map(entry -> new PolicyBundleEntry(
                                 entry.permission(), entry.scope(), attributed(entry.at(), document)))
@@ -367,6 +419,7 @@ public final class PolicyDocuments {
     private static PolicyRole withoutSourcePositions(PolicyRole role) {
         return new PolicyRole(
                 role.name(),
+                role.assignableAt(),
                 role.bundle().stream()
                         .map(entry -> new PolicyBundleEntry(
                                 entry.permission(), entry.scope(), SourceSpan.none()))

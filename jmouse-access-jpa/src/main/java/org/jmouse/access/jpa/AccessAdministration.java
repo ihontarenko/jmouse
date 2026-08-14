@@ -26,10 +26,11 @@ import java.util.List;
  * could walk"</em>. Listing roles is a bounded vocabulary; listing accounts is bounded by how big the
  * customer is. Every method here that reads takes a subject or a role and never asks for all of them.
  *
- * <p><strong>A second policy.</strong> A policy document may own a role's bundle, and the boot
- * cross-checks it. An administration call that could edit a bundle the file owns would let a screen
- * quietly disagree with a reviewed document — so {@link #setBundle} refuses one, and the refusal names
- * the file.
+ * <p><strong>A judge of what a change means.</strong> These methods perform writes; they do not decide
+ * whether a write is wise. A product with a rule about its own installation — <em>"somebody has to be
+ * left able to hand permissions back out"</em> — wraps this interface rather than asking the library to
+ * carry a policy it cannot know it has. ⚠️ It follows that a caller who reaches
+ * {@link JpaAccessAdministration} directly is a caller outside every such rule.
  */
 public interface AccessAdministration {
 
@@ -51,8 +52,10 @@ public interface AccessAdministration {
     /**
      * Replaces what a role carries.
      *
-     * @throws IllegalStateException where a policy document owns this role's bundle — editing it here
-     *                               would let a screen disagree with a file that was reviewed
+     * <p>⚠️ <strong>Replaces</strong>, so this is a removal as much as an addition: every account
+     * holding the role loses whatever the new bundle leaves out, everywhere they hold it. It is the
+     * shortest way to take a permission away from many people at once, which is worth knowing before
+     * calling it from anywhere that has not thought about the consequence.
      */
     RoleView setBundle(String roleName, List<BundleEntry> bundle);
 
@@ -82,7 +85,20 @@ public interface AccessAdministration {
      *               library legislating about a product's provenance vocabulary is a library that can
      *               be adopted once
      */
-    Change assign(String subjectId, String roleName, ScopeReference at, String source, String by);
+    default Change assign(String subjectId, String roleName, ScopeReference at, String source, String by) {
+        return assign(subjectId, roleName, at, source, by, null);
+    }
+
+    /**
+     * The same, applying only under a condition.
+     *
+     * @param conditionSource the expression, as source, or null for always. ⚠️ It narrows
+     *                        <em>everything</em> the role carries at this place, which is a different
+     *                        statement from narrowing one entry of its bundle — that one belongs on
+     *                        {@link BundleEntry} and reaches everybody holding the role
+     */
+    Change assign(String subjectId, String roleName, ScopeReference at, String source, String by,
+                  String conditionSource);
 
     /** Takes a role back at one place. Silent where it was not held — un-assigning twice is not an error. */
     Change unassign(String subjectId, String roleName, ScopeReference at);
@@ -103,8 +119,22 @@ public interface AccessAdministration {
      * <p>⚠️ A {@code DENY} is the only way to take away what a role gives without editing the role,
      * and {@code reason} is what makes the refusal answerable a year later.
      */
+    default Change grant(String subjectId, String permission, ScopeReference at, Effect effect,
+                         String reason, String by) {
+
+        return grant(subjectId, permission, at, effect, reason, by, null);
+    }
+
+    /**
+     * The same, applying only under a condition.
+     *
+     * <p>⚠️ {@code subjectId} may be {@link org.jmouse.access.jpa.entity.AccessSubjectPermission#EVERYBODY},
+     * which is how a denial reaches every account without a row per account — and which is only
+     * useful <em>with</em> a condition, since an unconditional universal denial is indistinguishable
+     * from switching the permission off.
+     */
     Change grant(String subjectId, String permission, ScopeReference at, Effect effect,
-                 String reason, String by);
+                 String reason, String by, String conditionSource);
 
     /** Removes a personal allow or deny — which restores whatever a role was already saying. */
     Change ungrant(String subjectId, String permission, ScopeReference at);
@@ -131,7 +161,20 @@ public interface AccessAdministration {
      * @param scopeType the scope <em>name</em> and never an instance — see
      *                  {@code AccessRolePermission} for why a bundle cannot name a place
      */
-    record BundleEntry(String permission, String scopeType) {
+    /**
+     * @param conditionSource ⚠️ the expression this entry applies under, as <strong>source</strong>, or
+     *                        null for always. Source rather than a compiled predicate, because this
+     *                        library has no expression language and must not acquire one — and because
+     *                        a condition has to survive being written back out, diffed and reviewed.
+     *                        Whoever hands one over is the one that can refuse it: a condition naming
+     *                        an action nothing publishes compiles perfectly and then never fires
+     */
+    record BundleEntry(String permission, String scopeType, String conditionSource) {
+
+        /** The ordinary entry: it applies whenever the role is held. */
+        public BundleEntry(String permission, String scopeType) {
+            this(permission, scopeType, null);
+        }
     }
 
     enum Effect {

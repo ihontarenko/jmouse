@@ -38,7 +38,7 @@ public class ActionsNode extends PolicyBlockNode {
                 declarations.add(declaration.toActionDeclaration());
             } else {
                 throw reject(expression, "an actions block holds only declarations like "
-                        + "'entry.listByPurpose \"List one purpose\" publishes purpose'");
+                        + "'entry.listByPurpose \"List one purpose\" produces purpose'");
             }
         }
 

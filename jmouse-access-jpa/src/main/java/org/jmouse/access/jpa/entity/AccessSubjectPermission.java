@@ -24,6 +24,20 @@ import java.time.Instant;
 @Table(name = "access_subject_permissions")
 public class AccessSubjectPermission {
 
+    /**
+     * The reserved {@code subject_id} meaning <em>every subject</em>.
+     *
+     * <p>⚠️ <strong>Matched, never expanded.</strong> A store cannot enumerate accounts — deliberately,
+     * because one that could would be one the engine could walk — so the everybody-block is one extra
+     * predicate on the read rather than a row per account. An expansion would also have to be
+     * maintained by whatever creates accounts, which is a coupling this library must not have.
+     *
+     * <p>⚠️ It may only ever <strong>deny</strong>, enforced by a {@code CHECK} rather than by whichever
+     * writer remembered. A universal allow appears on no screen that lists what one person holds, so
+     * nobody would find it by looking at the account it affected.
+     */
+    public static final String EVERYBODY = "*";
+
     @Id
     @Column(name = "id", length = 36, nullable = false)
     private String id;
@@ -44,6 +58,16 @@ public class AccessSubjectPermission {
     @Column(name = "scope_id", length = 36, nullable = false)
     private String scopeId;
 
+    /**
+     * ⚠️ The expression this grant only applies under, as source, or null.
+     *
+     * <p>It is what makes the {@link #EVERYBODY} row useful rather than blunt: a denial aimed at every
+     * account at once is almost never unconditional, and without a condition the only universal denial
+     * anybody can write is one that switches a permission off for the whole installation.
+     */
+    @Column(name = "condition_source", length = 1024)
+    private String conditionSource;
+
     @Column(name = "reason", length = 512)
     private String reason;
 
@@ -58,15 +82,22 @@ public class AccessSubjectPermission {
 
     public AccessSubjectPermission(String id, String subjectId, String permission, String effect,
                                    String scopeType, String scopeId, String reason, String grantedBy) {
-        this.id         = id;
-        this.subjectId  = subjectId;
-        this.permission = permission;
-        this.effect     = effect;
-        this.scopeType  = scopeType;
-        this.scopeId    = scopeId;
-        this.reason     = reason;
-        this.grantedBy  = grantedBy;
-        this.createdAt  = Instant.now();
+        this(id, subjectId, permission, effect, scopeType, scopeId, reason, grantedBy, null);
+    }
+
+    public AccessSubjectPermission(String id, String subjectId, String permission, String effect,
+                                   String scopeType, String scopeId, String reason, String grantedBy,
+                                   String conditionSource) {
+        this.id              = id;
+        this.subjectId       = subjectId;
+        this.permission      = permission;
+        this.effect          = effect;
+        this.scopeType       = scopeType;
+        this.scopeId         = scopeId;
+        this.reason          = reason;
+        this.grantedBy       = grantedBy;
+        this.conditionSource = conditionSource;
+        this.createdAt       = Instant.now();
     }
 
     public String getId()         { return id; }
@@ -79,7 +110,14 @@ public class AccessSubjectPermission {
     public String getGrantedBy()  { return grantedBy; }
     public Instant getCreatedAt() { return createdAt; }
 
+    public String getConditionSource() { return conditionSource; }
+
     public boolean allows() {
         return "ALLOW".equalsIgnoreCase(effect);
+    }
+
+    /** Whether this row is the everybody-block rather than a grant to one account. */
+    public boolean appliesToEverybody() {
+        return EVERYBODY.equals(subjectId);
     }
 }

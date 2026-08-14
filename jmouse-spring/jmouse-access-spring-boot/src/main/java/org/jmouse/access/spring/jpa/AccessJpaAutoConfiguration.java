@@ -5,15 +5,18 @@ import jakarta.persistence.EntityManagerFactory;
 import org.jmouse.access.ScopeCatalog;
 import org.jmouse.access.jpa.AccessAdministration;
 import org.jmouse.access.jpa.AccessDisclosure;
-import org.jmouse.access.jpa.DeclaredRoleBundles;
 import org.jmouse.access.jpa.EntitlementAdministration;
 import org.jmouse.access.jpa.JpaAccessAdministration;
 import org.jmouse.access.jpa.JpaAccessDisclosure;
 import org.jmouse.access.jpa.JpaEntitlementAdministration;
 import org.jmouse.access.jpa.JpaEntitlementStore;
 import org.jmouse.access.jpa.JpaGrantStore;
+import org.jmouse.access.jpa.JpaPlanTemplates;
 import org.jmouse.access.jpa.JpaPolicyRevisions;
+import org.jmouse.access.jpa.PlanTemplates;
 import org.jmouse.access.jpa.PolicyRevisions;
+import org.jmouse.access.jpa.StoredConditions;
+import org.jmouse.access.policy.ConditionCompiler;
 import org.jmouse.access.spi.EntitlementStore;
 import org.jmouse.access.spi.GrantStore;
 import org.springframework.beans.factory.ObjectProvider;
@@ -66,24 +69,47 @@ public class AccessJpaAutoConfiguration {
     public static final String STORED_GRANTS = "jpaGrantStore";
 
     /**
-     * @param declared ⚠️ Defaults to none rather than being required. A product with no policy
-     *                 documents has every bundle in the table, and asking it to register an empty seam
-     *                 to say so is the sort of tax that makes a library feel heavy.
+     * How a condition in a column becomes something the engine can ask.
+     *
+     * <p>⚠️ Absent where no {@link ConditionCompiler} is registered, and {@link StoredConditions#none()}
+     * then <em>throws</em> if a conditional row turns up rather than ignoring it — an installation with
+     * no dialect that meets a predicate has a row whose meaning it cannot honour, and honouring the
+     * wider half of it silently is the one outcome that must not happen.
      */
+    @Bean
+    @ConditionalOnMissingBean
+    public StoredConditions storedConditions(ObjectProvider<ConditionCompiler> compilers) {
+        ConditionCompiler compiler = compilers.getIfAvailable();
+
+        return compiler == null ? StoredConditions.none() : new CompiledStoredConditions(compiler);
+    }
+
     @Bean(STORED_GRANTS)
     @ConditionalOnMissingBean
     public GrantStore jpaGrantStore(
-            EntityManagerFactory entityManagers,
-            ScopeCatalog scopes,
-            ObjectProvider<DeclaredRoleBundles> declared) {
+            EntityManagerFactory entityManagers, ScopeCatalog scopes, StoredConditions conditions) {
 
-        return new JpaGrantStore(sharedEntityManager(entityManagers), scopes, declared.getIfAvailable(DeclaredRoleBundles::none));
+        return new JpaGrantStore(sharedEntityManager(entityManagers), scopes, conditions);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public EntitlementStore jpaEntitlementStore(EntityManagerFactory entityManagers, ScopeCatalog scopes) {
         return new JpaEntitlementStore(sharedEntityManager(entityManagers), scopes);
+    }
+
+    /**
+     * The tier catalogue — templates, never a grant source.
+     *
+     * <p>⚠️ {@code @Transactional} because {@code define} writes. It is read when somebody is <em>put</em>
+     * on a tier and never on the path of a decision, which is why it is a plain port rather than
+     * anything the resolver knows about.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @Transactional
+    public PlanTemplates jpaPlanTemplates(EntityManagerFactory entityManagers) {
+        return new JpaPlanTemplates(sharedEntityManager(entityManagers));
     }
 
     /**
@@ -97,11 +123,8 @@ public class AccessJpaAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @Transactional
-    public AccessAdministration accessAdministration(
-            EntityManagerFactory entityManagers, ObjectProvider<DeclaredRoleBundles> declared) {
-
-        return new JpaAccessAdministration(
-                sharedEntityManager(entityManagers), declared.getIfAvailable(DeclaredRoleBundles::none));
+    public AccessAdministration accessAdministration(EntityManagerFactory entityManagers) {
+        return new JpaAccessAdministration(sharedEntityManager(entityManagers));
     }
 
     /**
@@ -131,12 +154,9 @@ public class AccessJpaAutoConfiguration {
     @ConditionalOnMissingBean
     @Transactional(readOnly = true)
     public AccessDisclosure accessDisclosure(
-            EntityManagerFactory entityManagers,
-            ScopeCatalog scopes,
-            ObjectProvider<DeclaredRoleBundles> declared) {
+            EntityManagerFactory entityManagers, ScopeCatalog scopes, StoredConditions conditions) {
 
-        return new JpaAccessDisclosure(
-                sharedEntityManager(entityManagers), scopes, declared.getIfAvailable(DeclaredRoleBundles::none));
+        return new JpaAccessDisclosure(sharedEntityManager(entityManagers), scopes, conditions);
     }
 
     /**

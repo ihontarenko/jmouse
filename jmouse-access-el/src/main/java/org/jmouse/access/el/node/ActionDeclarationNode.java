@@ -10,12 +10,17 @@ import java.util.List;
 
 /**
  * One line of an {@code actions} block:
- * {@code entry.listByPurpose "List submissions of one purpose" publishes purpose, tier}.
+ * {@code entry.listByPurpose "List submissions of one purpose" produces purpose, tier}.
  *
  * <p>The description is for a person — it is what a policy editor shows beside an action somebody is
- * scoping a rule to. The {@code publishes} clause is what makes that rule writable: it names the
+ * scoping a rule to. The {@code produces} clause is what makes that rule writable: it names the
  * values the action carries, so an editor can offer them and a validator can refuse a rule mentioning
  * one this action does not have.
+ *
+ * <p>⚠️ <strong>What this call is about, and nothing that is merely true while it runs.</strong> A
+ * value attached to every decision is declared once in a {@code variables} block; listed here it
+ * would have to be repeated against every action, and every one of those lines would be saying
+ * something about a route that is not so.
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -74,7 +79,7 @@ public class ActionDeclarationNode extends AbstractExpression {
         }
 
         if (!getValues().isEmpty()) {
-            source.append(" publishes ").append(String.join(", ", getValues()));
+            source.append(" produces ").append(String.join(", ", getValues()));
         }
 
         return source.toString();

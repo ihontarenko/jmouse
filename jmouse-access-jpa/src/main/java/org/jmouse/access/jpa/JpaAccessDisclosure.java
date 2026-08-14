@@ -29,16 +29,20 @@ import java.util.Map;
  */
 public class JpaAccessDisclosure implements AccessDisclosure {
 
-    private final EntityManager       entityManager;
-    private final ScopeCatalog        scopes;
-    private final DeclaredRoleBundles declaredBundles;
+    private final EntityManager    entityManager;
+    private final ScopeCatalog     scopes;
+    private final StoredConditions conditions;
+
+    public JpaAccessDisclosure(EntityManager entityManager, ScopeCatalog scopes) {
+        this(entityManager, scopes, StoredConditions.none());
+    }
 
     public JpaAccessDisclosure(EntityManager entityManager, ScopeCatalog scopes,
-                               DeclaredRoleBundles declaredBundles) {
+                               StoredConditions conditions) {
 
-        this.entityManager   = entityManager;
-        this.scopes          = scopes;
-        this.declaredBundles = declaredBundles;
+        this.entityManager = entityManager;
+        this.scopes        = scopes;
+        this.conditions    = conditions;
     }
 
     @Override
@@ -102,10 +106,10 @@ public class JpaAccessDisclosure implements AccessDisclosure {
             List<BundledPermission> bundle = new ArrayList<>();
 
             role.getBundle().stream()
-                    .map(entry -> new BundledPermission(entry.getPermission(), kind(entry.getScopeType())))
+                    .map(entry -> new BundledPermission(
+                            entry.getPermission(), kind(entry.getScopeType()),
+                            conditions.of(entry.getConditionSource())))
                     .forEach(bundle::add);
-
-            bundle.addAll(declaredBundles.bundleOf(role.getRoleName()));
 
             byId.put(role.getId(), new Described(role.getRoleName(), List.copyOf(bundle)));
         }
@@ -125,6 +129,7 @@ public class JpaAccessDisclosure implements AccessDisclosure {
                 placeOf(assignment.getScopeType(), assignment.getScopeId()),
                 assignment.getGrantedBy(),
                 localise(assignment.getCreatedAt()),
+                assignment.getConditionSource(),
                 role == null ? List.of() : role.bundle());
     }
 
@@ -136,7 +141,8 @@ public class JpaAccessDisclosure implements AccessDisclosure {
                 placeOf(override.getScopeType(), override.getScopeId()),
                 override.getGrantedBy(),
                 override.getReason(),
-                localise(override.getCreatedAt()));
+                localise(override.getCreatedAt()),
+                override.getConditionSource());
     }
 
     private ScopeReference placeOf(String kind, String instance) {

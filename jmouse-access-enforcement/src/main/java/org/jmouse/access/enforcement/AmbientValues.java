@@ -1,5 +1,7 @@
 package org.jmouse.access.enforcement;
 
+import org.jmouse.access.VariableCatalog;
+import org.jmouse.access.VariableKind;
 import org.jmouse.access.spi.DeferredValue;
 
 import java.util.Collection;
@@ -7,16 +9,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.TreeMap;
 import java.util.function.Supplier;
 
 /**
- * The two readings of a set of {@link AmbientAccessValues} — their names, and their values.
+ * The readings of a set of {@link AmbientAccessValues} — their names, their kinds, and their values.
  *
- * <p>Both come from calling {@code publish} against a different {@link AmbientPublication}, which is
- * why the registration seam is worth having: <strong>the names are answerable without working any
- * value out</strong>, so a catalogue can be built at startup from the same declaration that serves
- * the request.
+ * <p>All of them come from calling {@code publish} against a different {@link AmbientPublication},
+ * which is why the registration seam is worth having: <strong>the names are answerable without
+ * working any value out</strong>, so a catalogue can be built at startup from the same declaration
+ * that serves the request.
  */
 public final class AmbientValues {
 
@@ -30,11 +32,40 @@ public final class AmbientValues {
      * body reads something would fail at boot, which is exactly where that mistake should surface.
      */
     public static Set<String> namesOf(Collection<AmbientAccessValues> publishers) {
-        Names names = new Names();
+        return kindsOf(publishers).keySet();
+    }
 
-        publishers.forEach(publisher -> publisher.publish(names));
+    /**
+     * The same names, each with the one thing a reader of a rule needs to know about it.
+     *
+     * <p>⚠️ <strong>The kind is read off how the value was registered, never declared twice.</strong>
+     * {@code attach} is a value already in hand and {@code attachLazy} is one that has to be worked
+     * out, which is exactly the {@code constant} / {@code dynamic} distinction a policy file writes —
+     * so a file claiming the wrong one can be refused without anybody maintaining a second list for it
+     * to be refused against.
+     *
+     * @return every attached name, in a stable order, mapped to where its value comes from
+     */
+    public static Map<String, VariableKind> kindsOf(Collection<AmbientAccessValues> publishers) {
+        Kinds kinds = new Kinds();
 
-        return Set.copyOf(names.collected);
+        publishers.forEach(publisher -> publisher.publish(kinds));
+
+        return Map.copyOf(kinds.collected);
+    }
+
+    /**
+     * The same reading, as the catalogue a policy file is checked against.
+     *
+     * <p>⚠️ <strong>Here rather than in each product, deliberately.</strong> The mapping from
+     * "how it was registered" to "what the file must call it" is one fact, and a product that built
+     * its own catalogue would be restating it — which is the shape of every drift this whole seam
+     * exists to prevent.
+     *
+     * @param publishers everything attaching values to a decision, or empty where nothing does
+     */
+    public static VariableCatalog catalogOf(Collection<AmbientAccessValues> publishers) {
+        return VariableCatalog.of(kindsOf(publishers));
     }
 
     /**
@@ -58,20 +89,20 @@ public final class AmbientValues {
         return publishedBy(List.of(publisher));
     }
 
-    /** Collects names and discards everything else. */
-    private static final class Names implements AmbientPublication {
+    /** Collects names and how each was registered, and discards the values themselves. */
+    private static final class Kinds implements AmbientPublication {
 
-        private final Set<String> collected = new TreeSet<>();
+        private final Map<String, VariableKind> collected = new TreeMap<>();
 
         @Override
         public AmbientPublication attach(String name, Object value) {
-            collected.add(name);
+            collected.put(name, VariableKind.CONSTANT);
             return this;
         }
 
         @Override
         public AmbientPublication attachLazy(String name, Supplier<Object> value) {
-            collected.add(name);
+            collected.put(name, VariableKind.DYNAMIC);
             return this;
         }
     }

@@ -6,7 +6,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- * Every action this installation publishes, and which values each one carries.
+ * Every action this installation publishes, and which values each one produces.
  *
  * <p>An action is <em>what is being done</em> — {@code entry.listByPurpose}, {@code label.print} —
  * as opposed to a permission, which is what somebody <em>may</em> do. One permission covers several
@@ -38,44 +38,51 @@ public interface ActionCatalog {
     /**
      * A fixed catalogue.
      *
-     * @param publishedValuesByAction every action, mapped to the value names it publishes
+     * @param producedValuesByAction every action, mapped to the value names it produces
      */
-    static ActionCatalog of(Map<String, Set<String>> publishedValuesByAction) {
+    static ActionCatalog of(Map<String, Set<String>> producedValuesByAction) {
         Map<String, Set<String>> copy = new TreeMap<>();
 
-        publishedValuesByAction.forEach((action, values) -> copy.put(action, Set.copyOf(values)));
+        producedValuesByAction.forEach((action, values) -> copy.put(action, Set.copyOf(values)));
 
         return () -> Map.copyOf(copy);
     }
 
-    /** Every action this installation publishes, mapped to the value names it carries. */
-    Map<String, Set<String>> publishedValuesByAction();
+    /**
+     * Every action this installation publishes, mapped to the value names it produces.
+     *
+     * <p>⚠️ <strong>What an action produces, and nothing that is merely true while it runs.</strong>
+     * A value attached to every decision belongs to {@link VariableCatalog}: folded in here it would
+     * make every action claim to produce it, which is both false and a line every declaration in a
+     * policy file then has to repeat.
+     */
+    Map<String, Set<String>> producedValuesByAction();
 
     /** Every action, in a stable order — what a picker on a screen offers. */
     default Set<String> all() {
-        return new TreeSet<>(publishedValuesByAction().keySet());
+        return new TreeSet<>(producedValuesByAction().keySet());
     }
 
     default boolean contains(String action) {
-        return publishedValuesByAction().containsKey(action);
+        return producedValuesByAction().containsKey(action);
     }
 
-    /** The values one action publishes, or an empty set where nothing publishes that action. */
+    /** The values one action produces, or an empty set where nothing publishes that action. */
     default Set<String> valuesOf(String action) {
-        return publishedValuesByAction().getOrDefault(action, Set.of());
+        return producedValuesByAction().getOrDefault(action, Set.of());
     }
 
     /**
-     * Every value name any action publishes.
+     * Every value name any action produces.
      *
-     * <p>What a rule written <em>without</em> an action can be checked against — which is all such a
-     * rule can be checked against, and the right incentive: an unscoped rule holds everywhere in a
-     * call, which is almost never what anybody means.
+     * <p>What a rule written <em>without</em> an action can be checked against — that, and the
+     * variables, which is all such a rule can be checked against. The right incentive: an unscoped
+     * rule holds everywhere in a call, which is almost never what anybody means.
      */
-    default Set<String> everyPublishedValue() {
+    default Set<String> everyProducedValue() {
         Set<String> names = new TreeSet<>();
 
-        publishedValuesByAction().values().forEach(names::addAll);
+        producedValuesByAction().values().forEach(names::addAll);
 
         return names;
     }

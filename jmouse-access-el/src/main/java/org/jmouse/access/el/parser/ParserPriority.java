@@ -44,6 +44,7 @@ public final class ParserPriority {
     public static final int PLAN         = Integer.MIN_VALUE + 1700;
     public static final int ENTITLEMENTS = Integer.MIN_VALUE + 1800;
     public static final int ACTIONS      = Integer.MIN_VALUE + 1900;
+    public static final int VARIABLES    = Integer.MIN_VALUE + 1950;
 
     /** Statements written inside a block, longest shape first. */
     public static final int GRANT                  = Integer.MIN_VALUE + 2000;
@@ -52,6 +53,7 @@ public final class ParserPriority {
     public static final int PERMISSION_DECLARATION = Integer.MIN_VALUE + 2300;
     public static final int ACTION_DECLARATION     = Integer.MIN_VALUE + 2350;
     public static final int INCLUDE                = Integer.MIN_VALUE + 2400;
+    public static final int VARIABLE_DECLARATION   = Integer.MIN_VALUE + 2450;
     public static final int CAPABILITY_DECLARATION = Integer.MIN_VALUE + 2500;
     public static final int PAID_CAPABILITIES      = Integer.MIN_VALUE + 2600;
     public static final int ENTITLEMENT            = Integer.MIN_VALUE + 2700;

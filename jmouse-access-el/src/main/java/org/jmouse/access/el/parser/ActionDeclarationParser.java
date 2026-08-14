@@ -18,9 +18,9 @@ import static org.jmouse.el.lexer.BasicToken.T_STRING;
 
 /**
  * Parses one line of an {@code actions} block:
- * {@code entry.listByPurpose "List submissions of one purpose" publishes purpose, tier}.
+ * {@code entry.listByPurpose "List submissions of one purpose" produces purpose, tier}.
  *
- * <p>The {@code publishes} clause is optional: an action that carries nothing is still worth
+ * <p>The {@code produces} clause is optional: an action that carries nothing is still worth
  * declaring, because a rule may scope itself to it and compare nothing but the action's own name.
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
@@ -37,7 +37,7 @@ public class ActionDeclarationParser extends AbstractParser {
         node.setName(SourceReader.dottedName(cursor));
         node.setDescription(SourceReader.literal(cursor.ensure(T_STRING)));
 
-        if (cursor.consumeIf(AccessToken.T_PUBLISHES)) {
+        if (cursor.consumeIf(AccessToken.T_PRODUCES)) {
             node.setValues(readValues(cursor));
         }
 
@@ -45,7 +45,7 @@ public class ActionDeclarationParser extends AbstractParser {
     }
 
     /**
-     * Reads {@code publishes purpose, tier} — the value names this action carries into a condition.
+     * Reads {@code produces purpose, tier} — the value names this action carries into a condition.
      *
      * <p>Names only, and deliberately: a name is what a rule mentions and therefore what a validator
      * can check a rule against. Anything more descriptive would be prose, and prose is what documents

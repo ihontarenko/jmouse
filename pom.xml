@@ -93,11 +93,18 @@
         <module>jmouse-storage</module>
         <module>jmouse-storage-s3</module>
         <module>jmouse-storage-jpa</module>
+        <module>jmouse-ai</module>
+        <module>jmouse-ai-provider</module>
+        <module>jmouse-ai-conversation</module>
+        <module>jmouse-ai-mcp</module>
+        <module>jmouse-ai-access</module>
+        <module>jmouse-ai-jpa</module>
         <module>jmouse-web</module>
         <module>jmouse-crawler</module>
         <module>jmouse-spring</module>
         <module>pet-gallery</module>
         <module>wep-app</module>
+        <module>jmouse-ai-sandbox</module>
     </modules>
 
     <build>

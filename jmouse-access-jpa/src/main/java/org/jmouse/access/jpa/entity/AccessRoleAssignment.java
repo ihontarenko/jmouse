@@ -57,6 +57,10 @@ public class AccessRoleAssignment {
     @Column(name = "source", length = 32, nullable = false)
     private String source;
 
+    /** The expression this assignment only applies under, as source, or null. */
+    @Column(name = "condition_source", length = 1024)
+    private String conditionSource;
+
     @Column(name = "granted_by", length = 36)
     private String grantedBy;
 
@@ -68,14 +72,21 @@ public class AccessRoleAssignment {
 
     public AccessRoleAssignment(String id, String subjectId, String roleId, String scopeType,
                                 String scopeId, String source, String grantedBy) {
-        this.id         = id;
-        this.subjectId  = subjectId;
-        this.roleId     = roleId;
-        this.scopeType  = scopeType;
-        this.scopeId    = scopeId;
-        this.source     = source;
-        this.grantedBy  = grantedBy;
-        this.createdAt  = Instant.now();
+        this(id, subjectId, roleId, scopeType, scopeId, source, grantedBy, null);
+    }
+
+    public AccessRoleAssignment(String id, String subjectId, String roleId, String scopeType,
+                                String scopeId, String source, String grantedBy,
+                                String conditionSource) {
+        this.id              = id;
+        this.subjectId       = subjectId;
+        this.roleId          = roleId;
+        this.scopeType       = scopeType;
+        this.scopeId         = scopeId;
+        this.source          = source;
+        this.grantedBy       = grantedBy;
+        this.conditionSource = conditionSource;
+        this.createdAt       = Instant.now();
     }
 
     public String getId()         { return id; }
@@ -86,4 +97,6 @@ public class AccessRoleAssignment {
     public String getSource()     { return source; }
     public String getGrantedBy()  { return grantedBy; }
     public Instant getCreatedAt() { return createdAt; }
+
+    public String getConditionSource() { return conditionSource; }
 }

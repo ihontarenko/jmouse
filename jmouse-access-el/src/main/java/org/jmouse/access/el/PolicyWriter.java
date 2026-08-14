@@ -22,7 +22,10 @@ import org.jmouse.access.el.node.ScopeDeclarationNode;
 import org.jmouse.access.el.node.ScopesNode;
 import org.jmouse.access.el.node.SingleScopeNode;
 import org.jmouse.access.el.node.SubjectNode;
+import org.jmouse.access.el.node.VariableDeclarationNode;
+import org.jmouse.access.el.node.VariablesNode;
 import org.jmouse.access.policy.model.PolicyBundleEntry;
+import org.jmouse.access.policy.model.PolicyVariableDeclaration;
 import org.jmouse.access.policy.model.PolicyActionDeclaration;
 import org.jmouse.access.policy.model.PolicyCapabilityDeclaration;
 import org.jmouse.access.policy.model.PolicyEntitlement;
@@ -125,6 +128,10 @@ public final class PolicyWriter {
 
         if (!document.actions().isEmpty()) {
             policy.addExpression(toActionsNode(document));
+        }
+
+        if (!document.variables().isEmpty()) {
+            policy.addExpression(toVariablesNode(document));
         }
 
         if (!document.capabilities().isEmpty()) {
@@ -302,6 +309,26 @@ public final class PolicyWriter {
         return node;
     }
 
+    private static PolicyBlockNode toVariablesNode(PolicyDocument document) {
+        VariablesNode block = new VariablesNode();
+
+        for (PolicyVariableDeclaration variable : document.variables()) {
+            block.addExpression(toNode(variable));
+        }
+
+        return block;
+    }
+
+    private static VariableDeclarationNode toNode(PolicyVariableDeclaration variable) {
+        VariableDeclarationNode node = new VariableDeclarationNode();
+
+        node.setName(variable.name());
+        node.setKind(variable.kind());
+        node.setDescription(variable.description());
+
+        return node;
+    }
+
     private static PolicyBlockNode toPermissionsNode(PolicyDocument document) {
         PermissionsNode block = new PermissionsNode();
 
@@ -323,6 +350,11 @@ public final class PolicyWriter {
 
     private static RoleNode toNode(PolicyRole role) {
         RoleNode node = new RoleNode(role.name());
+
+        // ⚠️ Written only where the document stated one. A projection derived from rows cannot know it
+        // — a RoleGrant carries what a role bundles, never where it may be handed out — so rendering
+        // `assignable` unconditionally would put a guess into a file people read as a statement.
+        node.setAssignableAt(role.assignableAt());
 
         for (PolicyBundleEntry entry : role.bundle()) {
             node.addExpression(toNode(entry));
