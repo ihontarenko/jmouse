@@ -134,6 +134,7 @@ public record ToolAction(
         private final Map<String, String>                 traceAttributes = new LinkedHashMap<>();
         private Function<ToolInvocation, AffectedRecords> affectedRecords;
         private Function<ToolInvocation, Object>          handler;
+        private boolean                                   schemaCameFromElsewhere;
 
         private Builder() {
         }
@@ -161,6 +162,31 @@ public record ToolAction(
         /** The arguments, built rather than assembled. See {@link ArgumentSchema}. */
         public Builder inputSchema(ArgumentSchema schema) {
             this.inputSchema = schema == null ? null : schema.build();
+            return this;
+        }
+
+        /**
+         * A schema this application did not write, republished exactly as it arrived.
+         *
+         * <p>⚠️ <strong>For forwarded actions, and nothing else.</strong> The door
+         * {@link #inputSchema(ArgumentSchema)} closes is a real one — a hand-assembled
+         * {@code Map.of("type", "object", …)} is how a malformed schema reaches a model at runtime
+         * instead of failing at startup — and this is not that door reopened. It is the one case the
+         * rule cannot cover: a tool defined on somebody else's machine, whose schema is a fact to be
+         * carried rather than a declaration to be built. Rebuilding it through {@link ArgumentSchema}
+         * would mean re-expressing another author's contract in this library's vocabulary and silently
+         * losing whatever did not survive the trip.
+         *
+         * <p>Named so that its one legitimate use is obvious — and, since a javadoc is not a rule,
+         * <strong>{@link #build()} refuses it for anything that is not {@link ToolOrigin#REMOTE}</strong>.
+         * Every other invariant in this library is a startup refusal or an architecture rule; leaving
+         * this one to be remembered would make it the single exception, in the one place a shortcut is
+         * most tempting.
+         */
+        public Builder publishedSchema(Map<String, Object> schema) {
+            this.schemaCameFromElsewhere = true;
+            this.inputSchema             = schema == null ? null : Map.copyOf(schema);
+
             return this;
         }
 
@@ -237,6 +263,21 @@ public record ToolAction(
             return this;
         }
 
+        /**
+         * The work.
+         *
+         * <p>⚠️ <strong>A handler finishes checking before it starts writing.</strong> Every refusal
+         * this library produces ends by promising that nothing was changed, and the dispatcher records
+         * one through {@link org.jmouse.ai.spi.InvocationTrace#recordRefusal} — a decision, with
+         * nothing attempted. A handler that validates a batch as it walks it refuses the third entry
+         * having already created the first two, and both the sentence the model reads and the row in
+         * the trail then say something untrue.
+         *
+         * <p>Nothing enforces this, and nothing can: only the handler knows where its writes begin.
+         * Work that genuinely cannot be checked in advance belongs in an exception rather than a
+         * refusal — see {@link RefusalRendering#renderFailure}, which deliberately says the opposite,
+         * that part of it may have been carried out.
+         */
         public Builder handler(Function<ToolInvocation, Object> handler) {
             this.handler = handler;
             return this;
@@ -251,10 +292,34 @@ public record ToolAction(
          * here would split the answer across two places and leave a reader unsure which one to trust.
          */
         public ToolAction build() {
+            refuseABorrowedSchemaOnALocalAction();
+
             return new ToolAction(
                     toolName, name, title, description, inputSchema, requiredPermission,
                     readOnly, destructive, scopeConfined, origin, traceAttributes,
                     affectedRecords, handler);
+        }
+
+        /**
+         * ⚠️ The one thing checked here rather than in the catalogue, and the reason is the exception.
+         *
+         * <p>Validation belongs to {@link ToolCatalog} because most of it is about the whole registered
+         * set. This is not: it is about a single builder having been asked two contradictory things, and
+         * it is answerable the moment it happens. Deferring it would mean the catalogue reporting that
+         * a schema is somehow wrong, a long way from the call that borrowed it.
+         */
+        private void refuseABorrowedSchemaOnALocalAction() {
+            if (!schemaCameFromElsewhere || origin == ToolOrigin.REMOTE) {
+                return;
+            }
+
+            throw new IllegalStateException(
+                    "'" + toolName + "." + name + "' is a local action and was given a schema through "
+                    + "publishedSchema, which exists for one case only: republishing, unchanged, the "
+                    + "schema of a tool defined on a server this application connects to. A local "
+                    + "action's arguments are declared through ArgumentSchema, so that a malformed one "
+                    + "fails here instead of confusing a model at runtime. Use inputSchema(…), or set "
+                    + "origin(ToolOrigin.REMOTE) if this really is a forwarded action.");
         }
     }
 }

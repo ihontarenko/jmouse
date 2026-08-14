@@ -52,10 +52,15 @@ public record InvocationScope(String kind, String id, String name, boolean defau
      *
      * <p>The parenthetical is the whole value of the field: a reader who wanted a different workspace
      * only notices when the sentence admits that nobody chose this one.
+     *
+     * <p>⚠️ Says nothing about the {@link #kind}, because every sentence this appears in has already
+     * named it — {@link ToolOutcome#describe()} leads with it. Naming it here produced
+     * <em>"Workshop: Bench (your default workshop)"</em>, which reads as a stutter and made the
+     * parenthetical easier to skip than to read.
      */
     public String echo() {
         return defaulted
-                ? label() + " (your default " + kind + ")"
+                ? label() + " (chosen by default)"
                 : label();
     }
 

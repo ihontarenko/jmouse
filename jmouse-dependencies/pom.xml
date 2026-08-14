@@ -77,6 +77,7 @@
         <org.jsoup>1.22.1</org.jsoup>
         <json-path>2.9.0</json-path>
         <awssdk.version>2.28.29</awssdk.version>
+        <mcp-sdk.version>2.0.0</mcp-sdk.version>
     </properties>
 
     <dependencyManagement>
@@ -516,6 +517,43 @@
                 <artifactId>json-path</artifactId>
                 <version>${json-path}</version>
                 <scope>compile</scope>
+            </dependency>
+
+            <!--
+              Model Context Protocol. Managed here rather than in jmouse-ai-mcp, like every other
+              third-party version this framework pins: the module that uses it declares no version at
+              all, so there is one place to look when the SDK moves.
+            -->
+            <dependency>
+                <groupId>io.modelcontextprotocol.sdk</groupId>
+                <artifactId>mcp</artifactId>
+                <version>${mcp-sdk.version}</version>
+            </dependency>
+
+            <!-- Testing. Versions from the parent, so one JUnit is in force across the reactor. -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!--
+              The core library only, deliberately: the rules are run from ordinary JUnit tests through
+              ArchRule.check, rather than through the archunit-junit5 engine. One test engine on a
+              classpath is one fewer thing to explain when a build reports nothing ran.
+            -->
+            <dependency>
+                <groupId>com.tngtech.archunit</groupId>
+                <artifactId>archunit</artifactId>
+                <version>${archunit.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

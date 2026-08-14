@@ -1,21 +1,17 @@
 /**
  * The tool-calling loop, and only the loop.
  *
- * <p>Per round: render the catalogue's published tools for the provider, ask the model, and hand every
- * tool call it makes to {@code ToolDispatcher} — the same dispatcher a Model Context Protocol client
- * reaches from outside the process, in the same transaction, under the same caller. Append the
- * results, ask again, until the model stops or the budget runs out.
+ * <p>Ask the model, hand what it asked for to {@code ToolDispatcher}, hand the results back, ask again,
+ * and stop when it finishes or when the budget does. Everything else a loop is tempted to grow — a tool
+ * lookup, a permission check, an {@code execute} method, an exception wrapper — already exists one
+ * module down, and a second copy of any of it is how an in-app assistant and an external client stop
+ * agreeing about what a caller may do.
  *
- * <p>A budget rather than a round counter, because rounds are only half of what runs away: token usage
- * arrives on every response and is what actually costs. A conversation that has spent its budget ends
- * with a stated reason rather than an exception carrying a magic number.
+ * <p>The budget bounds rounds <em>and</em> tokens, because a conversation is resent whole every round
+ * and a round cap alone bounds the wrong quantity.
  *
- * <p>A refusal is rendered as a result the model reads and retries against, never as a transport
- * error. A client told "something went wrong" reports exactly that to the user; a model told
- * <em>why</em> it was refused corrects itself and calls again. Both entry points render refusals the
- * same way, from the same text, which is why that text lives one module down.
- *
- * <p>This package holds no prompt, persists no conversation, and knows no product's vocabulary. Those
- * belong to the caller and are the first things that will try to leak in here.
+ * <p>⚠️ <strong>No prompt, no persistence, no product vocabulary.</strong> Those belong to the caller
+ * and are the first things that will try to leak in here. English in this package that is not a refusal
+ * or a stated reason for stopping is a bug.
  */
 package org.jmouse.ai.conversation;

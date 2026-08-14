@@ -171,6 +171,11 @@ public record ToolInvocation(
         return reader().objectList(name);
     }
 
+    /** The same list, each element already knowing where it sits. See {@link Arguments#each}. */
+    public List<Arguments> each(String name) {
+        return reader().each(name);
+    }
+
     /**
      * The single record this call is about, as the guards resolved it.
      *
@@ -179,6 +184,11 @@ public record ToolInvocation(
      * cannot reach from here — another scope, another subject, or something already gone. Saying all
      * three is what stops a model retrying the same identifier.
      *
+     * <p>⚠️ Refuses with {@link RefusalReason#NOTHING_TO_ACT_ON} rather than
+     * {@link RefusalReason#INVALID_ARGUMENT}, because the reason is what gets counted and this is not
+     * a malformed argument — it is a well-formed identifier that reached nothing. Folded into the
+     * largest bucket there is, a model steadily naming records it cannot see is invisible.
+     *
      * @param what               the kind of thing, in the user's words, e.g. {@code "page"}
      * @param verb               what was going to happen to it, e.g. {@code "delete"}
      * @param identifierArgument which argument named it, so the refusal can quote it back
@@ -186,7 +196,7 @@ public record ToolInvocation(
     public String requireConfirmedRecord(String what, String verb, String identifierArgument) {
         return confirmedRecords.stream().findFirst()
                 .map(AffectedRecords.Record::id)
-                .orElseThrow(() -> new ToolRefusedException(RefusalReason.INVALID_ARGUMENT,
+                .orElseThrow(() -> new ToolRefusedException(RefusalReason.NOTHING_TO_ACT_ON,
                         "No " + what + " '" + requiredString(identifierArgument) + "' is visible "
                         + (scope == null ? "to this caller" : "in the " + scope.kind() + " '" + scope.label() + "'")
                         + ", so there is nothing to " + verb + ". Use the matching list action to see "

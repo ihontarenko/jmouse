@@ -1,0 +1,8 @@
+org.jmouse.ai.spring.AiJpaAutoConfiguration
+org.jmouse.ai.spring.AiAccessAutoConfiguration
+org.jmouse.ai.spring.AiProviderAutoConfiguration
+org.jmouse.ai.spring.AiConversationAutoConfiguration
+org.jmouse.ai.spring.AiAutoConfiguration
+org.jmouse.ai.spring.AiMcpAutoConfiguration
+org.jmouse.ai.spring.AiManagementAutoConfiguration
+org.jmouse.ai.spring.migration.AiFlywayAutoConfiguration

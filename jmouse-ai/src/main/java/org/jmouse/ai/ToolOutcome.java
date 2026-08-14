@@ -53,8 +53,12 @@ public record ToolOutcome(Object payload, InvocationScope scope, CallVerdict ver
      * location over an operation that has not happened yet.
      */
     public String describe() {
+        // ⚠️ "Across everything this caller can see" was wrong for the arrangement this library was
+        // built for. An action that is not scope-confined acts on the *acting subject's* records, and
+        // a service credential's own reach is not what it ran over. The sentence now says only what is
+        // true of every scopeless action: nothing narrowed it.
         String where = scope == null
-                ? "Across everything this caller can see."
+                ? "Not confined to one place."
                 : capitalise(scope.kind()) + ": " + scope.echo() + ".";
 
         return headline().map(headline -> headline + " " + where).orElse(where);

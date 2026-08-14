@@ -54,27 +54,26 @@
         <java.version>21</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-
-        <!-- SCAFFOLD - remove with the first public type (ticket 07). See jmouse-ai/pom.xml for why. -->
-        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
     <!--
       The one module allowed to see the Model Context Protocol SDK, so that every other module can be
       used by a product that has never heard of MCP.
 
-      OPEN DECISION (see .scratch/jmouse-ai/spec.md, Open Decisions 1): which SDK.
-      Innoventa currently uses spring-ai-starter-mcp-server-webmvc, which drags Spring Boot 4 and a
-      servlet stack in with it. The protocol SDK on its own (io.modelcontextprotocol:mcp) is
-      transport-agnostic and Spring-free, which is what would let this module be pinned independently
-      of everything else and used outside Spring - at the cost of wiring a transport ourselves in
-      jmouse-ai-spring-boot. The dependency is left undeclared until ticket 07 settles it, rather
-      than declared and quietly load-bearing.
+      SETTLED (ticket 07): the raw SDK, not Spring AI's starter. Spring AI's would drag Spring Boot 4
+      and a servlet stack in with it; this one is transport-agnostic and Spring-free, so the module can
+      be pinned independently and used outside Spring. It also ships the servlet transports, so
+      "wire a transport ourselves" turned out to mean choose one - which jmouse-ai-spring-boot does in
+      ticket 10 - rather than write one.
     -->
     <dependencies>
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-ai</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.modelcontextprotocol.sdk</groupId>
+            <artifactId>mcp</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -84,6 +83,19 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <!-- Architecture rules only, and this is the module they are all about: the protocol SDK is
+             confined here, so the rule stating it lives beside the one module allowed to see it. -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

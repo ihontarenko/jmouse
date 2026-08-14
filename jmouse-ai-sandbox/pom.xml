@@ -33,6 +33,9 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.deploy.skip>true</maven.deploy.skip>
+
+        <!-- What `mvn exec:java` runs unless -Dexec.mainClass names the other one. -->
+        <exec.mainClass>org.jmouse.ai.sandbox.SandboxApplication</exec.mainClass>
     </properties>
 
     <!--
@@ -68,6 +71,26 @@
             <artifactId>jmouse-ai-mcp</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--
+          The optional management controllers, exercised the same way everything else here is: by being
+          called. They are plain methods returning plain values, so no container is needed to find out
+          whether they answer - and no container is what stops this module from quietly becoming a
+          Spring application whose behaviour depends on a context nobody reads.
+        -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-ai-management</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- To render what those methods return exactly as a client would receive it. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -83,6 +106,16 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <!--
+              A default rather than a fixed value, because the whole point of this module is that
+              somebody runs it after changing something - and there is more than one thing to run.
+              -Dexec.mainClass=... picks the other.
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
             </plugin>
         </plugins>
     </build>

@@ -124,7 +124,7 @@ public class ActionDefinitionNode extends AbstractExpression {
      * @return evaluated action definition
      */
     @Override
-    public org.jmouse.access.policy.model.PolicyBundleEntry evaluate(EvaluationContext context) {
+    public Object evaluate(EvaluationContext context) {
         Map<String, Object> arguments = new LinkedHashMap<>();
 
         for (Node child : getChildren()) {

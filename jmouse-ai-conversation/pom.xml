@@ -54,9 +54,6 @@
         <java.version>21</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-
-        <!-- SCAFFOLD - remove with the first public type (ticket 06). See jmouse-ai/pom.xml for why. -->
-        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
     <!--
@@ -76,6 +73,14 @@
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-ai-provider</artifactId>
         </dependency>
+        <!--
+          Only for the wire: a tool result is JSON of whatever a handler returned, and that string has
+          to be written somewhere. Nothing here is bound to Jackson's annotations or its object model.
+        -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -84,6 +89,19 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <!-- Architecture rules only. The loop itself is exercised by the sandbox against a scripted
+             model; what is stated here is what this module is not allowed to reach for. -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

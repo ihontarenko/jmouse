@@ -10,6 +10,10 @@ public record Part(String id, String workshopId, String name, String shelf, int 
         return new Part(id, workshopId, name, shelf, newQuantity);
     }
 
+    public Part withShelf(String newShelf) {
+        return new Part(id, workshopId, name, newShelf, quantity);
+    }
+
     /**
      * What a trail keeps once this part no longer exists.
      *

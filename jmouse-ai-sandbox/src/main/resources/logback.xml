@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The transcript is this application's output.
+
+  jmouse-ai logs a line per dispatch, per preview, per throttle and per refusal, and every one of them
+  is worth having in a running product. Interleaved with a printed transcript they are neither: the
+  ordering is a coin toss and the two vocabularies read as one confused stream. Raise this to INFO to
+  read what the library says about the same run.
+-->
+<configuration>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

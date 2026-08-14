@@ -17,9 +17,10 @@ package org.jmouse.ai;
  * them names anything a product owns. Being able to {@code switch} over a fixed set is worth more than
  * an extensibility nobody would use.
  *
- * <p>Four reasons this deliberately does <em>not</em> carry, all of which Innoventa's version did:
- * "not an agent", "agent disabled", "owner disabled agents" and "feature disabled". Those are a
- * product's identity policy — who may become a caller at all — and they belong behind
+ * <p>Four reasons this deliberately does <em>not</em> carry, all of which the reference implementation
+ * this was drawn from did: "not an agent", "agent disabled", "owner disabled agents" and "feature
+ * disabled". Those are a product's identity policy — who may become a caller at all — and they belong
+ * behind
  * {@link org.jmouse.ai.spi.CallerResolver}, which is free to raise a
  * {@link ToolRefusedException} carrying {@link #NO_CALLER} or to throw something of its own.
  */
@@ -60,12 +61,16 @@ public enum RefusalReason {
     AMBIGUOUS_TARGET,
 
     /**
-     * A destructive call matched nothing.
+     * A call aimed at existing records reached none of them — a destructive filter that matched
+     * nothing, or an identifier that resolved to nothing this caller can see from here.
      *
      * <p>Its own reason rather than an {@link #INVALID_ARGUMENT}, because it is the one refusal whose
-     * volume says something specific: a filter that keeps matching nothing is a model working from a
-     * description that promises records the domain does not hold. Folded into invalid arguments it
-     * would be invisible inside the largest bucket there is.
+     * volume says something specific: a model that keeps naming records the domain does not hold is
+     * working from a description that promises them. Folded into invalid arguments it would be
+     * invisible inside the largest bucket there is.
+     *
+     * <p>⚠️ Both halves are the same fact and are deliberately counted together. The arguments were
+     * well formed; what they named was not there.
      */
     NOTHING_TO_ACT_ON,
 
@@ -76,5 +81,20 @@ public enum RefusalReason {
     RATE_LIMITED,
 
     /** A confirmation token was presented that is unknown, expired, spent, or for another operation. */
-    INVALID_CONFIRMATION
+    INVALID_CONFIRMATION,
+
+    /**
+     * A server this application forwards to answered, and its answer was a refusal.
+     *
+     * <p>Its own reason, and the distinction it draws is the point of having it: this call was refused
+     * by <em>somebody else's</em> rules, not by this installation's. A pile of these says a remote
+     * server's permissions do not match what this product told its callers they could do — which is a
+     * conversation with whoever runs that server, and is not a bug here. Folded into
+     * {@link #MISSING_PERMISSION} it would send somebody to look at the wrong policy.
+     *
+     * <p>⚠️ A remote server that could not be <em>reached</em> is not this. That is a failure rather
+     * than a refusal, because a refusal ends by promising that nothing was changed, and a call that
+     * vanished into a broken connection cannot promise anything of the sort.
+     */
+    REMOTE_REFUSED
 }

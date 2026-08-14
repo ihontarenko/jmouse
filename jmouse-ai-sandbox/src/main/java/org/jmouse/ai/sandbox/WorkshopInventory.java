@@ -86,6 +86,17 @@ public final class WorkshopInventory {
                 .toList();
     }
 
+    /**
+     * One part by identifier, from anywhere.
+     *
+     * <p>Deliberately not narrowed to a workshop: an action addressing one record has to be able to
+     * tell "there is no such part" from "there is, and it is somewhere this call may not reach", and a
+     * lookup that already filtered by scope could only ever answer the first.
+     */
+    public Optional<Part> part(String partId) {
+        return Optional.ofNullable(parts.get(partId));
+    }
+
     public Part addPart(String workshopId, String shelf, String name, int quantity) {
         Part part = new Part("part-" + sequence.incrementAndGet(), workshopId, name, shelf, quantity);
         parts.put(part.id(), part);
@@ -94,6 +105,10 @@ public final class WorkshopInventory {
 
     public void adjustQuantity(String partId, int by) {
         parts.computeIfPresent(partId, (id, part) -> part.withQuantity(part.quantity() + by));
+    }
+
+    public void moveToShelf(String partId, String shelf) {
+        parts.computeIfPresent(partId, (id, part) -> part.withShelf(shelf));
     }
 
     public void discard(String partId) {

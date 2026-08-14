@@ -132,6 +132,22 @@ public final class ToolCatalog {
         return actionsByPublishedName.keySet().stream().sorted().toList();
     }
 
+    /**
+     * The namespaces, which is how many <em>tools</em> there are.
+     *
+     * <p>Not derivable from {@link #size()}, and the difference is the whole point of a namespace being
+     * contributable by two features: eight actions may be three tools. Anything reporting the catalogue
+     * to a person needs both numbers, and this was otherwise computable only by the startup log line
+     * that already does it.
+     */
+    public List<String> toolNames() {
+        return actionsByPublishedName.values().stream()
+                .map(ToolAction::toolName)
+                .distinct()
+                .sorted()
+                .toList();
+    }
+
     public boolean contains(String publishedName) {
         return actionsByPublishedName.containsKey(publishedName);
     }

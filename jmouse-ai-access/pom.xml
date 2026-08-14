@@ -54,9 +54,6 @@
         <java.version>21</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-
-        <!-- SCAFFOLD - remove with the first public type (ticket 09). See jmouse-ai/pom.xml for why. -->
-        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
     <!--
@@ -86,6 +83,18 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <!-- Architecture rules only: staying two translations wide is the whole of this module. -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

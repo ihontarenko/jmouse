@@ -43,9 +43,6 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <spring-boot.version>4.0.7</spring-boot.version>
-
-        <!-- SCAFFOLD - remove with the first public type (ticket 12). See jmouse-ai/pom.xml for why. -->
-        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
     <dependencyManagement>
@@ -97,6 +94,21 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!--
+          Tests. One rule, and it is the property this module's whole existence rests on: nothing here
+          may hold a dispatcher, a catalogue or an action, so it cannot become a second way in.
+        -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

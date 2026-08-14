@@ -116,33 +116,39 @@ public final class PartTool implements ToolDefinition {
     }
 
     private Object receiveParts(ToolInvocation invocation) {
-        List<Map<String, Object>> items = invocation.objectList("items");
+        // Each entry already knows it is 'items[2]', which is what makes a refusal about the third one
+        // say so. Composing that label by hand is what this sandbox did first, and disliked twice.
+        List<Arguments> items = invocation.each("items");
 
         if (items.isEmpty()) {
             throw invocation.reader().refuse("items", "must hold at least one part");
         }
 
-        List<Map<String, Object>> received = new ArrayList<>();
+        // ⚠️ Every entry is read and checked before any of it is written. Validating as it went would
+        // refuse the third entry having already created the first two — and every refusal in this
+        // library promises that nothing was changed.
+        List<Arrival> arrivals = new ArrayList<>();
 
-        for (int index = 0; index < items.size(); index++) {
-            // The context is what makes a refusal about the third entry say so. Without it, three
-            // entries all report a problem with something called 'quantity'.
-            Arguments entry = Arguments.at("items[" + index + "]", items.get(index));
-
+        for (Arguments entry : items) {
             int quantity = (int) entry.requiredNumber("quantity");
 
             if (quantity <= 0) {
                 throw entry.refuse("quantity", "must be a positive number, but " + quantity + " was sent");
             }
 
-            received.add(describe(inventory.addPart(
-                    invocation.scopeId(),
-                    entry.requiredString("shelf"),
-                    entry.requiredString("name"),
-                    quantity)));
+            arrivals.add(new Arrival(entry.requiredString("shelf"), entry.requiredString("name"), quantity));
         }
 
+        List<Map<String, Object>> received = arrivals.stream()
+                .map(arrival -> describe(inventory.addPart(
+                        invocation.scopeId(), arrival.shelf(), arrival.name(), arrival.quantity())))
+                .toList();
+
         return Map.of("received", received);
+    }
+
+    /** One checked entry, waiting for every other entry to be checked too. */
+    private record Arrival(String shelf, String name, int quantity) {
     }
 
     // ── A write over the confirmation threshold, and the ceiling ─────────────────

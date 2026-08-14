@@ -295,6 +295,28 @@ public record Arguments(Map<String, Object> values, String context) {
     }
 
     /**
+     * The same list, each element already knowing where it sits.
+     *
+     * <p>What {@link #objectList} is almost always followed by, and the loop that follows it is the
+     * same four lines in every handler that reads one: index, {@code Arguments.at(name + "[" + index +
+     * "]", …)}, read, refuse. Composing that label by hand is not hard, it is <em>skippable</em> — and
+     * a handler that skips it refuses the third entry with a sentence about something called
+     * {@code quantity}, which is the same sentence all three entries would have produced.
+     *
+     * <p>Discovered by writing the loop twice in a sandbox and disliking it both times.
+     */
+    public List<Arguments> each(String name) {
+        List<Map<String, Object>> objects = objectList(name);
+        List<Arguments>          readers  = new ArrayList<>(objects.size());
+
+        for (int index = 0; index < objects.size(); index++) {
+            readers.add(nested(name + "[" + index + "]", objects.get(index)));
+        }
+
+        return List.copyOf(readers);
+    }
+
+    /**
      * A readable refusal about one named argument, in the shape every reader here uses.
      *
      * <p>Public because a tool's own checks refuse about the same arguments and must sound the same;

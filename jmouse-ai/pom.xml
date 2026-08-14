@@ -83,6 +83,27 @@
             <artifactId>logback-classic</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!--
+          Tests, arriving at the end of the effort rather than alongside each ticket - the workspace
+          convention, with architecture rules as the one exception, because those are the ones that
+          decay silently. They run in the ordinary build rather than in a profile somebody remembers.
+        -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

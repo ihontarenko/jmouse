@@ -53,9 +53,6 @@
           shim was considered and rejected: it would outlive the migrations it exists to postpone.
         -->
         <spring-boot.version>4.0.7</spring-boot.version>
-
-        <!-- SCAFFOLD - remove with the first public type (ticket 10). See jmouse-ai/pom.xml for why. -->
-        <maven.javadoc.skip>true</maven.javadoc.skip>
     </properties>
 
     <dependencyManagement>
@@ -131,15 +128,37 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
+        <!--
+          For ServletRegistrationBean alone, and it is deliberately the only Boot type referenced
+          outside the @ConditionalOn* family: everything else here is spring-context. Boot 4 moved
+          plenty between modules; org.springframework.boot.web.servlet did not.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot</artifactId>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
             <optional>true</optional>
         </dependency>
+        <!-- Mapping the protocol transport into a container. Provided by the container itself. -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+
+        <!--
+          No tests. This module is wiring, and there is no architecture rule worth stating about a
+          starter whose entire job is to know about Spring. What it wires is checked by running the
+          sandbox; what it must not become is checked in the modules it wires.
+        -->
     </dependencies>
 
     <build>
