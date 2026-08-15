@@ -50,11 +50,20 @@ public final class McpToolServer {
     private final ToolDispatcher dispatcher;
     private final String         serverName;
     private final String         serverVersion;
+    private final String         instructions;
 
-    public McpToolServer(ToolDispatcher dispatcher, String serverName, String serverVersion) {
+    public McpToolServer(
+            ToolDispatcher dispatcher, String serverName, String serverVersion, String instructions) {
+
         this.dispatcher    = dispatcher;
         this.serverName    = serverName;
         this.serverVersion = serverVersion;
+        this.instructions  = instructions;
+    }
+
+    /** A server that says nothing about itself beyond its tools' own descriptions. */
+    public McpToolServer(ToolDispatcher dispatcher, String serverName, String serverVersion) {
+        this(dispatcher, serverName, serverVersion, null);
     }
 
     // ── What a transport is handed ───────────────────────────────────────────────
@@ -76,20 +85,43 @@ public final class McpToolServer {
 
     /** A server over the streamable HTTP transport — what a servlet container is given in ticket 10. */
     public McpSyncServer serving(McpStreamableServerTransportProvider transport) {
-        return McpServer.sync(transport)
-                .serverInfo(serverName, serverVersion)
-                .capabilities(McpSchema.ServerCapabilities.builder().tools(true).build())
-                .tools(specifications())
-                .build();
+        return serve(McpServer.sync(transport));
     }
 
     /** The same over a single-session transport — stdio, and anything else outside a web stack. */
     public McpSyncServer serving(McpServerTransportProvider transport) {
-        return McpServer.sync(transport)
+        return serve(McpServer.sync(transport));
+    }
+
+    /**
+     * The server's own description, once, for both transports.
+     *
+     * <p><strong>{@code instructions} is how a product says what this server is <em>for</em></strong>,
+     * and it is not the same thing as a tool's description. A description answers <em>should I call
+     * this one</em>; instructions answer <em>where do I start, and what is true of every call here</em>
+     * — which action to call first, that an answer states where it acted, that a refusal is worth
+     * reading rather than retrying. A client shows them to the model once, before it has seen a single
+     * tool.
+     *
+     * <p>The text is the product's, entirely: it is about a domain this library must not learn. Left
+     * unset it is simply absent, which is right for a server whose tools speak for themselves.
+     */
+    private McpSyncServer serve(McpServer.SyncSpecification<?> specification) {
+        // ⚠️ Load-bearing for authentication, and easy to read as unrelated. A tool runs on a different
+        // thread than the request that authenticated it, so without this every call is refused as
+        // NO_CALLER while the credential is valid. See McpCallerPropagation for the whole of it.
+        McpCallerPropagation.enable();
+
+        McpServer.SyncSpecification<?> described = specification
                 .serverInfo(serverName, serverVersion)
                 .capabilities(McpSchema.ServerCapabilities.builder().tools(true).build())
-                .tools(specifications())
-                .build();
+                .tools(specifications());
+
+        if (instructions != null && !instructions.isBlank()) {
+            described = described.instructions(instructions);
+        }
+
+        return described.build();
     }
 
     // ── One tool ─────────────────────────────────────────────────────────────────

@@ -12,10 +12,12 @@ import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.ExtensionContainer;
 import org.jmouse.el.extension.StandardExtensionContainer;
+import org.jmouse.el.lexer.Token;
 import org.jmouse.el.node.Expression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,20 +49,28 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
         this.expressionLanguage = expressionLanguage;
     }
 
+    /**
+     * ⚠️ <strong>Lexed once for all three questions asked of it.</strong> The vocabulary check, the
+     * name reading and the parser each need this condition's tokens, and only the parser's are cached
+     * — so a pass apiece meant two thirds of the work was redone every time, for an answer that could
+     * not have differed between them. See {@link ConditionTokens}.
+     */
     @Override
     public GrantCondition compile(String source) {
         if (source == null || source.isBlank()) {
             throw new PolicyException("a condition cannot be empty");
         }
 
-        ConditionVocabulary.verify(source);
+        List<Token> tokens = ConditionTokens.all(source);
+
+        ConditionVocabulary.verify(source, tokens);
 
         try {
             // ⚠️ The names are read here and kept, not read again per decision. They are what makes a
             // deferred value cost nothing: a rule binds the names it mentions and no others, so a
             // supplier behind a name this rule never writes is never asked.
             return new ExpressionCondition(
-                    source, expressionLanguage, expressionLanguage.compile(source), mentions(source));
+                    source, expressionLanguage, expressionLanguage.compile(source), mentionsOf(source, tokens));
         } catch (RuntimeException exception) {
             throw new PolicyException(
                     "condition '%s' will not compile: %s".formatted(source, exception.getMessage()), exception);
@@ -90,7 +100,25 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
         }
 
         try {
-            return ConditionReading.of(source);
+            return mentionsOf(source, ConditionTokens.all(source));
+        } catch (RuntimeException unlexable) {
+            LOGGER.debug("The condition `{}` could not be lexed for names: {}", source, unlexable.toString());
+
+            return ConditionMentions.unknown();
+        }
+    }
+
+    /**
+     * The same reading, over tokens somebody has already paid for.
+     *
+     * <p>⚠️ It swallows a failure into {@linkplain ConditionMentions#unknown() uncertain} rather than
+     * letting it out, and the caller in {@link #compile(String)} depends on that: a condition that
+     * compiles but cannot be <em>read</em> is a rule that works with its pair check switched off, not
+     * a rule that fails to load.
+     */
+    private ConditionMentions mentionsOf(String source, List<Token> tokens) {
+        try {
+            return ConditionReading.of(tokens);
         } catch (RuntimeException unreadable) {
             LOGGER.debug("The condition `{}` could not be read for names: {}", source, unreadable.toString());
 

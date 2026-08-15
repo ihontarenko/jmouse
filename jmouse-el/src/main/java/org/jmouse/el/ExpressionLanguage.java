@@ -226,12 +226,12 @@ public class ExpressionLanguage {
      * @return the compiled {@link Expression}
      */
     public Expression compile(String expression) {
-        Cache.Key  key    = Cache.Key.forObject(expression);
-        Expression cached = cache.get(key);
-
         if (expression == null || expression.isBlank()) {
             return new NullLiteralNode();
         }
+
+        Cache.Key  key    = Cache.Key.forObject(expression);
+        Expression cached = cache.get(key);
 
         if (cached == null) {
             TokenizableSource source = new StringSource("EXPRESSION(" + expression + ")", expression);

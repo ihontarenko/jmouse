@@ -2,17 +2,9 @@ package org.jmouse.access.el.condition;
 
 import org.jmouse.access.policy.ConditionMentions;
 import org.jmouse.core.MimeParser;
-import org.jmouse.el.StringSource;
 import org.jmouse.el.lexer.BasicToken;
-import org.jmouse.el.lexer.DefaultLexer;
-import org.jmouse.el.lexer.DefaultTokenizer;
-import org.jmouse.el.lexer.ExpressionRecognizer;
-import org.jmouse.el.lexer.ExpressionSplitter;
-import org.jmouse.el.lexer.Lexer;
 import org.jmouse.el.lexer.Token;
-import org.jmouse.el.lexer.TokenCursor;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,20 +44,20 @@ final class ConditionReading {
     /** The member a rule bounds itself with, rather than a value anybody published. */
     private static final String ACTION = "action";
 
-    private static final Lexer LEXER = new DefaultLexer(
-            new DefaultTokenizer(new ExpressionSplitter(), new ExpressionRecognizer()));
-
     private ConditionReading() {
     }
 
     /**
      * Reads one condition.
      *
-     * @param source the condition, as it was written in the file
+     * <p>⚠️ Takes the tokens rather than lexing them, so that the three readings a compilation makes
+     * of one condition cost one pass between them — see {@link ConditionTokens}.
+     *
+     * @param lexed its tokens, exactly as {@link ConditionTokens#all(String)} returned them
      * @return the names it talks about, and whether the reading was exhaustive
      */
-    static ConditionMentions of(String source) {
-        List<Token>              tokens  = tokensOf(source);
+    static ConditionMentions of(List<Token> lexed) {
+        List<Token>              tokens  = ConditionTokens.significant(lexed);
         Set<String>              actions = new TreeSet<>();
         Set<String>              values  = new TreeSet<>();
         Map<String, Set<String>> paths   = new TreeMap<>();
@@ -178,26 +170,5 @@ final class ConditionReading {
 
     private static boolean isAt(List<Token> tokens, int index, BasicToken type) {
         return index >= 0 && index < tokens.size() && tokens.get(index).type() == type;
-    }
-
-    /** Every token of the condition, structural ones dropped so lookahead can count on adjacency. */
-    private static List<Token> tokensOf(String source) {
-        TokenCursor cursor = LEXER.tokenize(new StringSource("CONDITION(" + source + ")", source));
-        List<Token> tokens = new ArrayList<>();
-
-        while (cursor.hasNext()) {
-            Token token = cursor.next();
-
-            if (token.type() == BasicToken.T_NEW_LINE
-                || token.type() == BasicToken.T_SOL
-                || token.type() == BasicToken.T_EOL) {
-
-                continue;
-            }
-
-            tokens.add(token);
-        }
-
-        return tokens;
     }
 }

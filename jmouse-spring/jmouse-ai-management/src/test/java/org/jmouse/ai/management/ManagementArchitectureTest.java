@@ -11,7 +11,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 /**
- * These controllers read, and structurally cannot do anything else.
+ * Nothing here can invoke a tool, and that is structural rather than careful.
  *
  * <p>The property a reviewer will want to check, checked. Shipping controllers over a tool catalogue is
  * only safe because <strong>this module cannot become a second way into an action</strong> — and the
@@ -19,7 +19,14 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
  * catalogue, no action; the richest thing any endpoint can reach is a {@code PublishedTool}, which
  * carries no handler.
  *
- * <p>Without this rule the guarantee is a paragraph in a package javadoc, honoured by whoever remembers
+ * <p>⚠️ <strong>One controller writes, and the rule had to be told the difference.</strong>
+ * {@link ProviderAdministrationController} changes which model this application talks to, through
+ * {@code org.jmouse.ai.administration} — a port that reaches settings and nothing that can act. So the
+ * allowed list gained a package, and the rule below gained the type names that actually matter: widening
+ * a package list is exactly how a guarantee gets weakened by accident, and naming the three types keeps
+ * the claim honest independently of which packages happen to be permitted.
+ *
+ * <p>Without these rules the guarantee is a paragraph in a package javadoc, honoured by whoever remembers
  * it — and the first person to add a "run this tool from the screen" endpoint would be adding something
  * that looked entirely reasonable in a review.
  */
@@ -49,14 +56,15 @@ class ManagementArchitectureTest {
     }
 
     @Test
-    @DisplayName("every controller reads through a port and nothing else")
-    void everyControllerReadsThroughAPort() {
+    @DisplayName("every controller works through a port and nothing else")
+    void everyControllerWorksThroughAPort() {
         classes()
                 .that().haveSimpleNameEndingWith("Controller")
                 .should().onlyDependOnClassesThat().resideInAnyPackage(
-                        "org.jmouse.ai",            // PublishedTool, and nothing that can act
-                        "org.jmouse.ai.view..",     // the four read ports
-                        "org.jmouse.ai.management", // the route constants and the one exception
+                        "org.jmouse.ai",                     // PublishedTool, and nothing that can act
+                        "org.jmouse.ai.view..",              // the four read ports
+                        "org.jmouse.ai.administration..",    // the one write port — settings, never a tool
+                        "org.jmouse.ai.management",          // the route constants and the one exception
                         "org.springframework..",
                         "java..")
                 .because("the dependency list of a controller here is the whole security argument for "

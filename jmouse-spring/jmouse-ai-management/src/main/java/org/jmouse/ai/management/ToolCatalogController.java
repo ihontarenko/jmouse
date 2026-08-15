@@ -73,7 +73,7 @@ public class ToolCatalogController {
 
     /** One action by its wire name, e.g. {@code parts_discard}. */
     @GetMapping("/tools/{publishedName}")
-    public PublishedTool tool(@PathVariable String publishedName) {
+    public PublishedTool tool(@PathVariable("publishedName") String publishedName) {
         return tools.find(publishedName)
                 .orElseThrow(() -> new UnknownPublishedToolException(publishedName));
     }

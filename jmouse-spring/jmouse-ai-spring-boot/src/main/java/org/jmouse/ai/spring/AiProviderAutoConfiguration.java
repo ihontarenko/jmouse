@@ -1,26 +1,23 @@
 package org.jmouse.ai.spring;
 
-import org.jmouse.ai.provider.AnthropicChatModel;
 import org.jmouse.ai.provider.ChatModel;
-import org.jmouse.ai.provider.GatewayChatModel;
-import org.jmouse.ai.provider.OpenAiChatModel;
+import org.jmouse.ai.provider.ProviderCatalog;
 import org.jmouse.ai.provider.ProviderSettings;
 import org.jmouse.ai.provider.ProviderSettingsSource;
+import org.jmouse.ai.provider.RoutingChatModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import java.util.List;
-import java.util.Locale;
-
 /**
  * Which model answers, and how it authenticates.
  *
- * <p>Present only where {@code jmouse-ai-provider} is, and contributing nothing at all until a provider
- * is named. <strong>Tools without a model provider is a supported arrangement</strong>, and the common
+ * <p>Present only where {@code jmouse-ai-provider} is, and contributing nothing at all until either a
+ * provider is named or a settings source exists. <strong>Tools without a model provider is a supported arrangement</strong>, and the common
  * one: an application serving the Model Context Protocol has no use for a chat model, because the model
  * is on the other end of the connection.
  *
@@ -39,7 +36,6 @@ import java.util.Locale;
  */
 @AutoConfiguration(before = AiAutoConfiguration.class)
 @ConditionalOnClass(ChatModel.class)
-@ConditionalOnProperty(name = "jmouse.ai.provider.name")
 @EnableConfigurationProperties(AiProperties.class)
 public class AiProviderAutoConfiguration {
 
@@ -51,11 +47,12 @@ public class AiProviderAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = "jmouse.ai.provider.name")
     public ProviderSettingsSource aiProviderSettingsSource(AiProperties properties) {
         AiProperties.Provider provider = properties.getProvider();
 
         return ProviderSettingsSource.fixed(new ProviderSettings(
-                normalised(provider.getName()),
+                ProviderCatalog.normalised(provider.getName()),
                 provider.getModel(),
                 provider.getApiKey(),
                 provider.getApiUrl(),
@@ -63,36 +60,42 @@ public class AiProviderAutoConfiguration {
     }
 
     /**
-     * The model, chosen by name.
+     * The model — named by a property where there is one, and read from the settings in force where
+     * there is not.
      *
-     * <p>An unknown name refuses at startup rather than leaving the application without a provider and
-     * no explanation — a typo here otherwise surfaces as an assistant that silently cannot answer.
+     * <p>⚠️ <strong>Conditional on a settings source existing, which is what "tools and no model" looks
+     * like.</strong> With neither {@code jmouse.ai.provider.name} nor a database-backed source there is
+     * no bean here at all, and an application serving only the Model Context Protocol starts perfectly
+     * — the model is on the other end of that connection.
+     *
+     * <h2>Two arrangements, and which one applies</h2>
+     *
+     * <p><strong>A property names the implementation.</strong> Then it is chosen here, once, and an
+     * unknown name refuses at startup rather than surfacing later as an assistant that silently cannot
+     * answer. That remains true even where the <em>settings</em> come from a table: which vendor's wire
+     * format this application speaks is a deploy-time fact.
+     *
+     * <p><strong>No property, settings from a table.</strong> Then the row carries the provider name
+     * too, and {@link RoutingChatModel} reads it per turn — so switching provider is a form rather than
+     * a restart. ⚠️ This is what a management screen needs to be worth having, and it was written out in
+     * two products before it was written here.
      */
     @Bean
     @ConditionalOnMissingBean
+    @ConditionalOnBean(ProviderSettingsSource.class)
     public ChatModel aiChatModel(ProviderSettingsSource settingsSource, AiProperties properties) {
-        String named = normalised(properties.getProvider().getName());
+        String named = ProviderCatalog.normalised(properties.getProvider().getName());
 
-        return switch (named) {
-            case AnthropicChatModel.PROVIDER_NAME -> new AnthropicChatModel(settingsSource);
-            case OpenAiChatModel.PROVIDER_NAME    -> new OpenAiChatModel(settingsSource);
-            case GatewayChatModel.PROVIDER_NAME   -> new GatewayChatModel(settingsSource);
-            default -> throw new IllegalStateException(
-                    "'jmouse.ai.provider.name' is '" + named + "', which is not a provider this library "
-                    + "ships. Available: " + String.join(", ", available()) + ". Leave the property "
-                    + "unset for an application that has tools and no model — that is a supported "
-                    + "arrangement, not a mistake.");
-        };
-    }
+        if (named.isBlank()) {
+            return RoutingChatModel.overShippedProviders(settingsSource);
+        }
 
-    private static List<String> available() {
-        return List.of(
-                AnthropicChatModel.PROVIDER_NAME,
-                OpenAiChatModel.PROVIDER_NAME,
-                GatewayChatModel.PROVIDER_NAME);
-    }
-
-    private static String normalised(String name) {
-        return name == null ? "" : name.trim().toLowerCase(Locale.ROOT);
+        return ProviderCatalog.modelFor(named, settingsSource).orElseThrow(
+                () -> new IllegalStateException(
+                        "'jmouse.ai.provider.name' is '" + named + "', which is not a provider this "
+                        + "library ships. Available: " + String.join(", ", ProviderCatalog.shipped())
+                        + ". Leave the property unset to let the settings in force name the provider, "
+                        + "or unset it entirely for an application that has tools and no model — both "
+                        + "are supported arrangements rather than mistakes."));
     }
 }

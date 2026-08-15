@@ -40,8 +40,8 @@ public class ToolCallHistoryController {
     /** The most recent calls, newest first, optionally narrowed to one caller. */
     @GetMapping("/calls")
     public List<ToolCallHistory.Entry> calls(
-            @RequestParam(required = false) String caller,
-            @RequestParam(defaultValue = "0") int limit) {
+            @RequestParam(name = "caller", required = false) String caller,
+            @RequestParam(name = "limit", defaultValue = "0") int limit) {
 
         int bounded = ManagementRoutes.boundedLimit(limit);
 
@@ -53,8 +53,8 @@ public class ToolCallHistoryController {
     /** The most recent calls of one action, addressed as {@code parts_discard}. */
     @GetMapping("/tools/{publishedName}/calls")
     public List<ToolCallHistory.Entry> callsOf(
-            @PathVariable String publishedName,
-            @RequestParam(defaultValue = "0") int limit) {
+            @PathVariable("publishedName") String publishedName,
+            @RequestParam(name = "limit", defaultValue = "0") int limit) {
 
         PublishedTool tool = tools.find(publishedName)
                 .orElseThrow(() -> new UnknownPublishedToolException(publishedName));

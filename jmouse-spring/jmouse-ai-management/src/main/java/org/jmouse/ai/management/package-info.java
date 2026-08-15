@@ -14,11 +14,26 @@
  *
  * <h2>The property a reviewer should check</h2>
  *
- * <p><strong>These controllers read, and structurally cannot do anything else.</strong> Not one of them
- * holds a {@code ToolDispatcher}, a {@code ToolCatalog} or a {@code ToolAction}; the richest thing any
- * of them can reach is a {@link org.jmouse.ai.PublishedTool}, which carries no handler. So this module
- * cannot become a second way into an action — not by convention, but because there is nothing here to
- * call. That is worth verifying rather than believing, and there is an architecture rule that does.
+ * <p><strong>Nothing here can invoke a tool.</strong> Not one of these controllers holds a
+ * {@code ToolDispatcher}, a {@code ToolCatalog} or a {@code ToolAction}; the richest thing any of them
+ * can reach is a {@link org.jmouse.ai.PublishedTool}, which carries no handler. So this module cannot
+ * become a second way into an action — not by convention, but because there is nothing here to call.
+ * That is worth verifying rather than believing, and there is an architecture rule that does.
+ *
+ * <h2>One of them writes, and that changed on purpose</h2>
+ *
+ * <p>{@link org.jmouse.ai.management.ProviderAdministrationController} changes which model this
+ * application talks to. The module used to refuse that on the grounds that it belongs behind a
+ * product's own authorization rather than behind whatever a library guessed — which was right about the
+ * <strong>gate</strong> and wrong about the <strong>code</strong>. Two products then wrote the same
+ * repository, the same one-row-in-force rule, the same blank-key-means-keep rule and the same six
+ * routes, and every rule they were re-deriving is one {@code jmouse-ai-jpa} already keeps.
+ *
+ * <p>Writing a <em>configuration</em> is still not invoking a <em>tool</em>: that controller reaches
+ * {@link org.jmouse.ai.administration.ProviderAdministration} and nothing else, so the property above
+ * survives intact. It is present only where the application has something to administer — settings that
+ * come from configuration get {@link org.jmouse.ai.administration.ProviderAdministration#unavailable()},
+ * which refuses every write with a sentence saying which arrangement it is in.
  *
  * <h2>What this module refuses to assume</h2>
  *
@@ -27,7 +42,10 @@
  *       that plainly belongs to a library rather than to the product mounting it.
  *   <li><strong>An authorization annotation.</strong> Nothing here is guarded — ⚠️ the product mounts
  *       these behind its own gate, and a product that mounts them behind nothing has published its call
- *       history and its provider configuration.
+ *       history and its provider configuration. A product using {@code jmouse-access} states the rule
+ *       with an {@code ExternalAccessRules} bean, which gates a type it does not own on a
+ *       <em>permission</em> rather than on a role — see that class for why a URL rule keyed on a role
+ *       was the wrong answer.
  *   <li><strong>An error body.</strong> These throw; a product's own handler decides what a client sees.
  * </ul>
  */

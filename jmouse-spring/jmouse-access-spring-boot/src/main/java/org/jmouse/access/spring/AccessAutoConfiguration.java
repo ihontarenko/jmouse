@@ -11,6 +11,7 @@ import org.jmouse.access.enforcement.AmbientAccessValues;
 import org.jmouse.access.enforcement.AccessTargetBinding;
 import org.jmouse.access.enforcement.AmbientPlace;
 import org.jmouse.access.enforcement.CurrentSubject;
+import org.jmouse.access.enforcement.ExternalAccessRules;
 import org.jmouse.access.enforcement.MethodAccessGuard;
 import org.jmouse.access.enforcement.ParameterNaming;
 import org.jmouse.access.enforcement.RefusalHandler;
@@ -22,7 +23,11 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.Pointcuts;
+import org.springframework.aop.ClassFilter;
+import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
+
+import java.lang.reflect.Method;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -76,10 +81,18 @@ public class AccessAutoConfiguration {
         return AmbientPlace.none();
     }
 
+    /**
+     * ⚠️ {@code all}, never {@code getIfAvailable}, for the reason stated below about ambient values:
+     * declarations about somebody else's types naturally arrive one bean per library adopted, so the
+     * moment there are two the application must not fail to start with a message about bean ambiguity
+     * rather than about access control. Contributing is many; consuming is one.
+     */
     @Bean
     @ConditionalOnMissingBean
-    public AccessRequirements accessRequirements(ScopeCatalog scopes) {
-        return new AccessRequirements(scopes);
+    public AccessRequirements accessRequirements(
+            ScopeCatalog scopes, ObjectProvider<ExternalAccessRules> external) {
+
+        return new AccessRequirements(scopes, ExternalAccessRules.all(external.stream().toList()));
     }
 
     @Bean
@@ -163,9 +176,10 @@ public class AccessAutoConfiguration {
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
     @ConditionalOnMissingBean(name = "accessAuthorizationAdvisor")
     static Advisor accessAuthorizationAdvisor(
-            ObjectProvider<MethodAccessGuard> guard,
-            ObjectProvider<CurrentSubject>    subject,
-            ObjectProvider<RefusalHandler>    refusals) {
+            ObjectProvider<MethodAccessGuard>   guard,
+            ObjectProvider<CurrentSubject>      subject,
+            ObjectProvider<RefusalHandler>      refusals,
+            ObjectProvider<ExternalAccessRules> external) {
 
         /*
          * ⚠️ @AccessContext is part of the pointcut, not only @RequiresAccess.
@@ -176,7 +190,7 @@ public class AccessAutoConfiguration {
          * values would silently never appear, which is the failure this whole cluster exists to
          * remove rather than relocate.
          */
-        Pointcut pointcut = Pointcuts.union(
+        Pointcut annotated = Pointcuts.union(
                 Pointcuts.union(
                         AnnotationMatchingPointcut.forClassAnnotation(RequiresAccess.class),
                         AnnotationMatchingPointcut.forMethodAnnotation(RequiresAccess.class)),
@@ -184,12 +198,49 @@ public class AccessAutoConfiguration {
                         AnnotationMatchingPointcut.forClassAnnotation(AccessContext.class),
                         AnnotationMatchingPointcut.forMethodAnnotation(AccessContext.class)));
 
+        /*
+         * ⚠️ And the types a product declares a rule ABOUT rather than ON.
+         *
+         * A library's controller cannot carry the annotation, so without this it is un-advised — and
+         * the only remaining way to guard it is a URL rule in the web layer, gated on a role, which
+         * reaches none of the axes. `ExternalAccessRules` says why that is worse than it looks. Asked
+         * lazily, because this advisor is built while the context is still coming up and the
+         * declarations are ordinary application beans.
+         */
+        Pointcut pointcut = Pointcuts.union(annotated, declaredExternally(external));
+
         DefaultPointcutAdvisor advisor = new DefaultPointcutAdvisor(
                 pointcut, new AccessAuthorizationInterceptor(guard, subject, refusals));
 
         advisor.setOrder(Ordered.LOWEST_PRECEDENCE);
 
         return advisor;
+    }
+
+    /**
+     * Every type some {@link ExternalAccessRules} bean speaks about, as a pointcut.
+     *
+     * <p>⚠️ A {@link StaticMethodMatcherPointcut} rather than a class filter alone, because the rules
+     * may name a single method on a type whose other routes stay un-gated — and matching the whole type
+     * would advise methods nothing has a requirement for, which is harmless but reads as guarded.
+     */
+    private static Pointcut declaredExternally(ObjectProvider<ExternalAccessRules> external) {
+        return new StaticMethodMatcherPointcut() {
+
+            @Override
+            public boolean matches(Method method, Class<?> targetClass) {
+                return rules().forMethod(method, targetClass).isPresent();
+            }
+
+            @Override
+            public ClassFilter getClassFilter() {
+                return rules()::covers;
+            }
+
+            private ExternalAccessRules rules() {
+                return ExternalAccessRules.all(external.stream().toList());
+            }
+        };
     }
 
     /** Whether an optional integration is on the classpath, without dragging it in to find out. */

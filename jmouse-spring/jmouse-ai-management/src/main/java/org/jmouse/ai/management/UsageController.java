@@ -41,8 +41,8 @@ public class UsageController {
      */
     @GetMapping("/usage")
     public List<UsageTotals.Total> usage(
-            @RequestParam(required = false) String caller,
-            @RequestParam(required = false) String action) {
+            @RequestParam(name = "caller", required = false) String caller,
+            @RequestParam(name = "action", required = false) String action) {
 
         // The port is asked first wherever it can be, so an implementation that pushes the narrowing
         // into a query does; whatever is left is filtered here.

@@ -80,7 +80,7 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
                     // Get the start position of the capturing group.
                     startOffset = offset + matcher.start(groupName);
                     tokenType = GROUP_TO_TOKEN_TYPE.get(groupName);
-                    LOGGER.debug("Found group '{}' in tag '{}'", tokenType, tokenValue);
+                    LOGGER.trace("Found group '{}' in tag '{}'", tokenType, tokenValue);
                     break;
                 }
             }
@@ -99,8 +99,11 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
             }
         }
 
-        LOGGER.info("Segment '{}' at offset '{}' and length '{}' splitted to: {} tokens",
-                    segment, offset, length, tokens.size());
+        // ⚠️ TRACE, and it has to be. Splitting happens once per lex, a lex happens inside anything
+        // that compiles an expression, and one of those callers is the authorization path — so at
+        // INFO this line is written for every request, quoting the whole source it just read.
+        LOGGER.trace("Segment '{}' at offset '{}' and length '{}' splitted to: {} tokens",
+                     segment, offset, length, tokens.size());
 
         return tokens;
     }

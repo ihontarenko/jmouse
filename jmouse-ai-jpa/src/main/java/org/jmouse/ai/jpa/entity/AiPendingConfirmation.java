@@ -52,8 +52,23 @@ public class AiPendingConfirmation {
     @Column(name = "scope_id", length = 64, updatable = false)
     private String scopeId;
 
+    /**
+     * The frozen record set, as JSON.
+     *
+     * <p>⚠️ <strong>The length is not decoration, and leaving it out is a startup failure.</strong>
+     * {@code @Lob} on a {@code String} asks for a character large object, which a dialect sizes from
+     * the column's length — unset, that is 255, so MySQL is told {@code TINYTEXT} while this module's
+     * own migration writes {@code LONGTEXT}. Under {@code ddl-auto: validate} the two disagree and the
+     * application does not start. Under a product that does not validate, a preview is silently
+     * truncated to 255 characters, which is the same bug wearing a much worse face.
+     *
+     * <p>Stated this way rather than through a Hibernate annotation because this module is Jakarta
+     * Persistence and nothing else — an architecture rule says so, and one convenient import is how
+     * that stops being true. The length maps to {@code LONGTEXT} on MySQL and {@code TEXT} on
+     * PostgreSQL, which is exactly what the two migrations create.
+     */
     @Lob
-    @Column(name = "records", nullable = false, updatable = false)
+    @Column(name = "records", nullable = false, updatable = false, length = Integer.MAX_VALUE)
     private String records;
 
     @Column(name = "expires_at", nullable = false, updatable = false)

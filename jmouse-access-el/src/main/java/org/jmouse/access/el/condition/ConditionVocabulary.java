@@ -2,10 +2,11 @@ package org.jmouse.access.el.condition;
 
 import org.jmouse.access.policy.PolicyException;
 import org.jmouse.core.MimeParser;
-import org.jmouse.el.StringSource;
-import org.jmouse.el.lexer.*;
+import org.jmouse.el.lexer.BasicToken;
+import org.jmouse.el.lexer.Token;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -62,25 +63,23 @@ public final class ConditionVocabulary {
             BasicToken.T_NEW_LINE, BasicToken.T_SOL, BasicToken.T_EOL
     );
 
-    private static final Lexer LEXER = new DefaultLexer(
-            new DefaultTokenizer(new ExpressionSplitter(), new ExpressionRecognizer()));
-
     private ConditionVocabulary() {
     }
 
     /**
      * Refuses a condition containing anything outside the dialect.
      *
-     * @param source the condition, as it was written in the file
+     * <p>⚠️ Takes the tokens rather than lexing them, so that the three readings a compilation makes
+     * of one condition cost one pass between them — see {@link ConditionTokens}.
+     *
+     * @param source the condition, as it was written in the file, for the message
+     * @param tokens its tokens, structural ones included
      * @throws PolicyException naming the first word that is not allowed here
      */
-    public static void verify(String source) {
-        TokenCursor cursor   = LEXER.tokenize(new StringSource("CONDITION(" + source + ")", source));
-        Token       previous = null;
+    public static void verify(String source, List<Token> tokens) {
+        Token previous = null;
 
-        while (cursor.hasNext()) {
-            Token token = cursor.next();
-
+        for (Token token : tokens) {
             if (token.type() instanceof BasicToken type) {
                 if (!ALLOWED.contains(type)) {
                     throw new PolicyException(("condition '%s' uses '%s', which an authorization rule may not: "

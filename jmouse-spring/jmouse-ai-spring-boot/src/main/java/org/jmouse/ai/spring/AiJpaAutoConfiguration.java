@@ -1,9 +1,15 @@
 package org.jmouse.ai.spring;
 
 import jakarta.persistence.EntityManagerFactory;
+import org.jmouse.ai.agent.AgentConnections;
+import org.jmouse.ai.agent.AgentDirectory;
 import org.jmouse.ai.guard.GuardSettings;
+import org.jmouse.ai.administration.ProviderAdministration;
+import org.jmouse.ai.jpa.JpaAgentConnections;
+import org.jmouse.ai.jpa.JpaAgentDirectory;
 import org.jmouse.ai.jpa.JpaCallCounter;
 import org.jmouse.ai.jpa.JpaConfirmationStore;
+import org.jmouse.ai.jpa.JpaProviderAdministration;
 import org.jmouse.ai.jpa.JpaProviderSettingsSource;
 import org.jmouse.ai.provider.ProviderSettingsSource;
 import org.jmouse.ai.spi.ConfirmationStore;
@@ -17,13 +23,15 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 /**
- * The three things worth surviving a restart.
+ * What is worth surviving a restart.
  *
  * <p>Counters, so a management screen has something to show and a runaway caller is visible. Pending
  * confirmations, so a preview issued by one instance can be redeemed against another — ⚠️ the in-memory
  * store is not merely non-durable, it is <em>per-instance</em>, and behind two application servers a
- * caller redeeming its own token has a coin's chance of being told the token does not exist. And
- * provider settings, so a key can be rotated without a deploy.
+ * caller redeeming its own token has a coin's chance of being told the token does not exist. Provider
+ * settings, so a key can be rotated without a deploy. And agents with the clients connected to them,
+ * because an identity that exists only while a client is connected is one nothing can be granted to,
+ * switched off, or pointed at afterwards.
  *
  * <p>Registered before everything else here, so that these win over the in-memory defaults rather than
  * losing to them: {@code @ConditionalOnMissingBean} is decided in registration order, and a store
@@ -81,5 +89,57 @@ public class AiJpaAutoConfiguration {
             EntityManagerFactory entityManagerFactory, AiProperties properties) {
 
         return new JpaProviderSettingsSource(entityManagerFactory, properties.getApplication());
+    }
+
+    /**
+     * The write half of the same rows, so the settings above can be administered rather than seeded by
+     * hand.
+     *
+     * <p>Under the same condition as the read half, and for the same reason: rows are only worth
+     * administering where they are what is read. An application whose settings come from configuration
+     * gets no bean here, and {@code AiManagementAutoConfiguration} therefore mounts no write routes —
+     * which is better than routes that answer a refusal.
+     *
+     * <p>⚠️ Every rule it keeps — exactly one row in force, a blank key meaning <em>keep the stored
+     * one</em>, a refusal to delete what is in force — is a condition
+     * {@link JpaProviderSettingsSource} above refuses to resolve without. They live beside it because
+     * two products re-derived them before it existed, and one of them getting it wrong shows up as an
+     * application that has stopped answering.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = "jmouse.ai.provider.source", havingValue = "database")
+    public ProviderAdministration aiJpaProviderAdministration(
+            EntityManagerFactory entityManagerFactory, AiProperties properties) {
+
+        return new JpaProviderAdministration(entityManagerFactory, properties.getApplication());
+    }
+
+    /**
+     * Which agents exist, who owns them, and whether they may act.
+     *
+     * <p>Unconditional, unlike the provider pair above, and the asymmetry is intentional. Provider
+     * settings in a table are an <em>alternative</em> to settings in a property file, so a product has to
+     * ask for them; an agent has no alternative — the only other place to keep one is a table the product
+     * writes itself, which is the duplication this port exists to end. A product that never creates one
+     * pays for an unused bean and two empty tables.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public AgentDirectory aiJpaAgentDirectory(EntityManagerFactory entityManagerFactory) {
+        return new JpaAgentDirectory(entityManagerFactory);
+    }
+
+    /**
+     * The clients connected to those agents.
+     *
+     * <p>⚠️ Storage only. What a credential <em>is</em> — how it is signed, how long it lasts, what stops
+     * it working anywhere else — stays with whoever mints it, because products disagree about all three
+     * on purpose. This bean holds the half they agree about.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public AgentConnections aiJpaAgentConnections(EntityManagerFactory entityManagerFactory) {
+        return new JpaAgentConnections(entityManagerFactory);
     }
 }

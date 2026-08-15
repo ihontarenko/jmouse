@@ -1,8 +1,8 @@
 package org.jmouse.el.template;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public interface Cache<K extends Cache.Key, V> {
@@ -11,17 +11,35 @@ public interface Cache<K extends Cache.Key, V> {
         return new Memory<>();
     }
 
+    /**
+     * ⚠️ <strong>Concurrent, and it is not an optimisation.</strong>
+     *
+     * <p>One {@link org.jmouse.el.ExpressionLanguage} is shared by everything that compiles through
+     * it, so this map is read and written by every request thread at once. A plain {@code HashMap}
+     * here loses entries under a concurrent write — which shows up as an expression being reparsed
+     * forever rather than as an error — and can corrupt its own table during a resize, which shows
+     * up as a thread that never returns.
+     */
     class Memory<K extends Cache.Key, V> implements Cache<K, V> {
 
-        private final Map<K, V> cache = new HashMap<>();
+        private final Map<K, V> cache = new ConcurrentHashMap<>();
 
         @Override
         public V get(K key) {
             return cache.get(key);
         }
 
+        /**
+         * ⚠️ A null value is not stored rather than thrown at: {@link #contains} already reads an
+         * absent entry and a null one as the same thing, and {@code ConcurrentHashMap} refuses null
+         * outright. Storing nothing keeps the old meaning without the new exception.
+         */
         @Override
         public void put(K key, V value) {
+            if (value == null) {
+                return;
+            }
+
             cache.put(key, value);
         }
 

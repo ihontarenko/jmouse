@@ -1,5 +1,8 @@
 package org.jmouse.ai.spring;
 
+import org.jmouse.ai.administration.ProviderAdministration;
+import org.jmouse.ai.management.OverviewController;
+import org.jmouse.ai.management.ProviderAdministrationController;
 import org.jmouse.ai.management.ProviderController;
 import org.jmouse.ai.management.ToolCallHistoryController;
 import org.jmouse.ai.management.ToolCatalogController;
@@ -9,6 +12,7 @@ import org.jmouse.ai.view.ToolCallHistory;
 import org.jmouse.ai.view.ToolCatalogView;
 import org.jmouse.ai.view.UsageTotals;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -61,5 +65,31 @@ public class AiManagementAutoConfiguration {
     @ConditionalOnMissingBean
     public ProviderController aiProviderController(ProviderRegistry providers) {
         return new ProviderController(providers);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public OverviewController aiOverviewController(
+            ProviderRegistry providers, ToolCatalogView tools, ToolCallHistory history) {
+
+        return new OverviewController(providers, tools, history);
+    }
+
+    /**
+     * The one that writes, and only where there is something to write.
+     *
+     * <p>⚠️ {@code @ConditionalOnBean} rather than a default of
+     * {@link ProviderAdministration#unavailable()}: an application whose settings come from a property
+     * should have no write routes at all, rather than routes that answer a refusal. The unavailable form
+     * is for an application that mounts the controller deliberately and wants the screen to say why it
+     * can change nothing.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnBean(ProviderAdministration.class)
+    public ProviderAdministrationController aiProviderAdministrationController(
+            ProviderAdministration configurations) {
+
+        return new ProviderAdministrationController(configurations);
     }
 }

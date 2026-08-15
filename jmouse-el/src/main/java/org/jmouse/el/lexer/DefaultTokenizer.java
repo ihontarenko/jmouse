@@ -56,7 +56,7 @@ public class DefaultTokenizer implements Tokenizer<TokenizableSource, Token> {
 
         tokens.add(entry(BasicToken.T_SOL, sol, counter));
 
-        LOGGER.info("Raw tokens '{}' acquired", rawTokens.size());
+        LOGGER.trace("Raw tokens '{}' acquired", rawTokens.size());
 
         for (RawToken rawToken : rawTokens) {
             RawToken.Type type       = rawToken.type();
@@ -118,7 +118,7 @@ public class DefaultTokenizer implements Tokenizer<TokenizableSource, Token> {
 
         tokens.add(entry(BasicToken.T_EOL, eol, counter));
 
-        LOGGER.info("StringSource '{}' tokens", tokens.size());
+        LOGGER.trace("StringSource '{}' tokens", tokens.size());
 
         return tokens;
     }

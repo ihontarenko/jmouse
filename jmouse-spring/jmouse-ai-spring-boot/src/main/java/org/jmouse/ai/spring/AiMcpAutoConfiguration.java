@@ -47,7 +47,11 @@ public class AiMcpAutoConfiguration {
     public McpToolServer aiMcpToolServer(ToolDispatcher dispatcher, AiProperties properties) {
         AiProperties.Protocol protocol = properties.getProtocol();
 
-        return new McpToolServer(dispatcher, protocol.getServerName(), protocol.getServerVersion());
+        return new McpToolServer(
+                dispatcher,
+                protocol.getServerName(),
+                protocol.getServerVersion(),
+                protocol.getInstructions());
     }
 
     /**

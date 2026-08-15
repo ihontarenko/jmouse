@@ -323,6 +323,19 @@ public class AiProperties {
 
         private String serverVersion = "1.0.0";
 
+        /**
+         * What this server is for, shown to a model once before it has seen a single tool.
+         *
+         * <p>Not a tool's description and not a substitute for one. A description answers <em>should I
+         * call this one</em>; this answers <em>where do I start, and what is true of every call here</em>
+         * — which action to call first, that every answer states where it acted, that a refusal is
+         * worth reading rather than retrying.
+         *
+         * <p>The text is the product's, about a domain this library never learns. Left unset the server
+         * says nothing and its tools speak for themselves.
+         */
+        private String instructions;
+
         public boolean isEnabled() {
             return enabled;
         }
@@ -361,6 +374,14 @@ public class AiProperties {
 
         public void setServerVersion(String serverVersion) {
             this.serverVersion = serverVersion;
+        }
+
+        public String getInstructions() {
+            return instructions;
+        }
+
+        public void setInstructions(String instructions) {
+            this.instructions = instructions;
         }
     }
 

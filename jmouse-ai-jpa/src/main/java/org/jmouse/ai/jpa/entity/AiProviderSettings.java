@@ -65,6 +65,40 @@ public class AiProviderSettings {
     protected AiProviderSettings() {
     }
 
+    /**
+     * A new row, as an administration screen creates one.
+     *
+     * <p>⚠️ <strong>Writable on purpose, and the reason is the class's own first paragraph.</strong>
+     * The point of a row rather than a property file is that a key can be rotated without a restart —
+     * and that is only true if something can write it. An entity with no constructor and no mutators
+     * described a table nothing could administer, which made the promise at the top of this file
+     * unkeepable. What may be changed is deliberately narrower than the field list: an identifier and
+     * a creation time are facts about the row rather than settings, and neither has a mutator.
+     */
+    public AiProviderSettings(
+            String        id,
+            String        application,
+            String        provider,
+            String        apiKey,
+            String        apiUrl,
+            String        model,
+            int           maximumTokens,
+            boolean       active,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
+
+        this.id            = id;
+        this.application   = application;
+        this.provider      = provider;
+        this.apiKey        = apiKey;
+        this.apiUrl        = apiUrl;
+        this.model         = model;
+        this.maximumTokens = maximumTokens;
+        this.active        = active;
+        this.createdAt     = createdAt;
+        this.updatedAt     = updatedAt;
+    }
+
     public String getId() {
         return id;
     }
@@ -103,5 +137,47 @@ public class AiProviderSettings {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    // ── What an administration screen may change ─────────────────────────────────
+    //
+    // Everything a person configures, and nothing else. The identifier and the creation time are
+    // facts about the row rather than settings, and the application is what the row is *about* —
+    // moving a configuration to another application is deleting one and creating another, which is
+    // the honest way to describe what happens to whatever was already talking through it.
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    /** ⚠️ Only when a new one was actually given: a blank field on a form must not erase the key. */
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public void setApiUrl(String apiUrl) {
+        this.apiUrl = apiUrl;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public void setMaximumTokens(int maximumTokens) {
+        this.maximumTokens = maximumTokens;
+    }
+
+    /**
+     * ⚠️ Exactly one row per application should carry this, and nothing here enforces it — the
+     * constraint spans rows, so it belongs to whatever administers them.
+     * {@link org.jmouse.ai.jpa.JpaProviderSettingsSource} refuses rather than guesses when more than
+     * one is active, which is the loud half of the same rule.
+     */
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

@@ -27,10 +27,21 @@ import java.util.function.Function;
  */
 public class AccessRequirements {
 
-    private final ScopeCatalog scopes;
+    private final ScopeCatalog        scopes;
+    private final ExternalAccessRules external;
 
     public AccessRequirements(ScopeCatalog scopes) {
-        this.scopes = scopes;
+        this(scopes, ExternalAccessRules.none());
+    }
+
+    /**
+     * @param external what the product declares about types it does not own — a library's controllers,
+     *                 which cannot carry the annotation. See {@link ExternalAccessRules} for why the
+     *                 alternative, a URL rule gated on a role, is worse than it looks
+     */
+    public AccessRequirements(ScopeCatalog scopes, ExternalAccessRules external) {
+        this.scopes   = scopes;
+        this.external = external;
     }
 
     /** What this call needs, or nothing where it declares nothing. */
@@ -39,7 +50,10 @@ public class AccessRequirements {
         RequiresAccess onClass  = findOnType(targetClass);
 
         if (onMethod == null && onClass == null) {
-            return Optional.empty();
+            // ⚠️ Only here, and never above: an annotation always wins. A type that states its own rule
+            // means it, and a product must not be able to widen somebody else's declared requirement
+            // from the outside without touching the declaration.
+            return external.forMethod(method, targetClass).map(this::resolve);
         }
 
         return Optional.of(new AccessRequirement(
@@ -48,6 +62,16 @@ public class AccessRequirements {
                 scopeOf(merged(onMethod, onClass, RequiresAccess::scope, "")),
                 merged(onMethod, onClass, RequiresAccess::resource,   void.class),
                 merged(onMethod, onClass, RequiresAccess::resourceId, "")));
+    }
+
+    /** An external declaration, read in exactly the shape an annotation would have been. */
+    private AccessRequirement resolve(ExternalAccessRules.Declaration declared) {
+        return new AccessRequirement(
+                declared.permission(),
+                declared.module(),
+                scopeOf(declared.scope()),
+                declared.resource(),
+                declared.resourceId());
     }
 
     /**

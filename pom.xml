@@ -125,6 +125,13 @@
                     <configuration>
                         <source>${maven.compiler.source}</source>
                         <target>${maven.compiler.target}</target>
+                        <!--
+                          Keep parameter names in the class file. Spring Boot's own parent turns this on,
+                          and this reactor is not built under it — so without the flag every @RequestParam,
+                          @PathVariable and constructor-bound @ConfigurationProperties that does not spell
+                          its name out fails at request time with a 400, never at build time.
+                        -->
+                        <parameters>true</parameters>
                     </configuration>
                 </plugin>
                 <plugin>

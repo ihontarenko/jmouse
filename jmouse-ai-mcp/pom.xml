@@ -79,6 +79,21 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+        <!--
+          ⚠️ LOAD-BEARING FOR AUTHENTICATION, despite reading as an observability extra, and NOT optional
+          for the same reason: it has to reach the product, and the product is exactly who must not have
+          to know about it.
+
+          The SDK's servlet transports answer a request through Reactor, so a tool runs on a different
+          thread than the one the product authenticated on. reactor-core declares this artifact OPTIONAL,
+          which makes Hooks.enableAutomaticContextPropagation() a SILENT NO-OP without it — the caller
+          stays behind, every tool call is refused as NO_CALLER, and the credential looks at fault.
+          See McpCallerPropagation.
+        -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>context-propagation</artifactId>
+        </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
