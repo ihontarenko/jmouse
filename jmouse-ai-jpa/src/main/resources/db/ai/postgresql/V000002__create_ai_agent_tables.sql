@@ -26,8 +26,14 @@ CREATE TABLE ai_agents
 
     name            VARCHAR(128) NOT NULL,
 
+    -- INHERITED — its owner's permissions, followed live, nothing to go stale.
+    -- RESTRICTED — its own grants, capped by its owner's in every scope.
+    -- ⚠️ Stored by name, never as an ordinal. See the MySQL file for why the pair
+    -- exists at all.
+    authority       VARCHAR(16)  NOT NULL,
+
     -- A disabled agent keeps its connections and its privileges, and does
-    -- nothing with either.
+    -- nothing with either. ⚠️ AT ALL, where `authority` is HOW MUCH.
     enabled         BOOLEAN      NOT NULL,
 
     created_at      TIMESTAMP(6) NOT NULL,

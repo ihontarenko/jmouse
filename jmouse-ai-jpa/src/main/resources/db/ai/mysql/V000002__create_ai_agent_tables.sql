@@ -44,8 +44,27 @@ CREATE TABLE ai_agents
     -- What a person called it: a screen and a provenance badge print this.
     name            VARCHAR(128) NOT NULL,
 
+    -- Whose permissions it acts with:
+    --   INHERITED  — its owner's, followed live. Nothing to go stale, so an owner
+    --                joining a project on Monday reaches it through the agent on
+    --                Monday. The only defensible default for something a person
+    --                just connected to act for them.
+    --   RESTRICTED — its own grants, capped by its owner's in every scope.
+    --
+    -- ⚠️ The pair exists because an access engine caps by INTERSECTION, and an
+    -- agent granted nothing yet would intersect to nothing and be refused every
+    -- call — reading as a broken connection rather than as an ungranted
+    -- permission. Naming the two cases beats inferring one from whether a grant
+    -- table happens to have rows in it.
+    --
+    -- ⚠️ Stored by NAME, never as an ordinal: reordering the enum would otherwise
+    -- silently reinterpret every row, and the reinterpretation is a privilege
+    -- change nobody wrote.
+    authority       VARCHAR(16)  NOT NULL,
+
     -- A disabled agent keeps its connections and its privileges and does nothing
     -- with either, which is what makes switching one off reversible.
+    -- ⚠️ A different question from `authority`: this is AT ALL, that is HOW MUCH.
     enabled         TINYINT(1)   NOT NULL,
 
     created_at      DATETIME(6)  NOT NULL,

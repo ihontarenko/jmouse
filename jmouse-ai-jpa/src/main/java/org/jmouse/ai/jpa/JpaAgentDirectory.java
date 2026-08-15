@@ -3,6 +3,7 @@ package org.jmouse.ai.jpa;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.jmouse.ai.agent.Agent;
+import org.jmouse.ai.agent.AgentAuthority;
 import org.jmouse.ai.agent.AgentDirectory;
 import org.jmouse.ai.jpa.entity.AiAgent;
 
@@ -53,6 +54,7 @@ public final class JpaAgentDirectory implements AgentDirectory {
                     UUID.randomUUID().toString(),
                     draft.ownerReference(),
                     name,
+                    draft.authority(),
                     draft.enabled(),
                     Instant.now());
 
@@ -92,6 +94,16 @@ public final class JpaAgentDirectory implements AgentDirectory {
 
             refuseDuplicateName(entityManager, agent.getOwnerReference(), wanted, agentId);
             agent.setName(wanted);
+
+            return describe(agent);
+        });
+    }
+
+    @Override
+    public Agent actWith(String agentId, AgentAuthority authority) {
+        return OwnTransaction.call(entityManagerFactory, entityManager -> {
+            AiAgent agent = require(entityManager, agentId);
+            agent.setAuthority(authority);
 
             return describe(agent);
         });
@@ -227,6 +239,7 @@ public final class JpaAgentDirectory implements AgentDirectory {
                 agent.getId(),
                 agent.getOwnerReference(),
                 agent.getName(),
+                agent.getAuthority(),
                 agent.isEnabled(),
                 agent.getCreatedAt(),
                 agent.getLastActiveAt());

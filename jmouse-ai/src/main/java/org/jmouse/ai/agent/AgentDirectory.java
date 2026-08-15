@@ -33,13 +33,16 @@ public interface AgentDirectory {
     /**
      * What somebody typed when they created one.
      *
-     * @param enabled whether it may act immediately. ⚠️ Worth passing {@code false} where the privileges
-     *                are granted through a different store than this one — which is every product,
-     *                because they are — since the two writes cannot be one transaction and an agent that
-     *                exists before its ceiling does is an agent that briefly holds whatever its owner
-     *                holds
+     * @param authority whose permissions it acts with. {@link AgentAuthority#INHERITED} is the sane
+     *                  default for something a person just connected — it can do what that person could
+     *                  have done by hand, and follows them
+     * @param enabled   whether it may act immediately. ⚠️ Worth passing {@code false} alongside
+     *                  {@link AgentAuthority#RESTRICTED}, because the grants live in a different store
+     *                  and the two writes cannot be one transaction — an agent that exists before its
+     *                  own set does is an agent that can do nothing, and its owner will read that as a
+     *                  broken connection
      */
-    record Draft(String ownerReference, String name, boolean enabled) {
+    record Draft(String ownerReference, String name, AgentAuthority authority, boolean enabled) {
     }
 
     /**
@@ -64,6 +67,16 @@ public interface AgentDirectory {
     List<Agent> ownedBy(String ownerReference);
 
     Agent rename(String agentId, String name);
+
+    /**
+     * Changes whose permissions it acts with.
+     *
+     * <p>⚠️ <strong>Switching to {@link AgentAuthority#RESTRICTED} takes effect on the next call and the
+     * agent can then do nothing until it has been granted something.</strong> That is the honest
+     * behaviour — restricting is an act, and one that silently left everything permitted would be worse
+     * — but it means a screen offering this has to say so before the click rather than after it.
+     */
+    Agent actWith(String agentId, AgentAuthority authority);
 
     /** Lets it act again. Its connections and its privileges were never taken away. */
     Agent putInService(String agentId);

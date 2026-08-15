@@ -68,20 +68,12 @@ public final class AccessToolAuthorizer implements ToolAuthorizer {
     }
 
     /**
-     * Who the engine decides about.
-     *
-     * <p>The one place the two identity models meet, and they meet cleanly: a caller acting on behalf
-     * of somebody is exactly the engine's <em>service sub-account</em>, whose ceiling is its master's in
-     * every scope. So authorization rests on the caller and ownership on the master, which is what both
-     * mechanisms already meant separately.
-     *
-     * <p>⚠️ Private, and staying that way. This is the bridge's own reading of a caller; exposing it
-     * would invite a product to build a {@code Subject} here and pass it somewhere else, and then the
-     * translation would live in two places.
+     * Who the engine decides about — {@link CallerSubjects}, which is now shared rather than private
+     * here. See that class for why it moved: a product with its own authorizer re-derived the
+     * translation and omitted the agent case, which is worse than the duplication keeping it private was
+     * meant to prevent.
      */
     private static Subject subjectOf(CallerIdentity caller) {
-        return caller.actsForItself()
-                ? Subject.of(caller.callerId(), caller.describe())
-                : Subject.agent(caller.callerId(), caller.actsOnBehalfOfId(), caller.describe());
+        return CallerSubjects.of(caller);
     }
 }

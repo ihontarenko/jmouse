@@ -15,9 +15,8 @@ import java.time.Instant;
  * <p><strong>Its privileges are not here, deliberately.</strong> What an agent may do is a question for
  * whatever authorization engine the product already runs, against the same policy as everything else —
  * duplicating a permission model here would produce a second answer that drifts from the first. What
- * this library supplies is the <em>subject</em> those privileges hang off: an agent acts as itself and
- * on behalf of its owner, which is exactly the ceiling relationship an access engine already knows how
- * to intersect. {@link AgentCallers} is the one line that says so.
+ * this library supplies is the <em>subject</em> those privileges hang off, and {@link AgentAuthority} is
+ * which subject that turns out to be. {@link AgentCallers} is the one line that says so.
  *
  * @param id             this agent's own identifier — what a permission is granted to, and what a
  *                       record created through it points at
@@ -27,6 +26,9 @@ import java.time.Instant;
  *                       knowing what an account is. The cost is that nothing cascades — see
  *                       {@link AgentDirectory#discardAllOwnedBy(String)}, which exists because of it
  * @param name           what a person called it, and what a screen and a provenance badge print
+ * @param authority      whose permissions it acts with — its owner's, or its own capped by its owner's.
+ *                       ⚠️ Two different questions from {@link #enabled}, and worth not confusing:
+ *                       this is <em>how much</em>, that is <em>at all</em>
  * @param enabled        whether it may act at all. A disabled agent keeps its connections and its
  *                       privileges, and does nothing with either — which is what makes switching one off
  *                       a reversible decision rather than a deletion
@@ -35,12 +37,13 @@ import java.time.Instant;
  *                       like an agent somebody is using
  */
 public record Agent(
-        String  id,
-        String  ownerReference,
-        String  name,
-        boolean enabled,
-        Instant createdAt,
-        Instant lastActiveAt
+        String         id,
+        String         ownerReference,
+        String         name,
+        AgentAuthority authority,
+        boolean        enabled,
+        Instant        createdAt,
+        Instant        lastActiveAt
 ) {
 
     /** Whether it has ever run anything — how an owner spots the one they created and forgot. */

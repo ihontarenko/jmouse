@@ -13,8 +13,8 @@ package org.jmouse.ai;
  * is whatever a product's resolver happened to know, carried untouched by a mechanism that never reads
  * it. Deciding anything on a value from here means deciding on something no layer validated.
  *
- * <p>A product may file anything else it likes alongside these. The point is only that these five mean
- * the same thing everywhere.
+ * <p>A product may file anything else it likes alongside these. The point is only that these mean the
+ * same thing everywhere.
  */
 public final class CallerAttributes {
 
@@ -37,6 +37,20 @@ public final class CallerAttributes {
      * anybody debugging a token is actually looking at.
      */
     public static final String SUBJECT_CLAIM = "caller.subject.claim";
+
+    /**
+     * Which agent this call is running as, where one is involved at all.
+     *
+     * <p>⚠️ <strong>Not redundant with the caller identifier, and this is the one to know.</strong> An
+     * agent acting with its owner's authority <em>is</em> the owner as far as authorization goes, so the
+     * caller identifier is the owner's and this is the only place the agent survives. A record's
+     * provenance, a trail and a badge all read it — which is why an agent that inherits authority is
+     * still a distinct identity rather than a person wearing a different hat.
+     */
+    public static final String AGENT_ID = "caller.agent.id";
+
+    /** What that agent is called, so a badge prints a name rather than an identifier. */
+    public static final String AGENT_NAME = "caller.agent.name";
 
     /** What the connected client called itself. ⚠️ A claim it made, shown as one, never an identity. */
     public static final String CLIENT_NAME = "caller.client.name";
