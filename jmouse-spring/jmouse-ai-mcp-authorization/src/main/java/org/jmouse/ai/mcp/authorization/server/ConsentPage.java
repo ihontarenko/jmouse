@@ -51,9 +51,20 @@ public class ConsentPage {
 
     private static final String TEMPLATE = "consent";
 
+    /**
+     * ⚠️ <strong>Held, not built per render — the parse cache lives inside the engine.</strong>
+     *
+     * <p>{@code TemplateEngine} keeps its compiled templates in an instance field, so a fresh engine is a
+     * cold cache and every template it is asked for is tokenized and parsed again. This one renders once
+     * today, which makes the distinction free; keeping the engine is what stops it costing something the
+     * day anything here needs rendering per request.
+     */
+    private final TemplateEngine engine;
+
     private final String rendered;
 
     public ConsentPage(McpAuthorizationProperties properties) {
+        this.engine   = engine();
         this.rendered = render(properties);
     }
 
@@ -62,11 +73,10 @@ public class ConsentPage {
         return rendered;
     }
 
-    private static String render(McpAuthorizationProperties properties) {
-        AuthorizationRoutes           routes  = properties.routes();
+    private String render(McpAuthorizationProperties properties) {
+        AuthorizationRoutes                routes  = properties.routes();
         McpAuthorizationProperties.Consent consent = properties.getConsent();
 
-        TemplateEngine    engine   = engine();
         Template          template = engine.getTemplate(TEMPLATE);
         EvaluationContext context  = template.newContext();
 
