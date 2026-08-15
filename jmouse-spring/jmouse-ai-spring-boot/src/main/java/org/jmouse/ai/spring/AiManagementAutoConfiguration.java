@@ -1,6 +1,9 @@
 package org.jmouse.ai.spring;
 
 import org.jmouse.ai.administration.ProviderAdministration;
+import org.jmouse.ai.agent.AgentConnections;
+import org.jmouse.ai.agent.AgentDirectory;
+import org.jmouse.ai.management.AgentAdministrationController;
 import org.jmouse.ai.management.OverviewController;
 import org.jmouse.ai.management.ProviderAdministrationController;
 import org.jmouse.ai.management.ProviderController;
@@ -91,5 +94,24 @@ public class AiManagementAutoConfiguration {
             ProviderAdministration configurations) {
 
         return new ProviderAdministrationController(configurations);
+    }
+
+    /**
+     * Every agent in the installation, and the clients holding a credential for one.
+     *
+     * <p>⚠️ {@code @ConditionalOnBean} on both ports, and on both rather than either: the screen shows
+     * an agent <em>with</em> its connections, and half of that is a screen offering a revoke button with
+     * no reason to press one.
+     *
+     * <p>An application that stores agents its own way supplies its own {@link AgentDirectory} and gets
+     * the same screen over it — which is the entire reason that is a port.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnBean({AgentDirectory.class, AgentConnections.class})
+    public AgentAdministrationController aiAgentAdministrationController(
+            AgentDirectory agents, AgentConnections connections) {
+
+        return new AgentAdministrationController(agents, connections);
     }
 }

@@ -86,6 +86,20 @@ public final class JpaAgentDirectory implements AgentDirectory {
     }
 
     @Override
+    public List<Agent> all(int limit) {
+        return OwnTransaction.call(entityManagerFactory, entityManager -> entityManager.createQuery("""
+                                select agent
+                                  from AiAgent agent
+                                 order by agent.createdAt desc
+                                """, AiAgent.class)
+                        .setMaxResults(limit)
+                        .getResultList())
+                .stream()
+                .map(JpaAgentDirectory::describe)
+                .toList();
+    }
+
+    @Override
     public Agent rename(String agentId, String name) {
         String wanted = requireName(name);
 

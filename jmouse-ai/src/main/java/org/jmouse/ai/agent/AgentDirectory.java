@@ -66,6 +66,16 @@ public interface AgentDirectory {
     /** Everything one person has created, newest first — what an owner's screen lists. */
     List<Agent> ownedBy(String ownerReference);
 
+    /**
+     * Every agent in the installation, newest first — what an administration screen lists.
+     *
+     * <p>⚠️ <strong>A disclosure surface, and a bounded one.</strong> It answers who has connected what
+     * across the whole installation, which is its own power and belongs behind the same permission the
+     * rest of this library's management screens do. The limit is not a convenience: a listing with no
+     * ceiling is a table scan anybody who reaches the route can ask for.
+     */
+    List<Agent> all(int limit);
+
     Agent rename(String agentId, String name);
 
     /**

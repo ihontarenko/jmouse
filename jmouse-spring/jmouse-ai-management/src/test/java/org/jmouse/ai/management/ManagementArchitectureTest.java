@@ -64,6 +64,10 @@ class ManagementArchitectureTest {
                         "org.jmouse.ai",                     // PublishedTool, and nothing that can act
                         "org.jmouse.ai.view..",              // the four read ports
                         "org.jmouse.ai.administration..",    // the one write port — settings, never a tool
+                        // Two more write ports, and they pass the same test as the one above: an agent
+                        // and a connection are rows ABOUT who may call, and nothing in that package can
+                        // run anything. Switching an agent off is a large power and a small capability.
+                        "org.jmouse.ai.agent..",
                         "org.jmouse.ai.management",          // the route constants and the one exception
                         "org.springframework..",
                         "java..")
