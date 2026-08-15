@@ -155,7 +155,7 @@
     <div class="brand">jMouse <span>MCP</span></div>
     <h1>Authorization</h1>
   </header>
-  <p class="application">Application: <strong>{{applicationName}}</strong></p>
+  <p class="application">Application: <strong>{{ applicationName }}</strong></p>
 
   <section class="card" id="loading">
     <div class="skeleton" style="width: 45%"></div>
@@ -166,7 +166,7 @@
   <section class="card" id="refusal" hidden>
     <h2 id="refusal-title">This request cannot be approved</h2>
     <p id="refusal-body"></p>
-    <p id="refusal-action" hidden><a id="sign-in-link" href="{{signInUrl}}">Sign in</a>, then start the
+    <p id="refusal-action" hidden><a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>, then start the
       connection again from the client.</p>
   </section>
 
@@ -209,11 +209,11 @@
 (function () {
   "use strict";
 
-  var APPLICATION   = "{{applicationName}}";
-  var REVIEW_URL    = "{{reviewUrl}}";
-  var APPROVE_URL   = "{{approveUrl}}";
-  var STORAGE_KEY   = "{{tokenStorageKey}}";
-  var STORAGE_FIELD = "{{tokenStorageField}}";
+  var APPLICATION   = "{{ applicationName }}";
+  var REVIEW_URL    = "{{ reviewUrl }}";
+  var APPROVE_URL   = "{{ approveUrl }}";
+  var STORAGE_KEY   = "{{ tokenStorageKey }}";
+  var STORAGE_FIELD = "{{ tokenStorageField }}";
 
   var parameters = new URLSearchParams(window.location.search);
   var request = {

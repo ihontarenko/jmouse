@@ -11,11 +11,11 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jmouse-el-spring-boot</artifactId>
+    <artifactId>jmouse-jmt-spring-boot</artifactId>
     <packaging>jar</packaging>
-    <name>jMouse - EL Spring Boot Starter</name>
-    <description>Spring Boot auto-configuration for jMouse EL as a Spring MVC view engine</description>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-el-spring-boot</url>
+    <name>jMouse - JMT Spring Boot Starter</name>
+    <description>jMouse Framework - jMouse Template (JMT) as a Spring MVC view engine</description>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-jmt-spring-boot</url>
 
     <properties>
         <java.version>21</java.version>

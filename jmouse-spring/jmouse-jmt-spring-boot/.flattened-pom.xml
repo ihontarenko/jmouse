@@ -3,11 +3,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
-  <artifactId>jmouse-el-spring-boot</artifactId>
+  <artifactId>jmouse-jmt-spring-boot</artifactId>
   <version>1.0.0-b20260802</version>
-  <name>jMouse - EL Spring Boot Starter</name>
-  <description>Spring Boot auto-configuration for jMouse EL as a Spring MVC view engine</description>
-  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-el-spring-boot</url>
+  <name>jMouse - JMT Spring Boot Starter</name>
+  <description>jMouse Framework - jMouse Template (JMT) as a Spring MVC view engine</description>
+  <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-jmt-spring-boot</url>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -22,9 +22,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:git://github.com/ihontarenko/jmouse.git/jmouse-spring/jmouse-el-spring-boot</connection>
-    <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git/jmouse-spring/jmouse-el-spring-boot</developerConnection>
-    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-core/jmouse-spring/jmouse-el-spring-boot</url>
+    <connection>scm:git:git://github.com/ihontarenko/jmouse.git/jmouse-spring/jmouse-jmt-spring-boot</connection>
+    <developerConnection>scm:git:ssh://github.com:ihontarenko/jmouse.git/jmouse-spring/jmouse-jmt-spring-boot</developerConnection>
+    <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-core/jmouse-spring/jmouse-jmt-spring-boot</url>
   </scm>
   <dependencies>
     <dependency>

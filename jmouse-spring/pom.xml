@@ -22,7 +22,7 @@
     </properties>
 
     <modules>
-        <module>jmouse-el-spring-boot</module>
+        <module>jmouse-jmt-spring-boot</module>
         <module>jmouse-storage-spring-boot</module>
         <module>jmouse-access-spring-boot</module>
         <module>jmouse-ai-management</module>

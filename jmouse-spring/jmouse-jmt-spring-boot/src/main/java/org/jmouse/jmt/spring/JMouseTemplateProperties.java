@@ -1,9 +1,9 @@
-package org.jmouse.el.spring;
+package org.jmouse.jmt.spring;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "jmouse.el")
-public class JMouseELProperties {
+@ConfigurationProperties(prefix = "jmouse.jmt")
+public class JMouseTemplateProperties {
 
     private String prefix = "templates/";
     private String suffix = ".html";

@@ -1,9 +1,9 @@
-package org.jmouse.el.spring.autoconfigure;
+package org.jmouse.jmt.spring.autoconfigure;
 
 import org.jmouse.el.template.TemplateEngine;
 import org.jmouse.el.template.loader.ClasspathLoader;
-import org.jmouse.el.spring.JMouseELProperties;
-import org.jmouse.el.spring.JMouseViewResolver;
+import org.jmouse.jmt.spring.JMouseTemplateProperties;
+import org.jmouse.jmt.spring.JMouseTemplateViewResolver;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -15,12 +15,12 @@ import org.springframework.web.servlet.DispatcherServlet;
 @AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass({TemplateEngine.class, DispatcherServlet.class})
-@EnableConfigurationProperties(JMouseELProperties.class)
-public class JMouseELAutoConfiguration {
+@EnableConfigurationProperties(JMouseTemplateProperties.class)
+public class JMouseTemplateAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(TemplateEngine.class)
-    public TemplateEngine jmouseTemplateEngine(JMouseELProperties properties) {
+    public TemplateEngine jmouseTemplateEngine(JMouseTemplateProperties properties) {
         TemplateEngine engine = new TemplateEngine();
         ClasspathLoader loader = new ClasspathLoader();
         loader.setPrefix(properties.getPrefix());
@@ -30,9 +30,9 @@ public class JMouseELAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(JMouseViewResolver.class)
-    public JMouseViewResolver jmouseViewResolver(TemplateEngine engine, JMouseELProperties properties) {
-        JMouseViewResolver resolver = new JMouseViewResolver(engine);
+    @ConditionalOnMissingBean(JMouseTemplateViewResolver.class)
+    public JMouseTemplateViewResolver jmouseTemplateViewResolver(TemplateEngine engine, JMouseTemplateProperties properties) {
+        JMouseTemplateViewResolver resolver = new JMouseTemplateViewResolver(engine);
         resolver.setContentType(properties.getContentType());
         resolver.setOrder(properties.getOrder());
         return resolver;

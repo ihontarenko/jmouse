@@ -1,4 +1,4 @@
-package org.jmouse.el.spring;
+package org.jmouse.jmt.spring;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,13 +12,13 @@ import org.springframework.web.servlet.View;
 
 import java.util.Map;
 
-public class JMouseView implements View {
+public class JMouseTemplateView implements View {
 
     private final Template template;
     private final Engine engine;
     private String contentType = "text/html;charset=UTF-8";
 
-    public JMouseView(Template template, Engine engine) {
+    public JMouseTemplateView(Template template, Engine engine) {
         this.template = template;
         this.engine = engine;
     }

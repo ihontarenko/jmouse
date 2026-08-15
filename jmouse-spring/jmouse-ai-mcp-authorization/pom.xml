@@ -86,6 +86,25 @@
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-ai-mcp</artifactId>
         </dependency>
+        <!--
+          jMouse Template, for the one page this module serves.
+
+          ⚠️ THE ENGINE, NOT jmouse-jmt-spring-boot. That module is a Spring MVC ViewResolver: it resolves
+          a view NAME returned by a @Controller, out of one classpath prefix the PRODUCT configures. A
+          template this library owns cannot live under a product's `templates/` prefix, and taking that
+          prefix over would be a library deciding where a product keeps its own views. So the engine is
+          used directly, against a loader pointed at this module's own package, and the endpoint stays a
+          @RestController that answers with a body.
+
+          ⚠️ And it is a real dependency in a real path: if the engine cannot render, nobody can approve a
+          client. The template is deliberately trivial for that reason - seven substitutions, no
+          conditionals, no loops, no inheritance - and it is rendered ONCE at startup, so a template that
+          will not parse fails where somebody is watching rather than on the first person to try.
+        -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-el</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
