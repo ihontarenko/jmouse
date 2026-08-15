@@ -27,6 +27,7 @@
         <module>jmouse-access-spring-boot</module>
         <module>jmouse-ai-management</module>
         <module>jmouse-ai-spring-boot</module>
+        <module>jmouse-ai-mcp-authorization</module>
     </modules>
 
 </project>

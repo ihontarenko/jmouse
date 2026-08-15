@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>jMouse MCP · Authorization</title>
+<style>
+  :root {
+    color-scheme: light dark;
+
+    --surface:        #ffffff;
+    --surface-sunken: #f6f7f9;
+    --ink:            #14171f;
+    --ink-muted:      #5c6472;
+    --line:           #e3e6ec;
+    --accent:         #3b5bdb;
+    --accent-ink:     #ffffff;
+    --warning:        #a8620a;
+    --warning-tint:   #fff6e8;
+    --danger:         #b42318;
+    --danger-tint:    #fef3f2;
+    --radius:         12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface:        #14171f;
+      --surface-sunken: #1b1f29;
+      --ink:            #e7eaf0;
+      --ink-muted:      #98a1b2;
+      --line:           #2a303c;
+      --accent:         #748ffc;
+      --accent-ink:     #10131a;
+      --warning:        #f0b429;
+      --warning-tint:   #26200f;
+      --danger:         #ff8b80;
+      --danger-tint:    #2a1513;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 2.5rem 1.25rem 4rem;
+    background: var(--surface-sunken);
+    color: var(--ink);
+    font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  main { max-width: 40rem; margin: 0 auto; }
+
+  .masthead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: .65rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .brand { font-size: 1.15rem; font-weight: 650; letter-spacing: -.01em; }
+  .brand span { color: var(--accent); }
+  .masthead h1 { margin: 0; font-size: 1.15rem; font-weight: 500; color: var(--ink-muted); }
+
+  .application { margin: .55rem 0 1.75rem; font-size: .82rem; color: var(--ink-muted); }
+  .application strong { color: var(--ink); font-weight: 600; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.15rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .card h2 { margin: 0 0 .35rem; font-size: 1rem; font-weight: 600; }
+  .card p  { margin: 0 0 .85rem; color: var(--ink-muted); }
+  .card p:last-child { margin-bottom: 0; }
+
+  dl { display: grid; grid-template-columns: 9.5rem 1fr; gap: .5rem 1rem; margin: 0; font-size: .9rem; }
+  dt { color: var(--ink-muted); }
+  dd { margin: 0; overflow-wrap: anywhere; }
+
+  code {
+    background: var(--surface-sunken);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: .1rem .35rem;
+    font: 500 .82rem/1.4 ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  }
+
+  .choices { display: grid; gap: .5rem; margin: 0; padding: 0; border: 0; }
+  .choices legend { padding: 0 0 .5rem; font-size: .9rem; color: var(--ink-muted); }
+
+  .choice {
+    display: flex;
+    gap: .7rem;
+    align-items: flex-start;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: .7rem .85rem;
+    cursor: pointer;
+  }
+
+  .choice:has(input:checked) { border-color: var(--accent); background: var(--surface-sunken); }
+  .choice.unavailable { opacity: .55; cursor: not-allowed; }
+  .choice input { margin-top: .25rem; accent-color: var(--accent); }
+  .choice-name { font-weight: 550; }
+  .choice-detail { font-size: .82rem; color: var(--ink-muted); }
+
+  .notice {
+    border-radius: 10px;
+    padding: .8rem .95rem;
+    font-size: .85rem;
+    margin-top: .95rem;
+  }
+
+  .notice.warning { background: var(--warning-tint); color: var(--warning); }
+  .notice.danger  { background: var(--danger-tint);  color: var(--danger); }
+  .notice strong  { font-weight: 650; }
+
+  .actions { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; margin-top: 1.2rem; }
+
+  button {
+    font: inherit;
+    font-weight: 550;
+    border-radius: 9px;
+    padding: .55rem 1.1rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+
+  button.primary { background: var(--accent); color: var(--accent-ink); }
+  button.quiet   { background: transparent; color: var(--ink-muted); border-color: var(--line); }
+  button[disabled] { opacity: .6; cursor: progress; }
+
+  .hint { font-size: .8rem; color: var(--ink-muted); }
+  a { color: var(--accent); }
+  [hidden] { display: none !important; }
+
+  .skeleton {
+    height: .8rem;
+    border-radius: 5px;
+    background: var(--surface-sunken);
+    border: 1px solid var(--line);
+    margin-bottom: .6rem;
+  }
+</style>
+</head>
+<body>
+<main>
+  <header class="masthead">
+    <div class="brand">jMouse <span>MCP</span></div>
+    <h1>Authorization</h1>
+  </header>
+  <p class="application">Application: <strong>{{applicationName}}</strong></p>
+
+  <section class="card" id="loading">
+    <div class="skeleton" style="width: 45%"></div>
+    <div class="skeleton" style="width: 90%"></div>
+    <div class="skeleton" style="width: 65%"></div>
+  </section>
+
+  <section class="card" id="refusal" hidden>
+    <h2 id="refusal-title">This request cannot be approved</h2>
+    <p id="refusal-body"></p>
+    <p id="refusal-action" hidden><a id="sign-in-link" href="{{signInUrl}}">Sign in</a>, then start the
+      connection again from the client.</p>
+  </section>
+
+  <form id="request" hidden>
+    <section class="card">
+      <h2 id="client-name"></h2>
+      <p id="acting-summary"></p>
+
+      <dl>
+        <dt>Signed in as</dt>
+        <dd id="approver"></dd>
+        <dt>Code is sent to</dt>
+        <dd><code id="redirect-target"></code></dd>
+      </dl>
+
+      <div class="notice warning">
+        ⚠️ That address is on <strong>this machine</strong>. If you did not just start this from a client
+        running here, close this page — approving would hand a live authorization code to whatever is
+        listening on that port.
+      </div>
+    </section>
+
+    <section class="card" id="choices-card" hidden>
+      <fieldset class="choices" id="choices">
+        <legend>What should this client act as?</legend>
+      </fieldset>
+    </section>
+
+    <div class="notice danger" id="failure" hidden></div>
+
+    <div class="actions">
+      <button type="submit" class="primary" id="approve">Approve</button>
+      <button type="button" class="quiet" id="cancel">Cancel</button>
+      <span class="hint" id="lifetime"></span>
+    </div>
+  </form>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var APPLICATION   = "{{applicationName}}";
+  var REVIEW_URL    = "{{reviewUrl}}";
+  var APPROVE_URL   = "{{approveUrl}}";
+  var STORAGE_KEY   = "{{tokenStorageKey}}";
+  var STORAGE_FIELD = "{{tokenStorageField}}";
+
+  var parameters = new URLSearchParams(window.location.search);
+  var request = {
+    client_id:             parameters.get("client_id") || "",
+    redirect_uri:          parameters.get("redirect_uri") || "",
+    code_challenge:        parameters.get("code_challenge") || "",
+    code_challenge_method: parameters.get("code_challenge_method") || "",
+    state:                 parameters.get("state") || null
+  };
+
+  var elements = {
+    loading:       document.getElementById("loading"),
+    refusal:       document.getElementById("refusal"),
+    refusalTitle:  document.getElementById("refusal-title"),
+    refusalBody:   document.getElementById("refusal-body"),
+    refusalAction: document.getElementById("refusal-action"),
+    form:          document.getElementById("request"),
+    clientName:    document.getElementById("client-name"),
+    actingSummary: document.getElementById("acting-summary"),
+    approver:      document.getElementById("approver"),
+    redirectTarget:document.getElementById("redirect-target"),
+    choicesCard:   document.getElementById("choices-card"),
+    choices:       document.getElementById("choices"),
+    failure:       document.getElementById("failure"),
+    approve:       document.getElementById("approve"),
+    cancel:        document.getElementById("cancel"),
+    lifetime:      document.getElementById("lifetime")
+  };
+
+  /**
+   * The token the product's own interface is already holding.
+   *
+   * This page is served on the same origin a person reaches that interface at, which is the only reason
+   * it can be one page for two products whose sign-in mechanisms have nothing in common. What differs is
+   * the key and whether the entry is the token or a document containing it, and both are configuration.
+   */
+  function accessToken() {
+    if (!STORAGE_KEY) {
+      return null;
+    }
+
+    var stored = window.localStorage.getItem(STORAGE_KEY) || window.sessionStorage.getItem(STORAGE_KEY);
+
+    if (!stored) {
+      return null;
+    }
+
+    if (!STORAGE_FIELD) {
+      return stored;
+    }
+
+    try {
+      return JSON.parse(stored)[STORAGE_FIELD] || null;
+    } catch (unreadable) {
+      return null;
+    }
+  }
+
+  function refuse(title, body, offerSignIn) {
+    elements.loading.hidden = true;
+    elements.form.hidden = true;
+    elements.refusal.hidden = false;
+    elements.refusalTitle.textContent = title;
+    elements.refusalBody.textContent = body;
+    elements.refusalAction.hidden = !offerSignIn;
+  }
+
+  /** The server's own sentence, preferred over anything invented here: every refusal in this flow
+   *  names what would have been accepted, which is strictly more useful than a generic message. */
+  function describe(answer, fallback) {
+    if (answer && (answer.error_description || answer.detail)) {
+      return answer.error_description || answer.detail;
+    }
+
+    return fallback;
+  }
+
+  function send(url, token, body) {
+    return fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify(body)
+    }).then(function (response) {
+      return response.json().catch(function () { return null; }).then(function (answer) {
+        if (!response.ok) {
+          throw { status: response.status, answer: answer };
+        }
+
+        return answer;
+      });
+    });
+  }
+
+  function renderChoices(subjects) {
+    if (!subjects || subjects.length < 2) {
+      return;
+    }
+
+    elements.choicesCard.hidden = false;
+
+    subjects.forEach(function (subject) {
+      var label = document.createElement("label");
+      label.className = subject.available ? "choice" : "choice unavailable";
+
+      var input = document.createElement("input");
+      input.type = "radio";
+      input.name = "subject";
+      input.value = subject.reference;
+      input.disabled = !subject.available;
+      input.checked = subject.available && !document.querySelector("input[name=subject]:checked");
+
+      var body = document.createElement("div");
+      var name = document.createElement("div");
+      name.className = "choice-name";
+      name.textContent = subject.name;
+      body.appendChild(name);
+
+      var detail = subject.available ? subject.detail : (subject.unavailable_reason || subject.detail);
+
+      if (detail) {
+        var note = document.createElement("div");
+        note.className = "choice-detail";
+        note.textContent = detail;
+        body.appendChild(note);
+      }
+
+      label.appendChild(input);
+      label.appendChild(body);
+      elements.choices.appendChild(label);
+    });
+
+    // Every choice was unavailable, so there is nothing to approve and the button says so by not working.
+    elements.approve.disabled = !document.querySelector("input[name=subject]:checked");
+  }
+
+  function show(review, subjects) {
+    elements.loading.hidden = true;
+    elements.form.hidden = false;
+
+    elements.clientName.textContent = review.client_name;
+    elements.actingSummary.textContent =
+      "It will act with exactly the permissions of whatever you approve it as, inside " +
+      (review.application_name || "this application") + " and nowhere else. Every action it takes is " +
+      "allowed or refused by the same rules that answer for your own browser.";
+
+    elements.approver.textContent =
+      review.approver_name + (review.approver_detail ? " · " + review.approver_detail : "");
+    elements.redirectTarget.textContent = review.redirect_target;
+    elements.lifetime.textContent =
+      "You have " + review.code_lifetime_seconds + " seconds to finish once you approve.";
+
+    renderChoices(subjects);
+  }
+
+  function approve(token) {
+    var chosen = document.querySelector("input[name=subject]:checked");
+
+    elements.failure.hidden = true;
+    elements.approve.disabled = true;
+    elements.approve.textContent = "Connecting…";
+
+    send(APPROVE_URL, token, Object.assign({ subject_reference: chosen ? chosen.value : null }, request))
+      .then(function (approved) {
+        // Out of the application entirely, to the client's own loopback listener. `replace` so the back
+        // button does not return to a screen whose one-time code has already been spent.
+        window.location.replace(approved.redirect_url);
+      })
+      .catch(function (failed) {
+        elements.failure.hidden = false;
+        elements.failure.textContent = describe(failed.answer,
+          "That did not work, and the server said nothing useful about why. Start the connection again "
+          + "from the client.");
+        elements.approve.disabled = false;
+        elements.approve.textContent = "Approve";
+      });
+  }
+
+  if (!request.redirect_uri || !request.code_challenge || !request.code_challenge_method) {
+    refuse("This link is incomplete",
+           "It is missing the parameters a client attaches when it asks for access. Start the connection "
+           + "from the client itself — this page is not something to open by hand.", false);
+    return;
+  }
+
+  var token = accessToken();
+
+  if (!token) {
+    refuse("You are not signed in",
+           "This page can only be used by somebody signed in to " + (APPLICATION || "this application")
+           + ", because what it grants is your own access.", true);
+    return;
+  }
+
+  elements.cancel.addEventListener("click", function () { window.close(); });
+  elements.choices.addEventListener("change", function () { elements.approve.disabled = false; });
+  elements.form.addEventListener("submit", function (submission) {
+    submission.preventDefault();
+    approve(token);
+  });
+
+  send(REVIEW_URL, token, request)
+    .then(function (review) { show(review, review.subjects); })
+    .catch(function (failed) {
+      if (failed.status === 401 || failed.status === 403) {
+        refuse("You are not signed in",
+               "The application did not recognise your session. Sign in and start the connection again "
+               + "from the client.", true);
+        return;
+      }
+
+      refuse("This request cannot be approved",
+             describe(failed.answer, "The application could not be reached to check this request. Try "
+                                     + "again, and start the connection from the client if it keeps failing."),
+             false);
+    });
+})();
+</script>
+</body>
+</html>

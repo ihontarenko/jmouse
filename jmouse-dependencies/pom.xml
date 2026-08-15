@@ -78,6 +78,7 @@
         <json-path>2.9.0</json-path>
         <awssdk.version>2.28.29</awssdk.version>
         <mcp-sdk.version>2.0.0</mcp-sdk.version>
+        <context-propagation.version>1.2.1</context-propagation.version>
     </properties>
 
     <dependencyManagement>
@@ -230,6 +231,11 @@
             <dependency>
                 <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-ai-management</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-ai-mcp-authorization</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>
             <dependency>
@@ -528,6 +534,19 @@
                 <groupId>io.modelcontextprotocol.sdk</groupId>
                 <artifactId>mcp</artifactId>
                 <version>${mcp-sdk.version}</version>
+            </dependency>
+
+            <!--
+              ⚠️ Not observability, whatever the coordinates suggest: this is what carries an
+              authenticated caller onto the thread an MCP tool actually runs on. reactor-core — which
+              the SDK above drags in — declares it OPTIONAL, so without it the propagation hook is a
+              silent no-op and every tool call is refused for having no caller. See McpCallerPropagation
+              in jmouse-ai-mcp before removing it.
+            -->
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>context-propagation</artifactId>
+                <version>${context-propagation.version}</version>
             </dependency>
 
             <!-- Testing. Versions from the parent, so one JUnit is in force across the reactor. -->
