@@ -38,23 +38,48 @@ public final class OpenAiChatModel extends HttpChatModel {
     /** What the canonical shape calls the same thing, as a content block. */
     private static final String TOOL_RESULT_BLOCK = "tool_result";
 
+    /**
+     * ⚠️ <strong>Not always OpenAI, and that is the point.</strong> Almost every provider worth having
+     * speaks this exact shape at a different address — including the free ones — so a compatible
+     * provider is this class under another name rather than a class of its own. Six files differing by
+     * one string each is how the seventh gets copied with that string forgotten.
+     *
+     * <p>The name is carried rather than constant because {@code HttpChatModel} refuses settings
+     * addressed to a different provider: an instance answering to {@code groq} must say so, or a key for
+     * one service goes to another service's endpoint.
+     */
+    private final String providerName;
+    private final String defaultApiUrl;
+
     public OpenAiChatModel(ProviderSettingsSource settingsSource) {
+        this(settingsSource, PROVIDER_NAME, DEFAULT_API_URL);
+    }
+
+    /** A provider speaking this shape at its own address — see the note above. */
+    public OpenAiChatModel(
+            ProviderSettingsSource settingsSource, String providerName, String defaultApiUrl) {
+
         super(settingsSource);
+        this.providerName  = providerName;
+        this.defaultApiUrl = defaultApiUrl == null ? DEFAULT_API_URL : defaultApiUrl;
     }
 
     public OpenAiChatModel(
             ProviderSettingsSource settingsSource, Duration connectTimeout, Duration readTimeout) {
+
         super(settingsSource, connectTimeout, readTimeout);
+        this.providerName  = PROVIDER_NAME;
+        this.defaultApiUrl = DEFAULT_API_URL;
     }
 
     @Override
     public String providerName() {
-        return PROVIDER_NAME;
+        return providerName;
     }
 
     @Override
     protected String defaultApiUrl() {
-        return DEFAULT_API_URL;
+        return defaultApiUrl;
     }
 
     @Override

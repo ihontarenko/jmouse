@@ -45,6 +45,15 @@ public final class JpaProviderAdministration implements ProviderAdministration {
         return ProviderCatalog.shipped();
     }
 
+    /** The same list with what a screen needs, in the catalogue's own order rather than alphabetically. */
+    @Override
+    public List<SupportedProvider> describeSupportedProviders() {
+        return ProviderCatalog.describeShipped().stream()
+                .map(shipped -> new SupportedProvider(
+                        shipped.name(), shipped.defaultApiUrl(), shipped.requiresKey(), shipped.note()))
+                .toList();
+    }
+
     @Override
     public List<Configuration> configurations() {
         return OwnTransaction.call(entityManagerFactory, entityManager -> entityManager.createQuery("""
@@ -118,7 +127,10 @@ public final class JpaProviderAdministration implements ProviderAdministration {
         return OwnTransaction.call(entityManagerFactory, entityManager -> {
             AiProviderSettings target = require(entityManager, id);
 
-            if (!hasKey(target)) {
+            // ⚠️ Asked of the provider rather than demanded of every configuration. A model running on
+            // this machine has no credential to give, and refusing it for not having one would make the
+            // only free-in-every-sense option the one option that cannot be switched on.
+            if (ProviderCatalog.requiresKey(target.getProvider()) && !hasKey(target)) {
                 throw new RefusedException(
                         "This configuration has no key, so every call through it would be refused before "
                         + "it was sent. Add the key first, then put it in force.");

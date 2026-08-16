@@ -1,5 +1,6 @@
 package org.jmouse.ai.conversation;
 
+import org.jmouse.ai.provider.ProviderCatalog;
 import org.jmouse.ai.provider.ProviderSettings;
 import org.jmouse.ai.provider.ProviderSettingsSource;
 import org.jmouse.ai.view.ProviderRegistry;
@@ -48,12 +49,21 @@ public final class SettingsProviderRegistry implements ProviderRegistry {
         }
     }
 
+    /**
+     * ⚠️ <strong>Usable is computed here because this is where the catalogue is visible.</strong> Whether
+     * a configuration could actually send a call is "has a key OR needs none", and the second half is
+     * the provider's fact rather than the settings'. Leaving it to each caller is what produced an
+     * assistant that reported itself off while a local model sat there able to answer.
+     */
     private static ActiveProvider withoutKey(ProviderSettings settings) {
+        boolean needsKey = ProviderCatalog.requiresKey(settings.providerName());
+
         return new ActiveProvider(
                 settings.providerName(),
                 settings.model(),
                 settings.apiUrl(),
                 settings.maximumTokens(),
-                settings.hasApiKey());
+                settings.hasApiKey(),
+                settings.hasApiKey() || !needsKey);
     }
 }

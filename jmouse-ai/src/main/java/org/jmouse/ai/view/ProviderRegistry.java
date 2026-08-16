@@ -27,18 +27,33 @@ public interface ProviderRegistry {
      * @param maximumTokens     the ceiling on one answer
      * @param keyConfigured whether a key is set. <strong>Never the key</strong>
      */
+    /**
+     * @param usable whether a call through this configuration could actually be sent.
+     *
+     *               <p>⚠️ <strong>Not the same as {@code keyConfigured}, and conflating them was a real
+     *               bug.</strong> Every caller used to read "has a key" as "will work", which is right
+     *               for a hosted provider and wrong for one running on this machine: a local model has
+     *               no credential to give, so the assistant reported itself unavailable while being
+     *               perfectly able to answer. Whether a key is <em>needed</em> is the provider's fact,
+     *               resolved where the catalogue is visible, and this is the answer callers want.</p>
+     */
     record ActiveProvider(
             String  providerName,
             String  model,
             String  apiUrl,
             int     maximumTokens,
-            boolean keyConfigured
+            boolean keyConfigured,
+            boolean usable
     ) {
 
         /** What a screen shows: enough to recognise the configuration, nothing to authenticate with. */
         public String describe() {
+            if (usable) {
+                return providerName + " / " + model + (keyConfigured ? " (key set)" : " (no key needed)");
+            }
+
             return providerName + " / " + model
-                 + (keyConfigured ? " (key set)" : " (NO KEY — calls will be refused before they are sent)");
+                 + " (NO KEY — calls will be refused before they are sent)";
         }
     }
 

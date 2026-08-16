@@ -52,18 +52,25 @@ public class ProviderAdministrationController {
      * added to or removed from the library changes what is offerable without a deploy of the screen.
      *
      * @param supportedProviders every provider name a configuration may carry
+     * @param providers          the same list with an address, a note, and whether a key is needed —
+     *                           ⚠️ carried beside the bare names rather than replacing them, so a screen
+     *                           written against the old shape keeps working while one that wants to say
+     *                           <em>this one is free and needs no account</em> can
      * @param configurations     what is stored, oldest first
      */
     public record StoredConfigurations(
-            List<String>        supportedProviders,
-            List<Configuration> configurations
+            List<String>                                     supportedProviders,
+            List<ProviderAdministration.SupportedProvider>   providers,
+            List<Configuration>                              configurations
     ) {
     }
 
     @GetMapping
     public StoredConfigurations configurations() {
         return new StoredConfigurations(
-                configurations.supportedProviders(), configurations.configurations());
+                configurations.supportedProviders(),
+                configurations.describeSupportedProviders(),
+                configurations.configurations());
     }
 
     /** One by identifier, or 404 where this application has no such row. */

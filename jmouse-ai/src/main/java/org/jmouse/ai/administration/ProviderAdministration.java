@@ -89,6 +89,37 @@ public interface ProviderAdministration {
      */
     List<String> supportedProviders();
 
+    /**
+     * One provider a configuration may name, with what a person needs in order to choose it.
+     *
+     * <p>⚠️ <strong>The shape is declared here and the data comes from elsewhere</strong>, which is the
+     * same split {@link #supportedProviders()} already made: which providers exist is
+     * {@code jmouse-ai-provider}'s fact and this module deliberately cannot see it. What this module
+     * <em>can</em> say is what a screen needs to know about one.
+     *
+     * @param defaultApiUrl where it answers when a configuration names no address. Null where there is
+     *                      nothing sensible to guess
+     * @param requiresKey   ⚠️ false is a real answer, not a relaxation. A model running on the same
+     *                      machine has no credential to give, and a screen that demanded one would make
+     *                      the only free-in-every-sense option the one nobody can switch on
+     * @param note          one line beside the name, so choosing does not require already knowing the
+     *                      landscape
+     */
+    record SupportedProvider(String name, String defaultApiUrl, boolean requiresKey, String note) {
+    }
+
+    /**
+     * Every provider a configuration may name, in the order they are meant to be read.
+     *
+     * <p>Default implementation answers from {@link #supportedProviders()} with nothing to say about
+     * each, so an implementation that has only the names is still correct — just less helpful.
+     */
+    default List<SupportedProvider> describeSupportedProviders() {
+        return supportedProviders().stream()
+                .map(name -> new SupportedProvider(name, null, true, null))
+                .toList();
+    }
+
     /** Every stored configuration, oldest first — the order somebody added them in. */
     List<Configuration> configurations();
 
