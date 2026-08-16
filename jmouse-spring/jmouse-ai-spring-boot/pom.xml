@@ -114,6 +114,16 @@
             <artifactId>jmouse-ai-jpa</artifactId>
             <optional>true</optional>
         </dependency>
+        <!--
+          ⚠️ For CurrentSubject alone, and optional like everything else here. The self-scoped agents
+          screen has to ask who is signed in, and only the enforcement layer knows; an application
+          without it simply gets no AgentOwners bean and the screen refuses with a sentence.
+        -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-access-enforcement</artifactId>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-ai-management</artifactId>

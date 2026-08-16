@@ -70,6 +70,13 @@
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-access-enforcement</artifactId>
+      <version>1.0.0-b20260802</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
       <artifactId>jmouse-ai-management</artifactId>
       <version>1.0.0-b20260802</version>
       <scope>compile</scope>

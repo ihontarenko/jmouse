@@ -3,8 +3,11 @@ package org.jmouse.ai.spring;
 import org.jmouse.access.AccessEngine;
 import org.jmouse.access.PermissionCatalog;
 import org.jmouse.access.ScopeCatalog;
+import org.jmouse.access.enforcement.CurrentSubject;
 import org.jmouse.ai.access.AccessToolAuthorizer;
 import org.jmouse.ai.access.InvocationScopes;
+import org.jmouse.ai.access.SubjectAgentOwners;
+import org.jmouse.ai.agent.AgentOwners;
 import org.jmouse.ai.spi.PermissionVocabulary;
 import org.jmouse.ai.spi.ToolAuthorizer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -12,6 +15,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * One policy, two entry points.
@@ -57,5 +61,29 @@ public class AiAccessAutoConfiguration {
     @ConditionalOnBean(PermissionCatalog.class)
     public PermissionVocabulary aiPermissionVocabulary(PermissionCatalog permissions) {
         return permissions::all;
+    }
+
+    /**
+     * Whose agents these are, for the self-scoped screen.
+     *
+     * <p>⚠️ <strong>Contributed here rather than written once per product</strong>, because the answer is
+     * the same sentence in both: an agent's owner reference is the identifier the engine keys that
+     * person's grants on. A product whose two differ has a bug rather than a preference, and writing this
+     * per product is how that bug stays hidden.
+     *
+     * <p>⚠️ Nested and {@code @ConditionalOnClass}, because {@code CurrentSubject} lives in the HTTP
+     * enforcement module and this starter is used by applications that do not have it. A condition naming
+     * a class that is absent is only safe when the class holding the method is guarded by one.
+     */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(CurrentSubject.class)
+    public static class SelfScopedAgents {
+
+        @Bean
+        @ConditionalOnMissingBean
+        @ConditionalOnBean(CurrentSubject.class)
+        public AgentOwners aiSubjectAgentOwners(CurrentSubject subjects) {
+            return new SubjectAgentOwners(subjects::get);
+        }
     }
 }

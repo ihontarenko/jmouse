@@ -5,15 +5,18 @@ import org.jmouse.ai.agent.AgentAuthority;
 import org.jmouse.ai.agent.AgentConnection;
 import org.jmouse.ai.agent.AgentConnections;
 import org.jmouse.ai.agent.AgentDirectory;
+import org.jmouse.ai.agent.AgentGrants;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.time.Instant;
 import java.util.List;
 
@@ -45,10 +48,14 @@ public class AgentAdministrationController {
 
     private final AgentDirectory   agents;
     private final AgentConnections connections;
+    private final AgentGrants      grants;
 
-    public AgentAdministrationController(AgentDirectory agents, AgentConnections connections) {
+    public AgentAdministrationController(
+            AgentDirectory agents, AgentConnections connections, AgentGrants grants) {
+
         this.agents      = agents;
         this.connections = connections;
+        this.grants      = grants;
     }
 
     /**
@@ -131,6 +138,46 @@ public class AgentAdministrationController {
     @PatchMapping("/{agentId}/authority")
     public AgentView authority(@PathVariable String agentId, @RequestBody AuthorityRequest request) {
         return describe(agents.actWith(agentId, request.authority()));
+    }
+
+    /** What an agent holds, beside what its owner could hand it. */
+    public record GrantsView(AgentGrants.Held held, AgentGrants.Offer offer) {
+    }
+
+    /** What a save carries — the whole set, never a delta. */
+    public record GrantsRequest(List<String> permissions, List<AgentGrants.Placement> placements) {
+    }
+
+    /**
+     * ⚠️ <strong>Read together, because a screen showing one without the other teaches the wrong
+     * rule.</strong> An agent's set is intersected with its owner's on every request, so a permission
+     * granted here that the owner does not hold resolves to nothing — and looks, from the outside,
+     * exactly like the agent being broken. The offer is what stops somebody granting into a void.
+     */
+    @GetMapping("/{agentId}/grants")
+    public GrantsView grants(@PathVariable String agentId) {
+        return new GrantsView(grants.heldBy(agentId), grants.offerFor(agentId));
+    }
+
+    /**
+     * Sets what an agent holds.
+     *
+     * <p>⚠️ Named for the person who pressed the button rather than the agent, because a grant's
+     * {@code granted_by} is the only thing that answers <em>who decided this</em> a year later.
+     */
+    @PutMapping("/{agentId}/grants")
+    public GrantsView replaceGrants(
+            @PathVariable String agentId,
+            @RequestBody GrantsRequest request,
+            Principal grantedBy) {
+
+        AgentGrants.Held held = grants.replace(
+                agentId,
+                request.permissions() == null ? List.of() : request.permissions(),
+                request.placements()  == null ? List.of() : request.placements(),
+                grantedBy == null ? null : grantedBy.getName());
+
+        return new GrantsView(held, grants.offerFor(agentId));
     }
 
     /** Ends one client. The agent and its other clients carry on. */
