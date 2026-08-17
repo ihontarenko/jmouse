@@ -244,11 +244,16 @@
   };
 
   /**
-   * The token the product's own interface is already holding.
+   * The token the product's own interface is already holding, or null where it holds none.
    *
    * This page is served on the same origin a person reaches that interface at, which is the only reason
-   * it can be one page for two products whose sign-in mechanisms have nothing in common. What differs is
-   * the key and whether the entry is the token or a document containing it, and both are configuration.
+   * it can be one page for products whose sign-in mechanisms have nothing in common. What differs is the
+   * key and whether the entry is the token or a document containing it, and both are configuration.
+   *
+   * ⚠️ Null is a THIRD shape rather than a failure: a product may keep no token at all and be signed in
+   * by a session cookie — which is what an authorization server itself looks like. `sendsCookies()`
+   * below is how that case is told apart from "signed out", and configuring no storage key is how a
+   * product asks for it.
    */
   function accessToken() {
     if (!STORAGE_KEY) {
@@ -291,10 +296,35 @@
     return fallback;
   }
 
+  /**
+   * Whether this installation signs its people in with a cookie rather than a stored token.
+   *
+   * Configuring no storage key is the ask. There is nothing to guess at: a product that keeps a token
+   * says where, and a product that says nothing has none to find.
+   */
+  function sendsCookies() {
+    return !STORAGE_KEY;
+  }
+
+  /**
+   * ⚠️ The credential goes in one of two ways and never both.
+   *
+   * With a stored token it is a bearer header, as before. Without one, the request carries the origin's
+   * cookies instead — `same-origin` is already the default, and it is written out because this is the
+   * whole mechanism rather than an incidental default. `Authorization: Bearer null` is what the header
+   * would otherwise say, which reads to a server as a malformed credential rather than as none.
+   */
   function send(url, token, body) {
+    var headers = { "Content-Type": "application/json" };
+
+    if (!sendsCookies()) {
+      headers["Authorization"] = "Bearer " + token;
+    }
+
     return fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      credentials: "same-origin",
+      headers: headers,
       body: JSON.stringify(body)
     }).then(function (response) {
       return response.json().catch(function () { return null; }).then(function (answer) {
@@ -350,6 +380,16 @@
   }
 
   function show(review, subjects) {
+    // Nothing to act as means nothing to approve, and the honest place to say so is here — not on an
+    // Approve button that looks live and answers with the same sentence after somebody presses it.
+    if (!subjects || subjects.length === 0) {
+      refuse("There is nothing to connect this to",
+             "Your account has nothing a client could act as, so there is nothing to approve. This is "
+             + "not something to fix from this page — start the connection again once your account has "
+             + "something to offer it.", false);
+      return;
+    }
+
     elements.loading.hidden = true;
     elements.form.hidden = false;
 
@@ -400,7 +440,13 @@
 
   var token = accessToken();
 
-  if (!token) {
+  /*
+   * ⚠️ Only a product that KEEPS a token can be found signed out here. Where the credential is a cookie
+   * this page cannot read it — that is the point of the cookie — so there is nothing to test, and
+   * refusing on its absence would refuse everybody. The server answers that question instead: the
+   * review call comes back 401 or 403, and the handler below turns it into the same sentence.
+   */
+  if (!token && !sendsCookies()) {
     refuse("You are not signed in",
            "This page can only be used by somebody signed in to " + (APPLICATION || "this application")
            + ", because what it grants is your own access.", true);
