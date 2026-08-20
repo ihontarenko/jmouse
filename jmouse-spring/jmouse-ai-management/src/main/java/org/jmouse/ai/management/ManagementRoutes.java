@@ -1,5 +1,7 @@
 package org.jmouse.ai.management;
 
+import org.jmouse.core.management.ManagementEndpoints;
+
 /**
  * Where these controllers answer, and how much of that this module gets to decide.
  *
@@ -9,22 +11,30 @@ package org.jmouse.ai.management;
 public final class ManagementRoutes {
 
     /**
-     * Where they answer when a product does not say.
+     * This module's own segment under the shared root.
      *
      * <p>Obviously a library's own corner of a URL space rather than an official-looking
      * {@code /admin/ai} that would collide with whatever the product already calls its administration
      * area. A product mounting these somewhere it means to sets the property; one that forgets gets a
      * working page at an address that reads as borrowed.
      */
-    public static final String DEFAULT_PREFIX = "/jmouse-ai";
+    public static final String SEGMENT = "/ai/api";
 
     /**
      * Where the controllers answer. Resolved by Spring, so a product only sets it in configuration.
      *
-     * <p>Composed from {@link #DEFAULT_PREFIX} — still a compile-time constant, so it is usable in an
-     * annotation, and there is one place the default is written rather than two that can disagree.
+     * <p>Two levels, and a product may use either — see {@link ManagementEndpoints}:
+     * {@code jmouse.management.prefix} moves every library management surface at once,
+     * {@code jmouse.ai.management.prefix} moves this one alone. The default composes to
+     * {@code /jmouse/ai/api}.
+     *
+     * <p>⚠️ <strong>It was {@code /jmouse-ai}, and the shape rather than the string is what changed.</strong>
+     * Every product that had configured this already set the property — Kiwi to {@code /jmai/api} — so
+     * nothing that was working moves. What a product gets now is the choice of moving ALL of them in one
+     * line instead of remembering each library's own name.
      */
-    public static final String PREFIX = "${jmouse.ai.management.prefix:" + DEFAULT_PREFIX + "}";
+    public static final String PREFIX =
+            "${jmouse.ai.management.prefix:" + ManagementEndpoints.ROOT + SEGMENT + "}";
 
     /** What a listing returns when nothing is asked for. */
     public static final int DEFAULT_LIMIT = 50;
