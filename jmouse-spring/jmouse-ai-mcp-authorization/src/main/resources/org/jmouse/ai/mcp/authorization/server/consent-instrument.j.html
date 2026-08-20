@@ -1,0 +1,148 @@
+{% extends "consent-frame" %}
+
+{#
+  INSTRUMENT — the page is a readout, and the loopback address is the largest thing on it.
+
+  ⚠️ The reasoning behind the type scale, so nobody "fixes" it later: the only way this screen can hurt
+  somebody is by handing a live authorization code to whatever is listening on that port. So the port
+  gets the largest type, and the client name, the approver and the scope arrange themselves around it.
+  Every other design here puts the client first; this one deliberately does not.
+
+  Committed to dark. A readout that follows the reader's theme is a readout that is sometimes a form.
+#}
+
+{% block "styles" %}
+<style>
+  body {
+    background: #070a0e;
+    color: #cfd6e0;
+    font: 14px/1.6 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    padding: 2.5rem 1.25rem 4rem;
+  }
+
+  main { max-width: 44rem; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .masthead { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap;
+              border-bottom: 1px solid #1a212b; padding-bottom: .8rem; }
+  .mark { color: #5cc8b0; letter-spacing: .14em; text-transform: uppercase; font-size: 10.5px; }
+  .application { color: #6b7686; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+
+  .panel { background: #0b0f15; border: 1px solid #1a212b; padding: 1.4rem 1.3rem;
+           display: flex; flex-direction: column; gap: 1.2rem; }
+
+  .skeleton { height: .85rem; background: #151c25; border-radius: 2px; }
+  .skeleton + .skeleton { margin-top: .7rem; }
+
+  h2 { margin: 0; font-size: 1.05rem; font-weight: 500; color: #f0f4f9; letter-spacing: -.005em; }
+
+  .who-label { color: #6b7686; font-size: 10.5px; letter-spacing: .13em; text-transform: uppercase; }
+  .who-name { color: #f0f4f9; font-size: 1.4rem; letter-spacing: -.015em; margin: .25rem 0 0; }
+
+  .summary { margin: 0; color: #97a2b1; font-size: 13px; line-height: 1.6; }
+
+  /* ⚠️ The hero. The port is what a person has to actually look at, so it is the only thing on the
+     page with a rule down its side and type above the body size. */
+  .port { border: 1px solid #2a3340; border-left: 3px solid #e0a03c; background: #10161e;
+          padding: 1.05rem 1.15rem; display: flex; flex-direction: column; gap: .6rem; }
+  .port-label { color: #e0a03c; font-size: 10.5px; letter-spacing: .13em; text-transform: uppercase; }
+  .port-value { color: #f0f4f9; font-size: 1.15rem; overflow-x: auto; white-space: nowrap; padding-bottom: .15rem; }
+  .port-note { color: #97a2b1; font-size: 12.5px; line-height: 1.55; }
+  .port-note strong { color: #f0f4f9; font-weight: 500; }
+
+  dl.rows { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: .45rem 1.4rem; font-size: 13px; }
+  dl.rows dt { color: #6b7686; letter-spacing: .08em; text-transform: uppercase; font-size: 10.5px; padding-top: .2em; }
+  dl.rows dd { margin: 0; color: #cfd6e0; overflow-wrap: anywhere; }
+
+  fieldset.choices { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .55rem; }
+  fieldset.choices legend { padding: 0; color: #6b7686; font-size: 10.5px; letter-spacing: .13em; text-transform: uppercase; }
+
+  .choice { display: flex; gap: .7rem; align-items: flex-start; cursor: pointer;
+            padding: .55rem .7rem; border: 1px solid #1a212b; background: #0d1219; }
+  .choice:hover { border-color: #2a3340; }
+  .choice:focus-within { outline: 2px solid #5cc8b0; outline-offset: 1px; }
+  .choice input { accent-color: #5cc8b0; margin: .28em 0 0; }
+  .choice-name { color: #e7edf4; }
+  .choice-detail { color: #6b7686; font-size: 12px; margin-top: .15rem; }
+  .choice.unavailable { opacity: .5; cursor: not-allowed; }
+
+  .notice { padding: .85rem 1rem; font-size: 12.5px; line-height: 1.55; }
+  .notice.danger { border: 1px solid #5a2620; background: #1c100e; color: #ff9182; }
+
+  .actions { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap;
+             border-top: 1px solid #1a212b; padding-top: 1.15rem; }
+
+  button.primary { background: #5cc8b0; color: #06231d; border: 0; border-radius: 2px;
+                   font: 600 13px/1 ui-monospace, Menlo, monospace; letter-spacing: .06em;
+                   text-transform: uppercase; padding: .82em 1.5em; cursor: pointer; }
+  button.primary:disabled { background: #2b3a38; color: #6b7686; cursor: not-allowed; }
+  button.quiet { background: transparent; color: #97a2b1; border: 1px solid #2a3340; border-radius: 2px;
+                 font: 13px/1 ui-monospace, Menlo, monospace; padding: .82em 1.3em; cursor: pointer; }
+  button:focus-visible { outline: 2px solid #5cc8b0; outline-offset: 2px; }
+
+  .hint { color: #6b7686; font-size: 12px; }
+
+  a { color: #5cc8b0; }
+</style>
+{% endblock %}
+
+{% block "page" %}
+<main>
+  <header class="masthead">
+    <div class="mark">jmouse · mcp authorization</div>
+    <div class="application">{{ applicationName }}</div>
+  </header>
+
+  <section class="panel" id="loading">
+    <div class="skeleton" style="width: 45%"></div>
+    <div class="skeleton" style="width: 90%"></div>
+    <div class="skeleton" style="width: 65%"></div>
+  </section>
+
+  <section class="panel" id="refusal" hidden>
+    <h2 id="refusal-title">This request cannot be approved</h2>
+    <p class="summary" id="refusal-body"></p>
+    <p class="summary" id="refusal-action" hidden><a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>,
+      then start the connection again from the client.</p>
+  </section>
+
+  <form id="request" hidden>
+    <section class="panel">
+      <div>
+        <div class="who-label">Client requesting access</div>
+        <h2 class="who-name" id="client-name"></h2>
+      </div>
+
+      <p class="summary" id="acting-summary"></p>
+
+      <div class="port">
+        <div class="port-label">⚠ Code will be sent to</div>
+        <div class="port-value"><code id="redirect-target"></code></div>
+        <div class="port-note">
+          That address is on <strong>this machine</strong>. If you did not just start this from a client
+          running here, close this page — approving would hand a live authorization code to whatever is
+          listening on that port.
+        </div>
+      </div>
+
+      <dl class="rows">
+        <dt>Signed in</dt>
+        <dd id="approver"></dd>
+      </dl>
+
+      <div id="choices-card" hidden>
+        <fieldset class="choices" id="choices">
+          <legend>Act as</legend>
+        </fieldset>
+      </div>
+
+      <div class="notice danger" id="failure" hidden></div>
+
+      <div class="actions">
+        <button type="submit" class="primary" id="approve">Approve</button>
+        <button type="button" class="quiet" id="cancel">Cancel</button>
+        <span class="hint" id="lifetime"></span>
+      </div>
+    </section>
+  </form>
+</main>
+{% endblock %}

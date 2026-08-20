@@ -4,7 +4,9 @@ import org.jmouse.ai.mcp.authorization.AuthorizationCodeStore;
 import org.jmouse.ai.mcp.authorization.LoopbackRedirectPolicy;
 import org.jmouse.ai.mcp.authorization.ProofKeyPolicy;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import jakarta.persistence.EntityManagerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -38,7 +40,9 @@ public class McpAuthorizationAutoConfiguration {
     @ConditionalOnMissingBean
     public LoopbackRedirectPolicy mcpRedirectPolicy(McpAuthorizationProperties properties) {
         return new LoopbackRedirectPolicy(
-                properties.getAllowedRedirectHosts(), properties.getAllowedRedirectPaths());
+                properties.getAllowedRedirectHosts(),
+                properties.getAllowedRedirectPaths(),
+                properties.isAllowNestedRedirectPaths());
     }
 
     @Bean
@@ -47,9 +51,38 @@ public class McpAuthorizationAutoConfiguration {
         return new InMemoryAuthorizationCodeStore();
     }
 
+    /**
+     * What a client called itself — durable wherever this library's tables exist.
+     *
+     * <h2>⚠️ The default changed, and the old one was losing names on every restart</h2>
+     *
+     * <p>This used to be {@link InMemoryClientNameRegistry} unconditionally, on the reasoning that a
+     * display name is a claim nobody verified and losing one costs a client nothing. True about the
+     * client; wrong about everything downstream. The name is <strong>copied onto the connection row</strong>
+     * at approval, and in at least one product it <strong>becomes the agent's name</strong> — the thing a
+     * person then grants permissions to and switches on and off. So a restart between registration and
+     * approval baked <em>An unnamed client</em> into a durable record, permanently, and two clients that
+     * both landed there became one agent in a product that matches by name.
+     *
+     * <p>⚠️ The in-memory form is still the fallback and is still correct for an application without
+     * these tables — it degrades a label rather than refusing a connection. What changed is which one
+     * you get by default when there is somewhere better to put it.
+     */
     @Bean
     @ConditionalOnMissingBean
-    public ClientNameRegistry mcpClientNameRegistry() {
+    @ConditionalOnClass(name = "org.jmouse.ai.jpa.entity.AiClientRegistration")
+    @ConditionalOnBean(EntityManagerFactory.class)
+    public ClientNameRegistry mcpClientNameRegistry(
+            EntityManagerFactory entityManagerFactory, McpAuthorizationProperties properties) {
+
+        return new JpaClientNameRegistry(
+                entityManagerFactory, properties.getClientRegistrationLifetime());
+    }
+
+    /** For an application with no tables of this library's: a label that a restart forgets. */
+    @Bean
+    @ConditionalOnMissingBean
+    public ClientNameRegistry mcpInMemoryClientNameRegistry() {
         return new InMemoryClientNameRegistry();
     }
 

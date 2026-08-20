@@ -285,6 +285,9 @@ public final class PolicyWriter {
         node.setName(scope.name());
         node.setNature(scope.nature());
         node.setParameter(scope.parameter());
+        node.setInside(scope.inside());
+        node.setBeside(scope.beside());
+        node.setRequires(scope.requires());
 
         return node;
     }

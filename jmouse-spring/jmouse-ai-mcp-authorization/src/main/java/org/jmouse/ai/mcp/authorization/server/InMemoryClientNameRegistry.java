@@ -36,19 +36,33 @@ public class InMemoryClientNameRegistry implements ClientNameRegistry {
         return clientId;
     }
 
+    /** ⚠️ Renews what it finds, for the same reason the durable one does — see {@link ClientNameRegistry}. */
     @Override
     public String nameOf(String clientId) {
-        if (clientId == null || clientId.isBlank()) {
+        NamedClient client = live(clientId);
+
+        if (client == null) {
             return UNNAMED;
+        }
+
+        clients.put(clientId, new NamedClient(client.name(), Instant.now().plus(LIFETIME)));
+
+        return client.name();
+    }
+
+    @Override
+    public boolean recognises(String clientId) {
+        return live(clientId) != null;
+    }
+
+    private NamedClient live(String clientId) {
+        if (clientId == null || clientId.isBlank()) {
+            return null;
         }
 
         NamedClient client = clients.get(clientId);
 
-        if (client == null || client.hasExpired(Instant.now())) {
-            return UNNAMED;
-        }
-
-        return client.name();
+        return client == null || client.hasExpired(Instant.now()) ? null : client;
     }
 
     private void forgetExpired() {

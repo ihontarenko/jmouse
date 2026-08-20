@@ -1,4 +1,5 @@
 org.jmouse.storage.spring.autoconfigure.StorageS3AutoConfiguration
 org.jmouse.storage.spring.autoconfigure.StorageAutoConfiguration
 org.jmouse.storage.spring.autoconfigure.StorageJpaAutoConfiguration
+org.jmouse.storage.spring.autoconfigure.StorageWebAutoConfiguration
 org.jmouse.storage.spring.autoconfigure.StorageFlywayAutoConfiguration

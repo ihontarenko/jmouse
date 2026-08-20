@@ -12,7 +12,10 @@ import org.jmouse.access.ScopeReference;
 import org.jmouse.access.Subject;
 import org.jmouse.access.spi.AccessContextScope;
 import org.jmouse.access.spi.ConditionContext;
+import org.jmouse.access.spi.ConditionFunctionFailure;
 import org.jmouse.access.spi.GrantCondition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.function.BiFunction;
 
@@ -60,6 +63,8 @@ import java.util.function.BiFunction;
  * means a condition is a guard on <em>touching</em> a row, not a rule about which rows exist.
  */
 public class ConditionAxis implements AccessAxisEvaluator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConditionAxis.class);
 
     private final AxisKind                     axis;
     private final EffectivePermissionsResolver resolver;
@@ -151,7 +156,9 @@ public class ConditionAxis implements AccessAxisEvaluator {
             Subject subject, AccessTarget target, PermissionProvenance provenance) {
 
         for (PermissionSource narrowing : provenance.narrowedBy()) {
-            if (holds(narrowing, subject, target)) {
+            // ⚠️ A deny whose function could not answer is APPLIED. That is the fail-closed reading
+            // here: a quota nobody can read refuses rather than waves through.
+            if (holds(narrowing, subject, target, true)) {
                 return AccessDecision.refused(refusal, because(narrowing, "denied where"));
             }
         }
@@ -175,7 +182,9 @@ public class ConditionAxis implements AccessAxisEvaluator {
         PermissionSource last = null;
 
         for (PermissionSource route : provenance.grantedBy()) {
-            if (!route.isConditional() || holds(route, subject, target)) {
+            // ⚠️ And an allow whose function could not answer is DROPPED — which is the same
+            // fail-closed reading from the other side, and why the two callers differ in this one flag.
+            if (!route.isConditional() || holds(route, subject, target, false)) {
                 return AccessDecision.allowed();
             }
 
@@ -185,15 +194,46 @@ public class ConditionAxis implements AccessAxisEvaluator {
         return AccessDecision.refused(refusal, because(last, "allowed only where"));
     }
 
-    private boolean holds(PermissionSource source, Subject subject, AccessTarget target) {
+    /**
+     * Whether one conditional source's rule holds — and what to answer when its function cannot say.
+     *
+     * <p>⚠️ <strong>{@code whenUnanswerable} is not a preference, it is the fail-closed answer read from
+     * two different sides.</strong> A condition that throws used to be flattened to {@code false}
+     * inside the evaluator, and that was safe only while conditions were pure. Once a function may read
+     * a counter, {@code false} means <em>refuse</em> on an allow and <em>permit</em> on a deny — so the
+     * single boolean the evaluator could return was safe in one position and dangerous in the other.
+     *
+     * <p>The axis is the first place that knows which position it is in, which is why the failure
+     * travels this far instead of being handled where it happened. A caller in the denial loop passes
+     * {@code true} (apply the deny); a caller in the granting loop passes {@code false} (drop the
+     * allow). Both refuse.
+     *
+     * <p>A function may opt out with {@link ConditionFunctionFailure#failsOpen()}, and then the old
+     * behaviour applies — for a signal that is genuinely advisory.
+     */
+    private boolean holds(
+            PermissionSource source, Subject subject, AccessTarget target, boolean whenUnanswerable) {
+
         GrantCondition condition = source.condition();
 
-        return condition != null && condition.holds(ConditionContext.of(
-                subject,
-                source.scope(),
-                resources.apply(target, source.scope()),
-                published.action(),
-                published.values()));
+        if (condition == null) {
+            return false;
+        }
+
+        try {
+            return condition.holds(ConditionContext.of(
+                    subject,
+                    source.scope(),
+                    resources.apply(target, source.scope()),
+                    published.action(),
+                    published.values()));
+        } catch (ConditionFunctionFailure unanswerable) {
+            LOGGER.warn("The rule `{}` could not be evaluated: {} — reading it as {}.",
+                        condition.source(), unanswerable.getMessage(),
+                        unanswerable.failsOpen() ? "not holding" : "holding, which refuses");
+
+            return !unanswerable.failsOpen() && whenUnanswerable;
+        }
     }
 
     /**

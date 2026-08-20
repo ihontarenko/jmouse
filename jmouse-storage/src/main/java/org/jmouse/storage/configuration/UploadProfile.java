@@ -27,6 +27,21 @@ public enum UploadProfile {
     ALLOW_DOCUMENTS_AND_IMAGES,
 
     /**
+     * ✅ The same, plus the <strong>inert text</strong> formats: notes, logs, exports, configuration.
+     *
+     * <p>For a tracker or a knowledge base, where the commonest attachment after a screenshot is a log
+     * or a Markdown note — and where {@link #ALLOW_DOCUMENTS_AND_IMAGES} refuses both, so the file a
+     * developer actually wants to hand over is the one that cannot be sent.</p>
+     *
+     * <p>⚠️ <strong>INERT text only, and the word is doing work.</strong> {@code text/html},
+     * {@code application/xhtml+xml}, {@code image/svg+xml} and every JavaScript type stay out — they are
+     * text by encoding and a script host by specification. A product serving any of these bytes from its
+     * own origin (a public avatar or file route) depends on that exclusion for its safety, so widening
+     * this set is not a cosmetic change.</p>
+     */
+    ALLOW_DOCUMENTS_IMAGES_AND_TEXT,
+
+    /**
      * 🛠️ Neither — read the configured mode and lists instead.
      */
     CUSTOM

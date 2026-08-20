@@ -5,12 +5,15 @@ import org.jmouse.ai.agent.AgentConnections;
 import org.jmouse.ai.agent.AgentDirectory;
 import org.jmouse.ai.guard.GuardSettings;
 import org.jmouse.ai.administration.ProviderAdministration;
+import org.jmouse.ai.jpa.JpaAiPreferences;
 import org.jmouse.ai.jpa.JpaAgentConnections;
 import org.jmouse.ai.jpa.JpaAgentDirectory;
 import org.jmouse.ai.jpa.JpaCallCounter;
 import org.jmouse.ai.jpa.JpaConfirmationStore;
 import org.jmouse.ai.jpa.JpaProviderAdministration;
 import org.jmouse.ai.jpa.JpaProviderSettingsSource;
+import org.jmouse.ai.preferences.AiPreferences;
+import org.jmouse.ai.preferences.PreferenceCatalog;
 import org.jmouse.ai.provider.ProviderSettingsSource;
 import org.jmouse.ai.spi.ConfirmationStore;
 import org.jmouse.ai.spi.InvocationTrace;
@@ -113,6 +116,29 @@ public class AiJpaAutoConfiguration {
             EntityManagerFactory entityManagerFactory, AiProperties properties) {
 
         return new JpaProviderAdministration(entityManagerFactory, properties.getApplication());
+    }
+
+    /**
+     * The declared settings, with whatever this installation wrote over them.
+     *
+     * <p>Unconditional, unlike the provider pair above, and the asymmetry is the same one the agent
+     * directory below makes: provider settings in a table are an <em>alternative</em> to settings in a
+     * property file, so a product has to ask for them. A preference has no alternative — the only other
+     * place to keep an edited prompt is a table the product writes itself, which is the duplication this
+     * port exists to end. An application that declares nothing pays for an unused bean and an empty
+     * table.
+     *
+     * <p>⚠️ Replaces {@code AiAutoConfiguration}'s shipped-values form, which reads the same declared
+     * defaults and refuses every write. Both are correct; only one of them can be edited.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public AiPreferences aiJpaPreferences(
+            EntityManagerFactory entityManagerFactory,
+            AiProperties         properties,
+            PreferenceCatalog    catalog) {
+
+        return new JpaAiPreferences(entityManagerFactory, properties.getApplication(), catalog);
     }
 
     /**

@@ -39,14 +39,32 @@ public final class OpenAiChatModel extends HttpChatModel {
     private static final String TOOL_RESULT_BLOCK = "tool_result";
 
     /**
+     * The field a provider hangs its own additions to a tool call on — carried through, never read.
+     *
+     * <p>⚠️ <strong>Dropping it is a conversation that works for exactly one round.</strong> Gemini's
+     * thinking models put a {@code thought_signature} here, on each tool call, and require it back on
+     * the assistant turn that asked for that call. This translated a tool call field by field, so the
+     * signature was recreated out of existence on the way back and Gemini refused the second round with
+     * <em>"Function call is missing a thought_signature"</em> — a refusal about something the model
+     * itself had sent and this library had thrown away.
+     *
+     * <p>It is opaque on purpose. Nothing here knows or should know what a provider keeps in it: the
+     * rule is that whatever arrived on a tool call goes back on that tool call, which is the same rule
+     * {@link ContentBlock} already applies to a block as a whole.
+     */
+    private static final String PROVIDER_EXTRA = "extra_content";
+
+    /**
      * ⚠️ <strong>Not always OpenAI, and that is the point.</strong> Almost every provider worth having
      * speaks this exact shape at a different address — including the free ones — so a compatible
      * provider is this class under another name rather than a class of its own. Six files differing by
      * one string each is how the seventh gets copied with that string forgotten.
      *
-     * <p>The name is carried rather than constant because {@code HttpChatModel} refuses settings
-     * addressed to a different provider: an instance answering to {@code groq} must say so, or a key for
-     * one service goes to another service's endpoint.
+     * <p>The name is carried rather than constant because two decisions turn on it. {@code HttpChatModel}
+     * refuses settings addressed to a different provider — an instance answering to {@code groq} must say
+     * so, or a key for one service goes to another service's endpoint. And {@link #requiresApiKey()}
+     * looks the name up in the catalogue, which is the only place that knows {@code ollama} needs no
+     * credential.
      */
     private final String providerName;
     private final String defaultApiUrl;
@@ -82,8 +100,35 @@ public final class OpenAiChatModel extends HttpChatModel {
         return defaultApiUrl;
     }
 
+    /**
+     * Asked of the catalogue rather than answered {@code true} for everyone.
+     *
+     * <p><strong>Not a relaxation — a correction.</strong> This class serves seven providers, and
+     * {@link ProviderCatalog} already records which of them will not talk without a credential. Letting
+     * the inherited {@code true} stand made {@code ollama} a provider the catalogue calls keyless, the
+     * administration screen labels "not needed", and {@code putInForce()} switches on happily — and
+     * which then refused its very first request for having no key. Two answers to one question, and the
+     * one nobody could see won.
+     *
+     * <p>⚠️ A name the catalogue does not ship answers {@code true}, which is the cautious way round: a
+     * provider this build cannot speak to should not also be inventing an exemption.
+     */
+    @Override
+    protected boolean requiresApiKey() {
+        return ProviderCatalog.requiresKey(providerName);
+    }
+
+    /**
+     * ⚠️ No header at all rather than an empty one. A model on this machine takes no credential, and
+     * {@code "Bearer " + null} is the literal string {@code "Bearer null"} — a header that looks like
+     * authentication to everything reading the request and is one to nothing.
+     */
     @Override
     protected Map<String, String> headers(ProviderSettings settings) {
+        if (!settings.hasApiKey()) {
+            return Map.of();
+        }
+
         return Map.of("authorization", "Bearer " + settings.apiKey());
     }
 
@@ -220,6 +265,9 @@ public final class OpenAiChatModel extends HttpChatModel {
         toolCall.put("type",     "function");
         toolCall.put("function", function);
 
+        // Handed back exactly as it arrived, unread. See the note on the constant.
+        block.providerExtra().ifPresent(extra -> toolCall.put(PROVIDER_EXTRA, extra));
+
         return toolCall;
     }
 
@@ -296,6 +344,11 @@ public final class OpenAiChatModel extends HttpChatModel {
         block.put("id",    toolCall.get("id"));
         block.put("name",  function.get("name"));
         block.put("input", parseArguments(stringOf(function.get("arguments"))));
+
+        // Kept on the block so it survives the round trip through the caller's stored conversation.
+        if (toolCall.get(PROVIDER_EXTRA) != null) {
+            block.put(ContentBlock.PROVIDER_EXTRA, toolCall.get(PROVIDER_EXTRA));
+        }
 
         return block;
     }

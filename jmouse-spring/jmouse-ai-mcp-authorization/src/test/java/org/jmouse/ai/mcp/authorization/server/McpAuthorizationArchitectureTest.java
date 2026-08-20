@@ -67,10 +67,22 @@ class McpAuthorizationArchitectureTest {
                 .check(module);
     }
 
+    /**
+     * ⚠️ <strong>Narrowed, and the narrowing is the point.</strong> This used to name the whole module,
+     * from back when nothing here was durable. Then a client's name turned out to need a table — losing
+     * one on restart baked <em>An unnamed client</em> into a connection row, and in one product into an
+     * agent's name — so {@code JpaClientNameRegistry} arrived and this rule was quietly false.
+     *
+     * <p>What it was actually protecting survives: the <em>flow</em> must not know where anything is kept.
+     * A storage adapter that a product may replace with its own bean is the opposite arrangement, and
+     * naming the classes it may not reach is what keeps the rule true instead of merely present.
+     */
     @Test
-    @DisplayName("nothing here stores anything, or knows where anything is stored")
+    @DisplayName("the flow itself stores nothing, and knows where nothing is stored")
     void storesNothing() {
         noClasses()
+                .that().haveSimpleNameNotEndingWith("ClientNameRegistry")
+                .and().doNotHaveSimpleName("McpAuthorizationAutoConfiguration")
                 .should().dependOnClassesThat().resideInAnyPackage(
                         "jakarta.persistence..", "org.springframework.data..", "javax.sql..")
                 .because("where a one-time code lives is AuthorizationCodeStore's, and the two products "

@@ -170,6 +170,19 @@ public final class ToolCatalog {
         return Optional.ofNullable(actionsByPublishedName.get(publishedName));
     }
 
+    /**
+     * Every action in registration order, handler included — for the one caller that has to weigh them.
+     *
+     * <p>⚠️ <strong>Package-private for the same reason {@link #find} is.</strong> {@link
+     * ToolDispatcher} asks this to answer "what may <em>this</em> caller reach", which needs the
+     * {@link ToolAction} a {@link org.jmouse.ai.spi.ToolAuthorizer} is asked about and which {@link #published()}
+     * deliberately does not carry. Widening it would put a handler within reach of anything that
+     * wanted to enumerate the catalogue.
+     */
+    List<ToolAction> actions() {
+        return List.copyOf(actionsByPublishedName.values());
+    }
+
     // ── The seven refusals ───────────────────────────────────────────────────────
 
     /**
@@ -209,18 +222,58 @@ public final class ToolCatalog {
             return;
         }
 
-        Set<String> declared = actions.stream()
-                .map(ToolAction::requiredPermission)
-                .collect(Collectors.toCollection(TreeSet::new));
+        List<ToolAction> unreachable = actions.stream()
+                .filter(action -> !known.contains(action.requiredPermission()))
+                .sorted(Comparator.comparing(ToolAction::publishedName))
+                .toList();
 
-        List<String> unknown = declared.stream().filter(name -> !known.contains(name)).toList();
-
-        if (!unknown.isEmpty()) {
-            throw new IllegalStateException(
-                    "These actions require permissions that do not exist: " + String.join(", ", unknown)
-                    + ". No caller can ever hold them, so the actions would be permanently unreachable. "
-                    + "The vocabulary holds " + known.size() + " name(s); check the spelling against it.");
+        if (unreachable.isEmpty()) {
+            return;
         }
+
+        // ⚠️ Told apart, because the two have opposite fixes and one of them cannot be a typo. An
+        // action that declared nothing got `tool:<published name>` derived from the name it already
+        // has — so the name is right by construction and what is missing is the DECLARATION. An action
+        // that asked for something explicitly may genuinely have misspelled it.
+        List<ToolAction> undeclared = unreachable.stream()
+                .filter(action -> action.requiredPermission().equals(ToolPermissions.of(action)))
+                .toList();
+
+        List<ToolAction> misnamed = unreachable.stream()
+                .filter(action -> !undeclared.contains(action))
+                .toList();
+
+        StringBuilder complaint = new StringBuilder(
+                "Every one of these actions asks for a permission this installation does not have, so no "
+                + "caller could ever hold it and the action would be published and permanently "
+                + "unreachable. Nothing is started.\n");
+
+        if (!undeclared.isEmpty()) {
+            complaint.append("\n  NOT DECLARED IN THE POLICY — this is almost certainly a forgotten line:\n");
+            undeclared.forEach(action -> complaint
+                    .append("    ").append(action.qualifiedName())
+                    .append("  needs  ").append(action.requiredPermission()).append('\n'));
+            complaint.append("  These derive their permission from their own name, so it cannot be "
+                           + "misspelled — it is simply not declared anywhere. Add one line per action "
+                           + "to a 'declare permissions' block in this application's policy, e.g.\n")
+                    .append("        ").append(undeclared.getFirst().requiredPermission())
+                    .append("  \"").append(undeclared.getFirst().title()).append("\"\n");
+        }
+
+        if (!misnamed.isEmpty()) {
+            complaint.append("\n  ASKED FOR EXPLICITLY AND NOT FOUND — either a typo, or the "
+                           + "declaration was removed and the call was not:\n");
+            misnamed.forEach(action -> complaint
+                    .append("    ").append(action.qualifiedName())
+                    .append("  asks for  ").append(action.requiredPermission())
+                    .append("  (dropping requiredPermission would derive ")
+                    .append(ToolPermissions.of(action)).append(")\n"));
+        }
+
+        complaint.append("\nThe vocabulary this installation knows holds ")
+                .append(known.size()).append(" name(s).");
+
+        throw new IllegalStateException(complaint.toString());
     }
 
     /** 3. One would shadow the other, and which one wins would depend on the order beans arrived in. */

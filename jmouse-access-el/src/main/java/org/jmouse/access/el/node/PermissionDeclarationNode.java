@@ -49,9 +49,18 @@ public class PermissionDeclarationNode extends AbstractExpression {
         return toPermissionDeclaration();
     }
 
+    /**
+     * ⚠️ <strong>A missing description is written as an empty literal, never left out.</strong> The
+     * parser requires the string, so a line with nothing after the name does not parse — and rendering
+     * the null itself put the word {@code null} in the file as if somebody had described it that way.
+     * Only a document the parser built can be sure of having one; a projection assembled from a
+     * catalogue cannot, because a permission is allowed to go undescribed.
+     */
     @Override
     public String toSource() {
-        return "%s %s".formatted(getName(), SourceWriter.literal(getDescription()));
+        String description = getDescription();
+
+        return "%s %s".formatted(getName(), SourceWriter.literal(description == null ? "" : description));
     }
 
     @Override

@@ -15,6 +15,9 @@ import org.jmouse.ai.guard.InMemoryDuplicateCallStore;
 import org.jmouse.ai.guard.InvocationGuard;
 import org.jmouse.ai.guard.RateLimitGuard;
 import org.jmouse.ai.guard.TokenBucketCallerRateLimiter;
+import org.jmouse.ai.preferences.AiPreferences;
+import org.jmouse.ai.preferences.PreferenceCatalog;
+import org.jmouse.ai.preferences.PreferenceDefinition;
 import org.jmouse.ai.spi.CallerRateLimiter;
 import org.jmouse.ai.spi.CallerResolver;
 import org.jmouse.ai.spi.ConfirmationStore;
@@ -228,6 +231,33 @@ public class AiAutoConfiguration {
      * @param guards asked only for its names, so that a guard this installation <em>believes</em> it has
      *               and does not is refused at startup rather than discovered from a bill
      */
+    /**
+     * Every setting a product declares about how its AI behaves, vetted as a set.
+     *
+     * <p>Collected the same way {@link ToolDefinition} beans are, and for the same reason: a product
+     * declares a setting where the setting belongs — the assistant's prompt beside the assistant — and
+     * nothing central learns its name.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public PreferenceCatalog aiPreferenceCatalog(ObjectProvider<PreferenceDefinition> declarations) {
+        return PreferenceCatalog.of(declarations.orderedStream().toList());
+    }
+
+    /**
+     * The shipped values, for an application that stores none of its own.
+     *
+     * <p>⚠️ Reads work and writes refuse — unlike the provider administration port, which is absent
+     * entirely when there is nothing to administer. The asymmetry is the point of a declared default: a
+     * prompt has to be readable for the assistant to run at all, whether or not anybody can edit it.
+     * {@code AiJpaAutoConfiguration} replaces this where the rows exist.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public AiPreferences aiShippedPreferences(PreferenceCatalog catalog) {
+        return AiPreferences.shipped(catalog);
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public ToolCatalog aiToolCatalog(

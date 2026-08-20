@@ -1,0 +1,144 @@
+{% extends "consent-frame" %}
+
+{#
+  PORTRAIT — the client, centred and alone above everything else.
+
+  The shape a phone shows when an app asks for the camera. The most direct answer to "make the
+  requesting application prominent", and the least interesting to look at, which may well be correct
+  for a screen nobody should linger on.
+
+  ⚠️ The avatar is a MONOGRAM, not a logo, and the page must never imply otherwise. A protocol client
+  registers with a name and a redirect address and nothing else, so the mark is derived from what it
+  sent — initials and a stable hue. Adding a border, a checkmark, or the word "verified" beside it
+  would turn a generated shape into a claim about identity.
+
+  Committed to light.
+#}
+
+{% block "styles" %}
+<style>
+  body { background: #fbfbfc; color: #16191e;
+         font: 15px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+         padding: 3rem 1.25rem 4rem; }
+
+  main { max-width: 32rem; margin: 0 auto; display: flex; flex-direction: column;
+         align-items: center; gap: 1.15rem; text-align: center; }
+
+  /* ⚠️ The hue is set by the script from the client's own identifier, so the same client is the same
+     colour every time and two are told apart at a glance. The lightness is fixed here so no generated
+     hue can produce an unreadable tile. */
+  .avatar { width: 5.5rem; height: 5.5rem; border-radius: 20px;
+            background: hsl(var(--client-hue, 18) 55% 55%); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font: 640 1.75rem/1 system-ui, sans-serif; letter-spacing: -.02em; }
+
+  .skeleton { height: 1rem; background: #eef0f3; border-radius: 4px; }
+  .skeleton + .skeleton { margin-top: .8rem; }
+
+  h1 { margin: 0; font-size: 1.6rem; font-weight: 640; letter-spacing: -.022em; text-wrap: balance; }
+  h2 { margin: 0; font-size: 1.2rem; font-weight: 620; }
+
+  p.body { margin: 0; font-size: 1.02rem; color: #4d5560; max-width: 34ch; text-wrap: pretty; }
+  p.body strong { color: #16191e; font-weight: 600; }
+
+  .identifier { font: 11.5px/1.4 ui-monospace, Menlo, monospace; color: #8a929c;
+                letter-spacing: .04em; overflow-wrap: anywhere; }
+
+  dl.panel { margin: 0; width: 100%; background: #f3f5f7; border-radius: 9px; padding: .9rem 1.05rem;
+             text-align: left; display: grid; grid-template-columns: max-content 1fr;
+             gap: .32rem .9rem; font-size: 13px; }
+  dl.panel dt { color: #6d757f; }
+  dl.panel dd { margin: 0; overflow-wrap: anywhere; }
+  dl.panel dd code { font: 12.5px/1.5 ui-monospace, Menlo, monospace; }
+
+  .caution { font-size: 12.5px; color: #8a4a12; line-height: 1.5; text-align: left; width: 100%; }
+
+  fieldset.choices { border: 0; margin: 0; padding: 0; width: 100%; text-align: left;
+                     display: flex; flex-direction: column; gap: .45rem; }
+  fieldset.choices legend { padding: 0 0 .2rem; font-size: 12px; color: #6d757f; }
+
+  .choice { display: flex; align-items: flex-start; gap: .6rem; cursor: pointer;
+            border: 1px solid #e2e6eb; border-radius: 9px; padding: .65rem .8rem;
+            background: #fff; font-size: 13.5px; }
+  .choice:hover { border-color: #16191e; }
+  .choice:focus-within { outline: 2px solid #16191e; outline-offset: 1px; }
+  .choice input { accent-color: #16191e; margin: .22em 0 0; }
+  .choice-name { font-weight: 560; }
+  .choice-detail { font-size: 12.5px; color: #8a929c; margin-top: .08rem; }
+  .choice.unavailable { opacity: .55; cursor: not-allowed; }
+
+  .notice.danger { width: 100%; text-align: left; border-radius: 9px; padding: .8rem .95rem;
+                   font-size: 13px; background: #fdf1ef; color: #a3271c; }
+
+  .buttons { display: flex; gap: .55rem; width: 100%; }
+
+  button.primary { flex: 1; background: #16191e; color: #fff; border: 0; border-radius: 9px;
+                   font: 600 14.5px/1 system-ui, sans-serif; padding: .9em 1em; cursor: pointer; }
+  button.primary:disabled { background: #9aa1ab; cursor: not-allowed; }
+  button.quiet { flex: 1; background: #eceef1; color: #16191e; border: 0; border-radius: 9px;
+                 font: 14.5px/1 system-ui, sans-serif; padding: .9em 1em; cursor: pointer; }
+  button:focus-visible { outline: 2px solid #16191e; outline-offset: 2px; }
+
+  .hint { font-size: 11.5px; color: #8a929c; }
+
+  a { color: #16191e; }
+</style>
+{% endblock %}
+
+{% block "page" %}
+<main>
+  <section id="loading" style="width:100%">
+    <div class="skeleton" style="width: 45%; margin: 0 auto"></div>
+    <div class="skeleton" style="width: 90%"></div>
+    <div class="skeleton" style="width: 65%; margin: 0 auto"></div>
+  </section>
+
+  <section id="refusal" hidden style="display:flex; flex-direction:column; gap:.7rem; align-items:center">
+    <h2 id="refusal-title">This request cannot be approved</h2>
+    <p class="body" id="refusal-body"></p>
+    <p class="body" id="refusal-action" hidden><a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>,
+      then start the connection again from the client.</p>
+  </section>
+
+  <form id="request" hidden
+        style="display:flex; flex-direction:column; align-items:center; gap:1.15rem; width:100%">
+    <div class="avatar" id="client-avatar" aria-hidden="true"></div>
+
+    <h1 id="client-name"></h1>
+
+    <p class="body">
+      wants to act in <strong>{{ applicationName }}</strong> as you — seeing exactly what you see, and
+      nothing more.
+    </p>
+
+    <div class="identifier" id="client-id" hidden></div>
+
+    <p class="body" id="acting-summary" style="font-size:13.5px; max-width:40ch"></p>
+
+    <dl class="panel">
+      <dt>Signed in as</dt><dd id="approver"></dd>
+      <dt>Code goes to</dt><dd><code id="redirect-target"></code></dd>
+    </dl>
+
+    <p class="caution">
+      ⚠ That address is on this machine. If you did not just start this from a client running here,
+      close this page.
+    </p>
+
+    <div id="choices-card" hidden style="width:100%">
+      <fieldset class="choices" id="choices">
+        <legend>It writes as</legend>
+      </fieldset>
+    </div>
+
+    <div class="notice danger" id="failure" hidden></div>
+
+    <div class="buttons">
+      <button type="button" class="quiet" id="cancel">Cancel</button>
+      <button type="submit" class="primary" id="approve">Allow</button>
+    </div>
+
+    <div class="hint" id="lifetime"></div>
+  </form>
+</main>
+{% endblock %}

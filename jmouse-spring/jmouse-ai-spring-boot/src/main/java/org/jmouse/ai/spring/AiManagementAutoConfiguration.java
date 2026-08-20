@@ -8,6 +8,8 @@ import org.jmouse.ai.agent.AgentOwners;
 import org.jmouse.ai.management.AgentAdministrationController;
 import org.jmouse.ai.management.AgentSelfController;
 import org.jmouse.ai.management.OverviewController;
+import org.jmouse.ai.management.PreferenceController;
+import org.jmouse.ai.preferences.AiPreferences;
 import org.jmouse.ai.management.ProviderAdministrationController;
 import org.jmouse.ai.management.ProviderController;
 import org.jmouse.ai.management.ToolCallHistoryController;
@@ -68,6 +70,22 @@ public class AiManagementAutoConfiguration {
         return new UsageController(usage);
     }
 
+    /**
+     * What provider is in force.
+     *
+     * <p>⚠️ <strong>Unconditional, and a {@code @ConditionalOnBean(ProviderRegistry.class)} here would
+     * be a no-op that reads like a decision.</strong> {@link AiAutoConfiguration} registers
+     * {@link ProviderRegistry#none()} behind {@code @ConditionalOnMissingBean} and this configuration
+     * runs after it, so the bean is <em>always</em> present — the real one where the conversation half
+     * is on the classpath, the empty one otherwise.
+     *
+     * <p>Which is also why <strong>a product with no model can take this module as it stands</strong>.
+     * That was believed to be impossible and it is not: every dependency of every controller here has a
+     * fallback — {@code ToolCallHistory.none()}, {@code UsageTotals.none()}, {@code ProviderRegistry.none()},
+     * {@code AiPreferences.shipped(…)} — so the screens answer "there is no provider" rather than
+     * failing to start. A product that wrote its own management screen on the strength of that belief
+     * wrote it for nothing.
+     */
     @Bean
     @ConditionalOnMissingBean
     public ProviderController aiProviderController(ProviderRegistry providers) {
@@ -98,6 +116,21 @@ public class AiManagementAutoConfiguration {
             ProviderAdministration configurations) {
 
         return new ProviderAdministrationController(configurations);
+    }
+
+    /**
+     * The settings screen — what this application tells its model, and whatever else it declares.
+     *
+     * <p>Unconditional, unlike the provider controller above: there is always an {@link AiPreferences}
+     * bean, because a shipped default is a real value and the assistant reads one whether or not
+     * anything can be edited. Where the storage is absent, the screen lists the declared settings and
+     * every save refuses with a sentence saying why — which is better than a screen that is missing on
+     * one installation and present on another.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public PreferenceController aiPreferenceController(AiPreferences preferences) {
+        return new PreferenceController(preferences);
     }
 
     /**

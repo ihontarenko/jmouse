@@ -49,11 +49,24 @@ public class ValueObjectIntrospector<T>
                     container.getTarget());
             introspector.owner(parent).name(parameter.getName());
 
-            introspector.type(parameter.getType());
+            RecordComponent component = components.get(parameter.getName());
 
-            if (components.containsKey(parameter.getName())) {
-                RecordComponent  component = components.get(parameter.getName());
-                MethodDescriptor method    = new MethodIntrospector(component.getAccessor()).introspect()
+            // ⚠️ The component, not the parameter, when there is one. A record whose canonical
+            // constructor is compact reflects its parameters WITHOUT generics —
+            // Parameter.getParameterizedType() answers a bare `Set` where the source says
+            // `Set<String>` — while the record component keeps the full type. Reading the parameter
+            // therefore lost every element type, and a collection property bound through
+            // CollectionBinder with nothing to bind its elements as: "No binder found for bindable
+            // type 'Object'", raised only once the property actually carried values, which is why an
+            // empty list always looked fine.
+            introspector.type(component == null
+                                      ? parameter.getType()
+                                      : new ClassTypeIntrospector(
+                                              InferredType.forType(component.getGenericType()))
+                                              .introspect().toDescriptor());
+
+            if (component != null) {
+                MethodDescriptor method = new MethodIntrospector(component.getAccessor()).introspect()
                         .toDescriptor();
                 introspector.getterMethod(method);
             }

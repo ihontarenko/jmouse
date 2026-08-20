@@ -24,6 +24,12 @@ import java.util.Set;
  * subsystem, and most-specific still does not win: one personal deny takes the permission away
  * entirely, so the listing shows nothing rather than showing the parts the deny did not name. That is
  * the property {@code space:module:restrict} was invented to have, applied to reading.
+ *
+ * <p>⚠️ <strong>An <em>unconditional</em> deny, that is.</strong> A conditional one is a rule about a
+ * row and this question has no row, so it is carried past rather than applied — exactly as
+ * {@link EffectivePermissionsResolver} carries it and lets a later axis subtract it. The two have to
+ * treat it the same way: reading it as unconditional here emptied every listing filtered by a
+ * permission that any single row still passed the check for.
  */
 public class VisibilityScopeResolver {
 
@@ -80,7 +86,23 @@ public class VisibilityScopeResolver {
             if (!direct.permission().equals(permission)) {
                 continue;
             }
+
             if (!direct.allowed()) {
+                // ⚠️ A CONDITIONAL DENIAL IS NOT A DENIAL YET — the same rule
+                // EffectivePermissionsResolver keeps, and it has to be the same rule or the two
+                // disagree. Its condition is about a row ("… when the entry's purpose is not ASSET"),
+                // and there is no row here: a listing asks where the permission is held at all. Read
+                // as unconditional it took the permission away everywhere, so one narrow rule about
+                // one action emptied every listing filtered by that permission — while the check on
+                // any single row still passed, which is the pair disagreeing in the worst direction.
+                //
+                // Skipped rather than applied, so the listing is the wider of the two and the check
+                // that has a row to ask about does the subtracting. An unconditional denial still
+                // wins outright, below.
+                if (direct.isConditional()) {
+                    continue;
+                }
+
                 return VisibilityScope.nothing();
             }
 

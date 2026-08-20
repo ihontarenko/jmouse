@@ -39,7 +39,10 @@ public record ToolOutcome(Object payload, InvocationScope scope, CallVerdict ver
                     "wasDefault", scope.defaulted()));
         }
 
-        body.put("result", payload);
+        // ⚠️ An image is described here and carried as a content block, never both: base64 in the
+        // JSON as well would send it twice, and the second copy lands somewhere no model looks at it
+        // and every model pays for it.
+        body.put("result", payload instanceof ToolImage picture ? picture.about() : payload);
 
         return body;
     }
@@ -79,5 +82,18 @@ public record ToolOutcome(Object payload, InvocationScope scope, CallVerdict ver
 
     private static String capitalise(String word) {
         return word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1);
+    }
+
+    /**
+     * 🖼️ The picture this call is handing back, where it is handing one back.
+     *
+     * <p>⚠️ A transport that can carry an image should add it as a content block of its own; one that
+     * cannot is still correct, because {@link #asStructuredContent()} always describes it in words. What
+     * neither does is put the bytes in the JSON — see {@link ToolImage}.</p>
+     *
+     * @return the image, or empty
+     */
+    public Optional<ToolImage> image() {
+        return payload instanceof ToolImage picture ? Optional.of(picture) : Optional.empty();
     }
 }

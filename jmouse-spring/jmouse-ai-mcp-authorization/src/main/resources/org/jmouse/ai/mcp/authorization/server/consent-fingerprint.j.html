@@ -1,0 +1,151 @@
+{% extends "consent-frame" %}
+
+{#
+  FINGERPRINT — the identifier gets the same weight as the name, broken into groups the way a key
+  fingerprint is.
+
+  ⚠️ THE ONLY DESIGN HERE THAT NEEDS NOTHING THE PROTOCOL DOES NOT ALREADY SEND. The other five
+  client-first designs look better with a real logo and worse with a generated monogram, and a client
+  registers with a name and a redirect address and nothing else. This one never promised a logo: it
+  treats the client's IDENTITY rather than its BRANDING as the thing worth looking at, which is also
+  the more honest object — a name can be copied by a hostile client, an identifier cannot.
+
+  Committed to dark.
+#}
+
+{% block "styles" %}
+<style>
+  body { background: #0d1014; color: #d3dae2;
+         font: 15px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+         padding: 2.5rem 1.25rem 4rem; }
+
+  main { max-width: 40rem; margin: 0 auto; display: flex; flex-direction: column; gap: 1.35rem; }
+
+  .eyebrow { font: 600 10.5px/1 ui-monospace, Menlo, monospace; letter-spacing: .2em;
+             text-transform: uppercase; color: #79838f; }
+
+  .skeleton { height: 1rem; background: #161c23; border-radius: 3px; }
+  .skeleton + .skeleton { margin-top: .8rem; }
+
+  h2 { margin: 0; font-size: 1.15rem; font-weight: 620; color: #f1f5f9; }
+  p.body { margin: 0; color: #a8b3bf; font-size: 14px; line-height: 1.6; }
+
+  .identity { display: flex; gap: 1.1rem; align-items: flex-start; }
+  .avatar { width: 3.9rem; height: 3.9rem; border-radius: 12px; flex: none;
+            background: hsl(var(--client-hue, 18) 50% 50%); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font: 640 1.25rem/1 system-ui, sans-serif; letter-spacing: -.02em; }
+  .identity-text { display: flex; flex-direction: column; gap: .4rem; min-width: 0; }
+  .name { font-size: 1.45rem; font-weight: 650; letter-spacing: -.024em; color: #f1f5f9;
+          overflow-wrap: anywhere; }
+
+  /* ⚠️ The identifier is set as large as the body text, monospaced and grouped, because it is the
+     thing this design asks a person to actually read. Shrinking it to a caption would make this
+     Portrait with extra steps. */
+  .identifier { font: 15px/1.5 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: .06em;
+                color: #9fb3c8; background: #151b22; border-radius: 3px;
+                padding: .4em .6em; overflow-wrap: anywhere; }
+
+  .lede { margin: 0; font-size: 1.02rem; color: #b6c0cb; text-wrap: pretty; }
+  .lede strong { color: #f1f5f9; font-weight: 620; }
+
+  dl.rows { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: .42rem 1.25rem;
+            font-size: 13.5px; border-top: 1px solid #1e242c; padding-top: 1.05rem; }
+  dl.rows dt { font: 600 9.5px/1.9 ui-monospace, Menlo, monospace; letter-spacing: .14em;
+               text-transform: uppercase; color: #79838f; }
+  dl.rows dd { margin: 0; color: #d3dae2; overflow-wrap: anywhere; }
+  dl.rows dd code { font: 12.5px/1.5 ui-monospace, Menlo, monospace; }
+
+  .caution { border-left: 2px solid #e0a03c; padding-left: 1rem; font-size: 13px;
+             color: #a8b3bf; line-height: 1.55; }
+
+  fieldset.choices { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+  fieldset.choices legend { padding: 0; font: 600 9.5px/1 ui-monospace, Menlo, monospace;
+                            letter-spacing: .14em; text-transform: uppercase; color: #79838f; }
+
+  .choice { display: flex; align-items: flex-start; gap: .65rem; cursor: pointer;
+            border: 1px solid #1e242c; border-radius: 4px; padding: .7rem .85rem; background: #12181e; }
+  .choice:hover { border-color: #2c3540; }
+  .choice:focus-within { outline: 2px solid #5cc8b0; outline-offset: 1px; }
+  .choice input { accent-color: #5cc8b0; margin: .25em 0 0; }
+  .choice-name { font-weight: 560; color: #e7edf4; }
+  .choice-detail { font-size: 13px; color: #79838f; margin-top: .1rem; }
+  .choice.unavailable { opacity: .5; cursor: not-allowed; }
+
+  .notice.danger { border: 1px solid #5a2620; background: #1c100e; color: #ff9182;
+                   border-radius: 4px; padding: .85rem 1rem; font-size: 13.5px; }
+
+  .actions { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; }
+
+  button.primary { background: #5cc8b0; color: #06231d; border: 0; border-radius: 4px;
+                   font: 640 14px/1 system-ui, sans-serif; padding: .85em 1.8em; cursor: pointer; }
+  button.primary:disabled { background: #2b3a38; color: #79838f; cursor: not-allowed; }
+  button.quiet { background: transparent; color: #9aa6b2; border: 1px solid #262e38; border-radius: 4px;
+                 font: 14px/1 system-ui, sans-serif; padding: .85em 1.35em; cursor: pointer; }
+  button:focus-visible { outline: 2px solid #5cc8b0; outline-offset: 2px; }
+
+  .hint { font-size: 12.5px; color: #79838f; }
+
+  a { color: #5cc8b0; }
+</style>
+{% endblock %}
+
+{% block "page" %}
+<main>
+  <div class="eyebrow">Authorization · {{ applicationName }}</div>
+
+  <section id="loading">
+    <div class="skeleton" style="width: 45%"></div>
+    <div class="skeleton" style="width: 90%"></div>
+    <div class="skeleton" style="width: 65%"></div>
+  </section>
+
+  <section id="refusal" hidden style="display:flex; flex-direction:column; gap:.7rem">
+    <h2 id="refusal-title">This request cannot be approved</h2>
+    <p class="body" id="refusal-body"></p>
+    <p class="body" id="refusal-action" hidden><a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>,
+      then start the connection again from the client.</p>
+  </section>
+
+  <form id="request" hidden style="display:flex; flex-direction:column; gap:1.25rem">
+    <div class="identity">
+      <div class="avatar" id="client-avatar" aria-hidden="true"></div>
+      <div class="identity-text">
+        <div class="name" id="client-name"></div>
+        <div class="identifier" id="client-id" hidden></div>
+      </div>
+    </div>
+
+    <p class="lede">
+      Asking to act in <strong>{{ applicationName }}</strong> as you. It sees exactly what you see, and
+      nothing more.
+    </p>
+
+    <p class="body" id="acting-summary"></p>
+
+    <dl class="rows">
+      <dt>Signed in</dt><dd id="approver"></dd>
+      <dt>Code to</dt><dd><code id="redirect-target"></code></dd>
+    </dl>
+
+    <p class="caution">
+      ⚠ That address is on this machine. If you did not just start this from a client running here,
+      close the page — approving hands a live authorization code to whatever is listening on that port.
+    </p>
+
+    <div id="choices-card" hidden>
+      <fieldset class="choices" id="choices">
+        <legend>Writes as</legend>
+      </fieldset>
+    </div>
+
+    <div class="notice danger" id="failure" hidden></div>
+
+    <div class="actions">
+      <button type="submit" class="primary" id="approve">Approve</button>
+      <button type="button" class="quiet" id="cancel">Cancel</button>
+      <span class="hint" id="lifetime"></span>
+    </div>
+  </form>
+</main>
+{% endblock %}

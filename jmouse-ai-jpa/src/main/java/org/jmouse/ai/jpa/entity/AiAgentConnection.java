@@ -38,6 +38,13 @@ public class AiAgentConnection {
     @Column(name = "client_name", length = 255, nullable = false)
     private String clientName;
 
+    /**
+     * Which registration this came from. ⚠️ Nullable — every connection approved before the column
+     * existed has none, and inventing one would assert something nobody recorded.
+     */
+    @Column(name = "client_id", length = 128, updatable = false)
+    private String clientId;
+
     @Column(name = "refresh_token_hash", length = 64, nullable = false)
     private String refreshTokenHash;
 
@@ -61,6 +68,7 @@ public class AiAgentConnection {
             String  id,
             String  agentId,
             String  clientName,
+            String  clientId,
             String  refreshTokenHash,
             Instant refreshExpiresAt,
             Instant issuedAt) {
@@ -68,6 +76,7 @@ public class AiAgentConnection {
         this.id               = id;
         this.agentId          = agentId;
         this.clientName       = clientName;
+        this.clientId         = clientId;
         this.refreshTokenHash = refreshTokenHash;
         this.refreshExpiresAt = refreshExpiresAt;
         this.issuedAt         = issuedAt;
@@ -79,6 +88,10 @@ public class AiAgentConnection {
 
     public String getAgentId() {
         return agentId;
+    }
+
+    public String getClientId() {
+        return clientId;
     }
 
     public String getClientName() {

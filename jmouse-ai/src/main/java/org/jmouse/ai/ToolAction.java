@@ -13,12 +13,23 @@ import java.util.function.Function;
  * the unit would force one permission to cover reading and deleting alike, which is the shape of every
  * over-broad credential ever issued.
  *
- * <p>{@link #requiredPermission()} is <strong>mandatory and has no default</strong>, and
- * {@link ToolCatalog} refuses to start when one is missing. That is not defensiveness. A handler
- * reaches a domain service directly, bypassing whatever authorization a product hangs on its HTTP
- * layer, which makes the dispatcher's check the only one that runs on this path — so a defaulted
- * permission would silently register an unguarded action. Failing to start is loud; an unguarded
- * action is silent.
+ * <p>{@link #requiredPermission()} is <strong>derived from the action's own name</strong> —
+ * {@code issues.create} costs {@code tool:issues_create} — so a definition declares its arguments and
+ * its handler and says nothing about authorization at all. One tool, one permission.
+ *
+ * <p>⚠️ <strong>This was mandatory until it was derived, and the old reasoning is worth keeping.</strong>
+ * It said a defaulted permission would silently register an unguarded action, because a handler reaches
+ * a domain service directly, bypassing whatever authorization a product hangs on its HTTP layer — the
+ * dispatcher's check is the only one on this path. That is right about the defaults it had in mind, a
+ * blank or one permission shared by a whole tool, and backwards about this one: what is derived is
+ * unique to the single action and held by nobody until granted, so forgetting to think about
+ * authorization now yields the <em>narrowest</em> answer rather than the widest. And the action still
+ * cannot register unnoticed — {@link ToolCatalog} refuses to start unless the
+ * {@link org.jmouse.ai.spi.PermissionVocabulary} knows the name, which means the installation has
+ * declared it somewhere a person can read.
+ *
+ * <p>An action may still declare its own, and a few must: one republished from a server this
+ * application merely connects to is not this installation's to name.
  *
  * <p>The library never interprets the permission. The catalogue insists it is present and, where a
  * {@link org.jmouse.ai.spi.PermissionVocabulary} is supplied, that it exists; what it <em>means</em> is
@@ -88,6 +99,16 @@ public record ToolAction(
      */
     public String publishedName() {
         return toolName + PUBLISHED_SEPARATOR + name;
+    }
+
+    /**
+     * The same spelling, before there is an action to ask.
+     *
+     * <p>Exists for {@link Builder}, which derives the permission while it still holds the two halves
+     * separately. Composed here rather than there so the separator has one home.
+     */
+    public static String publishedName(String toolName, String actionName) {
+        return toolName + PUBLISHED_SEPARATOR + actionName;
     }
 
     /** How the action is referred to in refusals, log lines and conversation. */
@@ -295,9 +316,27 @@ public record ToolAction(
             refuseABorrowedSchemaOnALocalAction();
 
             return new ToolAction(
-                    toolName, name, title, description, inputSchema, requiredPermission,
+                    toolName, name, title, description, inputSchema, permissionOrDerived(),
                     readOnly, destructive, scopeConfined, origin, traceAttributes,
                     affectedRecords, handler);
+        }
+
+        /**
+         * What this action costs — what it declared, or {@code tool:<published name>}.
+         *
+         * <p>⚠️ <strong>Deriving it is the point, and a declaration is now the exception.</strong> One
+         * tool, one permission, named after the action, so a definition says nothing about authorization
+         * and there is no second spelling of the name to keep in step. What remains to be checked is
+         * whether this installation <em>knows</em> that name, and {@link ToolCatalog} refuses to start
+         * otherwise — so an action still cannot register unguarded, it simply cannot register at all.
+         *
+         * <p>See {@link ToolPermissions} for why a derived permission is the tightest default rather
+         * than a missing one, and for what still declares its own.
+         */
+        private String permissionOrDerived() {
+            return requiredPermission == null || requiredPermission.isBlank()
+                    ? ToolPermissions.of(toolName, name)
+                    : requiredPermission;
         }
 
         /**

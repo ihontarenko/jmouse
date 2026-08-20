@@ -28,3 +28,11 @@ output/
 *public.properties
 *.db
 *mariadb.properties
+
+# Tessera issue mirror — a local copy of the JMF project's issues, written by the `tessera` skill
+# so a future session can read the tickets with no server running. It is not source, it goes stale
+# the moment somebody edits an issue elsewhere, and a merge conflict in it would be meaningless.
+/.tessera/
+
+# Mirrors of WiQi pages — the record is WiQi, these are copies for reading with the server down.
+/.wiqi/

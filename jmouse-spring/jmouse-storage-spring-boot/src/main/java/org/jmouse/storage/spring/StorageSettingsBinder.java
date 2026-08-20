@@ -7,10 +7,16 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 🔗 Reads the library's settings out of Spring's environment, under whatever prefix the product
@@ -34,6 +40,20 @@ import java.util.Set;
  * matches component names directly. Rather than annotate every component with an alias — which
  * would put a Spring convention into a Spring-free module — the conversion happens here, on the way
  * in, along with assembling the flat dotted keys into the nested shape the binder reads.</p>
+ *
+ * <h3>Lists</h3>
+ *
+ * <p>Spring flattens a YAML sequence into one indexed property name per entry —
+ * {@code content-types[0]}, {@code content-types[1]}, … — and this adapter walks property
+ * <em>names</em>, so those used to become keys literally called {@code contentTypes[0]}. Nothing ever
+ * landed on {@code contentTypes}: the allowlist bound empty, and an empty allowlist honestly meaning
+ * "admit nothing", every upload was then refused with a message about its content type and no hint
+ * that a list had failed to arrive. They are reassembled here, in index order.</p>
+ *
+ * <p>A comma-separated string is split by {@link #translate} instead, and that path was broken for a
+ * different reason until {@code ValueObjectBinder} was taught to read a record component's
+ * <em>generic</em> type: the element type arrived as {@code Object} and the application refused to
+ * start with "No binder found for bindable type 'Object'". Both spellings work now.</p>
  */
 public final class StorageSettingsBinder {
 
@@ -53,6 +73,9 @@ public final class StorageSettingsBinder {
     private static final char   SNAKE_UNDERSCORE = '_';
     private static final String ROOT_KEY       = "storage";
     private static final String LIST_SEPARATOR = ",";
+
+    /** A YAML sequence reaches the environment one indexed key at a time: {@code contentTypes[0]}. */
+    private static final Pattern INDEXED_KEY = Pattern.compile("(.+)\\[(\\d+)]");
 
     private StorageSettingsBinder() {
     }
@@ -74,15 +97,27 @@ public final class StorageSettingsBinder {
      * @return the settings, defaulted wherever configuration said nothing
      */
     public static StorageSettings bind(ConfigurableEnvironment environment) {
-        String              prefix = prefixOf(environment);
-        SettingsShape       shape  = SettingsShape.of(StorageSettings.class);
-        Map<String, Object> nested = new HashMap<>();
+        String                                  prefix    = prefixOf(environment);
+        SettingsShape                           shape     = SettingsShape.of(StorageSettings.class);
+        Map<String, Object>                     nested    = new HashMap<>();
+        Map<String, SortedMap<Integer, String>> sequences = new LinkedHashMap<>();
 
         for (String propertyName : propertyNamesUnder(environment, prefix)) {
-            String relative = camelCasePath(propertyName.substring(prefix.length() + SEPARATOR.length()));
+            String  relative = camelCasePath(propertyName.substring(prefix.length() + SEPARATOR.length()));
+            String  value    = environment.getProperty(propertyName);
+            Matcher indexed  = INDEXED_KEY.matcher(relative);
 
-            place(nested, relative, translate(environment.getProperty(propertyName), relative, shape));
+            if (indexed.matches() && value != null) {
+                sequences.computeIfAbsent(indexed.group(1), path -> new TreeMap<>())
+                        .put(Integer.parseInt(indexed.group(2)), value.trim());
+
+                continue;
+            }
+
+            place(nested, relative, translate(value, relative, shape));
         }
+
+        sequences.forEach((path, entries) -> place(nested, path, List.copyOf(entries.values())));
 
         return StorageSettings.bind(Map.of(ROOT_KEY, nested), ROOT_KEY);
     }
@@ -153,7 +188,7 @@ public final class StorageSettingsBinder {
      */
     private static Set<String> propertyNamesUnder(ConfigurableEnvironment environment, String prefix) {
         String        qualified = prefix + SEPARATOR;
-        Set<String> names     = new LinkedHashSet<>();
+        Set<String>   names     = new LinkedHashSet<>();
 
         for (PropertySource<?> source : environment.getPropertySources()) {
             if (source instanceof EnumerablePropertySource<?> enumerable) {

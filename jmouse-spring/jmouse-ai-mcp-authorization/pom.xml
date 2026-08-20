@@ -82,6 +82,21 @@
       interfaces in `org.jmouse.ai.mcp.authorization.server`.
     -->
     <dependencies>
+        <!--
+              ⚠️ Optional, for `JpaClientNameRegistry` alone. A durable registry needs a table, and the
+              table lives with every other `ai_*` one; an application that keeps client names some
+              other way (or accepts the in-memory default) never sees this on its classpath.
+            -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-ai-jpa</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-ai-mcp</artifactId>
@@ -141,6 +156,23 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!--
+          ⚠️ Minting the credential is what moved in here, so the JWT encoder came with it. It is
+          `oauth2-jose` rather than a JWT library of our own choosing on purpose: the product's protocol
+          filter chain already decodes with Spring Security's `JwtDecoder`, and a token minted by one
+          library and read by another is two places to keep an algorithm agreement.
+        -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
+        </dependency>
+
+        <!-- Issuing and rotating are two writes that must not half-happen. -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
         </dependency>
 
         <!-- Architecture rules only. Nothing here is worth a Spring context to assert. -->

@@ -4,20 +4,26 @@ import jakarta.persistence.EntityManager;
 import org.jmouse.storage.FileStore;
 import org.jmouse.storage.FileStores;
 import org.jmouse.storage.configuration.StorageSettings;
+import org.jmouse.storage.delivery.DeliveryPlanner;
 import org.jmouse.storage.jpa.JpaStoredFileRegistry;
+import org.jmouse.storage.jpa.StoredFileDelivery;
 import org.jmouse.storage.jpa.StoredFileIngestion;
+import org.jmouse.storage.jpa.StoredFileReferenceDiscovery;
 import org.jmouse.storage.jpa.StoredFileReferences;
 import org.jmouse.storage.jpa.StoredFileRegistry;
 import org.jmouse.storage.jpa.sweeper.OrphanSweeper;
 import org.jmouse.storage.key.StorageKeyStrategy;
 import org.jmouse.storage.policy.UploadPolicy;
 import org.jmouse.storage.spring.ScheduledOrphanSweep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,6 +48,8 @@ import java.util.List;
 @AutoConfiguration(after = StorageAutoConfiguration.class)
 @ConditionalOnClass({EntityManager.class, StoredFileRegistry.class})
 public class StorageJpaAutoConfiguration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StorageJpaAutoConfiguration.class);
 
     /**
      * 📇 The registry, over the application's own persistence context.
@@ -77,15 +85,39 @@ public class StorageJpaAutoConfiguration {
     }
 
     /**
-     * 🧹 The sweeper, over whatever reference sources the product declared.
+     * 📤 The read path: a registry row, planned for delivery.
      *
-     * <p>An application that declares none gets a sweeper whose reference union is empty — which
-     * would make every object an orphan. That is why the sweeper ships disabled and an operator
-     * has to turn it on: enabling it is also the moment to check that the sources exist.</p>
+     * <p>Sits here rather than beside the planner because it takes a registry row, and the registry
+     * is what this configuration is conditional on. A product with no database plans deliveries
+     * straight through {@link DeliveryPlanner} as before.</p>
+     *
+     * @param deliveryPlanner decides between streaming and a presigned redirect
+     * @return the read path
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public StoredFileDelivery storedFileDelivery(DeliveryPlanner deliveryPlanner) {
+        return new StoredFileDelivery(deliveryPlanner);
+    }
+
+    /**
+     * 🧹 The sweeper, over every reference source — the ones the mappings imply and the ones the
+     * product declared.
+     *
+     * <p>⚠️ <strong>Discovered first, declared second, both kept.</strong>
+     * {@link StoredFileReferenceDiscovery} finds every mapped association pointing at the registry,
+     * which is what stops a new kind of file being invisible to the sweeper because somebody forgot a
+     * bean. A product's own {@link StoredFileReferences} beans are added on top rather than replaced:
+     * a collection, a bare identifier column or a query spanning several tables is not a singular
+     * association and cannot be discovered.</p>
+     *
+     * <p>Overlap between the two is harmless — the sweeper unions identifiers, so an association that
+     * is both discovered and declared by hand simply appears twice in the report.</p>
      *
      * @param registry         registry to sweep
      * @param fileStores       every backend, so each orphan is reclaimed through the one holding it
-     * @param referenceSources one per table pointing at the registry
+     * @param referenceSources what the product declared, on top of what the mappings imply
+     * @param entityManager    persistence context whose metamodel is asked
      * @param settings         whether the sweeper runs, and how long an object is left alone
      * @return the sweeper
      */
@@ -93,8 +125,17 @@ public class StorageJpaAutoConfiguration {
     @ConditionalOnMissingBean
     public OrphanSweeper orphanSweeper(StoredFileRegistry registry, FileStores fileStores,
                                        List<StoredFileReferences> referenceSources,
-                                       StorageSettings settings) {
-        return new OrphanSweeper(registry, fileStores, referenceSources, settings.sweeper());
+                                       EntityManager entityManager, StorageSettings settings) {
+        List<StoredFileReferences> sources =
+            new ArrayList<>(StoredFileReferenceDiscovery.discover(entityManager));
+
+        sources.addAll(referenceSources);
+
+        LOGGER.info("🔎 Stored-file reference sources: {} discovered, {} declared — {}",
+                    sources.size() - referenceSources.size(), referenceSources.size(),
+                    sources.stream().map(StoredFileReferences::sourceName).toList());
+
+        return new OrphanSweeper(registry, fileStores, sources, settings.sweeper());
     }
 
     /**

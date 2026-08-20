@@ -2,6 +2,7 @@ package org.jmouse.access.el.condition;
 
 import org.jmouse.access.CallerView;
 import org.jmouse.access.PlaceView;
+import org.jmouse.access.spi.ConditionFunctionFailure;
 import org.jmouse.access.spi.DeferredValue;
 import org.jmouse.access.spi.GrantCondition;
 import org.jmouse.access.policy.ConditionCompiler;
@@ -40,13 +41,34 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionConditionCompiler.class);
 
     private final ExpressionLanguage expressionLanguage;
+    private final FunctionCatalog    functions;
 
+    /** An installation contributing no function: the dialect exactly as it was before functions existed. */
     public ExpressionConditionCompiler() {
-        this(new ExpressionLanguage(restrictedExtensions()));
+        this(FunctionCatalog.empty());
+    }
+
+    /**
+     * The ordinary wiring: the dialect, plus whatever this product registered as an
+     * {@link AccessFunction}.
+     *
+     * <p>⚠️ The catalogue is kept as well as being built into the language, because
+     * {@link ConditionVocabulary} has to refuse an <em>unregistered</em> name at load. Without it, a
+     * mistyped call compiles, boots, and then reads as {@code false} on every request — see
+     * {@link #compile(String)}.
+     */
+    public ExpressionConditionCompiler(FunctionCatalog functions) {
+        this.functions          = functions == null ? FunctionCatalog.empty() : functions;
+        this.expressionLanguage = new ExpressionLanguage(restrictedExtensions(this.functions));
     }
 
     public ExpressionConditionCompiler(ExpressionLanguage expressionLanguage) {
+        this(expressionLanguage, FunctionCatalog.empty());
+    }
+
+    public ExpressionConditionCompiler(ExpressionLanguage expressionLanguage, FunctionCatalog functions) {
         this.expressionLanguage = expressionLanguage;
+        this.functions          = functions == null ? FunctionCatalog.empty() : functions;
     }
 
     /**
@@ -64,6 +86,11 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
         List<Token> tokens = ConditionTokens.all(source);
 
         ConditionVocabulary.verify(source, tokens);
+
+        // ⚠️ Before compiling, not during evaluation. FunctionNode does throw for an unregistered name,
+        // but `holds` reads any exception as false — so an unchecked typo boots clean and then refuses
+        // everybody, forever, with a log line. See ConditionCalls.
+        ConditionCalls.verify(source, tokens, functions);
 
         try {
             // ⚠️ The names are read here and kept, not read again per decision. They are what makes a
@@ -126,9 +153,9 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
         }
     }
 
-    private static ExtensionContainer restrictedExtensions() {
+    private static ExtensionContainer restrictedExtensions(FunctionCatalog functions) {
         StandardExtensionContainer container = new StandardExtensionContainer();
-        container.importExtension(new ConditionDialect());
+        container.importExtension(new ConditionDialect(functions));
         return container;
     }
 
@@ -181,6 +208,13 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
          * axis that may narrow and never widen. A false here can cost somebody a permission and can
          * never hand one out.
          */
+        /**
+         * ⚠️ <strong>One exception is deliberately not caught here.</strong>
+         * {@link ConditionFunctionFailure} carries on to {@code ConditionAxis}, because the safe answer
+         * to "the function could not answer" depends on whether this condition is attached to an allow
+         * or to a deny, and only the axis knows which. Flattening it to {@code false} here is precisely
+         * how a dead counter store would lift every quota written as a deny.
+         */
         @Override
         public boolean holds(ConditionContext context) {
             try {
@@ -201,6 +235,8 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
                         .convert(compiled.evaluate(evaluation), Boolean.class);
 
                 return Boolean.TRUE.equals(holds);
+            } catch (ConditionFunctionFailure unanswerable) {
+                throw unanswerable;
             } catch (RuntimeException failed) {
                 LOGGER.warn("The condition `{}` could not be evaluated and is being read as false: {}",
                             source, failed.toString());

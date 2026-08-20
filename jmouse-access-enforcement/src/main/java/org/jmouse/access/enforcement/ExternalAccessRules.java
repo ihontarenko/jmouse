@@ -197,6 +197,12 @@ public interface ExternalAccessRules {
         private final Map<Class<?>, Declaration>              byType   = new HashMap<>();
         private final Map<Class<?>, Map<String, Declaration>> byMethod = new HashMap<>();
 
+        /**
+         * Types served without authorization on purpose, and why. Covered but never gated — see
+         * {@link #publicType(Class, String)}.
+         */
+        private final Map<Class<?>, String>                   publicTypes = new HashMap<>();
+
         private Builder() {
         }
 
@@ -221,10 +227,45 @@ public interface ExternalAccessRules {
             return this;
         }
 
+        /**
+         * What a foreign type needs when the honest answer is <strong>nothing</strong> — the external
+         * twin of {@link PublicEndpoint}.
+         *
+         * <h4>⚠️ Why this is not the same as leaving it out</h4>
+         *
+         * <p>Behaviourally it is: an undeclared type is gated on nothing, and so is this one. The
+         * difference is that {@link #covers(Class)} answers <em>true</em> here, which is what lets an
+         * architecture test tell <em>deliberately public</em> apart from <em>somebody forgot</em>. Without
+         * it, a product mounting a library's unauthenticated route has two options and both are bad: omit
+         * the whole module from the check — and lose the guarantee for every other controller in it — or
+         * declare {@link Declaration#authenticated()}, which is a lie that breaks the route, because the
+         * cases these routes exist for are the ones that <em>cannot</em> sign in. An {@code <img>} tag
+         * has no Authorization header to offer.</p>
+         *
+         * <p>⚠️ The reason is required and is not decoration. A route being public is a decision somebody
+         * has to be able to review later, and "it was already like that" is not reviewable.</p>
+         *
+         * @param type   the foreign type served without authorization
+         * @param reason why that is safe — the property the route's safety actually rests on
+         * @return this builder
+         */
+        public Builder publicType(Class<?> type, String reason) {
+            if (reason == null || reason.isBlank()) {
+                throw new IllegalArgumentException(
+                    "Declaring %s public needs a reason: what makes serving it without authorization "
+                    + "safe is the thing a reviewer has to be able to check.".formatted(type.getName()));
+            }
+
+            publicTypes.put(type, reason);
+
+            return this;
+        }
+
         public ExternalAccessRules build() {
             Map<Class<?>, Declaration>              types   = Map.copyOf(byType);
             Map<Class<?>, Map<String, Declaration>> methods = Map.copyOf(byMethod);
-            Set<Class<?>>                           covered = coveredTypes(types, methods);
+            Map<Class<?>, String>                   declaredPublic = Map.copyOf(publicTypes);
+            Set<Class<?>>                           covered        = coveredTypes(types, methods, declaredPublic);
 
             return new ExternalAccessRules() {
 
@@ -255,10 +296,14 @@ public interface ExternalAccessRules {
         }
 
         private static Set<Class<?>> coveredTypes(
-                Map<Class<?>, Declaration> types, Map<Class<?>, Map<String, Declaration>> methods) {
+                Map<Class<?>, Declaration> types, Map<Class<?>, Map<String, Declaration>> methods,
+                Map<Class<?>, String> declaredPublic) {
 
             Set<Class<?>> covered = new LinkedHashSet<>(types.keySet());
             covered.addAll(methods.keySet());
+            // ⚠️ Covered, deliberately — but no Declaration is ever stored for these, so forMethod keeps
+            // answering empty and nothing gates them. Being covered is what makes them reviewable.
+            covered.addAll(declaredPublic.keySet());
 
             return Set.copyOf(covered);
         }

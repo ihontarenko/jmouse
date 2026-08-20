@@ -49,7 +49,7 @@ public class ConsentPage {
     /** The house suffix for a jMouse Template. */
     private static final String TEMPLATE_SUFFIX = ".j.html";
 
-    private static final String TEMPLATE = "consent";
+
 
     /**
      * ⚠️ <strong>Held, not built per render — the parse cache lives inside the engine.</strong>
@@ -77,7 +77,7 @@ public class ConsentPage {
         AuthorizationRoutes                routes  = properties.routes();
         McpAuthorizationProperties.Consent consent = properties.getConsent();
 
-        Template          template = engine.getTemplate(TEMPLATE);
+        Template          template = engine.getTemplate(consent.getTemplate());
         EvaluationContext context  = template.newContext();
 
         context.setValue("applicationName",   escapeHtml(properties.getApplicationName()));

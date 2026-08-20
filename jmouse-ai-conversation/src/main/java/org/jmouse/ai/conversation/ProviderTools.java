@@ -1,7 +1,6 @@
 package org.jmouse.ai.conversation;
 
 import org.jmouse.ai.PublishedTool;
-import org.jmouse.ai.ToolCatalog;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,9 +26,17 @@ public final class ProviderTools {
     private ProviderTools() {
     }
 
-    /** Everything a caller may reach, in the catalogue's stable order. */
-    public static List<Map<String, Object>> from(ToolCatalog catalog) {
-        return catalog.published().stream().map(ProviderTools::from).toList();
+    /**
+     * The actions to put in front of a model, in the catalogue's stable order.
+     *
+     * <p>⚠️ <strong>A list rather than the catalogue, and the difference is a permission.</strong> This
+     * took a {@link ToolCatalog} and rendered all of it, which is every action the installation has
+     * rather than every action the person asking may run. Ask {@code ToolDispatcher.reachable()} for
+     * the list — it is the dispatcher's own gate, so what is rendered here is exactly what would be
+     * allowed through.
+     */
+    public static List<Map<String, Object>> from(List<PublishedTool> tools) {
+        return tools.stream().map(ProviderTools::from).toList();
     }
 
     /**

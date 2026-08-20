@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{% block "pageTitle" %}jMouse MCP · Authorization{% endblock %}</title>
+<style>
+  /*
+    The only rules the frame imposes. Everything else belongs to whichever design extends it — a
+    consent screen is one page with one job, and a base stylesheet fighting a variant's own is how a
+    page ends up with two opinions about its own spacing.
+  */
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; }
+  [hidden] { display: none !important; }
+  button { font: inherit; }
+  code { overflow-wrap: anywhere; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+</style>
+{% block "styles" %}{% endblock %}
+</head>
+<body>
+{% block "page" %}{% endblock %}
+<script>
+/*
+ * ═══════════════════════════════════════════════════════════════════════════════════════════════
+ *  THE CONSENT FLOW — one copy, extended by every design.
+ *
+ *  ⚠️ THIS SCRIPT IS THE REASON THE DESIGNS ARE TEMPLATES RATHER THAN PAGES. It decides whether
+ *  somebody is signed in, what the server is willing to say about the request, which subjects may be
+ *  acted as, and what happens to a one-time code — and a second copy of that, per design, is a
+ *  security rule that would drift the first time one of them was edited.
+ *
+ *  A design supplies markup carrying these ids and nothing else:
+ *
+ *    REQUIRED  loading · refusal · refusal-title · refusal-body · refusal-action · sign-in-link
+ *              request (a <form>) · client-name · acting-summary · approver · redirect-target
+ *              choices-card · choices · failure · approve (submit) · cancel · lifetime
+ *
+ *    OPTIONAL  client-avatar · client-id — for designs that make the requesting client the subject
+ *              of the page. Absent ones are simply not written to.
+ *
+ *  And these class names, which this script creates at runtime:
+ *
+ *    .choice · .choice.unavailable · .choice-name · .choice-detail
+ * ═══════════════════════════════════════════════════════════════════════════════════════════════
+ */
+(function () {
+  "use strict";
+
+  var APPLICATION   = "{{ applicationName }}";
+  var REVIEW_URL    = "{{ reviewUrl }}";
+  var APPROVE_URL   = "{{ approveUrl }}";
+  var STORAGE_KEY   = "{{ tokenStorageKey }}";
+  var STORAGE_FIELD = "{{ tokenStorageField }}";
+
+  var parameters = new URLSearchParams(window.location.search);
+
+  var request = {
+    client_id:             parameters.get("client_id") || "",
+    redirect_uri:          parameters.get("redirect_uri") || "",
+    code_challenge:        parameters.get("code_challenge") || "",
+    code_challenge_method: parameters.get("code_challenge_method") || "",
+    state:                 parameters.get("state") || null
+  };
+
+  var elements = {
+    loading:        document.getElementById("loading"),
+    refusal:        document.getElementById("refusal"),
+    refusalTitle:   document.getElementById("refusal-title"),
+    refusalBody:    document.getElementById("refusal-body"),
+    refusalAction:  document.getElementById("refusal-action"),
+    form:           document.getElementById("request"),
+    clientName:     document.getElementById("client-name"),
+    actingSummary:  document.getElementById("acting-summary"),
+    approver:       document.getElementById("approver"),
+    redirectTarget: document.getElementById("redirect-target"),
+    choicesCard:    document.getElementById("choices-card"),
+    choices:        document.getElementById("choices"),
+    failure:        document.getElementById("failure"),
+    approve:        document.getElementById("approve"),
+    cancel:         document.getElementById("cancel"),
+    lifetime:       document.getElementById("lifetime"),
+    // Optional — only the client-first designs carry these.
+    clientAvatar:   document.getElementById("client-avatar"),
+    clientId:       document.getElementById("client-id")
+  };
+
+  /*
+   * ⚠️ Captured before anything can change it. A failed approval puts the button back the way it was,
+   * and the way it was is not the word "Approve" in every design — one of them says "Grant access" and
+   * another "Issue permit". Hard-coding the reset renamed the button on first failure, which reads as
+   * the page having quietly become a different page.
+   */
+  var approveLabel = elements.approve.textContent;
+
+  /**
+   * The token the product's own interface is already holding, or null where it holds none.
+   *
+   * This page is served on the same origin a person reaches that interface at, which is the only reason
+   * it can be one page for products whose sign-in mechanisms have nothing in common. What differs is the
+   * key and whether the entry is the token or a document containing it, and both are configuration.
+   *
+   * ⚠️ Null is a THIRD shape rather than a failure: a product may keep no token at all and be signed in
+   * by a session cookie — which is what an authorization server itself looks like. `sendsCookies()`
+   * below is how that case is told apart from "signed out", and configuring no storage key is how a
+   * product asks for it.
+   */
+  function accessToken() {
+    if (!STORAGE_KEY) {
+      return null;
+    }
+
+    var stored = window.localStorage.getItem(STORAGE_KEY) || window.sessionStorage.getItem(STORAGE_KEY);
+
+    if (!stored) {
+      return null;
+    }
+
+    if (!STORAGE_FIELD) {
+      return stored;
+    }
+
+    try {
+      return JSON.parse(stored)[STORAGE_FIELD] || null;
+    } catch (unreadable) {
+      return null;
+    }
+  }
+
+  function refuse(title, body, offerSignIn) {
+    elements.loading.hidden = true;
+    elements.form.hidden = true;
+    elements.refusal.hidden = false;
+    elements.refusalTitle.textContent = title;
+    elements.refusalBody.textContent = body;
+    elements.refusalAction.hidden = !offerSignIn;
+  }
+
+  /** The server's own sentence, preferred over anything invented here: every refusal in this flow
+   *  names what would have been accepted, which is strictly more useful than a generic message. */
+  function describe(answer, fallback) {
+    if (answer && (answer.error_description || answer.detail)) {
+      return answer.error_description || answer.detail;
+    }
+
+    return fallback;
+  }
+
+  /**
+   * Whether this installation signs its people in with a cookie rather than a stored token.
+   *
+   * Configuring no storage key is the ask. There is nothing to guess at: a product that keeps a token
+   * says where, and a product that says nothing has none to find.
+   */
+  function sendsCookies() {
+    return !STORAGE_KEY;
+  }
+
+  /**
+   * ⚠️ The credential goes in one of two ways and never both.
+   *
+   * With a stored token it is a bearer header, as before. Without one, the request carries the origin's
+   * cookies instead — `same-origin` is already the default, and it is written out because this is the
+   * whole mechanism rather than an incidental default. `Authorization: Bearer null` is what the header
+   * would otherwise say, which reads to a server as a malformed credential rather than as none.
+   */
+  function send(url, token, body) {
+    var headers = { "Content-Type": "application/json" };
+
+    if (!sendsCookies()) {
+      headers["Authorization"] = "Bearer " + token;
+    }
+
+    return fetch(url, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: headers,
+      body: JSON.stringify(body)
+    }).then(function (response) {
+      return response.json().catch(function () { return null; }).then(function (answer) {
+        if (!response.ok) {
+          throw { status: response.status, answer: answer };
+        }
+
+        return answer;
+      });
+    });
+  }
+
+  /**
+   * Up to two letters standing for a client that shipped no logo.
+   *
+   * ⚠️ A protocol client registers with a NAME and a REDIRECT ADDRESS and nothing else — no icon, no
+   * publisher, no URL. So a mark either comes from an allowlist this module does not have, or it is
+   * derived from what the client did send. This is the second: initials for the eye, a stable hue so
+   * two clients are told apart at a glance, and no claim of authenticity anywhere.
+   */
+  function initials(name) {
+    var words = String(name || "?").trim().split(/\s+/).slice(0, 2);
+
+    return words.map(function (word) { return word.charAt(0).toUpperCase(); }).join("") || "?";
+  }
+
+  /** A hue from the client's own identifier, so the same client is the same colour every time. */
+  function hueOf(text) {
+    var total = 0;
+
+    for (var index = 0; index < String(text).length; index++) {
+      total = (total * 31 + String(text).charCodeAt(index)) % 360;
+    }
+
+    return total;
+  }
+
+  /** `8f3c2ac41e9b02` → `8f3c · 2ac4 · 1e9b · 02` — a fingerprint is read in groups or not at all. */
+  function grouped(identifier) {
+    return String(identifier || "").replace(/[^a-zA-Z0-9]/g, "").match(/.{1,4}/g);
+  }
+
+  function describeClient(review) {
+    if (elements.clientAvatar) {
+      elements.clientAvatar.textContent = initials(review.client_name);
+      elements.clientAvatar.style.setProperty("--client-hue", hueOf(request.client_id || review.client_name));
+    }
+
+    if (elements.clientId) {
+      var groups = grouped(request.client_id);
+
+      elements.clientId.textContent = groups ? groups.join(" · ") : "";
+      elements.clientId.hidden = !groups;
+    }
+  }
+
+  function renderChoices(subjects) {
+    if (!subjects || subjects.length < 2) {
+      return;
+    }
+
+    elements.choicesCard.hidden = false;
+
+    subjects.forEach(function (subject) {
+      var label = document.createElement("label");
+      label.className = subject.available ? "choice" : "choice unavailable";
+
+      var input = document.createElement("input");
+      input.type = "radio";
+      input.name = "subject";
+      input.value = subject.reference;
+      input.disabled = !subject.available;
+      input.checked = subject.available && !document.querySelector("input[name=subject]:checked");
+
+      var body = document.createElement("div");
+      var name = document.createElement("div");
+      name.className = "choice-name";
+      name.textContent = subject.name;
+      body.appendChild(name);
+
+      var detail = subject.available ? subject.detail : (subject.unavailable_reason || subject.detail);
+
+      if (detail) {
+        var note = document.createElement("div");
+        note.className = "choice-detail";
+        note.textContent = detail;
+        body.appendChild(note);
+      }
+
+      label.appendChild(input);
+      label.appendChild(body);
+      elements.choices.appendChild(label);
+    });
+
+    // Every choice was unavailable, so there is nothing to approve and the button says so by not working.
+    elements.approve.disabled = !document.querySelector("input[name=subject]:checked");
+  }
+
+  function show(review, subjects) {
+    // Nothing to act as means nothing to approve, and the honest place to say so is here — not on an
+    // Approve button that looks live and answers with the same sentence after somebody presses it.
+    if (!subjects || subjects.length === 0) {
+      refuse("There is nothing to connect this to",
+             "Your account has nothing a client could act as, so there is nothing to approve. This is "
+             + "not something to fix from this page — start the connection again once your account has "
+             + "something to offer it.", false);
+      return;
+    }
+
+    elements.loading.hidden = true;
+    elements.form.hidden = false;
+
+    elements.clientName.textContent = review.client_name;
+    elements.actingSummary.textContent =
+      "It will act with exactly the permissions of whatever you approve it as, inside " +
+      (review.application_name || "this application") + " and nowhere else. Every action it takes is " +
+      "allowed or refused by the same rules that answer for your own browser.";
+
+    elements.approver.textContent =
+      review.approver_name + (review.approver_detail ? " · " + review.approver_detail : "");
+    elements.redirectTarget.textContent = review.redirect_target;
+    elements.lifetime.textContent =
+      "You have " + review.code_lifetime_seconds + " seconds to finish once you approve.";
+
+    describeClient(review);
+    renderChoices(subjects);
+  }
+
+  function approve(token) {
+    var chosen = document.querySelector("input[name=subject]:checked");
+
+    elements.failure.hidden = true;
+    elements.approve.disabled = true;
+    elements.approve.textContent = "Connecting…";
+
+    send(APPROVE_URL, token, Object.assign({ subject_reference: chosen ? chosen.value : null }, request))
+      .then(function (approved) {
+        // Out of the application entirely, to the client's own loopback listener. `replace` so the back
+        // button does not return to a screen whose one-time code has already been spent.
+        window.location.replace(approved.redirect_url);
+      })
+      .catch(function (failed) {
+        elements.failure.hidden = false;
+        elements.failure.textContent = describe(failed.answer,
+          "That did not work, and the server said nothing useful about why. Start the connection again "
+          + "from the client.");
+        elements.approve.disabled = false;
+        elements.approve.textContent = approveLabel;
+      });
+  }
+
+  if (!request.redirect_uri || !request.code_challenge || !request.code_challenge_method) {
+    refuse("This link is incomplete",
+           "It is missing the parameters a client attaches when it asks for access. Start the connection "
+           + "from the client itself — this page is not something to open by hand.", false);
+    return;
+  }
+
+  var token = accessToken();
+
+  /*
+   * ⚠️ Only a product that KEEPS a token can be found signed out here. Where the credential is a cookie
+   * this page cannot read it — that is the point of the cookie — so there is nothing to test, and
+   * refusing on its absence would refuse everybody. The server answers that question instead: the
+   * review call comes back 401 or 403, and the handler below turns it into the same sentence.
+   */
+  if (!token && !sendsCookies()) {
+    refuse("You are not signed in",
+           "This page can only be used by somebody signed in to " + (APPLICATION || "this application")
+           + ", because what it grants is your own access.", true);
+    return;
+  }
+
+  elements.cancel.addEventListener("click", function () { window.close(); });
+  elements.choices.addEventListener("change", function () { elements.approve.disabled = false; });
+  elements.form.addEventListener("submit", function (submission) {
+    submission.preventDefault();
+    approve(token);
+  });
+
+  send(REVIEW_URL, token, request)
+    .then(function (review) { show(review, review.subjects); })
+    .catch(function (failed) {
+      if (failed.status === 401 || failed.status === 403) {
+        refuse("You are not signed in",
+               "The application did not recognise your session. Sign in and start the connection again "
+               + "from the client.", true);
+        return;
+      }
+
+      refuse("This request cannot be approved",
+             describe(failed.answer, "The application could not be reached to check this request. Try "
+                                     + "again, and start the connection from the client if it keeps failing."),
+             false);
+    });
+})();
+</script>
+</body>
+</html>

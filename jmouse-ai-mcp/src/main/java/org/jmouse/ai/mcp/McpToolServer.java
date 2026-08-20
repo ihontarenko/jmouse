@@ -14,6 +14,7 @@ import org.jmouse.ai.ToolRefusedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -156,11 +157,19 @@ public final class McpToolServer {
         try {
             ToolOutcome outcome = dispatcher.dispatch(tool.publishedName(), arguments);
 
-            return McpSchema.CallToolResult.builder()
+            McpSchema.CallToolResult.Builder result = McpSchema.CallToolResult.builder()
                     .addTextContent(outcome.describe())
                     .structuredContent(outcome.asStructuredContent())
-                    .isError(false)
-                    .build();
+                    .isError(false);
+
+            // A tool handing back a picture gets an image content block, so the model LOOKS at it rather
+            // than reading a filename. The structured body still describes it in words — a client that
+            // renders neither images nor prose is not a client this has to serve, but one that renders
+            // only the JSON still learns what came back.
+            outcome.image().ifPresent(picture -> result.addContent(new McpSchema.ImageContent(
+                    null, Base64.getEncoder().encodeToString(picture.bytes()), picture.mimeType())));
+
+            return result.build();
 
         } catch (ToolRefusedException refusal) {
             // The identical sentence an in-app assistant reads. Written once, in jmouse-ai, because two

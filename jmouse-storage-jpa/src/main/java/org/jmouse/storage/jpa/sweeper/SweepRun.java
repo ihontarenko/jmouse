@@ -50,6 +50,16 @@ public class SweepRun {
     private final int                sourcesConsulted;
     private final int                batchSize;
 
+    /**
+     * ⚠️ Whether this run actually removes anything.
+     *
+     * <p>A preview counts exactly what a real sweep would take and removes none of it. That matters
+     * more than the sweep itself: the sweeper ships disabled in every product, so the first honest
+     * measurement of how much is leaking has to be obtainable WITHOUT betting live data on the
+     * reference sources being complete. Turning it on to find out is the wrong order.</p>
+     */
+    private final boolean            reclaiming;
+
     private String  cursor;
     private boolean exhausted;
     private int     objectsExamined;
@@ -67,9 +77,11 @@ public class SweepRun {
      * @param sourcesConsulted      how many sources contributed to that union
      * @param cutOff                only objects registered strictly before this are candidates
      * @param batchSize             how many rows one batch examines
+     * @param reclaiming            {@code false} to count what would go and remove nothing
      */
     SweepRun(StoredFileRegistry registry, FileStores fileStores, Set<String> referencedIdentifiers,
-             int sourcesConsulted, LocalDateTime cutOff, int batchSize) {
+             int sourcesConsulted, LocalDateTime cutOff, int batchSize, boolean reclaiming) {
+        this.reclaiming            = reclaiming;
         this.registry              = registry;
         this.fileStores            = fileStores;
         this.referencedIdentifiers = referencedIdentifiers;
@@ -113,6 +125,17 @@ public class SweepRun {
             objectsExamined++;
 
             if (referencedIdentifiers.contains(candidate.getIdentifier())) {
+                continue;
+            }
+
+            if (!reclaiming) {
+                // Counted exactly as a real sweep would count it, and left alone. The size is the
+                // registry's rather than the backend's, which is what makes a preview cheap: it asks
+                // no store anything.
+                objectsReclaimed++;
+                bytesFreed += candidate.getSizeBytes();
+                reclaimedInBatch++;
+
                 continue;
             }
 

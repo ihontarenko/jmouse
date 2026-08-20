@@ -23,8 +23,8 @@ import java.util.Map;
  *       <td>{@code of(owner)}</td>
  *       <td>the owner — so the agent follows them, with nothing to go stale</td></tr>
  *   <tr><td>{@link AgentAuthority#RESTRICTED}</td>
- *       <td>{@code actingFor(agent, owner)}</td>
- *       <td>the agent, capped by the owner in every scope</td></tr>
+ *       <td>{@code of(agent)}</td>
+ *       <td>the agent, and ONLY the agent — its own roles and permissions, uncapped</td></tr>
  * </table>
  *
  * <p>⚠️ <strong>The agent is named in the attributes either way, and that matters.</strong> Under
@@ -33,10 +33,24 @@ import java.util.Map;
  * the badge on a record all read it. Attributes are display and record-keeping, never an authorization
  * input, which is exactly the right register for "which of my agents did this".
  *
- * <p><strong>Records belong to the owner under both.</strong> Authorization rests on the caller and
- * ownership on the acting subject, so something an agent creates is the owner's — it appears in their
- * inventory and survives the agent being discarded. An agent owning rows would mean deleting one orphans
- * everything it was created to capture.
+ * <p>⚠️ <strong>{@code RESTRICTED} is not "the owner, narrowed" — it is a different account.</strong>
+ * The agent's own roles and permissions decide, on their own, and the owner's set is not consulted at
+ * all. It used to be {@code actingFor(agent, owner)}, which made the engine intersect the two; that cap
+ * is gone deliberately. An agent restricted to a set its owner does not hold is now a thing an
+ * installation can say — a client trusted with one destructive action nobody else has, or a service
+ * account whose owner is merely who set it up.
+ *
+ * <p>⚠️ <strong>Which means the two authorities are answers to different questions, not two points on
+ * one scale.</strong> {@code INHERITED} is <em>be this person</em>: the owner's roles, the owner's
+ * permissions, the owner's tool switches, followed live and going stale nowhere. {@code RESTRICTED} is
+ * <em>be yourself</em>: whatever was granted to the agent, and nothing implicit. Reading the second as
+ * "the first with fewer things" is the mistake this note exists to prevent — an agent granted nothing is
+ * not a slightly limited owner, it is an account that holds nothing.
+ *
+ * <p>⚠️ <strong>Records follow the same split.</strong> Under {@code INHERITED} something the agent
+ * creates is the owner's, because the owner is who is acting. Under {@code RESTRICTED} it is the
+ * agent's — which is right where an agent is a row in the people table with a name and a face, and is
+ * the reason such a row is retired rather than deleted: what it authored has to keep resolving.
  *
  * <p>⚠️ <strong>Nothing here checks whether the agent may act.</strong> Reading a row as a caller and
  * deciding it is allowed to be one are different questions, and a factory that quietly refused would put
@@ -85,7 +99,7 @@ public final class AgentCallers {
     private static CallerIdentity identityOf(Agent agent) {
         return switch (agent.authority()) {
             case INHERITED  -> CallerIdentity.of(agent.ownerReference());
-            case RESTRICTED -> CallerIdentity.actingFor(agent.id(), agent.ownerReference());
+            case RESTRICTED -> CallerIdentity.of(agent.id());
         };
     }
 }

@@ -43,7 +43,7 @@ public class McpAuthorizationProperties {
     public static final String CONSENT_PREFIX_EXPRESSION =
             "${" + PREFIX + ".consent-prefix:" + PROTOCOL_PREFIX_EXPRESSION + "}";
 
-    /** What the consent screen calls this installation: "Innoventa", "Tessera". */
+    /** What the consent screen calls this installation — the product's own display name. */
     private String applicationName = "";
 
     /** Where a client reaches this API, absolute, without a trailing slash. */
@@ -61,6 +61,47 @@ public class McpAuthorizationProperties {
     private Duration codeLifetime = Duration.ofSeconds(120);
 
     /**
+     * How long a client's registered name is remembered.
+     *
+     * <p>⚠️ Longer than it sounds it needs to be, because the name is not only shown on the consent
+     * screen. It is copied onto the connection row at approval, and in some products it becomes the
+     * agent's name; a client re-authorising after its registration lapsed comes back as
+     * <em>An unnamed client</em>, and that string then sticks. A month covers the whole life of a
+     * refresh credential, which is the window in which a client will plausibly come back.
+     *
+     * <p>It expires at all because a registration nobody has used since is a row about a client that
+     * is gone — and because the identifier confers nothing, so keeping one forever buys nothing either.
+     */
+    private Duration clientRegistrationLifetime = Duration.ofDays(30);
+
+    /**
+     * What an issued access token's {@code aud} claim says, and therefore which decoder will take it.
+     *
+     * <p>⚠️ <strong>Left empty on purpose, and {@link AgentCredentials} refuses to start without it.</strong>
+     * A default here would be a default audience — a token this product mints being accepted by whichever
+     * service happens to share the guess. The one value that cannot be inferred is the one that must be
+     * stated.
+     */
+    private String audience = "";
+
+    /**
+     * How long a minted access token stands.
+     *
+     * <p>Short by design: it is self-contained, so nothing consults a row while it is valid and a
+     * revocation cannot reach one that is already out. The refresh token is what makes a long-lived
+     * connection possible without a long-lived credential.
+     */
+    private Duration accessTokenLifetime = Duration.ofHours(1);
+
+    /**
+     * How long a connection may go unused before its refresh token stops working.
+     *
+     * <p>⚠️ The window <em>slides</em> on every renewal — a fixed one would end a connection somebody uses
+     * daily, on a date nobody chose.
+     */
+    private Duration refreshTokenLifetime = Duration.ofDays(30);
+
+    /**
      * The exact paths a client may be sent back to on its own machine.
      *
      * <p>⚠️ Exact paths rather than a pattern: this list is the last thing between a live authorization
@@ -71,6 +112,17 @@ public class McpAuthorizationProperties {
 
     /** The loopback names a client may be returned to. Narrower is safer; see the redirect policy. */
     private List<String> allowedRedirectHosts = List.of("127.0.0.1", "localhost", "[::1]");
+
+    /**
+     * Whether a client may also be sent to its own segments under one of those paths.
+     *
+     * <p>Off, so that an installation that has not thought about it keeps the strictest rule. Turn it on
+     * for a client that puts a fresh nonce in the path it listens on — Codex registers
+     * {@code /callback/<nonce>} and there is therefore no spelling of it to add to the list above. The
+     * segments are held to unreserved characters and cannot climb out of the path they hang under; see
+     * {@link org.jmouse.ai.mcp.authorization.LoopbackRedirectPolicy} for why that gives nothing away.
+     */
+    private boolean allowNestedRedirectPaths = false;
 
     private final Consent consent = new Consent();
 
@@ -114,6 +166,20 @@ public class McpAuthorizationProperties {
         /** Where to send somebody who turns out not to be signed in at all. */
         private String signInRoute = "/";
 
+        /**
+         * Which consent design this installation serves.
+         *
+         * <p>The name of a template beside {@code consent-frame.j.html}, without the suffix. Every one of
+         * them extends that frame, so the flow — who is signed in, what the server allows, what happens to
+         * a one-time code — is the same page whichever is chosen; only the markup and the stylesheet differ.
+         *
+         * <p>⚠️ <strong>A name nothing matches fails at startup, not at first use.</strong> The page is
+         * rendered once when {@link ConsentPage} is constructed, so a typo here is a boot failure rather
+         * than a blank screen the first time somebody connects a client — which is the whole reason it is
+         * rendered eagerly.
+         */
+        private String template = "consent";
+
         public String getTokenStorageKey() {
             return tokenStorageKey;
         }
@@ -136,6 +202,14 @@ public class McpAuthorizationProperties {
 
         public void setSignInRoute(String signInRoute) {
             this.signInRoute = signInRoute;
+        }
+
+        public String getTemplate() {
+            return template;
+        }
+
+        public void setTemplate(String template) {
+            this.template = template;
         }
     }
 
@@ -191,8 +265,40 @@ public class McpAuthorizationProperties {
         return codeLifetime;
     }
 
+    public Duration getClientRegistrationLifetime() {
+        return clientRegistrationLifetime;
+    }
+
+    public void setClientRegistrationLifetime(Duration clientRegistrationLifetime) {
+        this.clientRegistrationLifetime = clientRegistrationLifetime;
+    }
+
     public void setCodeLifetime(Duration codeLifetime) {
         this.codeLifetime = codeLifetime;
+    }
+
+    public String getAudience() {
+        return audience;
+    }
+
+    public void setAudience(String audience) {
+        this.audience = audience;
+    }
+
+    public Duration getAccessTokenLifetime() {
+        return accessTokenLifetime;
+    }
+
+    public void setAccessTokenLifetime(Duration accessTokenLifetime) {
+        this.accessTokenLifetime = accessTokenLifetime;
+    }
+
+    public Duration getRefreshTokenLifetime() {
+        return refreshTokenLifetime;
+    }
+
+    public void setRefreshTokenLifetime(Duration refreshTokenLifetime) {
+        this.refreshTokenLifetime = refreshTokenLifetime;
     }
 
     public List<String> getAllowedRedirectPaths() {
@@ -209,6 +315,14 @@ public class McpAuthorizationProperties {
 
     public void setAllowedRedirectHosts(List<String> allowedRedirectHosts) {
         this.allowedRedirectHosts = allowedRedirectHosts;
+    }
+
+    public boolean isAllowNestedRedirectPaths() {
+        return allowNestedRedirectPaths;
+    }
+
+    public void setAllowNestedRedirectPaths(boolean allowNestedRedirectPaths) {
+        this.allowNestedRedirectPaths = allowNestedRedirectPaths;
     }
 
     public Consent getConsent() {

@@ -23,19 +23,25 @@ import java.util.function.Function;
  * <p>⚠️ Which means a product using container-managed transactions gets a second connection from the
  * pool for the duration. That is the cost, it is real, and it is smaller than the alternative.
  */
-final class OwnTransaction {
+/*
+ * ⚠️ Public because `JpaClientNameRegistry` lives in the module that owns `ClientNameRegistry`
+ * rather than in this one — the interface is a Spring module’s and the schema is this one’s, and
+ * neither should take a hard dependency on the other just to place one class. Everything above
+ * still applies: this is not a convenience.
+ */
+public final class OwnTransaction {
 
     private OwnTransaction() {
     }
 
-    static void run(EntityManagerFactory factory, Consumer<EntityManager> work) {
+    public static void run(EntityManagerFactory factory, Consumer<EntityManager> work) {
         call(factory, entityManager -> {
             work.accept(entityManager);
             return null;
         });
     }
 
-    static <T> T call(EntityManagerFactory factory, Function<EntityManager, T> work) {
+    public static <T> T call(EntityManagerFactory factory, Function<EntityManager, T> work) {
         try (EntityManager entityManager = factory.createEntityManager()) {
             EntityTransaction transaction = entityManager.getTransaction();
             transaction.begin();

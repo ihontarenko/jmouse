@@ -3,6 +3,7 @@ package org.jmouse.storage.configuration;
 import org.jmouse.core.binding.BindDefault;
 import org.jmouse.storage.policy.AcceptanceMode;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -66,6 +67,7 @@ public record UploadSettings(@BindDefault("CUSTOM") UploadProfile profile,
         return switch (profile) {
             case BLOCK_DANGEROUS_CONTENT -> blockingDangerousContent();
             case ALLOW_DOCUMENTS_AND_IMAGES -> allowingDocumentsAndImages();
+            case ALLOW_DOCUMENTS_IMAGES_AND_TEXT -> allowingDocumentsImagesAndText();
             case CUSTOM -> this;
         };
     }
@@ -155,5 +157,44 @@ public record UploadSettings(@BindDefault("CUSTOM") UploadProfile profile,
         );
 
         return new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.ALLOWLIST, contentTypes, extensions);
+    }
+
+    /**
+     * ✅ Documents, images, and the <strong>inert text</strong> formats.
+     *
+     * <p>{@link #allowingDocumentsAndImages()} plus notes, logs, exports and configuration — the files a
+     * tracker or a knowledge base is handed most often after a screenshot, and which that profile
+     * refuses outright.</p>
+     *
+     * <p>⚠️ <strong>INERT is the load-bearing word.</strong> Absent by name and not by oversight:
+     * {@code text/html}, {@code application/xhtml+xml}, {@code image/svg+xml} and every JavaScript
+     * type. They are text by encoding and a script host by specification, and a product that serves
+     * uploaded bytes from its own origin — a public avatar route, a public file route — is safe
+     * precisely because they are not in a list like this one.</p>
+     *
+     * <p>⚠️ {@code text/xml} is out too, for the same reason one step removed: an XML document can carry
+     * a stylesheet that executes, and "it is only data" is a claim about the file rather than about the
+     * format.</p>
+     *
+     * @return an allowlist of document, image and inert text formats
+     */
+    public static UploadSettings allowingDocumentsImagesAndText() {
+        Set<String> contentTypes = new HashSet<>(allowingDocumentsAndImages().contentTypes());
+
+        contentTypes.addAll(Set.of(
+                "text/plain", "text/markdown", "text/x-markdown", "text/csv", "text/tab-separated-values",
+                "application/json", "application/x-ndjson",
+                "application/yaml", "application/x-yaml", "text/yaml", "text/x-yaml",
+                "text/x-log"
+        ));
+
+        Set<String> extensions = new HashSet<>(allowingDocumentsAndImages().extensions());
+
+        extensions.addAll(Set.of(
+                "txt", "md", "markdown", "csv", "tsv", "json", "ndjson", "yaml", "yml", "log"
+        ));
+
+        return new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.ALLOWLIST,
+                                  Set.copyOf(contentTypes), Set.copyOf(extensions));
     }
 }

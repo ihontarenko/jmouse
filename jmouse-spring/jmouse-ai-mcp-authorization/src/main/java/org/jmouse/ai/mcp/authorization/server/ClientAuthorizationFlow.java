@@ -72,7 +72,11 @@ public class ClientAuthorizationFlow {
 
         redirectUris.forEach(redirectPolicy::require);
 
-        String clientId = clientRegistry.register(clientName);
+        // ⚠️ The addresses are folded into the label here rather than in the registry: this is the only
+        // point where both are in hand, and a registry that took them would be a registry that had to
+        // know what a redirect means.
+        String clientId = clientRegistry.register(
+                ClientNameRegistry.describe(clientName, redirectUris));
 
         LOGGER.info("Registered client '{}' as {}", clientRegistry.nameOf(clientId), clientId);
 
@@ -135,7 +139,8 @@ public class ClientAuthorizationFlow {
 
         return credentialIssuer.issue(new CredentialIssuer.ApprovedAuthorization(
                 authorization.subjectReference(),
-                clientRegistry.nameOf(authorization.clientId())));
+                clientRegistry.nameOf(authorization.clientId()),
+                authorization.clientId()));
     }
 
     /** Renews a credential a client already holds. */

@@ -1,0 +1,165 @@
+{% extends "consent-frame" %}
+
+{#
+  PERMIT — a pass with a stub, and the perforation does real work.
+
+  Everything left of it is what YOU are agreeing to; everything right of it is what the CLIENT walks
+  away with. The one structural device on the page encodes the actual split in the transaction rather
+  than decorating it — which is the test any ornament here has to pass.
+
+  ⚠️ The stub collapses ABOVE the main panel on a narrow window, not below it, because the redirect
+  address and the approve button both live in it and neither should be reached by scrolling past the
+  thing they act on.
+
+  Committed to light: a permit is a printed object.
+#}
+
+{% block "styles" %}
+<style>
+  body { background: #1d2b2a; color: #1b2422;
+         font: 15px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+         padding: 2.5rem 1.25rem 4rem; }
+
+  main { max-width: 46rem; margin: 0 auto; }
+
+  .pass { background: #f4f2ec; border-radius: 6px; overflow: hidden;
+          display: grid; grid-template-columns: 1fr; }
+  @media (min-width: 44rem) { .pass { grid-template-columns: 1fr 14rem; } }
+
+  .body { padding: 1.7rem clamp(1.2rem, 4vw, 1.9rem); display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .issuer-row { display: flex; justify-content: space-between; align-items: baseline; gap: .8rem; flex-wrap: wrap; }
+  .issuer { font: 600 10px/1 ui-monospace, Menlo, monospace; letter-spacing: .22em;
+            text-transform: uppercase; color: #5d6b68; }
+
+  .skeleton { height: 1rem; background: #e4e1d8; border-radius: 3px; }
+  .skeleton + .skeleton { margin-top: .8rem; }
+
+  .label { font: 600 9.5px/1 ui-monospace, Menlo, monospace; letter-spacing: .16em;
+           text-transform: uppercase; color: #5d6b68; }
+
+  h1.holder { margin: .25rem 0 0; font-size: 1.6rem; font-weight: 640; letter-spacing: -.022em; }
+  h2 { margin: 0; font-size: 1.15rem; font-weight: 620; }
+
+  p.body-text { margin: 0; font-size: 14px; color: #46524f; line-height: 1.6; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1rem 1.5rem; }
+  .cell { display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+  .cell-value { font-size: 14px; overflow-wrap: anywhere; }
+
+  .caution { background: #f7e6cf; border-radius: 4px; padding: .9rem 1.05rem;
+             font-size: 13.5px; color: #573c14; display: flex; flex-direction: column; gap: .3rem; line-height: 1.55; }
+  .caution strong { font-weight: 640; }
+
+  fieldset.choices { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+  fieldset.choices legend { padding: 0; font: 600 9.5px/1 ui-monospace, Menlo, monospace;
+                            letter-spacing: .16em; text-transform: uppercase; color: #5d6b68; }
+
+  .choice { display: flex; align-items: flex-start; gap: .65rem; cursor: pointer;
+            border: 1px solid #c9c6bb; border-radius: 4px; padding: .65rem .85rem; background: #fbfaf7; }
+  .choice:hover { border-color: #8f9a97; }
+  .choice:focus-within { outline: 2px solid #1b2422; outline-offset: 1px; }
+  .choice input { accent-color: #1b2422; margin: .25em 0 0; }
+  .choice-name { font-weight: 560; }
+  .choice-detail { font-size: 13px; color: #5d6b68; margin-top: .1rem; }
+  .choice.unavailable { opacity: .55; cursor: not-allowed; }
+
+  .notice.danger { border-radius: 4px; padding: .85rem 1rem; font-size: 13.5px;
+                   background: #f7dfdb; color: #7a241d; }
+
+  /* ⚠️ The perforation. Dashed on the axis that actually separates the two halves, which flips with
+     the layout — a horizontal tear when the stub is stacked, a vertical one when it is beside. */
+  .stub { background: #e7e4db; padding: 1.6rem 1.25rem; display: flex; flex-direction: column;
+          gap: 1.1rem; justify-content: space-between; border-bottom: 2px dashed #c2beb2; order: -1; }
+  @media (min-width: 44rem) {
+    .stub { border-bottom: 0; border-left: 2px dashed #c2beb2; order: 0; }
+  }
+
+  .stub-value { font: 13px/1.5 ui-monospace, Menlo, monospace; overflow-wrap: anywhere; }
+
+  button.primary { background: #1b2422; color: #f4f2ec; border: 0; border-radius: 4px; width: 100%;
+                   font: 600 14px/1 system-ui, sans-serif; padding: .9em 1em; cursor: pointer; }
+  button.primary:disabled { background: #97a19e; cursor: not-allowed; }
+  button.quiet { background: transparent; color: #5d6b68; border: 0; width: 100%;
+                 font: 13px/1 system-ui, sans-serif; padding: .55em; cursor: pointer; text-decoration: underline; }
+  button:focus-visible { outline: 2px solid #1b2422; outline-offset: 2px; }
+
+  .hint { font-size: 12px; color: #5d6b68; }
+
+  a { color: #1b2422; }
+</style>
+{% endblock %}
+
+{% block "page" %}
+<main>
+  <div class="pass">
+    <div class="body">
+      <div class="issuer-row">
+        <div class="issuer">Issued by {{ applicationName }}</div>
+      </div>
+
+      <section id="loading">
+        <div class="skeleton" style="width: 45%"></div>
+        <div class="skeleton" style="width: 90%"></div>
+        <div class="skeleton" style="width: 65%"></div>
+      </section>
+
+      <section id="refusal" hidden>
+        <h2 id="refusal-title">This request cannot be approved</h2>
+        <p class="body-text" id="refusal-body"></p>
+        <p class="body-text" id="refusal-action" hidden><a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>,
+          then start the connection again from the client.</p>
+      </section>
+
+      <form id="request" hidden style="display:flex; flex-direction:column; gap:1.25rem">
+        <div>
+          <div class="label">Access permit for</div>
+          <h1 class="holder" id="client-name"></h1>
+        </div>
+
+        <p class="body-text" id="acting-summary"></p>
+
+        <div class="grid">
+          <div class="cell">
+            <div class="label">Bearer acts as</div>
+            <div class="cell-value" id="approver"></div>
+          </div>
+          <div class="cell">
+            <div class="label">Scope</div>
+            <div class="cell-value">mcp — nothing else</div>
+          </div>
+        </div>
+
+        <div class="caution">
+          <strong>⚠ Check the address</strong>
+          <span>
+            The code goes to the address on the stub, which is on <strong>this machine</strong>. If you
+            did not just start this from a client running here, close the page.
+          </span>
+        </div>
+
+        <div id="choices-card" hidden>
+          <fieldset class="choices" id="choices">
+            <legend>Writes as</legend>
+          </fieldset>
+        </div>
+
+        <div class="notice danger" id="failure" hidden></div>
+
+        <span class="hint" id="lifetime"></span>
+      </form>
+    </div>
+
+    <div class="stub">
+      <div>
+        <div class="label">Delivered to</div>
+        <div class="stub-value"><code id="redirect-target"></code></div>
+      </div>
+      <div>
+        <button type="submit" class="primary" id="approve" form="request">Issue permit</button>
+        <button type="button" class="quiet" id="cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

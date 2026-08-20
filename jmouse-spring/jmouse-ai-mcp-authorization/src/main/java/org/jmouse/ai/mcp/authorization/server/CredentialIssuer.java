@@ -45,8 +45,15 @@ public interface CredentialIssuer {
      *                         business
      * @param clientName       what the client called itself — ⚠️ a claim, for a log line and a screen,
      *                         never an identity
+     * @param clientId         which registration it came from. ⚠️ <strong>This is the half a product
+     *                         should key an agent on</strong>, and its absence was a real bug: one
+     *                         product looked an agent up BY NAME, so two clients that both failed to
+     *                         name themselves — which every client does once a registry has forgotten
+     *                         them — collapsed into one agent, sharing its permissions and its switch.
+     *                         Unlike the name, this is issued by the registry rather than claimed by
+     *                         the client
      */
-    record ApprovedAuthorization(String subjectReference, String clientName) {}
+    record ApprovedAuthorization(String subjectReference, String clientName, String clientId) {}
 
     /**
      * A credential, in the three parts the token response is built from.

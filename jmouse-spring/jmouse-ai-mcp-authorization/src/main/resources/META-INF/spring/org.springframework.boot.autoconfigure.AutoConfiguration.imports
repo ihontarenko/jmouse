@@ -1,1 +1,2 @@
+org.jmouse.ai.mcp.authorization.server.McpCredentialAutoConfiguration
 org.jmouse.ai.mcp.authorization.server.McpAuthorizationAutoConfiguration

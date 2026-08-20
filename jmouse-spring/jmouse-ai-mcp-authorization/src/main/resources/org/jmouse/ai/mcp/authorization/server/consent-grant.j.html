@@ -1,0 +1,143 @@
+{% extends "consent-frame" %}
+
+{#
+  GRANT — the consent as a formal instrument, something signed rather than a dialog dismissed.
+
+  ⚠️ The friction is the feature, and it is the one thing not to optimise away. This is the single
+  screen in the product where a moment's hesitation is worth buying, so the page is set as a document:
+  a serif, ruled terms, and a caution stated above the signature rather than beside the button.
+
+  ⚠️ Cold grey paper, never warm cream. Every generated "document" look reaches for cream and a
+  terracotta accent; this one is deliberately the other way, so the page reads as a record rather than
+  as a brand pretending to be one.
+
+  Committed to light for the same reason a contract is.
+#}
+
+{% block "styles" %}
+<style>
+  body {
+    background: #e3e7ea;
+    color: #1b2026;
+    font: 15px/1.65 ui-serif, "Iowan Old Style", Palatino, Georgia, serif;
+    padding: 2.5rem 1.25rem 4rem;
+  }
+
+  main { max-width: 42rem; margin: 0 auto; background: #eceff1;
+         padding: clamp(1.6rem, 5vw, 2.8rem) clamp(1.4rem, 5vw, 2.6rem) 2rem;
+         display: flex; flex-direction: column; gap: 1.5rem; }
+
+  header.deed { text-align: center; display: flex; flex-direction: column; gap: .4rem;
+                border-bottom: 2px solid #1b2026; padding-bottom: 1.2rem; }
+  .kicker { font: 600 10px/1 ui-sans-serif, system-ui, sans-serif; letter-spacing: .3em;
+            text-transform: uppercase; color: #6a7480; }
+  header.deed h1 { margin: 0; font-size: 1.9rem; font-weight: 500; letter-spacing: -.01em; }
+
+  .skeleton { height: 1rem; background: #dce1e5; }
+  .skeleton + .skeleton { margin-top: .8rem; }
+
+  h2 { margin: 0; font-size: 1.3rem; font-weight: 500; }
+
+  .lede { margin: 0; font-size: 1.02rem; }
+  .lede em { font-style: italic; }
+
+  dl.terms { margin: 0; display: grid; grid-template-columns: 11rem 1fr; gap: 0 1.2rem; }
+  @media (max-width: 32rem) { dl.terms { grid-template-columns: 1fr; } }
+  dl.terms dt { font: 600 10px/2.1 ui-sans-serif, system-ui, sans-serif; letter-spacing: .14em;
+                text-transform: uppercase; color: #6a7480; border-bottom: 1px solid #d3d9de; padding: .4rem 0; }
+  dl.terms dd { margin: 0; border-bottom: 1px solid #d3d9de; padding: .4rem 0; overflow-wrap: anywhere; }
+  dl.terms dd code { font: 13px/1.5 ui-monospace, Menlo, monospace; }
+
+  .caution { border: 1px solid #1b2026; padding: 1rem 1.15rem; font-size: 14px;
+             display: flex; flex-direction: column; gap: .35rem; }
+  .caution-label { font: 600 10px/1 ui-sans-serif, system-ui, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+  .caution strong { font-weight: 600; }
+
+  fieldset.choices { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+  fieldset.choices legend { padding: 0; font: 600 10px/1 ui-sans-serif, system-ui, sans-serif;
+                            letter-spacing: .18em; text-transform: uppercase; color: #6a7480; }
+
+  .choice { display: flex; gap: .7rem; align-items: flex-start; cursor: pointer; padding: .5rem .1rem; }
+  .choice input { accent-color: #1b2026; margin: .35em 0 0; }
+  .choice:focus-within { outline: 2px solid #1b2026; outline-offset: 2px; }
+  .choice-name { font-size: 1rem; }
+  .choice-detail { color: #6a7480; font-size: 13.5px; }
+  .choice.unavailable { opacity: .55; cursor: not-allowed; }
+
+  .notice.danger { border: 1px solid #8a2820; background: #f7e7e5; color: #7a241d;
+                   padding: .9rem 1.05rem; font-size: 14px; }
+
+  .signature { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+               border-top: 2px solid #1b2026; padding-top: 1.3rem; }
+
+  button.primary { background: #1b2026; color: #eceff1; border: 0;
+                   font: 500 15px/1 ui-serif, Georgia, serif; letter-spacing: .04em;
+                   padding: .9em 2.2em; cursor: pointer; }
+  button.primary:disabled { background: #9aa3ac; cursor: not-allowed; }
+  button.quiet { background: transparent; color: #1b2026; border: 0; border-bottom: 1px solid #1b2026;
+                 font: 15px/1 ui-serif, Georgia, serif; padding: .35em 0; cursor: pointer; }
+  button:focus-visible { outline: 2px solid #1b2026; outline-offset: 3px; }
+
+  .hint { margin-left: auto; font-size: 13px; color: #6a7480; font-style: italic; }
+
+  a { color: #1b2026; }
+</style>
+{% endblock %}
+
+{% block "page" %}
+<main>
+  <header class="deed">
+    <div class="kicker">jMouse · Model Context Protocol</div>
+    <h1>Grant of Access</h1>
+  </header>
+
+  <section id="loading">
+    <div class="skeleton" style="width: 45%"></div>
+    <div class="skeleton" style="width: 90%"></div>
+    <div class="skeleton" style="width: 65%"></div>
+  </section>
+
+  <section id="refusal" hidden>
+    <h2 id="refusal-title">This request cannot be approved</h2>
+    <p class="lede" id="refusal-body"></p>
+    <p class="lede" id="refusal-action" hidden><a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>,
+      then start the connection again from the client.</p>
+  </section>
+
+  <form id="request" hidden>
+    <p class="lede">
+      <strong id="client-name"></strong> is asking to act in <em>{{ applicationName }}</em> on your behalf.
+    </p>
+
+    <p class="lede" id="acting-summary"></p>
+
+    <dl class="terms">
+      <dt>Granted by</dt><dd id="approver"></dd>
+      <dt>Code delivered to</dt><dd><code id="redirect-target"></code></dd>
+    </dl>
+
+    <div class="caution">
+      <div class="caution-label">Before you sign</div>
+      <div>
+        That address is on <strong>this machine</strong>. If you did not just start this from a client
+        running here, close this page — approving would hand a live authorization code to whatever is
+        listening on that port.
+      </div>
+    </div>
+
+    <div id="choices-card" hidden>
+      <fieldset class="choices" id="choices">
+        <legend>Acting as</legend>
+      </fieldset>
+    </div>
+
+    <div class="notice danger" id="failure" hidden></div>
+
+    <div class="signature">
+      <button type="submit" class="primary" id="approve">Grant access</button>
+      <button type="button" class="quiet" id="cancel">Decline</button>
+      <span class="hint" id="lifetime"></span>
+    </div>
+  </form>
+</main>
+{% endblock %}

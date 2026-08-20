@@ -1,0 +1,2 @@
+org.jmouse.files.management.autoconfigure.FilesManagementAutoConfiguration
+org.jmouse.files.management.autoconfigure.FilesFlywayAutoConfiguration

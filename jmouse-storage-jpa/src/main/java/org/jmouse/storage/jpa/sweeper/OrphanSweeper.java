@@ -88,16 +88,61 @@ public class OrphanSweeper {
      * safe: a reference added while the sweep is walking belongs to an object that is either
      * already in the union or younger than the grace period, and so is not a candidate either way.</p>
      *
+     * <h3>⚠️ Refused when there are no sources at all</h3>
+     *
+     * <p>An empty union means every object in the registry is an orphan, and a sweep that reclaims
+     * everything is never what somebody meant — it is what an application looks like when its
+     * reference sources failed to appear. Answering "nothing is referenced" and deleting the lot is
+     * the one failure this whole mechanism exists to prevent, so it is refused instead of performed.</p>
+     *
+     * <p>Note that this is about having no <em>sources</em>, not about a source returning nothing: an
+     * installation whose files are genuinely all unreferenced has sources that all answer empty, and
+     * that sweep runs.</p>
+     *
      * @return a run positioned at the first candidate
+     * @throws IllegalStateException when no reference source is registered
      */
     public SweepRun begin() {
+        if (referenceSources.isEmpty()) {
+            throw new IllegalStateException(
+                "Refusing to sweep: no stored-file reference sources are registered, so every stored "
+                + "object would read as an orphan. Check that the persistence metamodel is available "
+                + "and that at least one mapping points at StoredFile.");
+        }
+
         Set<String> referenced = collectReferences();
         LocalDateTime cutOff = LocalDateTime.now().minus(settings.gracePeriod());
 
         LOGGER.info("🧹 Sweeping objects registered before {} — {} reference(s) across {} source(s)",
                     cutOff, referenced.size(), referenceSources.size());
 
-        return new SweepRun(registry, fileStores, referenced, referenceSources.size(), cutOff, batchSize);
+        return new SweepRun(registry, fileStores, referenced, referenceSources.size(), cutOff,
+                            batchSize, true);
+    }
+
+    /**
+     * 👁️ The same walk, removing nothing — what a sweep WOULD reclaim.
+     *
+     * <p>⚠️ <strong>This is the call an operator should reach for first, and the sweeper existed for
+     * three products without it.</strong> The sweep ships disabled everywhere, so the only way to learn
+     * how much is leaking was to enable it — which is to say, to bet live bytes on every reference
+     * source having been declared. A preview answers the same question and cannot delete anything.</p>
+     *
+     * <p>It is also cheap: nothing is asked of any backend, because the sizes come from the registry.</p>
+     *
+     * @return a run positioned at the first candidate, which will reclaim nothing
+     */
+    public SweepRun preview() {
+        if (referenceSources.isEmpty()) {
+            throw new IllegalStateException(
+                "Refusing to preview a sweep: no stored-file reference sources are registered, so every "
+                + "stored object would read as an orphan.");
+        }
+
+        Set<String> referenced = collectReferences();
+
+        return new SweepRun(registry, fileStores, referenced, referenceSources.size(),
+                            LocalDateTime.now().minus(settings.gracePeriod()), batchSize, false);
     }
 
     /**

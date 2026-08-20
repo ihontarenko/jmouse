@@ -16,9 +16,10 @@ import java.util.function.Supplier;
  * server rather than to this installation. Neither is an owner reference.
  *
  * <p>But both already answer {@link CurrentSubject}, and both key an agent on the same identifier the
- * engine keys a grant on — Innoventa on its account id, Tessera on its member id. So the owner reference
- * <em>is</em> {@link Subject#principalId()}, in both, by construction. Anything else would mean an
- * agent's grants were stored under one identifier and its ownership under another.
+ * engine keys a grant on — whichever local identifier that installation calls a principal, an account id
+ * in one and a membership id in another. So the owner reference <em>is</em> {@link Subject#principalId()},
+ * in both, by construction. Anything else would mean an agent's grants were stored under one identifier
+ * and its ownership under another.
  *
  * <h2>⚠️ An agent may not manage agents</h2>
  *

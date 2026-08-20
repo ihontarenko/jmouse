@@ -1,74 +1,144 @@
 package org.jmouse.access;
 
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 /**
- * One kind of scope a grant can be made at — the model's side of what {@code AccessScope} spells out
- * for this product.
+ * A kind of place a permission can be held at.
  *
- * <p>The engine used to read a closed enum, which meant that "how many floors are there, and what are
- * they called" was a fact compiled into the authorization core. A product with departments, or
- * tenants, or nothing at all between an account and a row could not use that core without editing it.
- * This interface is the same information asked as a question instead: a name, a width, whether the
- * scope names an instance, and {@linkplain ScopeNature what it is to the model}.
+ * <h2>⚠️ The scopes form a TREE, not a list</h2>
  *
- * <p><strong>Implement it with an enum.</strong> Nothing here needs one, but a product wants one:
- * enum constants are usable in annotations ({@code @RequiresAccess(scope = AccessScope.SPACE)}),
- * mappable by JPA as {@code @Enumerated(STRING)}, and usable in Spring Data derived queries — none of
- * which an open value type can do. So the product keeps its enum and its ergonomics, and the core
- * gets its ignorance; {@code AccessScope} is exactly that arrangement, and its {@link #rank()} is
- * {@code ordinal()}.
+ * <p>They were a list once, and the position in {@code declare scopes} was the width — each scope
+ * wrapping the next. That reads well right up to the first product with two kinds of place that do not
+ * wrap each other at all. Kiwi has exactly that: sections hold pages, library directories hold files,
+ * and one never contains the other. A linear order can only say "the next one is inside the previous",
+ * so it described a nesting that does not exist — <em>go into a section, then into a directory</em> —
+ * and nothing in the product could ever perform that descent.</p>
  *
- * <p>The set of kinds that exist is {@link ScopeCatalog}, which is where the ordering is checked and
- * where the two universal scopes are found. Nothing derives the vocabulary by scanning an enum's
- * constants, because the point is that the core does not know which enum to scan.
+ * <p>So a scope now names {@link #inside()}: the place it sits within, or nothing at all, which means it
+ * hangs directly off the widest scope. <strong>Siblings are the default and nesting is what has to be
+ * stated</strong>, which is the way round that makes the common case short and the load-bearing case
+ * explicit.</p>
+ *
+ * <h2>⚠️ Only a PLACE is in the tree</h2>
+ *
+ * <p>{@link ScopeNature#EVERYTHING} is the root and {@link ScopeNature#OWN_ROWS} is not a place at all —
+ * it answers <em>whose row</em>, which is an axis beside the tree rather than a leaf in it. In the old
+ * list they both had to occupy a position, which is why "own rows" ended up declared narrower than a
+ * section: an artefact of the notation, never a fact about the model.</p>
+ *
+ * <h2>⚠️ Covering and existing are two different questions</h2>
+ *
+ * <p>{@link #inside()} says a grant at the outer place reaches this one. {@link #requiredAncestor()}
+ * says a target naming this place must also name that one. They usually coincide and they are not the
+ * same: conflating them makes an incompletely addressed target refuse with <em>no permission</em>, which
+ * sends whoever reads it looking at grants rather than at the address.</p>
  */
 public interface ScopeKind {
 
-    /** The value stored where a scope kind has no instance to name — {@code EVERYTHING}, {@code OWN_ROWS}. */
+    /** What a scope with no instance is addressed as. */
     String NO_INSTANCE = "*";
 
-    /**
-     * What this kind is called, in grants, in the database and in a refusal.
-     *
-     * <p>An enum gets this for free. It is the stored form, so renaming a constant is a migration.
-     */
+    /** The scope's name, as the policy file writes it. */
     String name();
 
     /**
-     * How wide this kind is: {@code 0} is the widest, and larger is narrower.
+     * Position in the declaration, kept for stable ordering of refusals and reports.
      *
-     * <p>Ranks have to be unique across a vocabulary and are otherwise arbitrary — they are read only
-     * against each other, never as a count. An enum returns {@code ordinal()} and gets a correct,
-     * gap-free ordering from its declaration order, which is why the declaration order of
-     * {@code AccessScope} is documented as being read.
+     * <p>⚠️ <strong>No longer the width.</strong> Width is {@link #inside()}. This is only what makes two
+     * otherwise equal answers come back in the same order every time — a report that reshuffles between
+     * runs is a report nobody trusts.</p>
+     *
+     * @return the declaration position
      */
     int rank();
 
-    /** What this kind is to the model — the question a product cannot leave unanswered. */
+    /** Whether this is the widest scope, a place, or the owner axis. */
     ScopeNature nature();
 
-    /**
-     * The path variable or query parameter a route names an instance of this kind with.
-     *
-     * <p>Declared beside the scope rather than as a constant in the enforcement package, so that
-     * {@code AccessTargetBinder} holds no product vocabulary at all: it asks each floor what to look
-     * for. Empty for the two universal kinds, which name nothing.
-     */
+    /** Which request parameter names an instance of this place, where a route can name one. */
     Optional<String> requestParameter();
 
     /**
-     * Whether naming this kind requires an identifier — a place does, the two universal scopes do not.
+     * The place this one sits inside, or empty when it hangs off the widest scope.
      *
-     * <p>Derived from {@link #nature()} rather than from whether a request parameter happens to be
-     * set, so a floor that is never reachable from a URL is still a floor.
+     * <p>⚠️ Empty means <strong>sibling</strong>, not <em>narrowest</em>. A product declaring no nesting
+     * gets a flat set of independent places, which is what most products actually have.</p>
+     *
+     * @return the enclosing place
      */
+    default Optional<ScopeKind> inside() {
+        return Optional.empty();
+    }
+
+    /**
+     * A place every target naming this one must also name, or empty.
+     *
+     * <p>⚠️ Deliberately separate from {@link #inside()}. A space is inside an organization <em>and</em>
+     * cannot be addressed without one; a directory is inside the installation and there is nothing to
+     * name. Stating the second only where it is true keeps a refusal about an incomplete address from
+     * reading as a refusal about permissions.</p>
+     *
+     * @return the ancestor a target must name
+     */
+    default Optional<ScopeKind> requiredAncestor() {
+        return Optional.empty();
+    }
+
+    /** Whether naming this kind requires an identifier — a place does, the universal scopes do not. */
     default boolean namesAnInstance() {
         return nature() == ScopeNature.PLACE;
     }
 
-    /** Whether this kind is at least as wide as another. The widest covers everything. */
+    /**
+     * Every place this one sits inside, innermost first.
+     *
+     * @return the enclosing places
+     */
+    default Set<ScopeKind> enclosing() {
+        Set<ScopeKind> found = new LinkedHashSet<>();
+
+        for (Optional<ScopeKind> above = inside(); above.isPresent(); above = above.get().inside()) {
+            // A cycle would loop forever here, so stop on one. ScopeCatalog refuses cycles outright at
+            // startup; this guard is what stops a malformed catalogue hanging a request instead.
+            if (!found.add(above.get())) {
+                break;
+            }
+        }
+
+        return found;
+    }
+
+    /**
+     * Whether this kind covers another — the same kind, the widest scope, or an enclosing place.
+     *
+     * <p>⚠️ Two <strong>siblings</strong> cover each other in neither direction, which is the whole point
+     * of the tree: a grant over a section says nothing about a directory, and no ordering of the
+     * declaration can accidentally say otherwise.</p>
+     *
+     * @param other the kind to test
+     * @return whether a grant at this kind reaches that one
+     */
     default boolean isAtLeastAsWideAs(ScopeKind other) {
-        return rank() <= other.rank();
+        if (equals(other) || nature() == ScopeNature.EVERYTHING) {
+            return true;
+        }
+
+        // ⚠️ Own-rows is narrower than every place, and it is NOT in the tree — it answers "whose row",
+        // which every place still contains. Taking it out of the width chain without saying this made
+        // every permission floored at SELF unenforceable at a place, and the whole product refused to
+        // start with "means nothing below SELF" on a hundred routes.
+        if (other.nature() == ScopeNature.OWN_ROWS) {
+            return true;
+        }
+
+        // ⚠️ And own-rows is wider than nothing: two siblings cover each other in neither direction,
+        // which is the point of the tree.
+        if (nature() == ScopeNature.OWN_ROWS) {
+            return false;
+        }
+
+        return other.enclosing().contains(this);
     }
 }

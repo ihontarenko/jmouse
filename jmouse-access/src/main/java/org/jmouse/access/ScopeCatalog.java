@@ -51,6 +51,7 @@ public final class ScopeCatalog {
         this.ownRowsReference    = ownRows == null ? null : ScopeReference.of(ownRows, ScopeKind.NO_INSTANCE);
 
         requireUniqueRanks(widestFirst);
+        requireNoCycles(widestFirst);
         requireUniversalScopesAtTheEnds(widestFirst, everything, ownRows);
     }
 
@@ -158,15 +159,40 @@ public final class ScopeCatalog {
 
     private static void requireUniqueRanks(List<ScopeKind> kinds) {
         for (int position = 1; position < kinds.size(); position++) {
-            ScopeKind wider     = kinds.get(position - 1);
-            ScopeKind narrower  = kinds.get(position);
+            ScopeKind earlier = kinds.get(position - 1);
+            ScopeKind later   = kinds.get(position);
 
-            if (wider.rank() == narrower.rank()) {
+            if (earlier.rank() == later.rank()) {
                 throw new IllegalArgumentException(
-                        wider.name() + " and " + narrower.name() + " share rank " + wider.rank()
-                        + ". Ranks are read only against each other, but they have to be a total "
-                        + "order: two scopes of equal width make the covering chain's order — and so "
-                        + "which reason a refusal names — arbitrary.");
+                        earlier.name() + " and " + later.name() + " share position " + earlier.rank()
+                        + ". Position is no longer the width — width is `inside=` — but it still has to "
+                        + "be unique, because it is what makes two otherwise equal answers come back in "
+                        + "the same order every time.");
+            }
+        }
+    }
+
+    /**
+     * ⚠️ Refuse a scope that sits inside itself, however indirectly.
+     *
+     * <p>A cycle in {@code inside=} makes "does this grant reach there" unanswerable and would hang the
+     * walk that asks it. Refused at startup, where it is one message, rather than at the first request,
+     * where it is a thread that never returns.</p>
+     */
+    private static void requireNoCycles(List<ScopeKind> kinds) {
+        for (ScopeKind kind : kinds) {
+            java.util.Set<ScopeKind> seen = new java.util.LinkedHashSet<>();
+
+            for (java.util.Optional<ScopeKind> above = kind.inside();
+                 above.isPresent(); above = above.get().inside()) {
+
+                if (above.get().equals(kind) || !seen.add(above.get())) {
+                    throw new IllegalArgumentException(
+                            kind.name() + " is declared inside itself, by way of "
+                            + names(List.copyOf(seen)) + ". A scope cannot contain the place that "
+                            + "contains it, and the walk that answers 'does this grant reach there' "
+                            + "would never end.");
+                }
             }
         }
     }

@@ -45,6 +45,11 @@ import java.util.Map;
  * two agreeing — it is the day they do not, when a loop runs tools as somebody the dispatcher has never
  * heard of.
  *
+ * <p>⚠️ <strong>The same caller decides what the model is even shown.</strong> The tool list is
+ * {@code dispatcher.reachable()} rather than the whole catalogue, so a model is never offered an action
+ * that would be refused the moment it called it — which costs a round, and reads to whoever is watching
+ * as the product being broken rather than as a permission they do not hold.
+ *
  * <h2>What is not here</h2>
  *
  * <p>No system prompt, no persistence, no product vocabulary. A prompt is a product's voice, a stored
@@ -82,7 +87,10 @@ public final class ConversationRunner {
      */
     public ConversationResult run(ConversationRequest request) {
         List<Map<String, Object>> messages  = new ArrayList<>(request.messages());
-        List<Map<String, Object>> tools     = ProviderTools.from(dispatcher.catalog());
+        // ⚠️ What this caller may run, not what the installation has. Resolved once: the caller cannot
+        // change mid-conversation, so asking an authorization engine about every action again on every
+        // round is a cost with the same answer on the other side of it.
+        List<Map<String, Object>> tools     = ProviderTools.from(dispatcher.reachable());
 
         TokenUsage spent     = TokenUsage.none();
         int        rounds    = 0;

@@ -1,0 +1,150 @@
+{% extends "consent-frame" %}
+
+{#
+  BAND — the client owns a coloured band across the top and the rest of the page stays plain.
+
+  ⚠️ THE ONE HAZARD, AND IT IS NOT HYPOTHETICAL. The band is the obvious place to put a colour derived
+  from the client, and it must not be. Letting an unverified client choose how official it looks is
+  precisely backwards for this screen — the band is the PRODUCT'S colour and stays fixed here in CSS,
+  while the generated `--client-hue` is confined to the small avatar where it is a way to tell two
+  clients apart rather than a badge of legitimacy.
+
+  Committed to light.
+#}
+
+{% block "styles" %}
+<style>
+  body { background: #fdfdfd; color: #191d24;
+         font: 15px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+         padding: 0 0 4rem; }
+
+  main { max-width: 40rem; margin: 0 auto; }
+
+  /* ⚠️ Fixed. Never derived from the client — see the note at the top of this file. */
+  .band { background: linear-gradient(100deg, #24405f, #3d6690);
+          padding: 1.6rem clamp(1.2rem, 4vw, 2rem); color: #fff;
+          display: flex; align-items: center; gap: 1.05rem; flex-wrap: wrap; }
+
+  .avatar { width: 3.6rem; height: 3.6rem; border-radius: 13px; flex: none;
+            background: hsl(var(--client-hue, 18) 50% 52%);
+            border: 1px solid rgb(255 255 255 / .32); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font: 640 1.2rem/1 system-ui, sans-serif; letter-spacing: -.02em; }
+
+  .band-text { display: flex; flex-direction: column; gap: .14rem; min-width: 0; }
+  .band-label { font: 600 9.5px/1 ui-monospace, Menlo, monospace; letter-spacing: .18em;
+                text-transform: uppercase; opacity: .85; }
+  .band-name { font-size: 1.5rem; font-weight: 660; letter-spacing: -.025em; overflow-wrap: anywhere; }
+  .identifier { font: 11.5px/1.4 ui-monospace, Menlo, monospace; opacity: .8; overflow-wrap: anywhere; }
+
+  .body { padding: 1.5rem clamp(1.2rem, 4vw, 2rem) 0; display: flex; flex-direction: column; gap: 1.15rem; }
+
+  .skeleton { height: 1rem; background: #eef1f4; border-radius: 3px; }
+  .skeleton + .skeleton { margin-top: .8rem; }
+
+  h2 { margin: 0; font-size: 1.15rem; font-weight: 620; }
+  p.body-text { margin: 0; font-size: 14px; color: #5a636e; line-height: 1.6; }
+  .ask { margin: 0; font-size: 1.05rem; text-wrap: pretty; }
+  .ask strong { font-weight: 640; }
+
+  dl.rows { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: .42rem 1.15rem;
+            font-size: 13.5px; border-top: 1px solid #e5e9ee; padding-top: 1.05rem; }
+  dl.rows dt { font: 600 9.5px/1.9 ui-monospace, Menlo, monospace; letter-spacing: .14em;
+               text-transform: uppercase; color: #6b7480; }
+  dl.rows dd { margin: 0; overflow-wrap: anywhere; }
+  dl.rows dd code { font: 12.5px/1.5 ui-monospace, Menlo, monospace; }
+
+  .caution { background: #fdf3e7; border-radius: 6px; padding: .85rem 1rem;
+             font-size: 13px; color: #7d4a12; line-height: 1.55; }
+
+  fieldset.choices { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .45rem; }
+  fieldset.choices legend { padding: 0; font: 600 9.5px/1 ui-monospace, Menlo, monospace;
+                            letter-spacing: .14em; text-transform: uppercase; color: #6b7480; }
+
+  .choice { display: flex; align-items: flex-start; gap: .65rem; cursor: pointer;
+            border: 1px solid #e5e9ee; border-radius: 6px; padding: .65rem .85rem; background: #fff; }
+  .choice:hover { border-color: #24405f; }
+  .choice:focus-within { outline: 2px solid #24405f; outline-offset: 1px; }
+  .choice input { accent-color: #24405f; margin: .25em 0 0; }
+  .choice-name { font-weight: 560; }
+  .choice-detail { font-size: 13px; color: #6b7480; margin-top: .1rem; }
+  .choice.unavailable { opacity: .55; cursor: not-allowed; }
+
+  .notice.danger { border-radius: 6px; padding: .85rem 1rem; font-size: 13.5px;
+                   background: #fdf1ef; color: #a3271c; }
+
+  .actions { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; padding-bottom: 1.4rem; }
+
+  button.primary { background: #24405f; color: #fff; border: 0; border-radius: 6px;
+                   font: 600 14px/1 system-ui, sans-serif; padding: .85em 1.8em; cursor: pointer; }
+  button.primary:disabled { background: #9aa4b0; cursor: not-allowed; }
+  button.quiet { background: transparent; color: #6b7480; border: 1px solid #e5e9ee; border-radius: 6px;
+                 font: 14px/1 system-ui, sans-serif; padding: .85em 1.35em; cursor: pointer; }
+  button:focus-visible { outline: 2px solid #24405f; outline-offset: 2px; }
+
+  .hint { font-size: 12.5px; color: #6b7480; }
+
+  a { color: #24405f; }
+</style>
+{% endblock %}
+
+{% block "page" %}
+<main>
+  <div class="band">
+    <div class="avatar" id="client-avatar" aria-hidden="true"></div>
+    <div class="band-text">
+      <div class="band-label">Requesting access to {{ applicationName }}</div>
+      <div class="band-name" id="client-name"></div>
+      <div class="identifier" id="client-id" hidden></div>
+    </div>
+  </div>
+
+  <div class="body">
+    <section id="loading">
+      <div class="skeleton" style="width: 45%"></div>
+      <div class="skeleton" style="width: 90%"></div>
+      <div class="skeleton" style="width: 65%"></div>
+    </section>
+
+    <section id="refusal" hidden style="display:flex; flex-direction:column; gap:.65rem">
+      <h2 id="refusal-title">This request cannot be approved</h2>
+      <p class="body-text" id="refusal-body"></p>
+      <p class="body-text" id="refusal-action" hidden><a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>,
+        then start the connection again from the client.</p>
+    </section>
+
+    <form id="request" hidden style="display:flex; flex-direction:column; gap:1.15rem">
+      <p class="ask">
+        It will act as <strong>you</strong>, seeing exactly what you see and nothing more, until you
+        disconnect it.
+      </p>
+
+      <p class="body-text" id="acting-summary"></p>
+
+      <dl class="rows">
+        <dt>Signed in</dt><dd id="approver"></dd>
+        <dt>Code to</dt><dd><code id="redirect-target"></code></dd>
+      </dl>
+
+      <p class="caution">
+        ⚠ That address is on this machine. If you did not just start this from a client running here,
+        close the page — approving hands a live authorization code to whatever is listening on that port.
+      </p>
+
+      <div id="choices-card" hidden>
+        <fieldset class="choices" id="choices">
+          <legend>Writes as</legend>
+        </fieldset>
+      </div>
+
+      <div class="notice danger" id="failure" hidden></div>
+
+      <div class="actions">
+        <button type="submit" class="primary" id="approve">Approve</button>
+        <button type="button" class="quiet" id="cancel">Cancel</button>
+        <span class="hint" id="lifetime"></span>
+      </div>
+    </form>
+  </div>
+</main>
+{% endblock %}

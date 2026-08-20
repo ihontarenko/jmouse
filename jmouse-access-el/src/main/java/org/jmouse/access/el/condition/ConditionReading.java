@@ -28,10 +28,11 @@ import java.util.TreeSet;
  * reading <strong>uncertain</strong>, which switches the pair check off for that rule. Refusing a rule
  * because a checker could not follow it is how a checker comes to be switched off entirely.
  *
- * <p>A value is any other bare name the condition reads. Three things are deliberately not values:
+ * <p>A value is any other bare name the condition reads. Four things are deliberately not values:
  * the names the evaluator binds itself ({@code caller}, {@code place}, {@code resource}), anything
- * after a dot, which is a property of one of those rather than a name of its own, and anything after
- * {@code is}, which is the name of a test.
+ * after a dot, which is a property of one of those rather than a name of its own, anything after
+ * {@code is}, which is the name of a test, and anything with an argument list after it, which is the
+ * name of a function.
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -70,7 +71,7 @@ final class ConditionReading {
                 continue;
             }
 
-            if (isAProperty(tokens, index) || isATestName(tokens, index)) {
+            if (isAProperty(tokens, index) || isATestName(tokens, index) || isACallName(tokens, index)) {
                 continue;
             }
 
@@ -166,6 +167,26 @@ final class ConditionReading {
     /** Whether this name is a test's — the {@code empty} in {@code resource is empty}. */
     private static boolean isATestName(List<Token> tokens, int index) {
         return isAt(tokens, index - 1, BasicToken.T_IS);
+    }
+
+    /**
+     * Whether this name is a function's — the {@code consumed} in {@code consumed('ai-token', '3h')}.
+     *
+     * <p>⚠️ <strong>A call is not a value, and reading one as a value is a boot failure.</strong> A
+     * function name is not something a route publishes and not something {@code variables { }}
+     * declares — it is answered by an {@link AccessFunction} the product registered, which
+     * {@link ConditionCalls} has already checked by the time anybody asks this. Left in
+     * {@link ConditionMentions#values()} it reaches the load-time check that every value be produced
+     * somewhere, which then refuses a rule that is perfectly correct and names a catalogue the
+     * function was never going to be in.
+     *
+     * <p>Told apart the same way {@link ConditionCalls} tells them apart, and it has to stay that way:
+     * an identifier with an argument list after it. The two other shapes that lex identically —
+     * {@code is hasAny(…)} and {@code resource.thing(…)} — are already gone by the time this is asked,
+     * caught by {@link #isATestName} and {@link #isAProperty} above.
+     */
+    private static boolean isACallName(List<Token> tokens, int index) {
+        return isAt(tokens, index + 1, BasicToken.T_OPEN_PAREN);
     }
 
     private static boolean isAt(List<Token> tokens, int index, BasicToken type) {

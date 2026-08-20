@@ -94,6 +94,18 @@ public class McpProtocolEndpoints {
     ) {
         URI target = acceptableRedirectUri(redirectUri);
 
+        // ⚠️ Before anything else, and deliberately not left to the consent screen. A client whose
+        // registration this server no longer holds cannot be named on that screen, cannot be told apart
+        // from any other such client, and — because the name is copied onto durable rows and can become
+        // an agent's name — bakes "An unnamed client" into whatever it connects as, permanently. There is
+        // no repair afterwards: the name was never recorded. Answering invalid_client instead is the one
+        // refusal a client fixes by itself, by discarding what it cached and registering again.
+        if (!clientRegistry.recognises(clientId)) {
+            return refuseToClient(target, state, AuthorizationVocabulary.ERROR_INVALID_CLIENT,
+                    "This client_id is not one this server issued, or it has expired. Register again and "
+                  + "start the authorization with the identifier that registration returns.");
+        }
+
         if (!AuthorizationVocabulary.RESPONSE_TYPE_CODE.equals(responseType)) {
             return refuseToClient(target, state, AuthorizationVocabulary.ERROR_UNSUPPORTED_RESPONSE_TYPE,
                     "Only the authorization code flow is supported, so response_type must be 'code'.");

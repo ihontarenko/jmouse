@@ -94,7 +94,7 @@ public class ValueObjectBinder extends AbstractBinder {
         for (PropertyDescriptor<?> property : vo.getProperties()) {
             String        propertyName = property.getName();
             var           setter       = Setter.ofMap(propertyName);
-            TypedValue<?> component    = TypedValue.of(property.getType().getClassType());
+            TypedValue<?> component    = TypedValue.of(property.getType().getJavaType());
 
             @SuppressWarnings("unchecked")
             BindResult<T> result = (BindResult<T>) bindValue(name.append(propertyName), component, source, callback);

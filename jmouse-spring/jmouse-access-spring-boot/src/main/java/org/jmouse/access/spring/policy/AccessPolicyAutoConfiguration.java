@@ -22,6 +22,7 @@ import org.jmouse.access.policy.PolicyEntitlementStore.SubjectHandleResolver;
 import org.jmouse.access.policy.PolicyGrantStore;
 import org.jmouse.access.policy.QuantityScale;
 import org.jmouse.access.policy.model.PolicyDocument;
+import org.jmouse.access.policy.model.PolicyPermissionDeclaration;
 import org.jmouse.access.spi.CapabilitySwitchStore;
 import org.jmouse.access.spi.EntitlementStore;
 import org.jmouse.access.spi.GrantStore;
@@ -122,6 +123,45 @@ public class AccessPolicyAutoConfiguration {
                 document.name(), properties.getLocations(), document.roles().size(), document.subjects().size());
 
         return document;
+    }
+
+    /**
+     * The vocabulary, read off the documents that declare it.
+     *
+     * <p><strong>{@code declare permissions} is the definition of a permission, so it is also the list
+     * of them.</strong> Every product used to keep that list twice — as constants in Java and as
+     * declarations in a file — with a startup check comparing the two, and the check existed only
+     * because the pair could drift. It did: adding a second axis meant widening a hand-written list in
+     * two configurations, missing one failed the boot naming permissions that "do not exist" while they
+     * sat declared in a file, and the message was about spelling when the cause was arithmetic.
+     *
+     * <p>⚠️ <strong>This does not weaken the binder's check, which is about USAGE.</strong> A
+     * {@code declare permissions} block cannot disagree with itself; what a document can still get wrong
+     * is a role or a grant naming something never declared, and that is refused exactly as before. What
+     * is gone is the second copy, not the checking.
+     *
+     * <p>⚠️ <strong>No cycle, and the ordering is the point.</strong> {@link PolicyDocument} is parsed
+     * from files and needs no catalogue; the catalogue is derived from it; the binder then checks the
+     * rest of the document against the catalogue. An application that genuinely wants its vocabulary to
+     * come from somewhere else registers its own bean and this steps aside — but the reason to do that
+     * is now hard to name.
+     *
+     * @param document every configured location, merged into one — so an installation splitting its
+     *                 policy across files gets the union without saying so anywhere else
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public PermissionCatalog accessPermissionCatalog(PolicyDocument document) {
+        List<String> declared = document.permissions().stream()
+                .map(PolicyPermissionDeclaration::name)
+                .distinct()
+                .sorted()
+                .toList();
+
+        LOGGER.info("Permission vocabulary read from policy '{}': {} permission(s)",
+                document.name(), declared.size());
+
+        return new PermissionCatalog(declared);
     }
 
     /**

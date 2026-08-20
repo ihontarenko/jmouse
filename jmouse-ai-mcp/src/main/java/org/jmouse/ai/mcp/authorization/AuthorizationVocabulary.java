@@ -44,6 +44,16 @@ public final class AuthorizationVocabulary {
     /** The code or refresh token was unknown, expired, already spent, or unproven. */
     public static final String ERROR_INVALID_GRANT = "invalid_grant";
 
+    /**
+     * The identifier the client presented is not one this server issued, or no longer holds.
+     *
+     * <p>⚠️ <strong>The one refusal a client can fix by itself.</strong> A registration is cached by the
+     * client indefinitely and re-issued by nobody, so an identifier the server has forgotten would
+     * otherwise be a permanent, silent downgrade rather than an error. This is the code a conformant
+     * client answers by discarding what it cached and registering again.
+     */
+    public static final String ERROR_INVALID_CLIENT = "invalid_client";
+
     /** A grant type this server does not implement. */
     public static final String ERROR_UNSUPPORTED_GRANT_TYPE = "unsupported_grant_type";
 

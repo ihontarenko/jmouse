@@ -21,6 +21,26 @@ public class ScopeDeclarationNode extends AbstractExpression {
     private String nature;
     private String parameter;
 
+    /** The place this one sits inside, from {@code inside=@X}. */
+    private String inside;
+
+    /**
+     * A scope this one sits beside, from {@code beside=@X}.
+     *
+     * <p>⚠️ Sugar over {@link #inside}, not a third relation: "beside X" is "inside whatever X is inside".
+     * It exists because sibling-by-omission is invisible in a generated file — a projection that writes
+     * nothing where two places are siblings tells a reader nothing about whether that was meant.</p>
+     */
+    private String beside;
+
+    /**
+     * A place a target naming this one must also name, from {@code requires=@X}.
+     *
+     * <p>⚠️ A different question from {@link #inside}: that one is about a grant reaching, this one is
+     * about an address being complete.</p>
+     */
+    private String requires;
+
     public String getName() {
         return name;
     }
@@ -50,8 +70,33 @@ public class ScopeDeclarationNode extends AbstractExpression {
      *
      * @return the name, nature, optional parameter, and where it was written
      */
+    public String getInside() {
+        return inside;
+    }
+
+    public void setInside(String inside) {
+        this.inside = inside;
+    }
+
+    public String getBeside() {
+        return beside;
+    }
+
+    public void setBeside(String beside) {
+        this.beside = beside;
+    }
+
+    public String getRequires() {
+        return requires;
+    }
+
+    public void setRequires(String requires) {
+        this.requires = requires;
+    }
+
     public PolicyScopeDeclaration toScopeDeclaration() {
-        return new PolicyScopeDeclaration(getName(), getNature(), getParameter(), SourceSpanNode.at(this));
+        return new PolicyScopeDeclaration(getName(), getNature(), getParameter(), getInside(),
+                                          getBeside(), getRequires(), SourceSpanNode.at(this));
     }
 
     @Override
@@ -59,15 +104,35 @@ public class ScopeDeclarationNode extends AbstractExpression {
         return toScopeDeclaration();
     }
 
+    /**
+     * ⚠️ {@code beside=} is rendered even though omitting it would parse to the same thing.
+     *
+     * <p>Siblings are the default, and a default is invisible: a generated file that says nothing where
+     * two places sit side by side leaves a reader unable to tell a deliberate arrangement from a
+     * forgotten {@code inside=}. Writing it costs one attribute and removes the guess.</p>
+     */
     @Override
     public String toSource() {
-        String declaration = "@%s %s".formatted(getName(), SourceWriter.name(getNature()));
+        StringBuilder declaration = new StringBuilder(
+            "@%s %s".formatted(getName(), SourceWriter.name(getNature())));
 
-        if (parameter == null) {
-            return declaration;
+        if (parameter != null) {
+            declaration.append(" parameter=").append(SourceWriter.name(getParameter()));
         }
 
-        return declaration + " parameter=" + SourceWriter.name(getParameter());
+        if (inside != null) {
+            declaration.append(" inside=@").append(inside);
+        }
+
+        if (beside != null) {
+            declaration.append(" beside=@").append(beside);
+        }
+
+        if (requires != null) {
+            declaration.append(" requires=@").append(requires);
+        }
+
+        return declaration.toString();
     }
 
     @Override

@@ -9,6 +9,7 @@ import org.jmouse.ai.spi.ToolAuthorizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -145,6 +146,41 @@ public final class ToolDispatcher {
         return catalog;
     }
 
+    /**
+     * The same catalogue, cut to what <em>this</em> caller could actually run.
+     *
+     * <p><strong>The gate at step 3, asked before there is anything to call.</strong> It is the same
+     * question, of the same authorizer, with the same caller — so an action that survives this is one
+     * the permission step would have let through, and an action that does not is one the caller would
+     * have been refused. Nothing is hidden that could have been used, and nothing is offered that
+     * could not.
+     *
+     * <p>⚠️ <strong>Meant for a transport that puts the catalogue in front of a model, and worth the
+     * difference twice.</strong> A whole catalogue is a large fraction of every prompt of every round —
+     * with a small per-minute allowance it is the difference between a conversation and a refusal — and
+     * a model shown an action it may not run will eventually call it, spend a round being refused, and
+     * report the refusal as though the product were broken. A protocol client is a different case: its
+     * tool list is fetched once and cached at connect time, so cutting it there fixes the list at
+     * whatever the caller held that minute.
+     *
+     * <p>⚠️ Scope-confined actions are cut only by whether the caller holds the permission
+     * <em>somewhere</em> — which is all that is knowable before a scope exists. A call into a workspace
+     * the caller cannot reach is still refused at step 4, in the words that name the workspace.
+     */
+    public List<PublishedTool> reachable() {
+        CallerIdentity caller = requireCaller();
+
+        List<PublishedTool> permitted = catalog.actions().stream()
+                .filter(action -> authorizer.permits(caller, action))
+                .map(ToolAction::published)
+                .toList();
+
+        LOGGER.debug("{} of {} action(s) are reachable by {}",
+                permitted.size(), catalog.size(), caller.describe());
+
+        return permitted;
+    }
+
     // ── The steps ────────────────────────────────────────────────────────────────
 
     private CallerIdentity requireCaller() {
@@ -178,19 +214,28 @@ public final class ToolDispatcher {
      *
      * <p>The message says plainly that a permission is missing and names which one. A refusal that
      * blamed anything else would have the client report a different problem to the user, and a
-     * permission refusal that is not unambiguous is worse than none.
+     * permission refusal that is not unambiguous is worse than none — which is why the name comes from
+     * {@link ToolAuthorizer#unmetPermission} rather than from the action: an authorizer weighing two
+     * permissions is the only party that knows which of them answered no.
+     *
+     * <p>⚠️ Naming the permission is where the message used to stop, and it is <em>true but
+     * misleading</em> whenever the caller could not have held it in the first place — see
+     * {@link ToolAuthorizer#refusalAdvice}, which is why the sentence now has a second half.
      */
     private void requirePermission(CallerIdentity caller, ToolAction action) {
         if (authorizer.permits(caller, action)) {
             return;
         }
 
-        LOGGER.info("Refused {} for {} — missing {}",
-                action.qualifiedName(), caller.describe(), action.requiredPermission());
+        String missing = authorizer.unmetPermission(caller, action, null);
 
-        throw new ToolRefusedException(RefusalReason.MISSING_PERMISSION,
+        LOGGER.info("Refused {} for {} — missing {}",
+                action.qualifiedName(), caller.describe(), missing);
+
+        throw new ToolRefusedException(RefusalReason.MISSING_PERMISSION, diagnosed(
                 "This caller is not allowed to do that. '" + action.qualifiedName() + "' needs the '"
-                + action.requiredPermission() + "' permission and this caller does not hold it.");
+                + missing + "' permission and this caller does not hold it.",
+                caller, action, null));
     }
 
     /** The same gate again, now that there is somewhere to ask about. See {@link ToolAuthorizer}. */
@@ -201,14 +246,36 @@ public final class ToolDispatcher {
             return;
         }
 
-        LOGGER.info("Refused {} for {} in {} — missing {} there",
-                action.qualifiedName(), caller.describe(), scope.id(), action.requiredPermission());
+        String missing = authorizer.unmetPermission(caller, action, scope);
 
-        throw new ToolRefusedException(RefusalReason.MISSING_PERMISSION,
-                "This caller holds '" + action.requiredPermission() + "' somewhere, but not in the "
+        LOGGER.info("Refused {} for {} in {} — missing {} there",
+                action.qualifiedName(), caller.describe(), scope.id(), missing);
+
+        throw new ToolRefusedException(RefusalReason.MISSING_PERMISSION, diagnosed(
+                "This caller holds '" + missing + "' somewhere, but not in the "
                 + scope.kind() + " '" + scope.label() + "'. Name a different " + scope.kind()
                 + " in the '" + ToolInvocation.SCOPE_ARGUMENT + "' argument, or ask for the permission "
-                + "there.");
+                + "there.",
+                caller, action, scope));
+    }
+
+    /**
+     * The refusal the library wrote, plus whatever the product knows about why — see
+     * {@link ToolAuthorizer#refusalAdvice}.
+     *
+     * <p>Kept to an append. The library's sentence stays the library's sentence, identical across every
+     * product and every action, and an authorizer with nothing to add changes nothing at all.
+     */
+    private String diagnosed(
+            String refusal, CallerIdentity caller, ToolAction action, InvocationScope scope) {
+
+        String advice = authorizer.refusalAdvice(caller, action, scope);
+
+        if (advice == null || advice.isBlank()) {
+            return refusal;
+        }
+
+        return refusal + " " + advice.strip();
     }
 
     private InvocationScope resolveScope(

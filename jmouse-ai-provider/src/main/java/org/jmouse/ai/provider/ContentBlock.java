@@ -2,6 +2,7 @@ package org.jmouse.ai.provider;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * One piece of what a model said, read without casting.
@@ -24,6 +25,26 @@ public record ContentBlock(Map<String, Object> map) {
 
     /** A block that asks for a tool to be run. */
     public static final String TOOL_USE = "tool_use";
+
+    /**
+     * Where a provider's own additions to a tool call are kept, unread, for the way back.
+     *
+     * <p>A block arriving in the canonical shape already survives untouched — that is the whole design
+     * of this type. A tool call translated <em>out of</em> another provider's shape does not: it is
+     * rebuilt field by field, and anything the translation had no field for was silently gone. Gemini's
+     * {@code thought_signature} is the case that proved it, and it is required back on the next round,
+     * so losing it made every tool-using conversation exactly one round long.
+     *
+     * <p>⚠️ Opaque, and to be kept that way. What is in it belongs to the provider that sent it; the
+     * only rule this library has is that it goes back where it came from.
+     *
+     * <p>⚠️ <strong>Which is also its limit.</strong> A conversation continued against a <em>different</em>
+     * provider than the one that produced it can be refused over this field, because it is one
+     * provider's private data offered to another. Nothing here can translate it, and inventing a
+     * translation would be worse than the refusal. Starting a new conversation is the answer, and a
+     * provider is not something that changes mid-conversation on a working installation.
+     */
+    public static final String PROVIDER_EXTRA = "provider_extra";
 
     public ContentBlock {
         map = map == null ? Map.of() : map;
@@ -76,6 +97,16 @@ public record ContentBlock(Map<String, Object> map) {
         return map.get("input") instanceof Map<?, ?> input
                 ? (Map<String, Object>) input
                 : Map.of();
+    }
+
+    /**
+     * Whatever the provider hung on this tool call, if anything — see {@link #PROVIDER_EXTRA}.
+     *
+     * <p>{@code Optional} rather than an empty map: "the provider sent nothing" and "the provider sent
+     * an empty object" are different things to put back on the wire, and only one of them is honest.
+     */
+    public Optional<Object> providerExtra() {
+        return Optional.ofNullable(map.get(PROVIDER_EXTRA));
     }
 
     private String string(String name) {

@@ -1,0 +1,183 @@
+{% extends "consent-frame" %}
+
+{#
+  FACING — client and person side by side, the same size, joined by the word for the arrangement.
+
+  It makes visible the one fact people get wrong about this protocol without spending a sentence on it:
+  the client does not get its own account, it borrows yours. Both sides are drawn identically for that
+  reason — making the client smaller would say it gets less, which is exactly backwards.
+
+  Themed both ways.
+#}
+
+{% block "styles" %}
+<style>
+  :root {
+    color-scheme: light dark;
+    --surface: #f7f8fa; --raised: #ffffff; --sunken: #eef1f5;
+    --ink: #171c23; --muted: #6c7683; --line: #e0e6ed;
+    --accent: #4a6fa5; --accent-deep: #24405f; --accent-ink: #ffffff;
+    --caution: #8a4a12; --danger: #b42318; --danger-tint: #fef3f2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --surface: #0f141a; --raised: #171d25; --sunken: #131920;
+      --ink: #e6ecf3; --muted: #96a3b2; --line: #262f3a;
+      --accent: #7ea6d8; --accent-deep: #9dc0ea; --accent-ink: #0e1319;
+      --caution: #e0a03c; --danger: #ff9182; --danger-tint: #241210;
+    }
+  }
+  :root[data-theme="dark"] {
+    --surface: #0f141a; --raised: #171d25; --sunken: #131920;
+    --ink: #e6ecf3; --muted: #96a3b2; --line: #262f3a;
+    --accent: #7ea6d8; --accent-deep: #9dc0ea; --accent-ink: #0e1319;
+    --caution: #e0a03c; --danger: #ff9182; --danger-tint: #241210;
+  }
+
+  body { background: var(--surface); color: var(--ink);
+         font: 15px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+         padding: 2.5rem 1.25rem 4rem; }
+
+  main { max-width: 36rem; margin: 0 auto; display: flex; flex-direction: column; gap: 1.4rem; }
+
+  .skeleton { height: 1rem; background: var(--sunken); border-radius: 3px; }
+  .skeleton + .skeleton { margin-top: .8rem; }
+
+  h2 { margin: 0; font-size: 1.15rem; font-weight: 620; }
+  p.body { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+  .pair { display: flex; align-items: flex-start; justify-content: center;
+          gap: clamp(.8rem, 4vw, 1.8rem); flex-wrap: wrap; }
+  .side { display: flex; flex-direction: column; align-items: center; gap: .5rem;
+          text-align: center; min-width: 7.5rem; max-width: 11rem; }
+
+  /* Both avatars are the same size on purpose — see the note at the top of this file. */
+  .avatar { width: 4rem; height: 4rem; border-radius: 15px; display: flex;
+            align-items: center; justify-content: center; color: #fff;
+            font: 640 1.25rem/1 system-ui, sans-serif; letter-spacing: -.02em; }
+  .avatar.client { background: hsl(var(--client-hue, 18) 55% 55%); }
+  .avatar.person { background: var(--accent-deep); color: var(--accent-ink); }
+
+  .side-name { font-size: .98rem; font-weight: 620; letter-spacing: -.01em; overflow-wrap: anywhere; }
+  .side-role { font: 600 9.5px/1 ui-monospace, Menlo, monospace; letter-spacing: .14em;
+               text-transform: uppercase; color: var(--muted); }
+
+  .link { display: flex; flex-direction: column; align-items: center; gap: .35rem;
+          color: var(--muted); padding-top: 1.2rem; }
+  .link-bar { width: clamp(2.5rem, 9vw, 4.5rem); height: 2px; background: var(--line); border-radius: 2px; }
+  .link-text { font: 600 9.5px/1 ui-monospace, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; }
+
+  .claim { margin: 0; text-align: center; font-size: 1.05rem; text-wrap: balance; }
+  .claim strong { font-weight: 640; }
+
+  .identifier { font: 11.5px/1.4 ui-monospace, Menlo, monospace; color: var(--muted);
+                text-align: center; overflow-wrap: anywhere; }
+
+  dl.facts { margin: 0; background: var(--raised); border: 1px solid var(--line); border-radius: 6px;
+             padding: .95rem 1.05rem; display: grid; grid-template-columns: max-content 1fr;
+             gap: .38rem 1rem; font-size: 13.5px; }
+  dl.facts dt { color: var(--muted); }
+  dl.facts dd { margin: 0; overflow-wrap: anywhere; }
+  dl.facts dd code { font: 12.5px/1.5 ui-monospace, Menlo, monospace; }
+
+  .caution { font-size: 13px; color: var(--caution); line-height: 1.55; }
+
+  fieldset.choices { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .45rem; }
+  fieldset.choices legend { padding: 0; font-size: 10.5px; letter-spacing: .13em;
+                            text-transform: uppercase; color: var(--muted); font-weight: 600; }
+
+  .choice { display: flex; align-items: flex-start; gap: .65rem; cursor: pointer;
+            border: 1px solid var(--line); border-radius: 6px; padding: .65rem .85rem; background: var(--raised); }
+  .choice:hover { border-color: var(--accent); }
+  .choice:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .choice input { accent-color: var(--accent); margin: .25em 0 0; }
+  .choice-name { font-weight: 560; }
+  .choice-detail { font-size: 13px; color: var(--muted); margin-top: .1rem; }
+  .choice.unavailable { opacity: .55; cursor: not-allowed; }
+
+  .notice.danger { border: 1px solid var(--danger); background: var(--danger-tint); color: var(--danger);
+                   border-radius: 6px; padding: .85rem 1rem; font-size: 13.5px; }
+
+  .actions { display: flex; gap: .55rem; justify-content: center; flex-wrap: wrap; }
+
+  button.primary { background: var(--accent-deep); color: var(--accent-ink); border: 0; border-radius: 6px;
+                   font: 600 14px/1 system-ui, sans-serif; padding: .85em 2.1em; cursor: pointer; }
+  button.primary:disabled { opacity: .5; cursor: not-allowed; }
+  button.quiet { background: var(--raised); color: var(--ink); border: 1px solid var(--line);
+                 border-radius: 6px; font: 14px/1 system-ui, sans-serif; padding: .85em 1.4em; cursor: pointer; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .hint { font-size: 12.5px; color: var(--muted); text-align: center; }
+
+  a { color: var(--accent-deep); }
+</style>
+{% endblock %}
+
+{% block "page" %}
+<main>
+  <section id="loading">
+    <div class="skeleton" style="width: 45%"></div>
+    <div class="skeleton" style="width: 90%"></div>
+    <div class="skeleton" style="width: 65%"></div>
+  </section>
+
+  <section id="refusal" hidden style="display:flex; flex-direction:column; gap:.7rem">
+    <h2 id="refusal-title">This request cannot be approved</h2>
+    <p class="body" id="refusal-body"></p>
+    <p class="body" id="refusal-action" hidden><a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>,
+      then start the connection again from the client.</p>
+  </section>
+
+  <form id="request" hidden style="display:flex; flex-direction:column; gap:1.35rem">
+    <div class="pair">
+      <div class="side">
+        <div class="avatar client" id="client-avatar" aria-hidden="true"></div>
+        <div class="side-name" id="client-name"></div>
+        <div class="side-role">Client</div>
+      </div>
+      <div class="link">
+        <div class="link-bar"></div>
+        <div class="link-text">acts&nbsp;as</div>
+        <div class="link-bar"></div>
+      </div>
+      <div class="side">
+        <div class="avatar person" aria-hidden="true">·</div>
+        <div class="side-name" id="approver"></div>
+        <div class="side-role">You</div>
+      </div>
+    </div>
+
+    <p class="claim">
+      It borrows <strong>your</strong> access in {{ applicationName }}. It never gets its own.
+    </p>
+
+    <div class="identifier" id="client-id" hidden></div>
+
+    <p class="body" id="acting-summary"></p>
+
+    <dl class="facts">
+      <dt>Code goes to</dt><dd><code id="redirect-target"></code></dd>
+    </dl>
+
+    <p class="caution">
+      ⚠ That address is on this machine. If you did not just start this from a client running here,
+      close this page.
+    </p>
+
+    <div id="choices-card" hidden>
+      <fieldset class="choices" id="choices">
+        <legend>Writes as</legend>
+      </fieldset>
+    </div>
+
+    <div class="notice danger" id="failure" hidden></div>
+
+    <div class="actions">
+      <button type="submit" class="primary" id="approve">Approve</button>
+      <button type="button" class="quiet" id="cancel">Cancel</button>
+    </div>
+
+    <div class="hint" id="lifetime"></div>
+  </form>
+</main>
+{% endblock %}

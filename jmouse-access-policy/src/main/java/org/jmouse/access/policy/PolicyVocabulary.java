@@ -94,6 +94,26 @@ public final class PolicyVocabulary {
     }
 
     /**
+     * The word a {@code scopes} block writes this nature as.
+     *
+     * <p>⚠️ <strong>The inverse of {@link #NATURES}, and it lives beside it for that reason.</strong>
+     * Anything projecting a registered catalogue back into a document has to spell the nature, and a
+     * second spelling written where the projection happens is how {@code own-rows} becomes
+     * {@code OWN_ROWS} in a file that then refuses to parse. There is one alias in the reading
+     * direction and there must be none in the writing one, so this returns the canonical word.
+     *
+     * @param nature the nature to write
+     * @return {@code everything}, {@code place} or {@code own-rows}
+     */
+    public static String spellingOf(ScopeNature nature) {
+        return switch (nature) {
+            case EVERYTHING -> "everything";
+            case PLACE      -> "place";
+            case OWN_ROWS   -> "own-rows";
+        };
+    }
+
+    /**
      * The scopes a document declares, as a catalogue.
      *
      * @throws PolicyException where a nature is not one of the three, or the resulting set does not
@@ -343,9 +363,31 @@ public final class PolicyVocabulary {
             if (position < registered.size() && !registered.get(position).name().equals(declared.name())) {
                 problems.add(PolicyProblem.at(declared.at(), "'" + declared.name() + "' is written in "
                              + "position " + (position + 1) + ", where the application has '"
-                             + registered.get(position).name() + "'. Declaration order is width order, "
-                             + "so this file describes a different covering chain from the one that "
-                             + "runs."));
+                             + registered.get(position).name() + "'. Position no longer decides width — "
+                             + "`inside=` does — but the two still have to be listed in the same order, "
+                             + "so that a refusal names the same reason twice running."));
+            }
+
+            // ⚠️ WHERE IT SITS, which used to be said by position and is now said outright. A file that
+            // disagrees with the application here describes a different covering chain — the difference
+            // being that now it CAN describe two places side by side, which no order could.
+            String declaredParent = declared.inside();
+            String runningParent  = matching.inside().map(ScopeKind::name).orElse(null);
+
+            if (declared.beside() != null) {
+                declaredParent = scopes.byName(declared.beside())
+                        .flatMap(ScopeKind::inside)
+                        .map(ScopeKind::name)
+                        .orElse(null);
+            }
+
+            if (!java.util.Objects.equals(declaredParent, runningParent)) {
+                problems.add(PolicyProblem.at(declared.at(), "'" + declared.name() + "' sits inside '"
+                             + (declaredParent == null ? "nothing" : declaredParent)
+                             + "' here and inside '"
+                             + (runningParent == null ? "nothing" : runningParent)
+                             + "' in the application. A grant reaches what it encloses, so the two "
+                             + "describe different coverage."));
             }
 
             position++;

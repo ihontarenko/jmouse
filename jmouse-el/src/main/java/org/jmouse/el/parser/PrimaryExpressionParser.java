@@ -17,14 +17,20 @@ public class PrimaryExpressionParser implements Parser {
     public void parse(TokenCursor cursor, Node parent, ParserContext context) {
         Node left = null;
 
-        // parse left expression
+        // parse left expression.
+        //
+        // ⚠️ Every branch below is `else if`, and the first one used not to be. A function call parsed
+        // into `left` and then fell into the lambda test on an already-advanced cursor, so whatever
+        // followed the call could match a later branch and overwrite the FunctionNode that had just been
+        // built. Nothing exercised it while no restricted dialect registered FunctionParser; the moment
+        // one does, `f('a') >= 1` is the shape that loses its call.
         if (CursorMatcher.function().matches(cursor)) {
             left = context.getParser(FunctionParser.class).parse(cursor, context);
-        } if (CursorMatcher.lambda().matches(cursor)) {
+        } else if (CursorMatcher.lambda().matches(cursor)) {
             left = context.getParser(LambdaParser.class).parse(cursor, context);
         } else if (CursorMatcher.literal().matches(cursor)) {
             left = context.getParser(LiteralParser.class).parse(cursor, context);
-        }  else if (cursor.matchesSequence(T_IDENTIFIER, T_DOT, T_IDENTIFIER, T_OPEN_PAREN)) {
+        } else if (cursor.matchesSequence(T_IDENTIFIER, T_DOT, T_IDENTIFIER, T_OPEN_PAREN)) {
             left = context.getParser(ScopedCallParser.class).parse(cursor, context);
         } else if (cursor.matchesSequence(T_IDENTIFIER, T_DOT, T_IDENTIFIER)) {
             left = context.getParser(PropertyParser.class).parse(cursor, context);

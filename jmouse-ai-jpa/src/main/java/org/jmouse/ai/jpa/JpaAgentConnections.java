@@ -33,7 +33,8 @@ public final class JpaAgentConnections implements AgentConnections {
 
     @Override
     public AgentConnection open(
-            String agentId, String clientName, String refreshToken, Instant refreshExpiresAt) {
+            String agentId, String clientName, String clientId,
+            String refreshToken, Instant refreshExpiresAt) {
 
         String digest = RefreshTokens.digest(refreshToken);
 
@@ -42,6 +43,7 @@ public final class JpaAgentConnections implements AgentConnections {
                     UUID.randomUUID().toString(),
                     agentId,
                     requireClientName(clientName),
+                    clientId,
                     digest,
                     refreshExpiresAt,
                     Instant.now());
@@ -99,6 +101,25 @@ public final class JpaAgentConnections implements AgentConnections {
                         .stream()
                         .findFirst()
                         .map(JpaAgentConnections::describe));
+    }
+
+    @Override
+    public List<AgentConnection> byClientId(String clientId) {
+        if (clientId == null || clientId.isBlank()) {
+            return List.of();
+        }
+
+        return OwnTransaction.call(entityManagerFactory, entityManager -> entityManager.createQuery("""
+                                select connection
+                                  from AiAgentConnection connection
+                                 where connection.clientId = :clientId
+                                 order by connection.issuedAt desc
+                                """, AiAgentConnection.class)
+                        .setParameter("clientId", clientId)
+                        .getResultList())
+                .stream()
+                .map(JpaAgentConnections::describe)
+                .toList();
     }
 
     @Override
@@ -183,6 +204,7 @@ public final class JpaAgentConnections implements AgentConnections {
                 connection.getId(),
                 connection.getAgentId(),
                 connection.getClientName(),
+                connection.getClientId(),
                 connection.getIssuedAt(),
                 connection.getRefreshExpiresAt(),
                 connection.getLastUsedAt(),

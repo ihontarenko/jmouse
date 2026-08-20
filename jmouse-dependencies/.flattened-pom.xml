@@ -188,6 +188,11 @@
       </dependency>
       <dependency>
         <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-access-projection</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
         <artifactId>jmouse-storage</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
@@ -199,6 +204,16 @@
       <dependency>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-storage-jpa</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-files</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-files-jpa</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
@@ -234,6 +249,21 @@
       <dependency>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-ai-management</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-storage-spring-boot</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-storage-management</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-avatars</artifactId>
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>

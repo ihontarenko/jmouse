@@ -1,0 +1,154 @@
+{% extends "consent-frame" %}
+
+{#
+  PLAIN — the argument that a consent screen should have no visual identity at all.
+
+  It should look like the machine asking, not like a product selling. Every pixel of personality on
+  this page is a pixel spent making a security decision feel like marketing, and a person who has been
+  taught that this screen is branded is a person who can be shown a convincing forgery of it.
+
+  ⚠️ The restraint is the position, so resist decorating it later. If it starts growing a gradient or a
+  logo lockup it has become one of the other ten designs and should be replaced by whichever one it is
+  imitating.
+
+  Themed both ways: an OS prompt follows the system.
+#}
+
+{% block "styles" %}
+<style>
+  :root {
+    color-scheme: light dark;
+    --backdrop: #e9eaec; --surface: #ffffff; --sunken: #f6f7f9; --field: #ffffff;
+    --ink: #1a1c1f; --muted: #4d5561; --faint: #8b94a1; --line: #dfe4ea;
+    --accent: #2b6cb0; --accent-ink: #ffffff; --quiet: #f1f3f6;
+    --caution: #8a4a12; --danger: #b42318; --danger-tint: #fef3f2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --backdrop: #0b0d10; --surface: #191c21; --sunken: #21252c; --field: #21252c;
+      --ink: #e8ebef; --muted: #a3acb8; --faint: #79828e; --line: #2c323a;
+      --accent: #6aa5e0; --accent-ink: #0d1116; --quiet: #262b33;
+      --caution: #e0a03c; --danger: #ff9182; --danger-tint: #241210;
+    }
+  }
+  :root[data-theme="dark"] {
+    --backdrop: #0b0d10; --surface: #191c21; --sunken: #21252c; --field: #21252c;
+    --ink: #e8ebef; --muted: #a3acb8; --faint: #79828e; --line: #2c323a;
+    --accent: #6aa5e0; --accent-ink: #0d1116; --quiet: #262b33;
+    --caution: #e0a03c; --danger: #ff9182; --danger-tint: #241210;
+  }
+
+  body { background: var(--backdrop); color: var(--ink);
+         font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+         min-height: 100vh; display: flex; align-items: center; justify-content: center;
+         padding: 2rem 1.1rem; }
+
+  .dialog { background: var(--surface); border-radius: 11px; max-width: 27rem; width: 100%;
+            box-shadow: 0 1px 1px rgb(0 0 0 / .07), 0 20px 44px -14px rgb(0 0 0 / .32);
+            padding: 1.8rem 1.6rem 1.35rem; display: flex; flex-direction: column; gap: 1rem;
+            text-align: center; }
+
+  .glyph { width: 2.9rem; height: 2.9rem; margin: 0 auto; border-radius: 9px;
+           background: var(--sunken); border: 1px solid var(--line);
+           display: flex; align-items: center; justify-content: center;
+           font: 600 12.5px/1 ui-monospace, Menlo, monospace; color: var(--muted); letter-spacing: .04em; }
+
+  .skeleton { height: .9rem; background: var(--sunken); border-radius: 3px; }
+  .skeleton + .skeleton { margin-top: .7rem; }
+
+  h1 { margin: 0; font-size: 1.13rem; font-weight: 620; letter-spacing: -.01em; text-wrap: balance; }
+
+  p.body { margin: 0; font-size: 14px; color: var(--muted); text-wrap: pretty; }
+  p.body strong { color: var(--ink); font-weight: 600; }
+
+  dl.facts { margin: 0; text-align: left; background: var(--sunken); border-radius: 7px;
+             padding: .8rem .95rem; display: grid; grid-template-columns: max-content 1fr;
+             gap: .32rem .9rem; font-size: 13px; }
+  dl.facts dt { color: var(--faint); }
+  dl.facts dd { margin: 0; overflow-wrap: anywhere; }
+  dl.facts dd code { font: 12.5px/1.5 ui-monospace, Menlo, monospace; }
+
+  .caution { font-size: 12.5px; color: var(--caution); text-align: left; line-height: 1.5; }
+
+  fieldset.choices { border: 0; margin: 0; padding: 0; text-align: left;
+                     display: flex; flex-direction: column; gap: .4rem; }
+  fieldset.choices legend { padding: 0 0 .15rem; font-size: 12px; color: var(--faint); }
+
+  .choice { display: flex; align-items: flex-start; gap: .6rem; cursor: pointer;
+            border: 1px solid var(--line); border-radius: 7px; padding: .6rem .75rem;
+            background: var(--field); font-size: 13.5px; }
+  .choice:hover { border-color: var(--accent); }
+  .choice:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .choice input { accent-color: var(--accent); margin: .2em 0 0; }
+  .choice-name { font-weight: 560; }
+  .choice-detail { font-size: 12.5px; color: var(--faint); margin-top: .08rem; }
+  .choice.unavailable { opacity: .55; cursor: not-allowed; }
+
+  .notice.danger { text-align: left; border-radius: 7px; padding: .7rem .85rem;
+                   font-size: 12.5px; background: var(--danger-tint); color: var(--danger); }
+
+  .buttons { display: flex; gap: .55rem; }
+
+  button.primary { flex: 1; background: var(--accent); color: var(--accent-ink); border: 0;
+                   border-radius: 7px; font: 600 14px/1 system-ui, sans-serif;
+                   padding: .82em 1em; cursor: pointer; }
+  button.primary:disabled { opacity: .5; cursor: not-allowed; }
+  button.quiet { flex: 1; background: var(--quiet); color: var(--ink); border: 0; border-radius: 7px;
+                 font: 14px/1 system-ui, sans-serif; padding: .82em 1em; cursor: pointer; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .hint { font-size: 11.5px; color: var(--faint); }
+
+  a { color: var(--accent); }
+</style>
+{% endblock %}
+
+{% block "page" %}
+<div class="dialog">
+  <div class="glyph">MCP</div>
+
+  <section id="loading">
+    <div class="skeleton" style="width: 70%; margin: 0 auto"></div>
+    <div class="skeleton" style="width: 90%"></div>
+    <div class="skeleton" style="width: 55%; margin-left: auto; margin-right: auto"></div>
+  </section>
+
+  <section id="refusal" hidden>
+    <h1 id="refusal-title">This request cannot be approved</h1>
+    <p class="body" id="refusal-body" style="margin-top:.6rem"></p>
+    <p class="body" id="refusal-action" hidden style="margin-top:.6rem"><a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>,
+      then start the connection again from the client.</p>
+  </section>
+
+  <form id="request" hidden style="display:flex; flex-direction:column; gap:1rem">
+    <h1>Let <span id="client-name"></span> act in {{ applicationName }} as you?</h1>
+
+    <p class="body" id="acting-summary"></p>
+
+    <dl class="facts">
+      <dt>Signed in as</dt><dd id="approver"></dd>
+      <dt>Code goes to</dt><dd><code id="redirect-target"></code></dd>
+    </dl>
+
+    <p class="caution">
+      ⚠ That address is on this machine. If you did not just start this from a client running here,
+      close this page.
+    </p>
+
+    <div id="choices-card" hidden>
+      <fieldset class="choices" id="choices">
+        <legend>It writes as</legend>
+      </fieldset>
+    </div>
+
+    <div class="notice danger" id="failure" hidden></div>
+
+    <div class="buttons">
+      <button type="button" class="quiet" id="cancel">Cancel</button>
+      <button type="submit" class="primary" id="approve">Allow</button>
+    </div>
+
+    <div class="hint" id="lifetime"></div>
+  </form>
+</div>
+{% endblock %}

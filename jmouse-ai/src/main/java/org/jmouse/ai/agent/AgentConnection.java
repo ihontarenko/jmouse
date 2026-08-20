@@ -23,6 +23,15 @@ public record AgentConnection(
         String  id,
         String  agentId,
         String  clientName,
+        /**
+         * Which registration this came from, or null for a connection older than the column.
+         *
+         * <p>⚠️ <strong>This is the identity and {@link #clientName} is not.</strong> The name is what
+         * the client called itself and is forgotten when a registration lapses; this is issued by the
+         * registry and reused by the client across reconnects. A product deciding whether it has seen
+         * a client before keys on this.
+         */
+        String  clientId,
         Instant issuedAt,
         Instant refreshExpiresAt,
         Instant lastUsedAt,

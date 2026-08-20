@@ -1,0 +1,153 @@
+{% extends "consent-frame" %}
+
+{#
+  MARQUEE — the client's name set as display type.
+
+  ⚠️ Type size is a SECURITY CONTROL here, not a flourish. The attack this screen defends against is a
+  hostile client registering a name that looks like a friendly one, and the defence is making the name
+  impossible to misread. So the name is the largest thing on the page and `overflow-wrap: anywhere`
+  keeps a long one from being clipped rather than shrinking it.
+
+  Committed to dark.
+#}
+
+{% block "styles" %}
+<style>
+  body { background: #0c1014; color: #e6ebf0;
+         font: 15px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+         padding: 2.5rem 1.25rem 4rem; }
+
+  main { max-width: 44rem; margin: 0 auto; display: flex; flex-direction: column; gap: 1.4rem; }
+
+  .eyebrow { font: 600 10.5px/1 ui-monospace, Menlo, monospace; letter-spacing: .2em;
+             text-transform: uppercase; color: #7f8b99; }
+
+  .skeleton { height: 1.1rem; background: #171e26; border-radius: 3px; }
+  .skeleton + .skeleton { margin-top: .85rem; }
+
+  h2 { margin: 0; font-size: 1.2rem; font-weight: 620; color: #f1f5f9; }
+  p.body { margin: 0; color: #9aa6b4; font-size: 14px; line-height: 1.6; }
+
+  .title { display: flex; align-items: center; gap: 1.05rem; flex-wrap: wrap; }
+  .avatar { width: 3.2rem; height: 3.2rem; border-radius: 10px; flex: none;
+            background: hsl(var(--client-hue, 18) 55% 55%); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font: 640 1.1rem/1 system-ui, sans-serif; letter-spacing: -.02em; }
+
+  h1 { margin: 0; font-size: clamp(2rem, 6.5vw, 3.2rem); font-weight: 700;
+       letter-spacing: -.035em; line-height: .96; overflow-wrap: anywhere; }
+
+  .lede { margin: 0; font-size: 1.05rem; color: #9aa6b4; max-width: 46ch; }
+  .lede strong { color: #e6ebf0; font-weight: 620; }
+
+  .rule { height: 1px; background: #1d252e; }
+
+  .cells { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 1.1rem 1.7rem; }
+  .cell { display: flex; flex-direction: column; gap: .18rem; min-width: 0; }
+  .cell-label { font: 600 9.5px/1 ui-monospace, Menlo, monospace; letter-spacing: .16em;
+                text-transform: uppercase; color: #7f8b99; }
+  .cell-value { font-size: 14px; overflow-wrap: anywhere; }
+  .cell-value code { font: 13px/1.5 ui-monospace, Menlo, monospace; }
+  .identifier { font: 12.5px/1.5 ui-monospace, Menlo, monospace; color: #9aa6b4; overflow-wrap: anywhere; }
+
+  .caution { border-left: 2px solid #e0a03c; padding-left: 1rem; font-size: 13.5px;
+             color: #b9c3ce; line-height: 1.55; }
+
+  fieldset.choices { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+  fieldset.choices legend { padding: 0; font: 600 9.5px/1 ui-monospace, Menlo, monospace;
+                            letter-spacing: .16em; text-transform: uppercase; color: #7f8b99; }
+
+  .choice { display: flex; align-items: flex-start; gap: .65rem; cursor: pointer;
+            border: 1px solid #1d252e; border-radius: 4px; padding: .7rem .85rem; background: #12181f; }
+  .choice:hover { border-color: #2c3742; }
+  .choice:focus-within { outline: 2px solid #e6ebf0; outline-offset: 1px; }
+  .choice input { accent-color: #e6ebf0; margin: .25em 0 0; }
+  .choice-name { font-weight: 560; }
+  .choice-detail { font-size: 13px; color: #7f8b99; margin-top: .1rem; }
+  .choice.unavailable { opacity: .5; cursor: not-allowed; }
+
+  .notice.danger { border: 1px solid #5a2620; background: #1c100e; color: #ff9182;
+                   border-radius: 4px; padding: .85rem 1rem; font-size: 13.5px; }
+
+  .actions { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; }
+
+  button.primary { background: #e6ebf0; color: #0c1014; border: 0; border-radius: 4px;
+                   font: 640 14px/1 system-ui, sans-serif; padding: .88em 1.9em; cursor: pointer; }
+  button.primary:disabled { background: #3b444e; color: #7f8b99; cursor: not-allowed; }
+  button.quiet { background: transparent; color: #9aa6b4; border: 1px solid #2a3540; border-radius: 4px;
+                 font: 14px/1 system-ui, sans-serif; padding: .88em 1.35em; cursor: pointer; }
+  button:focus-visible { outline: 2px solid #e6ebf0; outline-offset: 2px; }
+
+  .hint { font-size: 12.5px; color: #7f8b99; }
+
+  a { color: #9dc0ea; }
+</style>
+{% endblock %}
+
+{% block "page" %}
+<main>
+  <div class="eyebrow">Authorization · {{ applicationName }}</div>
+
+  <section id="loading">
+    <div class="skeleton" style="width: 60%"></div>
+    <div class="skeleton" style="width: 90%"></div>
+    <div class="skeleton" style="width: 45%"></div>
+  </section>
+
+  <section id="refusal" hidden style="display:flex; flex-direction:column; gap:.7rem">
+    <h2 id="refusal-title">This request cannot be approved</h2>
+    <p class="body" id="refusal-body"></p>
+    <p class="body" id="refusal-action" hidden><a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>,
+      then start the connection again from the client.</p>
+  </section>
+
+  <form id="request" hidden style="display:flex; flex-direction:column; gap:1.35rem">
+    <div class="title">
+      <div class="avatar" id="client-avatar" aria-hidden="true"></div>
+      <h1 id="client-name"></h1>
+    </div>
+
+    <p class="lede">
+      is asking to act as <strong>you</strong> — it will see exactly what you see, and nothing more.
+    </p>
+
+    <p class="body" id="acting-summary"></p>
+
+    <div class="rule"></div>
+
+    <div class="cells">
+      <div class="cell">
+        <div class="cell-label">Signed in as</div>
+        <div class="cell-value" id="approver"></div>
+      </div>
+      <div class="cell">
+        <div class="cell-label">Client id</div>
+        <div class="identifier" id="client-id" hidden></div>
+      </div>
+      <div class="cell">
+        <div class="cell-label">Code goes to</div>
+        <div class="cell-value"><code id="redirect-target"></code></div>
+      </div>
+    </div>
+
+    <p class="caution">
+      ⚠ That address is on this machine. If you did not just start this from a client running here,
+      close the page — approving hands a live authorization code to whatever is listening on that port.
+    </p>
+
+    <div id="choices-card" hidden>
+      <fieldset class="choices" id="choices">
+        <legend>Writes as</legend>
+      </fieldset>
+    </div>
+
+    <div class="notice danger" id="failure" hidden></div>
+
+    <div class="actions">
+      <button type="submit" class="primary" id="approve">Approve</button>
+      <button type="button" class="quiet" id="cancel">Cancel</button>
+      <span class="hint" id="lifetime"></span>
+    </div>
+  </form>
+</main>
+{% endblock %}

@@ -40,7 +40,18 @@ public interface AgentConnections {
      *
      * @param clientName what the client called itself — ⚠️ a claim, never an identity
      */
-    AgentConnection open(String agentId, String clientName, String refreshToken, Instant refreshExpiresAt);
+    AgentConnection open(
+            String agentId, String clientName, String clientId,
+            String refreshToken, Instant refreshExpiresAt);
+
+    /**
+     * Every connection ever opened from one registration, newest first.
+     *
+     * <p>⚠️ Including revoked ones, deliberately: the question a product asks with this is "have I seen
+     * this client before, and which agent did it belong to" — and a client reconnecting after it was
+     * disconnected is precisely the case where the answer matters and the live list is empty.
+     */
+    List<AgentConnection> byClientId(String clientId);
 
     /** Replaces the renewal credential with a new one, which is what renewing means. */
     AgentConnection rotate(String connectionId, String refreshToken, Instant refreshExpiresAt);

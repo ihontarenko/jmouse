@@ -1,0 +1,145 @@
+{% extends "consent-frame" %}
+
+{#
+  BADGE — a visitor pass being issued at a desk.
+
+  ⚠️ The red strip is the only saturated thing on the page and it says UNVERIFIED, which is the honest
+  status of every protocol client: it registered itself minutes ago and nobody vouched for it. That
+  strip is the whole argument of this design — remove it and this becomes a nicer Portrait.
+
+  Committed to light.
+#}
+
+{% block "styles" %}
+<style>
+  body { background: #212933; color: #1c2129;
+         font: 15px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+         padding: 2.5rem 1.25rem 4rem; }
+
+  main { max-width: 31rem; margin: 0 auto; background: #fafaf8; border-radius: 7px; overflow: hidden; }
+
+  .strip { background: #b5443a; color: #fff; padding: .6rem 1.2rem;
+           font: 600 10px/1.4 ui-monospace, Menlo, monospace; letter-spacing: .24em;
+           text-transform: uppercase; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+
+  .body { padding: 1.4rem 1.25rem 1.35rem; display: flex; flex-direction: column; gap: 1.05rem; }
+
+  .skeleton { height: 1rem; background: #eceae2; border-radius: 3px; }
+  .skeleton + .skeleton { margin-top: .8rem; }
+
+  h2 { margin: 0; font-size: 1.15rem; font-weight: 620; }
+  p.body-text { margin: 0; font-size: 14px; color: #4b535d; line-height: 1.6; }
+
+  .who { display: flex; align-items: center; gap: .95rem; }
+  .avatar { width: 3.4rem; height: 3.4rem; border-radius: 11px; flex: none;
+            background: hsl(var(--client-hue, 18) 55% 55%); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font: 640 1.15rem/1 system-ui, sans-serif; letter-spacing: -.02em; }
+  .who-text { display: flex; flex-direction: column; gap: .12rem; min-width: 0; }
+  .label { font: 600 9.5px/1 ui-monospace, Menlo, monospace; letter-spacing: .16em;
+           text-transform: uppercase; color: #6e7681; }
+  .who-name { font-size: 1.3rem; font-weight: 640; letter-spacing: -.022em; overflow-wrap: anywhere; }
+  .identifier { font: 11.5px/1.4 ui-monospace, Menlo, monospace; color: #8b939d; overflow-wrap: anywhere; }
+
+  dl.rows { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: .38rem 1.1rem;
+            font-size: 13.5px; border-top: 1px dashed #d6d4cc; border-bottom: 1px dashed #d6d4cc;
+            padding: .85rem 0; }
+  dl.rows dt { font: 600 9.5px/1.9 ui-monospace, Menlo, monospace; letter-spacing: .14em;
+               text-transform: uppercase; color: #6e7681; }
+  dl.rows dd { margin: 0; overflow-wrap: anywhere; }
+  dl.rows dd code { font: 12.5px/1.5 ui-monospace, Menlo, monospace; }
+
+  .caution { font-size: 13px; color: #8a3a2c; line-height: 1.55; }
+
+  fieldset.choices { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .45rem; }
+  fieldset.choices legend { padding: 0; font: 600 9.5px/1 ui-monospace, Menlo, monospace;
+                            letter-spacing: .16em; text-transform: uppercase; color: #6e7681; }
+
+  .choice { display: flex; align-items: flex-start; gap: .6rem; cursor: pointer;
+            border: 1px solid #ddd9cf; border-radius: 5px; padding: .6rem .8rem; background: #fff; }
+  .choice:hover { border-color: #1c2129; }
+  .choice:focus-within { outline: 2px solid #1c2129; outline-offset: 1px; }
+  .choice input { accent-color: #b5443a; margin: .22em 0 0; }
+  .choice-name { font-weight: 560; }
+  .choice-detail { font-size: 12.5px; color: #8b939d; margin-top: .08rem; }
+  .choice.unavailable { opacity: .55; cursor: not-allowed; }
+
+  .notice.danger { border-radius: 5px; padding: .8rem .95rem; font-size: 13px;
+                   background: #f7ddd9; color: #7a241d; }
+
+  .actions { display: flex; gap: .55rem; }
+
+  button.primary { flex: 1; background: #1c2129; color: #fafaf8; border: 0; border-radius: 5px;
+                   font: 600 14px/1 system-ui, sans-serif; padding: .88em 1em; cursor: pointer; }
+  button.primary:disabled { background: #99a0a9; cursor: not-allowed; }
+  button.quiet { background: transparent; color: #6e7681; border: 1px solid #d6d4cc; border-radius: 5px;
+                 font: 14px/1 system-ui, sans-serif; padding: .88em 1.3em; cursor: pointer; }
+  button:focus-visible { outline: 2px solid #1c2129; outline-offset: 2px; }
+
+  .hint { font-size: 12px; color: #8b939d; }
+
+  a { color: #b5443a; }
+</style>
+{% endblock %}
+
+{% block "page" %}
+<main>
+  <div class="strip">
+    <span>Unverified client</span>
+    <span>{{ applicationName }}</span>
+  </div>
+
+  <div class="body">
+    <section id="loading">
+      <div class="skeleton" style="width: 45%"></div>
+      <div class="skeleton" style="width: 90%"></div>
+      <div class="skeleton" style="width: 65%"></div>
+    </section>
+
+    <section id="refusal" hidden style="display:flex; flex-direction:column; gap:.6rem">
+      <h2 id="refusal-title">This request cannot be approved</h2>
+      <p class="body-text" id="refusal-body"></p>
+      <p class="body-text" id="refusal-action" hidden><a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>,
+        then start the connection again from the client.</p>
+    </section>
+
+    <form id="request" hidden style="display:flex; flex-direction:column; gap:1.05rem">
+      <div class="who">
+        <div class="avatar" id="client-avatar" aria-hidden="true"></div>
+        <div class="who-text">
+          <div class="label">Requesting access</div>
+          <div class="who-name" id="client-name"></div>
+          <div class="identifier" id="client-id" hidden></div>
+        </div>
+      </div>
+
+      <p class="body-text" id="acting-summary"></p>
+
+      <dl class="rows">
+        <dt>Acts as</dt><dd id="approver"></dd>
+        <dt>Code to</dt><dd><code id="redirect-target"></code></dd>
+      </dl>
+
+      <p class="caution">
+        ⚠ That address is on this machine. If you did not just start this from a client running here,
+        close the page — approving hands a live authorization code to whatever is listening on that port.
+      </p>
+
+      <div id="choices-card" hidden>
+        <fieldset class="choices" id="choices">
+          <legend>Writes as</legend>
+        </fieldset>
+      </div>
+
+      <div class="notice danger" id="failure" hidden></div>
+
+      <div class="actions">
+        <button type="submit" class="primary" id="approve">Issue pass</button>
+        <button type="button" class="quiet" id="cancel">Cancel</button>
+      </div>
+
+      <div class="hint" id="lifetime"></div>
+    </form>
+  </div>
+</main>
+{% endblock %}

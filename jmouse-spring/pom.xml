@@ -24,10 +24,13 @@
     <modules>
         <module>jmouse-jmt-spring-boot</module>
         <module>jmouse-storage-spring-boot</module>
+        <module>jmouse-storage-management</module>
+        <module>jmouse-avatars</module>
         <module>jmouse-access-spring-boot</module>
         <module>jmouse-ai-management</module>
         <module>jmouse-ai-spring-boot</module>
         <module>jmouse-ai-mcp-authorization</module>
+        <module>jmouse-liveblocks</module>
     </modules>
 
 </project>

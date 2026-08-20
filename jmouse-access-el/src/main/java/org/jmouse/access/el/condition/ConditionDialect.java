@@ -42,6 +42,24 @@ import java.util.List;
  *   <tr><td>filters</td><td>a filter may touch I/O, and none of them answer a question a rule asks</td></tr>
  * </table>
  *
+ * <h2>⚠️ Functions are registered now, and the whitelist moved rather than opened</h2>
+ *
+ * <p>The dialect used to register no functions <em>and</em> no {@link FunctionParser}, which read as one
+ * decision and was two. Only one of them was load-bearing.
+ *
+ * <p>{@link FunctionParser} is pure syntax — {@code Identifier ( ":" Identifier )? Arguments?}. It
+ * reaches no bean: {@code @bean.method()} is a different parser behind a token
+ * {@link ConditionVocabulary} still refuses lexically. Every hole in the table above lives in the
+ * <strong>function registry</strong>, and the registry is now a {@link FunctionCatalog} carrying
+ * {@link AccessFunction} and nothing else — so what a policy may call is what a product deliberately
+ * contributed, and {@code class(…)} is not on that list because nobody implemented the marker for it.
+ *
+ * <p>What this buys is a predicate that may <em>read state</em> — how much has been consumed, what a
+ * counter says — which the five members of a
+ * {@link org.jmouse.access.spi.ConditionContext} cannot answer between them. What it does not buy is a
+ * predicate that may reach anywhere: those are different permissions, and conflating them is why the
+ * dialect was stricter than it needed to be.
+ *
  * <h2>Operators that answer wrongly instead of failing</h2>
  *
  * <p>⚠️ These live in the evaluator rather than in a registry, so no amount of function whitelisting
@@ -65,6 +83,17 @@ import java.util.List;
  */
 public class ConditionDialect implements Extension {
 
+    private final FunctionCatalog functions;
+
+    /** The dialect a product contributing no function gets — byte for byte what it always was. */
+    public ConditionDialect() {
+        this(FunctionCatalog.empty());
+    }
+
+    public ConditionDialect(FunctionCatalog functions) {
+        this.functions = functions == null ? FunctionCatalog.empty() : functions;
+    }
+
     @Override
     public List<AttributeResolver> getAttributeResolvers() {
         return List.of(
@@ -75,13 +104,18 @@ public class ConditionDialect implements Extension {
     }
 
     /**
-     * No functions at all — the registry is where {@code class(…)} and {@code set(…)} would live.
+     * Exactly what a product contributed as an {@link AccessFunction}, and nothing else.
      *
-     * @return an empty list
+     * <p>⚠️ This is the whitelist. {@code class(…)}, {@code set(…)} and the reflection function are
+     * absent not because they are filtered out but because nothing implements the marker for them —
+     * which is a stronger guarantee than a deny-list that has to be kept in step with
+     * {@code jmouse-el}'s catalogue.
+     *
+     * @return the contributed functions, empty where there are none
      */
     @Override
     public List<Function> getFunctions() {
-        return List.of();
+        return functions.functions();
     }
 
     /**
@@ -116,6 +150,11 @@ public class ConditionDialect implements Extension {
      * argument is parsed by the same {@link ExpressionParser} as the rest of the condition, so an
      * argument can hold exactly what a condition can hold.</p>
      *
+     * <p>⚠️ {@link FunctionParser} is here for the same reason and opens no more than
+     * {@link ArgumentsParser} did — it turns {@code name(args)} into a call and resolves nothing. What
+     * a call may resolve to is {@link #getFunctions()}'s answer, and that is where the whitelist is.
+     * Still absent: the bean, lambda and variable-binding parsers.</p>
+     *
      * @return the parsers a condition may be built from
      */
     @Override
@@ -127,6 +166,7 @@ public class ConditionDialect implements Extension {
                 new PropertyParser(),
                 new LiteralParser(),
                 new TestParser(),
+                new FunctionParser(),
                 new ParenthesesParser(),
                 new ArgumentsParser()
         );

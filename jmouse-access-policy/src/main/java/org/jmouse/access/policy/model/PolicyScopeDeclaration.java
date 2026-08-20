@@ -35,5 +35,24 @@ package org.jmouse.access.policy.model;
  * @param parameter the request parameter a route names an instance of this scope with, from
  *                  {@code parameter=…}, or null. Meaningful only for a place
  */
-public record PolicyScopeDeclaration(String name, String nature, String parameter, SourceSpan at) {
+public record PolicyScopeDeclaration(String name, String nature, String parameter,
+                                     String inside, String beside, String requires, SourceSpan at) {
+
+    /**
+     * ⚠️ {@code inside=} and {@code beside=} are two ways to write ONE fact, so writing both is refused
+     * rather than reconciled: they are the same "second statement of the same fact" this block has
+     * always been careful about.
+     */
+    public PolicyScopeDeclaration {
+        if (inside != null && beside != null) {
+            throw new IllegalArgumentException(
+                "'" + name + "' declares both inside= and beside=, which are two ways of saying where "
+                + "it sits. Say one: `beside=` is `inside=` whatever that one is inside.");
+        }
+    }
+
+    /** The older four-argument form, for a scope that states no relation. */
+    public PolicyScopeDeclaration(String name, String nature, String parameter, SourceSpan at) {
+        this(name, nature, parameter, null, null, null, at);
+    }
 }
