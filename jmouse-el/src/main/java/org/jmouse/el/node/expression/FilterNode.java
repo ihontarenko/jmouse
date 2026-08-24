@@ -19,6 +19,20 @@ import org.jmouse.el.node.Visitor;
  */
 public class FilterNode extends AbstractExpression {
 
+    /**
+     * Writes the filter back — {@code left | name(arguments)}.
+     *
+     * <p>The pipe is what declares a value's type at the point it is compared, so a filter that failed
+     * to round-trip would turn a typed comparison back into a textual one — the difference between
+     * {@code 900 > 1000} being false and {@code "900" > "1000"} being true.</p>
+     */
+    @Override
+    public String toSource() {
+        String written = "%s | %s".formatted(left == null ? "" : left.toSource(), name);
+
+        return arguments == null ? written : "%s(%s)".formatted(written, arguments.toSource());
+    }
+
     private final String     name;
     private       Expression left;
     private       Expression arguments;

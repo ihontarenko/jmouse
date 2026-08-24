@@ -43,6 +43,11 @@ public class PostfixUnaryOperation extends UnaryOperation {
     }
 
     @Override
+    public String toSource() {
+        return "%s%s".formatted(operand.toSource(), operator.getSpelling());
+    }
+
+    @Override
     public String toString() {
         return "( %s %s )".formatted(operand, operator.getName());
     }

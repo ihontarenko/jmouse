@@ -112,6 +112,11 @@ public class FunctionNode extends AbstractExpression {
      * @return a string in the format "functionName(ARGUMENTS[n])" where n is the number of arguments
      */
     @Override
+    public String toSource() {
+        return "%s(%s)".formatted(name, arguments == null ? "" : arguments.toSource());
+    }
+
+    @Override
     public String toString() {
         return "f:%s(%s)".formatted(name, arguments == null ? "" : arguments);
     }

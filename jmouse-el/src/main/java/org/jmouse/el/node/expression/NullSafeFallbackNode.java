@@ -96,6 +96,11 @@ public class NullSafeFallbackNode extends AbstractExpression {
      * @return a string representation of this node
      */
     @Override
+    public String toSource() {
+        return "%s ?? %s".formatted(nullable.toSource(), otherwise.toSource());
+    }
+
+    @Override
     public String toString() {
         return "%s ?? %s".formatted(nullable, otherwise);
     }

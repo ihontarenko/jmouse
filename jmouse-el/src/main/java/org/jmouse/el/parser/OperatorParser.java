@@ -58,7 +58,12 @@ public class OperatorParser implements Parser {
                 case InOperator.IN -> {
                     InOperationNode inNode = new InOperationNode();
                     inNode.setLeft(left);
-                    inNode.setRight((Expression) parse(cursor, context));
+                    // The right operand binds at this operator's own precedence, exactly as every binary
+                    // operator does below. Restarting at zero here let it swallow everything that
+                    // followed: "x in list and y == 1" parsed as "x in (list and (y == 1))", whose right
+                    // side is a boolean rather than a collection — and membership of a boolean is false,
+                    // silently, for every row.
+                    inNode.setRight(parseExpression(cursor, context, operator.getPrecedence() + 1));
                     left = inNode;
                 }
                 case TestOperator.IS -> {
@@ -69,7 +74,12 @@ public class OperatorParser implements Parser {
                 case NullCoalesceOperator.NULL_COALESCE -> {
                     NullSafeFallbackNode node = new NullSafeFallbackNode();
                     node.setNullable(left);
-                    node.setOtherwise((Expression) parse(cursor, context));
+                    // Same reasoning as the branch above: restarting at zero let the fallback swallow the
+                    // comparison after it, so "name ?? 'guest' == 'guest'" grouped as
+                    // "name ?? ('guest' == 'guest')" and answered with the name itself where a boolean was
+                    // meant — truthy, and therefore silently always true. Left-associativity is safe here:
+                    // (a ?? b) ?? c and a ?? (b ?? c) yield the same value for every input.
+                    node.setOtherwise(parseExpression(cursor, context, operator.getPrecedence() + 1));
                     left = node;
                 }
                 case FilterOperator.FILTER -> {

@@ -16,6 +16,19 @@ public class NegateUnaryOperation extends UnaryOperation {
         return operator.getCalculator().calculate(operand.evaluate(context));
     }
 
+    /**
+     * Writes the negation back as {@code !(…)}.
+     *
+     * <p>⚠️ The parentheses are not optional. {@code !} binds tighter than the comparison it usually
+     * wraps, so {@code !a == b} re-parses as {@code (!a) == b} — a different question with a plausible
+     * answer. And {@code not} cannot be used instead: in this lexer that word is an alias for
+     * {@code !=}, not a prefix negation.</p>
+     */
+    @Override
+    public String toSource() {
+        return "%s(%s)".formatted(operator.getSpelling(), operand.toSource());
+    }
+
     @Override
     public String toString() {
         return "( %s : %s )".formatted(operator.getName(), operand);

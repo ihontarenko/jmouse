@@ -69,6 +69,17 @@
             <artifactId>logback-classic</artifactId>
             <optional>true</optional>
         </dependency>
+        <!--
+            ⚠️ The first tests this module has ever had. It is the expression engine every other
+            product's rules, validations and calculators run through, and until now nothing checked
+            that `!=` agreed with `==` or that `and` stopped where it should — two defects that were
+            found from three levels up, by a subject area that had stopped working.
+        -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -26,7 +26,10 @@ public enum BasicToken implements Token.Type {
     T_SOL(-1),
 
     // Comparison operators (Group 1000)
-    T_EQ(1010, "=", "==", "eq", "equals"),
+    // ⚠️ `==` first because the first template is the CANONICAL spelling — it is what an un-parse emits.
+    // Both are read as equality, but a document written back as `x = 5` reads as an assignment to anyone
+    // with SQL or Java behind them, and these documents are read by people who are not writing code.
+    T_EQ(1010, "==", "=", "eq", "equals"),
     T_NE(1020, "!=", "<>", "not", "ne", "neq"),
     T_GT(1030, ">", "gt"),
     T_GE(1040, ">=", "gte", "ge"),

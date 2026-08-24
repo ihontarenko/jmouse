@@ -24,7 +24,7 @@ public class HasNoneTest extends AbstractContainsTest {
 
     @Override
     public boolean test(Object value, Arguments arguments, EvaluationContext context, TypeClassifier type) {
-        Collection<?> expected = toExpected(arguments);
+        Collection<?> expected = toExpected(arguments, value);
         Collection<?> actual   = ArraySupport.toCollection(value);
 
         if (value instanceof String string) {

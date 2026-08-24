@@ -113,6 +113,12 @@ public class TernaryNode extends AbstractExpression {
      * @return a formatted string "(condition ? thenBranch : elseBranch)"
      */
     @Override
+    public String toSource() {
+        return "%s ? %s : %s".formatted(
+                condition.toSource(), thenBranch.toSource(), elseBranch.toSource());
+    }
+
+    @Override
     public String toString() {
         return "TERNARY(%s ? %s : %s)".formatted(condition, thenBranch, elseBranch);
     }

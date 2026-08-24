@@ -53,9 +53,21 @@ abstract public class LiteralNode<T> extends AbstractExpression {
         return value == null ? "NULL" : value.toString();
     }
 
+    /**
+     * Writes the literal back in the syntax it was read from.
+     *
+     * <p>⚠️ <strong>Not {@code toString()}.</strong> That renders a null value as {@code NULL}, which the
+     * lexer reads back as an identifier rather than the null literal — a document that still parses and
+     * no longer says the same thing. A silently different document is worse than a refusal to write one,
+     * because it is stored and then read back as fact.</p>
+     *
+     * <p>Everything else — numbers, booleans — already prints in a form the lexer accepts.
+     * {@link org.jmouse.el.node.expression.literal.StringLiteralNode} overrides this, because a string
+     * needs its quotes and holds them already.</p>
+     */
     @Override
     public String toSource() {
-        return toString();
+        return value == null ? "null" : value.toString();
     }
 
     /**

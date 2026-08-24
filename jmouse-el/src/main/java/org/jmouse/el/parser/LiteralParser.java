@@ -68,15 +68,17 @@ public class LiteralParser implements Parser {
                 String raw = token.value();
 
                 if (raw.contains(".") || raw.toLowerCase().contains("e")) {
-                    BigDecimal big  = new BigDecimal(raw);
-                    float      f    = big.floatValue();
-                    double     d    = big.doubleValue();
-                    BigDecimal bigF = new BigDecimal(Float.toString(f));
-                    BigDecimal bigD = BigDecimal.valueOf(d);
+                    // ⚠️ A decimal with no suffix is a DOUBLE, and choosing the narrowest type that
+                    // happens to round-trip its text was quietly wrong. `0.8` prints back exactly as a
+                    // float, so it became one — and `500 * 0.8` then answered 400.0000059604645 while
+                    // `500 * 0.8d` answered 400.0. Nothing raised; a total was simply a little wrong.
+                    //
+                    // Java, and every language somebody arrives here from, reads an unsuffixed decimal as
+                    // a double. Somebody who wants a float writes `0.8f`, which the suffix path handles.
+                    BigDecimal big = new BigDecimal(raw);
+                    double     d   = big.doubleValue();
 
-                    if (big.compareTo(bigF) == 0) {
-                        parent.add(new FloatLiteralNode(f));
-                    } else if (big.compareTo(bigD) == 0) {
+                    if (big.compareTo(BigDecimal.valueOf(d)) == 0) {
                         parent.add(new DoubleLiteralNode(d));
                     } else {
                         parent.add(new BigDecimalLiteralNode(big));

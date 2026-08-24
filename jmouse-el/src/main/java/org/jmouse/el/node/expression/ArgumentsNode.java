@@ -63,4 +63,27 @@ public class ArgumentsNode extends AbstractExpression {
     public String toString() {
         return "ARGUMENTS: " + getChildren();
     }
+
+    /**
+     * Writes the arguments back as a comma-separated list, without brackets of any kind.
+     *
+     * <p>The surrounding punctuation belongs to whoever holds the arguments — parentheses for a call,
+     * square brackets for an array literal — so this renders the contents and nothing else.</p>
+     */
+    @Override
+    public String toSource() {
+        StringBuilder written = new StringBuilder();
+
+        for (Node child : getChildren()) {
+            if (child instanceof Expression expression) {
+                if (!written.isEmpty()) {
+                    written.append(", ");
+                }
+
+                written.append(expression.toSource());
+            }
+        }
+
+        return written.toString();
+    }
 }

@@ -14,6 +14,23 @@ import org.jmouse.el.node.Visitor;
  */
 public class TestNode extends AbstractExpression {
 
+    /**
+     * Writes the test back — {@code left is [not] name(arguments)}.
+     *
+     * <p>⚠️ The negation is written as {@code is not}, which is how it is read. {@code not} on its own
+     * is an alias for {@code !=} in this lexer rather than a prefix negation, so emitting it anywhere
+     * else would produce text that does not parse.</p>
+     */
+    @Override
+    public String toSource() {
+        String written = "%s is %s%s".formatted(
+                left == null ? "" : left.toSource(),
+                negated ? "not " : "",
+                name);
+
+        return arguments == null ? written : "%s(%s)".formatted(written, arguments.toSource());
+    }
+
     private final String     name;
     private       Expression arguments;
     private       Expression left;

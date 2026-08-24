@@ -25,7 +25,11 @@ public class ExpressionSplitter implements Splitter<List<RawToken>, TokenizableS
     private static final Pattern EXPRESSION_PATTERN = Pattern.compile(
             "[^\\S\\r\\n]*(?:(?<IDENTIFIER>[a-zA-Z_][a-zA-Z0-9_]*)" +
             "|(?<NUMBER>(?<!\\d)([+-]?\\d+(\\.\\d+)?([Ee][+-]?\\d+)?[FLIDSBClfidsbc]?))" +
-            "|(?<STRING>'[^'|\\n\\r]*'|\"[^\"|\\n\\r]*\")" +
+            // ⚠️ The character classes below must NOT exclude '|'. They used to read [^'|\n\r], which
+            // looks like alternation and is not: inside a character class the pipe is a literal, so the
+            // effect was to forbid the one character quoting exists to protect. `'a|b'` failed to parse
+            // anywhere in the language — and a value like "3300|mΩ" is ordinary data, not an edge case.
+            "|(?<STRING>'[^'\\n\\r]*'|\"[^\"\\n\\r]*\")" +
             "|(?<OPERATOR>\\?\\?|->|\\.\\.|<=|>=|!=|==|&&|\\|\\||-=|\\+=|\\+\\+|--|\\*\\*|[-+*/%^><=!])" +
             "|(?<NL>[\\n\\r]+)" +
             "|(?<OTHER>\\S))"

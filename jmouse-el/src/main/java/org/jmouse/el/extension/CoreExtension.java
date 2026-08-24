@@ -91,6 +91,12 @@ public class CoreExtension implements Extension {
                 new ClassFilter(),
                 new LengthFilter(),
                 new SplitFilter(),
+                // ⚠️ Beside `split`, not instead of it. `split` takes a REGEX and is right for that;
+                // these take a LITERAL separator, which is what makes them translatable into a data
+                // source's own SUBSTRING_INDEX / split_part with the same answer. Two names because they
+                // are two different promises — see BeforeFilter.
+                new BeforeFilter(),
+                new AfterFilter(),
                 new JoinFilter(),
                 new LastFilter(),
                 new FirstFilter(),

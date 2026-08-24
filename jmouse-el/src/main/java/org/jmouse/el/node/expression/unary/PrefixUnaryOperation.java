@@ -48,6 +48,17 @@ public class PrefixUnaryOperation extends UnaryOperation {
         return value;
     }
 
+    /**
+     * Writes the operation back — {@code !x}, {@code ++i}.
+     *
+     * <p>No space between operator and operand: {@code ++ i} would lex as two separate {@code +}
+     * operators followed by a name, which parses and means something else entirely.</p>
+     */
+    @Override
+    public String toSource() {
+        return "%s%s".formatted(operator.getSpelling(), operand.toSource());
+    }
+
     @Override
     public String toString() {
         return "( %s %s )".formatted(operator.getName(), operand);

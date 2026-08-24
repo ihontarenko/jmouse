@@ -51,7 +51,7 @@ public enum ComparisonCalculator implements Calculator<Boolean> {
 
     /**
      * Not equal ({@code !=}).
-     * Returns {@code true} if {@code !left.equals(right)}.
+     * Returns {@code true} if the two are not equal — null-safe, and the exact negation of {@code ==}.
      */
     NOT_EQUAL(new NotEqualOperation());
 
@@ -131,12 +131,29 @@ public enum ComparisonCalculator implements Calculator<Boolean> {
     }
 
     /**
-     * Not equal operation ({@code !=}).
+     * Not equal operation ({@code !=}) — <strong>the exact negation of {@link EqualOperation}</strong>.
+     *
+     * <p>⚠️ <strong>It delegates rather than repeating the logic, and that is the whole fix.</strong>
+     * This used to be {@code !left.equals(right)} with no null handling at all, while {@code ==} beside
+     * it handled null carefully. So {@code a == b} answered and {@code a != b} <em>threw</em> for the
+     * same pair — an asymmetry nobody would guess and nothing announced.
+     *
+     * <p>Where that lands is worse than a stack trace. In an authorization rule an operator that throws
+     * makes the condition unanswerable, and an unanswerable <em>deny</em> is applied fail-closed — so
+     * {@code purpose != 'ASSET'} refused every call that published no purpose. One missing null check
+     * took a whole subject area off the air (Innoventa INVT-0126), and it stayed invisible until
+     * somebody made the first workspace of that kind.
+     *
+     * <p>Negating the sibling is what stops the two ever disagreeing again. Repeating the null handling
+     * here would be the same bug waiting for the next edit.
      */
     public static class NotEqualOperation implements BiPredicate<Object, Object> {
+
+        private static final EqualOperation EQUALITY = new EqualOperation();
+
         @Override
         public boolean test(Object left, Object right) {
-            return !left.equals(right);
+            return !EQUALITY.test(left, right);
         }
     }
 

@@ -1,13 +1,12 @@
 package org.jmouse.el.node.expression;
 
-import org.jmouse.core.reflection.TypeInformation;
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.extension.Arguments;
-import org.jmouse.el.extension.test.HasAnyTest;
 import org.jmouse.el.node.AbstractExpression;
 import org.jmouse.el.node.Expression;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 
 public class InOperationNode extends AbstractExpression {
 
@@ -30,27 +29,44 @@ public class InOperationNode extends AbstractExpression {
         this.right = right;
     }
 
+    /**
+     * Answers whether the left value is one of the elements on the right.
+     *
+     * <p>⚠️ <strong>The membership is tested here rather than delegated to {@code hasAny}, and that is
+     * the whole point of this method.</strong> Handing an already-unpacked collection to that test as
+     * <em>varargs</em> let it re-interpret a single argument as a container of its own — so a
+     * one-element list of one string was expanded into that string's characters, and
+     * {@code 'abc' in ['abc']} answered <em>false</em> while {@code 'a' in ['abc']} answered
+     * <em>true</em>. Both silently. That unwrapping is correct behaviour for {@code hasAny}, whose
+     * contract is variadic; it was simply never the question this operator asks.</p>
+     */
     @Override
     public Object evaluate(EvaluationContext context) {
-        Object[] array;
-        Object   target = right.evaluate(context);
+        Collection<?> elements;
+        Object        target = right.evaluate(context);
 
-        if (target instanceof Collection<?> objects) {
-            array = objects.toArray();
-        } else if (target instanceof Object[] objects) {
-            array = objects;
+        if (target instanceof Collection<?> collection) {
+            elements = collection;
+        } else if (target instanceof Object[] array) {
+            elements = Arrays.asList(array);
         } else {
             return false;
         }
 
         Object value = left.evaluate(context);
 
-        return new HasAnyTest().test(
-                value,
-                Arguments.forArray(array),
-                context,
-                TypeInformation.forInstance(value)
-        );
+        for (Object element : elements) {
+            if (Objects.equals(value, element)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public String toSource() {
+        return "%s in %s".formatted(left.toSource(), right.toSource());
     }
 
     @Override
