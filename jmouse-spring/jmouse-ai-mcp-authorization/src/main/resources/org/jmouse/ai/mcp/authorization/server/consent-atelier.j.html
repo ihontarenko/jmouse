@@ -1,0 +1,154 @@
+{% extends "consent-frame" %}
+
+{#
+  ATELIER — warm paper with a coloured edge, set in a serif.
+
+  The other document-like design, and deliberately the opposite of `grant`: that one is cold grey and
+  reads as a record, this one is warm and reads as correspondence. Same seriousness, different
+  temperature — worth having both, because a product whose whole palette is warm looks wrong wearing
+  the cold one.
+
+  The stacked sheets behind the card are two absolutely positioned rectangles, so the effect costs no
+  markup a screen reader has to walk past.
+#}
+
+{% block "pageTitle" %}Authorize · {{ applicationName }} · jMouse MCP{% endblock %}
+
+{% block "styles" %}
+<style>
+  :root { --ink: #2a2118; --muted: #7d6f60; --line: #e4d9c9; --paper: #fdfaf4; --accent: #b4541f; }
+
+  body {
+    min-height: 100dvh; color: var(--ink); padding: clamp(1.5rem, 6vh, 3.5rem) 1.2rem;
+    font: 15px/1.68 ui-serif, "Iowan Old Style", Palatino, Georgia, serif;
+    display: grid; place-items: center;
+    background:
+      radial-gradient(55vmax 45vmax at 85% 8%, #f6e6d3 0%, transparent 62%),
+      radial-gradient(50vmax 40vmax at 8% 92%, #efe7d8 0%, transparent 60%),
+      #f4ede1;
+  }
+
+  .stack { position: relative; width: 100%; max-width: 33rem; }
+  .stack::before, .stack::after { content: ""; position: absolute; inset: 0; background: #fdfaf4;
+                                  border: 1px solid var(--line); border-radius: 4px; }
+  .stack::before { transform: rotate(-1.1deg) translateY(6px); }
+  .stack::after  { transform: rotate(.7deg) translateY(3px); }
+
+  /* z-index, because the two stacked sheets are pseudo-elements of the same box and ::after would
+     otherwise paint over the page. */
+  main { position: relative; z-index: 1; background: var(--paper); border: 1px solid var(--line); border-radius: 4px;
+         border-top: 4px solid var(--accent); box-shadow: 0 22px 50px -28px rgba(70,45,20,.5);
+         padding: clamp(1.6rem, 5vw, 2.6rem); display: flex; flex-direction: column; gap: 1.35rem; }
+
+  .brand { display: flex; align-items: center; gap: .7rem; }
+  .mark { width: 32px; height: 32px; border-radius: 4px; flex: none; display: grid; place-items: center;
+          background: var(--accent); }
+  .mark svg { width: 17px; height: 17px; }
+  .brand b { font: 600 14.5px/1.3 ui-sans-serif, system-ui, sans-serif; }
+  .brand small { display: block; font: 10px/1.5 ui-sans-serif, system-ui, sans-serif; color: var(--muted);
+                 letter-spacing: .18em; text-transform: uppercase; }
+
+  h1 { margin: 0; font-size: clamp(1.5rem, 4.2vw, 1.85rem); font-weight: 500; letter-spacing: -.012em; }
+  h2 { margin: 0; font-size: 1.2rem; font-weight: 500; }
+  p { margin: 0; color: #4a3f34; }
+  p.muted { color: var(--muted); }
+
+  .skeleton { height: 1rem; background: #efe7da; border-radius: 2px; }
+  .skeleton + .skeleton { margin-top: .8rem; }
+
+  dl { margin: 0; display: grid; grid-template-columns: 10rem 1fr; gap: 0 1.2rem; }
+  @media (max-width: 32rem) { dl { grid-template-columns: 1fr; } }
+  dt { font: 600 10px/2.2 ui-sans-serif, system-ui, sans-serif; letter-spacing: .16em; text-transform: uppercase;
+       color: var(--muted); padding: .45rem 0; border-bottom: 1px solid var(--line); }
+  dd { margin: 0; padding: .45rem 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; font-size: 14.5px; }
+  dd code { font: 13px/1.5 ui-monospace, Menlo, monospace; }
+
+  .caution { border-left: 3px solid var(--accent); background: #fbf1e6; padding: .9rem 1.1rem;
+             font-size: 14px; line-height: 1.6; color: #5e4429; }
+  .caution strong { color: var(--accent); font-weight: 600; }
+
+  #choices-card { display: grid; gap: .5rem; }
+  .choices-label { font: 600 10px/1 ui-sans-serif, system-ui, sans-serif; letter-spacing: .16em;
+                   text-transform: uppercase; color: var(--muted); }
+  .choice { display: flex; gap: .7rem; align-items: flex-start; cursor: pointer; padding: .6rem .8rem;
+            border: 1px solid var(--line); border-radius: 3px; background: #fbf7ef; transition: border-color .15s, background .15s; }
+  .choice:hover { border-color: #d8ab86; background: #fbefe3; }
+  .choice:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .choice input { accent-color: var(--accent); margin: .35em 0 0; }
+  .choice-name { font-size: 15px; }
+  .choice-detail { color: var(--muted); font-size: 13px; margin-top: .1rem; }
+  .choice.unavailable { opacity: .5; cursor: not-allowed; }
+
+  .failure { border-left: 3px solid #9b2c1e; background: #fbeae7; padding: .8rem 1rem; font-size: 14px; color: #8a2417; }
+
+  .actions { display: flex; align-items: center; gap: .9rem; flex-wrap: wrap;
+             border-top: 1px solid var(--line); padding-top: 1.2rem; }
+  button { cursor: pointer; border-radius: 3px; font-family: ui-sans-serif, system-ui, sans-serif; }
+  button.primary { border: 0; padding: .85em 2em; color: #fff8f0; background: var(--accent);
+                   font-weight: 600; font-size: 14.5px; letter-spacing: .01em; }
+  button.primary:hover { background: #9c4718; }
+  button.primary:disabled { background: #cbbba9; cursor: not-allowed; }
+  button.quiet { background: transparent; color: #5e5245; border: 0; border-bottom: 1px solid #b9a893;
+                 padding: .4em 0; font-size: 14.5px; border-radius: 0; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  .lifetime { margin-left: auto; font: italic 13px/1.5 ui-serif, Georgia, serif; color: var(--muted); }
+  a { color: var(--accent); }
+  form { display: flex; flex-direction: column; gap: 1.35rem; }
+</style>
+{% endblock %}
+
+{% block "page" %}
+<div class="stack">
+  <main>
+    <div class="brand">
+      <span class="mark"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 21 12l-9 9-9-9 9-9Z" fill="#fff8f0" opacity=".92"/><circle cx="12" cy="12" r="3" fill="#b4541f"/></svg></span>
+      <span><b>{{ applicationName }}</b><small>jMouse · Model Context Protocol</small></span>
+    </div>
+
+    <section id="loading">
+      <div class="skeleton" style="width:50%"></div>
+      <div class="skeleton" style="width:92%"></div>
+      <div class="skeleton" style="width:68%"></div>
+    </section>
+
+    <section id="refusal" hidden>
+      <h2 id="refusal-title">This request cannot be approved</h2>
+      <p id="refusal-body" style="margin-top:.55rem"></p>
+      <p id="refusal-action" style="margin-top:.55rem" hidden><a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>, then start the connection again from the client.</p>
+    </section>
+
+    <form id="request" hidden>
+      <div>
+        <h1>Permission to act as you</h1>
+        <p style="margin-top:.6rem"><strong id="client-name"></strong> is asking for it.</p>
+        <p class="muted" style="margin-top:.4rem" id="acting-summary"></p>
+      </div>
+
+      <dl>
+        <dt>Granted by</dt><dd id="approver"></dd>
+        <dt>Code goes to</dt><dd><code id="redirect-target"></code></dd>
+      </dl>
+
+      <div class="caution">
+        That address is on <strong>this machine</strong>. If you did not just start this from a client
+        running here, close the page — approving would hand a live authorization code to whatever is
+        listening on that port.
+      </div>
+
+      <div id="choices-card" hidden>
+        <div class="choices-label">Acting as</div>
+        <div id="choices" style="display:grid;gap:.5rem"></div>
+      </div>
+
+      <div class="failure" id="failure" hidden></div>
+
+      <div class="actions">
+        <button type="submit" class="primary" id="approve">Approve</button>
+        <button type="button" class="quiet" id="cancel">Decline</button>
+        <span class="lifetime" id="lifetime"></span>
+      </div>
+    </form>
+  </main>
+</div>
+{% endblock %}

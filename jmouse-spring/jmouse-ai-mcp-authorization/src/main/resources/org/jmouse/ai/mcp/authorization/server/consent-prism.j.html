@@ -1,0 +1,143 @@
+{% extends "consent-frame" %}
+
+{#
+  PRISM — a conic-gradient edge around a dark card, and the client wearing its own hue.
+
+  The most brand-forward of the set: the whole spectrum sits in the border rather than in the content,
+  so the page is colourful without any single element competing with the primary button. The second of
+  the two client-first designs — it carries the optional avatar, kept small, beside the name.
+
+  The rotating edge is one element and one keyframe. Reduced motion parks it, and parked it still reads
+  as a gradient border rather than as a broken effect, which is the bar.
+#}
+
+{% block "pageTitle" %}Authorize · {{ applicationName }} · jMouse MCP{% endblock %}
+
+{% block "styles" %}
+<style>
+  :root { --ink: #eceef7; --muted: #969db8; --line: rgba(255,255,255,.09); --accent: #ff7ac6; }
+
+  body { min-height: 100dvh; color: var(--ink); padding: 2rem 1.1rem; display: grid; place-items: center;
+         font: 15px/1.6 ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+         background: radial-gradient(60vmax 50vmax at 50% 0, #191b2c 0%, transparent 60%), #08090f; }
+
+  .edge { position: relative; width: 100%; max-width: 32rem; padding: 2px; border-radius: 22px; overflow: hidden;
+          box-shadow: 0 30px 70px -28px rgba(0,0,0,.85); }
+  .edge::before { content: ""; position: absolute; inset: -60%; z-index: 0;
+    background: conic-gradient(from 0deg, #ff7ac6, #7c6bff, #35d6f0, #6ee7a8, #ffd166, #ff7ac6);
+    animation: spin 14s linear infinite; }
+  @keyframes spin { to { transform: rotate(1turn); } }
+
+  main { position: relative; z-index: 1; background: #0d0f19; border-radius: 20px;
+         padding: clamp(1.5rem, 4.5vw, 2.3rem); display: flex; flex-direction: column; gap: 1.3rem; }
+
+  .brand { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .brand-name { font-size: 14px; font-weight: 600; }
+  .brand-name small { display: block; font-size: 10.5px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+  #client-avatar { width: 2.4rem; height: 2.4rem; border-radius: 12px; display: grid; place-items: center;
+                   font: 650 .95rem/1 ui-sans-serif, system-ui, sans-serif; color: #0a0b11; flex: none;
+                   background: hsl(var(--client-hue, 300) 80% 70%); }
+
+  h1 { margin: 0; font-size: clamp(1.35rem, 4vw, 1.62rem); font-weight: 640; letter-spacing: -.025em; }
+  h2 { margin: 0; font-size: 1.12rem; font-weight: 600; }
+  p { margin: 0; color: var(--muted); font-size: 14px; }
+  #client-id { font: 11.5px/1.4 ui-monospace, Menlo, monospace; color: #7f87a5; overflow-wrap: anywhere; }
+
+  .skeleton { height: .9rem; border-radius: 6px; background: rgba(255,255,255,.07); }
+  .skeleton + .skeleton { margin-top: .7rem; }
+
+  dl { margin: 0; display: grid; gap: .45rem; font-size: 13.5px; }
+  dl div { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline;
+           padding: .6rem .85rem; border-radius: 12px; background: rgba(255,255,255,.04); }
+  dt { color: var(--muted); font-size: 11px; letter-spacing: .09em; text-transform: uppercase; flex: none; }
+  dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+  dd code { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; color: #d3d8ec; }
+
+  .caution { border-radius: 12px; padding: .8rem .95rem; font-size: 13px; line-height: 1.55;
+             background: rgba(255,209,102,.08); border: 1px solid rgba(255,209,102,.26); color: #f3d9a4; }
+  .caution strong { color: #ffd166; }
+
+  #choices-card { display: grid; gap: .45rem; }
+  .choices-label { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+  .choice { display: flex; gap: .7rem; align-items: flex-start; cursor: pointer; padding: .65rem .8rem;
+            border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.025);
+            transition: border-color .15s, background .15s; }
+  .choice:hover { border-color: rgba(255,122,198,.5); background: rgba(255,122,198,.07); }
+  .choice:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .choice input { accent-color: var(--accent); margin: .3em 0 0; }
+  .choice-name { font-size: 14px; }
+  .choice-detail { color: var(--muted); font-size: 12.5px; margin-top: .1rem; }
+  .choice.unavailable { opacity: .45; cursor: not-allowed; }
+
+  .failure { border-radius: 12px; padding: .75rem .95rem; font-size: 13px;
+             background: rgba(255,99,99,.1); border: 1px solid rgba(255,99,99,.32); color: #ffb9b9; }
+
+  .actions { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; }
+  button { border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 14.5px; }
+  button.primary { flex: 1 1 11rem; border: 0; padding: .9em 1.4em; color: #12060f;
+                   background: linear-gradient(115deg, #ff7ac6, #a78bfa 55%, #56d8f0);
+                   box-shadow: 0 14px 32px -14px rgba(255,122,198,.85); }
+  button.primary:disabled { background: rgba(255,255,255,.12); color: var(--muted); box-shadow: none; cursor: not-allowed; }
+  button.quiet { background: transparent; color: var(--muted); border: 1px solid var(--line); padding: .9em 1.3em; }
+  button.quiet:hover { color: var(--ink); border-color: rgba(255,255,255,.26); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  .lifetime { width: 100%; font-size: 12.5px; color: var(--muted); }
+  a { color: #ffa8d9; }
+  form { display: flex; flex-direction: column; gap: 1.3rem; }
+</style>
+{% endblock %}
+
+{% block "page" %}
+<div class="edge">
+  <main>
+    <div class="brand">
+      <span class="brand-name">{{ applicationName }}<small>jMouse · Model Context Protocol</small></span>
+      <span id="client-avatar" aria-hidden="true"></span>
+    </div>
+
+    <section id="loading">
+      <div class="skeleton" style="width:55%"></div>
+      <div class="skeleton" style="width:92%"></div>
+      <div class="skeleton" style="width:70%"></div>
+    </section>
+
+    <section id="refusal" hidden>
+      <h2 id="refusal-title">This request cannot be approved</h2>
+      <p id="refusal-body" style="margin-top:.5rem"></p>
+      <p id="refusal-action" style="margin-top:.5rem" hidden><a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>, then start the connection again from the client.</p>
+    </section>
+
+    <form id="request" hidden>
+      <div>
+        <h1>Authorize <span id="client-name"></span></h1>
+        <div style="margin-top:.35rem"><code id="client-id"></code></div>
+        <p style="margin-top:.6rem" id="acting-summary"></p>
+      </div>
+
+      <dl>
+        <div><dt>Granted by</dt><dd id="approver"></dd></div>
+        <div><dt>Code goes to</dt><dd><code id="redirect-target"></code></dd></div>
+      </dl>
+
+      <div class="caution">
+        That address is on <strong>this machine</strong>. If you did not just start this from a client
+        running here, close the page.
+      </div>
+
+      <div id="choices-card" hidden>
+        <div class="choices-label">Acting as</div>
+        <div id="choices" style="display:grid;gap:.45rem"></div>
+      </div>
+
+      <div class="failure" id="failure" hidden></div>
+
+      <div class="actions">
+        <button type="submit" class="primary" id="approve">Approve</button>
+        <button type="button" class="quiet" id="cancel">Cancel</button>
+        <span class="lifetime" id="lifetime"></span>
+      </div>
+    </form>
+  </main>
+</div>
+{% endblock %}

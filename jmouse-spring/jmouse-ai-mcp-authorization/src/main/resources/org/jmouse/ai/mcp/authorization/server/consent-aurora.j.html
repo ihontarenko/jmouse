@@ -1,0 +1,160 @@
+{% extends "consent-frame" %}
+
+{#
+  AURORA — the sign-in page look, applied to the one screen that is not a sign-in.
+
+  A slow aurora behind glass. What makes it allowable here, on a page that argues elsewhere for
+  friction, is that the friction lives in the WORDS: the caution is stated in full above the button and
+  the address is set in monospace. Beauty in the background costs the decision nothing.
+
+  The blobs are three blurred radial gradients on one layer, not an image and not a canvas. This page
+  ships as one document with no assets, and that rule is what makes a shared screen possible at all.
+
+  Motion is opted out of by the frame's reduced-motion rule; the composition still reads when it never
+  moves, which is the test a decorative animation has to pass.
+#}
+
+{% block "pageTitle" %}Authorize · {{ applicationName }} · jMouse MCP{% endblock %}
+
+{% block "styles" %}
+<style>
+  :root {
+    --ink: #e9ecf5; --muted: #98a0bb; --line: rgba(255,255,255,.10);
+    --glass: rgba(20,22,35,.62); --accent: #8b7bff; --accent-ink: #0b0c14;
+  }
+
+  body {
+    min-height: 100dvh; background: #07080f; color: var(--ink);
+    font: 15px/1.6 ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+    display: grid; place-items: center; padding: 2rem 1.1rem; position: relative; overflow-x: hidden;
+  }
+
+  .aurora { position: fixed; inset: -25%; z-index: 0; filter: blur(90px); opacity: .75; }
+  .aurora i { position: absolute; display: block; border-radius: 50%; }
+  .aurora i:nth-child(1) { width: 46vmax; height: 46vmax; left: 4%;  top: 6%;
+    background: radial-gradient(circle, #6d5cff 0%, transparent 65%); animation: drift1 26s ease-in-out infinite alternate; }
+  .aurora i:nth-child(2) { width: 40vmax; height: 40vmax; right: 2%; top: 22%;
+    background: radial-gradient(circle, #17a2b8 0%, transparent 65%); animation: drift2 31s ease-in-out infinite alternate; }
+  .aurora i:nth-child(3) { width: 34vmax; height: 34vmax; left: 32%; bottom: 0;
+    background: radial-gradient(circle, #d946a8 0%, transparent 65%); animation: drift3 23s ease-in-out infinite alternate; }
+  @keyframes drift1 { to { transform: translate3d(9vw, 7vh, 0) scale(1.15); } }
+  @keyframes drift2 { to { transform: translate3d(-8vw, 10vh, 0) scale(1.1); } }
+  @keyframes drift3 { to { transform: translate3d(6vw, -9vh, 0) scale(1.2); } }
+
+  main {
+    position: relative; z-index: 1; width: 100%; max-width: 32rem;
+    background: var(--glass); border: 1px solid var(--line); border-radius: 20px;
+    backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%);
+    box-shadow: 0 30px 80px -20px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08);
+    padding: clamp(1.5rem, 4.5vw, 2.3rem); display: flex; flex-direction: column; gap: 1.35rem;
+  }
+
+  .brand { display: flex; align-items: center; gap: .7rem; }
+  .mark { width: 34px; height: 34px; border-radius: 10px; flex: none;
+          background: linear-gradient(140deg, var(--accent), #4dd4e0); display: grid; place-items: center; }
+  .mark svg { width: 18px; height: 18px; }
+  .brand b { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+  .brand small { display: block; font-size: 11px; color: var(--muted); letter-spacing: .09em; text-transform: uppercase; }
+
+  h1 { margin: 0; font-size: clamp(1.35rem, 4vw, 1.65rem); font-weight: 600; letter-spacing: -.02em; }
+  p { margin: 0; color: var(--muted); }
+  h2 { margin: 0; font-size: 1.15rem; font-weight: 600; }
+
+  .skeleton { height: .95rem; border-radius: 6px; background: rgba(255,255,255,.08); }
+  .skeleton + .skeleton { margin-top: .75rem; }
+
+  dl { margin: 0; display: grid; gap: .55rem; }
+  dl div { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline;
+           padding: .6rem .85rem; border-radius: 12px; background: rgba(255,255,255,.045); }
+  dt { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); flex: none; }
+  dd { margin: 0; text-align: right; overflow-wrap: anywhere; font-size: 13.5px; }
+  dd code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; color: #cfd5ea; }
+
+  .caution { border-radius: 12px; padding: .85rem 1rem; font-size: 13.5px; line-height: 1.55;
+             background: rgba(255,183,77,.09); border: 1px solid rgba(255,183,77,.25); color: #f2d7a6; }
+  .caution strong { color: #ffd28a; }
+
+  #choices-card { display: grid; gap: .5rem; }
+  .choices-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .choice { display: flex; gap: .7rem; align-items: flex-start; cursor: pointer;
+            padding: .7rem .85rem; border-radius: 12px; border: 1px solid var(--line);
+            background: rgba(255,255,255,.03); transition: border-color .15s, background .15s; }
+  .choice:hover { border-color: rgba(139,123,255,.5); background: rgba(139,123,255,.07); }
+  .choice:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .choice input { accent-color: var(--accent); margin: .3em 0 0; }
+  .choice-name { font-size: 14.5px; }
+  .choice-detail { color: var(--muted); font-size: 12.5px; margin-top: .1rem; }
+  .choice.unavailable { opacity: .45; cursor: not-allowed; }
+
+  .failure { border-radius: 12px; padding: .8rem 1rem; font-size: 13.5px;
+             background: rgba(255,99,99,.12); border: 1px solid rgba(255,99,99,.35); color: #ffc4c4; }
+
+  .actions { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+  button { border-radius: 11px; cursor: pointer; font-weight: 600; font-size: 14.5px; }
+  button.primary { flex: 1 1 12rem; border: 0; padding: .85em 1.4em; color: var(--accent-ink);
+                   background: linear-gradient(140deg, #a99bff, #5ee0e8);
+                   box-shadow: 0 10px 30px -10px rgba(139,123,255,.8); }
+  button.primary:disabled { background: rgba(255,255,255,.12); color: var(--muted); box-shadow: none; cursor: not-allowed; }
+  button.quiet { background: transparent; color: var(--muted); border: 1px solid var(--line); padding: .85em 1.3em; }
+  button.quiet:hover { color: var(--ink); border-color: rgba(255,255,255,.28); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  .lifetime { width: 100%; font-size: 12.5px; color: var(--muted); }
+  a { color: #b9aeff; }
+
+  form { display: flex; flex-direction: column; gap: 1.35rem; }
+</style>
+{% endblock %}
+
+{% block "page" %}
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<main>
+  <div class="brand">
+    <span class="mark"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 21 12l-9 9-9-9 9-9Z" fill="#0b0c14" opacity=".85"/><circle cx="12" cy="12" r="3" fill="#fff"/></svg></span>
+    <span><b>{{ applicationName }}</b><small>jMouse · Model Context Protocol</small></span>
+  </div>
+
+  <section id="loading">
+    <div class="skeleton" style="width:55%"></div>
+    <div class="skeleton" style="width:92%"></div>
+    <div class="skeleton" style="width:70%"></div>
+  </section>
+
+  <section id="refusal" hidden>
+    <h2 id="refusal-title">This request cannot be approved</h2>
+    <p id="refusal-body"></p>
+    <p id="refusal-action" hidden><a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>, then start the connection again from the client.</p>
+  </section>
+
+  <form id="request" hidden>
+    <div>
+      <h1>Authorize <span id="client-name"></span></h1>
+      <p style="margin-top:.5rem" id="acting-summary"></p>
+    </div>
+
+    <dl>
+      <div><dt>Granted by</dt><dd id="approver"></dd></div>
+      <div><dt>Code goes to</dt><dd><code id="redirect-target"></code></dd></div>
+    </dl>
+
+    <div class="caution">
+      That address is on <strong>this machine</strong>. If you did not just start this from a client
+      running here, close the page — approving hands a live code to whatever is listening on that port.
+    </div>
+
+    <div id="choices-card" hidden>
+      <div class="choices-label">Acting as</div>
+      <div id="choices" style="display:grid;gap:.5rem"></div>
+    </div>
+
+    <div class="failure" id="failure" hidden></div>
+
+    <div class="actions">
+      <button type="submit" class="primary" id="approve">Approve</button>
+      <button type="button" class="quiet" id="cancel">Cancel</button>
+      <span class="lifetime" id="lifetime"></span>
+    </div>
+  </form>
+</main>
+{% endblock %}

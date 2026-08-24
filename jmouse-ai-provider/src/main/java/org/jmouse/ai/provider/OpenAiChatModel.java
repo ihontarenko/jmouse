@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -217,7 +218,7 @@ public final class OpenAiChatModel extends HttpChatModel {
     }
 
     /**
-     * Tool results first, then whatever the user actually said.
+     * Tool results first, then the pictures, then whatever the user actually said.
      *
      * <p>⚠️ The order is not cosmetic: this provider requires the messages answering a tool call to
      * follow the assistant turn that asked for it, with nothing in between. The canonical shape puts
@@ -226,8 +227,20 @@ public final class OpenAiChatModel extends HttpChatModel {
      * <p>An {@code is_error} flag has nowhere to go — this provider has no equivalent field. Nothing is
      * lost that matters: a refusal's content is a sentence saying it was refused and why, which is what
      * a model reads either way.
+     *
+     * <h3>⚠️ A picture a tool handed back is lifted out of the tool result</h3>
+     *
+     * <p>This provider's {@code tool} role carries text and nothing else, so an image block inside a
+     * tool result has literally nowhere to go — and {@link #textOf} kept only the words, which meant it
+     * was <em>dropped in silence</em>. A tool that answers with a photograph was therefore useful
+     * against one provider and useless against every other, with nothing anywhere saying why.
+     *
+     * <p>So it becomes part of the ordinary user message that follows, which is where this provider
+     * takes an image and which is the message immediately after the tool results either way.
      */
     private void appendUserTurn(List<Map<String, Object>> messages, String role, List<ContentBlock> blocks) {
+        List<ContentBlock> pictures = new ArrayList<>();
+
         blocks.stream()
                 .filter(block -> TOOL_RESULT_BLOCK.equals(block.type()))
                 .forEach(block -> {
@@ -238,16 +251,60 @@ public final class OpenAiChatModel extends HttpChatModel {
                     result.put("content",      textOf(block.map().get("content")));
 
                     messages.add(result);
+                    pictures.addAll(imagesIn(block.map().get("content")));
                 });
+
+        blocks.stream().filter(ContentBlock::isImage).forEach(pictures::add);
 
         String said = blocks.stream()
                 .filter(ContentBlock::isText)
                 .map(ContentBlock::text)
                 .collect(Collectors.joining("\n\n"));
 
-        if (!said.isBlank()) {
-            messages.add(messageOf(role, said));
+        appendSaid(messages, role, said, pictures);
+    }
+
+    /**
+     * One user message, in whichever of this provider's two content shapes fits what is in it.
+     *
+     * <p>⚠️ <strong>A string where there are only words, an array where there is a picture.</strong>
+     * Both are legal and almost every message is the first — sending everything as a one-element array
+     * would work and would make every stored conversation unreadable for the sake of the one turn in
+     * fifty that carries an image.
+     *
+     * <p>Pictures lead, then the words. A question that says "what is this component" reads as a
+     * question about the picture above it and as a question about nothing at all below it, and the model
+     * is doing the same reading.
+     */
+    private static void appendSaid(
+            List<Map<String, Object>> messages, String role, String said, List<ContentBlock> pictures) {
+
+        List<Map<String, Object>> parts = pictures.stream()
+                .map(ContentBlock::imageDataUri)
+                .flatMap(Optional::stream)
+                .map(address -> Map.<String, Object>of("type", "image_url", "image_url", Map.of("url", address)))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        // Nothing to look at — including where every picture was unreadable, which is a message with
+        // words in it rather than a message with an empty array in it.
+        if (parts.isEmpty()) {
+            if (!said.isBlank()) {
+                messages.add(messageOf(role, said));
+            }
+
+            return;
         }
+
+        if (!said.isBlank()) {
+            parts.add(Map.of("type", ContentBlock.TEXT, "text", said));
+        }
+
+        Map<String, Object> message = new LinkedHashMap<>();
+
+        message.put("role",    role);
+        message.put("content", parts);
+
+        messages.add(message);
     }
 
     /** {@code {id, name, input}} as a block, becomes {@code {id, type, function:{name, arguments}}}. */
@@ -419,6 +476,15 @@ public final class OpenAiChatModel extends HttpChatModel {
         }
 
         return Json.write(content);
+    }
+
+    /** The pictures inside a tool result, whose content the canonical shape allows to be a block list. */
+    private static List<ContentBlock> imagesIn(Object content) {
+        if (!(content instanceof List<?> blocks)) {
+            return List.of();
+        }
+
+        return ContentBlock.allOf(blocksOf(blocks)).stream().filter(ContentBlock::isImage).toList();
     }
 
     private static String stringOf(Object value) {

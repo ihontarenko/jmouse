@@ -178,7 +178,7 @@ public class McpAuthorizationProperties {
          * than a blank screen the first time somebody connects a client — which is the whole reason it is
          * rendered eagerly.
          */
-        private String template = "consent";
+        private String template = "consent-aurora";
 
         public String getTokenStorageKey() {
             return tokenStorageKey;

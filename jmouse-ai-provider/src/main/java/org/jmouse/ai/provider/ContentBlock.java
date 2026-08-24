@@ -1,5 +1,7 @@
 package org.jmouse.ai.provider;
 
+import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +27,23 @@ public record ContentBlock(Map<String, Object> map) {
 
     /** A block that asks for a tool to be run. */
     public static final String TOOL_USE = "tool_use";
+
+    /**
+     * A block carrying a picture, for a model to <strong>look at</strong> rather than read a sentence
+     * about.
+     *
+     * <p>⚠️ <strong>This is the canonical shape, and it is Anthropic's</strong> — for the same reason
+     * everything else here is, which {@link AnthropicChatModel} spells out. A block is
+     * {@code {"type":"image","source":{"type":"base64","media_type":…,"data":…}}}, that provider forwards
+     * it untouched, and every other adapter translates it exactly as it already translates a tool call.
+     */
+    public static final String IMAGE = "image";
+
+    /** Where an image block keeps what it is and the bytes themselves. */
+    private static final String SOURCE     = "source";
+    private static final String BASE64     = "base64";
+    private static final String MEDIA_TYPE = "media_type";
+    private static final String DATA       = "data";
 
     /**
      * Where a provider's own additions to a tool call are kept, unread, for the way back.
@@ -69,6 +88,70 @@ public record ContentBlock(Map<String, Object> map) {
 
     public boolean isToolUse() {
         return TOOL_USE.equals(type());
+    }
+
+    public boolean isImage() {
+        return IMAGE.equals(type());
+    }
+
+    /**
+     * 🖼️ <strong>The one place in this library that turns bytes into something a model can see.</strong>
+     *
+     * <p>Written once on purpose. A picture reaches a conversation from two directions — somebody
+     * attaches one to a question, and a tool hands one back — and those are two callers, not two shapes.
+     * A second encoder would be a second opinion about a thing there is one right answer to, and the
+     * copies would agree until the day a provider wanted the media type spelled differently.
+     *
+     * <p>⚠️ <strong>No size ceiling here, deliberately.</strong> What is reasonable depends on what the
+     * product stores. A library that guessed would either refuse a legitimate photograph or wave a 20 MB
+     * one through — which does not fail, it fills the conversation and leaves no room for the answer.
+     * The product declares a limit and refuses over it, with a sentence saying so.
+     *
+     * @param mimeType what the bytes are, e.g. {@code image/png}
+     * @param bytes    the image itself
+     * @return the canonical block
+     */
+    public static Map<String, Object> image(String mimeType, byte[] bytes) {
+        Map<String, Object> source = new LinkedHashMap<>();
+
+        source.put("type",     BASE64);
+        source.put(MEDIA_TYPE, mimeType);
+        source.put(DATA,       Base64.getEncoder().encodeToString(bytes));
+
+        Map<String, Object> block = new LinkedHashMap<>();
+
+        block.put("type", IMAGE);
+        block.put(SOURCE, source);
+
+        return block;
+    }
+
+    /** What the picture is, or empty for a block that is not one. */
+    public Optional<String> imageMediaType() {
+        return isImage() && source().get(MEDIA_TYPE) instanceof String type
+                ? Optional.of(type)
+                : Optional.empty();
+    }
+
+    /**
+     * The picture as an inline address, for the providers that take one instead of a source object.
+     *
+     * <p>⚠️ {@code Optional} rather than a null string. A block that is not an image and one whose source
+     * this library cannot read are both <em>there is nothing to send here</em> — and an adapter handed
+     * {@code "data:null;base64,null"} would send a perfectly well-formed address to a picture that does
+     * not exist, which fails at the provider as a content error naming nothing recognisable.
+     */
+    public Optional<String> imageDataUri() {
+        if (!isImage() || !(source().get(DATA) instanceof String encoded) || encoded.isBlank()) {
+            return Optional.empty();
+        }
+
+        return imageMediaType().map(type -> "data:" + type + ";" + BASE64 + "," + encoded);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> source() {
+        return map.get(SOURCE) instanceof Map<?, ?> given ? (Map<String, Object>) given : Map.of();
     }
 
     /** What the block says, or empty for a block that does not say anything. */

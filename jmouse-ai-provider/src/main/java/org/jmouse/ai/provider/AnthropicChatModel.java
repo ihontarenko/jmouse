@@ -16,6 +16,11 @@ import java.util.Map;
  *
  * <p>⚠️ Which means a bug here is invisible and a bug there is obvious. Everything this class does not
  * translate, it forwards, so a message shape that is wrong arrives at the provider unexamined.
+ *
+ * <p>⚠️ <strong>An image is one of the shapes forwarded, and the absence of any code for it here is the
+ * design rather than an omission.</strong> {@link ContentBlock#IMAGE} <em>is</em> this provider's block,
+ * so a picture attached to a question and one handed back by a tool both arrive already correct. Anyone
+ * looking for the translation will not find it; there is nothing to translate.
  */
 public final class AnthropicChatModel extends HttpChatModel {
 

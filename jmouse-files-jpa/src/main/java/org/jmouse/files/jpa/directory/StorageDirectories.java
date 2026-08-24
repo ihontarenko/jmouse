@@ -225,6 +225,101 @@ public class StorageDirectories {
     }
 
     /**
+     * 🧭 The directory at a whole path, with every folder on the way to it made if it is not there yet.
+     *
+     * <p>{@code tessera/attachments/issues/TSSR/TSSR-42} in one call, from nothing.</p>
+     *
+     * <h3>⚠️ Why this is here rather than in each product</h3>
+     *
+     * <p>Anything that files by a <em>computed</em> path — one folder per issue, per month, per
+     * account — needs the same walk: look for the next segment, make it when it is missing, descend.
+     * Written product-side it is the same twenty lines three times, and each copy has to know two
+     * things about this class that are not obvious from outside it: that {@link #create} slugs the
+     * name it is given, so a lookup must be by the <em>slug</em>; and that {@code create} makes a
+     * <em>second</em> folder with a distinguishing suffix when the slug is taken, so a walk that
+     * creates without looking first ends up with {@code tssr-42} and {@code tssr-42-2} side by side.
+     * Neither is discoverable by writing the obvious loop and running it once.</p>
+     *
+     * <h3>⚠️ Idempotent, and meant to be called every time</h3>
+     *
+     * <p>Existing folders are read rather than remade, so this belongs on the upload path itself. There
+     * is nothing to cache and nothing to seed: asking for a path is how a path comes to exist.</p>
+     *
+     * <h3>⚠️ The race is the CALLER's to absorb, and that is not an omission</h3>
+     *
+     * <p>Two requests filing into the same new folder at the same moment both read nothing and both
+     * insert; the loser gets a unique-constraint violation on {@code (owner_key, path)}, which means
+     * precisely that the folder it wanted now exists. Re-reading is the right answer, and this method
+     * cannot be the thing that does it — a failed flush leaves the persistence context and the
+     * transaction unusable, so a retry has to happen in a <em>new</em> transaction, and this library
+     * demarcates none by design.</p>
+     *
+     * <p>So a caller that can race wraps the call the way {@code FileDirectories} in Innoventa already
+     * wraps {@link #requireRoot}: {@code REQUIRES_NEW}, and one retry on the integrity violation. A
+     * caller that cannot — a bootstrap step, a single-threaded import — needs neither.</p>
+     *
+     * @param ownerKey whose tree, as {@code KIND:id}, or {@link StorageDirectory#INSTALLATION}
+     * @param path     the whole path, root first — {@code <application>/<purpose>/…}
+     * @return the directory at that path
+     */
+    public StorageDirectory requirePath(String ownerKey, DirectoryPath path) {
+        List<String> segments = path.segments();
+
+        // ⚠️ Refused before anything is written, never half-made. A path too deep discovered three
+        // folders in would leave those three behind, and the caller would retry into a tree that had
+        // silently grown branches nobody asked for.
+        if (segments.size() > StorageDirectory.MAXIMUM_DEPTH) {
+            throw new DirectoryException(
+                "'%s' is %d deep, and %d is as far as this tree goes."
+                    .formatted(path, segments.size(), StorageDirectory.MAXIMUM_DEPTH));
+        }
+
+        StorageDirectory directory = requireRoot(ownerKey, path.root().toString());
+
+        for (String segment : segments.subList(DirectoryPath.ROOT_DEPTH, segments.size())) {
+            directory = requireChild(directory, segment);
+        }
+
+        return directory;
+    }
+
+    /**
+     * 🧭 The directory at a whole written path, made if it is not there yet.
+     *
+     * @param ownerKey whose tree, as {@code KIND:id}, or {@link StorageDirectory#INSTALLATION}
+     * @param path     the whole path as written, e.g. {@code tessera/attachments/issues/TSSR}
+     * @return the directory at that path
+     */
+    public StorageDirectory requirePath(String ownerKey, String path) {
+        return requirePath(ownerKey, DirectoryPath.of(path));
+    }
+
+    /**
+     * 🧭 The directory at a whole path in one owner's tree, made if it is not there yet.
+     *
+     * @param owner whose tree
+     * @param path  the whole path, root first
+     * @return the directory at that path
+     */
+    public StorageDirectory requirePath(OwnerReference owner, DirectoryPath path) {
+        return requirePath(owner.toString(), path);
+    }
+
+    /**
+     * 📁 One named folder inside another, read when it is already there.
+     *
+     * <p>⚠️ <strong>Looked up by the SLUG, not by the name.</strong> {@code create} slugs what it is
+     * given, so {@code "TSSR-42"} becomes {@code tssr-42} in the path — and a lookup by the raw name
+     * would miss it, create a second folder, and be given {@code tssr-42-2} because the first one has
+     * the slug. Two folders, one issue, and no error anywhere.</p>
+     */
+    private StorageDirectory requireChild(StorageDirectory parent, String name) {
+        DirectoryPath childPath = DirectoryPath.of(parent.getPath()).resolve(DirectorySlugs.of(name));
+
+        return find(parent.getOwnerKey(), childPath).orElseGet(() -> create(parent, name));
+    }
+
+    /**
      * 📁 A folder inside another.
      *
      * @param parent where it goes

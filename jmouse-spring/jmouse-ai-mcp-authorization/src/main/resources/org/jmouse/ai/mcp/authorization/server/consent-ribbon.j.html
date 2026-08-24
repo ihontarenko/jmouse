@@ -1,0 +1,139 @@
+{% extends "consent-frame" %}
+
+{#
+  RIBBON — a coloured band across the top with the card riding over its edge.
+
+  The warmest of the light designs. The band gives the page a horizon, which is what most consent
+  screens lack: without one, a centred card floats and the page reads as a modal that lost its parent.
+
+  The band is a gradient with a curved bottom edge cut by a border-radius, not an SVG — one less thing
+  to keep in step with the palette.
+#}
+
+{% block "pageTitle" %}Authorize · {{ applicationName }} · jMouse MCP{% endblock %}
+
+{% block "styles" %}
+<style>
+  :root { --ink: #1d1b22; --muted: #6b6675; --line: #e9e6ef; --accent: #7c3aed; }
+
+  body { min-height: 100dvh; background: #faf9fc; color: var(--ink);
+         font: 15px/1.62 ui-sans-serif, system-ui, "Segoe UI", sans-serif; }
+
+  .band { height: clamp(9rem, 24vh, 14rem); border-radius: 0 0 42% 42% / 0 0 3.2rem 3.2rem;
+          background: linear-gradient(115deg, #7c3aed 0%, #d946a8 55%, #f97362 100%);
+          display: flex; align-items: flex-start; justify-content: center; padding-top: clamp(1.2rem, 4vh, 2rem); }
+
+  .brand { display: flex; align-items: center; gap: .65rem; color: #fff; }
+  .mark { width: 32px; height: 32px; border-radius: 10px; background: rgba(255,255,255,.2);
+          display: grid; place-items: center; flex: none; }
+  .mark svg { width: 17px; height: 17px; }
+  .brand b { font-size: 15px; font-weight: 620; }
+  .brand small { display: block; font-size: 10.5px; opacity: .8; letter-spacing: .1em; text-transform: uppercase; }
+
+  .wrap { padding: 0 1.1rem 3rem; display: grid; place-items: start center; }
+  main { width: 100%; max-width: 31rem; margin-top: clamp(-6rem, -12vh, -4.5rem);
+         background: #fff; border-radius: 20px; border: 1px solid var(--line);
+         box-shadow: 0 1px 2px rgba(30,20,50,.05), 0 24px 60px -26px rgba(60,30,110,.32);
+         padding: clamp(1.5rem, 4.5vw, 2.3rem); display: flex; flex-direction: column; gap: 1.25rem; }
+
+  h1 { margin: 0; font-size: clamp(1.35rem, 4vw, 1.6rem); font-weight: 650; letter-spacing: -.025em; }
+  h2 { margin: 0; font-size: 1.15rem; font-weight: 600; }
+  p { margin: 0; color: var(--muted); }
+
+  .skeleton { height: .95rem; border-radius: 7px; background: #f1eff6; }
+  .skeleton + .skeleton { margin-top: .75rem; }
+
+  dl { margin: 0; display: grid; gap: .5rem; }
+  dl div { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline;
+           background: #f8f6fc; border-radius: 12px; padding: .65rem .9rem; }
+  dt { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); flex: none; }
+  dd { margin: 0; text-align: right; font-size: 13.5px; overflow-wrap: anywhere; }
+  dd code { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; }
+
+  .caution { border-radius: 12px; padding: .85rem 1rem; font-size: 13.5px; line-height: 1.55;
+             background: #fff5e9; border: 1px solid #f3d9b4; color: #7d5416; }
+
+  #choices-card { display: grid; gap: .5rem; }
+  .choices-label { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+  .choice { display: flex; gap: .7rem; align-items: flex-start; cursor: pointer; padding: .7rem .85rem;
+            border: 1px solid var(--line); border-radius: 12px; transition: border-color .15s, background .15s; }
+  .choice:hover { border-color: #d6bdf7; background: #faf5ff; }
+  .choice:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .choice input { accent-color: var(--accent); margin: .3em 0 0; }
+  .choice-name { font-size: 14.5px; }
+  .choice-detail { color: var(--muted); font-size: 12.5px; margin-top: .1rem; }
+  .choice.unavailable { opacity: .5; cursor: not-allowed; }
+
+  .failure { border-radius: 12px; padding: .8rem 1rem; font-size: 13.5px;
+             background: #fdecec; border: 1px solid #f3c4c4; color: #9b2222; }
+
+  .actions { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; }
+  button { border-radius: 999px; cursor: pointer; font-weight: 600; font-size: 14.5px; }
+  button.primary { flex: 1 1 11rem; border: 0; padding: .9em 1.5em; color: #fff;
+                   background: linear-gradient(115deg, #7c3aed, #d946a8);
+                   box-shadow: 0 12px 28px -14px rgba(124,58,237,.95); }
+  button.primary:disabled { background: #d5d0de; box-shadow: none; cursor: not-allowed; }
+  button.quiet { background: #fff; color: var(--ink); border: 1px solid var(--line); padding: .9em 1.4em; }
+  button.quiet:hover { background: #f8f6fc; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  .lifetime { width: 100%; font-size: 12.5px; color: var(--muted); }
+  a { color: var(--accent); }
+  form { display: flex; flex-direction: column; gap: 1.25rem; }
+</style>
+{% endblock %}
+
+{% block "page" %}
+<div class="band">
+  <div class="brand">
+    <span class="mark"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 21 12l-9 9-9-9 9-9Z" fill="#fff" opacity=".92"/><circle cx="12" cy="12" r="3" fill="#7c3aed"/></svg></span>
+    <span><b>{{ applicationName }}</b><small>jMouse · Model Context Protocol</small></span>
+  </div>
+</div>
+
+<div class="wrap">
+  <main>
+    <section id="loading">
+      <div class="skeleton" style="width:55%"></div>
+      <div class="skeleton" style="width:92%"></div>
+      <div class="skeleton" style="width:70%"></div>
+    </section>
+
+    <section id="refusal" hidden>
+      <h2 id="refusal-title">This request cannot be approved</h2>
+      <p id="refusal-body" style="margin-top:.5rem"></p>
+      <p id="refusal-action" style="margin-top:.5rem" hidden><a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>, then start the connection again from the client.</p>
+    </section>
+
+    <form id="request" hidden>
+      <div>
+        <h1><span id="client-name"></span> wants to act as you</h1>
+        <p style="margin-top:.55rem" id="acting-summary"></p>
+      </div>
+
+      <dl>
+        <div><dt>Granted by</dt><dd id="approver"></dd></div>
+        <div><dt>Code goes to</dt><dd><code id="redirect-target"></code></dd></div>
+      </dl>
+
+      <div class="caution">
+        That address is on <strong>this machine</strong>. If you did not just start this from a client
+        running here, close the page.
+      </div>
+
+      <div id="choices-card" hidden>
+        <div class="choices-label">Acting as</div>
+        <div id="choices" style="display:grid;gap:.5rem"></div>
+      </div>
+
+      <div class="failure" id="failure" hidden></div>
+
+      <div class="actions">
+        <button type="submit" class="primary" id="approve">Approve</button>
+        <button type="button" class="quiet" id="cancel">Cancel</button>
+        <span class="lifetime" id="lifetime"></span>
+      </div>
+    </form>
+  </main>
+</div>
+{% endblock %}

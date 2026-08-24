@@ -4,8 +4,16 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 🖼️ A picture a tool is handing back, so the model can <strong>look at it</strong> rather than read a
+ * 🖼️ A picture in a conversation, so the model can <strong>look at it</strong> rather than read a
  * sentence about it.
+ *
+ * <h3>⚠️ Both directions, despite the name</h3>
+ *
+ * <p>This began as the answer to <em>a tool is handing a picture back</em> and is still named for it.
+ * It carries a picture going the other way too — one somebody attached to a question — because the two
+ * are the same three things (what the bytes are, the bytes, and what to say about them) and a second
+ * record differing in nothing but its name would be a second place to fix anything either of them got
+ * wrong. The name is history; the type is a picture.
  *
  * <h3>Why a type of its own</h3>
  *

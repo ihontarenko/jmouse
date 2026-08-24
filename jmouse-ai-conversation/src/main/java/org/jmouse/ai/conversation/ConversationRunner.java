@@ -2,6 +2,7 @@ package org.jmouse.ai.conversation;
 
 import org.jmouse.ai.RefusalRendering;
 import org.jmouse.ai.ToolDispatcher;
+import org.jmouse.ai.ToolImage;
 import org.jmouse.ai.ToolOutcome;
 import org.jmouse.ai.ToolRefusedException;
 import org.jmouse.ai.provider.ChatModel;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Ask, run what was asked for, ask again — and stop.
@@ -137,10 +140,46 @@ public final class ConversationRunner {
         return Map.of("role", "assistant", "content", answer.content());
     }
 
+    /**
+     * Every tool the model asked for, in one turn — and anything they handed back to look at.
+     *
+     * <h3>⚠️ A picture travels beside the tool results, never inside one</h3>
+     *
+     * <p>{@link ToolOutcome#image()} has existed for as long as a tool has been able to answer with a
+     * photograph, and {@code asStructuredContent()} deliberately leaves the bytes out of the JSON. Which
+     * meant this loop wrote the description and dropped the picture: <strong>a protocol client looked at
+     * the image and the in-app assistant reading the same tool through the same dispatcher got a
+     * filename.</strong> That is the divergence this class's own note is about, one layer up — not what
+     * a caller may <em>do</em>, but what it may <em>see</em>.
+     *
+     * <p>Nesting the image in the tool result would be legal for the provider whose shape this is, and
+     * impossible for the one whose {@code tool} role takes text only. As siblings after the results it
+     * is correct for both: one forwards the turn as written, the other already splits a canonical turn
+     * into several messages and lands the pictures in the user message that follows — which is exactly
+     * where it needs them.
+     */
     private Map<String, Object> resultsOf(ChatResponse answer) {
-        List<Map<String, Object>> results = answer.toolCalls().stream().map(this::runOne).toList();
+        List<Answered> answered = answer.toolCalls().stream().map(this::runOne).toList();
 
-        return Map.of("role", "user", "content", results);
+        List<Map<String, Object>> content = answered.stream()
+                .map(Answered::result)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        answered.stream()
+                .map(Answered::picture)
+                .filter(Objects::nonNull)
+                .forEach(picture -> content.add(ContentBlock.image(picture.mimeType(), picture.bytes())));
+
+        return Map.of("role", "user", "content", content);
+    }
+
+    /**
+     * One call's result, and the picture that came with it where one did.
+     *
+     * <p>Two fields rather than a picture fished back out of the result map: the bytes are deliberately
+     * not in there, so there would be nothing to fish.
+     */
+    private record Answered(Map<String, Object> result, ToolImage picture) {
     }
 
     /**
@@ -155,7 +194,7 @@ public final class ConversationRunner {
      * Protocol client must read the identical words. Two implementations of one paragraph is how one of
      * them ends up saying less.
      */
-    private Map<String, Object> runOne(ContentBlock call) {
+    private Answered runOne(ContentBlock call) {
         Map<String, Object> result = new LinkedHashMap<>();
 
         result.put("type",        TOOL_RESULT);
@@ -167,6 +206,8 @@ public final class ConversationRunner {
             // The structured form, so the scope it ran in travels with the answer rather than being
             // buried in prose the model may not read.
             result.put("content", ToolResultJson.write(outcome.asStructuredContent()));
+
+            return new Answered(result, outcome.image().orElse(null));
 
         } catch (ToolRefusedException refusal) {
             result.put("content", RefusalRendering.render(refusal));
@@ -181,6 +222,6 @@ public final class ConversationRunner {
             result.put(IS_ERROR,  true);
         }
 
-        return result;
+        return new Answered(result, null);
     }
 }
