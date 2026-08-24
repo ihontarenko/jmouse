@@ -2,7 +2,7 @@
 
 > Project-specific notes for the `tessera` skill. The tracker is the record; this file is notes.
 > Fix it in the same response as any call that contradicts it.
-> Verified: 2026-08-17
+> Verified: 2026-08-21
 
 ## Project
 
@@ -19,9 +19,10 @@
 
 | Type | Used for |
 |---|---|
-| `Epic` | `JMF-1` — condition functions |
+| `Epic` | `JMF-1` condition functions (Done) · `JMF-21` storage management (Done) · `JMF-37` audit · `JMF-55` more condition vocabulary |
 | `Story` | ordinary library work |
 | `Bug` | a parser or formatting defect — these are the ones that bite silently |
+| `Feature` | exists as a row and is used — `JMF-54` is one |
 | `Task`, `Sub-task` | legal, installation-wide |
 | `UI changes` | legal but meaningless here — a library has no interface |
 
@@ -69,3 +70,12 @@ as having no folder. Anything pointing there is stale, not a second copy.
   product consuming it is usually two tickets in two projects, and the library one lands first.
 - The engine's expression gotchas (`in` precedence, one-element `in`, `minusDays`/null) return wrong
   answers **silently** rather than failing — a bug here is rarely a stack trace.
+- ⚠️ **A blocking link is enforced, not advisory.** `issues_transition` refuses to move an issue into
+  `WIP` while an issue that `Blocks` it is unresolved, naming it. So a chain raised with `Blocks` links
+  has to be built and **closed** in order — you cannot start the second one while the first sits in
+  `In Review`. Worth knowing before laying the links out.
+- ⚠️ **`JMF-2` … `JMF-9` are archived**, so `issues_list` does not return them and `issues_search` cannot
+  find them. They are Done, not missing. `issues_get` on the key still works.
+- The condition-function vocabulary is two epics: **`JMF-1`** opened the seam (Done, 2026-08-21) and
+  **`JMF-55`** widens it — `now(part)`, `AccessTest`, `now is workingHours` built; `allowance`, `count`,
+  `holds`, `fromNetwork`, `flag` and the self-description ticket still open.

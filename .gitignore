@@ -36,3 +36,7 @@ output/
 
 # Mirrors of WiQi pages — the record is WiQi, these are copies for reading with the server down.
 /.wiqi/
+
+# Kiwi page mirror — a local copy of the pages this codebase writes, by the `kiwi` skill
+# Kiwi is the record; these are copies. Never committed.
+/.kiwi/
