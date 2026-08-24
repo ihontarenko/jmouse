@@ -242,8 +242,25 @@ public class ConditionAxis implements AccessAxisEvaluator {
      * <p>The condition is quoted as it was written rather than described. Somebody reading a refusal
      * has to be able to find the line it came from, and a paraphrase is a line nobody can search for.
      */
+    /**
+     * ⚠️ <strong>The quote stays, and the sentence is added beside it.</strong>
+     *
+     * <p>Quoting the condition verbatim is what lets whoever administers the installation <em>find</em>
+     * the rule — respelling it would leave them searching for a line that is not in any file. But to
+     * somebody who merely pressed a button, {@code now is not workingHours} is an expression, not an
+     * explanation.
+     *
+     * <p>So a policy file may write {@code reason "…"} and the refusal carries both: the quote for the
+     * administrator, the sentence for the person.
+     */
     private static String because(PermissionSource source, String phrasing) {
-        return "This is " + phrasing + " `" + source.condition().source() + "`"
-               + (source.origin().isDeclared() ? ", declared in " + source.origin().describe() : "") + ".";
+        String written = "This is " + phrasing + " `" + source.condition().source() + "`"
+                         + (source.origin().isDeclared()
+                                    ? ", declared in " + source.origin().describe()
+                                    : "");
+
+        return source.attribution().isExplained()
+                ? written + " with reason '" + source.attribution().explanation() + "'."
+                : written + ".";
     }
 }

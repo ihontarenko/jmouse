@@ -1,5 +1,6 @@
 package org.jmouse.access.el.node;
 
+import org.jmouse.access.el.SourceWriter;
 import org.jmouse.access.policy.model.PolicyEffect;
 import org.jmouse.access.policy.model.PolicyGrant;
 import org.jmouse.el.evaluation.EvaluationContext;
@@ -23,6 +24,7 @@ public class GrantNode extends AbstractExpression {
     private SingleScopeNode scope;
     private String          permission;
     private String          condition;
+    private String          reason;
     private PolicyEffect    effect;
 
     public SingleScopeNode getScope() {
@@ -67,6 +69,18 @@ public class GrantNode extends AbstractExpression {
         return condition != null && !condition.isBlank();
     }
 
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public boolean isExplained() {
+        return reason != null && !reason.isBlank();
+    }
+
     /**
      * Returns the effect as written, or {@code null} where none was.
      *
@@ -103,6 +117,7 @@ public class GrantNode extends AbstractExpression {
                 getScope().toPolicyScope(),
                 resolveEffect(),
                 getCondition(),
+                getReason(),
                 SourceSpanNode.at(this)
         );
     }
@@ -122,6 +137,14 @@ public class GrantNode extends AbstractExpression {
 
         if (isConditional()) {
             builder.append(" when ").append(getCondition());
+        }
+
+        // ⚠️ Appended only when there is one, so a document without a reason is written back byte-for-byte
+        // as it was. PolicySeedStep's checksum comes from PolicyWriter's output, so a writer that
+        // respelled unchanged documents would fail every installation's bootstrap ledger exactly once —
+        // for a feature none of them use.
+        if (isExplained()) {
+            builder.append(" reason ").append(SourceWriter.literal(getReason()));
         }
 
         return builder.toString();

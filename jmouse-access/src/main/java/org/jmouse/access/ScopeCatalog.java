@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * The scopes this installation has, widest first — the vocabulary the engine is handed rather than
@@ -58,6 +59,49 @@ public final class ScopeCatalog {
     /** Every scope kind, widest first. */
     public List<ScopeKind> all() {
         return widestFirst;
+    }
+
+    /**
+     * A place written the way {@link ScopeReference#describe()} writes one — {@code space:42}, or just
+     * {@code installation} for a kind that names no instance.
+     *
+     * <p>It lives here for the same reason {@link #covering(AccessTarget, String)} does: reading a place
+     * out of text needs the <strong>vocabulary</strong>, and a static method could only have got the
+     * vocabulary by knowing which enum to read.
+     *
+     * <p>⚠️ Refuses with the kinds that would have worked, and is meant to be called <em>at load</em>. A
+     * scope name only checked on the first request would boot clean and then answer the same wrong
+     * answer forever.
+     */
+    public ScopeReference parse(String written) {
+        if (written == null || written.isBlank()) {
+            throw new IllegalArgumentException(
+                    "a place has to say which scope it means — for example 'space:42'. " + describeKinds());
+        }
+
+        String    trimmed   = written.trim();
+        int       separator = trimmed.indexOf(':');
+        String    name      = separator < 0 ? trimmed : trimmed.substring(0, separator);
+        String    id        = separator < 0 ? null : trimmed.substring(separator + 1);
+        ScopeKind kind      = byName(name).orElse(null);
+
+        if (kind == null) {
+            throw new IllegalArgumentException(
+                    "'%s' is not a scope in this installation. %s".formatted(name, describeKinds()));
+        }
+
+        if (kind.namesAnInstance() && (id == null || id.isBlank())) {
+            throw new IllegalArgumentException(
+                    ("'%s' names one instance, so it needs an identifier — write '%s:<id>' rather than "
+                     + "'%s'.").formatted(name, name, written));
+        }
+
+        return ScopeReference.of(kind, id);
+    }
+
+    private String describeKinds() {
+        return "Scopes: " + widestFirst.stream().map(ScopeKind::name).collect(Collectors.joining(", "))
+               + ".";
     }
 
     /**

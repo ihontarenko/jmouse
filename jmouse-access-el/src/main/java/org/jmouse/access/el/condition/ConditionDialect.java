@@ -21,6 +21,9 @@ import org.jmouse.el.parser.sub.ParenthesesParser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * The cut-down expression language an authorization condition is allowed to be written in.
@@ -83,15 +86,35 @@ import java.util.List;
  */
 public class ConditionDialect implements Extension {
 
-    private final FunctionCatalog functions;
+    /**
+     * The six tests the restricted dialect admits, chosen one by one.
+     *
+     * <p>They are stateless, so one instance apiece serves every dialect and every evaluation.
+     */
+    private static final List<Test> BUILT_IN_TESTS = List.of(
+            new NullTest(),
+            new StartsTest(),
+            new EndsTest(),
+            new HasAllTest(),
+            new HasAnyTest(),
+            new HasNoneTest()
+    );
 
-    /** The dialect a product contributing no function gets — byte for byte what it always was. */
+    private final FunctionCatalog functions;
+    private final TestCatalog     tests;
+
+    /** The dialect a product contributing nothing gets — byte for byte what it always was. */
     public ConditionDialect() {
-        this(FunctionCatalog.empty());
+        this(FunctionCatalog.empty(), TestCatalog.empty());
     }
 
     public ConditionDialect(FunctionCatalog functions) {
+        this(functions, TestCatalog.empty());
+    }
+
+    public ConditionDialect(FunctionCatalog functions, TestCatalog tests) {
         this.functions = functions == null ? FunctionCatalog.empty() : functions;
+        this.tests     = tests == null ? TestCatalog.empty() : tests;
     }
 
     @Override
@@ -128,16 +151,33 @@ public class ConditionDialect implements Extension {
         return List.of();
     }
 
+    /**
+     * The six chosen built-ins, plus whatever this installation contributed as an {@link AccessTest}.
+     *
+     * <p>The six are listed one by one rather than taken wholesale, and that has always been the point:
+     * a dialect that admitted every test {@code jmouse-el} ships would be a dialect nobody chose.
+     * {@link TestCatalog} keeps the same bargain for the contributed half — it collects
+     * {@code AccessTest} and never the raw {@link Test}, so a bean some unrelated module happens to
+     * expose does not become authorization vocabulary.
+     */
     @Override
     public List<Test> getTests() {
-        return List.of(
-                new NullTest(),
-                new StartsTest(),
-                new EndsTest(),
-                new HasAllTest(),
-                new HasAnyTest(),
-                new HasNoneTest()
-        );
+        List<Test> available = new ArrayList<>(BUILT_IN_TESTS);
+
+        available.addAll(tests.tests());
+
+        return available;
+    }
+
+    /**
+     * The names of the built-ins, for the load-time check — which must accept {@code x is null} while
+     * refusing {@code x is nulll}.
+     *
+     * <p>Derived from the instances above rather than written out a second time: a hand-kept list beside
+     * them is a list that goes one commit stale and starts refusing a test that works.
+     */
+    public static Set<String> builtInTestNames() {
+        return BUILT_IN_TESTS.stream().map(Test::getName).collect(Collectors.toCollection(TreeSet::new));
     }
 
     /**

@@ -33,8 +33,28 @@ public record PolicyGrant(
         PolicyScope  scope,
         PolicyEffect effect,
         String       condition,
+        String       reason,
         SourceSpan   at
 ) {
+
+    /**
+     * The four-part form, for everything that has no sentence to say.
+     *
+     * <p>⚠️ Kept so that adding {@code reason} did not touch twenty-three construction sites, and so a
+     * document without one is <strong>byte-for-byte</strong> what it was — which matters more than it
+     * looks: {@code PolicySeedStep}'s checksum is taken from {@code PolicyWriter}'s output, so a writer
+     * that respelled unchanged documents would fail every installation's bootstrap ledger once.
+     */
+    public PolicyGrant(
+            String permission, PolicyScope scope, PolicyEffect effect, String condition, SourceSpan at) {
+
+        this(permission, scope, effect, condition, null, at);
+    }
+
+    /** Whether this grant says, in words, why it is what it is. */
+    public boolean isExplained() {
+        return reason != null && !reason.isBlank();
+    }
 
     /**
      * Whether this grant is conditional.

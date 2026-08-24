@@ -42,8 +42,9 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
 
     private final ExpressionLanguage expressionLanguage;
     private final FunctionCatalog    functions;
+    private final TestCatalog        tests;
 
-    /** An installation contributing no function: the dialect exactly as it was before functions existed. */
+    /** An installation contributing nothing: the dialect exactly as it was before any of this existed. */
     public ExpressionConditionCompiler() {
         this(FunctionCatalog.empty());
     }
@@ -58,8 +59,22 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
      * {@link #compile(String)}.
      */
     public ExpressionConditionCompiler(FunctionCatalog functions) {
+        this(functions, TestCatalog.empty());
+    }
+
+    /**
+     * The full wiring: the dialect, plus whatever this product registered as an {@link AccessFunction}
+     * and as an {@link AccessTest}.
+     *
+     * <p>Both catalogues are kept as well as being built into the language, for the same reason: an
+     * unregistered <em>name</em> has to be refused at load. A mistyped call and a mistyped test both
+     * compile, boot, and then read as {@code false} on every request — and a {@code false} inside a
+     * {@code deny} permits.
+     */
+    public ExpressionConditionCompiler(FunctionCatalog functions, TestCatalog tests) {
         this.functions          = functions == null ? FunctionCatalog.empty() : functions;
-        this.expressionLanguage = new ExpressionLanguage(restrictedExtensions(this.functions));
+        this.tests              = tests == null ? TestCatalog.empty() : tests;
+        this.expressionLanguage = new ExpressionLanguage(restrictedExtensions(this.functions, this.tests));
     }
 
     public ExpressionConditionCompiler(ExpressionLanguage expressionLanguage) {
@@ -67,8 +82,15 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
     }
 
     public ExpressionConditionCompiler(ExpressionLanguage expressionLanguage, FunctionCatalog functions) {
+        this(expressionLanguage, functions, TestCatalog.empty());
+    }
+
+    public ExpressionConditionCompiler(
+            ExpressionLanguage expressionLanguage, FunctionCatalog functions, TestCatalog tests) {
+
         this.expressionLanguage = expressionLanguage;
         this.functions          = functions == null ? FunctionCatalog.empty() : functions;
+        this.tests              = tests == null ? TestCatalog.empty() : tests;
     }
 
     /**
@@ -90,7 +112,7 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
         // ⚠️ Before compiling, not during evaluation. FunctionNode does throw for an unregistered name,
         // but `holds` reads any exception as false — so an unchecked typo boots clean and then refuses
         // everybody, forever, with a log line. See ConditionCalls.
-        ConditionCalls.verify(source, tokens, functions);
+        ConditionCalls.verify(source, tokens, functions, tests);
 
         try {
             // ⚠️ The names are read here and kept, not read again per decision. They are what makes a
@@ -153,9 +175,9 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
         }
     }
 
-    private static ExtensionContainer restrictedExtensions(FunctionCatalog functions) {
+    private static ExtensionContainer restrictedExtensions(FunctionCatalog functions, TestCatalog tests) {
         StandardExtensionContainer container = new StandardExtensionContainer();
-        container.importExtension(new ConditionDialect(functions));
+        container.importExtension(new ConditionDialect(functions, tests));
         return container;
     }
 
@@ -196,24 +218,29 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
     ) implements GrantCondition {
 
         /**
-         * ⚠️ <strong>A condition that blows up answers "no", and says so in the log.</strong>
+         * ⚠️ <strong>A condition that blows up has not answered — and "not answered" is not "no".</strong>
          *
-         * <p>The evaluator can still fail on data a file could not anticipate — a property the row
-         * does not have, a null halfway down a path — and the two ways of handling that are not
-         * equally bad. Letting it out turns an authorization rule into a 500 on a route that would
-         * otherwise have worked; answering {@code false} costs one decision and leaves a line naming
-         * the rule that caused it.
+         * <p>The evaluator can still fail on data a file could not anticipate: a member the row does not
+         * have, a null halfway down a path. Letting that out would turn an authorization rule into a 500
+         * on a route that would otherwise have worked, so it is caught — but it is caught and
+         * <strong>re-thrown as a {@link ConditionFunctionFailure}</strong>, not flattened.
          *
-         * <p>Refusing is only the safe half of that trade because of <em>where</em> this runs: an
-         * axis that may narrow and never widen. A false here can cost somebody a permission and can
-         * never hand one out.
-         */
-        /**
-         * ⚠️ <strong>One exception is deliberately not caught here.</strong>
-         * {@link ConditionFunctionFailure} carries on to {@code ConditionAxis}, because the safe answer
-         * to "the function could not answer" depends on whether this condition is attached to an allow
-         * or to a deny, and only the axis knows which. Flattening it to {@code false} here is precisely
-         * how a dead counter store would lift every quota written as a deny.
+         * <p>⚠️ It used to answer {@code false}, and the argument for that was that this axis may only
+         * narrow, so a false could cost a permission and never hand one out. <strong>That argument is
+         * wrong, and {@code JMF-5} had already refuted it for functions:</strong> a {@code false}
+         * refuses a conditional <em>allow</em> and <em>permits</em> a conditional <em>deny</em>. So
+         * {@code resource.deletdAt is olderThan('30d')} — one letter short of a real member — made the
+         * whole condition false and the retention rule quietly stopped refusing anybody. One warn line,
+         * no failing test.
+         *
+         * <p>No boolean is safe in both positions, which is the entire reason
+         * {@link ConditionFunctionFailure} exists. It carries the failure to {@code ConditionAxis} — the
+         * only place that knows whether this condition is attached to an allow or to a deny — which
+         * applies the deny and drops the allow. <strong>Both refuse.</strong>
+         *
+         * <p>⚠️ An installation carrying a broken rule that has been quietly permitting will start
+         * refusing. That is the point, and it is the only honest direction; the log line names the rule
+         * so it can be fixed in one reading.
          */
         @Override
         public boolean holds(ConditionContext context) {
@@ -221,6 +248,10 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
                 EvaluationContext evaluation = expressionLanguage.newContext();
 
                 bindPublishedValues(evaluation, context);
+
+                // The decision itself, for the functions and tests this rule calls — under a key no
+                // rule can name. Everything a policy is allowed to see is published below, as a view.
+                ConditionBinding.bind(evaluation, context);
 
                 // ⚠️ Views rather than the engine's own records. `Subject` carries `description` and
                 // has never carried `name`, so binding it directly made `caller.name` a rule that
@@ -238,11 +269,33 @@ public class ExpressionConditionCompiler implements ConditionCompiler {
             } catch (ConditionFunctionFailure unanswerable) {
                 throw unanswerable;
             } catch (RuntimeException failed) {
-                LOGGER.warn("The condition `{}` could not be evaluated and is being read as false: {}",
-                            source, failed.toString());
+                // ⚠️ A rule that BLEW UP has not answered `false` — it has not answered at all, and the
+                // two are opposite readings inside a deny. Reading it as `false` used to mean a
+                // misspelled member such as `resource.deletdAt` made the whole condition false, so the
+                // denial quietly stopped refusing anybody, with one warn line and no failing test.
+                //
+                // Sending it on as a ConditionFunctionFailure hands the decision to ConditionAxis, the
+                // only place that knows whether this is an allow or a deny: it applies the deny and
+                // drops the allow. Both refuse. Same bargain JMF-5 made for a function that throws —
+                // this is the seam that was still flattening it for everything else.
+                LOGGER.warn("The condition `{}` could not be evaluated and is being refused rather than "
+                            + "read as false: {}", source, failed.toString());
 
-                return false;
+                throw new ConditionFunctionFailure(describe(), false, failed);
             }
+        }
+
+        /**
+         * What to call this condition when it could not be evaluated at all.
+         *
+         * <p>{@link ConditionFunctionFailure} was written for a named function, and this failure has no
+         * name to give — it is the expression itself that broke. The source is what a person can act on,
+         * trimmed so a refusal stays a sentence.
+         */
+        private String describe() {
+            String written = source.replaceAll("\\s+", " ").trim();
+
+            return written.length() <= 60 ? written : written.substring(0, 57) + "…";
         }
 
         /**

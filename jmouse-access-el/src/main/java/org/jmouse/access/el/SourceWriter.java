@@ -73,9 +73,13 @@ public final class SourceWriter {
         boolean holdsDouble = value.indexOf(DOUBLE_QUOTE) >= 0;
 
         if (holdsSingle && holdsDouble) {
+            // ⚠️ The parentheses are the fix, not decoration. `"a %s" + "b".formatted(v)` binds the call
+            // to the LAST literal only: every placeholder before it survives as a raw %s and the
+            // argument meant for it is dropped, silently, because String.format ignores arguments it
+            // was not asked for. See JMF-12 — this was the third of three sites.
             throw new IllegalArgumentException(
-                    "'%s' cannot be written to a policy file: a string literal there holds no escapes, "
-                            + "so a value carrying both kinds of quote has no spelling".formatted(value));
+                    ("'%s' cannot be written to a policy file: a string literal there holds no escapes, "
+                     + "so a value carrying both kinds of quote has no spelling").formatted(value));
         }
 
         char quote = holdsSingle ? DOUBLE_QUOTE : SINGLE_QUOTE;

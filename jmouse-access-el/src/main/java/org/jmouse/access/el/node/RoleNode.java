@@ -121,7 +121,8 @@ public class RoleNode extends PolicyBlockNode {
         }
 
         return new PolicyBundleEntry(
-                grant.getPermission(), scope.getKind(), grant.getCondition(), SourceSpanNode.at(grant));
+                grant.getPermission(), scope.getKind(), grant.getCondition(), grant.getReason(),
+                SourceSpanNode.at(grant));
     }
 
     @Override

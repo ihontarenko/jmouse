@@ -396,8 +396,9 @@ public final class PolicyBinder {
                 continue;
             }
 
-            GrantAttribution attribution =
-                    declared(policyName, assignment.at()).narrowedBy(condition);
+            GrantAttribution attribution = declared(policyName, assignment.at())
+                    .narrowedBy(condition)
+                    .explainedBy(assignment.reason());
 
             placed(assignment.scope(), assignment.at(), problems).ifPresent(where ->
                     assignments.add(new BoundAssignment(assignment.roleName(), where, attribution)));
@@ -425,7 +426,9 @@ public final class PolicyBinder {
             }
 
             boolean          allowed     = grant.effect() == PolicyEffect.ALLOW;
-            GrantAttribution attribution = declared(policyName, grant.at()).narrowedBy(condition);
+            GrantAttribution attribution = declared(policyName, grant.at())
+                    .narrowedBy(condition)
+                    .explainedBy(grant.reason());
 
             for (String permission : expand(grant.permission(), grant.at(), problems)) {
                 grants.add(new DirectGrant(permission, allowed, where, attribution));

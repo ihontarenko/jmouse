@@ -12,6 +12,7 @@ import org.jmouse.el.parser.ParserContext;
 
 import static org.jmouse.access.el.lexer.AccessToken.T_GRANTS;
 import static org.jmouse.access.el.lexer.AccessToken.T_WHEN;
+import static org.jmouse.access.el.lexer.AccessToken.T_REASON;
 import static org.jmouse.el.lexer.BasicToken.T_IDENTIFIER;
 import static org.jmouse.el.lexer.BasicToken.T_STRING;
 
@@ -49,6 +50,12 @@ public class RoleAssignmentParser extends AbstractParser {
 
         if (cursor.consumeIf(T_WHEN)) {
             node.setCondition(ConditionReader.read(cursor));
+        }
+
+        // ⚠️ With or without a `when`, the same way GrantParser takes it: an assignment that is simply
+        // absent is as opaque to whoever expected it as one that a condition switched off.
+        if (cursor.consumeIf(T_REASON)) {
+            node.setReason(SourceReader.literal(cursor.ensure(T_STRING)));
         }
 
         parent.add(node);

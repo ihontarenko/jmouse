@@ -14,6 +14,7 @@ import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.node.Node;
 
 import static org.jmouse.access.el.lexer.AccessToken.*;
+import static org.jmouse.el.lexer.BasicToken.T_STRING;
 
 /**
  * Parses one scoped permission: {@code @SCOPE[:instance] permission [allow|deny] [when …]}.
@@ -51,6 +52,13 @@ public class GrantParser extends AbstractParser {
 
         if (cursor.consumeIf(T_WHEN)) {
             node.setCondition(ConditionReader.read(cursor));
+        }
+
+        // ⚠️ Accepted with or without a `when`, deliberately. A rule that refuses only sometimes is the
+        // obvious place to want a sentence, but an unconditional `deny` is refused just as often and is
+        // just as opaque to whoever hits it — so the sentence hangs on the GRANT, not on the condition.
+        if (cursor.consumeIf(T_REASON)) {
+            node.setReason(SourceReader.literal(cursor.ensure(T_STRING)));
         }
 
         parent.add(node);

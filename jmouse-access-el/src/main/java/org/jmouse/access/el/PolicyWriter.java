@@ -380,6 +380,7 @@ public final class PolicyWriter {
         node.setScope(toNode(PolicyScope.kind(entry.scope())));
         node.setPermission(entry.permission());
         node.setCondition(entry.condition());
+        node.setReason(entry.reason());
 
         return node;
     }
@@ -404,6 +405,7 @@ public final class PolicyWriter {
         node.setRoleName(assignment.roleName());
         node.setScope(toNode(assignment.scope()));
         node.setCondition(assignment.condition());
+        node.setReason(assignment.reason());
 
         return node;
     }
@@ -423,6 +425,7 @@ public final class PolicyWriter {
         node.setScope(toNode(grant.scope()));
         node.setPermission(grant.permission());
         node.setCondition(grant.condition());
+        node.setReason(grant.reason());
 
         if (grant.effect() == PolicyEffect.DENY) {
             node.setEffect(PolicyEffect.DENY);

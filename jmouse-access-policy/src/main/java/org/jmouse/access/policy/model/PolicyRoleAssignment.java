@@ -32,15 +32,30 @@ package org.jmouse.access.policy.model;
  *                  bundle
  */
 public record PolicyRoleAssignment(
-        String roleName, PolicyScope scope, String condition, SourceSpan at) {
+        String roleName, PolicyScope scope, String condition, String reason, SourceSpan at) {
 
     /** The ordinary assignment: held whenever the subject is asked about. */
     public PolicyRoleAssignment(String roleName, PolicyScope scope, SourceSpan at) {
-        this(roleName, scope, null, at);
+        this(roleName, scope, null, null, at);
+    }
+
+    /**
+     * ⚠️ Kept so that adding {@code reason} left every existing construction site compiling, and so a
+     * document without one is written back byte-for-byte as it was.
+     */
+    public PolicyRoleAssignment(
+            String roleName, PolicyScope scope, String condition, SourceSpan at) {
+
+        this(roleName, scope, condition, null, at);
     }
 
     /** Whether anything narrows this assignment. */
     public boolean isConditional() {
         return condition != null && !condition.isBlank();
+    }
+
+    /** Whether this assignment says, in words, why it is what it is. */
+    public boolean isExplained() {
+        return reason != null && !reason.isBlank();
     }
 }

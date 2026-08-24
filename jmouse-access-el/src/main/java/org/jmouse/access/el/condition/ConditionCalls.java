@@ -71,7 +71,7 @@ final class ConditionCalls {
      * @param functions what a call may resolve to
      * @throws PolicyException naming the call and listing what would have worked
      */
-    static void verify(String source, List<Token> tokens, FunctionCatalog functions) {
+    static void verify(String source, List<Token> tokens, FunctionCatalog functions, TestCatalog tests) {
         for (Call call : in(tokens)) {
             AccessFunction called = functions.find(call.name());
 
@@ -82,6 +82,35 @@ final class ConditionCalls {
             }
 
             verifyArgumentsOf(source, call, called);
+        }
+
+        verifyApplications(source, tokens, tests);
+    }
+
+    /**
+     * The same check for the other half of the vocabulary: {@code x is somethingNobodyRegistered}.
+     *
+     * <p>⚠️ It matters more here than it does for a function. An unknown <em>function</em> throws at
+     * evaluation and is read as {@code false}; an unknown <em>test</em> does the same — and a
+     * {@code false} inside a {@code deny} means the deny does not hold. So a mistyped test in a denial
+     * boots clean and quietly stops refusing anybody.
+     */
+    private static void verifyApplications(String source, List<Token> tokens, TestCatalog tests) {
+        for (Call application : applied(tokens)) {
+            if (ConditionDialect.builtInTestNames().contains(application.name())) {
+                // A built-in the dialect chose. It declares no arguments to check.
+                continue;
+            }
+
+            AccessTest applied = tests.find(application.name());
+
+            if (applied == null) {
+                throw new PolicyException(
+                        ("condition '%s' applies the test '%s', which nothing registers. " + describe(tests))
+                                .formatted(source, application.name()));
+            }
+
+            verifyArgumentsOf(source, application, applied);
         }
     }
 
@@ -99,6 +128,16 @@ final class ConditionCalls {
             throw new PolicyException(
                     "condition '%s' calls %s incorrectly: %s".formatted(
                             source, call.name(), wrong.getMessage()), wrong);
+        }
+    }
+
+    private static void verifyArgumentsOf(String source, Call application, AccessTest applied) {
+        try {
+            applied.verifyArguments(application.arguments());
+        } catch (RuntimeException wrong) {
+            throw new PolicyException(
+                    "condition '%s' applies %s incorrectly: %s".formatted(
+                            source, application.name(), wrong.getMessage()), wrong);
         }
     }
 
@@ -128,6 +167,35 @@ final class ConditionCalls {
      * argument rather than becoming several. An argument that is exactly one string literal is read;
      * anything else is {@code null}.
      */
+    /**
+     * Every test a condition applies — {@code caller is agent}, {@code now is workingHours('mon-fri 09:00-18:00')}.
+     *
+     * <p>The counterpart of {@link #in(List)}, and it reads the same tokens from the other side: that
+     * method skips an identifier standing after {@code is} because it is a test, this one keeps only
+     * those. A test may be applied bare, so the parentheses are optional here and required there.
+     */
+    static List<Call> applied(List<Token> tokens) {
+        List<Token> significant   = ConditionTokens.significant(tokens);
+        List<Call>  applications  = new ArrayList<>();
+
+        for (int position = 0; position < significant.size(); position++) {
+            Token token = significant.get(position);
+
+            if (token.type() != BasicToken.T_IDENTIFIER || !isTestName(significant, position)) {
+                continue;
+            }
+
+            boolean withArguments = position + 1 < significant.size()
+                                    && significant.get(position + 1).type() == BasicToken.T_OPEN_PAREN;
+
+            applications.add(new Call(
+                    token.value(),
+                    withArguments ? argumentsFrom(significant, position + 1) : List.of()));
+        }
+
+        return applications;
+    }
+
     private static List<String> argumentsFrom(List<Token> tokens, int openingParen) {
         List<String> arguments = new ArrayList<>();
         List<Token>  current   = new ArrayList<>();
@@ -220,5 +288,16 @@ final class ConditionCalls {
         }
 
         return "Known functions: " + String.join(", ", functions.all()) + ".";
+    }
+
+    private static String describe(TestCatalog tests) {
+        String builtIn = "Built-in tests: " + String.join(", ", ConditionDialect.builtInTestNames()) + ".";
+
+        if (tests.isEmpty()) {
+            return builtIn + " This installation contributes no test of its own — a product adds them as "
+                   + "AccessTest beans.";
+        }
+
+        return builtIn + " Contributed tests: " + String.join(", ", tests.all()) + ".";
     }
 }

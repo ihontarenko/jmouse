@@ -3,6 +3,7 @@ package org.jmouse.access.el.condition;
 import org.jmouse.access.CallerView;
 import org.jmouse.access.ConsumptionKey;
 import org.jmouse.access.ConsumptionWindow;
+import org.jmouse.access.spi.ConditionContext;
 import org.jmouse.access.spi.ConsumptionCounters;
 import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.extension.Arguments;
@@ -167,7 +168,21 @@ public class ConsumedFunction implements AccessFunction {
      * without appearing in it would make a runaway agent invisible in the one number that would have
      * shown it.
      */
+    /**
+     * Who the quota is about.
+     *
+     * <p>The bound decision first — {@code Subject} is what the engine actually resolved, and it carries
+     * the same identifier the consumption writer records against. The published {@code caller} view stays
+     * behind it as the fallback, because a harness that evaluates a condition without driving it through
+     * the axis publishes the view and binds no decision.
+     */
     private static String callerId(EvaluationContext context) {
+        ConditionContext decision = ConditionBinding.find(context);
+
+        if (decision != null && decision.subject() != null) {
+            return decision.subject().principalId();
+        }
+
         return context.getValue(CALLER) instanceof CallerView caller ? caller.id() : null;
     }
 

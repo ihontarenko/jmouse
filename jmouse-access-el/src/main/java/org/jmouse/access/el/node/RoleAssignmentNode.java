@@ -20,6 +20,7 @@ public class RoleAssignmentNode extends AbstractExpression {
     private String          roleName;
     private SingleScopeNode scope;
     private String          condition;
+    private String          reason;
 
     public String getRoleName() {
         return roleName;
@@ -36,6 +37,18 @@ public class RoleAssignmentNode extends AbstractExpression {
 
     public boolean isConditional() {
         return condition != null && !condition.isBlank();
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public boolean isExplained() {
+        return reason != null && !reason.isBlank();
     }
 
     public void setRoleName(String roleName) {
@@ -57,7 +70,8 @@ public class RoleAssignmentNode extends AbstractExpression {
      */
     public PolicyRoleAssignment toRoleAssignment() {
         return new PolicyRoleAssignment(
-                getRoleName(), getScope().toPolicyScope(), getCondition(), SourceSpanNode.at(this));
+                getRoleName(), getScope().toPolicyScope(), getCondition(), getReason(),
+                SourceSpanNode.at(this));
     }
 
     @Override
@@ -71,7 +85,12 @@ public class RoleAssignmentNode extends AbstractExpression {
 
         // ⚠️ Verbatim, never re-rendered. The control room's revert writes this back, and a condition
         // respelled is a line the administrator who wrote it cannot find again.
-        return isConditional() ? written + " when " + getCondition() : written;
+        String withCondition = isConditional() ? written + " when " + getCondition() : written;
+
+        // Only when there is one — see GrantNode.toSource for why byte-for-byte matters here.
+        return isExplained()
+                ? withCondition + " reason " + SourceWriter.literal(getReason())
+                : withCondition;
     }
 
     @Override

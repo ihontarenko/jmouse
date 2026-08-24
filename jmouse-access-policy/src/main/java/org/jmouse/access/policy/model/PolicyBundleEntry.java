@@ -35,15 +35,29 @@ package org.jmouse.access.policy.model;
  *                   a condition that can never hold is a mass denial rather than one person's
  *                   missing permission, which is why an unresolvable name is refused at load
  */
-public record PolicyBundleEntry(String permission, String scope, String condition, SourceSpan at) {
+public record PolicyBundleEntry(
+        String permission, String scope, String condition, String reason, SourceSpan at) {
 
     /** The ordinary entry: nothing narrows it beyond the reach it is carried at. */
     public PolicyBundleEntry(String permission, String scope, SourceSpan at) {
-        this(permission, scope, null, at);
+        this(permission, scope, null, null, at);
+    }
+
+    /**
+     * ⚠️ Kept so that adding {@code reason} left every existing construction site compiling, and so a
+     * document without one is written back byte-for-byte as it was.
+     */
+    public PolicyBundleEntry(String permission, String scope, String condition, SourceSpan at) {
+        this(permission, scope, condition, null, at);
     }
 
     /** Whether anything narrows this entry. */
     public boolean isConditional() {
         return condition != null && !condition.isBlank();
+    }
+
+    /** Whether this line says, in words, why it is what it is. */
+    public boolean isExplained() {
+        return reason != null && !reason.isBlank();
     }
 }

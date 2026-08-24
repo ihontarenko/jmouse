@@ -34,13 +34,52 @@ public record GrantAttribution(
         String         reason,
         LocalDateTime  since,
         GrantOrigin    origin,
-        GrantCondition condition
+        GrantCondition condition,
+        String         explanation
 ) {
 
-    private static final GrantAttribution NOBODY = new GrantAttribution(null, null, null, null, null);
+    private static final GrantAttribution NOBODY =
+            new GrantAttribution(null, null, null, null, null, null);
 
     public GrantAttribution {
         origin = origin == null ? GrantOrigin.stored() : origin;
+    }
+
+    /**
+     * ⚠️ Kept so that adding {@link #explanation()} left every existing construction site compiling.
+     */
+    public GrantAttribution(
+            String         grantedBy,
+            String         reason,
+            LocalDateTime  since,
+            GrantOrigin    origin,
+            GrantCondition condition) {
+
+        this(grantedBy, reason, since, origin, condition, null);
+    }
+
+    /**
+     * The sentence the policy file wrote with {@code reason "…"}, for the person who is refused.
+     *
+     * <p>⚠️ <strong>Deliberately not {@link #reason()}, and the difference is the whole point.</strong>
+     * {@code reason} says why the grant <em>exists</em> — {@code "left the team"},
+     * {@code "declared at policy/rules/working-hours:12"} — and a refusal quoting that at somebody who
+     * pressed a button would be reading provenance out loud. This is what the author wrote <em>for that
+     * person</em>: <em>"службу тимчасово вимкнено, спробуйте за годину"</em>.
+     *
+     * <p>⚠️ Two names, one word, and the file spells it {@code reason}. That mismatch is known and
+     * accepted rather than fixed by renaming {@code reason}, which is a component of a core record with
+     * call sites in three products. Worth revisiting when somebody is already in there.
+     *
+     * @return the written sentence, or {@code null} where the file said nothing
+     */
+    public String explanation() {
+        return explanation;
+    }
+
+    /** Whether a sentence was written for whoever is refused. */
+    public boolean isExplained() {
+        return explanation != null && !explanation.isBlank();
     }
 
     /**
@@ -98,7 +137,21 @@ public record GrantAttribution(
         return narrowing == null
                 ? this
                 : new GrantAttribution(
-                        grantedBy, reason, since, origin, GrantCondition.all(condition, narrowing));
+                        grantedBy, reason, since, origin, GrantCondition.all(condition, narrowing),
+                        explanation);
+    }
+
+    /**
+     * The same attribution, carrying the sentence the policy file wrote for whoever is refused.
+     *
+     * <p>⚠️ Separate from {@link #narrowedBy(GrantCondition)} rather than an argument on it, because a
+     * grant may be explained without being conditional — an unconditional {@code deny} is refused just
+     * as often and is just as opaque.
+     */
+    public GrantAttribution explainedBy(String written) {
+        return written == null || written.isBlank()
+                ? this
+                : new GrantAttribution(grantedBy, reason, since, origin, condition, written);
     }
 
     /** Whether anything narrows the rule beyond the scope it applies at. */

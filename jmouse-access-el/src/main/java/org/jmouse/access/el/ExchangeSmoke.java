@@ -34,6 +34,7 @@ import org.jmouse.access.spi.GrantAttribution;
 import org.jmouse.access.spi.GrantOrigin;
 import org.jmouse.access.spi.GrantStore;
 import org.jmouse.access.spi.ResolutionCache;
+import org.jmouse.access.spi.ScopeHierarchy;
 import org.jmouse.access.spi.RoleGrant;
 
 import java.time.LocalDateTime;
@@ -320,7 +321,7 @@ public final class ExchangeSmoke {
         GrantStore   store  = new PolicyGrantStore(policy);
 
         EffectivePermissionsResolver resolver = new EffectivePermissionsResolver(
-                store, VOCABULARY, ResolutionCache.none(), null);
+                store, VOCABULARY, ScopeHierarchy.flat(), ResolutionCache.none(), null);
 
         EffectivePermissions resolved = resolver.resolve(
                 Subject.of("u-2", "u-2"), AccessTarget.installation().at(SPACE, "kyiv"));

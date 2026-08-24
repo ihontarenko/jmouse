@@ -5,9 +5,12 @@ import org.jmouse.access.spi.DirectGrant;
 import org.jmouse.access.spi.GrantStore;
 import org.jmouse.access.spi.RoleGrant;
 import org.jmouse.access.spi.ResolutionCache;
+import org.jmouse.access.spi.ScopeHierarchy;
 import org.jmouse.access.spi.ShareGrants;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * What a subject may do at a target, worked out once and with its provenance.
@@ -27,15 +30,46 @@ import java.util.List;
  * <p><strong>It answers with provenance rather than with a set of strings</strong>, and that is not
  * an extra: {@code /admin/access} renders exactly this object, and a control room computing its own
  * answer is a control room that lies on the day it matters.
+ *
+ * <h3>⚠️ A grant on a branch covers everything under it, and that is decided HERE (JMF-53)</h3>
+ *
+ * <p>{@link ScopeCatalog#covering} answers with the places a target <em>names</em>, and an
+ * {@link AccessTarget} names <strong>one instance per kind</strong> — {@link AccessTarget#at} replaces
+ * rather than appends. The grant stores then match a chain link for link. So without the widening below,
+ * a request about a folder is matched only against grants written on <em>that folder</em>, and a
+ * membership granted at the branch above it refuses everything inside it.</p>
+ *
+ * <p>⚠️ <strong>It was missing for exactly this long.</strong> {@link ScopeHierarchy} existed, every
+ * product registered one, and both of its methods were correct — and the only two callers were
+ * {@link VisibilityScopeResolver} (which rows a listing may show) and {@link CapabilityResolver}.
+ * Nothing on the authorize-this-request path ever asked it, so a product's tree was real for listings
+ * and imaginary for permissions. It surfaced as a 403 on a folder somebody had just made inside a
+ * folder they owned.</p>
+ *
+ * <p>⚠️ <strong>Deny-wins reaches down with it</strong>, and that half matters as much: a personal DENY
+ * written at a branch now beats a role granted above it for everything underneath, because the
+ * subtraction in {@link #resolveFor} runs over the widened chain.</p>
+ *
+ * <p>⚠️ <strong>What it costs</strong> is one {@link ScopeHierarchy#containing} call per place the
+ * target names, on every resolve, <em>before</em> the {@link ResolutionCache} is consulted — the cache is
+ * keyed on the finished chain, so it cannot save the walk that builds the key. The hierarchies are
+ * written as single indexed queries for this reason; one that walks parent pointers a row at a time
+ * becomes a per-request cost here rather than a per-listing one.</p>
  */
 public class EffectivePermissionsResolver {
 
     private final GrantStore      grants;
     private final ScopeCatalog    scopes;
+    private final ScopeHierarchy  hierarchy;
     private final ResolutionCache cache;
     private final ShareGrants     shareGrants;
 
     /**
+     * @param hierarchy   which wider places contain a given one — what makes a grant on a branch cover
+     *                    its subtree. ⚠️ <strong>The same instance the engine is given</strong>, never a
+     *                    second one: two answers to what contains what disagree the first time anything
+     *                    moves. {@link ScopeHierarchy#flat()} is the honest value for a product whose
+     *                    places do not nest, and null is read as exactly that
      * @param cache       where to keep an answer for the length of one unit of work.
      *                    {@link ResolutionCache#none()} is valid and merely slower
      * @param shareGrants what a share token grants, or null in an installation that has no shares —
@@ -44,11 +78,13 @@ public class EffectivePermissionsResolver {
     public EffectivePermissionsResolver(
             GrantStore      grants,
             ScopeCatalog    scopes,
+            ScopeHierarchy  hierarchy,
             ResolutionCache cache,
             ShareGrants     shareGrants) {
 
         this.grants      = grants;
         this.scopes      = scopes;
+        this.hierarchy   = hierarchy == null ? ScopeHierarchy.flat() : hierarchy;
         this.cache       = cache == null ? ResolutionCache.none() : cache;
         this.shareGrants = shareGrants;
     }
@@ -72,9 +108,39 @@ public class EffectivePermissionsResolver {
             return EffectivePermissions.none();
         }
 
-        List<ScopeReference> chain = scopes.covering(target, subject.ownedRowsBelongTo());
+        List<ScopeReference> chain = widened(scopes.covering(target, subject.ownedRowsBelongTo()));
 
         return cache.permissions(subject.principalId(), chain, () -> resolveSubject(subject, chain));
+    }
+
+    /**
+     * The same chain, with every place's ancestors in front of it.
+     *
+     * <p>⚠️ <strong>Ancestors go in BEFORE the place they contain, and that ordering is load-bearing
+     * twice over.</strong> {@link #narrowestOf} takes the last link as the place an agent's cap applied
+     * at, and {@link #conferredScope} reads the chain as widest-first when it records where a permission
+     * came from. A chain with an ancestor at the end would report both as the wrong place — which is
+     * wrong in a screen rather than in a decision, and therefore the kind of wrong nobody notices.</p>
+     *
+     * <p>⚠️ <strong>A set, because the chain is a cache key.</strong> It is handed to
+     * {@link ResolutionCache#permissions} and scanned with {@code contains}; a duplicated link changes
+     * no answer and splits the cache, which is a slow leak rather than a bug.</p>
+     *
+     * @param named the places the target names, widest first
+     * @return those places and everything containing them, widest first, without repeats
+     */
+    private List<ScopeReference> widened(List<ScopeReference> named) {
+        Set<ScopeReference> covering = new LinkedHashSet<>(named.size() * 2);
+
+        for (ScopeReference place : named) {
+            // A hierarchy answers about its own kind of place and nothing else, so a product running
+            // more than one tree gets each link widened by whichever tree owns it — and the widest
+            // scope, which contains everything and is contained by nothing, widens to itself.
+            covering.addAll(hierarchy.containing(place));
+            covering.add(place);
+        }
+
+        return List.copyOf(covering);
     }
 
     private EffectivePermissions resolveSubject(Subject subject, List<ScopeReference> chain) {
