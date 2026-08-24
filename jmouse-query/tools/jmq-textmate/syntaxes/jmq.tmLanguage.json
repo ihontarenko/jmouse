@@ -1,0 +1,229 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "jMouse Query",
+  "scopeName": "source.jmq",
+  "fileTypes": ["jmq"],
+
+  "patterns": [
+    { "include": "#document" }
+  ],
+
+  "repository": {
+
+    "document": {
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#source-block" },
+        { "include": "#function-block" },
+        { "include": "#view-block" },
+        { "include": "#reserved" },
+        { "include": "#expression" }
+      ]
+    },
+
+    "comment": {
+      "comment": "`#` to end of line — the same as .jmp, so one habit serves both.",
+      "match": "#.*$",
+      "name": "comment.line.number-sign.jmq"
+    },
+
+    "view-block": {
+      "comment": "view \"name\" on target { … }",
+      "begin": "\\b(view)\\b\\s*(\"[^\"\\n]*\"|'[^'\\n]*')?\\s*(?:\\b(on)\\b\\s*([\\p{L}_][\\p{L}\\p{N}_]*))?",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.declaration.jmq" },
+        "2": { "name": "string.quoted.title.jmq" },
+        "3": { "name": "keyword.operator.target.jmq" },
+        "4": { "name": "entity.name.type.target.jmq" }
+      },
+      "end": "(?<=\\})",
+      "patterns": [
+        { "include": "#clause-body" }
+      ]
+    },
+
+    "function-block": {
+      "comment": "function name(parameters) { … } — a named, parameterised query.",
+      "begin": "\\b(function)\\b\\s*([\\p{L}_][\\p{L}\\p{N}_]*)?",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.declaration.jmq" },
+        "2": { "name": "entity.name.function.jmq" }
+      },
+      "end": "(?<=\\})",
+      "patterns": [
+        { "include": "#parameter-type" },
+        { "include": "#clause-body" }
+      ]
+    },
+
+    "source-block": {
+      "comment": "source name { from … bag … attribute … } — where a product's data is.",
+      "begin": "\\b(source)\\b\\s*([\\p{L}_][\\p{L}\\p{N}_]*)?",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.declaration.jmq" },
+        "2": { "name": "entity.name.type.source.jmq" }
+      },
+      "end": "(?<=\\})",
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#source-clause" },
+        { "include": "#value-kind" },
+        { "include": "#access-kind" },
+        { "include": "#string" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "source-clause": {
+      "comment": "The three lines a source is made of, plus the words that join them.",
+      "match": "\\b(from|bag|attribute)\\b|\\b(as|key|value|on|in)\\b",
+      "captures": {
+        "1": { "name": "keyword.control.clause.jmq" },
+        "2": { "name": "keyword.operator.declaration.jmq" }
+      }
+    },
+
+    "value-kind": {
+      "comment": "⚠️ `unknown` is deliberately marked as the invalid-ish one of the five — it is an admission that nothing has promised a type, and it is what makes an ordered comparison refuse. A reader scanning a source file should be able to see which attributes are unpromised without reading the words.",
+      "match": "\\b(unknown)\\b|\\b(text|number|boolean|temporal)\\b",
+      "captures": {
+        "1": { "name": "invalid.deprecated.untyped.jmq" },
+        "2": { "name": "support.type.value-kind.jmq" }
+      }
+    },
+
+    "access-kind": {
+      "match": "\\b(bag|column)\\b",
+      "name": "support.type.access.jmq"
+    },
+
+    "clause-body": {
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#clause" },
+        { "include": "#reserved" },
+        { "include": "#expression" }
+      ]
+    },
+
+    "clause": {
+      "match": "\\b(where|order|columns)\\b",
+      "name": "keyword.control.clause.jmq"
+    },
+
+    "reserved": {
+      "comment": "⚠️ Recognised so an editor can grey them out BEFORE the parser refuses them. A word held for a later version should not look like a name that happens not to work.",
+      "match": "\\b(group|having|limit|offset|select|join|distinct|union|intersect|except|with|was|changed|insert|update|delete)\\b",
+      "name": "invalid.illegal.reserved.jmq"
+    },
+
+    "expression": {
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#converter" },
+        { "include": "#test" },
+        { "include": "#operator-word" },
+        { "include": "#direction" },
+        { "include": "#alias" },
+        { "include": "#attribute" },
+        { "include": "#string" },
+        { "include": "#number" },
+        { "include": "#operator" },
+        { "include": "#punctuation" }
+      ]
+    },
+
+    "converter": {
+      "comment": "⚠️ The pipe is the one thing neither JQL nor JPQL has, and the one a reader most needs to SEE: without it an ordered comparison over a bag compares words. Coloured as a function, not as punctuation.",
+      "match": "(\\|)\\s*\\b(int|long|short|byte|float|double|bigInt|bigDecimal|string|instant|boolean|before|after)\\b",
+      "captures": {
+        "1": { "name": "keyword.operator.pipe.jmq" },
+        "2": { "name": "support.function.converter.jmq" }
+      }
+    },
+
+    "test": {
+      "match": "\\b(is)\\b(\\s+\\b(not)\\b)?\\s*\\b(contains|starts|ends|null)\\b",
+      "captures": {
+        "1": { "name": "keyword.operator.test.jmq" },
+        "3": { "name": "keyword.operator.test.jmq" },
+        "4": { "name": "support.function.test.jmq" }
+      }
+    },
+
+    "operator-word": {
+      "match": "\\b(and|or|not|in)\\b",
+      "name": "keyword.operator.logical.jmq"
+    },
+
+    "direction": {
+      "match": "\\b(asc|desc)\\b",
+      "name": "keyword.other.direction.jmq"
+    },
+
+    "alias": {
+      "match": "\\b(as)\\b\\s*([\\p{L}_][\\p{L}\\p{N}_]*)?",
+      "captures": {
+        "1": { "name": "keyword.operator.alias.jmq" },
+        "2": { "name": "variable.other.alias.jmq" }
+      }
+    },
+
+    "attribute": {
+      "comment": "entry[quantity] and issue.points — the two shapes a product's data comes in. ⚠️ Non-ASCII on purpose: every document this language was designed against is Cyrillic.",
+      "patterns": [
+        {
+          "match": "([\\p{L}_][\\p{L}\\p{N}_]*)(\\[)([^\\]]*)(\\])",
+          "captures": {
+            "1": { "name": "variable.language.holder.jmq" },
+            "2": { "name": "punctuation.definition.attribute.jmq" },
+            "3": { "name": "variable.other.member.jmq" },
+            "4": { "name": "punctuation.definition.attribute.jmq" }
+          }
+        },
+        {
+          "match": "([\\p{L}_][\\p{L}\\p{N}_]*)(\\.)([\\p{L}_][\\p{L}\\p{N}_]*)",
+          "captures": {
+            "1": { "name": "variable.language.holder.jmq" },
+            "2": { "name": "punctuation.accessor.jmq" },
+            "3": { "name": "variable.other.member.jmq" }
+          }
+        }
+      ]
+    },
+
+    "parameter-type": {
+      "comment": "⚠️ `as` introduces a TYPE and `:` a DEFAULT. They look alike on a line and mean different things, so they are coloured differently — see the note in QueryToken about why `:` could not be the type.",
+      "match": "\\b(as)\\b\\s*([\\p{L}_][\\p{L}\\p{N}_]*)(\\[\\])?|(:)",
+      "captures": {
+        "1": { "name": "keyword.operator.alias.jmq" },
+        "2": { "name": "support.type.parameter.jmq" },
+        "3": { "name": "punctuation.definition.array.jmq" },
+        "4": { "name": "keyword.operator.default.jmq" }
+      }
+    },
+
+    "string": {
+      "comment": "⚠️ No escape sequences — a literal chooses its quote rather than escaping it, so a value holding both kinds has no spelling at all.",
+      "patterns": [
+        { "match": "\"[^\"\\n]*\"", "name": "string.quoted.double.jmq" },
+        { "match": "'[^'\\n]*'", "name": "string.quoted.single.jmq" }
+      ]
+    },
+
+    "number": {
+      "match": "\\b[+-]?\\d+(\\.\\d+)?\\b",
+      "name": "constant.numeric.jmq"
+    },
+
+    "operator": {
+      "match": "==|!=|<>|>=|<=|\\?\\?|[<>+*/%!-]|=",
+      "name": "keyword.operator.jmq"
+    },
+
+    "punctuation": {
+      "match": "[{}\\[\\](),;]",
+      "name": "punctuation.separator.jmq"
+    }
+  }
+}

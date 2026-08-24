@@ -1,0 +1,7 @@
+ticket[title];ticket[level];ticket[member];ticket[member].name;ticket[member].team
+Каса не друкує чек;3;member-1;Олена К.;platform
+Повільний пошук;2;member-2;Тарас М.;platform
+Дрібна опечатка;1;member-3;Марія Д.;delivery
+Втрата даних при імпорті;3;member-3;Марія Д.;delivery
+Кнопка не там;1;member-4;Богдан Р.;delivery
+Дубль у звіті;2;member-4;Богдан Р.;delivery

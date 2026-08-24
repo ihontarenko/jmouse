@@ -1,0 +1,41 @@
+# Innoventa, declared — a schemaless bag, and the two ways of reading it.
+#
+# ⚠️ The bag is TWO hops: field_entries.field_id points at fields.id, so the key column holds an ID
+# rather than a name. Nothing in the language changes for that — each attribute's `from` carries
+# whatever the store actually uses to identify it.
+
+source inventory {
+  from      form_entries as e key id
+  bag       field_entries on form_entry_id key field_id value text_value
+
+  # ⚠️ `text` is a PROMISE and `unknown` is an admission. A name really is text, so ordering it
+  # alphabetically is allowed. A quantity stored as text is not a number until somebody says how to
+  # read it — `| int` — because as words "900" is greater than "1000".
+  attribute entry[name]       from "f-component-name"    text     in bag
+  attribute entry[quantity]   from "f-quantity"          unknown  in bag
+  attribute entry[resistance] from "f-resistance"        unknown  in bag
+  attribute entry[price]      from "f-approximate-price" unknown  in bag
+  attribute created           from created_at            temporal in column
+}
+
+# The same table, read through its numeric column instead. Which one a query should use is a
+# product's decision, and the library never has to know there are two.
+source numbers {
+  from      form_entries as e key id
+  bag       field_entries on form_entry_id key field_id value numeric_value
+
+  # ⚠️ `number`, not `unknown` — this column really IS numeric, and saying so is what stops a
+  # converter wrapping it in a text guard that a DECIMAL never matches.
+  attribute entry[quantity]   from "f-quantity"   number in bag
+  attribute entry[resistance] from "f-resistance" number in bag
+}
+
+source assets {
+  from      form_entries as e key id
+  bag       field_entries on form_entry_id key field_id value text_value
+
+  attribute asset[manufacturer] from "field-asset-manufacturer"     text in bag
+  attribute asset[model]        from "field-asset-model"            text in bag
+  attribute asset[serial]       from "field-asset-serial-number"    text in bag
+  attribute asset[inventory]    from "field-asset-inventory-number" text in bag
+}

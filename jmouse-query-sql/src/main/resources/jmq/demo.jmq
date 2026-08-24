@@ -1,0 +1,167 @@
+# Ten products that do not exist, declared. One file, ten `source { }` blocks, and not a line of Java.
+#
+# ⚠️ This file is the CONFIGURATION half of the demonstrations — each of them prints the block it runs
+# against straight out of here, so what is shown and what is used cannot drift.
+#
+# Two shapes appear, and the difference is the whole reason jMQ has an `access`:
+#
+#   `in column` — an ordinary column on the row's own table.
+#   `in bag`    — a row in a side table keyed by a name, the way a schemaless product stores a field.
+#                 Only `catalog` below is one, because it is the shape that is hard.
+#
+# And two type words carry the weight:
+#
+#   `text` / `number` / `temporal` — a PROMISE. Believed, and compared accordingly.
+#   `unknown`                      — an ADMISSION. An ordered comparison over it is refused until a
+#                                    converter says how to read it, because as words "900" > "1000".
+
+# 1 · Клініка. Реєстратор шукає прийоми, які «висять» — фільтр і сортування приходять з URL.
+source visits {
+  from      visits as v key id
+
+  attribute visit[patient] from patient      text     in column
+  attribute visit[doctor]  from doctor_id    text     in column
+  attribute visit[status]  from status       text     in column
+  attribute visit[date]    from scheduled_at temporal in column
+}
+
+# 2 · Логістика. Вираз живе в анотації на методі репозиторію і компілюється на старті застосунку.
+source deliveries {
+  from      deliveries as d key id
+
+  attribute delivery[reference] from reference  text     in column
+  attribute delivery[carrier]   from carrier    text     in column
+  attribute delivery[city]      from city       text     in column
+  attribute delivery[weight]    from weight_kg  number   in column
+  attribute delivery[shipped]   from shipped_at temporal in column
+}
+
+# 3 · IoT. Правило алерту — значення YAML-конфіга: where + group + having.
+source readings {
+  from      sensor_readings as r key id
+
+  attribute reading[sensor] from sensor   text     in column
+  attribute reading[at]     from taken_at temporal in column
+  attribute reading[value]  from celsius  number   in column
+}
+
+# 4 · SaaS-білінг. Бібліотека функцій в одному .jmq, в'юхи — в іншому.
+source subscriptions {
+  from      subscriptions as s key id
+
+  attribute subscription[customer] from customer    text     in column
+  attribute subscription[plan]     from plan        text     in column
+  attribute subscription[mrr]      from mrr         number   in column
+  attribute subscription[from]     from valid_from  temporal in column
+  attribute subscription[until]    from valid_until temporal in column
+}
+
+# 5 · CRM. Плитка дашборду — агрегація як джерело графіка.
+source deals {
+  from      deals as d key id
+
+  attribute deal[title]  from title  text   in column
+  attribute deal[owner]  from owner  text   in column
+  attribute deal[stage]  from stage  text   in column
+  attribute deal[amount] from amount number in column
+}
+
+# 6 · ATS. Агент через MCP пише вираз сам — і сам виправляється з тексту відмови.
+source candidates {
+  from      candidates as c key id
+
+  attribute candidate[name]    from full_name  text     in column
+  attribute candidate[role]    from role       text     in column
+  attribute candidate[level]   from level      text     in column
+  attribute candidate[status]  from status     text     in column
+  attribute candidate[applied] from applied_at temporal in column
+}
+
+# 7 · Веб-шоп. ⚠️ ЄДИНИЙ приклад із мішком: атрибути товару лежать у side-таблиці, ціна там текстом.
+source catalog {
+  from      products as p key id
+  bag       product_attributes on product_id key attribute value value
+
+  attribute sku               from sku      text    in column
+  attribute name              from name     text    in column
+  # ⚠️ `unknown`, не `number` — у мішку лежить рядок. Саме тому `| bigDecimal` доводиться писати,
+  # і саме тому впорядкування без конвертера тут відмовляють.
+  attribute product[price]    from price    unknown in bag
+  attribute product[colour]   from colour   text    in bag
+  attribute product[archived] from archived text    in bag
+}
+
+# 8 · CI/CD. Один рядок у терміналі, без жодного файлу.
+source builds {
+  from      builds as b key id
+
+  attribute build[number]   from number           number   in column
+  attribute build[branch]   from branch           text     in column
+  attribute build[status]   from status           text     in column
+  attribute build[duration] from duration_seconds number   in column
+  attribute build[at]       from finished_at      temporal in column
+}
+
+# 9 · Освіта. Той самий вираз, вбудований у текст сторінки як live-блок.
+source students {
+  from      students as s key id
+
+  attribute student[name]   from name   text    in column
+  attribute student[course] from course text    in column
+  # ⚠️ VARCHAR в базі, тож `unknown`: як текст "100" стоїть НИЖЧЕ за "60".
+  attribute student[grade]  from grade  unknown in column
+}
+
+# 10 · Медіа. Скоуп орендаря сервер дописує до кожного запиту — у коді, не в тексті запиту.
+source assets {
+  from      assets as a key id
+
+  attribute asset[tenant]    from tenant       text     in column
+  attribute asset[title]     from title        text     in column
+  attribute asset[kind]      from kind         text     in column
+  attribute asset[published] from published_at temporal in column
+}
+
+# ⚠️ The vocabulary a real board filter needs, beyond a column and a bag.
+#
+#   `join`       — a row ONE HOP away. One alias per table, because two attributes out of `doctors`
+#                  are two columns of the same row.
+#   `collection` — MANY rows per row, and no single value. It has no expression at all: reached by a
+#                  join, a candidate with three skills would come back three times.
+source appointments {
+  from      visits as v key id
+  join      doctors on doctor_id key id
+
+  attribute visit[patient]           from patient            text     in column
+  attribute visit[status]            from status             text     in column
+  attribute visit[date]              from scheduled_at       temporal in column
+  attribute visit[doctor]            from doctor_id          text     in column
+  attribute visit[doctor].name       from doctors.name       text     in join
+  attribute visit[doctor].speciality from doctors.speciality text     in join
+  attribute visit[doctor].room       from doctors.room       text     in join
+}
+
+source applicants {
+  from       candidates as c key id
+  collection candidate_skills on candidate_id value skill
+
+  attribute candidate[name]    from full_name        text     in column
+  attribute candidate[role]    from role             text     in column
+  attribute candidate[level]   from level            text     in column
+  attribute candidate[status]  from status           text     in column
+  attribute candidate[applied] from applied_at       temporal in column
+  attribute candidate[skills]  from candidate_skills text     in collection
+}
+
+# ⚠️ The shape a real filter has: a number on the row, a value one hop away, and a list the CALLER
+# supplies. `blockedIds` is not in this file and never will be — a query cannot invent one.
+source tickets {
+  from      tickets as t key id
+  join      ticket_members on member_id key id
+
+  attribute ticket[title]       from title              text   in column
+  attribute ticket[level]       from level              number in column
+  attribute ticket[member]      from member_id          text   in column
+  attribute ticket[member].name from ticket_members.name text  in join
+  attribute ticket[member].team from ticket_members.team text  in join
+}

@@ -31,6 +31,7 @@
         <module>jmouse-ai-spring-boot</module>
         <module>jmouse-ai-mcp-authorization</module>
         <module>jmouse-liveblocks</module>
+        <module>jmouse-query-spring-boot</module>
     </modules>
 
 </project>

@@ -1,0 +1,18 @@
+# Tessera, declared. This is the whole of what a product tells jMQ about itself.
+#
+# ⚠️ Sources live apart from views on purpose: a view is cross-product, a mapping is not.
+# `view … on issues` runs in anything that declares an `issues` source — put the mapping in the
+# view's own file and the view stops being portable, which was the point of having it.
+
+source issues {
+  from      issues as i key id
+
+  attribute issue.key       from issue_key           text     in column
+  attribute issue.summary   from summary             text     in column
+  attribute issue.points    from story_points        number   in column
+  attribute issue.status    from status_id           text     in column
+  attribute issue.type      from issue_type_id       text     in column
+  attribute issue.assignee  from assignee_member_id  text     in column
+  attribute issue.parent    from parent_id           text     in column
+  attribute issue.opened    from created_at          temporal in column
+}

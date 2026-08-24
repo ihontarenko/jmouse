@@ -1,0 +1,57 @@
+{
+  "name": "jmq-textmate",
+  "displayName": "jMouse Query (.jmq)",
+  "description": "Syntax highlighting for jMouse query documents — views, functions and sources.",
+  "version": "1.0.0",
+  "publisher": "jmouse",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "jmq",
+        "aliases": [
+          "jMouse Query",
+          "jmq"
+        ],
+        "extensions": [
+          ".jmq"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "jmq",
+        "scopeName": "source.jmq",
+        "path": "./syntaxes/jmq.tmLanguage.json"
+      }
+    ],
+    "configurationDefaults": {
+      "editor.tokenColorCustomizations": {
+        "textMateRules": [
+          {
+            "_comment": "The converter pipe is the one thing neither JQL nor JPQL has, and the one a reader most needs to see: without it an ordered comparison over a bag of text compares words, and \"900\" is greater than \"1000\". Bold, so that its ABSENCE is what stands out on a line that needed it.",
+            "scope": "support.function.converter.jmq",
+            "settings": { "fontStyle": "bold" }
+          },
+          {
+            "_comment": "`unknown` is an admission, not a type — it says nobody has promised what an attribute holds. It is marked invalid-ish so a source file shows at a glance which attributes are unpromised, because those are the ones whose comparisons will be refused.",
+            "scope": "invalid.deprecated.untyped.jmq",
+            "settings": { "fontStyle": "italic" }
+          },
+          {
+            "_comment": "A reserved word is greyed out BEFORE the parser refuses it. A word held for a later version of the language should not look like a name that happens not to work.",
+            "scope": "invalid.illegal.reserved.jmq",
+            "settings": { "fontStyle": "italic" }
+          }
+        ]
+      }
+    }
+  }
+}

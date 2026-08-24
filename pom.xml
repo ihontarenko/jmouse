@@ -106,6 +106,10 @@
         <module>jmouse-access-policy</module>
         <module>jmouse-access-el</module>
         <module>jmouse-access-projection</module>
+        <module>jmouse-query</module>
+        <module>jmouse-query-sql</module>
+        <module>jmouse-query-store</module>
+        <module>jmouse-query-store-jpa</module>
         <module>jmouse-storage</module>
         <module>jmouse-storage-s3</module>
         <module>jmouse-storage-jpa</module>
