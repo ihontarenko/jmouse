@@ -32,11 +32,15 @@ public interface AvatarOwner {
     AvatarChoice avatarChoice();
 
     /**
-     * 🎲 The seed a generated face is drawn from, or {@code null} where none is worn.
+     * 🎲 What a generated face is drawn from, or {@code null} where none is worn.
      *
-     * @return the seed
+     * <p>⚠️ A <strong>descriptor</strong> — strategy, seed and that strategy's settings — not a bare
+     * seed. It was a bare seed before the drawing engine became a package, and a bare seed is still
+     * accepted forever: see {@link AvatarDescriptors}.</p>
+     *
+     * @return the descriptor
      */
-    String avatarSeed();
+    String avatarDescriptor();
 
     /**
      * 🖼️ The uploaded picture, or {@code null} where none is worn.
@@ -48,9 +52,9 @@ public interface AvatarOwner {
     /**
      * 🎲 Wear a generated face.
      *
-     * @param seed what to draw it from
+     * @param descriptor what draws it
      */
-    void wearsPreset(String seed);
+    void wearsPreset(String descriptor);
 
     /**
      * 🖼️ Wear a picture.

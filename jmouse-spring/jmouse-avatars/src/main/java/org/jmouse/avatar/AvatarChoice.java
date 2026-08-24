@@ -12,7 +12,7 @@ public enum AvatarChoice {
     /** Drawn from the name — the state everybody starts in. */
     INITIALS,
 
-    /** A generated face, drawn from a seed the person picked. */
+    /** A generated face, drawn from a descriptor the person picked — see {@link AvatarDescriptors}. */
     PRESET,
 
     /** A picture they uploaded. */

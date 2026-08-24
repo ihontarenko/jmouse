@@ -13,7 +13,6 @@ import org.jmouse.storage.key.StorageKeyRequest;
 
 import java.util.Locale;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * 🙂 A member's face: choosing one, uploading one, dropping back to initials, serving the bytes.
@@ -37,6 +36,11 @@ import java.util.regex.Pattern;
  * Both matter: the type rule is the second half of what makes the unauthenticated byte route safe, and
  * the size rule stopped being implied by the installation's the moment a product raised its ceiling to
  * fit documents.</p>
+ *
+ * <h3>What a generated face is stored as</h3>
+ *
+ * <p>A descriptor, not a bare seed — {@link AvatarDescriptors} states the shape and the reason a bare
+ * seed nonetheless stays valid forever.</p>
  */
 public class AvatarService {
 
@@ -53,19 +57,6 @@ public class AvatarService {
      */
     private static final Set<String> ACCEPTED_TYPES =
         Set.of("image/png", "image/jpeg", "image/webp", "image/gif");
-
-    /**
-     * What a preset seed may look like.
-     *
-     * <p>⚠️ A shape, not a catalogue. The generators that draw these faces are total — every string
-     * produces one — so there is no set of valid seeds to check against, and inventing one would mean a
-     * curated list on the server edited in step with the interface's every time a face is added. What
-     * this refuses is a seed that could not have come from a picker: long enough to be a payload, or
-     * carrying characters a URL and a column should not have to think about.</p>
-     */
-    private static final Pattern SEED_SHAPE = Pattern.compile("^[a-z0-9]+(-[a-z0-9]+)*$");
-
-    private static final int SEED_MAXIMUM_LENGTH = 64;
 
     private final StoredFileIngestion ingestion;
     private final StoredFileRegistry  registry;
@@ -91,11 +82,15 @@ public class AvatarService {
     /**
      * 🎲 Wear a generated face.
      *
-     * @param owner whose face
-     * @param seed  what to draw it from
+     * <p>⚠️ The value is a <strong>descriptor</strong> — the strategy that draws the face, the seed it
+     * is drawn from, and that strategy's settings. It used to be a bare seed, and a bare seed is still
+     * accepted forever: see {@link AvatarDescriptors}.</p>
+     *
+     * @param owner      whose face
+     * @param descriptor what draws it
      */
-    public void choosePreset(AvatarOwner owner, String seed) {
-        owner.wearsPreset(validSeed(seed));
+    public void choosePreset(AvatarOwner owner, String descriptor) {
+        owner.wearsPreset(AvatarDescriptors.validated(descriptor));
     }
 
     /**
@@ -195,19 +190,4 @@ public class AvatarService {
         }
     }
 
-    private String validSeed(String seed) {
-        String candidate = seed == null ? "" : seed.trim();
-
-        if (candidate.isEmpty()) {
-            throw new UploadRejectedException("A preset avatar needs a seed.");
-        }
-
-        if (candidate.length() > SEED_MAXIMUM_LENGTH || !SEED_SHAPE.matcher(candidate).matches()) {
-            throw new UploadRejectedException(
-                "'%s' is not a usable avatar seed — lowercase words joined by hyphens, up to %d characters."
-                    .formatted(candidate, SEED_MAXIMUM_LENGTH));
-        }
-
-        return candidate;
-    }
 }
