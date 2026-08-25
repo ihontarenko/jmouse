@@ -1,6 +1,7 @@
 package org.jmouse.query.el.node;
 
 import org.jmouse.el.node.Expression;
+import org.jmouse.query.translate.Capability;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,10 @@ import java.util.stream.Collectors;
  */
 public class GroupNode extends ClauseNode {
 
-    public static final String KEYWORD = "group";
+    public static final ClauseKind KIND =
+            ClauseKind.of("group", Capability.AGGREGATE, 3 * ClauseKind.STEP);
+
+    public static final String KEYWORD = KIND.keyword();
 
     private final List<Expression> keys = new ArrayList<>();
 
@@ -35,8 +39,8 @@ public class GroupNode extends ClauseNode {
     }
 
     @Override
-    public String keyword() {
-        return KEYWORD;
+    public ClauseKind kind() {
+        return KIND;
     }
 
     @Override

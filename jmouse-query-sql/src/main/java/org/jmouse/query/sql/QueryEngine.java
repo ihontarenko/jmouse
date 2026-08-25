@@ -7,12 +7,18 @@ import org.jmouse.query.el.QueryFunctions;
 import org.jmouse.query.el.function.FunctionInliner;
 import org.jmouse.query.el.node.QueryBlockNode;
 import org.jmouse.query.el.node.QueryDocumentNode;
+import org.jmouse.query.el.node.ClauseNode;
+import org.jmouse.query.el.node.JoinClauseNode;
 import org.jmouse.query.el.node.ViewNode;
 import org.jmouse.query.schema.QueryChecker;
 import org.jmouse.query.schema.QuerySchema;
 
+import org.jmouse.query.translate.Bindings;
+import org.jmouse.query.translate.SourceBinding;
+
 import java.time.Instant;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -60,14 +66,19 @@ import java.util.Set;
  */
 public class QueryEngine {
 
-    private final QueryLanguage           language;
-    private final Dialect                 dialect;
+    private final QueryLanguage            language;
+    private final Dialect                  dialect;
     private final Map<String, QuerySource> sources;
+    private final Targets                  targets;
+    private final Map<String, ViewNode>    views;
 
-    private QueryEngine(QueryLanguage language, Dialect dialect, Map<String, QuerySource> sources) {
+    private QueryEngine(QueryLanguage language, Dialect dialect, Map<String, QuerySource> sources,
+                        Targets targets, Map<String, ViewNode> views) {
         this.language = language;
         this.dialect = dialect;
         this.sources = Map.copyOf(sources);
+        this.targets = targets;
+        this.views = Map.copyOf(views);
     }
 
     public static Builder with(Dialect dialect) {
@@ -76,7 +87,7 @@ public class QueryEngine {
 
     /** The same sources, pointed at another database. */
     public QueryEngine forDialect(Dialect other) {
-        return new QueryEngine(language, other, sources);
+        return new QueryEngine(language, other, sources, targets, views);
     }
 
     /** The language itself, for a caller that wants to parse or rewrite without compiling. */
@@ -201,7 +212,7 @@ public class QueryEngine {
     }
 
     /**
-     * One source, as a {@link org.jmouse.query.adapter.QueryAdapter} — for a caller that wants to be
+     * One source, as a {@link org.jmouse.query.translate.Translator} — for a caller that wants to be
      * backend-agnostic rather than to hold SQL.
      *
      * <p>⚠️ The same registered source, reached through the interface every backend implements. A
@@ -210,10 +221,10 @@ public class QueryEngine {
      * is refused by name rather than quietly dropped.</p>
      *
      * @param targetName which source it is about
-     * @return an adapter over it
+     * @return a translator over it
      */
-    public SqlAdapter adapter(String targetName) {
-        return new SqlAdapter(require(targetName), dialect);
+    public SqlTranslator translator(String targetName) {
+        return new SqlTranslator(require(targetName), dialect);
     }
 
     /**
@@ -238,12 +249,126 @@ public class QueryEngine {
      * @return the compiled parts
      */
     public ViewCompiler.CompiledQuery compile(ViewNode view, Map<String, Object> values) {
-        QuerySource source = require(view.getTarget());
+        // ⚠️ Through the translator, so the capability check cannot be skipped on this path. It was, and
+        // the result was a `limit` clause that parsed, checked, compiled — and silently did not appear in
+        // the statement. A clause quietly dropped is the one failure this whole design exists to prevent,
+        // and the way it happened was a second route to the compiler that did not ask.
+        return translator(view, Bindings.of(values)).parts(view, values);
+    }
 
-        check(view, source.schema(), values.keySet());
+    /**
+     * The translator for one view — resolving {@code on $source} against what the caller supplies.
+     *
+     * <h2>⚠️ Late binding is resolved HERE, because this is what holds the registry</h2>
+     *
+     * <p>A {@link SqlTranslator} is deliberately over one source; that is what makes it a translator for a
+     * destination rather than a second registry. So the question <em>which source</em> is answered by the
+     * thing that knows what has been declared, and the translator is handed the answer.</p>
+     *
+     * @param view     a parsed view, pinned or late-bound
+     * @param bindings what the caller supplies by name
+     * @return the translator for whatever it turned out to be about
+     */
+    public SqlTranslator translator(ViewNode view, Bindings bindings) {
+        String      name  = SourceBinding.resolve(view, bindings, sources.keySet());
+        QuerySource about = require(name);
 
-        return new ViewCompiler(source.mapping(), source.membership())
-                .compile(view, dialect, source.schema(), source.target(), values);
+        return new SqlTranslator(joined(view, name, about), dialect, this::subquery, views.keySet());
+    }
+
+    /**
+     * The statement a named view stands for, where the name is one.
+     *
+     * <h2>⚠️ Compiled on demand, and refused when it projects more than one attribute</h2>
+     *
+     * <p>{ x in supportPeople} asks whether a value is one of a SET, so the inner view has to produce
+     * exactly one column. Two is refused by name rather than the language picking the first — picking one
+     * would answer a different question and look like it worked.</p>
+     */
+    private Optional<Fragment> subquery(String name) {
+        return subquery(name, new LinkedHashSet<>());
+    }
+
+    /**
+     * ⚠️ {@code being} is what stops a view standing in for itself.
+     *
+     * <p>{@code view 'x':a { where: k in a }} would otherwise compile {@code a} in order to compile
+     * {@code a}, forever — a stack overflow rather than a message, and one a person writing a query can
+     * reach by accident the moment two views reference each other.</p>
+     */
+    private Optional<Fragment> subquery(String name, Set<String> being) {
+        ViewNode inner = views.get(name);
+
+        if (inner == null) {
+            return Optional.empty();
+        }
+
+        if (!being.add(name)) {
+            throw new SqlCompileException(
+                    ("'%s' stands in for a set that includes itself; the views involved are %s")
+                            .formatted(name, String.join(" → ", being) + " → " + name));
+        }
+
+        int projected = inner.getColumns().map(columns -> columns.getProjections().size()).orElse(0);
+
+        if (projected != 1) {
+            throw new SqlCompileException(
+                    ("'%s' stands in for a set, so it has to fetch exactly one attribute; it fetches %s")
+                            .formatted(name, projected == 0 ? "none" : projected + " of them"));
+        }
+
+        try {
+            return Optional.of(
+                    new SqlTranslator(require(SourceBinding.resolve(inner, Bindings.none(), sources.keySet())),
+                            dialect, deeper -> subquery(deeper, being), views.keySet())
+                            .parts(inner, Map.of()).select());
+        } finally {
+            being.remove(name);
+        }
+    }
+
+    /** Every view this engine knows by name — what may stand in for a set. */
+    public Set<String> declaredViews() {
+        return views.keySet();
+    }
+
+    /**
+     * The source a view actually compiles against — its own, or its own composed with everything it joins.
+     *
+     * <h2>⚠️ Co-location is checked here, before anything is compiled</h2>
+     *
+     * <p>Two structures in different places cannot appear in one statement, and the refusal names both and
+     * says where each is. Deciding it at compile time rather than at run time is what makes it a message
+     * instead of a database error nobody can read.</p>
+     */
+    private QuerySource joined(ViewNode view, String name, QuerySource about) {
+        QuerySource composed = about;
+
+        for (ClauseNode clause : view.getClauses()) {
+            if (!(clause instanceof JoinClauseNode join)) {
+                continue;
+            }
+
+            targets.requireTogether(name, join.getStructure());
+
+            composed = JoinedStructures.compose(composed, require(join.getStructure()), join);
+        }
+
+        return composed;
+    }
+
+    /** Which mappings live in the same place — what a join asks about. */
+    public Targets targets() {
+        return targets;
+    }
+
+    /** The names anything late-bound may resolve to — what this engine was told about. */
+    public Set<String> declared() {
+        return Set.copyOf(sources.keySet());
+    }
+
+    private String target(ViewNode view, Map<String, Object> values) {
+        return SourceBinding.resolve(view, Bindings.of(values), sources.keySet());
     }
 
     /**
@@ -276,8 +401,42 @@ public class QueryEngine {
                 .compile(block, dialect, source.schema(), source.target(), values);
     }
 
+    /**
+     * ⚠️ A view's own declarations count as supplied names.
+     *
+     * <p>{@code view 'x':hot(since as temporal) uses(prefix as text)} may mention {@code since} and
+     * {@code prefix}; the checker would otherwise refuse them as attributes nothing declares. Declaring
+     * them is what makes the refusal of an UNdeclared one meaningful — without the list, every free name
+     * would have to be allowed.</p>
+     */
     private void check(QueryBlockNode block, QuerySchema schema, Set<String> values) {
-        new QueryChecker(schema, values).check(block);
+        new QueryChecker(schema, allowedNames(block, values)).check(block);
+    }
+
+    static Set<String> allowedNames(QueryBlockNode block, Set<String> values) {
+        return allowedNames(block, values, Set.of());
+    }
+
+    /**
+     * ⚠️ A declared VIEW's name is legal in a query too, because a view may stand in for a set.
+     *
+     * <p>It is allowed only for names this engine actually holds, so a mistyped one is still refused as an
+     * attribute nothing declares — which is what stops {@code x in supportPeaple} compiling into a bound
+     * null and returning no rows.</p>
+     */
+    static Set<String> allowedNames(QueryBlockNode block, Set<String> values, Set<String> views) {
+        Set<String> declared = block instanceof ViewNode view ? view.declaredNames() : Set.of();
+
+        if (declared.isEmpty() && views.isEmpty()) {
+            return values;
+        }
+
+        Set<String> allowed = new LinkedHashSet<>(values);
+
+        allowed.addAll(declared);
+        allowed.addAll(views);
+
+        return allowed;
     }
 
     private SqlContext context(QuerySource source, Map<String, Object> values) {
@@ -306,6 +465,8 @@ public class QueryEngine {
 
         private final Dialect                  dialect;
         private final Map<String, QuerySource> sources = new LinkedHashMap<>();
+        private final Map<String, ViewNode>    views   = new LinkedHashMap<>();
+        private final Targets.Builder          targets = Targets.builder();
 
         private QueryLanguage language = new QueryLanguage();
 
@@ -324,7 +485,19 @@ public class QueryEngine {
         }
 
         public Builder source(QuerySource source) {
+            return source(Targets.DEFAULT, source);
+        }
+
+        /**
+         * A source, in a named place.
+         *
+         * <p>⚠️ Only worth naming when a product genuinely has more than one — a second database, an
+         * export nobody joins to. Everything registered without one shares {@link Targets#DEFAULT}, so a
+         * product with a single database behaves exactly as it did and every structure is joinable.</p>
+         */
+        public Builder source(String target, QuerySource source) {
             sources.put(source.name(), source);
+            targets.mapping(target, source.name());
 
             return this;
         }
@@ -347,6 +520,13 @@ public class QueryEngine {
         public Builder sources(QueryDocumentNode document) {
             SourceLoader.load(document).forEach(this::source);
 
+            // ⚠️ The views come too, and only so that one can stand in for a SET — `x in supportPeople`.
+            // A view is registered under its IDENTIFIER, which is what another declaration writes down; a
+            // title is shown, translated and reworded, and referencing one would break the day somebody
+            // improved the wording.
+            document.getViews().forEach(view ->
+                    view.getIdentifier().ifPresent(name -> views.put(name, view)));
+
             return this;
         }
 
@@ -360,7 +540,7 @@ public class QueryEngine {
         }
 
         public QueryEngine build() {
-            return new QueryEngine(language, dialect, sources);
+            return new QueryEngine(language, dialect, sources, targets.build(), views);
         }
     }
 }

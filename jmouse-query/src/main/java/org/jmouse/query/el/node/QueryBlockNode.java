@@ -5,6 +5,7 @@ import org.jmouse.el.lexer.Token;
 import org.jmouse.query.el.QueryParseException;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,41 +18,57 @@ import java.util.Optional;
  * asked of them constantly and a list answers neither well: <em>has this block a {@code where}?</em>
  * and <em>was this clause written twice?</em></p>
  *
- * <p>⚠️ <strong>Insertion order is preserved and it matters.</strong> A person may write
- * {@code order} before {@code where} and the grammar allows it; {@code toSource()} then writes the
- * canonical order instead, so a document converges on one form the first time it is saved through a
- * builder — the same convergence {@code .jmp} arranges for its own optional prefixes. Keeping the
- * written order available means the choice of which to emit stays a decision rather than an
- * accident.</p>
+ * <h2>⚠️ The set of clauses is open, and nothing here enumerates it</h2>
+ *
+ * <p>A clause states its own keyword, the capability a backend needs for it, where it belongs when the
+ * block is written back out, and whether saying it twice is an {@code and} or a mistake — all four on
+ * the clause itself, in its {@link ClauseKind}. So a clause added to the language costs a parser and a
+ * capability, and no edit to this class or to any backend.</p>
+ *
+ * <p>⚠️ That is not tidiness. This class used to keep a hard-coded rendering order of the five clauses
+ * that existed, which meant a sixth would parse correctly and then <strong>disappear</strong> on the way
+ * back out — a saved query quietly losing a clause the first time somebody edited it.</p>
+ *
+ * <p>A person may write {@code order} before {@code where} and the grammar allows it; {@code toSource()}
+ * writes the canonical order instead, so a document converges on one form the first time it is saved
+ * through a builder — the same convergence {@code .jmp} arranges for its own optional prefixes.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
 public abstract class QueryBlockNode extends AbstractExpression {
 
-    /** The order clauses are written back in, whatever order they were read in. */
-    private static final List<String> CANONICAL_ORDER =
-            List.of(ColumnsNode.KEYWORD, WhereNode.KEYWORD, GroupNode.KEYWORD,
-                    HavingNode.KEYWORD, OrderNode.KEYWORD);
-
     private final Map<String, ClauseNode> clauses = new LinkedHashMap<>();
 
     /**
-     * Adds a clause, refusing a second one of the same kind.
+     * Adds a clause — combining it with the one already there when the clause says it may be repeated,
+     * and refusing it when it does not.
      *
-     * <p>⚠️ Refused rather than resolved. Two {@code where} lines read as though they ought to be
-     * {@code and}-ed together; silently keeping the last is the kind of thing nobody notices until a
-     * view returns rows it should not.</p>
+     * <p>⚠️ Both halves matter. Two {@code where} lines read as though they ought to be {@code and}-ed
+     * together, and now they are — a product composing a scope onto somebody else's filter no longer has
+     * to take the expression apart to do it. Two {@code fetch} lines read as a mistake, and stay
+     * refused: silently keeping the last is the kind of thing nobody notices until a view returns rows
+     * it should not.</p>
+     *
+     * <p>Which of the two a clause gets is the clause's own declaration, not a list kept here — see
+     * {@link ClauseKind}.</p>
      *
      * @param clause the clause to add
      * @param token  where it was written, for the refusal
      */
     public void addClause(ClauseNode clause, Token token) {
-        if (clauses.containsKey(clause.keyword())) {
+        ClauseNode existing = clauses.get(clause.keyword());
+
+        if (existing == null) {
+            clauses.put(clause.keyword(), clause);
+            return;
+        }
+
+        if (!clause.kind().repeatable()) {
             throw QueryParseException.repeated(clause.keyword(), token);
         }
 
-        clauses.put(clause.keyword(), clause);
+        existing.merge(clause);
     }
 
     /**
@@ -63,20 +80,26 @@ public abstract class QueryBlockNode extends AbstractExpression {
      * sort that arrived as two separate parameters. Neither has a token to point at, and neither should
      * be made to invent one: a position in a source file is exactly the thing they do not have.</p>
      *
-     * <p>⚠️ It refuses a second clause of the same kind for the same reason the parsed path does — two
-     * {@code where} clauses read as though they ought to be {@code and}-ed together, and quietly keeping
-     * the last is how a view returns rows it should not.</p>
+     * <p>⚠️ It treats a repeat exactly as the parsed path does — combined where the clause allows it,
+     * refused where it does not. An assembled block is not a block held to a weaker rule.</p>
      *
      * @param clause the clause to add
      */
     public void addClause(ClauseNode clause) {
-        if (clauses.containsKey(clause.keyword())) {
+        ClauseNode existing = clauses.get(clause.keyword());
+
+        if (existing == null) {
+            clauses.put(clause.keyword(), clause);
+            return;
+        }
+
+        if (!clause.kind().repeatable()) {
             throw new QueryParseException(
                     "this block already says '%s' once, and saying it twice is not an 'and'"
                             .formatted(clause.keyword()));
         }
 
-        clauses.put(clause.keyword(), clause);
+        existing.merge(clause);
     }
 
     public Optional<WhereNode> getWhere() {
@@ -110,12 +133,24 @@ public abstract class QueryBlockNode extends AbstractExpression {
     }
 
     /**
-     * Every clause this block holds, in the order it was written.
+     * Every clause this block carries, in the order it is written back out.
      *
-     * @return the clauses as read
+     * <h2>⚠️ Canonical, and derived from the clauses rather than from a list kept here</h2>
+     *
+     * <p>Each clause states where it sits ({@link ClauseKind#order()}), so a clause the language gains
+     * tomorrow takes its place without this class being edited — and, more to the point, without
+     * <strong>vanishing on un-parse</strong>, which is what a hard-coded rendering order did to anything
+     * it had never heard of.</p>
+     *
+     * <p>A person may write {@code order} before {@code where} and the grammar allows it; what comes
+     * back is the canonical form, so a document converges on one spelling the first time it is saved
+     * through a builder.</p>
      */
     public List<ClauseNode> getClauses() {
-        return List.copyOf(clauses.values());
+        return clauses.values().stream()
+                .sorted(Comparator.comparingInt((ClauseNode clause) -> clause.kind().order())
+                                .thenComparing(ClauseNode::keyword))
+                .toList();
     }
 
     private <T extends ClauseNode> Optional<T> clause(String keyword, Class<T> type) {
@@ -131,12 +166,8 @@ public abstract class QueryBlockNode extends AbstractExpression {
     protected String clausesToSource(String indent) {
         List<String> lines = new ArrayList<>();
 
-        for (String keyword : CANONICAL_ORDER) {
-            ClauseNode clause = clauses.get(keyword);
-
-            if (clause != null) {
-                lines.add(indent + clause.toSource());
-            }
+        for (ClauseNode clause : getClauses()) {
+            lines.add(indent + clause.toSource());
         }
 
         return String.join("\n", lines);

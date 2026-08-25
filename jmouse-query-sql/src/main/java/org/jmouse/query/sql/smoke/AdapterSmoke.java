@@ -1,8 +1,9 @@
 package org.jmouse.query.sql.smoke;
 
-import org.jmouse.query.adapter.Capabilities;
-import org.jmouse.query.adapter.QueryAdapter;
-import org.jmouse.query.adapter.memory.MemoryAdapter;
+import org.jmouse.query.translate.Capabilities;
+import org.jmouse.query.translate.Capability;
+import org.jmouse.query.translate.Translator;
+import org.jmouse.query.translate.row.RowTranslator;
 import org.jmouse.query.el.QueryLanguage;
 import org.jmouse.query.el.node.ViewNode;
 import org.jmouse.query.model.QueryModel;
@@ -78,8 +79,8 @@ public class AdapterSmoke {
             asAttributes.add(attributes);
         }
 
-        MemoryAdapter memory = new MemoryAdapter(Catalog.ISSUES);
-        List<Map<String, Object>> fromMemory = memory.compile(view).run(asAttributes);
+        RowTranslator memory = new RowTranslator(Catalog.ISSUES);
+        List<Map<String, Object>> fromMemory = memory.translate(view).run(asAttributes);
 
         System.out.println("  MEMORY ── " + fromMemory.size() + " rows");
         fromMemory.stream().limit(3).forEach(row -> System.out.println("     " + row));
@@ -89,14 +90,14 @@ public class AdapterSmoke {
         note(sameOrder(fromDatabase, fromMemory), "…in the same order, key for key");
 
         banner("⚠️ 2 · AN ADAPTER REFUSES WHAT IT CANNOT DO — it does not quietly drop it");
-        refuse(() -> memory.compile(language.document("""
+        refuse(() -> memory.translate(language.document("""
                 view "v" on issues {
                   columns issue.status as st, count() as many
                   group   issue.status
                 }
                 """).getViews().getFirst()));
 
-        note(!memory.capabilities().has(Capabilities.Feature.AGGREGATE),
+        note(!memory.capabilities().has(Capability.AGGREGATE),
                 "the memory adapter declares no AGGREGATE, and says so by name");
 
         banner("3 · THE THIRD OUTPUT — the same AST as plain data");
@@ -133,25 +134,25 @@ public class AdapterSmoke {
         System.out.println("     having  : " + report.having());
         note(report.grouped(), "grouped = true — a row of this result is a TUPLE, and paging counts groups");
 
-        banner("⚠️ 6 · BOTH BACKENDS REACHED AS ONE TYPE — QueryAdapter<?>, decided at run time");
+        banner("⚠️ 6 · BOTH BACKENDS REACHED AS ONE TYPE — Translator<?>, decided at run time");
 
         // ⚠️ The SQL backend now sits ON the seam rather than beside it. Until it did, a product holding
-        // a configured engine held something SQL-only: there was no QueryAdapter<?> it could be handed
+        // a configured engine held something SQL-only: there was no Translator<?> it could be handed
         // instead, and "one language, several backends" was true of the language rather than of the
         // thing anybody uses.
-        List<QueryAdapter<?>> backends = List.of(tssr.adapter("issues"), memory);
+        List<Translator<?>> backends = List.of(tssr.translator("issues"), memory);
 
-        for (QueryAdapter<?> backend : backends) {
+        for (Translator<?> backend : backends) {
             Capabilities declared = backend.capabilities();
 
             System.out.printf("     %-8s aggregate=%-5s join=%-5s clock=%s%n",
-                    declared.adapter(),
-                    declared.has(Capabilities.Feature.AGGREGATE),
-                    declared.has(Capabilities.Feature.JOIN),
-                    declared.has(Capabilities.Feature.CLOCK));
+                    declared.translator(),
+                    declared.has(Capability.AGGREGATE),
+                    declared.has(Capability.JOIN),
+                    declared.has(Capability.CLOCK));
 
-            note(backend.compile(view) != null,
-                    "%s compiled the same view, through the same interface".formatted(declared.adapter()));
+            note(backend.translate(view) != null,
+                    "%s compiled the same view, through the same interface".formatted(declared.translator()));
         }
 
         ViewNode grouped = language.document("""
@@ -161,8 +162,8 @@ public class AdapterSmoke {
                 }
                 """).getViews().getFirst();
 
-        note(tssr.adapter("issues").compile(grouped) != null, "the SQL adapter groups");
-        refuse(() -> memory.compile(grouped));
+        note(tssr.translator("issues").translate(grouped) != null, "the SQL translator groups");
+        refuse(() -> memory.translate(grouped));
         note(true, "…and the memory one refuses by name rather than returning ungrouped rows");
 
         summary();

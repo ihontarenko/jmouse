@@ -5,7 +5,9 @@ import org.jmouse.query.el.dialect.QueryDialect;
 import org.jmouse.query.el.parser.OrderParser;
 import org.jmouse.query.el.parser.QueryDocumentParser;
 import org.jmouse.query.el.parser.QueryFunctionParser;
+import org.jmouse.query.el.parser.MappingParser;
 import org.jmouse.query.el.parser.SourceParser;
+import org.jmouse.query.el.parser.StructureParser;
 import org.jmouse.query.el.parser.ViewParser;
 
 import java.util.ArrayList;
@@ -42,6 +44,8 @@ public class QueryExtension extends QueryDialect {
         parsers.add(new QueryDocumentParser());
         parsers.add(new ViewParser());
         parsers.add(new SourceParser());
+        parsers.add(new StructureParser());
+        parsers.add(new MappingParser());
         parsers.add(new QueryFunctionParser());
 
         // ⚠️ Registered even though nothing DISPATCHES to it: a language is built by naming its root

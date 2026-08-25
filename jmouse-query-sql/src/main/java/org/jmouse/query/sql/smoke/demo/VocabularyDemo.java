@@ -1,6 +1,6 @@
 package org.jmouse.query.sql.smoke.demo;
 
-import org.jmouse.query.adapter.memory.MemoryAdapter;
+import org.jmouse.query.translate.row.RowTranslator;
 import org.jmouse.query.sql.QueryEngine;
 import org.jmouse.query.sql.QuerySource;
 
@@ -190,9 +190,9 @@ public final class VocabularyDemo {
         section("⚠️ А ЩО КАЖЕ ДРУГИЙ БЕКЕНД");
         QuerySource applicants = engine.source("applicants").orElseThrow();
 
-        say("   memory declares: " + new MemoryAdapter(applicants.schema()).capabilities().adapter()
-            + ", join=" + new MemoryAdapter(applicants.schema()).capabilities()
-                    .has(org.jmouse.query.adapter.Capabilities.Feature.JOIN));
+        say("   memory declares: " + new RowTranslator(applicants.schema()).capabilities().translator()
+            + ", join=" + new RowTranslator(applicants.schema()).capabilities()
+                    .has(org.jmouse.query.translate.Capability.JOIN));
         say("   ⚠️ тобто in-memory прев'ю чесно відмовиться від того, чого не вміє, замість повернути");
         say("      правдоподібне. Це і є те, заради чого Capabilities оголошуються, а не вгадуються.");
     }

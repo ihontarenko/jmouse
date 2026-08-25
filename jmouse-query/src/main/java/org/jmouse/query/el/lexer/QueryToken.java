@@ -134,11 +134,46 @@ public enum QueryToken implements Token.Type {
      */
     T_HAVING(11700, "having"),
 
+    /** {@code limit <n>} — at most this many rows. */
+    T_LIMIT(11950, "limit"),
+
+    /**
+     * {@code structure <name> { … }} — the SHAPE: attribute names, their types, their defaults.
+     *
+     * <p>⚠️ Portable, and knowing nothing about storage. That is the whole reason it is a declaration of
+     * its own rather than half of a mapping: one structure may have several mappings, and a view names the
+     * structure.</p>
+     */
+    T_STRUCTURE(10400, "structure"),
+
+    /**
+     * {@code mapping <structure>[:<variant>] { … }} — the BINDING: which table, column, file or cell.
+     *
+     * <p>⚠️ Never portable, and it never names a database vendor — quoting and paging come from the
+     * dialect the connection reports.</p>
+     */
+    T_MAPPING(10500, "mapping"),
+
+    /** {@code attributes { … }} — the sub-block a mapping puts its bindings in. */
+    T_ATTRIBUTES(11510, "attributes"),
+
+    /** {@code fetch …} — what the query brings back. */
+    T_FETCH(11250, "fetch"),
+
+    /** {@code uses(name as type)} — the ambient values a view is allowed to read. */
+    T_USES(10250, "uses"),
+
+    /** {@code default: <value>} — part of what a structure promises. */
+    T_DEFAULT(12600, "default"),
+
+    /** {@code attributes: identity} — every attribute reads the entry of its own name. */
+    T_IDENTITY(12700, "identity"),
+
+    /** {@code file: 'rows.csv'} — a mapping whose rows are in a file. */
+    T_FILE(11520, "file"),
+
     // ── Reserved ──────────────────────────────────────────────────────────────────────────────────
     // Lexed so that they can be refused by name, never so that they can be used.
-
-    /** Reserved — bounded results. */
-    T_LIMIT(19020, "limit"),
 
     /** Reserved — bounded results. */
     T_OFFSET(19030, "offset"),

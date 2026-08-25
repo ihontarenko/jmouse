@@ -1,6 +1,7 @@
 package org.jmouse.query.el.node;
 
 import org.jmouse.el.node.Expression;
+import org.jmouse.query.translate.Capability;
 import org.jmouse.query.el.SourceWriter;
 
 import java.util.ArrayList;
@@ -22,7 +23,10 @@ import java.util.stream.Collectors;
  */
 public class ColumnsNode extends ClauseNode {
 
-    public static final String KEYWORD = "columns";
+    public static final ClauseKind KIND =
+            ClauseKind.of("fetch", Capability.PROJECT, 1 * ClauseKind.STEP);
+
+    public static final String KEYWORD = KIND.keyword();
 
     private final List<Projection> projections = new ArrayList<>();
 
@@ -35,8 +39,8 @@ public class ColumnsNode extends ClauseNode {
     }
 
     @Override
-    public String keyword() {
-        return KEYWORD;
+    public ClauseKind kind() {
+        return KIND;
     }
 
     @Override

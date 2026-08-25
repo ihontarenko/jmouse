@@ -1,6 +1,6 @@
 package org.jmouse.query.sql.smoke.demo;
 
-import org.jmouse.query.adapter.memory.MemoryAdapter;
+import org.jmouse.query.translate.row.RowTranslator;
 import org.jmouse.query.el.node.ViewNode;
 import org.jmouse.query.sql.QueryEngine;
 import org.jmouse.query.sql.QuerySource;
@@ -43,7 +43,7 @@ import static org.jmouse.query.sql.smoke.demo.Demo.section;
  *   <tr><th>what checks it</th><td colspan="2">the same {@code QuerySchema}, and the same refusals</td></tr>
  * </table>
  *
- * <p>⚠️ The two backends declare different {@link org.jmouse.query.adapter.Capabilities}, and that is the
+ * <p>⚠️ The two backends declare different {@link org.jmouse.query.translate.Capabilities}, and that is the
  * honest part: the in-memory one has no {@code JOIN} and no {@code AGGREGATE}, so a query needing either
  * is <strong>refused by name</strong> rather than answered approximately. A file has no second table to
  * join to — but it can carry the joined value as a column of its own, which is what the CSV below does.</p>
@@ -100,10 +100,10 @@ public final class SameQueryDemo {
                 .getSingleView()
                 .orElseThrow();
 
-        MemoryAdapter memory = new MemoryAdapter(
+        RowTranslator memory = new RowTranslator(
                 source.schema(), engine.language().expressionLanguage(), supplied);
 
-        List<Map<String, Object>> matched = memory.compile(view).run(rows);
+        List<Map<String, Object>> matched = memory.translate(view).run(rows);
 
         matched.forEach(row -> say("     " + row.get("ticket[title]")
                                    + "  ·  level=" + row.get("ticket[level]")
@@ -120,7 +120,7 @@ public final class SameQueryDemo {
 
         query("те саме з явним конвертером", typed);
         say("   SQL: " + engine.compileFilter("tickets", typed, supplied).sql());
-        note(memory.compile(engine.language()
+        note(memory.translate(engine.language()
                         .document("view \"csv\" on tickets { where %s }".formatted(typed))
                         .getSingleView().orElseThrow())
                      .run(rows).size() == 2,
@@ -128,7 +128,7 @@ public final class SameQueryDemo {
 
         section("⚠️ 4 · ЩО ФАЙЛ НЕ ВМІЄ — і каже про це");
         refuse("group/having над файлом — memory не оголошує AGGREGATE",
-                () -> memory.compile(engine.language().document("""
+                () -> memory.translate(engine.language().document("""
                         view "v" on tickets {
                           columns ticket[member] as who, count() as many
                           group   ticket[member]

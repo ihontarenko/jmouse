@@ -33,8 +33,17 @@ public final class ManagementRoutes {
      * nothing that was working moves. What a product gets now is the choice of moving ALL of them in one
      * line instead of remembering each library's own name.
      */
-    public static final String PREFIX =
-            "${jmouse.ai.management.prefix:" + ManagementEndpoints.ROOT + SEGMENT + "}";
+    /**
+     * The address these answer at when nothing overrides it — {@code /jmouse/ai/api}.
+     *
+     * <p>⚠️ Named because {@link #PREFIX} is a PLACEHOLDER, and anything without a Spring environment to
+     * resolve it against — a driver, a smoke, a message — would otherwise print {@code ${…}} or, worse,
+     * write the default out a second time by hand. A second copy of an address is an address that drifts,
+     * and this one drifts into a screen that renders as an empty installation rather than as an error.</p>
+     */
+    public static final String DEFAULT_PREFIX = ManagementEndpoints.ROOT + SEGMENT;
+
+    public static final String PREFIX = "${jmouse.ai.management.prefix:" + DEFAULT_PREFIX + "}";
 
     /** What a listing returns when nothing is asked for. */
     public static final int DEFAULT_LIMIT = 50;

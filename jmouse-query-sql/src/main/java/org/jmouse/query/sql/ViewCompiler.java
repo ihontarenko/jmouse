@@ -4,10 +4,13 @@ import org.jmouse.jdbc.dialect.Dialect;
 import org.jmouse.el.node.Expression;
 import org.jmouse.query.el.node.ColumnsNode;
 import org.jmouse.query.el.node.OrderNode;
+import org.jmouse.query.el.node.LimitNode;
 import org.jmouse.query.el.node.QueryBlockNode;
 import org.jmouse.query.schema.QuerySchema;
 
 import java.time.Instant;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -74,8 +77,24 @@ public class ViewCompiler {
     public CompiledQuery compile(QueryBlockNode block, Dialect dialect, QuerySchema schema, QueryTarget target,
                                  Map<String, Object> values) {
 
+        return compile(block, dialect, schema, target, values, name -> Optional.empty());
+    }
+
+    /**
+     * ⚠️ The five-argument shape kept meaning what it meant — a compilation that knows no views, and
+     * therefore no name that stands in for a set.
+     *
+     * @param subqueries how a named view resolves into the statement it stands for
+     */
+    public CompiledQuery compile(QueryBlockNode block, Dialect dialect, QuerySchema schema, QueryTarget target,
+                                 Map<String, Object> values,
+                                 Function<String, Optional<Fragment>> subqueries) {
+
         SqlContext  context  = new SqlContext(
                 dialect, schema, target, SqlContext.DEFAULT_ALIAS_PREFIX, Instant.now(), values);
+
+        context.subqueries(subqueries);
+
         SqlCompiler compiler = new SqlCompiler(mapping, membership, context);
 
         // ⚠️ The `where` is compiled FIRST even though it is written after the joins: walking it is what
@@ -95,7 +114,23 @@ public class ViewCompiler {
         // to render it unquoted, and a statement that quotes some identifiers and not others works right
         // up until a table is called `order`.
         return new CompiledQuery(context.from(), columns, context.joins(), where, group, having, order,
-                block.isGrouped());
+                block.isGrouped(), limit(block, dialect));
+    }
+
+    /**
+     * {@code limit: 50}, in whatever this database spells it.
+     *
+     * <p>⚠️ Rendered by the {@link Dialect} rather than written here. MySQL and Postgres say
+     * {@code LIMIT n}; others say {@code FETCH FIRST n ROWS ONLY}; and a compiler branching on which is
+     * a compiler that has to be edited for every database anybody adds.</p>
+     */
+    private Fragment limit(QueryBlockNode block, Dialect dialect) {
+        return block.getClauses().stream()
+                .filter(LimitNode.class::isInstance)
+                .map(LimitNode.class::cast)
+                .findFirst()
+                .map(clause -> Fragment.of(dialect.limit(clause.getCount(), 0)))
+                .orElse(Fragment.empty());
     }
 
     /**
@@ -193,7 +228,20 @@ public class ViewCompiler {
      *                and wrong.
      */
     public record CompiledQuery(String from, Fragment columns, Fragment joins, Fragment where,
-                                Fragment group, Fragment having, Fragment orderBy, boolean grouped) {
+                                Fragment group, Fragment having, Fragment orderBy, boolean grouped,
+                                Fragment limit) {
+
+        /**
+         * ⚠️ The eight-argument shape kept meaning what it meant — no limit.
+         *
+         * <p>A record gaining a component changes its canonical constructor and every caller with it.
+         * Keeping the old arity as a delegate is what stops growing the language from making somebody
+         * re-read code they already wrote.</p>
+         */
+        public CompiledQuery(String from, Fragment columns, Fragment joins, Fragment where,
+                             Fragment group, Fragment having, Fragment orderBy, boolean grouped) {
+            this(from, columns, joins, where, group, having, orderBy, grouped, Fragment.empty());
+        }
 
         /**
          * The same query with something added to its condition — row-level scoping, a tenant, a
@@ -212,7 +260,7 @@ public class ViewCompiler {
          */
         public CompiledQuery and(Fragment condition) {
             return new CompiledQuery(from, columns, joins, where.and(condition), group, having, orderBy,
-                    grouped);
+                    grouped, limit);
         }
 
         /**
@@ -222,7 +270,7 @@ public class ViewCompiler {
          * @return the same query, re-sorted
          */
         public CompiledQuery orderedBy(Fragment keys) {
-            return new CompiledQuery(from, columns, joins, where, group, having, keys, grouped);
+            return new CompiledQuery(from, columns, joins, where, group, having, keys, grouped, limit);
         }
 
         /**
@@ -277,6 +325,12 @@ public class ViewCompiler {
 
             if (!orderBy.isEmpty()) {
                 assembled = assembled.then(orderBy.wrap("ORDER BY ", ""), " ");
+            }
+
+            // ⚠️ Already rendered by the DIALECT — `LIMIT n` here, `FETCH FIRST n ROWS ONLY` there. This
+            // record never asks which database it is talking to; the compiler asked once, on its behalf.
+            if (!limit.isEmpty()) {
+                assembled = assembled.then(limit, " ");
             }
 
             return assembled;

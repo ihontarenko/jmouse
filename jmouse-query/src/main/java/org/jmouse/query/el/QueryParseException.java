@@ -41,9 +41,15 @@ public class QueryParseException extends ParseException {
     /**
      * A clause written twice in one block.
      *
-     * <p>⚠️ Refused rather than resolved. Two {@code where} lines read as though they ought to be
-     * {@code and}-ed together, and quietly keeping the last one is the kind of thing nobody notices
-     * until a view returns rows it should not.</p>
+     * <p>⚠️ Refused rather than resolved, and only for a clause that has not declared itself
+     * repeatable. Where a repeat genuinely means something — two {@code where} lines are an
+     * {@code and} — the block combines them instead, and this is never reached. Where it does not,
+     * quietly keeping the last one is the kind of thing nobody notices until a view returns rows it
+     * should not.</p>
+     *
+     * <p>⚠️ The message deliberately does not suggest {@code and}. It used to, back when {@code where}
+     * was refused here too — and now that {@code where} never is, that advice would only ever be read
+     * by somebody who repeated a clause where {@code and} means nothing at all.</p>
      *
      * @param clause the clause keyword
      * @param token  where the second one was written
@@ -51,9 +57,9 @@ public class QueryParseException extends ParseException {
      */
     public static QueryParseException repeated(String clause, Token token) {
         return new QueryParseException(
-                ("'%s' at line %d is the second one in this block, and a clause may appear once; "
-                 + "join the two conditions with 'and' instead")
-                        .formatted(clause, token.lineNumber()));
+                ("'%s' at line %d is the second one in this block, and '%s' may be written once; "
+                 + "put everything it says on the one line")
+                        .formatted(clause, token.lineNumber(), clause));
     }
 
     /**

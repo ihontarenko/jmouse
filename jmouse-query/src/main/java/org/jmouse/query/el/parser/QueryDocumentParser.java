@@ -10,7 +10,9 @@ import org.jmouse.query.el.QueryParseException;
 import org.jmouse.query.el.lexer.QueryToken;
 import org.jmouse.query.el.node.FunctionNode;
 import org.jmouse.query.el.node.QueryDocumentNode;
+import org.jmouse.query.el.node.MappingNode;
 import org.jmouse.query.el.node.SourceNode;
+import org.jmouse.query.el.node.StructureNode;
 import org.jmouse.query.el.node.ViewNode;
 
 /**
@@ -41,7 +43,13 @@ public class QueryDocumentParser extends ExpressionParser {
 
             int position = cursor.position();
 
-            if (cursor.isCurrent(QueryToken.T_SOURCE)) {
+            if (cursor.isCurrent(QueryToken.T_STRUCTURE)) {
+                document.addStructure(
+                        (StructureNode) context.getParser(StructureParser.class).parse(cursor, context));
+            } else if (cursor.isCurrent(QueryToken.T_MAPPING)) {
+                document.addMapping(
+                        (MappingNode) context.getParser(MappingParser.class).parse(cursor, context));
+            } else if (cursor.isCurrent(QueryToken.T_SOURCE)) {
                 document.addSource((SourceNode) context.getParser(SourceParser.class).parse(cursor, context));
             } else if (cursor.isCurrent(QueryToken.T_VIEW)) {
                 document.addView((ViewNode) context.getParser(ViewParser.class).parse(cursor, context));
@@ -50,7 +58,7 @@ public class QueryDocumentParser extends ExpressionParser {
                         (FunctionNode) context.getParser(QueryFunctionParser.class).parse(cursor, context));
             } else {
                 throw new QueryParseException(
-                        ("'%s' at line %d is not a declaration; a query document holds 'source', 'view' and "
+                        ("'%s' at line %d is not a declaration; a query document holds 'structure', 'mapping', 'view' and "
                          + "'function' blocks")
                                 .formatted(cursor.current().value(), cursor.current().lineNumber()));
             }

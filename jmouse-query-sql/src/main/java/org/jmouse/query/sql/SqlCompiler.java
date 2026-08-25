@@ -19,6 +19,7 @@ import org.jmouse.query.schema.QueryAttribute;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Map;
 import java.util.Set;
 
@@ -362,6 +363,16 @@ public class SqlCompiler implements ExpressionVisitor<Fragment> {
 
         Fragment left = compile(membership.getLeft());
 
+        // ⚠️ `x in someView` — a named view standing in for a set. Looked up before the right side is
+        // compiled, because compiled as an expression it is a bare name the checker already refused.
+        Optional<Fragment> subquery = subquery(membership.getRight());
+
+        if (subquery.isPresent()) {
+            return new Fragment(
+                    "%s IN (%s)".formatted(left.sql(), subquery.get().sql()),
+                    join(left.parameters(), subquery.get().parameters()));
+        }
+
         if (membership.getRight() instanceof ArrayNode array) {
             List<Fragment> items = items(array);
 
@@ -383,6 +394,27 @@ public class SqlCompiler implements ExpressionVisitor<Fragment> {
         return new Fragment(
                 "%s IN (%s)".formatted(left.sql(), right.sql()),
                 join(left.parameters(), right.parameters()));
+    }
+
+    /**
+     * The inner {@code SELECT} a named view stands for, where the right side names one.
+     *
+     * <h2>⚠️ A view, never an anonymous nested block</h2>
+     *
+     * <p>The inner question has a name, so it can be opened, tested and reviewed on its own — and the AST
+     * stays a flat list of blocks, with no depth to limit and no recursion to guard.</p>
+     *
+     * <p>⚠️ Empty when the name is not a declared view, and the caller carries on as before. A name that is
+     * neither a view nor a supplied value was already refused by the checker; what must never happen is
+     * this quietly compiling an unknown name into an empty set, which is a query that returns nothing and
+     * reports success.</p>
+     */
+    private Optional<Fragment> subquery(Node right) {
+        if (!(right instanceof PropertyNode named)) {
+            return Optional.empty();
+        }
+
+        return context.subquery(named.getPath());
     }
 
     @Override

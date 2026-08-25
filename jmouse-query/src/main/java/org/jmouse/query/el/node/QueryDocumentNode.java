@@ -1,6 +1,7 @@
 package org.jmouse.query.el.node;
 
 import org.jmouse.el.node.AbstractExpression;
+import org.jmouse.query.el.QueryParseException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +22,12 @@ import java.util.stream.Collectors;
  */
 public class QueryDocumentNode extends AbstractExpression {
 
-    private final List<SourceNode>   sources   = new ArrayList<>();
-    private final List<ViewNode>     views     = new ArrayList<>();
-    private final List<FunctionNode> functions = new ArrayList<>();
-    private final List<Object>       written   = new ArrayList<>();
+    private final List<SourceNode>    sources    = new ArrayList<>();
+    private final List<StructureNode> structures = new ArrayList<>();
+    private final List<MappingNode>   mappings   = new ArrayList<>();
+    private final List<ViewNode>      views      = new ArrayList<>();
+    private final List<FunctionNode>  functions  = new ArrayList<>();
+    private final List<Object>        written    = new ArrayList<>();
 
     /**
      * A declaration of where a product's data is.
@@ -38,8 +41,60 @@ public class QueryDocumentNode extends AbstractExpression {
         written.add(source);
     }
 
+    public void addStructure(StructureNode structure) {
+        structures.add(structure);
+        written.add(structure);
+    }
+
+    public void addMapping(MappingNode mapping) {
+        mappings.add(mapping);
+        written.add(mapping);
+    }
+
+    public List<StructureNode> getStructures() {
+        return List.copyOf(structures);
+    }
+
+    public List<MappingNode> getMappings() {
+        return List.copyOf(mappings);
+    }
+
+    /**
+     * Every shape-bound-to-a-place this document declares — what the loader, the checker and every
+     * translator read.
+     *
+     * <h2>⚠️ The two spellings meet HERE and nowhere else</h2>
+     *
+     * <p>A {@code structure} and its {@code mapping}s merge into the same object an older {@code source}
+     * block produces directly. So the split cost nothing below the parser: not one line of the compiler
+     * knows there are two declarations, and a document written either way reaches it identically.</p>
+     *
+     * <p>⚠️ A mapping naming a structure that is not declared here is refused by name. Guessing — treating
+     * it as an empty shape, or as the structure of the same name from another file — would produce a query
+     * that compiles and reads nothing.</p>
+     */
     public List<SourceNode> getSources() {
-        return List.copyOf(sources);
+        List<SourceNode> declared = new ArrayList<>(sources);
+
+        for (MappingNode mapping : mappings) {
+            declared.add(SourceNode.merge(structureFor(mapping), mapping));
+        }
+
+        return List.copyOf(declared);
+    }
+
+    private StructureNode structureFor(MappingNode mapping) {
+        return structures.stream()
+                .filter(structure -> structure.getName().equals(mapping.getStructure()))
+                .findFirst()
+                .orElseThrow(() -> new QueryParseException(
+                        ("mapping '%s' binds a structure called '%s', and this document declares no such "
+                         + "structure; it declares %s").formatted(
+                                mapping.getQualifiedName(), mapping.getStructure(),
+                                structures.isEmpty()
+                                        ? "none at all"
+                                        : structures.stream().map(StructureNode::getName)
+                                                .collect(Collectors.joining(", ")))));
     }
 
     public void addView(ViewNode view) {
@@ -96,6 +151,8 @@ public class QueryDocumentNode extends AbstractExpression {
                     case ViewNode view -> view.toSource();
                     case FunctionNode function -> function.toSource();
                     case SourceNode source -> source.toSource();
+                    case StructureNode structure -> structure.toSource();
+                    case MappingNode mapping -> mapping.toSource();
                     default -> declaration.toString();
                 })
                 .collect(Collectors.joining("\n\n"));

@@ -62,7 +62,7 @@ public class CollectionNode extends AbstractExpression {
 
     @Override
     public String toSource() {
-        return "collection %s on %s value %s".formatted(
+        return "collection: %s on %s value %s".formatted(
                 SourceWriter.name(table), SourceWriter.name(foreignKey), SourceWriter.name(valueColumn));
     }
 

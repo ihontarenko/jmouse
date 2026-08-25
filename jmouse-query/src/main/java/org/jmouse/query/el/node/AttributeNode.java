@@ -73,10 +73,21 @@ public class AttributeNode extends AbstractExpression {
         this.access = access;
     }
 
+    /**
+     * How this reads inside a mapping's {@code attributes { }} block.
+     *
+     * <p>⚠️ The type is deliberately absent. It belongs to the structure, and repeating it here would let
+     * two mappings of one shape disagree about what a value <em>is</em> — a difference visible from
+     * neither file.</p>
+     */
+    public String bindingToSource() {
+        return "%s: %s in %s".formatted(
+                SourceWriter.name(name), SourceWriter.name(source), access);
+    }
+
     @Override
     public String toSource() {
-        return "attribute %s from %s %s in %s".formatted(
-                SourceWriter.name(name), SourceWriter.name(source), type, access);
+        return bindingToSource();
     }
 
     @Override

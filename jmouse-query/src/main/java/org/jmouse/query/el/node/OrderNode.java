@@ -1,6 +1,7 @@
 package org.jmouse.query.el.node;
 
 import org.jmouse.el.node.Expression;
+import org.jmouse.query.translate.Capability;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,10 @@ import java.util.stream.Collectors;
  */
 public class OrderNode extends ClauseNode {
 
-    public static final String KEYWORD = "order";
+    public static final ClauseKind KIND =
+            ClauseKind.of("order", Capability.SORT, 5 * ClauseKind.STEP);
+
+    public static final String KEYWORD = KIND.keyword();
 
     private final List<Key> keys = new ArrayList<>();
 
@@ -35,8 +39,8 @@ public class OrderNode extends ClauseNode {
     }
 
     @Override
-    public String keyword() {
-        return KEYWORD;
+    public ClauseKind kind() {
+        return KIND;
     }
 
     @Override

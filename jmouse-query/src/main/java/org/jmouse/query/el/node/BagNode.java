@@ -58,7 +58,7 @@ public class BagNode extends AbstractExpression {
 
     @Override
     public String toSource() {
-        return "bag %s on %s key %s value %s".formatted(
+        return "bag: %s on %s key %s value %s".formatted(
                 SourceWriter.name(table), SourceWriter.name(foreignKey),
                 SourceWriter.name(keyColumn), SourceWriter.name(valueColumn));
     }

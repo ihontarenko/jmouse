@@ -1,4 +1,4 @@
-package org.jmouse.query.adapter;
+package org.jmouse.query.translate;
 
 /**
  * A query a backend cannot honour.

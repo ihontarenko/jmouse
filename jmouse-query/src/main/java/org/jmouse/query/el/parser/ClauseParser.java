@@ -10,10 +10,16 @@ import org.jmouse.query.el.QueryParseException;
 import org.jmouse.query.el.lexer.QueryToken;
 import org.jmouse.query.el.node.ClauseNode;
 import org.jmouse.query.el.node.ColumnsNode;
+import org.jmouse.query.el.node.LimitNode;
 import org.jmouse.query.el.node.GroupNode;
 import org.jmouse.query.el.node.HavingNode;
+import org.jmouse.query.el.node.JoinClauseNode;
 import org.jmouse.query.el.node.OrderNode;
 import org.jmouse.query.el.node.WhereNode;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Reads the clauses a {@code view} or {@code function} block is made of.
@@ -45,9 +51,18 @@ final class ClauseParser {
      * @param cursor the cursor to inspect
      * @return {@code true} when a clause follows
      */
+    /**
+     * Whether a clause starts here.
+     *
+     * <p>⚠️ Permissive on purpose: a registered clause is an ordinary identifier to the lexer, so this
+     * cannot tell one from a word nobody registered. Deciding that is {@link #parse}'s job, and it does it
+     * with a refusal that lists what would have worked — which is a better answer than a block quietly
+     * ending one line early.</p>
+     */
     static boolean opensClause(TokenCursor cursor) {
-        return cursor.isCurrent(QueryToken.T_WHERE, QueryToken.T_ORDER, QueryToken.T_COLUMNS,
-                QueryToken.T_GROUP, QueryToken.T_HAVING);
+        return cursor.isCurrent(QueryToken.T_WHERE, QueryToken.T_ORDER, QueryToken.T_FETCH,
+                QueryToken.T_COLUMNS, QueryToken.T_GROUP, QueryToken.T_HAVING, QueryToken.T_LIMIT)
+               || ClauseParsers.knows(cursor.peek().value());
     }
 
     /**
@@ -68,7 +83,9 @@ final class ClauseParser {
             return parseOrder(cursor, context);
         }
 
-        if (cursor.consumeIf(QueryToken.T_COLUMNS)) {
+        // ⚠️ `fetch` is the word; `columns` is what it used to be called. The reader answers to both so
+        // that a stored view keeps working, and the writer emits only `fetch`.
+        if (cursor.consumeIf(QueryToken.T_FETCH) || cursor.consumeIf(QueryToken.T_COLUMNS)) {
             return parseColumns(cursor, context);
         }
 
@@ -80,11 +97,116 @@ final class ClauseParser {
             return parseHaving(cursor, context);
         }
 
-        throw QueryParseException.notAClause(
-                opening, "'where', 'order', 'columns', 'group' and 'having'");
+        if (cursor.consumeIf(QueryToken.T_LIMIT)) {
+            return parseLimit(cursor);
+        }
+
+        if (cursor.consumeIf(QueryToken.T_JOIN)) {
+            return parseJoin(cursor);
+        }
+
+        // ⚠️ Anything else is looked up by the WORD it is written with, so a clause a product registered
+        // needs no token in this library. The five above keep theirs only because those tokens are
+        // load-bearing elsewhere — `from`, `key` and `on` all appear in a mapping.
+        return registered(cursor, context, opening);
+    }
+
+    /**
+     * A clause nobody built in — {@code limit}, {@code elastic.score}, whatever was registered.
+     *
+     * <p>⚠️ Refused with the registered words listed, never skipped and never read as an expression. A
+     * line nobody understood, silently ignored, is a query that returns the wrong rows and says
+     * nothing.</p>
+     */
+    private static ClauseNode registered(TokenCursor cursor, ParserContext context, Token opening) {
+        String keyword = keyword(cursor);
+
+        ClauseParsers.Reader reader = ClauseParsers.reader(keyword).orElseThrow(
+                () -> QueryParseException.notAClause(opening, listed()));
+
+        Declarations.optionalColon(cursor);
+
+        return reader.read(cursor, context);
+    }
+
+    /**
+     * The word a clause is written with, {@code elastic.score} included.
+     *
+     * <p>⚠️ A dot at clause position can only be a namespace: a clause is the first thing on its line and
+     * an attribute path is never one. So the two are read apart by WHERE they are, not by what they look
+     * like — which is the same reason a keyword may be an attribute name elsewhere.</p>
+     */
+    private static String keyword(TokenCursor cursor) {
+        StringBuilder written = new StringBuilder(Declarations.word(cursor));
+
+        while (cursor.isCurrent(BasicToken.T_DOT)) {
+            cursor.ensure(BasicToken.T_DOT);
+            written.append('.').append(Declarations.word(cursor));
+        }
+
+        return written.toString();
+    }
+
+    private static String listed() {
+        List<String> words = new ArrayList<>(
+                List.of("where", "order", "fetch", "group", "having", "limit"));
+
+        ClauseParsers.keywords().stream().sorted().filter(word -> !words.contains(word)).forEach(words::add);
+
+        return words.stream().map("'%s'"::formatted).collect(Collectors.joining(", "));
+    }
+
+    /**
+     * {@code join: person on person.key == request.assignee}
+     *
+     * <p>⚠️ Read as two attribute paths and an equality rather than as an expression. A join whose
+     * condition could be anything is a join a backend cannot promise to honour — a row pipeline hashes two
+     * sides on equal keys and cannot evaluate {@code a > b} without comparing every pair.</p>
+     */
+    private static ClauseNode parseJoin(TokenCursor cursor) {
+        Declarations.optionalColon(cursor);
+
+        JoinClauseNode join = new JoinClauseNode();
+
+        join.setStructure(Declarations.name(cursor));
+
+        cursor.ensure(QueryToken.T_ON);
+        join.setLeft(Declarations.path(cursor));
+
+        cursor.ensure(BasicToken.T_EQ);
+        join.setRight(Declarations.path(cursor));
+
+        return join;
+    }
+
+    /**
+     * {@code limit: 50} — a count, read here rather than as an expression.
+     *
+     * <p>⚠️ Refused when it is not a positive whole number, by name. A limit of zero is a query that
+     * cannot return anything and is never what somebody meant to write.</p>
+     */
+    private static ClauseNode parseLimit(TokenCursor cursor) {
+        Declarations.optionalColon(cursor);
+
+        Token written = cursor.ensure(BasicToken.T_INT, BasicToken.T_NUMERIC);
+        int   count   = (int) Double.parseDouble(written.value());
+
+        if (count <= 0) {
+            throw new QueryParseException(
+                    "'limit' at line %d is %d; write how many rows to bring back"
+                            .formatted(written.lineNumber(), count));
+        }
+
+        LimitNode limit = new LimitNode();
+
+        limit.setCount(count);
+
+        return limit;
     }
 
     private static ClauseNode parseGroup(TokenCursor cursor, ParserContext context) {
+        Declarations.optionalColon(cursor);
+
         GroupNode group = new GroupNode();
 
         do {
@@ -95,6 +217,8 @@ final class ClauseParser {
     }
 
     private static ClauseNode parseHaving(TokenCursor cursor, ParserContext context) {
+        Declarations.optionalColon(cursor);
+
         HavingNode having = new HavingNode();
 
         having.setCondition(expression(cursor, context));
@@ -103,6 +227,8 @@ final class ClauseParser {
     }
 
     private static ClauseNode parseWhere(TokenCursor cursor, ParserContext context) {
+        Declarations.optionalColon(cursor);
+
         WhereNode where = new WhereNode();
 
         where.setCondition(expression(cursor, context));
@@ -111,6 +237,8 @@ final class ClauseParser {
     }
 
     private static ClauseNode parseOrder(TokenCursor cursor, ParserContext context) {
+        Declarations.optionalColon(cursor);
+
         return parseKeys(cursor, context);
     }
 
@@ -138,6 +266,8 @@ final class ClauseParser {
     }
 
     private static ClauseNode parseColumns(TokenCursor cursor, ParserContext context) {
+        Declarations.optionalColon(cursor);
+
         ColumnsNode columns = new ColumnsNode();
 
         do {
@@ -145,7 +275,11 @@ final class ClauseParser {
             String     alias      = null;
 
             if (cursor.consumeIf(QueryToken.T_AS)) {
-                alias = cursor.ensure(BasicToken.T_IDENTIFIER, BasicToken.T_STRING).value();
+                // ⚠️ A keyword is a legal alias. `fetch: request.key as key` is the obvious thing to write,
+                // and `key` is a word this grammar spends in a mapping — so the identifier rule refused the
+                // natural case and left a message about an unexpected T_KEY to decode. Unambiguous here
+                // because what follows an alias is a comma or the end of the clause, never a keyword.
+                alias = Declarations.word(cursor);
             }
 
             columns.addProjection(projection, alias);

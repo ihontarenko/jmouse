@@ -6,6 +6,7 @@ import org.jmouse.query.schema.QuerySchema;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Optional;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,25 @@ public class SqlContext {
 
     /** What the caller supplied by name, bound rather than read off a row. */
     private final Map<String, Object> values;
+
+    /**
+     * The inner {@code SELECT} a named view stands for — {@code x in supportPeople}.
+     *
+     * <p>⚠️ A resolver rather than a map of fragments, because an inner view is only worth compiling if it
+     * is actually named. A document declaring twenty views would otherwise compile all twenty to answer a
+     * query that mentions one.</p>
+     */
+    private java.util.function.Function<String, Optional<Fragment>> subqueries = name -> Optional.empty();
+
+    /** How a named view is resolved into the statement it stands for. */
+    public void subqueries(java.util.function.Function<String, Optional<Fragment>> resolver) {
+        this.subqueries = resolver;
+    }
+
+    /** The inner statement this name stands for, where it names a declared view. */
+    public Optional<Fragment> subquery(String name) {
+        return subqueries.apply(name);
+    }
 
     /** One alias per key, in the order they were first asked for. */
     private final Map<String, String> aliases = new LinkedHashMap<>();

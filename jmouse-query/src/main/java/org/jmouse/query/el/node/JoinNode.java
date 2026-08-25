@@ -59,7 +59,7 @@ public class JoinNode extends AbstractExpression {
 
     @Override
     public String toSource() {
-        return "join %s on %s key %s".formatted(
+        return "join: %s on %s key %s".formatted(
                 SourceWriter.name(table), SourceWriter.name(localColumn), SourceWriter.name(foreignColumn));
     }
 

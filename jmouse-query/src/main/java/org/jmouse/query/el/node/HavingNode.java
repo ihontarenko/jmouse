@@ -1,6 +1,7 @@
 package org.jmouse.query.el.node;
 
 import org.jmouse.el.node.Expression;
+import org.jmouse.query.translate.Capability;
 
 /**
  * {@code having <expression>} — which groups survive.
@@ -21,7 +22,10 @@ import org.jmouse.el.node.Expression;
  */
 public class HavingNode extends ClauseNode {
 
-    public static final String KEYWORD = "having";
+    public static final ClauseKind KIND =
+            ClauseKind.of("having", Capability.AGGREGATE, 4 * ClauseKind.STEP);
+
+    public static final String KEYWORD = KIND.keyword();
 
     private Expression condition;
 
@@ -34,8 +38,8 @@ public class HavingNode extends ClauseNode {
     }
 
     @Override
-    public String keyword() {
-        return KEYWORD;
+    public ClauseKind kind() {
+        return KIND;
     }
 
     @Override
