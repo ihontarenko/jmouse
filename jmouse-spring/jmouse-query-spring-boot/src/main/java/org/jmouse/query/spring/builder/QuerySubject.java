@@ -3,7 +3,9 @@ package org.jmouse.query.spring.builder;
 import org.jmouse.query.compose.ConverterPolicy;
 import org.jmouse.query.schema.QueryAttribute;
 import org.jmouse.query.schema.QuerySchema;
+import org.jmouse.query.sql.QuerySource;
 import org.jmouse.query.store.QueryOwner;
+import org.jmouse.query.store.SourceOrigin;
 
 import java.util.List;
 import java.util.Map;
@@ -73,6 +75,100 @@ public interface QuerySubject {
      */
     default ConverterPolicy converters() {
         return ConverterPolicy.NONE;
+    }
+
+    /**
+     * Whether this listing's declaration is something a person wrote, or something derived.
+     *
+     * <h2>⚠️ {@code DERIVED} is the default, and that is the safe answer</h2>
+     *
+     * <p>A subject that has not thought about the question cannot accidentally become writable. Saying
+     * {@code AUTHORED} is what turns the guards on — a permission this subject decides, and an allow-list
+     * of the tables the installation publishes — because a mapping names tables, and the row-level checks
+     * on a listing never ask which table the rows came from.</p>
+     *
+     * <p>⚠️ An entry listing is derived by construction: what a query may name is the fields somebody put
+     * on a form, so there is no document to author and an editable copy would be a second truth that goes
+     * stale at the next field.</p>
+     */
+    default SourceOrigin origin() {
+        return SourceOrigin.DERIVED;
+    }
+
+    /**
+     * Refuses a caller who may not <strong>read</strong> this listing's declaration.
+     *
+     * <h2>⚠️ It defaults to {@link #authorize}, and that default is a decision somebody has to make</h2>
+     *
+     * <p>A declaration names <strong>tables and columns</strong> — more than the vocabulary, which is
+     * only what a query may say. Left on the same gate as writing a query, every caller who may filter a
+     * listing can also read the database schema behind it.</p>
+     *
+     * <p>For an internal product that is usually fine and is why it is the default. It stopped being an
+     * accident the moment this method existed: a product that wants it narrower overrides one method,
+     * and a product that is content says so by leaving it alone — either way somebody has looked.</p>
+     *
+     * <p>⚠️ Deliberately separate from {@link #authorizeSourceWrite}. Reading a mapping and rewriting it
+     * are different powers by a wide margin: one discloses a schema, the other chooses which tables the
+     * product reads from.</p>
+     *
+     * @param request what was asked
+     */
+    default void authorizeSourceRead(QueryRequest request) {
+        authorize(request);
+    }
+
+    /**
+     * Refuses a caller who may not rewrite this listing's declaration.
+     *
+     * <h2>⚠️ Separate from {@link #authorize}, and far narrower</h2>
+     *
+     * <p>Reading a listing and rewriting what the listing <em>is</em> are not the same permission and must
+     * never collapse into one. The default refuses everybody: a product opts a subject in by overriding
+     * this, which is one deliberate act rather than a consequence of having declared
+     * {@link SourceOrigin#AUTHORED}.</p>
+     *
+     * @param request what was asked
+     */
+    default void authorizeSourceWrite(QueryRequest request) {
+        throw new IllegalStateException(
+                "'%s' does not let anybody rewrite its declaration".formatted(name()));
+    }
+
+    /**
+     * Who an authored declaration belongs to — <strong>the installation, by default</strong>.
+     *
+     * <h2>⚠️ Deliberately NOT {@link #holder}, and the difference is not cosmetic</h2>
+     *
+     * <p>A saved view is one person's question and is filed against a member or a workspace. A
+     * declaration is what the listing <em>is</em>: there is one, everybody's queries run against it, and
+     * a per-member one would mean two people asking the same listing the same question and getting
+     * answers from different tables.</p>
+     *
+     * <p>Reusing {@code holder} here would have produced exactly that, silently — the endpoints would
+     * have worked, the screen would have shown a declaration, and it would have been a private one.</p>
+     *
+     * <p>A product that genuinely scopes declarations narrower — per tenant, say — overrides this, and
+     * then the narrowing is a decision somebody wrote down.</p>
+     */
+    default QueryOwner declarationOwner(QueryRequest request) {
+        return QueryOwner.installation();
+    }
+
+    /**
+     * ⚠️ The whole source — shape AND binding — for a screen that shows what this listing really is.
+     *
+     * <p>{@link #schema} answers what a query may NAME; this answers where those values are. A product
+     * that builds its sources in Java has that declaration and simply never writes it down, so handing it
+     * over is what lets a person read the mapping their queries run against instead of taking it on
+     * trust.</p>
+     *
+     * <p>⚠️ Empty means <em>not shown</em>, not <em>none</em>. A subject whose source is assembled per
+     * request out of something it would rather not disclose is entitled to decline, and the screen says
+     * the projection is unavailable rather than drawing an approximation.</p>
+     */
+    default Optional<QuerySource> source(QueryRequest request) {
+        return Optional.empty();
     }
 
     /**

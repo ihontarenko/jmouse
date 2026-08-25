@@ -4,12 +4,19 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.jmouse.query.el.QueryLanguage;
 import org.jmouse.query.spring.builder.QueryCallers;
+import org.jmouse.query.spring.builder.QueryRunner;
 import org.jmouse.query.spring.builder.QuerySubjects;
 import org.jmouse.query.spring.builder.SavedQueryController;
+import org.jmouse.query.spring.playground.PlaygroundController;
+import org.jmouse.query.spring.source.PublishedTables;
+import org.jmouse.query.spring.source.QuerySources;
+import org.jmouse.query.spring.source.SourceController;
 import org.jmouse.query.spring.store.QueryStoreFlywayMigrator;
 import org.jmouse.query.store.QueryLibrary;
+import org.jmouse.query.store.AuthoredSources;
 import org.jmouse.query.store.SavedQueries;
 import org.jmouse.query.store.SchemaCatalog;
+import org.jmouse.query.store.jpa.JpaAuthoredSources;
 import org.jmouse.query.store.jpa.JpaSavedQueries;
 import org.jmouse.query.store.jpa.migration.QueryStoreMigrations;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -17,10 +24,16 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * The saved-query store, for a product that put {@code jmouse-query-store-jpa} on its classpath.
@@ -59,6 +72,48 @@ public class QueryStoreAutoConfiguration {
     @ConditionalOnMissingBean(QueryStoreFlywayMigrator.class)
     public QueryStoreFlywayMigrator queryStoreFlywayMigrator(DataSource dataSource) {
         return new QueryStoreFlywayMigrator(dataSource);
+    }
+
+    /**
+     * 🔗 Makes the product's Flyway — and so, transitively, Hibernate — wait for this library's.
+     *
+     * <h2>⚠️ Without this, adding a table to the library BREAKS every product that uses it</h2>
+     *
+     * <p>Boot already makes {@code entityManagerFactory} depend on {@code flywayInitializer}, so the
+     * chain that matters is <em>EMF → the product's Flyway → this library's migrator</em>. The middle
+     * link is Boot's; the last one is nobody's unless it is stated here.</p>
+     *
+     * <p>It went unnoticed while the library had exactly one migration, because a table created on some
+     * earlier boot validates perfectly on the next. The day a second migration was added, the very next
+     * start died on {@code Schema validation: missing table} — an error about the entity rather than
+     * about the ordering that caused it. Every other library here — access, files, ai — carries this
+     * same post-processor, and this module was the one that did not.</p>
+     *
+     * <p>⚠️ A post-processor rather than an annotation, because the bean being ordered belongs to
+     * somebody else's autoconfiguration and both beans may legitimately be absent.</p>
+     */
+    @Bean
+    public static BeanFactoryPostProcessor queryStoreMigrationsRunFirst() {
+        return beanFactory -> {
+            String initializer = "flywayInitializer";
+
+            if (!beanFactory.containsBeanDefinition(initializer)
+                || !beanFactory.containsBeanDefinition(QueryStoreMigrations.MIGRATOR_BEAN_NAME)) {
+                return;
+            }
+
+            BeanDefinition definition = beanFactory.getBeanDefinition(initializer);
+            List<String>   dependsOn  = new ArrayList<>();
+
+            if (definition.getDependsOn() != null) {
+                dependsOn.addAll(Arrays.asList(definition.getDependsOn()));
+            }
+
+            if (!dependsOn.contains(QueryStoreMigrations.MIGRATOR_BEAN_NAME)) {
+                dependsOn.add(QueryStoreMigrations.MIGRATOR_BEAN_NAME);
+                definition.setDependsOn(dependsOn.toArray(String[]::new));
+            }
+        };
     }
 
     /**
@@ -131,5 +186,69 @@ public class QueryStoreAutoConfiguration {
                 QuerySubjects subjects, SavedQueries store, QueryCallers callers) {
             return new SavedQueryController(subjects, store, callers);
         }
+
+        /**
+         * ⚠️ Registered unconditionally alongside the one above, and NOT behind a condition naming
+         * anything in this class — same trap, same silent 404. Its constructor states what it needs; a
+         * missing dependency then fails the context loudly instead of removing an endpoint quietly.
+         */
+        @Bean
+        @ConditionalOnMissingBean(SourceController.class)
+        public SourceController sourceController(QuerySubjects subjects, QueryCallers callers,
+                                                 QuerySources sources, AuthoredSources stored,
+                                                 PublishedTables published) {
+            return new SourceController(subjects, callers, sources, stored, published);
+        }
+
+        /**
+         * ⚠️ Conditional on the {@link QueryRunner}, and this one genuinely is optional: compiling needs
+         * a dialect, which is read off a connection. A product with the builder and no runner keeps the
+         * screen it has, minus one tab — rather than a tab that fails at the first press.
+         */
+        @Bean
+        @ConditionalOnBean(QueryRunner.class)
+        @ConditionalOnMissingBean(PlaygroundController.class)
+        public PlaygroundController playgroundController(QuerySubjects subjects, QueryCallers callers,
+                                                         QuerySources sources, QueryRunner runner) {
+            return new PlaygroundController(subjects, callers, sources, runner);
+        }
+    }
+
+    /**
+     * Where authored declarations are kept.
+     *
+     * <p>⚠️ Conditional on the {@link EntityManagerFactory}, never on the {@code EntityManager}. The
+     * latter is injected as a proxy, so a condition naming it is evaluated against something that is not
+     * a bean of that type yet — and it fails by <em>skipping</em>, which is how the saved-query store
+     * once vanished without a line in any log.</p>
+     */
+    @Bean
+    @ConditionalOnMissingBean(AuthoredSources.class)
+    @ConditionalOnBean(EntityManagerFactory.class)
+    public AuthoredSources authoredSources(EntityManager entityManager) {
+        return new JpaAuthoredSources(entityManager);
+    }
+
+    /**
+     * The allow-list, as a bean rather than a property read at each call site.
+     *
+     * <p>⚠️ One object that knows how to refuse, so there is one place the rule lives. A controller
+     * reading the property itself would be a second reader, and the second reader is the one that
+     * forgets a table can also be named by a join, a bag and a collection.</p>
+     */
+    @Bean
+    @ConditionalOnMissingBean(PublishedTables.class)
+    public PublishedTables publishedTables(QueryProperties properties) {
+        return new PublishedTables(properties.getPublishedTables());
+    }
+
+    /**
+     * Which declaration a subject actually runs against — the one answer every caller has to ask.
+     */
+    @Bean
+    @ConditionalOnMissingBean(QuerySources.class)
+    public QuerySources querySources(AuthoredSources stored, QueryLanguage language,
+                                     PublishedTables published) {
+        return new QuerySources(stored, language, published);
     }
 }

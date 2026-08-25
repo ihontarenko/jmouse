@@ -170,8 +170,19 @@ public class ViewNode extends QueryBlockNode {
         return clauses.isEmpty() ? subject : subject + "\n" + clauses;
     }
 
+    /**
+     * ⚠️ An unnamed view writes {@code view {}, not {@code view null {}.
+     *
+     * <p>A view assembled in code — a filter and a sort handed to a compiler, with nobody to name it —
+     * has no title, and {@code literal(null)} rendered the four letters of the word. It looked like a
+     * view somebody had named <em>null</em>, which is worse than looking unnamed: it reads as data.</p>
+     */
     private String headerToSource() {
-        StringBuilder written = new StringBuilder("view ").append(SourceWriter.literal(title));
+        StringBuilder written = new StringBuilder("view");
+
+        if (title != null) {
+            written.append(' ').append(SourceWriter.literal(title));
+        }
 
         if (identifier != null) {
             written.append(':').append(SourceWriter.name(identifier));

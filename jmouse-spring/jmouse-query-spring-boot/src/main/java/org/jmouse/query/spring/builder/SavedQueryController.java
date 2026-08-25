@@ -1,6 +1,8 @@
 package org.jmouse.query.spring.builder;
 
 import org.jmouse.query.spring.builder.QuerySubject.SavedQueryHolder;
+import org.jmouse.query.sql.SourceLoader;
+import org.jmouse.query.translate.JmqTranslator;
 import org.jmouse.query.store.QueryOwner;
 import org.jmouse.query.store.SavedQueries;
 import org.jmouse.query.store.SavedQuery;
@@ -68,6 +70,14 @@ import java.util.UUID;
 @RequestMapping(QueryRoutes.PREFIX)
 public class SavedQueryController {
 
+    /**
+     * ⚠️ Stateless, so one instance is right — and it is constructed rather than injected because a
+     * translator into the language itself has nothing to configure: no vendor, no dialect, no source.
+     * Making it a bean would invite a product to replace it, and a product with its own idea of how jMQ
+     * is spelled is the one thing this seam exists to prevent.
+     */
+    private static final JmqTranslator JMQ = new JmqTranslator();
+
     private final QuerySubjects  subjects;
     private final SavedQueries   store;
     private final QueryCallers   callers;
@@ -102,6 +112,34 @@ public class SavedQueryController {
                            .on(held.subject().name())
                            .seenBy(held.holder().author()))
                 .forEach(kept -> shelf.add(View.of(kept, held.holder().author())));
+    }
+
+    /**
+     * What this listing IS, written as the declaration nobody typed.
+     *
+     * <p>⚠️ Read-only and derived — there is nothing here to edit. It exists so a person can see the
+     * shape their queries run against rather than infer it from what the builder happens to offer, and so
+     * a mapping that has quietly drifted from what somebody remembers is visible instead of surprising.</p>
+     */
+    @GetMapping("/{subject}/projection")
+    @Transactional(readOnly = true)
+    public Projection projection(@PathVariable String subject,
+                                 @RequestParam Map<String, String> parameters) {
+        QuerySubject named  = subjects.named(subject);
+        QueryRequest asked  = new QueryRequest(subject, callers.current(), parameters);
+
+        named.authorize(asked);
+
+        return named.source(asked)
+                .map(SourceLoader::declare)
+                .map(declared -> new Projection(named.name(),
+                                                JMQ.translate(declared.toStructure()),
+                                                JMQ.translate(declared.toMapping())))
+                .orElseGet(() -> new Projection(named.name(), null, null));
+    }
+
+    /** ⚠️ Nulls mean this subject declined to show it — not that it has none. See QuerySubject.source. */
+    public record Projection(String subject, String structure, String mapping) {
     }
 
     @PostMapping("/{subject}/views")

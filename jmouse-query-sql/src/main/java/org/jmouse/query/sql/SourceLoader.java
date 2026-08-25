@@ -85,6 +85,87 @@ public final class SourceLoader {
     }
 
     /**
+     * The other direction: a source built in Java, written back out as the block somebody would have typed.
+     *
+     * <h2>⚠️ It returns a NODE, and rendering it is somebody else's job</h2>
+     *
+     * <p>{@link org.jmouse.query.translate.Translator} is the one seam out of the tree — into SQL for a
+     * vendor, into a pipeline over rows, or back into jMQ. So this stops at the tree, and the text comes
+     * from {@link org.jmouse.query.translate.JmqTranslator} like every other rendering. Producing the
+     * string here would be a <strong>second writer</strong> for a language that already has one, and two
+     * writers of one language agree until the day only one of them is taught a new spelling.</p>
+     *
+     * <p>It lives beside {@link #load(SourceNode)} because they are inverses, and inverses that drift are
+     * only discovered by whoever round-trips a document and gets a different one back.</p>
+     *
+     * <h2>⚠️ Why a Java-built source is worth writing out at all</h2>
+     *
+     * <p>Every product here builds its sources in Java rather than declaring them in a file, and for one
+     * of them that is not a preference: what a query may name depends on fields somebody creates on a
+     * screen, and a file written in advance cannot mention a field that does not exist yet. The
+     * declaration exists — it is simply written nowhere a person can read. This writes it down.</p>
+     *
+     * <h2>⚠️ What cannot be recovered, and it stays silent rather than guessing</h2>
+     *
+     * <p>An {@code AttributeMapping} is a <strong>function</strong>, not data: which side table a bag
+     * lives in and which columns link and carry it are closed over inside a lambda, so no reading of a
+     * {@link QuerySource} recovers the {@code bag} line that would have declared them. The attribute's
+     * <em>access</em> survives, because the schema carries it; the table behind it does not. Inventing a
+     * plausible one would be worse than omitting it — the result would parse, read as authoritative, and
+     * name a table that may not exist.</p>
+     *
+     * @param source what a product assembled in Java
+     * @return the same declaration as a tree, ready for a translator
+     */
+    public static SourceNode declare(QuerySource source) {
+        QueryTarget target   = source.target();
+        SourceNode  declared = new SourceNode();
+
+        declared.setName(target.name());
+        declared.setStructure(target.name());
+        declared.setTable(target.table());
+        declared.setAlias(target.alias());
+        declared.setKey(target.key());
+
+        for (QueryAttribute attribute : source.schema().attributes()) {
+            AttributeNode written = new AttributeNode();
+
+            written.setName(attribute.name());
+            written.setSource(attribute.source() == null ? attribute.name() : attribute.source());
+            written.setType(written(attribute.type()));
+            written.setAccess(written(attribute.access()));
+
+            declared.addAttribute(written);
+        }
+
+        return declared;
+    }
+
+    /**
+     * ⚠️ {@code unknown} is written as itself rather than softened to {@code text}. It is the schema
+     * declining to promise anything, and it is why a converter is needed at all — a projection that hid
+     * it would describe a source on which comparisons behave differently from the one it came from.
+     */
+    private static String written(QueryType type) {
+        return (type == null ? QueryType.UNKNOWN : type).name().toLowerCase();
+    }
+
+    /**
+     * ⚠️ Spelled by hand rather than lower-casing the constant, because one of the four does not match:
+     * {@link QueryAttribute.Access#JOINED} is written {@code join}. {@code joined} parses — as
+     * {@code column}, silently, via the reader's default — so the round trip would lose a join and
+     * describe a source that reads the wrong table.
+     */
+    private static String written(QueryAttribute.Access access) {
+        return switch (access == null ? QueryAttribute.Access.COLUMN : access) {
+            case BAG -> "bag";
+            case JOINED -> "join";
+            case COLLECTION -> "collection";
+            case COLUMN -> "column";
+        };
+    }
+
+    /**
      * ⚠️ A source declaring bag attributes and no {@code bag} line is refused <strong>when it is
      * used</strong>, by {@link AttributeMappings#columnsOnly()}, naming the attribute. Refusing at load
      * time instead would stop a product whose file describes several sources because one of them is

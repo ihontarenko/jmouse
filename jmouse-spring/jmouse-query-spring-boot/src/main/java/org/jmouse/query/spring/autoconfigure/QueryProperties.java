@@ -2,6 +2,9 @@ package org.jmouse.query.spring.autoconfigure;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /**
  * What a product tells the bridge — and it is deliberately two things.
  *
@@ -37,6 +40,36 @@ public class QueryProperties {
      * different answer.</p>
      */
     private String dialect = "";
+
+    /**
+     * The tables an <strong>authored</strong> declaration may name.
+     *
+     * <pre>
+     * jmouse:
+     *   query:
+     *     published-tables: [ issues, statuses, issue_types, priorities, resolutions ]
+     * </pre>
+     *
+     * <h2>⚠️ Empty means NOTHING is allowed, and it is the default on purpose</h2>
+     *
+     * <p>A mapping names tables. The permission checks on a listing are about <em>rows</em> — none of
+     * them ask which table the rows came from, because until a mapping could be edited the answer was
+     * fixed at compile time. So an unconfigured allow-list that permitted everything would turn
+     * forgetting this property into silently switching the guard off, and a guard that is off by default
+     * is a guard that is off in production.</p>
+     *
+     * <p>A product that publishes nothing simply has no authored sources, which is what a product that
+     * has not thought about this should have.</p>
+     */
+    private Set<String> publishedTables = new LinkedHashSet<>();
+
+    public Set<String> getPublishedTables() {
+        return publishedTables;
+    }
+
+    public void setPublishedTables(Set<String> publishedTables) {
+        this.publishedTables = publishedTables;
+    }
 
     public String getSources() {
         return sources;
