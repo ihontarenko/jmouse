@@ -111,8 +111,10 @@ public class QueryStoreAutoConfiguration {
      * happened here: the controller was not registered, and every saved-view call answered 404 with
      * nothing in any log.</p>
      *
-     * <p>A nested configuration is processed after the outer one, so by the time this is read the store
-     * is a bean the condition can see.</p>
+     * <p>⚠️ And a nested configuration is NOT enough on its own: moving the bean here left it skipped
+     * just the same. So there is no bean condition at all — the constructor requires the store, and the
+     * store is created under the very same class-level condition as this. A condition that can only ever
+     * agree with the one above it buys nothing and costs a silent 404.</p>
      *
      * <p>⚠️ Mounted only where a store exists, and a <em>subject</em> still decides per listing whether it
      * keeps views at all — see {@link org.jmouse.query.spring.builder.QuerySubject#holder}. So adding the
@@ -121,7 +123,6 @@ public class QueryStoreAutoConfiguration {
     @Configuration(proxyBeanMethods = false)
     @ConditionalOnClass(RestController.class)
     @ConditionalOnWebApplication
-    @ConditionalOnBean(SavedQueries.class)
     public static class SavedQueryEndpoints {
 
         @Bean

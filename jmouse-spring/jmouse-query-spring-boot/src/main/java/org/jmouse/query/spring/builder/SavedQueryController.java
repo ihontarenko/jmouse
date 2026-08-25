@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -45,10 +46,23 @@ import java.util.UUID;
  * <p>Same gate as the schema and the translation — {@link QuerySubject#authorize}. Listing what a person
  * saved discloses what they are watching, so it is not a weaker question than reading the vocabulary.</p>
  *
+ * <h2>⚠️ Transactional at the class, because the store PERSISTS</h2>
+ *
+ * <p>A shared {@code EntityManager} outside a transaction reads perfectly well and refuses to write —
+ * <em>No EntityManager with actual transaction available for current thread</em>, thrown from inside the
+ * library rather than from the product, which is the least helpful place for it to surface. The reads are
+ * marked read-only individually.</p>
+ *
+ * <p>⚠️ And the entity is the LIBRARY's, so a product adopting the store has to name
+ * {@code org.jmouse.query.store.jpa} in its {@code @EntityScan}. Without it Hibernate answers
+ * <em>Could not resolve root entity 'SavedQueryRow'</em> at the first call rather than at startup — the
+ * same trap every other {@code jmouse-*-jpa} library here carries.</p>
+ *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
 @RestController
+@Transactional
 @RequestMapping(QueryRoutes.PREFIX)
 public class SavedQueryController {
 
@@ -63,6 +77,7 @@ public class SavedQueryController {
     }
 
     @GetMapping("/{subject}/views")
+    @Transactional(readOnly = true)
     public List<View> list(@PathVariable String subject,
                            @RequestParam Map<String, String> parameters) {
         Held held = held(subject, parameters);
