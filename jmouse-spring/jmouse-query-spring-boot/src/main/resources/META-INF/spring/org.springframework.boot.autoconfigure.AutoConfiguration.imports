@@ -1,2 +1,3 @@
 org.jmouse.query.spring.autoconfigure.QueryAutoConfiguration
 org.jmouse.query.spring.autoconfigure.QueryBuilderAutoConfiguration
+org.jmouse.query.spring.autoconfigure.QueryStoreAutoConfiguration

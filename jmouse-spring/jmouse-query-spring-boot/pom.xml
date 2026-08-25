@@ -56,6 +56,38 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!--
+          The saved-query store. ⚠️ OPTIONAL, so a product that only wants the builder gets exactly what
+          it has today: QueryStoreAutoConfiguration is conditional on these classes being present, and a
+          product adopts the store by naming them itself.
+        -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-query-store</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-query-store-jpa</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- ⚠️ Optional too: only the migrator touches it, and only where the store is adopted. -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- Spring Boot autoconfigure — optional so it is not pulled transitively -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
