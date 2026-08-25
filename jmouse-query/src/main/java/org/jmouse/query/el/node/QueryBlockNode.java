@@ -108,6 +108,60 @@ public abstract class QueryBlockNode extends AbstractExpression {
         existing.merge(clause);
     }
 
+    /**
+     * Lays a clause over this block the way a request lays one over a STORED view.
+     *
+     * <h2>⚠️ Not {@link #addClause}, and the difference is who is speaking</h2>
+     *
+     * <p>Two clauses of one kind written in one text is a mistake, and {@code addClause} refuses it.
+     * A saved view opened with {@code ?jmq:order=…} beside it is not that: the view was written once and
+     * stored, the parameter is somebody saying <em>this time, sorted differently</em>, and refusing it
+     * would make a stored question unusable the moment anybody wanted it narrowed.</p>
+     *
+     * <h2>⚠️ What a parameter DOES is read off the clause, never decided here</h2>
+     *
+     * <p>Whether the request narrows the view or replaces part of it is {@link ClauseKind.Repetition},
+     * the same rule that decides what writing a clause twice means:</p>
+     *
+     * <table>
+     *   <caption>How each kind overlays</caption>
+     *   <tr><th>{@code MERGED}</th><td>{@code where}</td><td><b>narrows</b> — combined into what is there, an {@code and}</td></tr>
+     *   <tr><th>{@code ONCE}</th><td>{@code order}, {@code fetch}, {@code limit}</td><td><b>replaces</b> that clause</td></tr>
+     *   <tr><th>{@code MANY}</th><td>{@code join}</td><td><b>adds</b> another</td></tr>
+     * </table>
+     *
+     * <p>So there is no second table of overlay rules to keep in step with the first, and a clause added
+     * to the language overlays correctly the day it is registered, having said nothing about requests.</p>
+     *
+     * <p>⚠️ <strong>It mutates this block, so overlay a COPY of a stored view, never the stored one.</strong>
+     * A view held in memory and overlaid per request would carry the first caller's narrowing into the
+     * second caller's answer — which reads correctly and returns the wrong rows.</p>
+     *
+     * @param clause what the request said
+     */
+    public void overlay(ClauseNode clause) {
+        ClauseKind.Repetition repetition = clause.kind().repetition();
+
+        if (repetition == ClauseKind.Repetition.MANY) {
+            clauses.add(clause);
+            return;
+        }
+
+        ClauseNode existing = first(clause.keyword());
+
+        if (existing == null) {
+            clauses.add(clause);
+            return;
+        }
+
+        if (repetition == ClauseKind.Repetition.MERGED) {
+            existing.merge(clause);
+            return;
+        }
+
+        clauses.set(clauses.indexOf(existing), clause);
+    }
+
     private ClauseNode first(String keyword) {
         return clauses.stream().filter(clause -> clause.keyword().equals(keyword)).findFirst().orElse(null);
     }
