@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * The builder's two questions, answered for any subject.
@@ -122,6 +123,47 @@ public class QueryBuilders {
 
         return new QueryViews.Translated(
                 filter, order, rows, refusal.isEmpty(), refusal.orElse(null));
+    }
+
+    /**
+     * Whether a query <strong>written somewhere else</strong> is one this listing can actually answer.
+     *
+     * <h2>⚠️ For queries nobody composed against this vocabulary</h2>
+     *
+     * <p>{@link #translate} judges text somebody is typing <em>at</em> a subject. This judges text that
+     * arrived already written — a ready-made question kept for the whole installation, an agent's tool
+     * call, a filter out of a configuration file — and asks the one question those share: does this
+     * listing have the things it names?</p>
+     *
+     * <p>⚠️ <strong>A predicate rather than a boolean, because the schema is the expensive half.</strong>
+     * A subject narrowed by a form loads that form to describe itself; asked once per candidate query,
+     * a shelf of eight ready-made questions is eight loads of one unchanging form.</p>
+     *
+     * <p>⚠️ <strong>It does not authorize.</strong> Judging a query is not reading one, and every caller
+     * of this has already passed the subject's own gate to have got as far as holding the query. Adding a
+     * second gate here would authorize twice per request and disagree the day one of them moved.</p>
+     *
+     * <p>⚠️ A subject that cannot describe itself for these parameters <strong>judges nothing</strong> and
+     * every query passes. Refusing instead would turn a listing asked without its narrowing parameter
+     * from an answer into a failure — and this method exists to hide questions, never to break a shelf.</p>
+     *
+     * @param request which listing, narrowed however it narrows, and who is asking
+     * @return a predicate over jMQ filter text — ⚠️ blank text is answerable, it names nothing
+     */
+    public Predicate<String> answerable(QueryRequest request) {
+        QuerySchema         schema;
+        Map<String, Object> values;
+
+        try {
+            QuerySubject subject = subjects.named(request.subject());
+
+            schema = subject.schema(request);
+            values = subject.values(request);
+        } catch (RuntimeException undescribable) {
+            return filter -> true;
+        }
+
+        return filter -> refusal(filter, schema, values).isEmpty();
     }
 
     /**

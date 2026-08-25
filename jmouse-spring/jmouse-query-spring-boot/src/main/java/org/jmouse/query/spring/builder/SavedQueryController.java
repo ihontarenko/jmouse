@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 /**
  * The questions somebody kept — listed, saved, renamed and discarded, for every product at once.
@@ -81,11 +82,14 @@ public class SavedQueryController {
     private final QuerySubjects  subjects;
     private final SavedQueries   store;
     private final QueryCallers   callers;
+    private final QueryBuilders  builders;
 
-    public SavedQueryController(QuerySubjects subjects, SavedQueries store, QueryCallers callers) {
+    public SavedQueryController(QuerySubjects subjects, SavedQueries store, QueryCallers callers,
+                                QueryBuilders builders) {
         this.subjects = subjects;
         this.store = store;
         this.callers = callers;
+        this.builders = builders;
     }
 
     @GetMapping("/{subject}/views")
@@ -101,16 +105,80 @@ public class SavedQueryController {
         // the installation, which is what the store's '*' sentinel exists for. Seeding them as rows is
         // what lets somebody rename one, and what lets the server say which of them still parse — neither
         // of which a list compiled into a frontend bundle can ever offer.
-        gather(shelf, QueryOwner.installation(), held);
-        gather(shelf, held.holder().owner(), held);
+        //
+        // ⚠️ And offered ONLY where this listing can answer them. An installation's ready-made question is
+        // written against a vocabulary it hopes exists — *running low* means a quantity, and a workspace's
+        // bug report has none — so the shelf is narrowed by the subject's own schema rather than by the
+        // subject's NAME, which is all the store knows. Dropped silently, because somebody who never had
+        // a quantity never wondered where *running low* went.
+        gather(shelf, QueryOwner.installation(), held, builders.answerable(held.request()));
+
+        // ⚠️ A person's own view is NOT judged the same way, and the asymmetry is the point. It is already
+        // filed against this listing rather than merely against the subject, so it is here because it
+        // belongs here — and hiding one whose field somebody has since renamed would take away the only
+        // screen it can be repaired from. It refuses when applied, in words, which is the honest failure.
+        gather(shelf, held.holder().owner(), held, filter -> true);
 
         return shelf;
     }
 
-    private void gather(List<View> shelf, QueryOwner owner, Held held) {
+    /**
+     * Every listing's kept views, in one request.
+     *
+     * <h2>⚠️ Why this exists at all</h2>
+     *
+     * <p>A product registers one subject per <em>thing being listed</em>, so a workspace with forty-four
+     * component types is forty-four {@code entries} subjects differing only in their parameters. The
+     * manager screen drew a row each and asked twice per row — eighty-eight requests to paint a sidebar.
+     * Ivan, 2026-08-25: <em>«багато таких запитів … можливо є сенс створити батч кол?»</em>, and then:
+     * <em>«краще зробити батч»</em>.</p>
+     *
+     * <h2>⚠️ One refusal does not fail the batch</h2>
+     *
+     * <p>Each element is authorized exactly as the single-subject route authorizes it — this calls the
+     * same {@link #held} — and a subject the caller may not read comes back {@code refused} rather than
+     * taking the whole answer down with it. A batch that failed as a unit would let one unreadable
+     * listing blank a screen that was showing forty-three readable ones.</p>
+     *
+     * <p>⚠️ <strong>POST, though it reads nothing but.</strong> The question is a list of subjects with
+     * their parameters, and that does not fit a query string at forty-four of them.</p>
+     */
+    @PostMapping("/views/batch")
+    @Transactional(readOnly = true)
+    public List<Kept> listMany(@RequestBody List<Asked> asked) {
+        List<Kept> answers = new ArrayList<>();
+
+        for (Asked one : asked) {
+            Map<String, String> parameters = one.parameters() == null ? Map.of() : one.parameters();
+
+            try {
+                answers.add(new Kept(one.subject(), parameters, list(one.subject(), parameters), false));
+            } catch (RuntimeException refusal) {
+                answers.add(new Kept(one.subject(), parameters, List.of(), true));
+            }
+        }
+
+        return answers;
+    }
+
+    /** One listing named in a batch — the subject, and whatever tells two of that name apart. */
+    public record Asked(String subject, Map<String, String> parameters) {
+    }
+
+    /**
+     * ⚠️ The parameters are echoed back, and a client needs them: they are the only thing that tells two
+     * subjects of the same name apart, so an answer identified by name alone could not be matched to the
+     * row that asked for it.
+     */
+    public record Kept(String subject, Map<String, String> parameters, List<View> views, boolean refused) {
+    }
+
+    private void gather(List<View> shelf, QueryOwner owner, Held held, Predicate<String> offered) {
         store.list(SavedQueryCriteria.ownedBy(owner)
                            .on(held.subject().name())
                            .seenBy(held.holder().author()))
+                .stream()
+                .filter(kept -> offered.test(kept.getBody()))
                 .forEach(kept -> shelf.add(View.of(kept, held.holder().author())));
     }
 
@@ -200,10 +268,16 @@ public class SavedQueryController {
                 HttpStatus.NOT_IMPLEMENTED,
                 "'%s' does not keep saved views in this product.".formatted(name)));
 
-        return new Held(subject, holder);
+        return new Held(subject, request, holder);
     }
 
-    private record Held(QuerySubject subject, SavedQueryHolder holder) {
+    /**
+     * ⚠️ The REQUEST is carried rather than rebuilt. What narrows a listing lives in its parameters —
+     * which form, which project — so a second {@code QueryRequest} assembled further down would be built
+     * from whatever that call site happened to hold, which is how a shelf ends up judged against a
+     * different listing than the one it was gathered for.
+     */
+    private record Held(QuerySubject subject, QueryRequest request, SavedQueryHolder holder) {
     }
 
     /** What a screen sends when a view is kept or renamed. */

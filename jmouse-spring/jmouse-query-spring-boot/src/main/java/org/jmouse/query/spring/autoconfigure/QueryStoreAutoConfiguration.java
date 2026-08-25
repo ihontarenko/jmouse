@@ -3,6 +3,7 @@ package org.jmouse.query.spring.autoconfigure;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.jmouse.query.el.QueryLanguage;
+import org.jmouse.query.spring.builder.QueryBuilders;
 import org.jmouse.query.spring.builder.QueryCallers;
 import org.jmouse.query.spring.builder.QueryRunner;
 import org.jmouse.query.spring.builder.QuerySubjects;
@@ -183,8 +184,9 @@ public class QueryStoreAutoConfiguration {
         @Bean
         @ConditionalOnMissingBean(SavedQueryController.class)
         public SavedQueryController savedQueryController(
-                QuerySubjects subjects, SavedQueries store, QueryCallers callers) {
-            return new SavedQueryController(subjects, store, callers);
+                QuerySubjects subjects, SavedQueries store, QueryCallers callers,
+                QueryBuilders builders) {
+            return new SavedQueryController(subjects, store, callers, builders);
         }
 
         /**
