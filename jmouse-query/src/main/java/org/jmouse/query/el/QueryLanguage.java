@@ -11,7 +11,11 @@ import org.jmouse.el.node.Expression;
 import org.jmouse.el.parser.ExpressionParser;
 import org.jmouse.query.el.lexer.QueryRecognizer;
 import org.jmouse.query.el.node.QueryDocumentNode;
+import org.jmouse.query.el.node.ClauseNode;
 import org.jmouse.query.el.node.OrderNode;
+import org.jmouse.query.el.node.QueryBlockNode;
+import org.jmouse.query.el.parser.ClauseParsers;
+import org.jmouse.query.el.parser.SingleClauseParser;
 import org.jmouse.query.el.parser.OrderParser;
 import org.jmouse.query.el.parser.QueryDocumentParser;
 
@@ -54,9 +58,14 @@ import org.jmouse.query.el.parser.QueryDocumentParser;
  */
 public class QueryLanguage {
 
+    /** A clause's name — the language's own word, or a product's, which carries a dot. */
+    private static final java.util.regex.Pattern KEYWORD =
+            java.util.regex.Pattern.compile("[a-zA-Z][a-zA-Z0-9]*(\\.[a-zA-Z][a-zA-Z0-9]*)?");
+
     private final ExpressionLanguage documents;
     private final ExpressionLanguage expressions;
     private final ExpressionLanguage orders;
+    private final ExpressionLanguage clauses;
 
     public QueryLanguage() {
         this(defaultExtensions());
@@ -82,6 +91,7 @@ public class QueryLanguage {
         this.documents = new ExpressionLanguage(extensions, lexer(), QueryDocumentParser.class);
         this.expressions = new ExpressionLanguage(extensions, lexer(), ExpressionParser.class);
         this.orders = new ExpressionLanguage(extensions, lexer(), OrderParser.class);
+        this.clauses = new ExpressionLanguage(extensions, lexer(), SingleClauseParser.class);
     }
 
     /**
@@ -163,6 +173,48 @@ public class QueryLanguage {
      * @return the clause
      * @throws QueryParseException when it is not a sort
      */
+    /**
+     * One clause, read on its own — what a {@code ?jmq:<clause>=} parameter carries.
+     *
+     * <h2>⚠️ The keyword is prepended HERE, from the registry, and never taken from the caller</h2>
+     *
+     * <p>A request names the clause in the parameter's own name — {@code jmq:where} — so the word is a
+     * key a controller looked up, not text somebody sent. What the caller supplies is only the body, and
+     * it is parsed as that clause and nothing else: anything left over is refused by
+     * {@link org.jmouse.query.el.parser.SingleClauseParser}, so a body carrying a second clause or a
+     * closing brace cannot restructure the query.</p>
+     *
+     * <p>⚠️ A word the registry does not know is refused before any parsing, because the alternative is
+     * assembling text around an unknown word and letting the parser explain it — which is the assembly
+     * this whole entry point exists to avoid.</p>
+     *
+     * @param keyword a registered clause word — {@code where}, {@code order}, {@code fetch}, {@code limit}
+     * @param body    what the caller wrote after it
+     * @return the clause, ready to be laid over a block with {@link QueryBlockNode#overlay}
+     */
+    public ClauseNode clause(String keyword, String body) {
+        // ⚠️ This guard asks whether the keyword is a WORD, not whether it is a clause. Deciding the
+        // second here would mean keeping a list beside the parser's own — and the parser's is better,
+        // because it covers the built-in clauses (which carry their own tokens and are therefore not in
+        // ClauseParsers) as well as everything a product registered, and it refuses with them listed.
+        //
+        // What this stops is the only thing text assembly could be exploited through: a "keyword" that is
+        // not a word at all. A parameter named `jmq:x } view 'evil':e {` would otherwise be pasted in
+        // front of the body and reopen the very hole SingleClauseParser exists to close.
+        if (!KEYWORD.matcher(keyword).matches()) {
+            throw new QueryParseException(
+                    ("'%s' is not the name of a clause; a clause is a word, and one belonging to a "
+                     + "product carries a dot").formatted(keyword));
+        }
+
+        if (clauses.compile("%s: %s".formatted(keyword, body)) instanceof ClauseNode clause) {
+            return clause;
+        }
+
+        throw new QueryParseException(
+                "'%s' did not read as a clause; it was given '%s'".formatted(keyword, body));
+    }
+
     public OrderNode order(String source) {
         if (orders.compile(source) instanceof OrderNode clause) {
             return clause;

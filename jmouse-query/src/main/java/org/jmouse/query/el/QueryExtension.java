@@ -3,6 +3,7 @@ package org.jmouse.query.el;
 import org.jmouse.el.parser.Parser;
 import org.jmouse.query.el.dialect.QueryDialect;
 import org.jmouse.query.el.parser.OrderParser;
+import org.jmouse.query.el.parser.SingleClauseParser;
 import org.jmouse.query.el.parser.QueryDocumentParser;
 import org.jmouse.query.el.parser.QueryFunctionParser;
 import org.jmouse.query.el.parser.MappingParser;
@@ -52,6 +53,7 @@ public class QueryExtension extends QueryDialect {
         // parser, and a root the container has never heard of is refused at construction. `?jmq:order=`
         // starts here, which is what keeps a sort out of a hand-assembled document.
         parsers.add(new OrderParser());
+        parsers.add(new SingleClauseParser());
 
         return parsers;
     }
