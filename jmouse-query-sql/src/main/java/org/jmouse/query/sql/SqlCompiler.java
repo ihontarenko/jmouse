@@ -164,6 +164,15 @@ public class SqlCompiler implements ExpressionVisitor<Fragment> {
     private final SqlContext        context;
 
     /**
+     * The declared names whose defaults are being compiled right now.
+     *
+     * <p>⚠️ Held so that {@code v(a : b, b : a)} is refused by name instead of recursing until the stack
+     * gives out. A default may legitimately mention another declared name, so the cycle is the only thing
+     * that can be forbidden — and a {@code StackOverflowError} is not a message anybody can act on.</p>
+     */
+    private final Set<String> standingIn = new java.util.LinkedHashSet<>();
+
+    /**
      * ⚠️ One compiler per compile, holding its context.
      *
      * <p>A visitor returning a value has nowhere to thread an extra argument through, so the context is
@@ -224,6 +233,13 @@ public class SqlCompiler implements ExpressionVisitor<Fragment> {
         // schema rather than on what the caller said. The checker refuses a name that is both.
         if (context.hasValue(property.getPath())) {
             return supplied(property.getPath(), context.value(property.getPath()));
+        }
+
+        // ⚠️ A declared name nobody supplied stands on its DEFAULT, and the default is compiled here
+        // rather than worked out beforehand. `now() - days(30)` therefore binds the same instant as any
+        // other `now()` in this statement, because it is this statement compiling it.
+        if (context.hasDefault(property.getPath())) {
+            return standingIn(property.getPath());
         }
 
         QueryAttribute attribute = context.schema().attribute(property.getPath())
@@ -635,6 +651,27 @@ public class SqlCompiler implements ExpressionVisitor<Fragment> {
      * <p>⚠️ And a list where a single value belongs is refused rather than compiled into
      * {@code x = ?, ?, ?}. See {@link #refuseListAsValue}.</p>
      */
+    /**
+     * A declared name compiled as the default standing in for it.
+     *
+     * <p>⚠️ Compiled here, in the middle of the statement, rather than worked out before it. That is what
+     * makes {@code now()} inside a default mean the same instant as {@code now()} beside it — and what
+     * lets a default use a function the product contributed, since the same compiler reads both.</p>
+     */
+    private Fragment standingIn(String name) {
+        if (!standingIn.add(name)) {
+            throw new SqlCompileException(
+                    ("'%s' stands on a default that leads back to itself; the names involved are %s")
+                            .formatted(name, String.join(" → ", standingIn) + " → " + name));
+        }
+
+        try {
+            return compile(context.defaultOf(name));
+        } finally {
+            standingIn.remove(name);
+        }
+    }
+
     private Fragment supplied(String name, Object value) {
         Collection<?> items = asCollection(value);
 

@@ -276,8 +276,6 @@ public class QueryEngine {
         SqlTranslator translator =
                 new SqlTranslator(joined(view, name, about), dialect, this::subquery, views.keySet());
 
-        translator.language(language.expressionLanguage());
-
         return translator;
     }
 
@@ -326,8 +324,6 @@ public class QueryEngine {
             SqlTranslator translator = new SqlTranslator(
                     require(innerSource(name, inner)), dialect,
                     deeper -> subquery(deeper, being), views.keySet());
-
-            translator.language(language.expressionLanguage());
 
             return Optional.of(translator.parts(inner, Map.of()).select());
         } finally {

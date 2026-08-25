@@ -1,5 +1,6 @@
 package org.jmouse.query.sql;
 
+import org.jmouse.el.node.Expression;
 import org.jmouse.jdbc.dialect.Dialect;
 import org.jmouse.query.schema.QuerySchema;
 
@@ -72,6 +73,33 @@ public class SqlContext {
     /** The inner statement this name stands for, where it names a declared view. */
     public Optional<Fragment> subquery(String name) {
         return subqueries.apply(name);
+    }
+
+    /**
+     * The expression standing in for a declared name the caller left out — its default.
+     *
+     * <h2>⚠️ A tree, not a value, and that is the whole point</h2>
+     *
+     * <p>A default may say {@code now() - days(30)}. Worked out separately it would need a clock of its
+     * own, and this context binds one moment for the whole statement precisely so that two clauses cannot
+     * disagree about when "now" was. Compiled where the name stands, the default shares that moment for
+     * free — and may use every function the query itself may use, product-contributed ones included.</p>
+     */
+    private Map<String, Expression> defaults = Map.of();
+
+    /** What each unsupplied declared name compiles as. */
+    public void defaults(Map<String, Expression> defaults) {
+        this.defaults = Map.copyOf(defaults);
+    }
+
+    /** Whether this name is a declared one standing on its default rather than on a supplied value. */
+    public boolean hasDefault(String name) {
+        return defaults.containsKey(name);
+    }
+
+    /** The expression this name stands for. */
+    public Expression defaultOf(String name) {
+        return defaults.get(name);
     }
 
     /** One alias per key, in the order they were first asked for. */

@@ -5,12 +5,14 @@ import org.jmouse.el.evaluation.EvaluationContext;
 import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.PropertyNode;
+import org.jmouse.el.node.expression.FunctionNode;
 import org.jmouse.query.translate.Capabilities;
 import org.jmouse.query.translate.Capability;
 import org.jmouse.query.translate.Bindings;
 import org.jmouse.query.translate.DeclaredValues;
 import org.jmouse.query.translate.Translator;
 import org.jmouse.query.translate.UnsupportedQueryException;
+import org.jmouse.query.el.QueryFunctions;
 import org.jmouse.query.el.QueryLanguage;
 import org.jmouse.query.el.function.Rewriter;
 import org.jmouse.query.el.node.ColumnsNode;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,6 +52,12 @@ import java.util.Optional;
  * aggregating in memory is real work that has not been done. Declaring them and returning ungrouped rows
  * would be the exact failure {@link Capabilities} exists to prevent.</p>
  *
+ * <p>⚠️ <strong>And no clock.</strong> {@code now()} and {@code days(7)} are compiled by the SQL side into
+ * a bound instant and an interval; nothing here answers to either, so a query using them used to reach a
+ * caller as an expression-language error about a missing function — a divergence between the two backends
+ * dressed up as a typo. It is refused by name instead, until the row side really does bind one instant
+ * per query the way the statement does.</p>
+ *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
@@ -59,7 +68,6 @@ public class RowTranslator implements Translator<RowTranslator.Query> {
             Capability.SORT,
             Capability.PROJECT,
             Capability.CONVERT,
-            Capability.CLOCK,
             Capability.LIMIT);
 
     private final QuerySchema         schema;
@@ -237,12 +245,13 @@ public class RowTranslator implements Translator<RowTranslator.Query> {
     private Query block(QueryBlockNode block, Map<String, Object> given) {
         requireSupport(block);
 
-        // ⚠️ Same rule as the SQL side, in the same words: a declared name arrives with a value or the
-        // translation is refused. Two backends disagreeing about whether a missing value is an error is
-        // two languages.
-        Map<String, Object> supplied = DeclaredValues.resolve(block, Bindings.of(given), language).asMap();
+        // ⚠️ Same rule as the SQL side, in the same words: a declared name arrives with a value, or with
+        // the expression that stands in for it, or the translation is refused. Two backends disagreeing
+        // about whether a missing value is an error is two languages.
+        DeclaredValues.Declared declared = DeclaredValues.resolve(block, Bindings.of(given));
+        Map<String, Object>     supplied = declared.asMap();
 
-        Names                        names   = new Names(supplied);
+        Names                        names   = new Names(supplied, declared.defaults());
         List<OrderNode.Key>          order   = new ArrayList<>();
         List<ColumnsNode.Projection> columns = new ArrayList<>();
 
@@ -301,8 +310,17 @@ public class RowTranslator implements Translator<RowTranslator.Query> {
      */
     public final class Names extends Rewriter {
 
-        private final Map<String, String> variables = new LinkedHashMap<>();
-        private final Map<String, Object> supplied;
+        private final Map<String, String>     variables = new LinkedHashMap<>();
+        private final Map<String, Object>     supplied;
+        private final Map<String, Expression> defaults;
+
+        /**
+         * The declared names whose defaults are being put in place right now.
+         *
+         * <p>⚠️ Held so that {@code v(a : b, b : a)} is refused by name rather than recursing until the
+         * stack gives out — the same guard, in the same words, as the SQL compiler's.</p>
+         */
+        private final Set<String> standingIn = new LinkedHashSet<>();
 
         /** Where each attribute is read from in a raw row. Empty means the row is already keyed by name. */
         public Map<String, String> columns() {
@@ -310,7 +328,12 @@ public class RowTranslator implements Translator<RowTranslator.Query> {
         }
 
         private Names(Map<String, Object> supplied) {
+            this(supplied, Map.of());
+        }
+
+        private Names(Map<String, Object> supplied, Map<String, Expression> defaults) {
             this.supplied = supplied;
+            this.defaults = defaults;
         }
 
         @Override
@@ -319,6 +342,12 @@ public class RowTranslator implements Translator<RowTranslator.Query> {
             // to be renamed to — it is put into the context under the name the query wrote.
             if (supplied.containsKey(property.getPath())) {
                 return property;
+            }
+
+            // ⚠️ A declared name nobody supplied is REPLACED BY ITS DEFAULT'S TREE, not by a value worked
+            // out beforehand — the same rule as the SQL side, so one document means one thing on both.
+            if (defaults.containsKey(property.getPath())) {
+                return standingIn(property.getPath());
             }
 
             if (subqueries.contains(property.getPath())) {
@@ -330,6 +359,38 @@ public class RowTranslator implements Translator<RowTranslator.Query> {
 
             return new PropertyNode(variables.computeIfAbsent(
                     property.getPath(), ignored -> "v" + (variables.size() + 1)));
+        }
+
+        /**
+         * ⚠️ A call to something only the clock answers is refused HERE, by name.
+         *
+         * <p>{@code now()} and the durations are compiled rather than evaluated — the SQL side turns them
+         * into a bound instant and an interval. Nothing in this backend answers to either, so leaving them
+         * to the evaluator produced <em>No function or lambda with name 'now'</em>, which reads like a
+         * misspelling and is really one backend quietly doing less than the other.</p>
+         */
+        @Override
+        public Expression visitCall(FunctionNode call) {
+            if (QueryFunctions.NOW.equals(call.getName()) || QueryFunctions.isDuration(call.getName())) {
+                CAPABILITIES.require(Capability.CLOCK, call.getName() + "()");
+            }
+
+            return super.visitCall(call);
+        }
+
+        /** The default's tree, rewritten in place of the name that stands on it. */
+        private Expression standingIn(String name) {
+            if (!standingIn.add(name)) {
+                throw new UnsupportedQueryException(
+                        ("'%s' stands on a default that leads back to itself; the names involved are %s")
+                                .formatted(name, String.join(" → ", standingIn) + " → " + name));
+            }
+
+            try {
+                return rewrite(defaults.get(name));
+            } finally {
+                standingIn.remove(name);
+            }
         }
 
         Map<String, String> variables() {

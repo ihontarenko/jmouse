@@ -1,6 +1,5 @@
 package org.jmouse.query.sql;
 
-import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.jdbc.dialect.Dialect;
 import org.jmouse.query.translate.Capabilities;
 import org.jmouse.query.translate.Bindings;
@@ -19,7 +18,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.Map;
 
 /**
  * The SQL backend, on the same seam every other backend sits on.
@@ -77,20 +75,6 @@ public class SqlTranslator implements Translator<Fragment> {
 
     /** The names this translator can resolve into an inner statement. */
     private final Set<String> views;
-
-    /**
-     * The vocabulary a declared default is evaluated with.
-     *
-     * <p>⚠️ The product's own where it has one. A default written with a contributed function —
-     * {@code since : lastVisit()} — would otherwise work on the row side, which holds the product's
-     * language, and fail here, which held the library's.</p>
-     */
-    private ExpressionLanguage language = null;
-
-    /** Tells this translator which vocabulary a declared default may use. */
-    public void language(ExpressionLanguage language) {
-        this.language = language;
-    }
 
     public SqlTranslator(QuerySource source, Dialect dialect) {
         this(source, dialect, name -> Optional.empty());
@@ -206,17 +190,17 @@ public class SqlTranslator implements Translator<Fragment> {
     public ViewCompiler.CompiledQuery parts(QueryBlockNode block, Map<String, Object> values) {
         requireSupport(block);
 
-        // ⚠️ Defaults filled in and omissions refused BEFORE the check, so a declared name reaches the
-        // compiler with a value or does not reach it at all. Binding a null for something a view said it
-        // needs is the failure this step exists to make impossible.
-        Map<String, Object> supplied = (language == null
-                ? DeclaredValues.resolve(block, Bindings.of(values))
-                : DeclaredValues.resolve(block, Bindings.of(values), language)).asMap();
+        // ⚠️ Omissions refused BEFORE the check, so a declared name reaches the compiler with a value, or
+        // with the default that stands in for it, or not at all. Binding a null for something a view said
+        // it needs is the failure this step exists to make impossible.
+        DeclaredValues.Declared declared = DeclaredValues.resolve(block, Bindings.of(values));
+        Map<String, Object>     supplied = declared.asMap();
 
         new QueryChecker(source.schema(),
                 QueryEngine.allowedNames(block, supplied.keySet(), viewNames())).check(block);
 
         return new ViewCompiler(source.mapping(), source.membership())
+                .defaults(declared.defaults())
                 .compile(block, dialect, source.schema(), source.target(), supplied, subqueries);
     }
 

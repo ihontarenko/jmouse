@@ -51,6 +51,21 @@ public class ViewCompiler {
         this.membership = membership;
     }
 
+    /** What each declared name the caller left out compiles as — see {@link SqlContext#defaults(Map)}. */
+    private Map<String, Expression> defaults = Map.of();
+
+    /**
+     * The defaults to compile in place of the names nobody supplied.
+     *
+     * <p>⚠️ Set rather than passed, so that every existing {@code compile} arity keeps meaning exactly
+     * what it meant — a compilation with no declarations to stand in for.</p>
+     */
+    public ViewCompiler defaults(Map<String, Expression> defaults) {
+        this.defaults = Map.copyOf(defaults);
+
+        return this;
+    }
+
     /**
      * Compiles a view or a function body.
      *
@@ -94,6 +109,7 @@ public class ViewCompiler {
                 dialect, schema, target, SqlContext.DEFAULT_ALIAS_PREFIX, Instant.now(), values);
 
         context.subqueries(subqueries);
+        context.defaults(defaults);
 
         SqlCompiler compiler = new SqlCompiler(mapping, membership, context);
 
