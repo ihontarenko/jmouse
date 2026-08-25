@@ -181,13 +181,31 @@ public class FunctionInliner {
     /**
      * ⚠️ Checked at the call site, in the caller's own vocabulary, and only where it can be known.
      *
-     * <p>A literal argument can be judged now; an expression cannot, and pretending otherwise would mean
+     * <p>A literal argument can be judged now; anything else cannot, and pretending otherwise would mean
      * either refusing valid queries or inventing a type system this language does not have. So the check
      * is deliberately partial — it catches the mistake somebody actually makes, which is passing a word
      * where a list of numbers was declared.</p>
+     *
+     * <p>⚠️ <strong>"Anything else" includes a bare name</strong>, which is the ordinary way a product
+     * passes a collection: {@code recent(blockedIds)}. Judging it here is impossible — nothing is bound
+     * yet — so it passes through and is judged where its value is.</p>
      */
     private void checkType(String function, ParameterDeclarationNode parameter, Expression argument) {
         if (!parameter.hasType()) {
+            return;
+        }
+
+        // ⚠️ A NAME IS NOT JUDGED HERE, and this is the paragraph above meant literally rather than
+        // nearly. Inlining happens before anything is bound, so `recent(ids)` — a value the runtime
+        // supplies, which is how every product passes a collection — carries nothing this method could
+        // read. It used to be refused as "an expression", which made the ordinary way of calling a
+        // function the one way that did not work.
+        //
+        // What arrives later is judged later: an unsupplied name is refused by the checker, and a bound
+        // value is expanded or refused by the compiler according to what it turns out to hold. Refusing
+        // here would mean either turning away valid queries or inventing a type system this language
+        // does not have.
+        if (!(argument instanceof LiteralNode<?> || argument instanceof ArrayNode)) {
             return;
         }
 

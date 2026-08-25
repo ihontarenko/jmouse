@@ -914,6 +914,20 @@ public class SqlCompiler implements ExpressionVisitor<Fragment> {
         throw new SqlCompileException("this test needs something to compare against");
     }
 
+    /**
+     * A value that has to be known while compiling — a test's argument, a duration's amount.
+     *
+     * <h2>⚠️ A supplied NAME counts as fixed, and that is the point</h2>
+     *
+     * <p>{@code days(span)} where the caller supplies {@code span} is a fixed number by the time anything
+     * runs; refusing it made a function's own parameter the one thing that could not be passed on —
+     * {@code recent(ids, span)} calling {@code days(within)} failed while {@code days(7)} worked. A name
+     * standing on a default resolves the same way, so the two mechanisms agree.</p>
+     *
+     * <p>⚠️ It is still not an <em>expression</em>. Nothing computed reaches here, because the places that
+     * ask for this write the value into syntax the database cannot parameterise — an interval unit, a
+     * wildcard — and a value that only exists once rows are being read has nothing to offer them.</p>
+     */
     private Object literal(Expression expression) {
         if (expression instanceof StringLiteralNode text) {
             return MimeParser.unquote(text.getValue());
@@ -921,6 +935,20 @@ public class SqlCompiler implements ExpressionVisitor<Fragment> {
 
         if (expression instanceof LiteralNode<?> value) {
             return value.getValue();
+        }
+
+        if (expression instanceof PropertyNode property) {
+            if (context.hasValue(property.getPath())) {
+                return context.value(property.getPath());
+            }
+
+            if (context.hasDefault(property.getPath())) {
+                return literal(context.defaultOf(property.getPath()));
+            }
+
+            throw new SqlCompileException(
+                    ("'%s' has to be known while this query is being compiled, and nothing supplies it; "
+                     + "pass it by name or write the value").formatted(property.getPath()));
         }
 
         throw new SqlCompileException("only a fixed value can be compared against here, not an expression");
