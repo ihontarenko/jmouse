@@ -27,7 +27,7 @@ import org.jmouse.query.translate.Capability;
 public class JoinClauseNode extends ClauseNode {
 
     public static final ClauseKind KIND =
-            ClauseKind.of("join", Capability.JOIN, ClauseKind.STEP / 2);
+            ClauseKind.of("join", Capability.JOIN, ClauseKind.STEP / 2).many();
 
     public static final String KEYWORD = KIND.keyword();
 

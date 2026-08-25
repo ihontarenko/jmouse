@@ -12,9 +12,14 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Two structures in one query, composed into the single source everything downstream expects.
+ * Several structures in one query, composed into the single source everything downstream expects.
  *
  * <h2>⚠️ A composition, not a second compiler</h2>
+ *
+ * <p>⚠️ It composes, so it nests: the result of one composition is the outer side of the next, and a view
+ * saying {@code join:} three times is three calls rather than a compiler that counts sources. A later join
+ * may therefore hang off an earlier one, and reads through it correctly, because the far side of every
+ * condition is resolved through whatever the outer side turned out to be.</p>
  *
  * <p>A view joining two structures does not need the compiler to learn about two sources. It needs one
  * source whose schema is the union of both and whose mapping knows which half each attribute came from —
@@ -76,14 +81,45 @@ public final class JoinedStructures {
 
             requireColumn(attribute, inner, "read through a join between structures");
 
+            // ⚠️ The far side is resolved THROUGH the outer mapping rather than as a column of the root
+            // table. A second join may hang off the first — `join: category on category.key ==
+            // person.category` — and there the far side lives at the first join's alias. Asking the
+            // mapping registers that join first and answers with its alias; writing `context.column(…)`
+            // instead would name the root table and compare two columns that have nothing to do with
+            // each other, which is a wrong answer rather than a failure.
+            String far = qualified(outer, outerKey, context);
+
+            // ⚠️ Keyed on the joined SOURCE, so every attribute out of it shares one join and two different
+            // structures never share an alias.
             String alias = context.alias("structure:" + inner.name());
 
             context.join(alias, Join.left(inner.target().table(), alias)
-                    .on(alias, innerKey.source()).equalTo(context.column(outerKey.source()))
+                    .on(alias, innerKey.source()).equalTo(far)
                     .toFragment(context.dialect()));
 
             return Fragment.of(context.column(alias, attribute.source()));
         };
+    }
+
+    /**
+     * The far side of a join condition, as the outer source itself reads it.
+     *
+     * <p>⚠️ Refused when that expression binds a value. A join condition is written as two names and an
+     * equality precisely so a backend can promise to honour it; an attribute whose SQL carries a
+     * parameter has nowhere to put it here, and rendering the text without the value would produce a
+     * statement whose {@code ?} count no longer matches what is bound.</p>
+     */
+    private static String qualified(QuerySource outer, QueryAttribute key, SqlContext context) {
+        Fragment fragment = outer.mapping().expression(key, context);
+
+        if (!fragment.parameters().isEmpty()) {
+            throw new SqlCompileException(
+                    ("'%s' is joined on, and it reads as an expression that binds a value in '%s'; "
+                     + "a join is written as two plain columns and an equality").formatted(
+                            key.name(), outer.name()));
+        }
+
+        return fragment.sql();
     }
 
     private static QueryAttribute require(QuerySource source, String name, JoinClauseNode clause) {

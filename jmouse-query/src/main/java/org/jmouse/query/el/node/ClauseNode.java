@@ -29,10 +29,11 @@ public abstract class ClauseNode extends AbstractExpression {
     /**
      * Combines another clause of the same kind into this one.
      *
-     * <p>⚠️ Only ever called for a clause whose {@link ClauseKind#repeatable()} is set, and the default
-     * refuses rather than quietly keeping one of the two. A clause that declares itself repeatable
-     * without overriding this would lose whichever half the block happened to discard — which is the
-     * silent-wrongness this whole area is built to avoid.</p>
+     * <p>⚠️ Only ever called for a clause whose repetition is {@link ClauseKind.Repetition#MERGED}, and
+     * the default refuses rather than quietly keeping one of the two. A clause that declares itself
+     * merged without overriding this would lose whichever half the block happened to discard — which is
+     * the silent-wrongness this whole area is built to avoid. A {@link ClauseKind.Repetition#MANY}
+     * clause never reaches here at all: its repeats stay apart.</p>
      *
      * @param other the second one, of the same kind
      */

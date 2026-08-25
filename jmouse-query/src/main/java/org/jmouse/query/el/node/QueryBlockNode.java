@@ -6,23 +6,19 @@ import org.jmouse.query.el.QueryParseException;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
  * What a {@code view} and a {@code function} have in common: a {@code { … }} holding clauses.
  *
- * <p>Clauses are kept keyed by their keyword rather than in a plain list, because two questions are
- * asked of them constantly and a list answers neither well: <em>has this block a {@code where}?</em>
- * and <em>was this clause written twice?</em></p>
+ * <p>Clauses are held in the order they were written, and read back canonically.</p>
  *
  * <h2>⚠️ The set of clauses is open, and nothing here enumerates it</h2>
  *
  * <p>A clause states its own keyword, the capability a backend needs for it, where it belongs when the
- * block is written back out, and whether saying it twice is an {@code and} or a mistake — all four on
- * the clause itself, in its {@link ClauseKind}. So a clause added to the language costs a parser and a
+ * block is written back out, and whether saying it twice is an {@code and}, two separate things, or a
+ * mistake — all four on the clause itself, in its {@link ClauseKind}. So a clause added to the language costs a parser and a
  * capability, and no edit to this class or to any backend.</p>
  *
  * <p>⚠️ That is not tidiness. This class used to keep a hard-coded rendering order of the five clauses
@@ -38,7 +34,17 @@ import java.util.Optional;
  */
 public abstract class QueryBlockNode extends AbstractExpression {
 
-    private final Map<String, ClauseNode> clauses = new LinkedHashMap<>();
+    /**
+     * The clauses, in the order they were written.
+     *
+     * <h2>⚠️ A list rather than a map keyed by keyword</h2>
+     *
+     * <p>A map made one keyword one clause, which is right for {@code fetch} and wrong for {@code join}:
+     * two joins are two tables, and there is no one clause that says both. A list is the only shape that
+     * holds all three of "once", "combined into one" and "kept apart" — see
+     * {@link ClauseKind.Repetition}.</p>
+     */
+    private final List<ClauseNode> clauses = new ArrayList<>();
 
     /**
      * Adds a clause — combining it with the one already there when the clause says it may be repeated,
@@ -57,14 +63,14 @@ public abstract class QueryBlockNode extends AbstractExpression {
      * @param token  where it was written, for the refusal
      */
     public void addClause(ClauseNode clause, Token token) {
-        ClauseNode existing = clauses.get(clause.keyword());
+        ClauseNode existing = first(clause.keyword());
 
-        if (existing == null) {
-            clauses.put(clause.keyword(), clause);
+        if (existing == null || clause.kind().repetition() == ClauseKind.Repetition.MANY) {
+            clauses.add(clause);
             return;
         }
 
-        if (!clause.kind().repeatable()) {
+        if (clause.kind().repetition() == ClauseKind.Repetition.ONCE) {
             throw QueryParseException.repeated(clause.keyword(), token);
         }
 
@@ -86,20 +92,24 @@ public abstract class QueryBlockNode extends AbstractExpression {
      * @param clause the clause to add
      */
     public void addClause(ClauseNode clause) {
-        ClauseNode existing = clauses.get(clause.keyword());
+        ClauseNode existing = first(clause.keyword());
 
-        if (existing == null) {
-            clauses.put(clause.keyword(), clause);
+        if (existing == null || clause.kind().repetition() == ClauseKind.Repetition.MANY) {
+            clauses.add(clause);
             return;
         }
 
-        if (!clause.kind().repeatable()) {
+        if (clause.kind().repetition() == ClauseKind.Repetition.ONCE) {
             throw new QueryParseException(
                     "this block already says '%s' once, and saying it twice is not an 'and'"
                             .formatted(clause.keyword()));
         }
 
         existing.merge(clause);
+    }
+
+    private ClauseNode first(String keyword) {
+        return clauses.stream().filter(clause -> clause.keyword().equals(keyword)).findFirst().orElse(null);
     }
 
     public Optional<WhereNode> getWhere() {
@@ -147,14 +157,26 @@ public abstract class QueryBlockNode extends AbstractExpression {
      * through a builder.</p>
      */
     public List<ClauseNode> getClauses() {
-        return clauses.values().stream()
-                .sorted(Comparator.comparingInt((ClauseNode clause) -> clause.kind().order())
-                                .thenComparing(ClauseNode::keyword))
+        // ⚠️ A STABLE sort, so two clauses of one kind keep the order they were written in. A join written
+        // second is a join compiled second, and a statement whose tables swap places between runs is a
+        // statement nobody can diff.
+        return clauses.stream()
+                .sorted(Comparator.comparingInt(clause -> clause.kind().order()))
                 .toList();
     }
 
+    /**
+     * Every clause of one kind — what a clause written several times is read through.
+     *
+     * <p>⚠️ A clause whose repeats are kept apart has NO singular accessor, on purpose. One would return
+     * the first of several and look like it worked.</p>
+     */
+    public <T extends ClauseNode> List<T> getClauses(Class<T> type) {
+        return clauses.stream().filter(type::isInstance).map(type::cast).toList();
+    }
+
     private <T extends ClauseNode> Optional<T> clause(String keyword, Class<T> type) {
-        return Optional.ofNullable(clauses.get(keyword)).filter(type::isInstance).map(type::cast);
+        return Optional.ofNullable(first(keyword)).filter(type::isInstance).map(type::cast);
     }
 
     /**

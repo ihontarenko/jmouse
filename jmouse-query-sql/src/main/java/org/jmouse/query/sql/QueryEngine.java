@@ -371,11 +371,7 @@ public class QueryEngine {
     private QuerySource joined(ViewNode view, String name, QuerySource about) {
         QuerySource composed = about;
 
-        for (ClauseNode clause : view.getClauses()) {
-            if (!(clause instanceof JoinClauseNode join)) {
-                continue;
-            }
-
+        for (JoinClauseNode join : view.getClauses(JoinClauseNode.class)) {
             targets.requireTogether(name, join.getStructure());
 
             composed = JoinedStructures.compose(composed, require(join.getStructure()), join);

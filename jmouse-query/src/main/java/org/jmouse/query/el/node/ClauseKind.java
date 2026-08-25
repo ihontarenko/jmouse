@@ -20,12 +20,34 @@ import org.jmouse.query.translate.Capability;
  * @param keyword    the word that opens it — {@code where}, {@code order}
  * @param capability what a backend must declare in order to honour it
  * @param order      where it sits when the block is written back out; lower comes first
- * @param repeatable whether saying it twice is legal, and therefore an {@code and} rather than a mistake
+ * @param repetition how often it may be written, and what a repeat means
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public record ClauseKind(String keyword, Capability capability, int order, boolean repeatable) {
+public record ClauseKind(String keyword, Capability capability, int order, Repetition repetition) {
+
+    /**
+     * How often a clause may be written, and what a repeat MEANS.
+     *
+     * <h2>⚠️ Three states, because two were not enough</h2>
+     *
+     * <p>A boolean said "repeatable" and meant "combined into one". That is right for {@code where}, whose
+     * repeats are an {@code and}, and wrong for {@code join}: two joins are two tables and there is no one
+     * clause that says both. With only two states a second join was refused, and the advice it gave —
+     * <em>put everything it says on the one line</em> — was impossible to follow.</p>
+     */
+    public enum Repetition {
+
+        /** Written once. A second is a mistake, and everything it says fits on the one line. */
+        ONCE,
+
+        /** Written several times and COMBINED — {@code where} twice is an {@code and}. */
+        MERGED,
+
+        /** Written several times and KEPT apart — {@code join} twice is two tables. */
+        MANY
+    }
 
     /**
      * ⚠️ Gaps of ten, so a clause can be slotted between two existing ones without renumbering either.
@@ -46,7 +68,12 @@ public record ClauseKind(String keyword, Capability capability, int order, boole
 
     /** A clause that may be written once. */
     public static ClauseKind of(String keyword, Capability capability, int order) {
-        return new ClauseKind(keyword, capability, order, false);
+        return new ClauseKind(keyword, capability, order, Repetition.ONCE);
+    }
+
+    /** Whether a second one of these is legal at all. */
+    public boolean repeatable() {
+        return repetition != Repetition.ONCE;
     }
 
     /**
@@ -57,7 +84,18 @@ public record ClauseKind(String keyword, Capability capability, int order, boole
      * would keep the second one and drop the first, silently.</p>
      */
     public ClauseKind repeating() {
-        return new ClauseKind(keyword, capability, order, true);
+        return new ClauseKind(keyword, capability, order, Repetition.MERGED);
+    }
+
+    /**
+     * The same clause, sayable more than once and kept APART.
+     *
+     * <p>⚠️ For a clause whose repeats are separate things rather than one combined thing — two joins are
+     * two tables. Nothing merges, and a reader asking the block for "the" one of these gets the first,
+     * which is why such a clause is read through a plural accessor and never a singular one.</p>
+     */
+    public ClauseKind many() {
+        return new ClauseKind(keyword, capability, order, Repetition.MANY);
     }
 
     @Override
