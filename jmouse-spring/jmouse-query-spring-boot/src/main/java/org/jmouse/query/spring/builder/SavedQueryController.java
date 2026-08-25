@@ -1,6 +1,7 @@
 package org.jmouse.query.spring.builder;
 
 import org.jmouse.query.spring.builder.QuerySubject.SavedQueryHolder;
+import org.jmouse.query.store.QueryOwner;
 import org.jmouse.query.store.SavedQueries;
 import org.jmouse.query.store.SavedQuery;
 import org.jmouse.query.store.SavedQueryCriteria;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -82,12 +84,24 @@ public class SavedQueryController {
                            @RequestParam Map<String, String> parameters) {
         Held held = held(subject, parameters);
 
-        return store.list(SavedQueryCriteria.ownedBy(held.holder().owner())
-                                  .on(held.subject().name())
-                                  .seenBy(held.holder().author()))
-                .stream()
-                .map(kept -> View.of(kept, held.holder().author()))
-                .toList();
+        List<View> shelf = new ArrayList<>();
+
+        // ⚠️ The INSTALLATION's own first — what a fresh workspace has before anybody saves anything.
+        // A preset is not a third kind of thing beside a saved view: it is a saved view whose owner is
+        // the installation, which is what the store's '*' sentinel exists for. Seeding them as rows is
+        // what lets somebody rename one, and what lets the server say which of them still parse — neither
+        // of which a list compiled into a frontend bundle can ever offer.
+        gather(shelf, QueryOwner.installation(), held);
+        gather(shelf, held.holder().owner(), held);
+
+        return shelf;
+    }
+
+    private void gather(List<View> shelf, QueryOwner owner, Held held) {
+        store.list(SavedQueryCriteria.ownedBy(owner)
+                           .on(held.subject().name())
+                           .seenBy(held.holder().author()))
+                .forEach(kept -> shelf.add(View.of(kept, held.holder().author())));
     }
 
     @PostMapping("/{subject}/views")
