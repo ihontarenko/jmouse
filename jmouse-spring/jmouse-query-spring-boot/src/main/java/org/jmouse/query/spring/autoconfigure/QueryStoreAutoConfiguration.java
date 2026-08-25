@@ -1,7 +1,11 @@
 package org.jmouse.query.spring.autoconfigure;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import org.jmouse.query.el.QueryLanguage;
+import org.jmouse.query.spring.builder.QueryCallers;
+import org.jmouse.query.spring.builder.QuerySubjects;
+import org.jmouse.query.spring.builder.SavedQueryController;
 import org.jmouse.query.spring.store.QueryStoreFlywayMigrator;
 import org.jmouse.query.store.QueryLibrary;
 import org.jmouse.query.store.SavedQueries;
@@ -11,6 +15,8 @@ import org.jmouse.query.store.jpa.migration.QueryStoreMigrations;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -55,11 +61,31 @@ public class QueryStoreAutoConfiguration {
         return new QueryStoreFlywayMigrator(dataSource);
     }
 
+    /**
+     * ⚠️ Conditional on the FACTORY, not on {@code EntityManager}. Spring exposes the manager as a
+     * shared proxy whose bean definition a condition may or may not have seen yet — and when it has not,
+     * the store is skipped SILENTLY and every saved-view call answers 404 with nothing in any log. The
+     * factory is an ordinary bean and is there whenever JPA is.
+     */
     @Bean
-    @ConditionalOnBean(EntityManager.class)
+    @ConditionalOnBean(EntityManagerFactory.class)
     @ConditionalOnMissingBean(SavedQueries.class)
     public SavedQueries savedQueries(EntityManager entityManager) {
         return new JpaSavedQueries(entityManager);
+    }
+
+    /**
+     * The parser the library checks a saved query with.
+     *
+     * <p>⚠️ Supplied here rather than required from the product. Reading a query needs no database, no
+     * dialect and no schema, so a product having to publish one would be a bean it declares in order to
+     * satisfy a library — and the first product to forget brought the whole context down naming a type
+     * nobody in that codebase had heard of.</p>
+     */
+    @Bean
+    @ConditionalOnMissingBean(QueryLanguage.class)
+    public QueryLanguage queryLanguage() {
+        return new QueryLanguage();
     }
 
     /**
@@ -72,5 +98,37 @@ public class QueryStoreAutoConfiguration {
     @ConditionalOnMissingBean(QueryLibrary.class)
     public QueryLibrary queryLibrary(SavedQueries store, QueryLanguage language, SchemaCatalog catalog) {
         return new QueryLibrary(store, language, catalog);
+    }
+
+    /**
+     * The saved-view endpoints, beside the builder's own.
+     *
+     * <h2>⚠️ A NESTED configuration, and that is not tidiness</h2>
+     *
+     * <p>{@code @ConditionalOnBean} is evaluated as bean definitions are registered, so a condition
+     * naming a bean defined in the <strong>same</strong> class is a race the condition usually loses —
+     * and it loses <em>silently</em>, by skipping the bean rather than by failing. That is exactly what
+     * happened here: the controller was not registered, and every saved-view call answered 404 with
+     * nothing in any log.</p>
+     *
+     * <p>A nested configuration is processed after the outer one, so by the time this is read the store
+     * is a bean the condition can see.</p>
+     *
+     * <p>⚠️ Mounted only where a store exists, and a <em>subject</em> still decides per listing whether it
+     * keeps views at all — see {@link org.jmouse.query.spring.builder.QuerySubject#holder}. So adding the
+     * store to a product does not silently give every one of its listings a shelf.</p>
+     */
+    @Configuration(proxyBeanMethods = false)
+    @ConditionalOnClass(RestController.class)
+    @ConditionalOnWebApplication
+    @ConditionalOnBean(SavedQueries.class)
+    public static class SavedQueryEndpoints {
+
+        @Bean
+        @ConditionalOnMissingBean(SavedQueryController.class)
+        public SavedQueryController savedQueryController(
+                QuerySubjects subjects, SavedQueries store, QueryCallers callers) {
+            return new SavedQueryController(subjects, store, callers);
+        }
     }
 }

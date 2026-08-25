@@ -3,9 +3,11 @@ package org.jmouse.query.spring.builder;
 import org.jmouse.query.compose.ConverterPolicy;
 import org.jmouse.query.schema.QueryAttribute;
 import org.jmouse.query.schema.QuerySchema;
+import org.jmouse.query.store.QueryOwner;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * One thing a product lets people write queries about — its whole contribution to the shared builder.
@@ -71,6 +73,37 @@ public interface QuerySubject {
      */
     default ConverterPolicy converters() {
         return ConverterPolicy.NONE;
+    }
+
+    /**
+     * Who a saved view belongs to here, and who is keeping it.
+     *
+     * <h2>⚠️ The product answers, because only the product knows what a view hangs off</h2>
+     *
+     * <p>The store keeps an owner as a <strong>pair</strong> — a type and an identifier — rather than an
+     * enum, precisely so that one product can hang views off a member, another off a workspace, and a
+     * third off a board, without the library being released each time somebody finds a new thing to hang
+     * them off. This is where that pair is decided.</p>
+     *
+     * <p>⚠️ <strong>Returning empty means this subject keeps no views</strong>, and the endpoints answer
+     * as much rather than filing them somewhere plausible. A default owner invented here would put one
+     * caller's saved views where another caller could see them, which is the one mistake in this area
+     * that is invisible until somebody complains about a view they never wrote.</p>
+     *
+     * @param request what arrived, including who is asking
+     * @return the owner and the author, or empty where this subject keeps none
+     */
+    default Optional<SavedQueryHolder> holder(QueryRequest request) {
+        return Optional.empty();
+    }
+
+    /**
+     * Where a saved view is filed, and by whom.
+     *
+     * @param owner  what holds it — {@code MEMBER}/{@code id}, {@code WORKSPACE}/{@code id}
+     * @param author the product's own identifier for the person keeping it
+     */
+    record SavedQueryHolder(QueryOwner owner, String author) {
     }
 
     /**
