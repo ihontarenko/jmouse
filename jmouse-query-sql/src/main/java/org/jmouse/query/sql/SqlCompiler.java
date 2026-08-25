@@ -15,6 +15,7 @@ import org.jmouse.el.node.expression.*;
 import org.jmouse.el.node.expression.literal.StringLiteralNode;
 import org.jmouse.el.node.expression.unary.NegateUnaryOperation;
 import org.jmouse.query.schema.QueryAttribute;
+import org.jmouse.query.schema.QueryType;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -466,6 +467,11 @@ public class SqlCompiler implements ExpressionVisitor<Fragment> {
             return shift(operation.getLeft(), call, operator.getType() == BasicToken.T_MINUS);
         }
 
+        // ⚠️ Everything else arithmetic against a MOMENT is refused. See refuseUnmeasuredShift.
+        if (isArithmetic(operator)) {
+            refuseUnmeasuredShift(operation, operator);
+        }
+
         Fragment left = compile(operation.getLeft());
         Fragment right = compile(operation.getRight());
 
@@ -551,6 +557,88 @@ public class SqlCompiler implements ExpressionVisitor<Fragment> {
      * shortcut. Neither database accepts a parameter where an interval unit goes — it is syntax, not a
      * value — so the unit comes from a closed list this compiler owns and can never be user text.</p>
      */
+    /**
+     * Refuses adding to or subtracting from a moment anything that is not a length of time.
+     *
+     * <h2>⚠️ The bug this closes is a WRONG ANSWER, not a failure</h2>
+     *
+     * <p>{@code now() - 7d} looks like every other query language and is not one here: the shared lexer
+     * reads a trailing letter on a number as a <strong>type suffix</strong>, so {@code 7d} is the double
+     * {@code 7.0} and the {@code d} is gone before this compiler sees anything. It used to render
+     * {@code (? - ?)} — a timestamp minus seven of nothing — which runs, returns rows, and says nothing
+     * anywhere about being meaningless.</p>
+     *
+     * <p>⚠️ And it was never only about that spelling. A declared parameter does it too:
+     * {@code recent(days as int : 7) { where request.opened > now() - days }} reads perfectly and
+     * subtracts the integer seven from an instant.</p>
+     *
+     * <h2>⚠️ Decided on the MOMENT, never on the other operand</h2>
+     *
+     * <p>{@code request.hours - 7} is ordinary arithmetic and must keep working. What has no answer is a
+     * temporal operand against anything that is not a duration — so the test is whether this compiler
+     * can see that one side is a moment, and it refuses only then. Where it cannot tell — a bag attribute,
+     * a supplied value of an unknown shape — nothing is refused, because a refusal fired on a guess is
+     * worse than the bug.</p>
+     */
+    private void refuseUnmeasuredShift(BinaryOperation operation, Operator operator) {
+        Expression moment = isMoment(operation.getLeft()) ? operation.getLeft()
+                : isMoment(operation.getRight()) ? operation.getRight() : null;
+
+        if (moment == null) {
+            return;
+        }
+
+        Expression other = moment == operation.getLeft() ? operation.getRight() : operation.getLeft();
+
+        throw new SqlCompileException(
+                ("'%s %s %s' %s a moment, and %s is not a length of time. Write the unit — "
+                 + "'days(7)', or seconds, minutes, hours, weeks, months, years")
+                        .formatted(
+                                operation.getLeft().toSource(), sqlOperator(operator),
+                                operation.getRight().toSource(),
+                                operator.getType() == BasicToken.T_MINUS ? "takes something from" : "adds to",
+                                other.toSource()));
+    }
+
+    /**
+     * Whether this expression is a moment, as far as this compiler can tell.
+     *
+     * <p>⚠️ Answers only where it <em>knows</em>. A declared name standing on a default is followed into
+     * the default, because that is the shape the refusal exists for; anything else it cannot see through
+     * answers no, and the arithmetic compiles as it always did.</p>
+     */
+    private boolean isMoment(Expression expression) {
+        if (expression instanceof FunctionNode call) {
+            return QueryFunctions.NOW.equals(call.getName());
+        }
+
+        if (expression instanceof BinaryOperation shifted) {
+            // A moment already shifted once is still a moment: `now() - days(7) - 1`.
+            return shifted.getRight() instanceof FunctionNode call
+                   && QueryFunctions.isDuration(call.getName())
+                   && isMoment(shifted.getLeft());
+        }
+
+        if (!(expression instanceof PropertyNode property)) {
+            return false;
+        }
+
+        String name = property.getPath();
+
+        if (context.hasValue(name)) {
+            return context.value(name) instanceof java.time.temporal.Temporal
+                   || context.value(name) instanceof java.util.Date;
+        }
+
+        if (context.hasDefault(name)) {
+            return isMoment(context.defaultOf(name));
+        }
+
+        return context.schema().attribute(name)
+                .filter(attribute -> attribute.type() == QueryType.TEMPORAL)
+                .isPresent();
+    }
+
     private Fragment shift(Expression moment, FunctionNode duration, boolean subtract) {
         Fragment shifted = compile(moment);
         Object amount = argument(duration.getArguments());
