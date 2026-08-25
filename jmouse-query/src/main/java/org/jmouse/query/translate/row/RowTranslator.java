@@ -2,10 +2,15 @@ package org.jmouse.query.translate.row;
 
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.el.evaluation.EvaluationContext;
+import org.jmouse.el.lexer.BasicToken;
+import org.jmouse.el.lexer.Token;
 import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.PropertyNode;
+import org.jmouse.el.node.expression.ArgumentsNode;
+import org.jmouse.el.node.expression.BinaryOperation;
 import org.jmouse.el.node.expression.FunctionNode;
+import org.jmouse.el.node.expression.LiteralNode;
 import org.jmouse.query.translate.Capabilities;
 import org.jmouse.query.translate.Capability;
 import org.jmouse.query.translate.Bindings;
@@ -25,6 +30,11 @@ import org.jmouse.query.el.node.SourceNode;
 import org.jmouse.query.schema.QueryAttribute;
 import org.jmouse.query.schema.QuerySchema;
 import org.jmouse.query.schema.QueryType;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,11 +62,12 @@ import java.util.Optional;
  * aggregating in memory is real work that has not been done. Declaring them and returning ungrouped rows
  * would be the exact failure {@link Capabilities} exists to prevent.</p>
  *
- * <p>⚠️ <strong>And no clock.</strong> {@code now()} and {@code days(7)} are compiled by the SQL side into
- * a bound instant and an interval; nothing here answers to either, so a query using them used to reach a
- * caller as an expression-language error about a missing function — a divergence between the two backends
- * dressed up as a typo. It is refused by name instead, until the row side really does bind one instant
- * per query the way the statement does.</p>
+ * <h2>⚠️ The clock is FOLDED, not evaluated</h2>
+ *
+ * <p>{@code now() - days(30)} is worked out once while the query is being rewritten and put where a
+ * supplied value goes — the same shape the SQL side gives it, where the moment is one bound parameter
+ * rather than a call the database makes. One instant per translation, so two clauses asking the clock
+ * cannot see two answers, and the two backends cannot come to disagree about when "now" was.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -68,7 +79,22 @@ public class RowTranslator implements Translator<RowTranslator.Query> {
             Capability.SORT,
             Capability.PROJECT,
             Capability.CONVERT,
+            Capability.CLOCK,
             Capability.LIMIT);
+
+    /**
+     * ⚠️ Which calendar unit each duration function means — the row side's twin of the SQL compiler's
+     * interval table, and a closed map for the same reason: a unit is never something a query's text can
+     * hand over.
+     */
+    private static final Map<String, ChronoUnit> UNITS = Map.of(
+            "seconds", ChronoUnit.SECONDS,
+            "minutes", ChronoUnit.MINUTES,
+            "hours", ChronoUnit.HOURS,
+            "days", ChronoUnit.DAYS,
+            "weeks", ChronoUnit.WEEKS,
+            "months", ChronoUnit.MONTHS,
+            "years", ChronoUnit.YEARS);
 
     private final QuerySchema         schema;
     private final ExpressionLanguage  language;
@@ -273,13 +299,14 @@ public class RowTranslator implements Translator<RowTranslator.Query> {
                 .findFirst()
                 .orElse(0);
 
-        return new Query(language, names, supplied, where, order, columns, limit);
+        return new Query(language, names, names.bound(supplied), where, order, columns, limit);
     }
 
     private Query condition(Expression condition, Map<String, Object> supplied) {
-        Names names = new Names(supplied);
+        Names      names   = new Names(supplied);
+        Expression written = names.rewrite(condition);
 
-        return new Query(language, names, supplied, names.rewrite(condition), List.of(), List.of(), 0);
+        return new Query(language, names, names.bound(supplied), written, List.of(), List.of(), 0);
     }
 
     /**
@@ -322,6 +349,18 @@ public class RowTranslator implements Translator<RowTranslator.Query> {
          */
         private final Set<String> standingIn = new LinkedHashSet<>();
 
+        /**
+         * ⚠️ ONE instant for this whole translation, taken when the rewriter is made.
+         *
+         * <p>Two clauses each asking the clock must agree, or a query translated across a second boundary
+         * keeps rows satisfying neither of them. It is the same rule the SQL side follows by binding one
+         * per statement, and it is the only reason one document can mean one thing on both.</p>
+         */
+        private final Instant now = Instant.now();
+
+        /** Every moment worked out of the text, by the name that now stands for it. */
+        private final Map<String, Object> folded = new LinkedHashMap<>();
+
         /** Where each attribute is read from in a raw row. Empty means the row is already keyed by name. */
         public Map<String, String> columns() {
             return columns;
@@ -362,20 +401,143 @@ public class RowTranslator implements Translator<RowTranslator.Query> {
         }
 
         /**
-         * ⚠️ A call to something only the clock answers is refused HERE, by name.
+         * {@code now() - days(30)} — worked out here, once, and bound.
          *
-         * <p>{@code now()} and the durations are compiled rather than evaluated — the SQL side turns them
-         * into a bound instant and an interval. Nothing in this backend answers to either, so leaving them
-         * to the evaluator produced <em>No function or lambda with name 'now'</em>, which reads like a
-         * misspelling and is really one backend quietly doing less than the other.</p>
+         * <h2>⚠️ Folded while rewriting, never evaluated per row</h2>
+         *
+         * <p>The SQL side binds one instant per statement so that every clause of one query means the same
+         * moment. This is that rule, in the same place it belongs on this side: the whole moment
+         * expression collapses to a single value at translation time, and a query asking the clock twice
+         * cannot see two answers.</p>
+         *
+         * <p>⚠️ It becomes a <strong>bound value</strong>, exactly as it becomes a bound parameter in SQL —
+         * the same mechanism, not a parallel one. That is also what keeps the moment out of the expression
+         * tree the evaluator walks per row.</p>
          */
         @Override
+        public Expression visitBinary(BinaryOperation operation) {
+            Token.Type type = operation.getOperator().getType();
+
+            if ((type == BasicToken.T_PLUS || type == BasicToken.T_MINUS)
+                && operation.getRight() instanceof FunctionNode call
+                && QueryFunctions.isDuration(call.getName())) {
+
+                Instant moment = momentOf(operation.getLeft());
+
+                if (moment != null) {
+                    return bind(shift(moment, call, type == BasicToken.T_MINUS));
+                }
+            }
+
+            return super.visitBinary(operation);
+        }
+
+        /** A bare {@code now()}, with no duration applied to it. */
+        @Override
         public Expression visitCall(FunctionNode call) {
-            if (QueryFunctions.NOW.equals(call.getName()) || QueryFunctions.isDuration(call.getName())) {
-                CAPABILITIES.require(Capability.CLOCK, call.getName() + "()");
+            if (QueryFunctions.NOW.equals(call.getName())) {
+                return bind(now);
+            }
+
+            // ⚠️ A duration reaching here is one that was NOT applied to a moment — `days(7)` alone, or
+            // `request.hours - days(7)`. It is meaningless either way, and is refused rather than read as
+            // the number seven, which is the same refusal the SQL compiler gives.
+            if (QueryFunctions.isDuration(call.getName())) {
+                throw new UnsupportedQueryException(
+                        ("'%s(…)' is a length of time and means nothing on its own — add it to or "
+                         + "subtract it from a moment, as in \"now() - days(7)\"")
+                                .formatted(call.getName()));
             }
 
             return super.visitCall(call);
+        }
+
+        /**
+         * The moment an expression is, or {@code null} where it is not one.
+         *
+         * <p>⚠️ Only {@code now()} and a moment already shifted — a row's own value is not a candidate,
+         * because a duration applied to a column would have to be worked out per row and this whole
+         * mechanism exists to work the moment out once.</p>
+         */
+        private Instant momentOf(Expression expression) {
+            if (expression instanceof FunctionNode call && QueryFunctions.NOW.equals(call.getName())) {
+                return now;
+            }
+
+            if (expression instanceof BinaryOperation shifted
+                && shifted.getRight() instanceof FunctionNode call
+                && QueryFunctions.isDuration(call.getName())) {
+
+                Instant inner = momentOf(shifted.getLeft());
+
+                return inner == null
+                        ? null
+                        : shift(inner, call, shifted.getOperator().getType() == BasicToken.T_MINUS);
+            }
+
+            return null;
+        }
+
+        /**
+         * ⚠️ Through a calendar, not by adding seconds. A month is not thirty days and a year is not three
+         * hundred and sixty-five of them; {@code Instant} itself refuses those units for exactly that
+         * reason. The zone is the machine's, which is the only one a list of maps carries any information
+         * about — a database answers the same question in its own, and a query that cares about the
+         * difference should take the moment as a supplied value rather than ask either clock.
+         */
+        private Instant shift(Instant moment, FunctionNode duration, boolean subtract) {
+            long        amount = amountOf(duration);
+            ChronoUnit  unit   = UNITS.get(duration.getName());
+            ZonedDateTime local = moment.atZone(ZoneId.systemDefault());
+
+            return (subtract ? local.minus(amount, unit) : local.plus(amount, unit)).toInstant();
+        }
+
+        private long amountOf(FunctionNode duration) {
+            Expression written = duration.getArguments();
+
+            if (written instanceof ArgumentsNode arguments && !arguments.getChildren().isEmpty()
+                && arguments.getChildren().getFirst() instanceof Expression first) {
+                written = first;
+            }
+
+            if (written instanceof LiteralNode<?> literal && literal.getValue() instanceof Number amount) {
+                return amount.longValue();
+            }
+
+            // ⚠️ A supplied name counts, exactly as it does on the SQL side. `days(within)` inside a
+            // function whose caller passes the count is the ordinary shape, and a backend that took it
+            // while the other refused it would be the divergence this class exists to disprove.
+            if (written instanceof PropertyNode property && supplied.get(property.getPath()) instanceof Number amount) {
+                return amount.longValue();
+            }
+
+            throw new UnsupportedQueryException(
+                    ("'%s(…)' needs a whole number of them — '%s' is not one")
+                            .formatted(duration.getName(),
+                                    written == null ? "nothing" : written.toSource()));
+        }
+
+        /** Puts a worked-out moment where a supplied value goes, and writes the name that reads it. */
+        private Expression bind(Instant moment) {
+            String name = "%s$%d".formatted(QueryFunctions.NOW, folded.size() + 1);
+
+            folded.put(name, moment);
+
+            return new PropertyNode(name);
+        }
+
+        /** What the caller supplied, plus every moment folded out of the text. */
+        Map<String, Object> bound(Map<String, Object> supplied) {
+            if (folded.isEmpty()) {
+                return supplied;
+            }
+
+            Map<String, Object> everything = new LinkedHashMap<>(supplied);
+
+            everything.putAll(folded);
+
+            return everything;
         }
 
         /** The default's tree, rewritten in place of the name that stands on it. */
