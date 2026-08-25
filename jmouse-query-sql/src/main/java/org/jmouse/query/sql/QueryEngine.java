@@ -273,7 +273,12 @@ public class QueryEngine {
         String      name  = SourceBinding.resolve(view, bindings, sources.keySet());
         QuerySource about = require(name);
 
-        return new SqlTranslator(joined(view, name, about), dialect, this::subquery, views.keySet());
+        SqlTranslator translator =
+                new SqlTranslator(joined(view, name, about), dialect, this::subquery, views.keySet());
+
+        translator.language(language.expressionLanguage());
+
+        return translator;
     }
 
     /**
@@ -318,12 +323,34 @@ public class QueryEngine {
         }
 
         try {
-            return Optional.of(
-                    new SqlTranslator(require(SourceBinding.resolve(inner, Bindings.none(), sources.keySet())),
-                            dialect, deeper -> subquery(deeper, being), views.keySet())
-                            .parts(inner, Map.of()).select());
+            SqlTranslator translator = new SqlTranslator(
+                    require(innerSource(name, inner)), dialect,
+                    deeper -> subquery(deeper, being), views.keySet());
+
+            translator.language(language.expressionLanguage());
+
+            return Optional.of(translator.parts(inner, Map.of()).select());
         } finally {
             being.remove(name);
+        }
+    }
+
+    /**
+     * Which source the inner view is about — and ⚠️ a refusal that says it is an INNER one.
+     *
+     * <p>A view standing in for a set is compiled where nobody passed it anything, so a late-bound one has
+     * nothing to resolve against. Left alone the message reads {@code this view runs against '$x' and
+     * nothing was bound to it} — true, and it names neither the view nor the fact that somebody else's
+     * query is what pulled it in. Somebody would have to trace it back by hand.</p>
+     */
+    private String innerSource(String name, ViewNode inner) {
+        try {
+            return SourceBinding.resolve(inner, Bindings.none(), sources.keySet());
+        } catch (RuntimeException unresolved) {
+            throw new SqlCompileException(
+                    ("'%s' stands in for a set here, and it is late-bound, so there is nothing to resolve it "
+                     + "against: %s. Pin it with 'from: <source>', or do not use it as a set")
+                            .formatted(name, unresolved.getMessage()));
         }
     }
 

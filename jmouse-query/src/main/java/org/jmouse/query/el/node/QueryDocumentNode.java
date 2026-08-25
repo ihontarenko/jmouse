@@ -30,6 +30,17 @@ public class QueryDocumentNode extends AbstractExpression {
     private final List<Object>        written    = new ArrayList<>();
 
     /**
+     * The merged sources, computed once.
+     *
+     * <h2>⚠️ Cleared on every declaration rather than computed lazily and left</h2>
+     *
+     * <p>A document is built by a parser calling {@code add…} several times, so a value cached during that
+     * would be a document missing whatever was declared after it — and missing it silently, because a
+     * source that is simply absent reads as a document that never declared one.</p>
+     */
+    private List<SourceNode> resolved;
+
+    /**
      * A declaration of where a product's data is.
      *
      * <p>⚠️ Kept in the same document type as views deliberately: a product may ship its sources in one
@@ -39,16 +50,19 @@ public class QueryDocumentNode extends AbstractExpression {
     public void addSource(SourceNode source) {
         sources.add(source);
         written.add(source);
+        resolved = null;
     }
 
     public void addStructure(StructureNode structure) {
         structures.add(structure);
         written.add(structure);
+        resolved = null;
     }
 
     public void addMapping(MappingNode mapping) {
         mappings.add(mapping);
         written.add(mapping);
+        resolved = null;
     }
 
     public List<StructureNode> getStructures() {
@@ -74,13 +88,17 @@ public class QueryDocumentNode extends AbstractExpression {
      * that compiles and reads nothing.</p>
      */
     public List<SourceNode> getSources() {
-        List<SourceNode> declared = new ArrayList<>(sources);
+        if (resolved == null) {
+            List<SourceNode> declared = new ArrayList<>(sources);
 
-        for (MappingNode mapping : mappings) {
-            declared.add(SourceNode.merge(structureFor(mapping), mapping));
+            for (MappingNode mapping : mappings) {
+                declared.add(SourceNode.merge(structureFor(mapping), mapping));
+            }
+
+            resolved = List.copyOf(declared);
         }
 
-        return List.copyOf(declared);
+        return resolved;
     }
 
     private StructureNode structureFor(MappingNode mapping) {

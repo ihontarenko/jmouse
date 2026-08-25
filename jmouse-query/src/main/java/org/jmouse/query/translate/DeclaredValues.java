@@ -39,13 +39,25 @@ import java.util.Map;
 public final class DeclaredValues {
 
     /**
-     * ⚠️ One language, built once. A default may only use what the language itself provides, so nothing
-     * about this context varies per call — and building a parser per translation to evaluate
-     * {@code now()} would be a cost paid on every query.
+     * ⚠️ The LANGUAGE'S own vocabulary, built once — the fallback for a caller that has no language to
+     * offer. A default may only use what the language provides, so nothing about this context varies per
+     * call, and building a parser per translation to evaluate {@code now()} would be a cost paid on every
+     * query.
      */
-    private static final ExpressionLanguage DEFAULTS = new QueryLanguage().expressionLanguage();
+    private static final ExpressionLanguage BUILT_IN = new QueryLanguage().expressionLanguage();
 
     private DeclaredValues() {
+    }
+
+    /**
+     * The bindings a block should be translated with, using the language's own vocabulary for defaults.
+     *
+     * <p>⚠️ Only for a caller with no language of its own. A product contributing functions —
+     * {@code currentUser()}, a domain helper — must pass its own, or a default written with one fails on
+     * one path and works on another.</p>
+     */
+    public static Bindings resolve(QueryBlockNode block, Bindings bindings) {
+        return resolve(block, bindings, BUILT_IN);
     }
 
     /**
@@ -56,7 +68,7 @@ public final class DeclaredValues {
      * @return the same bindings, with defaults filled in
      * @throws UnsupportedQueryException when something declared has neither a value nor a default
      */
-    public static Bindings resolve(QueryBlockNode block, Bindings bindings) {
+    public static Bindings resolve(QueryBlockNode block, Bindings bindings, ExpressionLanguage language) {
         if (!(block instanceof ViewNode view)) {
             return bindings;
         }
@@ -82,7 +94,7 @@ public final class DeclaredValues {
                 continue;
             }
 
-            resolved.put(declaration.getName(), declaration.getDefaultValue().evaluate(DEFAULTS.newContext()));
+            resolved.put(declaration.getName(), evaluate(view, declaration, language));
         }
 
         if (!missing.isEmpty()) {
@@ -94,6 +106,35 @@ public final class DeclaredValues {
         }
 
         return Bindings.of(resolved);
+    }
+
+    /**
+     * A default, worked out without a row and without a database.
+     *
+     * <h2>⚠️ Not everything the language can COMPILE can be EVALUATED here</h2>
+     *
+     * <p>{@code now()} is not a function of the expression language — the compiler binds the clock once
+     * per statement, so a moment means the same thing in every clause of one query. Evaluating it here
+     * would need a second clock, and two clocks in one query is the bug that mechanism exists to
+     * prevent.</p>
+     *
+     * <p>So a default that cannot be worked out standing alone is <strong>refused, naming what it
+     * tried</strong>, rather than reaching a caller as an expression-language error about a missing
+     * function. A literal default works; one that needs the clock does not yet.</p>
+     */
+    private static Object evaluate(
+            ViewNode view, ParameterDeclarationNode declaration, ExpressionLanguage language) {
+
+        try {
+            return declaration.getDefaultValue().evaluate(language.newContext());
+        } catch (RuntimeException undecidable) {
+            throw new UnsupportedQueryException(
+                    ("view %s gives '%s' the default %s, and that cannot be worked out on its own: %s. "
+                     + "A default is decided with no row and no database, so it has to stand alone — "
+                     + "supply the value by name instead")
+                            .formatted(name(view), declaration.getName(),
+                                    declaration.getDefaultValue().toSource(), undecidable.getMessage()));
+        }
     }
 
     /**

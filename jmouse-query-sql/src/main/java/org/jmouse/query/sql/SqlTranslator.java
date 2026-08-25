@@ -1,5 +1,6 @@
 package org.jmouse.query.sql;
 
+import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.jdbc.dialect.Dialect;
 import org.jmouse.query.translate.Capabilities;
 import org.jmouse.query.translate.Bindings;
@@ -76,6 +77,20 @@ public class SqlTranslator implements Translator<Fragment> {
 
     /** The names this translator can resolve into an inner statement. */
     private final Set<String> views;
+
+    /**
+     * The vocabulary a declared default is evaluated with.
+     *
+     * <p>⚠️ The product's own where it has one. A default written with a contributed function —
+     * {@code since : lastVisit()} — would otherwise work on the row side, which holds the product's
+     * language, and fail here, which held the library's.</p>
+     */
+    private ExpressionLanguage language = null;
+
+    /** Tells this translator which vocabulary a declared default may use. */
+    public void language(ExpressionLanguage language) {
+        this.language = language;
+    }
 
     public SqlTranslator(QuerySource source, Dialect dialect) {
         this(source, dialect, name -> Optional.empty());
@@ -194,7 +209,9 @@ public class SqlTranslator implements Translator<Fragment> {
         // ⚠️ Defaults filled in and omissions refused BEFORE the check, so a declared name reaches the
         // compiler with a value or does not reach it at all. Binding a null for something a view said it
         // needs is the failure this step exists to make impossible.
-        Map<String, Object> supplied = DeclaredValues.resolve(block, Bindings.of(values)).asMap();
+        Map<String, Object> supplied = (language == null
+                ? DeclaredValues.resolve(block, Bindings.of(values))
+                : DeclaredValues.resolve(block, Bindings.of(values), language)).asMap();
 
         new QueryChecker(source.schema(),
                 QueryEngine.allowedNames(block, supplied.keySet(), viewNames())).check(block);

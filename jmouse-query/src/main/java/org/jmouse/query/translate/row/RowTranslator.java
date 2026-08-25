@@ -240,7 +240,7 @@ public class RowTranslator implements Translator<RowTranslator.Query> {
         // ⚠️ Same rule as the SQL side, in the same words: a declared name arrives with a value or the
         // translation is refused. Two backends disagreeing about whether a missing value is an error is
         // two languages.
-        Map<String, Object> supplied = DeclaredValues.resolve(block, Bindings.of(given)).asMap();
+        Map<String, Object> supplied = DeclaredValues.resolve(block, Bindings.of(given), language).asMap();
 
         Names                        names   = new Names(supplied);
         List<OrderNode.Key>          order   = new ArrayList<>();
