@@ -150,8 +150,15 @@ public class QuerySmoke {
         refuse(() -> invt.compileFilter("inventory", "entry[name] | upper == 'A'"));
         refuse(() -> tssr.compileFilter("issues", "issue.pointz > 5"));
         refuse(() -> tssr.compileFilter("backlog", "issue.points > 5"));
-        refuse(() -> tssr.compileDocument("view \"v\" on issues { where issue.points > 1 limit 10 }"));
-        refuse(() -> tssr.compileDocument("view \"v\" on issues { where issue.points > 1 where issue.points < 9 }"));
+        // ⚠️ Both of these were written when the language refused them, and both are now legal — `limit`
+        // became a clause, and a second `where` became an `and`. A refusal check for something the
+        // language deliberately started allowing is a check that reports the feature as a fault.
+        note(tssr.compileDocument("view \"v\" on issues { where issue.points > 1 limit 10 }")
+                     .sql().contains("LIMIT"),
+             "'limit' is a clause now, not a refusal  ok");
+        note(tssr.compileDocument("view \"v\" on issues { where issue.points > 1 where issue.points < 9 }")
+                     .sql().contains("AND"),
+             "a second 'where' is an 'and', not a refusal  ok");
         refuse(() -> tssr.compileDocument("view \"v\" on issues { order issue.key asc where low_stok(3) }"));
 
         summary();
