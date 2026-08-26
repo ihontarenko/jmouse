@@ -75,6 +75,72 @@ public interface ObjectAccessor extends TypeClassifier {
     ObjectAccessor get(String name);
 
     /**
+     * Reads a property's value without wrapping it. 📤
+     *
+     * <p>{@link #get(String)} answers with an accessor, which is the right shape for navigating and the
+     * wrong one for a caller that only wants the value: it allocates an accessor per property of every
+     * object, and the caller unwraps it on the next line. The mapping engine does exactly that for
+     * every property it copies, so on a six-property bean this is six allocations built to be
+     * discarded.</p>
+     *
+     * <p>The default keeps that behaviour so nothing has to override this. Implementations on the hot
+     * path do, and the two contracts stay identical otherwise - a property this accessor does not have
+     * is refused the same way {@link #get(String)} refuses it.</p>
+     *
+     * @param name the property name
+     * @return the property's value, or {@code null} when it holds none
+     */
+    default Object read(String name) {
+        ObjectAccessor accessor = get(name);
+        return accessor == null ? null : accessor.unwrap();
+    }
+
+    /**
+     * Whether {@link #get(String)} would find something under this name.
+     *
+     * <p>⚠️ The default is {@code true}, meaning "I cannot tell you cheaply - call {@code get} and find
+     * out". An implementation that already holds a description of what it exposes should override this
+     * and answer from it. Nothing may treat a {@code true} from the default as proof the name exists.</p>
+     *
+     * <p>This exists because reading a target property off a source that does not have it is the
+     * <em>ordinary</em> case in mapping - a target routinely carries fields its source does not - and
+     * answering it by throwing costs an exception, a stack trace and a formatted message per property
+     * per object.</p>
+     *
+     * @param name property name to test
+     * @return {@code false} only when this accessor knows the name is absent
+     */
+    default boolean hasProperty(String name) {
+        return true;
+    }
+
+    /**
+     * Reads a property, answering {@code null} where this accessor does not have one under that name.
+     *
+     * <h2>⚠️ One question, because the two it replaces are asked of the same table</h2>
+     *
+     * <p>A caller that wants a value and treats an absent property as {@code null} otherwise writes
+     * {@code hasProperty(name) ? read(name) : null}. That is two probes of one map for every property of
+     * every mapped object — and under a sampling profile the pair cost <strong>more than the generated
+     * getter and setter that do the actual work, put together</strong>. An implementation that holds a
+     * description of what it exposes can answer both questions with one lookup.</p>
+     *
+     * <p>⚠️ It deliberately does <strong>not</strong> distinguish an absent property from one holding
+     * {@code null}, and that is a narrowing of the contract rather than an oversight: nothing above it
+     * can act on the difference — a mapping treats both as "no value here" — and promising the
+     * distinction would oblige every implementation to be able to make it, including the ones whose
+     * honest answer to {@link #hasProperty(String)} is "I cannot tell you cheaply".</p>
+     *
+     * <p>The default asks both questions, so nothing has to override this.</p>
+     *
+     * @param name the property name
+     * @return the value, or {@code null} when it holds none and when there is no such property
+     */
+    default Object readIfPresent(String name) {
+        return hasProperty(name) ? read(name) : null;
+    }
+
+    /**
      * Retrieve a nested {@link ObjectAccessor} by key object.
      *
      * <p>Intended for map-like structures where keys are not necessarily strings.</p>

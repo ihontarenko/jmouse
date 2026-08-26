@@ -13,9 +13,6 @@ public class ValueObjectPropertyDescriptor<T>
         extends AbstractDescriptor<T, PropertyData<T>, ValueObjectPropertyIntrospector<T>>
         implements PropertyDescriptor<T> {
 
-    public static final UnsupportedOperationException UNSUPPORTED_OPERATION_EXCEPTION = new UnsupportedOperationException(
-            "Descriptor is immutable unable to modify it.");
-
     protected ValueObjectPropertyDescriptor(ValueObjectPropertyIntrospector<T> introspector, PropertyData<T> container) {
         super(introspector, container);
     }
@@ -99,7 +96,7 @@ public class ValueObjectPropertyDescriptor<T>
      */
     @Override
     public Setter<T, Object> getSetter() {
-        throw UNSUPPORTED_OPERATION_EXCEPTION;
+        throw noSetter();
     }
 
     /**
@@ -109,7 +106,51 @@ public class ValueObjectPropertyDescriptor<T>
      */
     @Override
     public void setSetter(Setter<T, ?> setter) {
-        throw UNSUPPORTED_OPERATION_EXCEPTION;
+        throw noSetter();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <h2>⚠️ Answered, not thrown — a predicate with a third outcome is not a predicate</h2>
+     *
+     * <p>The inherited default is {@code getSetter() != null}, and {@link #getSetter()} here refuses.
+     * So asking a record's component the ordinary question <em>"can this be written?"</em> used to blow
+     * up, which meant every caller had to know what kind of descriptor it was holding before it dared
+     * ask — defeating the point of asking through the interface at all. It reached a screen: the mapping
+     * builder listed a product's response types and could not open a single one of them, because they
+     * were records.</p>
+     *
+     * <p>⚠️ {@code false} is the honest answer to <em>this</em> question, and it is not the whole truth
+     * about a record. A component <strong>can</strong> be filled — through the constructor — which is
+     * what makes a record a legal mapping target. That is a different question, and it is asked of
+     * {@link org.jmouse.core.access.descriptor.structured.record.ValueObjectDescriptor#getComponents()}.
+     * Anything deciding whether it may write into a type has to ask both.</p>
+     */
+    @Override
+    public boolean isWritable() {
+        return false;
+    }
+
+    /**
+     * Says there is no setter, at the place where somebody asked for one.
+     *
+     * <h2>⚠️ Constructed here rather than shared, because a stack trace is captured where the exception
+     * is BUILT</h2>
+     *
+     * <p>This used to be one {@code static final} instance created in the class initializer. Every throw
+     * for the rest of the JVM's life then carried the frames of whoever happened to load the class first
+     * — a trace that pointed confidently at an introspector doing nothing wrong, several frames away from
+     * the call that actually failed. It cost real time to read past. An exception on a should-never-happen
+     * path is not worth pre-allocating, and a trace naming the wrong place is worse than none.</p>
+     *
+     * @return the refusal, naming what was asked for
+     */
+    private UnsupportedOperationException noSetter() {
+        return new UnsupportedOperationException(
+                ("'%s' is a component of a record and has no setter — a record is built through its "
+                 + "constructor. Ask isWritable() first, or take the components from "
+                 + "ValueObjectDescriptor.getComponents().").formatted(getName()));
     }
 
     /**

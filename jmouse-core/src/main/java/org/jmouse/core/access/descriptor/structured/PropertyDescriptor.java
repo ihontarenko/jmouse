@@ -103,7 +103,7 @@ public interface PropertyDescriptor<T> {
      * @return {@code true} if the property has a setter, {@code false} otherwise
      */
     default boolean isWritable() {
-        return getSetter() != null /*&& (getSetterMethod().unwrap().getModifiers() & Modifier.ABSTRACT) == 0*/;
+        return getSetter() != null;
     }
 
     /**

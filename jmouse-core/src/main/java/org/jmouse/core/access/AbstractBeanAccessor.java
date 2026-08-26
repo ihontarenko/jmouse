@@ -33,14 +33,20 @@ abstract public class AbstractBeanAccessor extends AbstractAccessor {
     /**
      * Sets a property value by name.
      *
+     * <p>⚠️ One lookup, and the absent case is the {@code null} it hands back. Fetching the descriptor
+     * and then asking a second time whether it exists is a question already answered — and it used to be
+     * asked in that order, so the map was read twice to decide whether the first read had found
+     * anything.</p>
+     *
      * @param name  the property name
      * @param value the value to set
+     * @throws BeanPropertyNotFound when this type has no such property
      */
     @Override
     public void set(String name, Object value) {
         PropertyDescriptor<Object> property = descriptor.getProperty(name);
 
-        if (!descriptor.hasProperty(name)) {
+        if (property == null) {
             throw new BeanPropertyNotFound(
                     "Accessor '%s' does not have property: '%s'.".formatted(descriptor, name));
         }
@@ -68,20 +74,76 @@ abstract public class AbstractBeanAccessor extends AbstractAccessor {
     /**
      * Retrieves a property from the structured instance as a {@link ObjectAccessor}.
      *
+     * <p>⚠️ The absence check belongs to {@link #read(String)} and is not repeated here. This method
+     * used to ask whether the property existed and then call {@code read}, which asked again and then
+     * looked the descriptor up — three probes of one map to answer one question, carrying two copies of
+     * the same message.</p>
+     *
      * @param name the name of the property to retrieve
      * @return a {@link ObjectAccessor} wrapping the property value
      * @throws IllegalArgumentException if the property does not exist
      */
     @Override
     public ObjectAccessor get(String name) {
+        return wrap(read(name));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Reads straight through the property's accessor, so nothing is allocated to carry a value the
+     * caller is about to take out again.</p>
+     *
+     * <h2>⚠️ One lookup, because this is the mapping engine's hot path</h2>
+     *
+     * <p>Asking {@code hasProperty} and then {@code getProperty} reads the same map twice for every
+     * property of every mapped object. Under a sampling profile that pair was the <strong>largest single
+     * cost</strong> of a flat bean-to-bean mapping — more than the generated getter and setter that do
+     * the actual work, put together. A {@code get} answers both questions at once: the descriptor, or
+     * {@code null}.</p>
+     *
+     * <p>The two forms differ only for a name mapped to a {@code null} descriptor, which cannot occur:
+     * {@code addProperty} is the only writer of that map and it dereferences the descriptor to key it.
+     * Where it somehow did occur, the old form reached {@code getAccessor()} on {@code null} and threw a
+     * {@link NullPointerException} naming nothing; this one says which property, on which accessor.</p>
+     */
+    @Override
+    public Object read(String name) {
         PropertyDescriptor<Object> property = descriptor.getProperty(name);
 
-        if (!descriptor.hasProperty(name)) {
+        if (property == null) {
             throw new IllegalArgumentException(
                     "Accessor '%s' does not have property: '%s'.".formatted(descriptor, name));
         }
 
-        return wrap(property.getAccessor().readValue(source));
+        return property.getAccessor().readValue(source);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Answered from the descriptor this accessor already holds, so a caller never has to learn the
+     * answer from a thrown exception.</p>
+     */
+    @Override
+    public boolean hasProperty(String name) {
+        return descriptor.hasProperty(name);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>⚠️ The whole point of the override: the descriptor is fetched once and its absence <em>is</em>
+     * the answer to "does this property exist". The inherited default asks
+     * {@link #hasProperty(String)} and then {@link #read(String)}, which reads the same map a second
+     * time — and this is the call the mapping engine makes for every property of every object it
+     * copies.</p>
+     */
+    @Override
+    public Object readIfPresent(String name) {
+        PropertyDescriptor<Object> property = descriptor.getProperty(name);
+
+        return property == null ? null : property.getAccessor().readValue(source);
     }
 
     /**

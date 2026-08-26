@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -28,6 +30,27 @@ public class StandardConversion implements Conversion {
     private final TypeNormalizer                         normalizer = new TypeNormalizer.EnumTypeNormalizer();
     private final Graph<Class<?>>                        graph      = new DirectedMapGraph<>();
     private final PathFinder<Class<?>>                   pathFinder = new BFSPathFinder<>();
+
+    /**
+     * Memoized answers to {@link #hasAnyConverter(Class, Class)}.
+     *
+     * <p>⚠️ That question is asked once per property of every mapped object, and answering it in the
+     * negative costs a breadth-first search over the whole type graph. Registering a converter
+     * invalidates this, because a pair that had no path may now have one.</p>
+     */
+    private final Map<ClassPair, Boolean> reachable = new ConcurrentHashMap<>();
+
+    /**
+     * Converters reachable by name.
+     *
+     * <p>⚠️ <strong>Deliberately a second registry rather than an index over the first.</strong> A name
+     * and a type pair answer different questions: the pair asks <em>how do I get from here to there</em>
+     * and must have one answer, while a name asks for <em>this particular</em> transformation and exists
+     * precisely because one pair may have several. Indexing the pair registry by name would make every
+     * named converter also answer the generic question, which is the failure names were added to
+     * prevent.</p>
+     */
+    private final Map<String, GenericConverter<?, ?>> named = new ConcurrentHashMap<>();
 
     /**
      * Registers a simple {@link Converter} for converting from {@code sourceType} to {@code targetType}.
@@ -57,6 +80,64 @@ public class StandardConversion implements Conversion {
             graph.addEdge(supportedType.classA(), supportedType.classB());
             converters.putIfAbsent(supportedType, genericConverter);
         }
+
+        reachable.clear();
+    }
+
+    /**
+     * Registers a converter under a name only — see
+     * {@link ConverterFactory#registerConverter(String, Class, Class, Converter)}.
+     *
+     * @param <S>        the source type
+     * @param <T>        the target type
+     * @param name       what to call it
+     * @param sourceType the source class
+     * @param targetType the target class
+     * @param converter  the converter instance
+     */
+    @Override
+    public <S, T> void registerConverter(
+            String name, Class<S> sourceType, Class<T> targetType, Converter<S, T> converter) {
+        registerConverter(name, GenericConverter.of(sourceType, targetType, converter));
+    }
+
+    /**
+     * Registers a {@link GenericConverter} under a name only.
+     *
+     * <p>⚠️ It is not added to the pair registry and not added to the type graph, so it changes no
+     * answer any existing caller gets. That is the point: a named converter is reached deliberately or
+     * not at all.</p>
+     *
+     * @param name             what to call it
+     * @param genericConverter the converter
+     */
+    @Override
+    public void registerConverter(String name, GenericConverter<?, ?> genericConverter) {
+        String claimed = ConverterName.of(name).name();
+
+        GenericConverter<?, ?> existing = named.putIfAbsent(claimed, genericConverter);
+
+        if (existing != null && existing != genericConverter) {
+            throw new IllegalArgumentException(
+                    ("the name '%s' is already registered to %s; two converters under one name is the "
+                     + "ambiguity naming them was meant to remove")
+                            .formatted(claimed, existing.getClass().getName()));
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <S, T> GenericConverter<S, T> getConverter(String name) {
+        return (GenericConverter<S, T>) named.get(name);
+    }
+
+    /**
+     * ⚠️ Sorted, because this list ends up inside a refusal message. A set iterated in hash order
+     * reads differently on two runs, which makes a message somebody is comparing look like it changed.
+     */
+    @Override
+    public Set<String> converterNames() {
+        return new TreeSet<>(named.keySet());
     }
 
     /**
@@ -76,13 +157,41 @@ public class StandardConversion implements Conversion {
      */
     @Override
     public boolean hasAnyConverter(Class<?> sourceType, Class<?> targetType) {
-        if (!hasConverter(sourceType, targetType)) {
-            if (searchPossibleCandidate(sourceType, targetType) == null) {
-                List<ClassPair> chain = searchTransitionChain(sourceType, targetType);
-                return chain != null && !chain.isEmpty();
-            }
+        ClassPair pair  = new ClassPair(sourceType, targetType);
+        Boolean   known = reachable.get(pair);
+
+        // ⚠️ Read before written to, because this is asked once per property of every mapped object from
+        // a memo that has been fully populated since the first object went through. computeIfAbsent
+        // builds its mapping function whether or not it is needed - the lambda below captures `this`, so
+        // it was an allocation on every hit, to answer a question the table already knew. The extra get
+        // on a miss is paid once per pair, in front of a breadth-first search over the type graph.
+        if (known != null) {
+            return known;
         }
-        return true;
+
+        return reachable.computeIfAbsent(
+                pair, absent -> searchAnyConverter(absent.classA(), absent.classB()));
+    }
+
+    /**
+     * Answers whether any conversion path exists, without consulting the memo.
+     *
+     * @param sourceType source runtime type
+     * @param targetType target runtime type
+     * @return {@code true} if a direct converter, a candidate, or a transition chain exists
+     */
+    private boolean searchAnyConverter(Class<?> sourceType, Class<?> targetType) {
+        if (hasConverter(sourceType, targetType)) {
+            return true;
+        }
+
+        if (searchPossibleCandidate(sourceType, targetType) != null) {
+            return true;
+        }
+
+        List<ClassPair> chain = searchTransitionChain(sourceType, targetType);
+
+        return chain != null && !chain.isEmpty();
     }
 
     /**
@@ -93,10 +202,17 @@ public class StandardConversion implements Conversion {
      */
     @Override
     public boolean hasConverter(ClassPair classPair) {
-        if (!converters.containsKey(classPair)) {
-            return searchPossibleCandidate(classPair.classA(), classPair.classB()) != null;
+        if (converters.containsKey(classPair)) {
+            return true;
         }
-        return true;
+
+        // ⚠️ The exact pair is asked a second time in here, and that is left alone deliberately.
+        // searchPossibleCandidate's candidate lists both begin with the types themselves, so its first
+        // probe repeats the line above - but the only way to remove it is to teach the search which pair
+        // its caller already ruled out, and this whole branch sits behind the `reachable` memo and is
+        // reached once per pair for the life of the conversion. A cold repeat is not worth a search that
+        // takes an argument nobody else can supply correctly.
+        return searchPossibleCandidate(classPair.classA(), classPair.classB()) != null;
     }
 
     /**
