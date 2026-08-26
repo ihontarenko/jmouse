@@ -2,7 +2,7 @@
 
 > Project-specific notes for the `tessera` skill. The tracker is the record; this file is notes.
 > Fix it in the same response as any call that contradicts it.
-> Verified: 2026-08-21
+> Verified: 2026-08-26
 
 ## Project
 
@@ -36,6 +36,8 @@ on `/administration` → Issue types, §1's "work nobody asked to file" rule fil
 - ⚠️ The in-flight status is **`WIP`**, not "In Progress". `In Progress` exists in the installation's
   catalog but is not on this path, and naming it is refused.
 - Finishing is **two transitions**, not one. Read `canMoveTo` before each.
+- `canMoveTo` from `To Do` is **`Parked`, `WIP`, `Draft`** (verified 2026-08-26). Neither `Parked` nor
+  `Draft` is a step towards Done — they are where an issue waits, and the path resumes from them.
 
 ## Resolutions
 
