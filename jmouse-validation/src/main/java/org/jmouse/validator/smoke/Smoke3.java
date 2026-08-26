@@ -2,9 +2,9 @@ package org.jmouse.validator.smoke;
 
 import org.jmouse.core.context.beans.BeanLookup;
 import org.jmouse.core.context.beans.BeanLookupContext;
-import org.jmouse.core.mapping.Mapper;
-import org.jmouse.core.mapping.Mappers;
-import org.jmouse.core.mapping.config.MappingConfig;
+import org.jmouse.mapper.Mapper;
+import org.jmouse.mapper.Mappers;
+import org.jmouse.mapper.config.MappingConfig;
 import org.jmouse.core.reflection.InferredType;
 import org.jmouse.el.ExpressionLanguage;
 

@@ -1,11 +1,11 @@
 package org.jmouse.crawler.examples.smoke;
 
-import org.jmouse.core.mapping.Mapper;
-import org.jmouse.core.mapping.Mappers;
-import org.jmouse.core.mapping.config.MappingConfig;
-import org.jmouse.core.mapping.errors.ErrorAction;
-import org.jmouse.core.mapping.errors.ErrorsPolicy;
-import org.jmouse.core.mapping.errors.ErrorCodes;
+import org.jmouse.mapper.Mapper;
+import org.jmouse.mapper.Mappers;
+import org.jmouse.mapper.config.MappingConfig;
+import org.jmouse.mapper.errors.ErrorAction;
+import org.jmouse.mapper.errors.ErrorsPolicy;
+import org.jmouse.mapper.errors.ErrorCodes;
 import org.jmouse.crawler.adapter.jsonpath.JaywayJsonPathSelector;
 import org.jmouse.crawler.adapter.jsoup.*;
 import org.jmouse.crawler.api.*;

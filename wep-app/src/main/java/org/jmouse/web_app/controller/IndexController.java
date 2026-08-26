@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.jmouse.beans.annotation.BeanConstructor;
 import org.jmouse.beans.annotation.ProxiedBean;
-import org.jmouse.core.mapping.binding.annotation.MappingReference;
+import org.jmouse.mapper.binding.annotation.MappingReference;
 import org.jmouse.core.throttle.RateLimit;
 import org.jmouse.jdbc.JdbcTemplate;
 import org.jmouse.jdbc.connection.datasource.DataSourceKeyHolder;

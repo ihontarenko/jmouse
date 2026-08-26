@@ -1,9 +1,9 @@
 package org.jmouse.web.binding.smoke;
 
 import org.jmouse.core.context.ContextScope;
-import org.jmouse.core.mapping.Mapper;
-import org.jmouse.core.mapping.Mappers;
-import org.jmouse.core.mapping.config.MappingConfig;
+import org.jmouse.mapper.Mapper;
+import org.jmouse.mapper.Mappers;
+import org.jmouse.mapper.config.MappingConfig;
 import org.jmouse.validator.*;
 import org.jmouse.validator.jsr380.*;
 import org.jmouse.web.binding.*;

@@ -1,7 +1,7 @@
 package org.jmouse.validator.smoke;
 
-import org.jmouse.core.mapping.Mapper;
-import org.jmouse.core.mapping.Mappers;
+import org.jmouse.mapper.Mapper;
+import org.jmouse.mapper.Mappers;
 import org.jmouse.core.parameters.RequestParametersJavaStructureConverter;
 import org.jmouse.core.parameters.RequestParametersJavaStructureOptions;
 import org.jmouse.core.parameters.RequestParametersTree;

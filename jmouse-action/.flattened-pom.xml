@@ -35,6 +35,12 @@
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
+      <artifactId>jmouse-mapper</artifactId>
+      <version>1.0.0-b20260802</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmouse</groupId>
       <artifactId>jmouse-el</artifactId>
       <version>1.0.0-b20260802</version>
       <scope>compile</scope>

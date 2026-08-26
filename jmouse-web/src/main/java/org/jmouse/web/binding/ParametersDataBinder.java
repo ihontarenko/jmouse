@@ -1,7 +1,7 @@
 package org.jmouse.web.binding;
 
 import org.jmouse.core.context.ContextScope;
-import org.jmouse.core.mapping.Mapper;
+import org.jmouse.mapper.Mapper;
 import org.jmouse.validator.*;
 
 public final class ParametersDataBinder {

@@ -16,8 +16,8 @@ import org.jmouse.core.invoke.ContextMethodArgumentResolver;
 import org.jmouse.core.invoke.InvocationRequestMethodArgumentResolver;
 import org.jmouse.core.invoke.MethodArgumentResolverComposite;
 import org.jmouse.core.invoke.MethodInvoker;
-import org.jmouse.core.mapping.Mapper;
-import org.jmouse.core.mapping.Mappers;
+import org.jmouse.mapper.Mapper;
+import org.jmouse.mapper.Mappers;
 import org.jmouse.el.ExpressionLanguage;
 
 import java.util.List;

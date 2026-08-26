@@ -2,8 +2,8 @@ package org.jmouse.action.adapter.mapper;
 
 import org.jmouse.action.ActionDefinition;
 import org.jmouse.core.SingletonSupplier;
-import org.jmouse.core.mapping.Mapper;
-import org.jmouse.core.mapping.Mappers;
+import org.jmouse.mapper.Mapper;
+import org.jmouse.mapper.Mappers;
 
 import java.util.function.Supplier;
 

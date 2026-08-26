@@ -1,6 +1,6 @@
 package org.jmouse.validator.constraint.adapter.el;
 
-import org.jmouse.core.mapping.Mapper;
+import org.jmouse.mapper.Mapper;
 import org.jmouse.el.ExpressionLanguage;
 import org.jmouse.validator.constraint.registry.ConstraintTypeRegistry;
 

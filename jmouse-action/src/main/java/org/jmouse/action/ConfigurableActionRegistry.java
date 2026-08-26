@@ -1,7 +1,7 @@
 package org.jmouse.action;
 
 import org.jmouse.action.adapter.mapper.ActionDefinitionMapper;
-import org.jmouse.core.mapping.Mapper;
+import org.jmouse.mapper.Mapper;
 
 import static org.jmouse.core.Verify.nonNull;
 

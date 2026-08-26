@@ -88,6 +88,8 @@
              shaded packages. -->
         <!-- <module>jmouse-vendor</module> -->
         <module>jmouse-core</module>
+        <module>jmouse-mapper</module>
+        <module>jmouse-mapper-el</module>
         <module>jmouse-action</module>
         <module>jmouse-common</module>
         <module>jmouse-materializer</module>

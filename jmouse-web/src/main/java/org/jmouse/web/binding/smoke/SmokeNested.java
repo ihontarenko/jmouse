@@ -4,12 +4,10 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.jmouse.core.context.ContextScope;
-import org.jmouse.core.mapping.Mapper;
-import org.jmouse.core.mapping.Mappers;
-import org.jmouse.core.mapping.binding.TypeMappingRegistry;
-import org.jmouse.core.mapping.binding.annotation.AnnotationRuleSource;
-import org.jmouse.core.mapping.binding.annotation.MappingReference;
-import org.jmouse.core.mapping.config.MappingConfig;
+import org.jmouse.mapper.Mapper;
+import org.jmouse.mapper.Mappers;
+import org.jmouse.mapper.binding.annotation.MappingReference;
+import org.jmouse.mapper.config.MappingConfig;
 import org.jmouse.validator.*;
 import org.jmouse.validator.jsr380.Jsr380Support;
 import org.jmouse.validator.jsr380.StrongPassword;
@@ -80,9 +78,6 @@ public class SmokeNested {
                 .config(MappingConfig.builder()
                                 .plugins(List.of(bindingPlugin))
                                 .build())
-                .mappingRegistry(TypeMappingRegistry.builder()
-                                         .ruleSource(new AnnotationRuleSource())
-                                         .build())
                 .build();
 
         // 6) DataBinder

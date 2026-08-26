@@ -1,7 +1,7 @@
 package org.jmouse.web.binding;
 
 import org.jmouse.core.context.ContextScope;
-import org.jmouse.core.mapping.plugin.*;
+import org.jmouse.mapper.plugin.*;
 import org.jmouse.validator.Errors;
 
 import java.util.List;
