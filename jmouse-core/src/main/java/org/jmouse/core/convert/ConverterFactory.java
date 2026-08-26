@@ -1,6 +1,7 @@
 package org.jmouse.core.convert;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * A factory interface for registering and retrieving {@link Converter} or
@@ -57,6 +58,83 @@ public interface ConverterFactory {
      * @param genericConverter the generic converter to register
      */
     void registerConverter(GenericConverter<?, ?> genericConverter);
+
+    /**
+     * Registers a converter under a name, so a caller may ask for it by name rather than by type pair.
+     *
+     * <h3>⚠️ A named converter does NOT answer a pair lookup</h3>
+     *
+     * <p>That is the whole reason names exist. A pair has one answer; a converter registered for a
+     * <em>specific</em> job — {@code BigDecimal → Money} as a rate rather than as an amount — answering
+     * the generic question is exactly how the wrong one silently wins. So this registration is
+     * <strong>name-only</strong>, and a converter that should serve both is registered twice, on
+     * purpose and visibly.</p>
+     *
+     * <h3>⚠️ A name is claimed once</h3>
+     *
+     * <p>Two converters under one name is the same class of silent failure this whole mechanism exists
+     * to prevent, so the second registration is refused rather than overwriting the first.</p>
+     *
+     * @param <S>        the source type
+     * @param <T>        the target type
+     * @param name       what to call it — see {@link ConverterName} for the naming rule
+     * @param sourceType the class representing the source type
+     * @param targetType the class representing the target type
+     * @param converter  the converter instance
+     * @throws IllegalArgumentException when the name is malformed or already claimed
+     */
+    <S, T> void registerConverter(
+            String name, Class<S> sourceType, Class<T> targetType, Converter<S, T> converter);
+
+    /**
+     * Registers a {@link GenericConverter} under a name — see
+     * {@link #registerConverter(String, Class, Class, Converter)} for what a name does and does not do.
+     *
+     * @param name             what to call it
+     * @param genericConverter the converter
+     * @throws IllegalArgumentException when the name is malformed or already claimed
+     */
+    void registerConverter(String name, GenericConverter<?, ?> genericConverter);
+
+    /**
+     * The converter registered under a name, or {@code null} when nothing claims it.
+     *
+     * @param <S>  the source type
+     * @param <T>  the target type
+     * @param name the name to look up
+     * @return the converter, or {@code null}
+     */
+    <S, T> GenericConverter<S, T> getConverter(String name);
+
+    /**
+     * Every name a converter is registered under, for a caller that wants to show them or report them.
+     *
+     * @return the names, sorted, so a refusal reads the same way twice
+     */
+    Set<String> converterNames();
+
+    /**
+     * The converter registered under a name, refusing when nothing claims it.
+     *
+     * <p>⚠️ The refusal lists the names that <strong>would</strong> have worked. A name comes from a
+     * text file somebody typed, and "no such converter" without the alternatives is a message that has
+     * to be debugged rather than read.</p>
+     *
+     * @param <S>  the source type
+     * @param <T>  the target type
+     * @param name the name to look up
+     * @return the converter, never {@code null}
+     * @throws ConverterNotFound when nothing is registered under that name
+     */
+    default <S, T> GenericConverter<S, T> requireConverter(String name) {
+        GenericConverter<S, T> converter = getConverter(name);
+
+        if (converter == null) {
+            throw new ConverterNotFound(name, converterNames());
+        }
+
+        return converter;
+    }
 
     /**
      * Check whether any conversion path exists between {@code sourceType} and {@code targetType}.

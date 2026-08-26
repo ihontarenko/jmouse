@@ -19,4 +19,22 @@ public class ConverterNotFound extends RuntimeException {
         super("Unable to convert %s — no registered converter found.".formatted(classPair));
     }
 
+    /**
+     * Constructs a new {@code ConverterNotFound} exception for a converter asked for by <em>name</em>.
+     *
+     * <p>⚠️ The available names are part of the message, not an afterthought. A name reaches this
+     * lookup from a text file somebody typed, and the overwhelmingly likely fault is a typo or a
+     * missing namespace — both of which the list answers on sight, and neither of which "no such
+     * converter" answers at all.</p>
+     *
+     * @param name      the name that was asked for
+     * @param available every name a converter is registered under
+     */
+    public ConverterNotFound(String name, java.util.Collection<String> available) {
+        super(available.isEmpty()
+                      ? "No converter is named '%s', and none is named at all.".formatted(name)
+                      : "No converter is named '%s'. Registered names: %s."
+                              .formatted(name, String.join(", ", available)));
+    }
+
 }
