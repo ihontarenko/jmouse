@@ -14,7 +14,7 @@ import org.jmouse.query.store.AuthoredSource;
 import org.jmouse.query.store.AuthoredSources;
 import org.jmouse.query.store.QueryOwner;
 import org.jmouse.query.store.SourceOrigin;
-import org.jmouse.query.translate.Bindings;
+import org.jmouse.el.translate.Bindings;
 import org.jmouse.query.translate.JmqTranslator;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -100,6 +101,50 @@ public class SourceController {
                 .orElseGet(() -> new Declaration(
                         named.name(), named.origin(), null, false, null, null, false,
                         published.publishesAnything()));
+    }
+
+    /**
+     * Every listing's declaration, in one request.
+     *
+     * <h2>⚠️ The manager asks this once per row, and a product has as many rows as it has listings</h2>
+     *
+     * <p>The sidebar marks the subjects whose declaration somebody has taken over. Asked per row against
+     * a workspace with forty-four component types, that alone was forty-four requests to draw forty-four
+     * badges. Ivan, 2026-08-25: <em>«краще зробити батч»</em>.</p>
+     *
+     * <p>⚠️ <strong>Authorized per element, exactly as the single route is</strong> — this calls
+     * {@link #declaration} — and a subject the caller may not read comes back {@code refused} instead of
+     * failing the batch. One unreadable listing must not blank a screen showing forty-three readable
+     * ones.</p>
+     */
+    @PostMapping("/sources/batch")
+    @Transactional(readOnly = true)
+    public List<Declared> declarationMany(@RequestBody List<Asked> asked) {
+        List<Declared> answers = new ArrayList<>();
+
+        for (Asked one : asked) {
+            Map<String, String> parameters = one.parameters() == null ? Map.of() : one.parameters();
+
+            try {
+                answers.add(new Declared(one.subject(), parameters, declaration(one.subject(), parameters), false));
+            } catch (RuntimeException refusal) {
+                answers.add(new Declared(one.subject(), parameters, null, true));
+            }
+        }
+
+        return answers;
+    }
+
+    /** One listing named in a batch — the subject, and whatever tells two of that name apart. */
+    public record Asked(String subject, Map<String, String> parameters) {
+    }
+
+    /**
+     * ⚠️ The parameters are echoed back: they are the only thing that tells two subjects of the same
+     * name apart, so an answer identified by name alone could not be matched to the row that asked.
+     */
+    public record Declared(String subject, Map<String, String> parameters, Declaration declaration,
+                           boolean refused) {
     }
 
     /**

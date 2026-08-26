@@ -41,18 +41,20 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  *
  * <h3>⚠️ How a product overrides one</h3>
  *
- * <p>This advice sits at {@link Ordered#LOWEST_PRECEDENCE}, so a product's own advice wins <em>only if
- * it says so</em>: an unannotated {@code @RestControllerAdvice} also sits at lowest precedence, and
- * two handlers tied at the same order are resolved in an unspecified order. A product that means to
- * answer differently must give its advice an explicit {@code @Order} ahead of this one — for
- * example {@code @Order(Ordered.LOWEST_PRECEDENCE - 100)}.</p>
+ * <p>This advice sits at {@link ProblemDetailAdvices#LIBRARY_PRECEDENCE} — ahead of an unordered
+ * product advice, and deliberately so. A product that means to answer one of these differently gives
+ * its own advice an explicit {@code @Order} ahead of that; a product that does not still has to keep
+ * its catch-all in an advice of its own at {@link Ordered#LOWEST_PRECEDENCE}, or the catch-all claims
+ * these exceptions before this class is ever consulted. {@link ProblemDetailAdvices} carries the whole
+ * reasoning and is the file to read before changing either number.</p>
  *
- * <p>Today that tie is harmless, because the products carrying their own mappings answer with exactly
- * these statuses and exactly these messages. It is written down because the day one of them changes
- * its mind is the day the tie starts to matter.</p>
+ * <p>⚠️ This used to sit at {@link Ordered#LOWEST_PRECEDENCE}, described as a tie that was
+ * <em>harmless today</em>. It was not: the tie is broken by bean registration order, which puts a
+ * component-scanned product advice first, so every refusal below was answered as an internal error
+ * with the message thrown away.</p>
  */
 @RestControllerAdvice
-@Order(Ordered.LOWEST_PRECEDENCE)
+@Order(ProblemDetailAdvices.LIBRARY_PRECEDENCE)
 public class StorageProblemDetails {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StorageProblemDetails.class);

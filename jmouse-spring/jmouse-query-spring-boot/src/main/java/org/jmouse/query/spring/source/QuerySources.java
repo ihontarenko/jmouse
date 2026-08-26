@@ -11,7 +11,7 @@ import org.jmouse.query.store.AuthoredSource;
 import org.jmouse.query.store.AuthoredSources;
 import org.jmouse.query.store.QueryOwner;
 import org.jmouse.query.store.SourceOrigin;
-import org.jmouse.query.translate.Bindings;
+import org.jmouse.el.translate.Bindings;
 import org.jmouse.query.translate.JmqTranslator;
 
 import java.time.Instant;

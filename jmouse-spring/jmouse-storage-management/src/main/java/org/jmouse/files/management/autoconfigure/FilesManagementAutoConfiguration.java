@@ -81,6 +81,23 @@ public class FilesManagementAutoConfiguration {
     /** Property naming what this installation announces itself as when fetching. */
     public static final String IMPORT_USER_AGENT = "jmouse.files.management.import.user-agent";
 
+    /**
+     * ⚠️ <strong>A browser's, and deliberately.</strong>
+     *
+     * <p>What an import actually fetches is distributor photographs and manufacturer datasheets, and
+     * those hosts routinely answer a client they do not recognise with {@code 200} and a bot-check
+     * page. The refusal that reaches the user then says the file is an HTML document, about a URL that
+     * renders perfectly in the tab they are looking at — and the only difference between the two
+     * requests is this header. A tool-shaped {@code User-Agent} is honest and does not work.</p>
+     *
+     * <p>The Chrome version in it ages, which costs nothing: it is matched as "a browser", never
+     * parsed. Set {@link #IMPORT_USER_AGENT} to override it — an installation fetching only from hosts
+     * it controls should.</p>
+     */
+    public static final String DEFAULT_IMPORT_USER_AGENT =
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+            + "Chrome/131.0.0.0 Safari/537.36";
+
     /** Property a product sets to publish the storage administration surface. */
     public static final String ADMINISTRATION_ENABLED = "jmouse.storage.administration.enabled";
 
@@ -171,8 +188,12 @@ public class FilesManagementAutoConfiguration {
     @ConditionalOnProperty(name = IMPORT_ENABLED, havingValue = "true")
     public RemoteFileFetcher remoteFileFetcher(
             UploadPolicy uploadPolicy,
-            @Value("${" + IMPORT_USER_AGENT + ":jMouse-Storage/1.0}") String userAgent) {
-        return new RemoteFileFetcher(uploadPolicy, userAgent);
+            @Value("${" + IMPORT_USER_AGENT + ":}") String userAgent) {
+        // Resolved here rather than as a placeholder default: the default is a browser string full of
+        // punctuation a placeholder would have to be read very carefully to be trusted with.
+        String announcedAs = userAgent.isBlank() ? DEFAULT_IMPORT_USER_AGENT : userAgent;
+
+        return new RemoteFileFetcher(uploadPolicy, announcedAs);
     }
 
     /**

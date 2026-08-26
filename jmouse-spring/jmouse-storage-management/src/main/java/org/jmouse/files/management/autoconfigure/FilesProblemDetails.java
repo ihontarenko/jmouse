@@ -6,7 +6,7 @@ import org.jmouse.files.exception.ManagedFileTooLargeException;
 import org.jmouse.files.exception.RemoteFetchException;
 import org.jmouse.files.exception.FileBindingException;
 import org.jmouse.files.exception.ManagedFileNotFoundException;
-import org.springframework.core.Ordered;
+import org.jmouse.storage.spring.ProblemDetailAdvices;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -20,12 +20,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * to whoever has to fix them: storage's 404 says the bytes are gone from the bucket, this one says the
  * row was never there.</p>
  *
- * <p>⚠️ Same precedence caveat as its neighbour: this sits at {@link Ordered#LOWEST_PRECEDENCE}, and an
- * unannotated product advice sits there too. A product meaning to answer differently must give its own
- * advice an explicit {@code @Order} ahead of this one.</p>
+ * <p>⚠️ Same precedence rule as its neighbour: this sits at
+ * {@link ProblemDetailAdvices#LIBRARY_PRECEDENCE}, ahead of an unordered product advice, and a product
+ * that means to answer differently gives its own advice an explicit {@code @Order} ahead of that.
+ * {@link ProblemDetailAdvices} carries the reasoning — including why a product's catch-all has to live
+ * alone in an advice of its own, which no setting here can arrange for it.</p>
  */
 @RestControllerAdvice
-@Order(Ordered.LOWEST_PRECEDENCE)
+@Order(ProblemDetailAdvices.LIBRARY_PRECEDENCE)
 public class FilesProblemDetails {
 
     /** 🔍 No such file row. */
