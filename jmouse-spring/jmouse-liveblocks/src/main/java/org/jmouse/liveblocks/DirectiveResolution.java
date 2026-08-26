@@ -73,6 +73,41 @@ public class DirectiveResolution {
         return directives.stream().map(this::resolveOne).toList();
     }
 
+    /**
+     * What a document could refer to, in one namespace.
+     *
+     * <p>⚠️ <strong>An unknown namespace answers an empty list, not an error.</strong> A picker asks
+     * every namespace its installation has a row for, and a product that answers only two of them is
+     * ordinary — a tab with nothing in it is a true statement, where a 404 would read as an outage.
+     *
+     * <p>⚠️ And a suggester that throws costs its own tab, exactly as a resolver that throws costs its
+     * own block. It is logged at <em>warn</em> for the same reason: silence would hide the defect for
+     * good.
+     */
+    public List<DirectiveSuggestion> suggest(String namespace, String query, int limit) {
+        if (namespace == null || namespace.isBlank()) {
+            return List.of();
+        }
+
+        DirectiveResolver resolver = byName.get(namespace.trim().toLowerCase());
+
+        if (resolver == null) {
+            return List.of();
+        }
+
+        try {
+            List<DirectiveSuggestion> suggested = resolver.suggest(query == null ? "" : query.trim(), limit);
+
+            return suggested == null ? List.of() : suggested;
+        } catch (RuntimeException failure) {
+            LOGGER.warn(
+                    "Resolver {} threw suggesting '{}' for namespace '{}' — answering nothing",
+                    resolver.getClass().getName(), query, namespace, failure);
+
+            return List.of();
+        }
+    }
+
     private ResolvedDirective resolveOne(Directive directive) {
         if (directive == null || !directive.isAskable()) {
             return ResolvedDirective.miss(

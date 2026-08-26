@@ -43,4 +43,29 @@ public interface DirectiveResolver {
      */
     ResolvedDirective resolve(Directive directive);
 
+    /**
+     * What a document could refer to — the picker's question, asked before anything has been named.
+     *
+     * <h2>⚠️ Answering nothing is a complete implementation</h2>
+     *
+     * <p>The default is an empty list, so every resolver written before this existed goes on compiling
+     * and a product that has nothing worth browsing simply offers no picker. That is a correct answer,
+     * not a gap: {@code :::stock R-0402-10K} is written from a part number somebody already has in
+     * front of them, and a list of every component in a warehouse would help nobody.
+     *
+     * <h2>⚠️ It is a search, so it narrows to the reader like everything else here</h2>
+     *
+     * <p>And more sharply than {@link #resolve} does. A resolver leaking one thing needs its identifier
+     * guessed first; a <em>suggester</em> that leaks needs nothing at all — it hands over the list. So
+     * the same rule with none of the slack: what this returns is what that person could already find in
+     * this product's own interface.
+     *
+     * @param query what has been typed so far. ⚠️ Blank is legitimate and means "the first few" — the
+     *              picker opens before anybody types, and answering nothing there reads as broken
+     * @param limit the most to return; a suggester may return fewer and never more
+     */
+    default java.util.List<DirectiveSuggestion> suggest(String query, int limit) {
+        return java.util.List.of();
+    }
+
 }

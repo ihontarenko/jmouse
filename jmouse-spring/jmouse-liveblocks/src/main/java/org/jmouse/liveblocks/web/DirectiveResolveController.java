@@ -2,6 +2,7 @@ package org.jmouse.liveblocks.web;
 
 import org.jmouse.liveblocks.Directive;
 import org.jmouse.liveblocks.DirectiveResolution;
+import org.jmouse.liveblocks.DirectiveSuggestion;
 import org.jmouse.liveblocks.ResolvedDirective;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,6 +48,15 @@ public class DirectiveResolveController {
      */
     public static final int MAXIMUM_DIRECTIVES = 100;
 
+    /** What a picker gets when it asks for nothing in particular — a list somebody can read at a glance. */
+    public static final int DEFAULT_SUGGESTIONS = 10;
+
+    /**
+     * ⚠️ A ceiling rather than a preference. A picker asking for a thousand is not a picker — it is
+     * somebody reading the product's contents through a search box that was never meant to page.
+     */
+    public static final int MAXIMUM_SUGGESTIONS = 50;
+
     private final DirectiveResolution resolution;
 
     public DirectiveResolveController(DirectiveResolution resolution) {
@@ -69,6 +79,25 @@ public class DirectiveResolveController {
         }
 
         return ResponseEntity.ok(resolution.resolve(asked));
+    }
+
+    /**
+     * What a document could refer to — what a picker is built on.
+     *
+     * <p>⚠️ <strong>A search, and therefore the route in this module that needs the most care.</strong>
+     * {@code resolve} leaks only to somebody who already guessed an identifier; this one hands over a
+     * list. Each resolver narrows its own answer to the caller — see {@code DirectiveResolver.suggest} —
+     * and this class, like the one above it, gates nothing: the product puts both behind its own
+     * authentication, its CORS allowlist and its audience check.
+     *
+     * <p>⚠️ <strong>An unknown namespace is an empty list, not a 404.</strong> A picker offers a tab per
+     * namespace its installation has a row for, and a product answering only some of them is ordinary.
+     */
+    @PostMapping("/suggest")
+    public ResponseEntity<List<DirectiveSuggestion>> suggest(@RequestBody SuggestDirectivesRequest request) {
+        int limit = request.limit() <= 0 ? DEFAULT_SUGGESTIONS : Math.min(request.limit(), MAXIMUM_SUGGESTIONS);
+
+        return ResponseEntity.ok(resolution.suggest(request.namespace(), request.query(), limit));
     }
 
     /**
