@@ -10,6 +10,8 @@ import org.jmouse.helpers.Arrays;
 
 import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.jmouse.core.reflection.InferredType.forClass;
 import static org.jmouse.core.reflection.Reflections.*;
@@ -33,14 +35,26 @@ final public class ValueObject<T extends Record> extends Bean<T> {
     }
 
     /**
+     * One {@link ValueObject} per record class, for the reason {@link JavaBean} is cached.
+     *
+     * <p>⚠️ Building one introspects the record and resolves its canonical constructor, and the record
+     * mapping strategy asks for one per mapped object.</p>
+     *
+     * <p>Nothing here mutates: the descriptor and the constructor are fixed at construction, and
+     * {@link #getRecordValues()} hands out a fresh bag per call, so the instance is shared safely.</p>
+     */
+    private static final Map<Class<?>, ValueObject<?>> CACHE = new ConcurrentHashMap<>();
+
+    /**
      * Creates a {@code ValueObject} for the given record type.
      *
      * @param type the record class
      * @param <I>  the type of the record
-     * @return a new {@code ValueObject} instance
+     * @return a {@code ValueObject} for that record type
      */
+    @SuppressWarnings("unchecked")
     public static <I extends Record> ValueObject<I> of(Class<I> type) {
-        return new ValueObject<>(type);
+        return (ValueObject<I>) CACHE.computeIfAbsent(type, ValueObject::new);
     }
 
     /**

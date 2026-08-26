@@ -3,8 +3,6 @@ package org.jmouse.core;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import static org.jmouse.core.reflection.Reflections.getMethodName;
-
 /**
  * A functional interface representing a setter method for assigning a value to an instance.
  * <p>
@@ -33,6 +31,9 @@ public interface Setter<T, V> {
     /**
      * Creates a setter that invokes a given method on an instance.
      *
+     * <p>The call is compiled once, here, rather than reflected on every write - see
+     * {@link MethodAccessorFactory} for what that buys and for the cases where it is not possible.</p>
+     *
      * @param setter the method to be invoked as a setter
      * @param <T>    the type of the instance
      * @param <V>    the type of the value being set
@@ -40,15 +41,7 @@ public interface Setter<T, V> {
      * @throws SetterCallException if the method invocation fails
      */
     static <T, V> Setter<T, V> ofMethod(Method setter) {
-        return (T instance, V value) -> {
-            try {
-                setter.setAccessible(true);
-                setter.invoke(instance, value);
-            } catch (Exception exception) {
-                throw new SetterCallException(
-                        "Failed to call setter '%s'".formatted(getMethodName(setter)), exception);
-            }
-        };
+        return MethodAccessorFactory.setter(setter);
     }
 
     /**

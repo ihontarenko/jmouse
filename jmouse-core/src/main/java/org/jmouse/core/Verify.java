@@ -41,8 +41,13 @@ public final class Verify {
      * @throws IllegalArgumentException if {@code value} is {@code null}
      */
     public static <T> T argument(T value, String name) {
-        return argument(value, () ->
-                new IllegalArgumentException("Required argument '" + name + "' must be non-null"));
+        // ⚠️ See nonNull(T, String): the Supplier overload's lambda captures, so it allocates on the
+        // success path. Build the exception only where it is thrown.
+        if (value == null) {
+            throw new IllegalArgumentException("Required argument '" + name + "' must be non-null");
+        }
+
+        return value;
     }
 
     /**
@@ -262,8 +267,12 @@ public final class Verify {
      * @throws IllegalStateException if {@code value} is {@code null}
      */
     public static <T> T state(T value, String name) {
-        state(value != null, () ->
-                new IllegalStateException("Illegal state of '" + name + "'. Must be non-null"));
+        // ⚠️ See nonNull(T, String): the Supplier overload's lambda captures, so it allocates on the
+        // success path. Build the exception only where it is thrown.
+        if (value == null) {
+            throw new IllegalStateException("Illegal state of '" + name + "'. Must be non-null");
+        }
+
         return value;
     }
 
@@ -274,7 +283,11 @@ public final class Verify {
      * @throws IllegalStateException if {@code condition} is {@code false}
      */
     public static void state(boolean condition, String message) {
-        state(condition, () -> new IllegalStateException(message));
+        // ⚠️ See nonNull(T, String): the Supplier overload's lambda captures, so it allocates on the
+        // success path. Build the exception only where it is thrown.
+        if (!condition) {
+            throw new IllegalStateException(message);
+        }
     }
 
     /**
@@ -310,8 +323,15 @@ public final class Verify {
      * @throws NullPointerException if {@code value} is {@code null}
      */
     public static <T> T nonNull(T value, String message) {
-        return nonNull(value, () ->
-                new NullPointerException("Required value must be non-null: '" + message + "'."));
+        // ⚠️ Not routed through the Supplier overload. That lambda CAPTURES `message`, so it is a fresh
+        // object on every call - including the overwhelmingly common one where nothing is null and no
+        // exception is ever built. A guard that allocates in order NOT to fire is paid by all 491 call
+        // sites in this framework, and the mapper's hottest path alone calls it ten times per property.
+        if (value == null) {
+            throw new NullPointerException("Required value must be non-null: '" + message + "'.");
+        }
+
+        return value;
     }
 
     /**

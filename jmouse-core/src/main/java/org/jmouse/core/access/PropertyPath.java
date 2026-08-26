@@ -6,6 +6,7 @@ import org.jmouse.helpers.Arrays;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -36,8 +37,13 @@ final public class PropertyPath {
 
     /**
      * Cached paths.
+     *
+     * <p>⚠️ Concurrent, and this is the hottest cache in the mapping engine - {@link #forPath(String)}
+     * is reached once per property of every mapped object, from whatever thread is mapping. A plain
+     * {@link HashMap} resized by two of them at once can corrupt its table and spin forever inside a
+     * lookup, which is not a failure any caller could diagnose from where it surfaces.</p>
      */
-    public static final Map<String, PropertyPath> CACHE = new HashMap<>();
+    public static final Map<String, PropertyPath> CACHE = new ConcurrentHashMap<>();
 
     /**
      * The separator used in property paths (dot notation).
@@ -45,10 +51,6 @@ final public class PropertyPath {
     public static final char SEPARATOR = '.';
 
     private Entries entries;
-
-    static {
-        CACHE.put(null, empty());
-    }
 
     /**
      * Constructs a PropertyPath by lexer the given string.
@@ -103,10 +105,19 @@ final public class PropertyPath {
     /**
      * Creates a PropertyPath instance from a given name.
      *
+     * <p>⚠️ {@code null} is answered before the cache is consulted, not through it. It used to be a
+     * key mapped to the empty path, which a {@link ConcurrentHashMap} cannot hold - and the failure
+     * was not a rejected lookup but a {@link NullPointerException} while this class initialized,
+     * surfacing as every mapping breaking at once.</p>
+     *
      * @param name the property path to parse
      * @return a PropertyPath instance, or an empty instance if the input is null
      */
     public static PropertyPath forPath(String name) {
+        if (name == null) {
+            return empty();
+        }
+
         return CACHE.computeIfAbsent(name, PropertyPath::new);
     }
 

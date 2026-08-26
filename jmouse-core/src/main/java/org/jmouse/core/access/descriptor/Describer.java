@@ -7,12 +7,12 @@ import org.jmouse.core.reflection.Reflections;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
 final public class Describer {
 
-    private static final Map<Class<?>, ObjectDescriptor<?>> DESCRIPTORS = new HashMap<>();
+    private static final Map<Class<?>, ObjectDescriptor<?>> DESCRIPTORS = new ConcurrentHashMap<>();
 
     private Describer() {}
 

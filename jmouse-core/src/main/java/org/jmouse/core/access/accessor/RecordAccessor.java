@@ -1,6 +1,7 @@
 package org.jmouse.core.access.accessor;
 
 import org.jmouse.core.access.AbstractBeanAccessor;
+import org.jmouse.core.access.descriptor.structured.DescriptorResolver;
 import org.jmouse.core.access.descriptor.structured.ObjectDescriptor;
 import org.jmouse.core.access.descriptor.structured.record.ValueObjectIntrospector;
 
@@ -28,9 +29,17 @@ public class RecordAccessor extends AbstractBeanAccessor {
      * @param type the class type of the value object to introspect
      * @return an {@link ObjectDescriptor} representing the structure of the value object
      */
+    /**
+     * {@inheritDoc}
+     *
+     * <p>⚠️ Answered from {@link DescriptorResolver}, which caches. This ran a full introspection on
+     * every construction, and an accessor is constructed per wrapped object - so a record's components
+     * were being rediscovered, with their annotations, for each one that passed through.</p>
+     */
     @Override
     @SuppressWarnings({"unchecked"})
     protected ObjectDescriptor<Object> getDescriptor(Class<?> type) {
-        return new ValueObjectIntrospector<>((Class<Object>) type).introspect().toDescriptor();
+        return (ObjectDescriptor<Object>) (ObjectDescriptor<?>) DescriptorResolver.ofRecordType(
+                (Class<? extends Record>) type);
     }
 }

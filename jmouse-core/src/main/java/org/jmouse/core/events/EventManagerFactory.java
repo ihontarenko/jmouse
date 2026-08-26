@@ -3,7 +3,6 @@ package org.jmouse.core.events;
 import org.jmouse.core.annotation.AnnotationBootstrapper;
 import org.jmouse.core.annotation.AnnotationDiscovery;
 import org.jmouse.core.annotation.AnnotationProcessingContext;
-import org.jmouse.core.mapping.Mappers;
 import org.jmouse.core.reflection.TypeMatchers;
 import org.jmouse.core.events.annotation.Listener;
 import org.jmouse.core.reflection.ClassFinder;

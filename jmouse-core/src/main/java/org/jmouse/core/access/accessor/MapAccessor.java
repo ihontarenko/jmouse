@@ -44,13 +44,24 @@ public class MapAccessor extends AbstractAccessor {
      */
     @Override
     public ObjectAccessor get(String name) {
+        return wrap(read(name));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Reads the entry straight out of the map, so nothing is allocated to carry a value the caller
+     * is about to take out again.</p>
+     */
+    @Override
+    public Object read(String name) {
         Object value = null;
 
         if (isMap() && descriptor.getProperty(name) instanceof PropertyDescriptor<Map<Object, Object>> property) {
             value = property.getAccessor().readValue(asMap(Object.class, Object.class));
         }
 
-        return wrap(value);
+        return value;
     }
 
     /**

@@ -53,6 +53,29 @@ abstract public class Reflections {
     );
 
     /**
+     * Every primitive type paired with the wrapper it boxes into.
+     * <p>
+     * The set is closed and known at compile time - the language defines exactly these nine and will
+     * never define a tenth - so the mapping is a table rather than something to be discovered.
+     * </p>
+     * <p>
+     * {@code void.class} is a member: it answers {@code true} to {@link Class#isPrimitive()}, and any
+     * lookup driven by that question has to be able to answer for it.
+     * </p>
+     */
+    public static final Map<Class<?>, Class<?>> PRIMITIVE_BOXED_TYPES = Map.of(
+                    boolean.class, Boolean.class,
+                    byte.class, Byte.class,
+                    short.class, Short.class,
+                    int.class, Integer.class,
+                    long.class, Long.class,
+                    float.class, Float.class,
+                    double.class, Double.class,
+                    char.class, Character.class,
+                    void.class, Void.class
+    );
+
+    /**
      * Converts a primitive type to its corresponding boxed (wrapper) type.
      * <p>
      * If the given class is a primitive type, this method returns the equivalent wrapper type.
@@ -70,14 +93,7 @@ abstract public class Reflections {
      * }</pre>
      */
     public static Class<?> boxType(Class<?> primitiveType) {
-        Class<?> boxedType = primitiveType;
-
-        if (primitiveType.isPrimitive()) {
-            Object array = Array.newInstance(primitiveType, 1);
-            boxedType = Array.get(array, 0).getClass();
-        }
-
-        return boxedType;
+        return PRIMITIVE_BOXED_TYPES.getOrDefault(primitiveType, primitiveType);
     }
 
     /**

@@ -1,13 +1,7 @@
 package org.jmouse.core;
 
-import org.jmouse.core.reflection.Reflections;
-
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Map;
-
-import static org.jmouse.core.reflection.Reflections.getMethodName;
 
 /**
  * A functional interface representing a getter method for retrieving a value from an instance.
@@ -37,36 +31,17 @@ public interface Getter<T, R> {
     /**
      * Creates a getter that invokes a given method on an instance.
      *
+     * <p>The call is compiled once, here, rather than reflected on every read - see
+     * {@link MethodAccessorFactory} for what that buys and for the cases where it is not possible.</p>
+     *
      * @param getter the method to be invoked as a getter
      * @param <T>    the type of the instance
      * @param <V>    the type of the value being retrieved
      * @return a getter that calls the specified method
      * @throws GetterCallException if the method invocation fails
      */
-    @SuppressWarnings({"unchecked"})
     static <T, V> Getter<T, V> ofMethod(Method getter) {
-        return (T instance) -> {
-            try {
-                if ((getter.getModifiers() & Modifier.PUBLIC) == 0) {
-                    getter.setAccessible(true);
-                }
-
-                try {
-                    return (V) getter.invoke(instance);
-                } catch (InvocationTargetException e) {
-                    Class<?> type = getter.getReturnType();
-
-                    if (type.isPrimitive()) {
-                        return (V) Reflections.PRIMITIVES_DEFAULT_TYPE_VALUES.get(type);
-                    }
-
-                    throw e;
-                }
-            } catch (Exception exception) {
-                throw new GetterCallException(
-                        "Failed to call getter '%s'".formatted(getMethodName(getter)), exception);
-            }
-        };
+        return MethodAccessorFactory.getter(getter);
     }
 
     /**

@@ -4,6 +4,7 @@ import org.jmouse.helpers.Arrays;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.*;
 
 /**
@@ -54,12 +55,41 @@ public class InferredType implements TypeClassifier {
         static TypeCache of(Type type, InferredType parent) {
             return new TypeCache(type, parent);
         }
+
+        /**
+         * ⚠️ The context is compared by identity, and it has to be.
+         *
+         * <p>{@link InferredType#equals(Object)} compares the wrapped {@link Type} alone, so two nodes
+         * standing for {@code Collection<Alpha>} and {@code Collection<Beta>} answer that they are
+         * equal - they wrap the very same {@code Collection<E>} token and differ only in the context
+         * that resolves {@code E}. Letting the generated {@code equals} delegate to that made this key
+         * as blind to context as the thing it was introduced to prevent: the first {@code List<X>}
+         * resolved in a JVM claimed the shared node, and every later {@code List<Y>} was handed its
+         * element type instead of its own.</p>
+         *
+         * <p>Every context reaching this map is itself canonical - it came out of the same map - so
+         * identity is exactly "the same resolution context" and nothing weaker.</p>
+         */
+        @Override
+        public boolean equals(Object object) {
+            return object instanceof TypeCache that && parent == that.parent && Objects.equals(type, that.type);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * Objects.hashCode(type) + System.identityHashCode(parent);
+        }
     }
 
     /**
      * A cache for storing resolved {@link InferredType} instances to avoid redundant resolution.
+     *
+     * <p>⚠️ Concurrent, and not as a precaution. This map is written by {@link #forType(Type, InferredType)},
+     * which any thread touching a type reaches - and a plain {@link HashMap} resized by two threads at
+     * once does not merely lose an entry, it can corrupt its own table and spin forever inside a
+     * lookup.</p>
      */
-    private static final Map<TypeCache, InferredType> CACHE = new HashMap<>();
+    private static final Map<TypeCache, InferredType> CACHE = new ConcurrentHashMap<>();
 
     /**
      * A constant representing a "no type" scenario.
@@ -191,8 +221,13 @@ public class InferredType implements TypeClassifier {
         InferredType instance  = CACHE.get(typeCache);
 
         if (instance == null) {
-            instance = new InferredType(type, parent);
-            CACHE.put(typeCache, instance);
+            // Two threads may build the same node; the map decides which one everybody then uses, so
+            // a node stays canonical and identity keeps meaning "the same resolved type".
+            // computeIfAbsent is not an option here - resolution re-enters this map.
+            InferredType candidate = new InferredType(type, parent);
+            InferredType winner    = CACHE.putIfAbsent(typeCache, candidate);
+
+            instance = winner == null ? candidate : winner;
         }
 
         return instance;
@@ -997,15 +1032,6 @@ public class InferredType implements TypeClassifier {
     }
 
     /**
-     * Sets the hash code for this {@link InferredType}.
-     *
-     * @param hashCode the hash code to set
-     */
-    public void setHashCode(int hashCode) {
-        this.hashCode = hashCode;
-    }
-
-    /**
      * Calculates the hash code for this {@link InferredType}.
      *
      * @return the calculated hash code
@@ -1014,16 +1040,29 @@ public class InferredType implements TypeClassifier {
      * @see Objects#hashCode(Object)
      */
     public int calculateHashCode() {
-        return Objects.hashCode(this.type);
+        return 31 * Objects.hashCode(this.type) + Objects.hashCode(this.parent);
     }
 
+    /**
+     * ⚠️ The resolution context is part of what this type <em>is</em>, so it is part of equality.
+     *
+     * <p>Comparing the wrapped {@link Type} alone made {@code Collection<Alpha>} equal to
+     * {@code Collection<Beta>}: both wrap the identical {@code Collection<E>} token and differ only in
+     * the context that resolves {@code E} - which is exactly what {@link #toString()} prints and
+     * exactly what a caller means by "the same type". Any {@code Map} or {@code Set} of these was
+     * conflating them, silently.</p>
+     *
+     * <p>The chain is walked, and it is short: a type's parent is its enclosing declaration, not its
+     * whole hierarchy. Nodes are canonical anyway, so the common case answers on the first identity
+     * check inside {@link Objects#equals}.</p>
+     */
     @Override
     public boolean equals(Object object) {
         boolean equals = false;
 
         if (object != null && getClass() == object.getClass()) {
             InferredType that = (InferredType) object;
-            equals = Objects.equals(type, that.type);
+            equals = Objects.equals(type, that.type) && Objects.equals(parent, that.parent);
         }
 
         return equals;
@@ -1149,6 +1188,41 @@ public class InferredType implements TypeClassifier {
         @Override
         public Type getOwnerType() {
             return null;
+        }
+
+        /**
+         * Equality as {@link ParameterizedType} defines it: same owner, same raw type, same arguments.
+         *
+         * <p>⚠️ Without this the class claimed to be a {@link ParameterizedType} while comparing by
+         * identity, and two consequences followed. Each {@code forParametrizedClass(List.class, X.class)}
+         * minted a type nothing could ever match, so a call sitting in a loop grew {@link #CACHE}
+         * without bound - a synthetic type built per mapped object is a leak, not a lookup. And a
+         * synthetic {@code List<String>} was never the same type as the one reflection reports for a
+         * field of that type, though they describe the same thing.</p>
+         *
+         * <p>The comparison accepts any {@link ParameterizedType}, which is what makes a synthetic type
+         * and a reflected one agree in both directions.</p>
+         */
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+
+            return object instanceof ParameterizedType that
+                    && that.getOwnerType() == null
+                    && rawType.equals(that.getRawType())
+                    && java.util.Arrays.equals(typeArguments, that.getActualTypeArguments());
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Arrays.hashCode(typeArguments) ^ rawType.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return getTypeName();
         }
     }
 

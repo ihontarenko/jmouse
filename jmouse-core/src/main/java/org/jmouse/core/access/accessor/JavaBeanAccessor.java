@@ -2,14 +2,8 @@ package org.jmouse.core.access.accessor;
 
 import org.jmouse.core.access.AbstractBeanAccessor;
 import org.jmouse.core.access.ObjectAccessor;
+import org.jmouse.core.access.descriptor.structured.DescriptorResolver;
 import org.jmouse.core.access.descriptor.structured.ObjectDescriptor;
-import org.jmouse.core.access.descriptor.structured.bean.JavaBeanDescriptor;
-import org.jmouse.core.access.descriptor.structured.bean.JavaBeanIntrospector;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.jmouse.core.reflection.Reflections.getShortName;
 
 /**
  * A {@link ObjectAccessor} implementation for accessing properties of a structured instance.
@@ -19,8 +13,6 @@ import static org.jmouse.core.reflection.Reflections.getShortName;
  * </p>
  */
 public class JavaBeanAccessor extends AbstractBeanAccessor {
-
-    public static final Map<Class<?>, JavaBeanDescriptor<?>> CACHED_DESCRIPTORS = new HashMap<>();
 
     /**
      * Creates a {@link JavaBeanAccessor} for the given structured instance.
@@ -32,12 +24,19 @@ public class JavaBeanAccessor extends AbstractBeanAccessor {
         super(source);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>⚠️ Answered from {@link DescriptorResolver}, which is where bean descriptors are cached, rather
+     * than from a cache of this class's own. An accessor is built per wrapped object, so this is asked
+     * constantly; it previously memoized into a plain {@link java.util.HashMap} populated with
+     * {@code computeIfAbsent} from whatever thread arrived, which is a resize away from a corrupt table.
+     * Sharing the one cache also stops the same class being introspected twice and held twice.</p>
+     */
     @Override
     @SuppressWarnings({"unchecked"})
     protected ObjectDescriptor<Object> getDescriptor(Class<?> type) {
-        return (ObjectDescriptor<Object>) CACHED_DESCRIPTORS.computeIfAbsent(type, (t) ->
-            new JavaBeanIntrospector<>(t).introspect().toDescriptor()
-        );
+        return (ObjectDescriptor<Object>) DescriptorResolver.ofBeanType(type);
     }
 
 }
