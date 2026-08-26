@@ -1,0 +1,13 @@
+# A second file, a different target — both are found and both apply.
+
+mapping "receipts" {
+
+    use org.jmouse.mapper.el.examples.LoadedMappingProbe$OrderRequest
+    use org.jmouse.mapper.el.examples.LoadedMappingProbe$Receipt
+
+    target Receipt {
+        from OrderRequest {
+            who : buyer | trim
+        }
+    }
+}

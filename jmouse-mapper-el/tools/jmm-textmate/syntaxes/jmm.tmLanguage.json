@@ -1,0 +1,222 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "jMouse Mapping",
+  "scopeName": "source.jmm",
+  "fileTypes": ["jmm"],
+
+  "_comment": [
+    "A TextMate grammar for .jmm, for IntelliJ IDEA and anything else that reads them.",
+    "",
+    "⚠️ This is a SECOND grammar for one language, and that is a cost paid deliberately. The",
+    "CodeMirror scanner the products render with is @jmouse/codemirror's src/jmmSyntax.ts — a",
+    "different repository, which is precisely why this is written down: IDEA cannot load a",
+    "StreamParser, and a language people edit in an IDE with no highlighting is a language people",
+    "edit badly. The two must be changed together, and the CodeMirror one is the reference when",
+    "they disagree. Neither of them is the language: JmmRecognizer and JmmParser, two directories",
+    "up from here, are.",
+    "",
+    "⚠️ What this grammar deliberately does NOT do is decide. Whether a mapping is valid — whether the",
+    "property exists on the target, whether the source path can be read — is answered by the reader on",
+    "a backend when the file loads. A regular expression cannot know any of it and must not pretend to.",
+    "",
+    "⚠️ And it cannot express the one rule the CodeMirror scanner is built around: what stands on each",
+    "side of a ':' depends on the block. TextMate has no state across a block, so a condition inside a",
+    "refuse block is matched as an expression by position rather than by knowing where it is. The",
+    "'refuse-block' pattern below is what buys most of that back."
+  ],
+
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#refuse-block" },
+    { "include": "#use" },
+    { "include": "#block-opener" },
+    { "include": "#modifier" },
+    { "include": "#rule" },
+    { "include": "#expression" }
+  ],
+
+  "repository": {
+
+    "comment": {
+      "match": "#.*$",
+      "name": "comment.line.number-sign.jmm"
+    },
+
+    "use": {
+      "_comment": [
+        "A whole type on one line, dots and $ included — coloured as one thing, not nine.",
+        "",
+        "⚠️ And as a NAMESPACE rather than a type, which is the one place this grammar deliberately",
+        "spends a second colour on what is arguably one kind of thing. A `use` line is bookkeeping: it",
+        "says which types the file will go on to name. `target Project` says what the block in front of",
+        "you is about, and that is what a reader scans a file for. Painted alike, a header of five `use`",
+        "lines competes with the four words that actually locate you in the document."
+      ],
+      "match": "^\\s*(use)\\s+([A-Za-z_$][\\w$]*(?:\\.[A-Za-z_$][\\w$]*)*)",
+      "captures": {
+        "1": { "name": "keyword.control.import.jmm" },
+        "2": { "name": "entity.name.namespace.jmm" }
+      }
+    },
+
+    "block-opener": {
+      "_comment": "⚠️ Anchored to the start of a line, exactly as the CodeMirror scanner is: a source property called `target`, `from` or `source` is legitimate, and `source.total` must read as a path.",
+      "patterns": [
+        {
+          "match": "^\\s*(mapping)\\s+(\"[^\"]*\"|'[^']*')",
+          "captures": {
+            "1": { "name": "keyword.control.declaration.jmm" },
+            "2": { "name": "string.quoted.jmm" }
+          }
+        },
+        {
+          "match": "^\\s*(target|from)\\s+([A-Za-z_$][\\w$]*(?:\\.[A-Za-z_$][\\w$]*)*)",
+          "captures": {
+            "1": { "name": "keyword.control.jmm" },
+            "2": { "name": "entity.name.type.jmm" }
+          }
+        },
+        {
+          "match": "^\\s*(fragment)\\s+([A-Za-z_][\\w]*)",
+          "captures": {
+            "1": { "name": "keyword.control.jmm" },
+            "2": { "name": "entity.name.function.jmm" }
+          }
+        },
+        {
+          "match": "^\\s*(always)\\b",
+          "name": "keyword.control.jmm"
+        }
+      ]
+    },
+
+    "refuse-block": {
+      "_comment": "⚠️ The one place a ':' does NOT introduce a rule: the left is a condition and the right is a message. Matched as a block so the lines inside it are not read as target properties.",
+      "begin": "^\\s*(refuse)\\s+(source|target)\\s+(before|after)\\s*(\\{)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.jmm" },
+        "2": { "name": "keyword.other.phase.jmm" },
+        "3": { "name": "keyword.other.phase.jmm" },
+        "4": { "name": "punctuation.section.block.begin.jmm" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.section.block.end.jmm" }
+      },
+      "patterns": [
+        { "include": "#comment" },
+        {
+          "_comment": "condition : \"message\" — the message is a string and the condition is an expression.",
+          "match": "(:)\\s*(\"[^\"]*\"|'[^']*')",
+          "captures": {
+            "1": { "name": "keyword.operator.assignment.jmm" },
+            "2": { "name": "string.quoted.jmm" }
+          }
+        },
+        { "include": "#expression" }
+      ]
+    },
+
+    "modifier": {
+      "patterns": [
+        {
+          "match": "^\\s*(include)\\s+([A-Za-z_][\\w]*)",
+          "captures": {
+            "1": { "name": "keyword.other.jmm" },
+            "2": { "name": "entity.name.function.jmm" }
+          }
+        },
+        {
+          "match": "^\\s*(let)\\s+([A-Za-z_][\\w]*)",
+          "captures": {
+            "1": { "name": "keyword.other.jmm" },
+            "2": { "name": "variable.other.jmm" }
+          }
+        },
+        {
+          "match": "^\\s*(unmapped)\\s+(fail|ignore)\\b",
+          "captures": {
+            "1": { "name": "keyword.other.jmm" },
+            "2": { "name": "constant.language.jmm" }
+          }
+        }
+      ]
+    },
+
+    "rule": {
+      "_comment": "⚠️ A target property is a word a ':' FOLLOWS. Tested by look-ahead rather than by position on the line, because `target Order` and `unmapped fail` are also before a colon and neither is a property — the same rule the CodeMirror scanner is built on.",
+      "match": "^\\s*([A-Za-z_][\\w]*)\\s*(?=:)",
+      "captures": {
+        "1": { "name": "variable.other.member.jmm" }
+      }
+    },
+
+    "expression": {
+      "patterns": [
+        { "include": "#comment" },
+        {
+          "_comment": "⚠️ `ignore` is the one reserved VALUE — never evaluated. Not a keyword, so it must not look like `from`; not a name, so it must not look like a variable somebody forgot to define.",
+          "match": "\\bignore\\b",
+          "name": "constant.language.ignore.jmm"
+        },
+        {
+          "match": "\\bwhen\\b",
+          "name": "keyword.other.jmm"
+        },
+        {
+          "_comment": "A filter after a lone pipe, exactly as in jME. `| int` is not decoration: it is what stops \"900\" > \"1000\" being true.",
+          "match": "(\\|)\\s*([A-Za-z_][\\w]*)",
+          "captures": {
+            "1": { "name": "keyword.operator.jmm" },
+            "2": { "name": "support.function.filter.jmm" }
+          }
+        },
+        {
+          "match": "\\b(true|false|null)\\b",
+          "name": "constant.language.jmm"
+        },
+        {
+          "match": "\\b(and|or|not|is|in|contains|starts|ends|matches|empty|even|odd)\\b",
+          "name": "keyword.operator.word.jmm"
+        },
+        {
+          "match": "\"[^\"]*\"|'[^']*'",
+          "name": "string.quoted.jmm"
+        },
+        {
+          "match": "\\b\\d+(\\.\\d+)?([eE][-+]?\\d+)?\\b",
+          "name": "constant.numeric.jmm"
+        },
+        {
+          "match": "([A-Za-z_][\\w]*)\\s*(?=\\()",
+          "name": "entity.name.function.jmm"
+        },
+        {
+          "match": "(\\.)([A-Za-z_][\\w]*)",
+          "captures": {
+            "1": { "name": "punctuation.accessor.jmm" },
+            "2": { "name": "variable.other.property.jmm" }
+          }
+        },
+        {
+          "_comment": "⚠️ A capitalised word is a type by CONVENTION, not by rule — which is enough to colour it and not enough to rely on for anything else. Matched before the plain identifier below for the same reason, and in the same order, as the CodeMirror scanner's tail.",
+          "match": "\\b[A-Z][\\w$]*\\b",
+          "name": "entity.name.type.jmm"
+        },
+        {
+          "_comment": "⚠️ The ROOT of a path, and the last rule that can claim a bare word. Without it `space.id` renders half-painted — the `.id` coloured as a segment and the `space` in front of it as nothing — and a one-word condition inside a refuse block gets no colour at all. It deliberately does NOT reuse the target-property scope: in a rule block the left column is a name being written into, here it is a value being read, and the two must not look alike.",
+          "match": "\\b[A-Za-z_$][\\w$]*\\b",
+          "name": "variable.other.jmm"
+        },
+        {
+          "match": "==|!=|<>|<=|>=|&&|\\|\\||\\?\\?|->|\\.\\.|[+\\-*/%<>!=|&^~?:]",
+          "name": "keyword.operator.jmm"
+        },
+        {
+          "match": "[(){}\\[\\],;]",
+          "name": "punctuation.jmm"
+        }
+      ]
+    }
+  }
+}

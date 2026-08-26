@@ -1,0 +1,49 @@
+<!--
+  Darcula, plus the four colours a TextMate-highlighted file needs and Darcula does not give it.
+
+  ⚠️ This is NOT a jmm decoration, and it is not a workaround for a defect in the grammar. IntelliJ
+  maps a TextMate scope onto one of its own attribute keys — `entity.name*` onto CLASS_NAME,
+  `variable*` onto LOCAL_VARIABLE, `support.function` onto FUNCTION_CALL — and Darcula leaves every one
+  of those keys at the plain text colour. It does the same to Java: a class reference in a Darcula
+  editor is plain `#a9b7c6`, by design. So a .jmm file came out with its keywords, strings, constants
+  and comments coloured and everything else white, and no choice of scope in the grammar could have
+  fixed it without lying about what the token is.
+
+  Import it: Settings → Editor → Color Scheme → the gear → Import Scheme, then pick "jMouse Dark" in
+  the scheme list. It inherits from Darcula, so everything not named below is unchanged.
+
+  ⚠️ It is global, not per-language — that is what an IntelliJ colour scheme is. Java class references
+  and locals take these colours too. Values are the house dark palette from @jmouse/codemirror's
+  styles.css, so a .jmm file in the IDE and the same file in a product's own editor agree.
+
+  ⚠️ And it serves `.jmp` and `.jmq` as well as `.jmm` — the three bundles hit the same four keys. It
+  lives here because this is the bundle that turned the problem up, not because it belongs to .jmm.
+-->
+<scheme name="jMouse Dark" version="142" parent_scheme="Darcula">
+  <attributes>
+    <!-- entity.name.* — the type a block is about, and the whole name on a `use` line. -->
+    <option name="DEFAULT_CLASS_NAME">
+      <value>
+        <option name="FOREGROUND" value="6fc3e8" />
+      </value>
+    </option>
+    <!-- variable.* — the target-property column, and the root of a source path. -->
+    <option name="DEFAULT_LOCAL_VARIABLE">
+      <value>
+        <option name="FOREGROUND" value="9be29b" />
+      </value>
+    </option>
+    <!-- support.function — a filter after a pipe. Its ABSENCE is what has to stand out. -->
+    <option name="DEFAULT_FUNCTION_CALL">
+      <value>
+        <option name="FOREGROUND" value="86d8f0" />
+      </value>
+    </option>
+    <!-- support.type — reserved for a type the language itself provides. -->
+    <option name="DEFAULT_PREDEFINED_SYMBOL">
+      <value>
+        <option name="FOREGROUND" value="c3a6ff" />
+      </value>
+    </option>
+  </attributes>
+</scheme>

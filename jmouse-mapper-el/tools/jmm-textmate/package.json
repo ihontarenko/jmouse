@@ -1,0 +1,67 @@
+{
+  "name": "jmm-textmate",
+  "displayName": "jMouse Mapping (.jmm)",
+  "description": "Syntax highlighting for jMouse mapping documents — targets, rules, fragments and refusals.",
+  "version": "1.0.0",
+  "publisher": "jmouse",
+  "license": "Apache-2.0",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "jmm",
+        "aliases": [
+          "jMouse Mapping",
+          "jmm"
+        ],
+        "extensions": [
+          ".jmm"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "jmm",
+        "scopeName": "source.jmm",
+        "path": "./syntaxes/jmm.tmLanguage.json"
+      }
+    ],
+    "configurationDefaults": {
+      "editor.tokenColorCustomizations": {
+        "textMateRules": [
+          {
+            "_comment": "`ignore` is the one value on the right of a colon that is never evaluated — it says this property is deliberately left alone. Italic, because it is neither a keyword nor a name: a reader scanning a rule block should see at a glance which lines DO something and which line is a decision not to.",
+            "scope": "constant.language.ignore.jmm",
+            "settings": { "fontStyle": "italic" }
+          },
+          {
+            "_comment": "The filter pipe is the same one jMQ paints bold and for the same reason: `| int` is not decoration, it is what stops a text comparison being wrong about numbers. Bold, so a line that NEEDED one and has none is what stands out.",
+            "scope": "support.function.filter.jmm",
+            "settings": { "fontStyle": "bold" }
+          },
+          {
+            "_comment": "A phase word — source/target, before/after — says WHEN a refusal is tested, and a refusal tested on the wrong side of the mapping passes every file it was written to stop. Italic bold, the same treatment jmp gives a word that qualifies a block rather than opening one.",
+            "scope": "keyword.other.phase.jmm",
+            "settings": { "fontStyle": "italic bold" }
+          },
+          {
+            "_comment": "The type a block is about — the `Project` of `target Project`. Bold, because `mapping`, `target` and `from` repeat on every block and carry no information once you know the language, while the type is the only thing on the line that says WHICH block you are looking at. A scheme that paints a keyword and a class alike leaves a reader nothing to scan by.",
+            "scope": "entity.name.type.jmm",
+            "settings": { "fontStyle": "bold" }
+          },
+          {
+            "_comment": "And the `use` header the other way: italic, and left on the theme's namespace hue rather than its class one. It is read once when a file is opened and scanned past forever after — it should not compete with the four words that locate you in the document.",
+            "scope": "entity.name.namespace.jmm",
+            "settings": { "fontStyle": "italic" }
+          }
+        ]
+      }
+    }
+  }
+}

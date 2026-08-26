@@ -1,0 +1,16 @@
+# ── examples/mapping/orders.jmm ──────────────────────────────────────────
+# Loaded from the classpath by JmmLoader — no product wires JmmReader by hand.
+# Only what deviates is here; same-named properties travel by themselves.
+
+mapping "orders" {
+
+    use org.jmouse.mapper.el.examples.LoadedMappingProbe$OrderRequest
+    use org.jmouse.mapper.el.examples.LoadedMappingProbe$Order
+
+    target Order {
+        from OrderRequest {
+            reference : reference | trim | upper   # a reference is stored normalised
+            secret    : ignore                     # never carried off the request
+        }
+    }
+}

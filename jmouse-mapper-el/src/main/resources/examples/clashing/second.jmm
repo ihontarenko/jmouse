@@ -1,0 +1,8 @@
+mapping "second" {
+    use org.jmouse.mapper.el.examples.LoadedMappingProbe$OrderRequest
+    use org.jmouse.mapper.el.examples.LoadedMappingProbe$Order
+
+    target Order {
+        from OrderRequest { reference : reference | upper }
+    }
+}
