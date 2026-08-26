@@ -1,4 +1,4 @@
-package org.jmouse.query.translate;
+package org.jmouse.el.translate;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -119,7 +119,7 @@ public final class Capabilities {
      */
     public void require(Capability capability, String clause) {
         if (!has(capability)) {
-            throw new UnsupportedQueryException(
+            throw new TranslationRefusedException(
                     "'%s' is not supported by the '%s' translator; it can do %s".formatted(
                             clause, translator, describe()));
         }

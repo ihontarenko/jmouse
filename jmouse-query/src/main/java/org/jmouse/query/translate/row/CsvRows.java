@@ -1,6 +1,6 @@
 package org.jmouse.query.translate.row;
 
-import org.jmouse.query.translate.UnsupportedQueryException;
+import org.jmouse.el.translate.TranslationRefusedException;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -169,10 +169,10 @@ public final class CsvRows {
         try {
             return Files.readAllLines(file, charset);
         } catch (IOException unreadable) {
-            throw new UnsupportedQueryException(
+            throw new TranslationRefusedException(
                     "'%s' cannot be read: %s".formatted(file, unreadable.getMessage()));
         } catch (UncheckedIOException unreadable) {
-            throw new UnsupportedQueryException("'%s' cannot be read".formatted(file));
+            throw new TranslationRefusedException("'%s' cannot be read".formatted(file));
         }
     }
 }

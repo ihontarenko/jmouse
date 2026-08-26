@@ -11,12 +11,12 @@ import org.jmouse.el.node.expression.ArgumentsNode;
 import org.jmouse.el.node.expression.BinaryOperation;
 import org.jmouse.el.node.expression.FunctionNode;
 import org.jmouse.el.node.expression.LiteralNode;
-import org.jmouse.query.translate.Capabilities;
-import org.jmouse.query.translate.Capability;
-import org.jmouse.query.translate.Bindings;
+import org.jmouse.el.translate.Capabilities;
+import org.jmouse.el.translate.Capability;
+import org.jmouse.el.translate.Bindings;
 import org.jmouse.query.translate.DeclaredValues;
-import org.jmouse.query.translate.Translator;
-import org.jmouse.query.translate.UnsupportedQueryException;
+import org.jmouse.query.translate.QueryTranslator;
+import org.jmouse.el.translate.TranslationRefusedException;
 import org.jmouse.query.el.QueryFunctions;
 import org.jmouse.query.el.QueryLanguage;
 import org.jmouse.query.el.function.Rewriter;
@@ -72,7 +72,7 @@ import java.util.Optional;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class RowTranslator implements Translator<RowTranslator.Query> {
+public class RowTranslator implements QueryTranslator<RowTranslator.Query> {
 
     private static final Capabilities CAPABILITIES = Capabilities.of("row",
             Capability.FILTER,
@@ -263,7 +263,7 @@ public class RowTranslator implements Translator<RowTranslator.Query> {
             return condition(condition, supplied);
         }
 
-        throw new UnsupportedQueryException(
+        throw new TranslationRefusedException(
                 "the '%s' translator was handed a %s; it reads a block, a 'where' or a condition"
                         .formatted(CAPABILITIES.translator(), node.getClass().getSimpleName()));
     }
@@ -443,7 +443,7 @@ public class RowTranslator implements Translator<RowTranslator.Query> {
             // `request.hours - days(7)`. It is meaningless either way, and is refused rather than read as
             // the number seven, which is the same refusal the SQL compiler gives.
             if (QueryFunctions.isDuration(call.getName())) {
-                throw new UnsupportedQueryException(
+                throw new TranslationRefusedException(
                         ("'%s(…)' is a length of time and means nothing on its own — add it to or "
                          + "subtract it from a moment, as in \"now() - days(7)\"")
                                 .formatted(call.getName()));
@@ -512,7 +512,7 @@ public class RowTranslator implements Translator<RowTranslator.Query> {
                 return amount.longValue();
             }
 
-            throw new UnsupportedQueryException(
+            throw new TranslationRefusedException(
                     ("'%s(…)' needs a whole number of them — '%s' is not one")
                             .formatted(duration.getName(),
                                     written == null ? "nothing" : written.toSource()));
@@ -543,7 +543,7 @@ public class RowTranslator implements Translator<RowTranslator.Query> {
         /** The default's tree, rewritten in place of the name that stands on it. */
         private Expression standingIn(String name) {
             if (!standingIn.add(name)) {
-                throw new UnsupportedQueryException(
+                throw new TranslationRefusedException(
                         ("'%s' stands on a default that leads back to itself; the names involved are %s")
                                 .formatted(name, String.join(" → ", standingIn) + " → " + name));
             }

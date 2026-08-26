@@ -89,7 +89,7 @@ public final class SourceLoader {
      *
      * <h2>⚠️ It returns a NODE, and rendering it is somebody else's job</h2>
      *
-     * <p>{@link org.jmouse.query.translate.Translator} is the one seam out of the tree — into SQL for a
+     * <p>{@link org.jmouse.el.translate.Translator} is the one seam out of the tree — into SQL for a
      * vendor, into a pipeline over rows, or back into jMQ. So this stops at the tree, and the text comes
      * from {@link org.jmouse.query.translate.JmqTranslator} like every other rendering. Producing the
      * string here would be a <strong>second writer</strong> for a language that already has one, and two

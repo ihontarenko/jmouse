@@ -98,7 +98,7 @@ public final class PolicyWriter {
      * @throws IllegalArgumentException where a name holds both kinds of quote and so has no spelling
      */
     public static String write(PolicyDocument document) {
-        return toNode(document).toSource();
+        return PolicySourceTranslator.INSTANCE.translate(toNode(document));
     }
 
     /**
@@ -108,10 +108,17 @@ public final class PolicyWriter {
      * written against, then the roles, then who holds what. A reader meets a name after the block that
      * declares it.
      *
+     * <p>⚠️ <strong>Public because the tree, not the text, is what a destination is handed.</strong>
+     * {@link #write(PolicyDocument)} is the one that renders source; a second destination — a
+     * structured form, a screen's model, a documentation page — takes this tree and its own
+     * {@link org.jmouse.el.translate.Translator}, and never reimplements the walk from the document.
+     * That is the rule the whole seam exists for: build nodes and hand them to a translator, never
+     * assemble the language beside the compiler.
+     *
      * @param document the policy to build
      * @return the tree, ready to render
      */
-    private static PolicyNode toNode(PolicyDocument document) {
+    public static PolicyNode toNode(PolicyDocument document) {
         PolicyNode policy = new PolicyNode(document.name());
 
         for (PolicyInclude include : document.includes()) {

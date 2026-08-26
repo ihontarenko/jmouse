@@ -1,12 +1,12 @@
 package org.jmouse.query.sql;
 
 import org.jmouse.jdbc.dialect.Dialect;
-import org.jmouse.query.translate.Capabilities;
-import org.jmouse.query.translate.Bindings;
-import org.jmouse.query.translate.Capability;
+import org.jmouse.el.translate.Capabilities;
+import org.jmouse.el.translate.Bindings;
+import org.jmouse.el.translate.Capability;
 import org.jmouse.query.translate.DeclaredValues;
-import org.jmouse.query.translate.Translator;
-import org.jmouse.query.translate.UnsupportedQueryException;
+import org.jmouse.query.translate.QueryTranslator;
+import org.jmouse.el.translate.TranslationRefusedException;
 import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 import org.jmouse.query.el.node.QueryBlockNode;
@@ -57,7 +57,7 @@ import java.util.function.Function;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class SqlTranslator implements Translator<Fragment> {
+public class SqlTranslator implements QueryTranslator<Fragment> {
 
     private static final Capabilities CAPABILITIES = Capabilities.everything("sql");
 
@@ -138,7 +138,7 @@ public class SqlTranslator implements Translator<Fragment> {
             return predicate(condition, bindings);
         }
 
-        throw new UnsupportedQueryException(
+        throw new TranslationRefusedException(
                 "the '%s' translator was handed a %s; it reads a block, a 'where' or a condition"
                         .formatted(CAPABILITIES.translator(), node.getClass().getSimpleName()));
     }

@@ -192,7 +192,7 @@ public final class VocabularyDemo {
 
         say("   memory declares: " + new RowTranslator(applicants.schema()).capabilities().translator()
             + ", join=" + new RowTranslator(applicants.schema()).capabilities()
-                    .has(org.jmouse.query.translate.Capability.JOIN));
+                    .has(org.jmouse.el.translate.Capability.JOIN));
         say("   ⚠️ тобто in-memory прев'ю чесно відмовиться від того, чого не вміє, замість повернути");
         say("      правдоподібне. Це і є те, заради чого Capabilities оголошуються, а не вгадуються.");
     }

@@ -2,22 +2,21 @@ package org.jmouse.access.el;
 
 import org.jmouse.access.el.lexer.AccessToken;
 import org.jmouse.access.el.node.SourceSpanNode;
-import org.jmouse.core.MimeParser;
-import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
-import org.jmouse.el.lexer.TokenizableSource;
+import org.jmouse.el.lexer.support.SourceReading;
 
 /**
- * Reads positions and raw text back out of a {@link TokenCursor}.
+ * Reads positions and raw text back out of a {@link TokenCursor}, in the policy language's own terms.
  *
- * <p>A {@link Token} knows its offset but not the characters around it, which leaves two things the
- * language document insists on out of reach: a span that names a <em>column</em> rather than a
- * position in the whole file, and a condition preserved exactly as it was typed. Both need the
- * source, and this is where the parser goes to get it.</p>
+ * <p>The reading itself is {@link SourceReading}, shared with every other language on this lexer. What
+ * stays here is the part that is {@code .jmp}'s and could not be shared: the span node this parser
+ * builds, and the fact that a name in a policy may be any of {@link AccessToken}'s own keywords.</p>
  *
- * <p>A cursor is allowed not to have a source. Where that happens the offset stands in for the
- * column and a slice falls back to the tokens themselves — degraded, never broken.</p>
+ * <p>⚠️ The keyword set is why these methods exist at all rather than callers reaching for
+ * {@link SourceReading} directly. Passing {@code AccessToken.nameTokens()} at ninety call sites is
+ * ninety chances to forget it, and forgetting it is a permission or an action that cannot be written
+ * down — see {@link AccessToken#nameTokens()}.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
@@ -56,16 +55,14 @@ public final class SourceReader {
      * @return the column within the token's own line
      */
     public static int column(TokenCursor cursor, Token token) {
-        TokenizableSource source = cursor.source();
-        return source == null ? token.offset() : source.getColumnNumber(token.offset());
+        return SourceReading.column(cursor, token);
     }
 
     /**
      * Returns the source text spanning a run of tokens, exactly as it was written.
      *
-     * <p>⚠️ Rendering the same run back from its parsed tree would give <em>a</em> spelling of it,
-     * not the one in the file — different spacing, different parentheses, a reader who cannot find
-     * the line. Anything shown back to an administrator has to come from here.</p>
+     * <p>⚠️ Rendering the same run back from its parsed tree would give <em>a</em> spelling of it, not
+     * the one in the file. Anything shown back to an administrator has to come from here.</p>
      *
      * @param cursor the cursor the tokens were read from
      * @param first  the first token of the run
@@ -73,29 +70,17 @@ public final class SourceReader {
      * @return the verbatim text, trimmed of surrounding whitespace
      */
     public static String text(TokenCursor cursor, Token first, Token last) {
-        TokenizableSource source = cursor.source();
-
-        if (source == null) {
-            return first.value();
-        }
-
-        int start = Math.max(0, first.offset());
-        int end   = Math.min(source.length(), last.offset() + last.value().length());
-
-        return start >= end ? first.value() : source.subSequence(start, end).toString().trim();
+        return SourceReading.text(cursor, first, last);
     }
 
     /**
      * Reads a token's value with any surrounding quotes removed.
      *
-     * <p>A quoted identifier exists so a name can hold what the bare form cannot; the quotes are how
-     * it was written, never part of what it says.</p>
-     *
      * @param token the token to read
      * @return the token's value, unquoted
      */
     public static String literal(Token token) {
-        return MimeParser.unquote(token.value());
+        return SourceReading.literal(token);
     }
 
     /**
@@ -104,30 +89,18 @@ public final class SourceReader {
      *
      * <p>⚠️ <strong>The lexer does not produce these as one token.</strong> {@code storage-byte}
      * arrives as {@code storage}, {@code -}, {@code byte}, exactly as {@code form:read} arrives as
-     * three tokens and is joined by a run of the same kind. Quoting would also work — {@code 'own-rows'}
-     * in a scopes block already does — but a capability key appears on every line of every bundle, and
-     * a catalogue in quotes is a catalogue nobody enjoys proofreading, which is the whole reason it
-     * moved out of a migration and into a document.
+     * three tokens and is joined by a run of the same kind. Quoting would also work, but a capability
+     * key appears on every line of every bundle, and a catalogue in quotes is a catalogue nobody enjoys
+     * proofreading — which is the whole reason it moved out of a migration and into a document.</p>
      *
      * <p>The run cannot swallow what follows: nothing that may come after a key — a description, a
-     * number, {@code per}, a comma, the end of the line — begins with a hyphen.
+     * number, {@code per}, a comma, the end of the line — begins with a hyphen.</p>
      *
      * @param cursor the cursor, positioned on the first token of the name
      * @return the name, hyphens included and quotes removed
      */
     public static String hyphenatedName(TokenCursor cursor) {
-        if (cursor.isCurrent(BasicToken.T_STRING)) {
-            return literal(cursor.ensure(BasicToken.T_STRING));
-        }
-
-        StringBuilder name = new StringBuilder(cursor.ensure(AccessToken.nameTokens()).value());
-
-        while (cursor.isCurrent(BasicToken.T_MINUS) && cursor.isNext(AccessToken.nameTokens())) {
-            cursor.ensure(BasicToken.T_MINUS);
-            name.append('-').append(cursor.ensure(AccessToken.nameTokens()).value());
-        }
-
-        return name.toString();
+        return SourceReading.hyphenatedName(cursor, AccessToken.nameTokens());
     }
 
     /**
@@ -135,26 +108,15 @@ public final class SourceReader {
      *
      * <p>The counterpart of {@link #hyphenatedName(TokenCursor)}, and it exists for the same reason:
      * the lexer gives {@code entry}, {@code .} and {@code listByPurpose} separately, and an action is
-     * one word.
+     * one word.</p>
      *
      * <p>The run cannot swallow what follows: nothing that may come after an action name — its
-     * description, {@code publishes}, the end of the line — begins with a dot.
+     * description, {@code publishes}, the end of the line — begins with a dot.</p>
      *
      * @param cursor the cursor, positioned on the first token of the name
      * @return the name, dots included and quotes removed
      */
     public static String dottedName(TokenCursor cursor) {
-        if (cursor.isCurrent(BasicToken.T_STRING)) {
-            return literal(cursor.ensure(BasicToken.T_STRING));
-        }
-
-        StringBuilder name = new StringBuilder(cursor.ensure(AccessToken.nameTokens()).value());
-
-        while (cursor.isCurrent(BasicToken.T_DOT) && cursor.isNext(AccessToken.nameTokens())) {
-            cursor.ensure(BasicToken.T_DOT);
-            name.append('.').append(cursor.ensure(AccessToken.nameTokens()).value());
-        }
-
-        return name.toString();
+        return SourceReading.dottedName(cursor, AccessToken.nameTokens());
     }
 }

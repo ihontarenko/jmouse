@@ -1,4 +1,4 @@
-package org.jmouse.query.translate;
+package org.jmouse.el.translate;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

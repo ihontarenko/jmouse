@@ -59,19 +59,30 @@ public record GrantAttribution(
     }
 
     /**
-     * The sentence the policy file wrote with {@code reason "…"}, for the person who is refused.
+     * The sentence a rule wrote with {@code reason "…"}, for the person who is refused.
      *
-     * <p>⚠️ <strong>Deliberately not {@link #reason()}, and the difference is the whole point.</strong>
-     * {@code reason} says why the grant <em>exists</em> — {@code "left the team"},
-     * {@code "declared at policy/rules/working-hours:12"} — and a refusal quoting that at somebody who
-     * pressed a button would be reading provenance out loud. This is what the author wrote <em>for that
-     * person</em>: <em>"службу тимчасово вимкнено, спробуйте за годину"</em>.
+     * <h2>⚠️ It is the same words as {@link #reason()} for a stored rule, and that is a decision</h2>
      *
-     * <p>⚠️ Two names, one word, and the file spells it {@code reason}. That mismatch is known and
-     * accepted rather than fixed by renaming {@code reason}, which is a component of a core record with
-     * call sites in three products. Worth revisiting when somebody is already in there.
+     * <p>These began as two ideas: {@code reason} said why the grant <em>exists</em> — provenance, for
+     * whoever administers the installation — and {@code explanation} said what to tell the person who
+     * hit the refusal. The distinction is real in prose and turned out to be unbuildable in practice,
+     * because <strong>there is one column on the table and one keyword in the grammar</strong>, and
+     * nobody typing into either was ever choosing between two meanings.
      *
-     * @return the written sentence, or {@code null} where the file said nothing
+     * <p>Kept apart, the consequences were all silent. A {@code deny} stored as a row refused with its
+     * sentence dropped, because only {@link org.jmouse.access.policy.PolicyBinder} filled this field and
+     * only files went through it. The projection wrote documents with the sentence missing, so opening
+     * the policy editor and pressing Apply <em>erased</em> it. And the editor's own writes stamped
+     * {@code "Written from the policy editor"} over whatever the document said.
+     *
+     * <p>So: <strong>one field end to end.</strong> {@link #stored} fills both, the projection carries it
+     * back out, and the <em>Who</em> view goes on rendering {@link #reason()} — the same sentence an
+     * administrator typed, which is what they expected to see there anyway.
+     *
+     * <p>⚠️ {@link #derived} is deliberately NOT changed. Its {@code reason} is the engine describing its
+     * own mechanism — a ceiling, a share link — and no such sentence was written for a reader.
+     *
+     * @return the written sentence, or {@code null} where nothing said anything
      */
     public String explanation() {
         return explanation;
@@ -90,9 +101,16 @@ public record GrantAttribution(
         return new GrantAttribution(grantedBy, null, since, GrantOrigin.stored(), null);
     }
 
-    /** The same, with the words somebody typed at the time. */
+    /**
+     * The same, with the words somebody typed at the time.
+     *
+     * <p>⚠️ <strong>Those words land in BOTH {@link #reason} and {@link #explanation}, on purpose.</strong>
+     * A store has one column and the person filling it wrote one sentence; splitting it here would mean
+     * every store deciding which half it meant, and every one of them would decide differently. See
+     * {@link #explanation()} for what that cost while the two were kept apart.
+     */
     public static GrantAttribution stored(String grantedBy, String reason, LocalDateTime since) {
-        return new GrantAttribution(grantedBy, reason, since, GrantOrigin.stored(), null);
+        return new GrantAttribution(grantedBy, reason, since, GrantOrigin.stored(), null, reason);
     }
 
     /**

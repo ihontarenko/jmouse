@@ -106,7 +106,10 @@ final public class ExpressionEvaluator {
      */
     public String rewrite(String source) {
         if (expressionLanguage.compile(source) instanceof PolicyNode document) {
-            return document.toSource();
+            // ⚠️ Through the translator, not `toSource()` directly. This and PolicyWriter are the two
+            // ways a policy leaves a tree, and they used to be two renderings that merely happened to
+            // agree — which is how an un-parse and a compiler drift apart. One seam, one destination.
+            return PolicySourceTranslator.INSTANCE.translate(document);
         }
 
         throw new PolicyParseException(

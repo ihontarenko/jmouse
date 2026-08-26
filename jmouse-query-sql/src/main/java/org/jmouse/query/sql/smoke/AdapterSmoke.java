@@ -1,8 +1,8 @@
 package org.jmouse.query.sql.smoke;
 
-import org.jmouse.query.translate.Capabilities;
-import org.jmouse.query.translate.Capability;
-import org.jmouse.query.translate.Translator;
+import org.jmouse.el.translate.Capabilities;
+import org.jmouse.el.translate.Capability;
+import org.jmouse.el.translate.Translator;
 import org.jmouse.query.translate.row.RowTranslator;
 import org.jmouse.query.el.QueryLanguage;
 import org.jmouse.query.el.node.ViewNode;

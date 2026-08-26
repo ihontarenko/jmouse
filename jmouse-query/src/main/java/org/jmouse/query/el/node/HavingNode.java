@@ -1,7 +1,7 @@
 package org.jmouse.query.el.node;
 
 import org.jmouse.el.node.Expression;
-import org.jmouse.query.translate.Capability;
+import org.jmouse.el.translate.Capability;
 
 /**
  * {@code having <expression>} — which groups survive.

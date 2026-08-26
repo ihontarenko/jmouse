@@ -202,15 +202,28 @@ public class JpaAccessAdministration implements AccessAdministration {
         // ⚠️ The condition is part of "the same grant". Compared here rather than left out, because a
         // caller removing a condition would otherwise be told nothing changed while the predicate
         // stayed on the row and went on narrowing.
+        //
+        // ⚠️ AND SO IS THE REASON, for the same argument one step further along. It is not provenance
+        // decorating the row: it is the sentence the refusal reads out, so a caller who rewrote it and
+        // was told "nothing changed" goes on refusing people in the words they just replaced. That is
+        // exactly what happened — a grant seeded once kept saying "Seeded from the policy files" no
+        // matter what anybody typed into the policy editor afterwards, because the only two things
+        // compared here were the effect and the condition.
         if (existing.isPresent()
             && existing.get().getEffect().equalsIgnoreCase(effect.name())
-            && Objects.equals(existing.get().getConditionSource(), conditionSource)) {
+            && Objects.equals(existing.get().getConditionSource(), conditionSource)
+            && Objects.equals(existing.get().getReason(), reason)) {
 
             return Change.nothing(subjectId, permission, at);
         }
 
         // ⚠️ Replaced rather than updated, so that flipping an ALLOW to a DENY reads as one decision
         // rather than as an edit to somebody else's. The unique key would refuse the second row anyway.
+        //
+        // ⚠️ Which means a REASON-ONLY edit resets `created_at`, so the Who view will say the grant was
+        // made when somebody fixed a typo in its sentence. Known and left alone: the entity has no
+        // setters on purpose, and growing one for this is a change to a table four products share.
+        // Worth doing properly when somebody is already in here.
         existing.ifPresent(entityManager::remove);
         entityManager.flush();
 

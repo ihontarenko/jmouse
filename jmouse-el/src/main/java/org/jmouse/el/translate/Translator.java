@@ -1,9 +1,6 @@
-package org.jmouse.query.translate;
+package org.jmouse.el.translate;
 
 import org.jmouse.el.node.Node;
-import org.jmouse.query.el.node.ClauseKind;
-import org.jmouse.query.el.node.ClauseNode;
-import org.jmouse.query.el.node.QueryBlockNode;
 
 /**
  * One way out of the tree — into SQL for a vendor, into a pipeline over rows, or back into jMQ itself.
@@ -66,27 +63,16 @@ public interface Translator<T> {
     }
 
     /**
-     * Refuses every clause this translator cannot honour, before translating any of them.
+     * ⚠️ <strong>The convenience that walked a document and required a capability per clause is not
+     * here.</strong>
      *
-     * <h2>⚠️ Up front, and never silently</h2>
+     * <p>It named the query language's own node types, and a seam three languages share cannot know one
+     * of them. It lives on {@code QueryTranslator} in {@code jmouse-query}, which is where those nodes
+     * live — and any other language wanting the same shape declares its own, against its own tree.</p>
      *
-     * <p>Checked before anything is built, so a document asking for two things this destination lacks is
-     * told about the first rather than handed half a statement. And <strong>refused</strong> rather than
-     * ignored: quietly dropping a {@code group} and returning ungrouped rows is the bug this whole area
-     * exists to make impossible to write by accident.</p>
-     *
-     * <p>⚠️ It asks each clause what it needs rather than knowing the clauses itself, so a clause added
-     * to the language costs no edit here and none in any translator.</p>
-     *
-     * @param block what was asked for
+     * <p>What every destination still owes, wherever the walk happens, is the rule {@link Capabilities}
+     * states: a construct that cannot be honoured is <strong>refused</strong>, never ignored. Dropping a
+     * clause and returning a plausible answer is the failure that whole type exists to make impossible
+     * to write by accident.</p>
      */
-    default void requireSupport(QueryBlockNode block) {
-        Capabilities capabilities = capabilities();
-
-        for (ClauseNode clause : block.getClauses()) {
-            ClauseKind kind = clause.kind();
-
-            capabilities.require(kind.capability(), kind.keyword());
-        }
-    }
 }

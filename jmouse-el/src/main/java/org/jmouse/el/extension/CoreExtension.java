@@ -87,6 +87,10 @@ public class CoreExtension implements Extension {
                 new SubFilter(),
                 new DefaultFilter(),
                 new TrimFilter(),
+                // ⚠️ A converter reached by name, and deliberately a FILTER rather than a clause of its
+                // own: a converter applied to a value is exactly what a filter is, so it composes with
+                // every other one on the line instead of needing its own place in a grammar.
+                new ViaFilter(),
                 new TypeFilter(),
                 new ClassFilter(),
                 new LengthFilter(),

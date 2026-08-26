@@ -1,6 +1,6 @@
 package org.jmouse.query.el.node;
 
-import org.jmouse.query.translate.Capability;
+import org.jmouse.el.translate.Capability;
 
 /**
  * {@code join: person on person.key == request.assignee} — a second structure, in the query.

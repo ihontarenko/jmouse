@@ -8,6 +8,7 @@ import org.jmouse.access.EffectivePermissionsResolver;
 import org.jmouse.access.PermissionProvenance;
 import org.jmouse.access.PermissionSource;
 import org.jmouse.access.RefusalReason;
+import org.jmouse.access.RefusalWords;
 import org.jmouse.access.ScopeReference;
 import org.jmouse.access.Subject;
 import org.jmouse.access.spi.AccessContextScope;
@@ -159,7 +160,7 @@ public class ConditionAxis implements AccessAxisEvaluator {
             // ⚠️ A deny whose function could not answer is APPLIED. That is the fail-closed reading
             // here: a quota nobody can read refuses rather than waves through.
             if (holds(narrowing, subject, target, true)) {
-                return AccessDecision.refused(refusal, because(narrowing, "denied where"));
+                return refusedBy(narrowing, "denied where");
             }
         }
 
@@ -191,7 +192,7 @@ public class ConditionAxis implements AccessAxisEvaluator {
             last = route;
         }
 
-        return AccessDecision.refused(refusal, because(last, "allowed only where"));
+        return refusedBy(last, "allowed only where");
     }
 
     /**
@@ -241,26 +242,27 @@ public class ConditionAxis implements AccessAxisEvaluator {
      *
      * <p>The condition is quoted as it was written rather than described. Somebody reading a refusal
      * has to be able to find the line it came from, and a paraphrase is a line nobody can search for.
-     */
-    /**
-     * ⚠️ <strong>The quote stays, and the sentence is added beside it.</strong>
      *
-     * <p>Quoting the condition verbatim is what lets whoever administers the installation <em>find</em>
-     * the rule — respelling it would leave them searching for a line that is not in any file. But to
-     * somebody who merely pressed a button, {@code now is not workingHours} is an expression, not an
-     * explanation.
+     * <p>⚠️ <strong>The quote stays, and the sentence is added beside it.</strong> Quoting the condition
+     * verbatim is what lets whoever administers the installation <em>find</em> the rule — respelling it
+     * would leave them searching for a line that is not in any file. But to somebody who merely pressed
+     * a button, {@code now is not workingHours} is an expression, not an explanation. So a policy file
+     * may write {@code reason "…"} and the refusal carries both: the quote for the administrator, the
+     * sentence for the person.
      *
-     * <p>So a policy file may write {@code reason "…"} and the refusal carries both: the quote for the
-     * administrator, the sentence for the person.
+     * <p>⚠️ The tail is {@link RefusalWords}' rather than this method's, and that is not tidying: this
+     * axis is no longer the only one with an explanation to add, and two axes spelling the same tail
+     * two ways is how a reader learns to distrust both.
      */
-    private static String because(PermissionSource source, String phrasing) {
+    private AccessDecision refusedBy(PermissionSource source, String phrasing) {
         String written = "This is " + phrasing + " `" + source.condition().source() + "`"
                          + (source.origin().isDeclared()
                                     ? ", declared in " + source.origin().describe()
                                     : "");
 
-        return source.attribution().isExplained()
-                ? written + " with reason '" + source.attribution().explanation() + "'."
-                : written + ".";
+        String explanation = source.attribution().explanation();
+
+        return AccessDecision.refused(
+                refusal, RefusalWords.explained(written, explanation), explanation);
     }
 }

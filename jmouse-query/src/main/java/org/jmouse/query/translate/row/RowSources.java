@@ -4,9 +4,9 @@ import org.jmouse.query.el.node.QueryDocumentNode;
 import org.jmouse.query.el.node.SourceNode;
 import org.jmouse.query.el.node.ViewNode;
 import org.jmouse.query.schema.QuerySchema;
-import org.jmouse.query.translate.Bindings;
+import org.jmouse.el.translate.Bindings;
 import org.jmouse.query.translate.SourceBinding;
-import org.jmouse.query.translate.UnsupportedQueryException;
+import org.jmouse.el.translate.TranslationRefusedException;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -110,7 +110,7 @@ public final class RowSources {
         QuerySchema schema = schemas.get(name);
 
         if (schema == null) {
-            throw new UnsupportedQueryException(
+            throw new TranslationRefusedException(
                     "there is nothing called '%s' to read; this registry has %s".formatted(
                             name, declared().isEmpty() ? "nothing at all" : String.join(", ", declared())));
         }

@@ -1,5 +1,10 @@
 package org.jmouse.query.translate;
 
+import org.jmouse.el.translate.Translator;
+import org.jmouse.el.translate.Capabilities;
+import org.jmouse.el.translate.Bindings;
+import org.jmouse.el.translate.TranslationRefusedException;
+
 import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
 
@@ -56,7 +61,7 @@ public final class JmqTranslator implements Translator<String> {
             return expression.toSource();
         }
 
-        throw new UnsupportedQueryException(
+        throw new TranslationRefusedException(
                 "a %s cannot be written back out as jMQ; only an expression knows its own source"
                         .formatted(node.getClass().getSimpleName()));
     }

@@ -1,4 +1,4 @@
-package org.jmouse.query.translate;
+package org.jmouse.el.translate;
 
 /**
  * A query a backend cannot honour.
@@ -10,9 +10,9 @@ package org.jmouse.query.translate;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class UnsupportedQueryException extends RuntimeException {
+public class TranslationRefusedException extends RuntimeException {
 
-    public UnsupportedQueryException(String message) {
+    public TranslationRefusedException(String message) {
         super(message);
     }
 }

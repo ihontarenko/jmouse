@@ -13,7 +13,7 @@ import org.jmouse.query.el.node.ViewNode;
 import org.jmouse.query.schema.QueryChecker;
 import org.jmouse.query.schema.QuerySchema;
 
-import org.jmouse.query.translate.Bindings;
+import org.jmouse.el.translate.Bindings;
 import org.jmouse.query.translate.SourceBinding;
 
 import java.time.Instant;
@@ -212,7 +212,7 @@ public class QueryEngine {
     }
 
     /**
-     * One source, as a {@link org.jmouse.query.translate.Translator} — for a caller that wants to be
+     * One source, as a {@link org.jmouse.el.translate.Translator} — for a caller that wants to be
      * backend-agnostic rather than to hold SQL.
      *
      * <p>⚠️ The same registered source, reached through the interface every backend implements. A

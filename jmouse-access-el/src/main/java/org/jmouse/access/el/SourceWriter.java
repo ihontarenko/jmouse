@@ -1,5 +1,7 @@
 package org.jmouse.access.el;
 
+import org.jmouse.el.lexer.support.SourceWriting;
+
 import java.util.regex.Pattern;
 
 /**
@@ -30,7 +32,6 @@ public final class SourceWriter {
     private static final String PLACEHOLDER_CLOSING = "}";
 
     private static final char SINGLE_QUOTE = '\'';
-    private static final char DOUBLE_QUOTE = '"';
 
     private SourceWriter() {
     }
@@ -56,35 +57,23 @@ public final class SourceWriter {
     /**
      * Writes a value the grammar always quotes — a description, an included path, a policy name.
      *
-     * <p>⚠️ A {@code .jmp} string literal has no escape sequence, so the quote character has to be
-     * chosen rather than escaped. A value holding both kinds cannot be written at all, and saying so
-     * is better than emitting a file that will not parse.</p>
+     * <p>⚠️ The rule that a string literal here holds no escapes, so the quote has to be chosen and a
+     * value carrying both kinds has no spelling, is the <strong>lexer's</strong> rather than this
+     * language's — {@code .jmm} is on the same lexer and had worked it out separately. It lives in
+     * {@link SourceWriting} beside {@link org.jmouse.el.lexer.support.SourceReading#literal}, which is
+     * the reading half of exactly the same fact.</p>
+     *
+     * <p>⚠️ What stays here is the <em>preference</em>: a policy writes single quotes. That is not
+     * taste, it is a compatibility fact — a policy's output is stored as revisions an installation
+     * reverts to, so a value that used to render {@code 'my-space'} rendering {@code "my-space"} is a
+     * change to every revision saved from then on, for nothing.</p>
      *
      * @param value the value to quote
      * @return the value as a string literal
      * @throws IllegalArgumentException when the value holds both kinds of quote
      */
     public static String literal(String value) {
-        if (value == null) {
-            return null;
-        }
-
-        boolean holdsSingle = value.indexOf(SINGLE_QUOTE) >= 0;
-        boolean holdsDouble = value.indexOf(DOUBLE_QUOTE) >= 0;
-
-        if (holdsSingle && holdsDouble) {
-            // ⚠️ The parentheses are the fix, not decoration. `"a %s" + "b".formatted(v)` binds the call
-            // to the LAST literal only: every placeholder before it survives as a raw %s and the
-            // argument meant for it is dropped, silently, because String.format ignores arguments it
-            // was not asked for. See JMF-12 — this was the third of three sites.
-            throw new IllegalArgumentException(
-                    ("'%s' cannot be written to a policy file: a string literal there holds no escapes, "
-                     + "so a value carrying both kinds of quote has no spelling").formatted(value));
-        }
-
-        char quote = holdsSingle ? DOUBLE_QUOTE : SINGLE_QUOTE;
-
-        return quote + value + quote;
+        return SourceWriting.literal(value, SINGLE_QUOTE);
     }
 
     /**

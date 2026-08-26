@@ -1,6 +1,6 @@
 package org.jmouse.query.sql;
 
-import org.jmouse.query.translate.UnsupportedQueryException;
+import org.jmouse.el.translate.TranslationRefusedException;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -97,7 +97,7 @@ public final class Targets {
             return;
         }
 
-        throw new UnsupportedQueryException(
+        throw new TranslationRefusedException(
                 ("'%s' is in '%s' and '%s' is in '%s', so one statement cannot reach both; "
                  + "read each side and join them in memory if that is what you want").formatted(
                         one, of(one), other, of(other)));

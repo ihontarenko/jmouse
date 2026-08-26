@@ -1,6 +1,6 @@
 package org.jmouse.query.el.node;
 
-import org.jmouse.query.translate.Capability;
+import org.jmouse.el.translate.Capability;
 
 /**
  * {@code limit: 50} — at most this many rows.

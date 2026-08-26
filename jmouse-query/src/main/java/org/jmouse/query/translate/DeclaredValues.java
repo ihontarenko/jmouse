@@ -1,5 +1,8 @@
 package org.jmouse.query.translate;
 
+import org.jmouse.el.translate.Bindings;
+import org.jmouse.el.translate.TranslationRefusedException;
+
 import org.jmouse.el.node.Expression;
 import org.jmouse.query.el.node.ParameterDeclarationNode;
 import org.jmouse.query.el.node.QueryBlockNode;
@@ -81,7 +84,7 @@ public final class DeclaredValues {
      * @param block    a view, or any other block — one that declares nothing is returned untouched
      * @param bindings what the caller supplied
      * @return the caller's values, plus an expression for each name left out that has a default
-     * @throws UnsupportedQueryException when something declared has neither a value nor a default
+     * @throws TranslationRefusedException when something declared has neither a value nor a default
      */
     public static Declared resolve(QueryBlockNode block, Bindings bindings) {
         if (!(block instanceof ViewNode view)) {
@@ -113,7 +116,7 @@ public final class DeclaredValues {
         }
 
         if (!missing.isEmpty()) {
-            throw new UnsupportedQueryException(
+            throw new TranslationRefusedException(
                     ("view %s needs %s, and nothing was supplied for %s; "
                      + "supply them by name or give them a default").formatted(
                             name(view), String.join(", ", missing),

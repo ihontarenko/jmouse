@@ -375,11 +375,17 @@ public final class PolicyProjection {
 
         for (DirectHolding holding : directHoldings) {
             held.computeIfAbsent(holding.subjectId(), subject -> new Held())
+                    // ⚠️ THE REASON HAS TO COME BACK OUT, and it used to be dropped here — the
+                    // five-argument constructor leaves it null, and the row's words were sitting one
+                    // field away the whole time. What that cost is not a missing line in a document:
+                    // the policy editor OPENS on this projection and writes rows back from what it was
+                    // shown, so a reason absent here was a reason deleted by anybody who pressed Apply.
                     .grants.add(new PolicyGrant(
                             holding.permission(),
                             scopeOf(holding.at()),
                             holding.allowed() ? PolicyEffect.ALLOW : PolicyEffect.DENY,
                             holding.condition(),
+                            holding.reason(),
                             SourceSpan.none()));
         }
 

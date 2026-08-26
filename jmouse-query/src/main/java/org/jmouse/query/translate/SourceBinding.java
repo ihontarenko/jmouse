@@ -1,5 +1,8 @@
 package org.jmouse.query.translate;
 
+import org.jmouse.el.translate.Bindings;
+import org.jmouse.el.translate.TranslationRefusedException;
+
 import org.jmouse.query.el.node.ViewNode;
 
 import java.util.Collection;
@@ -49,7 +52,7 @@ public final class SourceBinding {
         String binding = view.getTarget();
 
         if (!bindings.has(binding)) {
-            throw new UnsupportedQueryException(
+            throw new TranslationRefusedException(
                     ("this view runs against '$%s' and nothing was bound to it; "
                      + "supply it by name, choosing one of %s").formatted(binding, list(declared)));
         }
@@ -59,13 +62,13 @@ public final class SourceBinding {
         // ⚠️ A name, and only a name. Anything else — a source object, a table, a statement — would make
         // the caller the one deciding what gets read rather than which of the declared things gets read.
         if (!(value instanceof String name) || name.isBlank()) {
-            throw new UnsupportedQueryException(
+            throw new TranslationRefusedException(
                     ("'$%s' has to be bound to the NAME of a declared source; "
                      + "it was bound to %s").formatted(binding, describe(value)));
         }
 
         if (!declared.contains(name)) {
-            throw new UnsupportedQueryException(
+            throw new TranslationRefusedException(
                     ("'$%s' was bound to '%s', and nothing is declared under that name; "
                      + "this engine has %s").formatted(binding, name, list(declared)));
         }

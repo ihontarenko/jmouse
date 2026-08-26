@@ -4,6 +4,7 @@ import org.jmouse.access.el.lexer.AccessToken;
 import org.jmouse.core.matcher.Matcher;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.lexer.support.CursorLookahead;
 
 import static org.jmouse.access.el.lexer.AccessToken.*;
 import static org.jmouse.el.lexer.BasicToken.*;
@@ -38,10 +39,7 @@ public final class CursorMatcher {
      * Generous for a property path, and short enough that a stray {@code $} cannot make a matcher
      * read the rest of the file.
      */
-    private static final int PLACEHOLDER_LOOKAHEAD = 32;
-
-    /** Returned by the scanners below for "this is not that shape". */
-    private static final int NO_MATCH = -1;
+    private static final int NO_MATCH = CursorLookahead.NO_MATCH;
 
     private CursorMatcher() {
     }
@@ -659,21 +657,7 @@ public final class CursorMatcher {
      * @return how many tokens it occupies, or {@link #NO_MATCH} when it never closes
      */
     private static int placeholderLength(TokenCursor cursor, int start) {
-        if (!checkAt(cursor, start, T_DOLLAR) || !checkAt(cursor, start + 1, T_OPEN_CURLY)) {
-            return NO_MATCH;
-        }
-
-        for (int index = start + 2; index < start + PLACEHOLDER_LOOKAHEAD; index++) {
-            if (checkAt(cursor, index, T_CLOSE_CURLY)) {
-                return index - start + 1;
-            }
-
-            if (checkAt(cursor, index, T_NEW_LINE, T_EOL, T_SEMICOLON)) {
-                return NO_MATCH;
-            }
-        }
-
-        return NO_MATCH;
+        return CursorLookahead.placeholderLength(cursor, start);
     }
 
     /**
@@ -685,7 +669,6 @@ public final class CursorMatcher {
      * @return {@code true} when a token is there and has one of those types
      */
     private static boolean checkAt(TokenCursor cursor, int offset, Token.Type... expected) {
-        Token token = cursor.lookAt(offset);
-        return token != null && cursor.checkAt(offset, expected);
+        return CursorLookahead.at(cursor, offset, expected);
     }
 }

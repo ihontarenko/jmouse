@@ -1,5 +1,9 @@
 package org.jmouse.query.translate;
 
+import org.jmouse.el.translate.Translator;
+import org.jmouse.el.translate.Capabilities;
+import org.jmouse.el.translate.Bindings;
+
 import org.jmouse.el.node.Node;
 
 /**

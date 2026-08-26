@@ -1,6 +1,7 @@
 package org.jmouse.access.el.parser;
 
 import org.jmouse.access.el.SourceReader;
+import org.jmouse.access.el.lexer.AccessToken;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
 import org.jmouse.el.lexer.TokenCursor;
@@ -31,18 +32,33 @@ import org.jmouse.el.lexer.TokenCursor;
  * running to the end of the line. A statement is one line, the restricted dialect has no braces and
  * no separators, and nothing it may contain can span a newline — so there is no expression this reads
  * too little of, and no keyword left to trip over.
+ *
+ * <p>⚠️ With one exception, and it is the only keyword that can ever follow a condition on its own
+ * line: {@code reason}. See {@code TERMINATORS} below for why stopping there costs nothing.
  */
 public final class ConditionReader {
 
     /**
-     * Where a condition stops: the end of the line, or the brace that closes the block it is in.
+     * Where a condition stops: the end of the line, the brace that closes the block it is in, or the
+     * one keyword a statement may still carry after its condition.
      *
      * <p>The closing brace is here because a statement may be the last line before it with nothing
      * between them, and because the condition dialect has no braces of its own — so one appearing
      * here can only be the block's.
+     *
+     * <p>⚠️ <strong>{@code reason} is here because running to the end of the line swallowed it.</strong>
+     * A statement is {@code … when <condition> [reason "…"]}, so on the one-line form the condition and
+     * the sentence share a line — and a reader that stops only at the newline takes both. The damage is
+     * the shape this module exists to prevent: the grant silently loses its {@code reason}, and the
+     * words end up inside the condition, where binding reports {@code reason} as a variable nothing
+     * declares. Nothing legitimate is cut short by stopping here, because
+     * {@link org.jmouse.access.el.lexer.AccessRecognizer} makes {@code reason} a keyword
+     * <em>wherever</em> it appears — a condition could never have named a variable that the lexer
+     * refuses to hand over as an identifier.
      */
     private static final Token.Type[] TERMINATORS = {
             BasicToken.T_NEW_LINE, BasicToken.T_EOL, BasicToken.T_SEMICOLON, BasicToken.T_CLOSE_CURLY,
+            AccessToken.T_REASON,
     };
 
     private ConditionReader() {

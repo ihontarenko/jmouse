@@ -1,4 +1,4 @@
-package org.jmouse.query.translate;
+package org.jmouse.el.translate;
 
 /**
  * One thing a query may ask for that a backend may or may not be able to do.

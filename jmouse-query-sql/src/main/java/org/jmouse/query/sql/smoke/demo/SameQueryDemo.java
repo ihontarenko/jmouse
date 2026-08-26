@@ -43,7 +43,7 @@ import static org.jmouse.query.sql.smoke.demo.Demo.section;
  *   <tr><th>what checks it</th><td colspan="2">the same {@code QuerySchema}, and the same refusals</td></tr>
  * </table>
  *
- * <p>⚠️ The two backends declare different {@link org.jmouse.query.translate.Capabilities}, and that is the
+ * <p>⚠️ The two backends declare different {@link org.jmouse.el.translate.Capabilities}, and that is the
  * honest part: the in-memory one has no {@code JOIN} and no {@code AGGREGATE}, so a query needing either
  * is <strong>refused by name</strong> rather than answered approximately. A file has no second table to
  * join to — but it can carry the joined value as a column of its own, which is what the CSV below does.</p>

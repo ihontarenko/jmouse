@@ -1,5 +1,7 @@
 package org.jmouse.access;
 
+import org.jmouse.access.spi.GrantAttribution;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,5 +74,28 @@ public record PermissionProvenance(
      */
     public boolean wasRemoved() {
         return !held && !grantedBy.isEmpty();
+    }
+
+    /**
+     * What the deny that took this away wrote for whoever is refused, or null.
+     *
+     * <p>⚠️ <strong>Read off {@link #removedBy}, never off {@link #grantedBy}.</strong> Both carry an
+     * explanation and they answer opposite questions: a grant's says why somebody <em>has</em> a power,
+     * a deny's says why they do not. Quoting the wrong one at a refusal produces a sentence that argues
+     * the reader should be allowed.
+     *
+     * <p>The <strong>first</strong> explained removal wins where several removed it. Removals are held
+     * in the order they were resolved, so this is stable between two readings of one answer — and any
+     * of them is a true answer, since every one of them alone would have been enough.
+     *
+     * @return the written sentence, or {@code null} where nothing that removed this said anything
+     */
+    public String explanation() {
+        return removedBy.stream()
+                .map(PermissionSource::attribution)
+                .filter(GrantAttribution::isExplained)
+                .map(GrantAttribution::explanation)
+                .findFirst()
+                .orElse(null);
     }
 }
