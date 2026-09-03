@@ -1,10 +1,11 @@
 package org.jmouse.query.schema;
 
 /**
- * One thing a query may filter, sort or return — what it is called, what the store calls it, what it
- * holds, and how it is reached.
+ * One thing a query may filter, sort or return — what it is called, what a person reads, what the store
+ * calls it, what it holds, and how it is reached.
  *
  * @param name   how it is written in a query — {@code entry[component_name]}, {@code issue.assignee}
+ * @param label  what a person reads instead — {@code "Lines with no source"}, or {@code null}
  * @param source what the store calls it — {@code component_name}, {@code assignee_id}
  * @param type   what kind of value it holds
  * @param access how a compiler gets at it
@@ -12,7 +13,17 @@ package org.jmouse.query.schema;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public record QueryAttribute(String name, String source, QueryType type, Access access) {
+public record QueryAttribute(String name, String label, String source, QueryType type, Access access) {
+
+    /**
+     * An attribute that has no separate label — a query's name and a person's are the same word.
+     *
+     * <p>⚠️ Kept so that adding {@link #label} renamed nothing. Every product and every smoke test that
+     * built a four-argument attribute still compiles, and reads exactly as it did.</p>
+     */
+    public QueryAttribute(String name, String source, QueryType type, Access access) {
+        this(name, null, source, type, access);
+    }
 
     /**
      * An attribute a query writes exactly as the store spells it.
@@ -22,7 +33,28 @@ public record QueryAttribute(String name, String source, QueryType type, Access 
      * @param access how it is reached
      */
     public QueryAttribute(String name, QueryType type, Access access) {
-        this(name, name, type, access);
+        this(name, null, name, type, access);
+    }
+
+    /**
+     * What to show somebody who is building a query — the label where one was declared, else the name.
+     *
+     * <h2>⚠️ Why a label belongs to the SCHEMA and not to whoever draws the builder</h2>
+     *
+     * <p>A product that keeps its labels beside its screens keeps the same list of attribute names
+     * twice: once where the source is declared, once in a map of pretty words — and nothing holds the
+     * two together. Renaming an attribute in the declaration then leaves the map keyed on a name that no
+     * longer exists, the lookup misses, and the builder quietly shows the raw name. Nothing fails; the
+     * screen is simply worse, in a way only somebody who remembers the old label would notice.</p>
+     *
+     * <p>⚠️ <strong>A label is never queryable.</strong> It is what a person reads, and a query still
+     * writes {@link #name}. Making it a second spelling would mean two ways to write one condition, and
+     * a saved query that stops parsing the day somebody improves the wording.</p>
+     *
+     * @return the label, or the name where none was declared — never {@code null}
+     */
+    public String readableName() {
+        return label == null || label.isBlank() ? name : label;
     }
 
     /**

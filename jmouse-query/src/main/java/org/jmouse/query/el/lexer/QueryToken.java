@@ -120,6 +120,78 @@ public enum QueryToken implements Token.Type {
     /** {@code … value text_value} — which column holds a bag row's value. */
     T_VALUE(12400, "value"),
 
+    /**
+     * {@code priority: int, label: "How urgent"} — what a PERSON reads where a query writes a name.
+     *
+     * <h2>⚠️ Why the language carries this at all, rather than leaving it to whoever draws a builder</h2>
+     *
+     * <p>Because otherwise the attribute names are written twice: once here, and once in a map of
+     * pretty words beside a screen — with nothing holding the two together. Rename an attribute in the
+     * declaration and the map is keyed on a name that no longer exists; the lookup misses and the
+     * builder falls back to showing {@code p.unsourced}. Nothing errors. The label simply stops
+     * appearing, and only somebody who remembers it was ever there notices.</p>
+     *
+     * <h2>⚠️ It is a comma-clause, like {@code default:}, and that was not a free choice</h2>
+     *
+     * <p>A structure's field line spends its one colon on the type ({@code priority: int}), and the
+     * language already had a way to say more about a field afterwards. Inventing a second shape —
+     * {@code priority:"How urgent": int}, or a bare quoted string after the name — would mean two
+     * grammars for trailing facts in the same block, and the next fact would have to pick one.</p>
+     *
+     * <p>⚠️ <strong>A label is never queryable.</strong> A query writes the name; this is what a person
+     * reads. Accepting it as a second spelling would mean a saved query stops parsing the day somebody
+     * improves the wording.</p>
+     */
+    T_LABEL(12800, "label"),
+
+    /**
+     * {@code bag field_entries on entry_id key field value text_value matching form_entry_id} — the
+     * column on the FILTERED row that a bag hangs off, when it is not that row's own key.
+     *
+     * <h2>⚠️ The shape this exists for, and why nothing else expresses it</h2>
+     *
+     * <p>An ordinary bag row points straight at the row being filtered:
+     * {@code bag.entry_id = root.id}. But a product whose subject area is <em>about</em> something that
+     * has a bag has a second shape — an asset is a row of its own carrying a state and a due date, and
+     * everything a person recognises it by lives on the entry it describes. There the correlation is
+     * {@code field_entries.form_entry_id = assets.form_entry_id}: one hop sideways, not down.</p>
+     *
+     * <p>⚠️ Omitted, the bag hangs off the target's key, which is what every ordinary bag wants. So this
+     * word changes nothing that already parses — and without it such a source parses, compiles,
+     * correlates against the wrong column and matches <strong>nothing</strong>, with no error anywhere.</p>
+     *
+     * <h2>⚠️ Why {@code matching} rather than another {@code key} or {@code on}</h2>
+     *
+     * <p>The line already spends {@code on} on the bag's own column and {@code key} on the column that
+     * says which attribute a row is. A third of either would read as a fourth name of the same kind. The
+     * clause is a correlation — <em>this bag's foreign key matches that column</em> — and the word says
+     * so, which is the only thing that stops a reader guessing which side it names.</p>
+     */
+    T_MATCHING(12900, "matching"),
+
+    /**
+     * {@code join <table> through <attribute> key <column>} — the foreign key is an attribute's value.
+     *
+     * <h2>⚠️ What it is for</h2>
+     *
+     * <p>{@code join} normally reads a column of the row's own table: {@code join statuses on status_id
+     * key id}. A product that keeps its values in a bag keeps its foreign keys there too, and then there
+     * is no such column — Innoventa's stock position holds the part it counts as a bag row, so the part's
+     * table is unreachable from any column of {@code form_entries}.</p>
+     *
+     * <p>{@code through} names the ATTRIBUTE instead, and the attribute already knows what the store
+     * calls it and how it is reached. So the same word serves a bag row, a plain column, or a value one
+     * join further on, and none of the language's spelling rules leak into a mapping.</p>
+     *
+     * <h2>⚠️ Why {@code through} rather than widening {@code on}</h2>
+     *
+     * <p>{@code on} takes a COLUMN and has since the first source was written. Letting it take either
+     * would make the two indistinguishable in a document — a reader could not tell {@code on part} from
+     * {@code on part} — and a column and an attribute may perfectly well share a name. Two words, two
+     * meanings, no guessing.</p>
+     */
+    T_THROUGH(13000, "through"),
+
     /** {@code … in bag} / {@code … in column} — how an attribute is reached. */
     T_COLUMN(12500, "column"),
 

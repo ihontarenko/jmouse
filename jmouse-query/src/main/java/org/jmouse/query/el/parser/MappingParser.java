@@ -125,7 +125,11 @@ public class MappingParser extends AbstractParser {
         mapping.setTable(Declarations.name(cursor));
 
         cursor.ensure(QueryToken.T_AS);
-        mapping.setAlias(cursor.ensure(BasicToken.T_IDENTIFIER).value());
+
+        /* ⚠️ A keyword is a legal alias — the same rule `ClauseParser` states for a projection alias and
+           `SourceParser` for the older spelling. A product whose table is called `labels` reasonably
+           aliases it `label`, and the identifier rule refused that the day `label` became a word. */
+        mapping.setAlias(Declarations.name(cursor));
 
         cursor.ensure(QueryToken.T_KEY);
         mapping.setKey(Declarations.name(cursor));

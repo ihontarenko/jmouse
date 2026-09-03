@@ -236,6 +236,11 @@ public class SourceNode extends AbstractExpression {
             merged.setAccess(binding.getAccess());
             merged.setType(field.getCanonicalType());
 
+            // ⚠️ From the STRUCTURE, like the type and for the same reason: what an attribute is called
+            // is a fact about the shape. Read off the binding instead, two mappings of one structure
+            // could label the same attribute differently — a difference visible from neither file.
+            merged.setLabel(field.getLabel());
+
             source.addAttribute(merged);
         }
 
@@ -309,6 +314,11 @@ public class SourceNode extends AbstractExpression {
                     ? attribute.getName().substring(prefix.length())
                     : attribute.getName());
             field.setType(attribute.getType());
+
+            // ⚠️ The label goes to the STRUCTURE half and never to the mapping, which is what makes the
+            // older `source { }` spelling — where shape and binding share a line — round-trip into the
+            // current one without the label landing in both or in neither.
+            field.setLabel(attribute.getLabel());
 
             declared.addField(field);
         }

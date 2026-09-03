@@ -12,7 +12,6 @@ import org.jmouse.query.sql.mapping.BagMapping;
 import org.jmouse.query.sql.mapping.BagTable;
 import org.jmouse.query.sql.mapping.CollectionMapping;
 import org.jmouse.query.sql.mapping.CollectionTable;
-import org.jmouse.query.sql.mapping.JoinMapping;
 import org.jmouse.query.sql.mapping.JoinedTable;
 import org.jmouse.query.sql.mapping.ColumnMapping;
 
@@ -76,6 +75,7 @@ public final class SourceLoader {
         for (AttributeNode attribute : declared.getAttributes()) {
             attributes.put(attribute.getName(), new QueryAttribute(
                     attribute.getName(),
+                    attribute.getLabel(),
                     attribute.getSource(),
                     type(attribute.getType()),
                     access(attribute.getAccess())));
@@ -131,6 +131,7 @@ public final class SourceLoader {
             AttributeNode written = new AttributeNode();
 
             written.setName(attribute.name());
+            written.setLabel(attribute.label());
             written.setSource(attribute.source() == null ? attribute.name() : attribute.source());
             written.setType(written(attribute.type()));
             written.setAccess(written(attribute.access()));
@@ -177,22 +178,29 @@ public final class SourceLoader {
         AttributeMapping bagged = bag
                 .<AttributeMapping>map(table -> BagMapping.of(new BagTable(
                         table.getTable(), table.getForeignKey(),
-                        table.getKeyColumn(), table.getValueColumn())))
+                        table.getKeyColumn(), table.getValueColumn(),
+                        table.getLocalColumn())))
                 .orElse(null);
 
         List<JoinedTable> joined = declared.getJoins().stream()
-                .map(join -> new JoinedTable(
-                        join.getTable(), join.getLocalColumn(), join.getForeignColumn()))
+                .map(join -> join.getLocalAttribute() == null
+                        ? new JoinedTable(join.getTable(), join.getLocalColumn(), join.getForeignColumn())
+                        : JoinedTable.through(
+                                join.getTable(), join.getLocalAttribute(), join.getForeignColumn()))
                 .toList();
 
         if (bagged == null && joined.isEmpty()) {
             return AttributeMappings.columnsOnly();
         }
 
+        /* ⚠️ The tables go in as DATA, not as a finished JoinMapping. A join declared `through` an
+           attribute has to compile that attribute, and the attribute may be reached any way at all — so
+           what compiles it is the dispatcher being built. `byAccess` ties that knot; a caller that
+           assembled the mapping itself would hand the join branch a pointer that reaches nothing. */
         return AttributeMappings.byAccess(
                 ColumnMapping.qualified(),
                 bagged == null ? AttributeMappings.refusing("a bag") : bagged,
-                new JoinMapping(joined));
+                joined);
     }
 
     /**

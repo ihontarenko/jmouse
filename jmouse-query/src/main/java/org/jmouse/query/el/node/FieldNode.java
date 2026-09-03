@@ -37,6 +37,7 @@ public class FieldNode extends AbstractExpression {
             List.of("string", "text", "int", "number", "boolean", "temporal", "unknown");
 
     private String     name;
+    private String     label;
     private String     type;
     private boolean    collection;
     private Expression defaultValue;
@@ -47,6 +48,28 @@ public class FieldNode extends AbstractExpression {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * What a PERSON reads where a query writes {@link #getName()} — or {@code null} where they are the
+     * same word.
+     *
+     * <h2>⚠️ It belongs to the structure, for the same reason the type does</h2>
+     *
+     * <p>A label is a fact about the shape, not about where the shape is stored. Two mappings of one
+     * structure disagreeing about what an attribute is CALLED would be a difference visible from
+     * neither file — which is precisely the argument this class already makes about a default.</p>
+     *
+     * <p>⚠️ <strong>Never queryable.</strong> A query writes the name; this is what a builder shows.
+     * Accepting it as a second spelling would mean a saved query stops parsing the day somebody
+     * improves the wording.</p>
+     */
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     /** The type as it was written — {@code string} stays {@code string} so a document round-trips. */
@@ -90,11 +113,26 @@ public class FieldNode extends AbstractExpression {
         this.defaultValue = defaultValue;
     }
 
+    /**
+     * ⚠️ The trailing facts are written in a fixed order — label, then default — so a document that is
+     * read and written back out is byte-identical to one somebody typed in the same order. Emitting them
+     * in whatever order they were parsed would make a round trip depend on the input, which is the one
+     * thing a stored document must not do.
+     */
     @Override
     public String toSource() {
-        String written = "%s: %s%s".formatted(SourceWriter.name(name), type, collection ? "[]" : "");
+        StringBuilder written = new StringBuilder(
+                "%s: %s%s".formatted(SourceWriter.name(name), type, collection ? "[]" : ""));
 
-        return defaultValue == null ? written : written + ", default: " + defaultValue.toSource();
+        if (label != null && !label.isBlank()) {
+            written.append(", label: ").append(SourceWriter.literal(label));
+        }
+
+        if (defaultValue != null) {
+            written.append(", default: ").append(defaultValue.toSource());
+        }
+
+        return written.toString();
     }
 
     @Override

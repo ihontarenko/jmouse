@@ -1,6 +1,7 @@
 package org.jmouse.query.el.parser;
 
 import org.jmouse.el.lexer.BasicToken;
+import org.jmouse.el.lexer.Token;
 import org.jmouse.query.el.QueryParseException;
 import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.Node;
@@ -93,13 +94,33 @@ public class StructureParser extends AbstractParser {
             field.setCollection(true);
         }
 
-        // ⚠️ A default is part of what the SHAPE promises, so it is read here and nowhere else. Two
-        // mappings of one structure disagreeing about one would be a difference visible from neither file.
-        if (cursor.consumeIf(BasicToken.T_COMMA)) {
-            cursor.ensure(QueryToken.T_DEFAULT);
-            cursor.ensure(BasicToken.T_COLON);
+        /*
+         * ⚠️ **Any number of trailing facts, in any order, and that generalisation is the point.**
+         *
+         * There was exactly one — `default:` — read by a single `if`, so it had to be last and could not
+         * have a neighbour. `label:` arriving would otherwise have had to pick a side, and the fact after
+         * that another; a file would then have an order nobody could remember and a parser that refused
+         * the other one for no reason a reader could see.
+         *
+         * Both facts are part of what the SHAPE promises, which is why they are read here and nowhere
+         * else. Two mappings of one structure disagreeing about a default — or about what an attribute
+         * is CALLED — would be a difference visible from neither file.
+         */
+        while (cursor.consumeIf(BasicToken.T_COMMA)) {
+            Token which = cursor.peek();
 
-            field.setDefaultValue((Expression) context.getParser(ExpressionParser.class).parse(cursor, context));
+            if (cursor.consumeIf(QueryToken.T_DEFAULT)) {
+                cursor.ensure(BasicToken.T_COLON);
+                field.setDefaultValue(
+                        (Expression) context.getParser(ExpressionParser.class).parse(cursor, context));
+            } else if (cursor.consumeIf(QueryToken.T_LABEL)) {
+                cursor.ensure(BasicToken.T_COLON);
+                field.setLabel(Declarations.text(cursor));
+            } else {
+                throw new QueryParseException(
+                        ("'%s' at line %d is not something a field can say about itself; write 'label' "
+                         + "or 'default'").formatted(which.value(), which.lineNumber()));
+            }
         }
 
         return field;

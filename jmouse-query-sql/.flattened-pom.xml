@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-query-sql</artifactId>
-  <version>1.0.0-b20260802</version>
+  <version>1.0.0-b20260902</version>
   <name>jMouse - Query (sql)</name>
   <description>jMouse Framework - Compiles a jMQ query into SQL and its bound parameters</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-query-sql</url>
@@ -30,13 +30,13 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-query</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-jdbc</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

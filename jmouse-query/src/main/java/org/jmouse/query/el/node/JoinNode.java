@@ -30,6 +30,7 @@ public class JoinNode extends AbstractExpression {
     private String table;
     private String localColumn;
     private String foreignColumn;
+    private String localAttribute;
 
     public String getTable() {
         return table;
@@ -57,10 +58,35 @@ public class JoinNode extends AbstractExpression {
         this.foreignColumn = foreignColumn;
     }
 
+    /**
+     * The attribute whose value points at the other table, where no column of our own row does.
+     *
+     * <p>⚠️ Written {@code join form_entries through e.part key id}, and mutually exclusive with
+     * {@link #getLocalColumn()} — see {@code QueryToken.T_THROUGH} for why it is a second word rather
+     * than a widening of {@code on}.</p>
+     */
+    public String getLocalAttribute() {
+        return localAttribute;
+    }
+
+    public void setLocalAttribute(String localAttribute) {
+        this.localAttribute = localAttribute;
+    }
+
+    /**
+     * ⚠️ Writes back whichever of the two pointers the declaration used.
+     *
+     * <p>A round trip that always wrote {@code on} would turn a join through an attribute into a join
+     * on a column of the same name — which compiles, runs, and reads something else entirely.</p>
+     */
     @Override
     public String toSource() {
-        return "join: %s on %s key %s".formatted(
-                SourceWriter.name(table), SourceWriter.name(localColumn), SourceWriter.name(foreignColumn));
+        String pointer = localAttribute == null
+                ? "on %s".formatted(SourceWriter.name(localColumn))
+                : "through %s".formatted(localAttribute);
+
+        return "join: %s %s key %s".formatted(
+                SourceWriter.name(table), pointer, SourceWriter.name(foreignColumn));
     }
 
     @Override

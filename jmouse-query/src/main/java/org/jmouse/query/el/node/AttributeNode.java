@@ -29,6 +29,7 @@ import org.jmouse.query.el.SourceWriter;
 public class AttributeNode extends AbstractExpression {
 
     private String  name;
+    private String  label;
     private String  source;
     private String  type;
     private String  access;
@@ -39,6 +40,23 @@ public class AttributeNode extends AbstractExpression {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * What a PERSON reads where a query writes {@link #getName()}, or {@code null}.
+     *
+     * <p>⚠️ <strong>Carried here only to reach the structure.</strong> A label belongs to the shape, not
+     * to a binding — {@link SourceNode#toStructure()} moves it onto the {@link FieldNode}, and
+     * {@link #bindingToSource()} deliberately does not write it. The older {@code source { }} spelling
+     * states shape and binding on one line, so this is where it arrives from a document; the modern
+     * spelling reads it on the structure's field line, where it belongs.</p>
+     */
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 
     public String getSource() {

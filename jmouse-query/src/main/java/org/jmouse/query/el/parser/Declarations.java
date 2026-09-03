@@ -112,7 +112,22 @@ final class Declarations {
         cursor.consumeIf(BasicToken.T_COLON);
     }
 
-    /** {@code bag: request_fields on request_id key field_code value text_value} */
+    /**
+     * A value the grammar always quotes — a label, a title. Read through {@link #word}, so the quotes
+     * come off; storing the token's raw value would keep them and a builder would print them.
+     */
+    static String text(TokenCursor cursor) {
+        return word(cursor);
+    }
+
+    /**
+     * {@code bag: request_fields on request_id key field_code value text_value [matching entry_id]}
+     *
+     * <p>⚠️ {@code matching} names the column on the <strong>filtered</strong> row that the bag hangs
+     * off. Omitted, it is that row's own key — which is what every ordinary bag wants, so every document
+     * written before the word existed still means what it said. See {@link BagNode#getLocalColumn()} for
+     * the shape it exists for, and for why getting it wrong fails silently rather than loudly.</p>
+     */
     static BagNode bag(TokenCursor cursor) {
         BagNode bag = new BagNode();
 
@@ -128,6 +143,10 @@ final class Declarations {
         cursor.ensure(QueryToken.T_VALUE);
         bag.setValueColumn(name(cursor));
 
+        if (cursor.consumeIf(QueryToken.T_MATCHING)) {
+            bag.setLocalColumn(name(cursor));
+        }
+
         return bag;
     }
 
@@ -138,8 +157,15 @@ final class Declarations {
         optionalColon(cursor);
         join.setTable(name(cursor));
 
-        cursor.ensure(QueryToken.T_ON);
-        join.setLocalColumn(name(cursor));
+        /* ⚠️ `through` reads an ATTRIBUTE the way a query writes it — `e.part`, `entry[part]` — where
+           `on` reads a stored column name. Two readers because they read two different alphabets, and a
+           single word taking either would leave a document unable to say which it meant. */
+        if (cursor.consumeIf(QueryToken.T_THROUGH)) {
+            join.setLocalAttribute(path(cursor));
+        } else {
+            cursor.ensure(QueryToken.T_ON);
+            join.setLocalColumn(name(cursor));
+        }
 
         cursor.ensure(QueryToken.T_KEY);
         join.setForeignColumn(name(cursor));
