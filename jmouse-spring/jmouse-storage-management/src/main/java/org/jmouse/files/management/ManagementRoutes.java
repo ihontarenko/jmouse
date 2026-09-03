@@ -105,6 +105,18 @@ public final class ManagementRoutes {
     /** Where one directory sits. */
     public static final String DIRECTORY_PARENT = DIRECTORY + "/parent";
 
+    /** Everything one directory says about itself. */
+    public static final String DIRECTORY_CONFIGURATIONS = DIRECTORY + "/configurations";
+
+    /**
+     * What one directory says of one kind.
+     *
+     * <p>⚠️ Addressed by <strong>kind</strong> rather than by a route per setting, which is the whole
+     * point of the table behind it: a second kind of directory configuration is a registry entry and a
+     * record, not a new endpoint and not a migration.</p>
+     */
+    public static final String DIRECTORY_CONFIGURATION = DIRECTORY_CONFIGURATIONS + "/{kind}";
+
     private ManagementRoutes() {
     }
 }

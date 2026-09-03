@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
-        <version>1.0.0-b20260802</version>
+        <version>1.0.0-b20260902</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -57,6 +57,17 @@
     </properties>
 
     <dependencies>
+        <!-- ⚠️ For AcceptanceMode and UploadPolicy alone, and deliberately rather than a second
+             acceptance vocabulary of this module's own. A folder's upload configuration IS an
+             acceptance rule; carrying the mode as a duplicate enum here would mean a conversion at
+             every boundary and two enums that drift the first time one of them gains a case.
+             Nothing new lands on any classpath — jmouse-files-jpa already pulls this in through
+             jmouse-storage-jpa; it only becomes declared where it is actually used. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-storage</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

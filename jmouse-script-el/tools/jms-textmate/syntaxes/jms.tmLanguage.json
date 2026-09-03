@@ -1,0 +1,179 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "jMouse Script",
+  "scopeName": "source.jms",
+  "fileTypes": ["jms"],
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#include-statement" },
+    { "include": "#script-block" },
+    { "include": "#behaviour-block" },
+    { "include": "#statement" }
+  ],
+  "repository": {
+    "comment": {
+      "comment": "A '#' opens a comment everywhere EXCEPT immediately after a facade name, where it reaches a constant. #scoped-call matches at the '@', which is earlier, and the earliest match wins — so `@player#MAX` is a constant access and `# a note` is a comment, without either rule having to know about the other.",
+      "name": "comment.line.number-sign.jms",
+      "match": "#.*$"
+    },
+    "include-statement": {
+      "match": "\\b(include)\\b\\s*((\"[^\"]*\"|'[^']*')?)",
+      "captures": {
+        "1": { "name": "keyword.control.import.jms" },
+        "2": { "name": "string.quoted.jms" }
+      }
+    },
+    "script-block": {
+      "begin": "\\b(script)\\b\\s*((\"[^\"]*\"|'[^']*'))\\s*(\\{)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.script.jms" },
+        "2": { "name": "entity.name.type.script.jms" },
+        "4": { "name": "punctuation.section.block.begin.jms" }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": { "name": "punctuation.section.block.end.jms" }
+      },
+      "patterns": [
+        { "include": "#statement" }
+      ]
+    },
+    "behaviour-block": {
+      "comment": "Both spellings, because the backend's lexer accepts both and a file refused over a 'u' is a file nobody enjoys.",
+      "begin": "\\b(behaviour|behavior)\\b\\s*((\"[^\"]*\"|'[^']*'))\\s*\\b(do)\\b",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.behaviour.jms" },
+        "2": { "name": "entity.name.type.behaviour.jms" },
+        "4": { "name": "keyword.control.do.jms" }
+      },
+      "end": "\\b(end)\\b",
+      "endCaptures": {
+        "1": { "name": "keyword.control.end.jms" }
+      },
+      "patterns": [
+        { "include": "#statement" }
+      ]
+    },
+    "on-handler": {
+      "comment": "The event name is whatever word follows 'on', INCLUDING one spelled like a keyword — a host is entitled to an event called 'end'. The optional literal of `on timer 180` falls through to #expression.",
+      "begin": "\\b(on)\\b\\s+([A-Za-z_][A-Za-z0-9_-]*)(?:\\s+\\b(when)\\b)?",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.on.jms" },
+        "2": { "name": "entity.name.function.event.jms" },
+        "3": { "name": "keyword.control.when.jms" }
+      },
+      "end": "\\b(do)\\b",
+      "endCaptures": {
+        "1": { "name": "keyword.control.do.jms" }
+      },
+      "patterns": [
+        { "include": "#expression" }
+      ]
+    },
+    "function-block": {
+      "begin": "\\b(function)\\b\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*(\\()",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.function.jms" },
+        "2": { "name": "entity.name.function.jms" },
+        "3": { "name": "punctuation.definition.parameters.begin.jms" }
+      },
+      "end": "\\)",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.parameters.end.jms" }
+      },
+      "patterns": [
+        { "match": "[A-Za-z_][A-Za-z0-9_]*", "name": "variable.parameter.jms" },
+        { "match": ",", "name": "punctuation.separator.parameters.jms" }
+      ]
+    },
+    "statement": {
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#on-handler" },
+        { "include": "#function-block" },
+        { "include": "#keyword" },
+        { "include": "#expression" }
+      ]
+    },
+    "keyword": {
+      "comment": "Control words only. `and`, `or`, `not`, `is` and `in` are OPERATORS in this language and live in #operator-word — `not` in particular is the engine's second spelling of `!=` and the partner of `is`, never a prefix. Negation is `!`.",
+      "name": "keyword.control.jms",
+      "match": "\\b(if|then|elseif|else|end|do|for|local|return)\\b"
+    },
+    "expression": {
+      "patterns": [
+        { "include": "#comment" },
+        { "include": "#string" },
+        { "include": "#scoped-call" },
+        { "include": "#number" },
+        { "include": "#constant" },
+        { "include": "#operator-word" },
+        { "include": "#assignment" },
+        { "include": "#operator" },
+        { "include": "#keyword" }
+      ]
+    },
+    "scoped-call": {
+      "comment": "Existing jME: @bean.method(args) | @bean#CONST | @bean:$field. The one syntax in a script that reaches outside it, so it is coloured as a thing of its own.",
+      "patterns": [
+        {
+          "match": "@([A-Za-z_][A-Za-z0-9_]*)\\.([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": {
+            "0": { "name": "meta.scoped-call.jms" },
+            "1": { "name": "variable.other.bean.jms" },
+            "2": { "name": "entity.name.function.method.jms" }
+          }
+        },
+        {
+          "match": "@([A-Za-z_][A-Za-z0-9_]*)#([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": {
+            "1": { "name": "variable.other.bean.jms" },
+            "2": { "name": "constant.other.jms" }
+          }
+        },
+        {
+          "match": "@([A-Za-z_][A-Za-z0-9_]*):\\$([A-Za-z_][A-Za-z0-9_]*)",
+          "captures": {
+            "1": { "name": "variable.other.bean.jms" },
+            "2": { "name": "variable.other.field.jms" }
+          }
+        }
+      ]
+    },
+    "string": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.jms",
+          "begin": "\"",
+          "end": "\""
+        },
+        {
+          "name": "string.quoted.single.jms",
+          "begin": "'",
+          "end": "'"
+        }
+      ]
+    },
+    "number": {
+      "name": "constant.numeric.jms",
+      "match": "\\b[0-9]+(\\.[0-9]+)?\\b"
+    },
+    "constant": {
+      "name": "constant.language.jms",
+      "match": "\\b(true|false|null|none)\\b"
+    },
+    "operator-word": {
+      "name": "keyword.operator.word.jms",
+      "match": "\\b(and|or|not|is|in)\\b"
+    },
+    "assignment": {
+      "comment": "A lone '=' assigns; '==' compares, and writing the second where the first was meant is refused at load — it would otherwise evaluate and throw its answer away. They are one token type to the lexer, so they are told apart here by what surrounds them, and coloured apart because that is the mistake this language expects people to make.",
+      "name": "keyword.operator.assignment.jms",
+      "match": "(?<![=!<>+\\-*/%])=(?!=)"
+    },
+    "operator": {
+      "name": "keyword.operator.jms",
+      "match": "(==|!=|<>|<=|>=|\\|\\||&&|\\?\\?|\\.\\.|->|[+\\-*/%<>!|])"
+    }
+  }
+}

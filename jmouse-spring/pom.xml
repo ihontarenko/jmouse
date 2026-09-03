@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
-        <version>1.0.0-b20260802</version>
+        <version>1.0.0-b20260902</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -29,10 +29,12 @@
         <module>jmouse-access-spring-boot</module>
         <module>jmouse-ai-management</module>
         <module>jmouse-mapper-management</module>
+        <module>jmouse-validation-management</module>
         <module>jmouse-ai-spring-boot</module>
         <module>jmouse-ai-mcp-authorization</module>
         <module>jmouse-liveblocks</module>
         <module>jmouse-query-spring-boot</module>
+        <module>jmouse-money-spring-boot</module>
     </modules>
 
 </project>

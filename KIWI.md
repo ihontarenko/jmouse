@@ -110,3 +110,48 @@ documentation, is committed normally.
 - ⚠️ **Never right-click in this UI while automating.** It opens Chrome's own context menu, which blocks
   every subsequent tool call until `Escape`. The row menus are ordinary buttons — find them by
   accessibility name (`Manage <section>`) rather than by coordinates.
+
+## Documentation set — jMS
+
+`documentation/jmouse-framework-3/jms` — the manual for jMouse Script, derived from
+`jmouse-script-el`'s public surface. Four pages:
+
+- **Overview** `overview-0becd2` — what the dialect is, the five pieces, and what a script cannot do.
+- **Syntax** `syntax-c622db` — the whole language by example: the `script` block, handlers, `when`,
+  conditions, locals, loops, functions, `@facade` access, and the parse/bind split.
+- **Host API** `host-api-8b63a1` — `ScriptHost`, `ScriptCatalogue`, `BoundScript`, `ScriptBudget`,
+  `ScriptResources`, the failure types, and a host end to end.
+- **Examples** `examples-bfd389` — whole documents.
+
+⚠️ The facade names in the examples (`@stock`, `@world`) are an embedder's, never the language's. A
+product's own catalogue is documented with that product.
+
+## Documentation set — jMV
+
+`documentation/jmouse-framework-3/jmv` — the manual for jMouse Validation, derived from
+`jmouse-validation-el`'s public surface and its smoke fixtures. Four pages:
+
+- **Overview** `overview-8c769d` — what it answers, the four block kinds, and what it never does.
+- **Syntax** `syntax-bcaa62` — check lines, `stop`, `optional`, the check catalogue, `always`,
+  `when`/`otherwise`, `gate`, `invariant`.
+- **API** `api-e0f50d` — `JmvReader`, `JmvCompiler`, `CompiledValidation`, `ValidationOutcome`,
+  `JmvLoader`, `JmvWriter`, `ValidationDrafts`.
+- **Examples** `examples-7cb458` — whole documents.
+
+⚠️ The examples are the smoke fixtures, so they are documents that really compile.
+
+## Documentation set — jMP
+
+`documentation/jmouse-framework-3/jmp` — the manual for jMouse Policy, derived from `jmouse-access-el`
+and `jmouse-access-policy`. Four pages:
+
+- **Overview** `overview-112bac` — the vocabulary half against the grants half, and why a file is never
+  the source of truth for the first.
+- **Syntax** `syntax-fa6c02` — every block, including the braced `when { … }` and why the one-line form
+  truncates.
+- **API** `api-7541df` — `ExpressionEvaluator`, `PolicyDocument` and its model types, `PolicyWriter`,
+  `PolicyLoader`, `LivePolicy`.
+- **Examples** `examples-987cff` — whole files.
+
+⚠️ The corpus example is `Smoke.DECLARATION`, which is the fixture two surfaces read — so it exercises
+every construct the grammar has.

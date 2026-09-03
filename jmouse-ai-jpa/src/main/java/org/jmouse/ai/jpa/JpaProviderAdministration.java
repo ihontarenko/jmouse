@@ -94,6 +94,8 @@ public final class JpaProviderAdministration implements ProviderAdministration {
                     now,
                     now);
 
+            created.setPurpose(draft.purpose());
+
             entityManager.persist(created);
 
             return describe(created);
@@ -111,6 +113,7 @@ public final class JpaProviderAdministration implements ProviderAdministration {
             configured.setModel(draft.model());
             configured.setApiUrl(blankToNull(draft.apiUrl()));
             configured.setMaximumTokens(draft.maximumTokens());
+            configured.setPurpose(draft.purpose());
             configured.setUpdatedAt(LocalDateTime.now());
 
             // Blank means "leave it", never "clear it" — see Draft.
@@ -136,8 +139,16 @@ public final class JpaProviderAdministration implements ProviderAdministration {
                         + "it was sent. Add the key first, then put it in force.");
             }
 
-            // ⚠️ Not a tidy-up afterwards — it is the other half of this operation. Two active rows is
-            // the one state the settings source cannot resolve.
+            /*
+              ⚠️ Not a tidy-up afterwards — it is the other half of this operation. Two active rows
+              for one purpose is the one state the settings source cannot resolve.
+
+              ⚠️ AND IT IS SCOPED TO THE PURPOSE, which is the whole reason purposes are usable at
+              all. Deactivating every active row of the application — which is what this did, and
+              was right when there was only one — would mean switching on a provider for matching
+              switched OFF the assistant. Two features silently fighting over one row, with the
+              symptom appearing in whichever one somebody used second.
+             */
             entityManager.createQuery("""
                             select configured
                               from AiProviderSettings configured
@@ -148,6 +159,7 @@ public final class JpaProviderAdministration implements ProviderAdministration {
                     .getResultList()
                     .stream()
                     .filter(inForce -> !inForce.getId().equals(id))
+                    .filter(inForce -> samePurpose(inForce.getPurpose(), target.getPurpose()))
                     .forEach(JpaProviderAdministration::deactivate);
 
             target.setActive(true);
@@ -240,6 +252,17 @@ public final class JpaProviderAdministration implements ProviderAdministration {
      * ⚠️ The stored times are zoneless columns written from {@link LocalDateTime#now()}, so the zone they
      * were written in is the one running this — the same reading {@link JpaCallCounter} takes.
      */
+    /**
+     * Whether two rows are competing for the same job.
+     *
+     * <p>⚠️ Both null is the same purpose — the general one — and that case matters most, because it
+     * is every installation configured before purposes existed. {@code Objects.equals} would say so
+     * too; this is named so the call site reads as a question about purposes rather than about nulls.
+     */
+    private static boolean samePurpose(String one, String other) {
+        return one == null ? other == null : one.equals(other);
+    }
+
     private static Configuration describe(AiProviderSettings configured) {
         return new Configuration(
                 configured.getId(),
@@ -250,6 +273,7 @@ public final class JpaProviderAdministration implements ProviderAdministration {
                 configured.isActive(),
                 hasKey(configured),
                 configured.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant(),
-                configured.getUpdatedAt().atZone(ZoneId.systemDefault()).toInstant());
+                configured.getUpdatedAt().atZone(ZoneId.systemDefault()).toInstant(),
+                configured.getPurpose());
     }
 }

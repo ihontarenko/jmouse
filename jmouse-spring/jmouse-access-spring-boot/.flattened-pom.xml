@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-access-spring-boot</artifactId>
-  <version>1.0.0-b20260802</version>
+  <version>1.0.0-b20260902</version>
   <name>jMouse - Access Spring Boot Starter</name>
   <description>Spring Boot auto-configuration for the jMouse access engine: @RequiresAccess advice, target binding, request-scoped resolution cache</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-access-spring-boot</url>
@@ -30,33 +30,33 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-access</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-access-enforcement</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-access-jpa</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-access-policy</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-access-el</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>

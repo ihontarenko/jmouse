@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-ai-spring-boot</artifactId>
-  <version>1.0.0-b20260802</version>
+  <version>1.0.0-b20260902</version>
   <name>jMouse - AI Spring Boot</name>
   <description>jMouse Framework - Spring Boot autoconfiguration for the AI tool catalogue, dispatcher, providers and MCP transport</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-ai-spring-boot</url>
@@ -30,55 +30,55 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-ai</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-ai-provider</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-ai-conversation</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-ai-mcp</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-ai-access</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-ai-jpa</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-access-enforcement</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-ai-management</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>

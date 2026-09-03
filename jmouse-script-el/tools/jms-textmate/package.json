@@ -1,0 +1,37 @@
+{
+  "name": "jms-textmate",
+  "displayName": "jMouse Script (.jms)",
+  "description": "Syntax highlighting for jMS — jMouse Script.",
+  "version": "1.0.0",
+  "publisher": "jmouse",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "jms",
+        "aliases": [
+          "jMouse Script",
+          "jMS",
+          "jms"
+        ],
+        "extensions": [
+          ".jms"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "jms",
+        "scopeName": "source.jms",
+        "path": "./syntaxes/jms.tmLanguage.json"
+      }
+    ]
+  }
+}

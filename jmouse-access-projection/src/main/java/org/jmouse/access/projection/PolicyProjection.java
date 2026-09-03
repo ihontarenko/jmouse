@@ -15,6 +15,7 @@ import org.jmouse.access.policy.model.PolicyDocument;
 import org.jmouse.access.policy.model.PolicyEffect;
 import org.jmouse.access.policy.model.PolicyGrant;
 import org.jmouse.access.policy.model.PolicyPermissionDeclaration;
+import org.jmouse.access.policy.model.PolicyPermissionRedirect;
 import org.jmouse.access.policy.model.PolicyPlan;
 import org.jmouse.access.policy.model.PolicyRole;
 import org.jmouse.access.policy.model.PolicyRoleAssignment;
@@ -30,6 +31,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
@@ -101,6 +103,9 @@ public final class PolicyProjection {
 
     private Collection<String>              permissions    = List.of();
     private UnaryOperator<String>           describe       = permission -> null;
+
+    /** A permission's {@code through} clause, where the vocabulary declares one. */
+    private Function<String, PolicyPermissionRedirect> redirect = permission -> null;
     private Collection<? extends ScopeKind> scopes         = List.of();
     private Collection<RoleView>            roles          = List.of();
     private Collection<RoleHolding>         roleHoldings   = List.of();
@@ -134,8 +139,28 @@ public final class PolicyProjection {
      *                    string rather than omitted, because the grammar requires one
      */
     public PolicyProjection permissions(Collection<String> permissions, UnaryOperator<String> describe) {
+        return permissions(permissions, describe, permission -> null);
+    }
+
+    /**
+     * The same, for a build whose permissions may carry a {@code through} clause.
+     *
+     * <p>⚠️ <strong>Without this the policy editor deletes them.</strong> This projection is what
+     * {@code /admin/access} opens and what a save is diffed against, so anything the file can say and
+     * this cannot render is a rule that survives a parse and not a save — silently, and in the one
+     * document where a silent deletion is an authorization change. {@code through} is vocabulary, exactly
+     * like a description, which is why it arrives the same way and from the same place.
+     *
+     * @param redirect a permission's {@code through} clause, or null where it has none
+     */
+    public PolicyProjection permissions(
+            Collection<String> permissions,
+            UnaryOperator<String> describe,
+            Function<String, PolicyPermissionRedirect> redirect) {
+
         this.permissions = permissions;
         this.describe    = describe;
+        this.redirect    = redirect;
 
         return this;
     }
@@ -289,7 +314,7 @@ public final class PolicyProjection {
     private List<PolicyPermissionDeclaration> projectedPermissions() {
         return permissions.stream()
                 .map(permission -> new PolicyPermissionDeclaration(
-                        permission, descriptionOf(permission), SourceSpan.none()))
+                        permission, descriptionOf(permission), redirect.apply(permission), SourceSpan.none()))
                 .toList();
     }
 

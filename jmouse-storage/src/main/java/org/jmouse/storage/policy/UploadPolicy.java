@@ -140,7 +140,7 @@ public final class UploadPolicy {
      * @param extension lower-cased extension without its dot, possibly empty
      */
     private void ensureExtensionAccepted(String extension) {
-        if (extension.isEmpty() && mode == AcceptanceMode.DENYLIST) {
+        if (extension.isEmpty() && mode == AcceptanceMode.DENY_LIST) {
             return;
         }
 
@@ -152,6 +152,46 @@ public final class UploadPolicy {
     }
 
     /**
+     * 🔎 How the lists are read.
+     *
+     * <p>These four accessors exist so a screen can <strong>show</strong> the rule that applies rather
+     * than only discover it by being refused. A policy that can judge but not describe itself forces
+     * every interface to reconstruct it from configuration, which is the same rule written twice.</p>
+     *
+     * @return the acceptance mode
+     */
+    public AcceptanceMode mode() {
+        return mode;
+    }
+
+    /**
+     * 🔎 The listed content types, lower-cased and without parameters.
+     *
+     * @return the content types
+     */
+    public Set<String> contentTypes() {
+        return contentTypes;
+    }
+
+    /**
+     * 🔎 The listed extensions, lower-cased and without their dot.
+     *
+     * @return the extensions
+     */
+    public Set<String> extensions() {
+        return extensions;
+    }
+
+    /**
+     * 🔎 The largest content this policy accepts.
+     *
+     * @return the limit, in bytes
+     */
+    public long maxSizeBytes() {
+        return maxSizeBytes;
+    }
+
+    /**
      * 🚦 Read a list according to the active mode.
      *
      * @param listed    the configured list
@@ -159,7 +199,7 @@ public final class UploadPolicy {
      * @return {@code true} when the candidate must be refused
      */
     private boolean isRefused(Set<String> listed, String candidate) {
-        if (mode == AcceptanceMode.ALLOWLIST) {
+        if (mode == AcceptanceMode.ALLOW_LIST) {
             return !listed.contains(candidate);
         }
 

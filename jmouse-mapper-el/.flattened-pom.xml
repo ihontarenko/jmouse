@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-mapper-el</artifactId>
-  <version>1.0.0-b20260802</version>
+  <version>1.0.0-b20260902</version>
   <name>jMouse - Mapper (.jmm)</name>
   <description>jMouse Framework - The .jmm mapping declaration: its tokens, its document model, its parsers, and the rule source that hands what it read to the mapping engine</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-mapper-el</url>
@@ -30,13 +30,13 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-mapper</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-el</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

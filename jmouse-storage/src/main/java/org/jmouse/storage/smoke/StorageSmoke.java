@@ -25,7 +25,9 @@ import org.jmouse.storage.key.StorageKeyRequest;
 import org.jmouse.storage.key.StorageKeyStrategy;
 import org.jmouse.storage.local.LocalFileStore;
 import org.jmouse.storage.policy.AcceptanceMode;
+import org.jmouse.storage.policy.FixedUploadPolicy;
 import org.jmouse.storage.policy.UploadPolicy;
+import org.jmouse.storage.policy.UploadPolicyResolver;
 import org.jmouse.storage.resource.FileStoreResourceLoader;
 
 import java.io.IOException;
@@ -85,6 +87,7 @@ public final class StorageSmoke {
             verifyDirectLinkAbsence(fileStore);
             verifyResourceLoader(fileStore);
             verifyPolicyModes();
+            verifyPolicyResolution();
             verifySettingsBinding();
         } finally {
             removeRecursively(root);
@@ -279,7 +282,7 @@ public final class StorageSmoke {
      */
     private static void verifyPolicyModes() {
         UploadPolicy denying = UploadPolicy.of(settingsWith(
-                new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.DENYLIST, Set.of("text/html", "image/svg+xml"),
+                new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.DENY_LIST, Set.of("text/html", "image/svg+xml"),
                                    Set.of("exe", "svg"))));
 
         accepts("denylist admits a PDF", denying, pdf());
@@ -291,7 +294,7 @@ public final class StorageSmoke {
         accepts("denylist admits no extension at all", denying, named("README", null));
 
         UploadPolicy allowing = UploadPolicy.of(settingsWith(
-                new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.ALLOWLIST, Set.of("application/pdf", "image/png"),
+                new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.ALLOW_LIST, Set.of("application/pdf", "image/png"),
                                    Set.of("pdf", "png"))));
 
         accepts("allowlist admits a PDF", allowing, pdf());
@@ -302,7 +305,7 @@ public final class StorageSmoke {
         rejects("allowlist refuses no extension at all", UploadRejectedException.class,
                 () -> allowing.accept(named("README", null)));
 
-        UploadPolicy tiny = new UploadPolicy(AcceptanceMode.DENYLIST, Set.of(), Set.of(), 8);
+        UploadPolicy tiny = new UploadPolicy(AcceptanceMode.DENY_LIST, Set.of(), Set.of(), 8);
         rejects("size limit enforced", UploadRejectedException.class,
                 () -> tiny.accept(Content.ofBytes("payload.txt", MediaType.TEXT_PLAIN, PAYLOAD)));
         accepts("unknown size passes the declared check", tiny,
@@ -311,6 +314,44 @@ public final class StorageSmoke {
                 () -> tiny.accept(Content.ofBytes("payload.txt", MediaType.TEXT_PLAIN, new byte[0])));
 
         verifyShippedPolicies();
+    }
+
+    /**
+     * 🧭 A destination can carry its own rule, and an installation that contributes none never notices.
+     */
+    private static void verifyPolicyResolution() {
+        UploadPolicy installation = UploadPolicy.of(settingsWith(
+                new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.DENY_LIST, Set.of(), Set.of("zip"))));
+        UploadPolicy archives = UploadPolicy.of(settingsWith(
+                new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.DENY_LIST, Set.of(), Set.of())));
+
+        UploadPolicyResolver fixed = new FixedUploadPolicy(installation);
+
+        check("fixed resolver answers for a directory", installation,
+              fixed.policyFor("DIRECTORY", "42"));
+        check("fixed resolver answers for nowhere in particular", installation,
+              fixed.policyFor(null, null));
+
+        // What jmouse-storage-management contributes, in miniature: one folder widened, everything else
+        // left exactly as the installation configured it.
+        UploadPolicyResolver perDirectory = (ownerType, ownerId) ->
+                "DIRECTORY".equals(ownerType) && "prototypes".equals(ownerId) ? archives : installation;
+
+        rejects("the installation refuses an archive", UploadRejectedException.class,
+                () -> perDirectory.policyFor("DIRECTORY", "manuals").accept(named("gerbers.zip", null)));
+        accepts("a widened folder admits it", perDirectory.policyFor("DIRECTORY", "prototypes"),
+                named("gerbers.zip", null));
+        rejects("an issue is not a folder and keeps the installation's rule", UploadRejectedException.class,
+                () -> perDirectory.policyFor("ISSUE", "prototypes").accept(named("gerbers.zip", null)));
+
+        StorageKeyRequest request = StorageKeyRequest.forOwner("42").ownerType("directory").build();
+
+        check("owner kind travels with the request", "DIRECTORY", request.ownerType());
+        check("owner kind survives a digest", "DIRECTORY", request.withContentDigest("abc").ownerType());
+        check("no owner kind means nowhere in particular", true,
+              StorageKeyRequest.forOwner("42").build().ownerType() == null);
+        check("a blank owner kind means nowhere in particular", true,
+              StorageKeyRequest.forOwner("42").ownerType("  ").build().ownerType() == null);
     }
 
     /**

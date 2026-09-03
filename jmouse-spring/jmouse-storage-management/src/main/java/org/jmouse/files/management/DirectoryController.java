@@ -1,7 +1,9 @@
 package org.jmouse.files.management;
 
 import org.jmouse.files.jpa.directory.StorageDirectory;
+import org.jmouse.files.management.access.DirectoryVisibility;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 🌳 The directory endpoints — a separate set from the file ones, deliberately.
@@ -51,12 +54,23 @@ public class DirectoryController {
     private final DirectoryManagement directories;
 
     /**
+     * ⚠️ Which of the rows a listing returns this caller may actually see (JMF-278).
+     *
+     * <p>The guard outside authorizes the directory the caller <em>named</em>; nothing authorized the
+     * rows handed back. So a caller who could read a root could enumerate every folder under it,
+     * including ones an explicit deny closed to them — refused on opening, listed by name in every tree.
+     */
+    private final DirectoryVisibility visible;
+
+    /**
      * 🏗️ Serve the tree.
      *
      * @param directories the tree's transactional surface
+     * @param visible     which of its rows this caller may see
      */
-    public DirectoryController(DirectoryManagement directories) {
+    public DirectoryController(DirectoryManagement directories, DirectoryVisibility visible) {
         this.directories = directories;
+        this.visible     = visible;
     }
 
     /**
@@ -82,7 +96,7 @@ public class DirectoryController {
      */
     @GetMapping(ManagementRoutes.DIRECTORIES)
     public List<DirectoryView> roots(@RequestParam(defaultValue = StorageDirectory.INSTALLATION) String owner) {
-        return directories.roots(owner).stream().map(DirectoryView::of).toList();
+        return visible.readable(directories.roots(owner)).stream().map(DirectoryView::of).toList();
     }
 
     /**
@@ -90,12 +104,23 @@ public class DirectoryController {
      *
      * <p>One indexed range query, which is the whole reason the numbering exists.</p>
      *
+     * <h2>⚠️ FILTERED, and it was not (JMF-278)</h2>
+     *
+     * <p>The guard authorizes the directory NAMED in the path. Every descendant then came back
+     * unfiltered, so a caller who may read a root could enumerate every folder beneath it — names, paths
+     * and all — including ones an explicit deny closed to them. That made a per-directory deny stop
+     * somebody <em>opening</em> a folder while leaving its existence in every tree the product draws.</p>
+     *
+     * <p>⚠️ A folder the caller may not read takes its children with it, because the engine walks the
+     * containing chain: a child of a closed folder is closed too, and is dropped by the same predicate
+     * rather than by anything here knowing about parents.</p>
+     *
      * @param directoryId the directory
-     * @return the subtree, itself first
+     * @return the readable part of the subtree, itself first
      */
     @GetMapping(ManagementRoutes.DIRECTORY_SUBTREE)
     public List<DirectoryView> subtree(@PathVariable String directoryId) {
-        return directories.subtree(directoryId).stream().map(DirectoryView::of).toList();
+        return visible.readable(directories.subtree(directoryId)).stream().map(DirectoryView::of).toList();
     }
 
     /**
@@ -166,5 +191,103 @@ public class DirectoryController {
     public void delete(@PathVariable String directoryId,
                        @RequestParam(defaultValue = "false") boolean withSubtree) {
         directories.delete(directoryId, withSubtree);
+    }
+
+    /**
+     * 🌳 One folder, with what actually applies to it.
+     *
+     * <p>⚠️ The rule reported here is the <strong>effective</strong> one — after inheritance — and it
+     * says where it came from: this folder, an ancestor (by path), or the installation. A screen cannot
+     * derive that for itself, because from below an inherited rule and a folder's own look identical.</p>
+     *
+     * <p>⚠️ It also says whether the rule admits active content. That is a <em>fact</em>, not a verdict:
+     * the library reserves no type and declined to refuse anything on an owner's behalf. What it did not
+     * decline was to say so out loud, and a folder quietly admitting {@code .svg} because a rule three
+     * levels up says so is hidden risk rather than understood risk.</p>
+     *
+     * <p>⚠️ And a folder whose rule was <em>narrowed</em> still contains what it accepted before — a rule
+     * governs entry, never residence. A listing showing files the folder would now refuse is correct;
+     * this is what lets a screen say so rather than look broken.</p>
+     *
+     * @param directoryId the folder
+     * @return the folder and every rule that applies to it
+     */
+    @GetMapping(ManagementRoutes.DIRECTORY)
+    public DirectoryView read(@PathVariable String directoryId) {
+        return directories.describe(directoryId);
+    }
+
+    /**
+     * 📋 Which kinds of configuration this folder carries a row of its own for.
+     *
+     * <p>What a screen draws "clear" as available or not from — and with a table, that is simply
+     * whether the row exists rather than a sentinel value somebody has to interpret.</p>
+     *
+     * @param directoryId the folder
+     * @return the kind names
+     */
+    @GetMapping(ManagementRoutes.DIRECTORY_CONFIGURATIONS)
+    public List<String> configurations(@PathVariable String directoryId) {
+        return directories.configurationKinds(directoryId);
+    }
+
+    /**
+     * 🔎 What this folder itself says, of one kind.
+     *
+     * <p>⚠️ Its <strong>own</strong> row, never what it inherits — the effective rule and where it came
+     * from are on the directory's view, because that is where a screen needs them together.</p>
+     *
+     * @param directoryId the folder
+     * @param kind        which question
+     * @return the configuration, or {@code 404} when the folder carries none of its own
+     */
+    @GetMapping(ManagementRoutes.DIRECTORY_CONFIGURATION)
+    public ResponseEntity<Object> configuration(@PathVariable String directoryId,
+                                                @PathVariable String kind) {
+        return directories.configuration(directoryId, kind)
+                .map(configuration -> ResponseEntity.ok((Object) configuration))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    /**
+     * ✏️ Say what this folder does, of one kind.
+     *
+     * <h2>⚠️ Its own right, and that is load-bearing rather than tidy</h2>
+     *
+     * <p>The library reserves no file type: a folder may be configured to admit {@code exe},
+     * {@code jar}, {@code php}. So <em>who may change a folder's upload rule</em> is literally <em>who
+     * may put an executable into this installation</em>, and it cannot ride on the permission that
+     * renames a folder. {@code FilesAccessRules.configuringWith(...)} declares it, and a product that
+     * leaves it unset keeps the type's write rule — the safe direction, and almost certainly not what
+     * was meant.</p>
+     *
+     * <p>⚠️ An unknown kind is refused from the registry, and a document that will not bind as that
+     * kind's record is refused here — never stored to explode at somebody's next upload.</p>
+     *
+     * @param directoryId the folder
+     * @param kind        which question
+     * @param document    the answer
+     * @return the configuration as it now reads, normalised
+     */
+    @PutMapping(ManagementRoutes.DIRECTORY_CONFIGURATION)
+    public Object configure(@PathVariable String directoryId, @PathVariable String kind,
+                            @RequestBody Map<String, Object> document) {
+        return directories.writeConfiguration(directoryId, kind, document);
+    }
+
+    /**
+     * 🧹 Stop saying anything of this kind, and go back to inheriting.
+     *
+     * <p>⚠️ Reachable on purpose. A configuration that could be set and not removed would be a one-way
+     * door on every folder — and "cleared" here is genuinely no row at all, which is the state the
+     * resolver reads as "ask my parent".</p>
+     *
+     * @param directoryId the folder
+     * @param kind        which question
+     */
+    @DeleteMapping(ManagementRoutes.DIRECTORY_CONFIGURATION)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void clearConfiguration(@PathVariable String directoryId, @PathVariable String kind) {
+        directories.clearConfiguration(directoryId, kind);
     }
 }

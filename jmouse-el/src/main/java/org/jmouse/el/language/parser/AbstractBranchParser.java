@@ -25,7 +25,7 @@ public abstract class AbstractBranchParser<N extends ExpressionsNode, B extends 
     }
 
     protected void parseBranchBody(TokenCursor cursor, B branch, ParserContext context) {
-        Node children = context.getParser(StatementsParser.class).parse(cursor, context);
+        Node children = context.getParser(statementsParser()).parse(cursor, context);
         children.getChildren().stream().map(Expression.class::cast).forEach(branch::addExpression);
     }
 

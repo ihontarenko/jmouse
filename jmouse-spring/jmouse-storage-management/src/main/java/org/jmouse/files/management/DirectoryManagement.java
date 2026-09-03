@@ -1,10 +1,17 @@
 package org.jmouse.files.management;
 
+import org.jmouse.files.directory.DirectoryConfigurationKind;
+import org.jmouse.files.directory.DirectoryConfigurationKinds;
 import org.jmouse.files.jpa.directory.StorageDirectories;
 import org.jmouse.files.jpa.directory.StorageDirectory;
+import org.jmouse.files.jpa.directory.StorageDirectoryConfigurations;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * 🌳 The whole of what a directory endpoint does, minus the routing and minus the authorization.
@@ -47,7 +54,18 @@ import java.util.List;
  */
 public class DirectoryManagement {
 
-    private final StorageDirectories directories;
+    private final StorageDirectories             directories;
+    private final StorageDirectoryConfigurations configurations;
+    private final DirectoryConfigurationKinds    kinds;
+
+    /**
+     * One per kind of configuration — they resolve what applies to a folder, and they are what has to
+     * be told when a branch stops meaning what it meant.
+     */
+    private final List<DirectoryConfigurationResolver> resolvers;
+
+    /** Where "this folder changed its mind" is announced, or {@code null} where nobody is listening. */
+    private final ApplicationEventPublisher      events;
 
     /**
      * 🏗️ Own the tree's transactions.
@@ -55,7 +73,51 @@ public class DirectoryManagement {
      * @param directories the tree
      */
     public DirectoryManagement(StorageDirectories directories) {
-        this.directories = directories;
+        this(directories, null, null, List.of(), null);
+    }
+
+    /**
+     * 🏗️ Own the tree's transactions, and what its folders say about themselves.
+     *
+     * @param directories    the tree
+     * @param configurations what folders say about themselves, or {@code null} where nothing may
+     * @param kinds          what kinds this installation knows about
+     * @param resolvers      one per kind — what applies to a folder, and what to forget when it changes
+     * @param events         where a change is announced, or {@code null} to announce nothing
+     */
+    public DirectoryManagement(StorageDirectories directories,
+                               StorageDirectoryConfigurations configurations,
+                               DirectoryConfigurationKinds kinds,
+                               List<DirectoryConfigurationResolver> resolvers,
+                               ApplicationEventPublisher events) {
+        this.directories    = directories;
+        this.configurations = configurations;
+        this.kinds          = kinds;
+        this.resolvers      = resolvers == null ? List.of() : List.copyOf(resolvers);
+        this.events         = events;
+    }
+
+    /**
+     * 🌳 One directory, with what applies to it.
+     *
+     * <p>⚠️ The enriched read, and deliberately not what a tree listing gives you: resolving an
+     * effective rule walks a folder's ancestors, so filling it in per row would turn drawing a sidebar
+     * into a resolve per node. A folder's own screen asks about one folder.</p>
+     *
+     * @param directoryId the directory
+     * @return the directory and every kind of rule that applies to it
+     */
+    @Transactional(readOnly = true)
+    public DirectoryView describe(String directoryId) {
+        StorageDirectory directory = directories.require(directoryId);
+
+        Map<String, DirectoryConfigurationView> applied = new LinkedHashMap<>();
+
+        for (DirectoryConfigurationResolver resolver : resolvers) {
+            applied.putAll(resolver.describe(directory));
+        }
+
+        return DirectoryView.of(directory, applied);
     }
 
     /**
@@ -123,6 +185,10 @@ public class DirectoryManagement {
         StorageDirectory directory   = directories.require(directoryId);
         StorageDirectory destination = directories.require(parentId);
 
+        // ⚠️ BEFORE the move, while the subtree is still walkable at its old numbering — and the moved
+        // branch now inherits from somewhere else entirely, which is the eviction that gets forgotten.
+        forget(directory);
+
         return directories.moveTo(directory, destination);
     }
 
@@ -134,6 +200,151 @@ public class DirectoryManagement {
      */
     @Transactional
     public void delete(String directoryId, boolean withSubtree) {
-        directories.delete(directories.require(directoryId), withSubtree);
+        StorageDirectory directory = directories.require(directoryId);
+
+        forget(directory);
+        directories.delete(directory, withSubtree);
+    }
+
+    // ── What a folder says about itself ───────────────────────────────────────
+
+    /**
+     * 🔎 What this folder itself says, of one kind — never what it inherits.
+     *
+     * @param directoryId the folder
+     * @param kind        which question, by name
+     * @return the configuration, or empty when it carries none of its own
+     */
+    @Transactional(readOnly = true)
+    public Optional<?> configuration(String directoryId, String kind) {
+        directories.require(directoryId);
+
+        return configurations().find(directoryId, requireKind(kind));
+    }
+
+    /**
+     * 📋 Every kind this folder carries a row for.
+     *
+     * @param directoryId the folder
+     * @return the kind names
+     */
+    @Transactional(readOnly = true)
+    public List<String> configurationKinds(String directoryId) {
+        directories.require(directoryId);
+
+        return configurations().kindsOf(directoryId);
+    }
+
+    /**
+     * ✏️ Say what this folder does, of one kind — replacing whatever it said before.
+     *
+     * <p>⚠️ Three things happen together and none of them is optional: the row is written, the cached
+     * answers for the whole subtree are dropped, and the change is announced. A write without the
+     * eviction leaves every folder beneath still resolving the old rule until a restart, which is a bug
+     * that looks exactly like the feature not working.</p>
+     *
+     * <p>⚠️ The document is bound as <strong>that kind's record</strong> rather than stored as whatever
+     * JSON arrived. A payload that will not bind is a refusal here, never a row that explodes at
+     * somebody's next upload.</p>
+     *
+     * @param directoryId the folder
+     * @param kind        which question, by name
+     * @param document    the answer, as it arrived
+     * @param <T>         the kind's payload type
+     * @return the configuration as it now reads, normalised
+     */
+    @Transactional
+    @SuppressWarnings("unchecked")
+    public <T> T writeConfiguration(String directoryId, String kind, Object document) {
+        StorageDirectory              directory = directories.require(directoryId);
+        DirectoryConfigurationKind<T> known     = (DirectoryConfigurationKind<T>) requireKind(kind);
+        String                        previous  = payloadOf(directoryId, known);
+        T                             payload   = configurations().bind(known, document);
+
+        configurations().write(directoryId, known, payload);
+
+        forget(directory);
+        announce(directory, known.name(), previous, String.valueOf(payload));
+
+        return payload;
+    }
+
+    /**
+     * 🧹 Stop saying anything of this kind, and go back to inheriting.
+     *
+     * @param directoryId the folder
+     * @param kind        which question, by name
+     * @return whether there was anything to clear
+     */
+    @Transactional
+    public boolean clearConfiguration(String directoryId, String kind) {
+        StorageDirectory              directory = directories.require(directoryId);
+        DirectoryConfigurationKind<?> known     = requireKind(kind);
+        String                        previous  = payloadOf(directoryId, known);
+
+        boolean cleared = configurations().clear(directoryId, known);
+
+        forget(directory);
+
+        if (cleared) {
+            announce(directory, known.name(), previous, null);
+        }
+
+        return cleared;
+    }
+
+    /**
+     * 📋 What kinds of configuration this installation knows about.
+     *
+     * @return the kind names
+     */
+    public List<String> knownKinds() {
+        return kinds == null ? List.of() : kinds.names();
+    }
+
+    // ── Internals ─────────────────────────────────────────────────────────────
+
+    private StorageDirectoryConfigurations configurations() {
+        if (configurations == null) {
+            throw new IllegalStateException(
+                "This installation stores no directory configurations — "
+                + "declare a StorageDirectoryConfigurations bean to enable them.");
+        }
+
+        return configurations;
+    }
+
+    /**
+     * 🔎 The kind of this name, or a refusal naming the ones that would have worked.
+     */
+    private DirectoryConfigurationKind<?> requireKind(String kind) {
+        if (kinds == null) {
+            throw new IllegalStateException("This installation registers no configuration kinds.");
+        }
+
+        return kinds.require(kind);
+    }
+
+    /**
+     * 📜 The stored document as it currently reads, for an audit line to compare against.
+     */
+    private String payloadOf(String directoryId, DirectoryConfigurationKind<?> kind) {
+        return configurations().find(directoryId, kind).map(Object::toString).orElse(null);
+    }
+
+    /**
+     * 🧹 Drop whatever was memoised about this folder and everything under it.
+     */
+    private void forget(StorageDirectory directory) {
+        for (DirectoryConfigurationResolver resolver : resolvers) {
+            resolver.evictSubtreeOf(directory);
+        }
+    }
+
+    private void announce(StorageDirectory directory, String kind, String previous, String payload) {
+        if (events != null) {
+            events.publishEvent(new FileManagementEvent.ConfigurationChanged(
+                    directory.getId(), directory.getPath(), kind, previous, payload));
+        }
     }
 }

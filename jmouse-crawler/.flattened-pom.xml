@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-crawler</artifactId>
-  <version>1.0.0-b20260802</version>
+  <version>1.0.0-b20260902</version>
   <name>jMouse - Crawler</name>
   <description>jMouse Framework - Crawler</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-crawler</url>
@@ -30,19 +30,19 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-core</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-mapper</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-beans</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

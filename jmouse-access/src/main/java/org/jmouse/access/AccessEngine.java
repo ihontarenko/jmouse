@@ -2,6 +2,9 @@ package org.jmouse.access;
 
 import org.jmouse.access.axis.AccessAxisEvaluator;
 import org.jmouse.access.spi.AccessTargetRegistry;
+import org.jmouse.access.spi.PermissionRelations;
+import org.jmouse.access.spi.ResourceRelation;
+import org.jmouse.access.spi.ResourceRelationRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +12,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * The one call every authorization question goes through.
@@ -41,6 +45,36 @@ public class AccessEngine {
     private final VisibilityScopeResolver   visibilityScopes;
     private final EngineRefusals            refusals;
 
+    /** Where a row with no place of its own borrows one. Empty in a build that declares no relation. */
+    private final ResourceRelationRegistry  relations;
+
+    /** Which permissions aim elsewhere. {@link PermissionRelations#none()} where the policy says none. */
+    private final PermissionRelations       permissionRelations;
+
+    public AccessEngine(
+            List<AccessAxisEvaluator> axes,
+            AxisCatalog               declaredAxes,
+            AccessTargetRegistry      targets,
+            VisibilityScopeResolver   visibilityScopes,
+            EngineRefusals            refusals,
+            ResourceRelationRegistry  relations,
+            PermissionRelations       permissionRelations) {
+
+        this.axes                = orderedByAxis(axes, declaredAxes);
+        this.targets             = targets;
+        this.visibilityScopes    = visibilityScopes;
+        this.refusals            = refusals;
+        this.relations           = relations;
+        this.permissionRelations = permissionRelations;
+    }
+
+    /**
+     * The engine as it was before {@code through} existed.
+     *
+     * <p>⚠️ Kept so that adding a widening feature does not force every product to wire two beans it has
+     * no use for. A build with no relations behaves identically to one compiled before this — the
+     * redirect lookup answers empty and {@code decideAbout} takes the path it always took.
+     */
     public AccessEngine(
             List<AccessAxisEvaluator> axes,
             AxisCatalog               declaredAxes,
@@ -48,10 +82,8 @@ public class AccessEngine {
             VisibilityScopeResolver   visibilityScopes,
             EngineRefusals            refusals) {
 
-        this.axes             = orderedByAxis(axes, declaredAxes);
-        this.targets          = targets;
-        this.visibilityScopes = visibilityScopes;
-        this.refusals         = refusals;
+        this(axes, declaredAxes, targets, visibilityScopes, refusals,
+             new ResourceRelationRegistry(List.of()), PermissionRelations.none());
     }
 
     /**
@@ -113,11 +145,116 @@ public class AccessEngine {
     public AccessDecision decideAbout(
             Subject subject, String permission, Class<?> resourceType, String resourceId) {
 
+        return decideAbout(subject, permission, resourceType, resourceId, null);
+    }
+
+    /**
+     * The same, for a caller that also knows which module the route belongs to.
+     *
+     * <p>⚠️ <strong>This overload is what {@code @RequiresAccess(resource = …)} goes through, and adding
+     * it is what made {@code through} reach an endpoint at all.</strong> The enforcement guard used to
+     * resolve the row itself and call {@link #decide} with the single target that came back — so a
+     * permission's {@code through} clause was honoured by anything calling this method directly and
+     * silently ignored by every annotated route, which is every route. The module is threaded rather than
+     * applied by the caller because the redirect produces <em>several</em> targets and each of them needs
+     * it; decorating one target before the redirect ran would have decorated the wrong one.
+     *
+     * @param module the module the route belongs to, or null where it declares none
+     */
+    public AccessDecision decideAbout(
+            Subject subject, String permission, Class<?> resourceType, String resourceId, String module) {
+
+        Optional<PermissionRelations.Redirect> redirect = permissionRelations.redirectFor(permission);
+
+        if (redirect.isPresent()) {
+            return decideThrough(subject, permission, resourceType, resourceId, redirect.get(), module);
+        }
+
         return targets.resolve(resourceType, resourceId)
-                .map(target -> decide(subject, permission, target))
-                .orElseGet(() -> AccessDecision.refused(
-                        refusals.noSuchRow(),
-                        "No such " + resourceType.getSimpleName().toLowerCase() + "."));
+                .map(target -> decide(subject, permission, within(target, module)))
+                .orElseGet(() -> AccessDecision.refused(refusals.noSuchRow(), noSuchRow(resourceType)));
+    }
+
+    private AccessTarget within(AccessTarget target, String module) {
+        return module == null ? target : target.withModule(module);
+    }
+
+    /**
+     * The same question, asked where the permission's {@code through} clause points.
+     *
+     * <p>⚠️ <strong>The permission does not change and the subject does not change — only the target
+     * does.</strong> {@code field:write through form} still asks about {@code field:write}; it asks it
+     * about the forms the field stands on, because a field has no place of its own to ask about. See
+     * {@link ResourceRelation} for why this is the one thing in the model that can widen, and for the
+     * two rules that keep it safe.
+     *
+     * <p>⚠️ <strong>Both empties refuse, and they refuse differently.</strong> No relation declared for
+     * the pair is a <em>wiring</em> fault — the policy names a destination this build cannot reach — and
+     * it says so, because a rule that silently does nothing is worse than one that fails loudly. A
+     * relation answering with no rows is a row that hangs off nothing, and falls back to the installation
+     * target — the narrowest place still reachable, which only a GLOBAL holding covers.
+     */
+    private AccessDecision decideThrough(
+            Subject subject,
+            String permission,
+            Class<?> resourceType,
+            String resourceId,
+            PermissionRelations.Redirect redirect,
+            String module) {
+
+        Optional<List<AccessTarget>> borrowed =
+                relations.targetsOf(resourceType, redirect.destination(), resourceId);
+
+        if (borrowed.isEmpty()) {
+            throw new IllegalStateException(
+                    "'" + permission + "' is declared 'through " + redirect.destination().getSimpleName()
+                    + "' but nothing relates " + resourceType.getSimpleName() + " to it. Register a "
+                    + "ResourceRelation for that pair, or drop the clause — a permission whose target "
+                    + "cannot be reached refuses every request and explains none of them.");
+        }
+
+        List<AccessTarget> places = borrowed.get();
+
+        if (places.isEmpty()) {
+            // A row related to nothing falls back to the INSTALLATION, not to a refusal. Refusing was the
+            // first design and it was wrong: fifteen of Innoventa's 283 fields stand on no form, and under
+            // that rule nobody — an administrator included — could ever have edited or deleted one, with
+            // no way out of the state from inside the product.
+            //
+            // It grants nobody anything. Only a GLOBAL holding covers the installation target, and anybody
+            // with installation-wide `field:write` could already edit every field there is; a holding at an
+            // organisation, a workspace or SELF does not cover it. So the floor is the narrowest place
+            // still reachable, which is what a row belonging nowhere deserves.
+            return decide(subject, permission, within(AccessTarget.installation(), module));
+        }
+
+        // `through each X` needs every place to agree; `through any X` needs one. The quantifier is written
+        // in the policy precisely so this line is not a default somebody has to go and look up.
+        AccessDecision refusal = null;
+
+        for (AccessTarget place : places) {
+            AccessDecision decision = decide(subject, permission, within(place, module));
+
+            if (decision.granted() && !redirect.requiresEach()) {
+                return decision;
+            }
+
+            if (!decision.granted()) {
+                if (redirect.requiresEach()) {
+                    return decision;
+                }
+
+                refusal = refusal == null ? decision : refusal;
+            }
+        }
+
+        // Every place allowed it (`all`), or none did (`any`) — in which case the first refusal is the
+        // one to report, so the caller is told why rather than merely that.
+        return refusal == null ? AccessDecision.allowed() : refusal;
+    }
+
+    private String noSuchRow(Class<?> resourceType) {
+        return "No such " + targets.nameOf(resourceType).orElseGet(resourceType::getSimpleName) + ".";
     }
 
     /** {@link #decideAbout}, for call sites with nothing to say about why not. */

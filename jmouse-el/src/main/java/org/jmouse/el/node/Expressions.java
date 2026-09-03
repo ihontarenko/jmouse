@@ -45,7 +45,15 @@ public final class Expressions {
             case NegateUnaryOperation negation -> visitor.visitNegation(negation);
             case UnaryOperation unary -> visitor.visitUnary(unary);
             case BinaryOperation operation -> visitor.visitBinary(operation);
+            // ⚠️ ScopedCallNode extends FunctionNode, so it is asked first for the same reason ArrayNode
+            // is asked before ArgumentsNode below: a call on a named scope is not a plain call, and a
+            // visitor that told them apart could not if the general case matched first.
+            case ScopedCallNode call -> visitor.visitScopedCall(call);
             case FunctionNode call -> visitor.visitCall(call);
+            case BeanAccessNode access -> visitor.visitBeanAccess(access);
+            case RangeNode range -> visitor.visitRange(range);
+            case KeyValueNode entry -> visitor.visitKeyValue(entry);
+            case MapNode map -> visitor.visitMap(map);
             case ArrayNode array -> visitor.visitArray(array);
             case ArgumentsNode arguments -> visitor.visitArguments(arguments);
             default -> visitor.visitUnsupported(expression);

@@ -128,4 +128,36 @@ public interface ExpressionVisitor<R> {
     default R visitArguments(ArgumentsNode arguments) {
         return visitUnsupported(arguments);
     }
+
+    /**
+     * A scoped bean access — {@code @world.reveal('base')}, {@code @player#MAX}, {@code @player:$id}.
+     *
+     * <p>⚠️ <strong>A backend that does not implement this refuses it, and that is the safe default.</strong>
+     * This is the one shape reaching outside the expression into whatever a host registered, so a
+     * visitor auditing what a document may touch has to see it — one that silently skipped it would
+     * report a document clean while it called into anything at all.</p>
+     */
+    default R visitBeanAccess(BeanAccessNode access) {
+        return visitUnsupported(access);
+    }
+
+    /** A method call on a value already in scope — {@code unit.distanceTo(target)}. */
+    default R visitScopedCall(ScopedCallNode call) {
+        return visitUnsupported(call);
+    }
+
+    /** A range — {@code 1..10}. */
+    default R visitRange(RangeNode range) {
+        return visitUnsupported(range);
+    }
+
+    /** A literal map — <code>{'a': 1}</code>. */
+    default R visitMap(MapNode map) {
+        return visitUnsupported(map);
+    }
+
+    /** One entry of a literal map. */
+    default R visitKeyValue(KeyValueNode entry) {
+        return visitUnsupported(entry);
+    }
 }

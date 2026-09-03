@@ -187,7 +187,11 @@ public class FileManagement {
             allowance.requireRoomFor(owner, content.declaredSize());
         }
 
+        // ⚠️ The KIND travels with the identifier and does not lay anything out. It is what lets storage
+        // resolve the rule of wherever this is going — a folder that admits archives, an issue that does
+        // not — instead of applying one installation-wide answer to both.
         StorageKeyRequest request = StorageKeyRequest.forContent(owner.ownerId(), content)
+            .ownerType(owner.ownerType())
             .namespace(namespace)
             .build();
 
@@ -230,7 +234,9 @@ public class FileManagement {
                     "This installation does not import files from web addresses.");
         }
 
-        RemoteFileFetcher.RemoteFile remote = fetcher.fetch(sourceUrl);
+        // ⚠️ The owner goes with it. The fetcher checks a declared size of its own, and one that did not
+        // know the destination would let a fetch past a limit an upload of the same bytes would meet.
+        RemoteFileFetcher.RemoteFile remote = fetcher.fetch(sourceUrl, owner);
 
         try (InputStream bytes = remote.inputStream()) {
             Content content = Content.of(remote.originalName(), null, Content.UNKNOWN_SIZE, () -> bytes);
@@ -314,6 +320,14 @@ public class FileManagement {
     /**
      * 📦 File it against something else of the same kind.
      *
+     * <p>⚠️ <strong>Judged by where it is going.</strong> Uploading into a permissive folder and then
+     * moving the file into one that would have refused it was, until this check existed, a way past
+     * every acceptance rule in the installation — and the file ended up somewhere its own folder says
+     * it may not be.</p>
+     *
+     * <p>⚠️ This is the one place a rule judges bytes that are <em>already stored</em>, so the refusal
+     * has to say so. "Upload rejected" reads as nonsense to somebody who is not uploading anything.</p>
+     *
      * @param fileId the file
      * @param owner  where it should now be filed
      * @return the file
@@ -321,6 +335,8 @@ public class FileManagement {
     @Transactional
     public ManagedFile refile(String fileId, OwnerReference owner) {
         ManagedFile file = files.require(fileId);
+
+        refuseIfDestinationWouldNotAccept(file, owner);
         // Read before the move, because afterwards there is nothing left saying where it came from —
         // and "moved from the issue you were reading" is the half of the sentence that carries meaning.
         OwnerReference previous = bindings.ownerOf(file.getId(), owner.ownerType()).orElse(null);
@@ -468,6 +484,37 @@ public class FileManagement {
         return delivery.plan(file.getStoredFile(), file.getDisplayName(), intent);
     }
 
+
+    /**
+     * 🛃 Refuse a move into somewhere that would not have accepted this file in the first place.
+     *
+     * <p>The stored content type and the name's extension are judged, which is exactly what an upload
+     * is judged on — the bytes are not re-read, because acceptance has never been about the bytes.</p>
+     */
+    private void refuseIfDestinationWouldNotAccept(ManagedFile file, OwnerReference owner) {
+        StoredFile stored = file.getStoredFile();
+        Content    filed  = Content.of(file.getDisplayName(), stored.getContentType().toString(),
+                                       stored.getSizeBytes(), () -> null);
+
+        try {
+            ingestion.policyFor(owner.ownerType(), owner.ownerId()).accept(filed);
+        } catch (UploadRejectedException refusal) {
+            throw new UploadRejectedException(
+                    "'%s' cannot be moved there — %s".formatted(file.getDisplayName(),
+                                                                lowerCasedFirst(refusal.getMessage())));
+        }
+    }
+
+    /**
+     * 🔤 So a sentence reads as one sentence rather than as two glued together.
+     */
+    private static String lowerCasedFirst(String sentence) {
+        if (sentence == null || sentence.isEmpty()) {
+            return "that destination does not accept it.";
+        }
+
+        return Character.toLowerCase(sentence.charAt(0)) + sentence.substring(1);
+    }
 
     /**
      * 🔒 Refuse anything that would make a held file unreachable.

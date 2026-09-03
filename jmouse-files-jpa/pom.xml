@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jmouse</groupId>
         <artifactId>jmouse-parent</artifactId>
-        <version>1.0.0-b20260802</version>
+        <version>1.0.0-b20260902</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -71,6 +71,15 @@
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
+        </dependency>
+
+        <!-- A directory configuration's payload is a document of its kind's own record, and this is
+             what reads one back into that record. Deliberately Jackson rather than the core binder:
+             the binder's source is a property tree, so a JSON string would still need a parser to
+             become one — and jmouse-ai-jpa already stores documents exactly this way. -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
 
         <dependency>

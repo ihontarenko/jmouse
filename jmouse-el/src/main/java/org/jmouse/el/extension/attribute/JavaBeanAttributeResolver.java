@@ -71,40 +71,66 @@ public class JavaBeanAttributeResolver implements AttributeResolver {
     }
 
     /**
-     * Resolves a bean property by invoking its getter method.
+     * Resolves a bean property by invoking its getter, or answers {@code null} when there is no such
+     * readable property.
      *
-     * <p>
-     * The getter is looked up from descriptor metadata and cached using
-     * the instance/name pair. If the property is not readable, resolution
-     * fails with a null-check exception.
-     * </p>
+     * <h2>⚠️ Answering null IS the contract, and this used to throw instead</h2>
      *
-     * @param instance target bean instance
+     * <p>{@code EvaluationContext.getValue} asks every registered resolver in turn and breaks on the
+     * first non-null answer:</p>
+     *
+     * <pre>{@code
+     * for (AttributeResolver resolver : getAttributeResolvers()) {
+     *     if ((value = resolver.resolve(container, last)) != null) {
+     *         break;
+     *     }
+     * }
+     * }</pre>
+     *
+     * <p>This one threw a {@code NullPointerException} naming a local variable — <em>"Required value
+     * must be non-null: 'getter'"</em> — which broke that loop in two ways. The message said nothing
+     * about the property or the object, and, worse, <strong>the map and list resolvers registered after
+     * it never got asked</strong>: a value one of them would have answered was lost to an exception
+     * thrown by an earlier one.</p>
+     *
+     * <h2>⚠️ Why "no such property" is null rather than a failure</h2>
+     *
+     * <p>Two situations reach here and neither is this class's to judge: the container is {@code null},
+     * so the name resolved to nothing at all and nothing has properties; or it is real and simply not a
+     * bean of that shape — which is exactly when a later resolver should get its turn.</p>
+     *
+     * <p>A <em>typo</em> in a property name is a real mistake and deserves refusing, but it cannot be
+     * told from those two at this depth: a resolver sees one candidate object and one name. Whether an
+     * unknown property is an error belongs to whoever knows what was expected — a dialect, at bind,
+     * against a declared shape. Refusing here would instead mean every host had to put every key of
+     * every event into every context, which is a rule nobody can keep.</p>
+     *
+     * @param instance target bean instance, possibly {@code null}
      * @param name     property name
      *
-     * @return resolved property value
+     * @return the property's value, or {@code null} when this resolver cannot answer
      */
     @Override
     public Object resolve(Object instance, String name) {
-        InvocableMethod getter = null;
-
-        if (instance != null) {
-            Class<?> type = instance.getClass();
-            CacheKey key  = CacheKey.of(instance, name);
-
-            getter = CACHE.get(key);
-
-            if (getter == null) {
-                ObjectDescriptor<?> descriptor = Describer.forObjectDescriptor(type);
-                if (descriptor.hasProperty(name) && descriptor.getProperty(name).isReadable()) {
-                    Method method = descriptor.getProperty(name).getGetterMethod().unwrap();
-                    getter = new InvocableMethod(instance, method);
-                    CACHE.put(key, getter);
-                }
-            }
+        if (instance == null) {
+            return null;
         }
 
-        return invoker.invoke(new InvocationRequest.Default(nonNull(getter, "getter"), context));
+        CacheKey        key    = CacheKey.of(instance, name);
+        InvocableMethod getter = CACHE.get(key);
+
+        if (getter == null) {
+            ObjectDescriptor<?> descriptor = Describer.forObjectDescriptor(instance.getClass());
+
+            if (!descriptor.hasProperty(name) || !descriptor.getProperty(name).isReadable()) {
+                return null;
+            }
+
+            getter = new InvocableMethod(instance, descriptor.getProperty(name).getGetterMethod().unwrap());
+            CACHE.put(key, getter);
+        }
+
+        return invoker.invoke(new InvocationRequest.Default(getter, context));
     }
 
 }

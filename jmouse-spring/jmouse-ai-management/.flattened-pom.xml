@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-ai-management</artifactId>
-  <version>1.0.0-b20260802</version>
+  <version>1.0.0-b20260902</version>
   <name>jMouse - AI Management</name>
   <description>jMouse Framework - Optional REST controllers over the AI read ports (tool catalogue, call history, usage, provider settings)</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-ai-management</url>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-ai</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

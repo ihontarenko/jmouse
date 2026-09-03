@@ -134,4 +134,34 @@ public sealed interface FileManagementEvent {
     record Deleted(String fileId, String displayName, List<OwnerReference> owners)
             implements FileManagementEvent {
     }
+
+    /**
+     * 🔧 A folder changed what it says about itself.
+     *
+     * <p>⚠️ <strong>Announced because the decision declined to PREVENT a dangerous rule; it did not
+     * decline to RECORD one.</strong> With no reserved type anywhere in the library, editing a folder's
+     * upload rule is literally deciding what may be put into this installation — and a change of that
+     * weight leaving no trace is what makes a permission unauditable. Both payloads travel, because
+     * "widened" and "narrowed" is the whole content of the line an audit wants to write.</p>
+     *
+     * <p>⚠️ It is about a directory, not a file, so {@link #fileId()} is {@code null}. The sealed
+     * interface is still the right home: a listener wiring up an audit line for this module wires up
+     * one listener, and a second event hierarchy for the tree would be a second thing to remember.</p>
+     *
+     * @param fileId          always {@code null} — this is about a folder
+     * @param directoryId     the folder
+     * @param directoryPath   its address, so a line can be written without a second lookup
+     * @param kind            which question it answers differently now
+     * @param previousPayload what it said before, or {@code null} when it said nothing
+     * @param payload         what it says now, or {@code null} when it has gone back to inheriting
+     */
+    record ConfigurationChanged(String fileId, String directoryId, String directoryPath, String kind,
+                                String previousPayload, String payload)
+            implements FileManagementEvent {
+
+        public ConfigurationChanged(String directoryId, String directoryPath, String kind,
+                                    String previousPayload, String payload) {
+            this(null, directoryId, directoryPath, kind, previousPayload, payload);
+        }
+    }
 }

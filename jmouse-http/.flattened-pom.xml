@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-http</artifactId>
-  <version>1.0.0-b20260802</version>
+  <version>1.0.0-b20260902</version>
   <name>jMouse - HTTP Protocol</name>
   <description>jMouse Framework - HTTP Protocol Values (headers, status codes, methods, content disposition, ranges, cache control, entity tags, conditional requests)</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-http</url>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-core</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

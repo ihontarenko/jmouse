@@ -220,7 +220,17 @@ public interface TokenCursor extends Streamable<Token> {
      * @return a Savepoint representing the current position in the token stream
      */
     default Savepoint savepoint() {
-        return this::position;
+        // ⚠️ The position is READ NOW and captured. It used to be `this::position` — a method reference,
+        // which is a live view of wherever the cursor has since moved to, so `restore` assigned the
+        // cursor its own current value and did nothing at all.
+        //
+        // ⚠️ It looked right and stayed invisible for as long as it did because everything that
+        // backtracked only ever consumed newlines speculatively, and un-consuming a newline changes
+        // nothing anybody can see. The first parser to speculatively read something that mattered — a
+        // comment — lost it, on every file, with no error.
+        int position = position();
+
+        return () -> position;
     }
 
     /**

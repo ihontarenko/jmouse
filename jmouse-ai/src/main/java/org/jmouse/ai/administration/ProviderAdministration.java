@@ -34,8 +34,12 @@ public interface ProviderAdministration {
     /**
      * A stored configuration, with the credential reduced to a yes or a no.
      *
-     * @param active        whether this is the one in force. ⚠️ At most one is, and putting one in force
-     *                      takes the previous one out of it — the settings source refuses to resolve two
+     * @param purpose       what this configuration is FOR, in the product's own words, or null for the
+     *                      general one. ⚠️ Null answers EVERY purpose — see
+     *                      {@code ProviderSettingsSource#settings(String)}
+     * @param active        whether this is the one in force <em>for its purpose</em>. ⚠️ At most one is
+     *                      per purpose, and putting one in force takes the previous one for THAT purpose
+     *                      out of it — the settings source refuses to resolve two
      * @param keyConfigured whether a key is stored. <strong>Never the key</strong>
      */
     record Configuration(
@@ -47,8 +51,24 @@ public interface ProviderAdministration {
             boolean active,
             boolean keyConfigured,
             Instant createdAt,
-            Instant updatedAt
+            Instant updatedAt,
+            String  purpose
     ) {
+
+        /**
+         * ⚠️ APPENDED, and with this constructor beside it, so adding the field breaks nobody.
+         *
+         * <p>A record component added in the middle would change every positional construction and
+         * every deconstruction pattern in every product at once. Last, plus a constructor without it,
+         * means existing code compiles and reads as the general configuration it always was.
+         */
+        public Configuration(String id, String provider, String model, String apiUrl,
+                             int maximumTokens, boolean active, boolean keyConfigured,
+                             Instant createdAt, Instant updatedAt) {
+
+            this(id, provider, model, apiUrl, maximumTokens, active, keyConfigured,
+                 createdAt, updatedAt, null);
+        }
     }
 
     /**
@@ -64,8 +84,17 @@ public interface ProviderAdministration {
             String model,
             String apiKey,
             String apiUrl,
-            int    maximumTokens
+            int    maximumTokens,
+            String purpose
     ) {
+
+        /**
+         * ⚠️ The five-argument form, kept so this addition breaks no product. It means "the general
+         * one", which is exactly what every existing caller was creating.
+         */
+        public Draft(String provider, String model, String apiKey, String apiUrl, int maximumTokens) {
+            this(provider, model, apiKey, apiUrl, maximumTokens, null);
+        }
 
         /** Whether a credential was actually typed, as opposed to the field being left alone. */
         public boolean carriesKey() {

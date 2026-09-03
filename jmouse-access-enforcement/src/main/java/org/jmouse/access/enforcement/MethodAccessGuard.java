@@ -143,8 +143,31 @@ public class MethodAccessGuard {
             return Optional.empty();
         }
 
-        AccessRequirement      required = declared.get();
-        Optional<AccessTarget> aimed    = binding.bind(method, arguments, required, subject);
+        AccessRequirement required = declared.get();
+
+        // ⚠️ A declaration naming a ROW is asked of the engine as a row, not resolved here.
+        //
+        // This used to bind a single target and call `decide` with it — which meant a permission's
+        // `through` clause was honoured by anything calling `decideAbout` directly and silently ignored
+        // by every annotated route, i.e. by every route. A field definition, whose whole point is that it
+        // borrows the place of the forms it stands on, therefore answered "No such field." to its own
+        // owner. Where the row lives, and where it borrows a place from, is the engine's single answer.
+        if (required.namesARow()) {
+            String identifier = binding.identifierOf(method, arguments, required).orElse(null);
+
+            AccessDecision decision = identifier == null
+                    ? AccessDecision.refused(refusals.noSuchRow(),
+                            "No such " + required.resource().getSimpleName().toLowerCase() + ".")
+                    : engine.decideAbout(
+                            subject, required.permission(), required.resource(), identifier,
+                            required.namesAModule() ? required.module() : null);
+
+            return decision.refused()
+                    ? Optional.of(new AccessRefusal(required, null, decision))
+                    : Optional.empty();
+        }
+
+        Optional<AccessTarget> aimed = binding.bind(method, arguments, required, subject);
 
         if (aimed.isEmpty()) {
             return Optional.of(new AccessRefusal(required, null, AccessDecision.refused(

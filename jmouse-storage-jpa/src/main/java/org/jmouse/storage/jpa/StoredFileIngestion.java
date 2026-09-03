@@ -7,7 +7,9 @@ import org.jmouse.storage.StorageKey;
 import org.jmouse.storage.StoredObject;
 import org.jmouse.storage.key.StorageKeyRequest;
 import org.jmouse.storage.key.StorageKeyStrategy;
+import org.jmouse.storage.policy.FixedUploadPolicy;
 import org.jmouse.storage.policy.UploadPolicy;
+import org.jmouse.storage.policy.UploadPolicyResolver;
 import org.jmouse.storage.support.SpooledContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,30 +44,54 @@ import java.util.Optional;
  * consequence: bytes are written before the row is registered, so a transaction that rolls back
  * afterwards leaves an object nothing points at — which is exactly the case the orphan sweeper
  * exists to clean up, and why its grace period is not optional.</p>
+ *
+ * <h3>⚠️ The policy is resolved per upload, not held</h3>
+ *
+ * <p>Because an installation is allowed more than one answer: a destination may carry its own
+ * acceptance rule, and this path is where every upload passes. It is resolved once at the top of a
+ * call and used throughout it, so one upload is judged by one rule even if the rule changes underneath
+ * — and an installation with a single answer pays one virtual call for the privilege.</p>
  */
 public class StoredFileIngestion {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StoredFileIngestion.class);
 
-    private final FileStores         fileStores;
-    private final StoredFileRegistry registry;
-    private final StorageKeyStrategy keyStrategy;
-    private final UploadPolicy       uploadPolicy;
+    private final FileStores           fileStores;
+    private final StoredFileRegistry   registry;
+    private final StorageKeyStrategy   keyStrategy;
+    private final UploadPolicyResolver uploadPolicies;
 
     /**
      * 🏗️ Build the write path out of its four collaborators.
      *
+     * @param fileStores     every backend the application has
+     * @param registry       where written objects are recorded
+     * @param keyStrategy    where content is laid out
+     * @param uploadPolicies what may enter storage, per destination
+     */
+    public StoredFileIngestion(FileStores fileStores, StoredFileRegistry registry,
+                               StorageKeyStrategy keyStrategy, UploadPolicyResolver uploadPolicies) {
+        this.fileStores     = fileStores;
+        this.registry       = registry;
+        this.keyStrategy    = keyStrategy;
+        this.uploadPolicies = uploadPolicies;
+    }
+
+    /**
+     * 🏗️ Build the write path over one policy that applies everywhere.
+     *
      * @param fileStores   every backend the application has
      * @param registry     where written objects are recorded
      * @param keyStrategy  where content is laid out
-     * @param uploadPolicy what may enter storage
+     * @param uploadPolicy what may enter storage, anywhere in it
+     * @deprecated pass a {@link UploadPolicyResolver} instead — a destination may carry its own rule,
+     *             and this constructor is the one that cannot express it. Kept because it is what every
+     *             caller wrote before there was anything else to pass.
      */
+    @Deprecated(since = "1.1")
     public StoredFileIngestion(FileStores fileStores, StoredFileRegistry registry,
                                StorageKeyStrategy keyStrategy, UploadPolicy uploadPolicy) {
-        this.fileStores   = fileStores;
-        this.registry     = registry;
-        this.keyStrategy  = keyStrategy;
-        this.uploadPolicy = uploadPolicy;
+        this(fileStores, registry, keyStrategy, new FixedUploadPolicy(uploadPolicy));
     }
 
     /**
@@ -89,12 +115,16 @@ public class StoredFileIngestion {
      * @return the registry row backing it
      */
     public StoredFile ingest(StorageKeyRequest request, Content content, String requestedBackendName) {
+        // Resolved once, against where the content is going, and used for the whole call — so an upload
+        // is judged by one rule rather than by whatever the rule happened to be at each check.
+        UploadPolicy uploadPolicy = policyFor(request);
+
         uploadPolicy.accept(content);
 
         FileStore fileStore = fileStores.forWriting(requestedBackendName);
 
         if (!keyStrategy.requiresContentDigest()) {
-            return store(fileStore, keyStrategy.compose(request), content);
+            return store(fileStore, keyStrategy.compose(request), content, uploadPolicy);
         }
 
         try (SpooledContent spooled = SpooledContent.of(content)) {
@@ -111,8 +141,34 @@ public class StoredFileIngestion {
 
             StorageKeyRequest digested = request.withContentDigest(spooled.sha256());
 
-            return store(fileStore, keyStrategy.compose(digested), spooled.content());
+            return store(fileStore, keyStrategy.compose(digested), spooled.content(), uploadPolicy);
         }
+    }
+
+    /**
+     * 🛃 The rule governing content headed for a destination.
+     *
+     * <p>Exposed because acceptance lives here, and other write paths have to ask the same question
+     * without going through {@link #ingest}: re-filing a stored file into another folder is an entry
+     * into that folder, and a caller that could not ask this would have no way to judge it. Reaching
+     * past this class into the resolver instead is how a second acceptance rule gets written.</p>
+     *
+     * @param ownerType what kind of thing will hold the content, or {@code null} when unknown
+     * @param ownerId   which one, or {@code null} when unknown
+     * @return the policy to judge it by
+     */
+    public UploadPolicy policyFor(String ownerType, String ownerId) {
+        return uploadPolicies.policyFor(ownerType, ownerId);
+    }
+
+    /**
+     * 🛃 The rule governing content headed where this request says.
+     *
+     * @param request what the caller knows about the content, including where it is going
+     * @return the policy to judge it by
+     */
+    private UploadPolicy policyFor(StorageKeyRequest request) {
+        return policyFor(request.ownerType(), request.ownerIdentifier());
     }
 
     /**
@@ -126,11 +182,18 @@ public class StoredFileIngestion {
      * replace, and quietly pointing the binding at somebody else's identical bytes instead would
      * make the next save overwrite <em>their</em> file.</p>
      *
+     * <p>⚠️ <strong>Judged by the installation's own rule, not by a destination's.</strong> Nothing is
+     * entering anywhere — the object already sits where it sits, under a key that is not being
+     * recomposed — and a destination rule governs entry rather than residence. There is also nothing
+     * here to resolve one from: an overwrite names an object, never an owner.</p>
+     *
      * @param existing the row whose bytes are being replaced
      * @param content  the new content
      * @return the same row, updated to match what was written
      */
     public StoredFile reingest(StoredFile existing, Content content) {
+        UploadPolicy uploadPolicy = uploadPolicies.policyFor(null, null);
+
         uploadPolicy.accept(content);
 
         FileStore    fileStore = fileStores.require(existing.getBackend());
@@ -147,12 +210,14 @@ public class StoredFileIngestion {
     /**
      * 📝 Write the bytes, verify what actually arrived, and record the object.
      *
-     * @param fileStore backend to write through
-     * @param key       where to write
-     * @param content   what to write
+     * @param fileStore    backend to write through
+     * @param key          where to write
+     * @param content      what to write
+     * @param uploadPolicy the rule this upload is being judged by
      * @return the registry row
      */
-    private StoredFile store(FileStore fileStore, StorageKey key, Content content) {
+    private StoredFile store(FileStore fileStore, StorageKey key, Content content,
+                             UploadPolicy uploadPolicy) {
         StoredObject stored = fileStore.write(key, content);
 
         try {

@@ -1,7 +1,7 @@
 package org.jmouse.mapper.el.node;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.AbstractExpression;
+import org.jmouse.el.node.expression.ExpressionsNode;
 
 /**
  * The rules for one source of the enclosing target: {@code from OrderRequest { … }}.
@@ -14,7 +14,7 @@ import org.jmouse.el.node.AbstractExpression;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class FromNode extends AbstractExpression {
+public class FromNode extends ExpressionsNode {
 
     private String        sourceType;
     private RuleBlockNode rules;

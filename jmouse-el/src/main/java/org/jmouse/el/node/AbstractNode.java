@@ -18,6 +18,44 @@ abstract public class AbstractNode implements Node {
     protected       Node       parent;                          // Parent node reference
 
     /**
+     * What was written above this node — see {@link Trivia}.
+     *
+     * <p>⚠️ Created on demand rather than eagerly. Most nodes in most trees carry none, and a language
+     * parses thousands of them; an always-allocated list is a per-node cost paid for a property that is
+     * usually absent.</p>
+     */
+    private List<Trivia> leadingTrivia;
+    private Trivia       trailingTrivia;
+
+    @Override
+    public List<Trivia> getLeadingTrivia() {
+        return leadingTrivia == null ? List.of() : List.copyOf(leadingTrivia);
+    }
+
+    @Override
+    public void addLeadingTrivia(List<Trivia> trivia) {
+        if (trivia.isEmpty()) {
+            return;
+        }
+
+        if (leadingTrivia == null) {
+            leadingTrivia = new ArrayList<>(trivia.size());
+        }
+
+        leadingTrivia.addAll(trivia);
+    }
+
+    @Override
+    public Trivia getTrailingTrivia() {
+        return trailingTrivia;
+    }
+
+    @Override
+    public void setTrailingTrivia(Trivia trivia) {
+        this.trailingTrivia = trivia;
+    }
+
+    /**
      * Constructs an {@code AbstractNode} with no parent.
      */
     public AbstractNode() {

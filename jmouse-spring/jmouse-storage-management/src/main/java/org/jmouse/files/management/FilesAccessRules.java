@@ -55,10 +55,11 @@ public final class FilesAccessRules {
     private static final String GLOBAL_SCOPE = "GLOBAL";
 
     private final String scope;
-    private String       readPermission       = "";
-    private String       writePermission      = "";
-    private String       module               = "";
-    private String       administerPermission = "";
+    private String       readPermission        = "";
+    private String       writePermission       = "";
+    private String       module                = "";
+    private String       administerPermission  = "";
+    private String       configuringPermission = "";
 
     private FilesAccessRules(String scope) {
         this.scope = scope;
@@ -120,6 +121,40 @@ public final class FilesAccessRules {
     }
 
     /**
+     * 🔧 What changing a folder's own configuration requires.
+     *
+     * <h3>⚠️ Its own right, and it is the only barrier there is</h3>
+     *
+     * <p>This library reserves no file type. A folder's upload configuration may admit {@code exe},
+     * {@code jar}, {@code php}, {@code html} — that was decided deliberately, on the reading that
+     * <em>access</em> rather than <em>acceptance</em> is what closes a dangerous branch. Which makes
+     * this permission literally <em>who may put an executable into this installation</em>, and it
+     * cannot be the one that renames a folder.</p>
+     *
+     * <p>⚠️ <strong>Grant it on a directory and it covers the subtree</strong>, like every other
+     * directory grant — so "you may configure anything under {@code innoventa/files}" is expressible
+     * without handing over the whole tree. Verify that: the permission axis does not consult the scope
+     * hierarchy by itself, and a grant at a parent silently not reaching a child has bitten twice.</p>
+     *
+     * <p>⚠️ One right for every kind, because one kind exists. {@code upload} without a floor and a
+     * future {@code retention} are not equally dangerous, and levelling them under one name is a
+     * decision worth revisiting the day a second kind arrives — which is why the route is written
+     * against the kind rather than against {@code upload}, and why this is a separate builder method
+     * rather than a reused one.</p>
+     *
+     * <p>Leaving it unset keeps the type's WRITE rule — the safe direction, and almost certainly not
+     * what was meant.</p>
+     *
+     * @param permission the permission's name, e.g. {@code directory:policy}
+     * @return the builder
+     */
+    public FilesAccessRules configuringWith(String permission) {
+        this.configuringPermission = permission;
+
+        return this;
+    }
+
+    /**
      * 🎛️ The feature module these routes belong to, where the product has one.
      *
      * @param module the module's name
@@ -139,6 +174,11 @@ public final class FilesAccessRules {
     public ExternalAccessRules build() {
         Declaration read  = declaration(readPermission);
         Declaration write = declaration(writePermission);
+
+        // Unset means the type's write rule, which is the safe direction rather than the intended one.
+        Declaration configure = configuringPermission.isBlank()
+                ? write
+                : declaration(configuringPermission);
 
         return ExternalAccessRules.builder()
                 // ⚠️ The stricter rule on the type, so an unnamed method is gated as a write.
@@ -170,10 +210,24 @@ public final class FilesAccessRules {
                 // could live: the library does not know whether this installation's root is a thing
                 // anybody may list.
                 .method(DirectoryController.class, "roots", read.about(OwnerReference.class, "owner"))
+                .method(DirectoryController.class, "read",
+                        read.about(StorageDirectory.class, "directoryId"))
                 .method(DirectoryController.class, "subtree",
                         read.about(StorageDirectory.class, "directoryId"))
                 .method(DirectoryController.class, "create",
                         write.about(StorageDirectory.class, "parentId"))
+
+                // ⚠️ Reading a folder's own configuration is a READ of that folder. Writing one is
+                // neither a read nor an ordinary write: with no reserved type anywhere in this library,
+                // it is the decision about what may enter this installation, so it gets its own right.
+                .method(DirectoryController.class, "configurations",
+                        read.about(StorageDirectory.class, "directoryId"))
+                .method(DirectoryController.class, "configuration",
+                        read.about(StorageDirectory.class, "directoryId"))
+                .method(DirectoryController.class, "configure",
+                        configure.about(StorageDirectory.class, "directoryId"))
+                .method(DirectoryController.class, "clearConfiguration",
+                        configure.about(StorageDirectory.class, "directoryId"))
 
                 // ⚠️ GLOBAL, and administrative. This surface spans every space and project by design,
                 // so a scoped permission cannot express it and a read permission understates it.

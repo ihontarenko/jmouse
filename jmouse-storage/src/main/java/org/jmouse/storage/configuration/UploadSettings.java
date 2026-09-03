@@ -14,9 +14,9 @@ import java.util.Set;
  * closed set. Content type and extension are listed separately, and checked separately, because a
  * client controls both and may lie about either.</p>
  *
- * <p>An empty list under {@link AcceptanceMode#ALLOWLIST} admits nothing, which is the honest
+ * <p>An empty list under {@link AcceptanceMode#ALLOW_LIST} admits nothing, which is the honest
  * reading of "accept only these" and makes a half-written allowlist fail loudly rather than
- * silently open the gate. Under {@link AcceptanceMode#DENYLIST} an empty list refuses nothing.</p>
+ * silently open the gate. Under {@link AcceptanceMode#DENY_LIST} an empty list refuses nothing.</p>
  *
  * <p>{@link #blockingDangerousContent()} and {@link #allowingDocumentsAndImages()} ship the two
  * configurations already in production, so adopting the library does not mean re-typing sixty
@@ -42,7 +42,7 @@ import java.util.Set;
  * @param extensions   extensions without their dot
  */
 public record UploadSettings(@BindDefault("CUSTOM") UploadProfile profile,
-                             @BindDefault("DENYLIST") AcceptanceMode mode,
+                             @BindDefault("DENY_LIST") AcceptanceMode mode,
                              Set<String> contentTypes,
                              Set<String> extensions) {
 
@@ -52,7 +52,7 @@ public record UploadSettings(@BindDefault("CUSTOM") UploadProfile profile,
      */
     public UploadSettings {
         profile      = (profile == null) ? UploadProfile.CUSTOM : profile;
-        mode         = (mode == null) ? AcceptanceMode.DENYLIST : mode;
+        mode         = (mode == null) ? AcceptanceMode.DENY_LIST : mode;
         contentTypes = (contentTypes == null) ? Set.of() : Set.copyOf(contentTypes);
         extensions   = (extensions == null) ? Set.of() : Set.copyOf(extensions);
     }
@@ -78,7 +78,7 @@ public record UploadSettings(@BindDefault("CUSTOM") UploadProfile profile,
      * @return a permissive denylist
      */
     public static UploadSettings permissive() {
-        return new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.DENYLIST, Set.of(), Set.of());
+        return new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.DENY_LIST, Set.of(), Set.of());
     }
 
     /**
@@ -130,7 +130,7 @@ public record UploadSettings(@BindDefault("CUSTOM") UploadProfile profile,
                 "lnk", "url", "desktop"
         );
 
-        return new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.DENYLIST, contentTypes, extensions);
+        return new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.DENY_LIST, contentTypes, extensions);
     }
 
     /**
@@ -156,7 +156,7 @@ public record UploadSettings(@BindDefault("CUSTOM") UploadProfile profile,
                 "pdf", "doc", "docx", "xls", "xlsx"
         );
 
-        return new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.ALLOWLIST, contentTypes, extensions);
+        return new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.ALLOW_LIST, contentTypes, extensions);
     }
 
     /**
@@ -194,7 +194,7 @@ public record UploadSettings(@BindDefault("CUSTOM") UploadProfile profile,
                 "txt", "md", "markdown", "csv", "tsv", "json", "ndjson", "yaml", "yml", "log"
         ));
 
-        return new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.ALLOWLIST,
+        return new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.ALLOW_LIST,
                                   Set.copyOf(contentTypes), Set.copyOf(extensions));
     }
 }

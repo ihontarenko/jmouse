@@ -1,7 +1,7 @@
 package org.jmouse.mapper.el.node;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.AbstractExpression;
+import org.jmouse.el.node.expression.ExpressionsNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.List;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class TargetNode extends AbstractExpression {
+public class TargetNode extends ExpressionsNode {
 
     private final List<FromNode>  sources  = new ArrayList<>();
     private final List<RefuseNode> refusals = new ArrayList<>();

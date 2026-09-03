@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-access-jpa</artifactId>
-  <version>1.0.0-b20260802</version>
+  <version>1.0.0-b20260902</version>
   <name>jMouse - Access (jpa)</name>
   <description>jMouse Framework - Scoped authorization engine (scope model, ordered axes, grant store SPI, visibility scopes)</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-access-jpa</url>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-access</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

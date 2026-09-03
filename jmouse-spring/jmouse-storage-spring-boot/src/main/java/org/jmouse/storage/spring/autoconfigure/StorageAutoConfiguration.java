@@ -10,7 +10,9 @@ import org.jmouse.storage.key.ContentAddressedKeyStrategy;
 import org.jmouse.storage.key.OwnerNamespacedKeyStrategy;
 import org.jmouse.storage.key.StorageKeyStrategy;
 import org.jmouse.storage.local.LocalFileStoreFactory;
+import org.jmouse.storage.policy.FixedUploadPolicy;
 import org.jmouse.storage.policy.UploadPolicy;
+import org.jmouse.storage.policy.UploadPolicyResolver;
 import org.jmouse.storage.resource.FileStoreResourceLoader;
 import org.jmouse.storage.spring.DeliveryRenderer;
 import org.jmouse.storage.spring.StorageSettingsBinder;
@@ -137,6 +139,10 @@ public class StorageAutoConfiguration {
     /**
      * 🛃 What may enter storage, entirely from configuration.
      *
+     * <p>⚠️ Published even though the write paths now ask {@link #uploadPolicyResolver} instead: this is
+     * a bean of a released library, something outside them may well inject it, and withdrawing one is a
+     * breaking change nobody asked for. It is also what the default resolver hands back.</p>
+     *
      * @param settings the active settings
      * @return the acceptance policy
      */
@@ -144,6 +150,22 @@ public class StorageAutoConfiguration {
     @ConditionalOnMissingBean
     public UploadPolicy uploadPolicy(StorageSettings settings) {
         return UploadPolicy.of(settings);
+    }
+
+    /**
+     * 🛃 Which policy applies to content headed for a given destination.
+     *
+     * <p>The installation's one policy, everywhere — which is what a product got before destinations
+     * could carry their own, and what it keeps until a module contributes a resolver that knows better.
+     * {@code jmouse-storage-management} publishes one that reads a directory's own rule.</p>
+     *
+     * @param uploadPolicy the installation's policy
+     * @return the resolver
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public UploadPolicyResolver uploadPolicyResolver(UploadPolicy uploadPolicy) {
+        return new FixedUploadPolicy(uploadPolicy);
     }
 
     /**

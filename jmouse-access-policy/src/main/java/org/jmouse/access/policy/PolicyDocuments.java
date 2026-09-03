@@ -122,7 +122,8 @@ public final class PolicyDocuments {
                         .toList(),
                 document.permissions().stream()
                         .map(permission -> new PolicyPermissionDeclaration(
-                                permission.name(), permission.description(), SourceSpan.none()))
+                                permission.name(), permission.description(), permission.through(),
+                                SourceSpan.none()))
                         .toList(),
                 document.actions().stream()
                         .map(action -> new PolicyActionDeclaration(

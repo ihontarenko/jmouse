@@ -1,11 +1,12 @@
 package org.jmouse.mapper.el.parser;
 
+import org.jmouse.core.Priority;
 import org.jmouse.el.lexer.BasicToken;
 import org.jmouse.el.lexer.Token;
-import org.jmouse.el.lexer.support.CursorLookahead;
 import org.jmouse.el.lexer.TokenCursor;
+import org.jmouse.el.lexer.support.CursorLookahead;
 import org.jmouse.el.lexer.support.SourceReading;
-import org.jmouse.el.node.expression.SpanNode;
+import org.jmouse.el.parser.ParserContext;
 import org.jmouse.mapper.el.lexer.JmmToken;
 import org.jmouse.mapper.el.node.AssertionNode;
 import org.jmouse.mapper.el.node.RefuseNode;
@@ -19,48 +20,30 @@ import org.jmouse.mapper.el.node.RefuseNode;
  * it; the language does not, and saying so at load is the difference between a typo and a no-op nobody
  * notices.</p>
  *
+ * <h2>⚠️ Its body is read here, not by {@code StatementsParser} — and that is the one place jMM does
+ * have an ambiguous position</h2>
+ *
+ * <p>An assertion reads {@code condition : "message"}; a rule reads {@code property : value}. Both are
+ * a name, a colon and something, so offered to global dispatch they compete for every line — and
+ * {@link org.jmouse.el.parser.Parser#supports(TokenCursor)} is handed a cursor and nothing else, so
+ * neither can ask which block it is standing in.</p>
+ *
+ * <p>{@code ContextScope} looks like the answer and is not: it holds one value for the current thread,
+ * so it answers "who is my immediate parent" rather than "am I inside a refusal", and {@code supports}
+ * cannot reach it anyway. So an assertion is treated as what it is — a <strong>line form local to this
+ * block</strong>, like a check's arguments in {@code .jmv} — and never enters dispatch. Everything else
+ * in the language does.</p>
+ *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public final class RefuseParser {
+@Priority(JmmParserPriority.REFUSE)
+public class RefuseParser extends JmmBlockParser<RefuseNode, JmmToken> {
 
-    private RefuseParser() {
-    }
-
-    /**
-     * Whether the cursor is on a refusal block rather than on a property called {@code refuse}.
-     *
-     * <h2>⚠️ Every reserved word here is a plausible property name</h2>
-     *
-     * <p>A target with a property called {@code refuse} is ordinary, and a grammar that could not write
-     * it down would leave renaming the field as the only advice. So the keyword is only a keyword when a
-     * subject follows it — and the test is total rather than merely likely, because a rule's property
-     * name is always followed by a colon, so {@code refuse : …} can never be mistaken for
-     * {@code refuse source …}.</p>
-     *
-     * <p>⚠️ Both places that may open a refusal ask this, and they must: the one that does not is the one
-     * where a property called {@code refuse} is swallowed and reported as a missing subject.</p>
-     *
-     * @param cursor the cursor to inspect
-     * @return {@code true} when a refusal block starts here
-     */
-    public static boolean opensBlock(TokenCursor cursor) {
-        return cursor.isCurrent(JmmToken.T_REFUSE)
-                && cursor.isNext(JmmToken.T_SOURCE, JmmToken.T_TARGET);
-    }
-
-    /**
-     * Reads a refusal block.
-     *
-     * @param cursor the cursor, positioned on {@code refuse}
-     * @return the block
-     */
-    public static RefuseNode parse(TokenCursor cursor) {
+    @Override
+    protected RefuseNode createNode(TokenCursor cursor, ParserContext context) {
         RefuseNode node = new RefuseNode();
 
-        node.setSpan(SpanNode.of(cursor.current().lineNumber(), SourceReading.column(cursor)));
-
-        cursor.ensure(JmmToken.T_REFUSE);
         node.setSubject(readSubject(cursor));
         node.setPhase(readPhase(cursor));
 
@@ -70,17 +53,58 @@ public final class RefuseParser {
                     + "Write it as 'refuse source before'");
         }
 
+        return node;
+    }
+
+    @Override
+    protected JmmToken token() {
+        return JmmToken.T_REFUSE;
+    }
+
+    @Override
+    protected boolean matches(TokenCursor cursor) {
+        return opensBlock(cursor);
+    }
+
+    /**
+     * Reads the assertions, brace to brace.
+     *
+     * @param cursor the cursor, positioned on the opening brace
+     * @param node   the block being filled
+     */
+    @Override
+    protected void parseBody(TokenCursor cursor, RefuseNode node, ParserContext context) {
         cursor.ensure(BasicToken.T_OPEN_CURLY);
         Separators.skip(cursor);
 
         while (cursor.hasNext() && !cursor.isCurrent(BasicToken.T_CLOSE_CURLY)) {
-            node.add(readAssertion(cursor));
+            AssertionNode assertion = readAssertion(cursor);
+
+            node.add(assertion);
+            node.addExpression(assertion);
             Separators.skip(cursor);
         }
 
         cursor.ensure(BasicToken.T_CLOSE_CURLY);
+    }
 
-        return node;
+    /**
+     * Whether the cursor is on a refusal block rather than on a property called {@code refuse}.
+     *
+     * <h2>⚠️ Every reserved word here is a plausible property name</h2>
+     *
+     * <p>A target with a property called {@code refuse} is ordinary, and a grammar that could not write
+     * it down would leave renaming the field as the only advice. So the keyword is only a keyword when
+     * a subject follows it — and the test is total rather than merely likely, because a rule's property
+     * name is always followed by a colon, so {@code refuse : …} can never be mistaken for
+     * {@code refuse source …}.</p>
+     *
+     * @param cursor the cursor to inspect
+     * @return {@code true} when a refusal block starts here
+     */
+    public static boolean opensBlock(TokenCursor cursor) {
+        return cursor.isCurrent(JmmToken.T_REFUSE)
+                && cursor.isNext(JmmToken.T_SOURCE, JmmToken.T_TARGET);
     }
 
     /**
@@ -140,7 +164,7 @@ public final class RefuseParser {
 
         // ⚠️ Stamped before the line is consumed. A condition that will not compile is refused by the
         // binder, long after any cursor exists, and without this it could name no line at all.
-        assertion.setSpan(SpanNode.of(first.lineNumber(), SourceReading.column(cursor)));
+        assertion.setSpan(JmmSpans.at(cursor, first));
 
         int separator = separatorOffset(cursor);
         Token last    = cursor.lookAt(separator - 1);

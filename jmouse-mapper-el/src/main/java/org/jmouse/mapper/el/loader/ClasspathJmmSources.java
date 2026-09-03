@@ -1,183 +1,105 @@
 package org.jmouse.mapper.el.loader;
 
+import org.jmouse.core.io.CompositeResourceLoader;
+import org.jmouse.core.io.PatternMatcherResourceLoader;
+import org.jmouse.core.io.Resource;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.net.JarURLConnection;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Comparator;
 import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.stream.Stream;
 
 /**
- * {@code .jmm} documents found on the classpath, with no framework underneath. 📚
+ * {@code .jmm} documents found on the classpath. 📚
  *
- * <h2>⚠️ Why the library ships a working one rather than only an interface</h2>
+ * <h2>⚠️ It walks nothing — {@code jmouse-core} already does</h2>
  *
- * <p>{@code .jmp} declares {@code PolicySources} and leaves every implementation to a Spring module,
- * which is right for a policy: an installation has one, it is administered, and it is loaded by an
- * application container. A mapping is not like that — a library that maps objects should be usable
- * from a test, a command-line tool or a plain {@code main} without acquiring a web framework first.
- * So the interface is the seam and this is a default that works, and a Spring module may still replace
- * it with a resource-pattern resolver that does more.</p>
+ * <p>This class was a hundred and eighty lines: enumerate the class loader's URLs, branch on
+ * {@code file} versus {@code jar}, list a directory, walk jar entries, filter by extension, sort. Every
+ * line of it already existed one module down, in {@code org.jmouse.core.io} — a resource loader that
+ * does exactly that, with an Ant matcher on top and the file-versus-jar branch behind it.</p>
  *
- * <h2>⚠️ What it does and does not resolve</h2>
+ * <p>⚠️ <strong>The duplication was not a shortcut anybody took; it was a module nobody looked in.</strong>
+ * This is where the copy started; the validation language was written from it. What is left
+ * here is the only part that is about mapping at all: turning a {@link Resource} into a
+ * {@link JmmSource}.</p>
  *
- * <p>A location is a directory — {@code classpath:mapping}, or bare {@code mapping} — and every
- * {@code .jmm} <strong>directly inside it</strong> is a document. Deliberately not a glob: {@code **}
- * over a classpath means walking every jar on it, which is a scan whose cost nobody expects from a
- * mapping library and whose results depend on packaging. A product that wants patterns supplies its
- * own {@link JmmSources}.</p>
+ * <h2>⚠️ A location is a directory, and may be a pattern</h2>
  *
- * <p>Both a directory on disk and an entry in a jar are read, because the second is what a packaged
- * application actually has.</p>
+ * <p>{@code classpath:mapping} means every {@code .jmm} <strong>directly inside</strong> it, which is
+ * what the hand-written version did and what a product's configuration already says. A location that
+ * carries its own glob is passed through untouched, so {@code classpath:mapping/&#42;&#42;/&#42;.jmm}
+ * reaches every one below it too — something the hand-written version could not do at all.</p>
  *
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
 public final class ClasspathJmmSources implements JmmSources {
 
-    private static final String CLASSPATH_PREFIX = "classpath:";
-    private static final String EXTENSION        = ".jmm";
+    private static final String EXTENSION = ".jmm";
+    private static final char   GLOB      = '*';
 
-    private final ClassLoader loader;
+    private final PatternMatcherResourceLoader loader;
 
     public ClasspathJmmSources() {
-        this(Thread.currentThread().getContextClassLoader());
+        this(new CompositeResourceLoader());
     }
 
-    public ClasspathJmmSources(ClassLoader loader) {
+    public ClasspathJmmSources(PatternMatcherResourceLoader loader) {
         this.loader = loader;
     }
 
     @Override
     public List<JmmSource> at(String location) {
-        String directory = directoryOf(location);
-
         List<JmmSource> documents = new ArrayList<>();
 
-        try {
-            Enumeration<URL> roots = loader.getResources(directory);
-
-            while (roots.hasMoreElements()) {
-                collect(roots.nextElement(), directory, documents);
-            }
-        } catch (IOException exception) {
-            throw new UncheckedIOException(
-                    "could not read '%s' from the classpath".formatted(location), exception);
+        for (Resource resource : loader.findResources(patternOf(location))) {
+            documents.add(JmmSource.at(resource.getName(), textOf(resource)));
         }
 
         // ⚠️ Sorted, so two runs report the same file as the duplicate. Classpath order is not stable
-        // across machines, and a load error that names a different file each time is one nobody can act
-        // on.
-        documents.sort((first, second) -> first.location().compareTo(second.location()));
+        // across machines, and a load error naming a different file each time is one nobody can act on.
+        documents.sort(Comparator.comparing(JmmSource::location));
 
         return documents;
     }
 
     /**
-     * Reads every {@code .jmm} under one classpath root.
+     * The pattern a configured location means.
      *
-     * @param root      where the directory was found
-     * @param directory the directory, as a classpath path
-     * @param into      where to add what is found
-     * @throws IOException when the root cannot be read
+     * @param location as configured — a directory, or a glob of its own
+     * @return what to hand the resource loader
      */
-    private void collect(URL root, String directory, List<JmmSource> into) throws IOException {
-        if ("jar".equals(root.getProtocol())) {
-            collectFromJar(root, directory, into);
-
-            return;
+    private static String patternOf(String location) {
+        if (location.indexOf(GLOB) >= 0) {
+            return location;
         }
 
-        // ⚠️ toURI(), not URI.create(toString()). The second throws on any character the URL left
-        // unencoded, and a checkout under a directory with a space in its name is the ordinary way to
-        // meet one — a failure that depends on where somebody put the project.
-        Path base;
+        String directory = location.endsWith("/") ? location.substring(0, location.length() - 1)
+                                                  : location;
 
-        try {
-            base = Paths.get(root.toURI());
-        } catch (URISyntaxException malformed) {
-            throw new IOException("'%s' is not a readable location".formatted(root), malformed);
-        }
-
-        if (!Files.isDirectory(base)) {
-            return;
-        }
-
-        try (Stream<Path> entries = Files.list(base)) {
-            for (Path entry : entries.sorted().toList()) {
-                if (Files.isRegularFile(entry) && entry.getFileName().toString().endsWith(EXTENSION)) {
-                    into.add(JmmSource.at(directory + "/" + entry.getFileName(),
-                                          Files.readString(entry, StandardCharsets.UTF_8)));
-                }
-            }
-        }
+        return directory + "/*" + EXTENSION;
     }
 
     /**
-     * Reads every {@code .jmm} directly inside one directory of a jar.
+     * A resource's text.
      *
-     * @param root      the jar URL the directory was found at
-     * @param directory the directory, as a classpath path
-     * @param into      where to add what is found
-     * @throws IOException when the jar cannot be read
-     */
-    private void collectFromJar(URL root, String directory, List<JmmSource> into) throws IOException {
-        URLConnection connection = root.openConnection();
-
-        if (!(connection instanceof JarURLConnection jarConnection)) {
-            return;
-        }
-
-        // ⚠️ Not closed: a JarFile obtained through a URLConnection with caching on is shared with the
-        // class loader, and closing it here closes it for everybody.
-        JarFile               jar     = jarConnection.getJarFile();
-        Enumeration<JarEntry> entries = jar.entries();
-        String                prefix  = directory.endsWith("/") ? directory : directory + "/";
-
-        while (entries.hasMoreElements()) {
-            JarEntry entry = entries.nextElement();
-            String   name  = entry.getName();
-
-            if (entry.isDirectory() || !name.startsWith(prefix) || !name.endsWith(EXTENSION)) {
-                continue;
-            }
-
-            if (name.indexOf('/', prefix.length()) >= 0) {
-                continue;
-            }
-
-            try (InputStream stream = jar.getInputStream(entry)) {
-                into.add(JmmSource.at(name, new String(stream.readAllBytes(), StandardCharsets.UTF_8)));
-            }
-        }
-    }
-
-    /**
-     * The classpath directory a location names.
+     * <p>⚠️ Read here rather than through {@code Resource.asString()}, which swallows an
+     * {@link IOException} and answers {@code null}. A document that silently becomes nothing is a
+     * document whose rules silently stop applying — the failure a mapping library may least afford.</p>
      *
-     * @param location as configured, with or without the {@code classpath:} prefix
-     * @return the directory
+     * @param resource what to read
+     * @return its text
      */
-    private String directoryOf(String location) {
-        String path = location.startsWith(CLASSPATH_PREFIX)
-                ? location.substring(CLASSPATH_PREFIX.length())
-                : location;
-
-        while (path.startsWith("/")) {
-            path = path.substring(1);
+    private static String textOf(Resource resource) {
+        try (InputStream stream = resource.getInputStream()) {
+            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException unreadable) {
+            throw new UncheckedIOException(
+                    "could not read '%s'".formatted(resource.getName()), unreadable);
         }
-
-        return path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
     }
 }

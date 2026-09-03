@@ -100,6 +100,45 @@ public interface Node {
     }
 
     /**
+     * The comments and blank lines written immediately above this node.
+     *
+     * <p>⚠️ A parser is entitled to ignore trivia; a writer is not. See {@link Trivia}.</p>
+     *
+     * @return the leading trivia, in the order it was written; never {@code null}
+     */
+    default List<Trivia> getLeadingTrivia() {
+        return List.of();
+    }
+
+    /**
+     * The comment written after this node on its own line.
+     *
+     * @return it, or {@code null} where there was none
+     */
+    default Trivia getTrailingTrivia() {
+        return null;
+    }
+
+    /**
+     * Records what was written above this node.
+     *
+     * <p>Ignored by default: a node type that does not intend to survive a round trip does not have to
+     * carry it, and every node built by hand rather than parsed has none.</p>
+     *
+     * @param trivia what was written
+     */
+    default void addLeadingTrivia(List<Trivia> trivia) {
+    }
+
+    /**
+     * Records the comment written after this node on its line.
+     *
+     * @param trivia what was written
+     */
+    default void setTrailingTrivia(Trivia trivia) {
+    }
+
+    /**
      * Adds a child node to this node.
      * <p>
      * Ensures that the node is not added to itself.

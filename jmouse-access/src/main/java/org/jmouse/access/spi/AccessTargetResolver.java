@@ -34,6 +34,34 @@ public interface AccessTargetResolver<T> {
     Class<T> resourceType();
 
     /**
+     * The word a policy writes for this resource — {@code through form}, {@code kind: "form"}.
+     *
+     * <p>The default reads {@link AccessResourceName} off the type, which is where the name belongs for
+     * anything this product owns: it sits beside the class it names, and a reader of that class can see
+     * that the word is load-bearing.
+     *
+     * <p>⚠️ <strong>Override it for a type from a library that does not know about access control.</strong>
+     * {@code ManagedFile} and {@code StorageDirectory} come from {@code jmouse-files}, which has no
+     * dependency on this module and must not grow one — a storage library that cannot be used without an
+     * authorization library is the wrong shape. Their resolver lives in the product, so the name is
+     * declared there:
+     *
+     * <pre>
+     * &#64;Override
+     * public String resourceName() {
+     *     return "file";
+     * }
+     * </pre>
+     *
+     * <p>⚠️ <strong>What is never allowed is deriving it.</strong> Both forms are a written-down word; the
+     * only difference is which file it is written in. A name computed from {@code getSimpleName()} is a
+     * contract nobody can see and a rename silently breaks — see {@link AccessResourceName}.
+     */
+    default String resourceName() {
+        return AccessResourceNames.of(resourceType());
+    }
+
+    /**
      * Where this row lives and who owns it, or nothing where there is no such row.
      *
      * <p>Empty means "no such row", which the engine reads as {@code NOT_FOUND_OR_HIDDEN} rather than

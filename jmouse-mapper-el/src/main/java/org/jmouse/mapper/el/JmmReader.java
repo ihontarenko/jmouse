@@ -1,5 +1,8 @@
 package org.jmouse.mapper.el;
 
+import org.jmouse.el.extension.CoreExtension;
+import org.jmouse.el.extension.ExtensionContainer;
+import org.jmouse.el.extension.StandardExtensionContainer;
 import org.jmouse.el.lexer.DefaultLexer;
 import org.jmouse.el.lexer.DefaultTokenizer;
 import org.jmouse.el.lexer.Lexer;
@@ -8,7 +11,11 @@ import org.jmouse.el.StringSource;
 import org.jmouse.el.lexer.ExpressionSplitter;
 import org.jmouse.mapper.el.lexer.JmmRecognizer;
 import org.jmouse.mapper.el.node.MappingDocumentNode;
-import org.jmouse.mapper.el.parser.JmmParser;
+import org.jmouse.el.node.BasicNode;
+import org.jmouse.el.node.Node;
+import org.jmouse.el.parser.DefaultParserContext;
+import org.jmouse.el.parser.ParserContext;
+import org.jmouse.mapper.el.parser.MappingDocumentParser;
 import org.jmouse.mapper.el.parser.JmmSyntaxException;
 
 /**
@@ -36,14 +43,39 @@ public final class JmmReader {
     private static final Lexer LEXER = new DefaultLexer(
             new DefaultTokenizer(new ExpressionSplitter(), new JmmRecognizer()));
 
-    private final JmmBinder binder;
+    private final JmmBinder     binder;
+    private final ParserContext context;
 
     public JmmReader() {
         this(new JmmBinder());
     }
 
     public JmmReader(JmmBinder binder) {
+        this(binder, defaultContext());
+    }
+
+    public JmmReader(JmmBinder binder, ParserContext context) {
         this.binder = binder;
+        this.context = context;
+    }
+
+    /**
+     * The engine's vocabulary plus this language's.
+     *
+     * <p>⚠️ Two vocabularies, deliberately. This one reads the <em>file</em>. What a rule's value may
+     * then use is a narrower question answered elsewhere, by whatever {@code ExpressionLanguage} the
+     * binder compiles a sliced value with — which is what lets a product widen one without the
+     * other.</p>
+     *
+     * @return a context every {@code .jmm} parser has been registered with
+     */
+    private static ParserContext defaultContext() {
+        ExtensionContainer extensions = new StandardExtensionContainer();
+
+        extensions.importExtension(new CoreExtension());
+        extensions.importExtension(new JmmExtension());
+
+        return new DefaultParserContext(extensions);
     }
 
     /**
@@ -58,7 +90,11 @@ public final class JmmReader {
         try {
             TokenCursor cursor = LEXER.tokenize(new StringSource(file, source));
 
-            return JmmParser.parse(cursor);
+            Node container = BasicNode.forToken(cursor.current());
+
+            context.getParser(MappingDocumentParser.class).parse(cursor, container, context);
+
+            return (MappingDocumentNode) container.getFirst();
         } catch (JmmSyntaxException failure) {
             // ⚠️ The parser reads a cursor and has no idea what it was opened from. Rather than thread
             // a file name through every parser so one message can carry it, the name is stamped here.

@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-mapper-management</artifactId>
-  <version>1.0.0-b20260802</version>
+  <version>1.0.0-b20260902</version>
   <name>jMouse - Mapper Management</name>
   <description>jMouse Framework - The mapping builder as a library surface: the type catalogue, a pair's properties, and rows rendered into .jmm through the one translator</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-mapper-management</url>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-mapper-el</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

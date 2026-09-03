@@ -180,6 +180,40 @@ public enum AccessToken implements Token.Type {
      */
     T_DYNAMIC(22900, "dynamic"),
 
+    /**
+     * {@code field:write "…" through each form} — the permission is asked about a <em>related</em> row.
+     *
+     * <p>⚠️ The word at the end is a <strong>resource name</strong>, not a permission namespace. They are
+     * two vocabularies that happen to share spellings: {@code form:read} is a permission and
+     * {@code through each form} names the type {@code @AccessResourceName("form")} declares. Nothing
+     * joins them, and a resource needs no permission named after it.
+     *
+     * <p>It exists because some rows have no place of their own — a field definition has no owner and
+     * belongs to no workspace, since one field stands on many forms — so the only honest place to ask
+     * about one is the forms it stands on.
+     *
+     * <p>⚠️ A quantifier is <strong>required</strong> between this and the resource: {@code through form}
+     * does not parse. See {@link #T_ANY}.
+     */
+    T_THROUGH(23000, "through"),
+
+    /** {@code through any form} — one related row allowing it is enough. */
+    T_ANY(23100, "any"),
+
+    /**
+     * {@code through each form} — every related row must allow it, and the first refusal is the answer.
+     *
+     * <p>⚠️ <strong>This exists so that neither reading is silent.</strong> {@code through} briefly took
+     * no quantifier and meant this one, which is a default nobody can see. What it hid is not small: a
+     * field standing on forty-five forms is renamed by anybody who owns <em>one</em> of them under
+     * {@link #T_ANY}, and by nobody short of an administrator under this. Ivan, 2026-09-01: <em>«якщо є
+     * any / every то і евері треба додати»</em>.
+     *
+     * <p>The word is {@code each} rather than {@code all} because the resource is named in the singular,
+     * so {@code through each form} is the only spelling that is also English.
+     */
+    T_EACH(23200, "each"),
+
     /** {@code include 'path'} — records a path; the loader, not the parser, follows it. */
     T_INCLUDE(21000, "include");
 

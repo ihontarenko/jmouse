@@ -13,7 +13,7 @@ import java.util.List;
  * @param defaultBackend   which one new content goes to
  * @param contentAddressed whether keys are digests, and so whether identical bytes cost one object
  * @param maximumSizeBytes the installation's ceiling
- * @param acceptanceMode   ALLOWLIST or DENYLIST — what the lists below mean
+ * @param acceptanceMode   ALLOW_LIST or DENY_LIST — what the lists below mean
  * @param contentTypes     the resolved content-type list
  * @param extensions       the resolved extension list
  * @param sweeperEnabled   whether the scheduled sweep runs at all

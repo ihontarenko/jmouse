@@ -6,6 +6,13 @@ import org.jmouse.el.lexer.TokenCursor;
 /**
  * Skips what separates one construction from the next.
  *
+
+ * <h2>⚠️ One caller left, and that is the point</h2>
+ *
+ * <p>Everything else now goes through {@code StatementsParser}, which skips separators and comments
+ * and carries a no-progress guard this never had. What remains is {@link RefuseParser}, whose lines are
+ * not statements of the general grammar and so cannot be read by it — see that class for why.</p>
+ *
  * <p>A {@code .jmm} file is line-oriented, so the lexer hands back newlines and the parser has to step
  * over them between constructions. ⚠️ It steps over them <em>between</em> constructions only — inside a
  * rule a newline is the terminator that ends the value, and a helper that skipped them everywhere would

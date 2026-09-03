@@ -26,8 +26,14 @@ public final class StandardConstraintModule implements ConstraintTypeContributor
                 .register("required", RequiredConstraint.class)
                 .register("notBlank", NotBlankConstraint.class)
                 .alias("notBlank", "notEmpty")
-                .register("webLink", WebLinkConstraint.class);
-
+                .register("webLink", WebLinkConstraint.class)
+                // ⚠️ The string family, absent until 2026-08-27. Its absence is why a field editor
+                // shipped invented examples: the checks people obviously want were not there to name.
+                .register("size", SizeConstraint.class)
+                .alias("size", "length")
+                .register("pattern", PatternConstraint.class)
+                .alias("pattern", "matches")
+                .register("email", EmailConstraint.class);
     }
 
     private StandardConstraintModule() {}

@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-mapper</artifactId>
-  <version>1.0.0-b20260802</version>
+  <version>1.0.0-b20260902</version>
   <name>jMouse - Mapper</name>
   <description>jMouse Framework - The object mapping engine: strategies per type pair, a plan compiled once per pair, the rule DSL, plugins, policies and a located error model</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-mapper</url>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-core</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

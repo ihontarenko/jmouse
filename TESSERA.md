@@ -2,7 +2,7 @@
 
 > Project-specific notes for the `tessera` skill. The tracker is the record; this file is notes.
 > Fix it in the same response as any call that contradicts it.
-> Verified: 2026-08-26
+> Verified: 2026-08-31 — jMS branch JMF-260…266 raised and linked across to RTS.
 
 ## Project
 
@@ -19,7 +19,7 @@
 
 | Type | Used for |
 |---|---|
-| `Epic` | `JMF-1` condition functions (Done) · `JMF-21` storage management (Done) · `JMF-37` audit · `JMF-55` more condition vocabulary |
+| `Epic` | `JMF-1` condition functions (Done) · `JMF-21` storage management (Done) · `JMF-37` audit · `JMF-55` more condition vocabulary · `JMF-254` per-directory upload rules |
 | `Story` | ordinary library work |
 | `Bug` | a parser or formatting defect — these are the ones that bite silently |
 | `Feature` | exists as a row and is used — `JMF-54` is one |
@@ -64,6 +64,12 @@ as having no folder. Anything pointing there is stale, not a second copy.
   their reasoning. The eleven tickets under that epic are deliberately thin without it.
 
 ## Local notes
+
+- ⚠️ **`JMF-260` (jMS — jMouse Script) arrived from the games tree on 2026-08-31.** The dialect was first
+  filed in the `RTS` project while it looked like a game feature; it is a jmouse-el dialect like `.jmp`,
+  `.jmm` and `.jmq`, so it lives here. `RTS-14`…`RTS-18` there are closed as Duplicate and archived.
+  ⚠️ Nothing in this epic may name a consuming product: `JMF-266`'s fake host is a **test fixture**, and a
+  game noun in `main` is a defect. The engine keeps the host half as `RTS-13` / `RTS-19`…`RTS-22`.
 
 - ⚠️ **The code is here; the products that consume it are not.** `Git/jmouse` is a sibling checkout of
   `Git/jMouseProjects`, so a session started in either one is missing half the picture. Paths between

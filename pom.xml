@@ -7,7 +7,7 @@
     <groupId>org.jmouse</groupId>
     <artifactId>jmouse-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-b20260802</version>
+    <version>1.0.0-b20260902</version>
 
     <description>jMouse Framework</description>
     <url>https://github.com/ihontarenko/jmouse</url>
@@ -70,7 +70,7 @@
             <!-- <dependency>
                 <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-dependencies</artifactId>
-                <version>1.0.0-b20260802</version>
+                <version>1.0.0-b20260902</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency> -->
@@ -99,6 +99,8 @@
         <module>jmouse-security</module>
         <module>jmouse-expression</module>
         <module>jmouse-validation</module>
+        <module>jmouse-validation-el</module>
+        <module>jmouse-validation-jpa</module>
         <module>jmouse-beans</module>
         <module>jmouse-context</module>
         <module>jmouse-http</module>
@@ -107,6 +109,7 @@
         <module>jmouse-access-jpa</module>
         <module>jmouse-access-policy</module>
         <module>jmouse-access-el</module>
+        <module>jmouse-script-el</module>
         <module>jmouse-access-projection</module>
         <module>jmouse-query</module>
         <module>jmouse-query-sql</module>
@@ -116,6 +119,11 @@
         <module>jmouse-storage-s3</module>
         <module>jmouse-storage-jpa</module>
         <module>jmouse-files</module>
+        <module>jmouse-money</module>
+        <module>jmouse-money-jpa</module>
+        <module>jmouse-search</module>
+        <module>jmouse-search-text</module>
+        <module>jmouse-search-jpa</module>
         <module>jmouse-files-jpa</module>
         <module>jmouse-ai</module>
         <module>jmouse-ai-provider</module>

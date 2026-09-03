@@ -20,6 +20,6 @@ public abstract class AbstractBodyParser<N extends ExpressionsNode, T extends To
     }
 
     protected Node parseStatements(TokenCursor cursor, ParserContext context) {
-        return context.getParser(StatementsParser.class).parse(cursor, context);
+        return context.getParser(statementsParser()).parse(cursor, context);
     }
 }

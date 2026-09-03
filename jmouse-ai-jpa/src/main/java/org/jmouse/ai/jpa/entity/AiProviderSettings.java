@@ -36,6 +36,22 @@ public class AiProviderSettings {
     @Column(name = "application", length = 64, nullable = false)
     private String application;
 
+    /**
+     * What this configuration is FOR, in the product's own words.
+     *
+     * <h2>⚠️ NULLABLE, and that is the migration rather than an oversight</h2>
+     *
+     * <p>Every row written before purposes existed has none, and a row with none answers <em>every</em>
+     * purpose — see {@code JpaProviderSettingsSource}. So an installation that configured one provider
+     * years ago keeps working untouched, and starts being specific only when somebody chooses to be.
+     *
+     * <p>⚠️ Free text, keyed by the product. This module has no idea what "movie matching" is and must
+     * not learn: an enum here would mean a release of this library for every purpose any product
+     * invents.
+     */
+    @Column(name = "purpose", length = 64)
+    private String purpose;
+
     /** Matched against {@code ChatModel.providerName()}, which refuses settings addressed elsewhere. */
     @Column(name = "provider", length = 32, nullable = false)
     private String provider;
@@ -105,6 +121,15 @@ public class AiProviderSettings {
 
     public String getApplication() {
         return application;
+    }
+
+    /** ⚠️ May be null — a row written before purposes existed, which answers every purpose. */
+    public String getPurpose() {
+        return purpose;
+    }
+
+    public void setPurpose(String purpose) {
+        this.purpose = purpose == null || purpose.isBlank() ? null : purpose.trim();
     }
 
     public String getProvider() {

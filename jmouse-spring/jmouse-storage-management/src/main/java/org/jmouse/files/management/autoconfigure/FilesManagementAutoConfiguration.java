@@ -4,8 +4,18 @@ import jakarta.persistence.EntityManager;
 import org.jmouse.files.jpa.FileBindings;
 import org.jmouse.files.jpa.ManagedFile;
 import org.jmouse.files.jpa.ManagedFiles;
+import org.jmouse.files.directory.DirectoryConfigurationKind;
+import org.jmouse.files.directory.DirectoryConfigurationKinds;
 import org.jmouse.files.jpa.directory.StorageDirectories;
+import org.jmouse.files.jpa.directory.StorageDirectoryConfigurations;
+import org.jmouse.files.management.DirectoryConfigurationResolver;
+import org.jmouse.access.AccessEngine;
+import org.jmouse.access.ScopeCatalog;
+import org.jmouse.access.enforcement.CurrentSubject;
+import org.jmouse.access.enforcement.ExternalAccessRules;
 import org.jmouse.files.management.DirectoryController;
+import org.jmouse.files.management.access.DirectoryVisibility;
+import org.jmouse.files.management.DirectoryUploadPolicyResolver;
 import org.jmouse.files.management.DirectoryManagement;
 import org.jmouse.files.management.FileController;
 import org.jmouse.files.management.FileManagement;
@@ -18,6 +28,7 @@ import org.jmouse.storage.administration.StorageAdministrationController;
 import org.jmouse.storage.administration.StorageAdministrationDiagnostics;
 import org.jmouse.storage.configuration.StorageSettings;
 import org.jmouse.storage.policy.UploadPolicy;
+import org.jmouse.storage.policy.UploadPolicyResolver;
 import org.jmouse.storage.jpa.StoredFileDelivery;
 import org.jmouse.storage.jpa.StoredFileIngestion;
 import org.jmouse.storage.jpa.StoredFileReferences;
@@ -173,27 +184,86 @@ public class FilesManagementAutoConfiguration {
     }
 
     /**
+     * 🗂️ Every kind of configuration a folder may carry.
+     *
+     * <p>{@code upload} is registered by the registry itself; a module contributing another declares a
+     * {@link DirectoryConfigurationKind} bean and it is taken in here. ⚠️ An unregistered kind is refused
+     * on write rather than stored and ignored, which is the whole difference between an extensible
+     * schema and a junk drawer.</p>
+     *
+     * @param contributed kinds any module on the classpath declared
+     * @return the registry
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public DirectoryConfigurationKinds directoryConfigurationKinds(
+            ObjectProvider<DirectoryConfigurationKind<?>> contributed) {
+        return new DirectoryConfigurationKinds(contributed.stream().toList());
+    }
+
+    /**
+     * 🔧 What folders say about themselves.
+     *
+     * @param entityManager the application's persistence context
+     * @param identifiers   where a new row's identifier comes from
+     * @param kinds         what kinds this installation knows about
+     * @return the store
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public StorageDirectoryConfigurations storageDirectoryConfigurations(
+            EntityManager entityManager,
+            @Qualifier("filesIdentifierSupplier") Supplier<String> identifiers,
+            DirectoryConfigurationKinds kinds) {
+        return new StorageDirectoryConfigurations(entityManager, identifiers, kinds);
+    }
+
+    /**
+     * 🛃 A folder's own acceptance rule, inherited down its subtree.
+     *
+     * <p>⚠️ Displaces {@code StorageAutoConfiguration}'s fixed resolver by being a
+     * {@link UploadPolicyResolver} the application declares — which is exactly the seam that
+     * configuration published it behind. With no configuration row anywhere in a tree, every upload
+     * still resolves to the installation's own policy, so switching this module on changes nothing by
+     * itself.</p>
+     *
+     * @param directories    the tree, for the ancestor chain
+     * @param configurations what folders say about themselves
+     * @param uploadPolicy   the installation's own rule
+     * @param settings       where its size limit comes from
+     * @return the resolver
+     */
+    @Bean
+    @ConditionalOnMissingBean(UploadPolicyResolver.class)
+    public DirectoryUploadPolicyResolver directoryUploadPolicyResolver(
+            StorageDirectories directories, StorageDirectoryConfigurations configurations,
+            UploadPolicy uploadPolicy, StorageSettings settings) {
+        return new DirectoryUploadPolicyResolver(directories, configurations, uploadPolicy,
+                                                 settings.maxSizeBytes());
+    }
+
+    /**
      * 🌐 How a file is fetched from a web address.
      *
      * <p>⚠️ Only where the product asked for it. Importing makes this server fetch things on a caller's
      * behalf, which is a capability rather than a convenience — a product that never wanted it should not
      * acquire it by adding a dependency.</p>
      *
-     * @param uploadPolicy what this installation accepts
-     * @param userAgent    what to announce this installation as
+     * @param uploadPolicies what this installation accepts, per destination
+     * @param userAgent      what to announce this installation as
      * @return the fetcher
      */
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = IMPORT_ENABLED, havingValue = "true")
     public RemoteFileFetcher remoteFileFetcher(
-            UploadPolicy uploadPolicy,
+            UploadPolicyResolver uploadPolicies,
             @Value("${" + IMPORT_USER_AGENT + ":}") String userAgent) {
         // Resolved here rather than as a placeholder default: the default is a browser string full of
         // punctuation a placeholder would have to be read very carefully to be trusted with.
         String announcedAs = userAgent.isBlank() ? DEFAULT_IMPORT_USER_AGENT : userAgent;
 
-        return new RemoteFileFetcher(uploadPolicy, announcedAs);
+        return new RemoteFileFetcher(uploadPolicies, announcedAs);
     }
 
     /**
@@ -262,22 +332,51 @@ public class FilesManagementAutoConfiguration {
         @ConditionalOnMissingBean
         @ConditionalOnProperty(name = DIRECTORY_ENDPOINTS_ENABLED, havingValue = "true",
                                matchIfMissing = true)
-        public DirectoryManagement directoryManagement(StorageDirectories directories) {
-            return new DirectoryManagement(directories);
+        public DirectoryManagement directoryManagement(
+                StorageDirectories directories, StorageDirectoryConfigurations configurations,
+                DirectoryConfigurationKinds kinds,
+                ObjectProvider<DirectoryConfigurationResolver> resolvers,
+                ApplicationEventPublisher events) {
+            return new DirectoryManagement(directories, configurations, kinds,
+                                           resolvers.stream().toList(), events);
+        }
+
+        /**
+         * 🔒 Which folders a caller may see, applied to what a listing returns (JMF-278).
+         *
+         * <p>⚠️ Its own bean rather than something the controller builds, because it is the piece a
+         * product may need to reuse: a screen that draws the tree from somewhere else has to hide the
+         * same rows, and two filters would be two answers.
+         *
+         * @return the filter
+         */
+        @Bean
+        @ConditionalOnMissingBean
+        @ConditionalOnProperty(name = DIRECTORY_ENDPOINTS_ENABLED, havingValue = "true",
+                               matchIfMissing = true)
+        public DirectoryVisibility directoryVisibility(
+                ObjectProvider<AccessEngine> engine,
+                ObjectProvider<CurrentSubject> currentSubject,
+                ObjectProvider<ExternalAccessRules> rules,
+                ObjectProvider<ScopeCatalog> scopes) {
+            return new DirectoryVisibility(engine, currentSubject, rules, scopes,
+                                           DirectoryController.class);
         }
 
         /**
          * 🌳 The tree's routes.
          *
          * @param directories the tree's transactional surface
+         * @param visible     which of the rows a listing returns this caller may actually see
          * @return the controller
          */
         @Bean
         @ConditionalOnMissingBean
         @ConditionalOnProperty(name = DIRECTORY_ENDPOINTS_ENABLED, havingValue = "true",
                                matchIfMissing = true)
-        public DirectoryController directoryController(DirectoryManagement directories) {
-            return new DirectoryController(directories);
+        public DirectoryController directoryController(DirectoryManagement directories,
+                                                       DirectoryVisibility visible) {
+            return new DirectoryController(directories, visible);
         }
     }
 

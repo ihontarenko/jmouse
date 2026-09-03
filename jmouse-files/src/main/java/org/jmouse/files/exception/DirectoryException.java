@@ -17,4 +17,18 @@ public class DirectoryException extends RuntimeException {
     public DirectoryException(String message) {
         super(message);
     }
+
+    /**
+     * 🏗️ Report a refusal caused by something underneath.
+     *
+     * <p>For the one case where the reason is not the tree's own: a configuration document that will
+     * not bind into the record its kind declares. The cause carries the parser's sentence, which is the
+     * half that says <em>which field</em>.</p>
+     *
+     * @param message what was wrong
+     * @param cause   what said so
+     */
+    public DirectoryException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

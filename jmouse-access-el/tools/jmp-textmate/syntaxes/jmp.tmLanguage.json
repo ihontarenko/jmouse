@@ -121,10 +121,21 @@
       },
       "patterns": [
         { "include": "#comment" },
+        { "include": "#through-clause" },
         { "include": "#permission" },
         { "include": "#string" },
         { "include": "#punctuation" }
       ]
+    },
+
+    "through-clause": {
+      "comment": "field:write \"…\" through each form — where the permission is asked, when the row named is not the one carrying the authority. The quantifier is compulsory; the word after it is a RESOURCE name, not a permission namespace, which is why it is painted as a type rather than as a permission.",
+      "match": "\\b(through)\\s+(any|each)\\s+([A-Za-z_][\\w-]*)",
+      "captures": {
+        "1": { "name": "keyword.other.through.jmp" },
+        "2": { "name": "keyword.operator.quantifier.jmp" },
+        "3": { "name": "entity.name.type.resource.jmp" }
+      }
     },
 
     "actions-block": {

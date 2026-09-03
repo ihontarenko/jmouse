@@ -135,6 +135,25 @@ public class AccessTargetBinding {
         return ambient.instance().map(instance -> aimed.at(kind, instance)).orElse(aimed);
     }
 
+    /**
+     * The identifier this call names, or nothing where the route promised one and was called without it.
+     *
+     * <p>⚠️ <strong>Exposed because a row is decided by the ENGINE, not resolved here.</strong> A
+     * permission may be declared {@code through} another resource, in which case the row's own place is
+     * not the one to ask about — and only the engine knows that. So a route naming a row hands over the
+     * identifier and lets one place work out where the question lands; anything else is a second copy of
+     * the rule, disagreeing on the third change.
+     */
+    public Optional<String> identifierOf(
+            Method method, Object[] arguments, AccessRequirement required) {
+
+        MethodArguments parameters = argumentsByMethod.computeIfAbsent(
+                method, cached -> MethodArguments.of(cached, naming));
+
+        return identifierName(parameters, required)
+                .flatMap(name -> parameters.valueOf(name, arguments));
+    }
+
     private Optional<String> identifierName(MethodArguments parameters, AccessRequirement required) {
         return required.resourceId().isBlank()
                 ? parameters.soleIdentifierName()

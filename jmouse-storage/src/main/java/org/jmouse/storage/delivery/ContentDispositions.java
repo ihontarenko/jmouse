@@ -46,6 +46,17 @@ public final class ContentDispositions {
             "text/xml", "application/xml"
     );
 
+    /**
+     * The extensions that reach the same place as {@link #ACTIVE_CONTENT_TYPES}.
+     *
+     * <p>⚠️ Beside the types rather than anywhere else, because they are the same fact stated the other
+     * way round and a client controls both. Anything asking "does this admit active content" has to ask
+     * both lists — a rule admitting {@code html} by extension and nothing by type still admits it.</p>
+     */
+    private static final Set<String> ACTIVE_CONTENT_EXTENSIONS = Set.of(
+            "svg", "html", "htm", "xhtml", "shtml", "xml"
+    );
+
     private static final String IMAGE_TYPE = "image";
     private static final String TEXT_TYPE  = "text";
     private static final String PDF_TYPE   = "application/pdf";
@@ -93,6 +104,30 @@ public final class ContentDispositions {
         }
 
         return baseType.startsWith(IMAGE_TYPE) || baseType.startsWith(TEXT_TYPE) || baseType.equals(PDF_TYPE);
+    }
+
+    /**
+     * ⚡ Content types that run when a browser renders them.
+     *
+     * <p>⚠️ <strong>The one list, published so nobody writes a second one.</strong> It is why these
+     * types are served as an attachment on every delivery path, and it is what an interface warning
+     * "this folder admits active content" has to be computed from. Three products each keeping their
+     * own copy would be three lists that drift, and the one that drifts is the one that stops
+     * warning.</p>
+     *
+     * @return the active content types, lower-cased and without parameters
+     */
+    public static Set<String> activeContentTypes() {
+        return ACTIVE_CONTENT_TYPES;
+    }
+
+    /**
+     * ⚡ Extensions that reach the same place as {@link #activeContentTypes()}.
+     *
+     * @return the active extensions, lower-cased and without their dot
+     */
+    public static Set<String> activeContentExtensions() {
+        return ACTIVE_CONTENT_EXTENSIONS;
     }
 
     /**

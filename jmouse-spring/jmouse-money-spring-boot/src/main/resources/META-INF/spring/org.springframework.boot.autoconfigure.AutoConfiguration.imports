@@ -1,0 +1,3 @@
+org.jmouse.money.spring.autoconfigure.MoneyAutoConfiguration
+org.jmouse.money.spring.autoconfigure.MoneyFlywayAutoConfiguration
+org.jmouse.money.spring.autoconfigure.MoneyScheduledSyncAutoConfiguration

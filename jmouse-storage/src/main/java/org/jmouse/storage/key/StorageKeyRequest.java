@@ -6,6 +6,7 @@ import org.jmouse.storage.exception.StorageKeyException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * 📐 What a caller knows about content, expressed so a {@link StorageKeyStrategy} can decide where
@@ -16,7 +17,18 @@ import java.util.List;
  * {@code String}, and reading a call site told you nothing about what {@code a} and {@code b}
  * were — which is how two products ended up disagreeing about it.</p>
  *
+ * <h3>⚠️ The owner is two values, and only one of them lays anything out</h3>
+ *
+ * <p>{@link #ownerIdentifier} is what a layout writes into the key. {@link #ownerType} says what kind
+ * of thing that identifier names, and no shipped layout reads it — it is here because an identifier
+ * alone is ambiguous the moment a product has two kinds of owner sharing an identifier space, and
+ * because it is what {@link org.jmouse.storage.policy.UploadPolicyResolver} needs to tell a folder from
+ * an issue. A caller that does not know the kind leaves it unset and gets the installation's own
+ * policy.</p>
+ *
  * @param namespace       logical content class, e.g. {@code documents/md}; may be blank
+ * @param ownerType       what kind of thing the content belongs to, upper-cased; {@code null} when the
+ *                        caller does not say
  * @param ownerIdentifier who the content belongs to (never blank)
  * @param segments        further path segments, e.g. a category slug; blanks are dropped
  * @param filenameBase    filename without extension; blank means "generate one"
@@ -24,19 +36,28 @@ import java.util.List;
  * @param contentDigest   lower-case hex SHA-256 of the bytes, for layouts that place content by
  *                        what it is rather than by whose it is; {@code null} otherwise
  */
-public record StorageKeyRequest(String namespace, String ownerIdentifier, List<String> segments,
-                                String filenameBase, String extension, String contentDigest) {
+public record StorageKeyRequest(String namespace, String ownerType, String ownerIdentifier,
+                                List<String> segments, String filenameBase, String extension,
+                                String contentDigest) {
 
     /**
      * 🏗️ Normalise the collection and enforce the one field a layout cannot do without.
      *
      * <p>Blank and {@code null} segments are dropped here rather than by each strategy, so every
      * strategy receives a segment list it can simply join.</p>
+     *
+     * <p>The owner kind is upper-cased and a blank one becomes {@code null}, so {@code directory} and
+     * {@code DIRECTORY} are one kind rather than two — matching what {@code OwnerReference} does with
+     * the same value, since that is where it usually comes from.</p>
      */
     public StorageKeyRequest {
         if (ownerIdentifier == null || ownerIdentifier.isBlank()) {
             throw new StorageKeyException("Storage key request must carry an owner identifier.");
         }
+
+        ownerType = (ownerType == null || ownerType.isBlank())
+                ? null
+                : ownerType.trim().toUpperCase(Locale.ROOT);
 
         segments = (segments == null) ? List.of() : segments.stream()
                 .filter(segment -> segment != null && !segment.isBlank())
@@ -53,8 +74,8 @@ public record StorageKeyRequest(String namespace, String ownerIdentifier, List<S
      * @return a copy carrying the digest
      */
     public StorageKeyRequest withContentDigest(String contentDigest) {
-        return new StorageKeyRequest(namespace, ownerIdentifier, segments, filenameBase, extension,
-                                     contentDigest);
+        return new StorageKeyRequest(namespace, ownerType, ownerIdentifier, segments, filenameBase,
+                                     extension, contentDigest);
     }
 
     /**
@@ -85,6 +106,7 @@ public record StorageKeyRequest(String namespace, String ownerIdentifier, List<S
 
         private final String       ownerIdentifier;
         private final List<String> segments = new ArrayList<>();
+        private       String       ownerType;
         private       String       namespace;
         private       String       filenameBase;
         private       String       extension;
@@ -102,6 +124,20 @@ public record StorageKeyRequest(String namespace, String ownerIdentifier, List<S
          */
         public Builder namespace(String namespace) {
             this.namespace = namespace;
+            return this;
+        }
+
+        /**
+         * 🔖 Say what kind of thing the owner is, so the destination can carry its own acceptance rule.
+         *
+         * <p>Leave it unset and the content is judged by the installation's policy — which is what every
+         * caller got before destinations could carry one.</p>
+         *
+         * @param ownerType e.g. {@code DIRECTORY}, {@code ISSUE}, {@code PAGE}
+         * @return this builder
+         */
+        public Builder ownerType(String ownerType) {
+            this.ownerType = ownerType;
             return this;
         }
 
@@ -158,8 +194,8 @@ public record StorageKeyRequest(String namespace, String ownerIdentifier, List<S
          * @return the assembled request
          */
         public StorageKeyRequest build() {
-            return new StorageKeyRequest(namespace, ownerIdentifier, segments, filenameBase, extension,
-                                         contentDigest);
+            return new StorageKeyRequest(namespace, ownerType, ownerIdentifier, segments, filenameBase,
+                                         extension, contentDigest);
         }
     }
 }

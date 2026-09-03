@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-core</artifactId>
-  <version>1.0.0-b20260802</version>
+  <version>1.0.0-b20260902</version>
   <name>jMouse - Core API</name>
   <description>jMouse Framework - Core Library</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-core</url>

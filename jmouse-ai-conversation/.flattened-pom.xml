@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-ai-conversation</artifactId>
-  <version>1.0.0-b20260802</version>
+  <version>1.0.0-b20260902</version>
   <name>jMouse - AI Conversation</name>
   <description>jMouse Framework - Tool-calling loop (conversation runner, budget, tool-result assembly)</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-ai-conversation</url>
@@ -30,13 +30,13 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-ai</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-ai-provider</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

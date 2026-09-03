@@ -1,7 +1,7 @@
 package org.jmouse.mapper.el.node;
 
 import org.jmouse.el.evaluation.EvaluationContext;
-import org.jmouse.el.node.AbstractExpression;
+import org.jmouse.el.node.expression.ExpressionsNode;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -24,7 +24,7 @@ import java.util.Map;
  * @author Ivan Hontarenko (Mr. Jerry Mouse)
  * @author ihontarenko@gmail.com
  */
-public class RuleBlockNode extends AbstractExpression {
+public class RuleBlockNode extends ExpressionsNode {
 
     private final Map<String, RuleNode> rules    = new LinkedHashMap<>();
     private final List<LetNode>         bindings = new ArrayList<>();

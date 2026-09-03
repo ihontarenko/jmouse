@@ -1,7 +1,10 @@
 package org.jmouse.files.management;
 
+import org.jmouse.files.OwnerReference;
 import org.jmouse.files.exception.RemoteFetchException;
+import org.jmouse.storage.policy.FixedUploadPolicy;
 import org.jmouse.storage.policy.UploadPolicy;
+import org.jmouse.storage.policy.UploadPolicyResolver;
 import org.springframework.web.util.UriUtils;
 
 import java.io.IOException;
@@ -74,19 +77,37 @@ public class RemoteFileFetcher {
     /** Used when the URL path carries no usable filename; datasheets are the dominant use case. */
     private static final String FALLBACK_FILENAME = "datasheet.pdf";
 
-    private final UploadPolicy uploadPolicy;
-    private final String       userAgent;
+    private final UploadPolicyResolver uploadPolicies;
+    private final String               userAgent;
 
     /**
      * 🏗️ Build a fetcher that announces itself as this installation.
      *
-     * @param uploadPolicy what this installation accepts
-     * @param userAgent    what to send as {@code User-Agent} — most media and datasheet hosts refuse a
-     *                     client they do not recognise as a browser
+     * <p>⚠️ <strong>A resolver rather than a policy, and that is not tidiness.</strong> This is the
+     * second write path into storage, and it is the one with a size limit of its own — so a fetcher
+     * holding a single policy is a fetcher that walks straight past whatever a destination says it
+     * accepts, while every multipart upload obeys it.</p>
+     *
+     * @param uploadPolicies what this installation accepts, per destination
+     * @param userAgent      what to send as {@code User-Agent} — most media and datasheet hosts refuse a
+     *                       client they do not recognise as a browser
      */
+    public RemoteFileFetcher(UploadPolicyResolver uploadPolicies, String userAgent) {
+        this.uploadPolicies = uploadPolicies;
+        this.userAgent      = userAgent;
+    }
+
+    /**
+     * 🏗️ Build a fetcher over one policy that applies everywhere.
+     *
+     * @param uploadPolicy what this installation accepts
+     * @param userAgent    what to announce this installation as
+     * @deprecated pass a {@link UploadPolicyResolver} instead, so a fetch obeys the rule of wherever
+     *             the file is headed.
+     */
+    @Deprecated(since = "1.1")
     public RemoteFileFetcher(UploadPolicy uploadPolicy, String userAgent) {
-        this.uploadPolicy = uploadPolicy;
-        this.userAgent    = userAgent;
+        this(new FixedUploadPolicy(uploadPolicy), userAgent);
     }
 
     /**
@@ -99,7 +120,8 @@ public class RemoteFileFetcher {
     }
 
     /**
-     * 📥 Open {@code sourceUrl} and hand back its name and content stream.
+     * 📥 Open {@code sourceUrl} and hand back its name and content stream, judged by the installation's
+     * own rule.
      *
      * @param sourceUrl the address to fetch
      * @return the open download
@@ -108,6 +130,25 @@ public class RemoteFileFetcher {
      *                              oversized {@code Content-Length}, or fails on the network
      */
     public RemoteFile fetch(String sourceUrl) {
+        return fetch(sourceUrl, null);
+    }
+
+    /**
+     * 📥 Open {@code sourceUrl} and hand back its name and content stream, judged by the rule of
+     * wherever the file is headed.
+     *
+     * @param sourceUrl the address to fetch
+     * @param owner     what will hold the file, or {@code null} to apply the installation's own rule
+     * @return the open download
+     * @throws RemoteFetchException when the URL is unusable, resolves to an internal address, redirects
+     *                              endlessly, answers with an error status or an HTML page, declares an
+     *                              oversized {@code Content-Length}, or fails on the network
+     */
+    public RemoteFile fetch(String sourceUrl, OwnerReference owner) {
+        UploadPolicy uploadPolicy = owner == null
+                ? uploadPolicies.policyFor(null, null)
+                : uploadPolicies.policyFor(owner.ownerType(), owner.ownerId());
+
         try {
             HttpURLConnection connection = follow(addressOf(sourceUrl));
 

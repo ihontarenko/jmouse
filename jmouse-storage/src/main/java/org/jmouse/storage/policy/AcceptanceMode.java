@@ -13,10 +13,10 @@ public enum AcceptanceMode {
      * ✅ Only what is listed may enter storage. Anything unlisted — including content with no
      * extension at all — is refused.
      */
-    ALLOWLIST,
+    ALLOW_LIST,
 
     /**
      * ⛔ Everything may enter storage except what is listed.
      */
-    DENYLIST
+    DENY_LIST
 }

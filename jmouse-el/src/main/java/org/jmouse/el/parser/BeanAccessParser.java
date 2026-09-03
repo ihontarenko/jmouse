@@ -8,6 +8,7 @@ import org.jmouse.el.node.Node;
 import org.jmouse.el.node.expression.BeanAccessNode;
 import org.jmouse.el.node.expression.literal.NullLiteralNode;
 import org.jmouse.el.parser.sub.ArgumentsParser;
+import org.jmouse.el.parser.sub.ParenthesesParser;
 
 import static org.jmouse.el.lexer.BasicToken.*;
 import static org.jmouse.el.node.expression.BeanAccessNode.AccessType.*;
@@ -32,17 +33,27 @@ public class BeanAccessParser implements Parser {
             case METHOD_CALL:
                 cursor.ensure(T_DOT);
 
-                Expression  arguments   = new NullLiteralNode();
-                String      name        = cursor.ensure(T_IDENTIFIER).value();
+                String name = cursor.ensure(T_IDENTIFIER).value();
 
-                if (!cursor.matchesSequence(T_OPEN_PAREN, T_CLOSE_PAREN)) {
-                    arguments = (Expression) context.getParser(ArgumentsParser.class).parse(cursor, context);
-                } else {
-                    cursor.ensure(T_OPEN_PAREN);
-                    cursor.ensure(T_CLOSE_PAREN);
-                }
+                // ⚠️ Through ParenthesesParser with ArgumentsParser as the next parser — exactly as
+                // FunctionParser does it, and not by calling ArgumentsParser directly.
+                //
+                // ⚠️ Calling it directly is what this used to do, and it cannot read more than one
+                // argument: ArgumentsParser does not consume the brackets, so the leading '(' was handed
+                // to the expression parser, which read it as a parenthesised expression and then
+                // demanded a ')' where the first comma was. `@bean.method('a')` worked and
+                // `@bean.method('a', 30)` failed with "expected T_CLOSE_PAREN" — pointing at the comma,
+                // and saying nothing about brackets nobody wrote wrong.
+                //
+                // ⚠️ It stayed invisible because the only dialect on this parser before jMS was `.jmp`,
+                // which deliberately does not register BeanAccessParser at all.
+                context.setOptions(ParserOptions.withNextParser(ArgumentsParser.class));
+                Expression parsed = (Expression) context.getParser(ParenthesesParser.class).parse(cursor, context);
+                context.clearOptions();
 
-                node.setAction(new BeanAccessNode.MethodCall(name, arguments));
+                // An empty argument list parses to nothing at all, and MethodCall evaluates whatever it
+                // is given — so "no arguments" is a null literal rather than a null reference.
+                node.setAction(new BeanAccessNode.MethodCall(name, parsed == null ? new NullLiteralNode() : parsed));
                 break;
             case FIELD_ACCESS: {
                 cursor.ensure(T_COLON);

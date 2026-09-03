@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-storage-spring-boot</artifactId>
-  <version>1.0.0-b20260802</version>
+  <version>1.0.0-b20260902</version>
   <name>jMouse - Storage Spring Boot Starter</name>
   <description>Spring Boot auto-configuration for jMouse storage: backends, delivery rendering, registry and migrations</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-storage-spring-boot</url>
@@ -30,20 +30,20 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-storage</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-storage-s3</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-storage-jpa</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>

@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jmouse</groupId>
   <artifactId>jmouse-jmt-spring-boot</artifactId>
-  <version>1.0.0-b20260802</version>
+  <version>1.0.0-b20260902</version>
   <name>jMouse - JMT Spring Boot Starter</name>
   <description>jMouse Framework - jMouse Template (JMT) as a Spring MVC view engine</description>
   <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-spring/jmouse-jmt-spring-boot</url>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.jmouse</groupId>
       <artifactId>jmouse-el</artifactId>
-      <version>1.0.0-b20260802</version>
+      <version>1.0.0-b20260902</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

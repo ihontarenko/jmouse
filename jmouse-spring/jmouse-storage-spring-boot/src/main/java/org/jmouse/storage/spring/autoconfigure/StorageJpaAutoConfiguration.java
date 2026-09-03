@@ -13,7 +13,7 @@ import org.jmouse.storage.jpa.StoredFileReferences;
 import org.jmouse.storage.jpa.StoredFileRegistry;
 import org.jmouse.storage.jpa.sweeper.OrphanSweeper;
 import org.jmouse.storage.key.StorageKeyStrategy;
-import org.jmouse.storage.policy.UploadPolicy;
+import org.jmouse.storage.policy.UploadPolicyResolver;
 import org.jmouse.storage.spring.ScheduledOrphanSweep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,18 +70,18 @@ public class StorageJpaAutoConfiguration {
     /**
      * 📥 The write path: judge, place, store, record.
      *
-     * @param fileStores   every backend the application has
-     * @param registry     where written objects are recorded
-     * @param keyStrategy  where content is laid out
-     * @param uploadPolicy what may enter storage
+     * @param fileStores     every backend the application has
+     * @param registry       where written objects are recorded
+     * @param keyStrategy    where content is laid out
+     * @param uploadPolicies what may enter storage, per destination
      * @return the ingestion path
      */
     @Bean
     @ConditionalOnMissingBean
     public StoredFileIngestion storedFileIngestion(FileStores fileStores, StoredFileRegistry registry,
                                                    StorageKeyStrategy keyStrategy,
-                                                   UploadPolicy uploadPolicy) {
-        return new StoredFileIngestion(fileStores, registry, keyStrategy, uploadPolicy);
+                                                   UploadPolicyResolver uploadPolicies) {
+        return new StoredFileIngestion(fileStores, registry, keyStrategy, uploadPolicies);
     }
 
     /**
