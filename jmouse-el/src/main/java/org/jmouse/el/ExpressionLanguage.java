@@ -10,6 +10,7 @@ import org.jmouse.el.node.Expression;
 import org.jmouse.el.node.expression.literal.NullLiteralNode;
 import org.jmouse.el.parser.DefaultParserContext;
 import org.jmouse.el.parser.ExpressionParser;
+import org.jmouse.el.parser.ParseException;
 import org.jmouse.el.parser.ParserContext;
 import org.jmouse.el.template.Cache;
 
@@ -222,8 +223,36 @@ public class ExpressionLanguage {
      * Compiles the given expression string into an AST ({@link Expression}),
      * using a cache to avoid repeated parsing.
      *
+     * <h2>⚠️ THE WHOLE STRING HAS TO PARSE, and it did not used to</h2>
+     *
+     * <p>This parsed the first complete expression it could and <strong>silently discarded whatever
+     * followed</strong>. Nothing failed, nothing logged, and the answer was the prefix's:
+     *
+     * <pre>
+     *   true frobnicate false            → true
+     *   1 + 1 garbage                    → 2
+     *   1 2 3                            → 1
+     *   'a' 'b'                          → a
+     *   1 == 1 nonsense 2 == 2           → true
+     *   true xor true                    → true   ⚠️ 'xor' is not a word here; only '^' is
+     *   x == 'a' OR x == 'b'             → the left half   ⚠️ 'OR' uppercase is not a keyword
+     * </pre>
+     *
+     * <p>The last two are the ones that actually happen. A typo, a wrong-case keyword, or a word that
+     * merely looks like it belongs turns a rule into <em>half</em> of that rule — and every surface
+     * that shows the rule back keeps showing all of it, because the source text was never the thing
+     * that was truncated. In an authorization condition that is a silent grant; in a calculator it is
+     * a different number.
+     *
+     * <p>⚠️ <strong>This checks HERE and not in the parser, and that distinction is load-bearing.</strong>
+     * The same parser reads sub-expressions inside a template, where a trailing {@code %&#125;} or
+     * {@code &#125;&#125;} is not leftover input but the next thing the template needs. Only a caller
+     * that handed over a complete standalone expression may insist the tokens ran out — so only this
+     * method does.
+     *
      * @param expression the expression to compile
      * @return the compiled {@link Expression}
+     * @throws ParseException where the string holds anything the expression did not consume
      */
     public Expression compile(String expression) {
         if (expression == null || expression.isBlank()) {
@@ -238,10 +267,40 @@ public class ExpressionLanguage {
             TokenCursor cursor = lexer.tokenize(source);
             cursor.consumeIf(BasicToken.T_SOL);
             cached = (Expression) parser.parse(cursor, context);
+            requireNothingLeftOver(cursor, expression);
             cache.put(key, cached);
         }
 
         return cached;
+    }
+
+    /**
+     * Refuses an expression whose tokens did not all belong to it.
+     *
+     * <p>⚠️ {@code T_EOL} is the end marker the lexer appends and is the one token that legitimately
+     * remains — everything the parser accepted stops in front of it. Anything else standing there is
+     * input nobody read.
+     *
+     * <p>The message names the token, quotes it, and gives the offset, because the failure this
+     * replaces was invisible: somebody meeting it for the first time is looking at an expression that
+     * reads perfectly to them, and the only useful thing to say is <em>the parse stopped HERE</em>.
+     */
+    private void requireNothingLeftOver(TokenCursor cursor, String expression) {
+        cursor.consumeIf(BasicToken.T_EOL);
+
+        if (!cursor.hasNext()) {
+            return;
+        }
+
+        Token unread = cursor.peek();
+
+        throw new ParseException(
+                "Expression [%s] was only partly read: the parse stopped at '%s' (%s) at offset %d, and "
+                        .formatted(expression, unread.value(), unread.type(), unread.offset())
+                + "everything from there on was ignored. This is a syntax error rather than a warning "
+                + "because the prefix on its own is a perfectly plausible answer — check for a typo, "
+                + "for a keyword in the wrong case ('AND' and 'OR' are not keywords; 'and' and 'or' "
+                + "are), or for a word this language does not have ('xor' is spelled '^').");
     }
 
     /**

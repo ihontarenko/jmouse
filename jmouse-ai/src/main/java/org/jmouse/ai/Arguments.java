@@ -179,16 +179,38 @@ public record Arguments(Map<String, Object> values, String context) {
         return Arrays.stream(permitted).map(Enum::name).collect(Collectors.joining(", "));
     }
 
-    public boolean flag(String name) {
+    /**
+     * A boolean that distinguishes <em>absent</em> from <em>false</em>.
+     *
+     * <h2>⚠️ The missing member of the family, and the distinction is not pedantic</h2>
+     *
+     * <p>{@link #flag} collapses the two, which is right for a switch that is off until somebody turns
+     * it on — {@code allowDuplicate}, {@code force}. It is wrong wherever the sensible default is
+     * <em>true</em>: read through {@code flag}, an argument nobody sent arrives as a deliberate
+     * {@code false}, and the caller is held to a choice it never made.
+     *
+     * <p>Every other type here already offers both readings. This is the one that did not, so a
+     * definition needing a default-true boolean had no way to express it — while
+     * {@link ArgumentSchema#optionalBoolean} would happily declare one.
+     *
+     * @param name the argument
+     * @return the value, or empty when it was not sent
+     */
+    public Optional<Boolean> optionalBoolean(String name) {
         Object value = values.get(name);
 
         return switch (value) {
-            case null                 -> false;
-            case Boolean booleanValue -> booleanValue;
-            case String text          -> Boolean.parseBoolean(text.trim());
+            case null                 -> Optional.empty();
+            case Boolean booleanValue -> Optional.of(booleanValue);
+            case String text          -> Optional.of(Boolean.parseBoolean(text.trim()));
             default -> throw refuse(name, "must be true or false, but a " + describeType(value)
                                         + " was sent");
         };
+    }
+
+    /** A switch that is off unless it was turned on — {@link #optionalBoolean} where absent is false. */
+    public boolean flag(String name) {
+        return optionalBoolean(name).orElse(false);
     }
 
     /** A list of text values, accepting a bare string as the one-element list a model often sends. */

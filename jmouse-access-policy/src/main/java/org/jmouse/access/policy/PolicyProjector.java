@@ -16,6 +16,7 @@ import org.jmouse.access.spi.BundledPermission;
 import org.jmouse.access.spi.CapabilityGrant;
 import org.jmouse.access.spi.DirectGrant;
 import org.jmouse.access.spi.EntitlementStore;
+import org.jmouse.access.spi.GrantAttribution;
 import org.jmouse.access.spi.GrantCondition;
 import org.jmouse.access.spi.GrantStore;
 import org.jmouse.access.spi.RoleGrant;
@@ -163,7 +164,9 @@ public final class PolicyProjector {
         for (RoleGrant role : held) {
             assignments.add(new PolicyRoleAssignment(
                     role.roleName(), toScope(role.at()),
-                    sourceOf(role.attribution().condition()), SourceSpan.none()));
+                    sourceOf(role.attribution().condition()),
+                    writtenReason(role.attribution()),
+                    SourceSpan.none()));
         }
 
         return List.copyOf(assignments);
@@ -182,7 +185,27 @@ public final class PolicyProjector {
                 toScope(grant.at()),
                 grant.allowed() ? PolicyEffect.ALLOW : PolicyEffect.DENY,
                 sourceOf(grant.attribution().condition()),
+                writtenReason(grant.attribution()),
                 SourceSpan.none());
+    }
+
+    /**
+     * The sentence a rule was written with, or null.
+     *
+     * <p>⚠️ <strong>{@link GrantAttribution#explanation()} and never {@code reason()},
+     * and the difference is not cosmetic here.</strong> A stored row fills both — {@code stored(by,
+     * reason, since)} says so in as many words — so a real rule is covered either way. A
+     * {@code derived} attribution is the part that differs: its {@code reason} is <em>the engine
+     * describing its own answer</em>, and rendering that into a document would put the resolver's prose
+     * where a person's sentence belongs, in a file somebody may then read back and apply.
+     *
+     * <p>⚠️ Both projections here dropped this entirely until {@code JMF-290}, so the <em>Database</em>
+     * and <em>Resolved</em> readings rendered every grant and every assignment stripped of the one
+     * field that says why it exists — including the denials, which are the lines a reader is on that
+     * screen to understand.
+     */
+    private static String writtenReason(GrantAttribution attribution) {
+        return attribution == null || !attribution.isExplained() ? null : attribution.explanation();
     }
 
     /**

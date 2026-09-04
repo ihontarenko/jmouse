@@ -77,7 +77,7 @@ public class McpAuthorizationProperties {
     /**
      * What an issued access token's {@code aud} claim says, and therefore which decoder will take it.
      *
-     * <p>⚠️ <strong>Left empty on purpose, and {@link AgentCredentials} refuses to start without it.</strong>
+     * <p>⚠️ <strong>Left empty on purpose, and {@link ProtocolCredentials} refuses to start without it.</strong>
      * A default here would be a default audience — a token this product mints being accepted by whichever
      * service happens to share the guess. The one value that cannot be inferred is the one that must be
      * stated.

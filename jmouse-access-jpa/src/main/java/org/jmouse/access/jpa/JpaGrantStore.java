@@ -191,7 +191,15 @@ public class JpaGrantStore implements GrantStore {
                 // ⚠️ The assignment's own condition narrows everything the role carries, and a bundle
                 // entry's narrows that one entry further. Both apply, which is what `narrowedBy`
                 // composes rather than replaces — a narrowing of a narrowing is still a narrowing.
-                GrantAttribution.stored(assignment.getGrantedBy(), writtenAt(assignment.getCreatedAt()))
+                //
+                // ⚠️ AND THE REASON IS PART OF THE ATTRIBUTION, exactly as it is for a direct grant
+                // below. This read `stored(grantedBy, since)` for as long as there was no column to
+                // read from — so every explanation the engine produced about a role-derived power said
+                // who and when and never why, which is the half somebody auditing actually wants.
+                GrantAttribution.stored(
+                                assignment.getGrantedBy(),
+                                assignment.getReason(),
+                                writtenAt(assignment.getCreatedAt()))
                         .narrowedBy(conditions.of(assignment.getConditionSource())));
     }
 

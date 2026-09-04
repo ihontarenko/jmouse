@@ -1,0 +1,40 @@
+-- =============================================================================
+--  V000003  Why a role was handed over (JMF-290)
+--
+--  ⚠️ A NEW file, never an edit of V000001. These migrations are append-only from
+--  first release — a library's schema has already run against other people's
+--  databases, and a changed checksum stops one of them booting. The workspace
+--  rule that a Flyway file may be edited in place applies to a product whose
+--  database can be dropped, which this is not. `AccessMigrations`'s own javadoc
+--  says as much, and names this exact case: "every future column on a role is an
+--  ALTER TABLE in a library release".
+--
+--  ⚠️ THE COLUMN IS NOT PROVENANCE, AND `granted_by` IS NOT A SUBSTITUTE FOR IT.
+--  Who did it and why they did it are different facts, and only the second one
+--  survives the person leaving. `access_subject_permissions` has had `reason`
+--  since V000001 for exactly this argument — a denial nobody can explain is a
+--  support ticket that outlives whoever wrote it — and an ASSIGNMENT is the other
+--  half of the same question. "Why does this contractor hold SPACE_ADMIN in
+--  Kyiv?" is asked far more often than why one permission was denied, and until
+--  now there was nowhere for the answer to live.
+--
+--  ⚠️ IT ALREADY EXISTED EVERYWHERE ELSE. `reason '…'` parses in `.jmp`,
+--  `PolicyRoleAssignment` carries it, and `RoleAssignmentNode` writes it back
+--  out — so a policy document could state a reason, validate, be saved as a
+--  revision, and then lose it the moment it was applied, because there was no
+--  column for it to land in. Every projection afterwards re-rendered the file
+--  without the sentence somebody had written. This closes that.
+--
+--  512, matching `access_subject_permissions.reason`. Nullable: a role handed out
+--  by a membership mechanism has no sentence to offer, and inventing one ("granted
+--  by joining the workspace") would be noise on every row in the table.
+--
+--  ⚠️ No `AFTER`, unlike the MySQL file. PostgreSQL has no column-position clause
+--  and appends; the two schemas therefore differ in column ORDER and in nothing
+--  else. Nothing here reads a column by position — every query names its columns
+--  and Hibernate maps by name — so this is a difference to know about rather than
+--  one to work around.
+-- =============================================================================
+
+ALTER TABLE access_role_assignments
+    ADD COLUMN reason VARCHAR(512);

@@ -76,6 +76,23 @@ public final class ArgumentSchema {
               + "repeated within the deduplication window otherwise does nothing.");
     }
 
+    /**
+     * However this installation lets a file arrive, declared from the roster itself.
+     *
+     * <p>⚠️ <strong>Asked of the roster rather than written here.</strong> Which sources exist is a
+     * deployment decision, so a schema that named them would be a schema that lies wherever the
+     * deployment differs — advertising a path argument to an installation that reads no files, or
+     * hiding an object-store one from an installation that has it. Every tool that takes a file gets
+     * the arguments this installation actually offers, described by the sources themselves.
+     *
+     * @param sources what this installation offers
+     * @see ToolFileBytes
+     */
+    public ArgumentSchema fileBytes(ToolFileBytes sources) {
+        sources.arguments().forEach(this::optionalString);
+        return this;
+    }
+
     /** The result-count argument, clamped to the same ceiling everywhere. */
     public ArgumentSchema limit(int fallback) {
         return optionalNumber(ToolInvocation.LIMIT_ARGUMENT,

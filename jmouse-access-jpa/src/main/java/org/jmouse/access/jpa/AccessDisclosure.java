@@ -64,7 +64,13 @@ public interface AccessDisclosure {
     /**
      * One subject's role, where they hold it, and what it carries.
      *
-     * @param at where the <em>assignment</em> was made, which is never the bundle's own reach
+     * @param at     where the <em>assignment</em> was made, which is never the bundle's own reach
+     * @param reason why it was handed over, in words, or null. ⚠️ <strong>The same field, and the same
+     *               argument, as {@link DirectHolding#reason()}</strong> — and it was missing here for
+     *               a long time while the grammar, the policy model and the writer all carried it. A
+     *               projection built without it re-rendered every document with the sentence stripped
+     *               out, which is worse than never having offered one: the editor opens on that
+     *               projection and writes back what it was shown
      */
     record RoleHolding(
             String                  subjectId,
@@ -73,6 +79,7 @@ public interface AccessDisclosure {
             String                  grantedBy,
             LocalDateTime           since,
             String                  condition,
+            String                  reason,
             List<BundledPermission> bundle
     ) {
 
@@ -80,7 +87,26 @@ public interface AccessDisclosure {
         public RoleHolding(String subjectId, String roleName, ScopeReference at, String grantedBy,
                            LocalDateTime since, List<BundledPermission> bundle) {
 
-            this(subjectId, roleName, at, grantedBy, since, null, bundle);
+            this(subjectId, roleName, at, grantedBy, since, null, null, bundle);
+        }
+
+        /**
+         * ⚠️ Kept for callers that predate reasons, so adding one touched no construction site.
+         *
+         * <p>Note what the sibling record teaches: {@code DirectHolding} grew its arity-preserving
+         * constructor for the condition and a caller quietly went on using it, which is how a reason
+         * reached a screen as null for months. An overload is a convenience, never a default worth
+         * reaching for — if a caller <em>knows</em> the reason, it passes it.</p>
+         */
+        public RoleHolding(String subjectId, String roleName, ScopeReference at, String grantedBy,
+                           LocalDateTime since, String condition, List<BundledPermission> bundle) {
+
+            this(subjectId, roleName, at, grantedBy, since, condition, null, bundle);
+        }
+
+        /** Whether this assignment says, in words, why it is what it is. */
+        public boolean isExplained() {
+            return reason != null && !reason.isBlank();
         }
 
         /** How far this holding carries one permission, or null where it does not carry it at all. */

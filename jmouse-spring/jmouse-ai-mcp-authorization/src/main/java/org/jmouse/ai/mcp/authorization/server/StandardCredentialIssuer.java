@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * <p>Identity's, Tessera's and WiQ's were 66, 60 and 77 lines, and every line was library types calling
  * library types: {@link ApprovingSubject} to tell an enrolment apart from a returning agent, {@link
- * AgentEnrolment} to mint the first one, {@link AgentCredentials} to do the actual work, and a record
+ * AgentEnrolment} to mint the first one, {@link ProtocolCredentials} to do the actual work, and a record
  * copy to cross the interface. Nothing in any of them knew which product it was in.
  *
  * <p>So it is here, and a product that genuinely differs still implements {@link CredentialIssuer}
@@ -30,12 +30,12 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public class StandardCredentialIssuer implements CredentialIssuer {
 
-    private final AgentCredentials   credentials;
+    private final ProtocolCredentials   credentials;
     private final AgentDirectory     agents;
     private final AgentConnections   connections;
 
     public StandardCredentialIssuer(
-            AgentCredentials credentials, AgentDirectory agents, AgentConnections connections) {
+            ProtocolCredentials credentials, AgentDirectory agents, AgentConnections connections) {
 
         this.credentials = credentials;
         this.agents      = agents;
@@ -65,7 +65,7 @@ public class StandardCredentialIssuer implements CredentialIssuer {
                                 "The agent this code was approved for no longer exists.")));
     }
 
-    private static IssuedCredential asIssued(AgentCredentials.IssuedCredential credential) {
+    private static IssuedCredential asIssued(ProtocolCredentials.IssuedCredential credential) {
         return new IssuedCredential(
                 credential.accessToken(), credential.refreshToken(), credential.expiresIn());
     }

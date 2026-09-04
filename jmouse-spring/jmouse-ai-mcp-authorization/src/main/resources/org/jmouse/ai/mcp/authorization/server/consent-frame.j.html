@@ -345,7 +345,10 @@
    * ⚠️ Only a product that KEEPS a token can be found signed out here. Where the credential is a cookie
    * this page cannot read it — that is the point of the cookie — so there is nothing to test, and
    * refusing on its absence would refuse everybody. The server answers that question instead: the
-   * review call comes back 401 or 403, and the handler below turns it into the same sentence.
+   * review call comes back 401 or 403, and the handler below says so.
+   *
+   * ⚠️ That handler distinguishes what this check cannot: a 401 with a token in hand is an EXPIRED
+   * session, not a missing one. Do not collapse the two back into one sentence.
    */
   if (!token && !sendsCookies()) {
     refuse("You are not signed in",
@@ -364,7 +367,30 @@
   send(REVIEW_URL, token, request)
     .then(function (review) { show(review, review.subjects); })
     .catch(function (failed) {
+      /*
+       * ⚠️ **A token that was SENT and rejected is an expired session, not a missing one.**
+       *
+       * These two cases arrive at the same status and are not the same fact. Where this page found no
+       * token at all, nobody is signed in and saying so is right. Where it found one and the server
+       * refused it, somebody IS signed in — their access token has simply aged out, and telling them
+       * they are not signed in sends them to re-enter a password they never needed.
+       *
+       * ⚠️ It also misdirects whoever debugs it: "not signed in" reads as a broken session, a wrong
+       * storage key or a proxy fault, and all three get investigated before the real one. This page
+       * holds no refresh token and has no interceptor, so it cannot renew what the product's own
+       * interface renews silently — which is why merely opening the application fixes it, and why
+       * that is the instruction to give.
+       */
       if (failed.status === 401 || failed.status === 403) {
+        if (token) {
+          refuse("Your session has expired",
+                 "You are signed in to " + (APPLICATION || "this application")
+                 + ", but the access token has aged out and this page cannot renew it. Open "
+                 + (APPLICATION || "the application") + " — that refreshes it — then start the "
+                 + "connection again from the client. You should not need to sign in again.", true);
+          return;
+        }
+
         refuse("You are not signed in",
                "The application did not recognise your session. Sign in and start the connection again "
                + "from the client.", true);

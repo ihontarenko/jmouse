@@ -42,7 +42,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
  * {@link AgentConnections} are contributed by another autoconfiguration, and {@link ConditionalOnBean}
  * sees only what has been registered by the time it runs. Without the ordering it evaluated first, found
  * no directory, and <strong>quietly contributed nothing</strong> — which surfaced as a product failing to
- * start on a missing {@link AgentCredentials} bean, pointing at the controller that wanted it rather than
+ * start on a missing {@link ProtocolCredentials} bean, pointing at the controller that wanted it rather than
  * at the condition that declined to make it.
  *
  * <p>By <strong>name</strong> rather than by class because this module must not depend on
@@ -78,19 +78,19 @@ public class McpCredentialAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public AgentCredentials agentCredentials(
+    public ProtocolCredentials protocolCredentials(
             AgentDirectory agents,
             AgentConnections connections,
             ProtocolTokenMinter minter,
             McpAuthorizationProperties properties) {
 
-        return new AgentCredentials(agents, connections, minter, properties);
+        return new ProtocolCredentials(agents, connections, minter, properties);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public CredentialIssuer credentialIssuer(
-            AgentCredentials credentials, AgentDirectory agents, AgentConnections connections) {
+            ProtocolCredentials credentials, AgentDirectory agents, AgentConnections connections) {
 
         return new StandardCredentialIssuer(credentials, agents, connections);
     }

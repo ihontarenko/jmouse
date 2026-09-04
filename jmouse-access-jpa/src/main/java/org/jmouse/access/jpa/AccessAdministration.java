@@ -97,8 +97,32 @@ public interface AccessAdministration {
      *                        statement from narrowing one entry of its bundle — that one belongs on
      *                        {@link BundleEntry} and reaches everybody holding the role
      */
+    default Change assign(String subjectId, String roleName, ScopeReference at, String source,
+                          String by, String conditionSource) {
+
+        return assign(subjectId, roleName, at, source, by, conditionSource, null);
+    }
+
+    /**
+     * The same, with the sentence that says why.
+     *
+     * <p>⚠️ <strong>{@code reason} is not provenance, and {@code by} is not a substitute for it.</strong>
+     * Who did it and why they did it are different facts, and only the second one survives the person
+     * leaving. The same argument {@link #grant} has always made about a denial applies here and is asked
+     * more often: <em>why does this contractor hold SPACE_ADMIN in Kyiv?</em></p>
+     *
+     * <p>⚠️ <strong>It is part of what makes an assignment "the same assignment".</strong> Rewriting only
+     * the reason is a change, and a caller told nothing changed would go on showing the words they just
+     * replaced. That is exactly what happened to grants before {@code reason} joined the comparison
+     * there — a row seeded once kept saying <em>Seeded from the policy files</em> however often somebody
+     * edited it.</p>
+     *
+     * @param reason why, in words, or null where there is nothing to say. A role handed out by a
+     *               membership mechanism has none, and manufacturing one would put noise on the
+     *               majority of rows in the table
+     */
     Change assign(String subjectId, String roleName, ScopeReference at, String source, String by,
-                  String conditionSource);
+                  String conditionSource, String reason);
 
     /** Takes a role back at one place. Silent where it was not held — un-assigning twice is not an error. */
     Change unassign(String subjectId, String roleName, ScopeReference at);

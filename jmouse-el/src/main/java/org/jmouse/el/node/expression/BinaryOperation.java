@@ -109,20 +109,18 @@ public class BinaryOperation extends AbstractExpression {
      * Anything else falls through to the calculator unchanged, so {@code XOR}, {@code NOT} and every
      * non-boolean left operand behave exactly as they did.
      *
-     * <h3>⚠️ The one answer that changed, stated rather than glossed over</h3>
+     * <h3>⚠️ The short circuit is also what keeps a refused operand out of the way</h3>
      *
-     * <p>{@code true or <non-boolean>} used to be <strong>false</strong> and is now
-     * <strong>true</strong>. {@link org.jmouse.el.extension.calculator.LogicalCalculator} answers
-     * {@code false} whenever <em>either</em> operand is not a {@link Boolean}, so a right-hand side
-     * that was never boolean used to drag a decided {@code true} down with it. Short-circuiting cannot
-     * preserve that, because the whole point is not to look at the right operand at all.
+     * <p>{@link org.jmouse.el.extension.calculator.LogicalCalculator} no longer answers {@code false}
+     * for an operand that is not a {@link Boolean} — it treats {@code null} as false and <em>refuses</em>
+     * anything else, because a plausible wrong answer was the whole defect there. Deciding here first
+     * means {@code true or <anything at all>} is {@code true} and the right operand is never looked at,
+     * so a rule guarded by a cheap test in front of a doubtful value keeps working exactly as its
+     * author intended.
      *
-     * <p>The new answer is the right one — {@code true or anything} is true in every language a reader
-     * knows, and the old one was a silent surprise of exactly the kind this change exists to remove.
-     * But it <em>is</em> a change, and anything relying on the old reading was relying on a bug.
-     *
-     * <p>⚠️ {@code false and <non-boolean>} is unaffected: it was {@code false} before and is
-     * {@code false} now, by both routes.
+     * <p>⚠️ {@code false and <anything>} is the same story on the other side, and both were already
+     * true of this method before the calculator changed. What changed is that the operands the short
+     * circuit does <em>not</em> skip are now answered honestly rather than as a silent {@code false}.
      *
      * @param context the evaluation context
      * @return the result of the operation

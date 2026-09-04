@@ -22,6 +22,19 @@ import java.util.Optional;
 /**
  * The one place a credential that reaches a protocol endpoint is minted, renewed, or ended.
  *
+ * <h2>⚠️ IT IS NOT NAMED AFTER WHOM IT ISSUES TO, and that is enforced</h2>
+ *
+ * <p>This was {@code AgentCredentials}, with a nested {@code ActingAgent}, and the module's own
+ * architecture test refuses the word: <em>one product issues to a sub-account holding its own
+ * permissions and another to the approving person, so a module that knew the difference would be
+ * wrong for one of them.</em> Whom a credential is issued against is the product's fact and reaches
+ * here only as an opaque reference — see {@code ApprovingSubject}.
+ *
+ * <p>The forbidden words are {@code account}, {@code user}, {@code member} and {@code agent}, checked
+ * against every type name in this package. ⚠️ Only type <em>names</em> — the {@code Agent} rows this
+ * class reads still come from {@code org.jmouse.ai.agent}, because holding a product's row is not the
+ * same as being named after one.
+ *
  * <h2>⚠️ This class existed three times before it existed once</h2>
  *
  * <p>Identity, Tessera and WiQ each wrote it — 258, 366 and 381 lines — and the three agreed on every
@@ -39,9 +52,9 @@ import java.util.Optional;
  * product carrying one has an ADR saying so; here the types make it hard rather than the discipline,
  * because a mirror is not reachable from this class at all.
  */
-public class AgentCredentials {
+public class ProtocolCredentials {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AgentCredentials.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolCredentials.class);
 
     /**
      * Names the connection an access token was issued against, so revocation can reach it.
@@ -73,7 +86,7 @@ public class AgentCredentials {
     private final ProtocolTokenMinter        minter;
     private final McpAuthorizationProperties properties;
 
-    public AgentCredentials(
+    public ProtocolCredentials(
             AgentDirectory agents,
             AgentConnections connections,
             ProtocolTokenMinter minter,
@@ -94,7 +107,7 @@ public class AgentCredentials {
     }
 
     /** An agent and the connection a call arrived over — the pair every check here needs. */
-    public record ActingAgent(Agent agent, AgentConnection connection) {
+    public record ActingParty(Agent agent, AgentConnection connection) {
     }
 
     /**
@@ -184,9 +197,9 @@ public class AgentCredentials {
 
     /** The agent and connection behind a call, for whoever needs the rows rather than a verdict. */
     @Transactional(readOnly = true)
-    public Optional<ActingAgent> actingAgent(String agentId, String connectionId) {
+    public Optional<ActingParty> actingParty(String agentId, String connectionId) {
         return agents.find(agentId).flatMap(agent -> connections.find(connectionId)
-                .map(connection -> new ActingAgent(agent, connection)));
+                .map(connection -> new ActingParty(agent, connection)));
     }
 
     /**
@@ -197,7 +210,7 @@ public class AgentCredentials {
      * can act on.
      */
     @Transactional(readOnly = true)
-    public List<ActingAgent> connectionsOf(String ownerReference) {
+    public List<ActingParty> connectionsOf(String ownerReference) {
         return pairedWithTheirAgents(agents.ownedBy(ownerReference));
     }
 
@@ -216,7 +229,7 @@ public class AgentCredentials {
      * otherwise until then.
      */
     @Transactional(readOnly = true)
-    public List<ActingAgent> everyConnection(int limit) {
+    public List<ActingParty> everyConnection(int limit) {
         return pairedWithTheirAgents(agents.all(limit));
     }
 
@@ -291,12 +304,12 @@ public class AgentCredentials {
         return true;
     }
 
-    private List<ActingAgent> pairedWithTheirAgents(List<Agent> chosen) {
+    private List<ActingParty> pairedWithTheirAgents(List<Agent> chosen) {
         return chosen.stream()
                 .flatMap(agent -> connections.of(agent.id()).stream()
-                        .map(connection -> new ActingAgent(agent, connection)))
+                        .map(connection -> new ActingParty(agent, connection)))
                 .sorted(Comparator.comparing(
-                        (ActingAgent acting) -> acting.connection().issuedAt()).reversed())
+                        (ActingParty acting) -> acting.connection().issuedAt()).reversed())
                 .toList();
     }
 

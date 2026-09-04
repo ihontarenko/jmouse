@@ -61,6 +61,22 @@ public class AccessRoleAssignment {
     @Column(name = "condition_source", length = 1024)
     private String conditionSource;
 
+    /**
+     * Why this role was handed over, in words, or null.
+     *
+     * <p>⚠️ <strong>Not provenance, and {@code grantedBy} is not a substitute.</strong> Who did it and
+     * why they did it are different facts, and only the second survives the person leaving. <em>Why
+     * does this contractor hold SPACE_ADMIN in Kyiv?</em> is asked more often than why a single
+     * permission was denied, and {@link AccessSubjectPermission} has carried the answer to the second
+     * question since the schema's first release while this one had nowhere to put the first.</p>
+     *
+     * <p>⚠️ Null where there is nothing to say. A role handed out by a membership mechanism has no
+     * sentence to offer, and manufacturing one would put noise on the majority of rows in this
+     * table.</p>
+     */
+    @Column(name = "reason", length = 512)
+    private String reason;
+
     @Column(name = "granted_by", length = 36)
     private String grantedBy;
 
@@ -75,9 +91,20 @@ public class AccessRoleAssignment {
         this(id, subjectId, roleId, scopeType, scopeId, source, grantedBy, null);
     }
 
+    /**
+     * ⚠️ Kept so that adding {@code reason} touched no construction site outside this library. Every
+     * caller that has nothing to say goes on saying nothing.
+     */
     public AccessRoleAssignment(String id, String subjectId, String roleId, String scopeType,
                                 String scopeId, String source, String grantedBy,
                                 String conditionSource) {
+
+        this(id, subjectId, roleId, scopeType, scopeId, source, grantedBy, conditionSource, null);
+    }
+
+    public AccessRoleAssignment(String id, String subjectId, String roleId, String scopeType,
+                                String scopeId, String source, String grantedBy,
+                                String conditionSource, String reason) {
         this.id              = id;
         this.subjectId       = subjectId;
         this.roleId          = roleId;
@@ -86,6 +113,7 @@ public class AccessRoleAssignment {
         this.source          = source;
         this.grantedBy       = grantedBy;
         this.conditionSource = conditionSource;
+        this.reason          = reason;
         this.createdAt       = Instant.now();
     }
 
@@ -99,4 +127,5 @@ public class AccessRoleAssignment {
     public Instant getCreatedAt() { return createdAt; }
 
     public String getConditionSource() { return conditionSource; }
+    public String getReason()          { return reason; }
 }

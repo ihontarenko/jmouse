@@ -374,29 +374,62 @@ public final class PolicyDocuments {
 
     // ── Attribution ───────────────────────────────────────────────────────────
 
+    /**
+     * ⚠️ <strong>EVERY FIELD, LISTED IN FULL — a shortened constructor here is a silent grant.</strong>
+     *
+     * <p>These two methods rebuild each node to stamp the document's name on it, and each of them used
+     * a convenience constructor that predates {@code condition} and {@code reason}. Those constructors
+     * exist so that <em>adding</em> a field left twenty-three call sites compiling and so a document
+     * without one is written back byte-for-byte — a good argument about {@code PolicyWriter}, and the
+     * wrong one here. Attribution is not a place where a field may be absent; it is a place where
+     * every field of the node must survive.
+     *
+     * <p>The consequence was not cosmetic, because {@code merge} runs on every load:
+     *
+     * <pre>
+     *     role LIBRARY_ADMIN assignable &#64;GLOBAL {
+     *         &#64;GLOBAL library:write when hours == 'office'   ← the condition was dropped here
+     *     }
+     *
+     *     subject 'someone' {
+     *         grants LIBRARY_ADMIN &#64;GLOBAL when profile == 'adult'   ← and here
+     *     }
+     * </pre>
+     *
+     * <p>Both loaded as <strong>unconditional</strong>. Nothing failed, nothing logged, the projection
+     * rendered the document back with the clause intact — and the engine granted more than the
+     * document said. That is the exact failure {@code AccessPolicyAutoConfiguration} refuses to start
+     * over when no {@code ConditionCompiler} is registered; it must not be reintroduced two layers
+     * down by a constructor call.
+     *
+     * <p>⚠️ So a field added to any of these records has to be added here as well, and the compiler
+     * will not say so — the shortened constructor goes on accepting the old argument list forever.
+     */
     private static PolicyRole writtenIn(PolicyRole role, String document) {
         return new PolicyRole(
                 role.name(),
                 role.assignableAt(),
                 role.bundle().stream()
                         .map(entry -> new PolicyBundleEntry(
-                                entry.permission(), entry.scope(), attributed(entry.at(), document)))
+                                entry.permission(), entry.scope(), entry.condition(), entry.reason(),
+                                attributed(entry.at(), document)))
                         .toList(),
                 attributed(role.at(), document));
     }
 
+    /** @see #writtenIn(PolicyRole, String) for why every field is listed rather than defaulted */
     private static PolicySubject writtenIn(PolicySubject subject, String document) {
         return new PolicySubject(
                 subject.id(),
                 subject.roles().stream()
                         .map(assignment -> new PolicyRoleAssignment(
-                                assignment.roleName(), assignment.scope(),
-                                attributed(assignment.at(), document)))
+                                assignment.roleName(), assignment.scope(), assignment.condition(),
+                                assignment.reason(), attributed(assignment.at(), document)))
                         .toList(),
                 subject.grants().stream()
                         .map(grant -> new PolicyGrant(
                                 grant.permission(), grant.scope(), grant.effect(), grant.condition(),
-                                attributed(grant.at(), document)))
+                                grant.reason(), attributed(grant.at(), document)))
                         .toList(),
                 attributed(subject.at(), document));
     }
@@ -417,28 +450,39 @@ public final class PolicyDocuments {
 
     // ── Positions ─────────────────────────────────────────────────────────────
 
+    /**
+     * ⚠️ <strong>Only the POSITION goes; every other field stays.</strong>
+     *
+     * <p>Same trap as {@link #writtenIn(PolicyRole, String)}, and it bites differently here: these
+     * strip source positions so two documents can be compared for what they <em>say</em>, and a strip
+     * that also dropped conditions would report a document and a narrowed version of it as identical.
+     * A comparison that cannot see a {@code when} is a comparison that approves the removal of one.
+     */
     private static PolicyRole withoutSourcePositions(PolicyRole role) {
         return new PolicyRole(
                 role.name(),
                 role.assignableAt(),
                 role.bundle().stream()
                         .map(entry -> new PolicyBundleEntry(
-                                entry.permission(), entry.scope(), SourceSpan.none()))
+                                entry.permission(), entry.scope(), entry.condition(), entry.reason(),
+                                SourceSpan.none()))
                         .toList(),
                 SourceSpan.none());
     }
 
+    /** @see #withoutSourcePositions(PolicyRole) for why only the position is dropped */
     private static PolicySubject withoutSourcePositions(PolicySubject subject) {
         return new PolicySubject(
                 subject.id(),
                 subject.roles().stream()
                         .map(assignment -> new PolicyRoleAssignment(
-                                assignment.roleName(), assignment.scope(), SourceSpan.none()))
+                                assignment.roleName(), assignment.scope(), assignment.condition(),
+                                assignment.reason(), SourceSpan.none()))
                         .toList(),
                 subject.grants().stream()
                         .map(grant -> new PolicyGrant(
                                 grant.permission(), grant.scope(), grant.effect(), grant.condition(),
-                                SourceSpan.none()))
+                                grant.reason(), SourceSpan.none()))
                         .toList(),
                 SourceSpan.none());
     }

@@ -394,8 +394,18 @@ public final class PolicyProjection {
 
         for (RoleHolding holding : roleHoldings) {
             held.computeIfAbsent(holding.subjectId(), subject -> new Held())
+                    // ⚠️ THE REASON HAS TO COME BACK OUT HERE TOO, and this was the half that stayed
+                    // broken after the one below was fixed — the four-argument constructor leaves it
+                    // null, and for a while there was no column behind it either, so the omission was
+                    // invisible from both ends. The cost is the same one the note below spells out:
+                    // the policy editor OPENS on this projection and writes rows back from what it was
+                    // shown, so a reason absent here is a reason deleted by anybody who pressed Apply.
                     .assignments.add(new PolicyRoleAssignment(
-                            holding.roleName(), scopeOf(holding.at()), holding.condition(), SourceSpan.none()));
+                            holding.roleName(),
+                            scopeOf(holding.at()),
+                            holding.condition(),
+                            holding.reason(),
+                            SourceSpan.none()));
         }
 
         for (DirectHolding holding : directHoldings) {

@@ -141,26 +141,43 @@ public class JpaAccessAdministration implements AccessAdministration {
      */
     @Override
     public Change assign(String subjectId, String roleName, ScopeReference at, String source, String by,
-                         String conditionSource) {
+                         String conditionSource, String reason) {
 
         AccessRole                     role     = requireRole(roleName);
         Optional<AccessRoleAssignment> existing = assignment(subjectId, role.getId(), at);
 
         if (existing.isPresent()) {
-            if (Objects.equals(existing.get().getConditionSource(), conditionSource)) {
+            // ⚠️ The condition is part of "the same assignment", because a caller removing one would
+            // otherwise be told nothing changed while the predicate stayed on the row and went on
+            // narrowing everything the role carries here.
+            //
+            // ⚠️ AND SO IS THE REASON, for the same argument one step further along — the identical
+            // one `grant` already makes. It is not provenance decorating the row: it is what the
+            // control room reads out beside the assignment and what a policy document round-trips
+            // through. A caller who rewrote it and was told "nothing changed" would go on publishing
+            // the sentence they had just replaced, and the projection would keep re-rendering the
+            // document without their edit.
+            if (Objects.equals(existing.get().getConditionSource(), conditionSource)
+                && Objects.equals(existing.get().getReason(), reason)) {
+
                 return Change.nothing(subjectId, roleName, at);
             }
 
             // Replaced rather than updated, for the same reason a grant is: the unique key would
             // refuse the second row anyway, and one decision reads better than an edit to somebody
             // else's.
+            //
+            // ⚠️ Which means a REASON-ONLY edit resets `created_at`, so a "who holds what" screen will
+            // say the role was handed over when somebody fixed a typo in its sentence. Known, and the
+            // same trade `grant` makes for the same cause: the entity has no setters on purpose, and
+            // growing one is a change to a table four products share.
             entityManager.remove(existing.get());
             entityManager.flush();
         }
 
         entityManager.persist(new AccessRoleAssignment(
                 identifiers.get(), subjectId, role.getId(), at.type().name(), at.id(), source, by,
-                conditionSource));
+                conditionSource, reason));
 
         return Change.made(subjectId, roleName, at);
     }

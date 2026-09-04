@@ -130,6 +130,11 @@ public class JpaAccessDisclosure implements AccessDisclosure {
                 assignment.getGrantedBy(),
                 localise(assignment.getCreatedAt()),
                 assignment.getConditionSource(),
+                // ⚠️ Passed explicitly rather than left to the shorter constructor. That is precisely
+                // how the reason on a DIRECT holding came to be null everywhere for months — the
+                // arity-preserving overload compiled, nothing warned, and the row's own words sat one
+                // field away from the screen built to read them out.
+                assignment.getReason(),
                 role == null ? List.of() : role.bundle());
     }
 

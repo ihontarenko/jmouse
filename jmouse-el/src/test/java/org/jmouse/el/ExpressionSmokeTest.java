@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -198,27 +199,43 @@ class ExpressionSmokeTest {
         }
 
         /**
-         * ⚠️ <strong>The one answer short-circuiting changed, pinned so it stays deliberate.</strong>
+         * ⚠️ <strong>A skipped operand is never judged, and that is the point of skipping it.</strong>
          *
-         * <p>{@code LogicalCalculator} answers {@code false} whenever <em>either</em> operand is not a
-         * {@link Boolean}, so {@code true or 'text'} used to be {@code false} — a decided {@code true}
-         * dragged down by a right-hand side that was never boolean. Short-circuiting cannot preserve
-         * that, because the point is not to look at the right operand at all.
-         *
-         * <p>The new answer is the right one. But it is a change, and it belongs in a test rather than
-         * in somebody's surprise.
+         * <p>{@code true or <anything>} is decided before the right operand is looked at, so a value
+         * the calculator would refuse never reaches it. That is what lets a cheap test guard a
+         * doubtful value — the shape everybody writes, and the shape that has to keep working.
          */
         @Test
-        @DisplayName("⚠️ `true or <non-boolean>` is true — it used to be false, and that was the bug")
-        void theOneAnswerThatChanged() {
-            assertEquals(true, evaluate("true or 'text'"));
-            assertEquals(true, evaluate("true or 5"));
-
-            // ⚠️ And the AND side is unaffected: false either way, by both routes.
+        @DisplayName("⚠️ a short-circuited operand is never evaluated, whatever it is")
+        void theSkippedOperandIsNeverJudged() {
+            assertEquals(true,  evaluate("true or 'text'"));
+            assertEquals(true,  evaluate("true or 5"));
             assertEquals(false, evaluate("false and 'text'"));
-            assertEquals(false, evaluate("true and 'text'"),
-                    "A non-boolean right operand still drags an undecided AND down, exactly as before "
-                    + "— short-circuiting never reaches this case.");
+            assertEquals(false, evaluate("false and 5"));
+        }
+
+        /**
+         * ⚠️ <strong>An operand the short circuit does NOT skip is answered honestly, or refused.</strong>
+         *
+         * <p>This used to be a silent {@code false} for every non-boolean, which is an answer, is
+         * plausible, and is wrong — and in an authorization {@code deny} a spurious {@code false}
+         * permits. {@code null} is the one value with an unambiguous reading and keeps it.
+         */
+        @Test
+        @DisplayName("⚠️ null is false; any other non-boolean is refused rather than guessed")
+        void nonBooleanOperandsAreRefusedRatherThanGuessed() {
+            assertEquals(false, evaluate("null and true"));
+            assertEquals(true,  evaluate("null or true"));
+            assertEquals(false, evaluate("null or false"));
+
+            // ⚠️ The one that was INVERTED: null is falsy, so negating it is true.
+            assertEquals(true,  evaluate("!null"));
+
+            assertThrows(RuntimeException.class, () -> evaluate("true and 'text'"),
+                    "A non-boolean operand the short circuit cannot skip must fail loudly. It used to "
+                    + "answer false, which is indistinguishable from a rule that genuinely said no.");
+            assertThrows(RuntimeException.class, () -> evaluate("true and 5"));
+            assertThrows(RuntimeException.class, () -> evaluate("!5"));
         }
 
         @Test

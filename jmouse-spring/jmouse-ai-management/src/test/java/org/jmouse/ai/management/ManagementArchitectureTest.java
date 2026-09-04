@@ -68,6 +68,15 @@ class ManagementArchitectureTest {
                         // and a connection are rows ABOUT who may call, and nothing in that package can
                         // run anything. Switching an agent off is a large power and a small capability.
                         "org.jmouse.ai.agent..",
+                        // ⚠️ Admitted rather than the controller changed, and it passes the same test as
+                        // the two above: `AiPreferences` is an interface over stored settings — reading
+                        // them, writing them, putting one in force. Nothing in that package can run a
+                        // tool or reach a provider, so a controller holding it gains no capability.
+                        //
+                        // ⚠️ It was missing because the rule predates `PreferenceController`, which is
+                        // the failure shape to watch for here: this list does not grow by itself, so a
+                        // new port means a new line, and the build says so the first time it does not.
+                        "org.jmouse.ai.preferences..",
                         "org.jmouse.ai.management",          // the route constants and the one exception
                         "org.springframework..",
                         "java..")

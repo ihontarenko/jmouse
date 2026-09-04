@@ -78,8 +78,8 @@ public interface ToolAuthorizer {
      * whose permissions are handed out by belonging somewhere refuses a caller who belongs nowhere with
      * a sentence indistinguishable from one aimed at a caller whose role was misconfigured. The reader —
      * an operator, or a model reporting to one — goes and grants a permission that no assignment could
-     * have carried, concludes the engine is broken, and says so. Tessera hit exactly this on every
-     * freshly created database.
+     * have carried, concludes the engine is broken, and says so. An adopting application hit exactly
+     * this on every freshly created database, where nobody belongs anywhere yet.
      *
      * <p>This does <em>not</em> reopen the message to five implementations each writing their own
      * sentence. The library still composes the refusal, still names the permission, and still says it in

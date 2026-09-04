@@ -40,9 +40,10 @@ public interface ProviderSettingsSource {
      * that must not leave the machine. Keyed only by application, that is inexpressible: there is one
      * active row, and every caller gets it.
      *
-     * <p>It surfaced concretely in Norro, which matches films against a model and also wants an
-     * assistant. It had to keep its own configuration table rather than use this one — a second store
-     * of the same thing, in one product, because the shared one could not say "this vendor, for this".
+     * <p>It surfaced concretely in a product that matches catalogue records against one model and also
+     * wants a conversational assistant. It had to keep its own configuration table rather than use this
+     * one — a second store of the same thing, in one application, because the shared one could not say
+     * "this vendor, for this".
      *
      * <h2>⚠️ THE PURPOSE IS THE PRODUCT'S WORD, and this library must never enumerate them</h2>
      *
