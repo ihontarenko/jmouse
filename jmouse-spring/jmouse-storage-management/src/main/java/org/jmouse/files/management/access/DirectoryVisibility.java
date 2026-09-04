@@ -172,24 +172,36 @@ public final class DirectoryVisibility {
                         .map(scope -> new Question(asking, asker.get(), declared.permission(), scope)));
     }
 
-    /** The rule the product declared for reading ONE directory, or empty where it declared none. */
+    /**
+     * The rule the product declared for reading ONE directory, or empty where it declared none.
+     *
+     * <h3>⚠️ EVERY declaration is asked, because a product has SEVERAL and always will</h3>
+     *
+     * <p>{@code ExternalAccessRules} is a contribution point: each adopted library module gets its own
+     * bean — files, the AI surface, the query builder, the mapping builder, validation. Asking the
+     * container for <em>the</em> one therefore throws {@code NoUniqueBeanDefinitionException} the moment
+     * a product adopts a second module, and it throws <strong>inside a request</strong> rather than at
+     * startup: every folder listing answered {@code 500} and the file manager read as
+     * <em>your file cabinet could not be loaded</em>. Measured in Innoventa, which declares five.</p>
+     *
+     * <p>So the beans are streamed and the first one that speaks for this controller answers. A module
+     * whose rules are about something else simply has no declaration for it and is skipped, which is
+     * also what makes the order between them irrelevant.</p>
+     */
     private Optional<ExternalAccessRules.Declaration> declaration() {
-        ExternalAccessRules declared = rules.getIfAvailable();
+        for (ExternalAccessRules declared : rules) {
+            for (Method method : controller.getMethods()) {
+                if (method.getName().equals(READS_ONE_DIRECTORY)) {
+                    Optional<ExternalAccessRules.Declaration> found =
+                            declared.forMethod(method, controller);
 
-        if (declared == null) {
-            return Optional.empty();
-        }
-
-        for (Method method : controller.getMethods()) {
-            if (method.getName().equals(READS_ONE_DIRECTORY)) {
-                Optional<ExternalAccessRules.Declaration> found =
-                        declared.forMethod(method, controller);
-
-                if (found.isPresent()) {
-                    return found;
+                    if (found.isPresent()) {
+                        return found;
+                    }
                 }
             }
         }
+
         return Optional.empty();
     }
 

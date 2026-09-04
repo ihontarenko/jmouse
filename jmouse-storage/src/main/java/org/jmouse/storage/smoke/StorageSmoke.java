@@ -313,6 +313,7 @@ public final class StorageSmoke {
         rejects("empty content refused", UploadRejectedException.class,
                 () -> tiny.accept(Content.ofBytes("payload.txt", MediaType.TEXT_PLAIN, new byte[0])));
 
+        verifyRefusalsExplainThemselves();
         verifyShippedPolicies();
     }
 
@@ -352,6 +353,62 @@ public final class StorageSmoke {
               StorageKeyRequest.forOwner("42").build().ownerType() == null);
         check("a blank owner kind means nowhere in particular", true,
               StorageKeyRequest.forOwner("42").ownerType("  ").build().ownerType() == null);
+    }
+
+    /**
+     * 🗣️ A refusal says what is wrong, why this destination is narrow, and what would have worked.
+     *
+     * <p>⚠️ Asserted on the <strong>message</strong> rather than on the type, because the type has never
+     * been the part that was wrong. A policy that refuses correctly and explains itself as
+     * <em>«extension not allowed»</em> passes every test that only checks what was thrown, and is
+     * precisely the failure this exists to catch.</p>
+     */
+    private static void verifyRefusalsExplainThemselves() {
+        UploadPolicy shelf = new UploadPolicy(
+                AcceptanceMode.ALLOW_LIST,
+                Set.of("application/octet-stream"),
+                Set.of("kicad_mod", "kicad_pcb", "step", "stp", "gbr", "drl", "dxf", "stl", "obj", "wrl"),
+                1024L * 1024L,
+                "The CAD shelf keeps drawings and the bytes behind them.");
+
+        String refusal = refusalOf(() -> shelf.accept(named("photo.png", null)));
+
+        check("a refusal names what was wrong", true, refusal.contains("'.png'"));
+        check("a refusal carries the destination's reason", true, refusal.contains("keeps drawings"));
+        check("a refusal names what would have worked", true, refusal.contains("Accepted extensions here"));
+
+        // ⚠️ Ten listed, eight named, two counted — a folder taking forty extensions must not answer
+        // with forty of them, and the ones named have to be stable rather than whatever a Set iterates.
+        check("a long list is summarised, not printed", true, refusal.contains("and 2 more"));
+        check("the named ones are sorted", true, refusal.contains("drl, dxf, gbr, kicad_mod"));
+
+        // ⚠️ Both axes refuse this one, and the order of the two checks decides which sentence a person
+        // reads. The extension is in the filename they chose; the content type is what their browser
+        // guessed. Reversing `accept` would still refuse and would answer about the invisible half.
+        check("a file failing both axes is reported by its extension", true,
+              refusalOf(() -> shelf.accept(named("holiday.mp3", "audio/mpeg"))).contains("'.mp3'"));
+
+        UploadPolicy bare = new UploadPolicy(AcceptanceMode.DENY_LIST, Set.of(), Set.of("exe"), 1024L);
+
+        check("a policy with no reason answers in one clean sentence",
+              "Files ending '.exe' are not accepted here. Refused extensions here: exe.",
+              refusalOf(() -> bare.accept(named("setup.exe", null))));
+    }
+
+    /**
+     * 🗣️ What a refusal actually said, or a sentence saying it did not refuse.
+     *
+     * @param action the upload to attempt
+     * @return the refusal's message
+     */
+    private static String refusalOf(Runnable action) {
+        try {
+            action.run();
+
+            return "nothing was refused";
+        } catch (UploadRejectedException refusal) {
+            return refusal.getMessage();
+        }
     }
 
     /**

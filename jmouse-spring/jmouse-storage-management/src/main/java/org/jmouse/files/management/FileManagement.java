@@ -488,6 +488,29 @@ public class FileManagement {
     /**
      * 🛃 Refuse a move into somewhere that would not have accepted this file in the first place.
      *
+     * <p>The same judgement {@link #refile} makes, asked <strong>before</strong> committing to a move —
+     * for a caller that has to say no earlier than the move itself happens.</p>
+     *
+     * <h3>⚠️ Why this is public, and why nobody should re-implement it</h3>
+     *
+     * <p>A product filing a record's attachments moves them <em>after</em> the record is saved, which is
+     * too late to tell anybody: by then the save has committed and the only place the refusal can go is
+     * a log. Asking here beforehand gets the identical verdict and the identical sentence — resolver,
+     * inheritance, wording and all. A product that instead resolved a policy and called {@code accept}
+     * itself would be a second implementation of this, free to drift from the one that actually
+     * governs the move.</p>
+     *
+     * @param fileId the file
+     * @param owner  where it would be filed
+     * @throws org.jmouse.storage.exception.UploadRejectedException naming the file and the reason
+     */
+    public void requireAcceptedBy(String fileId, OwnerReference owner) {
+        refuseIfDestinationWouldNotAccept(files.require(fileId), owner);
+    }
+
+    /**
+     * 🛃 The judgement itself.
+     *
      * <p>The stored content type and the name's extension are judged, which is exactly what an upload
      * is judged on — the bytes are not re-read, because acceptance has never been about the bytes.</p>
      */

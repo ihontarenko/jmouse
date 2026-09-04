@@ -31,14 +31,29 @@ import java.util.stream.Collectors;
  * are served as an attachment on every delivery path whoever let the bytes in, and who may read a
  * directory is a separate axis entirely.</p>
  *
+ * <h3>⚠️ The reason is part of the rule, not commentary on it</h3>
+ *
+ * <p>A list of extensions says what is refused and can never say why. "The CAD shelf keeps drawings and
+ * the bytes behind them; a datasheet belongs on the part" is not derivable from {@code kicad_mod,
+ * step, gbr} by anything, so a refusal without it tells somebody they were wrong and not what to do
+ * instead.</p>
+ *
+ * <p>It lives <strong>here</strong>, on the row, rather than in whatever product configured the folder,
+ * because the alternative was tried: a sentence kept beside the rule and stitched back on in an
+ * interface is a second authority over one question, and it goes stale the first time somebody edits
+ * the rule on screen. Being in the payload document, it costs no migration — a row written before this
+ * existed binds with {@code reason} null and behaves exactly as it did.</p>
+ *
  * @param mode         how the lists are read
  * @param contentTypes bare {@code type/subtype} values, without parameters, lower-cased
  * @param extensions   extensions without their dot, lower-cased
  * @param maxSizeBytes largest content accepted, or {@code null} to keep the installation's limit —
  *                     a folder may widen the lists without having an opinion about size
+ * @param reason       one sentence saying what this folder is for, addressed to whoever was just
+ *                     refused, or {@code null} where nobody wrote one
  */
 public record DirectoryUploadConfiguration(AcceptanceMode mode, Set<String> contentTypes,
-                                           Set<String> extensions, Long maxSizeBytes) {
+                                           Set<String> extensions, Long maxSizeBytes, String reason) {
 
     /** The kind this record is the payload of. */
     public static final DirectoryConfigurationKind<DirectoryUploadConfiguration> KIND =
@@ -60,6 +75,10 @@ public record DirectoryUploadConfiguration(AcceptanceMode mode, Set<String> cont
 
         contentTypes = normalised(contentTypes, DirectoryUploadConfiguration::baseType);
         extensions   = normalised(extensions, DirectoryUploadConfiguration::withoutDot);
+
+        // ⚠️ Blank collapses to absent. A textarea somebody opened and closed again arrives as "" or as
+        // a few spaces, and a refusal is otherwise followed by an empty sentence's worth of whitespace.
+        reason = reason == null || reason.isBlank() ? null : reason.trim();
 
         if (maxSizeBytes != null && maxSizeBytes <= 0) {
             throw new DirectoryException(
@@ -88,7 +107,8 @@ public record DirectoryUploadConfiguration(AcceptanceMode mode, Set<String> cont
      */
     public UploadPolicy asPolicy(long installationMaxSizeBytes) {
         return new UploadPolicy(mode, contentTypes, extensions,
-                                maxSizeBytes == null ? installationMaxSizeBytes : maxSizeBytes);
+                                maxSizeBytes == null ? installationMaxSizeBytes : maxSizeBytes,
+                                reason);
     }
 
     private static Set<String> normalised(Set<String> values,

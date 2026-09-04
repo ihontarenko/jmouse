@@ -28,11 +28,13 @@ import java.util.Set;
  * @param contentTypes        bare {@code type/subtype} values
  * @param extensions          extensions without their dot
  * @param maxSizeBytes        largest content accepted here
+ * @param reason              why this folder is narrow, as whoever configured it wrote it, or
+ *                            {@code null} where nobody did
  * @param admitsActiveContent whether anything that executes in a browser could be stored here
  * @param admitsNothing       whether this rule accepts nothing at all — an allowlist listing nothing
  */
 public record EffectiveUploadRule(AcceptanceMode mode, Set<String> contentTypes, Set<String> extensions,
-                                  long maxSizeBytes, boolean admitsActiveContent,
+                                  long maxSizeBytes, String reason, boolean admitsActiveContent,
                                   boolean admitsNothing) {
 
     /**
@@ -44,7 +46,7 @@ public record EffectiveUploadRule(AcceptanceMode mode, Set<String> contentTypes,
     public static EffectiveUploadRule of(UploadPolicy policy) {
         return new EffectiveUploadRule(
                 policy.mode(), policy.contentTypes(), policy.extensions(), policy.maxSizeBytes(),
-                admitsActiveContent(policy), admitsNothing(policy));
+                policy.reason(), admitsActiveContent(policy), admitsNothing(policy));
     }
 
     /**
