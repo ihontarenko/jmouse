@@ -1,0 +1,336 @@
+{% extends "consent-frame" %}
+
+{#
+  SHEET - a drawing sheet beside the form. Warm grey paper, one orange action, a near-black chassis.
+
+  A dark panel carrying the mark and three short facts, ruled like the border of an engineering
+  drawing, and the request itself set on paper beside it. The arrangement is the one an application's
+  own sign-in screen tends to use, which is the point: somebody arriving here has just come from a
+  product and is about to hand something out on its behalf, and a screen in a visibly different design
+  system is the moment they stop being sure whose page they are on. That is the one moment a consent
+  screen cannot afford.
+
+  What the panel says is NOT a description of the product. It states the three things that make
+  approving safe - that the code can only reach a listener on this machine, that the client had to
+  prove it started the request, and that the credential carries the approver's own permissions and no
+  more. Every one of them is a claim about THIS request that the server already enforced before the
+  page was drawn, which is why they can be stated flatly. A feature list would be the first thing here
+  that nobody could check.
+
+  ⚠️ THE PALETTE IS COPIED, NOT DERIVED, and the source is worth writing down because nothing links
+  the two files. Every value below comes from `Innoventa/jMUI/src/styles/theme.css` - paper #f2f2ef,
+  surface #ffffff, ink #191917, second ink #66665f, hairline #e4e4df, accent #e8590c with dark ink on
+  top, chassis #181816 in BOTH themes. A library template cannot import a product's stylesheet (see
+  the frame for why this page has no assets at all), so a product that moves its accent moves it here
+  by hand or the two quietly drift. Cosmetic when it happens, and invisible until somebody puts the
+  two screens side by side.
+
+  ⚠️ Dark follows `prefers-color-scheme` and nothing else. This page is rendered before anybody is
+  signed in, so there is no reader whose stored choice it could honour - and the chassis does not flip
+  either way, because a dark panel that turns pale is the one element that would stop being
+  recognisable.
+#}
+
+{% block "pageTitle" %}Authorize &middot; {{ applicationName }}{% endblock %}
+
+{% block "styles" %}
+<style>
+  :root {
+    --bg: #f2f2ef; --surface: #ffffff; --surface-2: #f7f7f5;
+    --ink: #191917; --ink-2: #66665f;
+    --border: #e4e4df; --border-strong: #cfcfc8; --hairline: #ecece8;
+    --accent: #e8590c; --accent-ink: #191917; --accent-soft: #fdeee3; --accent-border: #f6d7bf;
+    --warn: #9a6700; --warn-soft: #faf1dd; --warn-border: #eddfba;
+    --danger: #c22f2f; --danger-soft: #faebea; --danger-border: #f0cfcd;
+    /* The chassis does not flip between themes. The dark panel is what the product is recognised by. */
+    --chassis: #181816; --chassis-ink: #a3a39b; --chassis-line: #2a2a27;
+    --chassis-label: #8a8a82; --chassis-bright: #e6e6e0; --chassis-mark: #3a3a36;
+    --sans: "Onest", "Segoe UI", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #10100f; --surface: #1a1a17; --surface-2: #141412;
+      --ink: #f2f2ef; --ink-2: #b0b0a8;
+      --border: #2c2c28; --border-strong: #3d3d37; --hairline: #262622;
+      --accent-soft: #2b2018; --accent-border: #5a3418;
+      --warn: #d4a84a; --warn-soft: #2a2414; --warn-border: #4a3c14;
+      --danger: #e0716a; --danger-soft: #2a1818; --danger-border: #4a2424;
+      color-scheme: dark;
+    }
+  }
+
+  /* ---- Page ---------------------------------------------------------- */
+
+  body {
+    min-height: 100dvh; background: var(--bg); color: var(--ink);
+    font: 13px/1.6 var(--sans);
+  }
+
+  .page { min-height: 100dvh; display: grid; }
+  @media (min-width: 64rem) { .page { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); } }
+
+  /* ---- The chassis panel --------------------------------------------- */
+
+  .panel {
+    display: none; position: relative; overflow: hidden;
+    background: var(--chassis); border-right: 1px solid var(--chassis-line);
+    padding: 40px; align-content: space-between; gap: 32px;
+  }
+  @media (min-width: 64rem) { .panel { display: grid; } }
+
+  /* The ruled sheet: hairlines on a fixed pitch, drawn from the chassis mark token so it cannot
+     drift off the palette. Two gradients rather than an image - a raster is the one thing here that
+     could not follow a theme, and it goes soft on a dense display. */
+  .sheet {
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      linear-gradient(var(--chassis-mark) 1px, transparent 1px) 0 0 / 100% 28px,
+      linear-gradient(90deg, var(--chassis-mark) 1px, transparent 1px) 0 0 / 28px 100%;
+    opacity: .55;
+  }
+  /* The sheet's own frame, which is what tells a drawing from a grid. */
+  .sheet::after {
+    content: ""; position: absolute; inset: 24px; border: 1px solid var(--chassis-mark);
+  }
+
+  /* Everything the panel says sits ABOVE the drawing. ⚠️ `:not(.sheet)` rather than `*`, because a
+     bare `.panel > *` matches the sheet too and — being the later rule of equal weight — quietly
+     takes its `position: absolute` away. It then becomes an in-flow grid item of zero height: the
+     drawing disappears, and the three things the panel says are pushed down by a fourth row that is
+     not there. Nothing errors, and the screen still looks deliberate. */
+  .panel > :not(.sheet) { position: relative; }
+
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .plate {
+    width: 28px; height: 28px; flex: none; display: grid; place-items: center;
+    background: var(--accent); color: var(--accent-ink);
+  }
+  .plate svg { width: 21px; height: 21px; }
+  .brand b { font-size: 13px; font-weight: 600; color: var(--chassis-bright); }
+  .label {
+    font: 500 10px/1.4 var(--mono); letter-spacing: .09em; text-transform: uppercase;
+    color: var(--chassis-label);
+  }
+
+  .panel h2 {
+    margin: 0 0 20px; max-width: 26rem;
+    font-size: 28px; font-weight: 600; line-height: 1.15; letter-spacing: -.01em;
+    color: var(--chassis-bright);
+  }
+
+  /* Three checkable facts, set as a schedule. Not a feature list: every line here is something the
+     server enforced before this page was drawn. */
+  .facts { margin: 0; max-width: 26rem; border-top: 1px solid var(--chassis-line); }
+  .facts dt {
+    padding-top: 12px;
+    font: 500 10px/1.4 var(--mono); letter-spacing: .09em; text-transform: uppercase;
+    color: var(--chassis-label);
+  }
+  .facts dd {
+    margin: 0; padding: 4px 0 12px; border-bottom: 1px solid var(--chassis-line);
+    font-size: 13px; color: var(--chassis-ink);
+  }
+
+  /* ---- The form column ------------------------------------------------ */
+
+  .column { display: grid; place-items: center; padding: 24px; }
+  @media (min-width: 40rem) { .column { padding: 40px; } }
+
+  .sheet-inner { width: 100%; max-width: 26rem; display: grid; align-content: start; gap: 20px; }
+
+  .brand-small { display: flex; align-items: center; gap: 8px; color: var(--ink); }
+  .brand-small b { font-size: 13px; font-weight: 600; }
+  @media (min-width: 64rem) { .brand-small { display: none; } }
+
+  h1 {
+    margin: 0; font-size: 28px; font-weight: 600; line-height: 1.1; letter-spacing: -.01em;
+    overflow-wrap: anywhere;
+  }
+  h2.refusal { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -.01em; }
+  p { margin: 0; }
+  .quiet { color: var(--ink-2); font-size: 12.5px; }
+
+  .head { display: grid; gap: 8px; }
+
+  /* Loading: three rules where the sentence will be. No spinner - nothing is spinning, a request is
+     being answered, and the shape of the answer is already known. */
+  .skeleton { height: 12px; background: var(--surface-2); border: 1px solid var(--border); }
+  .skeleton + .skeleton { margin-top: 8px; }
+
+  /* ---- The request ---------------------------------------------------- */
+
+  form { display: grid; gap: 20px; }
+
+  .schedule { margin: 0; border-top: 1px solid var(--border); }
+  .schedule dt {
+    padding-top: 10px;
+    font: 500 10px/1.4 var(--mono); letter-spacing: .09em; text-transform: uppercase; color: var(--ink-2);
+  }
+  .schedule dd {
+    margin: 0; padding: 3px 0 10px; border-bottom: 1px solid var(--hairline);
+    font-size: 12.5px; overflow-wrap: anywhere;
+  }
+  .schedule dd code { font: 12px/1.5 var(--mono); }
+
+  .caution {
+    padding: 10px 12px; font-size: 12.5px; line-height: 1.55;
+    background: var(--warn-soft); border: 1px solid var(--warn-border); color: var(--ink);
+  }
+  .caution strong { font-weight: 600; }
+
+  .failure {
+    padding: 10px 12px; font-size: 12.5px; line-height: 1.55;
+    background: var(--danger-soft); border: 1px solid var(--danger-border); color: var(--ink);
+  }
+
+  /* ---- Acting as ------------------------------------------------------ */
+
+  #choices-card { display: grid; gap: 8px; }
+  #choices { display: grid; gap: 0; border: 1px solid var(--border); }
+
+  .choice {
+    display: flex; gap: 10px; align-items: flex-start; cursor: pointer;
+    padding: 10px 12px; background: var(--surface);
+    border-bottom: 1px solid var(--hairline);
+    transition: background-color 120ms ease;
+  }
+  .choice:last-child { border-bottom: 0; }
+  .choice:hover { background: var(--surface-2); }
+  .choice:focus-within { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .choice:has(input:checked) { background: var(--accent-soft); }
+  .choice input { accent-color: var(--accent); margin: 3px 0 0; }
+  .choice-name { font-size: 13px; font-weight: 500; }
+  .choice-detail { margin-top: 2px; font-size: 11.5px; color: var(--ink-2); }
+  .choice.unavailable { cursor: not-allowed; color: var(--ink-2); background: var(--surface-2); }
+
+  /* ---- Actions -------------------------------------------------------- */
+
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+  button {
+    font: 500 13px/1 var(--sans); cursor: pointer; border-radius: 0;
+    padding: 0 16px; height: 32px;
+    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+  }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* The one filled action on the page, in the accent, with the product's own dark ink on top. */
+  #approve { flex: 1 1 12rem; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  #approve:hover:not(:disabled) { background: #c44e0b; border-color: #c44e0b; }
+  #approve:disabled { background: var(--surface-2); border-color: var(--border); color: var(--ink-2); cursor: not-allowed; }
+
+  #cancel { background: var(--surface); border: 1px solid var(--border-strong); color: var(--ink); }
+  #cancel:hover { background: var(--surface-2); }
+
+  .lifetime { flex-basis: 100%; font: 11px/1.5 var(--mono); color: var(--ink-2); }
+
+  a { color: var(--ink); text-underline-offset: 2px; }
+
+  .foot { border-top: 1px solid var(--hairline); padding-top: 12px; font-size: 11.5px; color: var(--ink-2); }
+</style>
+{% endblock %}
+
+{% block "page" %}
+<div class="page">
+
+  <aside class="panel">
+    <div class="sheet" aria-hidden="true"></div>
+
+    <div class="brand">
+      <span class="plate" aria-hidden="true">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square">
+          <path d="M2 5.2V2h3.2M10.8 2H14v3.2M14 10.8V14h-3.2M5.2 14H2v-3.2"/>
+          <path d="M8 5.6v4.8M5.6 8h4.8"/>
+          <circle cx="8" cy="8" r="0.9" fill="currentColor" stroke="none"/>
+        </svg>
+      </span>
+      <b>{{ applicationName }}</b>
+      <span class="label">Model Context Protocol</span>
+    </div>
+
+    <div>
+      <h2>A program is asking to act as you.</h2>
+      <dl class="facts">
+        <dt>Where the code goes</dt>
+        <dd>Only to a listener on this machine. An address anywhere else is refused before this page is drawn.</dd>
+        <dt>What it proves</dt>
+        <dd>The client has to show it started this request before anything is issued to it.</dd>
+        <dt>What it gets</dt>
+        <dd>Exactly the permissions of whoever you approve it as, in {{ applicationName }} and nowhere else.</dd>
+      </dl>
+    </div>
+
+    <p class="label">Approve nothing you did not just start yourself</p>
+  </aside>
+
+  <div class="column">
+    <div class="sheet-inner">
+
+      <div class="brand-small">
+        <span class="plate" aria-hidden="true">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square">
+            <path d="M2 5.2V2h3.2M10.8 2H14v3.2M14 10.8V14h-3.2M5.2 14H2v-3.2"/>
+            <path d="M8 5.6v4.8M5.6 8h4.8"/>
+            <circle cx="8" cy="8" r="0.9" fill="currentColor" stroke="none"/>
+          </svg>
+        </span>
+        <b>{{ applicationName }}</b>
+        <span class="label" style="color:var(--ink-2)">Protocol</span>
+      </div>
+
+      <section id="loading" aria-live="polite">
+        <div class="skeleton" style="width:58%"></div>
+        <div class="skeleton" style="width:100%"></div>
+        <div class="skeleton" style="width:74%"></div>
+      </section>
+
+      <section id="refusal" hidden>
+        <h2 class="refusal" id="refusal-title">This request cannot be approved</h2>
+        <p class="quiet" id="refusal-body" style="margin-top:8px"></p>
+        <p class="quiet" id="refusal-action" style="margin-top:8px" hidden>
+          <a id="sign-in-link" href="{{ signInUrl }}">Sign in</a>, then start the connection again from the client.
+        </p>
+      </section>
+
+      <form id="request" hidden>
+        <div class="head">
+          <h1>Authorize <span id="client-name"></span></h1>
+          <p class="quiet" id="acting-summary"></p>
+        </div>
+
+        <dl class="schedule">
+          <dt>Granted by</dt>
+          <dd id="approver"></dd>
+          <dt>Code goes to</dt>
+          <dd><code id="redirect-target"></code></dd>
+        </dl>
+
+        <p class="caution">
+          That address is on <strong>this machine</strong>. If you did not just start this from a client
+          running here, close the page - approving hands a live code to whatever is listening on that port.
+        </p>
+
+        <div id="choices-card" hidden>
+          <span class="label" style="color:var(--ink-2)">Acting as</span>
+          <div id="choices"></div>
+        </div>
+
+        <p class="failure" id="failure" hidden></p>
+
+        <div class="actions">
+          <button type="submit" id="approve">Approve</button>
+          <button type="button" id="cancel">Cancel</button>
+          <span class="lifetime" id="lifetime"></span>
+        </div>
+      </form>
+
+      <p class="foot">This page grants your own access and nothing wider. It cannot grant what you do not have.</p>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
