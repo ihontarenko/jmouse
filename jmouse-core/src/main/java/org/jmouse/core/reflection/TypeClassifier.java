@@ -171,17 +171,46 @@ public interface TypeClassifier {
     }
 
     /**
+     * Checks if the inspected type is a value written as a single string rather than a structure to
+     * walk into — an address, a moment, a pattern.
+     * <p>
+     * The same reasoning as {@link #isTemporalAmount()}, carried to the other types that have it. A
+     * {@link java.net.URI} has getters for its scheme, host and path, so a binder that has not been
+     * told otherwise treats it as a bean, walks into it, finds nothing to set and produces
+     * {@code null} — silently, since nothing failed.
+     * </p>
+     * <p>
+     * ⚠️ The set is exactly the types {@code PredefinedConversion} already registers a
+     * {@code String} converter for, and widening it beyond them would make things worse rather than
+     * better: a type classified as a value with no converter to build it from text turns a confusing
+     * reflection failure into a silent {@code null}. {@code UUID}, {@code Path}, {@code Charset},
+     * {@code Locale} and {@code LocalDateTime} are all in that position today, which is why they are
+     * deliberately absent — each of them needs its converter registered first.
+     * </p>
+     *
+     * @return {@code true} if the class type is a single-string value, otherwise {@code false}
+     */
+    default boolean isSingleValue() {
+        return is(java.net.URI.class)
+                || is(java.net.URL.class)
+                || is(java.util.regex.Pattern.class)
+                || is(java.time.Instant.class)
+                || is(java.time.LocalDate.class)
+                || is(java.time.ZonedDateTime.class);
+    }
+
+    /**
      * Checks if the inspected type is a scalar type.
      * <p>
      * A scalar type is defined as a primitive, a string, a number, a boolean, a byte, a character,
-     * or an amount of time.
+     * an amount of time, or a value written as a single string.
      * </p>
      *
      * @return {@code true} if the class type is scalar, otherwise {@code false}
      */
     default boolean isScalar() {
         return isString() || isNumber() || isBoolean() || isByte() || isCharacter() || isPrimitive()
-                || isTemporalAmount();
+                || isTemporalAmount() || isSingleValue();
     }
 
     /**
