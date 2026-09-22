@@ -68,6 +68,15 @@
             <artifactId>jmouse-storage</artifactId>
         </dependency>
 
+        <!-- ⚠️ For Slugifier, and DECLARED rather than left transitive through jmouse-storage.
+             Nothing new lands on any classpath — it was already there — but a module compiling
+             against a dependency it does not name breaks the day the module in between drops it,
+             and the failure lands here rather than where the decision was made. -->
+        <dependency>
+            <groupId>org.jmouse</groupId>
+            <artifactId>jmouse-core</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
