@@ -313,6 +313,11 @@
                 <artifactId>jmouse-crawler</artifactId>
                 <version>${jmouse.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.jmouse</groupId>
+                <artifactId>jmouse-grabber</artifactId>
+                <version>${jmouse.version}</version>
+            </dependency>
             <!-- Proxy -->
             <!-- CGLIB Dependencies -->
             <dependency>

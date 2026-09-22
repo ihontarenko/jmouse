@@ -133,6 +133,7 @@
         <module>jmouse-ai-jpa</module>
         <module>jmouse-web</module>
         <module>jmouse-crawler</module>
+        <module>jmouse-grabber</module>
         <module>jmouse-spring</module>
         <module>pet-gallery</module>
         <module>wep-app</module>
