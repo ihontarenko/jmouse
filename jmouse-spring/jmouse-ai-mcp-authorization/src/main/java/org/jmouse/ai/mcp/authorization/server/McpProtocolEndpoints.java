@@ -100,10 +100,25 @@ public class McpProtocolEndpoints {
         // an agent's name — bakes "An unnamed client" into whatever it connects as, permanently. There is
         // no repair afterwards: the name was never recorded. Answering invalid_client instead is the one
         // refusal a client fixes by itself, by discarding what it cached and registering again.
+        //
+        // ⚠️ THIS SENTENCE IS READ BY A PERSON, NOT BY A PROGRAM, AND IT IS THE ONLY THING THEY ARE
+        // SHOWN. The client's failure page prints the description verbatim under a heading of its own
+        // — Claude Code's says "Authentication failed. Close this tab and try again" — so whatever is
+        // written here IS the explanation somebody standing in a dead-ended browser tab gets. Written
+        // as instructions to the client's code ("register again with the identifier registration
+        // returns"), it tells them nothing they can act on and reads as a fault in their account.
+        //
+        // So it says the three things that actually help: what was lost, that it is not about them,
+        // and that starting over works. The last one is not reassurance but the mechanism — the
+        // refusal is what makes the client discard its cached registration, so the next attempt
+        // registers afresh and goes through. One failed round trip is the design, not a malfunction,
+        // and a person who has not been told that reasonably reads it as the connection being broken.
         if (!clientRegistry.recognises(clientId)) {
             return refuseToClient(target, state, AuthorizationVocabulary.ERROR_INVALID_CLIENT,
-                    "This client_id is not one this server issued, or it has expired. Register again and "
-                  + "start the authorization with the identifier that registration returns.");
+                    hostingApplication() + " no longer holds the registration this client is connecting "
+                  + "with: it expired, or this installation's records were reset. Nothing is wrong with "
+                  + "your account or your sign-in. Close this tab and start the connection again from "
+                  + "the client - it registers afresh and goes through on that second attempt.");
         }
 
         if (!AuthorizationVocabulary.RESPONSE_TYPE_CODE.equals(responseType)) {
@@ -173,6 +188,23 @@ public class McpProtocolEndpoints {
     }
 
     // ── Internal ─────────────────────────────────────────────────────────────────
+
+    /**
+     * What to call this installation in a sentence somebody reads on a page this server does not draw.
+     *
+     * <p>The display name is configuration and an installation may never have set one, so there is a
+     * fallback rather than a sentence opening on an empty space where a product name should be. It is
+     * the same fallback the consent screen uses, and for the same reason.
+     */
+    private String hostingApplication() {
+        String applicationName = properties.getApplicationName();
+
+        if (applicationName == null || applicationName.isBlank()) {
+            return "This application";
+        }
+
+        return applicationName;
+    }
 
     /** The consent screen is served on the address a <em>person</em> reaches this product at. */
     private URI consentScreenFor(String clientId, String redirectUri, String state, String codeChallenge) {
