@@ -13,6 +13,7 @@ import org.jmouse.access.AccessEngine;
 import org.jmouse.access.ScopeCatalog;
 import org.jmouse.access.enforcement.CurrentSubject;
 import org.jmouse.access.enforcement.ExternalAccessRules;
+import org.jmouse.access.spi.AccessTargetRegistry;
 import org.jmouse.files.management.DirectoryController;
 import org.jmouse.files.management.access.DirectoryVisibility;
 import org.jmouse.files.management.DirectoryUploadPolicyResolver;
@@ -358,8 +359,9 @@ public class FilesManagementAutoConfiguration {
                 ObjectProvider<AccessEngine> engine,
                 ObjectProvider<CurrentSubject> currentSubject,
                 ObjectProvider<ExternalAccessRules> rules,
-                ObjectProvider<ScopeCatalog> scopes) {
-            return new DirectoryVisibility(engine, currentSubject, rules, scopes,
+                ObjectProvider<ScopeCatalog> scopes,
+                ObjectProvider<AccessTargetRegistry> targets) {
+            return new DirectoryVisibility(engine, currentSubject, rules, scopes, targets,
                                            DirectoryController.class);
         }
 

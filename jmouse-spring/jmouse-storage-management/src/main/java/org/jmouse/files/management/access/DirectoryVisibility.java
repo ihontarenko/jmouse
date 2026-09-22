@@ -7,6 +7,7 @@ import org.jmouse.access.ScopeKind;
 import org.jmouse.access.Subject;
 import org.jmouse.access.enforcement.CurrentSubject;
 import org.jmouse.access.enforcement.ExternalAccessRules;
+import org.jmouse.access.spi.AccessTargetRegistry;
 import org.jmouse.files.jpa.directory.StorageDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,27 @@ import java.util.Optional;
  * <p>⚠️ Likewise a declaration with <strong>no scope</strong>. An installation-wide rule is already
  * decided by the guard, identically for every row, so asking again per directory would be one query
  * per folder to reach an answer that cannot vary.
+ *
+ * <h2>⚠️ THE FILTER ASKS THE QUESTION THE ROUTE ASKS — THROUGH THE PRODUCT'S RESOLVER (JMF-300)</h2>
+ *
+ * <p>It used to build the target itself: the declared scope, the directory's id, and nothing else. The
+ * guard on {@code read} never does that — it hands the id to the product's
+ * {@code AccessTargetResolver<StorageDirectory>} and decides on whatever comes back. The two disagreed
+ * the moment a resolver attached anything beyond the id, and both disagreements were silent:
+ *
+ * <ul>
+ *   <li>a resolver that names an <strong>owner</strong> — a member's own tree, an account's — opens it
+ *       on the route through the own-rows scope, while the filter, seeing no owner, dropped the very
+ *       tree the listing existed to show. The screen drew "you have no folders";</li>
+ *   <li>a resolver that attaches a <strong>second place</strong> — a folder named by its path so a
+ *       policy file can write about it — had its deny honoured on the route and ignored by every
+ *       listing, so a folder closed by path stayed in every tree.</li>
+ * </ul>
+ *
+ * <p>So the filter asks {@link AccessEngine#permitsAbout} for {@link StorageDirectory}, which is the
+ * guard's own path. The hand-built target remains only for a product that registered no resolver for
+ * the type — every product mounting these routes has one, because without it the {@code read} route
+ * itself answers "no such directory", but the seam is the library's to keep honest.
  */
 public final class DirectoryVisibility {
 
@@ -63,6 +85,7 @@ public final class DirectoryVisibility {
     private final ObjectProvider<CurrentSubject>      currentSubject;
     private final ObjectProvider<ExternalAccessRules> rules;
     private final ObjectProvider<ScopeCatalog>        scopes;
+    private final ObjectProvider<AccessTargetRegistry> targets;
     private final Class<?>                            controller;
 
     /** ⚠️ Said once, not per request — a listing runs on every screen that draws the tree. */
@@ -76,17 +99,20 @@ public final class DirectoryVisibility {
      * class has no business influencing — the module is mounted by a product that may declare its rules
      * anywhere.
      *
+     * @param targets    the product's resolvers, so a folder is placed the way the route guard places it
      * @param controller the type whose declaration is read — {@code DirectoryController}
      */
     public DirectoryVisibility(ObjectProvider<AccessEngine> engine,
                                ObjectProvider<CurrentSubject> currentSubject,
                                ObjectProvider<ExternalAccessRules> rules,
                                ObjectProvider<ScopeCatalog> scopes,
+                               ObjectProvider<AccessTargetRegistry> targets,
                                Class<?> controller) {
         this.engine         = engine;
         this.currentSubject = currentSubject;
         this.rules          = rules;
         this.scopes         = scopes;
+        this.targets        = targets;
         this.controller     = controller;
     }
 
@@ -165,11 +191,15 @@ public final class DirectoryVisibility {
             return Optional.empty();
         }
 
+        AccessTargetRegistry registry = targets.getIfAvailable();
+        boolean resolved = registry != null && registry.speaksFor(StorageDirectory.class);
+
         return declaration()
                 .filter(declared -> !declared.permission().isBlank())
                 .filter(declared -> !declared.scope().isBlank())
                 .flatMap(declared -> catalog.byName(declared.scope())
-                        .map(scope -> new Question(asking, asker.get(), declared.permission(), scope)));
+                        .map(scope -> new Question(
+                                asking, asker.get(), declared.permission(), scope, resolved)));
     }
 
     /**
@@ -212,14 +242,24 @@ public final class DirectoryVisibility {
      * {@code CurrentSubject.get()} per row would be a lookup per folder for an answer that cannot change
      * inside one request — and on a deep tree that is the difference between one query and hundreds.
      */
-    private record Question(AccessEngine engine, Subject subject, String permission, ScopeKind scope) {
+    private record Question(AccessEngine engine, Subject subject, String permission, ScopeKind scope,
+                            boolean throughResolver) {
 
         boolean permits(String directoryId) {
             /*
               ⚠️ Asked at the FOLDER, which is what makes the subtree rule apply. The engine walks the
               containing chain — the folder, then its ancestors — so a deny written on a parent closes
               everything under it without anybody enumerating the children.
+
+              ⚠️ And asked THROUGH THE PRODUCT'S RESOLVER where there is one, which is what the route
+              guard does. Whatever the product attaches to a folder — an owner, a second place named by
+              path — reaches the decision here exactly as it reaches the decision on `read`. A row the
+              resolver cannot place is refused there and is hidden here, for the same reason.
              */
+            if (throughResolver) {
+                return engine.permitsAbout(subject, permission, StorageDirectory.class, directoryId);
+            }
+
             return engine.permits(
                     subject, permission, AccessTarget.installation().at(scope, directoryId));
         }
