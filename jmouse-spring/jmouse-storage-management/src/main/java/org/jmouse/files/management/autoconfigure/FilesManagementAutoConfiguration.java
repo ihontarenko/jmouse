@@ -15,10 +15,14 @@ import org.jmouse.access.enforcement.CurrentSubject;
 import org.jmouse.access.enforcement.ExternalAccessRules;
 import org.jmouse.access.spi.AccessTargetRegistry;
 import org.jmouse.files.management.DirectoryController;
+import org.jmouse.files.management.access.DirectoryRefusals;
 import org.jmouse.files.management.access.DirectoryVisibility;
+import org.jmouse.files.management.access.FileRefusals;
+import org.jmouse.files.management.access.FileVisibility;
 import org.jmouse.files.management.DirectoryUploadPolicyResolver;
 import org.jmouse.files.management.DirectoryManagement;
 import org.jmouse.files.management.FileController;
+import org.jmouse.files.management.TrashController;
 import org.jmouse.files.management.FileManagement;
 import org.jmouse.files.management.FileManagementContext;
 import org.jmouse.files.management.RemoteFileFetcher;
@@ -295,14 +299,44 @@ public class FilesManagementAutoConfiguration {
      * @param management what the routes do
      * @param renderer   turns a delivery plan into a response
      * @param context    where an upload goes and who is making it
+     * @param visible    which listed files the caller may read
      * @return the controller
      */
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = ENDPOINTS_ENABLED, havingValue = "true")
     public FileController fileController(FileManagement management, DeliveryRenderer renderer,
-                                         FileManagementContext context) {
-        return new FileController(management, renderer, context);
+                                         FileManagementContext context, FileVisibility visible) {
+        return new FileController(management, renderer, context, visible);
+    }
+
+    /**
+     * 🗑️ The trash routes — alongside the file routes, behind the same switch.
+     *
+     * @param management what the routes do
+     * @return the controller
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = ENDPOINTS_ENABLED, havingValue = "true")
+    public TrashController trashController(FileManagement management) {
+        return new TrashController(management);
+    }
+
+    /**
+     * 🔒 Which files a caller may see in a listing — the per-file twin of {@code DirectoryVisibility}.
+     *
+     * <p>⚠️ Engages only where the product declares a {@code FileRefusals} bean; otherwise it returns
+     * every file, which is exactly what the listing did before it existed.
+     *
+     * @param refusals the product's per-listing answer, if any
+     * @return the filter
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = ENDPOINTS_ENABLED, havingValue = "true")
+    public FileVisibility fileVisibility(ObjectProvider<FileRefusals> refusals) {
+        return new FileVisibility(refusals);
     }
 
     /**
@@ -360,9 +394,10 @@ public class FilesManagementAutoConfiguration {
                 ObjectProvider<CurrentSubject> currentSubject,
                 ObjectProvider<ExternalAccessRules> rules,
                 ObjectProvider<ScopeCatalog> scopes,
-                ObjectProvider<AccessTargetRegistry> targets) {
+                ObjectProvider<AccessTargetRegistry> targets,
+                ObjectProvider<DirectoryRefusals> refusals) {
             return new DirectoryVisibility(engine, currentSubject, rules, scopes, targets,
-                                           DirectoryController.class);
+                                           DirectoryController.class, refusals);
         }
 
         /**

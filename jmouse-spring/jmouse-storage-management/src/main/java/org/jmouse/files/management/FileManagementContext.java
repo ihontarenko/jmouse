@@ -50,4 +50,14 @@ public interface FileManagementContext {
     default String uploader() {
         return null;
     }
+
+    /**
+     * 👤 Who is acting — the person putting a file in the trash. The same answer as {@link #uploader()}
+     * unless a product says otherwise: both are "the person making this request".
+     *
+     * @return their identifier, or {@code null}
+     */
+    default String actor() {
+        return uploader();
+    }
 }

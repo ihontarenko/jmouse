@@ -108,6 +108,20 @@ public class ManagedFile {
     @Column(name = "held_reason", length = MAXIMUM_HELD_REASON_LENGTH)
     private String heldReason;
 
+    /**
+     * 🗑️ When this file was put in the trash, or {@code null} while it is not there.
+     *
+     * <p>⚠️ <strong>A state, not a place.</strong> Nothing moves when a file is trashed: the bytes stay
+     * where the store put them and the file stays filed where it was, so restoring is clearing this one
+     * field. Every listing leaves a trashed file out; emptying the trash is the ordinary delete.</p>
+     */
+    @Column(name = "trashed_at")
+    private LocalDateTime trashedAt;
+
+    /** 🗑️ Who put it in the trash — the same shape as {@code uploadedBy}, {@code null} for no person. */
+    @Column(name = "trashed_by", length = 64)
+    private String trashedBy;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -224,5 +238,48 @@ public class ManagedFile {
      */
     public boolean isHeld() {
         return heldReason != null;
+    }
+
+    /**
+     * When this file went to the trash.
+     *
+     * @return the moment, or {@code null} while it is not in the trash
+     */
+    public LocalDateTime getTrashedAt() {
+        return trashedAt;
+    }
+
+    /**
+     * Who put it in the trash.
+     *
+     * @return the person, or {@code null}
+     */
+    public String getTrashedBy() {
+        return trashedBy;
+    }
+
+    /**
+     * Whether it is in the trash — derived from the moment, so the two can never disagree.
+     *
+     * @return whether it is in the trash
+     */
+    public boolean isTrashed() {
+        return trashedAt != null;
+    }
+
+    /**
+     * 🗑️ Put it in the trash.
+     *
+     * @param by who did, or {@code null}
+     */
+    public void moveToTrash(String by) {
+        this.trashedAt = LocalDateTime.now();
+        this.trashedBy = by;
+    }
+
+    /** ♻️ Take it back out of the trash, exactly as it was. */
+    public void restoreFromTrash() {
+        this.trashedAt = null;
+        this.trashedBy = null;
     }
 }

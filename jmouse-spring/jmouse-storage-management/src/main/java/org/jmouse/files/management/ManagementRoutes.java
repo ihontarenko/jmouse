@@ -93,6 +93,15 @@ public final class ManagementRoutes {
     /** Whether a file is listed only to whoever may already reach it. */
     public static final String PRIVACY = ONE + "/private";
 
+    /** Put one file in the trash. */
+    public static final String TRASH_ONE = ONE + "/trash";
+
+    /** Take one file back out of the trash. */
+    public static final String RESTORE = ONE + "/restore";
+
+    /** The trash itself — every trashed file in the installation, and emptying it. */
+    public static final String TRASH = PREFIX + "/trash";
+
     /** The directory tree. */
     public static final String DIRECTORIES = PREFIX + "/directories";
 
@@ -101,6 +110,9 @@ public final class ManagementRoutes {
 
     /** One directory and everything under it. */
     public static final String DIRECTORY_SUBTREE = DIRECTORY + "/subtree";
+
+    /** 🌿 One level down — what a tree that opens on demand asks for. */
+    public static final String DIRECTORY_CHILDREN = DIRECTORY + "/children";
 
     /** Where one directory sits. */
     public static final String DIRECTORY_PARENT = DIRECTORY + "/parent";

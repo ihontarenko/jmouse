@@ -36,10 +36,24 @@ import java.util.Set;
  * <p>{@link UploadProfile#CUSTOM} reads {@link #mode}, {@link #contentTypes} and
  * {@link #extensions} instead, for a product whose answer is genuinely its own.</p>
  *
+ * <h3>A profile, plus one more thing</h3>
+ *
+ * <p>The lists may be written <em>beside</em> a named profile, and then they extend it in its own
+ * direction — see {@link #resolve()}. A media hub that keeps films wants the shipped denylist and one
+ * addition, and that is a line rather than a fork of the list:</p>
+ *
+ * <pre>{@code
+ * jmouse.storage.upload.profile: BLOCK_DANGEROUS_CONTENT
+ * jmouse.storage.upload.extensions: [apk]
+ * jmouse.storage.upload.content-types: [application/vnd.android.package-archive]
+ * }</pre>
+ *
  * @param profile      a shipped configuration, or {@link UploadProfile#CUSTOM} to spell one out
- * @param mode         how {@link #contentTypes} and {@link #extensions} are read
- * @param contentTypes bare {@code type/subtype} values, without parameters
- * @param extensions   extensions without their dot
+ * @param mode         how {@link #contentTypes} and {@link #extensions} are read; ⚠️ a named profile
+ *                     keeps its own direction and this is not consulted
+ * @param contentTypes bare {@code type/subtype} values, without parameters — the whole list under
+ *                     {@code CUSTOM}, additions to the profile otherwise
+ * @param extensions   extensions without their dot, read the same way
  */
 public record UploadSettings(@BindDefault("CUSTOM") UploadProfile profile,
                              @BindDefault("DENY_LIST") AcceptanceMode mode,
@@ -65,11 +79,51 @@ public record UploadSettings(@BindDefault("CUSTOM") UploadProfile profile,
      */
     public UploadSettings resolve() {
         return switch (profile) {
-            case BLOCK_DANGEROUS_CONTENT -> blockingDangerousContent();
-            case ALLOW_DOCUMENTS_AND_IMAGES -> allowingDocumentsAndImages();
-            case ALLOW_DOCUMENTS_IMAGES_AND_TEXT -> allowingDocumentsImagesAndText();
+            case BLOCK_DANGEROUS_CONTENT -> extending(blockingDangerousContent());
+            case ALLOW_DOCUMENTS_AND_IMAGES -> extending(allowingDocumentsAndImages());
+            case ALLOW_DOCUMENTS_IMAGES_AND_TEXT -> extending(allowingDocumentsImagesAndText());
+            case ALLOW_MEDIA_DOCUMENTS_AND_IMAGES -> extending(allowingMediaDocumentsAndImages());
             case CUSTOM -> this;
         };
+    }
+
+    /**
+     * ➕ A shipped profile with this product's own entries folded into it.
+     *
+     * <h3>⚠️ The lists beside a profile EXTEND it; they used to be discarded in silence</h3>
+     *
+     * <p>"The shipped list, plus this one thing" is the commonest real requirement a product has, and
+     * it was the one thing this record could not express: a named profile returned its own lists and
+     * ignored everything configured beside them. A product needing one more extension had to choose
+     * between copying sixty of them into its YAML — a copy that goes stale the day the library
+     * corrects its own — and declaring a policy bean in code to get round its own configuration.</p>
+     *
+     * <p>⚠️ <strong>In the profile's own direction, and the profile keeps the direction.</strong> Added
+     * to a denylist an entry is refused as well; added to an allowlist it is admitted as well. A
+     * {@link #mode} written beside a profile is not honoured, because "an allowlist profile, read as a
+     * denylist" is not a stricter rule or a looser one — it is a different rule with the profile's
+     * name on it.</p>
+     *
+     * @param shipped the profile as it ships
+     * @return the profile itself where nothing was added, otherwise the union
+     */
+    private UploadSettings extending(UploadSettings shipped) {
+        if (contentTypes.isEmpty() && extensions.isEmpty()) {
+            return shipped;
+        }
+
+        Set<String> allTypes = new HashSet<>(shipped.contentTypes());
+        allTypes.addAll(contentTypes);
+
+        Set<String> allExtensions = new HashSet<>(shipped.extensions());
+        allExtensions.addAll(extensions);
+
+        /*
+          ⚠️ CUSTOM on the way out, so resolving is idempotent. Keeping the profile's name on a set
+          that is no longer the profile's would make a second resolve throw the additions away again —
+          and something somewhere always resolves twice.
+         */
+        return new UploadSettings(UploadProfile.CUSTOM, shipped.mode(), allTypes, allExtensions);
     }
 
     /**
@@ -192,6 +246,69 @@ public record UploadSettings(@BindDefault("CUSTOM") UploadProfile profile,
 
         extensions.addAll(Set.of(
                 "txt", "md", "markdown", "csv", "tsv", "json", "ndjson", "yaml", "yml", "log"
+        ));
+
+        return new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.ALLOW_LIST,
+                                  Set.copyOf(contentTypes), Set.copyOf(extensions));
+    }
+
+    /**
+     * ✅ Films, music and their subtitles, on top of {@link #allowingDocumentsImagesAndText()}.
+     *
+     * <p>For a product whose cabinet holds <strong>media</strong>: a household's film library, a photo
+     * archive, anything where an {@code .mkv} is the ordinary case rather than a surprise. The two
+     * document profiles refuse every video and every audio file, so a media product choosing one of
+     * them refuses the files it exists for — and choosing {@link #blockingDangerousContent()} instead
+     * swings the other way and accepts anything nobody thought to name.</p>
+     *
+     * <h3>⚠️ AN ALLOW-LIST, so an installer is refused by NOT BEING ON IT</h3>
+     *
+     * <p>Which is the point: {@code .apk}, {@code .dmg}, {@code .deb}, and whatever ships next, are all
+     * refused without anybody keeping a list of them up to date. A product that genuinely wants one of
+     * them somewhere puts a rule on the <em>one folder</em> that takes it, which is a sentence a person
+     * can read off a screen.</p>
+     *
+     * <h3>⚠️ CONTAINERS BY EXTENSION AND BY TYPE, because browsers disagree about media types</h3>
+     *
+     * <p>The same {@code .mkv} arrives as {@code video/x-matroska}, {@code video/mkv} or
+     * {@code application/octet-stream} depending on the operating system — and both halves are checked
+     * independently, so a file refused on its declared type while its extension was listed would be a
+     * refusal nobody could act on. The types below are the ones actually seen; the extension list is
+     * what carries the rest.</p>
+     *
+     * @return an allowlist of media, document, image and inert text formats
+     */
+    public static UploadSettings allowingMediaDocumentsAndImages() {
+        Set<String> contentTypes = new HashSet<>(allowingDocumentsImagesAndText().contentTypes());
+
+        contentTypes.addAll(Set.of(
+                // video containers
+                "video/mp4", "video/x-matroska", "video/quicktime", "video/x-msvideo", "video/webm",
+                "video/mpeg", "video/mp2t", "video/x-ms-wmv", "video/ogg", "video/3gpp",
+                // audio
+                "audio/mpeg", "audio/mp4", "audio/aac", "audio/flac", "audio/x-flac", "audio/ogg",
+                "audio/opus", "audio/wav", "audio/x-wav", "audio/x-ms-wma",
+                // subtitles, which travel with a film
+                "text/vtt", "application/x-subrip",
+                /*
+                  ⚠️ The honest one. A large file dragged from a file manager frequently arrives with no
+                  usable type at all, and refusing it on that would refuse films that are perfectly
+                  ordinary. The EXTENSION still has to be on the list below, which is where the decision
+                  actually lives for media.
+                 */
+                "application/octet-stream"
+        ));
+
+        Set<String> extensions = new HashSet<>(allowingDocumentsImagesAndText().extensions());
+
+        extensions.addAll(Set.of(
+                // video
+                "mp4", "m4v", "mkv", "mov", "avi", "webm", "mpg", "mpeg", "ts", "m2ts", "wmv", "flv",
+                "ogv", "3gp",
+                // audio
+                "mp3", "m4a", "aac", "flac", "ogg", "oga", "opus", "wav", "wma",
+                // subtitles and the sidecar a media library writes beside a film
+                "srt", "vtt", "ass", "ssa", "sub", "nfo"
         ));
 
         return new UploadSettings(UploadProfile.CUSTOM, AcceptanceMode.ALLOW_LIST,

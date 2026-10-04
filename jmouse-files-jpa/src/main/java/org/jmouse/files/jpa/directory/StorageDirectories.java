@@ -109,6 +109,26 @@ public class StorageDirectories {
      *
      * @return the roots, by path
      */
+    /**
+     * 🌿 The folders directly inside one — one level, in tree order.
+     *
+     * <p>What a tree that opens on demand asks for. {@link #subtreeOf} answers the whole subtree, which
+     * is right for a move or a delete and wrong for drawing: a household with a folder per film had
+     * every one of them decided and sent before anybody opened anything.
+     *
+     * @param parent the folder
+     * @return its children
+     */
+    public List<StorageDirectory> childrenOf(StorageDirectory parent) {
+        return entityManager.createQuery(
+                "SELECT directory FROM StorageDirectory directory "
+                + "WHERE directory.ownerKey = :ownerKey AND directory.parentId = :parentId "
+                + "ORDER BY directory.treeLeft", StorageDirectory.class)
+            .setParameter("ownerKey", parent.getOwnerKey())
+            .setParameter("parentId", parent.getId())
+            .getResultList();
+    }
+
     public List<StorageDirectory> roots(String ownerKey) {
         return entityManager.createQuery(
                 "SELECT directory FROM StorageDirectory directory "

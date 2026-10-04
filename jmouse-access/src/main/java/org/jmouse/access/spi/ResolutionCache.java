@@ -1,5 +1,6 @@
 package org.jmouse.access.spi;
 
+import org.jmouse.access.AccessTarget;
 import org.jmouse.access.EffectivePermissions;
 import org.jmouse.access.ScopeReference;
 import org.jmouse.access.VisibilityScope;
@@ -63,4 +64,33 @@ public interface ResolutionCache {
      * once per row and gets the same answer every time.
      */
     VisibilityScope visibility(String subjectId, String permission, Supplier<VisibilityScope> loader);
+
+    /**
+     * The covering chain for one target — the places it names, and everything containing them.
+     *
+     * <h3>⚠️ The chain is built BEFORE the other two can be consulted, so it needs its own line</h3>
+     *
+     * <p>{@link #permissions} is keyed ON the finished chain, which means the walk that builds the key
+     * can never be saved by it — and that walk asks a {@link ScopeHierarchy} per place the target
+     * names, which for a tree is an indexed query each. A listing deciding per row therefore paid for
+     * the chain again on every decision, including the decisions the permissions cache then answered
+     * from memory: measured at 156 ancestor queries for 63 folders in one request.</p>
+     *
+     * <p>⚠️ <strong>Keyed on the subject as well as the target</strong>, because the chain depends on
+     * both: {@code covering} is passed which rows this subject owns, and an owned row names a
+     * {@code SELF} place that somebody else's does not.</p>
+     *
+     * <p>⚠️ Default: no memory at all, which is correct and merely slower — the same contract as
+     * {@link #none()}. An implementation that already keeps the other two answers should keep this
+     * one; it is the cheapest of the three and the most often repeated.</p>
+     *
+     * @param subjectId who is asking
+     * @param target    what is being asked about
+     * @param loader    how to build it when nothing is remembered
+     * @return the chain, widest first
+     */
+    default List<ScopeReference> covering(String subjectId, AccessTarget target,
+                                          Supplier<List<ScopeReference>> loader) {
+        return loader.get();
+    }
 }

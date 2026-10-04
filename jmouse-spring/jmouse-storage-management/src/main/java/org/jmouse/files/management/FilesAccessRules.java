@@ -188,6 +188,10 @@ public final class FilesAccessRules {
                 .method(FileController.class, "importFrom", write.about(OwnerReference.class, "owner"))
                 .method(FileController.class, "read", read.about(ManagedFile.class, "fileId"))
                 .method(FileController.class, "content", read.about(ManagedFile.class, "fileId"))
+                // Trashing and restoring one file are writes on that file — the type rule says so already,
+                // and they are named so nobody has to work that out.
+                .method(FileController.class, "trash", write.about(ManagedFile.class, "fileId"))
+                .method(FileController.class, "restore", write.about(ManagedFile.class, "fileId"))
 
                 .type(DirectoryController.class, write.about(StorageDirectory.class, "directoryId"))
 
@@ -214,6 +218,8 @@ public final class FilesAccessRules {
                         read.about(StorageDirectory.class, "directoryId"))
                 .method(DirectoryController.class, "subtree",
                         read.about(StorageDirectory.class, "directoryId"))
+                .method(DirectoryController.class, "children",
+                        read.about(StorageDirectory.class, "directoryId"))
                 .method(DirectoryController.class, "create",
                         write.about(StorageDirectory.class, "parentId"))
 
@@ -228,6 +234,13 @@ public final class FilesAccessRules {
                         configure.about(StorageDirectory.class, "directoryId"))
                 .method(DirectoryController.class, "clearConfiguration",
                         configure.about(StorageDirectory.class, "directoryId"))
+
+                // ⚠️ THE TRASH IS ADMINISTRATION, guarded exactly like the storage surface below: it spans
+                // every folder in every tree, and emptying it is the one act here nothing can undo.
+                .type(TrashController.class,
+                      administerPermission.isBlank()
+                              ? write
+                              : Declaration.permission(administerPermission).atScope(GLOBAL_SCOPE))
 
                 // ⚠️ GLOBAL, and administrative. This surface spans every space and project by design,
                 // so a scoped permission cannot express it and a read permission understates it.

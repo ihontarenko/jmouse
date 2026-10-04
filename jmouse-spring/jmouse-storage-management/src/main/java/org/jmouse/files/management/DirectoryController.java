@@ -5,6 +5,7 @@ import org.jmouse.files.management.access.DirectoryVisibility;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -94,6 +95,15 @@ public class DirectoryController {
      * @param owner whose tree — the installation's own unless the product scopes trees per person
      * @return the roots
      */
+    /*
+       ⚠️ ONE TRANSACTION FOR READING THE TREE AND DECIDING ABOUT IT — see the note on
+       `DirectoryVisibility.readable`. Reading the rows in one transaction and judging them in
+       another gave the judging half an empty persistence context, so every row the listing had just
+       loaded was read from the database a second time, one row at a time, by the product's target
+       resolver. It is also the honest boundary: a listing decided against a tree that changed
+       between the two halves would refuse rows it had already returned.
+     */
+    @Transactional(readOnly = true)
     @GetMapping(ManagementRoutes.DIRECTORIES)
     public List<DirectoryView> roots(@RequestParam(defaultValue = StorageDirectory.INSTALLATION) String owner) {
         return visible.readable(directories.roots(owner)).stream().map(DirectoryView::of).toList();
@@ -118,9 +128,24 @@ public class DirectoryController {
      * @param directoryId the directory
      * @return the readable part of the subtree, itself first
      */
+    @Transactional(readOnly = true)
     @GetMapping(ManagementRoutes.DIRECTORY_SUBTREE)
     public List<DirectoryView> subtree(@PathVariable String directoryId) {
         return visible.readable(directories.subtree(directoryId)).stream().map(DirectoryView::of).toList();
+    }
+
+    /**
+     * 🌿 The folders directly inside one that the caller may read — one level, for a tree that opens
+     * on demand. Each carries {@code hasChildren}, so the tree knows where to draw a chevron without
+     * asking for the next level first.
+     *
+     * @param directoryId the directory
+     * @return its readable children, in tree order
+     */
+    @Transactional(readOnly = true)
+    @GetMapping(ManagementRoutes.DIRECTORY_CHILDREN)
+    public List<DirectoryView> children(@PathVariable String directoryId) {
+        return visible.readable(directories.children(directoryId)).stream().map(DirectoryView::of).toList();
     }
 
     /**

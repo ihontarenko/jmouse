@@ -42,6 +42,19 @@ public enum UploadProfile {
     ALLOW_DOCUMENTS_IMAGES_AND_TEXT,
 
     /**
+     * ✅ The same again, plus FILMS, MUSIC and their subtitles.
+     *
+     * <p>For a product whose cabinet holds media — a household's film library, a photo archive —
+     * where the two document profiles refuse the very files the product exists for, and
+     * { #BLOCK_DANGEROUS_CONTENT} swings the other way and accepts anything nobody named.</p>
+     *
+     * <p>⚠️ Being an allowlist, it refuses an installer — { apk}, { dmg}, { deb} — by
+     * not listing it, with no list of installers to keep up to date. Somewhere that genuinely takes
+     * one says so on that one folder.</p>
+     */
+    ALLOW_MEDIA_DOCUMENTS_AND_IMAGES,
+
+    /**
      * 🛠️ Neither — read the configured mode and lists instead.
      */
     CUSTOM

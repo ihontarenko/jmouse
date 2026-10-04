@@ -136,6 +136,25 @@ public sealed interface FileManagementEvent {
     }
 
     /**
+     * 🗑️ A file went to the trash. It is still filed and its bytes are untouched — every listing just
+     * leaves it out until it is restored or the trash is emptied.
+     *
+     * @param fileId the file
+     * @param file   the row, now trashed
+     */
+    record Trashed(String fileId, ManagedFile file) implements FileManagementEvent {
+    }
+
+    /**
+     * ♻️ A file came back out of the trash, filed exactly where it was.
+     *
+     * @param fileId the file
+     * @param file   the row
+     */
+    record Restored(String fileId, ManagedFile file) implements FileManagementEvent {
+    }
+
+    /**
      * 🔧 A folder changed what it says about itself.
      *
      * <p>⚠️ <strong>Announced because the decision declined to PREVENT a dangerous rule; it did not

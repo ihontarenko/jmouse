@@ -109,9 +109,24 @@ public class ManagedFiles {
                 "SELECT file FROM ManagedFile file, FileBinding binding "
                 + "WHERE binding.fileId = file.id "
                 + "AND binding.ownerType = :ownerType AND binding.ownerId = :ownerId "
+                // ⚠️ A trashed file is still filed — that is what makes restoring exact — and is left
+                // out of every listing here instead.
+                + "AND file.trashedAt IS NULL "
                 + "ORDER BY binding.sortOrder, file.displayName", ManagedFile.class)
             .setParameter("ownerType", owner.ownerType())
             .setParameter("ownerId", owner.ownerId())
+            .getResultList();
+    }
+
+    /**
+     * 🗑️ Everything in the trash, most recently trashed first.
+     *
+     * @return the trashed files
+     */
+    public List<ManagedFile> listTrashed() {
+        return entityManager.createQuery(
+                "SELECT file FROM ManagedFile file WHERE file.trashedAt IS NOT NULL "
+                + "ORDER BY file.trashedAt DESC", ManagedFile.class)
             .getResultList();
     }
 

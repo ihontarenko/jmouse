@@ -1,0 +1,5 @@
+org.jmouse.telegram.spring.autoconfigure.TelegramAutoConfiguration
+org.jmouse.telegram.spring.autoconfigure.TelegramPollingAutoConfiguration
+org.jmouse.telegram.spring.autoconfigure.TelegramWebAutoConfiguration
+org.jmouse.telegram.spring.autoconfigure.TelegramJpaAutoConfiguration
+org.jmouse.telegram.spring.autoconfigure.TelegramFlywayAutoConfiguration

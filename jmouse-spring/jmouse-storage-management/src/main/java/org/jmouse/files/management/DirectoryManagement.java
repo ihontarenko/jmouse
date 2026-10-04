@@ -143,6 +143,17 @@ public class DirectoryManagement {
     }
 
     /**
+     * 🌿 The folders directly inside one — what a tree asks for when somebody opens a folder.
+     *
+     * @param directoryId the directory
+     * @return its children, in tree order
+     */
+    @Transactional(readOnly = true)
+    public List<StorageDirectory> children(String directoryId) {
+        return directories.childrenOf(directories.require(directoryId));
+    }
+
+    /**
      * 📁 Make a folder inside another.
      *
      * <p>⚠️ Resolving the parent and inserting under it are one unit: the insert renumbers against the

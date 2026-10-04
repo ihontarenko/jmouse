@@ -27,8 +27,14 @@ import java.util.Map;
  * @param depth          how far down it sits, a root being one
  * @param configurations what applies here, by kind — empty where nobody asked
  */
+/**
+ * @param hasChildren whether anything is filed inside — read off the nested set, so a tree can draw
+ *                    a chevron without asking for the children first. ⚠️ Says a folder has children,
+ *                    not that the caller may read any of them; opening it may show none.
+ */
 public record DirectoryView(String id, String parentId, String name, String path, boolean root,
-                            int depth, Map<String, DirectoryConfigurationView> configurations) {
+                            int depth, boolean hasChildren,
+                            Map<String, DirectoryConfigurationView> configurations) {
 
     /**
      * 🏗️ Describe a directory, without resolving anything about it.
@@ -51,6 +57,7 @@ public record DirectoryView(String id, String parentId, String name, String path
                                    Map<String, DirectoryConfigurationView> configurations) {
         return new DirectoryView(directory.getId(), directory.getParentId(), directory.getName(),
                                  directory.getPath(), directory.isRoot(), directory.getDepth(),
+                                 directory.getTreeRight() - directory.getTreeLeft() > 1,
                                  configurations);
     }
 }

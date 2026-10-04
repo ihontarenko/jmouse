@@ -6,6 +6,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A self-educational Spring-inspired Java framework that reimplements DI/IoC, web MVC, JDBC, security, an expression language, and more. It is a multi-module Maven project targeting Java 21.
 
+## ⚠️ Read The Module Orientation File Before The Module
+
+`JMOUSE_*.md` at this root are **agent orientation files**: what a module is, its public API, how to wire
+it, the gotchas, and what not to do. They exist so a session does not re-scan the same code every time.
+
+| File | Module |
+|---|---|
+| `JMOUSE_TELEGRAM.md` | `jmouse-telegram` — the contracts, refusal taxonomy, update model, pacing |
+| `JMOUSE_TELEGRAM_BOT.md` | `jmouse-telegram-bot` — the Bot API transport and the polling loop |
+| `JMOUSE_TELEGRAM_JPA.md` | `jmouse-telegram-jpa` — accounts, credential sealing, bindings, migrations |
+| `JMOUSE_TELEGRAM_SPRING_BOOT.md` | `jmouse-spring/jmouse-telegram-spring-boot` — properties and beans |
+
+Only Telegram has one so far; the rest are written as modules are touched.
+
+⚠️ **The code is the record and these files are a copy.** When one disagrees with the code, the code
+wins — and the file is corrected in the same change, the way `TESSERA.md` is. A file that lies is worse
+than no file, because the next session trusts it instead of reading.
+
 ## Build Commands
 
 ```bash

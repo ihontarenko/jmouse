@@ -2,6 +2,7 @@ package org.jmouse.files.management;
 
 import org.jmouse.files.OwnerReference;
 import org.jmouse.files.exception.FileHeldException;
+import org.jmouse.files.exception.ManagedFileNotFoundException;
 import org.jmouse.files.exception.ManagedFileTooLargeException;
 import org.jmouse.files.exception.RemoteFetchException;
 import org.jmouse.files.jpa.FileBindings;
@@ -22,7 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -430,6 +434,106 @@ public class FileManagement {
         announce(new FileManagementEvent.Deleted(fileId, name, owners));
     }
 
+    // ── The trash ─────────────────────────────────────────────────────────────
+
+    /**
+     * 🗑️ Put it in the trash.
+     *
+     * <p>⚠️ <strong>Nothing moves.</strong> The file stays filed where it was and its bytes stay where
+     * the store put them; every listing simply leaves it out. That is what makes {@link #restore} exact
+     * and what makes this work the same on a disk and on S3. {@link #emptyTrash} is what really deletes.</p>
+     *
+     * <p>⚠️ Refused for a held file, for the reason {@link #delete} is: hiding an avatar breaks whatever
+     * is displaying it just as surely as removing it.</p>
+     *
+     * @param fileId the file
+     * @param by     who is doing it, or {@code null}
+     * @return the file, now in the trash
+     */
+    @Transactional
+    public ManagedFile trash(String fileId, String by) {
+        ManagedFile file = files.require(fileId);
+
+        if (file.isTrashed()) {
+            return file;
+        }
+
+        refuseIfHeld(file, "moved to the trash");
+
+        file.moveToTrash(by);
+        announce(new FileManagementEvent.Trashed(fileId, file));
+
+        return file;
+    }
+
+    /**
+     * ♻️ Take it back out of the trash, filed exactly where it was. Idempotent.
+     *
+     * @param fileId the file
+     * @return the file
+     */
+    @Transactional
+    public ManagedFile restore(String fileId) {
+        ManagedFile file = files.require(fileId);
+
+        if (!file.isTrashed()) {
+            return file;
+        }
+
+        file.restoreFromTrash();
+        announce(new FileManagementEvent.Restored(fileId, file));
+
+        return file;
+    }
+
+    /**
+     * 🗑️ Everything in the trash, most recently trashed first.
+     *
+     * @return the trashed files
+     */
+    @Transactional(readOnly = true)
+    public List<ManagedFile> listTrash() {
+        return files.listTrashed();
+    }
+
+    /**
+     * 🔎 Everywhere each of several files is filed, in one query.
+     *
+     * @param fileIds the files
+     * @return each file's owners
+     */
+    @Transactional(readOnly = true)
+    public Map<String, List<OwnerReference>> ownersOfAll(Collection<String> fileIds) {
+        return bindings.ownersOfAll(fileIds);
+    }
+
+    /**
+     * 🔥 Empty the trash — really delete what is in it.
+     *
+     * <p>⚠️ Each one through {@link #delete}, so a listener hears a `Deleted` for every file exactly as it
+     * would for one removed by hand, and a file something started holding while it sat in the trash is
+     * refused rather than torn out. The bytes are then the orphan sweeper's, as they always were.</p>
+     *
+     * @param trashedBefore only what went in before this moment, or {@code null} for everything
+     * @return how many were deleted
+     */
+    @Transactional
+    public int emptyTrash(LocalDateTime trashedBefore) {
+        int deleted = 0;
+
+        for (ManagedFile file : files.listTrashed()) {
+            if (trashedBefore != null && !file.getTrashedAt().isBefore(trashedBefore)) {
+                continue;
+            }
+            if (file.isHeld()) {
+                continue;
+            }
+            delete(file.getId());
+            deleted++;
+        }
+        return deleted;
+    }
+
     /**
      * 📥 The whole file, in memory, up to a limit the caller sets.
      *
@@ -480,6 +584,12 @@ public class FileManagement {
     @Transactional(readOnly = true)
     public DeliveryPlan planDelivery(String fileId, DeliveryIntent intent) {
         ManagedFile file = files.require(fileId);
+
+        // ⚠️ A trashed file is not served — the trash hides it everywhere, links included. Restoring it
+        // is one click; serving it from the trash would make "removed" mean "unlisted".
+        if (file.isTrashed()) {
+            throw new ManagedFileNotFoundException(fileId);
+        }
 
         return delivery.plan(file.getStoredFile(), file.getDisplayName(), intent);
     }

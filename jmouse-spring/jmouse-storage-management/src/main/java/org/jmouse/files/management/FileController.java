@@ -2,6 +2,8 @@ package org.jmouse.files.management;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.jmouse.files.OwnerReference;
+import org.jmouse.files.jpa.ManagedFile;
+import org.jmouse.files.management.access.FileVisibility;
 import org.jmouse.storage.delivery.DeliveryIntent;
 import org.jmouse.storage.spring.DeliveryIntents;
 import org.jmouse.storage.spring.DeliveryRenderer;
@@ -62,6 +64,9 @@ public class FileController {
     private final DeliveryRenderer      renderer;
     private final FileManagementContext context;
 
+    /** ⚠️ Nullable — see the four-argument constructor. */
+    private final FileVisibility        visible;
+
     /**
      * 🏗️ Serve files over the management surface.
      *
@@ -71,9 +76,21 @@ public class FileController {
      */
     public FileController(FileManagement management, DeliveryRenderer renderer,
                           FileManagementContext context) {
+        this(management, renderer, context, null);
+    }
+
+    /**
+     * 🏗️ Serve files, hiding from a listing the ones this caller may not read.
+     *
+     * @param visible which listed files the caller may read — {@code null} lists everything filed under
+     *                the owner, which is what the three-argument constructor has always done
+     */
+    public FileController(FileManagement management, DeliveryRenderer renderer,
+                          FileManagementContext context, FileVisibility visible) {
         this.management = management;
         this.renderer   = renderer;
         this.context    = context;
+        this.visible    = visible;
     }
 
     /**
@@ -85,8 +102,13 @@ public class FileController {
      */
     @GetMapping(ManagementRoutes.BASE)
     public List<FileView> list(@RequestParam String owner) {
-        return management.listFiledUnder(OwnerReference.parse(owner))
-                .stream()
+        List<ManagedFile> filed = management.listFiledUnder(OwnerReference.parse(owner));
+
+        /* ⚠️ The owner was decided by the route guard; one file closed on its own is decided here —
+           see FileVisibility. Absent, never marked. */
+        List<ManagedFile> readable = visible == null ? filed : visible.readable(filed);
+
+        return readable.stream()
                 .map(FileView::of)
                 .toList();
     }
@@ -234,5 +256,30 @@ public class FileController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable String fileId) {
         management.delete(fileId);
+    }
+
+    /**
+     * 🗑️ Put it in the trash — listed nowhere, served to nobody, restorable exactly as it was.
+     *
+     * <p>⚠️ <strong>The person is the server's answer</strong>, from {@link FileManagementContext}, for
+     * the reason the uploader is: who removed a file is not something a caller gets to claim.</p>
+     *
+     * @param fileId the file
+     * @return the file
+     */
+    @PostMapping(ManagementRoutes.TRASH_ONE)
+    public FileView trash(@PathVariable String fileId) {
+        return FileView.of(management.trash(fileId, context.actor()));
+    }
+
+    /**
+     * ♻️ Take it back out of the trash.
+     *
+     * @param fileId the file
+     * @return the file
+     */
+    @PostMapping(ManagementRoutes.RESTORE)
+    public FileView restore(@PathVariable String fileId) {
+        return FileView.of(management.restore(fileId));
     }
 }

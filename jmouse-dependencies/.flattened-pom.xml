@@ -317,6 +317,41 @@
         <version>${jmouse.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-grabber</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-telegram</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-telegram-bot</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-telegram-jpa</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-script-el</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-script</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jmouse</groupId>
+        <artifactId>jmouse-script-jpa</artifactId>
+        <version>${jmouse.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm</artifactId>
         <version>${asm.version}</version>

@@ -3,8 +3,11 @@ package org.jmouse.files.jpa;
 import jakarta.persistence.EntityManager;
 import org.jmouse.files.OwnerReference;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 🔗 Filing, unfiling and re-filing — the whole of what a place means here.
@@ -169,6 +172,26 @@ public class FileBindings {
             .stream()
             .map(FileBinding::owner)
             .toList();
+    }
+
+    /**
+     * 🔎 Everywhere each of several files is filed — one query, for a listing of many.
+     *
+     * @param fileIds the files
+     * @return each file's owners; a file filed nowhere is absent
+     */
+    public Map<String, List<OwnerReference>> ownersOfAll(Collection<String> fileIds) {
+        if (fileIds.isEmpty()) {
+            return Map.of();
+        }
+        return entityManager.createQuery(
+                "SELECT binding FROM FileBinding binding WHERE binding.fileId IN :fileIds",
+                FileBinding.class)
+            .setParameter("fileIds", fileIds)
+            .getResultList()
+            .stream()
+            .collect(Collectors.groupingBy(FileBinding::getFileId,
+                                           Collectors.mapping(FileBinding::owner, Collectors.toList())));
     }
 
     /**

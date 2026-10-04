@@ -12,10 +12,12 @@ import org.jmouse.files.jpa.directory.StorageDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * 🔒 Which folders a caller may actually see, applied to what a listing is about to return.
@@ -71,7 +73,7 @@ import java.util.Optional;
  * the type — every product mounting these routes has one, because without it the {@code read} route
  * itself answers "no such directory", but the seam is the library's to keep honest.
  */
-public final class DirectoryVisibility {
+public class DirectoryVisibility {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DirectoryVisibility.class);
 
@@ -87,6 +89,9 @@ public final class DirectoryVisibility {
     private final ObjectProvider<ScopeCatalog>        scopes;
     private final ObjectProvider<AccessTargetRegistry> targets;
     private final Class<?>                            controller;
+
+    /** ⚠️ Nullable — the six-argument constructor has none, and then every folder is asked about. */
+    private final ObjectProvider<DirectoryRefusals>   refusals;
 
     /** ⚠️ Said once, not per request — a listing runs on every screen that draws the tree. */
     private volatile boolean announced;
@@ -108,12 +113,29 @@ public final class DirectoryVisibility {
                                ObjectProvider<ScopeCatalog> scopes,
                                ObjectProvider<AccessTargetRegistry> targets,
                                Class<?> controller) {
+        this(engine, currentSubject, rules, scopes, targets, controller, null);
+    }
+
+    /**
+     * 🏗️ Build the filter, preferring the product's per-listing answer where it gives one.
+     *
+     * @param refusals the product's {@link DirectoryRefusals}, or {@code null} — see that interface
+     *                 for why a product should answer, and what it costs when it does not
+     */
+    public DirectoryVisibility(ObjectProvider<AccessEngine> engine,
+                               ObjectProvider<CurrentSubject> currentSubject,
+                               ObjectProvider<ExternalAccessRules> rules,
+                               ObjectProvider<ScopeCatalog> scopes,
+                               ObjectProvider<AccessTargetRegistry> targets,
+                               Class<?> controller,
+                               ObjectProvider<DirectoryRefusals> refusals) {
         this.engine         = engine;
         this.currentSubject = currentSubject;
         this.rules          = rules;
         this.scopes         = scopes;
         this.targets        = targets;
         this.controller     = controller;
+        this.refusals       = refusals;
     }
 
     /**
@@ -123,12 +145,47 @@ public final class DirectoryVisibility {
      * tree tells somebody exactly what a hidden one does not — that it is there, what it is called, and
      * that it is worth asking about.
      *
+     * <h2>⚠️ ONE TRANSACTION FOR THE WHOLE LISTING, AND IT IS A PERFORMANCE FIX WORTH THE ANNOTATION</h2>
+     *
+     * <p>Every decision below reaches the database several times over — the product's resolver reads
+     * the folder, the hierarchy reads its ancestors, the grant store asks two questions — and each of
+     * those is a {@code @Transactional} method of its own. Called from outside any transaction they
+     * each opened one, so a listing of sixty-three folders ran <strong>1 507 transactions</strong>: with
+     * the driver's {@code SET autocommit}, {@code SET SESSION TRANSACTION READ ONLY} and {@code COMMIT}
+     * around every one, seven and a half thousand of the eight and a half thousand statements that
+     * request sent were transaction protocol rather than questions about data. Measured on MySQL over
+     * a local socket at six seconds for sixty-three rows.
+     *
+     * <p>Opening one read-only transaction here makes every nested one join it (REQUIRED), which
+     * removes the protocol entirely — and gives the whole listing a single persistence context, so the
+     * same folder read by the resolver and by the hierarchy is read from the database once.
+     *
+     * <p>⚠️ The class is no longer {@code final} for this: the annotation needs a proxy, and CGLIB
+     * cannot subclass a final class. It silently does nothing on one, which is the failure to know
+     * about — the code looks transactional and is not.
+     *
      * @param found what the tree returned
      * @return the readable subset, or all of it where nothing can be decided
      */
+    @Transactional(readOnly = true)
     public List<StorageDirectory> readable(List<StorageDirectory> found) {
         if (found == null || found.isEmpty()) {
             return found;
+        }
+
+        /*
+          ⚠️ THE PRODUCT'S ANSWER FIRST, once for the whole listing. Asking the engine per folder is
+          correct and was measured at ~5 ms a folder — see DirectoryRefusals. Where the product knows
+          which folders any rule can reach, it answers in a query or two.
+         */
+        DirectoryRefusals answering = refusals == null ? null : refusals.getIfAvailable();
+
+        if (answering != null) {
+            Set<String> refused = answering.refusedAmong(found);
+
+            return refused.isEmpty()
+                   ? found
+                   : found.stream().filter(directory -> !refused.contains(directory.getId())).toList();
         }
 
         Question question = question().orElse(null);

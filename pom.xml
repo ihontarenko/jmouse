@@ -110,6 +110,8 @@
         <module>jmouse-access-policy</module>
         <module>jmouse-access-el</module>
         <module>jmouse-script-el</module>
+        <module>jmouse-script</module>
+        <module>jmouse-script-jpa</module>
         <module>jmouse-access-projection</module>
         <module>jmouse-query</module>
         <module>jmouse-query-sql</module>
@@ -131,6 +133,9 @@
         <module>jmouse-ai-mcp</module>
         <module>jmouse-ai-access</module>
         <module>jmouse-ai-jpa</module>
+        <module>jmouse-telegram</module>
+        <module>jmouse-telegram-bot</module>
+        <module>jmouse-telegram-jpa</module>
         <module>jmouse-web</module>
         <module>jmouse-crawler</module>
         <module>jmouse-grabber</module>

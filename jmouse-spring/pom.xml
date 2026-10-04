@@ -35,6 +35,8 @@
         <module>jmouse-liveblocks</module>
         <module>jmouse-query-spring-boot</module>
         <module>jmouse-money-spring-boot</module>
+        <module>jmouse-script-spring-boot</module>
+        <module>jmouse-telegram-spring-boot</module>
     </modules>
 
 </project>

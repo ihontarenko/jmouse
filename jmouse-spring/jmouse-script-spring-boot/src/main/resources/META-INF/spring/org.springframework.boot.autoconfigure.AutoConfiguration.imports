@@ -1,0 +1,3 @@
+org.jmouse.script.spring.ScriptAutoConfiguration
+org.jmouse.script.spring.jpa.ScriptStoreAutoConfiguration
+org.jmouse.script.spring.migration.ScriptFlywayAutoConfiguration

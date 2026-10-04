@@ -108,7 +108,11 @@ public class EffectivePermissionsResolver {
             return EffectivePermissions.none();
         }
 
-        List<ScopeReference> chain = widened(scopes.covering(target, subject.ownedRowsBelongTo()));
+        // ⚠️ Through the cache too: building the chain walks a tree per place the target names, and the
+        // permissions cache below is keyed ON the finished chain and so can never save that walk.
+        List<ScopeReference> chain = cache.covering(
+                subject.principalId(), target,
+                () -> widened(scopes.covering(target, subject.ownedRowsBelongTo())));
 
         return cache.permissions(subject.principalId(), chain, () -> resolveSubject(subject, chain));
     }
