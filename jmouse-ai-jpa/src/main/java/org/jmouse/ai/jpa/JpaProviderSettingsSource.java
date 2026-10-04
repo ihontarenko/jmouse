@@ -35,7 +35,7 @@ public final class JpaProviderSettingsSource implements ProviderSettingsSource {
 
     @Override
     public ProviderSettings settings() {
-        return settings(GENERAL);
+        return settings(GENERAL, org.jmouse.ai.model.AiCapability.CHAT);
     }
 
     /**
@@ -54,12 +54,17 @@ public final class JpaProviderSettingsSource implements ProviderSettingsSource {
      */
     @Override
     public ProviderSettings settings(String purpose) {
+        return settings(purpose, org.jmouse.ai.model.AiCapability.CHAT);
+    }
+
+    @Override
+    public ProviderSettings settings(String purpose, org.jmouse.ai.model.AiCapability capability) {
         String wanted = purpose == null || purpose.isBlank() ? GENERAL : purpose.trim();
 
         List<AiProviderSettings> forPurpose = activeFor(wanted);
 
         if (!forPurpose.isEmpty()) {
-            return asSettings(only(forPurpose, "for '" + wanted + "'"));
+            return asSettings(onlyCapable(forPurpose, capability));
         }
 
         // ⚠️ GENERAL is asked for as null, because that is what an un-purposed row carries. Asking
@@ -74,7 +79,27 @@ public final class JpaProviderSettingsSource implements ProviderSettingsSource {
                     + ", so there is nothing to call. Configure one, or mark an existing row active.");
         }
 
-        return asSettings(only(unpurposed, "in general"));
+        return asSettings(onlyCapable(unpurposed, capability));
+    }
+
+    private AiProviderSettings onlyCapable(List<AiProviderSettings> rows, org.jmouse.ai.model.AiCapability capability) {
+        var capable = rows.stream().filter(row -> row.getCapabilities().contains(capability)).toList();
+        if (capable.isEmpty()) {
+            throw new ProviderException("No active configuration declares the required model capability.");
+        }
+        return only(capable, "for the required capability");
+    }
+
+    @Override
+    public ProviderSettings settingsById(String identifier, org.jmouse.ai.model.AiCapability capability) {
+        return OwnTransaction.call(entityManagerFactory, entityManager -> {
+            var rows = entityManager.createQuery("""
+                    SELECT configured FROM AiProviderSettings configured
+                    WHERE configured.application = :application AND configured.id = :identifier AND configured.active = true
+                    """, AiProviderSettings.class).setParameter("application", application)
+                    .setParameter("identifier", identifier).getResultList();
+            return asSettings(onlyCapable(rows, capability));
+        });
     }
 
     /**
@@ -121,6 +146,7 @@ public final class JpaProviderSettingsSource implements ProviderSettingsSource {
 
     private ProviderSettings asSettings(AiProviderSettings row) {
         return new ProviderSettings(
-                row.getProvider(), row.getModel(), row.getApiKey(), row.getApiUrl(), row.getMaximumTokens());
+                row.getProvider(), row.getModel(), row.getApiKey(), row.getApiUrl(), row.getMaximumTokens(),
+                row.getCapabilities(), row.getId(), row.getRevision());
     }
 }

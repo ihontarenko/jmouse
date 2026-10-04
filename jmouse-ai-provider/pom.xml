@@ -16,7 +16,7 @@
             <dependency>
                 <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-dependencies</artifactId>
-                <version>${project.version}</version>
+                <version>1.0.0-b20260902</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -25,6 +25,7 @@
 
     <packaging>jar</packaging>
     <artifactId>jmouse-ai-provider</artifactId>
+    <version>1.0.0-b20261004-voyage</version>
     <name>jMouse - AI Provider</name>
     <description>jMouse Framework - Chat model port and provider implementations (Anthropic, OpenAI, remote gateway)</description>
     <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-ai-provider</url>
@@ -63,6 +64,7 @@
       not inherit the other's classes.
     -->
     <dependencies>
+        <dependency><groupId>org.jmouse</groupId><artifactId>jmouse-ai-model</artifactId><version>1.0.0-b20261004-ai-capabilities</version></dependency>
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-core</artifactId>

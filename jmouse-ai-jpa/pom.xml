@@ -16,7 +16,7 @@
             <dependency>
                 <groupId>org.jmouse</groupId>
                 <artifactId>jmouse-dependencies</artifactId>
-                <version>${project.version}</version>
+                <version>1.0.0-b20260902</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -25,6 +25,7 @@
 
     <packaging>jar</packaging>
     <artifactId>jmouse-ai-jpa</artifactId>
+    <version>1.0.0-b20261004-ai-capabilities</version>
     <name>jMouse - AI JPA</name>
     <description>jMouse Framework - Persistent tool-call counters, invocation trail, provider settings and pending confirmations</description>
     <url>https://github.com/ihontarenko/jmouse/tree/master/jmouse-ai-jpa</url>
@@ -69,6 +70,7 @@
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-ai</artifactId>
+            <version>1.0.0-b20261004-ai-capabilities</version>
         </dependency>
         <!--
           For ai_provider_settings alone: this module owns that table, so it also owns the
@@ -77,6 +79,7 @@
         <dependency>
             <groupId>org.jmouse</groupId>
             <artifactId>jmouse-ai-provider</artifactId>
+            <version>1.0.0-b20261004-ai-capabilities</version>
         </dependency>
         <dependency>
             <groupId>jakarta.persistence</groupId>

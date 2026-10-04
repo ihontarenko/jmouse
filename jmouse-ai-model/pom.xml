@@ -1,0 +1,8 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent><groupId>org.jmouse</groupId><artifactId>jmouse-parent</artifactId><version>1.0.0-b20260902</version></parent>
+    <artifactId>jmouse-ai-model</artifactId>
+    <version>1.0.0-b20261004-ai-capabilities</version>
+    <name>jMouse - AI Model</name>
+    <description>Framework-free model capability vocabulary shared by management and execution.</description>
+</project>

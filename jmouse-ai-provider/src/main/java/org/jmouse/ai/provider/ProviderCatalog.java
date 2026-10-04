@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import org.jmouse.ai.model.AiCapability;
 
 /**
  * Which providers this library ships, in one place.
@@ -44,7 +46,14 @@ public final class ProviderCatalog {
      * @param note          one line a screen shows beside the name, so choosing does not require
      *                      knowing the landscape
      */
-    public record Shipped(String name, String defaultApiUrl, boolean requiresKey, String note) {
+    public record Shipped(String name, String defaultApiUrl, boolean requiresKey, String note, Set<AiCapability> capabilities) {
+        public Shipped {
+            capabilities = Set.copyOf(capabilities);
+        }
+
+        public Shipped(String name, String defaultApiUrl, boolean requiresKey, String note) {
+            this(name, defaultApiUrl, requiresKey, note, Set.of(AiCapability.CHAT));
+        }
     }
 
     /**
@@ -57,7 +66,7 @@ public final class ProviderCatalog {
                     "Claude. Its own request shape, adapted here."),
 
             new Shipped(OpenAiChatModel.PROVIDER_NAME, null, true,
-                    "GPT. The shape every provider below borrows."),
+                    "GPT. The shape every provider below borrows.", Set.of(AiCapability.CHAT, AiCapability.EMBEDDINGS)),
 
             new Shipped(GatewayChatModel.PROVIDER_NAME, null, true,
                     "Not a provider — your own endpoint speaking the canonical shape, holding the keys "
@@ -65,7 +74,13 @@ public final class ProviderCatalog {
 
             new Shipped("ollama", "http://localhost:11434/v1/chat/completions", false,
                     "Runs on this machine. Free with no account and no key — the address is the default "
-                    + "Ollama port, and the model is whatever you have pulled."),
+                    + "Ollama port, and the model is whatever you have pulled.", Set.of(AiCapability.CHAT, AiCapability.EMBEDDINGS)),
+
+            new Shipped("voyage", "https://api.voyageai.com/v1/embeddings", true,
+                    "Voyage AI text embeddings. Model and retrieval input type are caller configured.", Set.of(AiCapability.EMBEDDINGS)),
+
+            new Shipped("tei", null, false, "Local Text Embeddings Inference. Configure an explicit endpoint.",
+                    Set.of(AiCapability.EMBEDDINGS)),
 
             new Shipped("groq", "https://api.groq.com/openai/v1/chat/completions", true,
                     "Free tier, and the fastest of these by a distance. Open-weight models."),
@@ -101,6 +116,12 @@ public final class ProviderCatalog {
         return SHIPPED.containsKey(normalised(providerName));
     }
 
+    /** Protocol-wide ceiling. The particular model must declare its own supported subset. */
+    public static Set<AiCapability> capabilities(String providerName) {
+        Shipped known = SHIPPED.get(normalised(providerName));
+        return known == null ? Set.of() : known.capabilities();
+    }
+
     /**
      * Whether a configuration naming this provider must carry a credential.
      *
@@ -123,7 +144,7 @@ public final class ProviderCatalog {
     public static Optional<ChatModel> modelFor(String providerName, ProviderSettingsSource settings) {
         Shipped known = SHIPPED.get(normalised(providerName));
 
-        if (known == null) {
+        if (known == null || !known.capabilities().contains(AiCapability.CHAT)) {
             return Optional.empty();
         }
 

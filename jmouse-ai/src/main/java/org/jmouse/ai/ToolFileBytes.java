@@ -11,7 +11,7 @@ import java.util.Set;
  *
  * <h2>⚠️ Here because three products had written it separately</h2>
  *
- * <p>Tessera carried it as a class, Kiwi inline, Innoventa was about to be the third. Every one of them
+ * <p>Multiple applications had implemented the same file-byte boundary. Every one of them
  * answered <em>may this server read that path</em> for itself, and the answer that matters once they
  * drift is the loosest of the three — which is precisely the shape a check on a filesystem must not
  * have. One implementation cannot drift from itself.
@@ -36,7 +36,7 @@ import java.util.Set;
  *
  * <pre>{@code
  * @Bean
- * ToolFileBytes toolFileBytes(@Value("${innoventa.mcp.upload-root:}") String uploadRoot) {
+ * ToolFileBytes toolFileBytes(@Value("${application.mcp.upload-root:}") String uploadRoot) {
  *     return uploadRoot.isBlank()
  *             ? ToolFileBytes.encodedOnly()
  *             : ToolFileBytes.of(new EncodedFileSource(), new LocalDirectoryFileSource(uploadRoot));

@@ -83,6 +83,8 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency><groupId>org.jmouse</groupId><artifactId>jmouse-ai-model</artifactId><version>1.0.0-b20261004-ai-capabilities</version></dependency>
+            <dependency><groupId>org.jmouse</groupId><artifactId>jmouse-ai-embeddings</artifactId><version>1.0.0-b20261004-ai-capabilities</version></dependency>
             <!-- Object-store backend. Imported here rather than in jmouse-storage-s3 so that every
                  version this framework pins lives in one file; the module itself declares no
                  versions at all, like every other jMouse module. -->

@@ -16,6 +16,16 @@ package org.jmouse.ai.provider;
 @FunctionalInterface
 public interface ProviderSettingsSource {
 
+    /** Resolve a technical operation independently of application purpose, failing closed. */
+    default ProviderSettings settings(String purpose, org.jmouse.ai.model.AiCapability capability) {
+        return settings(purpose).requireCapability(capability);
+    }
+
+    /** Explicit active configuration selection. Sources without managed identities refuse. */
+    default ProviderSettings settingsById(String identifier, org.jmouse.ai.model.AiCapability capability) {
+        throw new ProviderException("This settings source does not support managed configuration identities.");
+    }
+
     /**
      * The purpose everything is configured for when nothing says otherwise.
      *

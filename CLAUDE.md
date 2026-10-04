@@ -18,7 +18,7 @@ it, the gotchas, and what not to do. They exist so a session does not re-scan th
 | `JMOUSE_TELEGRAM_JPA.md` | `jmouse-telegram-jpa` — accounts, credential sealing, bindings, migrations |
 | `JMOUSE_TELEGRAM_SPRING_BOOT.md` | `jmouse-spring/jmouse-telegram-spring-boot` — properties and beans |
 
-Only Telegram has one so far; the rest are written as modules are touched.
+AI model capabilities and embeddings also have orientation files: `JMOUSE_AI_MODEL.md` and `JMOUSE_AI_EMBEDDINGS.md`. Read them before touching the affected AI modules. Other modules receive these files as they are touched.
 
 ⚠️ **The code is the record and these files are a copy.** When one disagrees with the code, the code
 wins — and the file is corrected in the same change, the way `TESSERA.md` is. A file that lies is worse

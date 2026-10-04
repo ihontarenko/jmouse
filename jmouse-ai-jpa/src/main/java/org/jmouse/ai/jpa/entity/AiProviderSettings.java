@@ -27,6 +27,29 @@ import java.time.LocalDateTime;
 @Table(name = AiProviderSettings.TABLE_NAME)
 public class AiProviderSettings {
 
+    @jakarta.persistence.Convert(converter = AiCapabilitiesConverter.class)
+    @Column(name = "capabilities", length = 256, nullable = false)
+    private java.util.Set<org.jmouse.ai.model.AiCapability> capabilities = java.util.Set.of(org.jmouse.ai.model.AiCapability.CHAT);
+
+    @jakarta.persistence.Version
+    @Column(name = "revision", nullable = false)
+    private long revision;
+
+    public java.util.Set<org.jmouse.ai.model.AiCapability> getCapabilities() {
+        return java.util.Set.copyOf(capabilities);
+    }
+
+    public void setCapabilities(java.util.Set<org.jmouse.ai.model.AiCapability> capabilities) {
+        if (capabilities == null || capabilities.isEmpty()) {
+            throw new IllegalArgumentException("Explicit model capabilities are required.");
+        }
+        this.capabilities = java.util.Set.copyOf(capabilities);
+    }
+
+    public long getRevision() {
+        return revision;
+    }
+
     public static final String TABLE_NAME = "ai_provider_settings";
 
     @Id

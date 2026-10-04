@@ -115,6 +115,8 @@ public abstract class HttpChatModel implements ChatModel {
                                       + "call. Configure a provider, a model and a key.");
         }
 
+        settings.requireCapability(org.jmouse.ai.model.AiCapability.CHAT);
+
         // ⚠️ Before anything is sent. Settings addressed elsewhere otherwise send one provider's key to
         // another provider's endpoint, and the failure that comes back reads as a bad credential.
         if (settings.providerName() != null && !settings.providerName().equals(providerName())) {

@@ -128,7 +128,9 @@
         <module>jmouse-search-jpa</module>
         <module>jmouse-files-jpa</module>
         <module>jmouse-ai</module>
+        <module>jmouse-ai-model</module>
         <module>jmouse-ai-provider</module>
+        <module>jmouse-ai-embeddings</module>
         <module>jmouse-ai-conversation</module>
         <module>jmouse-ai-mcp</module>
         <module>jmouse-ai-access</module>

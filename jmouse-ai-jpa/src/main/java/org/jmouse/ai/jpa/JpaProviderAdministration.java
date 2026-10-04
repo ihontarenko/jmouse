@@ -50,7 +50,7 @@ public final class JpaProviderAdministration implements ProviderAdministration {
     public List<SupportedProvider> describeSupportedProviders() {
         return ProviderCatalog.describeShipped().stream()
                 .map(shipped -> new SupportedProvider(
-                        shipped.name(), shipped.defaultApiUrl(), shipped.requiresKey(), shipped.note()))
+                        shipped.name(), shipped.defaultApiUrl(), shipped.requiresKey(), shipped.note(), shipped.capabilities()))
                 .toList();
     }
 
@@ -78,6 +78,7 @@ public final class JpaProviderAdministration implements ProviderAdministration {
     @Override
     public Configuration add(Draft draft) {
         String        provider = requireSupported(draft.provider());
+        requireCapabilities(provider, draft);
         LocalDateTime now      = LocalDateTime.now();
 
         return OwnTransaction.call(entityManagerFactory, entityManager -> {
@@ -95,6 +96,7 @@ public final class JpaProviderAdministration implements ProviderAdministration {
                     now);
 
             created.setPurpose(draft.purpose());
+            created.setCapabilities(draft.capabilities());
 
             entityManager.persist(created);
 
@@ -105,21 +107,30 @@ public final class JpaProviderAdministration implements ProviderAdministration {
     @Override
     public Configuration change(String id, Draft draft) {
         String provider = requireSupported(draft.provider());
+        requireCapabilities(provider, draft);
 
         return OwnTransaction.call(entityManagerFactory, entityManager -> {
             AiProviderSettings configured = require(entityManager, id);
+
+            if (configured.isActive() && (!samePurpose(configured.getPurpose(), draft.purpose())
+                    || !configured.getCapabilities().equals(draft.capabilities()))) {
+                throw new RefusedException("Take the configuration out of force before changing purpose or capabilities.");
+            }
 
             configured.setProvider(provider);
             configured.setModel(draft.model());
             configured.setApiUrl(blankToNull(draft.apiUrl()));
             configured.setMaximumTokens(draft.maximumTokens());
             configured.setPurpose(draft.purpose());
+            configured.setCapabilities(draft.capabilities());
             configured.setUpdatedAt(LocalDateTime.now());
 
             // Blank means "leave it", never "clear it" — see Draft.
             if (draft.carriesKey()) {
                 configured.setApiKey(draft.apiKey());
             }
+
+            entityManager.flush();
 
             return describe(configured);
         });
@@ -128,6 +139,10 @@ public final class JpaProviderAdministration implements ProviderAdministration {
     @Override
     public Configuration putInForce(String id) {
         return OwnTransaction.call(entityManagerFactory, entityManager -> {
+            // Serialize activation across this application's existing rows in a stable lock order.
+            entityManager.createQuery("SELECT configured FROM AiProviderSettings configured WHERE configured.application = :application ORDER BY configured.id",
+                    AiProviderSettings.class).setParameter("application", application)
+                    .setLockMode(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE).getResultList();
             AiProviderSettings target = require(entityManager, id);
 
             // ⚠️ Asked of the provider rather than demanded of every configuration. A model running on
@@ -160,10 +175,13 @@ public final class JpaProviderAdministration implements ProviderAdministration {
                     .stream()
                     .filter(inForce -> !inForce.getId().equals(id))
                     .filter(inForce -> samePurpose(inForce.getPurpose(), target.getPurpose()))
+                    .filter(inForce -> inForce.getCapabilities().stream().anyMatch(target.getCapabilities()::contains))
                     .forEach(JpaProviderAdministration::deactivate);
 
             target.setActive(true);
             target.setUpdatedAt(LocalDateTime.now());
+
+            entityManager.flush();
 
             return describe(target);
         });
@@ -175,6 +193,8 @@ public final class JpaProviderAdministration implements ProviderAdministration {
             AiProviderSettings configured = require(entityManager, id);
 
             deactivate(configured);
+
+            entityManager.flush();
 
             return describe(configured);
         });
@@ -207,6 +227,12 @@ public final class JpaProviderAdministration implements ProviderAdministration {
         }
 
         return named;
+    }
+
+    private void requireCapabilities(String provider, Draft draft) {
+        if (!ProviderCatalog.capabilities(provider).containsAll(draft.capabilities())) {
+            throw new RefusedException("The provider does not support the configured model capabilities.");
+        }
     }
 
     /**
@@ -260,7 +286,11 @@ public final class JpaProviderAdministration implements ProviderAdministration {
      * too; this is named so the call site reads as a question about purposes rather than about nulls.
      */
     private static boolean samePurpose(String one, String other) {
-        return one == null ? other == null : one.equals(other);
+        return normalizedPurpose(one).equals(normalizedPurpose(other));
+    }
+
+    private static String normalizedPurpose(String value) {
+        return value == null || value.isBlank() ? org.jmouse.ai.provider.ProviderSettingsSource.GENERAL : value.trim();
     }
 
     private static Configuration describe(AiProviderSettings configured) {
@@ -274,6 +304,8 @@ public final class JpaProviderAdministration implements ProviderAdministration {
                 hasKey(configured),
                 configured.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant(),
                 configured.getUpdatedAt().atZone(ZoneId.systemDefault()).toInstant(),
-                configured.getPurpose());
+                configured.getPurpose(),
+                configured.getCapabilities(),
+                configured.getRevision());
     }
 }
