@@ -1,55 +1,75 @@
 package org.jmouse.ai.embeddings;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import org.jmouse.ai.model.AiCapability;
 import org.jmouse.ai.provider.ProviderSettings;
 
-/** Exact model-server tokenization, explicitly approximate policy, or an honest unknown. */
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * Counts inputs without vectorization: explicit estimates, unknown counts, or native TEI tokenization.
+ * Additional tokenizer integrations implement {@link TokenCounter}, independently of embedding protocols.
+ */
 public final class ManagedTokenCounter implements TokenCounter {
+
+    private static final String TEI = "tei";
+    private static final String INPUTS = "inputs";
+    private static final String ADD_SPECIAL_TOKENS = "add_special_tokens";
+    private static final String TOKEN_ID = "id";
+
     private final EmbeddingTransport transport;
+
     public ManagedTokenCounter(EmbeddingTransport transport) {
-        this.transport = java.util.Objects.requireNonNull(transport);
+        this.transport = Objects.requireNonNull(transport, "Tokenization transport is required.");
     }
+
     @Override
     public Count count(ProviderSettings settings, List<String> inputs, Policy policy, CallLimits limits) {
+        Objects.requireNonNull(settings, "Provider settings are required.");
+        Objects.requireNonNull(policy, "Tokenization policy is required.");
+        Objects.requireNonNull(limits, "Call limits are required.");
         settings.requireCapability(AiCapability.EMBEDDINGS);
         limits.validate(inputs);
-        if (policy.strategy() == Strategy.UNKNOWN) {
-            return new Count(java.util.Collections.nCopies(inputs.size(), null), Quality.UNKNOWN);
+
+        return switch (policy.strategy()) {
+            case UNKNOWN -> new Count(Collections.nCopies(inputs.size(), null), Quality.UNKNOWN);
+            case CODE_POINT_ESTIMATE -> estimate(inputs, policy);
+            case TEI -> tokenize(settings, inputs, policy, limits);
+        };
+    }
+
+    private Count estimate(List<String> inputs, Policy policy) {
+        var counts = new ArrayList<Long>(inputs.size());
+        for (String input : inputs) {
+            long tokens = (long) Math.ceil(input.codePointCount(0, input.length()) / policy.codePointsPerToken());
+            counts.add(Math.addExact(tokens, policy.additionalTokensPerInput()));
         }
-        var counts = new ArrayList<Long>();
-        if (policy.strategy() == Strategy.CODE_POINT_ESTIMATE) {
-            for (String input : inputs) {
-                counts.add(Math.addExact((long) Math.ceil(input.codePointCount(0, input.length()) / policy.codePointsPerToken()),
-                        policy.additionalTokensPerInput()));
-            }
-            return new Count(counts, Quality.APPROXIMATE);
-        }
+        return new Count(counts, Quality.APPROXIMATE);
+    }
+
+    private Count tokenize(ProviderSettings settings, List<String> inputs, Policy policy, CallLimits limits) {
         var endpoint = EmbeddingTransport.requireEndpoint(policy.endpoint().toString());
-        if (!"tei".equals(settings.providerName()) || !policy.tokenizer().equals(settings.model())
+        if (!TEI.equals(settings.providerName()) || !policy.tokenizer().equals(settings.model())
                 || !EmbeddingTransport.sameOrigin(EmbeddingTransport.requireEndpoint(settings.apiUrl()), endpoint)) {
             throw new EmbeddingException(EmbeddingException.Reason.CONFIGURATION, null);
         }
-        Object answer = transport.post(endpoint, settings, Map.of("inputs", inputs, "add_special_tokens", true), limits);
-        try {
-            var batches = (List<?>) answer;
-            if (batches.size() != inputs.size()) {
-                throw new IllegalArgumentException();
+
+        Object response = transport.post(endpoint, settings, Map.of(INPUTS, inputs, ADD_SPECIAL_TOKENS, true), limits);
+        List<?> batches = EmbeddingResponseReader.array(response);
+        if (batches.size() != inputs.size()) {
+            throw EmbeddingResponseReader.invalidResponse();
+        }
+
+        var counts = new ArrayList<Long>(batches.size());
+        for (Object batch : batches) {
+            List<?> tokens = EmbeddingResponseReader.array(batch);
+            for (Object token : tokens) {
+                EmbeddingResponseReader.nonnegativeInteger(EmbeddingResponseReader.object(token).get(TOKEN_ID));
             }
-            for (Object batch : batches) {
-                var tokens = (List<?>) batch;
-                for (Object token : tokens) {
-                    if (!(token instanceof Map<?, ?> record) || record.get("id") == null) {
-                        throw new IllegalArgumentException();
-                    }
-                    ProtocolEmbeddingModel.whole(record.get("id"));
-                }
-                counts.add((long) tokens.size());
-            }
-        } catch (RuntimeException failure) {
-            throw new EmbeddingException(EmbeddingException.Reason.INVALID_RESPONSE, null);
+            counts.add((long) tokens.size());
         }
         return new Count(counts, Quality.EXACT);
     }

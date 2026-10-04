@@ -1,26 +1,41 @@
 package org.jmouse.ai.embeddings;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.jmouse.ai.provider.ProviderSettings;
 
-/** Open adapter registry. Declared model capability alone never substitutes for an installed implementation. */
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+/** Immutable open registry; installed implementations and declared provider capabilities remain separate facts. */
 public final class EmbeddingModels {
+
     private final Map<String, EmbeddingModel> models;
+
     public EmbeddingModels(Collection<EmbeddingModel> models) {
-        this.models = models.stream().collect(Collectors.toUnmodifiableMap(EmbeddingModel::code, Function.identity()));
+        Objects.requireNonNull(models, "Installed embedding models are required.");
+        var indexed = new LinkedHashMap<String, EmbeddingModel>();
+        for (EmbeddingModel model : models) {
+            Objects.requireNonNull(model, "An installed model cannot be null.");
+            String code = model.code();
+            if (code == null || code.isBlank() || indexed.putIfAbsent(code, model) != null) {
+                throw new IllegalArgumentException("Installed embedding model codes must be nonblank and unique.");
+            }
+        }
+        this.models = Map.copyOf(indexed);
     }
+
     public EmbeddingModel require(String code, ProviderSettings settings) {
-        EmbeddingModel model = models.get(code);
+        Objects.requireNonNull(settings, "Provider settings are required.");
+        EmbeddingModel model = code == null ? null : models.get(code);
         if (model == null || !model.supports(settings.providerName())) {
             throw new EmbeddingException(EmbeddingException.Reason.CONFIGURATION, null);
         }
         return model;
     }
-    public java.util.Set<String> codes() {
+
+    public Set<String> codes() {
         return models.keySet();
     }
 }
-

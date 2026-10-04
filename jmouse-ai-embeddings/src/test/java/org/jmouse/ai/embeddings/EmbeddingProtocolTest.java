@@ -46,7 +46,7 @@ class EmbeddingProtocolTest {
         var limits = new CallLimits(4, 1000, 4000, 2000, 1024);
         var request = new EmbeddingModel.Request(List.of("Україна 😀", "JDBC"), 2);
         try (var transport = new JdkEmbeddingTransport(Duration.ofSeconds(1))) {
-            var openai = new ProtocolEmbeddingModel(ProtocolEmbeddingModel.Protocol.OPENAI, transport);
+            var openai = new HttpEmbeddingModel(new OpenAiEmbeddingProtocol(), transport);
             var settings = settings("openai", base + "/openai");
             var answer = openai.embed(settings, request, limits);
             assertEquals(List.of(List.of(1.0, 2.0), List.of(3.0, 4.0)), answer.vectors());
@@ -57,9 +57,9 @@ class EmbeddingProtocolTest {
                     () -> openai.embed(new ProviderSettings("openai", "model-v1", "secret", base + "/openai", 100), request, limits));
             assertEquals(beforeRefusal, calls.get());
             assertFalse(settings.toString().contains("secret"));
-            assertEquals(9L, new ProtocolEmbeddingModel(ProtocolEmbeddingModel.Protocol.OLLAMA, transport)
+            assertEquals(9L, new HttpEmbeddingModel(new OllamaEmbeddingProtocol(), transport)
                     .embed(settings("ollama", base + "/ollama"), request, limits).inputTokens());
-            assertNull(new ProtocolEmbeddingModel(ProtocolEmbeddingModel.Protocol.TEI, transport)
+            assertNull(new HttpEmbeddingModel(new TeiEmbeddingProtocol(), transport)
                     .embed(settings("tei", base + "/embed"), request, limits).inputTokens());
             var counter = new ManagedTokenCounter(transport);
             int beforeCounts = calls.get();
